@@ -10,7 +10,7 @@ from langgraph.types import Command, Send
 from langchain_core.runnables import RunnableConfig
 
 from haive_core.engine.base import Engine, InvokableEngine, NonInvokableEngine
-from haive_core.graph.GraphRegistry import GraphRegistry, register_graph_component
+from haive_core.graph.graph_pattern_registry import GraphRegistry, register_graph_component
 import importlib
 logger = logging.getLogger(__name__)
 

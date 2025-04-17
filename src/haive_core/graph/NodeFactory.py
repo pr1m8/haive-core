@@ -16,7 +16,7 @@ from haive_core.engine.vectorstore import VectorStoreConfig
 from haive_core.engine.retriever import RetrieverConfig
 from haive_core.engine.embeddings import EmbeddingsEngineConfig
 from haive_core.config.runnable import RunnableConfigManager
-from haive_core.graph.GraphRegistry import GraphRegistry
+from haive_core.graph.graph_pattern_registry import GraphRegistry
 import importlib
 logger = logging.getLogger(__name__)
 
