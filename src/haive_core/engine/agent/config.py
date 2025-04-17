@@ -24,7 +24,7 @@ from haive_core.engine.base import Engine, InvokableEngine, EngineType, EngineRe
 from haive_core.engine.aug_llm import AugLLMConfig
 from haive_core.schema.schema_composer import SchemaComposer
 from haive_core.schema.state_schema import StateSchema
-from haive_core.graph.GraphBuilder import DynamicGraph
+from haive_core.graph.dynamic_graph_builder import DynamicGraph
 from haive_core.config.runnable import RunnableConfigManager
 
 # Import persistence-related functionality

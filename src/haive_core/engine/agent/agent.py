@@ -10,7 +10,7 @@ from haive_core.engine.agent.config import AgentConfig
 from haive_core.engine.base import Engine, InvokableEngine, EngineType, EngineRegistry
 from haive_core.schema.schema_composer import SchemaComposer
 from haive_core.schema.state_schema import StateSchema
-from haive_core.graph.GraphBuilder import DynamicGraph
+from haive_core.graph.dynamic_graph_builder import DynamicGraph
 from typing import Generic, TypeVar, Optional, Union, List, Dict, Any,\
     Generator, AsyncGenerator
 from pydantic import BaseModel
