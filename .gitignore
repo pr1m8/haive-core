@@ -1,0 +1,87 @@
+#Distribution / packaging
+dist/
+build/
+*.egg-info/
+*.egg
+#Virtual environments
+venv/
+env/
+.env/
+.venv/
+ENV/
+#IDE-specific files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+#Jupyter Notebooks
+.ipynb_checkpoints/
+#Logs and databases
+*.log
+*.sqlite3
+*.db
+#Machine Learning and AI specific
+*.pth
+*.pt
+*.pkl
+*.joblib
+*.model
+models/
+checkpoints/
+#Configuration and secrets
+.env
+*.env
+secrets.json
+config.yaml
+#OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+#Local state and history
+state_history/
+graphs/
+resources/
+#Dependency directories
+node_modules/
+jspm_packages/
+#Type checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+#Pytest
+.pytest_cache/
+#Coverage reports
+.coverage
+htmlcov/
+coverage.xml
+#Temporary files
+*.swp
+*.swo
+*~
+#System files
+.DS_Store
+Thumbs.db
+#Specific to Haive framework
+vector_store/
+docstore/
+cache_LangChain/
+#Ignore compiled artifacts and serialized objects
+*.pkl
+*.joblib
+*.h5
+*.hdf5
+#Ignore local experiment and test directories
+experiments/
+tests/local/
+#Ignore large data files
+*.csv
+*.json
+*.parquet
+*.arrow
+*.feather
+#Ignore local configuration overrides
+config.local.yaml
