@@ -85,3 +85,17 @@ tests/local/
 *.feather
 #Ignore local configuration overrides
 config.local.yaml
+
+
+logs/allure-results/
+**/allure-results/
+**/*-attachment.txt
+
+
+# Bytecode caches
+__pycache__/
+*.pyc
+
+# Allure results (anywhere)
+**/allure-results/
+**/*-attachment.txt
