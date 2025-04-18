@@ -2,18 +2,17 @@
 name = "haive-core"
 version = "0.1.0"
 description = "haive-core for Haive framework"
-authors = ["0rac130fD31phi <william.astley@algebraicwealth.com>"]
+authors = ["pr1m8 <william.astley@algebraicwealth.com>"]
 license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.13"
-pydantic = "^2.10.6"
+pydantic = "^2.10.6"  # Removed duplicate entry
 langchain = "^0.3.20"
 langchain-core = "^0.3.44"
 langgraph = "^0.3.5"
 jsonpatch = "^1.33"
-pydantic = "^2.10.6"
 pytest = "^8.3.5"
 playwright-stealth = "^1.0.6"
 google-api-python-client = "^2.163.0"
@@ -93,7 +92,6 @@ supabase = "^2.15.0"
 simsimd = "^6.2.1"
 toml = "^0.10.2"
 astor = "^0.8.1"
-
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"
