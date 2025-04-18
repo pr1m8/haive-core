@@ -1,36 +1,42 @@
+# src/haive/core/engine/agent/agent.py
+
+from __future__ import annotations
+import os
+import json
+import uuid
+import logging
+from datetime import datetime
+from abc import ABC, abstractmethod
+from typing import Any, Dict, List, Optional, Type, Union, ClassVar, TypeVar, Generic, Generator, AsyncGenerator
+import copy
+from pydantic import BaseModel, Field
+from langchain_core.messages import HumanMessage, BaseMessage
+from langgraph.graph import StateGraph, END, START
+from langgraph.checkpoint.base import BaseCheckpointSaver
+from langgraph.store.base import BaseStore
+from langgraph.types import Command, Send
+from langchain_core.runnables import RunnableConfig
+
+from haive_core.engine.base import Engine, EngineType
+from haive_core.graph.dynamic_graph_builder import DynamicGraph
+from haive_core.config.runnable import RunnableConfigManager
+from haive_core.engine.agent.persistence.types import CheckpointerType
 from haive_core.engine.agent.persistence.handlers import (
     setup_checkpointer, 
     ensure_pool_open, 
     close_pool_if_needed, 
     register_thread_if_needed
 )
-from abc import ABC, abstractmethod 
-from haive_core.engine.agent.persistence.types import CheckpointerType
 from haive_core.engine.agent.config import AgentConfig
-from haive_core.engine.base import Engine, InvokableEngine, EngineType, EngineRegistry
-from haive_core.schema.schema_composer import SchemaComposer
-from haive_core.schema.state_schema import StateSchema
-from haive_core.graph.dynamic_graph_builder import DynamicGraph
-from typing import Generic, TypeVar, Optional, Union, List, Dict, Any,\
-    Generator, AsyncGenerator
-from pydantic import BaseModel
-import os
-from datetime import datetime
-import uuid
-from haive_core.config.runnable import RunnableConfigManager
-# Import state handling functionality
 from haive_core.engine.agent.utils.state_handling import (
     process_input, 
     prepare_merged_input
 )
-from langgraph.store.base import BaseStore
-from haive_core.engine.agent.config import TConfig
-from langchain_core.runnables import RunnableConfig
-import json 
-from langgraph.graph import END,START
-#from src.utils.logging import logger
-import logging
 
+# Type variables for generics
+TConfig = TypeVar('TConfig', bound=AgentConfig)
+
+# Set up logging
 logger = logging.getLogger(__name__)
 
 class Agent(Generic[TConfig], ABC):
@@ -105,6 +111,7 @@ class Agent(Generic[TConfig], ABC):
         """Build an engine from configuration."""
         if isinstance(config, str):
             # Try to resolve from registry
+            from haive_core.engine.base import EngineRegistry, EngineType
             registry = EngineRegistry.get_instance()
             for engine_type in EngineType:
                 engine = registry.get(engine_type, config)
@@ -116,7 +123,7 @@ class Agent(Generic[TConfig], ABC):
         
         # Build based on engine type
         if hasattr(config, "create_runnable"):
-            return config.create_runnable()
+            return config.create_runnable(self.runnable_config)
         return config  # Return as-is if already built
     
     def _resolve_parent(self) -> Optional['Agent']:
@@ -134,6 +141,7 @@ class Agent(Generic[TConfig], ABC):
             parent_config = self.config.parent
         elif isinstance(self.config.parent, str):
             # Look up in registry
+            from haive_core.engine.base import EngineRegistry
             registry = EngineRegistry.get_instance()
             parent_config = registry.get(EngineType.AGENT, self.config.parent)
             
@@ -149,17 +157,11 @@ class Agent(Generic[TConfig], ABC):
             # Derive from components
             self.state_schema = self.config.derive_schema()
         elif isinstance(self.config.state_schema, type) and issubclass(self.config.state_schema, BaseModel):
-            # Ensure it's a StateSchema
-            if not issubclass(self.config.state_schema, StateSchema):
-                self.state_schema = SchemaComposer.compose_as_state_schema(
-                    [self.config.state_schema],
-                    name=f"{self.config.name}State"
-                )
-            else:
-                # Use provided class directly
-                self.state_schema = self.config.state_schema
+            # Use provided class directly
+            self.state_schema = self.config.state_schema
         else:
             # Create from dict or other format
+            from haive_core.schema.schema_composer import SchemaComposer
             self.state_schema = SchemaComposer.compose_as_state_schema(
                 [self.config.state_schema],
                 name=f"{self.config.name}State"
@@ -170,17 +172,11 @@ class Agent(Generic[TConfig], ABC):
             # Default to state schema
             self.input_schema = self.state_schema
         elif isinstance(self.config.input_schema, type) and issubclass(self.config.input_schema, BaseModel):
-            # Ensure it's a StateSchema
-            if not issubclass(self.config.input_schema, StateSchema):
-                self.input_schema = SchemaComposer.compose_as_state_schema(
-                    [self.config.input_schema],
-                    name=f"{self.config.name}Input"
-                )
-            else:
-                # Use provided class directly
-                self.input_schema = self.config.input_schema
+            # Use provided class directly
+            self.input_schema = self.config.input_schema
         else:
             # Create from dict or other format
+            from haive_core.schema.schema_composer import SchemaComposer
             self.input_schema = SchemaComposer.compose_as_state_schema(
                 [self.config.input_schema],
                 name=f"{self.config.name}Input"
@@ -191,17 +187,11 @@ class Agent(Generic[TConfig], ABC):
             # Default to state schema
             self.output_schema = self.state_schema
         elif isinstance(self.config.output_schema, type) and issubclass(self.config.output_schema, BaseModel):
-            # Ensure it's a StateSchema
-            if not issubclass(self.config.output_schema, StateSchema):
-                self.output_schema = SchemaComposer.compose_as_state_schema(
-                    [self.config.output_schema],
-                    name=f"{self.config.name}Output"
-                )
-            else:
-                # Use provided class directly
-                self.output_schema = self.config.output_schema
+            # Use provided class directly
+            self.output_schema = self.config.output_schema
         else:
             # Create from dict or other format
+            from haive_core.schema.schema_composer import SchemaComposer
             self.output_schema = SchemaComposer.compose_as_state_schema(
                 [self.config.output_schema],
                 name=f"{self.config.name}Output"
@@ -214,6 +204,7 @@ class Agent(Generic[TConfig], ABC):
                 self.config_schema = self.config.config_schema
             else:
                 # Create from dict or other format
+                from haive_core.schema.schema_composer import SchemaComposer
                 self.config_schema = SchemaComposer.compose(
                     [self.config.config_schema],
                     name=f"{self.config.name}Config"
@@ -261,8 +252,9 @@ class Agent(Generic[TConfig], ABC):
         if self.parent_agent and hasattr(self.parent_agent, 'app'):
             self.graph.add_subgraph(
                 name="parent",
-                subgraph=self.parent_agent
+                subgraph=self.parent_agent.app
             )
+    
     @abstractmethod
     def setup_workflow(self) -> None:
         """
@@ -360,8 +352,8 @@ class Agent(Generic[TConfig], ABC):
         Args:
             input_data: Input data in various formats
             thread_id: Optional thread ID for persistence
-            config: Optional runtime configuration
-            **kwargs: Additional runtime configuration
+            config: Optional runnable configuration
+            **kwargs: Additional parameters for the runnable config
             
         Returns:
             Final state or output
@@ -369,9 +361,9 @@ class Agent(Generic[TConfig], ABC):
         if not self.app:
             self.app = self.compile()
             
-        # Prepare runtime configuration
-        runtime_config = self._prepare_runnable_config(thread_id, config, **kwargs)
-        current_thread_id = runtime_config["configurable"]["thread_id"]
+        # Prepare runnable configuration
+        runnable_config = self._prepare_runnable_config(thread_id, config, **kwargs)
+        current_thread_id = runnable_config["configurable"]["thread_id"]
         
         # Register thread in PostgreSQL if needed
         register_thread_if_needed(self.checkpointer, current_thread_id)
@@ -382,7 +374,7 @@ class Agent(Generic[TConfig], ABC):
         try:
             # Try to retrieve previous state
             try:
-                previous_state = self.app.get_state(runtime_config)
+                previous_state = self.app.get_state(runnable_config)
                 if previous_state:
                     logger.info(f"Found previous state for thread {current_thread_id}")
             except Exception as e:
@@ -393,7 +385,7 @@ class Agent(Generic[TConfig], ABC):
             processed_input = prepare_merged_input(
                 input_data, 
                 previous_state, 
-                runtime_config, 
+                runnable_config, 
                 self.input_schema, 
                 self.state_schema
             )
@@ -402,13 +394,13 @@ class Agent(Generic[TConfig], ABC):
             logger.info(f"Running agent {self.config.name} with thread_id: {current_thread_id}")
             result = self.app.invoke(
                 processed_input,
-                config=runtime_config,
+                config=runnable_config,
                 debug=getattr(self.config, 'debug', False)
             )
             
             # Save state history if requested
             if getattr(self.config, 'save_history', True):
-                self.save_state_history(runtime_config)
+                self.save_state_history(runnable_config)
             
             return result
         
@@ -436,8 +428,8 @@ class Agent(Generic[TConfig], ABC):
             input_data: Input data in various formats
             thread_id: Optional thread ID for persistence
             stream_mode: Stream mode (values, updates, debug, etc.)
-            config: Optional runtime configuration
-            **kwargs: Additional runtime configuration
+            config: Optional runnable configuration
+            **kwargs: Additional parameters for the runnable config
             
         Yields:
             State updates during execution
@@ -445,9 +437,9 @@ class Agent(Generic[TConfig], ABC):
         if not self.app:
             self.app = self.compile()
             
-        # Prepare runtime configuration
-        runtime_config = self._prepare_runnable_config(thread_id, config, **kwargs)
-        current_thread_id = runtime_config["configurable"]["thread_id"]
+        # Prepare runnable configuration
+        runnable_config = self._prepare_runnable_config(thread_id, config, **kwargs)
+        current_thread_id = runnable_config["configurable"]["thread_id"]
         
         # Register thread in PostgreSQL if needed
         register_thread_if_needed(self.checkpointer, current_thread_id)
@@ -458,7 +450,7 @@ class Agent(Generic[TConfig], ABC):
         try:
             # Try to retrieve previous state
             try:
-                previous_state = self.app.get_state(runtime_config)
+                previous_state = self.app.get_state(runnable_config)
                 if previous_state:
                     logger.info(f"Found previous state for thread {current_thread_id}")
             except Exception as e:
@@ -469,7 +461,7 @@ class Agent(Generic[TConfig], ABC):
             processed_input = prepare_merged_input(
                 input_data, 
                 previous_state, 
-                runtime_config, 
+                runnable_config, 
                 self.input_schema, 
                 self.state_schema
             )
@@ -479,14 +471,14 @@ class Agent(Generic[TConfig], ABC):
             for output in self.app.stream(
                 processed_input,
                 stream_mode=stream_mode,
-                config=runtime_config,
+                config=runnable_config,
                 debug=getattr(self.config, 'debug', False)
             ):
                 yield output
                 
             # Save state history if requested
             if getattr(self.config, 'save_history', True):
-                self.save_state_history(runtime_config)
+                self.save_state_history(runnable_config)
         
         finally:
             # Close pool if opened
@@ -506,8 +498,8 @@ class Agent(Generic[TConfig], ABC):
         Args:
             input_data: Input data in various formats
             thread_id: Optional thread ID for persistence
-            config: Optional runtime configuration
-            **kwargs: Additional runtime configuration
+            config: Optional runnable configuration
+            **kwargs: Additional parameters for the runnable config
             
         Returns:
             Final state or output
@@ -515,9 +507,9 @@ class Agent(Generic[TConfig], ABC):
         if not self.app:
             self.app = self.compile()
             
-        # Prepare runtime configuration
-        runtime_config = self._prepare_runnable_config(thread_id, config, **kwargs)
-        current_thread_id = runtime_config["configurable"]["thread_id"]
+        # Prepare runnable configuration
+        runnable_config = self._prepare_runnable_config(thread_id, config, **kwargs)
+        current_thread_id = runnable_config["configurable"]["thread_id"]
         
         # Register thread in PostgreSQL if needed - use sync version for now
         register_thread_if_needed(self.checkpointer, current_thread_id)
@@ -528,7 +520,7 @@ class Agent(Generic[TConfig], ABC):
         try:
             # Try to retrieve previous state
             try:
-                previous_state = await self.app.aget_state(runtime_config)
+                previous_state = await self.app.aget_state(runnable_config)
                 if previous_state:
                     logger.info(f"Found previous state for thread {current_thread_id}")
             except Exception as e:
@@ -539,7 +531,7 @@ class Agent(Generic[TConfig], ABC):
             processed_input = prepare_merged_input(
                 input_data, 
                 previous_state, 
-                runtime_config, 
+                runnable_config, 
                 self.input_schema, 
                 self.state_schema
             )
@@ -548,13 +540,13 @@ class Agent(Generic[TConfig], ABC):
             logger.info(f"Running agent {self.config.name} asynchronously with thread_id: {current_thread_id}")
             result = await self.app.ainvoke(
                 processed_input,
-                config=runtime_config,
+                config=runnable_config,
                 debug=getattr(self.config, 'debug', False)
             )
             
             # Save state history if requested
             if getattr(self.config, 'save_history', True):
-                self.save_state_history(runtime_config)
+                self.save_state_history(runnable_config)
                 
             return result
         except Exception as e:
@@ -564,7 +556,7 @@ class Agent(Generic[TConfig], ABC):
             # Close pool if opened
             if opened_pool:
                 close_pool_if_needed(self.checkpointer, opened_pool)
-            
+    
     async def astream(
         self, 
         input_data: Union[str, List[str], Dict[str, Any], BaseModel], 
@@ -580,8 +572,8 @@ class Agent(Generic[TConfig], ABC):
             input_data: Input data in various formats
             thread_id: Optional thread ID for persistence
             stream_mode: Stream mode (values, updates, debug, etc.)
-            config: Optional runtime configuration
-            **kwargs: Additional runtime configuration
+            config: Optional runnable configuration
+            **kwargs: Additional parameters for the runnable config
             
         Yields:
             State updates during execution
@@ -589,9 +581,9 @@ class Agent(Generic[TConfig], ABC):
         if not self.app:
             self.app = self.compile()
             
-        # Prepare runtime configuration
-        runtime_config = self._prepare_runnable_config(thread_id, config, **kwargs)
-        current_thread_id = runtime_config["configurable"]["thread_id"]
+        # Prepare runnable configuration
+        runnable_config = self._prepare_runnable_config(thread_id, config, **kwargs)
+        current_thread_id = runnable_config["configurable"]["thread_id"]
         
         # Register thread in PostgreSQL if needed - use sync version for now
         register_thread_if_needed(self.checkpointer, current_thread_id)
@@ -602,7 +594,7 @@ class Agent(Generic[TConfig], ABC):
         try:
             # Try to retrieve previous state
             try:
-                previous_state = await self.app.aget_state(runtime_config)
+                previous_state = await self.app.aget_state(runnable_config)
                 if previous_state:
                     logger.info(f"Found previous state for thread {current_thread_id}")
             except Exception as e:
@@ -613,7 +605,7 @@ class Agent(Generic[TConfig], ABC):
             processed_input = prepare_merged_input(
                 input_data, 
                 previous_state, 
-                runtime_config, 
+                runnable_config, 
                 self.input_schema, 
                 self.state_schema
             )
@@ -623,14 +615,14 @@ class Agent(Generic[TConfig], ABC):
             async for output in self.app.astream(
                 processed_input,
                 stream_mode=stream_mode,
-                config=runtime_config,
+                config=runnable_config,
                 debug=getattr(self.config, 'debug', False)
             ):
                 yield output
                 
             # Save state history if requested
             if getattr(self.config, 'save_history', True):
-                self.save_state_history(runtime_config)
+                self.save_state_history(runnable_config)
         finally:
             # Close pool if opened
             if opened_pool:
@@ -659,7 +651,7 @@ class Agent(Generic[TConfig], ABC):
                 return
             
             # Ensure state is JSON serializable
-            from src.utils.serialization import ensure_json_serializable
+            from haive_core.utils.pydantic_utils import ensure_json_serializable
             state_json = ensure_json_serializable(state_json)
             
             # Save to file
@@ -677,7 +669,7 @@ class Agent(Generic[TConfig], ABC):
         Args:
             thread_id: Optional thread ID for persistence
             config: Optional base configuration
-            **kwargs: Additional parameters
+            **kwargs: Additional parameters for the config
             
         Returns:
             Prepared RunnableConfig
@@ -688,34 +680,34 @@ class Agent(Generic[TConfig], ABC):
         # If explicit config provided, start with that instead
         if config:
             # Use RunnableConfigManager to merge configs
-            runtime_config = RunnableConfigManager.merge(base_config, config)
+            runnable_config = RunnableConfigManager.merge(base_config, config)
         else:
             # Start with a copy of the base config
-            runtime_config = json.loads(json.dumps(base_config))
+            runnable_config = copy.deepcopy(base_config)
         
         # Ensure configurable section exists
-        if "configurable" not in runtime_config:
-            runtime_config["configurable"] = {}
+        if "configurable" not in runnable_config:
+            runnable_config["configurable"] = {}
         
         # Use provided thread_id or keep existing one
         if thread_id:
-            runtime_config["configurable"]["thread_id"] = thread_id
-        elif "thread_id" not in runtime_config["configurable"]:
+            runnable_config["configurable"]["thread_id"] = thread_id
+        elif "thread_id" not in runnable_config["configurable"]:
             # Generate a new thread ID if none exists
-            runtime_config["configurable"]["thread_id"] = str(uuid.uuid4())
+            runnable_config["configurable"]["thread_id"] = str(uuid.uuid4())
         
         # Add other kwargs
         for key, value in kwargs.items():
             # If it's a configurable param, add to configurable section
             if key.startswith("configurable_"):
                 param_name = key.replace("configurable_", "")
-                runtime_config["configurable"][param_name] = value
+                runnable_config["configurable"][param_name] = value
             elif key == "configurable" and isinstance(value, dict):
                 # Merge configurable section
                 for k, v in value.items():
-                    runtime_config["configurable"][k] = v
+                    runnable_config["configurable"][k] = v
             else:
                 # Otherwise add to top level
-                runtime_config[key] = value
+                runnable_config[key] = value
         
-        return runtime_config
+        return runnable_config

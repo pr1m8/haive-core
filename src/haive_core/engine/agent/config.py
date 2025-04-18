@@ -1,65 +1,29 @@
-from __future__ import annotations
-# src/haive/core/engine/agent/agent.py
 
+# src/haive/core/engine/agent/config.py
 
-import os
-import json
+from typing import Any, Dict, List, Optional, Type, Union, Generic, TypeVar, get_args, get_origin
 import uuid
 import logging
-from datetime import datetime
-from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Type, Union, ClassVar, TypeVar, \
-    Generic, Generator, AsyncGenerator, Tuple, Literal, get_args, get_origin, cast, Self
-
 from pydantic import BaseModel, Field, model_validator
-from langchain_core.messages import HumanMessage, BaseMessage
-from langgraph.graph import StateGraph, END, START
-from langgraph.checkpoint.base import BaseCheckpointSaver
-from langgraph.checkpoint.memory import MemorySaver
-from langgraph.store.base import BaseStore
-from langgraph.types import Command, Send
+
 from langchain_core.runnables import RunnableConfig
 
-from haive_core.engine.base import Engine, InvokableEngine, EngineType, EngineRegistry
-from haive_core.engine.aug_llm import AugLLMConfig
-from haive_core.schema.schema_composer import SchemaComposer
-from haive_core.schema.state_schema import StateSchema
-from haive_core.graph.dynamic_graph_builder import DynamicGraph
-from haive_core.config.runnable import RunnableConfigManager
-
-# Import persistence-related functionality
-
+from haive_core.engine.base import Engine, InvokableEngine, EngineType
 from haive_core.engine.agent.persistence.base import CheckpointerConfig
-from haive_core.engine.agent.persistence.handlers import (
-    setup_checkpointer, 
-    ensure_pool_open, 
-    close_pool_if_needed, 
-    register_thread_if_needed
-)
-
-# Import state handling functionality
-from haive_core.engine.agent.utils.state_handling import (
-    process_input, 
-    prepare_merged_input
-)
+from haive_core.config.runnable import RunnableConfigManager
+from haive_core.schema.schema_composer import SchemaComposer
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from haive_core.engine.agent.agent import Agent
-
-# Set up logging
-logger = logging.getLogger(__name__)
+    from haive_core.engine.agent.agent import Agent  # wherever Agent lives
 
 # Type variables for generics
-TConfig = TypeVar('TConfig', bound='AgentConfig')
 TIn = TypeVar('TIn')
 TOut = TypeVar('TOut')
 
-# -----------------------------------------------------
-# Agent Registry - Maps config classes to agent classes
-# -----------------------------------------------------
-from haive_core.engine.agent.registry import AGENT_REGISTRY, register_agent
-class AgentConfig(InvokableEngine[TIn, TOut], ABC):
+logger = logging.getLogger(__name__)
+
+class AgentConfig(InvokableEngine[TIn, TOut]):
     """
     Base configuration for an agent architecture.
     
@@ -116,17 +80,17 @@ class AgentConfig(InvokableEngine[TIn, TOut], ABC):
     # Persistence Configuration
     persistence: Optional[CheckpointerConfig] = None
     
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = {"arbitrary_types_allowed": True}
     
     @model_validator(mode="after")
     def ensure_engine(self):
         """Ensure at least one engine is available."""
         if not self.engine and not self.engines:
+            from haive_core.engine.aug_llm import AugLLMConfig
             self.engine = AugLLMConfig()
         return self
     
-    def derive_schema(self) -> Type[StateSchema]:
+    def derive_schema(self) -> Type[BaseModel]:
         """Derive state schema from components and engines."""
         # Get all components including engines
         all_components = []
@@ -138,7 +102,7 @@ class AgentConfig(InvokableEngine[TIn, TOut], ABC):
         schema_name = f"{self.name.replace('-', '_').title()}State"
         
         # Use SchemaComposer to build schema
-        return SchemaComposer.compose(
+        return SchemaComposer.compose_as_state_schema(
             all_components, 
             name=schema_name,
             include_runnable_config=True
@@ -167,6 +131,7 @@ class AgentConfig(InvokableEngine[TIn, TOut], ABC):
         # If it's a string, look it up in the registry
         if isinstance(ref, str):
             # Try each engine type
+            from haive_core.engine.base import EngineRegistry
             registry = EngineRegistry.get_instance()
             for engine_type in registry.engines:
                 engine = registry.get(engine_type, ref)
@@ -194,6 +159,7 @@ class AgentConfig(InvokableEngine[TIn, TOut], ABC):
         # If it's a string, look it up in the registry
         if isinstance(self.parent, str):
             # Try to find in registry
+            from haive_core.engine.base import EngineRegistry
             registry = EngineRegistry.get_instance()
             parent = registry.get(EngineType.AGENT, self.parent)
             if parent and isinstance(parent, AgentConfig):
@@ -252,15 +218,9 @@ class AgentConfig(InvokableEngine[TIn, TOut], ABC):
         # Use provided schema if available
         if self.input_schema:
             if isinstance(self.input_schema, type) and issubclass(self.input_schema, BaseModel):
-                # Ensure it's a StateSchema
-                if not issubclass(self.input_schema, StateSchema):
-                    return SchemaComposer.compose_as_state_schema(
-                        [self.input_schema], 
-                        name=f"{self.name}Input"
-                    )
                 return self.input_schema
             elif isinstance(self.input_schema, dict):
-                return SchemaComposer.compose_as_state_schema(
+                return SchemaComposer.compose(
                     [self.input_schema], 
                     name=f"{self.name}Input"
                 )
@@ -274,12 +234,6 @@ class AgentConfig(InvokableEngine[TIn, TOut], ABC):
                     in_type = args[0]
                     if in_type is not TIn:  # Not the generic parameter itself
                         if isinstance(in_type, type) and issubclass(in_type, BaseModel):
-                            # Ensure it's a StateSchema
-                            if not issubclass(in_type, StateSchema):
-                                return SchemaComposer.compose_as_state_schema(
-                                    [in_type], 
-                                    name=f"{self.name}Input"
-                                )
                             return in_type
         
         # Default to deriving from state schema
@@ -295,15 +249,9 @@ class AgentConfig(InvokableEngine[TIn, TOut], ABC):
         # Use provided schema if available
         if self.output_schema:
             if isinstance(self.output_schema, type) and issubclass(self.output_schema, BaseModel):
-                # Ensure it's a StateSchema
-                if not issubclass(self.output_schema, StateSchema):
-                    return SchemaComposer.compose_as_state_schema(
-                        [self.output_schema], 
-                        name=f"{self.name}Output"
-                    )
                 return self.output_schema
             elif isinstance(self.output_schema, dict):
-                return SchemaComposer.compose_as_state_schema(
+                return SchemaComposer.compose(
                     [self.output_schema], 
                     name=f"{self.name}Output"
                 )
@@ -317,12 +265,6 @@ class AgentConfig(InvokableEngine[TIn, TOut], ABC):
                     out_type = args[1]
                     if out_type is not TOut:  # Not the generic parameter itself
                         if isinstance(out_type, type) and issubclass(out_type, BaseModel):
-                            # Ensure it's a StateSchema
-                            if not issubclass(out_type, StateSchema):
-                                return SchemaComposer.compose_as_state_schema(
-                                    [out_type], 
-                                    name=f"{self.name}Output"
-                                )
                             return out_type
         
         # Default to deriving from state schema
@@ -372,43 +314,6 @@ class AgentConfig(InvokableEngine[TIn, TOut], ABC):
         # Run with input data and config
         return await agent.arun(input_data, thread_id=thread_id, config=runnable_config)
     
-    def apply_runnable_config(self, runnable_config: Optional[RunnableConfig] = None) -> Dict[str, Any]:
-        """
-        Extract parameters from runnable_config relevant to this agent.
-        
-        Args:
-            runnable_config: Runtime configuration to extract from
-            
-        Returns:
-            Dictionary of relevant parameters
-        """
-        # Start with common parameters from base class
-        params = super().apply_runnable_config(runnable_config)
-        
-        if not runnable_config or "configurable" not in runnable_config:
-            return params
-            
-        configurable = runnable_config["configurable"]
-        
-        # Extract ALL agent parameters from fields
-        for field in self.model_fields:
-            if field in configurable and field not in params:
-                params[field] = configurable[field]
-        
-        # Extract engine parameters if engine configs are present
-        if "engine_configs" in configurable:
-            for engine_name, engine_config in configurable["engine_configs"].items():
-                # Handle primary engine
-                if engine_name == self.name or (self.engine and hasattr(self.engine, "name") and engine_name == self.engine.name):
-                    params.update(engine_config)
-                # Handle named engines
-                elif engine_name in self.engines:
-                    if "engines" not in params:
-                        params["engines"] = {}
-                    params["engines"][engine_name] = engine_config
-        
-        return params
-    
     def to_dict(self) -> Dict[str, Any]:
         """
         Convert agent config to a dictionary.
@@ -416,12 +321,7 @@ class AgentConfig(InvokableEngine[TIn, TOut], ABC):
         Returns:
             Dictionary representation of the agent config
         """
-        if hasattr(self, "model_dump"):
-            # Pydantic v2
-            data = self.model_dump(exclude={"input_schema", "output_schema", "config_schema"})
-        else:
-            # Pydantic v1
-            data = self.dict(exclude={"input_schema", "output_schema", "config_schema"})
+        data = self.model_dump(exclude={"input_schema", "output_schema", "config_schema"})
         
         # Convert engines to serializable format
         if "engine" in data and isinstance(data["engine"], Engine):
@@ -439,11 +339,6 @@ class AgentConfig(InvokableEngine[TIn, TOut], ABC):
         # Convert parent to name if it's an AgentConfig
         if "parent" in data and isinstance(data["parent"], AgentConfig):
             data["parent"] = data["parent"].name
-        
-        # Convert persistence config
-        if "persistence" in data and data["persistence"] is not None:
-            if hasattr(data["persistence"], "to_dict"):
-                data["persistence"] = data["persistence"].to_dict()
         
         # Convert schemas if available
         if hasattr(self, "state_schema") and isinstance(self.state_schema, type):
@@ -473,6 +368,7 @@ class AgentConfig(InvokableEngine[TIn, TOut], ABC):
         
         # Handle engine references
         if "engine" in config_data and isinstance(config_data["engine"], str):
+            from haive_core.engine.base import EngineRegistry
             registry = EngineRegistry.get_instance()
             for engine_type in registry.engines:
                 engine = registry.get(engine_type, config_data["engine"])
@@ -485,6 +381,7 @@ class AgentConfig(InvokableEngine[TIn, TOut], ABC):
             engines = {}
             for name, engine_ref in config_data["engines"].items():
                 if isinstance(engine_ref, str):
+                    from haive_core.engine.base import EngineRegistry
                     registry = EngineRegistry.get_instance()
                     for engine_type in registry.engines:
                         engine = registry.get(engine_type, engine_ref)
@@ -499,6 +396,7 @@ class AgentConfig(InvokableEngine[TIn, TOut], ABC):
         
         # Handle parent reference
         if "parent" in config_data and isinstance(config_data["parent"], str):
+            from haive_core.engine.base import EngineRegistry
             registry = EngineRegistry.get_instance()
             parent = registry.get(EngineType.AGENT, config_data["parent"])
             if parent:
@@ -510,12 +408,5 @@ class AgentConfig(InvokableEngine[TIn, TOut], ABC):
                 # We can't resolve class names here, so remove them
                 del config_data[schema_key]
         
-        # Process persistence configuration
-        if "persistence" in config_data and config_data["persistence"] is not None:
-            if isinstance(config_data["persistence"], dict):
-                from haive_core.engine.agent.persistence import load_checkpointer_config
-                config_data["persistence"] = load_checkpointer_config(config_data["persistence"])
-        
         # Create instance
         return cls(**config_data)
-

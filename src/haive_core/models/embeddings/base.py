@@ -7,7 +7,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.embeddings import CacheBackedEmbeddings
 from langchain.storage import LocalFileStore
 import torch
-from src.config.constants import EMBEDDINGS_CACHE_DIR
+from haive_core.config.constants import EMBEDDINGS_CACHE_DIR
 from haive_core.models.embeddings.provider_types import EmbeddingProvider
 
 load_dotenv('.env')
