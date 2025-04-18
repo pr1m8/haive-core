@@ -6,7 +6,7 @@ authors = ["pr1m8 <william.astley@algebraicwealth.com>"]
 license = "MIT"
 readme = "README.md"
 packages=[
-    {include = "src", from="."}
+    {include = "haive_core", from="src"}
 ]
 
 [tool.poetry.dependencies]
