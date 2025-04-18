@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 import inspect
 import logging
 
-from haive_core.graph.GraphRegistry import register_graph_component
+from haive_core.graph.graph_pattern_registry import register_graph_component
 
 logger = logging.getLogger(__name__)
 
