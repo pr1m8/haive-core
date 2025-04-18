@@ -5,6 +5,9 @@ description = "haive-core for Haive framework"
 authors = ["pr1m8 <william.astley@algebraicwealth.com>"]
 license = "MIT"
 readme = "README.md"
+packages=[
+    {include = "src", from="."}
+]
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.13"
