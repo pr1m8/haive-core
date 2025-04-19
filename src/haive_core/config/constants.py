@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 
 # Automatically resolve root relative to this file (should be inside `src/haive_core/config`)
@@ -34,14 +33,14 @@ for path in [
 
 # Expose constants
 __all__ = [
+    "AGENTS_DIR",
+    "CACHE_DIR",
+    "DOCUMENTS_DIR",
+    "EMBEDDINGS_CACHE_DIR",
+    "GRAPH_IMAGES_DIR",
+    "PROJECTS_DIR",
+    "RESOURCES_DIR",
     "ROOT_DIR",
     "SRC_DIR",
-    "RESOURCES_DIR",
-    "CACHE_DIR",
-    "GRAPH_IMAGES_DIR",
-    "EMBEDDINGS_CACHE_DIR",
-    "PROJECTS_DIR",
-    "DOCUMENTS_DIR",
     "VECTORSTORE_DIR",
-    "AGENTS_DIR",
 ]
