@@ -1,18 +1,23 @@
+# src/haive/core/engine/agent/persistence/memory_config.py
 from typing import Literal
 
 from langgraph.checkpoint.memory import MemorySaver
+from pydantic import Field
 
-from haive_core.engine.agent.persistence.base import CheckpointerConfig
-from haive_core.engine.agent.persistence.types import CheckpointerType
-
+from .base import CheckpointerConfig
+from .types import CheckpointerType
 
 class MemoryCheckpointerConfig(CheckpointerConfig):
-    type: Literal[CheckpointerType.memory] = CheckpointerType.memory
+    """Configuration for in-memory checkpointing.
+    
+    This is the simplest checkpointer, but doesn't persist across sessions.
+    """
+    type: Literal[CheckpointerType.memory] = Field(default=CheckpointerType.memory)
 
     def create_checkpointer(self):
+        """Create a memory checkpointer.
+        
+        Returns:
+            MemorySaver instance
+        """
         return MemorySaver()
-
-    """
-    def build(self) -> MemorySaver:
-        return MemorySaver()
-    """
