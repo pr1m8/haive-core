@@ -2,6 +2,7 @@ import pytest
 import os
 import tempfile
 import json
+import logging
 from typing import Dict, Any, List, Optional
 from unittest.mock import MagicMock, patch
 from pydantic import BaseModel
@@ -13,6 +14,37 @@ from haive_core.engine.base import Engine, InvokableEngine, EngineType
 from haive_core.config.runnable import RunnableConfigManager
 from haive_core.engine.aug_llm import AugLLMConfig
 from haive_core.models.llm.base import AzureLLMConfig
+
+# Setup logger with more visible formatting
+logger = logging.getLogger(__name__)
+logging.basicConfig(
+    level=logging.INFO,
+    format="\n%(asctime)s [%(levelname)s] %(name)s:\n%(message)s"
+)
+
+def log_test_result(test_name, result):
+    """Format and log test results for better visibility"""
+    separator = "=" * 70
+    log_msg = f"\n{separator}\n✅ TEST: {test_name}\n{separator}\n"
+    
+    # Pretty format the result based on type
+    if hasattr(result, "model_dump"):
+        try:
+            log_msg += f"RESULT:\n{json.dumps(result.model_dump(), indent=2)}\n"
+        except:
+            log_msg += f"RESULT:\n{result}\n"
+    elif isinstance(result, dict):
+        try:
+            log_msg += f"RESULT:\n{json.dumps(result, indent=2)}\n"
+        except:
+            log_msg += f"RESULT:\n{result}\n"
+    else:
+        log_msg += f"RESULT:\n{result}\n"
+    
+    log_msg += f"{separator}\n"
+    logger.info(log_msg)
+    print(log_msg)
+    return result
 
 # Define test state schema
 class GraphState(BaseModel):
@@ -60,6 +92,16 @@ def test_dynamic_graph_init():
     graph = create_test_graph()
     
     # Check basic properties
+    result = {
+        "name": graph.name,
+        "description": graph.description,
+        "component_count": len(graph.components),
+        "state_model": graph.state_model.__name__,
+        "engines": list(graph.engines.keys()),
+        "engines_by_id": list(graph.engines_by_id.keys())
+    }
+    log_test_result("test_dynamic_graph_init", result)
+    
     assert graph.name == "test_graph"
     assert graph.description == "Test graph"
     assert len(graph.components) == 2
@@ -89,6 +131,14 @@ def test_add_node():
         command_goto=END
     )
     
+    # Log result
+    node_info = {
+        "node_name": "process_node",
+        "engine_name": graph.nodes["process_node"].config.engine.name,
+        "command_goto": str(graph.nodes["process_node"].config.command_goto)
+    }
+    log_test_result("test_add_node (first node)", node_info)
+    
     # Check that node was added
     assert "process_node" in graph.nodes
     assert graph.nodes["process_node"].name == "process_node"
@@ -102,6 +152,14 @@ def test_add_node():
             config="engine2",
             command_goto="process_node"
         )
+    
+    # Log second node
+    node_info2 = {
+        "node_name": "query_node",
+        "engine_name": graph.nodes["query_node"].config.engine.name,
+        "command_goto": graph.nodes["query_node"].config.command_goto
+    }
+    log_test_result("test_add_node (second node)", node_info2)
     
     # Check that node was added
     assert "query_node" in graph.nodes
@@ -120,17 +178,35 @@ def test_add_edge():
     # Add edge
     graph.add_edge("node1", "node2")
     
+    # Log result
+    edge_info = {
+        "edges": [{"from": e.source, "to": e.target} for e in graph.edges]
+    }
+    log_test_result("test_add_edge (first edge)", edge_info)
+    
     # Check that edge was added
     assert any(e.source == "node1" and e.target == "node2" for e in graph.edges)
     
     # Add edge to END
     graph.add_edge("node2", END)
     
+    # Log second edge
+    edge_info2 = {
+        "edges": [{"from": e.source, "to": e.target} for e in graph.edges]
+    }
+    log_test_result("test_add_edge (second edge)", edge_info2)
+    
     # Check that edge was added
     assert any(e.source == "node2" and e.target == "END" for e in graph.edges)
     
     # Add multiple edges
     graph.add_edge(["START", "node1"], "node2")
+    
+    # Log third edge set
+    edge_info3 = {
+        "edges": [{"from": e.source, "to": e.target} for e in graph.edges]
+    }
+    log_test_result("test_add_edge (multiple edges)", edge_info3)
     
     # Check that edges were added
     assert any(e.source == "START" and e.target == "node2" for e in graph.edges)
@@ -144,6 +220,12 @@ def test_insert_node():
     graph.add_node("start_node", graph.engines["engine1"])
     graph.add_node("end_node", graph.engines["engine2"])
     graph.add_edge("start_node", "end_node")
+    
+    # Log initial setup
+    initial_edges = {
+        "initial_edges": [{"from": e.source, "to": e.target} for e in graph.edges]
+    }
+    log_test_result("test_insert_node (initial setup)", initial_edges)
     
     # Verify the initial state
     assert any(e.source == "start_node" and e.target == "end_node" for e in graph.edges)
@@ -160,6 +242,12 @@ def test_insert_node():
     # 3. Add edges to connect through the middle node
     graph.add_edge("start_node", "middle_node")
     graph.add_edge("middle_node", "end_node")
+    
+    # Log final state
+    final_edges = {
+        "final_edges": [{"from": e.source, "to": e.target} for e in graph.edges]
+    }
+    log_test_result("test_insert_node (after insertion)", final_edges)
     
     # Verify the changes
     # The original edge might still exist in the graph, so we check that the new edges are added
@@ -179,6 +267,13 @@ def test_apply_pattern(mock_registry_class):
     # Apply pattern
     graph.apply_pattern("test_pattern", param1="value1")
     
+    # Log result
+    pattern_info = {
+        "applied_patterns": graph.applied_patterns,
+        "pattern_params": {"param1": "value1"}
+    }
+    log_test_result("test_apply_pattern", pattern_info)
+    
     # Check that pattern was applied
     assert "test_pattern" in graph.applied_patterns
     mock_registry.get_pattern.assert_called_once_with("test_pattern")
@@ -192,6 +287,15 @@ def test_with_runnable_config():
     
     # Create new graph with config
     new_graph = graph.with_runnable_config(config)
+    
+    # Log result
+    config_info = {
+        "original_graph_name": graph.name,
+        "new_graph_name": new_graph.name,
+        "has_config": new_graph.default_runnable_config is not None,
+        "thread_id": new_graph.default_runnable_config.get("configurable", {}).get("thread_id") 
+    }
+    log_test_result("test_with_runnable_config", config_info)
     
     # Check that config was set
     assert new_graph.default_runnable_config == config
@@ -211,6 +315,13 @@ def test_set_default_runnable_config():
     # Set config
     graph.set_default_runnable_config(config)
     
+    # Log result
+    config_info = {
+        "has_config": graph.default_runnable_config is not None,
+        "thread_id": graph.default_runnable_config.get("configurable", {}).get("thread_id")
+    }
+    log_test_result("test_set_default_runnable_config", config_info)
+    
     # Check that config was set
     assert graph.default_runnable_config == config
 
@@ -221,12 +332,28 @@ def test_update_default_runnable_config():
     # Update config with no existing config
     graph.update_default_runnable_config(thread_id="test-thread")
     
+    # Log initial update
+    initial_config = {
+        "has_config": graph.default_runnable_config is not None,
+        "thread_id": graph.default_runnable_config.get("configurable", {}).get("thread_id"),
+        "user_id": graph.default_runnable_config.get("configurable", {}).get("user_id", None)
+    }
+    log_test_result("test_update_default_runnable_config (initial)", initial_config)
+    
     # Check that config was created
     assert graph.default_runnable_config is not None
     assert "thread_id" in graph.default_runnable_config["configurable"]
     
     # Update existing config
     graph.update_default_runnable_config(user_id="test-user")
+    
+    # Log final update
+    final_config = {
+        "has_config": graph.default_runnable_config is not None,
+        "thread_id": graph.default_runnable_config.get("configurable", {}).get("thread_id"),
+        "user_id": graph.default_runnable_config.get("configurable", {}).get("user_id")
+    }
+    log_test_result("test_update_default_runnable_config (after update)", final_config)
     
     # Check that config was updated
     assert "thread_id" in graph.default_runnable_config["configurable"]  # Thread ID exists (value may be auto-generated)
