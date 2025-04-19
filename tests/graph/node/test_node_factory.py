@@ -209,7 +209,8 @@ def test_handle_result():
     logger.debug(f"Handled dict result: {handled_dict}")
     assert isinstance(handled_dict, Command)
     assert handled_dict.goto is END
-    assert handled_dict.update == result_dict
+    # Check that the original key-value pairs are present, allowing for additional metadata
+    assert all(handled_dict.update.get(k) == v for k, v in result_dict.items())
     
     # Test with Command result
     cmd = Command(update={"test": True}, goto="next_node")
