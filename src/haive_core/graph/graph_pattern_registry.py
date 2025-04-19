@@ -1,29 +1,30 @@
 # src/haive/core/graph/GraphPatternRegistry.py
 
-from typing import Dict, List, Any, Optional, Union, Callable, Type
-from pydantic import BaseModel, Field
 import logging
+from collections.abc import Callable
+from typing import Any
+
+from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 
 class GraphPattern(BaseModel):
     """Serializable graph pattern definition."""
     name: str = Field(description="Unique name for this pattern")
-    description: Optional[str] = Field(default=None, description="Pattern description")
+    description: str | None = Field(default=None, description="Pattern description")
     pattern_type: str = Field(description="Type of pattern")
-    parameters: Dict[str, Any] = Field(default_factory=dict, description="Pattern parameters")
-    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
-    
+    parameters: dict[str, Any] = Field(default_factory=dict, description="Pattern parameters")
+    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+
     # Internal function reference (not serialized)
-    apply_func: Optional[Callable] = Field(default=None, exclude=True)
-    
+    apply_func: Callable | None = Field(default=None, exclude=True)
+
     model_config = {
         "arbitrary_types_allowed": True
     }
-    
+
     def apply(self, graph: Any, **kwargs) -> Any:
-        """
-        Apply this pattern to a graph.
+        """Apply this pattern to a graph.
         
         Args:
             graph: The graph to apply the pattern to
@@ -35,32 +36,31 @@ class GraphPattern(BaseModel):
         if self.apply_func is None:
             logger.warning(f"Pattern '{self.name}' has no apply function")
             return graph
-            
+
         # Merge parameters with overrides
         params = {**self.parameters, **kwargs}
-        
+
         # Apply the pattern
         return self.apply_func(graph, **params)
 
 class BranchDefinition(BaseModel):
     """Serializable branch definition."""
     name: str = Field(description="Unique name for this branch")
-    description: Optional[str] = Field(default=None, description="Branch description")
+    description: str | None = Field(default=None, description="Branch description")
     condition_type: str = Field(description="Type of condition")
-    routes: Dict[str, str] = Field(description="Mapping of condition values to node names")
-    default_route: Optional[str] = Field(default=None, description="Default route if no condition matches")
-    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
-    
+    routes: dict[str, str] = Field(description="Mapping of condition values to node names")
+    default_route: str | None = Field(default=None, description="Default route if no condition matches")
+    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+
     # Internal function reference (not serialized)
-    condition_func: Optional[Callable] = Field(default=None, exclude=True)
-    
+    condition_func: Callable | None = Field(default=None, exclude=True)
+
     model_config = {
         "arbitrary_types_allowed": True
     }
-    
+
     def create_condition(self, **kwargs) -> Callable:
-        """
-        Create a condition function from this branch definition.
+        """Create a condition function from this branch definition.
         
         Args:
             **kwargs: Override parameters
@@ -75,33 +75,32 @@ class BranchDefinition(BaseModel):
                 for route_key in self.routes:
                     if route_key in state:
                         return route_key
-                
+
                 # Return default or first route
                 return self.default_route or next(iter(self.routes.keys()))
-                
+
             return default_condition
-            
+
         # Use the provided condition function
         return self.condition_func
 
 class GraphPatternRegistry:
     """Registry for reusable graph patterns and branches."""
     _instance = None
-    
+
     @classmethod
-    def get_instance(cls) -> 'GraphPatternRegistry':
+    def get_instance(cls) -> "GraphPatternRegistry":
         """Get the singleton instance."""
         if cls._instance is None:
             cls._instance = cls()
         return cls._instance
-    
+
     def __init__(self):
-        self.patterns: Dict[str, GraphPattern] = {}
-        self.branches: Dict[str, BranchDefinition] = {}
-    
-    def register_pattern(self, pattern: Union[GraphPattern, Dict[str, Any]]) -> GraphPattern:
-        """
-        Register a pattern in the registry.
+        self.patterns: dict[str, GraphPattern] = {}
+        self.branches: dict[str, BranchDefinition] = {}
+
+    def register_pattern(self, pattern: GraphPattern | dict[str, Any]) -> GraphPattern:
+        """Register a pattern in the registry.
         
         Args:
             pattern: Pattern instance or dictionary of pattern data
@@ -112,14 +111,13 @@ class GraphPatternRegistry:
         # Convert dict to GraphPattern if needed
         if isinstance(pattern, dict):
             pattern = GraphPattern(**pattern)
-            
+
         self.patterns[pattern.name] = pattern
         logger.info(f"Registered pattern '{pattern.name}'")
         return pattern
-    
-    def register_branch(self, branch: Union[BranchDefinition, Dict[str, Any]]) -> BranchDefinition:
-        """
-        Register a branch in the registry.
+
+    def register_branch(self, branch: BranchDefinition | dict[str, Any]) -> BranchDefinition:
+        """Register a branch in the registry.
         
         Args:
             branch: Branch instance or dictionary of branch data
@@ -130,14 +128,13 @@ class GraphPatternRegistry:
         # Convert dict to BranchDefinition if needed
         if isinstance(branch, dict):
             branch = BranchDefinition(**branch)
-            
+
         self.branches[branch.name] = branch
         logger.info(f"Registered branch '{branch.name}'")
         return branch
-    
-    def get_pattern(self, name: str) -> Optional[GraphPattern]:
-        """
-        Get a pattern by name.
+
+    def get_pattern(self, name: str) -> GraphPattern | None:
+        """Get a pattern by name.
         
         Args:
             name: Name of the pattern
@@ -146,10 +143,9 @@ class GraphPatternRegistry:
             Pattern if found, None otherwise
         """
         return self.patterns.get(name)
-    
-    def get_branch(self, name: str) -> Optional[BranchDefinition]:
-        """
-        Get a branch by name.
+
+    def get_branch(self, name: str) -> BranchDefinition | None:
+        """Get a branch by name.
         
         Args:
             name: Name of the branch
@@ -158,25 +154,23 @@ class GraphPatternRegistry:
             Branch if found, None otherwise
         """
         return self.branches.get(name)
-    
-    def list_patterns(self) -> List[str]:
-        """
-        List all pattern names.
+
+    def list_patterns(self) -> list[str]:
+        """List all pattern names.
         
         Returns:
             List of pattern names
         """
         return list(self.patterns.keys())
-    
-    def list_branches(self) -> List[str]:
-        """
-        List all branch names.
+
+    def list_branches(self) -> list[str]:
+        """List all branch names.
         
         Returns:
             List of branch names
         """
         return list(self.branches.keys())
-    
+
     def clear(self) -> None:
         """Clear all registrations (useful for testing)."""
         self.patterns = {}
@@ -185,8 +179,7 @@ class GraphPatternRegistry:
 
 # Pattern registration decorator
 def register_pattern(name: str, pattern_type: str, description: str = None, **default_params):
-    """
-    Decorator to register a function as a graph pattern.
+    """Decorator to register a function as a graph pattern.
     
     Args:
         name: Unique name for the pattern
@@ -210,10 +203,9 @@ def register_pattern(name: str, pattern_type: str, description: str = None, **de
     return decorator
 
 # Branch registration decorator
-def register_branch(name: str, condition_type: str, routes: Dict[str, str], 
+def register_branch(name: str, condition_type: str, routes: dict[str, str],
                    default_route: str = None, description: str = None):
-    """
-    Decorator to register a function as a branch condition.
+    """Decorator to register a function as a branch condition.
     
     Args:
         name: Unique name for the branch
@@ -248,8 +240,7 @@ def register_branch(name: str, condition_type: str, routes: Dict[str, str],
     fallback_node="fallback"
 )
 def apply_error_handling(graph, error_node: str, fallback_node: str, **kwargs):
-    """
-    Apply error handling pattern to a graph.
+    """Apply error handling pattern to a graph.
     
     This adds exception handling to all nodes, routing to an error handler node
     on exceptions.
@@ -265,12 +256,12 @@ def apply_error_handling(graph, error_node: str, fallback_node: str, **kwargs):
     """
     # This is a simplified implementation - in practice, you would
     # wrap all nodes with try/except and add routing logic
-    
+
     # Check if graph has the necessary methods
     if not hasattr(graph, "add_node") or not hasattr(graph, "nodes"):
         logger.warning("Graph does not support error handling pattern")
         return graph
-    
+
     # Implementation depends on the specific graph implementation
     logger.info(f"Applied error handling pattern with handler '{error_node}'")
     return graph
@@ -283,8 +274,7 @@ def apply_error_handling(graph, error_node: str, fallback_node: str, **kwargs):
     auto_save=True
 )
 def apply_persistence(graph, storage_type: str, auto_save: bool, **kwargs):
-    """
-    Apply persistence pattern to a graph.
+    """Apply persistence pattern to a graph.
     
     This adds state persistence capabilities to the graph.
     
@@ -299,7 +289,7 @@ def apply_persistence(graph, storage_type: str, auto_save: bool, **kwargs):
     """
     # This is a simplified implementation - in practice, you would
     # add checkpointing logic to the graph
-    
+
     logger.info(f"Applied persistence pattern with storage '{storage_type}'")
     return graph
 
@@ -315,8 +305,7 @@ def apply_persistence(graph, storage_type: str, auto_save: bool, **kwargs):
     description="Route based on detected intent"
 )
 def intent_router(state):
-    """
-    Route based on intent in state.
+    """Route based on intent in state.
     
     Args:
         state: Current state
@@ -327,7 +316,7 @@ def intent_router(state):
     # Check for explicit intent
     if "intent" in state:
         return state["intent"]
-        
+
     # Simple keyword detection (in practice, use a real classifier)
     if "query" in state:
         query = state["query"].lower()
@@ -336,6 +325,6 @@ def intent_router(state):
         if any(cmd in query for cmd in ["do", "execute", "perform", "run"]):
             return "command"
         return "chitchat"
-        
+
     # Default
     return "fallback_node"

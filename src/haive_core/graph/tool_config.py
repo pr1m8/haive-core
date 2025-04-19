@@ -1,31 +1,32 @@
 # src/haive/core/graph/tool_config.py
 
-from typing import Any, Dict, List, Optional, Union, Callable,Tuple
-from pydantic import BaseModel, Field,create_model
+from collections.abc import Callable
+from typing import Any
 
 from langchain_core.tools import BaseTool, StructuredTool
 from langgraph.types import RetryPolicy
+from pydantic import BaseModel, Field
 
 
 class ToolConfig(BaseModel):
     """Configuration for a tool with routing and retry behavior."""
-    tool: Union[BaseTool, StructuredTool, Callable] = Field(
+    tool: BaseTool | StructuredTool | Callable = Field(
         ..., description="The tool implementation"
     )
-    route_to: Optional[str] = Field(
+    route_to: str | None = Field(
         default=None, description="Where to route after this tool is used (node name or 'END')"
     )
     return_direct: bool = Field(
-        default=False, 
+        default=False,
         description="Whether to return directly to user without further LLM processing"
     )
-    timeout: Optional[float] = Field(
+    timeout: float | None = Field(
         default=None, description="Timeout in seconds for this tool"
     )
-    retry_policy: Optional[RetryPolicy] = Field(
+    retry_policy: RetryPolicy | None = Field(
         default=None, description="Retry policy for this tool"
     )
-    fallback_response: Optional[str] = Field(
+    fallback_response: str | None = Field(
         default=None, description="Fallback response if tool fails"
     )
 
@@ -34,22 +35,21 @@ class NodeConfig(BaseModel):
     """Configuration for a custom node in the agent graph."""
     node_function: Callable = Field(..., description="The node function")
     node_name: str = Field(..., description="Name for this node")
-    routes_to: Union[str, Dict[str, str], Any] = Field(
+    routes_to: str | dict[str, str] | Any = Field(
         ..., description="Where this node routes to (direct, mapping, or router config)"
     )
 
 
 # Helper functions for tool configuration
 def configure_tool(
-    tool: Union[BaseTool, StructuredTool, Callable],
-    route_to: Optional[str] = None,
+    tool: BaseTool | StructuredTool | Callable,
+    route_to: str | None = None,
     return_direct: bool = False,
-    timeout: Optional[float] = None,
-    retry_policy: Optional[RetryPolicy] = None,
-    fallback_response: Optional[str] = None
+    timeout: float | None = None,
+    retry_policy: RetryPolicy | None = None,
+    fallback_response: str | None = None
 ) -> ToolConfig:
-    """
-    Configure a tool with routing, retry, and other settings.
+    """Configure a tool with routing, retry, and other settings.
     
     Args:
         tool: The tool implementation (BaseTool, StructuredTool, or callable)
@@ -75,10 +75,9 @@ def configure_tool(
 def create_node_config(
     node_function: Callable,
     node_name: str,
-    routes_to: Union[str, Dict[str, str], Any]
+    routes_to: str | dict[str, str] | Any
 ) -> NodeConfig:
-    """
-    Create a configuration for a custom node.
+    """Create a configuration for a custom node.
     
     Args:
         node_function: Function that implements the node
@@ -95,9 +94,8 @@ def create_node_config(
     )
 
 
-def process_tools(tools: List[Union[BaseTool, StructuredTool, Callable, ToolConfig]]) -> Tuple[List[Any], Dict[str, ToolConfig]]:
-    """
-    Process a list of tools, extracting configurations.
+def process_tools(tools: list[BaseTool | StructuredTool | Callable | ToolConfig]) -> tuple[list[Any], dict[str, ToolConfig]]:
+    """Process a list of tools, extracting configurations.
     
     Args:
         tools: List of tools and tool configs
@@ -107,7 +105,7 @@ def process_tools(tools: List[Union[BaseTool, StructuredTool, Callable, ToolConf
     """
     processed_tools = []
     tool_configs = {}
-    
+
     for item in tools:
         if isinstance(item, ToolConfig):
             # Extract the tool and keep the config
@@ -117,5 +115,5 @@ def process_tools(tools: List[Union[BaseTool, StructuredTool, Callable, ToolConf
         else:
             # Keep as is
             processed_tools.append(item)
-    
+
     return processed_tools, tool_configs

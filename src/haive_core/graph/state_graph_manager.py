@@ -1,19 +1,16 @@
-import networkx as nx
-import matplotlib.pyplot as plt
-from typing import Any, Dict
-
 from collections import defaultdict
-from typing import Any, Dict, Tuple
+from typing import Any
+
+import matplotlib.pyplot as plt
+import networkx as nx
 
 
 class StateGraphManager:
-    """
-    A manager for extracting metadata and modifying a StateGraph.
+    """A manager for extracting metadata and modifying a StateGraph.
     """
 
     def __init__(self, graph: Any):
-        """
-        Initialize the StateGraphManager.
+        """Initialize the StateGraphManager.
 
         Args:
             graph (StateGraph): The StateGraph object to manage.
@@ -22,9 +19,8 @@ class StateGraphManager:
         self.metadata = self.extract_metadata()
         self.needs_recompile = False  # Track modifications requiring recompilation
 
-    def extract_metadata(self) -> Dict[str, Any]:
-        """
-        Extract metadata from the StateGraph, including conditional branches.
+    def extract_metadata(self) -> dict[str, Any]:
+        """Extract metadata from the StateGraph, including conditional branches.
         """
         metadata = {
             "entry_point": getattr(self.graph, "entry_point", None),
@@ -71,9 +67,8 @@ class StateGraphManager:
             self.needs_recompile = True
 
     #def insert_node(self, node: str, between: Tuple[str, str], func: callable = None):
-    def insert_node(self, node: str, between: Tuple[str, str], func: callable = None):
-        """
-        Insert a new node between two existing nodes, using LangGraph's `add_node` and `add_edge` methods.
+    def insert_node(self, node: str, between: tuple[str, str], func: callable = None):
+        """Insert a new node between two existing nodes, using LangGraph's `add_node` and `add_edge` methods.
     
         Args:
             node (str): The name of the new node.
@@ -81,31 +76,31 @@ class StateGraphManager:
             func (callable, optional): The function that the node represents in LangGraph.
         """
         src, dst = between
-    
+
         if src not in self.graph.nodes or dst not in self.graph.nodes:
             self.graph.add_node(node,func)
             raise ValueError(f"Cannot insert node: {src} or {dst} does not exist in the graph.")
-    
+
         print(f"📌 Inserting `{node}` between `{src}` → `{dst}`")
-    
+
         # Remove the existing edge
         self.remove_edge(src, dst)
-    
+
         # If function is not provided, try to extract from the existing graph
         if func is None:
             func = getattr(self.graph, node, None)  # Try extracting from existing graph
             if not callable(func):
                 raise ValueError(f"No callable function found for `{node}`. Provide `func` explicitly.")
-    
+
         # ✅ Add the new node with its function in LangGraph
         self.graph.add_node(func, node)
-    
+
         # ✅ Add new edges
         self.graph.add_edge(src, node)
         self.graph.add_edge(node, dst)
-    
+
         self.needs_recompile = True
-    
+
 
 
 
@@ -113,47 +108,45 @@ class StateGraphManager:
 
     def insert_start_node(self, node: str):
         """Insert a node into the branch between `__start__` and the first connected node."""
-    
         # Retrieve edges originating from `__start__`
         start_edges = [edge for edge in self.graph.edges if edge[0] == "__start__"]
-    
+
         if not start_edges:
             raise ValueError("No existing start edges found. Ensure `__start__` is connected in the graph.")
-    
+
         # Pick the first transition from `__start__`
         _, first_node = start_edges[0]
-    
+
         print(f"📌 Inserting {node} between __start__ → {first_node}")
-    
+
         # Add the new node
         self.add_node(node)
-    
+
         # Remove old edge and insert new ones
         self.remove_edge("__start__", first_node)
         self.graph.edges.add(("__start__", node))
         self.graph.edges.add((node, first_node))
-    
+
         self.needs_recompile = True
-    
-    
+
+
 
     def insert_end_node(self, node: str):
         """Insert a node into the branch before `END`."""
-    
         # Retrieve edges that connect to `END`
         end_edges = [edge for edge in self.graph.edges if edge[1] == "END"]
-    
+
         if not end_edges:
             raise ValueError("No existing end edges found. Ensure `END` is connected in the graph.")
-    
+
         # Pick the first transition to `END`
         last_node, _ = end_edges[0]
-    
+
         print(f"📌 Inserting {node} between {last_node} → END")
-    
+
         # Add the new node
         self.add_node(node)
-    
+
         # Remove old edge and insert new edges
         #self.remove_edge(last_node, "END")
         #self.graph.edges.add((last_node, node))
@@ -182,8 +175,7 @@ class StateGraphManager:
         self.ensure_compiled()
 
     def visualize(self, output_file: str = "state_graph.png"):
-        """
-        Visualize the StateGraph using NetworkX, ensuring **arrows are drawn correctly**.
+        """Visualize the StateGraph using NetworkX, ensuring **arrows are drawn correctly**.
 
         Args:
             output_file (str): The filename to save the visualization.
@@ -260,8 +252,7 @@ class StateGraphManager:
     # Add this static method to create a manager and attach it to a graph
     @staticmethod
     def attach_to_graph(graph):
-        """
-        Create a manager and attach it to a StateGraph.
+        """Create a manager and attach it to a StateGraph.
         
         This modifies the graph object to add a get_manager method.
         
@@ -273,12 +264,12 @@ class StateGraphManager:
         """
         # Create manager
         manager = StateGraphManager(graph)
-        
+
         # Add get_manager method to the graph
         def get_manager():
             return manager
-            
+
         # Attach the method to the graph
         graph.get_manager = get_manager
-        
+
         return graph
