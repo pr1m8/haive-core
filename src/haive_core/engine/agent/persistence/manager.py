@@ -237,27 +237,30 @@ class PersistenceManager:
         try:
             conn = self.checkpointer.conn
 
-            # Check if it's a pool
+            # Handle different pool implementations
             if hasattr(conn, "is_open"):
-                is_open = conn.is_open()
-                if not is_open:
+                # Modern psycopg pools have is_open method
+                if not conn.is_open():
                     logger.info("Opening PostgreSQL connection pool")
                     conn.open()
                     self.pool_opened = True
-                    return True
                 return True
-            if hasattr(conn, "_opened"):
-                # Older versions might not have is_open()
-                if not getattr(conn, "_opened", False):
-                    logger.info("Setting PostgreSQL pool as opened")
-                    # Key fix: directly modify the _opened attribute
+                
+            elif hasattr(conn, "_opened"):
+                # Older versions use _opened attribute
+                if not conn._opened:
+                    logger.info("Opening PostgreSQL connection pool (legacy)")
                     conn._opened = True
                     self.pool_opened = True
-                    return True
                 return True
-            return False
+                
+            else:
+                # Not a pool or unknown implementation
+                logger.debug("Unknown pool implementation, assuming already open")
+                return True
+                
         except Exception as e:
-            logger.error(f"Error ensuring pool is open: {e}")
+            logger.error(f"Error ensuring pool is open: {e}", exc_info=True)
             return False
 
     def close_pool_if_needed(self):
@@ -291,11 +294,16 @@ class PersistenceManager:
         """
         # Skip if not PostgreSQL
         if not self.checkpointer or not hasattr(self.checkpointer, "conn"):
+            logger.debug("Skipping thread registration - not using PostgreSQL")
+            return False
+
+        if not thread_id:
+            logger.warning("Cannot register thread with empty thread_id")
             return False
 
         try:
             # Ensure pool is open
-            opened = self.ensure_pool_open()
+            self.ensure_pool_open()
 
             # Extract user information from auth_info
             metadata = {}
@@ -304,84 +312,108 @@ class PersistenceManager:
             if auth_info:
                 # Extract supabase_user_id specifically to match the test expectations
                 user_id = auth_info.get("supabase_user_id")
-                logger.debug(f"Extracted user_id={user_id} (type: {type(user_id).__name__}) from auth_info")
+                logger.debug(f"Registering thread {thread_id} with user_id={user_id}")
                 
                 # Make a copy of auth_info to avoid modifying the original
                 metadata = dict(auth_info)
 
-            # Serialize metadata to JSON string - fix for TypeError with dict
+            # Serialize metadata to JSON string
             metadata_json = json.dumps(metadata)
 
-            # Register the thread
+            # Register the thread - use a transaction
             with self.checkpointer.conn.connection() as conn:
+                # Create a savepoint to roll back to if necessary
                 with conn.cursor() as cursor:
-                    # Check if threads table exists
-                    cursor.execute("""
-                        SELECT EXISTS (
-                            SELECT FROM information_schema.tables 
-                            WHERE table_name = 'threads'
-                        );
-                    """)
-                    table_exists = cursor.fetchone()[0]
+                    # Check if threads table exists and create if needed
+                    self._ensure_threads_table_exists(cursor)
 
-                    if not table_exists:
-                        logger.info("Creating threads table")
-                        cursor.execute("""
-                            CREATE TABLE IF NOT EXISTS threads (
-                                thread_id VARCHAR(255) PRIMARY KEY,
-                                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                                last_access TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                                metadata JSONB DEFAULT '{}'::jsonb,
-                                user_id VARCHAR(255) NULL
-                            );
-                        """)
-
-                    # Update with user context if provided
+                    # Register the thread
                     if user_id:
-                        cursor.execute("""
-                            INSERT INTO threads (thread_id, last_access, metadata, user_id) 
-                            VALUES (%s, CURRENT_TIMESTAMP, %s, %s) 
-                            ON CONFLICT (thread_id) 
-                            DO UPDATE SET 
-                                last_access = CURRENT_TIMESTAMP,
-                                metadata = threads.metadata || %s::jsonb,
-                                user_id = COALESCE(%s, threads.user_id)
-                        """, (thread_id, metadata_json, user_id, metadata_json, user_id))
-                        
-                        # Verify thread was inserted correctly with the right user_id
-                        cursor.execute("""
-                            SELECT thread_id, user_id FROM threads WHERE thread_id = %s
-                        """, (thread_id,))
-                        stored_thread = cursor.fetchone()
-                        logger.debug(f"Registered thread {thread_id} with user_id={stored_thread[1]} (stored in DB)")
+                        self._register_thread_with_user(cursor, thread_id, metadata_json, user_id)
                     else:
-                        # Simple update without user context
-                        cursor.execute("""
-                            INSERT INTO threads (thread_id, last_access, metadata) 
-                            VALUES (%s, CURRENT_TIMESTAMP, %s) 
-                            ON CONFLICT (thread_id) 
-                            DO UPDATE SET 
-                                last_access = CURRENT_TIMESTAMP,
-                                metadata = threads.metadata || %s::jsonb
-                        """, (thread_id, metadata_json, metadata_json))
+                        self._register_thread_without_user(cursor, thread_id, metadata_json)
 
-            logger.debug(f"Thread {thread_id} registered/updated in PostgreSQL with user_id={user_id}")
+                    # Commit is automatic with autocommit=True (our default)
             
-            # After registration, check all threads in the database for diagnosis
-            with self.checkpointer.conn.connection() as conn:
-                with conn.cursor() as cursor:
-                    cursor.execute("""
-                        SELECT thread_id, user_id FROM threads
-                    """)
-                    all_threads = cursor.fetchall()
-                    logger.debug(f"Total threads in database after registration: {len(all_threads)}")
-                    for t in all_threads:
-                        logger.debug(f"  thread_id={t[0]}, user_id={t[1]}")
-                        
+            logger.debug(f"Thread {thread_id} registered in PostgreSQL")
             return True
+            
         except Exception as e:
-            logger.warning(f"Error registering thread: {e}")
+            logger.warning(f"Error registering thread: {e}", exc_info=True)
             return False
+            
+    def _ensure_threads_table_exists(self, cursor):
+        """Ensure the threads table exists, creating it if necessary.
+        
+        Args:
+            cursor: Database cursor
+        """
+        cursor.execute("""
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_name = 'threads'
+            );
+        """)
+        table_exists = cursor.fetchone()[0]
+
+        if not table_exists:
+            logger.info("Creating threads table")
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS threads (
+                    thread_id VARCHAR(255) PRIMARY KEY,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                    last_access TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                    metadata JSONB DEFAULT '{}'::jsonb,
+                    user_id VARCHAR(255) NULL
+                );
+            """)
+            
+    def _register_thread_with_user(self, cursor, thread_id, metadata_json, user_id):
+        """Register a thread with user information.
+        
+        Args:
+            cursor: Database cursor
+            thread_id: Thread ID
+            metadata_json: Serialized metadata JSON
+            user_id: User ID
+        """
+        cursor.execute("""
+            INSERT INTO threads (thread_id, last_access, metadata, user_id) 
+            VALUES (%s, CURRENT_TIMESTAMP, %s, %s) 
+            ON CONFLICT (thread_id) 
+            DO UPDATE SET 
+                last_access = CURRENT_TIMESTAMP,
+                metadata = threads.metadata || %s::jsonb,
+                user_id = COALESCE(%s, threads.user_id)
+        """, (thread_id, metadata_json, user_id, metadata_json, user_id))
+        
+        # Verify the insertion for debugging
+        if logger.isEnabledFor(logging.DEBUG):
+            cursor.execute("""
+                SELECT thread_id, user_id FROM threads WHERE thread_id = %s
+            """, (thread_id,))
+            result = cursor.fetchone()
+            if result:
+                logger.debug(f"Verified thread {result[0]} with user_id={result[1]}")
+            else:
+                logger.warning(f"Failed to verify thread {thread_id} after insertion")
+                
+    def _register_thread_without_user(self, cursor, thread_id, metadata_json):
+        """Register a thread without user information.
+        
+        Args:
+            cursor: Database cursor
+            thread_id: Thread ID
+            metadata_json: Serialized metadata JSON
+        """
+        cursor.execute("""
+            INSERT INTO threads (thread_id, last_access, metadata) 
+            VALUES (%s, CURRENT_TIMESTAMP, %s) 
+            ON CONFLICT (thread_id) 
+            DO UPDATE SET 
+                last_access = CURRENT_TIMESTAMP,
+                metadata = threads.metadata || %s::jsonb
+        """, (thread_id, metadata_json, metadata_json))
 
     def create_runnable_config(self, thread_id=None, user_info=None, **kwargs):
         """Create a RunnableConfig with proper thread ID and authentication context.
@@ -498,7 +530,7 @@ class PersistenceManager:
 
         try:
             # Ensure pool is open
-            opened = self.ensure_pool_open()
+            self.ensure_pool_open()
 
             # Query threads
             with self.checkpointer.conn.connection() as conn:
@@ -516,105 +548,111 @@ class PersistenceManager:
                         logger.debug("Threads table does not exist yet")
                         return []
                 
-                    # Check table schema to ensure we're querying correctly
-                    cursor.execute("""
-                        SELECT column_name, data_type 
-                        FROM information_schema.columns 
-                        WHERE table_name = 'threads'
-                    """)
-                    columns = cursor.fetchall()
-                    logger.debug(f"Threads table schema: {columns}")
-                    
-                    # Execute the query based on filters
+                    # Build the query based on filters
                     if thread_id:
-                        cursor.execute("""
+                        logger.debug(f"Filtering by thread_id={thread_id}")
+                        query = """
                             SELECT thread_id, metadata, user_id, created_at, last_access
                             FROM threads
                             WHERE thread_id = %s
                             LIMIT 1
-                        """, (thread_id,))
+                        """
+                        params = (thread_id,)
                     elif user_id:
-                        # Add logging to see what user_id we're filtering by
-                        logger.debug(f"Filtering threads by user_id='{user_id}' (type: {type(user_id).__name__})")
-                        
-                        cursor.execute("""
+                        logger.debug(f"Filtering by user_id={user_id} (type: {type(user_id).__name__})")
+                        query = """
                             SELECT thread_id, metadata, user_id, created_at, last_access
                             FROM threads
                             WHERE user_id = %s
                             ORDER BY last_access DESC
                             LIMIT %s OFFSET %s
-                        """, (user_id, limit, offset))
+                        """
+                        params = (user_id, limit, offset)
                     else:
-                        cursor.execute("""
+                        logger.debug(f"No filters, fetching all threads with limit={limit}, offset={offset}")
+                        query = """
                             SELECT thread_id, metadata, user_id, created_at, last_access
                             FROM threads
                             ORDER BY last_access DESC
                             LIMIT %s OFFSET %s
-                        """, (limit, offset))
+                        """
+                        params = (limit, offset)
 
+                    # Execute the query
+                    cursor.execute(query, params)
                     results = cursor.fetchall()
                     
-                    # Improved debug logging
                     if user_id:
-                        logger.debug(f"Found {len(results)} threads for user_id='{user_id}'")
-                        # Log all thread IDs and user IDs for debugging
-                        if results:
-                            logger.debug("Threads found:")
-                            for r in results:
-                                logger.debug(f"  thread_id={r[0]}, user_id={r[2]}")
+                        logger.debug(f"Found {len(results)} threads for user_id={user_id}")
                         
-                        # Query all threads to see what's in the database
-                        cursor.execute("""
-                            SELECT thread_id, user_id FROM threads
-                        """)
-                        all_threads = cursor.fetchall()
-                        logger.debug(f"Total threads in database: {len(all_threads)}")
-                        logger.debug("All threads in database:")
-                        for t in all_threads:
-                            logger.debug(f"  thread_id={t[0]}, user_id={t[1]}")
+                        # For debugging purposes
+                        if logger.isEnabledFor(logging.DEBUG):
+                            cursor.execute("SELECT COUNT(*) FROM threads")
+                            total = cursor.fetchone()[0]
+                            logger.debug(f"Total threads in database: {total}")
+                            
+                            cursor.execute("SELECT thread_id, user_id FROM threads LIMIT 5")
+                            sample_threads = cursor.fetchall()
+                            logger.debug(f"Sample threads: {sample_threads}")
 
+                    # Process results
                     threads = []
                     for result in results:
                         thread_id, metadata, user_id, created_at, last_access = result
-
-                        # Parse metadata JSON
-                        if isinstance(metadata, str):
-                            try:
-                                metadata = json.loads(metadata)
-                            except (json.JSONDecodeError, TypeError):
-                                logger.warning(f"Failed to parse metadata JSON for thread {thread_id}")
-                                metadata = {}
-                        elif metadata is None:
-                            metadata = {}
-
-                        # Handle timestamp formatting - fixed to handle string timestamps
-                        try:
-                            # For datetime objects
-                            if hasattr(created_at, 'isoformat'):
-                                created_at = created_at.isoformat()
-                            if hasattr(last_access, 'isoformat'):
-                                last_access = last_access.isoformat()
-                        except Exception as e:
-                            logger.warning(f"Error formatting timestamps: {e}")
-
-                        # Extract username from metadata for convenience
-                        username = metadata.get("username", "Unknown")
-
-                        # Build thread info
-                        thread_info = {
-                            "thread_id": thread_id,
-                            "user_id": user_id,
-                            "username": username,
-                            "created_at": created_at,
-                            "last_access": last_access,
-                            "metadata": metadata
-                        }
+                        thread_info = self._process_thread_result(thread_id, metadata, user_id, created_at, last_access)
                         threads.append(thread_info)
 
                     return threads
+                    
         except Exception as e:
-            logger.error(f"Error listing threads: {e}")
+            logger.error(f"Error listing threads: {e}", exc_info=True)
             return []
+
+    def _process_thread_result(self, thread_id, metadata, user_id, created_at, last_access):
+        """Process a thread result row into a dictionary.
+        
+        Args:
+            thread_id: Thread ID
+            metadata: Metadata JSON or dictionary
+            user_id: User ID
+            created_at: Creation timestamp
+            last_access: Last access timestamp
+            
+        Returns:
+            Thread information dictionary
+        """
+        # Parse metadata JSON
+        if isinstance(metadata, str):
+            try:
+                metadata = json.loads(metadata)
+            except (json.JSONDecodeError, TypeError):
+                logger.warning(f"Failed to parse metadata JSON for thread {thread_id}")
+                metadata = {}
+        elif metadata is None:
+            metadata = {}
+
+        # Format timestamps
+        try:
+            # For datetime objects
+            if hasattr(created_at, 'isoformat'):
+                created_at = created_at.isoformat()
+            if hasattr(last_access, 'isoformat'):
+                last_access = last_access.isoformat()
+        except Exception as e:
+            logger.warning(f"Error formatting timestamps: {e}")
+
+        # Extract username from metadata for convenience
+        username = metadata.get("username", "Unknown")
+
+        # Build thread info
+        return {
+            "thread_id": thread_id,
+            "user_id": user_id,
+            "username": username,
+            "created_at": created_at,
+            "last_access": last_access,
+            "metadata": metadata
+        }
 
     def delete_thread(self, thread_id):
         """Delete a thread from the PostgreSQL database.
@@ -627,24 +665,51 @@ class PersistenceManager:
         """
         # Skip if not PostgreSQL
         if not self.checkpointer or not hasattr(self.checkpointer, "conn"):
+            logger.debug("Skipping thread deletion - not using PostgreSQL")
+            return False
+            
+        if not thread_id:
+            logger.warning("Cannot delete thread with empty thread_id")
             return False
 
         try:
             # Ensure pool is open
-            opened = self.ensure_pool_open()
+            self.ensure_pool_open()
 
             # Delete thread
             with self.checkpointer.conn.connection() as conn:
                 with conn.cursor() as cursor:
+                    # First check if the threads table exists
+                    cursor.execute("""
+                        SELECT EXISTS (
+                            SELECT FROM information_schema.tables 
+                            WHERE table_name = 'threads'
+                        );
+                    """)
+                    table_exists = cursor.fetchone()[0]
+                    
+                    if not table_exists:
+                        logger.debug("Threads table does not exist, nothing to delete")
+                        return True
+                        
+                    # Delete the thread
                     cursor.execute("""
                         DELETE FROM threads
                         WHERE thread_id = %s
+                        RETURNING thread_id
                     """, (thread_id,))
-
-            logger.info(f"Thread {thread_id} deleted from PostgreSQL")
-            return True
+                    
+                    # Check if any rows were affected
+                    deleted = cursor.fetchone()
+                    if deleted:
+                        logger.info(f"Thread {thread_id} deleted from PostgreSQL")
+                        return True
+                    else:
+                        logger.debug(f"Thread {thread_id} not found in database")
+                        return False
+                        
         except Exception as e:
-            logger.warning(f"Error deleting thread: {e}")
+            logger.warning(f"Error deleting thread: {e}", exc_info=True)
             return False
 
     @classmethod
