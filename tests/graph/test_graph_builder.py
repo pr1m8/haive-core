@@ -343,7 +343,7 @@ sys.modules['src.haive.core.config.runnable'] = mock_config_module
 import unittest
 
 # Import the real engines
-from haive_core.engine.aug_llm import AugLLMConfig
+from haive_core.engine.aug_llm.base import AugLLMConfig
 from haive_core.models.llm.base import AzureLLMConfig
 
 # Create a test state model
