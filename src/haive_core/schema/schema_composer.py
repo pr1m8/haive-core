@@ -7,8 +7,6 @@ import inspect
 import logging
 from collections import defaultdict
 
-from haive_core.schema.state_schema import StateSchema
-
 logger = logging.getLogger(__name__)
 
 class SchemaComposer:
@@ -18,8 +16,10 @@ class SchemaComposer:
     The SchemaComposer provides methods to:
     - Extract fields from Engine objects
     - Merge schemas with conflict resolution
-    - Automatically detect reducers and shared fields
-    - Create StateSchema subclasses with the composed fields
+    - Identify shared fields
+    - Create schema classes with the composed fields
+    
+    Important: This implementation NEVER adds __runnable_config__ to state schemas.
     """
     
     def __init__(self, name: str = "ComposedSchema"):
@@ -32,7 +32,7 @@ class SchemaComposer:
         self.name = name
         self.fields = {}  # Field name -> (type, default/field_info)
         self.shared_fields = set()  # Fields shared with parent graph
-        self.reducer_fields = {}  # Field name -> reducer function
+        self.reducer_names = {}  # Field name -> reducer function name
         self.field_descriptions = {}  # Field name -> description
         self.field_sources = defaultdict(set)  # Field name -> set of sources
     
@@ -63,6 +63,11 @@ class SchemaComposer:
         Returns:
             Self for chaining
         """
+        # CRITICAL: Never add __runnable_config__ to state schemas
+        if name == "__runnable_config__":
+            logger.warning("Attempted to add __runnable_config__ to state schema. Ignoring.")
+            return self
+            
         from pydantic import Field
         
         # Warn about fields without defaults
@@ -106,7 +111,8 @@ class SchemaComposer:
             self.shared_fields.add(name)
 
         if reducer:
-            self.reducer_fields[name] = reducer
+            # Store reducer name for serialization
+            self.reducer_names[name] = getattr(reducer, "__name__", str(reducer))
 
         if source:
             self.field_sources[name].add(source)
@@ -126,6 +132,10 @@ class SchemaComposer:
         from typing import get_origin, Optional
 
         for name, type_default in fields.items():
+            # Skip __runnable_config__
+            if name == "__runnable_config__":
+                continue
+                
             # If it's a single type, make it Optional with None default
             if not isinstance(type_default, tuple):
                 self.add_field(name, Optional[type_default], default=None)
@@ -159,58 +169,127 @@ class SchemaComposer:
         Returns:
             Self for chaining
         """
-        from pydantic.fields import FieldInfo
-
         model_name = model.__name__
 
-        for field_name, field_info in model.model_fields.items():
-            field_type = field_info.annotation
-            shared = False
-            reducer = None
+        # Handle Pydantic v2
+        if hasattr(model, "model_fields"):
+            for field_name, field_info in model.model_fields.items():
+                # Skip __runnable_config__
+                if field_name == "__runnable_config__" or field_name.startswith("__") or field_name == "runnable_config":
+                    continue
+                    
+                field_type = field_info.annotation
+                shared = False
+                reducer_name = None
 
-            # Check for Annotated types with reducer
-            if get_origin(field_type) is Annotated:
-                args = get_args(field_type)
-                if len(args) > 1:
-                    field_type = args[0]
-                    for arg in args[1:]:
-                        if callable(arg):
-                            reducer = arg
-                            break
+                # Check for Annotated types with reducer
+                if get_origin(field_type) is Annotated:
+                    args = get_args(field_type)
+                    if len(args) > 1:
+                        field_type = args[0]
+                        for arg in args[1:]:
+                            if callable(arg):
+                                reducer_name = arg.__name__
 
-            # Get default value or default_factory
-            default = None
-            default_factory = None
-
-            if isinstance(field_info, FieldInfo):
+                # Handle default or default_factory
                 if field_info.default_factory is not None:
-                    default_factory = field_info.default_factory
-                elif not field_info.is_required():
-                    default = field_info.default
+                    self.add_field(
+                        name=field_name,
+                        field_type=field_type,
+                        default_factory=field_info.default_factory,
+                        description=field_info.description,
+                        shared=shared,
+                        source=model_name
+                    )
                 else:
-                    # If required but no default, auto-wrap with Optional
-                    from typing import Optional
-                    field_type = Optional[field_type]
-                    default = None
+                    default = field_info.default
+                    if default is ... and not field_info.is_required():
+                        # If required but no default, auto-wrap with Optional
+                        from typing import Optional
+                        field_type = Optional[field_type]
+                        default = None
 
-            description = field_info.description if hasattr(field_info, "description") else None
+                    self.add_field(
+                        name=field_name,
+                        field_type=field_type,
+                        default=default,
+                        description=field_info.description,
+                        shared=shared,
+                        source=model_name
+                    )
 
-            self.add_field(
-                name=field_name,
-                field_type=field_type,
-                default=default,
-                default_factory=default_factory,
-                description=description,
-                shared=shared,
-                reducer=reducer,
-                source=model_name
-            )
+                # Add reducer name if found
+                if reducer_name:
+                    self.reducer_names[field_name] = reducer_name
+
+        # Handle Pydantic v1 (backwards compatibility)
+        elif hasattr(model, "__fields__"):
+            for field_name, field_info in model.__fields__.items():
+                # Skip __runnable_config__
+                if field_name == "__runnable_config__" or field_name.startswith("__") or field_name == "runnable_config":
+                    continue
+                    
+                field_type = getattr(field_info, "type_", Any)
+                shared = False
+                reducer_name = None
+
+                # Check for Annotated types with reducer
+                if get_origin(field_type) is Annotated:
+                    args = get_args(field_type)
+                    if len(args) > 1:
+                        field_type = args[0]
+                        for arg in args[1:]:
+                            if callable(arg):
+                                reducer_name = arg.__name__
+
+                # Handle default or default_factory
+                if hasattr(field_info, 'default_factory') and field_info.default_factory is not None:
+                    self.add_field(
+                        name=field_name,
+                        field_type=field_type,
+                        default_factory=field_info.default_factory,
+                        description=getattr(field_info, 'description', None),
+                        shared=shared,
+                        source=model_name
+                    )
+                else:
+                    default = getattr(field_info, 'default', None)
+                    if default is ... and not getattr(field_info, 'required', False):
+                        # If required but no default, auto-wrap with Optional
+                        from typing import Optional
+                        field_type = Optional[field_type]
+                        default = None
+
+                    self.add_field(
+                        name=field_name,
+                        field_type=field_type,
+                        default=default,
+                        description=getattr(field_info, 'description', None),
+                        shared=shared,
+                        source=model_name
+                    )
+
+                # Add reducer name if found
+                if reducer_name:
+                    self.reducer_names[field_name] = reducer_name
+
+        # Handle shared fields
+        if hasattr(model, "__shared_fields__"):
+            for field in model.__shared_fields__:
+                if field in self.fields:
+                    self.shared_fields.add(field)
+
+        # Handle serializable reducers
+        if hasattr(model, "__serializable_reducers__"):
+            for field, reducer_name in model.__serializable_reducers__.items():
+                if field in self.fields:
+                    self.reducer_names[field] = reducer_name
 
         return self
 
     def add_fields_from_engine(self, engine) -> 'SchemaComposer':
         """
-        Comprehensively extract fields from an Engine object.
+        Extract fields from an Engine object.
         
         Args:
             engine: Engine object to extract fields from
@@ -227,35 +306,40 @@ class SchemaComposer:
                 schema_fields = engine.get_schema_fields()
                 
                 for field_name, (field_type, field_default) in schema_fields.items():
+                    # Skip __runnable_config__
+                    if field_name == "__runnable_config__" or field_name == "runnable_config":
+                        continue
+                        
                     # Check for Annotated types with reducers
-                    reducer = None
+                    reducer_name = None
                     if get_origin(field_type) is Annotated:
                         args = get_args(field_type)
                         # First arg is the actual type, remaining args might contain reducers
                         field_type = args[0]
                         for arg in args[1:]:
                             if callable(arg):
-                                reducer = arg
-                                break
+                                reducer_name = arg.__name__
                     
                     # Special handling for messages field
-                    if field_name == "messages" and not reducer:
-                        from langgraph.graph import add_messages
-                        reducer = add_messages
+                    if field_name == "messages" and not reducer_name:
+                        reducer_name = "add_messages"
                     
                     self.add_field(
                         name=field_name,
                         field_type=field_type,
                         default=field_default,
-                        shared=False,  # Default to not shared
-                        reducer=reducer,
+                        shared=False,
                         source=f"{engine_name}.schema_fields"
                     )
+                    
+                    # Record reducer name if found
+                    if reducer_name:
+                        self.reducer_names[field_name] = reducer_name
+                        
             except Exception as e:
                 logger.warning(f"Error getting schema fields from engine {engine_name}: {e}")
         
         # If the engine doesn't have get_schema_fields, try other methods
-        # This is for backward compatibility
         else:
             # Try input schema
             if hasattr(engine, 'derive_input_schema'):
@@ -273,7 +357,7 @@ class SchemaComposer:
                 except Exception as e:
                     logger.warning(f"Error deriving output schema: {e}")
                 
-            # Check for structured output model (common in AugLLM)
+            # Check for structured output model
             if hasattr(engine, 'structured_output_model') and engine.structured_output_model:
                 try:
                     self._extract_schema_fields(engine.structured_output_model, f"{engine_name}.output_model")
@@ -287,29 +371,30 @@ class SchemaComposer:
                 except Exception as e:
                     logger.warning(f"Error extracting prompt variables: {e}")
         
-        # Always check for messages field indicator
+        # Check for messages field indicator
         if hasattr(engine, 'uses_messages_field') and engine.uses_messages_field:
             self._ensure_messages_field(source=f"{engine_name}.messages")
             
         return self
 
     def _ensure_messages_field(self, source: str) -> None:
-        """Ensure messages field exists with proper reducer configuration."""
+        """Ensure messages field exists with proper configuration."""
         from typing import Sequence
         from langchain_core.messages import BaseMessage
-        from langgraph.graph import add_messages
         
         self.add_field(
             name="messages",
-            field_type=Annotated[Sequence[BaseMessage], add_messages],
+            field_type=Sequence[BaseMessage],
             default_factory=list,
             description="Chat message history",
-            reducer=add_messages,
             source=source
         )
+        
+        # Record add_messages as the reducer
+        self.reducer_names["messages"] = "add_messages"
 
     def _extract_schema_fields(self, model: Type[BaseModel], source: str) -> None:
-        """Extract fields from a Pydantic model with proper reducer detection."""
+        """Extract fields from a Pydantic model."""
         if not model:
             return
         
@@ -317,22 +402,21 @@ class SchemaComposer:
         fields_dict = getattr(model, 'model_fields', None) or getattr(model, '__fields__', {})
         
         for field_name, field_info in fields_dict.items():
-            # Skip internal fields
-            if field_name.startswith("__") or field_name in ["runnable_config"]:
+            # Skip internal fields and runnable_config
+            if field_name.startswith("__") or field_name == "runnable_config" or field_name == "__runnable_config__":
                 continue
             
             field_type = field_info.annotation if hasattr(field_info, "annotation") else getattr(field_info, "type_", Any)
             
             # Check for Annotated types with reducers
-            reducer = None
+            reducer_name = None
             if get_origin(field_type) is Annotated:
                 args = get_args(field_type)
                 # First arg is the actual type, remaining args might contain reducers
                 field_type = args[0]
                 for arg in args[1:]:
                     if callable(arg):
-                        reducer = arg
-                        break
+                        reducer_name = arg.__name__
             
             # Handle shared field indication
             shared = False
@@ -347,7 +431,6 @@ class SchemaComposer:
                     default_factory=field_info.default_factory,
                     description=getattr(field_info, 'description', None),
                     shared=shared,
-                    reducer=reducer,
                     source=source
                 )
             else:
@@ -365,9 +448,12 @@ class SchemaComposer:
                     default=default,
                     description=getattr(field_info, 'description', None),
                     shared=shared,
-                    reducer=reducer,
                     source=source
                 )
+            
+            # Record reducer name if found
+            if reducer_name:
+                self.reducer_names[field_name] = reducer_name
 
     def _extract_prompt_variables(self, prompt_template, source: str) -> None:
         """Extract variables from a prompt template."""
@@ -394,6 +480,10 @@ class SchemaComposer:
         
         # Add each variable as a field
         for var_name in variables:
+            # Skip __runnable_config__
+            if var_name == "__runnable_config__" or var_name == "runnable_config":
+                continue
+                
             if var_name not in partial_vars:
                 if var_name == "messages":
                     # Special handling for messages
@@ -426,19 +516,9 @@ class SchemaComposer:
             elif inspect.isclass(component) and issubclass(component, BaseModel):
                 self.add_fields_from_model(component)
                 
-            # Handle StateSchema instances
-            elif isinstance(component, StateSchema):
+            # Handle BaseModel instances
+            elif isinstance(component, BaseModel):
                 self.add_fields_from_model(component.__class__)
-                
-                # Also include shared fields information
-                for field in component.__class__.__shared_fields__:
-                    if field in self.fields:
-                        self.shared_fields.add(field)
-                        
-                # Include reducer information
-                for field, reducer in component.__class__.__reducer_fields__.items():
-                    if field in self.fields:
-                        self.reducer_fields[field] = reducer
                 
             # Handle dictionaries of field definitions
             elif isinstance(component, dict):
@@ -446,84 +526,72 @@ class SchemaComposer:
                 
         return self
     
-    def build(self) -> Type[StateSchema]:
+    def build(self) -> Type[BaseModel]:
         """
-        Build the final StateSchema class with all composed fields.
+        Build the final model class with all composed fields.
         
         Returns:
-            StateSchema subclass with all fields
+            Created model class
         """
+        # Import here to avoid circular imports
+        from haive_core.schema.state_schema import StateSchema
+        
         field_dict = {}
         
-        # Process fields to include reducers in Annotated types
+        # Process fields - ensure no __runnable_config__
         for field_name, (field_type, default) in self.fields.items():
-            # If field has a reducer, wrap in Annotated
-            if field_name in self.reducer_fields:
-                reducer = self.reducer_fields[field_name]
-                
-                # Check if it's already Annotated
-                if get_origin(field_type) is not Annotated:
-                    field_type = Annotated[field_type, reducer]
-                
-            # Add to field dict
-            field_dict[field_name] = (field_type, default)
+            if field_name != "__runnable_config__":
+                field_dict[field_name] = (field_type, default)
             
         # Create the model
-        schema_cls = StateSchema.create(__name__=self.name, **field_dict)
+        model = create_model(
+            self.name,
+            __base__=StateSchema,
+            **field_dict
+        )
         
-        # Set shared fields
-        schema_cls.__shared_fields__ = list(self.shared_fields)
+        # Add shared fields
+        model.__shared_fields__ = list(self.shared_fields)
         
-        # Ensure reducer fields dictionary is properly set
-        schema_cls.__reducer_fields__ = dict(self.reducer_fields)
+        # Add serializable reducers
+        model.__serializable_reducers__ = dict(self.reducer_names)
         
-        # Special handling for messages reducer
-        if "messages" in self.fields and "messages" not in schema_cls.__reducer_fields__:
-            from langgraph.graph import add_messages
-            schema_cls.__reducer_fields__["messages"] = add_messages
+        return model
+    
+    def get_model(self) -> Type[BaseModel]:
+        """
+        Get the model class. Alias for build() for compatibility.
         
-        return schema_cls
+        Returns:
+            Created model class
+        """
+        return self.build()
+    
+    # Core class methods
     
     @classmethod
     def compose(
         cls,
         components: List[Any],
         name: str = "ComposedSchema",
-        include_runnable_config: bool = False
-    ) -> Type[StateSchema]:
+        include_runnable_config: bool = False  # Parameter maintained for backwards compatibility
+    ) -> Type[BaseModel]:
         """
         Static method to quickly compose a schema from components.
 
         Args:
             components: List of components to extract fields from
             name: Name for the resulting schema
-            include_runnable_config: Whether to include a runnable_config field
-
+            include_runnable_config: IGNORED - Never adds runnable_config to state schema
+            
         Returns:
-            StateSchema subclass with fields from all components
+            Schema class with fields from all components
         """
+        if include_runnable_config:
+            logger.warning("include_runnable_config=True was specified but will be ignored - runnable_config should never be in state schema")
+            
         composer = cls(name=name)
         composer.compose_from_components(components)
-
-        # ✅ Automatically make all required fields Optional if no default
-        for field_name, (field_type, field_info) in composer.fields.items():
-            if isinstance(field_info, FieldInfo) and field_info.default is ...:
-                logger.debug(f"Auto-assigning default=None to required field '{field_name}' during compose()")
-                from typing import Optional
-                composer.fields[field_name] = (
-                    Optional[field_type],
-                    Field(default=None)
-                )
-
-        # Optional runtime config field
-        if include_runnable_config:
-            composer.add_field(
-                name='runnable_config',
-                field_type=Dict[str, Any],
-                default={},
-                description="Runtime configuration for components"
-            )
-
         return composer.build()
     
     @classmethod
@@ -532,20 +600,23 @@ class SchemaComposer:
         components: List[Any],
         name: str = "ComposedSchema",
         include_messages: bool = True,
-        include_runnable_config: bool = True
-    ) -> Type[StateSchema]:
+        include_runnable_config: bool = False  # Parameter maintained for backwards compatibility
+    ) -> Type[BaseModel]:
         """
-        Compose components into a StateSchema with standard conversions.
+        Compose components into a schema with standard fields.
         
         Args:
             components: List of components to extract fields from
             name: Name for the resulting schema
-            include_messages: Whether to include messages field with add_messages reducer
-            include_runnable_config: Whether to include runnable_config field
+            include_messages: Whether to include messages field
+            include_runnable_config: IGNORED - Never adds runnable_config to state schema
             
         Returns:
-            StateSchema subclass for the composition
+            Schema class for the composition
         """
+        if include_runnable_config:
+            logger.warning("include_runnable_config=True was specified but will be ignored - runnable_config should never be in state schema")
+            
         # Create composer
         composer = cls(name=name)
         
@@ -556,48 +627,44 @@ class SchemaComposer:
         if include_messages and "messages" not in composer.fields:
             from typing import Sequence
             from langchain_core.messages import BaseMessage
-            from langgraph.graph import add_messages
             
             composer.add_field(
                 name="messages",
-                field_type=Annotated[Sequence[BaseMessage], add_messages],
+                field_type=Sequence[BaseMessage],
                 default_factory=list,
-                description="Chat message history",
-                reducer=add_messages
+                description="Chat message history"
             )
-        
-        # Add runnable_config field if needed
-        if include_runnable_config:
-            composer.add_field(
-                name='runnable_config',
-                field_type=Dict[str, Any],
-                default_factory=dict,
-                description="Runtime configuration for components"
-            )
+            
+            # Record add_messages as the reducer name
+            composer.reducer_names["messages"] = "add_messages"
         
         # Build schema
-        schema_cls = composer.build()
-        
-        # Double-check reducer fields registration
-        if include_messages and "messages" not in schema_cls.__reducer_fields__:
-            from langgraph.graph import add_messages
-            schema_cls.__reducer_fields__["messages"] = add_messages
-        
-        return schema_cls
+        return composer.build()
     
-    @classmethod
-    def compose_schema(cls, components: List[Any], name: str = "ComposedSchema") -> Type[StateSchema]:
+    @staticmethod
+    def compose_schema(components: List[Union[Any, BaseModel, Dict]], name: str="ComposedSchema"):
         """
-        Creates a schema from components (compatible with older test code).
+        Creates a Pydantic model by composing from multiple components.
         
         Args:
-            components: List of components to extract fields from
+            components: List of engines or models to derive schema from
             name: Name for the resulting schema
             
         Returns:
-            StateSchema subclass
+            A Pydantic BaseModel class for the composed schema
         """
-        return cls.compose_as_state_schema(components, name=name)
+        # Validate components are not empty
+        if not components:
+            raise ValueError("No components provided for schema composition")
+        
+        # Create schema composer
+        schema_manager = SchemaComposer(name=name)
+        schema_manager.compose_from_components(components)
+        
+        # Build the model
+        model = schema_manager.build()
+        
+        return model
     
     @classmethod
     def compose_input_schema(cls, components: List[Any], name: str = "InputSchema") -> Type[BaseModel]:
@@ -609,7 +676,7 @@ class SchemaComposer:
             name: Name for the resulting schema
             
         Returns:
-            Input schema Pydantic model
+            Input schema model
         """
         # Create schema composer
         composer = cls(name=name)
@@ -625,7 +692,7 @@ class SchemaComposer:
         
         # Ensure a messages field exists
         if not any(field_name == 'messages' for field_name in composer.fields):
-            from typing import List, Sequence
+            from typing import Sequence
             from langchain_core.messages import BaseMessage
             
             composer.add_field(
@@ -634,13 +701,12 @@ class SchemaComposer:
                 default_factory=list,
                 description="Chat message history"
             )
+            
+            # Record add_messages as the reducer
+            composer.reducer_names["messages"] = "add_messages"
         
-        # Build as regular Pydantic model
-        field_dict = {}
-        for field_name, (field_type, default) in composer.fields.items():
-            field_dict[field_name] = (field_type, default)
-        
-        return create_model(name, **field_dict)
+        # Build and return the model
+        return composer.build()
     
     @classmethod
     def compose_output_schema(cls, components: List[Any], name: str = "OutputSchema") -> Type[BaseModel]:
@@ -652,7 +718,7 @@ class SchemaComposer:
             name: Name for the resulting schema
             
         Returns:
-            Output schema Pydantic model
+            Output schema model
         """
         # Create schema composer
         composer = cls(name=name)
@@ -668,7 +734,7 @@ class SchemaComposer:
         
         # Ensure a messages field exists
         if not any(field_name == 'messages' for field_name in composer.fields):
-            from typing import List, Sequence
+            from typing import Sequence
             from langchain_core.messages import BaseMessage
             
             composer.add_field(
@@ -677,18 +743,17 @@ class SchemaComposer:
                 default_factory=list,
                 description="Chat message history"
             )
+            
+            # Record add_messages as the reducer
+            composer.reducer_names["messages"] = "add_messages"
         
-        # Build as regular Pydantic model
-        field_dict = {}
-        for field_name, (field_type, default) in composer.fields.items():
-            field_dict[field_name] = (field_type, default)
-        
-        return create_model(name, **field_dict)
+        # Build and return the model
+        return composer.build()
     
     @classmethod
     def create_schema_for_components(cls, components: List[Any], name: str = "ComposedSchema", include_messages: bool = True):
         """
-        Creates a schema manager for components (compatible with older test code).
+        Creates a schema manager for components.
         
         Args:
             components: List of components to extract fields from
@@ -702,25 +767,26 @@ class SchemaComposer:
         composer.compose_from_components(components)
         
         # Add messages field if needed
-        if include_messages and not any(field_name == 'messages' for field_name in composer.fields):
-            from typing import List, Sequence
+        if include_messages and "messages" not in composer.fields:
+            from typing import Sequence
             from langchain_core.messages import BaseMessage
-            from langgraph.graph import add_messages
             
             composer.add_field(
                 name="messages",
-                field_type=Annotated[Sequence[BaseMessage], add_messages],
+                field_type=Sequence[BaseMessage],
                 default_factory=list,
-                description="Chat message history",
-                reducer=add_messages
+                description="Chat message history"
             )
+            
+            # Record add_messages as the reducer
+            composer.reducer_names["messages"] = "add_messages"
         
         return composer
     
     @classmethod
     def create_message_state(cls, 
                             additional_fields: Optional[Dict[str, Tuple[Any, Any]]] = None,
-                            name: str = "MessageState") -> Type[StateSchema]:
+                            name: str = "MessageState") -> Type[BaseModel]:
         """
         Create a standard message-based state schema.
         
@@ -729,23 +795,24 @@ class SchemaComposer:
             name: Name for the schema
             
         Returns:
-            StateSchema subclass with messages field and additional fields
+            Schema class with messages field and additional fields
         """
-        from typing import List, Sequence
+        from typing import Sequence
         from langchain_core.messages import BaseMessage
-        from langgraph.graph import add_messages
         
         # Create composer
         composer = cls(name=name)
         
-        # Add messages field with add_messages reducer
+        # Add messages field
         composer.add_field(
             name="messages",
             field_type=Sequence[BaseMessage],
             default_factory=list,
-            description="Chat message history",
-            reducer=add_messages
+            description="Chat message history"
         )
+        
+        # Record add_messages as the reducer
+        composer.reducer_names["messages"] = "add_messages"
         
         # Add any additional fields
         if additional_fields:

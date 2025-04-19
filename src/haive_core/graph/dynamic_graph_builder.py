@@ -78,6 +78,12 @@ class DynamicGraph(BaseModel):
     # Runtime configuration
     default_runnable_config: Optional[RunnableConfig] = None
     
+    # Override this parameter to always be False by default and document that it should never be True
+    include_runnable_config: bool = Field(
+        default=False, 
+        description="Whether to include runnable_config in state schema (should always be False)"
+    )
+    
     # Visualization
     visualize: bool = Field(default=True)
     visualization_dir: str = Field(default="graphs")
@@ -122,7 +128,83 @@ class DynamicGraph(BaseModel):
         
         # Initialize graph
         self._initialize_graph()
-    
+    def apply_pattern(self, pattern_name: Optional[str] = None, **pattern_params) -> 'DynamicGraph':
+        """
+        Apply a registered workflow pattern to the graph.
+        
+        Args:
+            pattern_name: Name of the pattern to apply, or None to use self.pattern
+            **pattern_params: Pattern parameters
+            
+        Returns:
+            Self for chaining
+        """
+        # Use provided pattern or default
+        pattern = pattern_name or self.pattern
+        
+        if not pattern:
+            logger.warning("No pattern specified to apply")
+            return self
+            
+        # Merge provided params with existing ones
+        params = {**self.pattern_params, **pattern_params}
+        
+        # Try to find pattern in registry
+        from haive_core.graph.graph_pattern_registry import GraphPatternRegistry
+        registry = GraphPatternRegistry.get_instance()
+        
+        pattern_obj = registry.get_pattern(pattern)
+        if pattern_obj:
+            # Apply the pattern using registry
+            pattern_obj.apply(self, **params)
+            logger.info(f"Applied registered pattern '{pattern}' to graph")
+        else:
+            # Try to apply a built-in pattern
+            method_name = f"_apply_{pattern}_pattern"
+            if hasattr(self, method_name) and callable(getattr(self, method_name)):
+                getattr(self, method_name)(**params)
+                logger.info(f"Applied built-in pattern '{pattern}' to graph")
+            else:
+                logger.warning(f"Pattern '{pattern}' not found in registry or built-in patterns")
+                
+        return self
+    def _apply_simple_pattern(self, node_name: str = "process", **kwargs) -> None:
+        """
+        Apply a simple single-node workflow pattern.
+        
+        This creates a graph with a single node that processes input.
+        
+        Args:
+            node_name: Name for the processing node
+            **kwargs: Additional parameters
+        """
+        from langgraph.graph import START, END
+        
+        # Check if we have components
+        if not self.components:
+            raise ValueError("Cannot apply simple pattern without components")
+            
+        # Use the first component as the main engine
+        main_engine = self.components[0]
+        
+        # Add the main engine node if not already present
+        if node_name not in self.nodes:
+            self.add_node(
+                name=node_name,
+                config=main_engine,
+                command_goto=END
+            )
+        
+        # Add edge from START to the node if not already present
+        # Check if edge exists
+        edge_exists = False
+        for edge in self.edges:
+            if edge.source == "START" and edge.target == node_name:
+                edge_exists = True
+                break
+                
+        if not edge_exists:
+            self.add_edge(START, node_name)
     def _process_components(self) -> None:
         """Process and resolve components to engines."""
         processed_components = []
@@ -223,29 +305,25 @@ class DynamicGraph(BaseModel):
             # Add component schemas
             self.schema_composer.compose_from_components(self.components)
             
-            # Always add runnable_config field
-            from typing import Dict, Any
-            self.schema_composer.add_field(
-                name='__runnable_config__',
-                field_type=Dict[str, Any],
-                default_factory=dict
-            )
+            # NEVER add runnable_config field
+            # We explicitly override any include_runnable_config setting
         
         # Process state schema
         if self.state_schema is None:
-            # Derive from components
+            # Always pass include_runnable_config=False when deriving from components
             self.state_model = self.schema_composer.build()
         elif isinstance(self.state_schema, type) and issubclass(self.state_schema, BaseModel):
             # Use provided class directly
             self.state_model = self.state_schema
         else:
-            # Create from dict or other format
+            # Create from dict or other format - always pass include_runnable_config=False
             self.state_model = SchemaComposer.compose(
                 [self.state_schema], 
-                name=f"{self.name}State"
+                name=f"{self.name}State",
+                include_runnable_config=False
             )
             
-        # Process input schema
+        # Process input schema - similarly ensure include_runnable_config=False
         if self.input_schema is None:
             # Default to state schema
             self.input_model = self.state_model
@@ -253,24 +331,26 @@ class DynamicGraph(BaseModel):
             # Use provided class directly
             self.input_model = self.input_schema
         else:
-            # Create from dict or other format
+            # Create from dict or other format - always pass include_runnable_config=False
             self.input_model = SchemaComposer.compose(
                 [self.input_schema],
-                name=f"{self.name}Input"
+                name=f"{self.name}Input",
+                include_runnable_config=False
             )
             
-        # Process output schema
+        # Process output schema - similarly ensure include_runnable_config=False
         if self.output_schema is None:
             # Default to state schema
             self.output_model = self.state_model
         elif isinstance(self.output_schema, type) and issubclass(self.output_schema, BaseModel):
-            # Use provided class directly
+            # Use provided class directly 
             self.output_model = self.output_schema
         else:
-            # Create from dict or other format
+            # Create from dict or other format - always pass include_runnable_config=False
             self.output_model = SchemaComposer.compose(
                 [self.output_schema],
-                name=f"{self.name}Output"
+                name=f"{self.name}Output",
+                include_runnable_config=False
             )
             
         # Process config schema
@@ -279,10 +359,11 @@ class DynamicGraph(BaseModel):
                 # Use provided class directly
                 self.config_model = self.config_schema
             else:
-                # Create from dict or other format
+                # Create from dict or other format - always pass include_runnable_config=False
                 self.config_model = SchemaComposer.compose(
                     [self.config_schema],
-                    name=f"{self.name}Config"
+                    name=f"{self.name}Config",
+                    include_runnable_config=False
                 )
     
     def _initialize_graph(self) -> None:
@@ -863,15 +944,11 @@ class DynamicGraph(BaseModel):
         Returns:
             Compiled graph application
         """
-        # Add default_runnable_config to kwargs if provided
-        if self.default_runnable_config and 'default_config' not in kwargs:
-            kwargs['default_config'] = self.default_runnable_config
-            
         # Build the graph
         graph = self.build(checkpointer)
         
         # Compile with checkpointer and other args
-        self.compiled_app = graph.compile(checkpointer=checkpointer, **kwargs)
+        self.compiled_app = graph.compile(checkpointer=checkpointer,)
         
         # Visualize if enabled
         if self.visualize:
@@ -879,6 +956,40 @@ class DynamicGraph(BaseModel):
         
         return self.compiled_app
     
+    def _sanitize_secret_values(self, data):
+        """
+        Sanitize sensitive values to ensure they can be serialized.
+        
+        Args:
+            data: Data to sanitize
+            
+        Returns:
+            Sanitized data
+        """
+        from pydantic import SecretStr
+        
+        if data is None:
+            return None
+            
+        # Handle SecretStr objects
+        if isinstance(data, SecretStr):
+            return "**********"  # Return redacted string instead of actual value
+            
+        # Handle dictionaries recursively
+        if isinstance(data, dict):
+            return {k: self._sanitize_secret_values(v) for k, v in data.items()}
+            
+        # Handle lists recursively
+        if isinstance(data, list):
+            return [self._sanitize_secret_values(item) for item in data]
+            
+        # Handle tuples recursively
+        if isinstance(data, tuple):
+            return tuple(self._sanitize_secret_values(item) for item in data)
+            
+        # Return primitive types as is
+        return data
+        
     def to_dict(self) -> Dict[str, Any]:
         """
         Convert to a serializable dictionary.
@@ -927,9 +1038,12 @@ class DynamicGraph(BaseModel):
         if self.config_model:
             result["config_schema"] = self.config_model.__name__
             
-        # Convert default runnable config if present
+        # Convert default runnable config if present and sanitize sensitive values
         if self.default_runnable_config:
-            result["default_runnable_config"] = self.default_runnable_config
+            result["default_runnable_config"] = self._sanitize_secret_values(self.default_runnable_config)
+        
+        # Sanitize any remaining sensitive values
+        result = self._sanitize_secret_values(result)
                 
         return result
     
@@ -952,19 +1066,29 @@ class DynamicGraph(BaseModel):
             else:
                 components.append(component)
         
+        # Create a clean dict without schema fields that might be strings
+        clean_data = {
+            "name": data.get("name", f"graph_{uuid.uuid4().hex[:8]}"),
+            "description": data.get("description"),
+            "components": components,
+            "default_runnable_config": data.get("default_runnable_config"),
+            "visualize": data.get("visualize", True),
+            "applied_patterns": data.get("applied_patterns", [])
+        }
+        
+        # For schema fields, only include if they're not strings
+        # (string schema refs are just class names that we can't resolve here)
+        if "state_schema" in data and not isinstance(data["state_schema"], str):
+            clean_data["state_schema"] = data["state_schema"]
+        if "input_schema" in data and not isinstance(data["input_schema"], str):
+            clean_data["input_schema"] = data["input_schema"]
+        if "output_schema" in data and not isinstance(data["output_schema"], str):
+            clean_data["output_schema"] = data["output_schema"]
+        if "config_schema" in data and not isinstance(data["config_schema"], str):
+            clean_data["config_schema"] = data["config_schema"]
+        
         # Create the graph
-        graph = cls(
-            name=data.get("name", f"graph_{uuid.uuid4().hex[:8]}"),
-            description=data.get("description"),
-            components=components,
-            state_schema=data.get("state_schema"),
-            input_schema=data.get("input_schema"),
-            output_schema=data.get("output_schema"),
-            config_schema=data.get("config_schema"),
-            default_runnable_config=data.get("default_runnable_config"),
-            visualize=data.get("visualize", True),
-            applied_patterns=data.get("applied_patterns", [])
-        )
+        graph = cls(**clean_data)
         
         # Process nodes
         for name, node_data in data.get("nodes", {}).items():
@@ -1053,7 +1177,7 @@ class DynamicGraph(BaseModel):
     
     def visualize_graph(self, filename: Optional[str] = None) -> None:
         """
-        Visualize the graph structure.
+        Visualize the graph structure using the haive_core utility function.
         
         Args:
             filename: Optional filename to save the visualization
@@ -1069,22 +1193,32 @@ class DynamicGraph(BaseModel):
         if self.graph is None:
             self._initialize_graph()
             
-        # Get manager and use its visualization method
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(os.path.abspath(filename)), exist_ok=True)
+        
         try:
-            manager = self.get_manager()
-            manager.visualize(output_file=filename)
+            # Use the haive_core visualization utility
+            from haive_core.utils.visualize_graph_utils import render_and_display_graph
+            
+            # Make sure we have a built graph
+            built_graph = self.build()
+            
+            # Use the utility function
+            render_and_display_graph(
+                compiled_graph=built_graph,
+                output_dir=os.path.dirname(filename),
+                output_name=os.path.basename(filename)
+            )
             logger.info(f"Graph visualization saved to {filename}")
         except ImportError as e:
-            logger.warning(f"Cannot visualize graph - required modules not available: {e}")
+            logger.warning(f"Cannot visualize graph - visualization utils not available: {e}")
         except Exception as e:
-            logger.warning(f"Error visualizing graph: {e}")
+            logger.error(f"Error visualizing graph: {e}")
             
-            # Try fallback visualization
+            # Try fallback method using StateGraphManager
             try:
-                from haive_core.utils.visualize_graph_utils import render_and_display_graph
-                render_and_display_graph(self.graph, output_name=filename)
+                manager = self.get_manager()
+                manager.visualize(output_file=filename)
                 logger.info(f"Graph visualization saved to {filename} (fallback method)")
-            except ImportError:
-                logger.warning("Cannot visualize graph: visualization utils not available")
-            except Exception as e:
-                logger.error(f"Fallback visualization failed: {e}")
+            except Exception as fallback_error:
+                logger.error(f"Fallback visualization also failed: {fallback_error}")
