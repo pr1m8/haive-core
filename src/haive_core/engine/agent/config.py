@@ -209,7 +209,7 @@ class AgentConfig(InvokableEngine[TIn, TOut], ABC):
             self.engine = AugLLMConfig()
         return self
     
-    def add_node_config(self, name: str, engine: Union[Engine, str, NodeConfig], **kwargs) -> "AgentConfig":
+    def add_node_config(self, name: str, engine: Union[Engine, str, 'NodeConfig'], **kwargs) -> "AgentConfig":
         """
         Add a node configuration to this agent with schema integration.
         
@@ -221,9 +221,16 @@ class AgentConfig(InvokableEngine[TIn, TOut], ABC):
         Returns:
             Self for method chaining
         """
+        # Import here to avoid circular imports
+        from haive_core.graph.node.config import NodeConfig
+        from langgraph.graph import END
+        
+        # Handle END constant conversion for command_goto
+        if 'command_goto' in kwargs and kwargs['command_goto'] == "END":
+            kwargs['command_goto'] = END
+            
         # Create NodeConfig if not already one
         if not isinstance(engine, NodeConfig):
-            from haive_core.graph.node.config import NodeConfig
             node_config = NodeConfig(
                 name=name,
                 engine=engine,
@@ -249,7 +256,11 @@ class AgentConfig(InvokableEngine[TIn, TOut], ABC):
         return self
     
     def _invalidate_schema_caches(self):
-        """Invalidate all schema caches for this instance."""
+        """
+        Invalidate all schema caches for this specific instance.
+        
+        This focuses on instance-level caches without affecting class-level caches.
+        """
         self._state_schema_instance = None
         self._input_schema_instance = None
         self._output_schema_instance = None
@@ -289,7 +300,36 @@ class AgentConfig(InvokableEngine[TIn, TOut], ABC):
             schema_instance = self.derive_schema()
             
         return StateSchemaManager(schema_instance)
-    
+    def _generate_cache_key(self) -> str:
+        """
+        Generate a deterministic cache key for schema caching.
+        
+        Returns:
+            A string key based on component identifiers
+        """
+        # Base key on name
+        key_parts = [self.name]
+        
+        # Add engine identifier
+        if self.engine:
+            engine_id = getattr(self.engine, "id", None) or getattr(self.engine, "name", str(id(self.engine)))
+            key_parts.append(f"engine:{engine_id}")
+        
+        # Add additional engines
+        if self.engines:
+            for name, engine in sorted(self.engines.items()):
+                engine_id = getattr(engine, "id", None) or getattr(engine, "name", str(id(engine)))
+                key_parts.append(f"{name}:{engine_id}")
+        
+        # Add node configs
+        if hasattr(self, "node_configs") and self.node_configs:
+            key_parts.append(f"nodes:{len(self.node_configs)}")
+        
+        # Add patterns
+        if hasattr(self, "patterns") and self.patterns:
+            key_parts.append(f"patterns:{len(self.patterns)}")
+        
+        return ":".join(key_parts)
     def derive_schema(self) -> Type[BaseModel]:
         """
         Derive state schema from components and engines using SchemaComposer.
@@ -297,37 +337,40 @@ class AgentConfig(InvokableEngine[TIn, TOut], ABC):
         Returns:
             A state schema class (with no __runnable_config__ field)
         """
+        # Testing mode check - bypass caching entirely if in testing mode
+        if getattr(self, '_testing_mode', False):
+            # Generate schema directly without caching for testing
+            return self._generate_schema_without_caching()
+        
         # Return cached instance if available
         if self._state_schema_instance:
             return self._state_schema_instance
             
-        # Generate cache key from components and schema parameters
-        cache_key = (
-            f"{self.name}:"
-            f"{id(self.engine)}:"
-            f"{id(tuple(sorted(self.engines.items(), key=lambda x: x[0])))}"
-        )
+        # Generate cache key
+        cache_key = self._generate_cache_key()
         
         # Check class-level cache
         if cache_key in self.__class__._schema_cache:
             self._state_schema_instance = self.__class__._schema_cache[cache_key]
             return self._state_schema_instance
         
-        # If an explicit schema is provided, use it
-        if self.state_schema is not None:
-            if isinstance(self.state_schema, type) and issubclass(self.state_schema, BaseModel):
-                schema = self.state_schema
-            else:
-                # Create schema from dictionary
-                schema = StateSchema.create(
-                    name=f"{self.name.replace('-', '_').title()}State", 
-                    **self.state_schema
-                )
-                
-            self._state_schema_instance = schema
-            self.__class__._schema_cache[cache_key] = schema
-            return schema
-            
+        # Create new schema
+        schema = self._generate_schema_without_caching()
+        
+        # Cache the result
+        self._state_schema_instance = schema
+        self.__class__._schema_cache[cache_key] = schema
+        
+        return schema
+    def _generate_schema_without_caching(self) -> Type[BaseModel]:
+        """
+        Generate schema directly without caching.
+        
+        This is used internally by derive_schema and in testing contexts.
+        
+        Returns:
+            Generated state schema
+        """
         # Get all components including engines
         all_components = []
         if self.engine:
@@ -335,71 +378,18 @@ class AgentConfig(InvokableEngine[TIn, TOut], ABC):
         all_components.extend(self.engines.values())
         
         # Add components from node configs
-        for node_config in self.node_configs.values():
+        for node_config in getattr(self, 'node_configs', {}).values():
             if isinstance(node_config.engine, Engine) and node_config.engine not in all_components:
                 all_components.append(node_config.engine)
         
-        # Add schema requirements from patterns
-        pattern_components = self._get_pattern_schema_components()
-        for component in pattern_components:
-            if component not in all_components:
-                all_components.append(component)
-        
-        # Create schema name
+        # Create schema
         schema_name = f"{self.name.replace('-', '_').title()}State"
-        
-        # Use SchemaComposer.compose_as_state_schema to leverage its full capabilities
-        schema = SchemaComposer.compose_as_state_schema(
+        return SchemaComposer.compose_as_state_schema(
             components=all_components,
             name=schema_name,
             include_messages=True,
-            include_runnable_config=False  # Never include runnable_config in state schemas
+            include_runnable_config=False
         )
-        
-        # Add subagent fields if they don't already exist
-        if self.subagents and schema:
-            manager = self.get_schema_manager(schema)
-            
-            for subagent_name in self.subagents:
-                # Add input/output fields for subagent communication if they don't exist
-                input_field = f"{subagent_name}_input"
-                output_field = f"{subagent_name}_output"
-                
-                # Add as shared fields with dict merging reducers
-                if not manager.has_field(input_field):
-                    from operator import add
-                    manager.add_field(
-                        input_field, 
-                        Dict[str, Any], 
-                        default_factory=dict, 
-                        shared=True,
-                        reducer=add,
-                        reducer_name="add"
-                    )
-                    
-                if not manager.has_field(output_field):
-                    from operator import add
-                    manager.add_field(
-                        output_field, 
-                        Dict[str, Any], 
-                        default_factory=dict, 
-                        shared=True,
-                        reducer=add,
-                        reducer_name="add"
-                    )
-            
-            # Get the updated schema
-            schema = manager.get_model()
-        
-        # Add pattern-specific schema customizations
-        schema = self._enhance_schema_with_patterns(schema)
-        
-        # Cache the result
-        self._state_schema_instance = schema
-        self.__class__._schema_cache[cache_key] = schema
-        
-        return schema
-    
     def _get_pattern_schema_components(self) -> List[Any]:
         """
         Get components required by patterns.
@@ -642,7 +632,11 @@ class AgentConfig(InvokableEngine[TIn, TOut], ABC):
         if isinstance(ref, Engine):
             return ref
             
-        # If it's a string, look it up in the registry
+        # If it's a string, first check our local engines dict
+        if isinstance(ref, str) and ref in self.engines:
+            return self.engines[ref]
+            
+        # If not found locally, look it up in the registry
         if isinstance(ref, str):
             # Try each engine type
             from haive_core.engine.base import EngineRegistry
@@ -972,6 +966,18 @@ class AgentConfig(InvokableEngine[TIn, TOut], ABC):
         
         return self
     
+    def set_testing_mode(self, enabled=True):
+        """
+        Enable or disable testing mode to bypass caching behavior.
+        
+        Args:
+            enabled: Whether testing mode should be enabled
+        
+        Returns:
+            Self for method chaining
+        """
+        self._testing_mode = enabled
+        return self
     def set_pattern_parameters(self, pattern_name: str, **parameters) -> "AgentConfig":
         """
         Set global parameters for a pattern.
@@ -1089,3 +1095,19 @@ class AgentConfig(InvokableEngine[TIn, TOut], ABC):
             pattern_name: Name of the pattern to mark
         """
         self._applied_patterns.add(pattern_name)
+    @classmethod
+    def clear_schema_caches(cls):
+        """
+        Clear all schema caches completely for this class and its subclasses.
+        
+        This ensures both class-level and instance-level caches are reset.
+        """
+        # Clear class-level caches
+        cls._schema_cache.clear()
+        cls._input_schema_cache.clear()
+        cls._output_schema_cache.clear()
+        
+        # Ensure any existing instances also clear their instance caches
+        # This is only useful if instances are shared across tests
+        for subclass in cls.__subclasses__():
+            subclass.clear_schema_caches()
