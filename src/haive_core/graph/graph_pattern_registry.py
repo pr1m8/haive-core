@@ -15,7 +15,7 @@ class GraphPattern(BaseModel):
     metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
     
     # Internal function reference (not serialized)
-    _apply_func: Optional[Callable] = Field(default=None, exclude=True)
+    apply_func: Optional[Callable] = Field(default=None, exclude=True)
     
     model_config = {
         "arbitrary_types_allowed": True
@@ -32,7 +32,7 @@ class GraphPattern(BaseModel):
         Returns:
             The modified graph
         """
-        if self._apply_func is None:
+        if self.apply_func is None:
             logger.warning(f"Pattern '{self.name}' has no apply function")
             return graph
             
@@ -40,7 +40,7 @@ class GraphPattern(BaseModel):
         params = {**self.parameters, **kwargs}
         
         # Apply the pattern
-        return self._apply_func(graph, **params)
+        return self.apply_func(graph, **params)
 
 class BranchDefinition(BaseModel):
     """Serializable branch definition."""
@@ -52,7 +52,7 @@ class BranchDefinition(BaseModel):
     metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
     
     # Internal function reference (not serialized)
-    _condition_func: Optional[Callable] = Field(default=None, exclude=True)
+    condition_func: Optional[Callable] = Field(default=None, exclude=True)
     
     model_config = {
         "arbitrary_types_allowed": True
@@ -68,7 +68,7 @@ class BranchDefinition(BaseModel):
         Returns:
             A condition function that can be used in conditional edges
         """
-        if self._condition_func is None:
+        if self.condition_func is None:
             # Create a default condition function based on routes
             def default_condition(state):
                 # Look for route matches in state
@@ -82,7 +82,7 @@ class BranchDefinition(BaseModel):
             return default_condition
             
         # Use the provided condition function
-        return self._condition_func
+        return self.condition_func
 
 class GraphPatternRegistry:
     """Registry for reusable graph patterns and branches."""
