@@ -1,38 +1,128 @@
+"""
+Agent configuration for the Haive framework.
 
-# src/haive/core/engine/agent/config.py
+This module provides the AgentConfig base class for configuring agent components.
+It serves as the foundation for all agent types within the framework, enabling
+dynamic composition, serialization, and integration with the schema system.
+"""
 
-from typing import Any, Dict, List, Optional, Type, Union, Generic, TypeVar, get_args, get_origin
+from typing import Dict, Any, Optional, Union, Type, ClassVar, \
+    TypeVar, Generic, Generator, AsyncGenerator, \
+        Tuple, get_args, get_origin, cast, TYPE_CHECKING, List, Set
+from abc import ABC, abstractmethod
 import uuid
 import logging
+from datetime import datetime
 from pydantic import BaseModel, Field, model_validator
 
-from langchain_core.runnables import RunnableConfig
-
 from haive_core.engine.base import Engine, InvokableEngine, EngineType
-from haive_core.engine.agent.persistence.base import CheckpointerConfig
-from haive_core.config.runnable import RunnableConfigManager
 from haive_core.schema.schema_composer import SchemaComposer
-from typing import TYPE_CHECKING
+from haive_core.schema.state_schema import StateSchema
+from langchain_core.runnables import RunnableConfig
+from haive_core.config.runnable import RunnableConfigManager
+from haive_core.graph.node.config import NodeConfig
+from langgraph.graph import END
 
+# Import persistence-related functionality
+from haive_core.engine.agent.persistence.types import CheckpointerType
+from haive_core.engine.agent.persistence.base import CheckpointerConfig
+
+# Import pattern system
+from haive_core.graph.patterns.base import PatternMetadata
+
+# Check if PostgreSQL dependencies are available
+try:
+    from langgraph.checkpoint.postgres import PostgresSaver
+    from haive_core.engine.agent.persistence import PostgresCheckpointerConfig, MemoryCheckpointerConfig
+    POSTGRES_AVAILABLE = True
+except ImportError:
+    from haive_core.engine.agent.persistence import MemoryCheckpointerConfig
+    POSTGRES_AVAILABLE = False
 if TYPE_CHECKING:
-    from haive_core.engine.agent.agent import Agent  # wherever Agent lives
+    from haive_core.engine.agent.agent import Agent
+
+# Set up logging
+logger = logging.getLogger(__name__)
 
 # Type variables for generics
 TIn = TypeVar('TIn')
 TOut = TypeVar('TOut')
 
-logger = logging.getLogger(__name__)
 
-class AgentConfig(InvokableEngine[TIn, TOut]):
+class PatternConfig(BaseModel):
+    """
+    Configuration for a pattern to be applied to an agent.
+    
+    This allows detailed configuration of pattern application,
+    including parameters, application order, and conditions.
+    """
+    name: str = Field(
+        description="Name of the pattern to apply"
+    )
+    parameters: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Parameters for pattern application"
+    )
+    order: Optional[int] = Field(
+        default=None,
+        description="Order to apply pattern (lower numbers first)"
+    )
+    condition: Optional[str] = Field(
+        default=None,
+        description="Condition for pattern application"
+    )
+    enabled: bool = Field(
+        default=True,
+        description="Whether this pattern is enabled"
+    )
+    metadata: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Additional metadata"
+    )
+    
+    class Config:
+        arbitrary_types_allowed = True
+    
+    def merge_with(self, other: 'PatternConfig') -> 'PatternConfig':
+        """
+        Merge this pattern configuration with another.
+        
+        Args:
+            other: The other pattern config to merge with
+            
+        Returns:
+            New merged pattern config
+        """
+        # Start with a copy of this config
+        merged_params = self.parameters.copy()
+        
+        # Update with other parameters
+        merged_params.update(other.parameters)
+        
+        # Create new config with merged parameters
+        return PatternConfig(
+            name=self.name,
+            parameters=merged_params,
+            order=other.order if other.order is not None else self.order,
+            condition=other.condition if other.condition is not None else self.condition,
+            enabled=other.enabled,
+            metadata={**self.metadata, **other.metadata}
+        )
+
+
+class AgentConfig(InvokableEngine[TIn, TOut], ABC):
     """
     Base configuration for an agent architecture.
+    Extends InvokableEngine to provide a consistent interface with the Engine framework.
     
-    AgentConfig extends InvokableEngine to provide a consistent interface
-    for creating and using agents within the Engine framework.
-    
-    Each AgentConfig is paired with an Agent implementation class that defines
-    the actual behavior and workflow.
+    This class is designed to NEVER include __runnable_config__ in any schemas.
+    By default, it uses PostgreSQL for persistence if available.
     """
+    # Class variables for schema caching
+    _schema_cache: ClassVar[Dict[str, Type[BaseModel]]] = {}
+    _input_schema_cache: ClassVar[Dict[str, Type[BaseModel]]] = {}
+    _output_schema_cache: ClassVar[Dict[str, Type[BaseModel]]] = {}
+    
     engine_type: EngineType = Field(default=EngineType.AGENT)
     name: str = Field(default_factory=lambda: f"agent_{uuid.uuid4().hex[:8]}")
     
@@ -46,16 +136,22 @@ class AgentConfig(InvokableEngine[TIn, TOut]):
     state_schema: Optional[Union[Type[BaseModel], Dict[str, Any]]] = None
     input_schema: Optional[Union[Type[BaseModel], Dict[str, Any]]] = None
     output_schema: Optional[Union[Type[BaseModel], Dict[str, Any]]] = None
-    config_schema: Optional[Union[Type[BaseModel], Dict[str, Any]]] = None
     
-    # Parent agent for subgraphs
-    parent: Optional[Union['AgentConfig', str]] = None
+    # Node configurations
+    node_configs: Dict[str, NodeConfig] = Field(
+        default_factory=dict,
+        description="Node configurations for explicit workflow definition"
+    )
     
-    # Node definition (for simple agents)
-    node_name: str = Field(default="process")
-    
-    # Graph patterns
-    auto_end: bool = Field(default=True, description="Automatically add END edge from last node")
+    # Pattern system integration
+    patterns: List[PatternConfig] = Field(
+        default_factory=list,
+        description="Patterns to apply to this agent"
+    )
+    pattern_parameters: Dict[str, Dict[str, Any]] = Field(
+        default_factory=dict,
+        description="Global parameters for patterns by name"
+    )
     
     # Visualization and debugging
     visualize: bool = Field(default=True)
@@ -63,7 +159,7 @@ class AgentConfig(InvokableEngine[TIn, TOut]):
     debug: bool = Field(default=False)
     save_history: bool = Field(default=True)
     
-    # Runtime settings using RunnableConfigManager
+    # Runtime settings
     runnable_config: RunnableConfig = Field(
         default_factory=lambda: RunnableConfigManager.create(
             thread_id=str(uuid.uuid4()),
@@ -77,36 +173,454 @@ class AgentConfig(InvokableEngine[TIn, TOut]):
     # Agent-specific settings (to be overridden by subclasses)
     agent_settings: Dict[str, Any] = Field(default_factory=dict)
 
-    # Persistence Configuration
-    persistence: Optional[CheckpointerConfig] = None
+    # Recursive agent composition
+    subagents: Dict[str, "AgentConfig"] = Field(
+        default_factory=dict,
+        description="Subagents for recursive composition"
+    )
+
+    # =============================================
+    # Persistence Configuration - DEFAULT TO POSTGRES IF AVAILABLE
+    # =============================================
+    persistence: Optional[CheckpointerConfig] = Field(
+        default_factory=lambda: (
+            PostgresCheckpointerConfig() if POSTGRES_AVAILABLE 
+            else MemoryCheckpointerConfig()
+        ),
+        description="Persistence configuration for state checkpointing"
+    )
     
-    model_config = {"arbitrary_types_allowed": True}
+    class Config:
+        arbitrary_types_allowed = True
+    
+    # Instance cache for derived schemas
+    _state_schema_instance: Optional[Type[BaseModel]] = None
+    _input_schema_instance: Optional[Type[BaseModel]] = None
+    _output_schema_instance: Optional[Type[BaseModel]] = None
+    
+    # Pattern application tracking
+    _applied_patterns: Set[str] = set()
     
     @model_validator(mode="after")
     def ensure_engine(self):
         """Ensure at least one engine is available."""
-        if not self.engine and not self.engines:
-            from haive_core.engine.aug_llm import AugLLMConfig
+        if not self.engine and not self.engines and not self.node_configs:
+            from haive_core.engine.aug_llm.base import AugLLMConfig
             self.engine = AugLLMConfig()
         return self
     
+    def add_node_config(self, name: str, engine: Union[Engine, str, NodeConfig], **kwargs) -> "AgentConfig":
+        """
+        Add a node configuration to this agent with schema integration.
+        
+        Args:
+            name: Name of the node
+            engine: Engine, engine name, or NodeConfig
+            **kwargs: Additional parameters for NodeConfig
+            
+        Returns:
+            Self for method chaining
+        """
+        # Create NodeConfig if not already one
+        if not isinstance(engine, NodeConfig):
+            from haive_core.graph.node.config import NodeConfig
+            node_config = NodeConfig(
+                name=name,
+                engine=engine,
+                **kwargs
+            )
+        else:
+            node_config = engine
+            
+        self.node_configs[name] = node_config
+        
+        # Add engine to components if it's an Engine
+        engine_ref = node_config.engine
+        if isinstance(engine_ref, Engine):
+            if self.engine is None:
+                self.engine = engine_ref
+            elif engine_ref not in self.engines.values():
+                engine_name = getattr(engine_ref, "name", f"engine_{len(self.engines)}")
+                self.engines[engine_name] = engine_ref
+            
+            # Invalidate schema caches since components changed
+            self._invalidate_schema_caches()
+                
+        return self
+    
+    def _invalidate_schema_caches(self):
+        """Invalidate all schema caches for this instance."""
+        self._state_schema_instance = None
+        self._input_schema_instance = None
+        self._output_schema_instance = None
+    
+    def add_subagent(self, name: str, agent_config: "AgentConfig") -> "AgentConfig":
+        """
+        Add a subagent for recursive composition with proper schema integration.
+        
+        Args:
+            name: Name of the subagent
+            agent_config: Configuration for the subagent
+            
+        Returns:
+            Self for method chaining
+        """
+        self.subagents[name] = agent_config
+        
+        # Invalidate schema caches
+        self._invalidate_schema_caches()
+        
+        return self
+    
+    def get_schema_manager(self, schema_instance=None):
+        """
+        Get a StateSchemaManager for the agent's schema.
+        
+        Args:
+            schema_instance: Optional specific schema to use (defaults to state_schema)
+            
+        Returns:
+            StateSchemaManager instance for schema manipulation
+        """
+        from haive_core.schema.schema_manager import StateSchemaManager
+        
+        if schema_instance is None:
+            # Use state schema by default
+            schema_instance = self.derive_schema()
+            
+        return StateSchemaManager(schema_instance)
+    
     def derive_schema(self) -> Type[BaseModel]:
-        """Derive state schema from components and engines."""
+        """
+        Derive state schema from components and engines using SchemaComposer.
+        
+        Returns:
+            A state schema class (with no __runnable_config__ field)
+        """
+        # Return cached instance if available
+        if self._state_schema_instance:
+            return self._state_schema_instance
+            
+        # Generate cache key from components and schema parameters
+        cache_key = (
+            f"{self.name}:"
+            f"{id(self.engine)}:"
+            f"{id(tuple(sorted(self.engines.items(), key=lambda x: x[0])))}"
+        )
+        
+        # Check class-level cache
+        if cache_key in self.__class__._schema_cache:
+            self._state_schema_instance = self.__class__._schema_cache[cache_key]
+            return self._state_schema_instance
+        
+        # If an explicit schema is provided, use it
+        if self.state_schema is not None:
+            if isinstance(self.state_schema, type) and issubclass(self.state_schema, BaseModel):
+                schema = self.state_schema
+            else:
+                # Create schema from dictionary
+                schema = StateSchema.create(
+                    name=f"{self.name.replace('-', '_').title()}State", 
+                    **self.state_schema
+                )
+                
+            self._state_schema_instance = schema
+            self.__class__._schema_cache[cache_key] = schema
+            return schema
+            
         # Get all components including engines
         all_components = []
         if self.engine:
             all_components.append(self.engine)
         all_components.extend(self.engines.values())
         
+        # Add components from node configs
+        for node_config in self.node_configs.values():
+            if isinstance(node_config.engine, Engine) and node_config.engine not in all_components:
+                all_components.append(node_config.engine)
+        
+        # Add schema requirements from patterns
+        pattern_components = self._get_pattern_schema_components()
+        for component in pattern_components:
+            if component not in all_components:
+                all_components.append(component)
+        
         # Create schema name
         schema_name = f"{self.name.replace('-', '_').title()}State"
         
-        # Use SchemaComposer to build schema
-        return SchemaComposer.compose_as_state_schema(
-            all_components, 
+        # Use SchemaComposer.compose_as_state_schema to leverage its full capabilities
+        schema = SchemaComposer.compose_as_state_schema(
+            components=all_components,
             name=schema_name,
-            include_runnable_config=True
+            include_messages=True,
+            include_runnable_config=False  # Never include runnable_config in state schemas
         )
+        
+        # Add subagent fields if they don't already exist
+        if self.subagents and schema:
+            manager = self.get_schema_manager(schema)
+            
+            for subagent_name in self.subagents:
+                # Add input/output fields for subagent communication if they don't exist
+                input_field = f"{subagent_name}_input"
+                output_field = f"{subagent_name}_output"
+                
+                # Add as shared fields with dict merging reducers
+                if not manager.has_field(input_field):
+                    from operator import add
+                    manager.add_field(
+                        input_field, 
+                        Dict[str, Any], 
+                        default_factory=dict, 
+                        shared=True,
+                        reducer=add,
+                        reducer_name="add"
+                    )
+                    
+                if not manager.has_field(output_field):
+                    from operator import add
+                    manager.add_field(
+                        output_field, 
+                        Dict[str, Any], 
+                        default_factory=dict, 
+                        shared=True,
+                        reducer=add,
+                        reducer_name="add"
+                    )
+            
+            # Get the updated schema
+            schema = manager.get_model()
+        
+        # Add pattern-specific schema customizations
+        schema = self._enhance_schema_with_patterns(schema)
+        
+        # Cache the result
+        self._state_schema_instance = schema
+        self.__class__._schema_cache[cache_key] = schema
+        
+        return schema
+    
+    def _get_pattern_schema_components(self) -> List[Any]:
+        """
+        Get components required by patterns.
+        
+        Returns:
+            List of components required by patterns
+        """
+        components = []
+        
+        # Load pattern registry if needed
+        try:
+            from haive_core.graph.patterns.registry import GraphPatternRegistry
+            registry = GraphPatternRegistry.get_instance()
+            
+            # Check each pattern for required components
+            for pattern_config in self.patterns:
+                if not pattern_config.enabled:
+                    continue
+                    
+                pattern = registry.get_pattern(pattern_config.name)
+                if pattern:
+                    # Extract requirements from pattern metadata
+                    for req in pattern.metadata.required_components:
+                        # This is a simplified approach - actual implementation would be more sophisticated
+                        component_type = req.type
+                        if component_type == "llm" and self.engine is None:
+                            from haive_core.engine.aug_llm.base import AugLLMConfig
+                            components.append(AugLLMConfig())
+                        elif component_type == "retriever" and not any(
+                            getattr(c, "engine_type", None) == EngineType.RETRIEVER 
+                            for c in [self.engine] + list(self.engines.values())
+                        ):
+                            from haive_core.engine.retriever import RetrieverConfig
+                            components.append(RetrieverConfig(name=f"pattern_required_retriever"))
+        except ImportError:
+            # Pattern system not available
+            logger.debug("Pattern system not available for schema component extraction")
+            
+        return components
+    
+    def _enhance_schema_with_patterns(self, schema: Type[BaseModel]) -> Type[BaseModel]:
+        """
+        Enhance schema with pattern-specific fields and reducers.
+        
+        Args:
+            schema: Base schema to enhance
+            
+        Returns:
+            Enhanced schema
+        """
+        manager = self.get_schema_manager(schema)
+        
+        try:
+            from haive_core.graph.patterns.registry import GraphPatternRegistry
+            registry = GraphPatternRegistry.get_instance()
+            
+            # Process each pattern
+            for pattern_config in self.patterns:
+                if not pattern_config.enabled:
+                    continue
+                    
+                pattern = registry.get_pattern(pattern_config.name)
+                if pattern:
+                    # Add schema customizations based on pattern type
+                    pattern_type = pattern.metadata.pattern_type
+                    
+                    # This is where we would add pattern-specific schema enhancements
+                    # For example, RAG patterns might add context fields
+                    if pattern_type == "retrieval":
+                        if not manager.has_field("context"):
+                            manager.add_field(
+                                "context", 
+                                List[Dict[str, Any]], 
+                                default_factory=list
+                            )
+                    elif pattern_type == "agent":
+                        if not manager.has_field("tools"):
+                            manager.add_field(
+                                "tools", 
+                                List[Dict[str, Any]], 
+                                default_factory=list
+                            )
+        except ImportError:
+            # Pattern system not available
+            logger.debug("Pattern system not available for schema enhancement")
+        
+        return manager.get_model()
+    
+    def derive_input_schema(self) -> Type[BaseModel]:
+        """
+        Derive input schema for this agent.
+        
+        Returns:
+            Input schema as BaseModel subclass
+        """
+        # Return cached instance if available
+        if self._input_schema_instance:
+            return self._input_schema_instance
+            
+        # Use provided schema if available
+        if self.input_schema is not None:
+            if isinstance(self.input_schema, type) and issubclass(self.input_schema, BaseModel):
+                # Get schema manager to handle customization
+                manager = self.get_schema_manager(self.input_schema)
+                
+                # Remove __runnable_config__ field if present
+                if manager.has_field("__runnable_config__"):
+                    manager.remove_field("__runnable_config__")
+                
+                schema = manager.get_model()
+                self._input_schema_instance = schema
+                return schema
+                
+            elif isinstance(self.input_schema, dict):
+                # Create schema from dictionary using SchemaComposer
+                composer = SchemaComposer(name=f"{self.name}Input")
+                composer.add_fields_from_dict(self.input_schema)
+                
+                schema = composer.build()
+                self._input_schema_instance = schema
+                return schema
+        
+        # Try to derive from generic type arguments
+        for base_cls in self.__class__.__orig_bases__:
+            if get_origin(base_cls) is InvokableEngine:
+                args = get_args(base_cls)
+                if len(args) >= 1:
+                    in_type = args[0]
+                    if in_type is not TIn:  # Not the generic parameter itself
+                        if isinstance(in_type, type) and issubclass(in_type, BaseModel):
+                            # Get schema manager to handle customization
+                            manager = self.get_schema_manager(in_type)
+                            
+                            # Remove __runnable_config__ field if present
+                            if manager.has_field("__runnable_config__"):
+                                manager.remove_field("__runnable_config__")
+                            
+                            schema = manager.get_model()
+                            self._input_schema_instance = schema
+                            return schema
+        
+        # Default to using SchemaComposer for input schema
+        all_components = []
+        if self.engine:
+            all_components.append(self.engine)
+        all_components.extend(self.engines.values())
+        
+        schema = SchemaComposer.compose_input_schema(
+            components=all_components,
+            name=f"{self.name}Input"
+        )
+        
+        self._input_schema_instance = schema
+        return schema
+    
+    def derive_output_schema(self) -> Type[BaseModel]:
+        """
+        Derive output schema for this agent.
+        
+        Returns:
+            Output schema as BaseModel subclass
+        """
+        # Return cached instance if available
+        if self._output_schema_instance:
+            return self._output_schema_instance
+            
+        # Use provided schema if available
+        if self.output_schema is not None:
+            if isinstance(self.output_schema, type) and issubclass(self.output_schema, BaseModel):
+                # Get schema manager to handle customization
+                manager = self.get_schema_manager(self.output_schema)
+                
+                # Remove __runnable_config__ field if present
+                if manager.has_field("__runnable_config__"):
+                    manager.remove_field("__runnable_config__")
+                
+                schema = manager.get_model()
+                self._output_schema_instance = schema
+                return schema
+                
+            elif isinstance(self.output_schema, dict):
+                # Create schema from dictionary using SchemaComposer
+                composer = SchemaComposer(name=f"{self.name}Output")
+                composer.add_fields_from_dict(self.output_schema)
+                
+                schema = composer.build()
+                self._output_schema_instance = schema
+                return schema
+        
+        # Try to derive from generic type arguments
+        for base_cls in self.__class__.__orig_bases__:
+            if get_origin(base_cls) is InvokableEngine:
+                args = get_args(base_cls)
+                if len(args) >= 2:
+                    out_type = args[1]
+                    if out_type is not TOut:  # Not the generic parameter itself
+                        if isinstance(out_type, type) and issubclass(out_type, BaseModel):
+                            # Get schema manager to handle customization
+                            manager = self.get_schema_manager(out_type)
+                            
+                            # Remove __runnable_config__ field if present
+                            if manager.has_field("__runnable_config__"):
+                                manager.remove_field("__runnable_config__")
+                            
+                            schema = manager.get_model()
+                            self._output_schema_instance = schema
+                            return schema
+        
+        # Default to using SchemaComposer for output schema
+        all_components = []
+        if self.engine:
+            all_components.append(self.engine)
+        all_components.extend(self.engines.values())
+        
+        schema = SchemaComposer.compose_output_schema(
+            components=all_components,
+            name=f"{self.name}Output"
+        )
+        
+        self._output_schema_instance = schema
+        return schema
     
     def resolve_engine(self, engine_ref=None) -> Engine:
         """
@@ -133,7 +647,7 @@ class AgentConfig(InvokableEngine[TIn, TOut]):
             # Try each engine type
             from haive_core.engine.base import EngineRegistry
             registry = EngineRegistry.get_instance()
-            for engine_type in registry.engines:
+            for engine_type in EngineType:
                 engine = registry.get(engine_type, ref)
                 if engine:
                     return engine
@@ -142,38 +656,24 @@ class AgentConfig(InvokableEngine[TIn, TOut]):
             
         raise TypeError(f"Unsupported engine reference type: {type(ref)}")
     
-    def resolve_parent(self) -> Optional['AgentConfig']:
-        """
-        Resolve parent reference to an actual AgentConfig.
-        
-        Returns:
-            Resolved parent AgentConfig or None
-        """
-        if not self.parent:
-            return None
-            
-        # If parent is already an AgentConfig, return it
-        if isinstance(self.parent, AgentConfig):
-            return self.parent
-            
-        # If it's a string, look it up in the registry
-        if isinstance(self.parent, str):
-            # Try to find in registry
-            from haive_core.engine.base import EngineRegistry
-            registry = EngineRegistry.get_instance()
-            parent = registry.get(EngineType.AGENT, self.parent)
-            if parent and isinstance(parent, AgentConfig):
-                return parent
-                
-            logger.warning(f"Parent agent '{self.parent}' not found in registry")
-            
-        return None
-    
     def build_agent(self) -> 'Agent':
         """Build an agent instance from this configuration."""
+        # Import locally to avoid circular imports
+        from haive_core.engine.agent.agent import AGENT_REGISTRY
+        
         # Try to find agent class in registry
-        from haive_core.engine.agent.registry import resolve_agent_class
-        agent_class = resolve_agent_class(self.__class__)
+        agent_class = None
+        
+        # Check exact class match first
+        agent_class = AGENT_REGISTRY.get(self.__class__)
+        
+        # Try class attribute if not in registry
+        if agent_class is None and hasattr(self.__class__, "agent_class"):
+            agent_class = self.__class__.agent_class
+        
+        # Try to resolve by naming convention
+        if agent_class is None:
+            agent_class = self._resolve_agent_class_by_name()
         
         if agent_class is None:
             raise TypeError(f"No agent class found for {self.__class__.__name__}")
@@ -181,6 +681,33 @@ class AgentConfig(InvokableEngine[TIn, TOut]):
         # Instantiate and return the agent
         return agent_class(config=self)
     
+    def _resolve_agent_class_by_name(self) -> Optional[Type['Agent']]:
+        """Try to resolve agent class by naming convention."""
+        import importlib
+        
+        agent_class_name = self.__class__.__name__.replace("Config", "")
+        
+        # Try same module 
+        try:
+            module = importlib.import_module(self.__class__.__module__)
+            return getattr(module, agent_class_name, None)
+        except (ImportError, AttributeError):
+            pass
+        
+        # Try sibling module
+        try:
+            base_module = self.__class__.__module__.rsplit(".", 1)[0]
+            for suffix in ["agent", "impl", ""]:
+                try:
+                    agent_module = importlib.import_module(f"{base_module}.{suffix}")
+                    return getattr(agent_module, agent_class_name, None)
+                except (ImportError, AttributeError):
+                    continue
+        except Exception:
+            pass
+        
+        return None
+
     def create_runnable(self, runnable_config: Optional[RunnableConfig] = None) -> Any:
         """
         Create a runnable instance from this agent config.
@@ -207,68 +734,6 @@ class AgentConfig(InvokableEngine[TIn, TOut]):
         
         # Return the built and compiled agent app
         return agent.app
-    
-    def derive_input_schema(self) -> Type[BaseModel]:
-        """
-        Derive input schema for this agent.
-        
-        Returns:
-            Pydantic model for input schema
-        """
-        # Use provided schema if available
-        if self.input_schema:
-            if isinstance(self.input_schema, type) and issubclass(self.input_schema, BaseModel):
-                return self.input_schema
-            elif isinstance(self.input_schema, dict):
-                return SchemaComposer.compose(
-                    [self.input_schema], 
-                    name=f"{self.name}Input"
-                )
-        
-        # Try to derive from class type hints
-        for base_cls in self.__class__.__orig_bases__:
-            if get_origin(base_cls) is InvokableEngine:
-                args = get_args(base_cls)
-                if len(args) >= 1:
-                    # Extract TIn from InvokableEngine[TIn, TOut]
-                    in_type = args[0]
-                    if in_type is not TIn:  # Not the generic parameter itself
-                        if isinstance(in_type, type) and issubclass(in_type, BaseModel):
-                            return in_type
-        
-        # Default to deriving from state schema
-        return self.derive_schema()
-    
-    def derive_output_schema(self) -> Type[BaseModel]:
-        """
-        Derive output schema for this agent.
-        
-        Returns:
-            Pydantic model for output schema
-        """
-        # Use provided schema if available
-        if self.output_schema:
-            if isinstance(self.output_schema, type) and issubclass(self.output_schema, BaseModel):
-                return self.output_schema
-            elif isinstance(self.output_schema, dict):
-                return SchemaComposer.compose(
-                    [self.output_schema], 
-                    name=f"{self.name}Output"
-                )
-        
-        # Try to derive from class type hints
-        for base_cls in self.__class__.__orig_bases__:
-            if get_origin(base_cls) is InvokableEngine:
-                args = get_args(base_cls)
-                if len(args) >= 2:
-                    # Extract TOut from InvokableEngine[TIn, TOut]
-                    out_type = args[1]
-                    if out_type is not TOut:  # Not the generic parameter itself
-                        if isinstance(out_type, type) and issubclass(out_type, BaseModel):
-                            return out_type
-        
-        # Default to deriving from state schema
-        return self.derive_schema()
     
     def invoke(self, input_data: TIn, runnable_config: Optional[RunnableConfig] = None) -> TOut:
         """
@@ -314,6 +779,63 @@ class AgentConfig(InvokableEngine[TIn, TOut]):
         # Run with input data and config
         return await agent.arun(input_data, thread_id=thread_id, config=runnable_config)
     
+    def apply_runnable_config(self, runnable_config: Optional[RunnableConfig] = None) -> Dict[str, Any]:
+        """
+        Extract parameters from runnable_config relevant to this agent.
+        
+        Args:
+            runnable_config: Runtime configuration to extract from
+            
+        Returns:
+            Dictionary of relevant parameters
+        """
+        # Start with common parameters from base class
+        params = super().apply_runnable_config(runnable_config)
+        
+        if not runnable_config or "configurable" not in runnable_config:
+            return params
+            
+        configurable = runnable_config["configurable"]
+        
+        # Extract agent-specific parameters
+        agent_params = ["thread_id", "user_id", "save_history", "debug"]
+        for param in agent_params:
+            if param in configurable:
+                params[param] = configurable[param]
+        
+        # Extract engine parameters if engine configs are present
+        if "engine_configs" in configurable:
+            for engine_name, engine_config in configurable["engine_configs"].items():
+                # Handle primary engine
+                if engine_name == self.name or (self.engine and hasattr(self.engine, "name") and engine_name == self.engine.name):
+                    params.update(engine_config)
+                # Handle named engines
+                elif engine_name in self.engines:
+                    if "engines" not in params:
+                        params["engines"] = {}
+                    params["engines"][engine_name] = engine_config
+        
+        return params
+    
+    def get_schema_fields(self) -> Dict[str, Tuple[Type, Any]]:
+        """
+        Get schema fields for this agent.
+        
+        Returns:
+            Dictionary mapping field names to (type, default) tuples
+            Never includes __runnable_config__
+        """
+        # Use the StateSchema/StateSchemaManager functionality to get fields
+        schema = self.derive_schema()
+        
+        if hasattr(schema, "get_field_definitions"):
+            # Use StateSchema's built-in method if available
+            return schema.get_field_definitions(include_runnable_config=False)
+        else:
+            # Otherwise use the manager
+            manager = self.get_schema_manager(schema)
+            return manager.get_field_definitions(include_runnable_config=False)
+    
     def to_dict(self) -> Dict[str, Any]:
         """
         Convert agent config to a dictionary.
@@ -321,92 +843,249 @@ class AgentConfig(InvokableEngine[TIn, TOut]):
         Returns:
             Dictionary representation of the agent config
         """
-        data = self.model_dump(exclude={"input_schema", "output_schema", "config_schema"})
+        if hasattr(self, "model_dump"):
+            # Pydantic v2
+            data = self.model_dump(exclude={"input_schema", "output_schema"})
+        else:
+            # Pydantic v1
+            data = self.dict(exclude={"input_schema", "output_schema"})
         
         # Convert engines to serializable format
         if "engine" in data and isinstance(data["engine"], Engine):
-            data["engine"] = data["engine"].extract_params()
+            if hasattr(data["engine"], "extract_params"):
+                data["engine"] = data["engine"].extract_params()
+            else:
+                data["engine"] = {"name": data["engine"].name, "type": str(data["engine"].engine_type)}
         
         if "engines" in data:
             serialized_engines = {}
             for name, engine in data["engines"].items():
                 if isinstance(engine, Engine):
-                    serialized_engines[name] = engine.extract_params()
+                    if hasattr(engine, "extract_params"):
+                        serialized_engines[name] = engine.extract_params()
+                    else:
+                        serialized_engines[name] = {"name": engine.name, "type": str(engine.engine_type)}
                 else:
                     serialized_engines[name] = engine
             data["engines"] = serialized_engines
         
-        # Convert parent to name if it's an AgentConfig
-        if "parent" in data and isinstance(data["parent"], AgentConfig):
-            data["parent"] = data["parent"].name
+        # Convert node_configs
+        if "node_configs" in data:
+            serialized_nodes = {}
+            for name, node_config in data["node_configs"].items():
+                if hasattr(node_config, "to_dict"):
+                    serialized_nodes[name] = node_config.to_dict()
+                else:
+                    serialized_nodes[name] = {"name": name}
+            data["node_configs"] = serialized_nodes
+            
+        # Convert subagents
+        if "subagents" in data:
+            serialized_subagents = {}
+            for name, subagent in data["subagents"].items():
+                if hasattr(subagent, "to_dict"):
+                    serialized_subagents[name] = subagent.to_dict()
+                else:
+                    serialized_subagents[name] = {"name": subagent.name}
+            data["subagents"] = serialized_subagents
         
-        # Convert schemas if available
-        if hasattr(self, "state_schema") and isinstance(self.state_schema, type):
-            data["state_schema"] = self.state_schema.__name__
-        if hasattr(self, "input_schema") and isinstance(self.input_schema, type):
-            data["input_schema"] = self.input_schema.__name__
-        if hasattr(self, "output_schema") and isinstance(self.output_schema, type):
-            data["output_schema"] = self.output_schema.__name__
-        if hasattr(self, "config_schema") and isinstance(self.config_schema, type):
-            data["config_schema"] = self.config_schema.__name__
+        # Convert persistence config
+        if "persistence" in data and data["persistence"] is not None:
+            if hasattr(data["persistence"], "to_dict"):
+                data["persistence"] = data["persistence"].to_dict()
         
         return data
     
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'AgentConfig':
+    def clear_schema_caches(cls):
+        """Clear all schema caches for this class."""
+        cls._schema_cache.clear()
+        cls._input_schema_cache.clear()
+        cls._output_schema_cache.clear()
+    
+    # =========================================
+    # Pattern-based composition methods
+    # =========================================
+    
+    def use_pattern(
+        self, 
+        pattern_name: str, 
+        parameters: Optional[Dict[str, Any]] = None,
+        order: Optional[int] = None,
+        condition: Optional[str] = None,
+        enabled: bool = True
+    ) -> "AgentConfig":
         """
-        Create an AgentConfig from a dictionary.
+        Add a pattern to be applied to this agent.
         
         Args:
-            data: Dictionary representation
+            pattern_name: Name of the pattern in the registry
+            parameters: Parameters for pattern application
+            order: Application order (lower numbers first)
+            condition: Optional condition for pattern application
+            enabled: Whether this pattern is enabled
             
         Returns:
-            AgentConfig instance
+            Self for method chaining
         """
-        # Create a copy to avoid modifying the input
-        config_data = data.copy()
+        # Check if pattern exists in registry
+        try:
+            from haive_core.graph.patterns.registry import GraphPatternRegistry
+            registry = GraphPatternRegistry.get_instance()
+            if not registry.get_pattern(pattern_name):
+                logger.warning(f"Pattern '{pattern_name}' not found in registry")
+        except ImportError:
+            logger.warning("Pattern registry not available")
         
-        # Handle engine references
-        if "engine" in config_data and isinstance(config_data["engine"], str):
-            from haive_core.engine.base import EngineRegistry
-            registry = EngineRegistry.get_instance()
-            for engine_type in registry.engines:
-                engine = registry.get(engine_type, config_data["engine"])
-                if engine:
-                    config_data["engine"] = engine
-                    break
+        # Check if we already have this pattern
+        existing_pattern = None
+        for pattern in self.patterns:
+            if pattern.name == pattern_name:
+                existing_pattern = pattern
+                break
+                
+        if existing_pattern:
+            # Update existing pattern
+            new_pattern = PatternConfig(
+                name=pattern_name,
+                parameters=parameters or {},
+                order=order,
+                condition=condition,
+                enabled=enabled
+            )
+            
+            # Replace with merged configuration
+            self.patterns.remove(existing_pattern)
+            self.patterns.append(existing_pattern.merge_with(new_pattern))
+        else:
+            # Add new pattern
+            self.patterns.append(PatternConfig(
+                name=pattern_name,
+                parameters=parameters or {},
+                order=order,
+                condition=condition,
+                enabled=enabled
+            ))
+            
+        # Invalidate schema caches
+        self._invalidate_schema_caches()
         
-        # Handle engine dict
-        if "engines" in config_data:
-            engines = {}
-            for name, engine_ref in config_data["engines"].items():
-                if isinstance(engine_ref, str):
-                    from haive_core.engine.base import EngineRegistry
-                    registry = EngineRegistry.get_instance()
-                    for engine_type in registry.engines:
-                        engine = registry.get(engine_type, engine_ref)
-                        if engine:
-                            engines[name] = engine
-                            break
-                    if name not in engines:
-                        engines[name] = engine_ref
-                else:
-                    engines[name] = engine_ref
-            config_data["engines"] = engines
+        return self
+    
+    def set_pattern_parameters(self, pattern_name: str, **parameters) -> "AgentConfig":
+        """
+        Set global parameters for a pattern.
         
-        # Handle parent reference
-        if "parent" in config_data and isinstance(config_data["parent"], str):
-            from haive_core.engine.base import EngineRegistry
-            registry = EngineRegistry.get_instance()
-            parent = registry.get(EngineType.AGENT, config_data["parent"])
-            if parent:
-                config_data["parent"] = parent
+        Args:
+            pattern_name: Name of the pattern
+            **parameters: Parameter values
+            
+        Returns:
+            Self for method chaining
+        """
+        if pattern_name not in self.pattern_parameters:
+            self.pattern_parameters[pattern_name] = {}
+            
+        # Update parameters
+        self.pattern_parameters[pattern_name].update(parameters)
         
-        # Remove schema names if present
-        for schema_key in ["state_schema", "input_schema", "output_schema", "config_schema"]:
-            if schema_key in config_data and isinstance(config_data[schema_key], str):
-                # We can't resolve class names here, so remove them
-                del config_data[schema_key]
+        # Update any existing pattern configs
+        for pattern in self.patterns:
+            if pattern.name == pattern_name:
+                for key, value in parameters.items():
+                    if key not in pattern.parameters:
+                        pattern.parameters[key] = value
         
-        # Create instance
-        return cls(**config_data)
+        return self
+    
+    def disable_pattern(self, pattern_name: str) -> "AgentConfig":
+        """
+        Disable a pattern.
+        
+        Args:
+            pattern_name: Name of the pattern to disable
+            
+        Returns:
+            Self for method chaining
+        """
+        for pattern in self.patterns:
+            if pattern.name == pattern_name:
+                pattern.enabled = False
+                break
+                
+        return self
+    
+    def enable_pattern(self, pattern_name: str) -> "AgentConfig":
+        """
+        Enable a pattern.
+        
+        Args:
+            pattern_name: Name of the pattern to enable
+            
+        Returns:
+            Self for method chaining
+        """
+        for pattern in self.patterns:
+            if pattern.name == pattern_name:
+                pattern.enabled = True
+                break
+                
+        return self
+    
+    def get_pattern_order(self) -> List[str]:
+        """
+        Get ordered list of patterns to apply.
+        
+        Returns:
+            List of pattern names in application order
+        """
+        # Sort patterns by order (None values last)
+        sorted_patterns = sorted(
+            self.patterns,
+            key=lambda p: (p.order is None, p.order or 999999)
+        )
+        
+        # Filter enabled patterns
+        return [p.name for p in sorted_patterns if p.enabled]
+    
+    def get_pattern_parameters(self, pattern_name: str) -> Dict[str, Any]:
+        """
+        Get combined parameters for a pattern.
+        
+        Args:
+            pattern_name: Name of the pattern
+            
+        Returns:
+            Combined parameters from pattern config and global parameters
+        """
+        # Start with global parameters
+        combined = self.pattern_parameters.get(pattern_name, {}).copy()
+        
+        # Add pattern-specific parameters (overriding globals)
+        for pattern in self.patterns:
+            if pattern.name == pattern_name:
+                combined.update(pattern.parameters)
+                break
+                
+        return combined
+    
+    def is_pattern_applied(self, pattern_name: str) -> bool:
+        """
+        Check if a pattern has been applied.
+        
+        Args:
+            pattern_name: Name of the pattern to check
+            
+        Returns:
+            True if the pattern has been applied
+        """
+        return pattern_name in self._applied_patterns
+    
+    def mark_pattern_applied(self, pattern_name: str) -> None:
+        """
+        Mark a pattern as applied.
+        
+        Args:
+            pattern_name: Name of the pattern to mark
+        """
+        self._applied_patterns.add(pattern_name)
