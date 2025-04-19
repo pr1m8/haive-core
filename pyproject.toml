@@ -98,12 +98,14 @@ astor = "^0.8.1"
 allure-pytest = "^2.14.0"
 pytest-sugar = "^1.0.0"
 pytest-html = "^4.1.1"
+pytest-clarity = "^1.0.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"
 black = "^25.1.0"
 isort = "^6.0.1"
 mypy = "^1.15.0"
+pytest-sugar = "^1.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
