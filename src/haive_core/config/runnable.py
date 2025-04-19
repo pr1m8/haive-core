@@ -1,5 +1,36 @@
 # src/haive/core/config/runnable.py
 
+"""Configuration management for Haive runnables.
+
+This module provides utilities for creating, managing, and manipulating runtime configurations
+for Haive engines and runnables. It handles parameter management, metadata tracking, and
+configuration merging.
+
+The main class RunnableConfigManager provides a comprehensive set of static methods for
+working with RunnableConfig objects, which are used to configure the behavior of engines
+at runtime.
+
+Classes:
+    RunnableConfigManager: Static utility class for managing runnable configurations
+
+Example:
+    ```python
+    # Create a basic config with thread tracking
+    config = RunnableConfigManager.create(
+        thread_id="123",
+        user_id="user_456"
+    )
+    
+    # Add engine-specific configuration
+    config = RunnableConfigManager.add_engine_config(
+        config,
+        "my_llm",
+        temperature=0.7,
+        max_tokens=100
+    )
+    ```
+"""
+
 from typing import Dict, Any, Optional, List, Union, TypeVar, Type
 import uuid
 import copy
@@ -8,8 +39,7 @@ from langchain_core.runnables import RunnableConfig
 from pydantic import BaseModel
 
 class RunnableConfigManager:
-    """
-    Enhanced manager for creating and manipulating RunnableConfig objects.
+    """Enhanced manager for creating and manipulating RunnableConfig objects.
     
     Provides methods for creating standardized configs, extracting values,
     and managing engine-specific configurations.
@@ -21,8 +51,7 @@ class RunnableConfigManager:
         user_id: Optional[str] = None,
         **kwargs
     ) -> RunnableConfig:
-        """
-        Create a standardized RunnableConfig with common parameters.
+        """Create a standardized RunnableConfig with common parameters.
         
         Args:
             thread_id: Optional thread ID for persistence (generated if not provided)
@@ -63,8 +92,7 @@ class RunnableConfigManager:
         user_id: Optional[str] = None,
         **kwargs
     ) -> RunnableConfig:
-        """
-        Create a RunnableConfig with engine parameters auto-populated.
+        """Create a RunnableConfig with engine parameters auto-populated.
         
         Args:
             engine: Engine object to extract params from
@@ -130,8 +158,7 @@ class RunnableConfigManager:
         user_id: Optional[str] = None,
         **kwargs
     ) -> RunnableConfig:
-        """
-        Create a RunnableConfig with metadata.
+        """Create a RunnableConfig with metadata.
         
         Useful for tracing, logging, and debugging.
         
@@ -154,8 +181,7 @@ class RunnableConfigManager:
     
     @staticmethod
     def merge(base: RunnableConfig, override: RunnableConfig) -> RunnableConfig:
-        """
-        Merge two RunnableConfigs, with override taking precedence.
+        """Merge two RunnableConfigs, with override taking precedence.
         
         Args:
             base: Base configuration
@@ -202,8 +228,7 @@ class RunnableConfigManager:
     
     @staticmethod
     def get_thread_id(config: RunnableConfig) -> Optional[str]:
-        """
-        Extract thread_id from a RunnableConfig.
+        """Extract thread_id from a RunnableConfig.
         
         Args:
             config: RunnableConfig to extract from
@@ -215,8 +240,7 @@ class RunnableConfigManager:
     
     @staticmethod
     def get_user_id(config: RunnableConfig) -> Optional[str]:
-        """
-        Extract user_id from a RunnableConfig.
+        """Extract user_id from a RunnableConfig.
         
         Args:
             config: RunnableConfig to extract from
@@ -228,8 +252,7 @@ class RunnableConfigManager:
     
     @staticmethod
     def extract_value(config: RunnableConfig, key: str, default: Any = None) -> Any:
-        """
-        Extract a value from RunnableConfig's configurable section.
+        """Extract a value from RunnableConfig's configurable section.
         
         Args:
             config: RunnableConfig to extract from
@@ -245,8 +268,7 @@ class RunnableConfigManager:
     
     @staticmethod
     def extract_engine_config(config: RunnableConfig, engine_name: str) -> Dict[str, Any]:
-        """
-        Extract engine-specific configuration.
+        """Extract engine-specific configuration.
         
         Args:
             config: RunnableConfig to extract from
@@ -263,8 +285,7 @@ class RunnableConfigManager:
     
     @staticmethod
     def extract_engine_type_config(config: RunnableConfig, engine_type: str) -> Dict[str, Any]:
-        """
-        Extract configuration for a specific engine type.
+        """Extract configuration for a specific engine type.
         
         Args:
             config: RunnableConfig to extract from
@@ -278,8 +299,7 @@ class RunnableConfigManager:
     
     @staticmethod
     def add_engine_config(config: RunnableConfig, engine_name: str, **params) -> RunnableConfig:
-        """
-        Add engine-specific configuration.
+        """Add engine-specific configuration.
         
         Args:
             config: RunnableConfig to add to
@@ -310,8 +330,7 @@ class RunnableConfigManager:
     
     @staticmethod
     def add_engine(config: RunnableConfig, engine: Any) -> RunnableConfig:
-        """
-        Add an engine's parameters to the RunnableConfig.
+        """Add an engine's parameters to the RunnableConfig.
         
         Args:
             config: RunnableConfig to add to
@@ -363,8 +382,7 @@ class RunnableConfigManager:
     
     @staticmethod
     def from_dict(input_dict: Dict[str, Any]) -> RunnableConfig:
-        """
-        Create a RunnableConfig from a dictionary.
+        """Create a RunnableConfig from a dictionary.
         
         Args:
             input_dict: Dictionary to convert
@@ -381,8 +399,7 @@ class RunnableConfigManager:
     
     @staticmethod
     def from_model(model: BaseModel) -> RunnableConfig:
-        """
-        Create a RunnableConfig from a Pydantic model.
+        """Create a RunnableConfig from a Pydantic model.
         
         Args:
             model: Pydantic model to convert
@@ -402,8 +419,7 @@ class RunnableConfigManager:
     
     @staticmethod
     def to_model(config: RunnableConfig, model_cls: Type[BaseModel]) -> BaseModel:
-        """
-        Convert a RunnableConfig to a Pydantic model.
+        """Convert a RunnableConfig to a Pydantic model.
         
         Args:
             config: RunnableConfig to convert
