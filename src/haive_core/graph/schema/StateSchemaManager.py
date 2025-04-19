@@ -1,22 +1,21 @@
 # src/haive/core/graph/StateSchemaManager.py
 
-from typing import Any, Dict, List, Optional, Type, Union, Callable, get_type_hints, Tuple
-from pydantic import BaseModel, Field, ValidationError, create_model
 import inspect
-import uuid
-import typing
-from langchain_core.messages import BaseMessage
-from haive_core.engine.aug_llm import AugLLMConfig
 import logging
+import typing
+from collections.abc import Callable
+from typing import Any, Union
 
 from langgraph.types import Command, Send
+from pydantic import BaseModel, Field, ValidationError, create_model
+
+from haive_core.engine.aug_llm.base import AugLLMConfig
 
 # Set up logging
 logger = logging.getLogger(__name__)
 
 class StateSchemaManager:
-    """
-    A dynamic schema manager that:
+    """A dynamic schema manager that:
     - Builds schemas from dicts, lists, or Pydantic models.
     - Merges schemas while preserving uniqueness (no duplicate `messages` field).
     - Tracks validators, properties, computed attributes, class/static methods.
@@ -25,15 +24,14 @@ class StateSchemaManager:
     - Prints schema nicely in Python class format.
     """
 
-    def __init__(self, 
-                 data: Optional[Union[Dict[str, Any], Type[BaseModel]]] = None,
-                 name: Optional[str] = None,
-                 config: Optional[Dict[str, Any]] = None):
-        """
-        Args:
-            data: Dictionary or Pydantic BaseModel.
-            name: Custom schema name (defaults to class name if BaseModel).
-            config: Optional dictionary for schema customization.
+    def __init__(self,
+                 data: dict[str, Any] | type[BaseModel] | None = None,
+                 name: str | None = None,
+                 config: dict[str, Any] | None = None):
+        """Args:
+        data: Dictionary or Pydantic BaseModel.
+        name: Custom schema name (defaults to class name if BaseModel).
+        config: Optional dictionary for schema customization.
         """
         self.fields = {}
         self.validators = {}
@@ -42,17 +40,17 @@ class StateSchemaManager:
         self.class_methods = {}
         self.static_methods = {}
         self.config = config or {}  # Store user-defined configurations
-        self.locked = False  
+        self.locked = False
         self.property_getters = {}  # Store property getter methods
         self.property_setters = {}  # Store property setter methods
         #self.input_fields =
         #self.output_fields
         if data is None:
             self.name = name or self.config.get("default_schema_name", "UnnamedSchema")
-            return  
+            return
 
         if name is None and isinstance(data, type) and issubclass(data, BaseModel):
-            self.name = data.__name__  
+            self.name = data.__name__
         else:
             self.name = name or "CustomState"
 
@@ -63,7 +61,7 @@ class StateSchemaManager:
         else:
             raise TypeError(f"Unsupported data type: {type(data)}")
 
-    def _load_from_dict(self, data: Dict[str, Any]) -> None:
+    def _load_from_dict(self, data: dict[str, Any]) -> None:
         logger.debug(f"Loading from dict: {data}")
         try:
             # Handle TypedDict (which has an __annotations__ attribute)
@@ -92,7 +90,7 @@ class StateSchemaManager:
                 # Last resort: just add an empty field
                 self.fields["placeholder"] = (str, Field(default=""))
 
-    def _load_from_model(self, model_cls: Type[BaseModel]) -> None:
+    def _load_from_model(self, model_cls: type[BaseModel]) -> None:
         try:
             # Handle Pydantic v2
             if hasattr(model_cls, "model_fields"):
@@ -102,7 +100,7 @@ class StateSchemaManager:
             elif hasattr(model_cls, "__fields__"):
                 for field_name, field_info in model_cls.__fields__.items():
                     self.fields[field_name] = (field_info.type_, field_info)
-            
+
             # Load methods
             for name, method in inspect.getmembers(model_cls, predicate=inspect.isfunction):
                 if hasattr(method, "__validator_config__"):
@@ -123,25 +121,24 @@ class StateSchemaManager:
             # Add a placeholder field to ensure we have something
             self.fields["placeholder"] = (str, Field(default=""))
 
-    def _infer_type(self, value: Any) -> Type:
+    def _infer_type(self, value: Any) -> type:
         """Infer the type of a value, with special handling for collections."""
         if isinstance(value, str):
             return str
-        elif isinstance(value, int):
+        if isinstance(value, int):
             return int
-        elif isinstance(value, float):
+        if isinstance(value, float):
             return float
-        elif isinstance(value, bool):
+        if isinstance(value, bool):
             return bool
-        elif isinstance(value, list):
-            return List[Any]  # We can't guarantee homogeneity so use Any
-        elif isinstance(value, dict):
-            return Dict[str, Any]
+        if isinstance(value, list):
+            return list[Any]  # We can't guarantee homogeneity so use Any
+        if isinstance(value, dict):
+            return dict[str, Any]
         return Any
-    def add_field(self, name: str, type_hint: Type, default: Any = None, 
-             config_aware: bool = False, **kwargs) -> 'StateSchemaManager':
-        """
-        Add a field to the schema, with optional config awareness.
+    def add_field(self, name: str, type_hint: type, default: Any = None,
+             config_aware: bool = False, **kwargs) -> "StateSchemaManager":
+        """Add a field to the schema, with optional config awareness.
 
         Args:
             name: Name of the field to add
@@ -155,50 +152,49 @@ class StateSchemaManager:
         """
         if self.locked:
             raise ValueError("Schema is locked and cannot be modified.")
-        
+
         # Simplified field handling for Pydantic
-        if default is None and 'default_factory' in kwargs:
+        if default is None and "default_factory" in kwargs:
             # Use default_factory if no explicit default is provided
-            default = kwargs.pop('default_factory')()
-        
+            default = kwargs.pop("default_factory")()
+
         # Create the field
         field_info = Field(default=default, **kwargs)
-        
+
         # Add the field
         self.fields[name] = (type_hint, field_info)
-        
+
         # Track config awareness
         if config_aware:
-            if not hasattr(self, '_config_aware_fields'):
+            if not hasattr(self, "_config_aware_fields"):
                 self._config_aware_fields = set()
             self._config_aware_fields.add(name)
-        
+
         return self
 
-    def add_computed_property(self, name: str, getter_func: Callable, setter_func: Optional[Callable] = None) -> 'StateSchemaManager':
+    def add_computed_property(self, name: str, getter_func: Callable, setter_func: Callable | None = None) -> "StateSchemaManager":
         """Add a computed property with getter and optional setter."""
         if self.locked:
             raise ValueError("Schema is locked and cannot be modified.")
         self.computed_properties[name] = (getter_func, setter_func)
         return self
 
-    def remove_field(self, name: str) -> 'StateSchemaManager':
+    def remove_field(self, name: str) -> "StateSchemaManager":
         if self.locked:
             raise ValueError("Schema is locked and cannot be modified.")
         if name in self.fields:
             del self.fields[name]
         return self
 
-    def modify_field(self, name: str, new_type: Type, new_default: Any = None) -> 'StateSchemaManager':
+    def modify_field(self, name: str, new_type: type, new_default: Any = None) -> "StateSchemaManager":
         if self.locked:
             raise ValueError("Schema is locked and cannot be modified.")
         if name in self.fields:
             self.fields[name] = (new_type, Field(default=new_default))
         return self
 
-    def merge(self, other: Union['StateSchemaManager', Type[BaseModel]]) -> 'StateSchemaManager':
-        """
-        Enhanced merge to preserve first occurrence and handle conflict more gracefully.
+    def merge(self, other: Union["StateSchemaManager", type[BaseModel]]) -> "StateSchemaManager":
+        """Enhanced merge to preserve first occurrence and handle conflict more gracefully.
         
         Args:
             other: Another schema manager or Pydantic model to merge with
@@ -208,7 +204,7 @@ class StateSchemaManager:
         """
         merged = StateSchemaManager(name=f"{self.name}_Merged", config=self.config)
         merged.fields = self.fields.copy()
-        
+
         # Process incoming fields
         if isinstance(other, StateSchemaManager):
             for field, (field_type, field_info) in other.fields.items():
@@ -217,56 +213,55 @@ class StateSchemaManager:
                     merged.fields[field] = (field_type, field_info)
         elif isinstance(other, type) and issubclass(other, BaseModel):
             # Handle Pydantic model fields
-            if hasattr(other, 'model_fields'):  # Pydantic v2
+            if hasattr(other, "model_fields"):  # Pydantic v2
                 for field_name, field_info in other.model_fields.items():
                     if field_name not in merged.fields:
                         # Use Optional type for added flexibility
                         from typing import Optional
                         optional_type = Optional[field_info.annotation]
                         merged.fields[field_name] = (optional_type, field_info.default)
-            elif hasattr(other, '__fields__'):  # Pydantic v1
+            elif hasattr(other, "__fields__"):  # Pydantic v1
                 for field_name, field_info in other.__fields__.items():
                     if field_name not in merged.fields:
                         # Use Optional type for added flexibility
                         from typing import Optional
                         optional_type = Optional[field_info.type_]
                         merged.fields[field_name] = (optional_type, field_info.default)
-        
+
         return merged
     def has_field(self, name: str) -> bool:
         return name in self.fields
-    def get_model(self, lock: bool = False) -> Type[BaseModel]:
+    def get_model(self, lock: bool = False) -> type[BaseModel]:
         """Create a Pydantic model with config awareness."""
         if lock:
             self.locked = True
-            
+
         # Create the base model
         model = create_model(self.name, **self.fields)
-        
+
         # Add config awareness if tracked
-        if hasattr(self, '_config_aware_fields'):
-            setattr(model, '_config_aware_fields', self._config_aware_fields)
-            
+        if hasattr(self, "_config_aware_fields"):
+            model._config_aware_fields = self._config_aware_fields
+
             # Add config application method
             def apply_config(self, config):
                 """Apply configuration to config-aware fields."""
                 if not hasattr(config, "configurable"):
                     return self
-                    
+
                 # Apply config to config-aware fields
-                for field in getattr(self.__class__, '_config_aware_fields', set()):
+                for field in getattr(self.__class__, "_config_aware_fields", set()):
                     if hasattr(self, field) and field in config["configurable"]:
                         setattr(self, field, config["configurable"][field])
-                        
+
                 return self
-                
-            setattr(model, 'apply_config', apply_config)
-            
+
+            model.apply_config = apply_config
+
         return model
 
     def pretty_print(self) -> None:
-        """
-        Print the schema as if it was written as a Python class.
+        """Print the schema as if it was written as a Python class.
         """
         print(f"class {self.name}(BaseModel):")
         if not any([self.fields, self.properties, self.computed_properties, self.class_methods, self.static_methods]):
@@ -280,19 +275,19 @@ class StateSchemaManager:
             print(f"    {field_name}: {type_str}{default_str}")
 
         for prop_name in self.properties.keys():
-            print(f"\n    @property")
+            print("\n    @property")
             print(f"    def {prop_name}(self): ...  # Regular property")
 
         for prop_name in self.computed_properties.keys():
-            print(f"\n    @property")
+            print("\n    @property")
             print(f"    def {prop_name}(self): ...  # Computed property")
 
         for method_name in self.class_methods.keys():
-            print(f"\n    @classmethod")
+            print("\n    @classmethod")
             print(f"    def {method_name}(cls): ...  # Class method")
 
         for method_name in self.static_methods.keys():
-            print(f"\n    @staticmethod")
+            print("\n    @staticmethod")
             print(f"    def {method_name}(): ...  # Static method")
 
         print()
@@ -303,9 +298,8 @@ class StateSchemaManager:
         config: AugLLMConfig,
         command_goto: str = "execute_step",
         async_mode: bool = True
-    ) -> Callable[[Dict[str, Any]], Any]:
-        """
-        Create a node function from an AugLLMConfig, wrapping it with state validation
+    ) -> Callable[[dict[str, Any]], Any]:
+        """Create a node function from an AugLLMConfig, wrapping it with state validation
         using this schema's base model.
         Returns a node function that accepts a dict, validates it, and then calls the underlying node.
         """
@@ -313,28 +307,27 @@ class StateSchemaManager:
         base_node = create_node_function(config, command_goto, async_mode)
         Model = self.get_model()
         if async_mode:
-            async def wrapped_node(state: Dict[str, Any]):
+            async def wrapped_node(state: dict[str, Any]):
                 try:
                     valid_state = Model.model_validate(state).model_dump()
                 except ValidationError as e:
                     raise ValueError(f"State validation failed: {e}")
                 return await base_node(valid_state)
             return wrapped_node
-        else:
-            def wrapped_node(state: Dict[str, Any]):
-                try:
-                    valid_state = Model.model_validate(state).model_dump()
-                except ValidationError as e:
-                    raise ValueError(f"State validation failed: {e}")
-                return base_node(valid_state)
-            return wrapped_node
+        def wrapped_node(state: dict[str, Any]):
+            try:
+                valid_state = Model.model_validate(state).model_dump()
+            except ValidationError as e:
+                raise ValueError(f"State validation failed: {e}")
+            return base_node(valid_state)
+        return wrapped_node
 
     # --- Helper methods for Commands and Send ---
     def create_default_command(
         self,
-        update: Optional[Dict[str, Any]] = None,
-        goto: Optional[Union[str, Send, List[Union[str, Send]]]] = None,
-        resume: Optional[Union[Any, Dict[str, Any]]] = None
+        update: dict[str, Any] | None = None,
+        goto: str | Send | list[str | Send] | None = None,
+        resume: Any | dict[str, Any] | None = None
     ) -> Command:
         update = update or {}
         goto = goto or ""
