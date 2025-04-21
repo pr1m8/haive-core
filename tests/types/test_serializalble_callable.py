@@ -1,7 +1,7 @@
 import pytest
 from typing import Callable
 
-from haive_core.types.serializable_callable import SerializableCallable
+from haive.core.types.serializable_callable import SerializableCallable
 
 
 # ---------- Sample Callables ----------

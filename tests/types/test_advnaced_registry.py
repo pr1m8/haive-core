@@ -1,5 +1,5 @@
 import pytest
-from haive_core.types.advanced_registry import (
+from haive.core.types.advanced_registry import (
     Registered,
     ComponentSpec,
     Tokenizer,

@@ -2,16 +2,18 @@
 name = "haive-core"
 version = "0.1.0"
 description = "haive-core for Haive framework"
-authors = ["pr1m8 <william.astley@algebraicwealth.com>"]
+authors = [
+    "pr1m8 <william.astley@algebraicwealth.com>",
+]
 license = "MIT"
 readme = "README.md"
-packages=[
-    {include = "haive_core", from="src"}
+packages = [
+    { include = "haive", from = "src" },
 ]
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.13"
-pydantic = "^2.10.6"  # Removed duplicate entry
+pydantic = "^2.10.6"
 langchain = "^0.3.20"
 langchain-core = "^0.3.44"
 langgraph = "^0.3.5"
@@ -25,7 +27,6 @@ duckduckgo-search = "^7.5.2"
 html2text = "^2024.2.26"
 markdownify = "^1.1.0"
 pandas = "^2.2.3"
-#monopoly = {path = "external/monopoly"}
 rich = "^13.9.4"
 psycopg2 = "^2.9.10"
 nox = "^2025.2.9"
@@ -52,7 +53,6 @@ langchain-fireworks = "^0.2.8"
 discord = "^2.3.2"
 langchain-mongodb = "^0.5.0"
 langchain-ollama = "^0.3.0"
-faiss-gpu-cu12 = { version = "^1.10.0", extras = ["fix-cuda"] }
 rank-bm25 = "^0.2.2"
 scikit-learn = "^1.6.1"
 zep-python = "^2.0.2"
@@ -75,10 +75,7 @@ youtube-transcript-api = "^1.0.3"
 pytube = "^15.0.0"
 openpyxl = "^3.1.5"
 gradio = "^5.23.1"
-unstructured = {extras = ["all"], version = "^0.17.2"}
 langchain-docling = "^0.2.0"
-secure-smtplib = {version = "^0.1.1", optional = true}
-yagmail = {version = "^0.15.293", optional = true}
 sqlparse = "^0.5.3"
 pdfplumber = "^0.11.6"
 pdfminer-six = "^20250327"
@@ -90,7 +87,6 @@ psycopg = "^3.2.6"
 psycopg-pool = "^3.2.6"
 uvicorn = "^0.34.0"
 fastapi = "^0.115.12"
-websockets = {version = "15.0.1", python = "<3.12"}
 supabase = "^2.15.0"
 simsimd = "^6.2.1"
 toml = "^0.10.2"
@@ -100,13 +96,40 @@ pytest-sugar = "^1.0.0"
 pytest-html = "^4.1.1"
 pytest-clarity = "^1.0.1"
 
+[tool.poetry.dependencies.faiss-gpu-cu12]
+version = "^1.10.0"
+extras = [
+    "fix-cuda",
+]
+
+[tool.poetry.dependencies.unstructured]
+extras = [
+    "all",
+]
+version = "^0.17.2"
+
+[tool.poetry.dependencies.secure-smtplib]
+version = "^0.1.1"
+optional = true
+
+[tool.poetry.dependencies.yagmail]
+version = "^0.15.293"
+optional = true
+
+[tool.poetry.dependencies.websockets]
+version = "15.0.1"
+python = "<3.12"
+
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"
 black = "^25.1.0"
 isort = "^6.0.1"
 mypy = "^1.15.0"
 pytest-sugar = "^1.0.0"
+pytest-asyncio = "^0.26.0"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = [
+    "poetry-core>=1.0.0",
+]
 build-backend = "poetry.core.masonry.api"

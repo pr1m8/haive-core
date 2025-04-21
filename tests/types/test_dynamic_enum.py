@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ValidationError
-from haive_core.types.dynamic_enum import DynamicEnum, create_dynamic_enum
+from haive.core.types.dynamic_enum import DynamicEnum, create_dynamic_enum
 
 # ─── Example subclass ─── #
 class AnimalType(DynamicEnum):

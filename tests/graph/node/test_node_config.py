@@ -1,11 +1,10 @@
-import pytest
-from langgraph.graph import END
-from typing import Dict, Any
-from pydantic import BaseModel
 import logging
 
-from haive_core.graph.node.config import NodeConfig
-from haive_core.engine.base import Engine, EngineType
+from langgraph.graph import END
+
+from haive.core.engine.base import EngineType
+from haive.core.graph.node.config import NodeConfig
+
 #from conftest import real_llm_engine
 
 # Configure logging for this test file
@@ -21,7 +20,7 @@ def test_node_config_init_basic():
         engine="test_engine"
     )
     logger.debug(f"Created NodeConfig: {node_config}")
-    
+
     assert node_config.name == "test_node"
     logger.debug(f"Asserted name: {node_config.name}")
     assert node_config.engine == "test_engine"
@@ -51,7 +50,7 @@ def test_node_config_with_end():
     logger.debug(f"Created NodeConfig (str): {node_config_str}")
     assert node_config_str.command_goto is END
     logger.debug(f"Asserted command_goto (str): {node_config_str.command_goto}")
-    
+
     # Test with END constant
     logger.debug("Testing with command_goto=END")
     node_config_const = NodeConfig(
@@ -73,7 +72,7 @@ def test_node_config_with_engine_object(real_llm_engine):
         engine=real_llm_engine
     )
     logger.debug(f"Created NodeConfig: {node_config}")
-    
+
     assert node_config.engine is real_llm_engine
     logger.debug(f"Asserted engine object: {node_config.engine}")
     assert node_config.engine_id == real_llm_engine.id
@@ -87,7 +86,7 @@ def test_node_config_with_mappings():
     output_mapping = {"output_key": "state_key"}
     logger.debug(f"Input mapping: {input_mapping}")
     logger.debug(f"Output mapping: {output_mapping}")
-    
+
     node_config = NodeConfig(
         name="test_node_mappings",
         engine="test_engine",
@@ -95,7 +94,7 @@ def test_node_config_with_mappings():
         output_mapping=output_mapping
     )
     logger.debug(f"Created NodeConfig: {node_config}")
-    
+
     assert node_config.input_mapping == input_mapping
     logger.debug(f"Asserted input_mapping: {node_config.input_mapping}")
     assert node_config.output_mapping == output_mapping
@@ -105,7 +104,7 @@ def test_node_config_with_mappings():
 def test_node_config_resolve_engine(real_llm_engine, monkeypatch):
     """Test resolving engine reference."""
     logger.debug("--- Starting test_node_config_resolve_engine ---")
-    
+
     # Test with engine object
     logger.debug("Testing resolve_engine with direct engine object")
     node_config_obj = NodeConfig(
@@ -118,11 +117,11 @@ def test_node_config_resolve_engine(real_llm_engine, monkeypatch):
     assert resolved_engine_obj is real_llm_engine
     assert engine_id_obj == real_llm_engine.id
     logger.debug("Assertions passed for engine object case.")
-    
+
     # Test with string (mock the registry lookup)
     logger.debug("Testing resolve_engine with string reference (mocking registry)")
-    from haive_core.engine.base import EngineRegistry
-    
+    from haive.core.engine.base import EngineRegistry
+
     # Create a mock registry class for testing
     class MockRegistry:
         def find(self, name_or_id):
@@ -153,19 +152,19 @@ def test_node_config_resolve_engine(real_llm_engine, monkeypatch):
                  return real_llm_engine
             logger.debug("MockRegistry.get returning None")
             return None
-            
+
     # Patch the get_instance method to return our mock
     mock_registry = MockRegistry()
     logger.debug("Patching EngineRegistry.get_instance")
     monkeypatch.setattr(EngineRegistry, "get_instance", lambda: mock_registry)
-    
+
     # Create config with string reference
     node_config_str = NodeConfig(
         name="test_node_resolve_str",
         engine="test_engine"
     )
     logger.debug(f"Created NodeConfig with string engine ref: {node_config_str}")
-    
+
     # Resolve engine
     resolved_engine_str, engine_id_str = node_config_str.resolve_engine()
     logger.debug(f"Resolved engine: {resolved_engine_str}, engine_id: {engine_id_str}")
@@ -177,7 +176,7 @@ def test_node_config_resolve_engine(real_llm_engine, monkeypatch):
 def test_node_config_serialization(real_llm_engine, monkeypatch):
     """Test NodeConfig serialization to/from dict."""
     logger.debug("--- Starting test_node_config_serialization ---")
-    
+
     # Create a config with various fields
     logger.debug("Creating NodeConfig for serialization")
     node_config = NodeConfig(
@@ -190,12 +189,12 @@ def test_node_config_serialization(real_llm_engine, monkeypatch):
         metadata={"description": "Test node"}
     )
     logger.debug(f"Original NodeConfig: {node_config}")
-    
+
     # Convert to dict
     logger.debug("Converting NodeConfig to dict using to_dict()")
     config_dict = node_config.to_dict()
     logger.debug(f"Serialized dict: {config_dict}")
-    
+
     # Check serialization details
     assert config_dict["name"] == "test_node_serialize"
     assert config_dict["engine_ref"]["id"] == real_llm_engine.id
@@ -206,11 +205,11 @@ def test_node_config_serialization(real_llm_engine, monkeypatch):
     assert config_dict["config_overrides"] == {"temperature": 0.7}
     assert config_dict["metadata"] == {"description": "Test node"}
     logger.debug("Serialization assertions passed.")
-    
+
     # Mock the registry for deserialization
     logger.debug("Setting up mock registry for deserialization")
-    from haive_core.engine.base import EngineRegistry
-    
+    from haive.core.engine.base import EngineRegistry
+
     class MockRegistry:
         def find(self, name_or_id):
             logger.debug(f"MockRegistry.find called with: {name_or_id} during deserialization")
@@ -219,16 +218,16 @@ def test_node_config_serialization(real_llm_engine, monkeypatch):
                 return real_llm_engine
             logger.debug("MockRegistry returning None")
             return None
-            
+
     mock_registry = MockRegistry()
     logger.debug("Patching EngineRegistry.get_instance for deserialization")
     monkeypatch.setattr(EngineRegistry, "get_instance", lambda: mock_registry)
-    
+
     # Deserialize using from_dict
     logger.debug("Deserializing dict using NodeConfig.from_dict()")
     new_config = NodeConfig.from_dict(config_dict)
     logger.debug(f"Deserialized NodeConfig: {new_config}")
-    
+
     # Check fields match
     assert new_config.name == node_config.name
     assert new_config.engine_id == real_llm_engine.id

@@ -1,18 +1,17 @@
 # tests/core/engine/vectorstore/test_vectorstore.py
 
-import pytest
 import logging
-from typing import Optional
+
 from langchain_core.documents import Document
 from langchain_core.vectorstores import InMemoryVectorStore
 
-from haive_core.engine.vectorstore import VectorStoreConfig, VectorStoreProvider
-from haive_core.models.embeddings.base import HuggingFaceEmbeddingConfig
+from haive.core.engine.vectorstore.vectorstore import VectorStoreConfig, VectorStoreProvider
+from haive.core.models.embeddings.base import HuggingFaceEmbeddingConfig
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-def make_default_config(docs: Optional[list[Document]] = None) -> VectorStoreConfig:
+def make_default_config(docs: list[Document] | None = None) -> VectorStoreConfig:
     used_docs = docs if docs is not None else [
         Document(page_content="The capital of France is Paris.")
     ]

@@ -1,18 +1,18 @@
 # tests/core/engine/aug_llm/conftest.py
 
-import pytest
 import os
-from typing import List, Dict, Any, Optional, Union, Literal
+
+import pytest
+from langchain_core.messages import SystemMessage  #, MessagesPlaceholder
+from langchain_core.prompts import (
+    ChatPromptTemplate,
+    MessagesPlaceholder,
+)
+from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 
-from langchain_core.messages import HumanMessage, SystemMessage#, MessagesPlaceholder
-from langchain_core.prompts import ChatPromptTemplate, PromptTemplate,\
-    HumanMessagePromptTemplate,MessagesPlaceholder
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.tools import tool
+from haive.core.models.llm.base import AzureLLMConfig, OpenAILLMConfig
 
-from haive_core.engine.aug_llm import AugLLMConfig
-from haive_core.models.llm.base import AzureLLMConfig, OpenAILLMConfig
 
 # Skip tests if API keys aren't available
 def check_api_keys():
@@ -21,7 +21,7 @@ def check_api_keys():
         "AZURE_OPENAI_API_KEY": os.getenv("AZURE_OPENAI_API_KEY"),
         "OPENAI_API_KEY": os.getenv("OPENAI_API_KEY")
     }
-    
+
     return any(api_keys.values())
 
 # Test skipping decorator
@@ -34,22 +34,22 @@ skip_if_no_api_keys = pytest.mark.skipif(
 class Person(BaseModel):
     """Model representing a person."""
     name: str = Field(description="The person's full name")
-    age: Optional[int] = Field(None, description="The person's age in years")
-    occupation: Optional[str] = Field(None, description="The person's job or profession")
-    location: Optional[str] = Field(None, description="Where the person lives")
+    age: int | None = Field(None, description="The person's age in years")
+    occupation: str | None = Field(None, description="The person's job or profession")
+    location: str | None = Field(None, description="Where the person lives")
 
 class ExtractedEvent(BaseModel):
     """Model representing an event with date, time, location."""
     event_name: str = Field(description="Name of the event")
     date: str = Field(description="Date of the event (YYYY-MM-DD)")
-    time: Optional[str] = Field(None, description="Time of the event (HH:MM)")
-    location: Optional[str] = Field(None, description="Location of the event")
-    attendees: Optional[List[str]] = Field(None, description="List of people attending")
+    time: str | None = Field(None, description="Time of the event (HH:MM)")
+    location: str | None = Field(None, description="Location of the event")
+    attendees: list[str] | None = Field(None, description="List of people attending")
 
 class WeatherQuery(BaseModel):
     """Model for weather query."""
     location: str = Field(description="The location to get weather for")
-    date: Optional[str] = Field(None, description="The date to get weather for (defaults to current)")
+    date: str | None = Field(None, description="The date to get weather for (defaults to current)")
 
 # Test fixtures
 @pytest.fixture
@@ -103,7 +103,7 @@ def weather_tool():
             "Sydney": "Clear, 80°F"
         }
         return weather_data.get(location, f"Weather data for {location} not available")
-    
+
     return get_weather
 
 @pytest.fixture
@@ -116,6 +116,6 @@ def calculator_tool():
             # This is for testing only - would use a safer approach in production
             return str(eval(expression))
         except Exception as e:
-            return f"Error: {str(e)}"
-    
+            return f"Error: {e!s}"
+
     return calculator

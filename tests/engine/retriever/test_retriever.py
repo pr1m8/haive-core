@@ -1,14 +1,14 @@
 # tests/core/engine/retriever/test_retriever.py
 
-import pytest
 import logging
+
 from langchain_core.documents import Document
 from langchain_core.retrievers import BaseRetriever
 from langchain_core.runnables import RunnableConfig
 
-from haive_core.engine.vectorstore import VectorStoreConfig, VectorStoreProvider
-from haive_core.engine.retriever import VectorStoreRetrieverConfig
-from haive_core.models.embeddings.base import HuggingFaceEmbeddingConfig
+from haive.core.engine.retriever import VectorStoreRetrieverConfig
+from haive.core.engine.vectorstore.vectorstore import VectorStoreConfig, VectorStoreProvider
+from haive.core.models.embeddings.base import HuggingFaceEmbeddingConfig
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -26,6 +26,7 @@ def make_retriever_config(docs=None) -> VectorStoreRetrieverConfig:
         vector_store_provider=VectorStoreProvider.IN_MEMORY,
         embedding_model=HuggingFaceEmbeddingConfig(
             model="sentence-transformers/all-MiniLM-L6-v2"
+            # cache_folder is now handled by the default in HuggingFaceEmbeddingConfig
         )
     )
 

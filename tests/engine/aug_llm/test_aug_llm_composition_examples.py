@@ -1,25 +1,22 @@
 # tests/core/engine/aug_llm/test_fixed_schema.py
 
-import pytest
-import os
 import logging
-import inspect
-import json
+import os
 import pprint
-from typing import List, Dict, Any, Optional, Union, Literal, Sequence, Annotated, get_args, get_origin
-from pydantic import BaseModel, Field, create_model
+from typing import (
+    Any,
+)
 
-from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, BaseMessage
-from langchain_core.prompts import ChatPromptTemplate, PromptTemplate, MessagesPlaceholder
-from langchain_core.output_parsers import StrOutputParser
+import pytest
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.tools import tool
-from langchain_core.runnables import RunnableConfig
-from langgraph.graph import add_messages
+from pydantic import BaseModel, Field
 
-from haive_core.engine.aug_llm import AugLLMConfig
-from haive_core.models.llm.base import AzureLLMConfig
-from haive_core.schema.schema_composer import SchemaComposer
-from haive_core.schema.state_schema import StateSchema
+from haive.core.engine.aug_llm.base import AugLLMConfig
+from haive.core.models.llm.base import AzureLLMConfig
+from haive.core.schema.schema_composer import SchemaComposer
+from haive.core.schema.state_schema import StateSchema
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -30,25 +27,24 @@ def extract_content(result):
     """Extract string content from various LLM response formats."""
     if hasattr(result, "content"):
         return result.content
-    elif isinstance(result, dict) and "content" in result:
+    if isinstance(result, dict) and "content" in result:
         return result["content"]
-    elif isinstance(result, dict) and "output" in result:
-        return result["output"] 
-    elif isinstance(result, str):
+    if isinstance(result, dict) and "output" in result:
+        return result["output"]
+    if isinstance(result, str):
         return result
-    else:
-        # As a last resort, convert to string
-        return str(result)
+    # As a last resort, convert to string
+    return str(result)
 
 # Helper function to analyze prompt templates
 def analyze_prompt_template(prompt_template):
     """Analyze a prompt template to get its required variables."""
     required_vars = []
-    
+
     # Check for input_variables attribute
     if hasattr(prompt_template, "input_variables"):
         required_vars.extend(prompt_template.input_variables)
-    
+
     # Check for messages with placeholders
     if hasattr(prompt_template, "messages"):
         for message in prompt_template.messages:
@@ -56,12 +52,11 @@ def analyze_prompt_template(prompt_template):
                 required_vars.extend(message.prompt.input_variables)
             elif hasattr(message, "variable_name"):
                 required_vars.append(message.variable_name)
-    
+
     # Remove duplicates and return
     return list(set(required_vars))
 def auto_detect_state_schema(aug_llm_configs, name="AutoDetectedStateSchema"):
-    """
-    Automatically detect and create a state schema from AugLLMConfig objects.
+    """Automatically detect and create a state schema from AugLLMConfig objects.
     
     Args:
         aug_llm_configs: List of AugLLMConfig objects
@@ -72,52 +67,53 @@ def auto_detect_state_schema(aug_llm_configs, name="AutoDetectedStateSchema"):
     """
     # Create a SchemaComposer
     composer = SchemaComposer(name=name)
-    
+
     # Collect all field names from prompt templates
     all_variables = set()
-    
+
     # Analyze each AugLLMConfig
     for config in aug_llm_configs:
         # Add from standard Engine schema
-        if hasattr(config, 'get_schema_fields'):
+        if hasattr(config, "get_schema_fields"):
             schema_fields = config.get_schema_fields()
             composer.add_fields_from_dict(schema_fields)
-            
+
         # Add fields from input/output schemas
-        if hasattr(config, 'derive_input_schema'):
+        if hasattr(config, "derive_input_schema"):
             try:
                 input_schema = config.derive_input_schema()
                 composer.add_fields_from_model(input_schema)
             except Exception as e:
                 logger.warning(f"Error deriving input schema: {e}")
-        
-        if hasattr(config, 'derive_output_schema'):
+
+        if hasattr(config, "derive_output_schema"):
             try:
                 output_schema = config.derive_output_schema()
                 composer.add_fields_from_model(output_schema)
             except Exception as e:
                 logger.warning(f"Error deriving output schema: {e}")
-        
+
         # Add structured output model fields if available
-        if hasattr(config, 'structured_output_model') and config.structured_output_model:
+        if hasattr(config, "structured_output_model") and config.structured_output_model:
             model = config.structured_output_model
             composer.add_fields_from_model(model)
-        
+
         # Add variables from prompt template
-        if hasattr(config, 'prompt_template') and config.prompt_template:
+        if hasattr(config, "prompt_template") and config.prompt_template:
             prompt_vars = analyze_prompt_template(config.prompt_template)
             all_variables.update(prompt_vars)
-    
+
     # Add all detected variables from prompt templates as fields
     for var_name in all_variables:
         if var_name not in composer.fields:
             # Special handling for 'messages'
-            if var_name == 'messages':
-                from typing import Sequence
+            if var_name == "messages":
+                from collections.abc import Sequence
+                from typing import Annotated
+
                 from langchain_core.messages import BaseMessage
                 from langgraph.graph import add_messages
-                from typing import Annotated
-                
+
                 composer.add_field(
                     name="messages",
                     field_type=Annotated[Sequence[BaseMessage], add_messages],
@@ -134,14 +130,15 @@ def auto_detect_state_schema(aug_llm_configs, name="AutoDetectedStateSchema"):
                     default=None,
                     description=f"Prompt variable: {var_name}"
                 )
-    
+
     # Always ensure a messages field exists
     if "messages" not in composer.fields:
-        from typing import Sequence
+        from collections.abc import Sequence
+        from typing import Annotated
+
         from langchain_core.messages import BaseMessage
         from langgraph.graph import add_messages
-        from typing import Annotated
-        
+
         composer.add_field(
             name="messages",
             field_type=Annotated[Sequence[BaseMessage], add_messages],
@@ -150,24 +147,24 @@ def auto_detect_state_schema(aug_llm_configs, name="AutoDetectedStateSchema"):
             shared=False,
             reducer=add_messages
         )
-    
+
     # Add runnable_config
     composer.add_field(
-        name='runnable_config',
-        field_type=Dict[str, Any],
+        name="runnable_config",
+        field_type=dict[str, Any],
         default_factory=dict,
         description="Runtime configuration for components"
     )
-    
+
     # Build the schema
     schema_cls = composer.build()
-    
+
     # Ensure the reducer fields are properly set
     # This is important for the test assertion to pass
-    if hasattr(schema_cls, '__reducer_fields__') and not schema_cls.__reducer_fields__:
+    if hasattr(schema_cls, "__reducer_fields__") and not schema_cls.__reducer_fields__:
         from langgraph.graph import add_messages
-        schema_cls.__reducer_fields__['messages'] = add_messages
-    
+        schema_cls.__reducer_fields__["messages"] = add_messages
+
     return schema_cls
 
 # Pretty print schema information
@@ -175,7 +172,7 @@ def print_schema_info(schema_cls):
     """Print detailed information about a schema class."""
     print(f"\n{'-'*10} Schema: {schema_cls.__name__} {'-'*10}")
     print(f"Base class: {schema_cls.__base__.__name__}")
-    
+
     # Print fields with annotations and defaults
     print("\nFields:")
     for name, field_info in schema_cls.model_fields.items():
@@ -187,20 +184,20 @@ def print_schema_info(schema_cls):
         print(f"      Default: {default}")
         if field_info.description:
             print(f"      Description: {field_info.description}")
-    
+
     # Print StateSchema specific attributes
     if issubclass(schema_cls, StateSchema):
         print("\nStateSchema attributes:")
         print(f"  Shared fields: {schema_cls.__shared_fields__}")
         print(f"  Reducer fields: {list(schema_cls.__reducer_fields__.keys())}")
-        
+
         # Show reducer implementations
         if schema_cls.__reducer_fields__:
             print("\nReducer implementations:")
             for field, reducer in schema_cls.__reducer_fields__.items():
                 reducer_name = reducer.__name__ if hasattr(reducer, "__name__") else str(reducer)
                 print(f"  {field}: {reducer_name}")
-    
+
     # Create an example instance
     try:
         instance = schema_cls()
@@ -217,7 +214,7 @@ def check_api_keys():
         "AZURE_OPENAI_API_KEY": os.getenv("AZURE_OPENAI_API_KEY"),
         "OPENAI_API_KEY": os.getenv("OPENAI_API_KEY")
     }
-    
+
     return any(api_keys.values())
 
 # Test skipping decorator
@@ -230,23 +227,23 @@ skip_if_no_api_keys = pytest.mark.skipif(
 class Person(BaseModel):
     """Model representing a person."""
     name: str = Field(description="The person's full name")
-    age: Optional[int] = Field(None, description="The person's age in years")
-    occupation: Optional[str] = Field(None, description="The person's job or profession")
-    location: Optional[str] = Field(None, description="Where the person lives")
+    age: int | None = Field(None, description="The person's age in years")
+    occupation: str | None = Field(None, description="The person's job or profession")
+    location: str | None = Field(None, description="Where the person lives")
 
 class WeatherQuery(BaseModel):
     """Model for weather query."""
     location: str = Field(description="The location to get weather for")
-    date: Optional[str] = Field(None, description="The date to get weather for (defaults to current)")
+    date: str | None = Field(None, description="The date to get weather for (defaults to current)")
 
 class TaskInfo(BaseModel):
     """Model for task information."""
     task_id: str = Field(description="Unique identifier for the task")
     title: str = Field(description="Task title")
-    description: Optional[str] = Field(None, description="Task description")
+    description: str | None = Field(None, description="Task description")
     priority: int = Field(1, description="Task priority (1-5)")
     completed: bool = Field(False, description="Whether the task is completed")
-    assigned_to: Optional[str] = Field(None, description="Person assigned to the task")
+    assigned_to: str | None = Field(None, description="Person assigned to the task")
 
 # Test fixtures
 @pytest.fixture
@@ -329,7 +326,7 @@ def weather_tool():
             "Sydney": "Clear, 80°F"
         }
         return weather_data.get(location, f"Weather data for {location} not available")
-    
+
     return get_weather
 
 @pytest.fixture
@@ -364,23 +361,23 @@ def test_auto_detect_schema_from_configs(
     print("\n" + "="*50)
     print("Testing Automatic Schema Detection from AugLLMConfig Objects")
     print("="*50)
-    
+
     # First, let's create a variety of AugLLMConfig objects with different capabilities
-    
+
     # 1. Simple chat assistant
     chat_assistant = AugLLMConfig(
         name="chat_assistant",
         llm_config=azure_llm_config,
         prompt_template=simple_chat_prompt
     )
-    
+
     # 2. Complex assistant with optional placeholders
     complex_assistant = AugLLMConfig(
         name="complex_assistant",
         llm_config=azure_llm_config,
         prompt_template=complex_chat_prompt
     )
-    
+
     # 3. Person extractor with structured output
     person_extractor = AugLLMConfig(
         name="person_extractor",
@@ -388,7 +385,7 @@ def test_auto_detect_schema_from_configs(
         prompt_template=structured_chat_prompt,
         structured_output_model=Person
     )
-    
+
     # 4. Weather assistant with tool
     weather_assistant = AugLLMConfig(
         name="weather_assistant",
@@ -397,28 +394,28 @@ def test_auto_detect_schema_from_configs(
         tools=[weather_tool],
         structured_output_model=WeatherQuery
     )
-    
+
     # 5. QA system with content and question parameters
     qa_system = AugLLMConfig(
         name="qa_system",
         llm_config=azure_llm_config,
         prompt_template=qa_prompt
     )
-    
+
     # Step 1: Analyze individual prompt templates
     print("\n" + "="*20 + " Prompt Template Analysis " + "="*20)
-    
+
     all_configs = [chat_assistant, complex_assistant, person_extractor, weather_assistant, qa_system]
-    
+
     for config in all_configs:
         name = config.name
         prompt = config.prompt_template
-        
+
         print(f"\nAnalyzing template for: {name}")
         if prompt:
             variables = analyze_prompt_template(prompt)
             print(f"  Required variables: {variables}")
-            
+
             # Test creating input with these variables
             input_data = {}
             for var in variables:
@@ -432,27 +429,27 @@ def test_auto_detect_schema_from_configs(
                     input_data[var] = [SystemMessage(content="Additional context here")]
                 else:
                     input_data[var] = f"Test value for {var}"
-            
+
             print(f"  Sample input data: {list(input_data.keys())}")
-        
+
         # Show structured output model if available
-        if hasattr(config, 'structured_output_model') and config.structured_output_model:
+        if hasattr(config, "structured_output_model") and config.structured_output_model:
             model = config.structured_output_model
             print(f"  Structured output model: {model.__name__}")
             print(f"  Model fields: {list(model.model_fields.keys())}")
-    
+
     # Step 2: Auto-detect a state schema from all configs
     print("\n" + "="*20 + " Auto-detected State Schema " + "="*20)
-    
+
     # Use our utility to auto-detect schema
     detected_schema = auto_detect_state_schema(all_configs, name="DetectedStateSchema")
-    
+
     # Print details about the schema
     print_schema_info(detected_schema)
-    
+
     # Step 3: Test the detected schema with data
     print("\n" + "="*20 + " Testing Detected Schema " + "="*20)
-    
+
     # Create an instance
     state = detected_schema(
         messages=[HumanMessage(content="Hello, I need information about machine learning.")],
@@ -463,53 +460,53 @@ def test_auto_detect_schema_from_configs(
         name="John Doe",
         runnable_config={"thread_id": "test-123"}
     )
-    
+
     # Print the state
     print("\nState instance:")
     pprint.pprint(state.model_dump(), indent=2, width=80)
-    
+
     # Verify schema supports reducer operations
     print("\nTesting reducer functionality:")
-    
+
     # Update with new messages
     state.update({
-        "messages": [AIMessage(content="I can help with that."), 
+        "messages": [AIMessage(content="I can help with that."),
                     HumanMessage(content="Tell me about efficiency improvements.")]
     })
-    
+
     # Print updated messages
     print("\nAfter adding messages:")
     for i, msg in enumerate(state.messages):
         role = msg.__class__.__name__.replace("Message", "")
         print(f"  {i+1}. {role}: {msg.content[:50]}...")
-    
+
     # Step 4: Compare with schema from SchemaComposer
     print("\n" + "="*20 + " Comparison with SchemaComposer " + "="*20)
-    
+
     composer_schema = SchemaComposer.compose_as_state_schema(
         all_configs,
         name="ComposerStateSchema",
         include_messages=True,
         include_runnable_config=True
     )
-    
+
     # Print details about this schema
     print_schema_info(composer_schema)
-    
+
     # Step 5: Test with different combinations
     print("\n" + "="*20 + " Testing Different AugLLMConfig Combinations " + "="*20)
-    
+
     # Test with just the first three configs
     subset_schema = auto_detect_state_schema(
         [chat_assistant, complex_assistant, person_extractor],
         name="SubsetSchema"
     )
-    
+
     # Print fields in this schema
     print("\nFields in subset schema:")
     for name, field_info in subset_schema.model_fields.items():
         print(f"  - {name}: {field_info.annotation}")
-    
+
     # Create an instance of this schema too
     subset_instance = subset_schema(
         messages=[HumanMessage(content="Testing the subset schema")],
@@ -517,16 +514,16 @@ def test_auto_detect_schema_from_configs(
         age=30,
         context=[SystemMessage(content="Context for subset")]
     )
-    
+
     print("\nSubset schema instance:")
     pprint.pprint(subset_instance.model_dump(), indent=2, width=80)
-    
+
     # Schema auto-detection works correctly if these assertions pass
     assert "messages" in detected_schema.model_fields
     assert "content" in detected_schema.model_fields
     assert "question" in detected_schema.model_fields
     assert "runnable_config" in detected_schema.model_fields
     assert "messages" in detected_schema.__reducer_fields__
-    
+
     # No error means test passed
     print("\nTest completed successfully!")

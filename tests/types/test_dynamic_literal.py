@@ -1,5 +1,5 @@
 import pytest
-from haive_core.types.dynamic_literal import Colour, PaintJob
+from haive.core.types.dynamic_literal import Colour, PaintJob
 
 
 def test_valid_values():

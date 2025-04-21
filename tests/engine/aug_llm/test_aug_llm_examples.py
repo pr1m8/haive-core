@@ -1,17 +1,19 @@
 # tests/core/engine/test_aug_llm_task_examples.py
 
-import pytest
-import os
 import logging
-from typing import List, Dict, Any, Optional, Union, Literal
+import os
+
+import pytest
+from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import (
+    ChatPromptTemplate,
+    HumanMessagePromptTemplate,
+)
 from pydantic import BaseModel, Field
 
-from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_core.prompts import ChatPromptTemplate, PromptTemplate, MessagesPlaceholder, HumanMessagePromptTemplate
-from langchain_core.output_parsers import StrOutputParser
-
-from haive_core.engine.aug_llm import AugLLMConfig
-from haive_core.models.llm.base import AzureLLMConfig
+from haive.core.engine.aug_llm.base import AugLLMConfig
+from haive.core.models.llm.base import AzureLLMConfig
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -24,7 +26,7 @@ def check_api_keys():
         "AZURE_OPENAI_API_KEY": os.getenv("AZURE_OPENAI_API_KEY"),
         "OPENAI_API_KEY": os.getenv("OPENAI_API_KEY")
     }
-    
+
     return any(api_keys.values())
 
 # Test skipping decorator
@@ -345,13 +347,13 @@ def test_summarization_example(azure_llm_config, summarization_prompt, sample_ar
         prompt_template=summarization_prompt,
         output_parser=StrOutputParser()
     )
-    
+
     # Test with sample article
     summary = summarizer.invoke({"content": sample_article})
-    
+
     print("\n" + "="*20 + " Article Summary " + "="*20)
     print(summary)
-    
+
     # Test with custom content
     custom_content = """
     The Internet of Things (IoT) refers to the network of physical objects embedded with sensors,
@@ -362,12 +364,12 @@ def test_summarization_example(azure_llm_config, summarization_prompt, sample_ar
     this number could reach 30 billion by 2030. The growth of 5G networks is expected to accelerate
     IoT adoption by providing faster, more reliable connectivity for devices.
     """
-    
+
     custom_summary = summarizer.invoke({"content": custom_content})
-    
+
     print("\n" + "="*20 + " IoT Summary " + "="*20)
     print(custom_summary)
-    
+
     assert len(summary) > 0
     assert len(custom_summary) > 0
 
@@ -380,7 +382,7 @@ def test_qa_example(azure_llm_config, qa_prompt, sample_article):
         llm_config=azure_llm_config,
         prompt_template=qa_prompt
     )
-    
+
     # Test with different questions
     questions = [
         "What are the key areas of machine learning progress mentioned in the article?",
@@ -389,18 +391,18 @@ def test_qa_example(azure_llm_config, qa_prompt, sample_article):
         "Who wrote this article?",  # This information isn't in the content
         "What year is the article focusing on?",
     ]
-    
+
     print("\n" + "="*20 + " Q&A Examples " + "="*20)
-    
+
     for question in questions:
         answer = qa_system.invoke({
             "content": sample_article,
             "question": question
         })
-        
+
         content = answer.content if hasattr(answer, "content") else answer
         print(f"\nQ: {question}\nA: {content}\n")
-        
+
         # Basic validation
         assert content is not None
         assert len(content) > 0
@@ -414,23 +416,23 @@ def test_data_extraction_example(azure_llm_config, extraction_prompt, sample_bus
         llm_config=azure_llm_config,
         prompt_template=extraction_prompt
     )
-    
+
     # Extract data from the business report
     extracted_data = extractor.invoke({"content": sample_business_data})
-    
+
     content = extracted_data.content if hasattr(extracted_data, "content") else extracted_data
-    
+
     print("\n" + "="*20 + " Extracted Business Data " + "="*20)
     print(content)
-    
+
     # Define structured output model for extraction
     class BusinessDataExtraction(BaseModel):
-        people: List[str] = Field(description="Names of people mentioned")
-        organizations: List[str] = Field(description="Organizations mentioned")
-        locations: List[str] = Field(description="Locations mentioned")
-        dates: List[str] = Field(description="Dates mentioned")
-        metrics: List[str] = Field(description="Key metrics or statistics")
-    
+        people: list[str] = Field(description="Names of people mentioned")
+        organizations: list[str] = Field(description="Organizations mentioned")
+        locations: list[str] = Field(description="Locations mentioned")
+        dates: list[str] = Field(description="Dates mentioned")
+        metrics: list[str] = Field(description="Key metrics or statistics")
+
     # Create structured extractor
     structured_extractor = AugLLMConfig(
         name="structured_data_extractor",
@@ -438,17 +440,17 @@ def test_data_extraction_example(azure_llm_config, extraction_prompt, sample_bus
         prompt_template=extraction_prompt,
         structured_output_model=BusinessDataExtraction
     )
-    
+
     # Extract structured data
     structured_data = structured_extractor.invoke({"content": sample_business_data})
-    
+
     print("\n" + "="*20 + " Structured Business Data Extraction " + "="*20)
     print(f"People: {structured_data.people}")
     print(f"Organizations: {structured_data.organizations}")
     print(f"Locations: {structured_data.locations}")
     print(f"Dates: {structured_data.dates}")
     print(f"Metrics: {structured_data.metrics}")
-    
+
     # Basic validation
     assert len(structured_data.people) > 0
     assert len(structured_data.organizations) > 0
@@ -463,29 +465,29 @@ def test_comparison_example(azure_llm_config, comparison_prompt, sample_product_
         llm_config=azure_llm_config,
         prompt_template=comparison_prompt
     )
-    
+
     # Compare the products
     comparison = comparator.invoke(sample_product_comparison)
-    
+
     content = comparison.content if hasattr(comparison, "content") else comparison
-    
+
     print("\n" + "="*20 + " Product Comparison " + "="*20)
     print(content)
-    
+
     # Try another comparison
     custom_comparison = {
         "item1": "Python programming language",
         "item2": "JavaScript programming language",
         "criteria": "Learning curve, performance, versatility, and job market demand."
     }
-    
+
     lang_comparison = comparator.invoke(custom_comparison)
-    
+
     lang_content = lang_comparison.content if hasattr(lang_comparison, "content") else lang_comparison
-    
+
     print("\n" + "="*20 + " Programming Language Comparison " + "="*20)
     print(lang_content)
-    
+
     # Basic validation
     assert content is not None
     assert lang_content is not None
@@ -501,29 +503,29 @@ def test_code_generation_example(azure_llm_config, code_generation_prompt, sampl
         llm_config=azure_llm_config,
         prompt_template=code_generation_prompt
     )
-    
+
     # Generate code based on requirements
     generated_code = code_generator.invoke(sample_code_requirements)
-    
+
     content = generated_code.content if hasattr(generated_code, "content") else generated_code
-    
+
     print("\n" + "="*20 + " Generated Python Code " + "="*20)
     print(content)
-    
+
     # Try a simpler code generation task
     simple_task = {
         "requirements": "Create a function that checks if a string is a palindrome.",
         "language": "Python",
         "specifications": "Keep it simple and efficient."
     }
-    
+
     simple_code = code_generator.invoke(simple_task)
-    
+
     simple_content = simple_code.content if hasattr(simple_code, "content") else simple_code
-    
+
     print("\n" + "="*20 + " Simple Function Generation " + "="*20)
     print(simple_content)
-    
+
     # Basic validation
     assert "def" in content
     assert "def" in simple_content
@@ -539,7 +541,7 @@ def test_format_conversion_example(azure_llm_config, format_conversion_prompt):
         llm_config=azure_llm_config,
         prompt_template=format_conversion_prompt
     )
-    
+
     # Convert markdown to HTML
     markdown_content = """
     # Project Status Report
@@ -560,18 +562,18 @@ def test_format_conversion_example(azure_llm_config, format_conversion_prompt):
     
     Contact: [project-team@example.com](mailto:project-team@example.com)
     """
-    
+
     html_conversion = converter.invoke({
         "content": markdown_content,
         "source_format": "Markdown",
         "target_format": "HTML"
     })
-    
+
     html_content = html_conversion.content if hasattr(html_conversion, "content") else html_conversion
-    
+
     print("\n" + "="*20 + " Markdown to HTML Conversion " + "="*20)
     print(html_content)
-    
+
     # Convert JSON to YAML
     json_content = """
     {
@@ -594,18 +596,18 @@ def test_format_conversion_example(azure_llm_config, format_conversion_prompt):
       "features": ["authentication", "logging", "api", "websockets"]
     }
     """
-    
+
     yaml_conversion = converter.invoke({
         "content": json_content,
         "source_format": "JSON",
         "target_format": "YAML"
     })
-    
+
     yaml_content = yaml_conversion.content if hasattr(yaml_conversion, "content") else yaml_conversion
-    
+
     print("\n" + "="*20 + " JSON to YAML Conversion " + "="*20)
     print(yaml_content)
-    
+
     # Basic validation
     assert "<h1>" in html_content
     assert "<ul>" in html_content
@@ -621,31 +623,31 @@ def test_translation_example(azure_llm_config, translation_prompt):
         llm_config=azure_llm_config,
         prompt_template=translation_prompt
     )
-    
+
     # Translate English to Spanish
     spanish_translation = translator.invoke({
         "text": "Machine learning is transforming how we interact with technology every day.",
         "source_language": "English",
         "target_language": "Spanish"
     })
-    
+
     spanish_content = spanish_translation.content if hasattr(spanish_translation, "content") else spanish_translation
-    
+
     print("\n" + "="*20 + " English to Spanish Translation " + "="*20)
     print(spanish_content)
-    
+
     # Translate English to French
     french_translation = translator.invoke({
         "text": "The artificial intelligence revolution has only just begun.",
         "source_language": "English",
         "target_language": "French"
     })
-    
+
     french_content = french_translation.content if hasattr(french_translation, "content") else french_translation
-    
+
     print("\n" + "="*20 + " English to French Translation " + "="*20)
     print(french_content)
-    
+
     # Translate with tone guidance
     formal_translation = translator.invoke({
         "text": "Hey there! Can you help me figure out how to use this app?",
@@ -655,12 +657,12 @@ def test_translation_example(azure_llm_config, translation_prompt):
             HumanMessage(content="Please maintain a formal, respectful tone in the translation.")
         ]
     })
-    
+
     formal_content = formal_translation.content if hasattr(formal_translation, "content") else formal_translation
-    
+
     print("\n" + "="*20 + " English to Formal Japanese Translation " + "="*20)
     print(formal_content)
-    
+
     # Basic validation
     assert spanish_content is not None
     assert french_content is not None
@@ -678,15 +680,15 @@ def test_analysis_example(azure_llm_config, analysis_prompt, sample_article):
         llm_config=azure_llm_config,
         prompt_template=analysis_prompt
     )
-    
+
     # Analyze the article
     analysis = analyzer.invoke({"content": sample_article})
-    
+
     content = analysis.content if hasattr(analysis, "content") else analysis
-    
+
     print("\n" + "="*20 + " Article Analysis " + "="*20)
     print(content)
-    
+
     # Create custom analysis prompt for SWOT analysis
     swot_prompt = ChatPromptTemplate.from_messages([
         SystemMessage(content="""
@@ -702,14 +704,14 @@ def test_analysis_example(azure_llm_config, analysis_prompt, sample_article):
         """),
         HumanMessagePromptTemplate.from_template("Perform a SWOT analysis for the following business:\n\n{business_info}")
     ])
-    
+
     # Create SWOT analyzer
     swot_analyzer = AugLLMConfig(
         name="swot_analyzer",
         llm_config=azure_llm_config,
         prompt_template=swot_prompt
     )
-    
+
     # Sample business info
     business_info = """
     GreenTech Solutions is a 5-year-old renewable energy startup focusing on residential solar 
@@ -725,15 +727,15 @@ def test_analysis_example(azure_llm_config, analysis_prompt, sample_article):
     The company's founder has ambitions to expand to 10 states within the next three years 
     but is concerned about rising equipment costs and potential changes in regulations.
     """
-    
+
     # Perform SWOT analysis
     swot_analysis = swot_analyzer.invoke({"business_info": business_info})
-    
+
     swot_content = swot_analysis.content if hasattr(swot_analysis, "content") else swot_analysis
-    
+
     print("\n" + "="*20 + " SWOT Analysis " + "="*20)
     print(swot_content)
-    
+
     # Basic validation
     assert "Strengths" in swot_content
     assert "Weaknesses" in swot_content

@@ -99,3 +99,16 @@ __pycache__/
 # Allure results (anywhere)
 **/allure-results/
 **/*-attachment.txt
+
+
+# Python cache
+__pycache__/
+*.py[cod]
+#You can also include:
+
+gitignore
+#Copy
+#Edit
+# Bytecode cache from Poetry/Nox/Pytest
+.cache/
+.nox/
