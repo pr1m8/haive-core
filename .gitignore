@@ -125,3 +125,5 @@ test_outputs/
 test_simple_agent/
 token.json
 venv/
+.secrets/
+docker/nginx/sites-enabled/
