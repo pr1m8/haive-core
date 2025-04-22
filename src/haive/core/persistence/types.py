@@ -12,6 +12,7 @@ class CheckpointerType(str, Enum):
     memory = "memory"
     postgres = "postgres"
     sqlite = "sqlite"
+    supabase = "supabase"
     # Add other checkpointer types as needed
 
 class CheckpointMetadata(Dict[str, Any]):

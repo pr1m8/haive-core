@@ -37,7 +37,8 @@ try:
     
     # Test if we can actually execute a query (the ultimate test)
     print("Testing database connection with a simple query...")
-    with postgres_config.pool.connection() as conn:
+    with PostgresCheckpointerConfig.pool.connection() as conn:
+
         with conn.cursor() as cursor:
             cursor.execute("SELECT 1 AS connection_test")
             result = cursor.fetchone()
@@ -76,6 +77,7 @@ except Exception as e:
 finally:
     # Always close the connection
     print("Closing connection...")
-    if hasattr(postgres_config, 'pool') and postgres_config.pool is not None:
-        postgres_config.close()
+    if PostgresCheckpointerConfig.pool is not None:
+        PostgresCheckpointerConfig.pool.close()
+        PostgresCheckpointerConfig.pool = None
         print("Connection closed.")

@@ -1,240 +1,29 @@
-# src/haive/core/engine/agent/persistence/postgres_config.py
-
-import asyncio
-import logging
-import json
-import urllib.parse
+# Factory functions for PostgreSQL checkpointer operations
 import time
 import random
-import uuid
-from typing import Optional, Dict, Any, List, Union, Tuple, ClassVar
-
-from pydantic import BaseModel, Field, model_validator
-
-# Check if PostgreSQL dependencies are installed
-try:
-    from psycopg_pool import ConnectionPool, AsyncConnectionPool
-    from langgraph.checkpoint.postgres import PostgresSaver, ShallowPostgresSaver
-    from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver, AsyncShallowPostgresSaver
-    POSTGRES_AVAILABLE = True
-except ImportError:
-    POSTGRES_AVAILABLE = False
+import asyncio
+from typing import Any, Optional, Dict
+import json 
+from haive.core.persistence.postgres_config import PostgresCheckpointerConfig
+from langgraph.checkpoint.postgres import PostgresSaver, AsyncPostgresSaver, ShallowPostgresSaver, AsyncShallowPostgresSaver
+from psycopg_pool import AsyncConnectionPool,AsyncConnectionPool
+import logging
+    
+from haive.core.persistence.postgres_config import POSTGRES_AVAILABLE
 
 logger = logging.getLogger(__name__)
 
-# Import CheckpointerType and CheckpointerConfig from base
-from .types import CheckpointerType  
-from .base import CheckpointerConfig
 
-class PostgresCheckpointerConfig(CheckpointerConfig):
+def create_postgres_checkpointer(config: PostgresCheckpointerConfig) -> Any:
     """
-    Configuration for PostgreSQL-based checkpointing with enhanced reliability features.
+    Create a PostgreSQL checkpointer with retry logic.
     
-    This class handles creation and configuration of a PostgreSQL-based
-    checkpointer for LangGraph agents, with thread registration, pool
-    management, and retry capabilities for both synchronous and asynchronous operations.
+    Args:
+        config: PostgreSQL checkpointer configuration
+        
+    Returns:
+        A PostgresSaver instance or fallback MemorySaver
     """
-    type: CheckpointerType = CheckpointerType.postgres
-    
-    # Database connection settings
-    db_host: str = Field(default="localhost", description="PostgreSQL host")
-    db_port: int = Field(default=5432, description="PostgreSQL port")
-    db_name: str = Field(default="postgres", description="PostgreSQL database name")
-    db_user: str = Field(default="postgres", description="PostgreSQL username")
-    db_pass: str = Field(default="postgres", description="PostgreSQL password")
-    ssl_mode: str = Field(default="disable", description="SSL mode for connection")
-    
-    # Pool settings
-    min_pool_size: int = Field(default=1, description="Minimum pool size")
-    max_pool_size: int = Field(default=5, description="Maximum pool size")
-    
-    # Connection tuning
-    auto_commit: bool = Field(default=True, description="Auto-commit transactions")
-    prepare_threshold: int = Field(default=0, description="Prepare threshold")
-    connect_timeout: int = Field(default=10, description="Connection timeout in seconds")
-    
-    # Retry settings
-    max_retries: int = Field(default=3, description="Maximum number of connection retry attempts")
-    retry_delay: float = Field(default=1.0, description="Initial delay between retries in seconds")
-    retry_backoff: float = Field(default=2.0, description="Backoff multiplier for each retry")
-    retry_jitter: bool = Field(default=True, description="Add random jitter to retry delays")
-    
-    # Runtime settings
-    setup_needed: bool = Field(default=True, description="Whether to initialize DB tables")
-    use_async: bool = Field(default=False, description="Whether to use async mode")
-    shallow_mode: bool = Field(default=False, description="Use shallow checkpointing (only most recent state)")
-    
-    # Connection string (alternative to individual parameters)
-    connection_string: Optional[str] = Field(
-        default=None, 
-        description="Full connection string (overrides individual connection parameters if provided)"
-    )
-
-    @model_validator(mode='after')
-    def validate_postgres_available(self):
-        """Validate that postgres dependencies are available if this config is used."""
-        if not POSTGRES_AVAILABLE:
-            raise ImportError(
-                "PostgreSQL dependencies not available. Please install with: "
-                "pip install psycopg[binary] langgraph-checkpoint-postgres"
-            )
-        return self
-    
-    def get_connection_uri(self) -> str:
-        """Build the connection URI from config or return the connection string."""
-        if self.connection_string:
-            return self.connection_string
-            
-        # Build connection URI from components
-        encoded_pass = urllib.parse.quote_plus(str(self.db_pass))
-        db_uri = f"postgresql://{self.db_user}:{encoded_pass}@{self.db_host}:{self.db_port}/{self.db_name}"
-        if self.ssl_mode:
-            db_uri += f"?sslmode={self.ssl_mode}"
-        
-        return db_uri
-        
-    def get_config_key(self) -> str:
-        """Generate a unique key for this configuration to use in the class caches."""
-        uri = self.get_connection_uri()
-        key = f"{uri}:{self.min_pool_size}:{self.max_pool_size}:{self.shallow_mode}"
-        return key
-    
-    def create_checkpointer(self) -> Any:
-        """
-        Create a PostgreSQL checkpointer with the specified configuration.
-        
-        Returns:
-            A PostgresSaver instance for use with LangGraph
-        """
-        return create_sync_checkpointer(self)
-    
-    async def acreate_checkpointer(self) -> Any:
-        """
-        Create an asynchronous PostgreSQL checkpointer.
-        
-        Returns:
-            An AsyncPostgresSaver instance for use with LangGraph
-        """
-        return await create_async_checkpointer(self)
-    
-    def register_thread(self, thread_id: str, metadata: Optional[Dict[str, Any]] = None) -> None:
-        """
-        Register a thread in the PostgreSQL database.
-        
-        This ensures that the thread exists in the database before
-        any checkpoints are created that reference it.
-        
-        Args:
-            thread_id: The thread ID to register
-            metadata: Optional metadata dict
-        """
-        register_thread_sync(self, thread_id, metadata)
-    
-    async def aregister_thread(self, thread_id: str, metadata: Optional[Dict[str, Any]] = None) -> None:
-        """
-        Asynchronously register a thread in the PostgreSQL database.
-        
-        Args:
-            thread_id: The thread ID to register
-            metadata: Optional metadata dict
-        """
-        await register_thread_async(self, thread_id, metadata)
-            
-    def _ensure_config_fields(self, config: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Ensure config has all required fields for LangGraph checkpointing.
-        
-        Args:
-            config: Configuration dict
-            
-        Returns:
-            Config with all required fields
-        """
-        # Create a copy to avoid modifying the original
-        config = config.copy()
-        
-        # Ensure configurable section exists
-        if "configurable" not in config:
-            config["configurable"] = {}
-            
-        # Ensure thread_id exists
-        if "thread_id" not in config["configurable"]:
-            config["configurable"]["thread_id"] = f"auto-{uuid.uuid4()}"
-            
-        # Ensure checkpoint_ns exists - required for low-level checkpointer calls
-        if "checkpoint_ns" not in config["configurable"]:
-            config["configurable"]["checkpoint_ns"] = ""
-            
-        return config
-            
-    def put_checkpoint(self, config: Dict[str, Any], data: Any, metadata: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """
-        Store a checkpoint in the database with retry logic.
-        
-        Args:
-            config: Configuration with thread_id and optional checkpoint_id
-            data: The checkpoint data to store
-            metadata: Optional metadata to associate with the checkpoint
-            
-        Returns:
-            Updated config with checkpoint_id
-        """
-        return put_checkpoint_sync(self, config, data, metadata)
-    
-    async def aput_checkpoint(self, config: Dict[str, Any], data: Any, metadata: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """
-        Asynchronously store a checkpoint in the database with retry logic.
-        """
-        return await put_checkpoint_async(self, config, data, metadata)
-
-    def get_checkpoint(self, config: Dict[str, Any]) -> Optional[Any]:
-        """
-        Retrieve a checkpoint from the database with retry logic.
-        
-        Args:
-            config: Configuration with thread_id and optional checkpoint_id
-            
-        Returns:
-            The checkpoint data if found, None otherwise
-        """
-        return get_checkpoint_sync(self, config)
-    
-    async def aget_checkpoint(self, config: Dict[str, Any]) -> Optional[Any]:
-        """
-        Asynchronously retrieve a checkpoint from the database with retry logic.
-        """
-        return await get_checkpoint_async(self, config)
-    
-    def close(self) -> None:
-        """
-        Close any connection pools created by this specific configuration instance.
-        
-        Note: This only affects pools created by this specific configuration.
-        Use class method close_all() to close all pools across all configurations.
-        """
-        close_sync_pool(self.get_config_key())
-
-    async def aclose(self) -> None:
-        """
-        Asynchronously close any connection pools created by this specific configuration instance.
-        
-        Note: This only affects pools created by this specific configuration.
-        Use class method aclose_all() to close all pools across all configurations.
-        """
-        await close_async_pool(self.get_config_key())
-
-
-# Initialize storage for connection pools and checkpointers
-# These need to be outside the class to avoid Pydantic serialization issues
-_sync_pools: Dict[str, Any] = {}
-_async_pools: Dict[str, Any] = {}
-_sync_checkpointers: Dict[str, Any] = {}
-_async_checkpointers: Dict[str, Any] = {}
-
-
-# Factory methods for creating checkpointers
-def create_sync_checkpointer(config: PostgresCheckpointerConfig) -> Any:
-    """Create a synchronous PostgreSQL checkpointer."""
     if not POSTGRES_AVAILABLE:
         logger.warning("PostgreSQL dependencies not available, falling back to memory checkpointer")
         from langgraph.checkpoint.memory import MemorySaver
@@ -242,31 +31,37 @@ def create_sync_checkpointer(config: PostgresCheckpointerConfig) -> Any:
     
     # Check if we already have a checkpointer for this config
     config_key = config.get_config_key()
-    if config_key in _sync_checkpointers:
-        return _sync_checkpointers[config_key]
+    if config_key in PostgresCheckpointerConfig._sync_checkpointers:
+        return PostgresCheckpointerConfig._sync_checkpointers[config_key]
         
     try:
         # Check if we have a pool for this config
         pool = None
-        if config_key in _sync_pools:
-            pool = _sync_pools[config_key]
+        if config_key in PostgresCheckpointerConfig._sync_pools:
+            pool = PostgresCheckpointerConfig._sync_pools[config_key]
         else:
             logger.info("Creating new PostgreSQL connection pool")
             
             # Get connection URI
             db_uri = config.get_connection_uri()
             
-            # Create connection pool with retry mechanism
+            # Create connection pool with retries
             for retry in range(config.max_retries):
                 try:
                     from psycopg_pool import ConnectionPool
                     pool = ConnectionPool(
                         conninfo=db_uri,
+                        min_size=config.min_pool_size,
                         max_size=config.max_pool_size,
-                        kwargs={"autocommit": True, "prepare_threshold": 0}
+                        kwargs={
+                            "autocommit": config.auto_commit,
+                            "prepare_threshold": config.prepare_threshold,
+                            "connect_timeout": config.connect_timeout
+                        },
+                        open=True  # Explicitly open the pool
                     )
-                    # Store in cache
-                    _sync_pools[config_key] = pool
+                    # Store in class cache
+                    PostgresCheckpointerConfig._sync_pools[config_key] = pool
                     break
                 except Exception as e:
                     if retry < config.max_retries - 1:
@@ -279,8 +74,11 @@ def create_sync_checkpointer(config: PostgresCheckpointerConfig) -> Any:
                         raise
         
         # Create appropriate PostgresSaver
-        from langgraph.checkpoint.postgres import PostgresSaver
-        checkpointer = PostgresSaver(pool)
+        checkpointer = None
+        if config.shallow_mode:
+            checkpointer = ShallowPostgresSaver(pool)
+        else:
+            checkpointer = PostgresSaver(pool)
         
         # Initialize tables if needed
         if config.setup_needed:
@@ -290,8 +88,8 @@ def create_sync_checkpointer(config: PostgresCheckpointerConfig) -> Any:
             except Exception as e:
                 logger.error(f"Error setting up PostgreSQL tables: {e}")
         
-        # Store in cache
-        _sync_checkpointers[config_key] = checkpointer
+        # Store in class cache
+        PostgresCheckpointerConfig._sync_checkpointers[config_key] = checkpointer
         return checkpointer
         
     except Exception as e:
@@ -299,8 +97,17 @@ def create_sync_checkpointer(config: PostgresCheckpointerConfig) -> Any:
         logger.warning("Falling back to memory checkpointer")
         from langgraph.checkpoint.memory import MemorySaver
         return MemorySaver()
-async def create_async_checkpointer(config: PostgresCheckpointerConfig) -> Any:
-    """Create an asynchronous PostgreSQL checkpointer."""
+
+async def acreate_postgres_checkpointer(config: PostgresCheckpointerConfig) -> Any:
+    """
+    Create an asynchronous PostgreSQL checkpointer with retry logic.
+    
+    Args:
+        config: PostgreSQL checkpointer configuration
+        
+    Returns:
+        An AsyncPostgresSaver instance or fallback MemorySaver
+    """
     if not POSTGRES_AVAILABLE:
         logger.warning("PostgreSQL dependencies not available, falling back to memory checkpointer")
         from langgraph.checkpoint.memory import MemorySaver
@@ -308,14 +115,14 @@ async def create_async_checkpointer(config: PostgresCheckpointerConfig) -> Any:
     
     # Check if we already have an async checkpointer for this config
     config_key = config.get_config_key()
-    if config_key in _async_checkpointers:
-        return _async_checkpointers[config_key]
+    if config_key in PostgresCheckpointerConfig._async_checkpointers:
+        return PostgresCheckpointerConfig._async_checkpointers[config_key]
         
     try:
         # Check if we have an async pool for this config
         async_pool = None
-        if config_key in _async_pools:
-            async_pool = _async_pools[config_key]
+        if config_key in PostgresCheckpointerConfig._async_pools:
+            async_pool = PostgresCheckpointerConfig._async_pools[config_key]
         else:
             logger.info("Creating new PostgreSQL async connection pool")
             
@@ -333,6 +140,7 @@ async def create_async_checkpointer(config: PostgresCheckpointerConfig) -> Any:
             for retry in range(config.max_retries):
                 try:
                     # Create pool
+                    from psycopg_pool import AsyncConnectionPool
                     async_pool = AsyncConnectionPool(
                         conninfo=db_uri,
                         min_size=config.min_pool_size,
@@ -344,8 +152,8 @@ async def create_async_checkpointer(config: PostgresCheckpointerConfig) -> Any:
                     # Explicitly open the pool
                     await async_pool.open()
                     
-                    # Store in cache
-                    _async_pools[config_key] = async_pool
+                    # Store in class cache
+                    PostgresCheckpointerConfig._async_pools[config_key] = async_pool
                     break
                 except Exception as e:
                     if retry < config.max_retries - 1:
@@ -372,8 +180,8 @@ async def create_async_checkpointer(config: PostgresCheckpointerConfig) -> Any:
             except Exception as e:
                 logger.error(f"Error setting up PostgreSQL tables asynchronously: {e}")
         
-        # Store in cache
-        _async_checkpointers[config_key] = async_checkpointer
+        # Store in class cache
+        PostgresCheckpointerConfig._async_checkpointers[config_key] = async_checkpointer
         return async_checkpointer
             
     except Exception as e:
@@ -382,16 +190,22 @@ async def create_async_checkpointer(config: PostgresCheckpointerConfig) -> Any:
         from langgraph.checkpoint.memory import MemorySaver
         return MemorySaver()
 
-
-def register_thread_sync(config: PostgresCheckpointerConfig, thread_id: str, metadata: Optional[Dict[str, Any]] = None) -> None:
-    """Register a thread in the PostgreSQL database."""
+def register_postgres_thread(config: PostgresCheckpointerConfig, thread_id: str, metadata: Optional[Dict[str, Any]] = None) -> None:
+    """
+    Register a thread in the PostgreSQL database with retry logic.
+    
+    Args:
+        config: PostgreSQL checkpointer configuration
+        thread_id: Thread ID to register
+        metadata: Optional metadata dict
+    """
     if not POSTGRES_AVAILABLE:
         logger.debug("PostgreSQL not available, skipping thread registration")
         return
     
     try:
         # Create checkpointer if not already created
-        checkpointer = create_sync_checkpointer(config)
+        checkpointer = create_postgres_checkpointer(config)
         
         # Skip if we got a MemorySaver fallback
         from langgraph.checkpoint.memory import MemorySaver
@@ -482,16 +296,22 @@ def register_thread_sync(config: PostgresCheckpointerConfig, thread_id: str, met
     except Exception as e:
         logger.error(f"Error in thread registration: {e}")
 
-
-async def register_thread_async(config: PostgresCheckpointerConfig, thread_id: str, metadata: Optional[Dict[str, Any]] = None) -> None:
-    """Asynchronously register a thread in the PostgreSQL database."""
+async def aregister_postgres_thread(config: PostgresCheckpointerConfig, thread_id: str, metadata: Optional[Dict[str, Any]] = None) -> None:
+    """
+    Asynchronously register a thread in the PostgreSQL database.
+    
+    Args:
+        config: PostgreSQL checkpointer configuration
+        thread_id: Thread ID to register
+        metadata: Optional metadata dict
+    """
     if not POSTGRES_AVAILABLE:
         logger.debug("PostgreSQL not available, skipping async thread registration")
         return
     
     try:
         # Create async checkpointer if not already created
-        checkpointer = await create_async_checkpointer(config)
+        checkpointer = await acreate_postgres_checkpointer(config)
         
         # Skip if we got a MemorySaver fallback
         from langgraph.checkpoint.memory import MemorySaver
@@ -573,88 +393,112 @@ async def register_thread_async(config: PostgresCheckpointerConfig, thread_id: s
                     
     except Exception as e:
         logger.error(f"Error in async thread registration: {e}")
-def put_checkpoint_sync(config: PostgresCheckpointerConfig, runnable_config: Dict[str, Any], data: Any, metadata: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-    """Store a checkpoint in the database with retry logic."""
+
+def put_postgres_checkpoint(config: PostgresCheckpointerConfig, runnable_config: Dict[str, Any], data: Any, metadata: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """
+    Store a checkpoint in the PostgreSQL database with retry logic.
+    
+    Args:
+        config: PostgreSQL checkpointer configuration
+        runnable_config: Configuration with thread_id and optional checkpoint_id
+        data: The checkpoint data to store
+        metadata: Optional metadata to associate with the checkpoint
+        
+    Returns:
+        Updated config with checkpoint_id
+    """
     if not POSTGRES_AVAILABLE:
         logger.warning("PostgreSQL dependencies not available, checkpoint not stored")
         return runnable_config
     
     # Create checkpointer
-    checkpointer = create_sync_checkpointer(config)
+    checkpointer = create_postgres_checkpointer(config)
     
     # Ensure config has required fields
-    runnable_config = config._ensure_config_fields(runnable_config)
+    config_dict = config._ensure_config_fields(runnable_config)
     
-    # Log the input
-    logger.debug(f"Storing checkpoint with data: {data}")
-    logger.debug(f"Using config: {runnable_config}")
+    # Basic checkpoint structure
+    checkpoint_data = {
+        "ts": time.strftime("%Y-%m-%dT%H:%M:%S.%fZ", time.gmtime()),
+        "id": config_dict["configurable"].get("checkpoint_id", ""),
+        "channel_values": data
+    }
     
-    try:
-        # Store the checkpoint using the tutorial approach
-        next_config = checkpointer.put(runnable_config, {"channel_values": data})
-        logger.debug(f"Checkpoint stored successfully")
-        
-        # Return the updated config
-        return next_config
-    except Exception as e:
-        logger.error(f"Failed to store checkpoint: {e}")
-        return runnable_config
+    # Metadata structure expected by LangGraph
+    checkpoint_metadata = metadata or {
+        "source": "update",
+        "step": 0,
+        "writes": {},
+        "parents": {}
+    }
+    
+    # Channel versions (required by newer LangGraph API)
+    channel_versions = {}
+    
+    # Try to store with retries
+    for retry in range(config.max_retries):
+        try:
+            # Call the appropriate put method
+            next_config = checkpointer.put(
+                config_dict, 
+                checkpoint_data, 
+                checkpoint_metadata, 
+                channel_versions
+            )
+            
+            # Return updated config
+            return next_config
+        except Exception as e:
+            if retry < config.max_retries - 1:
+                delay = config.retry_delay * (config.retry_backoff ** retry)
+                if config.retry_jitter:
+                    delay *= (0.5 + random.random())
+                logger.warning(f"Checkpoint storage attempt {retry+1} failed: {e}. Retrying in {delay:.2f}s")
+                time.sleep(delay)
+            else:
+                logger.error(f"All checkpoint storage attempts failed: {e}")
+                return config_dict
+    
+    # Should not reach here
+    return config_dict
 
-
-def get_checkpoint_sync(config: PostgresCheckpointerConfig, runnable_config: Dict[str, Any]) -> Optional[Any]:
-    """Retrieve a checkpoint from the database with retry logic."""
-    if not POSTGRES_AVAILABLE:
-        logger.warning("PostgreSQL dependencies not available, checkpoint not retrieved")
-        return None
+async def aput_postgres_checkpoint(config: PostgresCheckpointerConfig, runnable_config: Dict[str, Any], data: Any, metadata: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """
+    Asynchronously store a checkpoint in the PostgreSQL database with retry logic.
     
-    # Create checkpointer
-    checkpointer = create_sync_checkpointer(config)
-    
-    # Ensure config has required fields
-    runnable_config = config._ensure_config_fields(runnable_config)
-    
-    logger.debug(f"Getting checkpoint with config: {json.dumps(runnable_config, default=str)}")
-    
-    try:
-        # Retrieve the checkpoint using the tutorial approach
-        result = checkpointer.get(runnable_config)
-        logger.debug(f"Raw checkpoint result: {result}")
+    Args:
+        config: PostgreSQL checkpointer configuration
+        runnable_config: Configuration with thread_id and optional checkpoint_id
+        data: The checkpoint data to store
+        metadata: Optional metadata to associate with the checkpoint
         
-        # Return the data from channel_values
-        if result and isinstance(result, dict) and "channel_values" in result:
-            return result["channel_values"]
-        
-        return result
-    except Exception as e:
-        logger.error(f"Failed to retrieve checkpoint: {e}")
-        return None
-
-async def put_checkpoint_async(config: PostgresCheckpointerConfig, runnable_config: Dict[str, Any], data: Any, metadata: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-    """Asynchronously store a checkpoint in the database with retry logic."""
+    Returns:
+        Updated config with checkpoint_id
+    """
     if not POSTGRES_AVAILABLE:
         logger.warning("PostgreSQL dependencies not available, async checkpoint not stored")
         return runnable_config
     
     # Create async checkpointer
-    checkpointer = await create_async_checkpointer(config)
+    checkpointer = await acreate_postgres_checkpointer(config)
     
     # Ensure config has required fields
-    runnable_config = config._ensure_config_fields(runnable_config)
+    config_dict = config._ensure_config_fields(runnable_config)
     
     # Log complete config for debugging
-    logger.debug(f"Writing checkpoint with config: {json.dumps(runnable_config, default=str)}")
+    logger.debug(f"Writing checkpoint with config: {json.dumps(config_dict, default=str)}")
     logger.debug(f"Data type: {type(data)}, Data preview: {str(data)[:100]}")
     
     # Skip for MemorySaver fallback
     from langgraph.checkpoint.memory import MemorySaver
     if isinstance(checkpointer, MemorySaver):
         logger.info("Using MemorySaver fallback for checkpoint storage")
-        return checkpointer.put(runnable_config, {"channel_values": data})
+        return checkpointer.put(config_dict, {"channel_values": data})
     
     # Basic checkpoint structure
     checkpoint_data = {
         "ts": time.strftime("%Y-%m-%dT%H:%M:%S.%fZ", time.gmtime()),
-        "id": runnable_config["configurable"].get("checkpoint_id", ""),
+        "id": config_dict["configurable"].get("checkpoint_id", ""),
         "v": 1,  # Make sure version is included
         "channel_values": data
     }
@@ -677,11 +521,11 @@ async def put_checkpoint_async(config: PostgresCheckpointerConfig, runnable_conf
             if hasattr(checkpointer, "aput") and callable(checkpointer.aput):
                 try:
                     # Log exactly what we're passing to aput
-                    logger.debug(f"Calling aput with config: {json.dumps(runnable_config, default=str)}")
+                    logger.debug(f"Calling aput with config: {json.dumps(config_dict, default=str)}")
                     logger.debug(f"Checkpoint data: {json.dumps(checkpoint_data, default=str)[:200]}")
                     
                     next_config = await checkpointer.aput(
-                        runnable_config, 
+                        config_dict, 
                         checkpoint_data, 
                         checkpoint_metadata, 
                         channel_versions
@@ -694,12 +538,12 @@ async def put_checkpoint_async(config: PostgresCheckpointerConfig, runnable_conf
                     logger.error(f"Type error in aput: {te}")
                     # Try with simpler arguments if TypeError (could be API mismatch)
                     logger.info("Trying simplified aput call")
-                    next_config = await checkpointer.aput(runnable_config, {"channel_values": data})
+                    next_config = await checkpointer.aput(config_dict, {"channel_values": data})
                     return next_config
             else:
                 # Fallback to sync put for MemorySaver
                 logger.info("No aput method, using synchronous put")
-                return checkpointer.put(runnable_config, {"channel_values": data})
+                return checkpointer.put(config_dict, {"channel_values": data})
         except Exception as e:
             if retry < config.max_retries - 1:
                 delay = config.retry_delay * (config.retry_backoff ** retry)
@@ -709,94 +553,42 @@ async def put_checkpoint_async(config: PostgresCheckpointerConfig, runnable_conf
                 await asyncio.sleep(delay)
             else:
                 logger.error(f"All async checkpoint storage attempts failed: {str(e)}")
-                return runnable_config
+                return config_dict
     
     # Should not reach here
-    return runnable_config
+    return config_dict
 
-def get_checkpoint_sync(config: PostgresCheckpointerConfig, runnable_config: Dict[str, Any]) -> Optional[Any]:
-    """Retrieve a checkpoint from the database with retry logic."""
+def get_postgres_checkpoint(config: PostgresCheckpointerConfig, runnable_config: Dict[str, Any]) -> Optional[Any]:
+    """
+    Retrieve a checkpoint from the PostgreSQL database with retry logic.
+    
+    Args:
+        config: PostgreSQL checkpointer configuration
+        runnable_config: Configuration with thread_id and optional checkpoint_id
+        
+    Returns:
+        The checkpoint data if found, None otherwise
+    """
     if not POSTGRES_AVAILABLE:
         logger.warning("PostgreSQL dependencies not available, checkpoint not retrieved")
         return None
     
     # Create checkpointer
-    checkpointer = create_sync_checkpointer(config)
+    checkpointer = create_postgres_checkpointer(config)
     
     # Ensure config has required fields
-    runnable_config = config._ensure_config_fields(runnable_config)
-    
-    # Log the config we're using to retrieve
-    logger.debug(f"Getting checkpoint with config: {json.dumps(runnable_config, default=str)}")
+    config_dict = config._ensure_config_fields(runnable_config)
     
     # Try to retrieve with retries
     for retry in range(config.max_retries):
         try:
-            # First try get_tuple if available
-            result = None
-            try:
-                logger.debug("Trying get_tuple first")
-                result_tuple = checkpointer.get_tuple(runnable_config)
-                if result_tuple and hasattr(result_tuple, "checkpoint"):
-                    result = result_tuple.checkpoint
-                    logger.debug(f"get_tuple succeeded: {result}")
-                else:
-                    logger.debug("get_tuple returned None or invalid result, falling back to get")
-                    result = checkpointer.get(runnable_config)
-            except AttributeError:
-                logger.debug("checkpointer doesn't have get_tuple, using get")
-                result = checkpointer.get(runnable_config)
-            except Exception as e:
-                logger.debug(f"get_tuple failed: {e}, falling back to get")
-                result = checkpointer.get(runnable_config)
+            # Get the checkpoint
+            result = checkpointer.get(config_dict)
             
-            # Log the raw result
-            logger.debug(f"Raw checkpoint result: {result}")
-            
-            if result is None:
-                logger.warning("Checkpoint retrieval returned None")
-                return None
-            
-            # Try multiple approaches to extract data
-            
-            # Approach 1: Direct channel_values in top level
-            if isinstance(result, dict) and "channel_values" in result:
-                logger.debug(f"Found channel_values in top level: {result['channel_values']}")
+            # Extract channel values if present
+            if result is not None and "channel_values" in result:
                 return result["channel_values"]
             
-            # Approach 2: If result is the raw data we stored
-            if isinstance(result, dict) and "test_key" in result:
-                logger.debug(f"Found test_key in top level, returning result directly: {result}")
-                return result
-            
-            # Approach 3: Nested channel_values
-            if isinstance(result, dict):
-                def find_channel_values(data):
-                    if isinstance(data, dict):
-                        if "channel_values" in data:
-                            return data["channel_values"]
-                        for key, value in data.items():
-                            found = find_channel_values(value)
-                            if found is not None:
-                                return found
-                    return None
-                
-                nested_values = find_channel_values(result)
-                if nested_values is not None:
-                    logger.debug(f"Found nested channel_values: {nested_values}")
-                    return nested_values
-            
-            # Approach 4: Try checkpoint attribute if it's a tuple-like
-            if hasattr(result, "checkpoint") and hasattr(result.checkpoint, "get"):
-                checkpoint_data = result.checkpoint
-                logger.debug(f"Found checkpoint attribute: {checkpoint_data}")
-                
-                if "channel_values" in checkpoint_data:
-                    logger.debug(f"Found channel_values in checkpoint attribute: {checkpoint_data['channel_values']}")
-                    return checkpoint_data["channel_values"]
-            
-            # Approach 5: Just return the whole thing
-            logger.debug(f"Returning complete result: {result}")
             return result
         except Exception as e:
             if retry < config.max_retries - 1:
@@ -807,31 +599,40 @@ def get_checkpoint_sync(config: PostgresCheckpointerConfig, runnable_config: Dic
                 time.sleep(delay)
             else:
                 logger.error(f"All checkpoint retrieval attempts failed: {e}")
-                logger.exception("Exception details:")
                 return None
     
     # Should not reach here
     return None
-async def get_checkpoint_async(config: PostgresCheckpointerConfig, runnable_config: Dict[str, Any]) -> Optional[Any]:
-    """Asynchronously retrieve a checkpoint from the database with retry logic."""
+
+async def aget_postgres_checkpoint(config: PostgresCheckpointerConfig, runnable_config: Dict[str, Any]) -> Optional[Any]:
+    """
+    Asynchronously retrieve a checkpoint from the PostgreSQL database with retry logic.
+    
+    Args:
+        config: PostgreSQL checkpointer configuration
+        runnable_config: Configuration with thread_id and optional checkpoint_id
+        
+    Returns:
+        The checkpoint data if found, None otherwise
+    """
     if not POSTGRES_AVAILABLE:
         logger.warning("PostgreSQL dependencies not available, async checkpoint not retrieved")
         return None
     
     # Create async checkpointer
-    checkpointer = await create_async_checkpointer(config)
+    checkpointer = await acreate_postgres_checkpointer(config)
     
     # Ensure config has required fields
-    runnable_config = config._ensure_config_fields(runnable_config)
+    config_dict = config._ensure_config_fields(runnable_config)
     
     # Log complete config for debugging
-    logger.debug(f"Reading checkpoint with config: {json.dumps(runnable_config, default=str)}")
+    logger.debug(f"Reading checkpoint with config: {json.dumps(config_dict, default=str)}")
     
     # Skip for MemorySaver fallback
     from langgraph.checkpoint.memory import MemorySaver
     if isinstance(checkpointer, MemorySaver):
         logger.info("Using MemorySaver fallback for checkpoint retrieval")
-        result = checkpointer.get(runnable_config)
+        result = checkpointer.get(config_dict)
         if result and "channel_values" in result:
             return result["channel_values"]
         return result
@@ -841,8 +642,8 @@ async def get_checkpoint_async(config: PostgresCheckpointerConfig, runnable_conf
         try:
             # Get the checkpoint asynchronously
             if hasattr(checkpointer, "aget") and callable(checkpointer.aget):
-                logger.debug(f"Using async aget with config: {json.dumps(runnable_config, default=str)}")
-                result = await checkpointer.aget(runnable_config)
+                logger.debug(f"Using async aget with config: {json.dumps(config_dict, default=str)}")
+                result = await checkpointer.aget(config_dict)
                 
                 # Log the result structure
                 if result is not None:
@@ -859,7 +660,7 @@ async def get_checkpoint_async(config: PostgresCheckpointerConfig, runnable_conf
                 # Try with aget_tuple
                 if hasattr(checkpointer, "aget_tuple") and callable(checkpointer.aget_tuple):
                     logger.debug("Trying aget_tuple method")
-                    tuple_result = await checkpointer.aget_tuple(runnable_config)
+                    tuple_result = await checkpointer.aget_tuple(config_dict)
                     if tuple_result and hasattr(tuple_result, "checkpoint"):
                         result = tuple_result.checkpoint
                         if result and "channel_values" in result:
@@ -868,7 +669,7 @@ async def get_checkpoint_async(config: PostgresCheckpointerConfig, runnable_conf
                 
                 # Fallback to sync get for MemorySaver
                 logger.info("No async get methods, using synchronous get")
-                result = checkpointer.get(runnable_config)
+                result = checkpointer.get(config_dict)
                 if result and "channel_values" in result:
                     return result["channel_values"]
                 return result
@@ -886,11 +687,18 @@ async def get_checkpoint_async(config: PostgresCheckpointerConfig, runnable_conf
     # Should not reach here
     return None
 
-
-def close_sync_pool(config_key: str) -> None:
-    """Close a synchronous connection pool."""
-    if config_key in _sync_pools:
-        pool = _sync_pools[config_key]
+def close_postgres_pool(config: PostgresCheckpointerConfig) -> None:
+    """
+    Close any connection pools created by a specific configuration.
+    
+    Args:
+        config: PostgreSQL checkpointer configuration
+    """
+    config_key = config.get_config_key()
+    
+    # Close sync pool if it exists
+    if config_key in PostgresCheckpointerConfig._sync_pools:
+        pool = PostgresCheckpointerConfig._sync_pools[config_key]
         try:
             if hasattr(pool, 'is_open') and pool.is_open():
                 logger.info(f"Closing PostgreSQL connection pool for {config_key}")
@@ -900,16 +708,23 @@ def close_sync_pool(config_key: str) -> None:
                 pool.close()
                 
             # Remove from caches
-            _sync_pools.pop(config_key, None)
-            _sync_checkpointers.pop(config_key, None)
+            PostgresCheckpointerConfig._sync_pools.pop(config_key, None)
+            PostgresCheckpointerConfig._sync_checkpointers.pop(config_key, None)
         except Exception as e:
             logger.error(f"Error closing PostgreSQL connection pool: {e}")
 
-
-async def close_async_pool(config_key: str) -> None:
-    """Close an asynchronous connection pool."""
-    if config_key in _async_pools:
-        pool = _async_pools[config_key]
+async def aclose_postgres_pool(config: PostgresCheckpointerConfig) -> None:
+    """
+    Asynchronously close any connection pools created by a specific configuration.
+    
+    Args:
+        config: PostgreSQL checkpointer configuration
+    """
+    config_key = config.get_config_key()
+    
+    # Close async pool if it exists
+    if config_key in PostgresCheckpointerConfig._async_pools:
+        pool = PostgresCheckpointerConfig._async_pools[config_key]
         try:
             is_open = False
             # Check if pool is open
@@ -923,25 +738,47 @@ async def close_async_pool(config_key: str) -> None:
                 await pool.close()
                 
             # Remove from caches
-            _async_pools.pop(config_key, None)
-            _async_checkpointers.pop(config_key, None)
+            PostgresCheckpointerConfig._async_pools.pop(config_key, None)
+            PostgresCheckpointerConfig._async_checkpointers.pop(config_key, None)
         except Exception as e:
             logger.error(f"Error closing async PostgreSQL connection pool: {e}")
 
+def close_all_postgres_pools() -> None:
+    """Close all PostgreSQL connection pools."""
+    # Close sync pools
+    for key, pool in PostgresCheckpointerConfig._sync_pools.items():
+        try:
+            if hasattr(pool, 'is_open') and pool.is_open():
+                logger.info(f"Closing PostgreSQL connection pool for {key}")
+                pool.close()
+            elif hasattr(pool, '_opened') and pool._opened:
+                logger.info(f"Closing PostgreSQL connection pool for {key}")
+                pool.close()
+        except Exception as e:
+            logger.error(f"Error closing PostgreSQL connection pool: {e}")
+    
+    # Clear caches
+    PostgresCheckpointerConfig._sync_pools.clear()
+    PostgresCheckpointerConfig._sync_checkpointers.clear()
 
-# Class methods extracted as module functions
-def close_all_sync_pools():
-    """Close all synchronous connection pools."""
-    for key in list(_sync_pools.keys()):
-        close_sync_pool(key)
-
-
-async def close_all_async_pools():
-    """Close all asynchronous connection pools."""
-    for key in list(_async_pools.keys()):
-        await close_async_pool(key)
-
-
-# Add static methods to the class that reference the module functions
-PostgresCheckpointerConfig.close_all = staticmethod(close_all_sync_pools)
-PostgresCheckpointerConfig.aclose_all = staticmethod(close_all_async_pools)
+async def aclose_all_postgres_pools() -> None:
+    """Asynchronously close all PostgreSQL connection pools."""
+    # Close async pools
+    for key, pool in PostgresCheckpointerConfig._async_pools.items():
+        try:
+            is_open = False
+            # Check if pool is open
+            if hasattr(pool, 'is_closed'):
+                is_open = not await pool.is_closed()
+            elif hasattr(pool, '_opened'):
+                is_open = pool._opened
+            
+            if is_open:
+                logger.info(f"Closing async PostgreSQL connection pool for {key}")
+                await pool.close()
+        except Exception as e:
+            logger.error(f"Error closing async PostgreSQL connection pool: {e}")
+    
+    # Clear caches
+    PostgresCheckpointerConfig._async_pools.clear()
+    PostgresCheckpointerConfig._async_checkpointers.clear()

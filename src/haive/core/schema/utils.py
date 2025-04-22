@@ -323,3 +323,34 @@ class SchemaUtils:
             new_model.__reducer_fields__[name] = reducer
 
         return new_model
+
+    @staticmethod
+    def get_reducer_name(reducer: callable) -> str:
+        """
+        Get a serializable name for a reducer function.
+        
+        Args:
+            reducer: Reducer function
+            
+        Returns:
+            Serializable name for the reducer
+        """
+        # Special handling for operator module functions
+        if hasattr(reducer, "__module__") and reducer.__module__ == 'operator':
+            return f"operator.{reducer.__name__}"
+        
+        # Handle lambda functions
+        if hasattr(reducer, "__name__") and reducer.__name__ == "<lambda>":
+            return "<lambda>"
+        
+        # Handle standard functions with module and name
+        if hasattr(reducer, "__module__") and hasattr(reducer, "__name__") and reducer.__module__ != "__main__":
+            # Use fully qualified name for imported functions
+            return f"{reducer.__module__}.{reducer.__name__}"
+        
+        # Use just the name if it has one
+        if hasattr(reducer, "__name__"):
+            return reducer.__name__
+        
+        # Last resort: string representation
+        return str(reducer)

@@ -1,15 +1,18 @@
-# src/haive/core/engine/reference.py
 
-from typing import Any, Dict, List, Optional, Type, Union
-from pydantic import BaseModel, Field
+from typing import Any, Dict, Generic, List, Optional, TypeVar, Union
+from pydantic import BaseModel, Field, ConfigDict, PrivateAttr
 
-class ComponentRef(BaseModel):
+from haive.core.engine.base import EngineType
+
+T = TypeVar('T')  # Type variable for the resolved component
+
+class ComponentRef(BaseModel, Generic[T]):
     """
     Reference to a component that can be resolved at runtime.
     
-    This allows for clean serialization and avoids circular dependencies.
+    This allows for clean serialization while maintaining type information
+    about the referenced component.
     """
-    
     # Reference by ID (most specific)
     id: Optional[str] = Field(
         default=None,
@@ -22,9 +25,15 @@ class ComponentRef(BaseModel):
         description="Name of the referenced component"
     )
     
-    type: Optional[str] = Field(
+    type: Optional[Union[str, EngineType]] = Field(
         default=None,
         description="Type of component (e.g., 'llm', 'agent')"
+    )
+    
+    # Configuration overrides to apply when resolving
+    config_overrides: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Configuration overrides to apply when resolving"
     )
     
     # Extensions to apply when resolving
@@ -33,10 +42,13 @@ class ComponentRef(BaseModel):
         description="Extensions to apply when resolving"
     )
     
-    # Runtime cache (excluded from serialization)
-    _resolved: Optional[Any] = Field(default=None, exclude=True)
+    # Private attribute for runtime cache (correctly handled in Pydantic v2)
+    _resolved: Optional[T] = PrivateAttr(default=None)
     
-    def resolve(self) -> Optional[Any]:
+    # Configuration for model serialization
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    
+    def resolve(self) -> Optional[T]:
         """
         Resolve this reference to the actual component.
         
@@ -47,17 +59,23 @@ class ComponentRef(BaseModel):
         if self._resolved is not None:
             return self._resolved
         
+        from haive.core.engine.base import EngineRegistry
+        registry = EngineRegistry.get_instance()
+        
         # First try by ID if available
         if self.id:
-            from src.haive.core.engine.registry import EngineRegistry
-            config = EngineRegistry.get_instance().get_by_id(self.id)
-            if config:
-                # Build the component
-                component = config.build()
+            engine = registry.find_by_id(self.id)
+            if engine:
+                # Apply configuration overrides if any
+                if self.config_overrides and hasattr(engine, "with_config_overrides"):
+                    engine = engine.with_config_overrides(self.config_overrides)
+                
+                # Create the runtime component
+                component = engine.create_runnable(self.config_overrides)
                 
                 # Apply extensions if any
                 if self.extensions:
-                    from haive.core.engine.extension import Extension
+                    from haive.core.engine.base.extension import Extension
                     for ext_data in self.extensions:
                         ext = Extension.model_validate(ext_data)
                         component = ext.apply_to(component)
@@ -67,49 +85,51 @@ class ComponentRef(BaseModel):
         
         # Then try by name and type
         if self.name and self.type:
-            from src.haive.core.engine.config_base import EngineType
-            try:
-                from src.haive.core.engine.registry import EngineRegistry
-                engine_type = EngineType(self.type)
-                config = EngineRegistry.get_instance().get(engine_type, self.name)
-                if config:
-                    # Build the component
-                    component = config.build()
-                    
-                    # Apply extensions if any
-                    if self.extensions:
-                        from src.haive.core.engine.extension import Extension
-                        for ext_data in self.extensions:
-                            ext = Extension.model_validate(ext_data)
-                            component = ext.apply_to(component)
-                    
-                    self._resolved = component
-                    return component
-            except ValueError:
-                pass
+            engine_type = self.type
+            if isinstance(engine_type, str):
+                try:
+                    engine_type = EngineType(engine_type)
+                except ValueError:
+                    return None
+            
+            engine = registry.get(engine_type, self.name)
+            if engine:
+                # Apply configuration overrides if any
+                if self.config_overrides and hasattr(engine, "with_config_overrides"):
+                    engine = engine.with_config_overrides(self.config_overrides)
+                
+                # Create the runtime component
+                component = engine.create_runnable(self.config_overrides)
+                
+                # Apply extensions if any
+                if self.extensions:
+                    from haive.core.engine.base.extension import Extension
+                    for ext_data in self.extensions:
+                        ext = Extension.model_validate(ext_data)
+                        component = ext.apply_to(component)
+                
+                self._resolved = component
+                return component
         
         return None
     
+    def invalidate_cache(self) -> None:
+        """Clear the cached resolved component."""
+        self._resolved = None
+    
     @classmethod
-    def from_config(cls, config: Any) -> 'ComponentRef':
+    def from_engine(cls, engine: Any) -> 'ComponentRef':
         """
-        Create a reference from a configuration.
+        Create a reference from an engine.
         
         Args:
-            config: Configuration to reference
+            engine: Engine to reference
             
         Returns:
-            ComponentRef pointing to the configuration
+            ComponentRef pointing to the engine
         """
-        if hasattr(config, "id") and hasattr(config, "name") and hasattr(config, "engine_type"):
-            return cls(
-                id=config.id,
-                name=config.name,
-                type=config.engine_type.value if hasattr(config.engine_type, "value") else config.engine_type
-            )
-        
-        # Generic fallback
-        if hasattr(config, "name"):
-            return cls(name=getattr(config, "name"))
-        
-        return cls()
+        return cls(
+            id=engine.id,
+            name=engine.name,
+            type=engine.engine_type
+        )

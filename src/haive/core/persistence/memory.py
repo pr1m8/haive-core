@@ -30,13 +30,13 @@ class MemoryCheckpointerConfig(CheckpointerConfig):
     type: CheckpointerType = CheckpointerType.memory
     
     # Set to store registered threads with metadata
-    _threads: Dict[str, Dict[str, Any]] = Field(default_factory=dict, exclude=True)
+    threads: Dict[str, Dict[str, Any]] = Field(default_factory=dict, exclude=True)
     
     # Dictionary to store checkpoints by thread_id and checkpoint_id
-    _checkpoints: Dict[str, Dict[str, Dict[str, Any]]] = Field(default_factory=dict, exclude=True)
+    checkpoints: Dict[str, Dict[str, Dict[str, Any]]] = Field(default_factory=dict, exclude=True)
     
     # Internal state
-    _checkpointer: Optional[Any] = Field(default=None, exclude=True)
+    checkpointer: Optional[Any] = Field(default=None, exclude=True)
     
     def create_checkpointer(self) -> Any:
         """
@@ -45,14 +45,14 @@ class MemoryCheckpointerConfig(CheckpointerConfig):
         Returns:
             A MemorySaver instance from LangGraph
         """
-        if not self._checkpointer:
+        if not self.checkpointer:
             if MEMORY_AVAILABLE:
-                self._checkpointer = MemorySaver()
+                self.checkpointer = MemorySaver()
             else:
                 # Simple fallback if LangGraph is not available
-                self._checkpointer = self  # Use self as the checkpointer
+                self.checkpointer = self  # Use self as the checkpointer
         
-        return self._checkpointer
+        return self.checkpointer
     
     def register_thread(self, thread_id: str, name: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None) -> None:
         """
@@ -63,8 +63,8 @@ class MemoryCheckpointerConfig(CheckpointerConfig):
             name: Optional human-readable name for the thread
             metadata: Optional metadata to associate with the thread
         """
-        if thread_id not in self._threads:
-            self._threads[thread_id] = {
+        if thread_id not in self.threads:
+            self.threads[thread_id] = {
                 "created_at": datetime.now().isoformat(),
                 "metadata": metadata or {},
                 "name": name
@@ -72,8 +72,8 @@ class MemoryCheckpointerConfig(CheckpointerConfig):
             logger.info(f"Thread {thread_id} registered in memory")
             
             # Initialize checkpoint storage for this thread
-            if thread_id not in self._checkpoints:
-                self._checkpoints[thread_id] = {}
+            if thread_id not in self.checkpoints:
+                self.checkpoints[thread_id] = {}
         else:
             logger.debug(f"Thread {thread_id} already exists in memory")
     
@@ -90,7 +90,7 @@ class MemoryCheckpointerConfig(CheckpointerConfig):
             Updated config with checkpoint_id
         """
         # For LangGraph MemorySaver
-        if MEMORY_AVAILABLE and isinstance(self._checkpointer, MemorySaver):
+        if MEMORY_AVAILABLE and isinstance(self.checkpointer, MemorySaver):
             # Create a checkpoint structure with correct fields
             checkpoint_data = {
                 "id": config["configurable"].get("checkpoint_id", str(uuid.uuid4())),
@@ -101,10 +101,10 @@ class MemoryCheckpointerConfig(CheckpointerConfig):
             try:
                 # Try get method signature to determine needed parameters
                 import inspect
-                sig = inspect.signature(self._checkpointer.put)
+                sig = inspect.signature(self.checkpointer.put)
                 if "new_versions" in sig.parameters:
                     # New API
-                    result = self._checkpointer.put(
+                    result = self.checkpointer.put(
                         config, 
                         checkpoint_data, 
                         metadata or {}, 
@@ -112,7 +112,7 @@ class MemoryCheckpointerConfig(CheckpointerConfig):
                     )
                 else:
                     # Old API
-                    result = self._checkpointer.put(config, checkpoint_data)
+                    result = self.checkpointer.put(config, checkpoint_data)
                 return result
             except Exception as e:
                 logger.error(f"Error storing checkpoint: {e}")
@@ -127,11 +127,11 @@ class MemoryCheckpointerConfig(CheckpointerConfig):
             checkpoint_id = str(uuid.uuid4())
             
         # Make sure the thread exists
-        if thread_id not in self._threads:
+        if thread_id not in self.threads:
             self.register_thread(thread_id)
             
         # Store the checkpoint
-        self._checkpoints[thread_id][checkpoint_id] = {
+        self.checkpoints[thread_id][checkpoint_id] = {
             "data": data,
             "metadata": metadata or {},
             "timestamp": datetime.now().isoformat()
@@ -153,16 +153,16 @@ class MemoryCheckpointerConfig(CheckpointerConfig):
             The checkpoint data if found, None otherwise
         """
         # For LangGraph MemorySaver
-        if MEMORY_AVAILABLE and isinstance(self._checkpointer, MemorySaver):
-            return self._checkpointer.get(config)
+        if MEMORY_AVAILABLE and isinstance(self.checkpointer, MemorySaver):
+            return self.checkpointer.get(config)
             
         # Simple in-memory implementation
         thread_id = config["configurable"]["thread_id"]
         checkpoint_id = config["configurable"].get("checkpoint_id")
         
         # If no specific checkpoint was requested, return the latest
-        if not checkpoint_id and thread_id in self._checkpoints:
-            checkpoints = self._checkpoints[thread_id]
+        if not checkpoint_id and thread_id in self.checkpoints:
+            checkpoints = self.checkpoints[thread_id]
             if not checkpoints:
                 return None
                 
@@ -178,8 +178,8 @@ class MemoryCheckpointerConfig(CheckpointerConfig):
             return latest
             
         # Return the specific checkpoint if it exists
-        if thread_id in self._checkpoints and checkpoint_id in self._checkpoints[thread_id]:
-            return self._checkpoints[thread_id][checkpoint_id]["data"]
+        if thread_id in self.checkpoints and checkpoint_id in self.checkpoints[thread_id]:
+            return self.checkpoints[thread_id][checkpoint_id]["data"]
             
         return None
     
@@ -195,9 +195,9 @@ class MemoryCheckpointerConfig(CheckpointerConfig):
             List of (config, checkpoint) tuples
         """
         # For LangGraph MemorySaver
-        if MEMORY_AVAILABLE and isinstance(self._checkpointer, MemorySaver):
+        if MEMORY_AVAILABLE and isinstance(self.checkpointer, MemorySaver):
             try:
-                checkpoint_tuples = list(self._checkpointer.list(config, limit=limit))
+                checkpoint_tuples = list(self.checkpointer.list(config, limit=limit))
                 return [(cp.config, cp.checkpoint) for cp in checkpoint_tuples]
             except Exception as e:
                 logger.error(f"Error listing checkpoints: {e}")
@@ -206,19 +206,19 @@ class MemoryCheckpointerConfig(CheckpointerConfig):
         # Simple in-memory implementation
         thread_id = config["configurable"]["thread_id"]
         
-        if thread_id not in self._checkpoints:
+        if thread_id not in self.checkpoints:
             return []
             
         # Sort checkpoints by timestamp (newest first)
         checkpoints = []
-        for cp_id, cp_data in self._checkpoints[thread_id].items():
+        for cp_id, cp_data in self.checkpoints[thread_id].items():
             checkpoints.append((
                 {"configurable": {"thread_id": thread_id, "checkpoint_id": cp_id}},
                 cp_data["data"]
             ))
             
         # Sort by timestamp
-        checkpoints.sort(key=lambda x: self._checkpoints[thread_id][x[0]["configurable"]["checkpoint_id"]]["timestamp"], reverse=True)
+        checkpoints.sort(key=lambda x: self.checkpoints[thread_id][x[0]["configurable"]["checkpoint_id"]]["timestamp"], reverse=True)
         
         # Apply limit if specified
         if limit is not None and limit > 0:

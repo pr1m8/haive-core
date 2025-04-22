@@ -199,7 +199,7 @@ class TestAgentConfig:
             field2: str = "value2"
 
         # PHASE 1: Initial schema creation and caching
-        with patch("haive_core.schema.schema_composer.SchemaComposer.compose_as_state_schema", return_value=TestSchema1) as mock1:
+        with patch("haive.core.schema.schema_composer.SchemaComposer.compose_as_state_schema", return_value=TestSchema1) as mock1:
             # Get first schema - should be TestSchema1
             schema1 = basic_agent_config.derive_schema()
 
@@ -220,7 +220,7 @@ class TestAgentConfig:
         basic_agent_config._invalidate_schema_caches()
 
         # Create new mock in separate context
-        with patch("haive_core.schema.schema_composer.SchemaComposer.compose_as_state_schema", return_value=TestSchema2) as mock2:
+        with patch("haive.core.schema.schema_composer.SchemaComposer.compose_as_state_schema", return_value=TestSchema2) as mock2:
             # Get schema after cache invalidation
             schema3 = basic_agent_config.derive_schema()
 

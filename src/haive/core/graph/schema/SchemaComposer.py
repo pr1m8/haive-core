@@ -133,7 +133,7 @@ class SchemaComposer:
                         field_type,
                         default=default
                     )
-                    logger.debug(f"Added field {field_name} from model {model.__name__}")
+                    logger.debug(f"Added field {field_name} from model {model.__name__}")e
 
                     # Add description if available
                     if hasattr(field_info, "description") and field_info.description:

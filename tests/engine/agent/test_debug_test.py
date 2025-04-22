@@ -5,8 +5,7 @@ import uuid
 from typing import Any
 
 from langchain_core.messages import HumanMessage
-
-from haive_agents_dep.simple.config import SimpleAgentConfig
+from haive.agents.simple.config import SimpleAgentConfig
 from haive.core.engine.aug_llm.base import AugLLMConfig
 
 logger = logging.getLogger(__name__)

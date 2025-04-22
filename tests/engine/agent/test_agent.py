@@ -75,7 +75,7 @@ def agent_config(test_engine):
 @pytest.fixture
 def setup_checkpointer_mock():
     """Mock the setup_checkpointer function."""
-    with patch("haive_core.engine.agent.agent.setup_checkpointer") as mock:
+    with patch("haive.core.engine.agent.agent.setup_checkpointer") as mock:
         mock.return_value = MagicMock()
         yield mock
 
@@ -83,7 +83,7 @@ def setup_checkpointer_mock():
 @pytest.fixture
 def ensure_pool_open_mock():
     """Mock the ensure_pool_open function."""
-    with patch("haive_core.engine.agent.agent.ensure_pool_open") as mock:
+    with patch("haive.core.engine.agent.agent.ensure_pool_open") as mock:
         mock.return_value = None
         yield mock
 
@@ -91,21 +91,21 @@ def ensure_pool_open_mock():
 @pytest.fixture
 def close_pool_if_needed_mock():
     """Mock the close_pool_if_needed function."""
-    with patch("haive_core.engine.agent.agent.close_pool_if_needed") as mock:
+    with patch("haive.core.engine.agent.agent.close_pool_if_needed") as mock:
         yield mock
 
 
 @pytest.fixture
 def register_thread_if_needed_mock():
     """Mock the register_thread_if_needed function."""
-    with patch("haive_core.engine.agent.agent.register_thread_if_needed") as mock:
+    with patch("haive.core.engine.agent.agent.register_thread_if_needed") as mock:
         yield mock
 
 
 @pytest.fixture
 def prepare_merged_input_mock():
     """Mock the prepare_merged_input function."""
-    with patch("haive_core.engine.agent.agent.prepare_merged_input") as mock:
+    with patch("haive.core.engine.agent.agent.prepare_merged_input") as mock:
         mock.return_value = {"input": "processed"}
         yield mock
 
@@ -153,7 +153,7 @@ class TestAgentClass:
                            mock_setup_workflow, mock_derive_schema):
         """Test basic agent initialization."""
         # Mock DynamicGraph to prevent graph building issues
-        with patch("haive_core.engine.agent.agent.DynamicGraph", mock_dynamic_graph):
+        with patch("haive.core.engine.agent.agent.DynamicGraph", mock_dynamic_graph):
             agent = AgentForTests(agent_config)
             
             # Check basic attributes
@@ -179,7 +179,7 @@ class TestAgentClass:
     def test_directory_creation(self, agent_config, setup_checkpointer_mock, mock_dynamic_graph, 
                               mock_setup_workflow, mock_derive_schema):
         """Test that necessary directories are created."""
-        with patch("haive_core.engine.agent.agent.DynamicGraph", mock_dynamic_graph):
+        with patch("haive.core.engine.agent.agent.DynamicGraph", mock_dynamic_graph):
             with patch("os.makedirs") as mock_makedirs:
                 agent = AgentForTests(agent_config)
                 
@@ -197,9 +197,9 @@ class TestAgentClass:
     def test_build_engine(self, agent_config, setup_checkpointer_mock, mock_dynamic_graph, 
                         mock_setup_workflow, mock_derive_schema):
         """Test engine building logic."""
-        with patch("haive_core.engine.agent.agent3.DynamicGraph", mock_dynamic_graph):
+        with patch("haive.core.engine.agent.agent.DynamicGraph", mock_dynamic_graph):
             # Create a mock registry for engine lookup
-            with patch("haive_core.engine.base.EngineRegistry") as mock_registry:
+            with patch("haive.core.engine.base.EngineRegistry") as mock_registry:
                 registry_instance = MagicMock()
                 mock_registry.get_instance.return_value = registry_instance
                 
@@ -230,7 +230,7 @@ class TestAgentClass:
     def test_create_graph_builder(self, agent_config, setup_checkpointer_mock, mock_dynamic_graph, 
                                 mock_setup_workflow, mock_derive_schema):
         """Test graph builder creation."""
-        with patch("haive_core.engine.agent.agent3.DynamicGraph", mock_dynamic_graph):
+        with patch("haive.core.engine.agent.agent.DynamicGraph", mock_dynamic_graph):
             agent = AgentForTests(agent_config)
             
             # Check graph initialization called with appropriate parameters
@@ -256,7 +256,7 @@ class TestAgentClass:
         if hasattr(agent_config, 'node_configs'):
             agent_config.node_configs = {"custom_node": node_config}
         
-        with patch("haive_core.engine.agent.agent3.DynamicGraph", mock_dynamic_graph):
+        with patch("haive.core.engine.agent.agent.DynamicGraph", mock_dynamic_graph):
             # Instead of patching the method at module level, we'll patch the method on the Agent class
             with patch.object(AgentForTests, '_apply_node_configs', MagicMock()) as mock_apply:
                 agent = AgentForTests(agent_config)
@@ -266,7 +266,7 @@ class TestAgentClass:
     def test_compile(self, agent_config, setup_checkpointer_mock, mock_dynamic_graph, 
                    mock_setup_workflow, mock_derive_schema):
         """Test graph compilation."""
-        with patch("haive_core.engine.agent.agent3.DynamicGraph", mock_dynamic_graph):
+        with patch("haive.core.engine.agent.agent.DynamicGraph", mock_dynamic_graph):
             agent = AgentForTests(agent_config)
             
             # Reset the mock to clear initialization calls
@@ -282,7 +282,7 @@ class TestAgentClass:
     def test_prepare_runnable_config(self, agent_config, setup_checkpointer_mock, mock_dynamic_graph, 
                                    mock_setup_workflow, mock_derive_schema):
         """Test preparation of runnable config."""
-        with patch("haive_core.engine.agent.agent3.DynamicGraph", mock_dynamic_graph):
+        with patch("haive.core.engine.agent.agent.DynamicGraph", mock_dynamic_graph):
             agent = AgentForTests(agent_config)
             
             # Test with thread_id
@@ -301,9 +301,9 @@ class TestAgentClass:
         mock_app = MagicMock()
         mock_app.get_state.return_value = {"state": "test"}
         
-        with patch("haive_core.engine.agent.agent3.DynamicGraph", mock_dynamic_graph):
+        with patch("haive.core.engine.agent.agent.DynamicGraph", mock_dynamic_graph):
             # Need to patch the ensure_json_serializable function which might be in a different module
-            with patch("haive_core.utils.pydantic_utils.ensure_json_serializable", return_value={"state": "test"}):
+            with patch("haive.core.utils.pydantic_utils.ensure_json_serializable", return_value={"state": "test"}):
                 with patch("builtins.open", new_callable=MagicMock()) as mock_open:
                     with patch("json.dump") as mock_dump:
                         agent = AgentForTests(agent_config)
@@ -327,7 +327,7 @@ class TestAgentClass:
         mock_app.get_state.return_value = {"previous": "state"}
         mock_app.invoke.return_value = {"result": "success"}
         
-        with patch("haive_core.engine.agent.agent3.DynamicGraph", mock_dynamic_graph):
+        with patch("haive.core.engine.agent.agent.DynamicGraph", mock_dynamic_graph):
             agent = AgentForTests(agent_config)
             
             # Replace app with our mock
@@ -359,7 +359,7 @@ class TestAgentClass:
         mock_app.get_state.return_value = {"previous": "state"}
         mock_app.stream.return_value = [{"step1": "data"}, {"step2": "data"}]
         
-        with patch("haive_core.engine.agent.agent3.DynamicGraph", mock_dynamic_graph):
+        with patch("haive.core.engine.agent.agent.DynamicGraph", mock_dynamic_graph):
             agent = AgentForTests(agent_config)
             agent.app = mock_app
             
@@ -408,5 +408,5 @@ def test_register_agent_decorator():
             pass
     
     # Check that it was registered
-    from haive.core.engine.agent.agent3 import AGENT_REGISTRY
+    from haive.core.engine.agent.agent import AGENT_REGISTRY
     assert AGENT_REGISTRY[CustomTestConfig] == CustomTestAgent

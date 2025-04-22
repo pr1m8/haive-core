@@ -1,337 +1,234 @@
-# tests/core/engine/test_engine_base.py
+# tests/test_engine_base.py
 
-import uuid
-from typing import Any
-
-from langchain_core.runnables import RunnableConfig
+import pytest
 from pydantic import BaseModel
+from typing import Any, Dict, Optional
 
-from haive.core.engine.base import Engine, EngineRegistry, EngineType, InvokableEngine
+from haive.core.engine.base import Engine, EngineType, InvokableEngine, NonInvokableEngine, EngineRegistry
 
 
-# Mock models for testing - renamed to avoid being treated as test classes
-class InputModel(BaseModel):
-    query: str
-    param1: int | None = None
-    param2: str | None = None
+class TestModel(BaseModel):
+    value: str
 
-class OutputModel(BaseModel):
-    result: str
-    score: float | None = None
 
-# Mock engine implementation for testing
-class MockEngine(InvokableEngine[InputModel, OutputModel]):
+class TestEngine(Engine[str, str]):
     engine_type: EngineType = EngineType.LLM
-    model_name: str = "test-model"
-    param_a: str | None = None
-    param_b: int | None = None
+    test_param: str = "default"
+    
+    def create_runnable(self, runnable_config=None):
+        params = self.apply_runnable_config(runnable_config) or {}
+        test_param = params.get("test_param", self.test_param)
+        return lambda x: f"{test_param}: {x}"
 
-    def create_runnable(self, runnable_config: RunnableConfig | None = None) -> Any:
-        # Extract config parameters
-        params = self.apply_runnable_config(runnable_config)
 
-        # Apply parameters if provided
-        model = params.get("model_name", self.model_name)
-        param_a = params.get("param_a", self.param_a)
-        param_b = params.get("param_b", self.param_b)
+class TestInvokableEngine(InvokableEngine[str, str]):
+    engine_type = EngineType.LLM
+    test_param: str = "default"
+    
+    def create_runnable(self, runnable_config=None):
+        params = self.apply_runnable_config(runnable_config) or {}
+        test_param = params.get("test_param", self.test_param)
+        return lambda x: f"{test_param}: {x}"
 
-        # Return a simple callable that simulates a runnable
-        def mock_runnable(input_data):
-            # Process the input
-            query = input_data.query if isinstance(input_data, InputModel) else input_data.get("query", "")
 
-            # Generate a result
-            return OutputModel(
-                result=f"Result for {query} using {model}, params: {param_a}, {param_b}",
-                score=0.95
-            )
+class TestNonInvokableEngine(NonInvokableEngine[str, str]):
+    engine_type = EngineType.EMBEDDINGS
+    test_param: str = "default"
+    
+    def create_runnable(self, runnable_config=None):
+        params = self.apply_runnable_config(runnable_config) or {}
+        test_param = params.get("test_param", self.test_param)
+        return lambda x: f"{test_param}: {x}"
 
-        return mock_runnable
 
-class TestEngine:
-    """Test suite for the Engine base class."""
+def test_engine_creation():
+    """Test basic engine creation."""
+    engine = TestEngine(name="test_engine")
+    assert engine.name == "test_engine"
+    assert engine.engine_type == EngineType.LLM
+    assert engine.test_param == "default"
+    assert engine.id is not None
 
-    def test_engine_id_generation(self):
-        """Test that each engine gets a unique ID."""
-        engine1 = MockEngine(name="engine1")
-        engine2 = MockEngine(name="engine2")
 
-        # Each engine should have a unique ID
-        assert engine1.id != engine2.id
-        assert isinstance(engine1.id, str)
-        assert len(engine1.id) > 0
+def test_invokable_engine():
+    """Test InvokableEngine functionality."""
+    engine = TestInvokableEngine(name="test_engine")
+    
+    # Test invoke method
+    result = engine.invoke("hello")
+    assert result == "default: hello"
+    
+    # Test invoke with config
+    config = {"configurable": {"test_param": "custom"}}
+    result = engine.invoke("hello", config)
+    assert result == "custom: hello"
 
-    def test_engine_custom_id(self):
-        """Test setting a custom ID."""
-        custom_id = str(uuid.uuid4())
-        engine = MockEngine(id=custom_id, name="custom-id-engine")
 
-        assert engine.id == custom_id
+def test_non_invokable_engine():
+    """Test NonInvokableEngine functionality."""
+    engine = TestNonInvokableEngine(name="test_engine")
+    
+    # Test instantiate method
+    instance = engine.instantiate()
+    assert callable(instance)
+    assert instance("hello") == "default: hello"
+    
+    # Test instantiate with config
+    config = {"configurable": {"test_param": "custom"}}
+    instance = engine.instantiate(config)
+    assert instance("hello") == "custom: hello"
 
-    def test_registry_find_by_id(self):
-        """Test finding an engine by ID."""
-        registry = EngineRegistry.get_instance()
-        registry.clear()  # Start with a clean registry
 
-        # Create and register an engine
-        engine = MockEngine(name="test-engine")
-        registry.register(engine)
+def test_engine_registry():
+    """Test engine registry operations."""
+    # Clear registry
+    registry = EngineRegistry.get_instance()
+    registry.clear()
+    
+    # Create and register engines
+    engine1 = TestEngine(name="engine1", id="id1").register()
+    engine2 = TestEngine(name="engine2", id="id2").register()
+    
+    # Test get by type and name
+    assert registry.get(EngineType.LLM, "engine1") is engine1
+    assert registry.get(EngineType.LLM, "engine2") is engine2
+    
+    # Test get by ID
+    assert registry.find_by_id("id1") is engine1
+    assert registry.find_by_id("id2") is engine2
+    
+    # Test find by name or ID
+    assert registry.find("engine1") is engine1
+    assert registry.find("id2") is engine2
+    
+    # Test list engines
+    assert set(registry.list(EngineType.LLM)) == {"engine1", "engine2"}
+    
+    # Test get all engines
+    all_engines = registry.get_all(EngineType.LLM)
+    assert len(all_engines) == 2
+    assert all_engines["engine1"] is engine1
+    assert all_engines["engine2"] is engine2
 
-        # Find by ID
-        found_engine = registry.find_by_id(engine.id)
-        assert found_engine is engine
 
-        # Test with non-existent ID
-        assert registry.find_by_id("non-existent-id") is None
-
-    def test_engine_to_dict(self):
-        """Test serializing an engine to a dictionary."""
-        engine = MockEngine(
-            name="test-engine",
-            model_name="gpt-4",
-            param_a="test-value",
-            param_b=42
-        )
-
-        # Convert to dict
-        engine_dict = engine.to_dict()
-
-        # Check core fields
-        assert engine_dict["id"] == engine.id
-        assert engine_dict["name"] == "test-engine"
-        assert engine_dict["engine_type"] == EngineType.LLM
-        assert engine_dict["model_name"] == "gpt-4"
-        assert engine_dict["param_a"] == "test-value"
-        assert engine_dict["param_b"] == 42
-
-        # Check class information for reconstruction
-        assert "engine_class" in engine_dict
-        assert "MockEngine" in engine_dict["engine_class"]
-
-    def test_engine_from_dict(self):
-        """Test creating an engine from a dictionary."""
-        # Create a dictionary representation
-        engine_dict = {
-            "id": str(uuid.uuid4()),
-            "name": "reconstructed-engine",
-            "engine_type": EngineType.LLM,
-            "model_name": "gpt-3.5-turbo",
-            "param_a": "reconstructed-value",
-            "param_b": 99,
-            "engine_class": f"{MockEngine.__module__}.{MockEngine.__name__}"
-        }
-
-        # Reconstruct engine
-        engine = Engine.from_dict(engine_dict)
-
-        # Check that it's the right type and has correct values
-        assert isinstance(engine, MockEngine)
-        assert engine.id == engine_dict["id"]
-        assert engine.name == "reconstructed-engine"
-        assert engine.engine_type == EngineType.LLM
-        assert engine.model_name == "gpt-3.5-turbo"
-        assert engine.param_a == "reconstructed-value"
-        assert engine.param_b == 99
-
-    def test_apply_runnable_config_by_id(self):
-        """Test applying config using engine ID."""
-        engine = MockEngine(
-            name="test-engine",
-            model_name="default-model"
-        )
-
-        # Create a config targeting by ID
-        config = {
-            "configurable": {
-                "engine_configs": {
-                    engine.id: {
-                        "model_name": "id-targeted-model",
-                        "param_a": "id-value"
-                    }
-                }
+def test_apply_runnable_config():
+    """Test that runnable config is applied correctly."""
+    engine = TestEngine(name="test_engine")
+    
+    # Simple config
+    config = {"configurable": {"test_param": "custom"}}
+    params = engine.apply_runnable_config(config)
+    assert params == {"test_param": "custom"}
+    
+    # Config with engine ID targeting
+    config = {"configurable": {"engine_configs": {engine.id: {"test_param": "by_id"}}}}
+    params = engine.apply_runnable_config(config)
+    assert params == {"test_param": "by_id"}
+    
+    # Config with engine name targeting
+    config = {"configurable": {"engine_configs": {"test_engine": {"test_param": "by_name"}}}}
+    params = engine.apply_runnable_config(config)
+    assert params == {"test_param": "by_name"}
+    
+    # Config with engine type targeting
+    config = {"configurable": {"engine_configs": {"llm_config": {"test_param": "by_type"}}}}
+    params = engine.apply_runnable_config(config)
+    assert params == {"test_param": "by_type"}
+    
+    # Test priority (ID > name > type > global)
+    config = {
+        "configurable": {
+            "test_param": "global",
+            "engine_configs": {
+                "llm_config": {"test_param": "by_type"},
+                "test_engine": {"test_param": "by_name"},
+                engine.id: {"test_param": "by_id"}
             }
         }
+    }
+    params = engine.apply_runnable_config(config)
+    assert params == {"test_param": "by_id"}
 
-        # Apply the config
-        params = engine.apply_runnable_config(config)
 
-        # Check extracted parameters
-        assert params["model_name"] == "id-targeted-model"
-        assert params["param_a"] == "id-value"
+def test_with_config_overrides():
+    """Test creating a new engine with config overrides."""
+    engine = TestEngine(name="test_engine", test_param="original")
+    
+    # Create new engine with overrides
+    new_engine = engine.with_config_overrides({"test_param": "overridden"})
+    
+    # Original should be unchanged
+    assert engine.test_param == "original"
+    
+    # New engine should have override applied
+    assert new_engine.test_param == "overridden"
+    assert new_engine.name == "test_engine"  # Other params unchanged
+    assert new_engine.id == engine.id  # ID should be preserved
 
-    def test_apply_runnable_config_by_name(self):
-        """Test applying config using engine name."""
-        engine = MockEngine(
-            name="test-engine",
-            model_name="default-model"
-        )
 
-        # Create a config targeting by name
-        config = {
-            "configurable": {
-                "engine_configs": {
-                    "test-engine": {
-                        "model_name": "name-targeted-model",
-                        "param_a": "name-value"
-                    }
-                }
-            }
-        }
+def test_serialization():
+    """Test engine serialization and deserialization."""
+    engine = TestEngine(name="test_engine", test_param="test")
+    
+    # Convert to dict
+    data = engine.to_dict()
+    assert data["name"] == "test_engine"
+    assert data["test_param"] == "test"
+    assert "engine_class" in data
+    
+    # Convert to JSON
+    json_str = engine.to_json()
+    assert isinstance(json_str, str)
+    
+    # Deserialize from dict
+    new_engine = Engine.from_dict(data)
+    assert isinstance(new_engine, TestEngine)
+    assert new_engine.name == "test_engine"
+    assert new_engine.test_param == "test"
+    
+    # Deserialize from JSON
+    new_engine = TestEngine.from_json(json_str)
+    assert isinstance(new_engine, TestEngine)
+    assert new_engine.name == "test_engine"
+    assert new_engine.test_param == "test"
 
-        # Apply the config
-        params = engine.apply_runnable_config(config)
 
-        # Check extracted parameters
-        assert params["model_name"] == "name-targeted-model"
-        assert params["param_a"] == "name-value"
+def test_registry_serialization():
+    """Test registry serialization and deserialization."""
+    # Clear registry
+    registry = EngineRegistry.get_instance()
+    registry.clear()
+    
+    # Create and register engines
+    TestEngine(name="engine1", test_param="test1").register()
+    TestEngine(name="engine2", test_param="test2").register()
+    
+    # Serialize registry
+    registry_dict = registry.to_dict()
+    assert EngineType.LLM in registry_dict
+    assert "engine1" in registry_dict[EngineType.LLM]
+    assert "engine2" in registry_dict[EngineType.LLM]
+    
+    # Serialize to JSON
+    registry_json = registry.to_json()
+    assert isinstance(registry_json, str)
+    
+    # Clear registry and restore from dict
+    registry.clear()
+    assert len(registry.list(EngineType.LLM)) == 0
+    
+    registry.from_dict(registry_dict)
+    assert len(registry.list(EngineType.LLM)) == 2
+    assert registry.get(EngineType.LLM, "engine1") is not None
+    assert registry.get(EngineType.LLM, "engine2") is not None
+    
+    # Clear registry and restore from JSON
+    registry.clear()
+    registry.from_json(registry_json)
+    assert len(registry.list(EngineType.LLM)) == 2
+    assert registry.get(EngineType.LLM, "engine1") is not None
+    assert registry.get(EngineType.LLM, "engine2") is not None
 
-    def test_apply_runnable_config_by_type(self):
-        """Test applying config using engine type."""
-        engine = MockEngine(
-            name="test-engine",
-            model_name="default-model"
-        )
 
-        # Create a config targeting by type
-        config = {
-            "configurable": {
-                "engine_configs": {
-                    "llm_config": {
-                        "model_name": "type-targeted-model",
-                        "param_a": "type-value"
-                    }
-                }
-            }
-        }
-
-        # Apply the config
-        params = engine.apply_runnable_config(config)
-
-        # Check extracted parameters
-        assert params["model_name"] == "type-targeted-model"
-        assert params["param_a"] == "type-value"
-
-    def test_apply_runnable_config_priority(self):
-        """Test priority order when applying config (ID > name > type)."""
-        engine = MockEngine(
-            name="test-engine",
-            model_name="default-model"
-        )
-
-        # Create a config with all three targets
-        config = {
-            "configurable": {
-                "engine_configs": {
-                    engine.id: {
-                        "model_name": "id-targeted-model",
-                        "param_a": "id-value",
-                        "param_b": 1
-                    },
-                    "test-engine": {
-                        "model_name": "name-targeted-model",
-                        "param_a": "name-value",
-                        "param_b": 2
-                    },
-                    "llm_config": {
-                        "model_name": "type-targeted-model",
-                        "param_a": "type-value",
-                        "param_b": 3
-                    }
-                }
-            }
-        }
-
-        # Apply the config
-        params = engine.apply_runnable_config(config)
-
-        # ID should take priority
-        assert params["model_name"] == "id-targeted-model"
-        assert params["param_a"] == "id-value"
-        assert params["param_b"] == 1
-
-    def test_engine_invoke(self):
-        """Test invoking an engine."""
-        engine = MockEngine(
-            name="test-engine",
-            model_name="test-model",
-            param_a="test-a",
-            param_b=123
-        )
-
-        # Create input
-        input_data = InputModel(query="test query")
-
-        # Invoke the engine
-        result = engine.invoke(input_data)
-
-        # Check result
-        assert isinstance(result, OutputModel)
-        assert "test query" in result.result
-        assert "test-model" in result.result
-        assert "test-a" in result.result
-        assert "123" in result.result
-
-    def test_engine_invoke_with_config(self):
-        """Test invoking an engine with runtime config."""
-        engine = MockEngine(
-            name="test-engine",
-            model_name="default-model"
-        )
-
-        # Create config
-        config = {
-            "configurable": {
-                "engine_configs": {
-                    engine.id: {
-                        "model_name": "runtime-model",
-                        "param_a": "runtime-value",
-                        "param_b": 456
-                    }
-                }
-            }
-        }
-
-        # Create input
-        input_data = InputModel(query="config test")
-
-        # Invoke with config
-        result = engine.invoke(input_data, config)
-
-        # Check result reflects runtime config
-        assert isinstance(result, OutputModel)
-        assert "config test" in result.result
-        assert "runtime-model" in result.result
-        assert "runtime-value" in result.result
-        assert "456" in result.result
-
-    def test_to_runnable_config(self):
-        """Test converting an engine to a runnable config."""
-        engine = MockEngine(
-            name="test-engine",
-            model_name="test-model",
-            param_a="test-a",
-            param_b=123
-        )
-
-        # Convert to runnable config
-        config = engine.to_runnable_config(thread_id="test-thread")
-
-        # Check config structure
-        assert "configurable" in config
-        assert "thread_id" in config["configurable"]
-        assert config["configurable"]["thread_id"] == "test-thread"
-
-        # Check engine configs
-        assert "engine_configs" in config["configurable"]
-
-        # Check ID-based config
-        assert engine.id in config["configurable"]["engine_configs"]
-        assert config["configurable"]["engine_configs"][engine.id]["model_name"] == "test-model"
-        assert config["configurable"]["engine_configs"][engine.id]["param_a"] == "test-a"
-        assert config["configurable"]["engine_configs"][engine.id]["param_b"] == 123
-
-        # Check name-based config
-        assert "test-engine" in config["configurable"]["engine_configs"]
-
-        # Check type-based config
-        assert "llm_config" in config["configurable"]["engine_configs"]
+if __name__ == "__main__":
+    pytest.main(["-xvs", __file__])
