@@ -1,12 +1,15 @@
-# src/haive_core/graph/node/config.py
+# src/haive/core/graph/node/config.py
 
 from typing import Dict, Optional, Union, Any, List, Callable, Literal, Type, Tuple
 from pydantic import BaseModel, Field, model_validator
 from langgraph.graph import END
 from langgraph.types import Command, Send
 from langchain_core.runnables import RunnableConfig
+import asyncio
+import inspect
 
 from haive.core.engine.base import Engine
+from haive.core.graph.node.registry import NodeTypeRegistry
 
 class NodeConfig(BaseModel):
     """
@@ -27,20 +30,20 @@ class NodeConfig(BaseModel):
         description="Unique ID of the engine instance (auto-populated when resolving)"
     )
     
-    # Control flow options
+    # Control flow options with full Command/Send support
     command_goto: Optional[Union[str, Literal["END"], Send, List[Union[Send, str]]]] = Field(
         default=None,
-        description="Next node to go to after this node (or END)"
+        description="Next node to go to after this node (or END, Send object, or list of Send objects)"
     )
     
     # Mapping options
     input_mapping: Optional[Dict[str, str]] = Field(
         default=None,
-        description="Mapping from state keys to engine input keys (e.g., {'query': 'input', 'context': 'documents'})"
+        description="Mapping from state keys to engine input keys"
     )
     output_mapping: Optional[Dict[str, str]] = Field(
         default=None,
-        description="Mapping from engine output keys to state keys (e.g., {'output': 'result', 'confidence': 'score'})"
+        description="Mapping from engine output keys to state keys"
     )
     
     # Runtime configuration
@@ -55,27 +58,44 @@ class NodeConfig(BaseModel):
         description="Engine configuration overrides specific to this node"
     )
     
+    # Node type information
+    node_type: Optional[str] = Field(
+        default=None,
+        description="Type of node function (auto-detected if None)"
+    )
+    
     # Special handling flags
     use_direct_messages: Optional[bool] = Field(
         default=None, 
-        description="Force direct usage of messages field if present (auto-detected if None)"
+        description="Whether to use messages field directly (auto-detected if None)"
     )
     
-    extract_content: Optional[bool] = Field(
+    extract_content: bool = Field(
+        default=False,
+        description="Extract content from messages and add as 'content' field"
+    )
+    
+    preserve_state: bool = Field(
+        default=True,
+        description="Preserve state fields not affected by output mapping"
+    )
+    
+    # Registry reference (set automatically by NodeFactory)
+    registry: Optional[Any] = Field(
         default=None,
-        description="Extract content from messages and make it available as 'content' in state"
-    )
-    
-    # Metadata
-    metadata: Dict[str, Any] = Field(
-        default_factory=dict,
-        description="Additional metadata for this node"
+        exclude=True
     )
     
     # Debug mode
     debug: bool = Field(
         default=False,
         description="Enable debug logging for this node"
+    )
+    
+    # Metadata
+    metadata: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Additional metadata for this node"
     )
     
     model_config = {
@@ -149,26 +169,66 @@ class NodeConfig(BaseModel):
         engine_name = self.engine
         
         if registry is None:
-            from haive.core.engine.base import EngineRegistry, EngineType
+            registry = self.registry
+            
+        if registry is None:
+            from haive.core.engine.base import EngineRegistry
             registry = EngineRegistry.get_instance()
             
-        # Try each engine type
-        for engine_type in registry.engines:
-            engine = registry.get(engine_type, engine_name)
-            if engine:
-                # Update engine reference
-                self.engine = engine
-                
-                # Extract engine ID if available
-                engine_id = None
-                if hasattr(engine, "id"):
-                    engine_id = getattr(engine, "id")
-                    self.engine_id = engine_id
-                
-                return engine, engine_id
+        # Try to find engine by name or ID
+        engine = registry.find(engine_name)
+        if engine:
+            # Update engine reference
+            self.engine = engine
+            
+            # Extract engine ID if available
+            engine_id = None
+            if hasattr(engine, "id"):
+                engine_id = getattr(engine, "id")
+                self.engine_id = engine_id
+            
+            return engine, engine_id
                 
         # Not found - return as is
         return self.engine, None
+    
+    def determine_node_type(self) -> str:
+        """
+        Determine the most appropriate node type based on engine.
+        
+        Returns:
+            Node type string
+        """
+        if self.node_type:
+            return self.node_type
+            
+        engine = self.engine
+        
+        # Detect async functions
+        if asyncio.iscoroutinefunction(engine):
+            return "async"
+            
+        # Check for AsyncInvokable
+        if hasattr(engine, "ainvoke") and callable(getattr(engine, "ainvoke")):
+            return "async_invokable"
+            
+        # Check for Invokable
+        if hasattr(engine, "invoke") and callable(getattr(engine, "invoke")):
+            return "invokable"
+            
+        # Check for mapping functions (based on signature return annotation)
+        if callable(engine) and hasattr(engine, "__annotations__"):
+            if "return" in engine.__annotations__:
+                return_type = engine.__annotations__["return"]
+                if "List[Send]" in str(return_type) or "list[Send]" in str(return_type):
+                    return "mapping"
+        
+        # Default to "callable" for callable functions
+        if callable(engine):
+            return "callable"
+            
+        # Generic for everything else
+        return "generic"
     
     def to_dict(self) -> Dict[str, Any]:
         """
@@ -177,13 +237,12 @@ class NodeConfig(BaseModel):
         Returns:
             Dictionary representation of the node config
         """
-        # Use model_dump or dict based on Pydantic version
         if hasattr(self, "model_dump"):
             # Pydantic v2
-            data = self.model_dump(exclude={"engine"})
+            data = self.model_dump(exclude={"engine", "registry"})
         else:
             # Pydantic v1
-            data = self.dict(exclude={"engine"})
+            data = self.dict(exclude={"engine", "registry"})
         
         # Handle engine serialization
         if isinstance(self.engine, Engine):
@@ -195,16 +254,31 @@ class NodeConfig(BaseModel):
             }
         elif isinstance(self.engine, str):
             data["engine_ref"] = self.engine
-        elif self.engine is not None:
+        elif callable(self.engine):
             # For callables, store a reference if possible
             if hasattr(self.engine, "__name__"):
-                data["engine_ref"] = f"function:{self.engine.__name__}"
+                module = getattr(self.engine, "__module__", "")
+                data["engine_ref"] = f"function:{module}.{self.engine.__name__}"
             else:
                 data["engine_ref"] = "callable"
         
         # Special handling for END in command_goto
         if self.command_goto is END:
             data["command_goto"] = "END"
+        elif isinstance(self.command_goto, Send):
+            # Handle Send objects
+            data["command_goto"] = {
+                "type": "send",
+                "node": self.command_goto.node,
+                "arg": self.command_goto.arg
+            }
+        elif isinstance(self.command_goto, list) and any(isinstance(item, Send) for item in self.command_goto):
+            # Handle list containing Send objects
+            data["command_goto"] = [
+                {"type": "send", "node": item.node, "arg": item.arg} 
+                if isinstance(item, Send) else item
+                for item in self.command_goto
+            ]
         
         return data
     
@@ -220,7 +294,7 @@ class NodeConfig(BaseModel):
         Returns:
             Instantiated NodeConfig
         """
-        # Create a copy of the data to avoid modifying the input
+        # Create a copy to avoid modifying the input
         config_data = data.copy()
         
         # Handle engine references
@@ -228,39 +302,64 @@ class NodeConfig(BaseModel):
             ref = config_data.pop("engine_ref")
             
             if isinstance(ref, dict) and "id" in ref and "name" in ref:
-                # Try to look up by ID first, then by name
+                # Engine reference with ID and name
                 engine = None
                 
-                if registry is None:
-                    from haive.core.engine.base import EngineRegistry
-                    registry = EngineRegistry.get_instance()
-                
-                # Try to find by ID if available
-                if ref["id"]:
-                    engine = registry.find(ref["id"])
-                
-                # Fall back to name lookup
-                if engine is None and ref["name"]:
-                    engine = registry.find(ref["name"])
+                # Try to find the engine if registry provided
+                if registry:
+                    # Try ID first
+                    if ref["id"]:
+                        engine = registry.find_by_id(ref["id"])
+                    
+                    # Try name next
+                    if engine is None and ref["name"]:
+                        engine = registry.find(ref["name"])
                 
                 if engine:
                     config_data["engine"] = engine
                     config_data["engine_id"] = ref["id"]
                 else:
-                    # Fall back to name as string
-                    config_data["engine"] = ref["name"]
+                    # Store name reference
+                    config_data["engine"] = ref["name"] 
+                
             elif isinstance(ref, str):
-                # Handle function references or engine names
+                # String reference (name, ID, or function path)
                 if ref.startswith("function:"):
-                    # We can't easily resolve function references here
-                    # This would need application-specific handling
-                    config_data["engine"] = None
+                    # Function reference - try to import if possible
+                    try:
+                        module_path, func_name = ref[9:].rsplit(".", 1)
+                        module = importlib.import_module(module_path)
+                        func = getattr(module, func_name)
+                        config_data["engine"] = func
+                    except (ImportError, AttributeError, ValueError):
+                        # Can't resolve - store as string
+                        config_data["engine"] = ref
                 else:
+                    # Engine name or ID
                     config_data["engine"] = ref
+        
+        # Handle command_goto serialization
+        if "command_goto" in config_data:
+            goto = config_data["command_goto"]
             
-        # Handle special values
-        if "command_goto" in config_data and config_data["command_goto"] == "END":
-            config_data["command_goto"] = END
-            
+            if goto == "END":
+                config_data["command_goto"] = END
+            elif isinstance(goto, dict) and goto.get("type") == "send":
+                # Reconstruct Send object
+                config_data["command_goto"] = Send(goto["node"], goto["arg"])
+            elif isinstance(goto, list):
+                # Handle list containing Send dictionaries
+                config_data["command_goto"] = [
+                    Send(item["node"], item["arg"]) 
+                    if isinstance(item, dict) and item.get("type") == "send" 
+                    else item
+                    for item in goto
+                ]
+        
         # Create the NodeConfig
-        return cls(**config_data)
+        result = cls(**config_data)
+        
+        # Set registry
+        result.registry = registry
+        
+        return result
