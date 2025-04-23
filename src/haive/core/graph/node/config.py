@@ -1,5 +1,10 @@
 # src/haive/core/graph/node/config.py
-
+"""
+Configuration for a node in a graph.
+TODO: Fix up the conisistelycn in aug llm and llm. 
+Returns:
+    _type_: _description_
+"""
 from typing import Dict, Optional, Union, Any, List, Callable, Literal, Type, Tuple
 from pydantic import BaseModel, Field, model_validator
 from langgraph.graph import END
@@ -7,9 +12,10 @@ from langgraph.types import Command, Send
 from langchain_core.runnables import RunnableConfig
 import asyncio
 import inspect
+import json
 
 from haive.core.engine.base import Engine
-from haive.core.graph.node.registry import NodeTypeRegistry
+from haive.core.registry.base import AbstractRegistry
 
 class NodeConfig(BaseModel):
     """
@@ -63,6 +69,10 @@ class NodeConfig(BaseModel):
         default=None,
         description="Type of node function (auto-detected if None)"
     )
+    async_mode: Optional[bool] = Field(
+    default=None,
+    description="Whether to operate in async mode (auto-detected if None)"
+    )
     
     # Special handling flags
     use_direct_messages: Optional[bool] = Field(
@@ -80,8 +90,8 @@ class NodeConfig(BaseModel):
         description="Preserve state fields not affected by output mapping"
     )
     
-    # Registry reference (set automatically by NodeFactory)
-    registry: Optional[Any] = Field(
+    # Registry reference (not serialized)
+    registry: Optional[AbstractRegistry] = Field(
         default=None,
         exclude=True
     )
@@ -176,7 +186,7 @@ class NodeConfig(BaseModel):
             registry = EngineRegistry.get_instance()
             
         # Try to find engine by name or ID
-        engine = registry.find(engine_name)
+        engine = registry.find_by_id(engine_name)
         if engine:
             # Update engine reference
             self.engine = engine
@@ -188,6 +198,13 @@ class NodeConfig(BaseModel):
                 self.engine_id = engine_id
             
             return engine, engine_id
+                
+        # Try other lookup methods if find_by_id didn't work
+        engine = registry.find(engine_name) if hasattr(registry, "find") else None
+        if engine:
+            self.engine = engine
+            self.engine_id = getattr(engine, "id", None)
+            return engine, self.engine_id
                 
         # Not found - return as is
         return self.engine, None
@@ -204,7 +221,17 @@ class NodeConfig(BaseModel):
             
         engine = self.engine
         
-        # Detect async functions
+        # Handle async mode explicitly
+        if self.async_mode:
+            # Check for AsyncInvokable
+            if hasattr(engine, "ainvoke") and callable(getattr(engine, "ainvoke")):
+                return "async_invokable"
+            
+            # Check for async functions
+            if asyncio.iscoroutinefunction(engine):
+                return "async"
+        
+        # Standard detection logic
         if asyncio.iscoroutinefunction(engine):
             return "async"
             
@@ -270,17 +297,32 @@ class NodeConfig(BaseModel):
             data["command_goto"] = {
                 "type": "send",
                 "node": self.command_goto.node,
-                "arg": self.command_goto.arg
+                "arg": self._serialize_send_arg(self.command_goto.arg)
             }
         elif isinstance(self.command_goto, list) and any(isinstance(item, Send) for item in self.command_goto):
             # Handle list containing Send objects
             data["command_goto"] = [
-                {"type": "send", "node": item.node, "arg": item.arg} 
+                {"type": "send", "node": item.node, "arg": self._serialize_send_arg(item.arg)} 
                 if isinstance(item, Send) else item
                 for item in self.command_goto
             ]
         
         return data
+    
+    def _serialize_send_arg(self, arg: Any) -> Any:
+        """Serialize Send argument to ensure it's JSON serializable."""
+        if isinstance(arg, dict):
+            return {k: self._serialize_send_arg(v) for k, v in arg.items()}
+        elif isinstance(arg, list):
+            return [self._serialize_send_arg(item) for item in arg]
+        elif isinstance(arg, (str, int, float, bool, type(None))):
+            return arg
+        elif hasattr(arg, "model_dump"):
+            return arg.model_dump()
+        elif hasattr(arg, "dict"):
+            return arg.dict()
+        else:
+            return str(arg)
     
     @classmethod
     def from_dict(cls, data: Dict[str, Any], registry=None) -> 'NodeConfig':
@@ -312,7 +354,7 @@ class NodeConfig(BaseModel):
                         engine = registry.find_by_id(ref["id"])
                     
                     # Try name next
-                    if engine is None and ref["name"]:
+                    if engine is None and ref["name"] and hasattr(registry, "find"):
                         engine = registry.find(ref["name"])
                 
                 if engine:
@@ -327,6 +369,7 @@ class NodeConfig(BaseModel):
                 if ref.startswith("function:"):
                     # Function reference - try to import if possible
                     try:
+                        import importlib
                         module_path, func_name = ref[9:].rsplit(".", 1)
                         module = importlib.import_module(module_path)
                         func = getattr(module, func_name)
@@ -346,9 +389,11 @@ class NodeConfig(BaseModel):
                 config_data["command_goto"] = END
             elif isinstance(goto, dict) and goto.get("type") == "send":
                 # Reconstruct Send object
+                from langgraph.types import Send
                 config_data["command_goto"] = Send(goto["node"], goto["arg"])
             elif isinstance(goto, list):
                 # Handle list containing Send dictionaries
+                from langgraph.types import Send
                 config_data["command_goto"] = [
                     Send(item["node"], item["arg"]) 
                     if isinstance(item, dict) and item.get("type") == "send" 
