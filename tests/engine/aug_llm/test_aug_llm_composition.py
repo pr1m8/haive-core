@@ -5,13 +5,14 @@ import pprint
 from typing import Any, Literal
 
 import pytest
-from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
-from langchain_core.output_parsers import JsonOutputParser, PydanticOutputParser, StrOutputParser
+from langchain_core.messages import SystemMessage
 from langchain_core.prompts import (
     ChatPromptTemplate,
     HumanMessagePromptTemplate,
     MessagesPlaceholder,
 )
+from langchain_core.output_parsers import JsonOutputParser,PydanticOutputParser,StrOutputParser
+from langchain_core.messages import HumanMessage, AIMessage
 from langchain_core.tools import StructuredTool, tool
 from pydantic import BaseModel, Field
 
@@ -333,9 +334,9 @@ def test_schema_pretty_printing(azure_llm_config, structured_chat_prompt):
     )
 
     # Create schemas for these engines
-    user_schema = SchemaComposer.compose_schema([person_extractor], name="UserProfileSchema")
-    recipe_schema = SchemaComposer.compose_schema([recipe_analyzer], name="RecipeSchema")
-    movie_schema = SchemaComposer.compose_schema([movie_reviewer], name="MovieReviewSchema")
+    user_schema = SchemaComposer.create_model([person_extractor], name="UserProfileSchema")
+    recipe_schema = SchemaComposer.create_model([recipe_analyzer], name="RecipeSchema")
+    movie_schema = SchemaComposer.create_model([movie_reviewer], name="MovieReviewSchema")
 
     # Pretty print the schemas and their fields
     for schema_name, schema in [
@@ -418,10 +419,15 @@ def test_schema_pretty_printing(azure_llm_config, structured_chat_prompt):
         print(f"  - {field_name}: {field_type}")
 
     # Test StateSchema creation
-    state_schema = SchemaComposer.compose_as_state_schema(
+    state_schema = SchemaComposer.create_model(
         [person_extractor, recipe_analyzer, movie_reviewer],
         name="ContentAnalysisState"
     )
+    print('-'*100)
+    print('State Schema')
+    state_schema.pretty_print()
+    print(state_schema)
+    print('-'*100)
 
     print("\n" + "="*20 + " State Schema " + "="*20)
     print(f"\nFields in {state_schema.__name__}:")
@@ -775,7 +781,7 @@ def test_advanced_tools_with_structured_output(
 
     # Enhanced schema creation - show how the schema builder works with tools and structured outputs
     print("\n" + "="*20 + " Schema From Tool Configs " + "="*20)
-    combined_schema = SchemaComposer.compose_schema([weather_llm, recipe_llm, combined_llm], name="ToolsSchema")
+    combined_schema = SchemaComposer.create_model([weather_llm, recipe_llm, combined_llm], name="ToolsSchema")
 
     # Print model fields
     print(f"\nFields in {combined_schema.__name__}:")

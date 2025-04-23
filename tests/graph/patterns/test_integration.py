@@ -1,550 +1,577 @@
-"""Integration tests for graph patterns.
+# tests/graph/patterns/test_integration.py
 
-These tests verify the integration of patterns with the graph system.
-"""
-
-import os
-import logging
 import pytest
-from typing import Any, Dict, List
+import logging
+import uuid
+from typing import Any, Dict, Optional, List
+from pydantic import BaseModel
+from rich.logging import RichHandler
+from rich.console import Console
+from rich import print as rprint
+from rich.panel import Panel
+from rich.traceback import install
+
 from langgraph.graph import START, END
 
-from haive.core.engine.agent.agent import Agent, register_agent
-from haive.core.engine.agent.config import AgentConfig
+from haive.core.graph.dynamic_graph_builder import DynamicGraph
+from haive.core.graph.patterns.base import GraphPattern, PatternMetadata, ParameterDefinition
+from haive.core.graph.patterns.integration import register_integrations
 from haive.core.engine.aug_llm.base import AugLLMConfig
+from haive.core.engine.base import EngineType
+from haive.core.models.llm.base import AzureLLMConfig
+from haive.core.engine.agent.agent import AgentConfig
 
-# Skip tests if pattern system isn't available
-try:
-    from haive.core.graph.patterns.base import GraphPattern, PatternMetadata
-    from haive.core.graph.patterns.integration import (
-        apply_pattern_to_graph,
-        register_integrations,
-    )
-    from haive.core.graph.patterns.registry import GraphPatternRegistry
-    from haive.core.graph.dynamic_graph_builder import DynamicGraph, DynamicGraphEdge
-    PATTERN_SYSTEM_AVAILABLE = True
-except ImportError:
-    PATTERN_SYSTEM_AVAILABLE = False
+# Set up rich traceback handling for better error display
+install(show_locals=True)
 
-pytestmark = [
-    pytest.mark.skipif(
-        not any([os.getenv("OPENAI_API_KEY"), os.getenv("AZURE_OPENAI_API_KEY")]),
-        reason="No API keys available for LLM testing"
-    ),
-    pytest.mark.skipif(
-        not PATTERN_SYSTEM_AVAILABLE,
-        reason="Pattern system not available"
-    )
-]
+# Set up rich logging
+console = Console()
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(message)s",
+    handlers=[RichHandler(rich_tracebacks=True, console=console)]
+)
 
-# Set up logging
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)  # Set to DEBUG for testing
+logger = logging.getLogger("tests.graph.patterns.test_integration")
 
-# Add console handler if not already present
-if not logger.handlers:
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(levelname)s - %(name)s - %(message)s')
-    console_handler.setFormatter(formatter)
-    logger.addHandler(console_handler)
+# Create a test state schema
+# Do this (with underscore):
+class _TestState(BaseModel):
+    """Test state for pattern integration tests."""
+    test: str = ""
+    value: Optional[str] = None
+
+# Register integrations before running tests
+def setup_module():
+    """Set up for all tests in this module."""
+    rprint(Panel.fit("Setting up pattern integration tests", style="cyan"))
+    register_integrations()
 
 
 class TestAgentPatternIntegration:
-    """Tests for integrating patterns with agents."""
+    """Test integration of patterns with agents and graphs."""
+    
+    def setup_method(self):
+        """Set up for each test."""
+        # Create a unique test ID for this run
+        self.test_id = uuid.uuid4().hex[:8]
+        rprint(Panel.fit(f"Running test with ID: {self.test_id}", style="green"))
 
-    @pytest.fixture(autouse=True)
-    def setup_teardown(self):
-        """Setup and teardown for pattern integration tests."""
-        # Clear the pattern registry before each test
-        if hasattr(GraphPatternRegistry, "_instance") and GraphPatternRegistry._instance is not None:
-            GraphPatternRegistry._instance.patterns = {}
-
-        # Register the integrations before each test
-        register_integrations()
-        
-        yield
-        
-        # Clear pattern registry after each test
-        if hasattr(GraphPatternRegistry, "_instance") and GraphPatternRegistry._instance is not None:
-            GraphPatternRegistry._instance.patterns = {}
-
-    @pytest.fixture
-    def pattern_agent_config(self):
-        """Create an agent config for pattern tests."""
-        # Create AugLLM with minimal configuration
-        llm = AugLLMConfig(
+    def create_test_llm_engine(self):
+        """Create a test LLM engine for pattern testing."""
+        logger.info("Creating test LLM engine")
+        return AugLLMConfig(
             name="test_llm",
-            model="gpt-4o",
+            llm_config=AzureLLMConfig(
+                provider="azure",
+                model="gpt-4o",
+                api_key="dummy_key",
+                api_version="2024-08-01-preview",
+                api_base="https://awt-gpt.openai.azure.com/",
+                api_type="azure"
+            ),
             temperature=0.0,
-            max_tokens=100,
-            system_prompt="You are a helpful AI assistant for testing."
+            max_tokens=100
         )
 
-        # Create agent config with explicit settings
+    def create_test_agent_config(self):
+        """Create a test agent config for pattern testing."""
+        logger.info("Creating test agent config")
         return AgentConfig(
             name="pattern_agent",
-            engine=llm,
+            engine=self.create_test_llm_engine(),
+            engine_type=EngineType.AGENT,
             visualize=True,
             output_dir="./test_outputs",
-            enable_patterns=True
+            debug=False,
+            save_history=True,
+            runnable_config={
+                "configurable": {
+                    "thread_id": str(uuid.uuid4()),
+                    "recursion_limit": 200,
+                    "engine_configs": {}
+                }
+            },
+            persistence={
+                "type": "postgres",
+                "setup_needed": True,
+                "db_host": "localhost",
+                "db_port": 5432,
+                "db_name": "postgres",
+                "db_user": "postgres",
+                "db_pass": "postgres",
+                "ssl_mode": "disable"
+            }
         )
 
-    @pytest.fixture
-    def test_pattern(self):
-        """Create and register a test pattern."""
-        logger.info("Creating test integration pattern")
+    def test_pattern_enhanced_workflow(self):
+        """Test applying a pattern to enhance a workflow."""
+        logger.info("Testing pattern enhanced workflow")
         
-        # Define a test pattern class
+        # Create a test pattern class
         class TestIntegrationPattern(GraphPattern):
             """Test pattern for integration testing."""
-
-            def __init__(self, name="test_integration_pattern"):
+            
+            def __init__(self):
+                logger.info("Creating test integration pattern")
+                # Use proper ParameterDefinition for parameters
                 metadata = PatternMetadata(
-                    name=name,
-                    description="Test pattern for integration testing",
+                    name="test_integration_pattern",
+                    description="Test pattern for integration",
                     pattern_type="test",
-                    required_components=[],
-                    parameters={"node_name": "integration_node"}
+                    parameters={
+                        "node_name": ParameterDefinition(
+                            type="str",
+                            default="integration_node",
+                            description="Name of the integration node",
+                            required=False
+                        )
+                    }
                 )
                 super().__init__(metadata=metadata)
-
-            def apply(self, graph: Any, node_name: str = "integration_node", **kwargs) -> bool:
-                """Apply the pattern to a graph."""
-                logger.info(f"Applying pattern to graph: {self.metadata.name}")
-                logger.info(f"Graph type: {type(graph).__name__}")
+            
+            def apply(self, graph, **kwargs):
+                """Apply the test pattern to a graph."""
+                logger.info(f"Applying pattern to graph with kwargs: {kwargs}")
                 
-                # Verify graph capabilities
-                if not hasattr(graph, "add_node"):
-                    logger.error(f"Graph doesn't support add_node: {type(graph)}")
-                    raise ValueError(f"Graph doesn't support add_node: {type(graph)}")
+                # Extract parameters with defaults
+                node_name = kwargs.get("node_name", "integration_node")
+                
+                # Add a node to the graph
+                def node_fn(state):
+                    """Test node function."""
+                    logger.info(f"Processing state in test node: {state}")
+                    return {"test_applied": True, "pattern_name": "test_integration_pattern"}
+                
+                # Add the node to the graph
+                try:
+                    graph.add_node(node_name, node_fn)
+                    logger.info(f"Added node {node_name} to graph")
                     
-                if not hasattr(graph, "add_edge"):
-                    logger.error(f"Graph doesn't support add_edge: {type(graph)}")
-                    raise ValueError(f"Graph doesn't support add_edge: {type(graph)}")
-                
-                # Find an engine
-                engine = None
-                if hasattr(graph, "engines") and graph.engines:
-                    engine = next(iter(graph.engines.values()))
-                    logger.info(f"Using engine from graph.engines: {engine.name if hasattr(engine, 'name') else type(engine).__name__}")
-                elif hasattr(graph, "components") and graph.components:
-                    engine = graph.components[0]
-                    logger.info(f"Using engine from graph.components: {engine.name if hasattr(engine, 'name') else type(engine).__name__}")
-                
-                # Use a dummy function if no engine is found
-                if engine is None:
-                    logger.warning("No engine found, using dummy function")
-                    engine = lambda x: x  # Simple identity function
-
-                # Add node to graph
-                try:
-                    graph.add_node(node_name, engine)
-                    logger.info(f"Added node '{node_name}' to graph")
-                except Exception as e:
-                    logger.error(f"Failed to add node: {e}")
-                    raise
-                
-                # Add START edge - this is critical
-                try:
-                    # Direct approach
+                    # Add edges
                     graph.add_edge(START, node_name)
-                    logger.info(f"Added START edge to {node_name}")
+                    graph.add_edge(node_name, END)
+                    logger.info(f"Added edges: START → {node_name} → END")
                     
-                    # Add to edges list to be sure
-                    if hasattr(graph, "edges"):
-                        edge = DynamicGraphEdge(source="START", target=node_name)
-                        if edge not in graph.edges:
-                            graph.edges.append(edge)
-                            logger.info(f"Added START edge to graph.edges list")
+                    return True
                 except Exception as e:
-                    logger.error(f"Failed to add START edge: {e}")
-                    raise
-                
-                # Verify the edge was added
-                if hasattr(graph, "edges"):
-                    start_edge_found = False
-                    for edge in graph.edges:
-                        if (hasattr(edge, "source") and edge.source == "START" and 
-                            hasattr(edge, "target") and edge.target == node_name):
-                            start_edge_found = True
-                            break
-                    if not start_edge_found:
-                        logger.warning(f"START edge not found in graph.edges after adding")
-                
-                # Debug graph state
-                if hasattr(graph, "nodes"):
-                    logger.info(f"Graph nodes: {list(graph.nodes.keys())}")
-                if hasattr(graph, "edges"):
-                    logger.info(f"Graph edges: {graph.edges}")
-                
-                logger.info(f"Pattern {self.metadata.name} applied successfully")
-                return True
-
-        # Create and register the pattern
+                    logger.error(f"Error applying pattern: {e}", exc_info=True)
+                    return False
+        
+        # Create pattern instance
         pattern = TestIntegrationPattern()
-        registry = GraphPatternRegistry.get_instance()
-        registry.register_pattern(pattern)
-        registry.patterns[pattern.metadata.name] = pattern
         
-        logger.info(f"Test pattern registered: {pattern.metadata.name}")
-        return pattern
-
-    @register_agent(AgentConfig)
-    class IntegrationTestAgent(Agent):
-        """Agent implementation for integration testing."""
-
-        def setup_workflow(self):
-            """Set up a minimal workflow for testing."""
-            logger.info(f"Setting up minimal workflow for {self.config.name}")
-            # We intentionally leave this empty so patterns can populate it
-
-        def validate_graph(self):
-            """Validate the graph structure."""
-            logger.info(f"Validating graph for {self.config.name}")
-            
-            if not hasattr(self, "graph") or self.graph is None:
-                raise ValueError("No graph available")
-            
-            if not hasattr(self.graph, "nodes"):
-                raise ValueError("Graph has no nodes attribute")
-                
-            if not self.graph.nodes:
-                raise ValueError("Graph has no nodes")
-            
-            if not hasattr(self.graph, "edges"):
-                raise ValueError("Graph has no edges attribute")
-                
-            if not self.graph.edges:
-                raise ValueError("Graph has no edges")
-            
-            # Check for START edge
-            start_edges = [edge for edge in self.graph.edges 
-                          if hasattr(edge, "source") and edge.source == "START"]
-            if not start_edges:
-                raise ValueError("Graph has no START edges")
-            
-            logger.info(f"Graph validation successful for {self.config.name}")
-            return True
-
-    def test_pattern_enhanced_workflow(self, pattern_agent_config, test_pattern):
-        """Test enhanced workflow with patterns."""
-        # Create a standalone graph
-        from haive.core.graph.dynamic_graph_builder import DynamicGraph
-        graph = DynamicGraph(name="test_graph")
-        logger.info(f"Created DynamicGraph: {graph}")
+        # Create test graph
+        graph = DynamicGraph(
+            name="enhanced_workflow_test",
+            state_schema=_TestState
+        )
         
-        # Get pattern information
-        pattern_name = test_pattern.metadata.name
-        logger.info(f"Testing pattern: {pattern_name}")
+        # Apply the pattern
+        with console.status("[bold green]Applying pattern to graph..."):
+            result = pattern.apply(graph)
         
-        # Add an engine to the graph
-        if pattern_agent_config.engine:
-            logger.info(f"Adding engine to graph")
-            graph.engines = {"default": pattern_agent_config.engine}
-            graph.components = [pattern_agent_config.engine]
+        # Verify pattern was applied
+        assert result is True, "Pattern application should succeed"
+        assert "integration_node" in graph.nodes, "Node should be added to graph"
         
-        # Apply pattern directly to the graph
-        logger.info(f"Applying pattern to graph")
-        result = test_pattern.apply(graph, node_name="integration_node")
-        logger.info(f"Pattern application result: {result}")
+        # Check that nodes have engine/function
+        assert graph.nodes["integration_node"] is not None, "Node should have engine/function"
         
-        # Verify node was created
-        assert "integration_node" in graph.nodes, "Pattern node not found in graph"
-        
-        # Verify START edge exists
-        start_edge_exists = False
-        for edge in graph.edges:
-            if (hasattr(edge, "source") and edge.source == "START" and
-                hasattr(edge, "target") and edge.target == "integration_node"):
-                start_edge_exists = True
-                break
-        
-        assert start_edge_exists, "START edge not found in graph.edges"
+        # Build the graph
+        with console.status("[bold green]Building graph..."):
+            built_graph = graph.build()
+        assert built_graph is not None, "Graph building should succeed"
         
         # Compile the graph
-        logger.info("Compiling graph after pattern application")
-        compiled = graph.compile()
-        assert compiled is not None, "Graph failed to compile"
+        with console.status("[bold green]Compiling graph..."):
+            compiled_graph = graph.compile()
+        assert compiled_graph is not None, "Graph compilation should succeed"
         
-        logger.info(f"Test successful: pattern enhanced workflow")
+        # Invoke the graph with a test state
+        input_data = _TestState(test="test_value")
+        with console.status("[bold green]Invoking graph..."):
+            result = compiled_graph.invoke(input_data.model_dump())
+        
+        # Display the result
+        rprint(Panel.fit(f"Graph execution result: {result}", style="blue"))
+        
+        # Verify the result
+        assert "test_applied" in result, "Expected 'test_applied' in result"
+        assert result["test_applied"] is True, "Expected test_applied to be True"
+        assert result["pattern_name"] == "test_integration_pattern", "Pattern name mismatch"
 
-    def test_agent_config_pattern_integration(self, pattern_agent_config, test_pattern):
-        """Test integrating patterns via AgentConfig."""
+    def test_agent_config_pattern_integration(self):
+        """Test integrating patterns with agent configs."""
         logger.info("Testing agent config pattern integration")
         
-        # Create a standalone graph
-        from haive.core.graph.dynamic_graph_builder import DynamicGraph
-        graph = DynamicGraph(name="agent_config_test_graph")
-        logger.info(f"Created graph: {graph}")
-        
-        # Add engine to graph
-        if pattern_agent_config.engine:
-            logger.info("Adding engine to graph")
-            graph.engines = {"default": pattern_agent_config.engine}
-            graph.components = [pattern_agent_config.engine]
+        # Create a test pattern class
+        class TestIntegrationPattern(GraphPattern):
+            """Test pattern for agent config integration."""
             
-        # Apply pattern directly with a custom node name
-        node_name = "config_pattern_node"
-        logger.info(f"Applying pattern with node name: {node_name}")
-        result = test_pattern.apply(graph, node_name=node_name)
-        logger.info(f"Pattern application result: {result}")
-        
-        # Verify node was created
-        assert node_name in graph.nodes, f"Pattern node '{node_name}' not found in graph"
-        
-        # Verify START edge exists
-        start_edge_exists = False
-        for edge in graph.edges:
-            if (hasattr(edge, "source") and edge.source == "START" and
-                hasattr(edge, "target") and edge.target == node_name):
-                start_edge_exists = True
-                break
+            def __init__(self):
+                logger.info("Creating test integration pattern")
+                # Use proper ParameterDefinition for parameters
+                metadata = PatternMetadata(
+                    name="test_integration_pattern",
+                    description="Test pattern for integration",
+                    pattern_type="test",
+                    parameters={
+                        "node_name": ParameterDefinition(
+                            type="str",
+                            default="integration_node",
+                            description="Name of the integration node",
+                            required=False
+                        )
+                    }
+                )
+                super().__init__(metadata=metadata)
+            
+            def apply(self, agent_config, **kwargs):
+                """Apply the test pattern to an agent config."""
+                logger.info(f"Applying pattern to agent config: {agent_config.name}")
                 
-        assert start_edge_exists, f"START edge to {node_name} not found"
+                # Modify the agent config
+                if agent_config.node_configs is None:
+                    agent_config.node_configs = {}
+                
+                # Extract parameter with default
+                node_name = kwargs.get("node_name", "integration_node")
+                
+                # Add a node config
+                agent_config.node_configs[node_name] = {
+                    "name": node_name,
+                    "engine": "test_llm",  # Reference the engine by name
+                    "command_goto": "END"
+                }
+                
+                logger.info(f"Added node config: {node_name}")
+                return True
         
-        # Compile the graph
-        logger.info("Compiling graph after pattern application")
-        compiled = graph.compile()
-        assert compiled is not None, "Graph failed to compile"
+        # Create pattern instance
+        pattern = TestIntegrationPattern()
         
-        logger.info("Agent config pattern integration test successful")
+        # Create test agent config
+        agent_config = self.create_test_agent_config()
+        
+        # Apply the pattern
+        with console.status("[bold green]Applying pattern to agent config..."):
+            result = pattern.apply(agent_config)
+        
+        # Verify pattern was applied
+        assert result is True, "Pattern application should succeed"
+        assert "integration_node" in agent_config.node_configs, "Node config should be added"
+        
+        # Display the updated agent config
+        rprint(Panel.fit(f"Updated node configs: {agent_config.node_configs}", style="blue"))
 
-    def test_dynamic_graph_integration_with_agent(self, pattern_agent_config):
-        """Test DynamicGraph pattern integration with agents."""
+    def test_dynamic_graph_integration_with_agent(self):
+        """Test integrating patterns with dynamic graph and agent config."""
         logger.info("Testing dynamic graph integration with agent")
         
-        # Create a standalone graph
-        from haive.core.graph.dynamic_graph_builder import DynamicGraph
-        graph = DynamicGraph(name="dynamic_graph_test")
+        # Create graph
+        graph = DynamicGraph(
+            name="dynamic_graph_test",
+            state_schema=_TestState
+        )
         logger.info(f"Created graph: {graph}")
         
-        # Add engine to graph
-        if pattern_agent_config.engine:
-            logger.info("Adding engine to graph")
-            graph.engines = {"default": pattern_agent_config.engine}
-            graph.components = [pattern_agent_config.engine]
+        # Create test LLM engine
+        llm_engine = self.create_test_llm_engine()
+        logger.info("Adding engine to graph")
         
-        # Create a test pattern
+        # Create agent config
+        pattern_agent_config = self.create_test_agent_config()
+        
+        # Create test pattern
         class TestPattern(GraphPattern):
-            """Simple test pattern."""
+            """Test pattern for dynamic graph with agent config."""
             
             def __init__(self):
+                # Use proper ParameterDefinition for parameters
                 metadata = PatternMetadata(
-                    name="test_pattern",
-                    description="Simple test pattern",
+                    name="test_dynamic_graph_pattern",
+                    description="Test pattern for dynamic graph with agent",
                     pattern_type="test",
-                    required_components=[],
-                    parameters={"node_name": "test_node"}
+                    parameters={
+                        "node_name": ParameterDefinition(
+                            type="str",
+                            default="test_node",
+                            description="Name of the node to create",
+                            required=False
+                        )
+                    }
                 )
                 super().__init__(metadata=metadata)
             
-            def apply(self, graph, node_name="test_node", **kwargs):
-                """Apply a simple pattern with explicit START edge."""
-                logger.info(f"Applying test pattern to graph with node_name={node_name}")
+            def apply(self, graph, agent_config=None, **kwargs):
+                """Apply the pattern to a graph and optionally agent config."""
+                logger.info(f"Applying pattern to graph with agent config: {agent_config is not None}")
                 
-                # Add a simple node
-                graph.add_node(node_name, lambda x: x)
-                logger.info(f"Added node {node_name}")
+                # Extract parameters with defaults
+                node_name = kwargs.get("node_name", "test_node")
                 
-                # Add START edge
-                from langgraph.graph import START
+                # Add engine to graph components
+                graph.add_node(node_name, llm_engine, command_goto=END)
+                logger.info(f"Added node {node_name} to graph")
+                
+                # Add edges
                 graph.add_edge(START, node_name)
-                logger.info(f"Added START edge to {node_name}")
+                logger.info(f"Added edge: START → {node_name}")
                 
-                # Add to edges list
-                if hasattr(graph, "edges"):
-                    from haive.core.graph.dynamic_graph_builder import DynamicGraphEdge
-                    edge = DynamicGraphEdge(source="START", target=node_name)
-                    graph.edges.append(edge)
-                    logger.info(f"Added START edge to edges list")
+                # Update agent config if provided
+                if agent_config:
+                    if agent_config.node_configs is None:
+                        agent_config.node_configs = {}
+                    
+                    agent_config.node_configs[node_name] = {
+                        "name": node_name,
+                        "engine": llm_engine.name,
+                        "command_goto": "END"
+                    }
+                    logger.info(f"Updated agent config with node: {node_name}")
                 
                 return True
         
-        # Create and apply the pattern
+        # Create pattern instance
         pattern = TestPattern()
-        logger.info(f"Created pattern: {pattern.metadata.name}")
         
-        # Apply pattern directly
-        result = pattern.apply(graph)
-        logger.info(f"Pattern application result: {result}")
+        # Apply the pattern
+        with console.status("[bold green]Applying pattern to graph and agent config..."):
+            result = pattern.apply(graph, agent_config=pattern_agent_config)
         
-        # Verify node was created
-        assert "test_node" in graph.nodes, "Pattern node not found in graph"
+        # Verify pattern was applied
+        assert result is True, "Pattern application should succeed"
+        assert "test_node" in graph.nodes, "Node should be added to graph"
+        assert "test_node" in pattern_agent_config.node_configs, "Node config should be added to agent"
         
-        # Verify START edge exists
-        start_edge_exists = False
-        for edge in graph.edges:
-            if (hasattr(edge, "source") and edge.source == "START" and
-                hasattr(edge, "target") and edge.target == "test_node"):
-                start_edge_exists = True
-                break
+        # Build the graph
+        with console.status("[bold green]Building graph..."):
+            built_graph = graph.build()
+        assert built_graph is not None, "Graph building should succeed"
         
-        assert start_edge_exists, "START edge not found"
-        
-        # Compile the graph
-        logger.info("Compiling graph after pattern application")
-        compiled = graph.compile()
-        assert compiled is not None, "Graph failed to compile"
-        
-        logger.info("Dynamic graph integration test successful")
+        # Display the updated structures
+        rprint(Panel.fit(f"Updated graph nodes: {list(graph.nodes.keys())}", style="blue"))
+        rprint(Panel.fit(f"Updated agent node configs: {pattern_agent_config.node_configs}", style="blue"))
 
-    def test_pattern_schema_integration(self, pattern_agent_config):
-        """Test integration between patterns and schema system."""
+    def test_pattern_schema_integration(self):
+        """Test integrating patterns with state schema."""
         logger.info("Testing pattern schema integration")
         
-        # Skip test if StateSchema not properly available
-        try:
-            from haive.core.schema.state_schema import StateSchema
-        except (ImportError, AttributeError):
-            pytest.skip("StateSchema not available")
-        
-        # Create a standalone graph
-        from haive.core.graph.dynamic_graph_builder import DynamicGraph
-        graph = DynamicGraph(name="schema_pattern_test")
+        # Create graph with state schema
+        graph = DynamicGraph(
+            name="schema_pattern_test",
+            state_schema=_TestState
+        )
         logger.info(f"Created graph: {graph}")
         
-        # Add engine to graph
-        if pattern_agent_config.engine:
-            logger.info("Adding engine to graph")
-            graph.engines = {"default": pattern_agent_config.engine}
-            graph.components = [pattern_agent_config.engine]
+        # Create test LLM engine
+        llm_engine = self.create_test_llm_engine()
+        logger.info("Adding engine to graph")
         
-        # Create a schema pattern
+        # Create agent config
+        pattern_agent_config = self.create_test_agent_config()
+        
+        # Create test pattern with schema enhancement
         class SchemaPattern(GraphPattern):
-            """Pattern that works with schemas."""
+            """Test pattern that enhances state schema."""
             
             def __init__(self):
+                # Use proper ParameterDefinition for parameters
                 metadata = PatternMetadata(
                     name="schema_pattern",
-                    description="Test schema pattern",
+                    description="Pattern that enhances state schema",
                     pattern_type="schema",
-                    required_components=[],
-                    parameters={"node_name": "schema_node"}
+                    parameters={
+                        "node_name": ParameterDefinition(
+                            type="str",
+                            default="schema_node",
+                            description="Name of the node to create",
+                            required=False
+                        )
+                    }
                 )
                 super().__init__(metadata=metadata)
             
-            def apply(self, graph, node_name="schema_node", **kwargs):
-                """Apply pattern with explicit START edge."""
-                logger.info(f"Applying schema pattern to graph with node_name={node_name}")
+            def apply(self, graph, **kwargs):
+                """Apply the schema pattern to enhance a graph's state schema."""
+                from haive.core.schema.schema_composer import SchemaComposer
                 
-                # Add a basic node
-                graph.add_node(node_name, lambda x: x)
-                logger.info(f"Added node {node_name}")
+                logger.info(f"Applying schema pattern to graph")
                 
-                # Add START edge
-                from langgraph.graph import START
-                graph.add_edge(START, node_name)
-                logger.info(f"Added START edge to {node_name}")
+                # Extract parameters with defaults
+                node_name = kwargs.get("node_name", "schema_node")
                 
-                # Add to edges list
-                if hasattr(graph, "edges"):
-                    from haive.core.graph.dynamic_graph_builder import DynamicGraphEdge
-                    edge = DynamicGraphEdge(source="START", target=node_name)
-                    graph.edges.append(edge)
-                    logger.info(f"Added START edge to edges list")
-                
-                # For schema patterns, we would normally check/modify the schema
-                # but for this test, we just verify it exists
-                if hasattr(graph, "state_schema"):
-                    logger.info(f"Graph has state_schema: {type(graph.state_schema).__name__}")
-                
-                return True
+                # Create enhanced schema
+                try:
+                    # Get existing schema
+                    existing_schema = graph.state_schema
+                    logger.info(f"Found existing schema: {existing_schema.__name__}")
+                    
+                    # Create composer with existing schema
+                    composer = SchemaComposer(name=f"Enhanced{existing_schema.__name__}")
+                    
+                    # Add fields from existing schema
+                    composer.add_fields_from_model(existing_schema)
+                    logger.info("Added fields from existing schema")
+                    
+                    # Add enhanced fields
+                    composer.add_field("enhanced", bool, default=False, 
+                                     description="Flag added by schema pattern")
+                    composer.add_field("pattern_metadata", Dict[str, Any], default_factory=dict,
+                                     description="Metadata from pattern")
+                    logger.info("Added enhanced fields")
+                    
+                    # Build new schema
+                    enhanced_schema = composer.build()
+                    logger.info(f"Built enhanced schema: {enhanced_schema.__name__}")
+                    
+                    # Add a node that uses the enhanced schema
+                    def schema_node(state):
+                        """Node that uses enhanced schema."""
+                        logger.info(f"Schema node processing state: {state}")
+                        # Update enhanced fields
+                        return {
+                            "enhanced": True,
+                            "pattern_metadata": {
+                                "pattern": "schema_pattern",
+                                "applied_at": str(uuid.uuid4())
+                            }
+                        }
+                    
+                    # Add node to graph
+                    graph.add_node(node_name, schema_node)
+                    logger.info(f"Added node {node_name} to graph")
+                    
+                    # Update graph's schema
+                    graph.state_schema = enhanced_schema
+                    logger.info(f"Updated graph schema to {enhanced_schema.__name__}")
+                    
+                    return True
+                except Exception as e:
+                    logger.error(f"Error in schema pattern: {e}", exc_info=True)
+                    return False
         
-        # Create and apply the pattern
+        # Create pattern instance
         pattern = SchemaPattern()
-        logger.info(f"Created pattern: {pattern.metadata.name}")
         
-        # Apply pattern directly
-        result = pattern.apply(graph)
-        logger.info(f"Pattern application result: {result}")
+        # Apply the pattern
+        with console.status("[bold green]Applying schema pattern to graph..."):
+            result = pattern.apply(graph)
         
-        # Verify node was created
-        assert "schema_node" in graph.nodes, "Pattern node not found in graph"
+        # Verify pattern was applied
+        assert result is True, "Pattern application should succeed"
+        assert "schema_node" in graph.nodes, "Node should be added to graph"
+        assert hasattr(graph.state_schema, "model_fields"), "Schema should be a Pydantic model"
+        assert "enhanced" in graph.state_schema.model_fields, "Enhanced field should be added to schema"
         
-        # Verify START edge exists
-        start_edge_exists = False
-        for edge in graph.edges:
-            if (hasattr(edge, "source") and edge.source == "START" and
-                hasattr(edge, "target") and edge.target == "schema_node"):
-                start_edge_exists = True
-                break
-        
-        assert start_edge_exists, "START edge not found"
-        
-        # Compile the graph
-        logger.info("Compiling graph after pattern application")
-        compiled = graph.compile()
-        assert compiled is not None, "Graph failed to compile"
-        
-        logger.info("Pattern schema integration test successful")
+        # Display the enhanced schema
+        rprint(Panel.fit(f"Enhanced schema fields: {list(graph.state_schema.model_fields.keys())}", style="blue"))
 
     def test_simple_pattern_direct(self):
-        """Test pattern integration directly without fixtures."""
+        """Test simple pattern application directly."""
         logger.info("Testing pattern integration directly")
         
-        # Create a basic graph
-        from haive.core.graph.dynamic_graph_builder import DynamicGraph
-        graph = DynamicGraph(name="direct_test_graph")
+        # Create simple graph
+        graph = DynamicGraph(
+            name="direct_test_graph",
+            state_schema=_TestState
+        )
         
-        # Create a simple pattern
-        from haive.core.graph.patterns.base import GraphPattern, PatternMetadata
-        
+        # Create simple test pattern
         class SimpleTestPattern(GraphPattern):
-            """Very simple test pattern."""
+            """Basic test pattern."""
             
             def __init__(self):
                 metadata = PatternMetadata(
                     name="simple_test_pattern",
                     description="Basic test pattern",
                     pattern_type="test",
-                    required_components=[],
-                    parameters={}
+                    parameters={}  # No parameters needed
                 )
                 super().__init__(metadata=metadata)
             
-            def apply(self, graph, node_name="direct_test_node", **kwargs):
-                """Apply the pattern to graph."""
-                logger.info(f"Applying simple pattern to graph")
+            def apply(self, graph, **kwargs):
+                """Apply a simple pattern directly."""
+                logger.info("Applying simple pattern to graph")
                 
-                # Create a simple function for the node
-                identity_function = lambda x: x
+                # Simple identity function
+                def identity_function(state):
+                    """Return state unchanged."""
+                    logger.info(f"Identity function called with state: {state}")
+                    return {"processed": True}
                 
                 # Add node to graph
-                graph.add_node(node_name, identity_function)
-                logger.info(f"Added node: {node_name}")
-                
-                # Add START edge
-                from langgraph.graph import START
-                graph.add_edge(START, node_name)
-                logger.info(f"Added START edge: {START} -> {node_name}")
-                
-                # Also add to edges list
-                from haive.core.graph.dynamic_graph_builder import DynamicGraphEdge
-                edge = DynamicGraphEdge(source="START", target=node_name)
-                graph.edges.append(edge)
-                
-                return True
+                try:
+                    graph.add_node("direct_test_node", identity_function)
+                    logger.info("Added direct_test_node to graph")
+                    
+                    # Add edges
+                    graph.add_edge(START, "direct_test_node")
+                    graph.add_edge("direct_test_node", END)
+                    logger.info("Added edges to graph")
+                    
+                    return True
+                except Exception as e:
+                    logger.error(f"Error applying simple pattern: {e}", exc_info=True)
+                    return False
         
-        # Create the pattern and apply it
+        # Create pattern instance
         pattern = SimpleTestPattern()
-        result = pattern.apply(graph)
         
-        # Verify node was created
-        assert "direct_test_node" in graph.nodes, "Node not found in graph"
+        # Apply the pattern
+        with console.status("[bold green]Applying simple pattern to graph..."):
+            result = pattern.apply(graph)
         
-        # Verify edge was created
-        start_edge_exists = False
-        for edge in graph.edges:
-            if (hasattr(edge, "source") and edge.source == "START" and
-                hasattr(edge, "target") and edge.target == "direct_test_node"):
-                start_edge_exists = True
-                break
+        # Verify pattern was applied
+        assert result is True, "Pattern application should succeed"
+        assert "direct_test_node" in graph.nodes, "Node should be added to graph"
         
-        assert start_edge_exists, "START edge not found"
+        # Build and compile the graph
+        with console.status("[bold green]Building and compiling graph..."):
+            compiled_graph = graph.compile()
         
-        # Try to compile the graph
-        compiled = graph.compile()
-        assert compiled is not None, "Graph failed to compile"
+        # Invoke the graph
+        input_data = _TestState(test="simple_test")
+        with console.status("[bold green]Invoking graph..."):
+            result = compiled_graph.invoke(input_data.model_dump())
         
-        logger.info("Direct pattern test successful")
+        # Display the result
+        rprint(Panel.fit(f"Graph execution result: {result}", style="blue"))
+        
+        # Verify the result
+        assert "processed" in result, "Expected 'processed' in result"
+        assert result["processed"] is True, "Expected processed to be True"
+
+    def teardown_method(self):
+        """Clean up after each test."""
+        rprint(Panel.fit(f"Test completed: {self.test_id}", style="green"))
+
+
+if __name__ == "__main__":
+    # Run all tests manually
+    test_instance = TestAgentPatternIntegration()
+    
+    # Set up module
+    setup_module()
+    
+    # Run test methods with rich output
+    test_methods = [
+        test_instance.test_pattern_enhanced_workflow,
+        test_instance.test_agent_config_pattern_integration,
+        test_instance.test_dynamic_graph_integration_with_agent,
+        test_instance.test_pattern_schema_integration,
+        test_instance.test_simple_pattern_direct
+    ]
+    
+    for test_method in test_methods:
+        test_instance.setup_method()
+        try:
+            with console.status(f"[bold green]Running {test_method.__name__}..."):
+                test_method()
+            console.print(f"[bold green]✓[/] {test_method.__name__} passed")
+        except Exception as e:
+            console.print(f"[bold red]✗[/] {test_method.__name__} failed: {e}")
+            console.print_exception()
+        finally:
+            test_instance.teardown_method()

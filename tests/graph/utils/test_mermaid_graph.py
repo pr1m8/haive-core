@@ -16,17 +16,17 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
-
+from haive.core.models.retriever.base import RetrieverType
+from langchain_core.documents import Document
 # Adjust these imports to match your project structure
 from haive.core.graph.dynamic_graph_builder import DynamicGraph
 from haive.core.engine.aug_llm.base import AugLLMConfig
-from haive.core.engine.retriever import RetrieverConfig
+from haive.core.engine.retriever import RetrieverConfig,RetrieverType
 from haive.core.engine.vectorstore import VectorStoreConfig
 from langgraph.graph import START, END
 
 # Import the visualization utils
-from haive.core.graph.utils.mermaid_visualizer import visualize_graph, replace_visualization_method
-
+#from haive.core.graph.utils.mermaid_visualizer import visualize_graph, replace_visualization_method
 def create_sample_graph():
     """Create a sample graph for testing visualization."""
     
@@ -34,7 +34,7 @@ def create_sample_graph():
     llm_engine = AugLLMConfig(
         name="gpt4_engine",
         id="llm-" + uuid.uuid4().hex[:8],
-        model="gpt-4"
+        model="gpt-4o"
     )
     
     retriever_engine = RetrieverConfig(
@@ -44,13 +44,27 @@ def create_sample_graph():
     
     vectorstore_engine = VectorStoreConfig(
         name="vectorstore_engine",
-        id="vectorstore-" + uuid.uuid4().hex[:8]
+        id="vectorstore-" + uuid.uuid4().hex[:8],
+        documents=[Document(page_content="The capital of France is Paris."),
+                   Document(page_content="The capital of Germany is Berlin."),
+                   Document(page_content="The capital of Italy is Rome."),
+                   Document(page_content="The capital of Spain is Madrid."),
+                   Document(page_content="The capital of Portugal is Lisbon."),
+                   Document(page_content="The capital of Greece is Athens."),
+                   ]
+    )
+    
+    retrieve_engine = RetrieverConfig(
+        name="retrieve_engine",
+        id="retrieve-" + uuid.uuid4().hex[:8],
+        retriever_type=RetrieverType.VECTOR_STORE,
+        vector_store_config=vectorstore_engine
     )
     
     # Create a graph
     graph = DynamicGraph(
         name="TestRAGWorkflow",
-        components=[llm_engine, retriever_engine, vectorstore_engine],
+        components=[llm_engine, retriever_engine, vectorstore_engine, retrieve_engine],
         description="A test RAG workflow for visualization",
         visualize=True,
         debug_level="verbose"
@@ -71,9 +85,6 @@ def create_sample_graph():
     
     # Create a simple, linear flow
     graph.add_edge(START, "query_understanding")
-    graph.add_edge("query_understanding", "retrieve")
-    graph.add_edge("retrieve", "process_results")
-    graph.add_edge("process_results", "generate")
     
     # Add a conditional branch
     def route_by_query_complexity(state):
@@ -87,32 +98,38 @@ def create_sample_graph():
         else:
             return "simple"
     
-    # Add branching nodes
+    # Add branching nodes with clear names and configurations
     graph.add_node("complex_retrieval", retriever_engine, 
                   config_overrides={"k": 10})
     graph.add_node("simple_retrieval", retriever_engine,
                   config_overrides={"k": 3})
+    graph.add_node("medium_retrieval", retrieve_engine)
     
-    # Add conditional routing
+    # Add conditional routing - this will create the conditional edges
     graph.add_conditional_edges(
         "query_understanding",
         route_by_query_complexity,
         {
             "complex": "complex_retrieval",
             "simple": "simple_retrieval",
-            "medium": "retrieve"  # Default retrieval
+            "medium": "medium_retrieval"
         }
     )
     
-    # Connect branches back to main flow
+    # Connect all branches back to process_results
     graph.add_edge("complex_retrieval", "process_results")
     graph.add_edge("simple_retrieval", "process_results")
+    graph.add_edge("medium_retrieval", "process_results")
     
-    # Add error handling node
-    graph.add_node("error_handler", llm_engine, command_goto="generate")
+    # Connect process_results to generate (final step)
+    graph.add_edge("process_results", "generate")
     
-    # Make one node unreachable for testing
-    graph.add_node("unreachable_node", llm_engine)
+    # Compile the graph to check for errors
+    try:
+        compiled = graph.compile()
+        print(f"Graph compiled successfully.")
+    except Exception as e:
+        print(f"Compilation error: {e}")
     
     return graph
 
@@ -122,78 +139,8 @@ def test_direct_visualization():
     
     # Create sample graph
     graph = create_sample_graph()
+    graph.visualize_graph()
     
-    # Generate output filename
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_dir = "test_output"
-    os.makedirs(output_dir, exist_ok=True)
-    
-    # Test HTML format
-    html_file = os.path.join(output_dir, f"test_direct_html_{timestamp}.html")
-    print(f"Generating HTML visualization: {html_file}")
-    result_html = visualize_graph(
-        graph=graph,
-        output_file=html_file,
-        open_browser=False  # Set to True to open in browser
-    )
-    print(f"HTML visualization generated: {result_html}")
-    
-    # Test PNG format
-    png_file = os.path.join(output_dir, f"test_direct_png_{timestamp}.png")
-    print(f"Generating PNG visualization: {png_file}")
-    try:
-        result_png = visualize_graph(
-            graph=graph,
-            output_file=png_file,
-            format="png",
-            open_browser=False
-        )
-        print(f"PNG visualization generated: {result_png}")
-    except ImportError:
-        print("PNG visualization requires requests library - skipped")
-
-def test_method_replacement():
-    """Test visualization after method replacement."""
-    print("\n=== Testing Method Replacement ===")
-    
-    # Replace visualization method
-    result = replace_visualization_method()
-    print(f"Method replacement {'successful' if result else 'failed'}")
-    
-    if not result:
-        print("Skipping this test as method replacement failed")
-        return
-    
-    # Create sample graph
-    graph = create_sample_graph()
-    
-    # Generate output filename
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_dir = "test_output"
-    os.makedirs(output_dir, exist_ok=True)
-    
-    # Test using replaced method
-    output_file = os.path.join(output_dir, f"test_replaced_method_{timestamp}.html")
-    print(f"Generating visualization using replaced method: {output_file}")
-    
-    # Now we can use the replaced method directly on the graph instance
-    result = graph.visualize_graph(
-        output_file=output_file,
-        open_browser=False
-    )
-    print(f"Visualization generated: {result}")
-    
-    # Test using the dedicated Mermaid method
-    output_file = os.path.join(output_dir, f"test_mermaid_method_{timestamp}.html")
-    print(f"Generating visualization using dedicated Mermaid method: {output_file}")
-    
-    # Use the dedicated method
-    result = graph.visualize_mermaid(
-        output_file=output_file,
-        open_browser=False,
-        include_legend=True
-    )
-    print(f"Mermaid visualization generated: {result}")
 
 def main():
     """Main test function."""

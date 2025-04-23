@@ -483,11 +483,11 @@ def test_auto_detect_schema_from_configs(
     # Step 4: Compare with schema from SchemaComposer
     print("\n" + "="*20 + " Comparison with SchemaComposer " + "="*20)
 
-    composer_schema = SchemaComposer.compose_as_state_schema(
+    composer_schema = SchemaComposer.create_model(
         all_configs,
         name="ComposerStateSchema",
-        include_messages=True,
-        include_runnable_config=True
+        #include_messages=True,
+        #include_runnable_config=True
     )
 
     # Print details about this schema
