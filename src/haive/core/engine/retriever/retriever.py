@@ -173,7 +173,7 @@ class RetrieverConfig(InvokableEngine[Union[str, dict[str, Any]], list[Document]
         Raises:
             NotImplementedError: If not implemented by subclass
         """
-        raise NotImplementedError("Subclasses must implement instantiate method")
+        return 
 
     def apply_runnable_config(self, runnable_config: RunnableConfig | None = None) -> dict[str, Any]:
         """Extract parameters from runnable_config relevant to this retriever.
