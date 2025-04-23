@@ -19,17 +19,8 @@ def apply_pattern_to_graph(
     verify_compatibility: bool = True,
     **kwargs
 ) -> Any:
-    """Apply a registered pattern to a graph with enhanced verification.
-    
-    Args:
-        graph: Graph to apply the pattern to
-        pattern_name: Name of pattern to apply
-        verify_compatibility: Whether to verify component compatibility
-        **kwargs: Pattern parameters
-        
-    Returns:
-        Modified graph
-    """
+    """Apply a registered pattern to a graph with enhanced verification."""
+    # Get registry using singleton
     registry = GraphPatternRegistry.get_instance()
     pattern = registry.get_pattern(pattern_name)
 
@@ -293,12 +284,27 @@ def find_compatible_patterns(components: list[Any]) -> list[str]:
 
     return compatible_patterns
 
+# Add to src/haive/core/graph/patterns/integration.py
 
-# Register integrations when module is imported
+def register_callable_processor():
+    """Register the callable processor explicitly."""
+    try:
+        from haive.core.graph.node.registry import NodeTypeRegistry
+        from haive.core.graph.node.processors import CallableNodeProcessor
+        
+        # Get registry
+        registry = NodeTypeRegistry.get_instance()
+        
+        # Register callable processor
+        registry.register_node_processor("callable", CallableNodeProcessor())
+        
+        logger.info("Registered callable proWScessor")
+    except ImportError as e:
+        logger.warning(f"Could not register callable processor: {e}")
 def register_integrations():
     """Register all integrations."""
     register_node_factory_integration()
     register_dynamic_graph_integration()
-
+    register_callable_processor()  # Add this line
 # Uncomment to auto-register when module is imported
 # register_integrations()

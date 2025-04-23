@@ -129,6 +129,10 @@ class NodeFactory:
                 # Create runnable in advance to detect any initialization issues
                 logger.debug(f"Pre-creating runnable for engine {engine.__class__.__name__}")
                 try:
+                    logger.debug(f"Node config: {node_config}")
+                    print(f"Node config: {node_config}")
+                    logger.debug(f"Runnable config: {node_config.runnable_config}")
+                    logger.debug(f"Engine: {engine}")
                     runnable = engine.create_runnable(node_config.runnable_config)
                     logger.debug(f"Successfully created runnable: {type(runnable).__name__}")
                 except Exception as e:

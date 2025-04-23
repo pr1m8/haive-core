@@ -1,4 +1,6 @@
-from typing import Any, Dict, List, Optional, Union, Type, Tuple, Callable, Literal
+# src/haive/core/graph/dynamic_graph_builder.py
+
+from typing import Any, Dict, List, Optional, Union, Type, Tuple, Callable, Literal, cast
 from pydantic import BaseModel, Field
 import logging
 import os
@@ -9,7 +11,7 @@ import time
 import traceback
 from datetime import datetime
 from enum import Enum
-
+from langchain_core.runnables.graph import MermaidDrawMethod
 try:
     import networkx as nx
     import matplotlib.pyplot as plt
@@ -24,10 +26,28 @@ from haive.core.schema.schema_composer import SchemaComposer
 from haive.core.graph.node.config import NodeConfig
 from haive.core.graph.node.factory import NodeFactory
 from haive.core.config.runnable import RunnableConfigManager
+from haive.core.graph.node.registry import NodeTypeRegistry
+from haive.core.graph.node.protocols import NodeProcessor
 
-# Configure logger
+# Configure logger with file and console handlers
 logger = logging.getLogger("DynamicGraph")
-logger.setLevel(logging.INFO)
+
+# Set up detailed file handler
+file_handler = logging.FileHandler('dynamic_graph.log')
+file_handler.setLevel(logging.DEBUG)
+file_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(funcName)s - %(message)s')
+file_handler.setFormatter(file_formatter)
+
+# Set up console handler (less verbose)
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+console_formatter = logging.Formatter('%(levelname)s - %(message)s')
+console_handler.setFormatter(console_formatter)
+
+# Add handlers to logger
+logger.addHandler(file_handler)
+logger.addHandler(console_handler)
+logger.setLevel(logging.DEBUG)
 
 # Debug level enum
 class DebugLevel(str, Enum):
@@ -77,10 +97,11 @@ class NodeStatus(str, Enum):
 
 class DynamicGraph:
     """
-    Dynamic graph builder with enhanced error tracing.
+    Dynamic graph builder with enhanced error tracing and node system integration.
     
     This class provides a builder interface for creating StateGraph instances
-    with improved error diagnostics and tracing.
+    with improved error diagnostics, tracing, and full integration with the
+    advanced node system.
     """
     
     def __init__(
@@ -95,7 +116,7 @@ class DynamicGraph:
         **kwargs
     ):
         """
-        Initialize a new DynamicGraph builder.
+        Initialize a new DynamicGraph builder with enhanced node support.
         
         Args:
             name: Unique name for this graph
@@ -107,57 +128,105 @@ class DynamicGraph:
             debug_level: Level of debugging information
             **kwargs: Additional keyword arguments
         """
-        self.id = kwargs.get("id", str(uuid.uuid4()))
-        self.name = name
-        self.description = description
-        self.components = components or []
-        self.visualize = visualize
-        self.default_runnable_config = default_runnable_config or {}
-        self.debug_level = DebugLevel(debug_level) if isinstance(debug_level, str) else debug_level
-        
-        # State tracking
-        self.engines = {}  # name -> engine
-        self.engines_by_id = {}  # id -> engine
-        self.nodes = {}  # name -> node_config
-        self.node_statuses = {}  # name -> NodeStatus
-        self.edges = []  # list of DynamicGraphEdge
-        self.branches = []  # list of branch conditions
-        self.applied_patterns = []  # list of applied pattern names
-        
-        # Error tracking
-        self.errors = []  # track errors with traces
-        self.warnings = []  # track warnings
-        self.operation_counts = {}  # count of operations by type
-        self.created_at = datetime.now()
-        self.last_modified = self.created_at
-        
-        # Configure logger based on debug level
-        self._configure_logger()
-        
-        # Log initialization
-        logger.info(f"Initializing DynamicGraph: {self.name} [{self.id}]")
-        
-        # Process components and initialize schemas
         try:
-            self._process_components()
-            self._initialize_schemas(state_schema)
-            self._initialize_graph()
-            logger.info(f"DynamicGraph initialized: {self.name}")
+            logger.info(f"Initializing DynamicGraph: {name}")
+            logger.debug(f"Parameters: components={len(components) if components else 0}, "
+                        f"state_schema={'provided' if state_schema else 'None'}, "
+                        f"debug_level={debug_level}, visualize={visualize}")
+            
+            self.id = kwargs.get("id", str(uuid.uuid4()))
+            self.name = name
+            self.description = description
+            self.components = components or []
+            self.visualize = visualize
+            self.default_runnable_config = default_runnable_config or {}
+            self.debug_level = DebugLevel(debug_level) if isinstance(debug_level, str) else debug_level
+            
+            # State tracking
+            self.engines = {}  # name -> engine
+            self.engines_by_id = {}  # id -> engine
+            self.nodes = {}  # name -> node_config
+            self.node_statuses = {}  # name -> NodeStatus
+            self.edges = []  # list of DynamicGraphEdge
+            self.branches = []  # list of branch conditions
+            self.applied_patterns = []  # list of applied pattern names
+            
+            # Error tracking
+            self.errors = []  # track errors with traces
+            self.warnings = []  # track warnings
+            self.operation_counts = {}  # count of operations by type
+            self.created_at = datetime.now()
+            self.last_modified = self.created_at
+            self.metadata = {}  # Additional metadata
+            
+            # Configure logger based on debug level
+            self._configure_logger()
+            
+            # Initialize registries and node system
+            self._initialize_registries()
+            
+            # Process components and initialize schemas
+            try:
+                logger.debug("Processing components...")
+                self._process_components()
+                
+                logger.debug("Initializing schemas...")
+                self._initialize_schemas(state_schema)
+                
+                logger.debug("Initializing graph...")
+                self._initialize_graph()
+                
+                logger.info(f"DynamicGraph initialized: {self.name}")
+            except Exception as e:
+                tb = traceback.format_exc()
+                logger.error(f"Initialization failed: {str(e)}\n{tb}")
+                # Re-raise with context
+                raise ValueError(f"Failed to initialize DynamicGraph: {str(e)}") from e
+                
         except Exception as e:
-            self._log_error("Initialization failed", e)
-            # Re-raise with context
+            tb = traceback.format_exc()
+            logger.error(f"Error in DynamicGraph.__init__: {str(e)}\n{tb}")
             raise
     
     def _configure_logger(self):
         """Configure logger based on debug level."""
-        if self.debug_level == DebugLevel.NONE:
-            logger.setLevel(logging.WARNING)
-        elif self.debug_level == DebugLevel.BASIC:
-            logger.setLevel(logging.INFO)
-        elif self.debug_level in [DebugLevel.VERBOSE, DebugLevel.PERFORMANCE]:
-            logger.setLevel(logging.DEBUG)
-        elif self.debug_level == DebugLevel.TRACE:
-            logger.setLevel(logging.DEBUG)
+        try:
+            if self.debug_level == DebugLevel.NONE:
+                logger.setLevel(logging.WARNING)
+            elif self.debug_level == DebugLevel.BASIC:
+                logger.setLevel(logging.INFO)
+            elif self.debug_level in [DebugLevel.VERBOSE, DebugLevel.TRACE]:
+                logger.setLevel(logging.DEBUG)
+            elif self.debug_level == DebugLevel.PERFORMANCE:
+                logger.setLevel(logging.DEBUG)
+                
+            logger.debug(f"Logger configured with level: {self.debug_level}")
+        except Exception as e:
+            tb = traceback.format_exc()
+            logger.error(f"Error configuring logger: {str(e)}\n{tb}")
+    
+    def _initialize_registries(self):
+        """Initialize registries used by the graph builder."""
+        try:
+            logger.debug("Initializing node registry...")
+            
+            # Get the NodeTypeRegistry instance
+            self.node_registry = NodeTypeRegistry.get_instance()
+            
+            # Ensure default processors are registered
+            if not self.node_registry.node_processors:
+                logger.debug("Registering default node processors...")
+                self.node_registry.register_default_processors()
+                
+            # Set up NodeFactory to use our registry
+            NodeFactory.set_registry(self.node_registry)
+            
+            logger.debug("Node registry and factory initialized successfully")
+        except Exception as e:
+            tb = traceback.format_exc()
+            logger.error(f"Error initializing registries: {str(e)}\n{tb}")
+            # Store error but continue
+            self._log_error("Registry initialization failed", e)
     
     def _log_error(self, message: str, error: Exception, is_warning: bool = False):
         """
@@ -168,125 +237,153 @@ class DynamicGraph:
             error: Exception that occurred
             is_warning: Whether this is a warning (otherwise error)
         """
-        error_message = f"{message}: {error}"
-        
-        if is_warning:
-            logger.warning(error_message)
-            self.warnings.append(error_message)
-        else:
-            logger.error(error_message)
-            self.errors.append(error_message)
-        
-        if self.debug_level in [DebugLevel.VERBOSE, DebugLevel.TRACE]:
-            # Get and log full traceback
+        try:
+            error_message = f"{message}: {str(error)}"
+            
+            # Get traceback
             tb = traceback.format_exc()
-            for line in tb.split('\n'):
-                if is_warning:
+            error_with_tb = f"{error_message}\n{tb}"
+            
+            if is_warning:
+                logger.warning(error_message)
+                for line in tb.split('\n'):
                     logger.warning(f"  {line}")
-                else:
+                self.warnings.append(error_with_tb)
+            else:
+                logger.error(error_message)
+                for line in tb.split('\n'):
                     logger.error(f"  {line}")
+                self.errors.append(error_with_tb)
+        except Exception as e:
+            logger.error(f"Error in _log_error: {str(e)}")
     
     def _process_components(self):
         """Process and resolve component references to engines."""
-        logger.info(f"Processing {len(self.components)} components")
-        
-        registry = EngineRegistry.get_instance()
-        
-        resolved_components = 0
-        
-        for i, component in enumerate(self.components):
-            try:
-                # Handle string references
-                if isinstance(component, str):
-                    # Try to lookup in registry by name
-                    engine = registry.find(component)
-                    if engine:
-                        logger.info(f"Resolved component string '{component}' to engine: {engine.name}")
-                        component = engine
-                        resolved_components += 1
-                    else:
-                        logger.warning(f"Could not resolve component string: {component}")
-                        continue
-                
-                # Handle ComponentRef objects
-                elif isinstance(component, ComponentRef):
-                    engine = None
-                    # Try to lookup by ID first
-                    if component.id:
-                        engine = registry.find(component.id)
+        try:
+            component_count = len(self.components)
+            logger.debug(f"Processing {component_count} components")
+            
+            registry = EngineRegistry.get_instance()
+            
+            resolved_components = 0
+            
+            for i, component in enumerate(self.components):
+                try:
+                    logger.debug(f"Processing component {i+1}/{component_count}: {type(component).__name__}")
                     
-                    # Try to lookup by name
-                    if not engine and component.name:
-                        engine = registry.find(component.name)
+                    # Handle string references
+                    if isinstance(component, str):
+                        # Try to lookup in registry by name
+                        engine = registry.find(component)
+                        if engine:
+                            logger.debug(f"Resolved component string '{component}' to engine: {engine.name}")
+                            component = engine
+                            resolved_components += 1
+                        else:
+                            logger.warning(f"Could not resolve component string: {component}")
+                            continue
                     
-                    if engine:
-                        logger.info(f"Resolved ComponentRef '{component.name}' to engine: {engine.name}")
-                        component = engine
-                        resolved_components += 1
-                    else:
-                        logger.warning(f"Could not resolve ComponentRef: {component.name}")
-                        continue
-                
-                # If it's an Engine, register it by name and ID
-                if isinstance(component, Engine):
-                    self.engines[component.name] = component
-                    # Register by ID if available
-                    engine_id = getattr(component, "id", None)
-                    if engine_id:
-                        self.engines_by_id[engine_id] = component
-                
-                # Replace in components list (if changed)
-                self.components[i] = component
-                
-            except Exception as e:
-                self._log_error(f"Error processing component {i}", e)
-                # Continue with other components
-        
-        logger.info(f"Processed {len(self.components)} components, resolved {resolved_components}")
+                    # Handle ComponentRef objects
+                    elif isinstance(component, ComponentRef):
+                        engine = None
+                        # Try to lookup by ID first
+                        if component.id:
+                            engine = registry.find(component.id)
+                        
+                        # Try to lookup by name
+                        if not engine and component.name:
+                            engine = registry.find(component.name)
+                        
+                        if engine:
+                            logger.debug(f"Resolved ComponentRef '{component.name}' to engine: {engine.name}")
+                            component = engine
+                            resolved_components += 1
+                        else:
+                            logger.warning(f"Could not resolve ComponentRef: {component.name}")
+                            continue
+                    
+                    # If it's an Engine, register it by name and ID
+                    if isinstance(component, Engine):
+                        self.engines[component.name] = component
+                        # Register by ID if available
+                        engine_id = getattr(component, "id", None)
+                        if engine_id:
+                            logger.debug(f"Registering engine by ID: {engine_id}")
+                            self.engines_by_id[engine_id] = component
+                        else:
+                            logger.debug(f"Engine {component.name} has no ID")
+                    
+                    # Replace in components list (if changed)
+                    self.components[i] = component
+                    
+                except Exception as e:
+                    self._log_error(f"Error processing component {i}", e)
+                    # Continue with other components
+            
+            logger.info(f"Processed {len(self.components)} components, resolved {resolved_components}")
+            
+        except Exception as e:
+            tb = traceback.format_exc()
+            logger.error(f"Error in _process_components: {str(e)}\n{tb}")
+            raise
     
     def _initialize_schemas(self, state_schema=None):
         """Initialize state and I/O schemas."""
-        # Use provided schema if available
-        if state_schema:
-            self.state_model = state_schema
-            logger.info(f"Using provided state schema: {state_schema.__name__}")
-        else:
-            # Auto-derive schema from components
-            schema_name = f"{self.name.replace('-', '_').title()}State"
-            logger.info(f"Deriving state schema from components as '{schema_name}'")
-            
-            try:
-                self.schema_composer = SchemaComposer(name=schema_name)
-                self.schema_composer.compose_from_components(self.components)
-                self.state_model = self.schema_composer.build()
+        try:
+            # Use provided schema if available
+            if state_schema:
+                self.state_model = state_schema
+                logger.info(f"Using provided state schema: {state_schema.__name__}")
+            else:
+                # Auto-derive schema from components
+                schema_name = f"{self.name.replace('-', '_').title()}State"
+                logger.info(f"Deriving state schema from components as '{schema_name}'")
                 
-                logger.info(f"Successfully derived state schema: {self.state_model.__name__}")
-            except Exception as e:
-                self._log_error("Error deriving state schema", e, is_warning=True)
-                
-                # Create minimal backup schema
-                logger.warning(f"Creating backup minimal schema due to derivation failure")
-                self.schema_composer = SchemaComposer(name=schema_name)
-                self.schema_composer.add_field("messages", list, default_factory=list)
-                self.schema_composer.add_field("input", str, default="")
-                self.schema_composer.add_field("output", str, default="")
-                self.state_model = self.schema_composer.build()
+                try:
+                    self.schema_composer = SchemaComposer(name=schema_name)
+                    self.schema_composer.from_components(self.components)
+                    self.state_model = self.schema_composer.build()
+                    
+                    logger.info(f"Successfully derived state schema: {self.state_model.__name__}")
+                except Exception as e:
+                    self._log_error("Error deriving state schema", e, is_warning=True)
+                    
+                    # Create minimal backup schema
+                    logger.warning(f"Creating backup minimal schema due to derivation failure")
+                    self.schema_composer = SchemaComposer(name=schema_name)
+                    self.schema_composer.add_field("messages", list, default_factory=list)
+                    self.schema_composer.add_field("input", str, default="")
+                    self.schema_composer.add_field("output", str, default="")
+                    self.state_model = self.schema_composer.build()
+                    
+                    logger.debug(f"Backup schema created: {self.state_model.__name__}")
+        except Exception as e:
+            tb = traceback.format_exc()
+            logger.error(f"Error in _initialize_schemas: {str(e)}\n{tb}")
+            raise
     
     def _initialize_graph(self):
         """Initialize the underlying StateGraph."""
         try:
+            logger.debug(f"Initializing StateGraph with schema: {self.state_model.__name__}")
+            
             self.graph_builder = StateGraph(self.state_model)
             logger.info(f"Initialized StateGraph with schema: {self.state_model.__name__}")
+            
         except Exception as e:
-            self._log_error("Error initializing StateGraph", e)
+            tb = traceback.format_exc()
+            logger.error(f"Error initializing StateGraph: {str(e)}\n{tb}")
+            
             # Analyze common initialization errors
             if "required positional argument" in str(e):
                 logger.error("StateGraph initialization failed due to missing required arguments")
+                logger.error(f"StateGraph expected args: {inspect.signature(StateGraph.__init__)}")
             elif "not callable" in str(e):
                 logger.error("StateGraph initialization failed due to non-callable schema")
+                logger.error(f"Schema type: {type(self.state_model)}")
             
             # Re-raise with context
-            raise ValueError(f"Failed to initialize StateGraph: {e}")
+            raise ValueError(f"Failed to initialize StateGraph: {str(e)}") from e
     
     def with_runnable_config(self, config: Dict[str, Any]) -> 'DynamicGraph':
         """
@@ -298,28 +395,36 @@ class DynamicGraph:
         Returns:
             New DynamicGraph instance with the specified config
         """
-        # Create a new graph with the same settings but different config
-        new_graph = DynamicGraph(
-            name=self.name,
-            components=self.components,
-            state_schema=self.state_model,
-            description=self.description,
-            default_runnable_config=config,
-            visualize=self.visualize,
-            debug_level=self.debug_level,
-            id=str(uuid.uuid4())  # New ID for new instance
-        )
-        
-        # Copy existing nodes, edges, and branches
-        new_graph.nodes = self.nodes.copy()
-        new_graph.node_statuses = self.node_statuses.copy()
-        new_graph.edges = self.edges.copy()
-        new_graph.branches = self.branches.copy()
-        new_graph.applied_patterns = self.applied_patterns.copy()
-        
-        logger.info(f"Created new graph with custom runnable config: {new_graph.id}")
-        
-        return new_graph
+        try:
+            logger.debug(f"Creating new graph with custom runnable config")
+            
+            # Create a new graph with the same settings but different config
+            new_graph = DynamicGraph(
+                name=self.name,
+                components=self.components,
+                state_schema=self.state_model,
+                description=self.description,
+                default_runnable_config=config,
+                visualize=self.visualize,
+                debug_level=self.debug_level,
+                id=str(uuid.uuid4())  # New ID for new instance
+            )
+            
+            # Copy existing nodes, edges, and branches
+            new_graph.nodes = self.nodes.copy()
+            new_graph.node_statuses = self.node_statuses.copy()
+            new_graph.edges = self.edges.copy()
+            new_graph.branches = self.branches.copy()
+            new_graph.applied_patterns = self.applied_patterns.copy()
+            
+            logger.info(f"Created new graph with custom runnable config: {new_graph.id}")
+            
+            return new_graph
+            
+        except Exception as e:
+            tb = traceback.format_exc()
+            logger.error(f"Error in with_runnable_config: {str(e)}\n{tb}")
+            raise
     
     def set_default_runnable_config(self, config: Dict[str, Any]) -> 'DynamicGraph':
         """
@@ -331,9 +436,18 @@ class DynamicGraph:
         Returns:
             Self for chaining
         """
-        self.default_runnable_config = config
-        logger.info("Updated default runnable config")
-        return self
+        try:
+            logger.debug(f"Setting default runnable config")
+            
+            self.default_runnable_config = config
+            logger.info("Updated default runnable config")
+            
+            return self
+            
+        except Exception as e:
+            tb = traceback.format_exc()
+            logger.error(f"Error in set_default_runnable_config: {str(e)}\n{tb}")
+            raise
     
     def update_default_runnable_config(self, **kwargs) -> 'DynamicGraph':
         """
@@ -345,19 +459,32 @@ class DynamicGraph:
         Returns:
             Self for chaining
         """
-        # Convert to RunnableConfig if not already
-        if not self.default_runnable_config:
-            self.default_runnable_config = RunnableConfigManager.create(**kwargs)
-        else:
-            if "configurable" not in self.default_runnable_config:
-                self.default_runnable_config = {"configurable": {}}
+        try:
+            logger.debug(f"Updating default runnable config with keys: {list(kwargs.keys())}")
             
-            # Add each kwarg to the configurable section
-            for key, value in kwargs.items():
-                self.default_runnable_config["configurable"][key] = value
-        
-        logger.info(f"Updated default runnable config with: {', '.join(kwargs.keys())}")
-        return self
+            # Convert to RunnableConfig if not already
+            if not self.default_runnable_config:
+                self.default_runnable_config = RunnableConfigManager.create(**kwargs)
+            else:
+                # Ensure configurable section exists
+                if "configurable" not in self.default_runnable_config:
+                    self.default_runnable_config = {"configurable": {}}
+                elif not isinstance(self.default_runnable_config["configurable"], dict):
+                    # Fix misconfigured configurable
+                    logger.warning("Found invalid configurable section, resetting")
+                    self.default_runnable_config["configurable"] = {}
+                
+                # Add each kwarg to the configurable section
+                for key, value in kwargs.items():
+                    self.default_runnable_config["configurable"][key] = value
+            
+            logger.info(f"Updated default runnable config with: {', '.join(kwargs.keys())}")
+            return self
+            
+        except Exception as e:
+            tb = traceback.format_exc()
+            logger.error(f"Error in update_default_runnable_config: {str(e)}\n{tb}")
+            raise
     
     def add_node(
         self,
@@ -367,34 +494,41 @@ class DynamicGraph:
         input_mapping: Optional[Dict[str, str]] = None,
         output_mapping: Optional[Dict[str, str]] = None,
         runnable_config: Optional[Dict[str, Any]] = None,
+        debug: bool = False,
         **kwargs
     ) -> 'DynamicGraph':
         """
-        Add a node to the graph with enhanced error tracking.
+        Add a node to the graph with enhanced error tracking and processor support.
         
         Args:
             name: Name of the node
-            config: NodeConfig, Engine, engine name, or callable function
-            command_goto: Optional next node to go to
+            config: NodeConfig, Engine, or callable function for the node
+            command_goto: Optional next node to go to (ignored if NodeConfig provided)
             input_mapping: Optional mapping from state keys to engine input keys
             output_mapping: Optional mapping from engine output keys to state keys
             runnable_config: Optional runtime configuration
-            **kwargs: Additional node configuration parameters
+            debug: Enable debug logging for this node
+            **kwargs: Additional parameters for NodeConfig
             
         Returns:
             Self for chaining
         """
+        start_time = time.time()
         try:
+            logger.debug(f"Adding node: {name} (type: {type(config).__name__})")
+            
             # Check if node already exists
             if name in self.nodes:
                 logger.warning(f"Node '{name}' already exists. Overwriting.")
             
             # Handle END constant conversion
             if command_goto == "END":
+                logger.debug("Converting 'END' string to END constant")
                 command_goto = END
             
-            # Convert to NodeConfig if not already
+            # Create NodeConfig if not already
             if not isinstance(config, NodeConfig):
+                logger.debug(f"Creating NodeConfig for {name}")
                 node_config = NodeConfig(
                     name=name,
                     engine=config,
@@ -402,44 +536,49 @@ class DynamicGraph:
                     input_mapping=input_mapping,
                     output_mapping=output_mapping,
                     runnable_config=runnable_config,
+                    debug=debug or self.debug_level in [DebugLevel.VERBOSE, DebugLevel.TRACE],
+                    registry=self.node_registry,
                     **kwargs
                 )
+                logger.debug(f"Created NodeConfig: {node_config.name}")
             else:
+                logger.debug(f"Using provided NodeConfig: {config.name}")
                 node_config = config
                 # If this is already a NodeConfig, ensure END is properly set
                 if getattr(node_config, "command_goto", None) == "END":
                     node_config.command_goto = END
             
-            # Resolve engine reference
-            engine, engine_id = node_config.resolve_engine()
+            # Set registry reference 
+            node_config.registry = self.node_registry
             
-            # Create node function with detailed error tracking
-            try:
-                # Debug log the engine type
-                if isinstance(engine, Engine):
-                    logger.info(f"Creating node function for {name} using engine type: {type(engine).__name__}")
-                elif callable(engine):
-                    logger.info(f"Creating node function for {name} using callable: {getattr(engine, '__name__', 'anonymous')}")
-                else:
-                    logger.info(f"Creating node function for {name} using: {type(engine).__name__}")
-                
-                node_function = NodeFactory.create_node_function(node_config)
-            except Exception as nf_error:
-                self._log_error(f"Error creating node function for '{name}'", nf_error)
-                # Re-raise with more context
-                raise ValueError(f"Failed to create node function: {nf_error}")
+            # Resolve engine reference
+            logger.debug(f"Resolving engine reference for node: {name}")
+            engine, engine_id = node_config.resolve_engine(self.node_registry)
+            logger.debug(f"Resolved engine: {type(engine).__name__}, id: {engine_id}")
+            
+            # Create node function using NodeFactory
+            logger.debug(f"Creating node function with NodeFactory for: {name}")
+            node_function = NodeFactory.create_node_function(node_config)
             
             # Add to StateGraph
             try:
+                logger.debug(f"Adding node to StateGraph: {name}")
                 self.graph_builder.add_node(name, node_function)
+                logger.debug(f"Successfully added node to StateGraph: {name}")
             except Exception as sg_error:
                 self._log_error(f"Error adding node '{name}' to StateGraph", sg_error)
                 # Re-raise with more context
-                raise ValueError(f"Failed to add node to StateGraph: {sg_error}")
+                raise ValueError(f"Failed to add node to StateGraph: {str(sg_error)}") from sg_error
             
             # Store node config for debugging
             self.nodes[name] = node_config
             self.node_statuses[name] = NodeStatus.ADDED
+            
+            # Update node function storage
+            self.metadata.setdefault("node_functions", {})[name] = {
+                "type": node_config.determine_node_type(), 
+                "created_at": datetime.now().isoformat()
+            }
             
             logger.info(f"Added node: {name}")
             
@@ -448,10 +587,230 @@ class DynamicGraph:
                 logger.debug(f"Node '{name}' has command_goto=END, adding explicit edge")
                 self.add_edge(name, END)
             
+            # Log performance
+            if self.debug_level == DebugLevel.PERFORMANCE:
+                elapsed = time.time() - start_time
+                logger.debug(f"Node addition took {elapsed:.4f} seconds")
+            
             return self
             
         except Exception as e:
+            tb = traceback.format_exc()
+            logger.error(f"Error adding node '{name}': {str(e)}\n{tb}")
+            
+            # Track error
             self._log_error(f"Error adding node '{name}'", e)
+            
+            # Update node status to ERROR if it was partially added
+            if name in self.nodes:
+                self.node_statuses[name] = NodeStatus.ERROR
+            
+            raise
+    
+    def add_mapping_node(
+        self,
+        name: str,
+        item_provider: str,
+        target_node: str,
+        item_key: str = "item",
+        **kwargs
+    ) -> 'DynamicGraph':
+        """
+        Add a node that maps items to parallel processing.
+        
+        Args:
+            name: Name for the node
+            item_provider: State key containing the items list
+            target_node: Target node to send items to
+            item_key: Key to use for each item in the target
+            **kwargs: Additional node configuration options
+            
+        Returns:
+            Self for chaining
+        """
+        try:
+            logger.debug(f"Creating mapping node: {name} → {target_node}")
+            
+            # Create the mapping node function
+            node_function = NodeFactory.create_mapping_node(
+                item_provider=item_provider,
+                target_node=target_node,
+                item_key=item_key,
+                name=name
+            )
+            
+            # Add to graph
+            try:
+                logger.debug(f"Adding mapping node to StateGraph: {name}")
+                self.graph_builder.add_node(name, node_function)
+                logger.debug(f"Successfully added mapping node: {name}")
+            except Exception as sg_error:
+                self._log_error(f"Error adding mapping node '{name}' to StateGraph", sg_error)
+                raise ValueError(f"Failed to add mapping node: {str(sg_error)}") from sg_error
+            
+            # Store node config (create minimal one for tracking)
+            self.nodes[name] = NodeConfig(
+                name=name,
+                engine=node_function.__node_config__.engine,
+                node_type="mapping",
+                metadata={"item_provider": item_provider, "target_node": target_node},
+                registry=self.node_registry
+            )
+            self.node_statuses[name] = NodeStatus.ADDED
+            
+            logger.info(f"Added mapping node: {name} → {target_node}")
+            
+            return self
+            
+        except Exception as e:
+            tb = traceback.format_exc()
+            logger.error(f"Error adding mapping node '{name}': {str(e)}\n{tb}")
+            self._log_error(f"Error adding mapping node '{name}'", e)
+            raise
+    
+    def add_conditional_node(
+        self,
+        name: str,
+        condition_func: Callable,
+        routes: Dict[Any, str],
+        default_route: Optional[str] = None,
+        **kwargs
+    ) -> 'DynamicGraph':
+        """
+        Add a node that routes based on a condition function.
+        
+        Args:
+            name: Name for the node
+            condition_func: Function that takes state and returns a key
+            routes: Mapping from condition results to node names
+            default_route: Default route if no match
+            **kwargs: Additional node configuration options
+            
+        Returns:
+            Self for chaining
+        """
+        try:
+            logger.debug(f"Creating conditional node: {name} with {len(routes)} routes")
+            
+            # Create the conditional node function
+            node_function = NodeFactory.create_conditional_node(
+                condition_func=condition_func,
+                routes=routes,
+                default_route=default_route,
+                name=name
+            )
+            
+            # Add to graph
+            try:
+                logger.debug(f"Adding conditional node to StateGraph: {name}")
+                self.graph_builder.add_node(name, node_function)
+                logger.debug(f"Successfully added conditional node: {name}")
+            except Exception as sg_error:
+                self._log_error(f"Error adding conditional node '{name}' to StateGraph", sg_error)
+                raise ValueError(f"Failed to add conditional node: {str(sg_error)}") from sg_error
+            
+            # Store node config (create minimal one for tracking)
+            self.nodes[name] = NodeConfig(
+                name=name,
+                engine=node_function.__node_config__.engine,
+                metadata={"routes": routes, "default_route": default_route},
+                registry=self.node_registry
+            )
+            self.node_statuses[name] = NodeStatus.ADDED
+            
+            logger.info(f"Added conditional node: {name} with {len(routes)} routes")
+            
+            # Add edges for visualization (doesn't affect logic which is in the node)
+            for route_name, target in routes.items():
+                edge = DynamicGraphEdge(
+                    source=name,
+                    target=target,
+                    condition=condition_func,
+                    metadata={"condition_key": route_name}
+                )
+                self.edges.append(edge)
+                
+            # Add default route if provided
+            if default_route:
+                edge = DynamicGraphEdge(
+                    source=name,
+                    target=default_route,
+                    condition=condition_func,
+                    metadata={"is_default": True}
+                )
+                self.edges.append(edge)
+            
+            return self
+            
+        except Exception as e:
+            tb = traceback.format_exc()
+            logger.error(f"Error adding conditional node '{name}': {str(e)}\n{tb}")
+            self._log_error(f"Error adding conditional node '{name}'", e)
+            raise
+    
+    def add_error_handler(
+        self,
+        name: str,
+        fallback_node: str = "END",
+        **kwargs
+    ) -> 'DynamicGraph':
+        """
+        Add an error handling node to the graph.
+        
+        Args:
+            name: Name for the node
+            fallback_node: Node to route to after handling error
+            **kwargs: Additional node configuration options
+            
+        Returns:
+            Self for chaining
+        """
+        try:
+            logger.debug(f"Creating error handler node: {name} → {fallback_node}")
+            
+            # Handle END constant conversion
+            if fallback_node == "END":
+                fallback_node = END
+            
+            # Create the error handler node function
+            node_function = NodeFactory.create_error_handler_node(
+                fallback_node=fallback_node,
+                name=name
+            )
+            
+            # Add to graph
+            try:
+                logger.debug(f"Adding error handler node to StateGraph: {name}")
+                self.graph_builder.add_node(name, node_function)
+                logger.debug(f"Successfully added error handler node: {name}")
+            except Exception as sg_error:
+                self._log_error(f"Error adding error handler '{name}' to StateGraph", sg_error)
+                raise ValueError(f"Failed to add error handler: {str(sg_error)}") from sg_error
+            
+            # Store node config
+            self.nodes[name] = NodeConfig(
+                name=name,
+                engine=node_function.__node_config__.engine,
+                command_goto=fallback_node,
+                metadata={"handler_type": "error", "fallback": str(fallback_node)},
+                registry=self.node_registry
+            )
+            self.node_statuses[name] = NodeStatus.ADDED
+            
+            # Add edge to fallback for visualization
+            self.edges.append(DynamicGraphEdge(
+                source=name, 
+                target=str(fallback_node)
+            ))
+            
+            logger.info(f"Added error handler node: {name} → {fallback_node}")
+            
+            return self
+            
+        except Exception as e:
+            tb = traceback.format_exc()
+            logger.error(f"Error adding error handler '{name}': {str(e)}\n{tb}")
+            self._log_error(f"Error adding error handler '{name}'", e)
             raise
     
     def add_edge(self, from_node: str, to_node: Union[str, Literal["END"]]) -> 'DynamicGraph':
@@ -466,14 +825,18 @@ class DynamicGraph:
             Self for chaining
         """
         try:
+            logger.debug(f"Adding edge: {from_node} → {to_node}")
+            
             # Convert "START" to special constant
             original_from = from_node
             if from_node == "START":
+                logger.debug("Converting 'START' string to START constant")
                 from_node = START
             
             # Convert "END" to special constant
             original_to = to_node
             if to_node == "END":
+                logger.debug("Converting 'END' string to END constant")
                 to_node = END
             
             # Validate nodes exist (except START/END)
@@ -498,7 +861,23 @@ class DynamicGraph:
                     logger.warning("Edge will be added, but graph may not compile")
             
             # Add to StateGraph
-            self.graph_builder.add_edge(from_node, to_node)
+            try:
+                logger.debug(f"Adding edge to StateGraph: {from_node} → {to_node}")
+                self.graph_builder.add_edge(from_node, to_node)
+                logger.debug(f"Successfully added edge to StateGraph")
+            except Exception as sg_error:
+                self._log_error(f"Error adding edge {from_node} → {to_node} to StateGraph", sg_error)
+                
+                # Additional error analysis
+                if "is not in graph" in str(sg_error):
+                    if "from_node" in str(sg_error):
+                        logger.error(f"Source node '{from_node}' is not in the graph")
+                        logger.error("Add the source node first with add_node()")
+                    else:
+                        logger.error(f"Target node '{to_node}' is not in the graph")
+                        logger.error("Add the target node first with add_node()")
+                
+                raise ValueError(f"Failed to add edge: {str(sg_error)}") from sg_error
             
             # Update node statuses
             if original_from != "START" and original_from in self.nodes:
@@ -519,16 +898,9 @@ class DynamicGraph:
             return self
             
         except Exception as e:
+            tb = traceback.format_exc()
+            logger.error(f"Error adding edge {from_node} → {to_node}: {str(e)}\n{tb}")
             self._log_error(f"Error adding edge {from_node} → {to_node}", e)
-            
-            # Additional error analysis
-            if "from_node" in str(e) and "is not in graph" in str(e):
-                logger.error(f"Source node '{from_node}' is not in the graph")
-                logger.error("Make sure to add the node first with add_node()")
-            elif "to_node" in str(e) and "is not in graph" in str(e):
-                logger.error(f"Target node '{to_node}' is not in the graph")
-                logger.error("Make sure to add the node first with add_node()")
-            
             raise
     
     def add_conditional_edges(
@@ -551,6 +923,7 @@ class DynamicGraph:
         try:
             # Get condition name for better logging
             condition_name = getattr(condition, "__name__", "anonymous_condition")
+            logger.debug(f"Adding conditional edges from {from_node} using '{condition_name}'")
             
             # Validate source node
             if from_node not in self.nodes:
@@ -570,16 +943,38 @@ class DynamicGraph:
                 sig = inspect.signature(condition)
                 if len(sig.parameters) < 1:
                     logger.warning(f"Condition function '{condition_name}' doesn't accept state parameter")
-            except Exception:
-                # Skip validation if we can't inspect the function
-                pass
+            except Exception as sig_error:
+                logger.warning(f"Couldn't inspect condition function: {str(sig_error)}")
+            
+            # Convert END strings to constants
+            routes_with_constants = {}
+            for key, target in routes.items():
+                if target == "END":
+                    routes_with_constants[key] = END
+                else:
+                    routes_with_constants[key] = target
             
             # Add to StateGraph
-            self.graph_builder.add_conditional_edges(
-                from_node,
-                condition,
-                routes
-            )
+            try:
+                logger.debug(f"Adding conditional edges to StateGraph from: {from_node}")
+                self.graph_builder.add_conditional_edges(
+                    from_node,
+                    condition,
+                    routes_with_constants
+                )
+                logger.debug(f"Successfully added conditional edges to StateGraph")
+            except Exception as sg_error:
+                self._log_error(f"Error adding conditional edges from {from_node} to StateGraph", sg_error)
+                
+                # Enhanced error analysis
+                if "not in graph" in str(sg_error):
+                    logger.error(f"Node '{from_node}' is not in the graph")
+                    logger.error("Add the source node first with add_node()")
+                elif "callable" in str(sg_error):
+                    logger.error("Condition must be a callable function")
+                    logger.error(f"Got {type(condition).__name__} instead")
+                
+                raise ValueError(f"Failed to add conditional edges: {str(sg_error)}") from sg_error
             
             # Store branch info for debugging
             self.branches.append({
@@ -592,10 +987,12 @@ class DynamicGraph:
             
             # Add edges with special formatting for conditional edges
             for key, target in routes.items():
+                target_str = str(target) if target != END else "END"
+                
                 self.edges.append(
                     DynamicGraphEdge(
                         source=from_node,
-                        target=target,
+                        target=target_str,
                         condition=condition,
                         metadata={
                             "condition_key": key,
@@ -608,7 +1005,7 @@ class DynamicGraph:
                 if from_node in self.nodes:
                     self.node_statuses[from_node] = NodeStatus.CONNECTED
                 
-                if target != "END" and target in self.nodes:
+                if target != "END" and target != END and target in self.nodes:
                     self.node_statuses[target] = NodeStatus.CONNECTED
             
             logger.info(f"Added conditional edges from: {from_node} using '{condition_name}'")
@@ -616,16 +1013,9 @@ class DynamicGraph:
             return self
             
         except Exception as e:
+            tb = traceback.format_exc()
+            logger.error(f"Error adding conditional edges from {from_node}: {str(e)}\n{tb}")
             self._log_error(f"Error adding conditional edges from {from_node}", e)
-            
-            # Enhanced error analysis
-            if "not in graph" in str(e):
-                logger.error(f"Node '{from_node}' is not in the graph")
-                logger.error("Add the source node first with add_node()")
-            elif "callable" in str(e):
-                logger.error("Condition must be a callable function")
-                logger.error(f"Got {type(condition).__name__} instead")
-            
             raise
     
     def set_entry_point(self, node_name: str) -> 'DynamicGraph':
@@ -639,6 +1029,8 @@ class DynamicGraph:
             Self for chaining
         """
         try:
+            logger.debug(f"Setting entry point to: {node_name}")
+            
             # Validate node exists
             if node_name not in self.nodes:
                 logger.warning(f"Entry point node '{node_name}' doesn't exist yet")
@@ -661,30 +1053,46 @@ class DynamicGraph:
             return self
             
         except Exception as e:
+            tb = traceback.format_exc()
+            logger.error(f"Error setting entry point to {node_name}: {str(e)}\n{tb}")
             self._log_error(f"Error setting entry point to {node_name}", e)
             raise
     
     def apply_pattern(self, pattern_name: str, **kwargs) -> 'DynamicGraph':
         """
-        Apply a registered workflow pattern.
+        Apply a registered workflow pattern to the graph.
+        
+        This method applies a pre-defined workflow pattern from the pattern registry,
+        with support for customizing nodes created by the pattern. Patterns provide
+        reusable graph structures that can be applied consistently across different graphs.
         
         Args:
             pattern_name: Name of the pattern to apply
-            **kwargs: Pattern-specific parameters
+            **kwargs: Pattern-specific parameters and customization options
             
         Returns:
             Self for chaining
         """
         try:
-            # Import here to avoid circular imports
-            from haive.core.graph.graph_pattern_registry import GraphPatternRegistry
+            # Import pattern registry
+            from haive.core.graph.patterns.registry import GraphPatternRegistry
             
-            # Get pattern registry
+            # Get pattern registry and ensure registry is initialized
             registry = GraphPatternRegistry.get_instance()
             
+            # Log pattern application
             logger.info(f"Applying pattern: {pattern_name}")
             
-            # Get pattern
+            # Extract node configuration options
+            node_configs = {}
+            pattern_kwargs = kwargs.copy()
+            
+            # Extract node_configs if provided
+            if "node_configs" in pattern_kwargs:
+                node_configs = pattern_kwargs.pop("node_configs")
+                logger.debug(f"Found node configs for: {', '.join(node_configs.keys())}")
+            
+            # Get the pattern from registry
             pattern = registry.get_pattern(pattern_name)
             if not pattern:
                 logger.warning(f"Pattern not found: {pattern_name}")
@@ -693,48 +1101,209 @@ class DynamicGraph:
                     available_patterns = registry.list_patterns()
                     if available_patterns:
                         logger.warning(f"Available patterns: {', '.join(available_patterns)}")
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.debug(f"Error listing patterns: {e}")
                 
                 # Exit early but don't raise exception
                 return self
             
-            # Track initial state for comparison
-            initial_node_count = len(self.nodes)
-            initial_edge_count = len(self.edges)
+            # Track state before applying pattern for change detection
+            initial_state = {
+                "node_count": len(self.nodes),
+                "edge_count": len(self.edges),
+                "branch_count": len(self.branches)
+            }
             
-            # Apply the pattern
-            pattern.apply(self, **kwargs)
+            # Check compatibility between pattern and available components
+            if hasattr(pattern, "check_compatibility"):
+                compatibility_result = pattern.check_compatibility(self, **pattern_kwargs)
+                if not compatibility_result.get("compatible", True):
+                    warnings = compatibility_result.get("warnings", [])
+                    for warning in warnings:
+                        logger.warning(f"Compatibility issue: {warning}")
+                    
+                    # Check if we should continue despite warnings
+                    if not kwargs.get("force", False) and not compatibility_result.get("continue", True):
+                        logger.warning(f"Pattern {pattern_name} is not compatible with this graph")
+                        return self
+            
+            # Apply the pattern with node configuration options
+            try:
+                # Try newer pattern application method with node configs
+                if hasattr(pattern, "apply_with_configs"):
+                    logger.debug("Using apply_with_configs pattern method")
+                    result = pattern.apply_with_configs(self, node_configs=node_configs, **pattern_kwargs)
+                # Try integration method
+                elif hasattr(pattern, "apply_to_graph"):
+                    logger.debug("Using apply_to_graph pattern method")
+                    result = pattern.apply_to_graph(self, node_configs=node_configs, **pattern_kwargs)
+                # Fallback to basic apply method
+                else:
+                    logger.debug("Using standard apply pattern method")
+                    # Add node_configs back as a parameter for newer patterns that might use it
+                    pattern_kwargs["node_configs"] = node_configs
+                    result = pattern.apply(self, **pattern_kwargs)
+            except Exception as e:
+                self._log_error(f"Error applying pattern {pattern_name}", e)
+                raise ValueError(f"Failed to apply pattern {pattern_name}: {str(e)}") from e
             
             # Track changes for detailed logging
-            new_nodes = len(self.nodes) - initial_node_count
-            new_edges = len(self.edges) - initial_edge_count
+            changes = {
+                "new_nodes": len(self.nodes) - initial_state["node_count"],
+                "new_edges": len(self.edges) - initial_state["edge_count"],
+                "new_branches": len(self.branches) - initial_state["branch_count"]
+            }
             
-            # Track applied pattern
-            self.applied_patterns.append(pattern_name)
+            # Track applied pattern in history
+            if pattern_name not in self.applied_patterns:
+                pattern_entry = {
+                    "name": pattern_name,
+                    "timestamp": datetime.now().isoformat(),
+                    "parameters": {k: v for k, v in pattern_kwargs.items() 
+                                if not isinstance(v, (Callable, type))},
+                    "changes": changes
+                }
+                self.applied_patterns.append(pattern_name)
+                
+                # Store detailed pattern application in metadata if available
+                if "pattern_applications" not in self.metadata:
+                    self.metadata["pattern_applications"] = []
+                self.metadata["pattern_applications"].append(pattern_entry)
             
+            # Log pattern application results
             logger.info(f"Applied pattern '{pattern_name}'")
-            logger.info(f"Added {new_nodes} nodes and {new_edges} edges")
+            if changes["new_nodes"] > 0:
+                logger.info(f"Added {changes['new_nodes']} nodes")
+            if changes["new_edges"] > 0:
+                logger.info(f"Added {changes['new_edges']} edges")
+            if changes["new_branches"] > 0:
+                logger.info(f"Added {changes['new_branches']} conditional branches")
             
+            # Apply any post-pattern hooks if defined
+            if hasattr(pattern, "post_apply") and callable(pattern.post_apply):
+                try:
+                    pattern.post_apply(self, result, **pattern_kwargs)
+                except Exception as e:
+                    logger.warning(f"Error in post-apply hook: {e}")
+            
+            # Return self for method chaining
             return self
             
         except Exception as e:
-            self._log_error(f"Error applying pattern {pattern_name}", e)
+            tb = traceback.format_exc()
+            logger.error(f"Error applying pattern {pattern_name}: {str(e)}\n{tb}")
             
             # Enhanced error analysis
             if "has no attribute 'apply'" in str(e):
-                logger.error("Pattern doesn't have 'apply' method")
-                logger.error("Pattern may be incorrectly implemented")
-            elif "TypeError" in str(e) and "apply() got an unexpected keyword argument" in str(e):
-                logger.error("Pattern doesn't accept the provided parameters")
-                # Try to extract the invalid parameter
+                logger.error("Pattern doesn't have required method")
+                logger.error("Verify pattern implementation")
+            elif "TypeError" in str(e) and "unexpected keyword argument" in str(e):
                 import re
                 param_match = re.search(r"unexpected keyword argument '(.*?)'", str(e))
                 if param_match:
                     invalid_param = param_match.group(1)
                     logger.error(f"Invalid parameter: '{invalid_param}'")
+                    logger.error(f"Check pattern documentation for supported parameters")
             
+            # Re-raise with context for proper error tracking
+            raise ValueError(f"Failed to apply pattern '{pattern_name}': {str(e)}") from e
+    
+    def debug_node(self, node_name: str, enable: bool = True) -> 'DynamicGraph':
+        """
+        Enable or disable debugging for a specific node.
+        
+        Args:
+            node_name: Name of the node to debug
+            enable: Whether to enable or disable debugging
+            
+        Returns:
+            Self for chaining
+        """
+        try:
+            logger.debug(f"{'Enabling' if enable else 'Disabling'} debug for node: {node_name}")
+            
+            if node_name in self.nodes:
+                node_config = self.nodes[node_name]
+                if isinstance(node_config, NodeConfig):
+                    # Set debug flag
+                    node_config.debug = enable
+                    
+                    # Re-create node function
+                    node_function = NodeFactory.create_node_function(node_config)
+                    
+                    # Replace in graph
+                    self.graph_builder.add_node(node_name, node_function)
+                    
+                    logger.info(f"{'Enabled' if enable else 'Disabled'} debugging for node: {node_name}")
+                else:
+                    logger.warning(f"Node {node_name} does not have a NodeConfig")
+            else:
+                logger.warning(f"Node {node_name} not found")
+                
+            return self
+            
+        except Exception as e:
+            tb = traceback.format_exc()
+            logger.error(f"Error {'enabling' if enable else 'disabling'} debug for node {node_name}: {str(e)}\n{tb}")
+            self._log_error(f"Error changing debug state for node {node_name}", e)
             raise
+    
+    def validate_node_config(self, node_name: str) -> Dict[str, Any]:
+        """
+        Validate a node configuration and provide detailed diagnostic information.
+        
+        Args:
+            node_name: Name of the node to validate
+            
+        Returns:
+            Dictionary with validation results
+        """
+        try:
+            logger.debug(f"Validating node configuration: {node_name}")
+            
+            if node_name not in self.nodes:
+                logger.warning(f"Node {node_name} not found")
+                return {"valid": False, "error": "Node not found"}
+            
+            node_config = self.nodes[node_name]
+            
+            # Check if it's a NodeConfig
+            if not isinstance(node_config, NodeConfig):
+                logger.warning(f"Node {node_name} does not have a NodeConfig")
+                return {"valid": False, "error": "Not a NodeConfig", "type": type(node_config).__name__}
+            
+            # Check engine reference
+            engine, engine_id = node_config.resolve_engine()
+            
+            results = {
+                "valid": True,
+                "node_name": node_name,
+                "node_type": node_config.determine_node_type(),
+                "engine_type": str(getattr(engine, "engine_type", "unknown")),
+                "engine_id": engine_id,
+                "command_goto": str(node_config.command_goto) if node_config.command_goto else None,
+                "status": self.node_statuses.get(node_name, NodeStatus.ADDED).value,
+                "input_mapping": node_config.input_mapping,
+                "output_mapping": node_config.output_mapping,
+                "debug": node_config.debug
+            }
+            
+            # Test node creation 
+            try:
+                node_function = NodeFactory.create_node_function(node_config)
+                results["node_function"] = "created"
+                results["node_function_type"] = type(node_function).__name__
+            except Exception as e:
+                results["valid"] = False
+                results["error"] = f"Failed to create node function: {str(e)}"
+            
+            logger.debug(f"Node validation results: {results}")
+            return results
+            
+        except Exception as e:
+            tb = traceback.format_exc()
+            logger.error(f"Error validating node {node_name}: {str(e)}\n{tb}")
+            return {"valid": False, "error": str(e), "traceback": tb}
     
     def _validate_graph(self) -> List[str]:
         """
@@ -743,70 +1312,77 @@ class DynamicGraph:
         Returns:
             List of validation issues found
         """
-        logger.info("Validating graph structure...")
-        
-        validation_issues = []
-        
-        # 1. Check for START edges
-        start_edges = []
-        for edge in self.edges:
-            if edge.source in ["START", "__start__", str(START)]:
-                start_edges.append(edge)
-        
-        if not start_edges:
-            warning_msg = "Graph has no START edges - compilation will likely fail"
-            logger.warning(warning_msg)
-            validation_issues.append(warning_msg)
+        try:
+            logger.info("Validating graph structure...")
             
-            # Try to suggest a fix
-            if len(self.nodes) > 0:
-                first_node = next(iter(self.nodes.keys()))
-                suggestion = f"Add entry point with 'graph.add_edge(START, \"{first_node}\")'"
-                logger.warning(f"Suggestion: {suggestion}")
-        else:
-            logger.info(f"Found {len(start_edges)} START edge(s)")
-        
-        # 2. Check for unreachable nodes
-        reachable_nodes = set()
-        
-        # Start with nodes directly connected to START
-        for edge in self.edges:
-            if edge.source in ["START", "__start__", str(START)]:
-                reachable_nodes.add(edge.target)
-        
-        # Iteratively add nodes reachable from current set until no more are found
-        new_nodes_found = True
-        iteration = 0
-        max_iterations = 100  # Prevent infinite loop
-        
-        while new_nodes_found and iteration < max_iterations:
-            iteration += 1
-            new_nodes_found = False
+            validation_issues = []
             
+            # 1. Check for START edges
+            start_edges = []
             for edge in self.edges:
-                if edge.source in reachable_nodes and edge.target not in ["END", "__end__", str(END)]:
-                    if edge.target not in reachable_nodes:
-                        reachable_nodes.add(edge.target)
-                        new_nodes_found = True
-        
-        # Find unreachable nodes
-        unreachable_nodes = set(self.nodes.keys()) - reachable_nodes
-        if unreachable_nodes:
-            warning_msg = f"Found {len(unreachable_nodes)} unreachable node(s)"
-            logger.warning(warning_msg)
-            validation_issues.append(warning_msg)
+                if edge.source in ["START", "__start__", str(START)]:
+                    start_edges.append(edge)
             
-            # Show the list of unreachable nodes
-            logger.warning(f"Unreachable nodes: {', '.join(unreachable_nodes)}")
+            if not start_edges:
+                warning_msg = "Graph has no START edges - compilation will likely fail"
+                logger.warning(warning_msg)
+                validation_issues.append(warning_msg)
+                
+                # Try to suggest a fix
+                if len(self.nodes) > 0:
+                    first_node = next(iter(self.nodes.keys()))
+                    suggestion = f"Add entry point with 'graph.add_edge(START, \"{first_node}\")'"
+                    logger.warning(f"Suggestion: {suggestion}")
+            else:
+                logger.info(f"Found {len(start_edges)} START edge(s)")
             
-            # Try to suggest a fix
-            for node in unreachable_nodes:
-                # Update node status for visualization
-                self.node_statuses[node] = NodeStatus.UNREACHABLE
-        else:
-            logger.info("All nodes are reachable from START")
-        
-        return validation_issues
+            # 2. Check for unreachable nodes
+            reachable_nodes = set()
+            
+            # Start with nodes directly connected to START
+            for edge in self.edges:
+                if edge.source in ["START", "__start__", str(START)]:
+                    reachable_nodes.add(edge.target)
+            
+            # Iteratively add nodes reachable from current set until no more are found
+            new_nodes_found = True
+            iteration = 0
+            max_iterations = 100  # Prevent infinite loop
+            
+            while new_nodes_found and iteration < max_iterations:
+                iteration += 1
+                new_nodes_found = False
+                
+                for edge in self.edges:
+                    if edge.source in reachable_nodes and edge.target not in ["END", "__end__", str(END)]:
+                        if edge.target not in reachable_nodes:
+                            reachable_nodes.add(edge.target)
+                            new_nodes_found = True
+            
+            # Find unreachable nodes
+            unreachable_nodes = set(self.nodes.keys()) - reachable_nodes
+            if unreachable_nodes:
+                warning_msg = f"Found {len(unreachable_nodes)} unreachable node(s)"
+                logger.warning(warning_msg)
+                validation_issues.append(warning_msg)
+                
+                # Show the list of unreachable nodes
+                logger.warning(f"Unreachable nodes: {', '.join(unreachable_nodes)}")
+                
+                # Try to suggest a fix
+                for node in unreachable_nodes:
+                    # Update node status for visualization
+                    self.node_statuses[node] = NodeStatus.UNREACHABLE
+            else:
+                logger.info("All nodes are reachable from START")
+            
+            return validation_issues
+            
+        except Exception as e:
+            tb = traceback.format_exc()
+            logger.error(f"Error validating graph: {str(e)}\n{tb}")
+            validation_issues.append(f"Validation error: {str(e)}")
+            return validation_issues
     
     def build(self, checkpointer=None, **kwargs) -> Any:
         """
@@ -820,6 +1396,8 @@ class DynamicGraph:
             Built but not compiled graph
         """
         try:
+            logger.info(f"Building graph: {self.name}")
+            
             # Run validation before building
             validation_issues = self._validate_graph()
             
@@ -836,37 +1414,41 @@ class DynamicGraph:
             return self.graph_builder
             
         except Exception as e:
-            self._log_error(f"Error building graph", e)
+            tb = traceback.format_exc()
+            logger.error(f"Error building graph: {str(e)}\n{tb}")
             
             # Enhanced error analysis
             self._analyze_build_error(e)
             
-            raise
+            raise ValueError(f"Failed to build graph: {str(e)}") from e
     
     def _analyze_build_error(self, error: Exception) -> None:
         """Analyze build error and provide diagnostic information."""
-        error_str = str(error)
-        
-        # Check for common build errors
-        if "Graph must have an entrypoint" in error_str:
-            logger.error("Graph is missing an entry point (START edge)")
-            logger.error("Add at least one edge from START to a node")
+        try:
+            error_str = str(error)
             
-            # Suggest a fix if possible
-            if self.nodes:
-                first_node = next(iter(self.nodes.keys()))
-                logger.error(f"Try adding: graph.add_edge(START, \"{first_node}\")")
-        elif "No transitions defined" in error_str:
-            logger.error("Graph has no transitions (edges) defined")
-            logger.error("Add edges between nodes")
-        elif "Node" in error_str and "is not in graph" in error_str:
-            # Extract node name if possible
-            import re
-            node_match = re.search(r"Node ['\"](.*?)['\"] is not in graph", error_str)
-            if node_match:
-                node_name = node_match.group(1)
-                logger.error(f"Node '{node_name}' referenced in edges but not added to graph")
-                logger.error(f"Add this node first with graph.add_node()")
+            # Check for common build errors
+            if "Graph must have an entrypoint" in error_str:
+                logger.error("Graph is missing an entry point (START edge)")
+                logger.error("Add at least one edge from START to a node")
+                
+                # Suggest a fix if possible
+                if self.nodes:
+                    first_node = next(iter(self.nodes.keys()))
+                    logger.error(f"Try adding: graph.add_edge(START, \"{first_node}\")")
+            elif "No transitions defined" in error_str:
+                logger.error("Graph has no transitions (edges) defined")
+                logger.error("Add edges between nodes")
+            elif "Node" in error_str and "is not in graph" in error_str:
+                # Extract node name if possible
+                import re
+                node_match = re.search(r"Node ['\"](.*?)['\"] is not in graph", error_str)
+                if node_match:
+                    node_name = node_match.group(1)
+                    logger.error(f"Node '{node_name}' referenced in edges but not added to graph")
+                    logger.error(f"Add this node first with graph.add_node()")
+        except Exception as e:
+            logger.error(f"Error analyzing build error: {str(e)}")
     
     def compile(self, checkpointer=None, **kwargs) -> Any:
         """
@@ -880,11 +1462,14 @@ class DynamicGraph:
             Compiled graph
         """
         try:
+            logger.info(f"Compiling graph: {self.name}")
+            
             # Perform pre-compilation checks
             validation_issues = self._validate_graph()
             
             # Log detailed pre-compilation state
-            self.debug_graph()
+            if self.debug_level in [DebugLevel.VERBOSE, DebugLevel.TRACE]:
+                self.debug_graph()
             
             # Compilation banner
             logger.info("COMPILING GRAPH WORKFLOW")
@@ -894,9 +1479,8 @@ class DynamicGraph:
                 logger.warning(f"Proceeding with compilation despite {len(validation_issues)} validation issues")
             
             # Compile the graph with detailed error trapping
-            logger.info(f"Compiling graph: {self.name}")
-            
             try:
+                logger.debug(f"Starting compilation process with checkpointer: {checkpointer is not None}")
                 compiled_graph = self.graph_builder.compile(checkpointer=checkpointer, **kwargs)
                 
                 # Store the compiled graph for future use
@@ -909,6 +1493,19 @@ class DynamicGraph:
                 logger.info(f"Edges: {len(self.edges)}")
                 logger.info(f"Branches: {len(self.branches)}")
                 
+                # Visualize if enabled
+                if self.visualize and VISUALIZATION_AVAILABLE:
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    output_dir = "graph_visualizations"
+                    os.makedirs(output_dir, exist_ok=True)
+                    output_file = os.path.join(output_dir, f"{self.name.replace(' ', '_')}_{timestamp}.png")
+                    
+                    try:
+                        self.visualize_graph(output_file)
+                        logger.info(f"Graph visualization saved to: {output_file}")
+                    except Exception as viz_error:
+                        logger.warning(f"Error creating visualization: {str(viz_error)}")
+                
                 return compiled_graph
                 
             except Exception as compile_error:
@@ -918,16 +1515,17 @@ class DynamicGraph:
                 # Analyze the most common compilation issues with enhanced diagnostics
                 self._analyze_compilation_error(compile_error)
                 
-                raise compile_error
+                raise ValueError(f"Failed to compile graph: {str(compile_error)}") from compile_error
             
         except Exception as e:
-            self._log_error("Error during graph compilation process", e)
+            tb = traceback.format_exc()
+            logger.error(f"Error during graph compilation process: {str(e)}\n{tb}")
             
             # Debug detailed graph state for troubleshooting
             logger.error("Graph state at compilation failure:")
             self.debug_graph()
             
-            raise
+            raise ValueError(f"Failed to compile graph: {str(e)}") from e
     
     def _analyze_compilation_error(self, error: Exception) -> None:
         """
@@ -936,616 +1534,280 @@ class DynamicGraph:
         Args:
             error: The exception that occurred
         """
-        error_str = str(error)
-        
-        # Format issue header
-        logger.error("COMPILATION DIAGNOSTIC")
-        
-        # Handle specific known error patterns with enhanced diagnosis
-        if "Graph must have an entrypoint" in error_str:
-            logger.error("CRITICAL: Graph is missing an entry point (START edge)")
-            logger.error("SOLUTION: Add at least one edge from START to a node:")
+        try:
+            error_str = str(error)
             
-            if self.nodes:
-                first_node = next(iter(self.nodes.keys()))
-                logger.error(f"    graph.add_edge(START, \"{first_node}\")")
+            # Format issue header
+            logger.error("COMPILATION DIAGNOSTIC")
+            
+            # Handle specific known error patterns with enhanced diagnosis
+            if "Graph must have an entrypoint" in error_str:
+                logger.error("CRITICAL: Graph is missing an entry point (START edge)")
+                logger.error("SOLUTION: Add at least one edge from START to a node:")
                 
-                # Suggest entry point
-                logger.error(f"SUGGESTION: Consider using '{first_node}' as entry point")
-            else:
-                logger.error("    No nodes found. Add nodes before setting entry point.")
-                
-        elif "Node" in error_str and "is unreachable" in error_str:
-            # Extract node name from error message
-            import re
-            node_match = re.search(r"Node ['\"](.*?)['\"] is unreachable", error_str)
-            if node_match:
-                unreachable_node = node_match.group(1)
-                logger.error(f"CRITICAL: Node '{unreachable_node}' is unreachable")
-                logger.error("SOLUTION: Ensure there is a path from START to this node:")
-                
-                # Attempt to find closest connected node to suggest a fix
-                connected_nodes = set()
-                for edge in self.edges:
-                    if edge.source in ["START", "__start__", str(START)]:
-                        connected_nodes.add(edge.target)
-                
-                if connected_nodes:
-                    closest_node = next(iter(connected_nodes))
-                    logger.error(f"    graph.add_edge(\"{closest_node}\", \"{unreachable_node}\")")
-                    logger.error(f"SUGGESTION: Consider connecting '{unreachable_node}' to '{closest_node}'")
+                if self.nodes:
+                    first_node = next(iter(self.nodes.keys()))
+                    logger.error(f"    graph.add_edge(START, \"{first_node}\")")
+                    
+                    # Suggest entry point
+                    logger.error(f"SUGGESTION: Consider using '{first_node}' as entry point")
                 else:
-                    logger.error(f"    graph.add_edge(START, \"{unreachable_node}\")")
-            else:
-                logger.error("CRITICAL: Some node is unreachable")
-        
-        # General advice
-        logger.error("GENERAL DEBUGGING STEPS")
-        logger.error("1. Ensure all nodes are properly connected (check START and END edges)")
-        logger.error("2. Validate that all conditional functions return expected values")
-        logger.error("3. Check for typos in node names throughout your code")
-        logger.error("4. Verify your state schema is consistent and supports all required fields")
-        logger.error("5. Try adding nodes incrementally and compile after each addition to isolate issues")
-    
-    def get_manager(self) -> Any:
+                    logger.error("    No nodes found. Add nodes before setting entry point.")
+                    
+            elif "Node" in error_str and "is unreachable" in error_str:
+                # Extract node name from error message
+                import re
+                node_match = re.search(r"Node ['\"](.*?)['\"] is unreachable", error_str)
+                if node_match:
+                    unreachable_node = node_match.group(1)
+                    logger.error(f"CRITICAL: Node '{unreachable_node}' is unreachable")
+                    logger.error("SOLUTION: Ensure there is a path from START to this node:")
+                    
+                    # Attempt to find closest connected node to suggest a fix
+                    connected_nodes = set()
+                    for edge in self.edges:
+                        if edge.source in ["START", "__start__", str(START)]:
+                            connected_nodes.add(edge.target)
+                    
+                    if connected_nodes:
+                        closest_node = next(iter(connected_nodes))
+                        logger.error(f"    graph.add_edge(\"{closest_node}\", \"{unreachable_node}\")")
+                        logger.error(f"SUGGESTION: Consider connecting '{unreachable_node}' to '{closest_node}'")
+                    else:
+                        logger.error(f"    graph.add_edge(START, \"{unreachable_node}\")")
+                else:
+                    logger.error("CRITICAL: Some node is unreachable")
+            
+            # General advice
+            logger.error("GENERAL DEBUGGING STEPS")
+            #logger.
+        except Exception as e:
+            logger.error(f"Error analyzing compilation error: {str(e)}")
+            tb = traceback.format_exc()
+            logger.error(f"Traceback: {tb}")
+            raise ValueError(f"Failed to analyze compilation error: {str(e)}") from e
+    def visualize_graph(self, output_file=None, open_browser=True, include_legend=True, 
+                   format="html", include_stats=True):
         """
-        Get a StateGraphManager for this graph.
+        Visualize the graph using Mermaid diagrams.
         
+        Args:
+            output_file: Path to save the visualization (optional)
+            open_browser: Whether to open the visualization
+            include_legend: Whether to include a legend
+            format: Output format ('html' or 'png')
+            include_stats: Whether to include graph statistics
+            
         Returns:
-            StateGraphManager instance
+            Path to the generated file
         """
         try:
-            from haive.core.graph.state_graph_manager import StateGraphManager
-            return StateGraphManager(self.graph_builder)
+            # Generate timestamp-based filename if none provided
+            if output_file is None:
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                output_dir = "graph_visualizations"
+                os.makedirs(output_dir, exist_ok=True)
+                output_file = os.path.join(output_dir, f"{self.name.replace(' ', '_')}_{timestamp}.{format}")
+            
+            logger.info(f"Visualizing graph: {self.name}")
+            
+            # Create visualizer instance
+            from haive.core.graph.utils.mermaid_visualizer import MermaidVisualizer
+            visualizer = MermaidVisualizer(self)
+            
+            # Generate visualization based on format
+            if format.lower() == "png":
+                result_file = visualizer.render_as_png(output_file, open_browser)
+            else:
+                result_file = visualizer.render_to_file(output_file, open_browser, include_legend, include_stats)
+            
+            logger.info(f"Graph visualization saved to: {result_file}")
+            return result_file
+        
+        except ImportError:
+            logger.warning("MermaidVisualizer not available, falling back to basic visualization")
+            # Fallback to original method if available
+            if hasattr(self, "compiled_graph") and self.compiled_graph is not None:
+                try:
+                    if output_file is None:
+                        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                        output_dir = "graph_visualizations"
+                        os.makedirs(output_dir, exist_ok=True)
+                        output_file = os.path.join(output_dir, f"{self.name.replace(' ', '_')}_compiled_{timestamp}.png")
+                    
+                    # Use the compiled graph's visualization capabilities
+                    png_data = self.compiled_graph.get_graph(xray=True).draw_mermaid_png()
+                    
+                    # Save the PNG data to a file
+                    with open(output_file, "wb") as f:
+                        f.write(png_data)
+                        
+                    logger.info(f"Compiled graph visualization saved to: {output_file}")
+                    return output_file
+                except Exception as e:
+                    logger.warning(f"Error visualizing compiled graph: {str(e)}")
+                    return None
+            else:
+                logger.warning("Graph has not been compiled and MermaidVisualizer is not available")
+                return None
         except Exception as e:
-            self._log_error("Error creating StateGraphManager", e)
-            raise
-    
-    def debug_graph(self) -> None:
-        """Print detailed debug information about the graph."""
-        logger.info(f"GRAPH DEBUG: {self.name}")
+            logger.warning(f"Error visualizing graph: {str(e)}")
+            return None
+    def debug_graph(self):
+        """
+        Generate comprehensive debug information about the graph state.
         
-        # Graph info
-        logger.info("GRAPH INFO:")
-        logger.info(f"  • Name: {self.name}")
-        logger.info(f"  • ID: {self.id}")
-        logger.info(f"  • Description: {self.description}")
-        logger.info(f"  • State Schema: {self.state_model.__name__}")
-        logger.info(f"  • Debug Level: {self.debug_level.value}")
-        logger.info(f"  • Created: {self.created_at.strftime('%Y-%m-%d %H:%M:%S')}")
+        This method provides detailed debugging information about the current state
+        of the DynamicGraph, including nodes, edges, connections, and potential issues.
+        """
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        print(f"\n===== DEBUG GRAPH: {self.name} ({timestamp}) =====")
         
-        # Components
-        logger.info("COMPONENTS:")
-        if not self.components:
-            logger.info("  • None defined")
-        else:
-            for i, component in enumerate(self.components):
-                component_type = type(component).__name__
-                name = getattr(component, "name", f"component_{i}")
-                engine_type = getattr(component, "engine_type", None)
-                engine_id = getattr(component, "id", None)
-                
-                logger.info(f"  • [{i+1}/{len(self.components)}] {name} ({component_type})")
-                if engine_type:
-                    logger.info(f"    → Type: {engine_type}")
-                if engine_id:
-                    logger.info(f"    → ID: {engine_id}")
+        # Graph overview
+        print(f"Graph ID: {self.id}")
+        print(f"Name: {self.name}")
+        print(f"Description: {self.description}")
+        print(f"State Model: {getattr(self.state_model, '__name__', 'None')}")
+        print(f"Debug Level: {self.debug_level}")
         
-        # Nodes with status
-        logger.info("NODES:")
-        if not self.nodes:
-            logger.info("  • None defined")
-        else:
-            for name, node_config in self.nodes.items():
-                # Get status
-                status = self.node_statuses.get(name, NodeStatus.ADDED)
+        # Components and engines
+        print(f"\n--- Components ({len(self.components)}) ---")
+        for i, component in enumerate(self.components):
+            component_type = type(component).__name__
+            component_name = getattr(component, "name", f"Component-{i}")
+            print(f"  {i+1}. {component_name} ({component_type})")
+        
+        # Registered engines
+        print(f"\n--- Registered Engines ({len(self.engines)}) ---")
+        for name, engine in self.engines.items():
+            engine_type = getattr(engine, "engine_type", "unknown")
+            engine_id = getattr(engine, "id", "no-id")
+            print(f"  {name} (ID: {engine_id}, Type: {engine_type})")
+        
+        # Nodes
+        print(f"\n--- Nodes ({len(self.nodes)}) ---")
+        for name, node_config in self.nodes.items():
+            node_type = getattr(node_config, "node_type", "unknown")
+            if hasattr(node_config, "determine_node_type"):
+                node_type = node_config.determine_node_type()
                 
-                # Get engine info
-                engine_info = ""
-                if hasattr(node_config, "engine"):
-                    engine = node_config.engine
-                    if hasattr(engine, "name"):
-                        engine_info = f" [Engine: {engine.name}]"
-                    elif isinstance(engine, str):
-                        engine_info = f" [Engine: {engine}]"
-                    elif callable(engine) and hasattr(engine, "__name__"):
-                        engine_info = f" [Function: {engine.__name__}]"
-                
-                logger.info(f"  • {name}{engine_info} - {status.value}")
+            engine_name = "None"
+            engine_type = "None"
+            if isinstance(node_config.engine, Engine):
+                engine_name = node_config.engine.name
+                engine_type = getattr(node_config.engine, "engine_type", "unknown")
+            elif callable(node_config.engine):
+                engine_name = getattr(node_config.engine, "__name__", "callable")
+                engine_type = "function"
+            
+            status = self.node_statuses.get(name, NodeStatus.ADDED)
+            goto = getattr(node_config, "command_goto", None)
+            goto_str = "END" if goto is END else str(goto) if goto else "None"
+            
+            print(f"  {name} ({status.value}):")
+            print(f"    Type: {node_type}")
+            print(f"    Engine: {engine_name} ({engine_type})")
+            print(f"    Command Goto: {goto_str}")
+            
+            # Print mappings if they exist
+            if node_config.input_mapping:
+                print(f"    Input Mapping: {node_config.input_mapping}")
+            if node_config.output_mapping:
+                print(f"    Output Mapping: {node_config.output_mapping}")
         
         # Edges
-        logger.info("EDGES:")
-        if not self.edges:
-            logger.info("  • None defined")
-        else:
-            # Group edges for better visibility
-            standard_edges = []
-            conditional_edges = []
-            start_edges = []
-            end_edges = []
-            
-            for edge in self.edges:
-                if edge.source in ["START", "__start__", str(START)]:
-                    start_edges.append(edge)
-                elif edge.target in ["END", "__end__", str(END)]:
-                    end_edges.append(edge)
-                elif edge.condition:
-                    conditional_edges.append(edge)
-                else:
-                    standard_edges.append(edge)
-            
-            # Print entry points first
-            if start_edges:
-                logger.info("  • Entry Points:")
-                for edge in start_edges:
-                    logger.info(f"    → START → {edge.target}")
-            
-            # Print standard edges
-            if standard_edges:
-                logger.info("  • Standard Edges:")
-                for edge in standard_edges:
-                    logger.info(f"    → {edge.source} → {edge.target}")
-            
-            # Print conditional edges
-            if conditional_edges:
-                logger.info("  • Conditional Edges:")
-                for edge in conditional_edges:
-                    condition_name = getattr(edge.condition, "__name__", "conditional")
-                    logger.info(f"    → {edge.source} → {edge.target} [{condition_name}]")
-            
-            # Print exit points
-            if end_edges:
-                logger.info("  • Exit Points:")
-                for edge in end_edges:
-                    logger.info(f"    → {edge.source} → END")
+        print(f"\n--- Edges ({len(self.edges)}) ---")
+        # Group edges by source
+        edges_by_source = {}
+        for edge in self.edges:
+            if edge.source not in edges_by_source:
+                edges_by_source[edge.source] = []
+            edges_by_source[edge.source].append(edge)
         
-        # Errors and warnings
+        # Print edges organized by source
+        for source, edges in edges_by_source.items():
+            print(f"  From {source}:")
+            for edge in edges:
+                target = edge.target
+                if edge.condition:
+                    condition_name = getattr(edge.condition, "__name__", "condition")
+                    print(f"    → {target} [conditional: {condition_name}]")
+                else:
+                    print(f"    → {target}")
+        
+        # Check for START edges
+        start_edges = [edge for edge in self.edges 
+                    if edge.source in ["START", "__start__", str(START)]]
+        if not start_edges:
+            print("\nWARNING: No START edges found - this will cause compilation failure")
+        else:
+            print(f"\nFound {len(start_edges)} START edge(s)")
+        
+        # Check for END edges
+        end_edges = [edge for edge in self.edges 
+                    if edge.target in ["END", "__end__", str(END)]]
+        if not end_edges:
+            print("\nWARNING: No END edges found - graph may loop indefinitely")
+        else:
+            print(f"\nFound {len(end_edges)} END edge(s):")
+            for edge in end_edges:
+                print(f"  {edge.source} → END")
+        
+        # Check for nodes with command_goto=END
+        end_goto_nodes = [name for name, config in self.nodes.items() 
+                        if getattr(config, "command_goto", None) is END]
+        if end_goto_nodes:
+            print(f"\nNodes with command_goto=END: {len(end_goto_nodes)}")
+            for node in end_goto_nodes:
+                print(f"  {node}")
+        
+        # Check for unreachable nodes
+        reachable_nodes = set()
+        for edge in start_edges:
+            reachable_nodes.add(edge.target)
+        
+        # Iteratively add nodes reachable from current set
+        new_nodes_found = True
+        while new_nodes_found:
+            new_nodes_found = False
+            for edge in self.edges:
+                if edge.source in reachable_nodes and edge.target not in ["END", "__end__", str(END)]:
+                    if edge.target not in reachable_nodes:
+                        reachable_nodes.add(edge.target)
+                        new_nodes_found = True
+        
+        unreachable_nodes = set(self.nodes.keys()) - reachable_nodes
+        if unreachable_nodes:
+            print(f"\nWARNING: Found {len(unreachable_nodes)} unreachable node(s):")
+            for node in unreachable_nodes:
+                print(f"  {node}")
+        
+        # Check for existing errors
         if self.errors:
-            logger.info("ERRORS:")
+            print(f"\n--- Errors ({len(self.errors)}) ---")
             for i, error in enumerate(self.errors):
-                logger.error(f"  • Error {i+1}: {error}")
+                print(f"  {i+1}. {error.split('\n')[0]}")
         
-        if self.warnings:
-            logger.info("WARNINGS:")
-            for i, warning in enumerate(self.warnings):
-                logger.warning(f"  • Warning {i+1}: {warning}")
-    
-    def visualize_graph(self, output_file: Optional[str] = None) -> None:
-        """
-        Visualize the graph using NetworkX.
+        # Check if graph has been compiled
+        compiled = hasattr(self, "compiled_graph") and self.compiled_graph is not None
+        print(f"\nCompilation Status: {'COMPILED' if compiled else 'NOT COMPILED'}")
         
-        Args:
-            output_file: Optional path to save the visualization (defaults to graph name)
-        """
-        if not VISUALIZATION_AVAILABLE:
-            logger.warning("Visualization requires NetworkX and Matplotlib - skipping")
-            return
-        
-        try:
-            # Set default output file if not provided
-            if output_file is None:
-                # Generate a default filename with timestamp for uniqueness
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                output_file = f"{self.name.replace(' ', '_').lower()}_graph_{timestamp}.png"
-            
-            logger.info(f"Visualizing graph to: {output_file}")
-            
-            # Create a new graph
-            G = nx.DiGraph()
-            
-            # Add START and END nodes
-            start_node = "START"
-            end_node = "END"
-            G.add_node(start_node)
-            G.add_node(end_node)
-            
-            # Add regular nodes
-            for name in self.nodes:
-                G.add_node(name)
-            
-            # Add all edges
-            for edge in self.edges:
-                # Handle START/END conversion
-                source = start_node if edge.source in ["START", "__start__", str(START)] else edge.source
-                target = end_node if edge.target in ["END", "__end__", str(END)] else edge.target
-                
-                # Add edge to graph
-                G.add_edge(source, target)
-            
-            # Create the layout
-            pos = nx.spring_layout(G, seed=42)
-            
-            # Draw nodes
-            nx.draw_networkx_nodes(
-                G, pos,
-                node_color="lightblue",
-                node_size=1500,
-                edgecolors='black'
-            )
-            
-            # Draw edges
-            nx.draw_networkx_edges(
-                G, pos,
-                edge_color="gray",
-                width=1.5,
-                arrowsize=15,
-                arrows=True
-            )
-            
-            # Draw node labels
-            nx.draw_networkx_labels(
-                G, pos,
-                font_size=10,
-                font_weight='bold'
-            )
-            
-            # Add title
-            plt.title(f"{self.name} Graph")
-            
-            # Remove axis
-            plt.axis('off')
-            
-            # Make sure directory exists
-            import os
-            os.makedirs(os.path.dirname(os.path.abspath(output_file)) or '.', exist_ok=True)
-            
-            # Save the visualization
-            plt.tight_layout()
-            plt.savefig(output_file, format="png", bbox_inches='tight')
-            plt.close()
-            
-            logger.info(f"Graph visualization saved to: {output_file}")
-            
-        except Exception as e:
-            self._log_error(f"Error in visualization", e)
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """
-        Convert to a serializable dictionary.
-        
-        Returns:
-            Dictionary representation of the graph
-        """
-        try:
-            # Basic info
-            result = {
-                "id": self.id,
-                "name": self.name,
-                "description": self.description,
-                "visualize": self.visualize,
-                "debug_level": self.debug_level.value,
-                "created_at": self.created_at.isoformat(),
-                "nodes": {},
-                "edges": [],
-                "applied_patterns": self.applied_patterns,
-                "stats": {
-                    "node_count": len(self.nodes),
-                    "edge_count": len(self.edges),
-                    "branch_count": len(self.branches),
-                    "component_count": len(self.components),
-                    "error_count": len(self.errors),
-                    "warning_count": len(self.warnings)
-                }
-            }
-            
-            # Add components (with special handling)
-            component_refs = []
-            for component in self.components:
-                if isinstance(component, Engine):
-                    component_refs.append({
-                        "type": "engine",
-                        "name": component.name,
-                        "id": getattr(component, "id", None),
-                        "engine_type": str(getattr(component, "engine_type", None))
-                    })
-                elif isinstance(component, str):
-                    component_refs.append({
-                        "type": "reference",
-                        "name": component
-                    })
-                elif hasattr(component, "to_dict"):
-                    component_refs.append(component.to_dict())
-                else:
-                    component_refs.append({
-                        "type": "unknown",
-                        "class": type(component).__name__
-                    })
-            
-            result["components"] = component_refs
-            
-            # Add schema info
-            result["schema"] = {
-                "name": self.state_model.__name__,
-                "fields": list(getattr(self.state_model, "__annotations__", {}).keys())
-            }
-            
-            # Add nodes with status
-            for name, node_config in self.nodes.items():
-                if hasattr(node_config, "to_dict"):
-                    node_data = node_config.to_dict()
-                    # Add node status
-                    node_data["status"] = self.node_statuses.get(name, NodeStatus.ADDED).value
-                    result["nodes"][name] = node_data
-                else:
-                    result["nodes"][name] = {
-                        "type": type(node_config).__name__,
-                        "status": self.node_statuses.get(name, NodeStatus.ADDED).value
-                    }
-            
-            # Add edges
-            for edge in self.edges:
-                edge_dict = {
-                    "source": edge.source,
-                    "target": edge.target,
-                    "conditional": edge.condition is not None,
-                }
-                
-                # Add condition name if available
-                if edge.condition and hasattr(edge.condition, "__name__"):
-                    edge_dict["condition_name"] = edge.condition.__name__
-                    
-                if edge.metadata:
-                    edge_dict["metadata"] = edge.metadata
-                    
-                result["edges"].append(edge_dict)
-            
-            # Add default config
-            result["default_runnable_config"] = self._sanitize_secret_values(self.default_runnable_config)
-            
-            return result
-            
-        except Exception as e:
-            self._log_error(f"Error serializing graph", e)
-            raise
-    
-    def _sanitize_secret_values(self, data: Any) -> Any:
-        """
-        Sanitize sensitive values in data structure.
-        
-        Args:
-            data: Data structure to sanitize
-            
-        Returns:
-            Sanitized data structure
-        """
-        # List of patterns that indicate sensitive information
-        sensitive_patterns = [
-            "api_key", "apikey", "key", "token", "secret", "password", "credential",
-            "auth", "access", "private"
-        ]
-        
-        if isinstance(data, dict):
-            result = {}
-            for key, value in data.items():
-                # Check for sensitive keys
-                is_sensitive = any(pattern in key.lower() for pattern in sensitive_patterns)
-                
-                if is_sensitive and isinstance(value, str):
-                    # Mask string values
-                    if value:
-                        result[key] = "********"
-                    else:
-                        result[key] = ""
-                else:
-                    result[key] = self._sanitize_secret_values(value)
-            return result
-        elif isinstance(data, list):
-            return [self._sanitize_secret_values(item) for item in data]
-        elif isinstance(data, tuple):
-            return tuple(self._sanitize_secret_values(item) for item in data)
-        elif isinstance(data, set):
-            return {self._sanitize_secret_values(item) for item in data}
-        else:
-            return data
-    
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'DynamicGraph':
-        """
-        Create from a serialized dictionary.
-        
-        Args:
-            data: Dictionary representation of a graph
-            
-        Returns:
-            Instantiated DynamicGraph
-        """
-        # Configure logger for class method
-        logger.info(f"Loading graph from dictionary: {data.get('name')}")
-        
-        # Extract basic info
-        name = data.get("name", "loaded_graph")
-        description = data.get("description")
-        visualize = data.get("visualize", False)
-        debug_level = data.get("debug_level", DebugLevel.BASIC)
-        
-        # Create empty graph
-        graph = cls(
-            name=name,
-            description=description,
-            visualize=visualize,
-            debug_level=debug_level,
-            id=data.get("id", str(uuid.uuid4()))
-        )
-        
-        # Resolve components if provided
-        registry = EngineRegistry.get_instance()
-        components = []
-        
-        for comp_ref in data.get("components", []):
+        # Generate visualization if possible
+        if VISUALIZATION_AVAILABLE:
             try:
-                # Handle different component reference formats
-                if isinstance(comp_ref, dict):
-                    comp_type = comp_ref.get("type")
-                    
-                    if comp_type == "engine" and comp_ref.get("name"):
-                        # Try to find engine by ID first, then by name
-                        engine = None
-                        if comp_ref.get("id"):
-                            engine = registry.find(comp_ref["id"])
-                        
-                        if not engine and comp_ref.get("name"):
-                            engine = registry.find(comp_ref["name"])
-                        
-                        if engine:
-                            components.append(engine)
-                        else:
-                            # Add as component reference
-                            components.append(ComponentRef(
-                                name=comp_ref["name"],
-                                id=comp_ref.get("id"),
-                                type=str(comp_ref.get("engine_type"))
-                            ))
-                    elif comp_type == "reference" and comp_ref.get("name"):
-                        # Simple string reference
-                        components.append(comp_ref["name"])
-                elif isinstance(comp_ref, str):
-                    # Direct string reference
-                    components.append(comp_ref)
-            except Exception as e:
-                logger.error(f"Error processing component reference: {e}")
-        
-        graph.components = components
-        graph._process_components()
-        graph._initialize_schemas()
-        
-        # Add nodes if provided
-        for name, node_data in data.get("nodes", {}).items():
-            try:
-                # Find engine for this node
-                engine = None
-                engine_ref = node_data.get("engine_ref")
+                from haive.core.graph.utils.mermaid_visualizer import visualize_graph
+                output_dir = "debug_visualizations"
+                os.makedirs(output_dir, exist_ok=True)
+                output_file = os.path.join(output_dir, f"{self.name.replace(' ', '_')}_{timestamp}.html")
                 
-                if isinstance(engine_ref, dict) and engine_ref.get("name"):
-                    # Try by ID first
-                    if engine_ref.get("id"):
-                        engine = registry.find(engine_ref["id"])
-                    
-                    # Then by name
-                    if not engine and engine_ref.get("name"):
-                        engine = registry.find(engine_ref["name"])
-                elif isinstance(engine_ref, str):
-                    engine = registry.find(engine_ref)
-                
-                if engine:
-                    # Create node config
-                    node_config = NodeConfig(
-                        name=name,
-                        engine=engine,
-                        command_goto=node_data.get("command_goto"),
-                        input_mapping=node_data.get("input_mapping"),
-                        output_mapping=node_data.get("output_mapping")
-                    )
-                    
-                    # Add to graph
-                    graph.add_node(name, node_config)
-                    
-                    # Set node status if provided
-                    if node_data.get("status"):
-                        try:
-                            graph.node_statuses[name] = NodeStatus(node_data["status"])
-                        except:
-                            # Use default status if invalid
-                            graph.node_statuses[name] = NodeStatus.ADDED
-                else:
-                    logger.warning(f"Could not resolve engine for node: {name}")
-            except Exception as e:
-                logger.warning(f"Error adding node {name} from serialized data: {e}")
+                print(f"\nGenerating debug visualization: {output_file}")
+                visualize_graph(
+                    graph=self,
+                    output_file=output_file,
+                    open_browser=False
+                )
+                print(f"Debug visualization saved to: {output_file}")
+            except Exception as viz_error:
+                print(f"Visualization error: {str(viz_error)}")
         
-        # Add edges if provided
-        for edge_data in data.get("edges", []):
-            try:
-                source = edge_data.get("source")
-                target = edge_data.get("target")
-                
-                if not source or not target:
-                    logger.warning(f"Invalid edge data: missing source or target")
-                    continue
-                
-                # Handle only non-conditional edges with the simple add_edge method
-                if not edge_data.get("conditional", False):
-                    graph.add_edge(source, target)
-                else:
-                    # Log that conditional edges require special handling
-                    logger.warning(f"Conditional edge from {source} to {target} needs manual re-creation")
-            except Exception as e:
-                logger.warning(f"Error processing edge data: {e}")
-        
-        # Set default config if provided
-        default_config = data.get("default_runnable_config")
-        if default_config:
-            graph.default_runnable_config = default_config
-        
-        # Final restoration summary
-        logger.info(f"Loaded graph: {name} with {len(graph.nodes)} nodes and {len(graph.edges)} edges")
-        return graph
-    
-    def save(self, filename: str) -> None:
-        """
-        Save the graph configuration to a file.
-        
-        Args:
-            filename: Path to save the graph
-        """
-        try:
-            # Convert to dictionary
-            data = self.to_dict()
-            
-            # Create directory if needed
-            import os
-            os.makedirs(os.path.dirname(os.path.abspath(filename)) or '.', exist_ok=True)
-            
-            # Save to file with pretty formatting
-            with open(filename, "w") as f:
-                json.dump(data, f, indent=2, default=str)  # Use str for non-serializable objects
-            
-            logger.info(f"Graph saved to: {filename}")
-            
-        except Exception as e:
-            self._log_error(f"Error saving graph", e)
-            raise
-    
-    @classmethod
-    def load(cls, filename: str) -> 'DynamicGraph':
-        """
-        Load a graph configuration from a file.
-        
-        Args:
-            filename: Path to the graph configuration file
-            
-        Returns:
-            Instantiated DynamicGraph
-        """
-        logger.info(f"Loading graph from file: {filename}")
-        
-        try:
-            # Check if file exists
-            import os
-            if not os.path.exists(filename):
-                raise FileNotFoundError(f"Graph configuration file not found: {filename}")
-            
-            # Load from file
-            try:
-                with open(filename, "r") as f:
-                    data = json.load(f)
-            except json.JSONDecodeError as json_err:
-                logger.error(f"JSON parsing error: {json_err}")
-                raise
-            
-            # Create from dictionary
-            graph = cls.from_dict(data)
-            
-            logger.info(f"Graph loaded from file")
-            return graph
-            
-        except Exception as e:
-            logger.error(f"Error loading graph: {e}")
-            
-            # Enhanced error analysis
-            if isinstance(e, FileNotFoundError):
-                logger.error(f"The file '{filename}' does not exist")
-            elif isinstance(e, PermissionError):
-                logger.error(f"Permission denied when trying to read '{filename}'")
-            elif isinstance(e, json.JSONDecodeError):
-                logger.error(f"Invalid JSON format in '{filename}'")
-            
-            raise
+        print("\n===== END DEBUG GRAPH =====\n")
