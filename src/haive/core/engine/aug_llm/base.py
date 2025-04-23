@@ -811,64 +811,6 @@ class AugLLMConfig(InvokableEngine[Union[str, dict[str, Any], list[BaseMessage]]
             **kwargs
         )
 
-    @classmethod
-    def for_map_reduce(cls,
-                     map_template: str | BasePromptTemplate,
-                     reduce_template: str | BasePromptTemplate,
-                     llm_config: LLMConfig | None = None,
-                     **kwargs):
-        """Create a pair of AugLLMConfig objects for map-reduce operations.
-        
-        Args:
-            map_template: Template for mapping operation
-            reduce_template: Template for reduce operation
-            llm_config: Optional LLM configuration
-            **kwargs: Additional parameters
-            
-        Returns:
-            Tuple of (map_config, reduce_config)
-        """
-        # Extract partial_variables from kwargs if provided
-        partial_variables = kwargs.pop("partial_variables", {})
-
-        # Prepare map template if it's a string
-        if isinstance(map_template, str):
-            map_prompt = ChatPromptTemplate.from_messages([
-                HumanMessagePromptTemplate.from_template(map_template)
-            ])
-        else:
-            map_prompt = map_template
-
-        # Prepare reduce template if it's a string
-        if isinstance(reduce_template, str):
-            reduce_prompt = ChatPromptTemplate.from_messages([
-                HumanMessagePromptTemplate.from_template(reduce_template)
-            ])
-        else:
-            reduce_prompt = reduce_template
-
-        # Create map config
-        map_config = cls(
-            name="map_processor",
-            prompt_template=map_prompt,
-            llm_config=llm_config or AzureLLMConfig(model="gpt-4o"),
-            uses_messages_field=False,  # Map prompts typically don't use messages
-            partial_variables=partial_variables,
-            **kwargs
-        )
-
-        # Create reduce config
-        reduce_config = cls(
-            name="reduce_processor",
-            prompt_template=reduce_prompt,
-            llm_config=llm_config or AzureLLMConfig(model="gpt-4o"),
-            uses_messages_field=False,  # Reduce prompts typically don't use messages
-            partial_variables=partial_variables,
-            **kwargs
-        )
-
-        return map_config, reduce_config
-
 
 class AugLLMFactory:
     """Factory for creating structured LLM runnables.
