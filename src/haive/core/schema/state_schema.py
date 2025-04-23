@@ -6,8 +6,7 @@ capabilities for state management in graph-based systems, including field sharin
 value reduction, and serialization support.
 """
 from __future__ import annotations
-from typing import Any, Dict, List, Optional, Type, TypeVar, Generic,\
-    Union, get_origin, get_args, Annotated, Callable, Sequence, TYPE_CHECKING, Literal
+from typing import Any, Dict, List, Optional, Type, TypeVar, Generic, Union, get_origin, get_args, Annotated, Callable, Sequence, TYPE_CHECKING, Literal
 from pydantic import BaseModel, Field, create_model
 import copy
 import inspect
@@ -46,6 +45,13 @@ class StateSchema(BaseModel, Generic[T]):
             count: int
         
         state = StateSchema[MyState](value="test", count=5)
+    
+    Attributes:
+        __shared_fields__ (List[str]): Fields shared with parent graph.
+        __serializable_reducers__ (Dict[str, str]): Mapping of field names to reducer function names.
+        __engine_io_mappings__ (Dict[str, Dict[str, List[str]]]): Engine I/O field mappings.
+        __input_fields__ (Dict[str, List[str]]): Input fields for each engine.
+        __output_fields__ (Dict[str, List[str]]): Output fields for each engine.
     """
     
     # Class variables to track field sharing and reducers
@@ -252,6 +258,12 @@ class StateSchema(BaseModel, Generic[T]):
                 except Exception as e:
                     logger.warning(f"Error applying reducer for {key}: {e}")
                     # Fall through to special handling or simple assignment
+            
+            # Special handling for list values - concat them when both are lists
+            if isinstance(current_value, list) and isinstance(value, list):
+                merged_list = current_value + value
+                setattr(self, key, merged_list)
+                continue
             
             # Special handling for dictionary values - merge them instead of replacing
             if isinstance(current_value, dict) and isinstance(value, dict):
@@ -642,7 +654,7 @@ class StateSchema(BaseModel, Generic[T]):
         Returns:
             New combined schema class
         """
-        # Use first schema name if not provided
+        # Use provided name or default
         if name is None and len(schemas) > 0:
             name = f"Combined{schemas[0].__name__}"
         elif name is None:
@@ -875,72 +887,3 @@ class StateSchema(BaseModel, Generic[T]):
         if hasattr(cls, "__engine_io_mappings__"):
             return cls.__engine_io_mappings__.copy()
         return {}
-
-    def to_command(self, goto: Optional[Union[str, "END"]] = None, 
-                  resume: Optional[Any] = None, 
-                  graph: Optional[str] = None) -> Command:
-        """
-        Convert this state to a Command.
-        
-        Args:
-            goto: Next node to go to
-            resume: Value to resume with
-            graph: Graph to send command to
-            
-        Returns:
-            Command with this state as the update
-        """
-        # Handle special END case
-        if goto == "END":
-            from langgraph.graph import END
-            goto = END
-        
-        return Command(update=self.to_dict(), goto=goto, resume=resume, graph=graph)
-
-    def to_send(self, node: str) -> Send:
-        """
-        Convert this state to a Send object.
-        
-        Args:
-            node: Target node name
-            
-        Returns:
-            Send object with this state as the argument
-        """
-        return Send(node, self.to_dict())
-
-    @classmethod
-    def create_command(cls, update: Dict[str, Any], goto: Optional[Union[str, "END"]] = None, 
-                      resume: Optional[Any] = None, graph: Optional[str] = None) -> Command:
-        """
-        Create a Command for state update and routing.
-        
-        Args:
-            update: State updates to apply
-            goto: Next node to go to
-            resume: Value to resume with
-            graph: Graph to send command to
-            
-        Returns:
-            Command object
-        """
-        # Handle special END case
-        if goto == "END":
-            from langgraph.graph import END
-            goto = END
-        
-        return Command(update=update, goto=goto, resume=resume, graph=graph)
-
-    @classmethod
-    def create_send(cls, node: str, arg: Any) -> Send:
-        """
-        Create a Send object for routing to another node.
-        
-        Args:
-            node: Name of the target node
-            arg: State to send to the node
-            
-        Returns:
-            Send object
-        """
-        return Send(node, arg)

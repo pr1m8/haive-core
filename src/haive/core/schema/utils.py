@@ -1,3 +1,9 @@
+"""
+Utility functions for schema manipulation in the Haive framework.
+
+This module provides the SchemaUtils class containing static methods for
+formatting types, extracting fields, and building schemas programmatically.
+"""
 import logging
 from collections.abc import Callable
 from typing import Any, TypeVar
@@ -14,17 +20,26 @@ DefaultType = TypeVar("DefaultType")
 logger = logging.getLogger(__name__)
 
 class SchemaUtils:
-    """Utility functions for schema manipulation and formatting."""
+    """
+    Utility functions for schema manipulation and formatting.
+    
+    This class provides static methods for working with schema-related tasks
+    such as formatting type annotations, extracting field information, and
+    building state schemas from components.
+    """
 
     @staticmethod
     def format_type_annotation(type_hint: Any) -> str:
-        """Format a type hint for pretty printing.
+        """
+        Format a type hint for pretty printing.
+        
+        Creates a clean, readable string representation of a type annotation.
         
         Args:
-            type_hint: The type hint to format
+            type_hint: The type hint to format.
             
         Returns:
-            A clean string representation of the type
+            A clean string representation of the type.
         """
         # Handle primitive types
         if type_hint is str:
@@ -69,13 +84,14 @@ class SchemaUtils:
     def extract_field_info(
         field_info: FieldInfo
     ) -> tuple[Any, str, str | None]:
-        """Extract useful information from a Pydantic FieldInfo.
+        """
+        Extract useful information from a Pydantic FieldInfo.
         
         Args:
-            field_info: Pydantic field info object
+            field_info: Pydantic field info object.
             
         Returns:
-            Tuple of (default_value, default_string_representation, description)
+            Tuple of (default_value, default_string_representation, description).
         """
         description = getattr(field_info, "description", None)
 
@@ -119,22 +135,26 @@ class SchemaUtils:
         reducer_fields: dict[str, Callable] | None = None,
         base_class: str = "StateSchema"
     ) -> str:
-        """Format a schema definition as Python code.
+        """
+        Format a schema definition as Python code.
+        
+        Creates a string representation of a schema class with all its fields,
+        properties, methods, and metadata.
         
         Args:
-            schema_name: Name of the schema class
-            fields: Dictionary of field names to (type, field_info) tuples
-            properties: Optional dictionary of property names to property methods
-            computed_properties: Optional dictionary of computed property definitions
-            class_methods: Optional dictionary of class method names to methods
-            static_methods: Optional dictionary of static method names to methods
-            field_descriptions: Optional dictionary of field descriptions
-            shared_fields: Optional set of field names that are shared with parent
-            reducer_fields: Optional dictionary of fields with reducer functions
-            base_class: Base class name for the schema
+            schema_name: Name of the schema class.
+            fields: Dictionary of field names to (type, field_info) tuples.
+            properties: Optional dictionary of property names to property methods.
+            computed_properties: Optional dictionary of computed property definitions.
+            class_methods: Optional dictionary of class method names to methods.
+            static_methods: Optional dictionary of static method names to methods.
+            field_descriptions: Optional dictionary of field descriptions.
+            shared_fields: Optional set of field names that are shared with parent.
+            reducer_fields: Optional dictionary of fields with reducer functions.
+            base_class: Base class name for the schema.
         
         Returns:
-            String containing the Python code representation
+            String containing the Python code representation.
         """
         properties = properties or {}
         computed_properties = computed_properties or {}
@@ -213,17 +233,18 @@ class SchemaUtils:
         reducers: dict[str, Callable] | None = None,
         base_class: type[BaseModel] | None = None
     ) -> type[BaseModel]:
-        """Build a state schema from field definitions.
+        """
+        Build a state schema from field definitions.
         
         Args:
-            name: Name for the schema class
-            fields: Dictionary mapping field names to (type, default) tuples
-            shared_fields: Optional list of fields shared with parent
-            reducers: Optional dictionary mapping field names to reducer functions
-            base_class: Optional base class (defaults to StateSchema)
+            name: Name for the schema class.
+            fields: Dictionary mapping field names to (type, default) tuples.
+            shared_fields: Optional list of fields shared with parent.
+            reducers: Optional dictionary mapping field names to reducer functions.
+            base_class: Optional base class (defaults to StateSchema).
             
         Returns:
-            A new schema class
+            A new schema class.
         """
         # Import StateSchema if no base class provided
         if base_class is None:
@@ -265,19 +286,20 @@ class SchemaUtils:
         shared: bool = False,
         reducer: Callable | None = None
     ) -> type[BaseModel]:
-        """Add a field to an existing schema class.
+        """
+        Add a field to an existing schema class.
         
         Args:
-            schema: Existing schema class
-            name: Field name to add
-            field_type: Type of the field
-            default: Default value
-            description: Optional field description
-            shared: Whether the field is shared with parent
-            reducer: Optional reducer function
+            schema: Existing schema class.
+            name: Field name to add.
+            field_type: Type of the field.
+            default: Default value.
+            description: Optional field description.
+            shared: Whether the field is shared with parent.
+            reducer: Optional reducer function.
             
         Returns:
-            Updated schema class with the new field
+            Updated schema class with the new field.
         """
         # Create field dict for the new model
         field_dict = {}
@@ -330,10 +352,10 @@ class SchemaUtils:
         Get a serializable name for a reducer function.
         
         Args:
-            reducer: Reducer function
+            reducer: Reducer function.
             
         Returns:
-            Serializable name for the reducer
+            Serializable name for the reducer.
         """
         # Special handling for operator module functions
         if hasattr(reducer, "__module__") and reducer.__module__ == 'operator':
