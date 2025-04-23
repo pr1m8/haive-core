@@ -5,6 +5,7 @@ This module provides the StateSchemaManager class which handles the creation
 and modification of state schemas with fine-grained control over fields,
 reducers, shared fields, and more.
 """
+from __future__ import annotations
 import inspect
 import logging
 import operator
@@ -15,9 +16,10 @@ from typing import Any, Callable, Dict, List, Optional, Set, Type,\
 from pydantic import BaseModel, Field, create_model
 
 from haive.core.schema.state_schema import StateSchema
-from haive.core.schema.utils import get_reducer_name
-from websocket import send
+from haive.core.schema.utils import SchemaUtils
 from langgraph.types import Command, Send
+from haive.core.schema.field_extractor import FieldExtractor
+from haive.core.schema.field_definition import FieldDefinition
 
 # Type variables for generic types
 T = TypeVar('T', bound=BaseModel)
@@ -25,6 +27,8 @@ SchemaType = TypeVar('SchemaType', bound=Type[BaseModel])
 
 logger = logging.getLogger(__name__)
 
+if TYPE_CHECKING:
+    from haive.core.schema.schema_composer import SchemaComposer   
 
 class StateSchemaManager:
     """
@@ -58,6 +62,7 @@ class StateSchemaManager:
         self.class_methods: Dict[str, Callable] = {}
         self.static_methods: Dict[str, Callable] = {}
         self.field_descriptions: Dict[str, str] = {}
+        self.instance_methods: Dict[str, Callable] = {}
         self.locked: bool = False
         self.config: Dict[str, Any] = config or {}
         
@@ -94,6 +99,9 @@ class StateSchemaManager:
             self._load_from_model(data)
         elif isinstance(data, BaseModel):
             self._load_from_model(data.__class__)
+        # Add explicit SchemaComposer check before the more generic check
+        elif hasattr(data, "__class__") and data.__class__.__name__ == "SchemaComposer":
+            self._load_from_composer(data)
         elif hasattr(data, "fields") and (hasattr(data, "reducer_names") or hasattr(data, "reducer_functions")):
             # This appears to be a SchemaComposer or compatible object
             self._load_from_composer(data)
@@ -108,96 +116,28 @@ class StateSchemaManager:
             model_cls: Pydantic model class to load from
         """
         try:
-            # Get fields from annotations
-            annotations = getattr(model_cls, "__annotations__", {})
-            logger.debug(f"Loading fields from {model_cls.__name__}: {list(annotations.keys())}")
+            # Use the new field extractor utility
+            fields, descriptions, shared_fields, reducer_names, reducer_functions, engine_io_mappings, input_fields, output_fields = \
+                FieldExtractor.extract_from_model(model_cls)
             
-            # Process fields from annotations
-            for field_name, field_type in annotations.items():
-                # Skip internal fields
-                if field_name.startswith("__") or field_name == "runnable_config":
-                    continue
-                    
-                # Get field info directly from model fields (Pydantic v2)
-                if hasattr(model_cls, "model_fields") and field_name in model_cls.model_fields:
-                    field_info = model_cls.model_fields[field_name]
-                    
-                    # Make all fields Optional
-                    from typing import Optional
-                    if get_origin(field_type) is not Optional:
-                        field_type = Optional[field_type]
-                        
-                    # Handle default or default factory
-                    default = field_info.default
-                    default_factory = field_info.default_factory
-                    
-                    # Handle required fields (PydanticUndefined or ...)
-                    if default is ... or str(default) == "PydanticUndefined":
-                        default = None
-                        
-                    # Create field with proper defaults
-                    if default_factory is not None:
-                        self.fields[field_name] = (field_type, Field(default_factory=default_factory))
-                    else:
-                        self.fields[field_name] = (field_type, Field(default=default))
-                        
-                    # Add description if available
-                    if hasattr(field_info, "description") and field_info.description:
-                        self.field_descriptions[field_name] = field_info.description
-                else:
-                    # Fallback for non-standard field definitions
-                    # Look for class attribute to get default value
-                    if hasattr(model_cls, field_name):
-                        default = getattr(model_cls, field_name)
-                        
-                        # If it's a factory function, handle differently
-                        if callable(default) and not isinstance(default, type):
-                            default_factory = default
-                            default = None
-                            self.fields[field_name] = (field_type, Field(default_factory=default_factory))
-                        else:
-                            self.fields[field_name] = (field_type, Field(default=default))
-                    else:
-                        # No default found, use None for Optional types
-                        self.fields[field_name] = (field_type, Field(default=None))
+            # Apply extracted fields and metadata
+            self.fields.update(fields)
+            self.field_descriptions.update(descriptions)
+            self._shared_fields.update(shared_fields)
+            self._reducer_names.update(reducer_names)
+            self._reducer_functions.update(reducer_functions)
+            self._engine_io_mappings.update(engine_io_mappings)
+            
+            # Update input/output fields
+            for engine, fields in input_fields.items():
+                self._input_fields[engine].update(fields)
                 
+            for engine, fields in output_fields.items():
+                self._output_fields[engine].update(fields)
+            
             # Log the loaded fields
             logger.debug(f"Loaded fields: {list(self.fields.keys())}")
             
-            # Load shared fields
-            if hasattr(model_cls, "__shared_fields__"):
-                self._shared_fields.update(model_cls.__shared_fields__)
-                
-            # Load reducers
-            if hasattr(model_cls, "__serializable_reducers__"):
-                self._reducer_names.update(model_cls.__serializable_reducers__)
-                
-            if hasattr(model_cls, "__reducer_fields__"):
-                self._reducer_functions.update(model_cls.__reducer_fields__)
-                
-                # Fix: Ensure reducer names match for all functions, especially operator module
-                for field_name, reducer in model_cls.__reducer_fields__.items():
-                    if field_name not in self._reducer_names:
-                        # Add missing reducer name
-                        if hasattr(reducer, "__module__") and reducer.__module__ == 'operator':
-                            self._reducer_names[field_name] = f"operator.{reducer.__name__}"
-                        elif hasattr(reducer, "__name__"):
-                            self._reducer_names[field_name] = reducer.__name__
-                        else:
-                            self._reducer_names[field_name] = str(reducer)
-            
-            # Load engine I/O mappings
-            if hasattr(model_cls, "__engine_io_mappings__"):
-                self._engine_io_mappings.update(model_cls.__engine_io_mappings__)
-                
-            if hasattr(model_cls, "__input_fields__"):
-                for engine, fields in model_cls.__input_fields__.items():
-                    self._input_fields[engine].update(fields)
-                    
-            if hasattr(model_cls, "__output_fields__"):
-                for engine, fields in model_cls.__output_fields__.items():
-                    self._output_fields[engine].update(fields)
-                    
             # Load methods and validators
             for name, attr in inspect.getmembers(model_cls):
                 # Skip private/special methods
@@ -224,41 +164,43 @@ class StateSchemaManager:
             # Add a placeholder field as fallback
             self.fields["placeholder"] = (str, Field(default=""))
 
+    # In StateSchemaManager._load_from_composer method
     def _load_from_composer(self, composer: Any) -> None:
-        """
-        Load fields from a SchemaComposer or compatible object.
-        
-        Args:
-            composer: SchemaComposer instance or compatible object
-        """
         try:
-            # Copy fields
-            self.fields = composer.fields.copy()
+            # Existing code...
             
-            # Copy shared fields
-            self._shared_fields = set(composer.shared_fields) if hasattr(composer, "shared_fields") else set()
-            
-            # Copy reducer information
-            if hasattr(composer, "reducer_names"):
-                self._reducer_names = composer.reducer_names.copy()
-            
-            if hasattr(composer, "reducer_functions"):
-                self._reducer_functions = composer.reducer_functions.copy()
-            
-            # Copy field descriptions
-            if hasattr(composer, "field_descriptions"):
-                self.field_descriptions = composer.field_descriptions.copy()
-            
-            # Copy engine I/O mapping information if available
+            # Explicitly copy engine I/O mappings - deep copy to avoid reference issues
             if hasattr(composer, "engine_io_mappings"):
-                self._engine_io_mappings = composer.engine_io_mappings.copy()
+                self._engine_io_mappings = {
+                    k: v.copy() for k, v in composer.engine_io_mappings.items()
+                }
                 
+            # Explicitly copy input/output fields
             if hasattr(composer, "input_fields"):
-                self._input_fields = {k: set(v) for k, v in composer.input_fields.items()}
-                
+                for engine_name, fields in composer.input_fields.items():
+                    self._input_fields[engine_name] = set(fields)
+                    
             if hasattr(composer, "output_fields"):
-                self._output_fields = {k: set(v) for k, v in composer.output_fields.items()}
-            
+                for engine_name, fields in composer.output_fields.items():
+                    self._output_fields[engine_name] = set(fields)
+                    
+            # After copying fields, update engine_io_mappings to ensure consistency
+            for engine_name in self._input_fields:
+                if engine_name not in self._engine_io_mappings:
+                    self._engine_io_mappings[engine_name] = {
+                        "inputs": [],
+                        "outputs": []
+                    }
+                self._engine_io_mappings[engine_name]["inputs"] = list(self._input_fields[engine_name])
+                
+            for engine_name in self._output_fields:
+                if engine_name not in self._engine_io_mappings:
+                    self._engine_io_mappings[engine_name] = {
+                        "inputs": [],
+                        "outputs": []
+                    }
+                self._engine_io_mappings[engine_name]["outputs"] = list(self._output_fields[engine_name])
+                
         except Exception as e:
             logger.error(f"Error loading from composer: {e}")
             # Add a placeholder field as fallback
@@ -272,67 +214,29 @@ class StateSchemaManager:
             data: Dictionary containing field data
         """
         try:
-            for key, value in data.items():
-                # Handle special keys
-                if key == "shared_fields":
-                    self._shared_fields.update(value)
-                elif key == "reducer_names" or key == "serializable_reducers":
-                    self._reducer_names.update(value)
-                elif key == "reducer_functions":
-                    self._reducer_functions.update(value)
-                elif key == "field_descriptions":
-                    self.field_descriptions.update(value)
-                elif key == "engine_io_mappings":
-                    self._engine_io_mappings.update(value)
-                elif key == "input_fields":
-                    for engine, fields in value.items():
-                        self._input_fields[engine].update(fields)
-                elif key == "output_fields":
-                    for engine, fields in value.items():
-                        self._output_fields[engine].update(fields)
-                elif isinstance(value, tuple) and len(value) == 2:
-                    # Handle field definition: (type, default)
-                    field_type, default = value
-                    self.add_field(key, field_type, default=default)
-                else:
-                    # Infer type from value
-                    field_type = self._infer_type(value)
-                    self.add_field(key, field_type, default=value)
+            # Use the field extractor utility
+            fields, descriptions, shared_fields, reducer_names, reducer_functions, engine_io_mappings, input_fields, output_fields = \
+                FieldExtractor.extract_from_dict(data)
+            
+            # Apply extracted fields and metadata
+            self.fields.update(fields)
+            self.field_descriptions.update(descriptions)
+            self._shared_fields.update(shared_fields)
+            self._reducer_names.update(reducer_names)
+            self._reducer_functions.update(reducer_functions)
+            self._engine_io_mappings.update(engine_io_mappings)
+            
+            # Update input/output fields
+            for engine, fields in input_fields.items():
+                self._input_fields[engine].update(fields)
+                
+            for engine, fields in output_fields.items():
+                self._output_fields[engine].update(fields)
+                
         except Exception as e:
             logger.error(f"Error loading from dict: {e}")
             # Add a placeholder field as fallback
             self.fields["placeholder"] = (str, Field(default=""))
-
-    def _infer_type(self, value: Any) -> type:
-        """
-        Infer the type of a value with special handling for collections.
-        
-        Args:
-            value: Value to infer type from
-            
-        Returns:
-            Inferred type
-        """
-        from typing import Optional
-        
-        if isinstance(value, str):
-            return Optional[str]
-        if isinstance(value, int):
-            return Optional[int]
-        if isinstance(value, float):
-            return Optional[float]
-        if isinstance(value, bool):
-            return Optional[bool]
-        if isinstance(value, list):
-            from typing import List, Any
-            return Optional[List[Any]]
-        if isinstance(value, dict):
-            from typing import Dict, Any
-            return Optional[Dict[str, Any]]
-        if isinstance(value, set):
-            from typing import Set, Any
-            return Optional[Set[Any]]
-        return Optional[Any]
 
     def add_field(
         self,
@@ -357,7 +261,7 @@ class StateSchemaManager:
             description: Optional field description
             shared: Whether field is shared with parent graph
             reducer: Optional reducer function for this field
-            optional: Whether to make the field optional
+            optional: Whether to make the field optional (default: True)
             **kwargs: Additional field parameters
             
         Returns:
@@ -385,7 +289,7 @@ class StateSchemaManager:
         elif default is not None:
             # Use explicit default if provided
             field_info = Field(default=default, **field_metadata, **kwargs)
-        elif optional or get_origin(field_type) is OptionalType:
+        elif optional:
             # Use None for optional fields
             field_info = Field(default=None, **field_metadata, **kwargs)
         else:
@@ -407,7 +311,8 @@ class StateSchemaManager:
             self._reducer_functions[name] = reducer
             
             # Store serializable name for the reducer
-            self._reducer_names[name] = get_reducer_name(reducer)
+            field_def = FieldDefinition(name=name, field_type=field_type, reducer=reducer)
+            self._reducer_names[name] = field_def.get_reducer_name()
 
         return self
 
@@ -524,7 +429,8 @@ class StateSchemaManager:
                 self._reducer_functions[name] = new_reducer
                 
                 # Store serializable name for the reducer
-                self._reducer_names[name] = get_reducer_name(new_reducer)
+                field_def = FieldDefinition(name=name, field_type=field_type, reducer=new_reducer)
+                self._reducer_names[name] = field_def.get_reducer_name()
 
         return self
 
@@ -814,6 +720,15 @@ class StateSchemaManager:
         for name, (getter, setter) in self.computed_properties.items():
             prop = property(getter, setter)
             setattr(model, name, prop)
+            
+        # Add regular properties
+        for name, getter in self.properties.items():
+            prop = property(getter)
+            setattr(model, name, prop)
+
+        # Add instance methods
+        for name, method in self.instance_methods.items():
+            setattr(model, name, method)
 
         # Add class methods
         for name, method in self.class_methods.items():
@@ -1042,3 +957,76 @@ class StateSchemaManager:
             List of Send objects
         """
         return [self.create_send(target_node, state_factory(item), validate_args) for item in items]
+
+    def add_method(self, name: str, method: Callable) -> "StateSchemaManager":
+        """
+        Add a method to the schema.
+        
+        Args:
+            name: Method name
+            method: Method implementation
+            
+        Returns:
+            Self for chaining
+        """
+        if self.locked:
+            raise ValueError("Schema is locked and cannot be modified.")
+        
+        # Store the method as an instance method
+        self.instance_methods[name] = method
+        
+        return self
+
+    def mark_as_input_field(self, field_name: str, engine_name: str) -> 'StateSchemaManager':
+        """
+        Mark a field as an input field for an engine.
+        
+        Args:
+            field_name: Name of the field
+            engine_name: Name of the engine
+            
+        Returns:
+            Self for chaining
+        """
+        if field_name in self.fields:
+            self._input_fields[engine_name].add(field_name)
+            self._update_engine_io_mapping(engine_name)
+        return self
+    
+    def mark_as_output_field(self, field_name: str, engine_name: str) -> 'StateSchemaManager':
+        """
+        Mark a field as an output field for an engine.
+        
+        Args:
+            field_name: Name of the field
+            engine_name: Name of the engine
+            
+        Returns:
+            Self for chaining
+        """
+        if field_name in self.fields:
+            self._output_fields[engine_name].add(field_name)
+            self._update_engine_io_mapping(engine_name)
+        return self
+    
+    def _update_engine_io_mapping(self, engine_name: str) -> None:
+        """
+        Update engine I/O mapping for a specific engine.
+        
+        Args:
+            engine_name: Engine name to update mapping for
+        """
+        # Create mapping if it doesn't exist
+        if engine_name not in self._engine_io_mappings:
+            self._engine_io_mappings[engine_name] = {
+                "inputs": [],
+                "outputs": []
+            }
+            
+        # Update inputs from tracked fields
+        if engine_name in self._input_fields:
+            self._engine_io_mappings[engine_name]["inputs"] = list(self._input_fields[engine_name])
+            
+        # Update outputs from tracked fields
+        if engine_name in self._output_fields:
+            self._engine_io_mappings[engine_name]["outputs"] = list(self._output_fields[engine_name])
