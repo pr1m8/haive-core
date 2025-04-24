@@ -252,7 +252,7 @@ class TestPatternManager:
         assert new_manager.pattern_parameters["test_pattern"]["global_param"] == "global_value"
         assert new_manager.is_pattern_applied("test_pattern")
 
-    @patch("haive_core.graph.patterns.registry.GraphPatternRegistry")
+    @patch("haive.core.graph.patterns.registry.GraphPatternRegistry")
     def test_validate_patterns(self, mock_registry, pattern_manager):
         """Test pattern validation against registry."""
         # Mock registry behavior
@@ -276,7 +276,7 @@ class TestPatternManager:
         assert len(invalid) == 1
         assert "invalid_pattern" in invalid
 
-    @patch("haive_core.graph.patterns.registry.GraphPatternRegistry")
+    @patch("haive.core.graph.patterns.registry.GraphPatternRegistry")
     def test_get_required_components(self, mock_registry, pattern_manager):
         """Test getting components required by patterns."""
         # Mock registry behavior

@@ -97,10 +97,10 @@ def test_load_project_env_files(monkeypatch, tmp_path):
     # Create a fake project structure in a temp directory
     project_root = tmp_path / "project"
     packages_dir = project_root / "packages"
-    haive_core_dir = packages_dir / "haive-core"
-    src_dir = haive_core_dir / "src"
-    haive_core_src = src_dir / "haive_core"
-    utils_dir = haive_core_src / "utils"
+    haive.core_dir = packages_dir / "haive-core"
+    src_dir = haive.core_dir / "src"
+    haive.core_src = src_dir / "haive.core"
+    utils_dir = haive.core_src / "utils"
 
     # Create directories
     utils_dir.mkdir(parents=True)
@@ -110,7 +110,7 @@ def test_load_project_env_files(monkeypatch, tmp_path):
         f.write("ROOT_VAR=root_value\n")
         f.write("COMMON_VAR=root_value\n")
 
-    with open(haive_core_dir / ".env", "w") as f:
+    with open(haive.core_dir / ".env", "w") as f:
         f.write("PACKAGE_VAR=package_value\n")
         f.write("COMMON_VAR=package_value\n")  # Overrides root
 
@@ -119,7 +119,7 @@ def test_load_project_env_files(monkeypatch, tmp_path):
         f.write("COMMON_VAR=local_value\n")  # Highest priority
 
     # Mock __file__ path to point to our temp directory
-    monkeypatch.setattr("haive_core.utils.env_utils.__file__", str(utils_dir / "env_utils.py"))
+    monkeypatch.setattr("haive.core.utils.env_utils.__file__", str(utils_dir / "env_utils.py"))
 
     # Save original environment
     original_env = os.environ.copy()
