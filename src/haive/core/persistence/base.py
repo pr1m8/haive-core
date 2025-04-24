@@ -1,20 +1,43 @@
-# src/haive/core/engine/agent/persistence/base.py
-
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Tuple, Union
-from pydantic import BaseModel, Field
+from typing import Optional, Dict, Any, Generic, TypeVar, Union, Type
+from pydantic import BaseModel, Field, SecretStr
 
-from .types import CheckpointerType
+from haive.core.persistence.types import (
+    CheckpointerType, 
+    CheckpointerMode,
+    CheckpointStorageMode, 
+    ConnectionOptions
+)
 
-class CheckpointerConfig(BaseModel, ABC):
+# Type variable for different connection types
+T = TypeVar('T')
+
+class CheckpointerConfig(BaseModel, ABC, Generic[T]):
     """
-    Base configuration for agent state persistence.
+    Base configuration for checkpoint persistence.
     
-    This abstract class defines the interface that all checkpointer
-    configurations must implement.
+    This abstract base class defines the interface for all checkpointer
+    configurations in the Haive framework. Implementations must provide
+    concrete methods for creating actual checkpointer instances.
     """
-    type: CheckpointerType
-    setup_needed: bool = Field(default=True, description="Whether to initialize storage on first use")
+    type: CheckpointerType = Field(
+        description="Type of checkpointer to use"
+    )
+    mode: CheckpointerMode = Field(
+        default=CheckpointerMode.SYNC,
+        description="Operational mode - synchronous or asynchronous"
+    )
+    storage_mode: CheckpointStorageMode = Field(
+        default=CheckpointStorageMode.FULL,
+        description="Storage mode - full history or shallow (latest only)"
+    )
+    setup_needed: bool = Field(
+        default=True,
+        description="Whether tables need to be setup on first use"
+    )
+    
+    class Config:
+        arbitrary_types_allowed = True
     
     @abstractmethod
     def create_checkpointer(self) -> Any:
@@ -22,64 +45,16 @@ class CheckpointerConfig(BaseModel, ABC):
         Create a checkpointer instance based on this configuration.
         
         Returns:
-            A checkpointer instance compatible with LangGraph
+            A configured checkpointer instance
         """
         pass
     
-    def register_thread(self, thread_id: str, name: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None) -> None:
+    @abstractmethod
+    def create_async_checkpointer(self) -> Any:
         """
-        Register a thread in the persistence system.
+        Create an asynchronous checkpointer instance.
         
-        Args:
-            thread_id: Unique identifier for the thread
-            name: Optional human-readable name for the thread
-            metadata: Optional metadata to associate with the thread
-        """
-        pass
-    
-    def put_checkpoint(self, config: Dict[str, Any], data: Any, metadata: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """
-        Store a checkpoint in the persistence system.
-        
-        Args:
-            config: Configuration with thread_id and optional checkpoint_id
-            data: The checkpoint data to store
-            metadata: Optional metadata to associate with the checkpoint
-            
         Returns:
-            Updated config with checkpoint_id
-        """
-        pass
-    
-    def get_checkpoint(self, config: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        """
-        Retrieve a checkpoint from the persistence system.
-        
-        Args:
-            config: Configuration with thread_id and optional checkpoint_id
-            
-        Returns:
-            The checkpoint data if found, None otherwise
-        """
-        pass
-    
-    def list_checkpoints(self, config: Dict[str, Any], limit: Optional[int] = None) -> List[Tuple[Dict[str, Any], Any]]:
-        """
-        List checkpoints for a thread.
-        
-        Args:
-            config: Configuration with thread_id
-            limit: Optional maximum number of checkpoints to return
-            
-        Returns:
-            List of (config, checkpoint) tuples
-        """
-        return []
-    
-    def close(self) -> None:
-        """
-        Close any resources associated with this checkpointer.
-        
-        This method should be called when the checkpointer is no longer needed.
+            A configured async checkpointer instance
         """
         pass

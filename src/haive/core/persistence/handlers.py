@@ -1,83 +1,75 @@
-# src/haive/core/engine/agent/persistence/handlers.py
-
-"""
-Persistence handling utilities for agent checkpointing.
-
-This module provides functions for managing agent state persistence
-through checkpointers, with special support for PostgreSQL.
-"""
-
-import logging
-import asyncio
-from typing import Any, Optional, Dict, Union, Type,List
-
-from langgraph.checkpoint.base import BaseCheckpointSaver
-from langgraph.checkpoint.memory import MemorySaver
-from pydantic import BaseModel
-from langchain_core.runnables import RunnableConfig
-from langchain_core.messages import BaseMessage, HumanMessage
-
-from .types import CheckpointerType
-from .base import CheckpointerConfig
-
-logger = logging.getLogger(__name__)
-
-# Check if PostgreSQL dependencies are available
-try:
-    from .postgres_config import PostgresCheckpointerConfig
-    POSTGRES_AVAILABLE = True
-except ImportError:
-    POSTGRES_AVAILABLE = False
-
 # src/haive/core/persistence/handlers.py
 
+"""
+Persistence handling utilities for checkpointing.
+
+This module provides high-level functions for managing checkpoint operations,
+including creation, recovery, and thread management.
+"""
+import json 
+from pydantic import BaseModel
 import logging
-from typing import Any, Optional
+import asyncio
+import uuid
+from typing import Any, Optional, Dict, Union, Type, List, Tuple
 
-from langgraph.checkpoint.base import BaseCheckpointSaver
-from langgraph.checkpoint.memory import MemorySaver
+from langchain_core.runnables import RunnableConfig
 
-from .types import CheckpointerType
+from .types import CheckpointerType, CheckpointTuple, CheckpointMode, SyncMode
+from .base import CheckpointerConfig
+from .memory import MemoryCheckpointerConfig
+from .postgres_config import PostgresCheckpointerConfig
 
 logger = logging.getLogger(__name__)
 
-def setup_checkpointer(config: Any) -> BaseCheckpointSaver:
+def setup_checkpointer(config: Any) -> Any:
     """
     Set up the appropriate checkpointer based on persistence configuration.
     
     Args:
-        config: Agent configuration containing persistence settings
+        config: Configuration containing persistence settings
         
     Returns:
         A configured checkpointer instance
     """
     # Default to memory checkpointer
-    from langgraph.checkpoint.memory import MemorySaver
-    
-    # Handle no persistence config case
     if not hasattr(config, 'persistence') or config.persistence is None:
-        logger.info(f"No persistence config for {config.name}. Using memory checkpointer.")
-        return MemorySaver()
+        logger.info(f"No persistence config for {getattr(config, 'name', 'unnamed')}. Using memory checkpointer.")
+        memory_config = MemoryCheckpointerConfig()
+        return memory_config.create_checkpointer()
+    
+    # Handle already created checkpointer
+    if hasattr(config.persistence, 'create_checkpointer'):
+        # It's a CheckpointerConfig instance
+        try:
+            return config.persistence.create_checkpointer()
+        except Exception as e:
+            logger.error(f"Failed to create checkpointer: {e}")
+            logger.warning(f"Falling back to memory checkpointer for {getattr(config, 'name', 'unnamed')}")
+            memory_config = MemoryCheckpointerConfig()
+            return memory_config.create_checkpointer()
     
     # Handle dictionary config
     if isinstance(config.persistence, dict):
-        # Check for explicit memory type
-        if config.persistence.get('type', 'memory') == 'memory':
-            logger.info(f"Using memory checkpointer (per config) for {config.name}")
-            return MemorySaver()
-            
-        # Only continue with postgres if it's explicitly requested
-        if config.persistence.get('type') == 'postgres':
+        # Parse the persistence config
+        persistence_type = config.persistence.get('type', 'memory')
+        
+        if persistence_type == 'memory':
+            # Memory checkpointer
+            memory_config = MemoryCheckpointerConfig()
+            return memory_config.create_checkpointer()
+        
+        elif persistence_type == 'postgres':
+            # PostgreSQL checkpointer
             try:
-                # Import PostgresCheckpointerConfig only when needed
-                from .postgres_config import PostgresCheckpointerConfig, POSTGRES_AVAILABLE
+                # Get connection parameters
+                use_shallow = config.persistence.get('shallow', False)
+                use_async = config.persistence.get('async', False)
                 
-                if not POSTGRES_AVAILABLE:
-                    logger.warning("PostgreSQL dependencies not available, falling back to memory checkpointer")
-                    return MemorySaver()
-                
-                # Create a PostgresCheckpointerConfig from the dict
+                # Create the config
                 postgres_config = PostgresCheckpointerConfig(
+                    checkpoint_mode=CheckpointMode.shallow if use_shallow else CheckpointMode.standard,
+                    sync_mode=SyncMode.async_ if use_async else SyncMode.sync,
                     db_host=config.persistence.get('db_host', 'localhost'),
                     db_port=config.persistence.get('db_port', 5432),
                     db_name=config.persistence.get('db_name', 'postgres'),
@@ -88,34 +80,111 @@ def setup_checkpointer(config: Any) -> BaseCheckpointSaver:
                     max_pool_size=config.persistence.get('max_pool_size', 5),
                     auto_commit=config.persistence.get('auto_commit', True),
                     prepare_threshold=config.persistence.get('prepare_threshold', 0),
-                    setup_needed=config.persistence.get('setup_needed', True)
+                    setup_needed=config.persistence.get('setup_needed', True),
+                    connection_string=config.persistence.get('connection_string'),
+                    use_pipeline=config.persistence.get('use_pipeline', False)
                 )
                 
-                # Create checkpointer
                 return postgres_config.create_checkpointer()
-                
-            except Exception as e:
-                logger.error(f"Failed to setup PostgreSQL checkpointer: {e}")
-                logger.warning(f"Falling back to memory checkpointer for {config.name}")
-    
-    # Handle CheckpointerConfig objects
-    elif hasattr(config.persistence, 'type'):
-        if config.persistence.type == CheckpointerType.memory:
-            logger.info(f"Using memory checkpointer for {config.name}")
-            return MemorySaver()
-            
-        if config.persistence.type == CheckpointerType.postgres:
-            try:
-                # Try to use create_checkpointer method if available
-                if hasattr(config.persistence, 'create_checkpointer'):
-                    return config.persistence.create_checkpointer()
-                    
             except Exception as e:
                 logger.error(f"Failed to create PostgreSQL checkpointer: {e}")
+                logger.warning(f"Falling back to memory checkpointer for {getattr(config, 'name', 'unnamed')}")
+                memory_config = MemoryCheckpointerConfig()
+                return memory_config.create_checkpointer()
     
     # Default to memory checkpointer for any other case
-    logger.info(f"Using memory checkpointer (default) for {config.name}")
-    return MemorySaver()
+    logger.info(f"Using memory checkpointer (default) for {getattr(config, 'name', 'unnamed')}")
+    memory_config = MemoryCheckpointerConfig()
+    return memory_config.create_checkpointer()
+
+async def setup_async_checkpointer(config: Any) -> Any:
+    """
+    Set up the appropriate async checkpointer based on persistence configuration.
+    
+    Args:
+        config: Configuration containing persistence settings
+        
+    Returns:
+        A configured async checkpointer instance or context manager
+    """
+    # Default to memory checkpointer
+    if not hasattr(config, 'persistence') or config.persistence is None:
+        logger.info(f"No persistence config for {getattr(config, 'name', 'unnamed')}. Using memory checkpointer.")
+        memory_config = MemoryCheckpointerConfig()
+        return memory_config.create_checkpointer()
+    
+    # Handle already created checkpointer config
+    if hasattr(config.persistence, 'is_async_mode') and callable(config.persistence.is_async_mode):
+        # It's a CheckpointerConfig instance
+        try:
+            if config.persistence.is_async_mode():
+                # For async modes, we need to initialize the checkpointer
+                if hasattr(config.persistence, 'initialize_async_checkpointer'):
+                    return await config.persistence.initialize_async_checkpointer()
+                else:
+                    # Fall back to sync mode
+                    return config.persistence.create_checkpointer()
+            else:
+                # For sync modes, just create normally
+                return config.persistence.create_checkpointer()
+        except Exception as e:
+            logger.error(f"Failed to create async checkpointer: {e}")
+            logger.warning(f"Falling back to memory checkpointer for {getattr(config, 'name', 'unnamed')}")
+            memory_config = MemoryCheckpointerConfig()
+            return memory_config.create_checkpointer()
+    
+    # Handle dictionary config
+    if isinstance(config.persistence, dict):
+        # Parse the persistence config
+        persistence_type = config.persistence.get('type', 'memory')
+        
+        if persistence_type == 'memory':
+            # Memory checkpointer
+            memory_config = MemoryCheckpointerConfig()
+            return memory_config.create_checkpointer()
+        
+        elif persistence_type == 'postgres':
+            # PostgreSQL checkpointer
+            try:
+                # Get connection parameters
+                use_shallow = config.persistence.get('shallow', False)
+                use_async = config.persistence.get('async', True)  # Default to async for async setup
+                
+                # Create the config
+                postgres_config = PostgresCheckpointerConfig(
+                    checkpoint_mode=CheckpointMode.shallow if use_shallow else CheckpointMode.standard,
+                    sync_mode=SyncMode.async_ if use_async else SyncMode.sync,
+                    db_host=config.persistence.get('db_host', 'localhost'),
+                    db_port=config.persistence.get('db_port', 5432),
+                    db_name=config.persistence.get('db_name', 'postgres'),
+                    db_user=config.persistence.get('db_user', 'postgres'),
+                    db_pass=config.persistence.get('db_pass', 'postgres'),
+                    ssl_mode=config.persistence.get('ssl_mode', 'disable'),
+                    min_pool_size=config.persistence.get('min_pool_size', 1),
+                    max_pool_size=config.persistence.get('max_pool_size', 5),
+                    auto_commit=config.persistence.get('auto_commit', True),
+                    prepare_threshold=config.persistence.get('prepare_threshold', 0),
+                    setup_needed=config.persistence.get('setup_needed', True),
+                    connection_string=config.persistence.get('connection_string'),
+                    use_pipeline=config.persistence.get('use_pipeline', False)
+                )
+                
+                if use_async:
+                    # For async mode, initialize the checkpointer
+                    return await postgres_config.initialize_async_checkpointer()
+                else:
+                    # For sync mode, just create normally
+                    return postgres_config.create_checkpointer()
+            except Exception as e:
+                logger.error(f"Failed to create async PostgreSQL checkpointer: {e}")
+                logger.warning(f"Falling back to memory checkpointer for {getattr(config, 'name', 'unnamed')}")
+                memory_config = MemoryCheckpointerConfig()
+                return memory_config.create_checkpointer()
+    
+    # Default to memory checkpointer for any other case
+    logger.info(f"Using memory checkpointer (default) for {getattr(config, 'name', 'unnamed')}")
+    memory_config = MemoryCheckpointerConfig()
+    return memory_config.create_checkpointer()
 
 def ensure_pool_open(checkpointer: Any) -> Optional[Any]:
     """
@@ -190,6 +259,79 @@ def ensure_pool_open(checkpointer: Any) -> Optional[Any]:
         
     return opened_pool
 
+async def ensure_async_pool_open(checkpointer: Any) -> Optional[Any]:
+    """
+    Ensure that any async PostgreSQL connection pool is properly opened.
+    
+    This should be called before any operation that uses the async checkpointer.
+    
+    Args:
+        checkpointer: The checkpointer to check
+        
+    Returns:
+        The opened pool if one was found and opened, None otherwise
+    """
+    opened_pool = None
+    try:
+        # Check for connection pools in the checkpointer
+        if hasattr(checkpointer, 'conn'):
+            conn = checkpointer.conn
+            
+            # Import here to avoid dependency issues
+            try:
+                from psycopg_pool.base import BaseConnectionPool
+                
+                # Check if it's a pool
+                if isinstance(conn, BaseConnectionPool):
+                    # Check if the pool is already open
+                    try:
+                        if hasattr(conn, 'is_open'):
+                            is_open = await conn.is_open()
+                        else:
+                            # Older versions might not have is_open()
+                            is_open = getattr(conn, '_opened', False)
+                        
+                        # Open the pool if needed
+                        if not is_open:
+                            logger.info(f"Opening async PostgreSQL connection pool")
+                            try:
+                                await conn.open()
+                                opened_pool = conn
+                                logger.info(f"Successfully opened async pool")
+                            except Exception as e:
+                                logger.error(f"Error opening async pool: {e}")
+                                
+                                # Try a different approach with direct pool access
+                                if hasattr(conn, '_pool'):
+                                    logger.info("Trying alternative pool opening method")
+                                    conn._pool = [] if not hasattr(conn, '_pool') or conn._pool is None else conn._pool
+                                    conn._opened = True
+                                    opened_pool = conn
+                    except Exception as e:
+                        logger.error(f"Error checking if async pool is open: {e}")
+                        # Last ditch effort - try direct attribute manipulation
+                        if hasattr(conn, '_pool'):
+                            conn._pool = [] if not hasattr(conn, '_pool') or conn._pool is None else conn._pool
+                            conn._opened = True
+                            opened_pool = conn
+            except ImportError:
+                logger.debug("psycopg_pool not available")
+                
+        # Additional check for other types of pools or connections
+        if not opened_pool and hasattr(checkpointer, 'setup'):
+            # If the checkpointer has a setup method but no connection was found,
+            # just make sure tables are set up
+            logger.debug("No pool found but checkpointer has setup method")
+            try:
+                await checkpointer.setup()
+            except Exception as e:
+                logger.error(f"Error setting up async checkpointer: {e}")
+                
+    except Exception as e:
+        logger.error(f"Error ensuring async pool is open: {e}")
+        
+    return opened_pool
+
 def close_pool_if_needed(checkpointer: Any, pool: Any = None) -> None:
     """
     Close a PostgreSQL connection pool if it was previously opened.
@@ -219,30 +361,50 @@ def close_pool_if_needed(checkpointer: Any, pool: Any = None) -> None:
             # pool.close()
     except (ImportError, AttributeError):
         pass
-        
+
+async def close_async_pool_if_needed(checkpointer: Any, pool: Any = None) -> None:
+    """
+    Close an async PostgreSQL connection pool if it was previously opened.
+    
+    This should be called in finally blocks after operations.
+    
+    Args:
+        checkpointer: The checkpointer to check
+        pool: The pool to close. If None, will try to find the pool 
+            from the checkpointer.
+    """
+    if pool is None:
+        # Try to find a pool from the checkpointer
+        try:
+            if hasattr(checkpointer, 'conn'):
+                pool = checkpointer.conn
+        except AttributeError:
+            return
+            
     # Close the pool if it's an AsyncConnectionPool
     try:
         from psycopg_pool.pool import AsyncConnectionPool
-        if isinstance(pool, AsyncConnectionPool) and pool.is_open():
+        if isinstance(pool, AsyncConnectionPool) and await pool.is_open():
             logger.debug(f"Closing async PostgreSQL connection pool")
             # Similarly, we don't actually close the pool
-            # import asyncio
-            # try:
-            #     asyncio.run(pool.close())
-            # except RuntimeError:
-            #     loop = asyncio.get_event_loop()
-            #     task = loop.create_task(pool.close())
+            # await pool.close()
     except (ImportError, AttributeError):
         pass
 
-def register_thread_if_needed(checkpointer: Any, thread_id: str) -> None:
+def register_thread_if_needed(checkpointer: Any, thread_id: str, metadata: Optional[Dict[str, Any]] = None) -> None:
     """
-    Register a thread in the PostgreSQL database if needed.
+    Register a thread in the persistence system if needed.
     
     Args:
         checkpointer: The checkpointer to use
         thread_id: Thread ID to register
+        metadata: Optional metadata to associate with the thread
     """
+    # Skip for memory checkpointers
+    if hasattr(checkpointer, '__class__') and checkpointer.__class__.__name__ == 'MemorySaver':
+        return
+        
+    # Handle PostgreSQL checkpointers
     if hasattr(checkpointer, 'conn'):
         try:
             pool = checkpointer.conn
@@ -266,24 +428,92 @@ def register_thread_if_needed(checkpointer: Any, thread_id: str) -> None:
                             logger.debug("Creating threads table")
                             cursor.execute("""
                                 CREATE TABLE IF NOT EXISTS threads (
-                                    thread_id VARCHAR(255) PRIMARY KEY,
-                                    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                                    last_access TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                                    metadata JSONB DEFAULT '{}'::jsonb
+                                    thread_id TEXT PRIMARY KEY,
+                                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                    metadata JSONB DEFAULT '{}'::jsonb,
+                                    user_id TEXT,
+                                    last_access TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
                                 );
                             """)
                             
+                        # Convert metadata to JSON string if provided
+                        metadata_json = '{}'
+                        if metadata:
+                            metadata_json = json.dumps(metadata)
+                            
                         # Insert the thread if not exists
                         cursor.execute("""
-                            INSERT INTO threads (thread_id, last_access) 
-                            VALUES (%s, CURRENT_TIMESTAMP) 
+                            INSERT INTO threads (thread_id, metadata, last_access) 
+                            VALUES (%s, %s, CURRENT_TIMESTAMP) 
                             ON CONFLICT (thread_id) 
                             DO UPDATE SET last_access = CURRENT_TIMESTAMP
-                        """, (thread_id,))
+                        """, (thread_id, metadata_json))
                         
                         logger.info(f"Thread {thread_id} registered/updated in PostgreSQL")
         except Exception as e:
             logger.warning(f"Error registering thread: {e}")
+
+async def register_async_thread_if_needed(checkpointer: Any, thread_id: str, metadata: Optional[Dict[str, Any]] = None) -> None:
+    """
+    Register a thread in the persistence system asynchronously if needed.
+    
+    Args:
+        checkpointer: The checkpointer to use
+        thread_id: Thread ID to register
+        metadata: Optional metadata to associate with the thread
+    """
+    # Skip for memory checkpointers
+    if hasattr(checkpointer, '__class__') and checkpointer.__class__.__name__ == 'MemorySaver':
+        return
+        
+    # Handle async PostgreSQL checkpointers
+    if hasattr(checkpointer, 'conn'):
+        try:
+            pool = checkpointer.conn
+            if pool:
+                # Ensure connection pool is usable
+                pool_opened = await ensure_async_pool_open(checkpointer)
+                
+                # Register the thread
+                async with pool.connection() as conn:
+                    async with conn.cursor() as cursor:
+                        # Check if threads table exists
+                        await cursor.execute("""
+                            SELECT EXISTS (
+                                SELECT FROM information_schema.tables 
+                                WHERE table_name = 'threads'
+                            );
+                        """)
+                        table_exists = (await cursor.fetchone())[0]
+                        
+                        if not table_exists:
+                            logger.debug("Creating threads table")
+                            await cursor.execute("""
+                                CREATE TABLE IF NOT EXISTS threads (
+                                    thread_id TEXT PRIMARY KEY,
+                                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                    metadata JSONB DEFAULT '{}'::jsonb,
+                                    user_id TEXT,
+                                    last_access TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+                                );
+                            """)
+                            
+                        # Convert metadata to JSON string if provided
+                        metadata_json = '{}'
+                        if metadata:
+                            metadata_json = json.dumps(metadata)
+                            
+                        # Insert the thread if not exists
+                        await cursor.execute("""
+                            INSERT INTO threads (thread_id, metadata, last_access) 
+                            VALUES (%s, %s, CURRENT_TIMESTAMP) 
+                            ON CONFLICT (thread_id) 
+                            DO UPDATE SET last_access = CURRENT_TIMESTAMP
+                        """, (thread_id, metadata_json))
+                        
+                        logger.info(f"Thread {thread_id} registered/updated asynchronously in PostgreSQL")
+        except Exception as e:
+            logger.warning(f"Error registering thread asynchronously: {e}")
 
 def prepare_merged_input(
     input_data: Union[str, List[str], Dict[str, Any], BaseModel],
@@ -305,8 +535,8 @@ def prepare_merged_input(
     Returns:
         Processed input data merged with previous state
     """
-    # Process the input based on schema
-    processed_input = process_input(input_data, input_schema)
+    # Process the input
+    processed_input = input_data
     
     # Return as is if no previous state
     if not previous_state:
@@ -329,187 +559,81 @@ def prepare_merged_input(
     if not previous_values:
         return processed_input
     
-    # Merge with previous state
-    
-    # Special handling for messages to append rather than replace
-    if "messages" in processed_input and "messages" in previous_values:
-        # Start with all previous messages
-        merged_messages = list(previous_values["messages"])
+    # Special handling for merging different input types
+    if isinstance(processed_input, dict) and isinstance(previous_values, dict):
+        # Merge dictionaries
+        merged_input = dict(previous_values)
         
-        # Add new messages
-        new_messages = processed_input["messages"]
-        merged_messages.extend(new_messages)
+        # Update with new input values
+        for key, value in processed_input.items():
+            # Special case for messages - append rather than replace
+            if key == "messages" and key in previous_values:
+                # Start with all previous messages
+                merged_messages = list(previous_values["messages"])
+                
+                # Add new messages if any
+                if key in processed_input:
+                    new_messages = processed_input[key]
+                    if isinstance(new_messages, list):
+                        merged_messages.extend(new_messages)
+                    else:
+                        merged_messages.append(new_messages)
+                
+                # Update merged_input with merged messages
+                merged_input["messages"] = merged_messages
+            else:
+                # For other keys, just override
+                merged_input[key] = value
         
-        # Update processed input with merged messages
-        processed_input["messages"] = merged_messages
+        # Handle shared fields and reducers if using state_schema
+        if state_schema:
+            # Apply shared field values
+            if hasattr(state_schema, '__shared_fields__'):
+                for field in state_schema.__shared_fields__:
+                    if field in previous_values and field not in processed_input:
+                        merged_input[field] = previous_values[field]
+            
+            # Apply reducer functions
+            if hasattr(state_schema, '__reducer_fields__'):
+                for field, reducer in state_schema.__reducer_fields__.items():
+                    if field in merged_input and field in previous_values:
+                        try:
+                            merged_input[field] = reducer(previous_values[field], merged_input[field])
+                        except Exception as e:
+                            logger.warning(f"Reducer for {field} failed: {e}")
         
-        # Log the message count
-        logger.debug(f"Merged messages: {len(merged_messages)} total")
-    
-    # Merge other fields, keeping processed_input as priority
-    merged_input = dict(previous_values)
-    
-    # Update with new input values
-    for key, value in processed_input.items():
-        merged_input[key] = value
+        # Validate against schema if available
+        if state_schema:
+            try:
+                validated = state_schema(**merged_input)
+                # Convert back to dict
+                if hasattr(validated, 'model_dump'):
+                    return validated.model_dump()
+                elif hasattr(validated, 'dict'):
+                    return validated.dict()
+                return validated
+            except Exception as e:
+                logger.warning(f"Schema validation failed: {e}")
         
-    # Handle shared fields and reducers if using StateSchema
-    if state_schema and hasattr(state_schema, '__shared_fields__'):
-        for field in state_schema.__shared_fields__:
-            if field in previous_values and field not in processed_input:
-                merged_input[field] = previous_values[field]
+        return merged_input
     
-    if state_schema and hasattr(state_schema, '__reducer_fields__'):
-        for field, reducer in state_schema.__reducer_fields__.items():
-            if field in merged_input and field in previous_values:
-                try:
-                    merged_input[field] = reducer(previous_values[field], merged_input[field])
-                except Exception as e:
-                    logger.warning(f"Reducer for {field} failed: {e}")
-    
-    # Validate against state schema if available
-    if state_schema:
-        try:
-            return state_schema(**merged_input)
-        except Exception as e:
-            logger.warning(f"Schema validation failed: {e}")
-    
-    return merged_input
+    # Return unmodified input as fallback
+    return processed_input
 
-def process_input(
-    input_data: Union[str, List[str], Dict[str, Any], BaseModel], 
-    input_schema=None
-) -> Dict[str, Any]:
+def get_thread_id_from_config(config: Dict[str, Any]) -> Optional[str]:
     """
-    Process input for the agent based on the input schema.
+    Extract thread_id from a RunnableConfig.
     
     Args:
-        input_data: Input in various formats
-        input_schema: Schema for validation
+        config: Configuration to extract from
         
     Returns:
-        Processed input compatible with the graph
+        Thread ID if found, None otherwise
     """
-    from typing import List
-    
-    # Extract schema field information if available
-    schema_fields = {}
-    if input_schema and hasattr(input_schema, 'model_fields'):
-        schema_fields = input_schema.model_fields
-    
-    # Handle string input
-    if isinstance(input_data, str):
-        # Initialize with messages
-        prepared_input = {"messages": [HumanMessage(content=input_data)]}
+    if not config:
+        return None
         
-        # Add to other input fields based on schema
-        for field_name, field_info in schema_fields.items():
-            if field_name != 'messages' and field_name != '__runnable_config__':
-                # Only add to text fields
-                field_type = field_info.annotation
-                type_name = str(field_type)
-                if 'str' in type_name or 'String' in type_name:
-                    prepared_input[field_name] = input_data
+    if isinstance(config, dict) and "configurable" in config:
+        return config["configurable"].get("thread_id")
         
-        # Validate against schema if available
-        if input_schema:
-            try:
-                return input_schema(**prepared_input)
-            except Exception as e:
-                logger.warning(f"Schema validation failed: {e}")
-        
-        return prepared_input
-    
-    # Handle list of strings
-    elif isinstance(input_data, list) and all(isinstance(item, str) for item in input_data):
-        # Create messages list
-        messages = [HumanMessage(content=item) for item in input_data]
-        prepared_input = {'messages': messages}
-        
-        # Join strings for other text fields
-        joined_text = "\n".join(input_data)
-        for field_name, field_info in schema_fields.items():
-            if field_name != 'messages' and field_name != '__runnable_config__':
-                # Only add to text fields
-                field_type = field_info.annotation
-                type_name = str(field_type)
-                if 'str' in type_name or 'String' in type_name:
-                    prepared_input[field_name] = joined_text
-        
-        # Validate against schema
-        if input_schema:
-            try:
-                return input_schema(**prepared_input)
-            except Exception as e:
-                logger.warning(f"Schema validation failed: {e}")
-                
-        return prepared_input
-    
-    # Handle dictionary input
-    elif isinstance(input_data, dict):
-        # Create a copy to avoid modifying the original
-        input_dict = input_data.copy()
-        
-        # Ensure there's a messages field if not present and required
-        if "messages" not in input_dict and 'messages' in schema_fields:
-            # Try to create messages from other fields
-            for field in ['input', 'query', 'content', 'text']:
-                if field in input_dict and isinstance(input_dict[field], str):
-                    input_dict["messages"] = [HumanMessage(content=input_dict[field])]
-                    break
-        
-        # Validate against schema if available
-        if input_schema:
-            try:
-                return input_schema(**input_dict)
-            except Exception as e:
-                logger.warning(f"Schema validation failed: {e}")
-                
-        return input_dict
-    
-    # Handle Pydantic model input
-    elif isinstance(input_data, BaseModel):
-        # Convert to dict
-        if hasattr(input_data, "model_dump"):
-            # Pydantic v2
-            model_dict = input_data.model_dump()
-        elif hasattr(input_data, "dict"):
-            # Pydantic v1
-            model_dict = input_data.dict()
-        else:
-            # Manual extraction
-            model_dict = {}
-            for field in input_data.__annotations__:
-                if hasattr(input_data, field):
-                    model_dict[field] = getattr(input_data, field)
-        
-        # Ensure there's a messages field if needed by schema
-        if "messages" not in model_dict and 'messages' in schema_fields:
-            # Try to create messages from other fields
-            for field in ['input', 'query', 'content', 'text']:
-                if field in model_dict and isinstance(model_dict[field], str):
-                    model_dict["messages"] = [HumanMessage(content=model_dict[field])]
-                    break
-        
-        # Validate against schema if available
-        if input_schema:
-            try:
-                return input_schema(**model_dict)
-            except Exception as e:
-                logger.warning(f"Schema validation failed: {e}")
-                
-        return model_dict
-    
-    # Fallback for other types - convert to string message
-    fallback_input = {
-        "messages": [HumanMessage(content=str(input_data))]
-    }
-    
-    # Validate against schema if available
-    if input_schema:
-        try:
-            return input_schema(**fallback_input)
-        except Exception as e:
-            logger.warning(f"Schema validation failed: {e}")
-    
-    return fallback_input
+    return None

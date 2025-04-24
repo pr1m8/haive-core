@@ -110,7 +110,7 @@ This system is designed to work with LangGraph checkpointers:
 ```python
 from langgraph.checkpoint.base import BaseCheckpointSaver
 from src.haive.core.engine.agent.persistence import create_sqlite_checkpointer
-from src.haive.core.engine.agent.persistence.handlers import setup_checkpointer
+from src.haive.core.persistencehandlers import setup_checkpointer
 
 # Create agent config with persistence
 agent_config = AgentConfig(
@@ -136,7 +136,7 @@ The system maintains both threads (conversations) and checkpoints:
 The `handlers.py` module provides utility functions for working with thread state:
 
 ```python
-from src.haive.core.engine.agent.persistence.handlers import (
+from src.haive.core.persistencehandlers import (
     prepare_merged_input,
     process_input,
     register_thread_if_needed

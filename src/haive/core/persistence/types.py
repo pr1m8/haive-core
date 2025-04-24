@@ -1,58 +1,22 @@
-# src/haive/core/engine/agent/persistence/types.py
-
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Protocol, Union
+from typing import Optional, Dict, Any, Union, Literal
 
 class CheckpointerType(str, Enum):
-    """
-    Types of supported checkpointer implementations.
-    
-    This enum defines the available persistence backends for agent state.
-    """
-    memory = "memory"
-    postgres = "postgres"
-    sqlite = "sqlite"
-    supabase = "supabase"
-    # Add other checkpointer types as needed
+    """Types of checkpointers supported by the system."""
+    MEMORY = "memory"
+    POSTGRES = "postgres"
+    SQLITE = "sqlite"  # For future expansion
 
-class CheckpointMetadata(Dict[str, Any]):
-    """Type alias for checkpoint metadata dictionaries."""
-    pass
+class CheckpointerMode(str, Enum):
+    """Operational modes for checkpointers."""
+    SYNC = "sync"
+    ASYNC = "async"
 
-class CheckpointFailedCallback(Protocol):
-    """
-    Protocol for callbacks when checkpoint operations fail.
-    
-    This can be used for monitoring, logging, or taking corrective action.
-    """
-    def __call__(self, ex: Exception, config: Dict[str, Any]) -> None:
-        """
-        Called when a checkpoint operation fails.
-        
-        Args:
-            ex: The exception that occurred
-            config: The configuration that was being used
-        """
-        ...
+class CheckpointStorageMode(str, Enum):
+    """Storage modes for checkpoints."""
+    FULL = "full"      # Store complete history
+    SHALLOW = "shallow"  # Store only the most recent checkpoint
 
-class AsyncConnectFailedCB(Protocol):
-    """Protocol for async connection failed callbacks in PostgreSQL."""
-    def __call__(self, pool: Any) -> Any:
-        """
-        Called when connections cannot be established.
-        
-        Args:
-            pool: The connection pool that failed
-        """
-        ...
-
-class AsyncConnectionCB(Protocol):
-    """Protocol for async connection callbacks in PostgreSQL."""
-    def __call__(self, conn: Any) -> Any:
-        """
-        Called to configure or check connections.
-        
-        Args:
-            conn: The connection to configure or check
-        """
-        ...
+# Type aliases
+ConnectionOptions = Dict[str, Any]
+ThreadMetadata = Dict[str, Any]

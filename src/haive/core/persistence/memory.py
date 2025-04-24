@@ -1,81 +1,66 @@
-# src/haive/core/engine/agent/persistence/memory.py
+# src/haive/core/persistence/memory.py
 
 import logging
-import uuid
-from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Union
 
 from pydantic import Field
 
-from .types import CheckpointerType
+from .types import CheckpointerType, CheckpointTuple
 from .base import CheckpointerConfig
-
-# Try to import LangGraph's memory saver
-try:
-    from langgraph.checkpoint.memory import MemorySaver
-    MEMORY_AVAILABLE = True
-except ImportError:
-    MEMORY_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
 class MemoryCheckpointerConfig(CheckpointerConfig):
     """
-    Configuration for in-memory state persistence.
+    Configuration for in-memory checkpointing.
     
-    This provides a simple in-memory implementation that stores
-    checkpoints in memory, which is useful for testing and
-    development but doesn't persist data across restarts.
+    This class configures a simple in-memory checkpoint saver,
+    useful for development, testing, or simple applications that don't need
+    persistence between restarts.
     """
     type: CheckpointerType = CheckpointerType.memory
     
-    # Set to store registered threads with metadata
-    threads: Dict[str, Dict[str, Any]] = Field(default_factory=dict, exclude=True)
+    # No additional configuration parameters needed for memory checkpointer
+    setup_needed: bool = Field(default=False, description="No setup needed for memory checkpointer")
     
-    # Dictionary to store checkpoints by thread_id and checkpoint_id
-    checkpoints: Dict[str, Dict[str, Dict[str, Any]]] = Field(default_factory=dict, exclude=True)
-    
-    # Internal state
+    # Internal state (not serialized)
     checkpointer: Optional[Any] = Field(default=None, exclude=True)
     
     def create_checkpointer(self) -> Any:
         """
-        Create a memory-based checkpointer.
+        Create an in-memory checkpointer.
         
         Returns:
-            A MemorySaver instance from LangGraph
+            A MemorySaver instance
         """
-        if not self.checkpointer:
-            if MEMORY_AVAILABLE:
-                self.checkpointer = MemorySaver()
-            else:
-                # Simple fallback if LangGraph is not available
-                self.checkpointer = self  # Use self as the checkpointer
-        
-        return self.checkpointer
+        try:
+            # Import here to avoid circular imports
+            from langgraph.checkpoint.memory import MemorySaver
+            
+            if self._checkpointer is None:
+                logger.debug("Creating new in-memory checkpointer")
+                self._checkpointer = MemorySaver()
+            
+            return self._checkpointer
+            
+        except ImportError:
+            logger.error("Failed to import MemorySaver from langgraph")
+            raise
     
     def register_thread(self, thread_id: str, name: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None) -> None:
         """
-        Register a thread in memory.
+        Register a thread in the in-memory store.
+        
+        For memory checkpointer, this is a no-op since threads are implicitly created.
         
         Args:
-            thread_id: Unique identifier for the thread
-            name: Optional human-readable name for the thread
-            metadata: Optional metadata to associate with the thread
+            thread_id: The thread ID to register
+            name: Optional thread name
+            metadata: Optional metadata dict
         """
-        if thread_id not in self.threads:
-            self.threads[thread_id] = {
-                "created_at": datetime.now().isoformat(),
-                "metadata": metadata or {},
-                "name": name
-            }
-            logger.info(f"Thread {thread_id} registered in memory")
-            
-            # Initialize checkpoint storage for this thread
-            if thread_id not in self.checkpoints:
-                self.checkpoints[thread_id] = {}
-        else:
-            logger.debug(f"Thread {thread_id} already exists in memory")
+        logger.debug(f"Thread registration not needed for memory checkpointer: {thread_id}")
+        # No explicit registration needed for memory checkpointer
+        pass
     
     def put_checkpoint(self, config: Dict[str, Any], data: Any, metadata: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
@@ -89,58 +74,32 @@ class MemoryCheckpointerConfig(CheckpointerConfig):
         Returns:
             Updated config with checkpoint_id
         """
-        # For LangGraph MemorySaver
-        if MEMORY_AVAILABLE and isinstance(self.checkpointer, MemorySaver):
-            # Create a checkpoint structure with correct fields
-            checkpoint_data = {
-                "id": config["configurable"].get("checkpoint_id", str(uuid.uuid4())),
-                "channel_values": data
-            }
-            
-            # Get versions parameter required by newer versions
-            try:
-                # Try get method signature to determine needed parameters
-                import inspect
-                sig = inspect.signature(self.checkpointer.put)
-                if "new_versions" in sig.parameters:
-                    # New API
-                    result = self.checkpointer.put(
-                        config, 
-                        checkpoint_data, 
-                        metadata or {}, 
-                        {}  # Empty versions dict
-                    )
-                else:
-                    # Old API
-                    result = self.checkpointer.put(config, checkpoint_data)
-                return result
-            except Exception as e:
-                logger.error(f"Error storing checkpoint: {e}")
-                return config
+        checkpointer = self.create_checkpointer()
         
-        # Simple in-memory implementation
-        thread_id = config["configurable"]["thread_id"]
-        checkpoint_id = config["configurable"].get("checkpoint_id")
-        
-        # Generate a new checkpoint ID if none was provided
-        if not checkpoint_id:
-            checkpoint_id = str(uuid.uuid4())
-            
-        # Make sure the thread exists
-        if thread_id not in self.threads:
-            self.register_thread(thread_id)
-            
-        # Store the checkpoint
-        self.checkpoints[thread_id][checkpoint_id] = {
-            "data": data,
-            "metadata": metadata or {},
-            "timestamp": datetime.now().isoformat()
+        # Structure data correctly for MemorySaver
+        checkpoint_data = {
+            "id": config["configurable"].get("checkpoint_id", ""),  # Will be auto-generated if empty
+            "channel_values": data if isinstance(data, dict) else {"root": data}
         }
         
-        # Return updated config with checkpoint_id
-        updated_config = config.copy()
-        updated_config["configurable"]["checkpoint_id"] = checkpoint_id
-        return updated_config
+        # Prepare metadata
+        checkpoint_metadata = metadata or {}
+        
+        # Empty channel versions (required by newer API)
+        channel_versions = {}
+        
+        # Store the checkpoint
+        try:
+            updated_config = checkpointer.put(
+                config,
+                checkpoint_data,
+                checkpoint_metadata,
+                channel_versions
+            )
+            return updated_config
+        except Exception as e:
+            logger.error(f"Error storing checkpoint in memory: {e}")
+            return config
     
     def get_checkpoint(self, config: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """
@@ -152,80 +111,95 @@ class MemoryCheckpointerConfig(CheckpointerConfig):
         Returns:
             The checkpoint data if found, None otherwise
         """
-        # For LangGraph MemorySaver
-        if MEMORY_AVAILABLE and isinstance(self.checkpointer, MemorySaver):
-            return self.checkpointer.get(config)
-            
-        # Simple in-memory implementation
-        thread_id = config["configurable"]["thread_id"]
-        checkpoint_id = config["configurable"].get("checkpoint_id")
+        checkpointer = self.create_checkpointer()
         
-        # If no specific checkpoint was requested, return the latest
-        if not checkpoint_id and thread_id in self.checkpoints:
-            checkpoints = self.checkpoints[thread_id]
-            if not checkpoints:
+        try:
+            checkpoint = checkpointer.get(config)
+            if checkpoint is None:
                 return None
                 
-            # Find the latest checkpoint by timestamp
-            latest = None
-            latest_timestamp = None
-            
-            for cp_id, cp_data in checkpoints.items():
-                if latest_timestamp is None or cp_data["timestamp"] > latest_timestamp:
-                    latest = cp_data["data"]
-                    latest_timestamp = cp_data["timestamp"]
-                    
-            return latest
-            
-        # Return the specific checkpoint if it exists
-        if thread_id in self.checkpoints and checkpoint_id in self.checkpoints[thread_id]:
-            return self.checkpoints[thread_id][checkpoint_id]["data"]
-            
-        return None
+            # Return the channel_values as that's the agent state
+            return checkpoint.get("channel_values", {})
+        except Exception as e:
+            logger.error(f"Error retrieving checkpoint from memory: {e}")
+            return None
     
-    def list_checkpoints(self, config: Dict[str, Any], limit: Optional[int] = None) -> List[Tuple[Dict[str, Any], Any]]:
+    def get_checkpoint_tuple(self, config: Dict[str, Any]) -> Optional[CheckpointTuple]:
         """
-        List checkpoints for a thread.
+        Retrieve a checkpoint tuple from memory.
+        
+        Args:
+            config: Configuration with thread_id and optional checkpoint_id
+            
+        Returns:
+            CheckpointTuple if found, None otherwise
+        """
+        checkpointer = self.create_checkpointer()
+        
+        try:
+            result = checkpointer.get_tuple(config)
+            if result is None:
+                return None
+                
+            return CheckpointTuple(
+                config=result.config,
+                checkpoint=result.checkpoint,
+                metadata=result.metadata,
+                parent_config=result.parent_config,
+                pending_writes=result.pending_writes
+            )
+        except Exception as e:
+            logger.error(f"Error retrieving checkpoint tuple from memory: {e}")
+            return None
+    
+    def list_checkpoints(self, config: Dict[str, Any], limit: Optional[int] = None) -> List[CheckpointTuple]:
+        """
+        List checkpoints from memory.
         
         Args:
             config: Configuration with thread_id
             limit: Optional maximum number of checkpoints to return
             
         Returns:
-            List of (config, checkpoint) tuples
+            List of CheckpointTuple objects
         """
-        # For LangGraph MemorySaver
-        if MEMORY_AVAILABLE and isinstance(self.checkpointer, MemorySaver):
-            try:
-                checkpoint_tuples = list(self.checkpointer.list(config, limit=limit))
-                return [(cp.config, cp.checkpoint) for cp in checkpoint_tuples]
-            except Exception as e:
-                logger.error(f"Error listing checkpoints: {e}")
-                return []
+        checkpointer = self.create_checkpointer()
         
-        # Simple in-memory implementation
-        thread_id = config["configurable"]["thread_id"]
-        
-        if thread_id not in self.checkpoints:
+        try:
+            # Get checkpoint tuples from the checkpointer
+            results = list(checkpointer.list(config, limit=limit))
+            
+            # Convert to our CheckpointTuple type
+            return [
+                CheckpointTuple(
+                    config=result.config,
+                    checkpoint=result.checkpoint,
+                    metadata=result.metadata,
+                    parent_config=result.parent_config,
+                    pending_writes=result.pending_writes
+                ) 
+                for result in results
+            ]
+        except Exception as e:
+            logger.error(f"Error listing checkpoints from memory: {e}")
             return []
-            
-        # Sort checkpoints by timestamp (newest first)
-        checkpoints = []
-        for cp_id, cp_data in self.checkpoints[thread_id].items():
-            checkpoints.append((
-                {"configurable": {"thread_id": thread_id, "checkpoint_id": cp_id}},
-                cp_data["data"]
-            ))
-            
-        # Sort by timestamp
-        checkpoints.sort(key=lambda x: self.checkpoints[thread_id][x[0]["configurable"]["checkpoint_id"]]["timestamp"], reverse=True)
+    
+    def delete_thread(self, thread_id: str) -> None:
+        """
+        Delete all checkpoints for a thread from memory.
         
-        # Apply limit if specified
-        if limit is not None and limit > 0:
-            checkpoints = checkpoints[:limit]
-            
-        return checkpoints
+        Args:
+            thread_id: Identifier for the thread to delete
+        """
+        checkpointer = self.create_checkpointer()
+        
+        try:
+            checkpointer.delete_thread(thread_id)
+            logger.info(f"Deleted thread {thread_id} from memory")
+        except Exception as e:
+            logger.error(f"Error deleting thread from memory: {e}")
     
     def close(self) -> None:
-        """No-op for memory checkpointer since there are no resources to close."""
-        pass
+        """Close the checkpointer (no-op for memory checkpointer)."""
+        # Memory checkpointer doesn't need closing
+        self._checkpointer = None

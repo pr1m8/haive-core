@@ -1,348 +1,196 @@
-# src/haive/core/engine/agent/persistence/utils.py
-
-"""
-Utilities for working with persistence backends.
-
-This module provides helper functions for database operations
-and state management across different persistence backends.
-"""
-
 import logging
-import json
-import uuid
-from typing import Any, Dict, List, Optional, Tuple, Union
-from datetime import datetime
-
-from pydantic import BaseModel
-from langchain_core.runnables import RunnableConfig
+from typing import Any, Optional, Dict, Union
+import asyncio
 
 logger = logging.getLogger(__name__)
-
-# Check if PostgreSQL is available
-try:
-    import psycopg
-    from psycopg_pool import ConnectionPool
-    POSTGRES_AVAILABLE = True
-except ImportError:
-    POSTGRES_AVAILABLE = False
-
-def generate_checkpoint_id() -> str:
+def ensure_pool_open(checkpointer: Any) -> Optional[Any]:
     """
-    Generate a unique checkpoint ID.
-    
-    Returns:
-        A UUID string to use as checkpoint ID
+    Ensure that any PostgreSQL connection pool is properly opened.
     """
-    return str(uuid.uuid4())
-
-def serialize_metadata(metadata: Dict[str, Any]) -> str:
-    """
-    Serialize metadata to a JSON string.
-    
-    Args:
-        metadata: Dictionary of metadata
-        
-    Returns:
-        JSON string representation of metadata
-    """
-    def _serialize_item(item):
-        """Helper to make items serializable."""
-        if isinstance(item, (str, int, float, bool, type(None))):
-            return item
-        elif isinstance(item, dict):
-            return {k: _serialize_item(v) for k, v in item.items()}
-        elif isinstance(item, (list, tuple)):
-            return [_serialize_item(i) for i in item]
-        elif isinstance(item, datetime):
-            return item.isoformat()
-        elif isinstance(item, BaseModel):
-            if hasattr(item, "model_dump"):
-                return _serialize_item(item.model_dump())
-            elif hasattr(item, "dict"):
-                return _serialize_item(item.dict())
-        # Default serialization
-        return str(item)
-    
-    try:
-        serializable_metadata = _serialize_item(metadata)
-        return json.dumps(serializable_metadata)
-    except Exception as e:
-        logger.error(f"Error serializing metadata: {e}")
-        # Return empty json object as fallback
-        return "{}"
-
-def deserialize_metadata(metadata_str: str) -> Dict[str, Any]:
-    """
-    Deserialize metadata from a JSON string.
-    
-    Args:
-        metadata_str: JSON string representation of metadata
-        
-    Returns:
-        Dictionary of metadata
-    """
-    try:
-        if isinstance(metadata_str, dict):
-            # Already deserialized
-            return metadata_str
-        return json.loads(metadata_str)
-    except Exception as e:
-        logger.error(f"Error deserializing metadata: {e}")
-        return {}
-
-def extract_thread_id(config: RunnableConfig) -> str:
-    """
-    Extract thread ID from a runnable config.
-    
-    Args:
-        config: Runnable configuration
-        
-    Returns:
-        Thread ID or a new UUID if not found
-    """
-    if not config:
-        return str(uuid.uuid4())
-    
-    configurable = config.get("configurable", {})
-    thread_id = configurable.get("thread_id")
-    
-    if not thread_id:
-        thread_id = str(uuid.uuid4())
-        
-    return thread_id
-
-def extract_checkpoint_id(config: RunnableConfig) -> Optional[str]:
-    """
-    Extract checkpoint ID from a runnable config.
-    
-    Args:
-        config: Runnable configuration
-        
-    Returns:
-        Checkpoint ID if found, None otherwise
-    """
-    if not config:
+    if not hasattr(checkpointer, 'conn'):
         return None
     
-    configurable = config.get("configurable", {})
-    return configurable.get("checkpoint_id")
-
-def pg_execute_query(
-    conn_string: str,
-    query: str,
-    params: Optional[Tuple] = None,
-    fetch: bool = True
-) -> Optional[List[Dict[str, Any]]]:
-    """
-    Execute a PostgreSQL query with connection management.
-    
-    Args:
-        conn_string: PostgreSQL connection string
-        query: SQL query to execute
-        params: Query parameters
-        fetch: Whether to fetch results
-        
-    Returns:
-        Query results as a list of dictionaries if fetch=True, None otherwise
-    """
-    if not POSTGRES_AVAILABLE:
-        logger.error("PostgreSQL dependencies not available")
-        return None
+    conn = checkpointer.conn
     
     try:
-        with psycopg.connect(conn_string) as conn:
-            with conn.cursor(row_factory=psycopg.rows.dict_row) as cursor:
-                cursor.execute(query, params or ())
+        from psycopg_pool import ConnectionPool
+        
+        if isinstance(conn, ConnectionPool):
+            # Check if opened using the _opened attribute
+            is_open = getattr(conn, '_opened', False)
+            if not is_open:
+                logger.info("Opening PostgreSQL connection pool")
+                conn.open()
+                logger.info("Pool opened successfully")
+            return conn
+    except ImportError:
+        logger.debug("psycopg_pool not available")
+    
+    # Make sure setup is called
+    if hasattr(checkpointer, 'setup'):
+        try:
+            checkpointer.setup()
+        except Exception as e:
+            logger.error(f"Error setting up checkpointer: {e}")
+    
+    return None
+async def ensure_async_pool_open(checkpointer: Any) -> Optional[Any]:
+    """
+    Ensure that any async PostgreSQL connection pool is properly opened.
+    
+    Args:
+        checkpointer: The async checkpointer to check
+        
+    Returns:
+        The opened pool if one was found and opened, None otherwise
+    """
+    opened_pool = None
+    try:
+        # Check for connection pools in the checkpointer
+        if hasattr(checkpointer, 'conn'):
+            conn = checkpointer.conn
+            
+            # Import here to avoid dependency issues
+            try:
+                from psycopg_pool.base import AsyncPool
                 
-                if fetch:
-                    return cursor.fetchall()
-                return None
+                # Check if it's an async pool
+                if isinstance(conn, AsyncPool):
+                    # Check if the pool is already open
+                    try:
+                        if hasattr(conn, 'is_open'):
+                            is_open = conn.is_open()
+                        else:
+                            # Older versions might not have is_open()
+                            is_open = getattr(conn, '_opened', False)
+                        
+                        # Open the pool if needed
+                        if not is_open:
+                            logger.info(f"Opening async PostgreSQL connection pool")
+                            try:
+                                await conn.open()
+                                opened_pool = conn
+                                logger.info(f"Successfully opened async pool")
+                            except Exception as e:
+                                logger.error(f"Error opening async pool: {e}")
+                    except Exception as e:
+                        logger.error(f"Error checking if async pool is open: {e}")
+            except ImportError:
+                logger.debug("psycopg_pool AsyncPool not available")
+                
+        # Additional check for other types of pools or connections
+        if not opened_pool and hasattr(checkpointer, 'setup'):
+            # If the checkpointer has a setup method but no connection was found,
+            # just make sure tables are set up
+            logger.debug("No async pool found but checkpointer has setup method")
+            try:
+                await checkpointer.setup()
+            except Exception as e:
+                logger.error(f"Error setting up async checkpointer: {e}")
+                
     except Exception as e:
-        logger.error(f"PostgreSQL query error: {e}")
-        return None
+        logger.error(f"Error ensuring async pool is open: {e}")
+        
+    return opened_pool
+# In utils.py
+def register_thread(checkpointer: Any, thread_id: str, metadata: Optional[Dict[str, Any]] = None) -> bool:
+    """
+    Register a thread in the PostgreSQL database if needed.
+    """
+    try:
+        if hasattr(checkpointer, 'conn'):
+            pool = checkpointer.conn
+            if pool:
+                # Ensure connection pool is usable
+                ensure_pool_open(checkpointer)
+                
+                # Register the thread
+                with pool.connection() as conn:
+                    with conn.cursor() as cursor:
+                        # Check if threads table exists
+                        cursor.execute("""
+                            SELECT EXISTS (
+                                SELECT FROM information_schema.tables 
+                                WHERE table_name = 'threads'
+                            );
+                        """)
+                        table_exists = cursor.fetchone()[0]
+                        
+                        if not table_exists:
+                            logger.debug("Creating threads table")
+                            cursor.execute("""
+                                CREATE TABLE IF NOT EXISTS threads (
+                                    thread_id VARCHAR(255) PRIMARY KEY,
+                                    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                                    last_access TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                                    metadata JSONB DEFAULT '{}'::jsonb,
+                                    user_id VARCHAR(255)
+                                );
+                            """)
+                        
+                        # Convert metadata to JSON string first
+                        import json
+                        metadata_json = json.dumps(metadata) if metadata else "{}"
+                        
+                        # Insert the thread if not exists, or update last_access
+                        cursor.execute("""
+                            INSERT INTO threads (thread_id, last_access, metadata) 
+                            VALUES (%s, CURRENT_TIMESTAMP, %s::jsonb) 
+                            ON CONFLICT (thread_id) 
+                            DO UPDATE SET last_access = CURRENT_TIMESTAMP, metadata = %s::jsonb
+                        """, (thread_id, metadata_json, metadata_json))
+                        
+                        logger.info(f"Thread {thread_id} registered/updated in PostgreSQL")
+                        return True
+    except Exception as e:
+        logger.warning(f"Error registering thread: {e}")
+    
+    return False
 
-def pg_list_threads(conn_string: str, limit: int = 100) -> List[Dict[str, Any]]:
+async def register_thread_async(checkpointer: Any, thread_id: str, metadata: Optional[Dict[str, Any]] = None) -> bool:
     """
-    List all threads in a PostgreSQL database.
-    
-    Args:
-        conn_string: PostgreSQL connection string
-        limit: Maximum number of threads to return
-        
-    Returns:
-        List of thread dictionaries with metadata
+    Register a thread in the PostgreSQL database asynchronously.
     """
-    query = """
-    SELECT thread_id, created_at, last_access, metadata
-    FROM threads
-    ORDER BY last_access DESC
-    LIMIT %s
-    """
-    
-    results = pg_execute_query(conn_string, query, (limit,))
-    if not results:
-        return []
-        
-    # Process metadata
-    for thread in results:
-        if "metadata" in thread:
-            thread["metadata"] = deserialize_metadata(thread["metadata"])
-    
-    return results
-
-def pg_get_thread(conn_string: str, thread_id: str) -> Optional[Dict[str, Any]]:
-    """
-    Get a specific thread from PostgreSQL.
-    
-    Args:
-        conn_string: PostgreSQL connection string
-        thread_id: Thread ID to retrieve
-        
-    Returns:
-        Thread dictionary with metadata if found, None otherwise
-    """
-    query = """
-    SELECT thread_id, created_at, last_access, metadata
-    FROM threads
-    WHERE thread_id = %s
-    """
-    
-    results = pg_execute_query(conn_string, query, (thread_id,))
-    if not results:
-        return None
-        
-    thread = results[0]
-    
-    # Process metadata
-    if "metadata" in thread:
-        thread["metadata"] = deserialize_metadata(thread["metadata"])
-    
-    return thread
-
-def pg_update_thread_metadata(
-    conn_string: str,
-    thread_id: str,
-    metadata: Dict[str, Any]
-) -> bool:
-    """
-    Update a thread's metadata in PostgreSQL.
-    
-    Args:
-        conn_string: PostgreSQL connection string
-        thread_id: Thread ID to update
-        metadata: New metadata to set
-        
-    Returns:
-        True if successful, False otherwise
-    """
-    query = """
-    UPDATE threads
-    SET metadata = %s, last_access = CURRENT_TIMESTAMP
-    WHERE thread_id = %s
-    """
-    
-    metadata_json = serialize_metadata(metadata)
-    
-    results = pg_execute_query(conn_string, query, (metadata_json, thread_id), fetch=False)
-    return results is not None
-
-def pg_delete_thread(conn_string: str, thread_id: str) -> bool:
-    """
-    Delete a thread and its checkpoints from PostgreSQL.
-    
-    Args:
-        conn_string: PostgreSQL connection string
-        thread_id: Thread ID to delete
-        
-    Returns:
-        True if successful, False otherwise
-    """
-    # Delete checkpoints first due to foreign key constraints
-    checkpoint_query = """
-    DELETE FROM checkpoints
-    WHERE thread_id = %s
-    """
-    
-    thread_query = """
-    DELETE FROM threads
-    WHERE thread_id = %s
-    """
+    if not hasattr(checkpointer, 'conn'):
+        return False
     
     try:
-        # Delete checkpoints
-        pg_execute_query(conn_string, checkpoint_query, (thread_id,), fetch=False)
+        import json
+        metadata_json = json.dumps(metadata) if metadata else '{}'
         
-        # Delete thread
-        pg_execute_query(conn_string, thread_query, (thread_id,), fetch=False)
-        
-        return True
+        async with checkpointer.conn.connection() as conn:
+            async with conn.cursor() as cursor:
+                # Check if table exists
+                await cursor.execute("""
+                    SELECT EXISTS (
+                        SELECT FROM information_schema.tables 
+                        WHERE table_name = 'threads'
+                    );
+                """)
+                table_exists = (await cursor.fetchone())[0]
+                
+                if not table_exists:
+                    await cursor.execute("""
+                        CREATE TABLE IF NOT EXISTS threads (
+                            thread_id VARCHAR(255) PRIMARY KEY,
+                            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                            last_access TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                            metadata JSONB DEFAULT '{}'::jsonb,
+                            user_id VARCHAR(255)
+                        );
+                    """)
+                
+                # Use parameterized query with proper JSONB handling
+                await cursor.execute("""
+                    INSERT INTO threads (thread_id, last_access, metadata) 
+                    VALUES (%s, CURRENT_TIMESTAMP, %s::jsonb) 
+                    ON CONFLICT (thread_id) 
+                    DO UPDATE SET last_access = CURRENT_TIMESTAMP, metadata = %s::jsonb
+                """, (thread_id, metadata_json, metadata_json))
+                
+                logger.info(f"Thread {thread_id} registered/updated in PostgreSQL (async)")
+                return True
     except Exception as e:
-        logger.error(f"Error deleting thread {thread_id}: {e}")
-        return False
-
-def pg_list_checkpoints(
-    conn_string: str,
-    thread_id: str,
-    limit: int = 10
-) -> List[Dict[str, Any]]:
-    """
-    List checkpoints for a thread in PostgreSQL.
+        logger.warning(f"Error registering thread asynchronously: {e}")
     
-    Args:
-        conn_string: PostgreSQL connection string
-        thread_id: Thread ID to list checkpoints for
-        limit: Maximum number of checkpoints to return
-        
-    Returns:
-        List of checkpoint dictionaries
-    """
-    query = """
-    SELECT checkpoint_id, created_at, metadata
-    FROM checkpoints
-    WHERE thread_id = %s
-    ORDER BY created_at DESC
-    LIMIT %s
-    """
-    
-    results = pg_execute_query(conn_string, query, (thread_id, limit))
-    if not results:
-        return []
-        
-    # Process metadata
-    for checkpoint in results:
-        if "metadata" in checkpoint:
-            checkpoint["metadata"] = deserialize_metadata(checkpoint["metadata"])
-    
-    return results
-
-def create_connection_string(
-    db_host: str,
-    db_port: int,
-    db_name: str,
-    db_user: str,
-    db_pass: str,
-    ssl_mode: str = "disable"
-) -> str:
-    """
-    Create a PostgreSQL connection string from parameters.
-    
-    Args:
-        db_host: Database host
-        db_port: Database port
-        db_name: Database name
-        db_user: Database user
-        db_pass: Database password
-        ssl_mode: SSL mode
-        
-    Returns:
-        Connection string for PostgreSQL
-    """
-    import urllib.parse
-    encoded_pass = urllib.parse.quote_plus(str(db_pass))
-    
-    conn_string = f"postgresql://{db_user}:{encoded_pass}@{db_host}:{db_port}/{db_name}"
-    
-    if ssl_mode:
-        conn_string += f"?sslmode={ssl_mode}"
-        
-    return conn_string
+    return False
