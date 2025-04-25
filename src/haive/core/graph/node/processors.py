@@ -103,10 +103,22 @@ def apply_config_overrides(config: Dict[str, Any], engine_id: Optional[str], ove
             config["configurable"][key] = value
             
     return config
-
 def extract_input(state: Dict[str, Any], config: NodeConfig) -> Any:
-    """Extract input based on configuration."""
+    """
+    Extract input based on configuration with improved debugging.
+    
+    Args:
+        state: The current state
+        config: Node configuration
+        
+    Returns:
+        Extracted input data
+    """
+    logger = logging.getLogger("input_extraction")
     logger.debug(f"Extracting input for node: {config.name}")
+    logger.debug(f"State keys: {list(state.keys())}")
+    logger.debug(f"Input mapping: {config.input_mapping}")
+    logger.debug(f"Use direct messages: {config.use_direct_messages}")
     
     # Ensure state is a dictionary
     if not isinstance(state, dict):
@@ -117,6 +129,7 @@ def extract_input(state: Dict[str, Any], config: NodeConfig) -> Any:
             state = state.dict()
         else:
             state = {"value": state}
+        logger.debug(f"Converted state keys: {list(state.keys())}")
     
     # Apply mapping if it exists
     if config.input_mapping:
@@ -125,23 +138,34 @@ def extract_input(state: Dict[str, Any], config: NodeConfig) -> Any:
         for state_key, input_key in config.input_mapping.items():
             if state_key in state:
                 mapped_input[input_key] = state[state_key]
-                logger.debug(f"Mapped {state_key} → {input_key}")
+                logger.debug(f"Mapped {state_key} → {input_key}: {type(state[state_key]).__name__}")
+            else:
+                logger.warning(f"State key '{state_key}' not found in state")
         
-        # For single mapped values, return directly
-        if len(config.input_mapping) == 1 and len(mapped_input) == 1:
-            result = list(mapped_input.values())[0]
-            logger.debug(f"Returning single mapped value: {type(result).__name__}")
-            return result
-            
         # Return mapped dict if we have any values
         if mapped_input:
             logger.debug(f"Returning mapped input with keys: {list(mapped_input.keys())}")
             return mapped_input
+        
+        # If mapping exists but resulted in empty dict, log warning
+        if not mapped_input:
+            logger.warning(f"Mapping resulted in empty input dictionary")
     
     # If using direct messages and they exist, return them
     if config.use_direct_messages and "messages" in state:
-        logger.debug("Using direct messages")
+        logger.debug(f"Using direct messages (count: {len(state['messages'])})")
         return state["messages"]
+    
+    # If we get here with a mapping but no matches, log a clear error
+    if config.input_mapping and len(config.input_mapping) > 0:
+        msg = f"No input fields could be extracted using mapping: {config.input_mapping}"
+        logger.error(msg)
+        
+        # Check for common errors - missing state keys
+        missing_keys = [k for k in config.input_mapping.keys() if k not in state]
+        if missing_keys:
+            logger.error(f"State is missing these keys defined in mapping: {missing_keys}")
+            logger.error(f"Available state keys: {list(state.keys())}")
     
     # Default to returning full state
     logger.debug(f"Returning full state with keys: {list(state.keys())}")
@@ -434,10 +458,12 @@ class AsyncInvokableNodeProcessor:
                 if config.config_overrides and merged_config:
                     merged_config = apply_config_overrides(
                         merged_config, engine_id, config.config_overrides)
-                
+                logger.debug(f"Processed state: {processed_state}")
                 # Extract input based on mapping
                 input_data = extract_input(processed_state, config)
-                
+                logger.debug(f"Input data: {input_data}")
+                print(f"Input data: {input_data}")  
+                print(f"Processed state: {processed_state}")
                 # For async invokable engines, we'll use the synchronous invoke method
                 # instead of trying to run ainvoke in a sync context
                 logger.debug(f"Using invoke() instead of ainvoke() for async engine")
@@ -495,6 +521,11 @@ class CallableNodeProcessor:
                     result = engine(processed_state, merged_config)
                 else:
                     logger.debug(f"Calling with state only")
+                    logger.debug(f"Processed state: {processed_state}")
+                    logger.debug(f"Merged config: {merged_config}")
+                    logger.debug(f"Engine: {engine}")
+                    logger.debug(f"Engine type: {type(engine)}")    
+                    logger.debug(f"Engine signature: {sig}")
                     result = engine(processed_state)
                     
                 logger.debug(f"Function returned: {type(result).__name__}")
