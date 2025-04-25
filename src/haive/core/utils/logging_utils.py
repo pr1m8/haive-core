@@ -1,4 +1,4 @@
-# src/haive_core/utils/logging.py
+# src/haive.core/utils/logging.py
 
 import logging
 from pathlib import Path

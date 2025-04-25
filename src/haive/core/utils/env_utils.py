@@ -1,4 +1,4 @@
-# src/haive_core/utils/env_utils.py
+# src/haive.core/utils/env_utils.py
 
 import logging
 import os
@@ -131,7 +131,7 @@ def load_project_env_files() -> dict[str, str]:
     # Get module path to find project root
     module_path = Path(__file__)
 
-    # Navigate to project root (src/haive_core/utils → src/haive_core → src → packages/haive-core → packages → project_root)
+    # Navigate to project root (src/haive.core/utils → src/haive.core → src → packages/haive-core → packages → project_root)
     project_root = module_path.parent.parent.parent.parent.parent.parent
 
     # Load from project root
@@ -140,7 +140,7 @@ def load_project_env_files() -> dict[str, str]:
         loaded_vars.update(load_env_file(root_env))
 
     # Find which package we're in
-    package_dir = module_path.parent.parent.parent.parent  # src/haive_core/utils → src/haive_core → src → packages/haive-core
+    package_dir = module_path.parent.parent.parent.parent  # src/haive.core/utils → src/haive.core → src → packages/haive-core
     package_name = package_dir.name
 
     # Load package-specific .env
