@@ -109,6 +109,8 @@ class DynamicGraph:
         name: str,
         components: List[Any] = None,
         state_schema: Optional[Type[BaseModel]] = None,
+        input_schema: Optional[Type[BaseModel]] = None,
+        output_schema: Optional[Type[BaseModel]] = None, 
         description: Optional[str] = None,
         default_runnable_config: Optional[Dict[str, Any]] = None,
         visualize: bool = False,
@@ -164,7 +166,14 @@ class DynamicGraph:
             
             # Initialize registries and node system
             self._initialize_registries()
-            
+            if not input_schema:
+                self.input_schema = state_schema
+            else:
+                self.input_schema = input_schema
+            if not output_schema:
+                self.output_schema = state_schema
+            else:
+                self.output_schema = output_schema
             # Process components and initialize schemas
             try:
                 logger.debug("Processing components...")
@@ -361,13 +370,14 @@ class DynamicGraph:
             tb = traceback.format_exc()
             logger.error(f"Error in _initialize_schemas: {str(e)}\n{tb}")
             raise
-    
+    # TODO: Fix
     def _initialize_graph(self):
         """Initialize the underlying StateGraph."""
         try:
             logger.debug(f"Initializing StateGraph with schema: {self.state_model.__name__}")
             
-            self.graph_builder = StateGraph(self.state_model)
+            self.graph_builder = StateGraph(state_schema=self.state_model, input=self.input_schema,
+                                            output=self.output_schema)
             logger.info(f"Initialized StateGraph with schema: {self.state_model.__name__}")
             
         except Exception as e:
