@@ -16,7 +16,7 @@ from pydantic import BaseModel, Field, create_model
 
 from haive.core.schema.state_schema import StateSchema
 from haive.core.schema.field_definition import FieldDefinition
-
+from haive.core.schema.field_extractor import FieldExtractor
 logger = logging.getLogger(__name__)
 
 class SchemaComposer:
