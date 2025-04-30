@@ -14,7 +14,7 @@ from haive.core.engine.aug_llm.base import AugLLMConfig
 
 # Import core engine classes
 from haive.core.engine.embeddings import EmbeddingsEngineConfig
-from haive.core.engine.retriever import RetrieverConfig, RetrieverType
+from haive.core.engine.retriever import BaseRetrieverConfig, RetrieverType
 from haive.core.engine.vectorstore.vectorstore import VectorStoreConfig
 
 # Import graph building components
@@ -56,7 +56,7 @@ class TestEngineIntegration(unittest.TestCase):
             embedding_model=self.embeddings_config.embedding_config
         )
 
-        self.retriever_config = RetrieverConfig.from_retriever_type(
+        self.retriever_config = BaseRetrieverConfig.from_retriever_type(
             RetrieverType.VECTOR_STORE,
             name="test_retriever",
             vector_store_config=self.vectorstore_config,

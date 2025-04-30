@@ -459,7 +459,7 @@ def test_various_input_formats(azure_llm_config, complex_chat_prompt, custom_tem
 
 
     # Test 1: Simple string input
-    result1 = aug_llm.invoke("Tell me about quantum computing")
+    result1 = aug_llm.create_runnable().invoke("Tell me about quantum computing")
     print("\n" + "="*20 + " Result from string input " + "="*20)
     print(result1.content if hasattr(result1, "content") else result1)
 

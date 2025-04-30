@@ -28,7 +28,7 @@ from haive.core.schema.schema_composer import SchemaComposer
 from haive.core.schema.schema_manager import StateSchemaManager
 from haive.core.engine.base import InvokableEngine, EngineType, EngineRegistry
 from haive.core.engine.aug_llm.base import AugLLMConfig
-from haive.core.engine.retriever import RetrieverConfig, RetrieverType
+from haive.core.engine.retriever import BaseRetrieverConfig, RetrieverType
 from haive.core.engine.vectorstore import VectorStoreConfig, VectorStoreProvider
 from haive.core.engine.embeddings import EmbeddingsEngineConfig
 
@@ -104,7 +104,7 @@ def create_test_llm_engine():
     engine = AugLLMConfig(
         name="test_llm",
         id="llm-test-123",
-        model="gpt-4",
+        model="gpt-4o",
         temperature=0.7
     )
     
@@ -125,7 +125,7 @@ def create_test_retriever_engine():
     logger.debug(f"Created vector store config: {vs_config.name}")
     
     # Create retriever based on vector store
-    engine = RetrieverConfig(
+    engine = BaseRetrieverConfig(
         name="test_retriever",
         id="retriever-test-123",
         retriever_type=RetrieverType.VECTOR_STORE,

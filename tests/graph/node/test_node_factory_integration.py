@@ -14,7 +14,7 @@ from langchain_core.documents import Document
 
 from haive.core.engine.aug_llm.base import AugLLMConfig
 from haive.core.models.llm.base import AzureLLMConfig
-from haive.core.engine.retriever import RetrieverConfig, VectorStoreRetrieverConfig
+from haive.core.engine.retriever import BaseRetrieverConfig, VectorStoreRetrieverConfig
 from haive.core.engine.vectorstore import VectorStoreConfig, VectorStoreProvider
 from haive.core.models.embeddings.base import HuggingFaceEmbeddingConfig
 from haive.core.schema.schema_composer import SchemaComposer

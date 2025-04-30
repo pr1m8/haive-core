@@ -30,7 +30,7 @@ def make_default_config(docs: list[Document] | None = None) -> VectorStoreConfig
 
 def test_create_vectorstore_returns_inmemory():
     config = make_default_config()
-    vs = config.create_vectorstore()
+    vs = config.instantiate()
     logger.info(f"✅ Created vector store: {vs.__class__.__name__}")
     assert isinstance(vs, InMemoryVectorStore)
 

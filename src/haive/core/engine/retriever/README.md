@@ -51,9 +51,9 @@ The most common implementation is the `VectorStoreRetrieverConfig`, which:
 ### Creating a Retriever
 
 ```python
-from haive_core.engine.retriever import VectorStoreRetrieverConfig
-from haive_core.engine.vectorstore import VectorStoreConfig, VectorStoreProvider
-from haive_core.models.embeddings.base import HuggingFaceEmbeddingConfig
+from haive.core.engine.retriever import VectorStoreRetrieverConfig
+from haive.core.engine.vectorstore import VectorStoreConfig, VectorStoreProvider
+from haive.core.models.embeddings.base import HuggingFaceEmbeddingConfig
 from langchain_core.documents import Document
 
 # Create sample documents
@@ -148,7 +148,7 @@ docs = retriever_config.invoke("Latest AI developments", runtime_config)
 ### Using the Factory Function
 
 ```python
-from haive_core.engine.retriever import create_retriever_config, RetrieverType
+from haive.core.engine.retriever import create_retriever_config, RetrieverType
 
 # Create a retriever config using the factory function
 retriever_config = create_retriever_config(
@@ -164,7 +164,7 @@ retriever_config = create_retriever_config(
 ### Creating a Retriever Directly from a Vector Store
 
 ```python
-from haive_core.engine.retriever import create_retriever_from_vectorstore
+from haive.core.engine.retriever import create_retriever_from_vectorstore
 
 # Create a retriever directly from a vector store config
 retriever = create_retriever_from_vectorstore(
@@ -180,8 +180,8 @@ retriever = create_retriever_from_vectorstore(
 ### Using Different Retriever Types
 
 ```python
-from haive_core.engine.retriever import RetrieverType
-from haive_core.engine.augllm import AugLLMConfig
+from haive.core.engine.retriever import RetrieverType
+from haive.core.engine.augllm import AugLLMConfig
 
 # Create an LLM config
 llm_config = AugLLMConfig(
@@ -211,8 +211,8 @@ self_query_retriever = create_retriever_config(
 ### Integration with Graph Workflows
 
 ```python
-from haive_core.graph.dynamic_graph_builder import DynamicGraph
-from haive_core.engine.augllm import AugLLMConfig
+from haive.core.graph.dynamic_graph_builder import DynamicGraph
+from haive.core.engine.augllm import AugLLMConfig
 from langgraph.graph import START, END
 
 # Create engines
@@ -241,7 +241,7 @@ app = graph.compile()
 ### Creating a Custom Retriever Type
 
 ```python
-from haive_core.engine.retriever import RetrieverConfig, RetrieverType
+from haive.core.engine.retriever import RetrieverConfig, RetrieverType
 
 # Define a new retriever type
 class CustomRetrieverType(RetrieverType):

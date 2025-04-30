@@ -21,7 +21,7 @@ from langchain_core.documents import Document
 # Adjust these imports to match your project structure
 from haive.core.graph.dynamic_graph_builder import DynamicGraph
 from haive.core.engine.aug_llm.base import AugLLMConfig
-from haive.core.engine.retriever import RetrieverConfig,RetrieverType
+from haive.core.engine.retriever import BaseRetrieverConfig,RetrieverType
 from haive.core.engine.vectorstore import VectorStoreConfig
 from langgraph.graph import START, END
 
@@ -37,7 +37,7 @@ def create_sample_graph():
         model="gpt-4o"
     )
     
-    retriever_engine = RetrieverConfig(
+    retriever_engine = BaseRetrieverConfig(
         name="retriever_engine",
         id="retriever-" + uuid.uuid4().hex[:8]
     )
@@ -54,7 +54,7 @@ def create_sample_graph():
                    ]
     )
     
-    retrieve_engine = RetrieverConfig(
+    retrieve_engine = BaseRetrieverConfig(
         name="retrieve_engine",
         id="retrieve-" + uuid.uuid4().hex[:8],
         retriever_type=RetrieverType.VECTOR_STORE,
