@@ -899,15 +899,8 @@ class Agent(Generic[TConfig], ABC):
         if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
             with self.console.status(f"[bold blue]Generating graph visualization...[/bold blue]"):
                 # Use DynamicGraph's visualization capability
-                if hasattr(self.graph_builder, "visualize"):
-                    try:
-                        self.graph_builder.visualize_graph(output_path)
-                        self.console.print(f"[bold green]Graph visualization saved to:[/bold green] {output_path}")
-                        return
-                    except Exception as e:
-                        self.console.print(f"[bold yellow]Error using DynamicGraph visualization: {e}[/bold yellow]")
-                
-                # Fall back to compiled graph visualization if available
+                from haive.core.utils.visualize_graph_utils import render_and_display_graph
+                 # Fall back to compiled graph visualization if available
                 if self.app and hasattr(self.app, "get_graph"):
                     try:
                         # Ensure directory exists
@@ -921,6 +914,15 @@ class Agent(Generic[TConfig], ABC):
                         self.console.print(f"[bold green]Graph visualization saved to:[/bold green] {output_path}")
                     except Exception as e:
                         self.console.print(f"[bold red]Error visualizing graph: {e}[/bold red]")
+                if hasattr(self.graph_builder, "visualize"):
+                    try:
+                        self.graph_builder.visualize_graph(output_path)
+                        self.console.print(f"[bold green]Graph visualization saved to:[/bold green] {output_path}")
+                        return
+                    except Exception as e:
+                        self.console.print(f"[bold yellow]Error using DynamicGraph visualization: {e}[/bold yellow]")
+                
+               
         else:
             # Use DynamicGraph's visualization capability
             if hasattr(self.graph_builder, "visualize"):

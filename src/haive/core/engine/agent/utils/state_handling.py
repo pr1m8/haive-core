@@ -1,4 +1,4 @@
-# src/haive_core/engine/agent/utils/state_handling.py
+# src/haive.core/engine/agent/utils/state_handling.py
 
 """
 State handling utilities for agent inputs and outputs.

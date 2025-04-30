@@ -1,33 +1,43 @@
-# src/haive/core/engine/agent/persistence/__init__.py
-from .types import CheckpointerType
-from .base import CheckpointerConfig
-from .memory_config import MemoryCheckpointerConfig
-from .postgres_config import PostgresCheckpointerConfig
-from .mongodb_config import MongoDBCheckpointerConfig
-from .manager import PersistenceManager
-from .factory import load_checkpointer_config, create_persistence_manager
-from .integration import prepare_agent_run, aprepare_agent_run, extract_persistence_config
-from .handlers import (
-    process_input, 
-    prepare_merged_input, 
-    extract_output, 
-    extract_state_snapshot
+"""
+Persistence module for the Haive framework.
+
+This module provides components for state persistence in agents and workflow graphs,
+with implementations for various storage backends.
+"""
+
+from haive.core.persistence.types import (
+    CheckpointerType,
+    CheckpointerMode,
+    CheckpointStorageMode
 )
 
+from haive.core.persistence.base import CheckpointerConfig
+from haive.core.persistence.memory import MemoryCheckpointerConfig
+from haive.core.persistence.postgres_config import PostgresCheckpointerConfig
+
+# Utility functions
+from haive.core.persistence.utils import (
+    ensure_pool_open,
+    ensure_async_pool_open,
+    register_thread,
+    register_thread_async
+)
+
+# Default exports
 __all__ = [
-    'CheckpointerType',
+    # Main classes
     'CheckpointerConfig',
     'MemoryCheckpointerConfig',
     'PostgresCheckpointerConfig',
-    'MongoDBCheckpointerConfig',
-    'PersistenceManager',
-    'load_checkpointer_config',
-    'create_persistence_manager',
-    'prepare_agent_run',
-    'aprepare_agent_run',
-    'extract_persistence_config',
-    'process_input',
-    'prepare_merged_input',
-    'extract_output',
-    'extract_state_snapshot'
+    
+    # Enums & Types
+    'CheckpointerType',
+    'CheckpointerMode',
+    'CheckpointStorageMode',
+    
+    # Utility functions
+    'ensure_pool_open',
+    'ensure_async_pool_open',
+    'register_thread',
+    'register_thread_async'
 ]

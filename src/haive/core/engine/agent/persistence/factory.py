@@ -1,5 +1,5 @@
 # src/haive/core/engine/agent/persistence/factory.py
-from typing import Any, Dict, Optional, Type, Union, TYPE_CHECKING
+from typing import Any, Dict, Optional, Type, Union
 
 import logging
 
@@ -8,8 +8,6 @@ from .memory_config import MemoryCheckpointerConfig
 from .postgres_config import PostgresCheckpointerConfig
 from .mongodb_config import MongoDBCheckpointerConfig
 from .types import CheckpointerType
-if TYPE_CHECKING:
-    from .manager import PersistenceManager
 
 logger = logging.getLogger(__name__)
 

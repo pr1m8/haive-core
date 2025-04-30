@@ -1,6 +1,6 @@
 from pathlib import Path
 
-# Automatically resolve root relative to this file (should be inside `src/haive_core/config`)
+# Automatically resolve root relative to this file (should be inside `src/haive.core/config`)
 CONFIG_DIR = Path(__file__).resolve().parent
 HAIVE_CORE_DIR = CONFIG_DIR.parent
 SRC_DIR = HAIVE_CORE_DIR.parent
@@ -16,7 +16,7 @@ EMBEDDINGS_CACHE_DIR = RESOURCES_DIR / "embeddings_cache"
 PROJECTS_DIR = SRC_DIR / "projects"
 DOCUMENTS_DIR = SRC_DIR / "documents"
 VECTORSTORE_DIR = SRC_DIR / "vectorstore"
-AGENTS_DIR = SRC_DIR / "haive_core" / "agents"
+AGENTS_DIR = SRC_DIR / "haive.core" / "agents"
 
 # Create necessary dirs if not already present
 for path in [

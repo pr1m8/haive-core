@@ -1,5 +1,5 @@
 from .base import Engine, EngineRegistry, EngineType, InvokableEngine, NonInvokableEngine
-from .retriever import RetrieverConfig, RetrieverType
+from .retriever import BaseRetrieverConfig, RetrieverType
 from .vectorstore import VectorStoreConfig
 
 __all__ = [
@@ -8,7 +8,7 @@ __all__ = [
     "EngineType",
     "InvokableEngine",
     "NonInvokableEngine",
-    "RetrieverConfig",
+    "BaseRetrieverConfig",
     "RetrieverType",
     "VectorStoreConfig",
     "create_retriever",

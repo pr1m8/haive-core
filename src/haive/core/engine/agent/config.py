@@ -200,6 +200,13 @@ class AgentConfig(InvokableEngine[TIn, TOut], ABC):
             self.engine = AugLLMConfig()
         return self
 
+    @model_validator(mode="after")
+    def ensure_state_schema(self):
+        """Ensure state schema is derived if not provided."""
+        if self.state_schema is None:
+            self.state_schema = self.derive_schema()
+        return self
+    
     def add_node_config(self, name: str, engine: Union[Engine, str, "NodeConfig"], **kwargs) -> "AgentConfig":
         """Add a node configuration to this agent with schema integration.
         
@@ -367,11 +374,11 @@ class AgentConfig(InvokableEngine[TIn, TOut], ABC):
 
         # Create schema
         schema_name = f"{self.name.replace('-', '_').title()}State"
-        return SchemaComposer.compose_as_state_schema(
+        return SchemaComposer.compose_schema(
             components=all_components,
             name=schema_name,
-            include_messages=True,
-            include_runnable_config=False
+            #include_messages=True,
+            #include_runnable_config=False
         )
     def _get_pattern_schema_components(self) -> list[Any]:
         """Get components required by patterns.
@@ -404,8 +411,8 @@ class AgentConfig(InvokableEngine[TIn, TOut], ABC):
                             getattr(c, "engine_type", None) == EngineType.RETRIEVER
                             for c in [self.engine] + list(self.engines.values())
                         ):
-                            from haive.core.engine.retriever import RetrieverConfig
-                            components.append(RetrieverConfig(name="pattern_required_retriever"))
+                            from haive.core.engine.retriever import BaseRetrieverConfig
+                            components.append(BaseRetrieverConfig(name="pattern_required_retriever"))
         except ImportError:
             # Pattern system not available
             logger.debug("Pattern system not available for schema component extraction")

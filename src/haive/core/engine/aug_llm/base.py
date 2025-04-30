@@ -3,7 +3,7 @@
 import inspect
 import logging
 from collections.abc import Callable
-from typing import Any, Optional, Union
+from typing import Any, Dict, List, Optional, Union, Type, cast
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 from langchain_core.output_parsers import BaseOutputParser
@@ -13,18 +13,19 @@ from langchain_core.prompts import (
     FewShotPromptTemplate,
     HumanMessagePromptTemplate,
     MessagesPlaceholder,
+    PromptTemplate,
+    SystemMessagePromptTemplate,
 )
-from langchain_core.prompts.prompt import PromptTemplate
-from langchain_core.runnables import Runnable, RunnableConfig, RunnableLambda
+from langchain_core.runnables import Runnable, RunnableConfig, RunnableLambda, chain
 from langchain_core.tools import BaseTool, StructuredTool
-from pydantic import BaseModel, ConfigDict, Field, create_model, model_validator
+from pydantic import BaseModel, Field, create_model, model_validator
 
 from haive.core.engine.base import EngineRegistry, EngineType, InvokableEngine
 from haive.core.models.llm.base import AzureLLMConfig, LLMConfig
 
 logger = logging.getLogger(__name__)
 
-class AugLLMConfig(InvokableEngine[Union[str, dict[str, Any], list[BaseMessage]], Union[BaseMessage, dict[str, Any]]]):
+class AugLLMConfig(InvokableEngine[Union[str, Dict[str, Any], List[BaseMessage]], Union[BaseMessage, Dict[str, Any]]]):
     """Configuration for creating a structured runnable LLM pipeline.
     
     AugLLMConfig extends InvokableEngine to provide a powerful way to create
@@ -33,128 +34,149 @@ class AugLLMConfig(InvokableEngine[Union[str, dict[str, Any], list[BaseMessage]]
     engine_type: EngineType = Field(default=EngineType.LLM, description="The type of engine")
 
     # Use the existing LLMConfig system
-    llm_config: LLMConfig | dict[str, Any] = Field(
+    llm_config: Union[LLMConfig, Dict[str, Any]] = Field(
         default_factory=lambda: AzureLLMConfig(model="gpt-4o"),
         description="LLM provider configuration"
     )
 
     # Core components
-    prompt_template: BasePromptTemplate | None = Field(
+    prompt_template: Optional[BasePromptTemplate] = Field(
         default=None,
         description="Prompt template for the LLM"
     )
 
     # System message for chat models
-    system_message: str | None = Field(
+    system_message: Optional[str] = Field(
         default=None,
         description="System message for chat models"
     )
 
     # Few-shot components
-    examples: list[dict[str, Any]] | None = Field(
+    examples: Optional[List[Dict[str, Any]]] = Field(
         default=None,
         description="Examples for few-shot prompting"
     )
-    example_prompt: PromptTemplate | None = Field(
+    
+    example_prompt: Optional[PromptTemplate] = Field(
         default=None,
         description="Template for formatting few-shot examples"
     )
+    
+    prefix: Optional[str] = Field(
+        default=None,
+        description="Text before examples in few-shot prompting"
+    )
+    
+    suffix: Optional[str] = Field(
+        default=None,
+        description="Text after examples in few-shot prompting"
+    )
+    
+    example_separator: str = Field(
+        default="\n\n",
+        description="Separator between examples in few-shot prompting"
+    )
+    
+    input_variables: Optional[List[str]] = Field(
+        default=None,
+        description="Input variables for the prompt template"
+    )
 
     # Tools
-    tools: list[BaseTool | StructuredTool | type[BaseTool] | str] = Field(
+    tools: List[Union[BaseTool, StructuredTool, Type[BaseTool], str]] = Field(
         default_factory=list,
         description="List of tools to make available to the LLM"
     )
 
     # Output handling
-    structured_output_model: type[BaseModel] | None = Field(
+    structured_output_model: Optional[Type[BaseModel]] = Field(
         default=None,
         description="Pydantic model for structured output"
     )
-    output_parser: BaseOutputParser | None = Field(
+    output_parser: Optional[BaseOutputParser] = Field(
         default=None,
         description="Parser for LLM output"
     )
 
     # Tool binding options
-    tool_kwargs: dict[str, dict[str, Any]] = Field(
+    tool_kwargs: Dict[str, Dict[str, Any]] = Field(
         default_factory=dict,
         description="Parameters for tool instantiation"
     )
-    bind_tools_kwargs: dict[str, Any] = Field(
+    bind_tools_kwargs: Dict[str, Any] = Field(
         default_factory=dict,
         description="Parameters for binding tools to the LLM"
     )
-    bind_tools_config: dict[str, Any] = Field(
+    bind_tools_config: Dict[str, Any] = Field(
         default_factory=dict,
         description="Configuration for bind_tools"
     )
-    force_tool_choice: str | None = Field(
+    force_tool_choice: Optional[str] = Field(
         default=None,
         description="Force the LLM to use this specific tool"
     )
 
     # Pre/post processing
-    preprocess: Callable[[Any], Any] | None = Field(
+    preprocess: Optional[Callable[[Any], Any]] = Field(
         default=None,
         description="Function to preprocess input before sending to LLM",
         exclude=True  # Exclude from serialization
     )
-    postprocess: Callable[[Any], Any] | None = Field(
+    postprocess: Optional[Callable[[Any], Any]] = Field(
         default=None,
         description="Function to postprocess output from LLM",
         exclude=True  # Exclude from serialization
     )
 
     # Runtime options
-    temperature: float | None = Field(
+    temperature: Optional[float] = Field(
         default=None,
         description="Temperature parameter for the LLM"
     )
 
-    max_tokens: int | None = Field(
+    max_tokens: Optional[int] = Field(
         default=None,
         description="Maximum number of tokens to generate"
     )
 
-    runtime_options: dict[str, Any] = Field(
+    runtime_options: Dict[str, Any] = Field(
         default_factory=dict,
         description="Additional runtime options for the LLM"
     )
 
     # Custom runnables to chain
-    custom_runnables: list[Runnable] | None = Field(
+    custom_runnables: Optional[List[Runnable]] = Field(
         default=None,
         description="Custom runnables to add to the chain",
         exclude=True  # Exclude from serialization
     )
 
     # Schema definitions for explicit control
-    input_schema: type[BaseModel] | None = Field(
+    input_schema: Optional[Type[BaseModel]] = Field(
         default=None,
         description="Explicit input schema definition",
         exclude=True
     )
 
-    output_schema: type[BaseModel] | None = Field(
+    output_schema: Optional[Type[BaseModel]] = Field(
         default=None,
         description="Explicit output schema definition",
         exclude=True
     )
 
     # Override messages field detection
-    uses_messages_field: bool | None = Field(
+    uses_messages_field: Optional[bool] = Field(
         default=None,
         description="Explicitly specify if this engine uses a messages field. If None, auto-detected."
     )
 
     # Partial variables for templates
-    partial_variables: dict[str, Any] = Field(
+    partial_variables: Dict[str, Any] = Field(
         default_factory=dict,
         description="Partial variables for the prompt template"
     )
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_config = {"arbitrary_types_allowed": True}
 
     @model_validator(mode="after")
     def validate_and_setup(self):
@@ -183,6 +205,28 @@ class AugLLMConfig(InvokableEngine[Union[str, dict[str, Any], list[BaseMessage]]
 
             # Update with our partial variables
             self.prompt_template.partial_variables.update(self.partial_variables)
+            
+        # Create a FewShotPromptTemplate if examples and example_prompt are provided but no prompt_template
+        if self.examples and self.example_prompt and not self.prompt_template and self.prefix and self.suffix:
+            if self.input_variables:
+                self.prompt_template = FewShotPromptTemplate(
+                    examples=self.examples,
+                    example_prompt=self.example_prompt,
+                    prefix=self.prefix,
+                    suffix=self.suffix,
+                    input_variables=self.input_variables,
+                    example_separator=self.example_separator,
+                    partial_variables=self.partial_variables
+                )
+                self.uses_messages_field = False  # Few-shot prompts typically don't use messages
+
+        # Create a simple chat template with system message if only system_message is provided
+        if self.system_message and not self.prompt_template:
+            self.prompt_template = ChatPromptTemplate.from_messages([
+                SystemMessage(content=self.system_message),
+                MessagesPlaceholder(variable_name="messages")
+            ])
+            self.uses_messages_field = True
 
         return self
 
@@ -275,7 +319,7 @@ class AugLLMConfig(InvokableEngine[Union[str, dict[str, Any], list[BaseMessage]]
 
         return result
 
-    def create_runnable(self, runnable_config: RunnableConfig | None = None) -> Runnable:
+    def create_runnable(self, runnable_config: Optional[RunnableConfig] = None) -> Runnable:
         """Create a runnable LLM chain.
         
         Args:
@@ -295,7 +339,7 @@ class AugLLMConfig(InvokableEngine[Union[str, dict[str, Any], list[BaseMessage]]
         # Build the runnable chain
         return factory.create_runnable()
 
-    def invoke(self, input_data: str | dict[str, Any] | list[BaseMessage], runnable_config: RunnableConfig | None = None) -> BaseMessage | dict[str, Any]:
+    def invoke(self, input_data: Union[str, Dict[str, Any], List[BaseMessage]], runnable_config: Optional[RunnableConfig] = None) -> Union[BaseMessage, Dict[str, Any]]:
         """Invoke the LLM with input data.
         
         Args:
@@ -307,99 +351,53 @@ class AugLLMConfig(InvokableEngine[Union[str, dict[str, Any], list[BaseMessage]]
         """
         # Create runnable
         runnable = self.create_runnable(runnable_config)
-
+        logger.debug(f"Input data: {input_data}")
         # Process input
         processed_input = self._process_input(input_data)
-
+        logger.debug(f"Processed input: {processed_input}")
         # Invoke the runnable
         return runnable.invoke(processed_input, config=runnable_config)
 
-    def _process_input(self, input_data: str | dict[str, Any] | list[BaseMessage]) -> dict[str, Any]:
-        """Process input into a format usable by the runnable.
+    def _process_input(self, input_data: Union[str, Dict[str, Any], List[BaseMessage]]) -> Dict[str, Any]:
+        """Process input into a format usable by the runnable."""
+        # Find input variables required by the prompt template
+        required_vars = set()
+        if self.prompt_template:
+            if hasattr(self.prompt_template, "input_variables"):
+                required_vars.update(self.prompt_template.input_variables)
         
-        Args:
-            input_data: Input in various formats
-            
-        Returns:
-            Processed input
-        """
+        # If no variables required, default to messages
+        if not required_vars:
+            required_vars = {"messages"}
+        
+        # Remove partial variables
+        partial_vars = set()
+        if hasattr(self.prompt_template, "partial_variables"):
+            partial_vars.update(self.prompt_template.partial_variables.keys())
+        partial_vars.update(self.partial_variables.keys())
+        required_vars = required_vars - partial_vars
+        
+        # Handle dictionary input
+        if isinstance(input_data, dict):
+            # Simply return the input dict - all needed fields should be there
+            return input_data
+        
         # Handle string input
         if isinstance(input_data, str):
-            # Default always ensure messages field exists
-            result = {"messages": [HumanMessage(content=input_data)]}
-
-            # Get required variables
-            required_vars = self._get_input_variables()
-
-            # Check for template variables that need to be filled
+            result = {}
             for var in required_vars:
-                if var != "messages":
-                    result[var] = input_data
-
+                result[var] = input_data
             return result
-
+        
         # Handle list of messages
         if isinstance(input_data, list) and all(isinstance(item, BaseMessage) for item in input_data):
             result = {"messages": input_data}
-
-            # Get required variables
-            required_vars = self._get_input_variables()
-
-            # Additional vars needed? Extract content from last human message
-            human_content = None
-            for msg in reversed(input_data):
-                if isinstance(msg, HumanMessage):
-                    human_content = msg.content
-                    break
-
-            if human_content:
-                for var in required_vars:
-                    if var != "messages":
-                        result[var] = human_content
-
             return result
-
-        # Handle dictionary input - most flexible case
-        if isinstance(input_data, dict):
-            # Start with a copy of the input
-            result = dict(input_data)
-
-            # Always ensure messages exists if we're using a messages field
-            if self.uses_messages_field and "messages" not in result:
-                # Try to convert common fields to messages
-                for field in ["input", "text", "query", "content", "question"]:
-                    if field in result and isinstance(result[field], str):
-                        result["messages"] = [HumanMessage(content=result[field])]
-                        break
-                # Default empty list if no suitable field found
-                if "messages" not in result:
-                    result["messages"] = []
-
-            # Check that all required template variables are present
-            required_vars = self._get_input_variables()
-            for var in required_vars:
-                if var not in result:
-                    # Try to get from other fields or default to empty
-                    if var == "messages" and "messages" not in result:
-                        result["messages"] = []
-                    elif "messages" in result and len(result["messages"]) > 0:
-                        # Get content from last human message
-                        for msg in reversed(result["messages"]):
-                            if isinstance(msg, HumanMessage):
-                                result[var] = msg.content
-                                break
-                        if var not in result:  # If no human message found
-                            result[var] = ""
-                    else:
-                        # Default to empty string
-                        result[var] = ""
-
-            return result
-
-        # Default case - convert to string and use as both messages and primary input
+        
+        # Default case
         return {"messages": [HumanMessage(content=str(input_data))]}
 
-    def derive_input_schema(self) -> type[BaseModel]:
+    def derive_input_schema(self) -> Type[BaseModel]:
         """Derive input schema based on the prompt template and partial variables.
         
         Returns:
@@ -409,20 +407,20 @@ class AugLLMConfig(InvokableEngine[Union[str, dict[str, Any], list[BaseMessage]]
         if self.input_schema:
             return self.input_schema
 
-
+        from typing import Optional as OptionalType, Dict, List as ListType, Any
         schema_fields = {}
 
         # Get required input variables, excluding partials
         required_vars = self._get_input_variables()
 
         # Always include messages field for safety
-        schema_fields["messages"] = (list[BaseMessage], Field(default_factory=list))
+        schema_fields["messages"] = (List[BaseMessage], Field(default_factory=list))
 
         # Add content as a common field
-        schema_fields["content"] = (Optional[str], None)
+        schema_fields["content"] = (OptionalType[str], None)
 
         # Add question field for QA contexts
-        schema_fields["question"] = (Optional[str], None)
+        schema_fields["question"] = (OptionalType[str], None)
 
         # Add fields for all required variables
         for var in required_vars:
@@ -432,7 +430,7 @@ class AugLLMConfig(InvokableEngine[Union[str, dict[str, Any], list[BaseMessage]]
                 if hasattr(self.prompt_template, "input_types") and var in self.prompt_template.input_types:
                     var_type = self.prompt_template.input_types[var]
 
-                schema_fields[var] = (Optional[var_type], None)
+                schema_fields[var] = (OptionalType[var_type], None)
 
         # Add fields from structured output model if available
         if self.structured_output_model:
@@ -446,11 +444,49 @@ class AugLLMConfig(InvokableEngine[Union[str, dict[str, Any], list[BaseMessage]]
                 for field_name, field_info in self.structured_output_model.__fields__.items():
                     if field_name not in schema_fields:
                         schema_fields[field_name] = (field_info.type_, field_info.default)
+        
+        # Add fields based on output parser type
+        if self.output_parser:
+            # Try to detect output type from parser
+            parser_type = None
+            parser_output_type = str  # Default to string
+            
+            # Check for common parser types
+            parser_name = type(self.output_parser).__name__
+            
+            # String-based parsers
+            if parser_name in ["StrOutputParser", "StringOutputParser"]:
+                parser_output_type = str
+            
+            # JSON-based parsers
+            elif parser_name in ["JsonOutputParser", "JSONLinesOutputParser", "PydanticOutputParser"]:
+                parser_output_type = Dict[str, Any]
+            
+            # List-based parsers
+            elif parser_name in ["ListOutputParser", "CSVOutputParser"]:
+                parser_output_type = ListType[Any]
+                
+            # Try to get more specific types from parser if possible
+            if hasattr(self.output_parser, "pydantic_object") and self.output_parser.pydantic_object:
+                # Extract from PydanticOutputParser
+                pydantic_model = self.output_parser.pydantic_object
+                if hasattr(pydantic_model, "model_fields"):  # Pydantic v2
+                    for field_name, field_info in pydantic_model.model_fields.items():
+                        if field_name not in schema_fields:
+                            schema_fields[field_name] = (field_info.annotation, field_info.default)
+                elif hasattr(pydantic_model, "__fields__"):  # Pydantic v1
+                    for field_name, field_info in pydantic_model.__fields__.items():
+                        if field_name not in schema_fields:
+                            schema_fields[field_name] = (field_info.type_, field_info.default)
+            
+            # Add output field if not already present
+            if "output" not in schema_fields:
+                schema_fields["output"] = (OptionalType[parser_output_type], None)
 
         # Create and return the model
         return create_model(f"{self.__class__.__name__}Input", **schema_fields)
 
-    def derive_output_schema(self) -> type[BaseModel]:
+    def derive_output_schema(self) -> Type[BaseModel]:
         """Derive output schema based on structured_output_model.
         
         Returns:
@@ -483,27 +519,28 @@ class AugLLMConfig(InvokableEngine[Union[str, dict[str, Any], list[BaseMessage]]
         schema_fields["content"] = (OptionalType[str], None)
 
         # Always include messages field for all outputs
-        schema_fields["messages"] = (list[BaseMessage], Field(default_factory=list))
+        schema_fields["messages"] = (List[BaseMessage], Field(default_factory=list))
 
         # Create schema model
         return create_model(f"{self.__class__.__name__}Output", **schema_fields)
 
-    def get_schema_fields(self) -> dict[str, tuple[type, Any]]:
+    def get_schema_fields(self) -> Dict[str, tuple[type, Any]]:
         """Get schema fields based on prompt template and default fields.
         
         Returns:
             Dictionary mapping field names to (type, default) tuples
         """
+        from typing import Optional as OptionalType
         fields = {}
 
         # Always include content field
-        fields["content"] = (Optional[str], None)
+        fields["content"] = (OptionalType[str], None)
 
         # Always include question field
-        fields["question"] = (Optional[str], None)
+        fields["question"] = (OptionalType[str], None)
 
         # Always include messages field
-        fields["messages"] = (list[BaseMessage], Field(default_factory=list))
+        fields["messages"] = (List[BaseMessage], Field(default_factory=list))
 
         # Add variables from prompt template
         required_vars = self._get_input_variables()
@@ -515,9 +552,9 @@ class AugLLMConfig(InvokableEngine[Union[str, dict[str, Any], list[BaseMessage]]
             # Add field with appropriate type
             if hasattr(self.prompt_template, "input_types") and var in self.prompt_template.input_types:
                 var_type = self.prompt_template.input_types[var]
-                fields[var] = (Optional[var_type], None)
+                fields[var] = (OptionalType[var_type], None)
             else:
-                fields[var] = (Optional[str], None)
+                fields[var] = (OptionalType[str], None)
 
         # Add fields from structured output model if available
         if self.structured_output_model:
@@ -534,7 +571,7 @@ class AugLLMConfig(InvokableEngine[Union[str, dict[str, Any], list[BaseMessage]]
 
         return fields
 
-    def apply_runnable_config(self, runnable_config: RunnableConfig | None = None) -> dict[str, Any]:
+    def apply_runnable_config(self, runnable_config: Optional[RunnableConfig] = None) -> Dict[str, Any]:
         """Extract parameters from runnable_config relevant to this engine.
         
         Args:
@@ -564,7 +601,7 @@ class AugLLMConfig(InvokableEngine[Union[str, dict[str, Any], list[BaseMessage]]
 
         return params
 
-    def _resolve_tools(self) -> list[BaseTool]:
+    def _resolve_tools(self) -> List[BaseTool]:
         """Resolve tool references to actual tool objects.
         
         Returns:
@@ -603,7 +640,7 @@ class AugLLMConfig(InvokableEngine[Union[str, dict[str, Any], list[BaseMessage]]
         return cls(llm_config=llm_config, **kwargs)
 
     @classmethod
-    def from_prompt(cls, prompt: BasePromptTemplate, llm_config: LLMConfig | None = None, **kwargs):
+    def from_prompt(cls, prompt: BasePromptTemplate, llm_config: Optional[LLMConfig] = None, **kwargs):
         """Create from a prompt template.
         
         Args:
@@ -641,7 +678,7 @@ class AugLLMConfig(InvokableEngine[Union[str, dict[str, Any], list[BaseMessage]]
         return config
 
     @classmethod
-    def from_system_prompt(cls, system_prompt: str, llm_config: LLMConfig | None = None, **kwargs):
+    def from_system_prompt(cls, system_prompt: str, llm_config: Optional[LLMConfig] = None, **kwargs):
         """Create from a system prompt string.
         
         Args:
@@ -668,12 +705,12 @@ class AugLLMConfig(InvokableEngine[Union[str, dict[str, Any], list[BaseMessage]]
 
     @classmethod
     def from_few_shot(cls,
-                     examples: list[dict[str, Any]],
+                     examples: List[Dict[str, Any]],
                      example_prompt: PromptTemplate,
                      prefix: str,
                      suffix: str,
-                     input_variables: list[str],
-                     llm_config: LLMConfig | None = None,
+                     input_variables: List[str],
+                     llm_config: Optional[LLMConfig] = None,
                      **kwargs):
         """Create with few-shot examples.
         
@@ -691,6 +728,7 @@ class AugLLMConfig(InvokableEngine[Union[str, dict[str, Any], list[BaseMessage]]
         """
         # Extract partial_variables from kwargs if provided
         partial_variables = kwargs.pop("partial_variables", {})
+        example_separator = kwargs.pop("example_separator", "\n\n")
 
         # Create few-shot prompt template
         few_shot_prompt = FewShotPromptTemplate(
@@ -699,6 +737,7 @@ class AugLLMConfig(InvokableEngine[Union[str, dict[str, Any], list[BaseMessage]]
             prefix=prefix,
             suffix=suffix,
             input_variables=input_variables,
+            example_separator=example_separator,
             partial_variables=partial_variables
         )
 
@@ -706,6 +745,68 @@ class AugLLMConfig(InvokableEngine[Union[str, dict[str, Any], list[BaseMessage]]
             prompt_template=few_shot_prompt,
             examples=examples,
             example_prompt=example_prompt,
+            prefix=prefix,
+            suffix=suffix,
+            input_variables=input_variables,
+            example_separator=example_separator,
+            llm_config=llm_config or AzureLLMConfig(model="gpt-4o"),
+            uses_messages_field=False,  # FewShotPromptTemplate typically doesn't use messages
+            partial_variables=partial_variables,
+            **kwargs
+        )
+
+    @classmethod
+    def from_system_and_few_shot(cls,
+                               system_message: str,
+                               examples: List[Dict[str, Any]],
+                               example_prompt: PromptTemplate,
+                               prefix: str,
+                               suffix: str,
+                               input_variables: List[str],
+                               llm_config: Optional[LLMConfig] = None,
+                               **kwargs):
+        """Create with system message and few-shot examples.
+        
+        Args:
+            system_message: System message to use
+            examples: List of examples as dictionaries
+            example_prompt: Template for formatting examples
+            prefix: Text before examples
+            suffix: Text after examples
+            input_variables: Input variables for the prompt
+            llm_config: Optional LLM configuration
+            **kwargs: Additional parameters
+            
+        Returns:
+            AugLLMConfig instance
+        """
+        # Extract partial_variables from kwargs if provided
+        partial_variables = kwargs.pop("partial_variables", {})
+        example_separator = kwargs.pop("example_separator", "\n\n")
+        
+        # Create a prefix with system message
+        enhanced_prefix = f"{system_message}\n\n{prefix}"
+        
+        # Create few-shot prompt template
+        few_shot_prompt = FewShotPromptTemplate(
+            examples=examples,
+            example_prompt=example_prompt,
+            prefix=enhanced_prefix,
+            suffix=suffix,
+            input_variables=input_variables,
+            example_separator=example_separator,
+            partial_variables=partial_variables
+        )
+
+        return cls(
+            prompt_template=few_shot_prompt,
+            examples=examples,
+            example_prompt=example_prompt,
+            prefix=prefix,
+            suffix=suffix,
+            system_message=system_message,
+            input_variables=input_variables,
+            example_separator=example_separator,
             llm_config=llm_config or AzureLLMConfig(model="gpt-4o"),
             uses_messages_field=False,  # FewShotPromptTemplate typically doesn't use messages
             partial_variables=partial_variables,
@@ -714,11 +815,11 @@ class AugLLMConfig(InvokableEngine[Union[str, dict[str, Any], list[BaseMessage]]
 
     @classmethod
     def from_few_shot_chat(cls,
-                         examples: list[dict[str, Any]],
-                         system_message: str | None = None,
-                         human_template: str | None = None,
-                         ai_template: str | None = None,
-                         llm_config: LLMConfig | None = None,
+                         examples: List[Dict[str, Any]],
+                         system_message: Optional[str] = None,
+                         human_template: Optional[str] = None,
+                         ai_template: Optional[str] = None,
+                         llm_config: Optional[LLMConfig] = None,
                          **kwargs):
         """Create with few-shot examples for a chat prompt.
         
@@ -779,9 +880,9 @@ class AugLLMConfig(InvokableEngine[Union[str, dict[str, Any], list[BaseMessage]]
         )
 
     @classmethod
-    def from_tools(cls, tools: list[BaseTool | StructuredTool | type[BaseTool] | str],
-                 system_message: str | None = None,
-                 llm_config: LLMConfig | None = None,
+    def from_tools(cls, tools: List[Union[BaseTool, StructuredTool, Type[BaseTool], str]],
+                 system_message: Optional[str] = None,
+                 llm_config: Optional[LLMConfig] = None,
                  **kwargs):
         """Create with specified tools.
         
@@ -818,7 +919,7 @@ class AugLLMFactory:
     Handles the complexities of constructing LLM chains with various components.
     """
 
-    def __init__(self, aug_config: AugLLMConfig, config_params: dict[str, Any] | None = None):
+    def __init__(self, aug_config: AugLLMConfig, config_params: Optional[Dict[str, Any]] = None):
         """Initialize the factory with an AugLLMConfig.
         
         Args:
@@ -843,6 +944,14 @@ class AugLLMFactory:
         self.custom_runnables = getattr(self.aug_config, "custom_runnables", None)
         self.uses_messages_field = self.aug_config.uses_messages_field
         self.partial_variables = self.aug_config.partial_variables or {}
+
+        # Few-shot components
+        self.examples = self.aug_config.examples
+        self.example_prompt = self.aug_config.example_prompt
+        self.prefix = self.aug_config.prefix
+        self.suffix = self.aug_config.suffix
+        self.example_separator = self.aug_config.example_separator
+        self.input_variables = self.aug_config.input_variables
 
         # Apply any runtime config overrides
         self._apply_config_params()
@@ -898,7 +1007,7 @@ class AugLLMFactory:
         Returns:
             Instantiated LLM
         """
-        return self.llm_config.instantiate_llm()
+        return self.llm_config.instantiate()
 
     def initialize_llm_with_tools(self):
         """Bind tools to the LLM.
@@ -1073,6 +1182,19 @@ class AugLLMFactory:
                 MessagesPlaceholder(variable_name="messages")
             ])
             runnable_chain = prompt | runnable_chain
+        # Create few-shot template if components are available
+        elif self.examples and self.example_prompt and self.prefix and self.suffix and self.input_variables:
+            # Create few-shot prompt
+            few_shot_prompt = FewShotPromptTemplate(
+                examples=self.examples,
+                example_prompt=self.example_prompt,
+                prefix=self.prefix,
+                suffix=self.suffix,
+                input_variables=self.input_variables,
+                example_separator=self.example_separator,
+                partial_variables=self.partial_variables
+            )
+            runnable_chain = few_shot_prompt | runnable_chain
 
         # Add custom runnables if provided
         runnable_chain = self.apply_custom_runnables(runnable_chain)
@@ -1117,7 +1239,7 @@ class AugLLMFactory:
 
 # Utility functions
 
-def compose_runnable(aug_llm_config: AugLLMConfig, runnable_config: RunnableConfig | None = None) -> Runnable:
+def compose_runnable(aug_llm_config: AugLLMConfig, runnable_config: Optional[RunnableConfig] = None) -> Runnable:
     """Compose a runnable from an AugLLMConfig.
     
     Args:
@@ -1133,7 +1255,7 @@ def compose_runnable(aug_llm_config: AugLLMConfig, runnable_config: RunnableConf
         logger.error(f"Error composing runnable: {e}")
         raise e
 
-def create_runnables_dict(runnables: list[AugLLMConfig]) -> dict[str, AugLLMConfig]:
+def create_runnables_dict(runnables: List[AugLLMConfig]) -> Dict[str, AugLLMConfig]:
     """Create a dictionary mapping names to runnable configs.
     
     Args:
@@ -1145,9 +1267,9 @@ def create_runnables_dict(runnables: list[AugLLMConfig]) -> dict[str, AugLLMConf
     return {runnable.name: runnable for runnable in runnables}
 
 def compose_runnables_from_dict(
-    runnables: dict[str, AugLLMConfig],
-    runnable_config: RunnableConfig | None = None
-) -> dict[str, Runnable]:
+    runnables: Dict[str, AugLLMConfig],
+    runnable_config: Optional[RunnableConfig] = None
+) -> Dict[str, Runnable]:
     """Compose and return a dictionary of runnables from configs.
     
     Args:
@@ -1162,4 +1284,3 @@ def compose_runnables_from_dict(
         if isinstance(aug_runnable_config, AugLLMConfig):
             result[key] = compose_runnable(aug_runnable_config, runnable_config)
     return result
-
