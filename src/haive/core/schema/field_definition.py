@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, Generic, Optional, Type, TypeVar, Union,Tuple
+from typing import Any, Callable, Dict, Generic, Optional, Type, TypeVar, Union, Tuple
 from pydantic import Field
 
 # Type variables for field values and reducers
@@ -8,9 +8,6 @@ TReducer = TypeVar('TReducer', bound=Callable[[Any, Any], Any])
 class FieldDefinition(Generic[TField, TReducer]):
     """
     Definition of a schema field with metadata.
-    
-    This class provides a clean interface for defining fields with
-    associated metadata like defaults, descriptions, and reducers.
     """
     
     def __init__(
@@ -24,19 +21,7 @@ class FieldDefinition(Generic[TField, TReducer]):
         reducer: Optional[TReducer] = None,
         metadata: Optional[Dict[str, Any]] = None
     ):
-        """
-        Initialize a field definition.
-        
-        Args:
-            name: Field name
-            field_type: Type of the field
-            default: Default value
-            default_factory: Optional factory function for default value
-            description: Optional field description
-            shared: Whether field is shared with parent graph
-            reducer: Optional reducer function
-            metadata: Additional metadata
-        """
+        """Initialize a field definition."""
         self.name = name
         self.field_type = field_type
         self.default = default
@@ -47,12 +32,7 @@ class FieldDefinition(Generic[TField, TReducer]):
         self.metadata = metadata or {}
     
     def to_field_info(self) -> Tuple[Type[TField], Field]:
-        """
-        Convert to a field info tuple for Pydantic.
-        
-        Returns:
-            Tuple of (type, field_info)
-        """
+        """Convert to a field info tuple for Pydantic."""
         field_kwargs = {}
         if self.description:
             field_kwargs["description"] = self.description
@@ -63,12 +43,7 @@ class FieldDefinition(Generic[TField, TReducer]):
             return self.field_type, Field(default=self.default, **field_kwargs)
     
     def get_reducer_name(self) -> Optional[str]:
-        """
-        Get serializable name for the reducer.
-        
-        Returns:
-            Serializable name or None if no reducer
-        """
+        """Get serializable name for the reducer."""
         if not self.reducer:
             return None
             
