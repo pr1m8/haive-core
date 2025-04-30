@@ -2,87 +2,108 @@
 Agent - Base class for all agent implementations in the Haive framework.
 
 This module provides the core agent architecture with consistent schema handling,
-execution flows, persistence management, and rich debugging capabilities.
+execution flows, persistence management, and extensibility through patterns.
+All agent implementations conform to the protocol interfaces for consistent API access.
 """
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import os
-import uuid
 import time
+import uuid
 from abc import ABC, abstractmethod
 from collections.abc import AsyncGenerator, Generator
 from datetime import datetime
-from typing import Any, Generic, TypeVar, Optional, Union, Dict, List, Type, cast
 from pathlib import Path
+from typing import Any, ClassVar, Dict, Generic, List, Literal, Optional, Type, TypeVar, Union, cast
 
-from langchain_core.messages import BaseMessage, HumanMessage
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from langchain_core.runnables import RunnableConfig
 from langgraph.checkpoint.base import BaseCheckpointSaver
 from langgraph.checkpoint.memory import MemorySaver
+from langgraph.graph import END, StateGraph
 from pydantic import BaseModel, Field
 
 # Haive core imports
 from haive.core.config.runnable import RunnableConfigManager
-from haive.core.engine.base import Engine, EngineType
-from haive.core.persistence.types import CheckpointerType
-from haive.core.persistence.base import CheckpointerConfig
-from haive.core.persistence.postgres_config import PostgresCheckpointerConfig
-from haive.core.persistence.handlers import (
-    setup_checkpointer, 
-    ensure_pool_open, 
-    register_thread_if_needed, 
-    prepare_merged_input
-)
-from haive.core.graph.dynamic_graph_builder import DynamicGraph
-from haive.core.schema.schema_composer import SchemaComposer
-from haive.core.utils.pydantic_utils import ensure_json_serializable
 from haive.core.engine.agent.config import AgentConfig
-# Rich UI imports
+from haive.core.engine.base import Engine, EngineType
+from haive.core.graph.branches import Branch
+from haive.core.graph.dynamic_graph_builder import DynamicGraph
+from haive.core.graph.node.config import NodeConfig
+from haive.core.graph.node.factory import NodeFactory
+from haive.core.graph.patterns.registry import GraphPatternRegistry
+from haive.core.persistence.handlers import (
+    ensure_pool_open,
+    prepare_merged_input,
+    register_thread_if_needed,
+    setup_checkpointer,
+)
+from haive.core.schema.schema_composer import SchemaComposer
+from haive.core.schema.state_schema import StateSchema
+from haive.core.utils.pydantic_utils import ensure_json_serializable
+
+# Import protocol definitions
+from haive.core.engine.agent.protocols import (
+    AgentProtocol,
+    ExtensibilityAgentProtocol,
+    PersistentAgentProtocol,
+    StreamingAgentProtocol,
+    VisualizationAgentProtocol,
+)
+
+# Rich UI imports - handle gracefully if not available
 try:
     from rich.console import Console
-    from rich.panel import Panel
-    from rich.tree import Tree
-    from rich.table import Table
-    from rich.syntax import Syntax
-    from rich.traceback import install as install_rich_traceback
-    from rich.logging import RichHandler
     from rich.live import Live
-    from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn
+    from rich.logging import RichHandler
     from rich.markdown import Markdown
+    from rich.panel import Panel
+    from rich.progress import BarColumn, Progress, SpinnerColumn, TaskProgressColumn, TextColumn
+    from rich.syntax import Syntax
+    from rich.table import Table
+    from rich.traceback import install as install_rich_traceback
+    from rich.tree import Tree
     RICH_AVAILABLE = True
 except ImportError:
     RICH_AVAILABLE = False
-from langgraph.graph import StateGraph
+
 # Set up logging
 logger = logging.getLogger(__name__)
 
-# Type variables for generics
-TConfig = TypeVar("TConfig", bound="AgentConfig")
-TIn = TypeVar("TIn")
-TOut = TypeVar("TOut")
+
 
 # Agent registry maps config classes to agent classes
-AGENT_REGISTRY: Dict[Type["AgentConfig"], Type["Agent"]] = {}
+AGENT_REGISTRY: Dict[Type[AgentConfig], Type[Agent]] = {}
 
-def register_agent(config_class: Type["AgentConfig"]):
+def register_agent(config_class: Type[AgentConfig]):
     """Register an agent class with its configuration class."""
     def decorator(agent_class: Type[Agent]):
         AGENT_REGISTRY[config_class] = agent_class
+        # Set reference to config class on agent class
+        agent_class.config_class = config_class
+        logger.info(f"Registered agent class {agent_class.__name__} for config {config_class.__name__}")
         return agent_class
     return decorator
 
+TConfig = TypeVar('TConfig', bound='AgentConfig')  # Required
+TIn = TypeVar('TIn')  # Defaults to Any in practice
+TOut = TypeVar('TOut')  # Defaults to Any in practice
+TState = TypeVar('TState', bound=Optional[BaseModel])  # Defaults to None in practice
 
 class Agent(Generic[TConfig], ABC):
     """
     Base agent architecture class for all agent implementations.
     
-    The Agent class provides a consistent framework for defining agent behavior,
-    managing state, and executing workflows with rich debugging capabilities.
+    Type Parameters:
+        TConfig: Type of agent configuration
+        TIn: Type of input data (defaults to Any)
+        TOut: Type of output data (defaults to Any)
+        TState: Type of state data (defaults to Optional[BaseModel])
     """
-    
     def __init__(self, config: TConfig, verbose: bool = False, rich_logging: bool = True):
         """
         Initialize the agent with its configuration.
@@ -125,19 +146,23 @@ class Agent(Generic[TConfig], ABC):
         self._setup_runtime_config()
         
         # Now we have all prerequisites to build the graph
-        self._create_graph()
+        self._create_graph_builder()
         
         # Allow subclass to set up workflow
         logger.info(f"Setting up workflow for {config.name}")
-        self.graph = StateGraph(state_schema=self.state_schema,input=self.input_schema,\
-            output=self.output_schema,config_schema=self.runnable_config)
         self.setup_workflow()
+        
+        # Process node configurations if provided
+        self._process_node_configs()
         
         # Compile the graph
         self.compile()
         
+        # Apply patterns after compilation if configured
+        self._apply_configured_patterns()
+        
         # Generate visualization if requested
-        if getattr(self.config, "visualize", True) and self.graph:
+        if getattr(self.config, "visualize", True) and hasattr(self, "graph"):
             self.visualize_graph()
         
         self._log_agent_ready()
@@ -230,7 +255,7 @@ class Agent(Generic[TConfig], ABC):
         """Display rich initialization information."""
         if not self.rich_logging or not RICH_AVAILABLE:
             return
-        
+            
         # Create a table for agent configuration
         table = Table(title=f"[bold]Agent Configuration: [green]{self.config.name}[/green][/bold]")
         table.add_column("Property", style="cyan")
@@ -285,17 +310,17 @@ class Agent(Generic[TConfig], ABC):
         
         # Set up state history directory
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        self.state_history_dir = Path(self.config.output_dir) / "State_History"
+        self.state_history_dir = Path(self.config.output_dir) / "state_history"
         self.state_history_dir.mkdir(exist_ok=True)
         self.state_filename = self.state_history_dir / f"{self.config.name}_{timestamp}.json"
         
         # Set up graphs directory
-        self.graphs_dir = Path(self.config.output_dir) / "Graphs"
+        self.graphs_dir = Path(self.config.output_dir) / "graphs"
         self.graphs_dir.mkdir(exist_ok=True)
         self.graph_image_path = self.graphs_dir / f"{self.config.name}_{timestamp}.png"
         
         # Set up debug logs directory
-        self.debug_dir = Path(self.config.output_dir) / "Debug_Logs"
+        self.debug_dir = Path(self.config.output_dir) / "debug_logs"
         self.debug_dir.mkdir(exist_ok=True)
         self.debug_log_path = self.debug_dir / f"{self.config.name}_{timestamp}.log"
         
@@ -320,7 +345,7 @@ class Agent(Generic[TConfig], ABC):
                 input_task = progress.add_task("Setting up input schema...", total=100, start=False)
                 output_task = progress.add_task("Setting up output schema...", total=100, start=False)
                 
-                # 1. Process state schema
+                # Process state schema
                 if hasattr(self.config, "state_schema") and self.config.state_schema is not None:
                     progress.update(state_task, advance=20, description="[bold blue]Building state schema from config...[/bold blue]")
                     
@@ -363,7 +388,7 @@ class Agent(Generic[TConfig], ABC):
                 progress.update(state_task, completed=100, description="[bold green]State schema setup complete[/bold green]")
                 progress.start_task(input_task)
                 
-                # 2. Process input schema
+                # Process input schema
                 if hasattr(self.config, "input_schema") and self.config.input_schema is not None:
                     progress.update(input_task, advance=20, description="[bold blue]Building input schema from config...[/bold blue]")
                     
@@ -394,15 +419,15 @@ class Agent(Generic[TConfig], ABC):
                         logger.debug(f"Using provided input schema for {self.config.name}")
                         self.input_schema = self.config.input_schema
                 else:
-                    # Default to state schema
-                    progress.update(input_task, advance=80, description="[bold blue]Using state schema as input schema...[/bold blue]")
-                    logger.debug(f"Using state schema as input schema for {self.config.name}")
-                    self.input_schema = self.state_schema
+                    # Derive using config's derivation method
+                    progress.update(input_task, advance=80, description="[bold blue]Deriving input schema...[/bold blue]")
+                    logger.debug(f"Deriving input schema for {self.config.name}")
+                    self.input_schema = self.config.derive_input_schema()
                 
                 progress.update(input_task, completed=100, description="[bold green]Input schema setup complete[/bold green]")
                 progress.start_task(output_task)
                 
-                # 3. Process output schema
+                # Process output schema
                 if hasattr(self.config, "output_schema") and self.config.output_schema is not None:
                     progress.update(output_task, advance=20, description="[bold blue]Building output schema from config...[/bold blue]")
                     
@@ -433,18 +458,18 @@ class Agent(Generic[TConfig], ABC):
                         logger.debug(f"Using provided output schema for {self.config.name}")
                         self.output_schema = self.config.output_schema
                 else:
-                    # Default to state schema
-                    progress.update(output_task, advance=80, description="[bold blue]Using state schema as output schema...[/bold blue]")
-                    logger.debug(f"Using state schema as output schema for {self.config.name}")
-                    self.output_schema = self.state_schema
+                    # Derive using config's derivation method
+                    progress.update(output_task, advance=80, description="[bold blue]Deriving output schema...[/bold blue]")
+                    logger.debug(f"Deriving output schema for {self.config.name}")
+                    self.output_schema = self.config.derive_output_schema()
                 
                 progress.update(output_task, completed=100, description="[bold green]Output schema setup complete[/bold green]")
                 
             # Print schema details
             self._debug_print_schemas()
         else:
-            # Non-rich implementation (original logic)
-            # 1. Process state schema
+            # Non-rich implementation
+            # Process state schema
             if hasattr(self.config, "state_schema") and self.config.state_schema is not None:
                 if isinstance(self.config.state_schema, dict):
                     # Build from dictionary definition
@@ -452,15 +477,12 @@ class Agent(Generic[TConfig], ABC):
                     schema_composer = SchemaComposer(name=f"{self.config.name}State")
                     for field_name, field_info in self.config.state_schema.items():
                         if isinstance(field_info, tuple):
-                            # (type, default) format
                             field_type, default_value = field_info
                             schema_composer.add_field(field_name, field_type, default=default_value)
                         elif isinstance(field_info, dict):
-                            # Dict with parameters
                             field_type = field_info.pop("type", Any)
                             schema_composer.add_field(field_name, field_type, **field_info)
                         else:
-                            # Just a type
                             schema_composer.add_field(field_name, field_info)
                     self.state_schema = schema_composer.build()
                 else:
@@ -472,7 +494,7 @@ class Agent(Generic[TConfig], ABC):
                 logger.debug(f"Deriving state schema for {self.config.name}")
                 self.state_schema = self.config.derive_schema()
             
-            # 2. Process input schema (default to state schema if not provided)
+            # Process input schema
             if hasattr(self.config, "input_schema") and self.config.input_schema is not None:
                 if isinstance(self.config.input_schema, dict):
                     # Build from dictionary
@@ -493,11 +515,11 @@ class Agent(Generic[TConfig], ABC):
                     logger.debug(f"Using provided input schema for {self.config.name}")
                     self.input_schema = self.config.input_schema
             else:
-                # Default to state schema
-                logger.debug(f"Using state schema as input schema for {self.config.name}")
-                self.input_schema = self.state_schema
+                # Derive using config's derivation method
+                logger.debug(f"Deriving input schema for {self.config.name}")
+                self.input_schema = self.config.derive_input_schema()
             
-            # 3. Process output schema (default to state schema if not provided)
+            # Process output schema
             if hasattr(self.config, "output_schema") and self.config.output_schema is not None:
                 if isinstance(self.config.output_schema, dict):
                     # Build from dictionary
@@ -518,9 +540,9 @@ class Agent(Generic[TConfig], ABC):
                     logger.debug(f"Using provided output schema for {self.config.name}")
                     self.output_schema = self.config.output_schema
             else:
-                # Default to state schema
-                logger.debug(f"Using state schema as output schema for {self.config.name}")
-                self.output_schema = self.state_schema
+                # Derive using config's derivation method
+                logger.debug(f"Deriving output schema for {self.config.name}")
+                self.output_schema = self.config.derive_output_schema()
         
         logger.debug(f"Schemas set up successfully for {self.config.name}")
     
@@ -606,7 +628,7 @@ class Agent(Generic[TConfig], ABC):
             engine_table.add_column("Status", style="blue")
             
             # Initialize main engine if present
-            if hasattr(self.config, "engine") and self.config.engine:
+            if hasattr(self.config, "engine") and self.config.engine is not None:
                 engine_name = "main"
                 engine_type = getattr(self.config.engine, "engine_type", "unknown")
                 engine_id = getattr(self.config.engine, "id", "not-set")
@@ -643,11 +665,26 @@ class Agent(Generic[TConfig], ABC):
                     "[green]✓[/green]"
                 )
             
+            # Process any subagent engines
+            if hasattr(self.config, "subagents") and self.config.subagents:
+                for name, subagent_config in self.config.subagents.items():
+                    with self.console.status(f"[bold blue]Processing subagent '{name}'...[/bold blue]"):
+                        # We'll store the config for now, actual instantiation happens later
+                        self.engines[f"subagent:{name}"] = subagent_config
+                        
+                    engine_table.add_row(
+                        f"subagent:{name}",
+                        "agent",
+                        getattr(subagent_config, "id", "not-set"),
+                        getattr(subagent_config, "name", "unknown"),
+                        "[green]✓[/green]"
+                    )
+            
             self.console.print(engine_table)
             self.console.print(f"[green]Successfully initialized {len(self.engines)} engines[/green]")
         else:
             # Initialize main engine if present
-            if hasattr(self.config, "engine") and self.config.engine:
+            if hasattr(self.config, "engine") and self.config.engine is not None:
                 engine_name = "main"
                 logger.debug(f"Initializing main engine for {self.config.name}")
                 self.engine = self.config.engine
@@ -659,6 +696,12 @@ class Agent(Generic[TConfig], ABC):
                 logger.debug(f"Initializing engine '{name}' for {self.config.name}")
                 self.engines[name] = engine_config
                 logger.debug(f"Engine '{name}' initialized: {getattr(self.engines[name], 'name', 'unknown')}")
+                
+            # Process any subagent engines
+            if hasattr(self.config, "subagents") and self.config.subagents:
+                for name, subagent_config in self.config.subagents.items():
+                    logger.debug(f"Processing subagent '{name}' for {self.config.name}")
+                    self.engines[f"subagent:{name}"] = subagent_config
         
         logger.debug(f"Initialized {len(self.engines)} engines for {self.config.name}")
     
@@ -724,7 +767,7 @@ class Agent(Generic[TConfig], ABC):
             
         logger.debug(f"Runtime configuration set up for {self.config.name}")
     
-    def _create_graph(self):
+    def _create_graph_builder(self):
         """Create the DynamicGraph builder with proper schemas."""
         # Get all components for DynamicGraph
         components = list(self.engines.values())
@@ -744,26 +787,9 @@ class Agent(Generic[TConfig], ABC):
                     default_runnable_config=self.runnable_config,
                     debug=self.verbose
                 )
-                
-                # Apply default patterns if specified
-                status.update("[bold blue]Applying default patterns...[/bold blue]")
-                self._apply_default_patterns()
             
             # Show graph info
             self.console.print(f"[bold]Graph builder:[/bold] [green]Created successfully[/green]")
-            
-            # Display patterns if any were applied
-            default_patterns = getattr(self.config, "default_patterns", [])
-            if default_patterns:
-                patterns_list = ""
-                for pattern in default_patterns:
-                    if isinstance(pattern, str):
-                        patterns_list += f"- {pattern}\n"
-                    elif isinstance(pattern, dict) and "name" in pattern:
-                        patterns_list += f"- {pattern['name']}\n"
-                
-                if patterns_list:
-                    self.console.print(f"[bold]Applied patterns:[/bold]\n{patterns_list}")
         else:
             # Create DynamicGraph with fully resolved schemas
             logger.debug(f"Creating DynamicGraph for {self.config.name}")
@@ -778,41 +804,124 @@ class Agent(Generic[TConfig], ABC):
                 default_runnable_config=self.runnable_config,
                 debug=self.verbose
             )
-            
-            # Apply default patterns if specified
-            self._apply_default_patterns()
             logger.debug(f"DynamicGraph created for {self.config.name}")
         
-        # No graph yet - will be built after setup_workflow
+        # Initial graph structure will be built in setup_workflow
         self.graph = None
-        self.app = None
+        self._app = None
     
-    def _apply_default_patterns(self):
-        """Apply default graph patterns specified in config."""
-        default_patterns = getattr(self.config, "default_patterns", [])
-        
-        if not default_patterns:
+    def _process_node_configs(self):
+        """Process node configurations from config."""
+        node_configs = getattr(self.config, "node_configs", {})
+        if not node_configs:
             return
             
-        for pattern_def in default_patterns:
-            if isinstance(pattern_def, str):
-                # Simple pattern name
-                pattern_name = pattern_def
-                pattern_params = {}
-            elif isinstance(pattern_def, dict):
-                # Pattern with parameters
-                pattern_name = pattern_def.pop("name")
-                pattern_params = pattern_def
-            else:
-                logger.warning(f"Invalid pattern definition: {pattern_def}")
-                continue
+        logger.debug(f"Processing {len(node_configs)} node configurations")
+        
+        if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
+            with self.console.status(f"[bold blue]Processing {len(node_configs)} node configurations...[/bold blue]") as status:
+                for node_name, node_config in node_configs.items():
+                    status.update(f"[bold blue]Adding node '{node_name}'...[/bold blue]")
+                    
+                    # Create node in graph builder
+                    engine = node_config.engine
+                    command_goto = node_config.command_goto
+                    input_mapping = node_config.input_mapping
+                    output_mapping = node_config.output_mapping
+                    
+                    self.graph_builder.add_node(
+                        name=node_name,
+                        engine=engine,
+                        command_goto=command_goto,
+                        input_mapping=input_mapping,
+                        output_mapping=output_mapping
+                    )
+                    
+            self.console.print(f"[green]Added {len(node_configs)} nodes from configuration[/green]")
+        else:
+            for node_name, node_config in node_configs.items():
+                logger.debug(f"Adding node '{node_name}' from configuration")
                 
-            # Apply the pattern
-            try:
-                logger.debug(f"Applying default pattern '{pattern_name}' to {self.config.name}")
-                self.graph_builder.apply_pattern(pattern_name, **pattern_params)
-            except Exception as e:
-                logger.error(f"Error applying pattern '{pattern_name}': {e}")
+                # Create node in graph builder
+                engine = node_config.engine
+                command_goto = node_config.command_goto
+                input_mapping = node_config.input_mapping
+                output_mapping = node_config.output_mapping
+                
+                self.graph_builder.add_node(
+                    name=node_name,
+                    engine=engine,
+                    command_goto=command_goto,
+                    input_mapping=input_mapping,
+                    output_mapping=output_mapping
+                )
+                
+        logger.debug("Finished processing node configurations")
+    
+    def _apply_configured_patterns(self):
+        """Apply patterns configured in the agent config."""
+        patterns = getattr(self.config, "patterns", [])
+        if not patterns:
+            return
+            
+        # Get ordered pattern list
+        ordered_patterns = sorted(
+            [p for p in patterns if p.enabled],
+            key=lambda p: (p.order is None, p.order or 999999)
+        )
+        
+        if not ordered_patterns:
+            return
+            
+        logger.debug(f"Applying {len(ordered_patterns)} patterns from configuration")
+        
+        if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
+            with self.console.status(f"[bold blue]Applying {len(ordered_patterns)} patterns...[/bold blue]") as status:
+                for pattern_config in ordered_patterns:
+                    pattern_name = pattern_config.name
+                    status.update(f"[bold blue]Applying pattern '{pattern_name}'...[/bold blue]")
+                    
+                    # Get pattern parameters
+                    pattern_params = pattern_config.parameters.copy()
+                    
+                    # Update with global parameters
+                    if hasattr(self.config, "pattern_parameters"):
+                        global_params = self.config.pattern_parameters.get(pattern_name, {})
+                        for key, value in global_params.items():
+                            if key not in pattern_params:
+                                pattern_params[key] = value
+                    
+                    # Apply the pattern
+                    try:
+                        self.apply_pattern(pattern_name, **pattern_params)
+                        self.config.mark_pattern_applied(pattern_name)
+                    except Exception as e:
+                        self.console.print(f"[bold red]Error applying pattern '{pattern_name}': {e}[/bold red]")
+                        
+            self.console.print(f"[green]Applied {len(ordered_patterns)} patterns from configuration[/green]")
+        else:
+            for pattern_config in ordered_patterns:
+                pattern_name = pattern_config.name
+                logger.debug(f"Applying pattern '{pattern_name}' from configuration")
+                
+                # Get pattern parameters
+                pattern_params = pattern_config.parameters.copy()
+                
+                # Update with global parameters
+                if hasattr(self.config, "pattern_parameters"):
+                    global_params = self.config.pattern_parameters.get(pattern_name, {})
+                    for key, value in global_params.items():
+                        if key not in pattern_params:
+                            pattern_params[key] = value
+                
+                # Apply the pattern
+                try:
+                    self.apply_pattern(pattern_name, **pattern_params)
+                    self.config.mark_pattern_applied(pattern_name)
+                except Exception as e:
+                    logger.error(f"Error applying pattern '{pattern_name}': {e}")
+                    
+        logger.debug("Finished applying patterns from configuration")
     
     @abstractmethod
     def setup_workflow(self) -> None:
@@ -824,6 +933,13 @@ class Agent(Generic[TConfig], ABC):
         """
         pass
     
+    @property
+    def app(self) -> Any:
+        """Return the compiled agent application."""
+        if not hasattr(self, "_app") or self._app is None:
+            self.compile()
+        return self._app
+    
     def compile(self) -> None:
         """Compile the workflow graph into an executable app."""
         logger.info(f"Compiling graph for {self.config.name}")
@@ -831,7 +947,7 @@ class Agent(Generic[TConfig], ABC):
         if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
             with self.console.status("[bold blue]Compiling workflow graph...[/bold blue]") as status:
                 # Build graph if not already built
-                if not self.graph:
+                if not hasattr(self, "graph") or self.graph is None:
                     status.update("[bold blue]Building graph from builder...[/bold blue]")
                     self.graph = self.graph_builder.build()
                 
@@ -850,7 +966,7 @@ class Agent(Generic[TConfig], ABC):
                 # Compile the graph
                 status.update("[bold blue]Compiling graph with checkpointer...[/bold blue]")
                 start_time = time.time()
-                self.app = self.graph.compile(checkpointer=self.checkpointer)
+                self._app = self.graph.compile(checkpointer=self.checkpointer, store=self.store)
                 compile_time = time.time() - start_time
             
             # Show compilation result
@@ -861,7 +977,7 @@ class Agent(Generic[TConfig], ABC):
             self.console.print(f"[bold]Graph nodes:[/bold] {node_count}")
         else:
             # Build graph if not already built
-            if not self.graph:
+            if not hasattr(self, "graph") or self.graph is None:
                 logger.debug("Building graph from graph_builder")
                 self.graph = self.graph_builder.build()
             
@@ -880,7 +996,7 @@ class Agent(Generic[TConfig], ABC):
             
             # Compile the graph
             logger.debug("Compiling graph with checkpointer")
-            self.app = self.graph.compile(checkpointer=self.checkpointer)
+            self._app = self.graph.compile(checkpointer=self.checkpointer, store=self.store)
         
         logger.info(f"Graph compiled successfully for {self.config.name}")
     
@@ -899,8 +1015,15 @@ class Agent(Generic[TConfig], ABC):
         if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
             with self.console.status(f"[bold blue]Generating graph visualization...[/bold blue]"):
                 # Use DynamicGraph's visualization capability
-                from haive.core.utils.visualize_graph_utils import render_and_display_graph
-                 # Fall back to compiled graph visualization if available
+                if hasattr(self.graph_builder, "visualize_graph"):
+                    try:
+                        self.graph_builder.visualize_graph(output_path)
+                        self.console.print(f"[bold green]Graph visualization saved to:[/bold green] {output_path}")
+                        return
+                    except Exception as e:
+                        self.console.print(f"[bold yellow]Error using DynamicGraph visualization: {e}[/bold yellow]")
+                
+                # Fall back to compiled graph visualization if available
                 if self.app and hasattr(self.app, "get_graph"):
                     try:
                         # Ensure directory exists
@@ -914,18 +1037,9 @@ class Agent(Generic[TConfig], ABC):
                         self.console.print(f"[bold green]Graph visualization saved to:[/bold green] {output_path}")
                     except Exception as e:
                         self.console.print(f"[bold red]Error visualizing graph: {e}[/bold red]")
-                if hasattr(self.graph_builder, "visualize"):
-                    try:
-                        self.graph_builder.visualize_graph(output_path)
-                        self.console.print(f"[bold green]Graph visualization saved to:[/bold green] {output_path}")
-                        return
-                    except Exception as e:
-                        self.console.print(f"[bold yellow]Error using DynamicGraph visualization: {e}[/bold yellow]")
-                
-               
         else:
             # Use DynamicGraph's visualization capability
-            if hasattr(self.graph_builder, "visualize"):
+            if hasattr(self.graph_builder, "visualize_graph"):
                 try:
                     self.graph_builder.visualize_graph(output_path)
                     logger.info(f"Graph visualization saved to: {output_path}")
@@ -969,7 +1083,7 @@ class Agent(Generic[TConfig], ABC):
                     
                     # Mark graph as needing rebuild
                     self.graph = None
-                    self.app = None
+                    self._app = None
                 
                 self.console.print(f"[bold green]Pattern '{pattern_name}' applied successfully[/bold green]")
             else:
@@ -977,13 +1091,185 @@ class Agent(Generic[TConfig], ABC):
                 
                 # Mark graph as needing rebuild
                 self.graph = None
-                self.app = None
+                self._app = None
                 
                 logger.info(f"Pattern '{pattern_name}' applied successfully")
             
+            # Mark pattern as applied in config
+            if hasattr(self.config, "mark_pattern_applied"):
+                self.config.mark_pattern_applied(pattern_name)
+                
         except Exception as e:
             logger.error(f"Error applying pattern '{pattern_name}': {e}")
             raise RuntimeError(f"Failed to apply pattern '{pattern_name}': {e}") from e
+    
+    def _prepare_input(self, input_data: Any) -> Any:
+        """
+        Prepare input for the agent based on the input schema.
+        
+        Args:
+            input_data: Input in various formats
+            
+        Returns:
+            Processed input compatible with the graph
+        """
+        # Use the input schema to prepare the input correctly
+        input_schema = self.input_schema
+        
+        # Handle simple string input
+        if isinstance(input_data, str):
+            # If we have a schema, look for text fields to populate
+            if input_schema:
+                # Get schema fields
+                schema_fields = {}
+                if hasattr(input_schema, "model_fields"):
+                    # Pydantic v2
+                    schema_fields = input_schema.model_fields
+                elif hasattr(input_schema, "__fields__"):
+                    # Pydantic v1
+                    schema_fields = input_schema.__fields__
+                
+                # Create input dictionary
+                prepared_input = {}
+                
+                # Detect message field and populate if found
+                if "messages" in schema_fields:
+                    prepared_input["messages"] = [HumanMessage(content=input_data)]
+                    
+                # Populate common text fields with input string
+                for field_name in ["input", "query", "question", "text", "content"]:
+                    if field_name in schema_fields:
+                        prepared_input[field_name] = input_data
+                
+                # If no matches, use first field or create minimal dict
+                if not prepared_input:
+                    if schema_fields:
+                        # Use first field
+                        first_field = next(iter(schema_fields))
+                        prepared_input[first_field] = input_data
+                    else:
+                        # Minimal fallback
+                        prepared_input = {"input": input_data}
+                
+                # Create instance or return dict
+                try:
+                    result = input_schema(**prepared_input)
+                    logger.debug(f"Created input schema instance with {len(prepared_input)} fields")
+                    return result
+                except Exception as e:
+                    logger.warning(f"Error creating input schema instance: {e}")
+                    return prepared_input
+            else:
+                # No schema - create standard input with messages
+                return {"messages": [HumanMessage(content=input_data)]}
+                
+        # Handle list of strings
+        elif isinstance(input_data, list) and all(isinstance(item, str) for item in input_data):
+            # If we have a schema, look for appropriate fields to populate
+            if input_schema:
+                # Get schema fields
+                schema_fields = {}
+                if hasattr(input_schema, "model_fields"):
+                    # Pydantic v2
+                    schema_fields = input_schema.model_fields
+                elif hasattr(input_schema, "__fields__"):
+                    # Pydantic v1
+                    schema_fields = input_schema.__fields__
+                
+                # Create input dictionary
+                prepared_input = {}
+                
+                # Create messages from strings
+                if "messages" in schema_fields:
+                    prepared_input["messages"] = [HumanMessage(content=text) for text in input_data]
+                
+                # Join strings for other text fields
+                joined_text = "\n".join(input_data)
+                for field_name in ["input", "query", "question", "text", "content"]:
+                    if field_name in schema_fields:
+                        prepared_input[field_name] = joined_text
+                
+                # Use list directly for list fields
+                for field_name, field_info in schema_fields.items():
+                    field_type = str(getattr(field_info, "annotation", getattr(field_info, "type_", "")))
+                    if "list" in field_type.lower() and field_name not in prepared_input:
+                        prepared_input[field_name] = input_data
+                
+                # If no matches, use first field or create minimal dict
+                if not prepared_input:
+                    if schema_fields:
+                        # Use first field
+                        first_field = next(iter(schema_fields))
+                        prepared_input[first_field] = input_data
+                    else:
+                        # Minimal fallback
+                        prepared_input = {"input": input_data}
+                
+                # Create instance or return dict
+                try:
+                    result = input_schema(**prepared_input)
+                    logger.debug(f"Created input schema instance with {len(prepared_input)} fields")
+                    return result
+                except Exception as e:
+                    logger.warning(f"Error creating input schema instance: {e}")
+                    return prepared_input
+            else:
+                # No schema - create standard input with messages
+                return {"messages": [HumanMessage(content=text) for text in input_data]}
+                
+        # Handle dictionary input
+        elif isinstance(input_data, dict):
+            # If we have a schema, use it to validate
+            if input_schema:
+                # Handle messages specially if they're strings
+                if "messages" in input_data and isinstance(input_data["messages"], list):
+                    # Convert string messages to HumanMessages if needed
+                    messages = input_data["messages"]
+                    for i, msg in enumerate(messages):
+                        if isinstance(msg, str):
+                            messages[i] = HumanMessage(content=msg)
+                
+                # Create instance or return dict
+                try:
+                    result = input_schema(**input_data)
+                    logger.debug(f"Created input schema instance from dict with {len(input_data)} fields")
+                    return result
+                except Exception as e:
+                    logger.warning(f"Error creating input schema instance from dict: {e}")
+                    return input_data
+            else:
+                # No schema - return dict as is
+                return input_data
+                
+        # Handle BaseModel input
+        elif isinstance(input_data, BaseModel):
+            # If input is already a BaseModel, check if we need to convert
+            if input_schema and not isinstance(input_data, input_schema):
+                # Convert to dict first
+                if hasattr(input_data, "model_dump"):
+                    # Pydantic v2
+                    data_dict = input_data.model_dump()
+                else:
+                    # Pydantic v1
+                    data_dict = input_data.dict()
+                
+                # Create instance
+                try:
+                    result = input_schema(**data_dict)
+                    logger.debug(f"Converted BaseModel to input schema instance")
+                    return result
+                except Exception as e:
+                    logger.warning(f"Error converting BaseModel to input schema: {e}")
+                    return input_data
+            else:
+                # Already correct type or no schema
+                return input_data
+                
+        # Other types - convert to string and handle
+        else:
+            # Convert to string and handle recursively
+            logger.warning(f"Unsupported input type {type(input_data).__name__}, converting to string")
+            return self._prepare_input(str(input_data))
     
     def _prepare_runnable_config(
         self, 
@@ -1041,6 +1327,14 @@ class Agent(Generic[TConfig], ABC):
         if "thread_id" not in runtime_config["configurable"]:
             runtime_config["configurable"]["thread_id"] = str(uuid.uuid4())
             
+        # Add debug flag if specified
+        if "debug" in kwargs:
+            runtime_config["configurable"]["debug"] = kwargs.pop("debug")
+            
+        # Add save_history flag if specified
+        if "save_history" in kwargs:
+            runtime_config["configurable"]["save_history"] = kwargs.pop("save_history")
+            
         # Add other kwargs
         for key, value in kwargs.items():
             if key.startswith("configurable_"):
@@ -1073,7 +1367,680 @@ class Agent(Generic[TConfig], ABC):
                 
         return runtime_config
     
-    def save_state_history(self, runnable_config=None) -> bool:
+    def _process_output(self, output_data: Any) -> Any:
+        """
+        Process and validate output data.
+        
+        Args:
+            output_data: Raw output data from the graph
+            
+        Returns:
+            Processed output data
+        """
+        # Use the output schema to validate if available
+        if hasattr(self, "output_schema") and self.output_schema and not isinstance(output_data, self.output_schema):
+            # Try to instantiate with schema
+            try:
+                # Convert dict-like objects to proper form
+                if isinstance(output_data, dict):
+                    data_dict = output_data
+                elif hasattr(output_data, "model_dump"):
+                    
+# Pydantic v2
+                    data_dict = output_data.model_dump()
+                elif hasattr(output_data, "dict"):
+                    # Pydantic v1
+                    data_dict = output_data.dict()
+                else:
+                    # Fallback - create from dict members
+                    data_dict = {}
+                    for key, value in output_data.__dict__.items():
+                        if not key.startswith("_"):
+                            data_dict[key] = value
+                
+                # Create instance
+                result = self.output_schema(**data_dict)
+                logger.debug(f"Validated output with schema")
+                return result
+            except Exception as e:
+                logger.warning(f"Error validating output with schema: {e}")
+                return output_data
+        
+        # No schema or already correct type
+        return output_data
+    
+    def run(self, 
+            input_data: TIn, 
+            thread_id: Optional[str] = None,
+            debug: bool = None,
+            config: Optional[RunnableConfig] = None,
+            **kwargs) -> TOut:
+        """
+        Synchronously run the agent with input data.
+        
+        Args:
+            input_data: Input data for the agent
+            thread_id: Optional thread ID for persistence
+            debug: Whether to enable debug mode
+            config: Optional runtime configuration
+            **kwargs: Additional runtime configuration
+            
+        Returns:
+            Output from the agent
+        """
+        # Default debug to verbose if not specified
+        if debug is None:
+            debug = self.verbose
+            
+        # Prepare input data in correct format
+        processed_input = self._prepare_input(input_data)
+        
+        # Prepare runtime configuration
+        runtime_config = self._prepare_runnable_config(
+            thread_id=thread_id,
+            config=config,
+            debug=debug,
+            **kwargs
+        )
+        
+        # Extract thread_id for persistence
+        thread_id = runtime_config["configurable"].get("thread_id")
+        
+        # Set up tracing for rich UI if available
+        if self.rich_logging and RICH_AVAILABLE and debug and hasattr(self, "console"):
+            self.console.print(Panel.fit(
+                f"[bold blue]Running Agent: [green]{self.config.name}[/green][/bold blue]\n"
+                f"[cyan]Thread ID:[/cyan] {thread_id}",
+                border_style="blue",
+                title="Execution Started",
+                subtitle=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            ))
+            
+            # Show processed input
+            self.console.print("[bold cyan]Processed Input:[/bold cyan]")
+            if isinstance(processed_input, dict):
+                input_json = json.dumps(processed_input, indent=2, default=str)
+                self.console.print(Syntax(input_json, "json", theme="monokai"))
+            elif isinstance(processed_input, BaseModel):
+                if hasattr(processed_input, "model_dump"):
+                    input_json = json.dumps(processed_input.model_dump(), indent=2, default=str)
+                else:
+                    input_json = json.dumps(processed_input.dict(), indent=2, default=str)
+                self.console.print(Syntax(input_json, "json", theme="monokai"))
+            else:
+                self.console.print(str(processed_input))
+        
+        # Set up checkpointer if using persistence
+        start_time = time.time()
+        
+        # Register thread if needed
+        if self.checkpointer and thread_id:
+            register_thread_if_needed(self.checkpointer, thread_id)
+            
+        # Get previous state if available
+        previous_state = None
+        try:
+            if self.checkpointer and thread_id:
+                # Get last state for this thread
+                previous_state = self.app.get_state(runtime_config)
+                
+                if previous_state and debug:
+                    logger.debug(f"Retrieved previous state for thread {thread_id}")
+                    if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
+                        self.console.print("[bold cyan]Previous State Found.[/bold cyan]")
+        except Exception as e:
+            logger.warning(f"Error retrieving previous state: {e}")
+            
+        # Prepare merged input with previous state if available
+        if previous_state:
+            try:
+                full_input = prepare_merged_input(
+                    processed_input,
+                    previous_state,
+                    runtime_config,
+                    self.input_schema,
+                    self.state_schema
+                )
+                logger.debug("Merged input with previous state")
+                
+                # Update processed input for running
+                processed_input = full_input
+            except Exception as e:
+                logger.warning(f"Error merging with previous state: {e}")
+                
+        # Run the agent
+        try:
+            result = self.app.invoke(processed_input, runtime_config)
+            logger.debug(f"Agent execution completed successfully")
+            
+            # Process the result if needed
+            output = self._process_output(result)
+            
+            # Save state history if configured
+            if runtime_config["configurable"].get("save_history", getattr(self.config, "save_history", True)):
+                self.save_state_history(runtime_config)
+                
+            # Show debug info if enabled
+            if self.rich_logging and RICH_AVAILABLE and debug and hasattr(self, "console"):
+                execution_time = time.time() - start_time
+                
+                # Show output
+                self.console.print("[bold cyan]Output:[/bold cyan]")
+                if isinstance(output, dict):
+                    output_json = json.dumps(output, indent=2, default=str)
+                    self.console.print(Syntax(output_json, "json", theme="monokai"))
+                elif isinstance(output, BaseModel):
+                    if hasattr(output, "model_dump"):
+                        output_json = json.dumps(output.model_dump(), indent=2, default=str)
+                    else:
+                        output_json = json.dumps(output.dict(), indent=2, default=str)
+                    self.console.print(Syntax(output_json, "json", theme="monokai"))
+                else:
+                    self.console.print(str(output))
+                    
+                # Show completion message
+                self.console.print(Panel.fit(
+                    f"[bold green]Execution Completed[/bold green]\n"
+                    f"[cyan]Execution Time:[/cyan] {execution_time:.2f} seconds",
+                    border_style="green",
+                    title="Agent Execution",
+                    subtitle=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                ))
+            
+            return output
+            
+        except Exception as e:
+            logger.error(f"Error during agent execution: {e}")
+            
+            if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
+                self.console.print(Panel.fit(
+                    f"[bold red]Execution Error:[/bold red] {str(e)}",
+                    border_style="red",
+                    title="Agent Execution Failed"
+                ))
+                
+            raise
+    
+    async def arun(self, 
+                   input_data: TIn, 
+                   thread_id: Optional[str] = None,
+                   config: Optional[RunnableConfig] = None,
+                   **kwargs) -> TOut:
+        """
+        Asynchronously run the agent with input data.
+        
+        Args:
+            input_data: Input data for the agent
+            thread_id: Optional thread ID for persistence
+            config: Optional runtime configuration
+            **kwargs: Additional runtime configuration
+            
+        Returns:
+            Output from the agent
+        """
+        # Default debug to verbose if not specified
+        debug = kwargs.get("debug", self.verbose)
+            
+        # Prepare input data in correct format
+        processed_input = self._prepare_input(input_data)
+        
+        # Prepare runtime configuration
+        runtime_config = self._prepare_runnable_config(
+            thread_id=thread_id,
+            config=config,
+            **kwargs
+        )
+        
+        # Extract thread_id for persistence
+        thread_id = runtime_config["configurable"].get("thread_id")
+        
+        # Set up tracing for rich UI if available
+        if self.rich_logging and RICH_AVAILABLE and debug and hasattr(self, "console"):
+            self.console.print(Panel.fit(
+                f"[bold blue]Running Agent Async: [green]{self.config.name}[/green][/bold blue]\n"
+                f"[cyan]Thread ID:[/cyan] {thread_id}",
+                border_style="blue",
+                title="Async Execution Started",
+                subtitle=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            ))
+        
+        # Set up checkpointer if using persistence
+        start_time = time.time()
+        
+        # Register thread if needed
+        if self.checkpointer and thread_id:
+            register_thread_if_needed(self.checkpointer, thread_id)
+            
+        # Get previous state if available
+        previous_state = None
+        try:
+            if self.checkpointer and thread_id:
+                # Get last state for this thread
+                previous_state = self.app.get_state(runtime_config)
+                
+                if previous_state and debug:
+                    logger.debug(f"Retrieved previous state for thread {thread_id}")
+        except Exception as e:
+            logger.warning(f"Error retrieving previous state: {e}")
+            
+        # Prepare merged input with previous state if available
+        if previous_state:
+            try:
+                full_input = prepare_merged_input(
+                    processed_input,
+                    previous_state,
+                    runtime_config,
+                    self.input_schema,
+                    self.state_schema
+                )
+                logger.debug("Merged input with previous state")
+                
+                # Update processed input for running
+                processed_input = full_input
+            except Exception as e:
+                logger.warning(f"Error merging with previous state: {e}")
+                
+        # Run the agent asynchronously
+        try:
+            # Use ainvoke if available
+            if hasattr(self.app, "ainvoke"):
+                result = await self.app.ainvoke(processed_input, runtime_config)
+            else:
+                # Fall back to threaded execution
+                loop = asyncio.get_event_loop()
+                result = await loop.run_in_executor(
+                    None, 
+                    lambda: self.app.invoke(processed_input, runtime_config)
+                )
+                
+            logger.debug(f"Agent async execution completed successfully")
+            
+            # Process the result if needed
+            output = self._process_output(result)
+            
+            # Save state history if configured
+            if runtime_config["configurable"].get("save_history", getattr(self.config, "save_history", True)):
+                await loop.run_in_executor(None, lambda: self.save_state_history(runtime_config))
+                
+            # Show debug info if enabled
+            if self.rich_logging and RICH_AVAILABLE and debug and hasattr(self, "console"):
+                execution_time = time.time() - start_time
+                
+                # Show completion message
+                self.console.print(Panel.fit(
+                    f"[bold green]Async Execution Completed[/bold green]\n"
+                    f"[cyan]Execution Time:[/cyan] {execution_time:.2f} seconds",
+                    border_style="green",
+                    title="Agent Async Execution",
+                    subtitle=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                ))
+            
+            return output
+            
+        except Exception as e:
+            logger.error(f"Error during async agent execution: {e}")
+            
+            if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
+                self.console.print(Panel.fit(
+                    f"[bold red]Async Execution Error:[/bold red] {str(e)}",
+                    border_style="red",
+                    title="Agent Execution Failed"
+                ))
+                
+            raise
+    
+    def stream(self, 
+               input_data: TIn, 
+               thread_id: Optional[str] = None,
+               stream_mode: str = "values",
+               config: Optional[RunnableConfig] = None,
+               debug: bool = None,
+               **kwargs) -> Generator[Dict[str, Any], None, None]:
+        """
+        Stream agent execution with input data.
+        
+        Args:
+            input_data: Input data for the agent
+            thread_id: Optional thread ID for persistence
+            stream_mode: Stream mode (values, updates, debug, etc.)
+            config: Optional runtime configuration
+            debug: Whether to enable debug mode
+            **kwargs: Additional runtime configuration
+            
+        Yields:
+            State updates during execution
+        """
+        # Default debug to verbose if not specified
+        if debug is None:
+            debug = self.verbose
+            
+        # Prepare input data in correct format
+        processed_input = self._prepare_input(input_data)
+        
+        # Add stream_mode to runtime config
+        kwargs["stream_mode"] = stream_mode
+        
+        # Prepare runtime configuration
+        runtime_config = self._prepare_runnable_config(
+            thread_id=thread_id,
+            config=config,
+            debug=debug,
+            **kwargs
+        )
+        
+        # Extract thread_id for persistence
+        thread_id = runtime_config["configurable"].get("thread_id")
+        
+        # Set up tracing for rich UI if available
+        if self.rich_logging and RICH_AVAILABLE and debug and hasattr(self, "console"):
+            self.console.print(Panel.fit(
+                f"[bold blue]Streaming Agent: [green]{self.config.name}[/green][/bold blue]\n"
+                f"[cyan]Thread ID:[/cyan] {thread_id}\n"
+                f"[cyan]Stream Mode:[/cyan] {stream_mode}",
+                border_style="blue",
+                title="Streaming Started",
+                subtitle=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            ))
+        
+        # Set up checkpointer if using persistence
+        start_time = time.time()
+        
+        # Register thread if needed
+        if self.checkpointer and thread_id:
+            register_thread_if_needed(self.checkpointer, thread_id)
+            
+        # Get previous state if available
+        previous_state = None
+        try:
+            if self.checkpointer and thread_id:
+                # Get last state for this thread
+                previous_state = self.app.get_state(runtime_config)
+                
+                if previous_state and debug:
+                    logger.debug(f"Retrieved previous state for thread {thread_id}")
+        except Exception as e:
+            logger.warning(f"Error retrieving previous state: {e}")
+            
+        # Prepare merged input with previous state if available
+        if previous_state:
+            try:
+                full_input = prepare_merged_input(
+                    processed_input,
+                    previous_state,
+                    runtime_config,
+                    self.input_schema,
+                    self.state_schema
+                )
+                logger.debug("Merged input with previous state")
+                
+                # Update processed input for running
+                processed_input = full_input
+            except Exception as e:
+                logger.warning(f"Error merging with previous state: {e}")
+        
+        # Stream execution
+        try:
+            # Create generator to stream results
+            stream_gen = self.app.stream(processed_input, runtime_config)
+            
+            # Track the final result for state saving
+            final_result = None
+            
+            # Process stream chunks
+            chunk_count = 0
+            for chunk in stream_gen:
+                chunk_count += 1
+                
+                # Save the final chunk for state saving
+                final_result = chunk
+                
+                # Process the chunk if needed
+                processed_chunk = self._process_stream_chunk(chunk, stream_mode)
+                
+                # Debug if enabled
+                if self.rich_logging and RICH_AVAILABLE and debug and hasattr(self, "debug_console"):
+                    # Only log every few chunks to avoid overwhelming output
+                    if chunk_count % 5 == 0 or chunk_count < 3:
+                        chunk_type = type(chunk).__name__
+                        self.debug_console.print(f"[dim]Stream chunk {chunk_count} ({chunk_type})[/dim]")
+                
+                # Yield the processed chunk
+                yield processed_chunk
+                
+            # Save state history if configured and we have a final result
+            if (runtime_config["configurable"].get("save_history", getattr(self.config, "save_history", True)) 
+                and final_result is not None):
+                self.save_state_history(runtime_config)
+                
+            # Show debug info if enabled
+            if self.rich_logging and RICH_AVAILABLE and debug and hasattr(self, "console"):
+                execution_time = time.time() - start_time
+                
+                # Show completion message
+                self.console.print(Panel.fit(
+                    f"[bold green]Streaming Completed[/bold green]\n"
+                    f"[cyan]Execution Time:[/cyan] {execution_time:.2f} seconds\n"
+                    f"[cyan]Total Chunks:[/cyan] {chunk_count}",
+                    border_style="green",
+                    title="Agent Streaming",
+                    subtitle=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                ))
+            
+        except Exception as e:
+            logger.error(f"Error during streaming execution: {e}")
+            
+            if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
+                self.console.print(Panel.fit(
+                    f"[bold red]Streaming Error:[/bold red] {str(e)}",
+                    border_style="red",
+                    title="Agent Streaming Failed"
+                ))
+                
+            raise
+    
+    def _process_stream_chunk(self, chunk: Any, stream_mode: str) -> Dict[str, Any]:
+        """
+        Process a stream chunk based on stream mode.
+        
+        Args:
+            chunk: The raw stream chunk
+            stream_mode: Stream mode (values, updates, debug, etc.)
+            
+        Returns:
+            Processed stream chunk
+        """
+        # Process based on stream mode
+        if stream_mode == "custom":
+            # Return custom chunks as-is
+            return chunk
+        elif stream_mode == "values":
+            # Return the entire state values
+            if isinstance(chunk, dict) and "values" in chunk:
+                return chunk["values"]
+            return chunk
+        elif stream_mode == "updates":
+            # Return just the updates
+            if isinstance(chunk, dict) and "updates" in chunk:
+                return chunk["updates"]
+            elif isinstance(chunk, dict) and "node" in chunk:
+                return chunk
+            return chunk
+        elif stream_mode == "messages":
+            # Extract and return just the messages for token streaming
+            if isinstance(chunk, dict):
+                if "values" in chunk and "messages" in chunk["values"]:
+                    return {"messages": chunk["values"]["messages"]}
+                elif "updates" in chunk and "messages" in chunk["updates"]:
+                    return {"messages": chunk["updates"]["messages"]}
+                elif "messages" in chunk:
+                    return {"messages": chunk["messages"]}
+            
+            # Default fallback
+            return chunk
+        else:
+            # Debug mode or unknown - return everything
+            return chunk
+    
+    async def astream(self, 
+                      input_data: TIn, 
+                      thread_id: Optional[str] = None,
+                      stream_mode: str = "values",
+                      config: Optional[RunnableConfig] = None,
+                      **kwargs) -> AsyncGenerator[Dict[str, Any], None]:
+        """
+        Asynchronously stream agent execution with input data.
+        
+        Args:
+            input_data: Input data for the agent
+            thread_id: Optional thread ID for persistence
+            stream_mode: Stream mode (values, updates, debug, etc.)
+            config: Optional runtime configuration
+            **kwargs: Additional runtime configuration
+            
+        Yields:
+            Async iterator of state updates during execution
+        """
+        # Default debug to verbose if not specified
+        debug = kwargs.get("debug", self.verbose)
+            
+        # Prepare input data in correct format
+        processed_input = self._prepare_input(input_data)
+        
+        # Add stream_mode to runtime config
+        kwargs["stream_mode"] = stream_mode
+        
+        # Prepare runtime configuration
+        runtime_config = self._prepare_runnable_config(
+            thread_id=thread_id,
+            config=config,
+            **kwargs
+        )
+        
+        # Extract thread_id for persistence
+        thread_id = runtime_config["configurable"].get("thread_id")
+        
+        # Set up tracing for rich UI if available
+        if self.rich_logging and RICH_AVAILABLE and debug and hasattr(self, "console"):
+            self.console.print(Panel.fit(
+                f"[bold blue]Async Streaming Agent: [green]{self.config.name}[/green][/bold blue]\n"
+                f"[cyan]Thread ID:[/cyan] {thread_id}\n"
+                f"[cyan]Stream Mode:[/cyan] {stream_mode}",
+                border_style="blue",
+                title="Async Streaming Started",
+                subtitle=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            ))
+        
+        # Set up checkpointer if using persistence
+        start_time = time.time()
+        
+        # Register thread if needed
+        if self.checkpointer and thread_id:
+            register_thread_if_needed(self.checkpointer, thread_id)
+            
+        # Get previous state if available
+        previous_state = None
+        try:
+            if self.checkpointer and thread_id:
+                # Get last state for this thread
+                previous_state = self.app.get_state(runtime_config)
+                
+                if previous_state and debug:
+                    logger.debug(f"Retrieved previous state for thread {thread_id}")
+        except Exception as e:
+            logger.warning(f"Error retrieving previous state: {e}")
+            
+        # Prepare merged input with previous state if available
+        if previous_state:
+            try:
+                full_input = prepare_merged_input(
+                    processed_input,
+                    previous_state,
+                    runtime_config,
+                    self.input_schema,
+                    self.state_schema
+                )
+                logger.debug("Merged input with previous state")
+                
+                # Update processed input for running
+                processed_input = full_input
+            except Exception as e:
+                logger.warning(f"Error merging with previous state: {e}")
+        
+        # Stream execution asynchronously
+        try:
+            # Create async generator to stream results if available
+            if hasattr(self.app, "astream"):
+                stream_gen = self.app.astream(processed_input, runtime_config)
+            else:
+                # Fallback to sync streaming via thread
+                loop = asyncio.get_event_loop()
+                sync_gen = self.app.stream(processed_input, runtime_config)
+                
+                # Convert sync generator to async generator
+                async def async_wrapper():
+                    for chunk in sync_gen:
+                        yield chunk
+                
+                stream_gen = async_wrapper()
+            
+            # Track the final result for state saving
+            final_result = None
+            
+            # Process stream chunks
+            chunk_count = 0
+            async for chunk in stream_gen:
+                chunk_count += 1
+                
+                # Save the final chunk for state saving
+                final_result = chunk
+                
+                # Process the chunk if needed
+                processed_chunk = self._process_stream_chunk(chunk, stream_mode)
+                
+                # Debug if enabled
+                if self.rich_logging and RICH_AVAILABLE and debug and hasattr(self, "debug_console"):
+                    # Only log every few chunks to avoid overwhelming output
+                    if chunk_count % 5 == 0 or chunk_count < 3:
+                        chunk_type = type(chunk).__name__
+                        self.debug_console.print(f"[dim]Async stream chunk {chunk_count} ({chunk_type})[/dim]")
+                
+                # Yield the processed chunk
+                yield processed_chunk
+                
+            # Save state history if configured and we have a final result
+            if (runtime_config["configurable"].get("save_history", getattr(self.config, "save_history", True)) 
+                and final_result is not None):
+                # Run in executor to avoid blocking
+                loop = asyncio.get_event_loop()
+                await loop.run_in_executor(None, lambda: self.save_state_history(runtime_config))
+                
+            # Show debug info if enabled
+            if self.rich_logging and RICH_AVAILABLE and debug and hasattr(self, "console"):
+                execution_time = time.time() - start_time
+                
+                # Show completion message
+                self.console.print(Panel.fit(
+                    f"[bold green]Async Streaming Completed[/bold green]\n"
+                    f"[cyan]Execution Time:[/cyan] {execution_time:.2f} seconds\n"
+                    f"[cyan]Total Chunks:[/cyan] {chunk_count}",
+                    border_style="green",
+                    title="Agent Async Streaming",
+                    subtitle=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                ))
+            
+        except Exception as e:
+            logger.error(f"Error during async streaming execution: {e}")
+            
+            if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
+                self.console.print(Panel.fit(
+                    f"[bold red]Async Streaming Error:[/bold red] {str(e)}",
+                    border_style="red",
+                    title="Agent Async Streaming Failed"
+                ))
+                
+            raise
+    
+    def save_state_history(self, runnable_config: Optional[RunnableConfig] = None) -> bool:
         """
         Save the current agent state to a JSON file.
         
@@ -1133,958 +2100,6 @@ class Agent(Generic[TConfig], ABC):
                 logger.error(f"Error saving state history: {e}")
             return False
     
-    def _debug_input_processor(self, input_data, processed_input):
-        """Debug input processing with rich UI."""
-        if not self.rich_logging or not RICH_AVAILABLE or not hasattr(self, "debug_console"):
-            return
-            
-        # Only show in verbose mode
-        if not self.verbose:
-            return
-            
-        self.debug_console.rule("[bold]Input Processing Debug[/bold]")
-        
-        # Show raw input
-        self.debug_console.print("[bold cyan]Raw Input:[/bold cyan]")
-        if isinstance(input_data, str):
-            self.debug_console.print(f"[green]String Input:[/green] {input_data[:100]}{'...' if len(input_data) > 100 else ''}")
-        elif isinstance(input_data, list):
-            self.debug_console.print(f"[green]List Input:[/green] {len(input_data)} items")
-            for i, item in enumerate(input_data[:3]):
-                self.debug_console.print(f"  [dim]Item {i}:[/dim] {str(item)[:50]}{'...' if len(str(item)) > 50 else ''}")
-            if len(input_data) > 3:
-                self.debug_console.print(f"  [dim]... and {len(input_data) - 3} more items[/dim]")
-        elif isinstance(input_data, dict):
-            self.debug_console.print(f"[green]Dict Input:[/green] {len(input_data)} keys")
-            syntax = Syntax(json.dumps(input_data, indent=2, default=str)[:500], "json", theme="monokai")
-            self.debug_console.print(syntax)
-        elif isinstance(input_data, BaseModel):
-            self.debug_console.print(f"[green]Pydantic Model Input:[/green] {type(input_data).__name__}")
-            if hasattr(input_data, "model_dump"):
-                model_dict = input_data.model_dump()
-            else:
-                model_dict = input_data.dict()
-            syntax = Syntax(json.dumps(model_dict, indent=2, default=str)[:500], "json", theme="monokai")
-            self.debug_console.print(syntax)
-        else:
-            self.debug_console.print(f"[green]Other Input Type:[/green] {type(input_data).__name__}")
-            
-        # Show processed input
-        self.debug_console.print("\n[bold cyan]Processed Input:[/bold cyan]")
-        if isinstance(processed_input, dict):
-            syntax = Syntax(json.dumps(processed_input, indent=2, default=str)[:1000], "json", theme="monokai")
-            self.debug_console.print(syntax)
-        elif isinstance(processed_input, BaseModel):
-            if hasattr(processed_input, "model_dump"):
-                model_dict = processed_input.model_dump()
-            else:
-                model_dict = processed_input.dict()
-            syntax = Syntax(json.dumps(model_dict, indent=2, default=str)[:1000], "json", theme="monokai")
-            self.debug_console.print(syntax)
-        else:
-            self.debug_console.print(f"[yellow]Unexpected processed input type:[/yellow] {type(processed_input).__name__}")
-            
-        self.debug_console.rule()
-    
-    def _prepare_input(self, input_data: Union[str, List[str], Dict[str, Any], BaseModel]) -> Any:
-        """
-        Prepare input for the agent based on the input type.
-        
-        Args:
-            input_data: Input in various formats
-            
-        Returns:
-            Processed input compatible with the graph
-        """
-        # If we have an input schema and the input is a simple scalar (string, number, etc.),
-        # we need to convert it to match the schema's expected structure
-        if self.config.input_schema:
-            # Get the schema fields to determine the structure
-            schema_fields = {}
-            if hasattr(self.config.input_schema, "model_fields"):
-                # Pydantic v2
-                schema_fields = self.config.input_schema.model_fields
-            elif hasattr(self.config.input_schema, "__fields__"):
-                # Pydantic v1
-                schema_fields = self.config.input_schema.__fields__
-                
-            # First we need to convert the input to the appropriate format
-            if isinstance(input_data, str):
-                # Convert string input to dict format
-                if len(schema_fields) == 1:
-                    # If schema has only one field, use the string as its value
-                    field_name = list(schema_fields.keys())[0]
-                    prepared_input = {field_name: input_data}
-                else:
-                    # Otherwise, create a basic structure with the string in multiple fields
-                    prepared_input = {}
-                    # Fill in commonly expected fields with the string value
-                    for field_name in ["input", "query", "content", "question", "messages"]:
-                        if field_name in schema_fields:
-                            if field_name == "messages":
-                                prepared_input[field_name] = [HumanMessage(content=input_data)]
-                            else:
-                                prepared_input[field_name] = input_data
-                                
-                    # If no matches found, use the first field in the schema
-                    if not prepared_input and schema_fields:
-                        field_name = list(schema_fields.keys())[0]
-                        prepared_input = {field_name: input_data}
-                        
-            elif isinstance(input_data, list) and all(isinstance(item, str) for item in input_data):
-                # Convert list of strings to dict format
-                if len(schema_fields) == 1:
-                    # If schema has only one field, use the list as its value
-                    field_name = list(schema_fields.keys())[0]
-                    prepared_input = {field_name: input_data}
-                else:
-                    # Otherwise create a structure with different formats
-                    prepared_input = {}
-                    joined_text = "\n".join(input_data)
-                    
-                    for field_name in schema_fields:
-                        if field_name == "messages":
-                            prepared_input[field_name] = [HumanMessage(content=text) for text in input_data]
-                        elif "list" in str(schema_fields[field_name]).lower():
-                            # If the field is a list type, use the original list
-                            prepared_input[field_name] = input_data
-                        else:
-                            # Otherwise join the strings for text fields
-                            prepared_input[field_name] = joined_text
-                            
-            elif isinstance(input_data, dict):
-                # Use dict as is
-                prepared_input = input_data
-                
-            elif isinstance(input_data, BaseModel):
-                # Convert BaseModel to dict
-                if hasattr(input_data, "model_dump"):
-                    # Pydantic v2
-                    prepared_input = input_data.model_dump()
-                elif hasattr(input_data, "dict"):
-                    # Pydantic v1
-                    prepared_input = input_data.dict()
-                else:
-                    # Manual extraction
-                    prepared_input = {}
-                    for field in input_data.__annotations__:
-                        if hasattr(input_data, field):
-                            prepared_input[field] = getattr(input_data, field)
-            else:
-                # For other types, create a dictionary with the input as the value for each field
-                prepared_input = {}
-                for field_name in schema_fields:
-                    if field_name == "messages":
-                        prepared_input[field_name] = [HumanMessage(content=str(input_data))]
-                    else:
-                        prepared_input[field_name] = str(input_data)
-            
-            # Ensure all required fields have values
-            for field_name, field_info in schema_fields.items():
-                # Check if field is required
-                is_required = False
-                if hasattr(field_info, "is_required"):  # Pydantic v2
-                    is_required = field_info.is_required
-                elif hasattr(field_info, "required"):   # Pydantic v1
-                    is_required = field_info.required
-                    
-                # Add default values for missing required fields
-                if is_required and field_name not in prepared_input:
-                    if field_name == "messages":
-                        prepared_input[field_name] = []
-                    else:
-                        prepared_input[field_name] = ""
-                        
-            # Validate against the schema
-            result = self.config.input_schema.model_validate(prepared_input)
-            
-            # Debug
-            self._debug_input_processor(input_data, result)
-            
-            return result
-        
-        # When no input schema is available, use similar logic to original function
-        
-        # When input is a string
-        if isinstance(input_data, str):
-            # Initialize input dict
-            prepared_input = {"messages": [HumanMessage(content=input_data)]}
-            
-            # Detect additional required inputs
-            required_inputs = set()
-            if hasattr(self, 'engine') and hasattr(self.engine, 'prompt_template') and hasattr(self.engine.prompt_template, 'input_variables'):
-                required_inputs.update(self.engine.prompt_template.input_variables)
-            
-            # Add string to all required inputs
-            for input_name in required_inputs:
-                if input_name != 'messages':
-                    prepared_input[input_name] = input_data
-            
-            result = self.state_schema(**prepared_input) if hasattr(self, 'state_schema') else prepared_input
-            
-            # Debug
-            self._debug_input_processor(input_data, result)
-            
-            return result
-        
-        # Handle other types of input
-        elif isinstance(input_data, list) and all(isinstance(item, str) for item in input_data):
-            # List of strings - convert to messages
-            messages = [HumanMessage(content=item) for item in input_data]
-            
-            prepared_input = {'messages': messages}
-            
-            # For other inputs, join the strings
-            required_inputs = set()
-            if hasattr(self, 'engine') and hasattr(self.engine, 'prompt_template') and hasattr(self.engine.prompt_template, 'input_variables'):
-                required_inputs.update(self.engine.prompt_template.input_variables)
-            
-            for input_name in required_inputs:
-                if input_name != 'messages':
-                    prepared_input[input_name] = "\n".join(input_data)
-            
-            result = self.state_schema(**prepared_input) if hasattr(self, 'state_schema') else prepared_input
-            
-            # Debug
-            self._debug_input_processor(input_data, result)
-            
-            return result
-        
-        elif isinstance(input_data, dict):
-            # Dict input - use as is
-            result = self.state_schema(**input_data) if hasattr(self, 'state_schema') else input_data
-            
-            # Debug
-            self._debug_input_processor(input_data, result)
-            
-            return result
-        
-        elif isinstance(input_data, BaseModel):
-            # Convert BaseModel to dict
-            if hasattr(input_data, "model_dump"):
-                # Pydantic v2
-                model_dict = input_data.model_dump()
-                result = self.state_schema(**model_dict) if hasattr(self, 'state_schema') else model_dict
-            elif hasattr(input_data, "dict"):
-                # Pydantic v1
-                model_dict = input_data.dict()
-                result = self.state_schema(**model_dict) if hasattr(self, 'state_schema') else model_dict
-            else:
-                # Manual extraction
-                prepared_input = {}
-                for field in input_data.__annotations__:
-                    if hasattr(input_data, field):
-                        prepared_input[field] = getattr(input_data, field)
-                result = self.state_schema(**prepared_input) if hasattr(self, 'state_schema') else prepared_input
-                
-            # Debug
-            self._debug_input_processor(input_data, result)
-            
-            return result
-        
-        # Fallback
-        default_result = self.state_schema(messages=[HumanMessage(content=str(input_data))]) if hasattr(self, 'state_schema') else {
-            "messages": [HumanMessage(content=str(input_data))]
-        }
-        
-        # Debug
-        self._debug_input_processor(input_data, default_result)
-        
-        return default_result
-    
-    def _debug_execution(self, method: str, thread_id: str, result: Any = None, error: Exception = None):
-        """Log execution details using rich UI."""
-        if not self.rich_logging or not RICH_AVAILABLE or not hasattr(self, "debug_console"):
-            return
-            
-        # Only print in verbose mode
-        if not self.verbose:
-            return
-            
-        self.debug_console.rule(f"[bold]Execution Debug: {method}[/bold]")
-        
-        # Show thread ID
-        self.debug_console.print(f"[cyan]Thread ID:[/cyan] {thread_id}")
-        
-        # Show execution result or error
-        if error:
-            self.debug_console.print(f"[bold red]Error:[/bold red] {str(error)}")
-            if hasattr(error, "__traceback__"):
-                import traceback
-                tb_str = ''.join(traceback.format_tb(error.__traceback__))
-                self.debug_console.print(f"[dim red]Traceback:[/dim red]\n{tb_str}")
-        elif result is not None:
-            self.debug_console.print("[bold green]Result:[/bold green]")
-            if isinstance(result, dict):
-                # Print top-level keys
-                keys_str = ", ".join(result.keys())
-                self.debug_console.print(f"[dim]Keys:[/dim] {keys_str}")
-                
-                # For large results, show summary
-                if len(str(result)) > 1000:
-                    self.debug_console.print(f"[dim]Large result ({len(str(result))} chars). Summary:[/dim]")
-                    
-                    # Show select fields that are typically interesting
-                    for key in ["output", "answer", "response", "messages", "documents"]:
-                        if key in result:
-                            value = result[key]
-                            if isinstance(value, list):
-                                self.debug_console.print(f"[yellow]{key}:[/yellow] List with {len(value)} items")
-                                if value and len(value) > 0:
-                                    if isinstance(value[0], BaseMessage):
-                                        self.debug_console.print(f"  [dim]Last message ({type(value[-1]).__name__}):[/dim]")
-                                        self.debug_console.print(f"  {value[-1].content[:200]}{'...' if len(value[-1].content) > 200 else ''}")
-                            else:
-                                if isinstance(value, str):
-                                    self.debug_console.print(f"[yellow]{key}:[/yellow] {value[:200]}{'...' if len(value) > 200 else ''}")
-                                else:
-                                    self.debug_console.print(f"[yellow]{key}:[/yellow] {str(value)[:200]}{'...' if len(str(value)) > 200 else ''}")
-                else:
-                    # Show full result
-                    syntax = Syntax(json.dumps(result, indent=2, default=str), "json", theme="monokai")
-                    self.debug_console.print(syntax)
-            else:
-                # Non-dict result
-                self.debug_console.print(str(result)[:500] + ('...' if len(str(result)) > 500 else ''))
-        
-        self.debug_console.rule()
-    
-    def run(
-        self,
-        input_data: Union[str, List[str], Dict[str, Any], BaseModel],
-        thread_id: Optional[str] = None,
-        debug: bool = True,
-        config: Optional[RunnableConfig] = None,
-        **kwargs
-    ) -> Dict[str, Any]:
-        """
-        Run the agent with the given input and return the final state.
-        
-        Args:
-            input_data: Input data in various formats
-            thread_id: Optional thread ID for persistence
-            debug: Whether to enable debug mode
-            config: Optional runtime configuration
-            **kwargs: Additional runtime configuration
-            
-        Returns:
-            Final state or output
-        """
-        if not self.app:
-            logger.debug("Agent not compiled yet, compiling now")
-            self.compile()
-
-        # Prepare runtime configuration
-        runtime_config = self._prepare_runnable_config(thread_id, config, **kwargs)
-        current_thread_id = runtime_config["configurable"]["thread_id"]
-        
-        # Show run info in rich UI
-        if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
-            self.console.print(Panel.fit(
-                f"[bold]Running Agent[/bold]\n"
-                f"[cyan]Thread ID:[/cyan] {current_thread_id}",
-                border_style="blue",
-                title=self.config.name,
-                subtitle=datetime.now().strftime("%H:%M:%S")
-            ))
-        
-        logger.info(f"Running agent {self.config.name} with thread_id: {current_thread_id}")
-        
-        # Register thread in database if needed
-        register_thread_if_needed(self.checkpointer, current_thread_id)
-
-        # Get previous state
-        previous_state = None
-        try:
-            previous_state = self.app.get_state(runtime_config)
-            if previous_state:
-                logger.info(f"Found previous state for thread {current_thread_id}")
-                
-                # Show previous state in rich UI
-                if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console") and self.verbose:
-                    self.console.print("[bold]Found previous state:[/bold]")
-                    if hasattr(previous_state, 'values'):
-                        previous_values = previous_state.values
-                        # Show key stats
-                        if isinstance(previous_values, dict):
-                            keys_str = ", ".join(previous_values.keys())
-                            self.console.print(f"[dim]Keys:[/dim] {keys_str}")
-                
-        except Exception as e:
-            logger.debug(f"No previous state found: {e}")
-        
-        # Process input data
-        if isinstance(input_data, str):
-            processed_input = self._prepare_input(input_data)
-        else:
-            processed_input = input_data
-
-        # Run the agent
-        try:
-            if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
-                # Show animated status during execution
-                with self.console.status("[bold green]Agent processing...[/bold green]", spinner="dots") as status:
-                    start_time = time.time()
-                    result = self.app.invoke(
-                        processed_input,
-                        config=runtime_config,
-                        debug=debug
-                    )
-                    execution_time = time.time() - start_time
-                
-                # Show completion status
-                self.console.print(f"[bold green]Execution complete in {execution_time:.2f} seconds[/bold green]")
-                
-                # Show result summary
-                if isinstance(result, dict):
-                    # Check for common output fields
-                    output_fields = 0
-                    table = Table(title="Result Summary", box=None)
-                    table.add_column("Field", style="cyan")
-                    table.add_column("Value", style="green")
-                    
-                    for field in ["output", "answer", "response"]:
-                        if field in result and isinstance(result[field], str):
-                            output = result[field]
-                            display_output = output[:100] + ("..." if len(output) > 100 else "")
-                            table.add_row(field, display_output)
-                            output_fields += 1
-                    
-                    # Show message count if present
-                    if "messages" in result and isinstance(result["messages"], list):
-                        table.add_row("messages", f"{len(result['messages'])} messages")
-                        output_fields += 1
-                    
-                    # Show document count if present
-                    if "documents" in result and isinstance(result["documents"], list):
-                        table.add_row("documents", f"{len(result['documents'])} documents")
-                        output_fields += 1
-                    
-                    # Print table if we have output fields
-                    if output_fields > 0:
-                        self.console.print(table)
-                
-                # Save state history if requested
-                if getattr(self.config, "save_history", True):
-                    self.save_state_history(runtime_config)
-            else:
-                # Standard execution
-                result = self.app.invoke(
-                    processed_input,
-                    config=runtime_config,
-                    debug=debug
-                )
-
-                # Save state history if requested
-                if getattr(self.config, "save_history", True):
-                    self.save_state_history(runtime_config)
-            
-            # Debug execution results
-            self._debug_execution("run", current_thread_id, result)
-            
-            return result
-
-        except Exception as e:
-            logger.error(f"Error running agent: {e}", exc_info=True)
-            
-            if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
-                self.console.print(f"[bold red]Error running agent:[/bold red] {str(e)}")
-            
-            # Debug execution error
-            self._debug_execution("run", current_thread_id, error=e)
-            
-            raise
-    
-    def _stream_formatter(self, chunk: Any) -> str:
-        """Format stream chunks for rich output."""
-        if isinstance(chunk, dict):
-            # Extract content from common patterns
-            if "delta" in chunk and "content" in chunk["delta"]:
-                return chunk["delta"]["content"]
-            elif "choices" in chunk and chunk["choices"] and "text" in chunk["choices"][0]:
-                return chunk["choices"][0]["text"]
-            elif any(key in chunk for key in ["content", "text", "output", "chunk"]):
-                for key in ["content", "text", "output", "chunk"]:
-                    if key in chunk and isinstance(chunk[key], str):
-                        return chunk[key]
-        return ""
-    
-    def stream(
-        self,
-        input_data: Union[str, List[str], Dict[str, Any], BaseModel],
-        thread_id: Optional[str] = None,
-        stream_mode: str = "values",
-        config: Optional[RunnableConfig] = None,
-        debug: bool = True,
-        **kwargs
-    ) -> Generator[Dict[str, Any], None, None]:
-        """
-        Stream the agent execution.
-        
-        Args:
-            input_data: Input data in various formats
-            thread_id: Optional thread ID for persistence
-            stream_mode: Stream mode (values, updates, debug, etc.)
-            config: Optional runtime configuration
-            debug: Whether to enable debug mode
-            **kwargs: Additional runtime configuration
-            
-        Yields:
-            State updates during execution
-        """
-        if not self.app:
-            logger.debug("Agent not compiled yet, compiling now")
-            self.compile()
-
-        # Prepare runtime config with thread_id
-        runtime_config = self._prepare_runnable_config(thread_id, config, **kwargs)
-        current_thread_id = runtime_config["configurable"]["thread_id"]
-        
-        # Show stream info in rich UI
-        if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
-            self.console.print(Panel.fit(
-                f"[bold]Streaming Agent[/bold]\n"
-                f"[cyan]Thread ID:[/cyan] {current_thread_id}\n"
-                f"[cyan]Stream mode:[/cyan] {stream_mode}",
-                border_style="blue",
-                title=self.config.name,
-                subtitle=datetime.now().strftime("%H:%M:%S")
-            ))
-        
-        logger.info(f"Streaming agent {self.config.name} with thread_id: {current_thread_id}")
-        
-        # Register thread in database if needed
-        register_thread_if_needed(self.checkpointer, current_thread_id)
-
-        # Get previous state
-        previous_state = None
-        try:
-            previous_state = self.app.get_state(runtime_config)
-            if previous_state:
-                logger.info(f"Found previous state for thread {current_thread_id}")
-        except Exception as e:
-            logger.debug(f"No previous state found: {e}")
-
-        # Process input
-        if isinstance(input_data, str):
-            processed_input = self._prepare_input(input_data)
-        else:
-            processed_input = input_data
-        
-        # Stream the execution
-        try:
-            # Rich streaming
-            if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
-                # Show headers
-                self.console.print("[bold]Agent Streaming:[/bold]")
-                
-                # Start streaming with stats tracking
-                token_count = 0
-                chunk_count = 0
-                start_time = time.time()
-                live_output = ""
-                
-                # Use live display for streamed content
-                with Live("", console=self.console, refresh_per_second=10) as live:
-                    # Process each chunk
-                    for chunk in self.app.stream(
-                        processed_input,
-                        stream_mode=stream_mode,
-                        config=runtime_config,
-                        debug=debug
-                    ):
-                        # Count chunks
-                        chunk_count += 1
-                        
-                        # Extract content for displaying
-                        content = self._stream_formatter(chunk)
-                        if content:
-                            live_output += content
-                            token_count += len(content.split())
-                        
-                        # Update live display
-                        if stream_mode == "values":
-                            # For values mode, just show the latest state values
-                            live.update(f"[italic]{live_output}[/italic]")
-                        else:
-                            # For other modes, show raw chunks
-                            live.update(Markdown(live_output))
-                        
-                        # Yield the chunk
-                        yield chunk
-                
-                # Show streaming stats
-                execution_time = time.time() - start_time
-                self.console.print(f"[bold green]Streaming complete[/bold green]")
-                self.console.print(f"[dim]Chunks: {chunk_count} | Tokens: {token_count} | Time: {execution_time:.2f}s | Rate: {token_count/execution_time:.1f} tokens/sec[/dim]")
-            else:
-                # Standard streaming
-                for chunk in self.app.stream(
-                    processed_input,
-                    stream_mode=stream_mode,
-                    config=runtime_config,
-                    debug=debug
-                ):
-                    yield chunk
-            
-            # Save state history if requested
-            if getattr(self.config, "save_history", True):
-                self.save_state_history(runtime_config)
-                
-        except Exception as e:
-            logger.error(f"Error during streaming: {e}", exc_info=True)
-            
-            if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
-                self.console.print(f"[bold red]Error during streaming:[/bold red] {str(e)}")
-            
-            # Debug execution error
-            self._debug_execution("stream", current_thread_id, error=e)
-            
-            raise
-    
-    async def arun(
-        self,
-        input_data: Union[str, List[str], Dict[str, Any], BaseModel],
-        thread_id: Optional[str] = None,
-        config: Optional[RunnableConfig] = None,
-        **kwargs
-    ) -> Dict[str, Any]:
-        """
-        Run the agent asynchronously with the given input.
-        
-        Args:
-            input_data: Input data in various formats
-            thread_id: Optional thread ID for persistence
-            config: Optional runtime configuration
-            **kwargs: Additional runtime configuration
-            
-        Returns:
-            Final state or output
-        """
-        if not self.app:
-            logger.debug("Agent not compiled yet, compiling now")
-            self.compile()
-
-        # Prepare runtime config
-        runtime_config = self._prepare_runnable_config(thread_id, config, **kwargs)
-        current_thread_id = runtime_config["configurable"]["thread_id"]
-        
-        # Show run info in rich UI (when in async context)
-        if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
-            self.console.print(Panel.fit(
-                f"[bold]Async Running Agent[/bold]\n"
-                f"[cyan]Thread ID:[/cyan] {current_thread_id}",
-                border_style="blue",
-                title=self.config.name,
-                subtitle=datetime.now().strftime("%H:%M:%S")
-            ))
-        
-        logger.info(f"Running agent {self.config.name} asynchronously with thread_id: {current_thread_id}")
-        
-        # Register thread in database if needed
-        register_thread_if_needed(self.checkpointer, current_thread_id)
-
-        # Get previous state
-        previous_state = None
-        try:
-            previous_state = await self.app.aget_state(runtime_config)
-            if previous_state:
-                logger.info(f"Found previous state for thread {current_thread_id}")
-        except Exception as e:
-            logger.debug(f"No previous state found: {e}")
-
-        # Process input with schema validation
-        if isinstance(input_data, str):
-            processed_input = self._prepare_input(input_data)
-        else:
-            processed_input = input_data
-
-        # Run the agent asynchronously
-        try:
-            if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
-                # Show status during execution
-                with self.console.status("[bold green]Agent processing asynchronously...[/bold green]", spinner="dots") as status:
-                    start_time = time.time()
-                    result = await self.app.ainvoke(
-                        processed_input,
-                        config=runtime_config
-                    )
-                    execution_time = time.time() - start_time
-                
-                self.console.print(f"[bold green]Async execution complete in {execution_time:.2f} seconds[/bold green]")
-            else:
-                # Standard async execution
-                result = await self.app.ainvoke(
-                    processed_input,
-                    config=runtime_config
-                )
-
-            # Save state history if requested
-            if getattr(self.config, "save_history", True):
-                self.save_state_history(runtime_config)
-            
-            # Debug execution results
-            self._debug_execution("arun", current_thread_id, result)
-
-            return result
-        except Exception as e:
-            logger.error(f"Error running agent asynchronously: {e}", exc_info=True)
-            
-            if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
-                self.console.print(f"[bold red]Error running agent asynchronously:[/bold red] {str(e)}")
-            
-            # Debug execution error
-            self._debug_execution("arun", current_thread_id, error=e)
-            
-            raise
-    
-    async def astream(
-        self,
-        input_data: Union[str, List[str], Dict[str, Any], BaseModel],
-        thread_id: Optional[str] = None,
-        stream_mode: str = "values",
-        config: Optional[RunnableConfig] = None,
-        **kwargs
-    ) -> AsyncGenerator[Dict[str, Any], None]:
-        """
-        Stream the agent execution asynchronously.
-        
-        Args:
-            input_data: Input data in various formats
-            thread_id: Optional thread ID for persistence
-            stream_mode: Stream mode (values, updates, debug, etc.)
-            config: Optional runtime configuration
-            **kwargs: Additional runtime configuration
-            
-        Yields:
-            State updates during execution
-        """
-        if not self.app:
-            logger.debug("Agent not compiled yet, compiling now")
-            self.compile()
-
-        # Prepare runtime config with thread_id
-        runtime_config = self._prepare_runnable_config(thread_id, config, **kwargs)
-        current_thread_id = runtime_config["configurable"]["thread_id"]
-        
-        # Show stream info in rich UI
-        if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
-            self.console.print(Panel.fit(
-                f"[bold]Async Streaming Agent[/bold]\n"
-                f"[cyan]Thread ID:[/cyan] {current_thread_id}\n"
-                f"[cyan]Stream mode:[/cyan] {stream_mode}",
-                border_style="blue",
-                title=self.config.name,
-                subtitle=datetime.now().strftime("%H:%M:%S")
-            ))
-        
-        logger.info(f"Streaming agent {self.config.name} asynchronously with thread_id: {current_thread_id}")
-        
-        # Register thread in database if needed
-        register_thread_if_needed(self.checkpointer, current_thread_id)
-
-        # Get previous state
-        previous_state = None
-        try:
-            previous_state = await self.app.aget_state(runtime_config)
-            if previous_state:
-                logger.info(f"Found previous state for thread {current_thread_id}")
-        except Exception as e:
-            logger.debug(f"No previous state found: {e}")
-
-        # Process input
-        if isinstance(input_data, str):
-            processed_input = self._prepare_input(input_data)
-        else:
-            processed_input = input_data
-
-        # Stream the execution asynchronously
-        try:
-            # Rich async streaming
-            if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
-                # Show headers
-                self.console.print("[bold]Agent Streaming Asynchronously:[/bold]")
-                
-                # Start streaming with stats tracking
-                token_count = 0
-                chunk_count = 0
-                start_time = time.time()
-                live_output = ""
-                
-                # Use live display for streamed content
-                with Live("", console=self.console, refresh_per_second=10) as live:
-                    # Process each chunk
-                    async for chunk in self.app.astream(
-                        processed_input,
-                        stream_mode=stream_mode,
-                        config=runtime_config
-                    ):
-                        # Count chunks
-                        chunk_count += 1
-                        
-                        # Extract content for displaying
-                        content = self._stream_formatter(chunk)
-                        if content:
-                            live_output += content
-                            token_count += len(content.split())
-                        
-                        # Update live display
-                        if stream_mode == "values":
-                            # For values mode, just show the latest state values
-                            live.update(f"[italic]{live_output}[/italic]")
-                        else:
-                            # For other modes, show raw chunks
-                            live.update(Markdown(live_output))
-                        
-                        # Yield the chunk
-                        yield chunk
-                
-                # Show streaming stats
-                execution_time = time.time() - start_time
-                self.console.print(f"[bold green]Async streaming complete[/bold green]")
-                self.console.print(f"[dim]Chunks: {chunk_count} | Tokens: {token_count} | Time: {execution_time:.2f}s | Rate: {token_count/execution_time:.1f} tokens/sec[/dim]")
-            else:
-                # Standard async streaming
-                async for chunk in self.app.astream(
-                    processed_input,
-                    stream_mode=stream_mode,
-                    config=runtime_config
-                ):
-                    yield chunk
-            
-            # Save state history if requested
-            if getattr(self.config, "save_history", True):
-                self.save_state_history(runtime_config)
-                
-        except Exception as e:
-            logger.error(f"Error during async streaming: {e}", exc_info=True)
-            
-            if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
-                self.console.print(f"[bold red]Error during async streaming:[/bold red] {str(e)}")
-            
-            # Debug execution error
-            self._debug_execution("astream", current_thread_id, error=e)
-            
-            raise
-    
-    def debug_schema_validation(self, data: Any, schema_type: str = "input") -> None:
-        """
-        Debug schema validation issues.
-        
-        Args:
-            data: Data to validate
-            schema_type: Type of schema to use ('input', 'state', or 'output')
-        """
-        if not self.rich_logging or not RICH_AVAILABLE or not hasattr(self, "debug_console"):
-            return
-            
-        # Select the appropriate schema
-        if schema_type == "input":
-            schema = self.input_schema
-            schema_name = "Input Schema"
-        elif schema_type == "output":
-            schema = self.output_schema
-            schema_name = "Output Schema"
-        else:
-            schema = self.state_schema
-            schema_name = "State Schema"
-        
-        self.debug_console.rule(f"[bold]{schema_name} Validation Debug[/bold]")
-        
-        # Show input data
-        self.debug_console.print("[bold cyan]Validating Data:[/bold cyan]")
-        if isinstance(data, dict):
-            data_json = json.dumps(data, indent=2, default=str)
-            self.debug_console.print(Syntax(data_json[:1000], "json", theme="monokai"))
-            if len(data_json) > 1000:
-                self.debug_console.print(f"[dim]... {len(data_json) - 1000} more characters[/dim]")
-        elif isinstance(data, BaseModel):
-            if hasattr(data, "model_dump"):
-                model_dict = data.model_dump()
-            else:
-                model_dict = data.dict()
-            data_json = json.dumps(model_dict, indent=2, default=str)
-            self.debug_console.print(Syntax(data_json[:1000], "json", theme="monokai"))
-        else:
-            self.debug_console.print(f"[yellow]Data type:[/yellow] {type(data).__name__}")
-            self.debug_console.print(str(data)[:500])
-        
-        # Show schema
-        self.debug_console.print(f"\n[bold cyan]{schema_name}:[/bold cyan]")
-        field_table = Table("Field", "Type", "Required", "Default")
-        
-        if hasattr(schema, "model_fields"):
-            # Pydantic v2
-            for name, field in schema.model_fields.items():
-                field_table.add_row(
-                    name,
-                    str(field.annotation).replace("typing.", ""),
-                    str(field.is_required()),
-                    str(field.default)[:50]
-                )
-        elif hasattr(schema, "__fields__"):
-            # Pydantic v1
-            for name, field in schema.__fields__.items():
-                field_table.add_row(
-                    name,
-                    str(field.type_).replace("typing.", ""),
-                    str(field.required),
-                    str(field.default)[:50]
-                )
-        
-        self.debug_console.print(field_table)
-        
-        # Try validation
-        self.debug_console.print("\n[bold cyan]Validation Result:[/bold cyan]")
-        try:
-            if isinstance(data, dict):
-                validated = schema(**data)
-                self.debug_console.print("[bold green]✓ Validation successful[/bold green]")
-            elif isinstance(data, BaseModel):
-                # Convert to dict first
-                if hasattr(data, "model_dump"):
-                    dict_data = data.model_dump()
-                else:
-                    dict_data = data.dict()
-                validated = schema(**dict_data)
-                self.debug_console.print("[bold green]✓ Validation successful[/bold green]")
-            else:
-                self.debug_console.print("[bold yellow]⚠ Cannot directly validate non-dict/non-model data[/bold yellow]")
-                return
-            
-            # Show validation result structure
-            if hasattr(validated, "model_dump"):
-                result_dict = validated.model_dump()
-            elif hasattr(validated, "dict"):
-                result_dict = validated.dict()
-            else:
-                result_dict = validated
-                
-            result_json = json.dumps(result_dict, indent=2, default=str)
-            self.debug_console.print(Syntax(result_json[:500], "json", theme="monokai"))
-            if len(result_json) > 500:
-                self.debug_console.print(f"[dim]... {len(result_json) - 500} more characters[/dim]")
-                
-        except Exception as e:
-            self.debug_console.print(f"[bold red]✗ Validation failed:[/bold red] {str(e)}")
-            
-            # Try to identify missing fields
-            if "required" in str(e).lower() and "missing" in str(e).lower():
-                import re
-                missing_fields = re.findall(r"'([^']*)'", str(e))
-                if missing_fields:
-                    self.debug_console.print(f"[yellow]Missing required fields:[/yellow] {', '.join(missing_fields)}")
-                    
-                    # Check data keys
-                    if isinstance(data, dict):
-                        self.debug_console.print(f"[dim]Available keys:[/dim] {', '.join(data.keys())}")
-            
-            # Try to identify type errors
-            if "type_error" in str(e).lower():
-                self.debug_console.print("[yellow]Type error detected - check field types[/yellow]")
-        
-        self.debug_console.rule()
-    
     def inspect_state(self, thread_id: Optional[str] = None, config: Optional[RunnableConfig] = None) -> None:
         """
         Inspect the current state of the agent.
@@ -2097,109 +2112,91 @@ class Agent(Generic[TConfig], ABC):
             logger.error("Cannot inspect state: Workflow graph not compiled")
             return
 
-        # Prepare runtime config
-        runtime_config = self._prepare_runnable_config(thread_id, config)
-        current_thread_id = runtime_config["configurable"]["thread_id"]
-        
-        # Get current state
+        # Prepare runtime configuration
+        runtime_config = self._prepare_runnable_config(
+            thread_id=thread_id,
+            config=config
+        )
+
         try:
+            # Get current state
             state = self.app.get_state(runtime_config)
-            
+
             if not state:
-                logger.warning(f"No state found for thread {current_thread_id}")
-                
+                logger.warning("No state available")
                 if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
-                    self.console.print(f"[bold yellow]No state found for thread:[/bold yellow] {current_thread_id}")
-                
+                    self.console.print("[bold yellow]No state available[/bold yellow]")
                 return
-                
-            # Extract values from state
-            state_values = None
-            if hasattr(state, 'values'):
-                state_values = state.values
-            elif hasattr(state, 'channel_values'):
-                state_values = state.channel_values
-            elif isinstance(state, dict):
-                state_values = state
-                
-            if not state_values:
-                logger.warning(f"Could not extract values from state for thread {current_thread_id}")
-                
-                if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
-                    self.console.print(f"[bold yellow]Could not extract values from state for thread:[/bold yellow] {current_thread_id}")
-                
-                return
-            
-            # Display state in rich UI
+
+            # Extract thread ID from config
+            thread_id = runtime_config["configurable"].get("thread_id", "unknown")
+
+            # Log the state
             if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
-                self.console.rule("[bold]State Inspection[/bold]")
-                
-                # Show thread and state metadata
-                self.console.print(f"[bold cyan]Thread ID:[/bold cyan] {current_thread_id}")
-                
-                if hasattr(state, 'metadata') and state.metadata:
-                    self.console.print("[bold cyan]Metadata:[/bold cyan]")
-                    metadata_json = json.dumps(state.metadata, indent=2, default=str)
-                    self.console.print(Syntax(metadata_json, "json", theme="monokai"))
-                
-                # Create table for state values
-                state_table = Table(title=f"State Values for {self.config.name}")
-                state_table.add_column("Key", style="cyan")
-                state_table.add_column("Type", style="green")
-                state_table.add_column("Value", style="yellow")
-                
-                for key, value in state_values.items():
-                    # Format value preview
-                    if isinstance(value, list):
-                        if value and isinstance(value[0], BaseMessage):
-                            # Message list - show count and last message
-                            value_preview = f"{len(value)} messages"
-                            if value:
-                                last_msg = value[-1]
-                                value_preview += f"\nLast ({type(last_msg).__name__}): {last_msg.content[:100]}{'...' if len(last_msg.content) > 100 else ''}"
-                        else:
-                            # Regular list - show length and sample
-                            value_preview = f"{len(value)} items"
-                            if value and len(value) > 0:
-                                value_preview += f"\nSample: {str(value[0])[:100]}{'...' if len(str(value[0])) > 100 else ''}"
-                    elif isinstance(value, dict):
-                        # Dictionary - show keys
-                        value_preview = f"{len(value)} keys: {', '.join(list(value.keys())[:5])}"
-                        if len(value.keys()) > 5:
-                            value_preview += f"... and {len(value.keys()) - 5} more"
-                    elif isinstance(value, str):
-                        # String - truncate if long
-                        value_preview = value[:200] + ("..." if len(value) > 200 else "")
-                    else:
-                        # Other types - convert to string
-                        value_preview = str(value)[:200] + ("..." if len(str(value)) > 200 else "")
+                self.console.print(Panel.fit(
+                    f"[bold]State Inspection for Thread: [cyan]{thread_id}[/cyan][/bold]",
+                    border_style="blue"
+                ))
+
+                # Handle different state formats
+                if hasattr(state, "values"):
+                    # StateSnapshot format
+                    values = state.values
+                    metadata = getattr(state, "metadata", {})
+                    created_at = getattr(state, "created_at", "unknown")
                     
-                    state_table.add_row(
-                        key, 
-                        type(value).__name__, 
-                        value_preview
-                    )
-                
-                self.console.print(state_table)
-                self.console.rule()
+                    # Print values
+                    self.console.print("[bold]State Values:[/bold]")
+                    value_json = json.dumps(ensure_json_serializable(values), indent=2)
+                    self.console.print(Syntax(value_json, "json", theme="monokai"))
+                    
+                    # Print metadata if available
+                    if metadata:
+                        self.console.print("\n[bold]Metadata:[/bold]")
+                        metadata_json = json.dumps(ensure_json_serializable(metadata), indent=2)
+                        self.console.print(Syntax(metadata_json, "json", theme="monokai"))
+                        
+                    # Print creation time
+                    self.console.print(f"\n[bold]Created At:[/bold] {created_at}")
+                    
+                elif isinstance(state, dict):
+                    # Dictionary format
+                    self.console.print("[bold]State Dictionary:[/bold]")
+                    state_json = json.dumps(ensure_json_serializable(state), indent=2)
+                    self.console.print(Syntax(state_json, "json", theme="monokai"))
+                    
+                else:
+                    # Unknown format
+                    self.console.print(f"[bold]State (Type: {type(state).__name__}):[/bold]")
+                    self.console.print(str(state))
             else:
                 # Standard logging
-                logger.info(f"State inspection for thread {current_thread_id}:")
-                for key, value in state_values.items():
-                    if isinstance(value, list):
-                        logger.info(f"  {key}: List with {len(value)} items")
-                    elif isinstance(value, dict):
-                        logger.info(f"  {key}: Dict with {len(value)} keys")
-                    elif isinstance(value, str):
-                        logger.info(f"  {key}: String of length {len(value)}")
-                    else:
-                        logger.info(f"  {key}: {type(value).__name__}")
-        
+                logger.info(f"State inspection for thread {thread_id}")
+                
+                # Handle different state formats
+                if hasattr(state, "values"):
+                    # StateSnapshot format
+                    values = state.values
+                    metadata = getattr(state, "metadata", {})
+                    created_at = getattr(state, "created_at", "unknown")
+                    
+                    logger.info(f"State values: {values}")
+                    if metadata:
+                        logger.info(f"Metadata: {metadata}")
+                    logger.info(f"Created at: {created_at}")
+                    
+                elif isinstance(state, dict):
+                    # Dictionary format
+                    logger.info(f"State dictionary: {state}")
+                    
+                else:
+                    # Unknown format
+                    logger.info(f"State (Type: {type(state).__name__}): {state}")
+
         except Exception as e:
             logger.error(f"Error inspecting state: {e}")
-            
             if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
-                self.console.print(f"[bold red]Error inspecting state:[/bold red] {str(e)}")
+                self.console.print(f"[bold red]Error inspecting state: {e}[/bold red]")
     
     def reset_state(self, thread_id: Optional[str] = None, config: Optional[RunnableConfig] = None) -> bool:
         """
@@ -2212,93 +2209,202 @@ class Agent(Generic[TConfig], ABC):
         Returns:
             True if successful, False otherwise
         """
-        if not self.app:
-            logger.error("Cannot reset state: Workflow graph not compiled")
+        if not self.checkpointer:
+            logger.warning("Cannot reset state: No checkpointer configured")
             return False
-            
-        # Prepare runtime config
-        runtime_config = self._prepare_runnable_config(thread_id, config)
-        current_thread_id = runtime_config["configurable"]["thread_id"]
-        
+
+        # Prepare runtime configuration
+        runtime_config = self._prepare_runnable_config(
+            thread_id=thread_id,
+            config=config
+        )
+
+        # Extract thread ID from config
+        thread_id = runtime_config["configurable"].get("thread_id", None)
+        if not thread_id:
+            logger.warning("Cannot reset state: No thread ID provided")
+            return False
+
         try:
-            # First, check if there's any state to delete
-            has_state = False
-            try:
-                state = self.app.get_state(runtime_config)
-                has_state = state is not None
-            except Exception:
-                # No state exists
-                pass
-                
-            if not has_state:
-                logger.info(f"No state exists for thread {current_thread_id} - nothing to reset")
-                
-                if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
-                    self.console.print(f"[bold yellow]No state exists for thread:[/bold yellow] {current_thread_id}")
-                
-                return True
-                
-            # Delete the state if it exists
-            if hasattr(self.checkpointer, "delete_state"):
-                # Use delete_state if available
-                self.checkpointer.delete_state(config=runtime_config["configurable"])
-                
-                logger.info(f"State reset for thread {current_thread_id}")
-                
-                if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
-                    self.console.print(f"[bold green]State reset for thread:[/bold green] {current_thread_id}")
-                
-                return True
+            if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
+                with self.console.status(f"[bold blue]Resetting state for thread {thread_id}...[/bold blue]"):
+                    # Connect to checkpointer
+                    pool_opened = ensure_pool_open(self.checkpointer)
+                    
+                    # Reset state based on checkpointer type
+                    if hasattr(self.checkpointer, "delete"):
+                        # Use delete method if available
+                        self.checkpointer.delete(thread_id)
+                    elif hasattr(self.checkpointer, "conn") and self.checkpointer.conn:
+                        # Try database approach
+                        conn = self.checkpointer.conn
+                        with conn.connection() as db_conn:
+                            with db_conn.cursor() as cursor:
+                                # Delete all records for this thread ID
+                                cursor.execute(
+                                    "DELETE FROM checkpoints WHERE thread_id = %s",
+                                    (thread_id,)
+                                )
+                    
+                self.console.print(f"[bold green]State reset successfully for thread {thread_id}[/bold green]")
             else:
-                # Fall back to clearing the database directly for Postgres persistence
-                if "Postgres" in type(self.checkpointer).__name__:
-                    try:
-                        # Connect to database and delete state
-                        if hasattr(self.checkpointer, 'conn'):
-                            pool = self.checkpointer.conn
-                            if pool:
-                                # Ensure connection pool is usable
-                                pool_opened = ensure_pool_open(self.checkpointer)
-                                
-                                # Delete the state
-                                with pool.connection() as conn:
-                                    with conn.cursor() as cursor:
-                                        # Delete from snapshots table
-                                        cursor.execute(
-                                            "DELETE FROM snapshots WHERE config->>'thread_id' = %s",
-                                            (current_thread_id,)
-                                        )
-                                        
-                                        # Also delete from threads table if it exists
-                                        try:
-                                            cursor.execute(
-                                                "DELETE FROM threads WHERE thread_id = %s",
-                                                (current_thread_id,)
-                                            )
-                                        except Exception:
-                                            # Threads table might not exist
-                                            pass
-                                
-                                logger.info(f"State reset for thread {current_thread_id} (direct database access)")
-                                
-                                if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
-                                    self.console.print(f"[bold green]State reset for thread:[/bold green] {current_thread_id}")
-                                
-                                return True
-                    except Exception as e:
-                        logger.error(f"Error resetting state via direct database access: {e}")
+                # Connect to checkpointer
+                pool_opened = ensure_pool_open(self.checkpointer)
                 
-                logger.warning(f"Cannot reset state for thread {current_thread_id}: No delete_state method available")
+                # Reset state based on checkpointer type
+                if hasattr(self.checkpointer, "delete"):
+                    # Use delete method if available
+                    self.checkpointer.delete(thread_id)
+                elif hasattr(self.checkpointer, "conn") and self.checkpointer.conn:
+                    # Try database approach
+                    conn = self.checkpointer.conn
+                    with conn.connection() as db_conn:
+                        with db_conn.cursor() as cursor:
+                            # Delete all records for this thread ID
+                            cursor.execute(
+                                "DELETE FROM checkpoints WHERE thread_id = %s",
+                                (thread_id,)
+                            )
                 
-                if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
-                    self.console.print(f"[bold yellow]Cannot reset state for thread:[/bold yellow] {current_thread_id} (method not available)")
+                logger.info(f"State reset successfully for thread {thread_id}")
                 
-                return False
-                
+            return True
         except Exception as e:
             logger.error(f"Error resetting state: {e}")
-            
             if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
-                self.console.print(f"[bold red]Error resetting state:[/bold red] {str(e)}")
-            
+                self.console.print(f"[bold red]Error resetting state: {e}[/bold red]")
             return False
+    
+    def load_from_state(self, state_data: Union[Dict[str, Any], str], thread_id: Optional[str] = None) -> bool:
+        """
+        Load agent state from a saved state file or dictionary.
+        
+        Args:
+            state_data: Dictionary or path to JSON file containing state data
+            thread_id: Optional thread ID for persistence
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        if not self.checkpointer:
+            logger.warning("Cannot load state: No checkpointer configured")
+            return False
+            
+        # Generate thread ID if not provided
+        if not thread_id:
+            thread_id = str(uuid.uuid4())
+            
+        # Load state from string path if provided
+        if isinstance(state_data, str) and os.path.exists(state_data):
+            try:
+                with open(state_data, 'r') as f:
+                    state_data = json.load(f)
+            except Exception as e:
+                logger.error(f"Error loading state file: {e}")
+                return False
+                
+        # Ensure state is a dictionary
+        if not isinstance(state_data, dict):
+            logger.error(f"Invalid state data type: {type(state_data)}")
+            return False
+            
+        try:
+            if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
+                with self.console.status(f"[bold blue]Loading state for thread {thread_id}...[/bold blue]"):
+                    # Connect to checkpointer
+                    pool_opened = ensure_pool_open(self.checkpointer)
+                    
+                    # Create runtime config with thread ID
+                    runtime_config = self._prepare_runnable_config(thread_id=thread_id)
+                    
+                    # Process state based on its format
+                    if "values" in state_data:
+                        # Handle StateSnapshot-like dict
+                        values = state_data["values"]
+                        
+                        # Use checkpoint save mechanism
+                        if hasattr(self.app, "app"):
+                            # If app is a wrapper
+                            config = runtime_config.copy()
+                            self.app.app.checkpoint_save(thread_id, values, config)
+                        elif hasattr(self.app, "checkpoint_save"):
+                            # Direct access
+                            config = runtime_config.copy()
+                            self.app.checkpoint_save(thread_id, values, config)
+                        elif hasattr(self.checkpointer, "save"):
+                            # Use checkpointer directly
+                            self.checkpointer.save(thread_id, values)
+                        else:
+                            # Fallback approach
+                            raise NotImplementedError("No checkpoint save mechanism available")
+                    else:
+                        # Assume the entire dict is the state
+                        if hasattr(self.app, "app"):
+                            # If app is a wrapper
+                            config = runtime_config.copy()
+                            self.app.app.checkpoint_save(thread_id, state_data, config)
+                        elif hasattr(self.app, "checkpoint_save"):
+                            # Direct access
+                            config = runtime_config.copy()
+                            self.app.checkpoint_save(thread_id, state_data, config)
+                        elif hasattr(self.checkpointer, "save"):
+                            # Use checkpointer directly
+                            self.checkpointer.save(thread_id, state_data)
+                        else:
+                            # Fallback approach
+                            raise NotImplementedError("No checkpoint save mechanism available")
+                    
+                self.console.print(f"[bold green]State loaded successfully for thread {thread_id}[/bold green]")
+            else:
+                # Connect to checkpointer
+                pool_opened = ensure_pool_open(self.checkpointer)
+                
+                # Create runtime config with thread ID
+                runtime_config = self._prepare_runnable_config(thread_id=thread_id)
+                
+                # Process state based on its format
+                if "values" in state_data:
+                    # Handle StateSnapshot-like dict
+                    values = state_data["values"]
+                    
+                    # Use checkpoint save mechanism
+                    if hasattr(self.app, "app"):
+                        # If app is a wrapper
+                        config = runtime_config.copy()
+                        self.app.app.checkpoint_save(thread_id, values, config)
+                    elif hasattr(self.app, "checkpoint_save"):
+                        # Direct access
+                        config = runtime_config.copy()
+                        self.app.checkpoint_save(thread_id, values, config)
+                    elif hasattr(self.checkpointer, "save"):
+                        # Use checkpointer directly
+                        self.checkpointer.save(thread_id, values)
+                    else:
+                        # Fallback approach
+                        raise NotImplementedError("No checkpoint save mechanism available")
+                else:
+                    # Assume the entire dict is the state
+                    if hasattr(self.app, "app"):
+                        # If app is a wrapper
+                        config = runtime_config.copy()
+                        self.app.app.checkpoint_save(thread_id, state_data, config)
+                    elif hasattr(self.app, "checkpoint_save"):
+                        # Direct access
+                        config = runtime_config.copy()
+                        self.app.checkpoint_save(thread_id, state_data, config)
+                    elif hasattr(self.checkpointer, "save"):
+                        # Use checkpointer directly
+                        self.checkpointer.save(thread_id, state_data)
+                    else:
+                        # Fallback approach
+                        raise NotImplementedError("No checkpoint save mechanism available")
+                
+                logger.info(f"State loaded successfully for thread {thread_id}")
+                
+            return True
+        except Exception as e:
+            logger.error(f"Error loading state: {e}")
+            if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
+                self.console.print(f"[bold red]Error loading state: {e}[/bold red]")
+            return False
+
