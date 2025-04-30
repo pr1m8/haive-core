@@ -25,8 +25,7 @@ from langchain_core.tools import BaseTool, StructuredTool
 from pydantic import BaseModel, Field, model_validator
 
 from haive.core.engine.base import EngineType, InvokableEngine
-from haive.core.models.llm.base import LLMConfig
-from haive.core.models.llm import AzureLLMConfig
+from haive.core.models.llm.base import LLMConfig,AzureLLMConfig
 logger = logging.getLogger(__name__)
 
 
