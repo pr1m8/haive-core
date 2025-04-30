@@ -643,7 +643,7 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
         schema = SchemaComposer.compose_input_schema(
             components=all_components,
             name=f"{self.name}Input",
-            include_runnable_config=False  # Never include __runnable_config__
+            #include_runnable_config=False  # Never include __runnable_config__
         )
 
         self._input_schema_instance = schema
@@ -710,7 +710,7 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
         schema = SchemaComposer.compose_output_schema(
             components=all_components,
             name=f"{self.name}Output",
-            include_runnable_config=False  # Never include __runnable_config__
+            #include_runnable_config=False  # Never include __runnable_config__
         )
 
         self._output_schema_instance = schema

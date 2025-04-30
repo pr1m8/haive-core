@@ -146,7 +146,10 @@ class Agent(Generic[TConfig], ABC):
         self._initialize_engines()
         
         # 4. Setup persistence (needed for compilation)
-        self._setup_persistence()
+        if config.checkpoint_mode == "async":
+            self._setup_persistence()
+        else:
+            asyncio.run(self._asetup_persistence())
         
         # 5. Setup runtime configuration
         self._setup_runtime_config()
@@ -719,8 +722,9 @@ class Agent(Generic[TConfig], ABC):
         
         logger.debug(f"Initialized {len(self.engines)} engines for {self.config.name}")
     
+    
     def _setup_persistence(self):
-        """Set up persistence with proper checkpointer."""
+        """Set up synchronous persistence with proper checkpointer."""
         # Determine checkpoint mode
         if hasattr(self.config, 'checkpoint_mode'):
             self._checkpoint_mode = self.config.checkpoint_mode
@@ -728,29 +732,11 @@ class Agent(Generic[TConfig], ABC):
             # Use mode from persistence config if available
             self._checkpoint_mode = 'async' if self.config.persistence.mode == CheckpointerMode.ASYNC else 'sync'
         
-        is_async_mode = self._checkpoint_mode == 'async'
-        
         if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
-            with self.console.status(f"[bold blue]Setting up {self._checkpoint_mode} persistence...[/bold blue]"):
-                # Set up checkpointer based on mode
-                if is_async_mode:
-                    # For async mode, we need to initialize but not enter the context yet
-                    # We'll wrap this in a synchronous call for now
-                    try:
-                        import asyncio
-                        self._async_checkpointer_cm = asyncio.run(setup_async_checkpointer(self.config))
-                        
-                        # Store for later, but use a sync checkpointer for now
-                        self.checkpointer = setup_checkpointer(self.config)
-                    except Exception as e:
-                        logger.error(f"Failed to set up async checkpointer: {e}")
-                        logger.warning(f"Falling back to sync checkpointing")
-                        self._checkpoint_mode = 'sync'
-                        self.checkpointer = setup_checkpointer(self.config)
-                else:
-                    # Standard synchronous checkpointer
-                    self.checkpointer = setup_checkpointer(self.config)
-                
+            with self.console.status(f"[bold blue]Setting up synchronous persistence...[/bold blue]"):
+                # Set up standard synchronous checkpointer
+                self.checkpointer = setup_checkpointer(self.config)
+                    
                 # Add store if configured
                 self.store = None
                 if getattr(self.config, "add_store", False):
@@ -771,33 +757,15 @@ class Agent(Generic[TConfig], ABC):
                 
             self.console.print(
                 f"[bold]Persistence:[/bold] {status_icon} [{status_color}]{persistence_type}[/{status_color}] "
-                f"[dim]({self._checkpoint_mode} mode)[/dim]"
+                f"[dim](sync mode)[/dim]"
             )
             
             if hasattr(self, "store") and self.store:
                 self.console.print("[bold]Store:[/bold] ✅ Enabled")
         else:
-            # Set up checkpointer based on mode
-            if is_async_mode:
-                # For async mode, we need to initialize but not enter the context yet
-                # We'll wrap this in a synchronous call for now
-                try:
-                    import asyncio
-                    self._async_checkpointer_cm = asyncio.run(setup_async_checkpointer(self.config))
-                    
-                    # Store for later, but use a sync checkpointer for now
-                    self.checkpointer = setup_checkpointer(self.config)
-                    logger.debug(f"Async checkpointer context manager prepared for {self.config.name}")
-                except Exception as e:
-                    logger.error(f"Failed to set up async checkpointer: {e}")
-                    logger.warning(f"Falling back to sync checkpointing")
-                    self._checkpoint_mode = 'sync'
-                    self.checkpointer = setup_checkpointer(self.config)
-            else:
-                # Standard synchronous checkpointer
-                self.checkpointer = setup_checkpointer(self.config)
-                
-            logger.debug(f"Checkpointer set up for {self.config.name}: {type(self.checkpointer).__name__} ({self._checkpoint_mode} mode)")
+            # Standard synchronous checkpointer setup
+            self.checkpointer = setup_checkpointer(self.config)
+            logger.debug(f"Synchronous checkpointer set up for {self.config.name}: {type(self.checkpointer).__name__}")
             
             # Add store if configured
             self.store = None
@@ -805,7 +773,86 @@ class Agent(Generic[TConfig], ABC):
                 from langgraph.store.base import BaseStore
                 self.store = BaseStore()
                 logger.debug("BaseStore added to agent")
-    
+
+    async def _asetup_persistence(self):
+        """Set up asynchronous persistence with proper checkpointer."""
+        # Determine checkpoint mode
+        if hasattr(self.config, 'checkpoint_mode'):
+            self._checkpoint_mode = self.config.checkpoint_mode
+        elif hasattr(self.config, 'persistence') and hasattr(self.config.persistence, 'mode'):
+            # Use mode from persistence config if available
+            self._checkpoint_mode = 'async' if self.config.persistence.mode == CheckpointerMode.ASYNC else 'sync'
+        
+        # Set the mode to async explicitly
+        self._checkpoint_mode = 'async'
+        
+        if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
+            with self.console.status("[bold blue]Setting up asynchronous persistence...[/bold blue]") as status:
+                # Initialize async resources
+                self._async_checkpointer = None
+                self._async_context_managers = {}
+                
+                # Always set up a synchronous checkpointer as fallback
+                self.checkpointer = setup_checkpointer(self.config)
+                
+                # Create the async checkpointer
+                try:
+                    self._async_checkpointer = await setup_async_checkpointer(self.config)
+                    status.update("[bold blue]Async checkpointer created successfully[/bold blue]")
+                except Exception as e:
+                    self.console.print(f"[bold red]Error creating async checkpointer: {e}[/bold red]")
+                    self.console.print("[yellow]Falling back to synchronous checkpointer[/yellow]")
+                    logger.error(f"Failed to create async checkpointer: {e}")
+                    logger.warning("Falling back to synchronous checkpointer")
+                    
+                # Add store if configured
+                self.store = None
+                if getattr(self.config, "add_store", False):
+                    from langgraph.store.base import BaseStore
+                    self.store = BaseStore()
+                    
+            # Show persistence info
+            persistence_type = type(self._async_checkpointer or self.checkpointer).__name__
+            if "Postgres" in persistence_type:
+                status_color = "blue"
+                status_icon = "🐘"  # PostgreSQL elephant
+            elif "Memory" in persistence_type:
+                status_color = "yellow"
+                status_icon = "💾"  # Memory icon
+            else:
+                status_color = "green"
+                status_icon = "📦"  # Generic storage
+                
+            self.console.print(
+                f"[bold]Async Persistence:[/bold] {status_icon} [{status_color}]{persistence_type}[/{status_color}] "
+                f"[dim](async mode)[/dim]"
+            )
+            
+            if hasattr(self, "store") and self.store:
+                self.console.print("[bold]Store:[/bold] ✅ Enabled")
+        else:
+            # Initialize async resources
+            self._async_checkpointer = None
+            self._async_context_managers = {}
+            
+            # Always set up a synchronous checkpointer as fallback
+            self.checkpointer = setup_checkpointer(self.config)
+            
+            # Create the async checkpointer
+            try:
+                self._async_checkpointer = await setup_async_checkpointer(self.config)
+                logger.info(f"Async checkpointer created successfully for {self.config.name}")
+            except Exception as e:
+                logger.error(f"Failed to create async checkpointer: {e}")
+                logger.warning("Falling back to synchronous checkpointer")
+                
+            # Add store if configured
+            self.store = None
+            if getattr(self.config, "add_store", False):
+                from langgraph.store.base import BaseStore
+                self.store = BaseStore()
+                logger.debug("BaseStore added to agent")
+
     async def _get_async_checkpointer(self):
         """
         Get async checkpointer instance, creating it if necessary.
@@ -814,41 +861,31 @@ class Agent(Generic[TConfig], ABC):
             Async checkpointer instance
         """
         # Check if we already have a live async checkpointer
-        if self._async_checkpointer is not None:
+        if hasattr(self, '_async_checkpointer') and self._async_checkpointer is not None:
             return self._async_checkpointer
-            
-        # If we have a context manager, enter it to get the checkpointer
-        if hasattr(self, '_async_checkpointer_cm') and self._async_checkpointer_cm is not None:
-            # Initialize the context manager
-            self._async_ctx = self._async_checkpointer_cm.__aenter__()
-            self._async_checkpointer = await self._async_ctx
-            
-            # Register this in the active context managers
-            context_id = str(uuid.uuid4())
-            self._async_context_managers[context_id] = (self._async_checkpointer_cm, self._async_ctx)
-            
-            return self._async_checkpointer
-            
-        # If no context manager is available, set up a new one
+        
         try:
-            # Set up new context manager
-            self._async_checkpointer_cm = await setup_async_checkpointer(self.config)
-            
-            # Enter the context manager
-            self._async_ctx = self._async_checkpointer_cm.__aenter__()
-            self._async_checkpointer = await self._async_ctx
-            
-            # Register this in the active context managers
-            context_id = str(uuid.uuid4())
-            self._async_context_managers[context_id] = (self._async_checkpointer_cm, self._async_ctx)
-            
+            # Get the persistence config
+            if hasattr(self.config, 'persistence'):
+                persistence_config = self.config.persistence
+                
+                # Use create_async_checkpointer if available
+                if hasattr(persistence_config, 'create_async_checkpointer'):
+                    logger.info("Creating async checkpointer from persistence config")
+                    self._async_checkpointer = await persistence_config.create_async_checkpointer()
+                    return self._async_checkpointer
+        except Exception as e:
+            logger.error(f"Error creating async checkpointer from persistence config: {e}")
+        
+        # Fall back to using the setup function
+        try:
+            from haive.core.persistence.handlers import setup_async_checkpointer
+            logger.info("Creating async checkpointer using setup_async_checkpointer")
+            self._async_checkpointer = await setup_async_checkpointer(self.config)
             return self._async_checkpointer
         except Exception as e:
-            logger.error(f"Failed to get async checkpointer: {e}")
-            
-            # Fall back to synchronous checkpointer
-            return self.checkpointer
-    
+            logger.error(f"Error setting up async checkpointer: {e}")
+            raise RuntimeError(f"Failed to create async checkpointer: {e}")
     async def _cleanup_async_resources(self):
         """Clean up any active async context managers."""
         # Clean up each async context manager
@@ -1683,11 +1720,11 @@ class Agent(Generic[TConfig], ABC):
             raise
     
     async def arun(self, 
-                   input_data: TIn, 
-                   thread_id: Optional[str] = None,
-                   config: Optional[RunnableConfig] = None,
-                   debug: bool = None,
-                   **kwargs) -> TOut:
+           input_data: TIn, 
+           thread_id: Optional[str] = None,
+           config: Optional[RunnableConfig] = None,
+           debug: bool = None,
+           **kwargs) -> TOut:
         """
         Asynchronously run the agent with input data.
         
@@ -1739,21 +1776,22 @@ class Agent(Generic[TConfig], ABC):
         start_time = time.time()
         
         try:
-            # Use appropriate checkpointer based on mode
+            # Use appropriate persistence setup based on mode
             if is_async_mode:
-                # Get or create async checkpointer
-                async_checkpointer = await self._get_async_checkpointer()
-                
-                # Register thread if needed
-                await register_async_thread_if_needed(async_checkpointer, thread_id)
-                
-                # Get previous state if available
+                # Set up async persistence if not already done
+                if not hasattr(self, "_async_checkpointer") or self._async_checkpointer is None:
+                    await self._asetup_persistence()
+                    
+                # Register thread if needed for async checkpointer
+                if self._async_checkpointer and thread_id:
+                    await register_async_thread_if_needed(self._async_checkpointer, thread_id)
+                    
+                # Get previous state if available using async checkpointer
                 previous_state = None
                 try:
-                    # Use app with async checkpointer
-                    # We need to recompile with the async checkpointer
-                    async_app = self.graph.compile(checkpointer=async_checkpointer, store=self.store)
-                    previous_state = async_app.get_state(runtime_config)
+                    # Create async app with the async checkpointer
+                    async_app = self.graph.compile(checkpointer=self._async_checkpointer, store=self.store)
+                    previous_state = await async_app.get_state(runtime_config)
                     
                     if previous_state and debug:
                         logger.debug(f"Retrieved previous state for thread {thread_id}")
@@ -1777,28 +1815,24 @@ class Agent(Generic[TConfig], ABC):
                     except Exception as e:
                         logger.warning(f"Error merging with previous state: {e}")
                 
-                # Use ainvoke if available on the async app
-                if hasattr(async_app, "ainvoke"):
-                    result = await async_app.ainvoke(processed_input, runtime_config)
-                else:
-                    # Fall back to threaded execution
-                    loop = asyncio.get_event_loop()
-                    result = await loop.run_in_executor(
-                        None, 
-                        lambda: async_app.invoke(processed_input, runtime_config)
-                    )
+                # Use ainvoke with async app
+                try:
+                    # Run with async app and async checkpointer
+                    result = await async_app.ainvoke(processed_input, runtime_config,debug=debug)
+                    logger.debug(f"Agent async execution completed successfully")
                     
-                # Process the result if needed
-                output = self._process_output(result)
-                
-                # Save state history if configured
-                if runtime_config["configurable"].get("save_history", getattr(self.config, "save_history", True)):
-                    # Use a thread to save state history (could be async but we're keeping it simple)
-                    loop = asyncio.get_event_loop()
-                    await loop.run_in_executor(None, lambda: self.save_state_history(runtime_config))
-                
-                # Return the result
-                return output
+                    # Process the result
+                    output = self._process_output(result)
+                    
+                    # Save state history if configured
+                    if runtime_config["configurable"].get("save_history", getattr(self.config, "save_history", True)):
+                        await self.save_state_history_async(runtime_config)
+                    
+                    return output
+                except Exception as e:
+                    # Log error and re-raise
+                    logger.error(f"Error in async invocation using async checkpointer: {e}")
+                    raise
             else:
                 # Standard sync mode with async function wrapper
                 
@@ -1858,7 +1892,7 @@ class Agent(Generic[TConfig], ABC):
                 
                 # Return the result
                 return output
-                
+                    
         except Exception as e:
             logger.error(f"Error during async agent execution: {e}")
             
@@ -1878,12 +1912,19 @@ class Agent(Generic[TConfig], ABC):
                 # Show completion message
                 self.console.print(Panel.fit(
                     f"[bold green]Async Execution Completed[/bold green]\n"
-                    f"[cyan]Execution Time:[/cyan] {execution_time:.2f} seconds",
+                    f"[cyan]Execution Time:[/cyan] {execution_time:.2f} seconds\n"
+                    f"[cyan]Checkpoint Mode:[/cyan] {checkpoint_mode}",
                     border_style="green",
                     title="Agent Async Execution",
                     subtitle=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 ))
-    
+            
+            # Clean up async resources if we created them
+            if is_async_mode and hasattr(self, "_async_checkpointer") and self._async_checkpointer is not None:
+                try:
+                    await self._cleanup_async_resources()
+                except Exception as e:
+                    logger.error(f"Error cleaning up async resources: {e}")
     def stream(self, 
                input_data: TIn, 
                thread_id: Optional[str] = None,
