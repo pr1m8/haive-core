@@ -40,12 +40,16 @@ Example:
 """
 
 import logging
-from typing import Any, ClassVar, Optional, Union, List, Dict, Type
+import importlib
+import pkgutil
+import sys
+from pathlib import Path
+from typing import Any, ClassVar, Dict, List, Optional, Tuple, Type, Union
 
 from langchain_core.documents import Document
 from langchain_core.retrievers import BaseRetriever
 from langchain_core.runnables import RunnableConfig
-from pydantic import BaseModel, ConfigDict, Field, create_model, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from haive.core.engine.base import EngineType, InvokableEngine
 from haive.core.engine.retriever.types import RetrieverType
@@ -54,43 +58,43 @@ from haive.core.engine.vectorstore.vectorstore import VectorStoreConfig
 logger = logging.getLogger(__name__)
 
 
-# Define explicit input and output schemas
+# Input and output schemas as BaseModels
 class RetrieverInput(BaseModel):
     """Schema for retriever input."""
     query: str = Field(description="Query string for retrieval")
     k: Optional[int] = Field(default=None, description="Number of documents to retrieve")
     filter: Optional[Dict[str, Any]] = Field(default=None, description="Filter criteria for retrieval")
     search_type: Optional[str] = Field(default=None, description="Type of search to perform")
-    score_threshold: Optional[float] = Field(default=None, description="Minimum score threshold")
-
+    score_threshold: Optional[float] = Field(default=None, description="Minimum similarity score threshold")
+    
     model_config = ConfigDict(extra="allow")
 
 
 class RetrieverOutput(BaseModel):
     """Schema for retriever output."""
     documents: List[Document] = Field(description="Retrieved documents")
-
+    
     model_config = ConfigDict(extra="allow")
 
 
-class BaseRetrieverConfig(InvokableEngine[Union[str, Dict[str, Any]], List[Document]]):
+class BaseRetrieverConfig(InvokableEngine[RetrieverInput, RetrieverOutput]):
     """Base configuration for all retriever engines in the Haive framework.
 
     This class serves as the foundation for all retriever configurations, providing a consistent
-    interface for document retrieval operations. It supports various retriever types through a
-    plugin architecture and includes common parameters for search customization.
+    interface for document retrieval operations. It supports automatic discovery and registration
+    of retriever implementations through a plugin architecture.
+
+    The registry system allows new retriever types to be created simply by adding a new module
+    with a properly decorated class, without having to manually update central registries.
 
     Attributes:
         engine_type (EngineType): The type of engine (always RETRIEVER).
         retriever_type (RetrieverType): The specific type of retriever to use.
-        description (Optional[str]): Optional description of the retriever.
         search_type (str): The type of search to perform ('similarity', 'mmr', etc.).
         search_kwargs (Dict[str, Any]): Additional search parameters.
         k (int): Number of documents to retrieve.
         filter (Optional[Dict[str, Any]]): Optional filter to apply to vector store search.
         _registry (ClassVar[Dict[RetrieverType, Type['RetrieverConfig']]]): Registry for retriever types.
-        input_schema (Type[BaseModel]): Schema for retriever input.
-        output_schema (Type[BaseModel]): Schema for retriever output.
 
     Example:
         ```python
@@ -115,11 +119,7 @@ class BaseRetrieverConfig(InvokableEngine[Union[str, Dict[str, Any]], List[Docum
         description="The type of retriever to use",
         default=RetrieverType.VECTOR_STORE
     )
-    description: Optional[str] = Field(
-        default=None,
-        description="Description of this retriever"
-    )
-
+    
     # Common retriever parameters
     search_type: str = Field(
         default="similarity",
@@ -138,26 +138,52 @@ class BaseRetrieverConfig(InvokableEngine[Union[str, Dict[str, Any]], List[Docum
         description="Filter to apply to vector store search"
     )
 
-    # Explicitly set input and output schemas
+    # Schema definitions
     input_schema: Type[BaseModel] = Field(
         default=RetrieverInput,
-        description="Input schema for this retriever"
+        description="Input schema for this retriever",
+        exclude=True
     )
     output_schema: Type[BaseModel] = Field(
         default=RetrieverOutput,
-        description="Output schema for this retriever"
+        description="Output schema for this retriever",
+        exclude=True
     )
 
     # Registry for retriever types
     _registry: ClassVar[Dict[RetrieverType, Type["BaseRetrieverConfig"]]] = {}
+    _initialized: ClassVar[bool] = False
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @field_validator("engine_type")
     def validate_engine_type(cls, v):
+        """Validate that the engine type is RETRIEVER."""
         if v != EngineType.RETRIEVER:
             raise ValueError("engine_type must be RETRIEVER")
         return v
+    
+    def get_input_fields(self) -> Dict[str, Tuple[Type, Any]]:
+        """Return input field definitions from the RetrieverInput model.
+        
+        Returns:
+            Dictionary mapping field names to (type, default) tuples
+        """
+        fields = {}
+        for name, field_info in self.input_schema.model_fields.items():
+            fields[name] = (field_info.annotation, field_info.default)
+        return fields
+    
+    def get_output_fields(self) -> Dict[str, Tuple[Type, Any]]:
+        """Return output field definitions from the RetrieverOutput model.
+        
+        Returns:
+            Dictionary mapping field names to (type, default) tuples
+        """
+        fields = {}
+        for name, field_info in self.output_schema.model_fields.items():
+            fields[name] = (field_info.annotation, field_info.default)
+        return fields
 
     def create_runnable(self, runnable_config: Optional[RunnableConfig] = None) -> BaseRetriever:
         """Create a retriever with configuration applied.
@@ -193,7 +219,7 @@ class BaseRetrieverConfig(InvokableEngine[Union[str, Dict[str, Any]], List[Docum
 
         # Create the retriever with updated configuration
         return self.instantiate()
-
+    
     def instantiate(self) -> BaseRetriever:
         """Create the retriever instance.
         
@@ -230,77 +256,6 @@ class BaseRetrieverConfig(InvokableEngine[Union[str, Dict[str, Any]], List[Docum
 
         return params
 
-    def invoke(
-        self,
-        input_data: Union[str, Dict[str, Any]],
-        runnable_config: Optional[RunnableConfig] = None
-    ) -> List[Document]:
-        """Invoke the retriever with input data.
-        
-        Args:
-            input_data: Query string or dictionary with query parameters
-            runnable_config: Optional runtime configuration
-            
-        Returns:
-            List of retrieved documents
-        """
-        # Create retriever with config
-        retriever = self.create_runnable(runnable_config)
-
-        # Handle different input formats
-        if isinstance(input_data, str):
-            query = input_data
-        elif isinstance(input_data, dict):
-            query = input_data.get("query", "")
-
-            # Apply additional parameters if provided
-            if "k" in input_data and hasattr(retriever, "k"):
-                retriever.k = input_data["k"]
-            if "filter" in input_data and hasattr(retriever, "search_kwargs"):
-                retriever.search_kwargs["filter"] = input_data["filter"]
-        else:
-            raise ValueError(f"Unsupported input type: {type(input_data)}")
-
-        # Perform retrieval
-        return retriever.invoke(query)
-
-    def derive_input_schema(self) -> Type[BaseModel]:
-        """Return the input schema.
-        
-        Returns:
-            Pydantic model for input schema
-        """
-        return self.input_schema
-
-    def derive_output_schema(self) -> Type[BaseModel]:
-        """Return the output schema.
-        
-        Returns:
-            Pydantic model for output schema
-        """
-        return self.output_schema
-
-    def get_schema_fields(self) -> Dict[str, tuple[Type, Any]]:
-        """Get schema fields for this engine.
-        
-        Returns:
-            Dictionary mapping field names to (type, default) tuples
-        """
-        from typing import Optional, List, Dict, Any
-
-        # Use input schema fields
-        input_fields = {}
-        for name, field_info in self.input_schema.model_fields.items():
-            input_fields[name] = (field_info.annotation, field_info.default)
-            
-        # Add output schema fields
-        output_fields = {}
-        for name, field_info in self.output_schema.model_fields.items():
-            output_fields[name] = (field_info.annotation, field_info.default)
-            
-        # Combine fields
-        return {**input_fields, **output_fields}
-
     @classmethod
     def register(cls, retriever_type: RetrieverType):
         """Register a retriever config implementation.
@@ -312,6 +267,7 @@ class BaseRetrieverConfig(InvokableEngine[Union[str, Dict[str, Any]], List[Docum
             Decorator function
         """
         def decorator(subclass):
+            logger.debug(f"Registering retriever type {retriever_type} with class {subclass.__name__}")
             cls._registry[retriever_type] = subclass
             return subclass
         return decorator
@@ -326,6 +282,9 @@ class BaseRetrieverConfig(InvokableEngine[Union[str, Dict[str, Any]], List[Docum
         Returns:
             Retriever config class
         """
+        # Ensure all retriever types are loaded
+        cls._ensure_retrievers_loaded()
+        
         if retriever_type not in cls._registry:
             logger.warning(f"No registered config for {retriever_type}, using base config")
             return cls
@@ -344,6 +303,47 @@ class BaseRetrieverConfig(InvokableEngine[Union[str, Dict[str, Any]], List[Docum
         """
         config_class = cls.get_config_class(retriever_type)
         return config_class(retriever_type=retriever_type, **kwargs)
+    
+    @classmethod
+    def _ensure_retrievers_loaded(cls):
+        """Ensure all retriever implementations are loaded.
+        
+        This method automatically imports all modules in the retriever package
+        to ensure all retriever implementations are registered.
+        """
+        if cls._initialized:
+            return
+            
+        # Get the current module
+        current_module = sys.modules[__name__]
+        package_name = current_module.__name__
+        
+        # Find the parent package
+        parent_package = ".".join(package_name.split(".")[:-1])
+        retriever_package = f"{parent_package}.retriever"
+        
+        try:
+            # Import the retriever package
+            retriever_pkg = importlib.import_module(retriever_package)
+            
+            # Get the package path
+            if hasattr(retriever_pkg, "__path__"):
+                package_path = retriever_pkg.__path__
+                
+                # Discover and import all modules in the package
+                for _, name, is_pkg in pkgutil.walk_packages(package_path):
+                    if not is_pkg:
+                        try:
+                            importlib.import_module(f"{retriever_package}.{name}")
+                            logger.debug(f"Loaded retriever module: {name}")
+                        except ImportError as e:
+                            logger.warning(f"Failed to import retriever module {name}: {e}")
+            
+            cls._initialized = True
+            
+        except (ImportError, AttributeError) as e:
+            logger.warning(f"Failed to load retriever modules: {e}")
+            # Continue without loading modules
 
 
 @BaseRetrieverConfig.register(RetrieverType.VECTOR_STORE)
@@ -422,8 +422,9 @@ class VectorStoreRetrieverConfig(BaseRetrieverConfig):
 
     @field_validator("retriever_type")
     def validate_retriever_type(cls, v):
+        """Validate that the retriever type is VECTOR_STORE."""
         if v != RetrieverType.VECTOR_STORE:
-            raise ValueError("retriever_type must be VectorStore")
+            raise ValueError("retriever_type must be VECTOR_STORE")
         return v
 
     def instantiate(self) -> BaseRetriever:
@@ -444,11 +445,13 @@ class VectorStoreRetrieverConfig(BaseRetrieverConfig):
                 search_kwargs["filter"] = self.filter
 
             # Create retriever
-            return self.vector_store_config.create_retriever(
+            retriever = self.vector_store_config.create_retriever(
                 search_type=self.search_type,
                 search_kwargs=search_kwargs,
                 **extra_kwargs
             )
+            
+            return retriever
         except Exception as e:
             logger.error(f"Error creating retriever: {str(e)}")
             raise ValueError(f"Failed to create retriever: {str(e)}") from e
@@ -460,8 +463,6 @@ def create_retriever_config(
     retriever_type: Union[RetrieverType, str],
     name: str,
     description: Optional[str] = None,
-    vector_store_config: Optional[VectorStoreConfig] = None,
-    llm_config: Optional[Any] = None,
     **kwargs
 ) -> BaseRetrieverConfig:
     """Factory function to create appropriate retriever configuration.
@@ -470,13 +471,14 @@ def create_retriever_config(
         retriever_type: Type of retriever to create
         name: Name identifier for this retriever
         description: Description of the retriever
-        vector_store_config: Configuration for vector store (if needed)
-        llm_config: Configuration for LLM (if needed)
         **kwargs: Additional parameters specific to retriever type
         
     Returns:
         Appropriate retriever configuration object
     """
+    # Ensure all retrievers are loaded
+    BaseRetrieverConfig._ensure_retrievers_loaded()
+    
     # Convert string to enum if needed
     if isinstance(retriever_type, str):
         retriever_type = RetrieverType(retriever_type)
@@ -488,21 +490,7 @@ def create_retriever_config(
         **kwargs
     }
 
-    # Add specific parameters based on retriever type
-    if retriever_type in [
-        RetrieverType.VECTOR_STORE,
-        RetrieverType.TIME_WEIGHTED,
-        RetrieverType.MULTI_QUERY,
-        RetrieverType.SELF_QUERY
-    ]:
-        if vector_store_config:
-            config_params["vector_store_config"] = vector_store_config
-
-    if retriever_type in [RetrieverType.MULTI_QUERY, RetrieverType.REPHRASE_QUERY]:
-        if llm_config:
-            config_params["llm_config"] = llm_config
-
-    # Create and return the appropriate configuration
+    # Create and return the appropriate configuration using the registry
     return BaseRetrieverConfig.from_retriever_type(retriever_type, **config_params)
 
 
@@ -528,3 +516,7 @@ def create_retriever_from_vectorstore(
 
     # Instantiate retriever
     return retriever_config.instantiate()
+
+
+# Automatically load all retriever implementations
+BaseRetrieverConfig._ensure_retrievers_loaded()
