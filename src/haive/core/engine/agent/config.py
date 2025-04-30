@@ -470,7 +470,7 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
 
         # Create schema
         schema_name = f"{self.name.replace('-', '_').title()}State"
-        return SchemaComposer.compose_schema(
+        return SchemaComposer.from_components(
             components=all_components,
             name=schema_name,
             #include_messages=True,

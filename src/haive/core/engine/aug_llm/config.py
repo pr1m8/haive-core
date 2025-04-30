@@ -742,3 +742,7 @@ class AugLLMConfig(InvokableEngine[Union[str, Dict[str, Any], List[BaseMessage]]
             uses_messages_field=True,  # Tool-using LLMs always use messages
             **kwargs
         )
+        
+    def instatiate_llm(self) -> LLMConfig:
+        """Instatiate the LLM based on the configuration."""
+        return self.llm_config.instantiate() 

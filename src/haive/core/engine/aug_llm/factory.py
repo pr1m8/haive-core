@@ -90,7 +90,8 @@ class AugLLMFactory:
         # Add structured output if specified
         if self.aug_config.structured_output_model:
             runnable_llm = runnable_llm.with_structured_output(
-                self.aug_config.structured_output_model
+                self.aug_config.structured_output_model,
+                method="function_calling"  # Explicitly use function_calling to avoid warnings
             )
             
         # Add output parser if specified
