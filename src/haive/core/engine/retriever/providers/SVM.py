@@ -4,8 +4,8 @@ from langchain_core.documents import Document
 
 from haive.core.models.embeddings.base import BaseEmbeddingConfig
 
-from .retriever import BaseRetrieverConfig
-from .svm_retriever_impl import SVMRetriever
+from haive.core.engine.retriever.retriever import BaseRetrieverConfig
+from langchain.retrievers import SVMRetriever
 
 
 class SVMRetrieverConfig(BaseRetrieverConfig):

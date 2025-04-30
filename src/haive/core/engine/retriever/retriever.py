@@ -40,7 +40,7 @@ Example:
 """
 
 import logging
-from typing import Any, ClassVar, Optional, Union
+from typing import Any, ClassVar, Optional, Union, List, Dict, Type
 
 from langchain_core.documents import Document
 from langchain_core.retrievers import BaseRetriever
@@ -54,8 +54,26 @@ from haive.core.engine.vectorstore.vectorstore import VectorStoreConfig
 logger = logging.getLogger(__name__)
 
 
+# Define explicit input and output schemas
+class RetrieverInput(BaseModel):
+    """Schema for retriever input."""
+    query: str = Field(description="Query string for retrieval")
+    k: Optional[int] = Field(default=None, description="Number of documents to retrieve")
+    filter: Optional[Dict[str, Any]] = Field(default=None, description="Filter criteria for retrieval")
+    search_type: Optional[str] = Field(default=None, description="Type of search to perform")
+    score_threshold: Optional[float] = Field(default=None, description="Minimum score threshold")
 
-class RetrieverConfig(InvokableEngine[Union[str, dict[str, Any]], list[Document]]):
+    model_config = ConfigDict(extra="allow")
+
+
+class RetrieverOutput(BaseModel):
+    """Schema for retriever output."""
+    documents: List[Document] = Field(description="Retrieved documents")
+
+    model_config = ConfigDict(extra="allow")
+
+
+class BaseRetrieverConfig(InvokableEngine[Union[str, Dict[str, Any]], List[Document]]):
     """Base configuration for all retriever engines in the Haive framework.
 
     This class serves as the foundation for all retriever configurations, providing a consistent
@@ -71,6 +89,8 @@ class RetrieverConfig(InvokableEngine[Union[str, dict[str, Any]], list[Document]
         k (int): Number of documents to retrieve.
         filter (Optional[Dict[str, Any]]): Optional filter to apply to vector store search.
         _registry (ClassVar[Dict[RetrieverType, Type['RetrieverConfig']]]): Registry for retriever types.
+        input_schema (Type[BaseModel]): Schema for retriever input.
+        output_schema (Type[BaseModel]): Schema for retriever output.
 
     Example:
         ```python
@@ -95,7 +115,7 @@ class RetrieverConfig(InvokableEngine[Union[str, dict[str, Any]], list[Document]
         description="The type of retriever to use",
         default=RetrieverType.VECTOR_STORE
     )
-    description: str | None = Field(
+    description: Optional[str] = Field(
         default=None,
         description="Description of this retriever"
     )
@@ -105,7 +125,7 @@ class RetrieverConfig(InvokableEngine[Union[str, dict[str, Any]], list[Document]
         default="similarity",
         description="Search type ('similarity', 'mmr', etc.)"
     )
-    search_kwargs: dict[str, Any] = Field(
+    search_kwargs: Dict[str, Any] = Field(
         default_factory=dict,
         description="Additional search parameters"
     )
@@ -113,15 +133,25 @@ class RetrieverConfig(InvokableEngine[Union[str, dict[str, Any]], list[Document]
         default=4,
         description="Number of documents to retrieve"
     )
-    filter: dict[str, Any] | None = Field(
+    filter: Optional[Dict[str, Any]] = Field(
         default=None,
         description="Filter to apply to vector store search"
     )
 
-    # Registry for retriever types
-    _registry: ClassVar[dict[RetrieverType, type["RetrieverConfig"]]] = {}
+    # Explicitly set input and output schemas
+    input_schema: Type[BaseModel] = Field(
+        default=RetrieverInput,
+        description="Input schema for this retriever"
+    )
+    output_schema: Type[BaseModel] = Field(
+        default=RetrieverOutput,
+        description="Output schema for this retriever"
+    )
 
-    model_config = ConfigDict(arbitrary_types_allowed = True, )
+    # Registry for retriever types
+    _registry: ClassVar[Dict[RetrieverType, Type["BaseRetrieverConfig"]]] = {}
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @field_validator("engine_type")
     def validate_engine_type(cls, v):
@@ -129,7 +159,7 @@ class RetrieverConfig(InvokableEngine[Union[str, dict[str, Any]], list[Document]
             raise ValueError("engine_type must be RETRIEVER")
         return v
 
-    def create_runnable(self, runnable_config: RunnableConfig | None = None) -> BaseRetriever:
+    def create_runnable(self, runnable_config: Optional[RunnableConfig] = None) -> BaseRetriever:
         """Create a retriever with configuration applied.
         
         Args:
@@ -173,9 +203,9 @@ class RetrieverConfig(InvokableEngine[Union[str, dict[str, Any]], list[Document]
         Raises:
             NotImplementedError: If not implemented by subclass
         """
-        return 
+        raise NotImplementedError("Subclasses must implement instantiate method")
 
-    def apply_runnable_config(self, runnable_config: RunnableConfig | None = None) -> dict[str, Any]:
+    def apply_runnable_config(self, runnable_config: Optional[RunnableConfig] = None) -> Dict[str, Any]:
         """Extract parameters from runnable_config relevant to this retriever.
         
         Args:
@@ -202,9 +232,9 @@ class RetrieverConfig(InvokableEngine[Union[str, dict[str, Any]], list[Document]
 
     def invoke(
         self,
-        input_data: str | dict[str, Any],
-        runnable_config: RunnableConfig | None = None
-    ) -> list[Document]:
+        input_data: Union[str, Dict[str, Any]],
+        runnable_config: Optional[RunnableConfig] = None
+    ) -> List[Document]:
         """Invoke the retriever with input data.
         
         Args:
@@ -232,58 +262,44 @@ class RetrieverConfig(InvokableEngine[Union[str, dict[str, Any]], list[Document]
             raise ValueError(f"Unsupported input type: {type(input_data)}")
 
         # Perform retrieval
-        return retriever.get_relevant_documents(query)
+        return retriever.invoke(query)
 
-    def derive_input_schema(self) -> type[BaseModel]:
-        """Derive input schema for this engine.
+    def derive_input_schema(self) -> Type[BaseModel]:
+        """Return the input schema.
         
         Returns:
             Pydantic model for input schema
         """
-        # Use provided schema if available
-        if self.input_schema:
-            return self.input_schema
+        return self.input_schema
 
-        # Create a simple input schema
-        return create_model(
-            f"{self.__class__.__name__}Input",
-            query=(str, ...),
-            k=(Optional[int], None),
-            filter=(Optional[dict[str, Any]], None)
-        )
-
-    def derive_output_schema(self) -> type[BaseModel]:
-        """Derive output schema for this engine.
+    def derive_output_schema(self) -> Type[BaseModel]:
+        """Return the output schema.
         
         Returns:
             Pydantic model for output schema
         """
-        # Use provided schema if available
-        if self.output_schema:
-            return self.output_schema
+        return self.output_schema
 
-        # Create output schema for documents
-        return create_model(
-            f"{self.__class__.__name__}Output",
-            documents=(list[Document], ...)
-        )
-
-    def get_schema_fields(self) -> dict[str, tuple[type, Any]]:
+    def get_schema_fields(self) -> Dict[str, tuple[Type, Any]]:
         """Get schema fields for this engine.
         
         Returns:
             Dictionary mapping field names to (type, default) tuples
         """
-        from typing import Any, Optional
+        from typing import Optional, List, Dict, Any
 
-        fields = {
-            "query": (str, ...),
-            "k": (Optional[int], None),
-            "filter": (Optional[dict[str, Any]], None),
-            "documents": (list[Document], [])
-        }
-
-        return fields
+        # Use input schema fields
+        input_fields = {}
+        for name, field_info in self.input_schema.model_fields.items():
+            input_fields[name] = (field_info.annotation, field_info.default)
+            
+        # Add output schema fields
+        output_fields = {}
+        for name, field_info in self.output_schema.model_fields.items():
+            output_fields[name] = (field_info.annotation, field_info.default)
+            
+        # Combine fields
+        return {**input_fields, **output_fields}
 
     @classmethod
     def register(cls, retriever_type: RetrieverType):
@@ -301,7 +317,7 @@ class RetrieverConfig(InvokableEngine[Union[str, dict[str, Any]], list[Document]
         return decorator
 
     @classmethod
-    def get_config_class(cls, retriever_type: RetrieverType) -> type["RetrieverConfig"]:
+    def get_config_class(cls, retriever_type: RetrieverType) -> Type["BaseRetrieverConfig"]:
         """Get the appropriate config class for the retriever type.
         
         Args:
@@ -316,7 +332,7 @@ class RetrieverConfig(InvokableEngine[Union[str, dict[str, Any]], list[Document]
         return cls._registry[retriever_type]
 
     @classmethod
-    def from_retriever_type(cls, retriever_type: RetrieverType, **kwargs) -> "RetrieverConfig":
+    def from_retriever_type(cls, retriever_type: RetrieverType, **kwargs) -> "BaseRetrieverConfig":
         """Create the appropriate config for the given retriever type.
         
         Args:
@@ -330,8 +346,8 @@ class RetrieverConfig(InvokableEngine[Union[str, dict[str, Any]], list[Document]
         return config_class(retriever_type=retriever_type, **kwargs)
 
 
-@RetrieverConfig.register(RetrieverType.VECTOR_STORE)
-class VectorStoreRetrieverConfig(RetrieverConfig):
+@BaseRetrieverConfig.register(RetrieverType.VECTOR_STORE)
+class VectorStoreRetrieverConfig(BaseRetrieverConfig):
     """Configuration for a vector store-based retriever in the Haive framework.
 
     This class extends RetrieverConfig to provide specific configuration for vector store-based
@@ -342,7 +358,7 @@ class VectorStoreRetrieverConfig(RetrieverConfig):
         vector_store_config (VectorStoreConfig): Configuration for the underlying vector store.
         k (int): Number of documents to retrieve (default: 4).
         search_type (str): Type of search to perform, e.g., 'similarity' or 'mmr' (default: 'similarity').
-        search_kwargs (Dict[str, Any]): Additional search parameters for the vector store.
+        search_kwargs (Dict[str, Any]): Additional parameters for the search operation.
         filter (Optional[Dict[str, Any]]): Optional metadata filter for the search.
 
     Example:
@@ -394,12 +410,12 @@ class VectorStoreRetrieverConfig(RetrieverConfig):
         description="Search type: 'similarity', 'mmr', etc."
     )
 
-    search_kwargs: dict[str, Any] = Field(
+    search_kwargs: Dict[str, Any] = Field(
         default_factory=dict,
         description="Additional search parameters"
     )
 
-    filter: dict[str, Any] | None = Field(
+    filter: Optional[Dict[str, Any]] = Field(
         default=None,
         description="Filter to apply to vector store search"
     )
@@ -434,20 +450,20 @@ class VectorStoreRetrieverConfig(RetrieverConfig):
                 **extra_kwargs
             )
         except Exception as e:
-            logger.error(f"Error creating retriever: {e!s}")
-            raise ValueError(f"Failed to create retriever: {e!s}") from e
+            logger.error(f"Error creating retriever: {str(e)}")
+            raise ValueError(f"Failed to create retriever: {str(e)}") from e
 
 
 # Convenience factory functions
 
 def create_retriever_config(
-    retriever_type: RetrieverType | str,
+    retriever_type: Union[RetrieverType, str],
     name: str,
-    description: str | None = None,
-    vector_store_config: VectorStoreConfig | None = None,
-    llm_config: Any | None = None,
+    description: Optional[str] = None,
+    vector_store_config: Optional[VectorStoreConfig] = None,
+    llm_config: Optional[Any] = None,
     **kwargs
-) -> RetrieverConfig:
+) -> BaseRetrieverConfig:
     """Factory function to create appropriate retriever configuration.
     
     Args:
@@ -487,7 +503,7 @@ def create_retriever_config(
             config_params["llm_config"] = llm_config
 
     # Create and return the appropriate configuration
-    return RetrieverConfig.from_retriever_type(retriever_type, **config_params)
+    return BaseRetrieverConfig.from_retriever_type(retriever_type, **config_params)
 
 
 def create_retriever_from_vectorstore(
@@ -512,49 +528,3 @@ def create_retriever_from_vectorstore(
 
     # Instantiate retriever
     return retriever_config.instantiate()
-
-
-class VectorStoreRetriever(BaseRetriever):
-    """A retriever that uses a vector store for semantic document retrieval.
-
-    This class implements document retrieval using vector stores, which enable efficient
-    semantic search over document collections. It supports various search strategies and
-    filtering options to retrieve the most relevant documents for a given query.
-
-    The retriever uses the underlying vector store's similarity search capabilities to find
-    documents that are semantically similar to the input query. It supports both standard
-    similarity search and Maximal Marginal Relevance (MMR) for diverse results.
-
-    Attributes:
-        vector_store (VectorStore): The underlying vector store used for document storage and retrieval.
-        search_type (str): The type of search to perform ('similarity' or 'mmr').
-        search_kwargs (Dict[str, Any]): Additional parameters for the search operation.
-        k (int): Number of documents to retrieve.
-        filter (Optional[Dict[str, Any]]): Metadata filter for the search.
-
-    Example:
-        ```python
-        from haive.core.engine.vectorstore import VectorStore
-        from haive.core.engine.retriever import VectorStoreRetriever
-
-        # Assuming you have a configured vector store
-        vector_store = VectorStore(...)
-
-        # Create a retriever
-        retriever = VectorStoreRetriever(
-            vector_store=vector_store,
-            search_type="mmr",
-            k=4,
-            search_kwargs={"fetch_k": 20, "lambda_mult": 0.5}
-        )
-
-        # Retrieve relevant documents
-        query = "What is machine learning?"
-        documents = retriever.get_relevant_documents(query)
-
-        # Access the retrieved documents
-        for doc in documents:
-            print(doc.page_content)
-        ```
-    """
-    # ... existing code ...
