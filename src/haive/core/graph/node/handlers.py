@@ -135,7 +135,6 @@ class MappedInputProcessor:
         logger.debug(f"Returning mapped input with keys: {list(mapped_input.keys())}")
         return mapped_input
 
-
 @register_output_processor("standard")
 class StandardOutputProcessor:
     """Standard processor for output."""
@@ -163,6 +162,18 @@ class StandardOutputProcessor:
                 updates = original_state.copy(deep=True)
                 logger.debug(f"Created deep copy of original BaseModel: {updates.__class__.__name__}")
                 
+            # Handle string result with output mapping
+            if isinstance(result, str) and config.output_mapping:
+                logger.debug(f"Processing string result with output mapping: {config.output_mapping}")
+                for output_key, state_key in config.output_mapping.items():
+                    if output_key == "output":
+                        try:
+                            setattr(updates, state_key, result)
+                            logger.debug(f"Mapped string result to {state_key}")
+                            return updates
+                        except AttributeError:
+                            logger.warning(f"Cannot set attribute {state_key} on BaseModel")
+            
             # Handle different result types
             if isinstance(result, dict):
                 logger.debug(f"Processing dict result with keys: {list(result.keys())}")
@@ -224,31 +235,60 @@ class StandardOutputProcessor:
                 else:
                     # No mapping - try to set result model as attribute
                     model_name = result.__class__.__name__.lower()
-                    try:
-                        setattr(updates, model_name, result)
-                        logger.debug(f"Set BaseModel attribute: {model_name}")
-                    except AttributeError:
-                        logger.warning(f"Cannot set attribute {model_name} on BaseModel")
+                    
+                    # Check if model has the field before trying to set it
+                    has_field = False
+                    if hasattr(updates, "model_fields"):
+                        has_field = model_name in updates.model_fields
+                    elif hasattr(updates, "__fields__"):
+                        has_field = model_name in updates.__fields__
+                    
+                    if has_field:
+                        try:
+                            setattr(updates, model_name, result)
+                            logger.debug(f"Set result model as attribute: {model_name}")
+                        except AttributeError:
+                            logger.warning(f"Cannot set model attribute: {model_name}")
+                    else:
+                        logger.debug(f"Skipping model attribute {model_name} as field doesn't exist")
                         
                         # Try to copy all attributes from result to updates
                         if hasattr(result, "model_fields"):
                             # Pydantic v2
                             for key in result.model_fields.keys():
                                 if hasattr(result, key):
-                                    try:
-                                        setattr(updates, key, getattr(result, key))
-                                        logger.debug(f"Copied attribute {key} from result to original model")
-                                    except AttributeError:
-                                        pass
+                                    # Check if target model has this field
+                                    has_key = False
+                                    if hasattr(updates, "model_fields"):
+                                        has_key = key in updates.model_fields
+                                    elif hasattr(updates, "__fields__"):
+                                        has_key = key in updates.__fields__
+                                    
+                                    if has_key:
+                                        try:
+                                            value = getattr(result, key)
+                                            setattr(updates, key, value)
+                                            logger.debug(f"Copied attribute {key} from result model")
+                                        except AttributeError:
+                                            logger.warning(f"Cannot set attribute {key} on BaseModel")
                         elif hasattr(result, "__fields__"):
                             # Pydantic v1
                             for key in result.__fields__:
                                 if hasattr(result, key):
-                                    try:
-                                        setattr(updates, key, getattr(result, key))
-                                        logger.debug(f"Copied attribute {key} from result to original model")
-                                    except AttributeError:
-                                        pass
+                                    # Check if target model has this field
+                                    has_key = False
+                                    if hasattr(updates, "model_fields"):
+                                        has_key = key in updates.model_fields
+                                    elif hasattr(updates, "__fields__"):
+                                        has_key = key in updates.__fields__
+                                    
+                                    if has_key:
+                                        try:
+                                            value = getattr(result, key)
+                                            setattr(updates, key, value)
+                                            logger.debug(f"Copied attribute {key} from result model")
+                                        except AttributeError:
+                                            logger.warning(f"Cannot set attribute {key} on BaseModel")
             elif isinstance(result, BaseMessage):
                 logger.debug(f"Processing direct BaseMessage: {result.__class__.__name__}")
                 
@@ -281,13 +321,35 @@ class StandardOutputProcessor:
                     except AttributeError:
                         logger.warning(f"Cannot set content on BaseModel")
             else:
-                # Other result types - try to set as "result" attribute
-                try:
-                    setattr(updates, "result", result)
-                    logger.debug(f"Set generic result on BaseModel")
-                except AttributeError:
-                    logger.warning(f"Cannot set result on BaseModel")
+                # String or other result types - try to use output mapping
+                if config.output_mapping:
+                    logger.debug(f"Applying output mapping for string/other result")
+                    for output_key, state_key in config.output_mapping.items():
+                        if output_key == "output":
+                            try:
+                                setattr(updates, state_key, result)
+                                logger.debug(f"Mapped result to {state_key}")
+                                break
+                            except AttributeError:
+                                logger.warning(f"Cannot set attribute {state_key} on BaseModel")
+                
+                # If mapping didn't work, try common field names
+                for field_name in ["output", "result", "content", "response"]:
+                    # Check if field exists in the model
+                    has_field = False
+                    if hasattr(updates, "model_fields"):
+                        has_field = field_name in updates.model_fields
+                    elif hasattr(updates, "__fields__"):
+                        has_field = field_name in updates.__fields__
                     
+                    if has_field:
+                        try:
+                            setattr(updates, field_name, result)
+                            logger.debug(f"Set result on {field_name} field")
+                            break
+                        except AttributeError:
+                            logger.warning(f"Cannot set {field_name} on BaseModel")
+                
             # Return the updated model
             return updates
         
@@ -372,9 +434,32 @@ class StandardOutputProcessor:
                 
             return updates
         
-        # Fallback - store as result
-        logger.debug(f"Using fallback for type {type(result).__name__}")
+        # Handle string result with output mapping
+        if isinstance(result, str) and config.output_mapping:
+            logger.debug(f"Processing string result with output mapping")
+            for output_key, state_key in config.output_mapping.items():
+                if output_key == "output":
+                    updates[state_key] = result
+                    logger.debug(f"Mapped string result to {state_key}")
+                    return updates
+        
+        # Fallback - store as a field based on output mapping or common field names
+        if config.output_mapping:
+            # Try to use the first state_key in output mapping
+            state_key = next(iter(config.output_mapping.values()), "output")
+            updates[state_key] = result
+            logger.debug(f"Using fallback mapping to {state_key}")
+            return updates
+        
+        # Set output if it exists in state already
+        if "output" in updates:
+            updates["output"] = result
+            logger.debug("Set result to existing 'output' field")
+            return updates
+        
+        # Last resort fallback
         updates["result"] = result
+        logger.debug("Set generic 'result' field as fallback")
         return updates
 
 
@@ -392,8 +477,45 @@ class StructuredOutputProcessor:
         # Check for preserve_model flag with default to True
         preserve_model = getattr(config, "preserve_model", True)
         
+        # Special handling for string results when output mapping is provided
+        if isinstance(result, str) and config.output_mapping:
+            logger.debug(f"Processing string result with output mapping: {config.output_mapping}")
+            
+            # Handle BaseModel original state specially
+            if isinstance(original_state, BaseModel) and preserve_model:
+                # Make a copy of the original model
+                if hasattr(original_state, "model_copy"):
+                    updates = original_state.model_copy(deep=True)
+                else:
+                    updates = original_state.copy(deep=True)
+                
+                # Apply output mapping directly for string result
+                for output_key, state_key in config.output_mapping.items():
+                    # For simple strings, we can assume the "output" key maps to the string content
+                    if output_key == "output":
+                        try:
+                            setattr(updates, state_key, result)
+                            logger.debug(f"Mapped string result to {state_key}")
+                        except AttributeError:
+                            logger.warning(f"Cannot set attribute {state_key} on BaseModel")
+                
+                return updates
+            
+            # For dictionary state
+            updates = {}
+            # Start with original state if preserving
+            if config.preserve_state and isinstance(original_state, dict):
+                updates = original_state.copy()
+            
+            # Apply output mapping directly for string result
+            for output_key, state_key in config.output_mapping.items():
+                if output_key == "output":
+                    updates[state_key] = result
+                    logger.debug(f"Mapped string result to {state_key}")
+            
+            return updates
+            
         # Special handling for BaseMessages (like AIMessage)
-        # This needs to come BEFORE the general BaseModel handling
         if isinstance(result, BaseMessage):
             logger.debug(f"Processing BaseMessage (structured): {result.__class__.__name__}")
             
@@ -427,8 +549,16 @@ class StructuredOutputProcessor:
                     except AttributeError:
                         logger.warning(f"Cannot set content on BaseModel")
                 
-                # DO NOT try to set the message as a field with its class name
-                # That's what was causing the error
+                # Apply output mapping if exists
+                if config.output_mapping:
+                    logger.debug(f"Applying output mapping: {config.output_mapping}")
+                    for output_key, state_key in config.output_mapping.items():
+                        if output_key == "output" and hasattr(result, "content"):
+                            try:
+                                setattr(updates, state_key, result.content)
+                                logger.debug(f"Mapped message content to {state_key}")
+                            except AttributeError:
+                                logger.warning(f"Cannot set attribute {state_key} on BaseModel")
                 
                 return updates
             
@@ -452,6 +582,14 @@ class StructuredOutputProcessor:
                 updates["content"] = result.content
                 logger.debug(f"Extracted content from message")
                 
+            # Apply output mapping if exists
+            if config.output_mapping:
+                logger.debug(f"Applying output mapping: {config.output_mapping}")
+                for output_key, state_key in config.output_mapping.items():
+                    if output_key == "output" and hasattr(result, "content"):
+                        updates[state_key] = result.content
+                        logger.debug(f"Mapped message content to {state_key}")
+            
             # Save as message type if we know it's safe (i.e., not trying with original BaseModel)
             message_type = result.__class__.__name__.lower()
             updates[message_type] = result
@@ -549,15 +687,57 @@ class StructuredOutputProcessor:
                                         logger.warning(f"Cannot set attribute {key} on BaseModel")
                 
                 return updates
-                
+            
             # Handle other result types with BaseModel original state
-            # In this case, try to set the result as a "result" attribute
-            try:
-                setattr(updates, "result", result)
-                logger.debug(f"Set generic result on BaseModel")
-            except AttributeError:
-                logger.warning(f"Cannot set result on BaseModel")
+            # For string results, map them according to output_mapping
+            if isinstance(result, str) and config.output_mapping:
+                logger.debug(f"Processing string result with output mapping: {config.output_mapping}")
+                for output_key, state_key in config.output_mapping.items():
+                    if output_key == "output" and hasattr(updates, state_key):
+                        try:
+                            setattr(updates, state_key, result)
+                            logger.debug(f"Mapped string result to {state_key}")
+                            return updates
+                        except AttributeError:
+                            logger.warning(f"Cannot set attribute {state_key} on BaseModel")
+            
+            # Check if we have a field that matches our expected output field
+            if config.output_mapping:
+                for output_key, state_key in config.output_mapping.items():
+                    # Check if field exists in the model
+                    has_field = False
+                    if hasattr(updates, "model_fields"):
+                        has_field = state_key in updates.model_fields
+                    elif hasattr(updates, "__fields__"):
+                        has_field = state_key in updates.__fields__
+                    
+                    if has_field:
+                        try:
+                            setattr(updates, state_key, result)
+                            logger.debug(f"Set generic result on {state_key} field")
+                            return updates
+                        except AttributeError:
+                            logger.warning(f"Cannot set {state_key} on BaseModel")
+            
+            # If all else fails, try to use a known field from the schema
+            for common_field in ["result", "output", "content", "response"]:
+                # Check if field exists in the model
+                has_field = False
+                if hasattr(updates, "model_fields"):
+                    has_field = common_field in updates.model_fields
+                elif hasattr(updates, "__fields__"):
+                    has_field = common_field in updates.__fields__
                 
+                if has_field:
+                    try:
+                        setattr(updates, common_field, result)
+                        logger.debug(f"Set generic result on {common_field} field")
+                        return updates
+                    except AttributeError:
+                        logger.warning(f"Cannot set {common_field} on BaseModel")
+            
+            # If we reach here, we couldn't find a suitable field
+            logger.warning("Could not find a suitable field for the result in BaseModel")
             return updates
         
         # Standard dictionary handling for non-BaseModel original state
@@ -614,6 +794,30 @@ class StructuredOutputProcessor:
             
             return updates
         
-        # Fallback to standard processing for non-BaseModel results
-        logger.debug("Falling back to standard processing")
-        return StandardOutputProcessor().process_output(result, config, original_state)
+        # Handle string results with output mapping
+        if isinstance(result, str) and config.output_mapping:
+            logger.debug(f"Processing string result with output mapping: {config.output_mapping}")
+            for output_key, state_key in config.output_mapping.items():
+                if output_key == "output":
+                    updates[state_key] = result
+                    logger.debug(f"Mapped string result to {state_key}")
+                    return updates
+        
+        # Fallback - here we map to output instead of result if output exists in mapping
+        if isinstance(result, str) and config.output_mapping:
+            for output_key, state_key in config.output_mapping.items():
+                updates[state_key] = result
+                logger.debug(f"Used fallback mapping to {state_key}")
+                return updates
+        
+        # Last resort fallback - try common field names for any result
+        for common_field in ["output", "result", "content", "response"]:
+            if common_field in updates:
+                updates[common_field] = result
+                logger.debug(f"Set result to existing field: {common_field}")
+                return updates
+        
+        # If no mapping or common fields, set generic result field
+        updates["result"] = result
+        logger.debug("Set generic result field as fallback")
+        return updates

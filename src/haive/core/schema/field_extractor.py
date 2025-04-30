@@ -2,10 +2,11 @@
 Field extractor utility for extracting field information from various sources.
 """
 from typing import (
-    Any, Dict, List, Optional, Set, Type, Tuple, get_origin,
-    Callable, TypeVar
+    Any, Dict, List, Optional, Set, Type, Tuple, get_origin, get_args,
+    Callable, TypeVar, Union
 )
 from pydantic import BaseModel, Field
+import inspect
 import logging
 from collections import defaultdict
 
@@ -13,7 +14,6 @@ logger = logging.getLogger(__name__)
 
 # Type variable for return types
 T = TypeVar('T')
-
 
 class FieldExtractor:
     """Unified utility for extracting fields from various sources."""
@@ -73,6 +73,7 @@ class FieldExtractor:
                 field_info = model_cls.model_fields[field_name]
 
                 # Make field Optional
+                from typing import Optional
                 if get_origin(field_type) is not Optional:
                     field_type = Optional[field_type]
 
@@ -162,35 +163,227 @@ class FieldExtractor:
             for engine, fields in model_cls.__output_fields__.items():
                 output_fields[engine].update(fields)
 
-        # Return all extracted data
         return (fields, descriptions, shared_fields, reducer_names,
                 reducer_functions, engine_io_mappings, input_fields, output_fields)
-    
-    def extract_from_engine(engine: Any) -> Tuple[Dict[str, Any], Dict[str, str], Dict[str, Dict[str, List[str]]], Dict[str, Set[str]], Dict[str, Set[str]]]:
+
+    @staticmethod
+    def extract_from_engine(engine: Any) -> Tuple[
+        Dict[str, Tuple[Any, Any]],  # fields
+        Dict[str, str],  # descriptions
+        Dict[str, Dict[str, List[str]]],  # engine_io_mappings
+        Dict[str, Set[str]],  # input_fields
+        Dict[str, Set[str]]  # output_fields
+    ]:
+        """
+        Extract all field information from an engine.
+
+        Args:
+            engine: Engine object to extract fields from
+
+        Returns:
+            Tuple of (fields, descriptions, engine_io_mappings, input_fields, output_fields)
+        """
+        from typing import Optional
+        
         fields = {}
         descriptions = {}
         engine_io_mappings = {}
         input_fields = defaultdict(set)
         output_fields = defaultdict(set)
         
-        # Extract engine name for tracking - be more robust about getting a usable name
+        # Extract engine name for tracking
         if hasattr(engine, "name") and engine.name:
             engine_name = engine.name
         elif hasattr(engine, "id") and engine.id:
+            engine_id = getattr(engine, "id")
             engine_name = engine.id
         else:
             engine_name = str(engine)
-        
+
         # Create an initial empty mapping for this engine even if no fields are found
-        # This ensures the engine is at least represented in the mappings
         engine_io_mappings[engine_name] = {
             "inputs": [],
             "outputs": []
         }
         
-        # Rest of field extraction logic...
+        # Try different methods to extract field information
         
-        # Populate the mappings
+        # Method 1: Check for get_schema_fields method
+        if hasattr(engine, "get_schema_fields") and callable(engine.get_schema_fields):
+            try:
+                schema_fields = engine.get_schema_fields()
+                for field_name, (field_type, default) in schema_fields.items():
+                    # Skip internal or special fields
+                    if field_name.startswith("__") or field_name == "runnable_config":
+                        continue
+                    
+                    # Create field_info
+                    if callable(default) and not isinstance(default, type):
+                        # It's a factory function
+                        field_info = Field(default_factory=default)
+                    else:
+                        field_info = Field(default=default)
+                    
+                    # Make type Optional if not already
+                    if get_origin(field_type) is not Optional:
+                        field_type = Optional[field_type]
+                    
+                    fields[field_name] = (field_type, field_info)
+                    
+                    # Track I/O fields - assume all schema fields are potential inputs
+                    input_fields[engine_name].add(field_name)
+            except Exception as e:
+                logger.warning(f"Error getting schema_fields from {engine_name}: {e}")
+        
+        # Method 2: Check for structured_output_model in AugLLMConfig
+        if hasattr(engine, "structured_output_model") and engine.structured_output_model is not None:
+            try:
+                output_model = engine.structured_output_model
+                
+                # Extract fields from the structured output model
+                if hasattr(output_model, "model_fields"):
+                    # Pydantic v2
+                    for field_name, field_info in output_model.model_fields.items():
+                        # Skip internal or duplicate fields
+                        if field_name.startswith("__") or field_name in fields:
+                            continue
+                        
+                        field_type = field_info.annotation
+                        
+                        # Make type Optional if not already
+                        if get_origin(field_type) is not Optional:
+                            field_type = Optional[field_type]
+                        
+                        # Create field with defaults
+                        fields[field_name] = (field_type, field_info)
+                        
+                        # Get description if available
+                        description = getattr(field_info, "description", None)
+                        if description:
+                            descriptions[field_name] = description
+                        
+                        # Mark as output field
+                        output_fields[engine_name].add(field_name)
+                
+                # Also add the model name as a field (common pattern)
+                model_name = output_model.__name__.lower()
+                if model_name and model_name not in fields:
+                    fields[model_name] = (Optional[output_model], Field(default=None))
+                    output_fields[engine_name].add(model_name)
+                    
+            except Exception as e:
+                logger.warning(f"Error extracting from structured_output_model in {engine_name}: {e}")
+        
+        # Method 3: Try derive_input_schema and derive_output_schema methods
+        if hasattr(engine, "derive_input_schema") and callable(engine.derive_input_schema):
+            try:
+                input_schema = engine.derive_input_schema()
+                
+                # Extract fields from input schema
+                if hasattr(input_schema, "model_fields"):
+                    # Pydantic v2
+                    for field_name, field_info in input_schema.model_fields.items():
+                        # Skip internal, special, or duplicate fields
+                        if field_name.startswith("__") or field_name == "runnable_config" or field_name in fields:
+                            continue
+                        
+                        field_type = field_info.annotation
+                        
+                        # Make type Optional if not already
+                        if get_origin(field_type) is not Optional:
+                            field_type = Optional[field_type]
+                        
+                        # Create field with defaults
+                        fields[field_name] = (field_type, field_info)
+                        
+                        # Get description if available
+                        description = getattr(field_info, "description", None)
+                        if description:
+                            descriptions[field_name] = description
+                        
+                        # Mark as input field
+                        input_fields[engine_name].add(field_name)
+            except Exception as e:
+                logger.warning(f"Error deriving input schema from {engine_name}: {e}")
+        
+        if hasattr(engine, "derive_output_schema") and callable(engine.derive_output_schema):
+            try:
+                output_schema = engine.derive_output_schema()
+                
+                # Extract fields from output schema
+                if hasattr(output_schema, "model_fields"):
+                    # Pydantic v2
+                    for field_name, field_info in output_schema.model_fields.items():
+                        # Skip internal, special, or duplicate fields
+                        if field_name.startswith("__") or field_name == "runnable_config":
+                            continue
+                        
+                        field_type = field_info.annotation
+                        
+                        # Make type Optional if not already
+                        if get_origin(field_type) is not Optional:
+                            field_type = Optional[field_type]
+                        
+                        # Create or update field with defaults
+                        if field_name not in fields:
+                            fields[field_name] = (field_type, field_info)
+                        
+                        # Get description if available
+                        description = getattr(field_info, "description", None)
+                        if description and field_name not in descriptions:
+                            descriptions[field_name] = description
+                        
+                        # Mark as output field
+                        output_fields[engine_name].add(field_name)
+            except Exception as e:
+                logger.warning(f"Error deriving output schema from {engine_name}: {e}")
+        
+        # Method 4: Extract I/O mappings if available
+        if hasattr(engine, "input_schema") and engine.input_schema:
+            try:
+                input_schema = engine.input_schema
+                
+                # Extract fields from input schema
+                if hasattr(input_schema, "model_fields"):
+                    # Pydantic v2
+                    for field_name in input_schema.model_fields:
+                        # Mark as input field
+                        input_fields[engine_name].add(field_name)
+            except Exception as e:
+                logger.warning(f"Error extracting from input_schema in {engine_name}: {e}")
+        
+        if hasattr(engine, "output_schema") and engine.output_schema:
+            try:
+                output_schema = engine.output_schema
+                
+                # Extract fields from output schema
+                if hasattr(output_schema, "model_fields"):
+                    # Pydantic v2
+                    for field_name in output_schema.model_fields:
+                        # Mark as output field
+                        output_fields[engine_name].add(field_name)
+            except Exception as e:
+                logger.warning(f"Error extracting from output_schema in {engine_name}: {e}")
+        
+        # Method 5: For AugLLMConfig, handle special fields
+        if hasattr(engine, "uses_messages_field") and engine.uses_messages_field:
+            # LLM engines typically use messages
+            input_fields[engine_name].add("messages")
+            
+            # Additional fields typically used
+            common_fields = ["content", "query", "question"]
+            for field in common_fields:
+                input_fields[engine_name].add(field)
+        
+        # Always include messages field as a likely input if no input fields found
+        if not input_fields[engine_name]:
+            input_fields[engine_name].add("messages")
+        
+        # Always ensure content is an input field for LLMs
+        if hasattr(engine, "engine_type") and str(engine.engine_type).lower() == "llm" and "content" not in input_fields[engine_name]:
+            input_fields[engine_name].add("content")
+        
+        # Update engine I/O mappings
         engine_io_mappings[engine_name]["inputs"] = list(input_fields[engine_name])
         engine_io_mappings[engine_name]["outputs"] = list(output_fields[engine_name])
         
@@ -218,6 +411,8 @@ class FieldExtractor:
                     reducer_functions, engine_io_mappings, input_fields,
                     output_fields)
         """
+        from typing import Optional
+        
         fields: Dict[str, Tuple[Any, Any]] = {}
         descriptions: Dict[str, str] = {}
         shared_fields: Set[str] = set()
@@ -282,6 +477,8 @@ class FieldExtractor:
         Returns:
             Inferred type
         """
+        from typing import Optional, Dict, List, Set, Any
+        
         if isinstance(value, str):
             return Optional[str]
         if isinstance(value, int):

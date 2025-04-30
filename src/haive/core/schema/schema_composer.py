@@ -10,7 +10,8 @@ into a cohesive schema definition.
 import inspect
 import logging
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Set, Type, get_args, get_origin, Annotated, Union, Callable
+from typing import Any, Dict, List, Optional, Set, Type, get_args,\
+    get_origin, Annotated, Union, Callable,TYPE_CHECKING
 
 from pydantic import BaseModel, Field, create_model
 
@@ -18,6 +19,8 @@ from haive.core.schema.state_schema import StateSchema
 from haive.core.schema.field_definition import FieldDefinition
 from haive.core.schema.field_extractor import FieldExtractor
 logger = logging.getLogger(__name__)
+if TYPE_CHECKING:
+    from haive.core.schema.state_schema_manager import StateSchemaManager
 
 class SchemaComposer:
     """
@@ -277,7 +280,6 @@ class SchemaComposer:
             Self for method chaining.
         """
         return self.add_fields_from_engine(engine)
-
     def add_fields_from_engine(self, engine: Any) -> 'SchemaComposer':
         """
         Extract fields from an Engine object.
@@ -292,10 +294,13 @@ class SchemaComposer:
             Self for method chaining.
         """
         source = getattr(engine, "name", str(engine))
+        logger.debug(f"Extracting fields from engine: {source}")
         
         # Get fields, descriptions, mappings, etc. from the engine
         fields, descriptions, engine_io_mappings, input_fields, output_fields = \
             FieldExtractor.extract_from_engine(engine)
+        
+        logger.debug(f"Extracted fields from engine {source}: {list(fields.keys())}")
         
         # Add fields that aren't already present
         for field_name, (field_type, field_info) in fields.items():
@@ -328,6 +333,49 @@ class SchemaComposer:
                     description=descriptions.get(field_name),
                     source=source
                 )
+        
+        # Special handling for AugLLMConfig with structured_output_model
+        if hasattr(engine, "structured_output_model") and engine.structured_output_model is not None:
+            logger.debug(f"Found structured_output_model in {source}: {engine.structured_output_model.__name__}")
+            
+            # Add fields from the structured output model
+            structured_model = engine.structured_output_model
+            
+            if hasattr(structured_model, "model_fields"):
+                # Pydantic v2
+                for field_name, field_info in structured_model.model_fields.items():
+                    if field_name not in self.fields:
+                        # Add field from structured output model
+                        self.add_field(
+                            name=field_name,
+                            field_type=field_info.annotation,
+                            default=field_info.default,
+                            default_factory=field_info.default_factory,
+                            description=field_info.description,
+                            source=f"{source}.structured_output_model"
+                        )
+                        
+                        # Add to output fields for this engine
+                        self.output_fields[source].add(field_name)
+                        
+                        logger.debug(f"Added field {field_name} from structured_output_model")
+            
+            # Also add the model itself as a field with its own name in lowercase
+            model_name = structured_model.__name__.lower()
+            if model_name not in self.fields:
+                from typing import Optional
+                self.add_field(
+                    name=model_name,
+                    field_type=Optional[structured_model],
+                    default=None,
+                    description=f"Output in {structured_model.__name__} format",
+                    source=f"{source}.structured_output_model"
+                )
+                
+                # Add to output fields for this engine
+                self.output_fields[source].add(model_name)
+                
+                logger.debug(f"Added field {model_name} from structured_output_model name")
         
         # Update engine I/O mappings
         for engine_name, mapping in engine_io_mappings.items():
