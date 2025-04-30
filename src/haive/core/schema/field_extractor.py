@@ -16,7 +16,16 @@ logger = logging.getLogger(__name__)
 T = TypeVar('T')
 
 class FieldExtractor:
-    """Unified utility for extracting fields from various sources."""
+    """
+    Unified utility for extracting fields from various sources.
+    
+    This class provides methods for extracting field information from:
+    - Pydantic models
+    - Engine objects with get_input_fields/get_output_fields methods
+    - Dictionaries with field definitions
+    
+    It standardizes the field extraction process across the schema system.
+    """
 
     @staticmethod
     def extract_from_model(
@@ -34,10 +43,13 @@ class FieldExtractor:
         """
         Extract all field information from a Pydantic model.
         
+        Args:
+            model_cls: Pydantic model class to extract from
+            
         Returns:
             Tuple of (fields, descriptions, shared_fields, reducer_names,
-                     reducer_functions, engine_io_mappings, input_fields,
-                     output_fields)
+                    reducer_functions, engine_io_mappings, input_fields,
+                    output_fields)
         """
         fields = {}
         descriptions = {}
@@ -64,7 +76,7 @@ class FieldExtractor:
             # Get field type and info
             field_type = field_info.annotation
             
-            # Make field Optional
+            # Make field Optional if not already
             from typing import Optional
             if get_origin(field_type) is not Optional:
                 field_type = Optional[field_type]
@@ -127,6 +139,12 @@ class FieldExtractor:
         """
         Extract all field information from an engine.
         
+        This method prioritizes using the engine's explicit get_input_fields
+        and get_output_fields methods if available.
+        
+        Args:
+            engine: Engine object to extract from
+            
         Returns:
             Tuple of (fields, descriptions, engine_io_mappings, input_fields, output_fields)
         """
@@ -147,34 +165,59 @@ class FieldExtractor:
             "outputs": []
         }
         
-        # Try different methods to extract field information
+        # Primary approach: Use engine's get_input_fields and get_output_fields methods
+        input_fields_extracted = False
+        output_fields_extracted = False
         
-        # Method 1: Check for get_schema_fields method
-        if hasattr(engine, "get_schema_fields") and callable(engine.get_schema_fields):
+        # Try to get input fields directly from the engine
+        if hasattr(engine, "get_input_fields") and callable(engine.get_input_fields):
             try:
-                schema_fields = engine.get_schema_fields()
-                for field_name, (field_type, default) in schema_fields.items():
-                    # Skip internal or special fields
-                    if field_name.startswith("__") or field_name == "runnable_config":
-                        continue
-                    
-                    # Create field_info
-                    if callable(default) and not isinstance(default, type):
-                        # It's a factory function
-                        field_info = Field(default_factory=default)
-                    else:
-                        field_info = Field(default=default)
-                    
-                    # Make type Optional if not already
-                    if get_origin(field_type) is not Optional:
-                        field_type = Optional[field_type]
-                    
+                input_fields_dict = engine.get_input_fields()
+                
+                # Add input fields to fields dictionary
+                for field_name, (field_type, field_info) in input_fields_dict.items():
                     fields[field_name] = (field_type, field_info)
                     
-                    # Track as input field
+                    # Extract description if available
+                    description = getattr(field_info, "description", None)
+                    if description:
+                        descriptions[field_name] = description
+                    
+                    # Add to input fields
                     input_fields[engine_name].add(field_name)
+                
+                # Mark as successful
+                input_fields_extracted = True
+                logger.debug(f"Extracted {len(input_fields_dict)} input fields from {engine_name}")
             except Exception as e:
-                logger.warning(f"Error getting schema_fields from {engine_name}: {e}")
+                logger.warning(f"Error getting input_fields from {engine_name}: {e}")
+        
+        # Try to get output fields directly from the engine
+        if hasattr(engine, "get_output_fields") and callable(engine.get_output_fields):
+            try:
+                output_fields_dict = engine.get_output_fields()
+                
+                # Add output fields to fields dictionary
+                for field_name, (field_type, field_info) in output_fields_dict.items():
+                    # Only add if not already added from input fields
+                    if field_name not in fields:
+                        fields[field_name] = (field_type, field_info)
+                        
+                        # Extract description if available
+                        description = getattr(field_info, "description", None)
+                        if description:
+                            descriptions[field_name] = description
+                    
+                    # Add to output fields
+                    output_fields[engine_name].add(field_name)
+                
+                # Mark as successful
+                output_fields_extracted = True
+                logger.debug(f"Extracted {len(output_fields_dict)} output fields from {engine_name}")
+            except Exception as e:
+                logger.warning(f"Error getting output_fields from {engine_name}: {e}")
+        
+        # Secondary approaches if primary extraction methods failed
         
         # Method 2: Check for structured_output_model in AugLLMConfig
         if hasattr(engine, "structured_output_model") and engine.structured_output_model is not None:
@@ -194,7 +237,81 @@ class FieldExtractor:
             except Exception as e:
                 logger.warning(f"Error extracting from structured_output_model in {engine_name}: {e}")
         
-        # Method 3: Try derive_input_schema and derive_output_schema methods
+        # Method 3: Try to detect field requirements via get_in_out_variables method
+        if hasattr(engine, "get_in_out_variables") and callable(engine.get_in_out_variables):
+            try:
+                in_vars, out_vars = engine.get_in_out_variables()
+                
+                # Process input variables
+                if in_vars and not input_fields_extracted:
+                    from typing import Any
+                    
+                    for var_name in in_vars:
+                        if var_name not in fields:
+                            # Create a generic field
+                            fields[var_name] = (Optional[Any], Field(
+                                default=None,
+                                description=f"Input variable for {engine_name}"
+                            ))
+                            
+                            # Track as input field
+                            input_fields[engine_name].add(var_name)
+                
+                # Process output variables
+                if out_vars and not output_fields_extracted:
+                    from typing import Any
+                    
+                    for var_name in out_vars:
+                        if var_name not in fields:
+                            # Create a generic field
+                            fields[var_name] = (Optional[Any], Field(
+                                default=None,
+                                description=f"Output variable from {engine_name}"
+                            ))
+                            
+                            # Track as output field
+                            output_fields[engine_name].add(var_name)
+                
+                logger.debug(f"Extracted variables from get_in_out_variables in {engine_name}")
+            except Exception as e:
+                logger.warning(f"Error getting variables from {engine_name}: {e}")
+        
+        # Method 4: Check for schema_fields method
+        if hasattr(engine, "get_schema_fields") and callable(engine.get_schema_fields):
+            try:
+                schema_fields = engine.get_schema_fields()
+                for field_name, (field_type, default) in schema_fields.items():
+                    # Skip internal or special fields
+                    if field_name.startswith("__") or field_name == "runnable_config":
+                        continue
+                    
+                    # Skip if already extracted
+                    if field_name in fields:
+                        continue
+                    
+                    # Create field_info
+                    if callable(default) and not isinstance(default, type):
+                        # It's a factory function
+                        field_info = Field(default_factory=default)
+                    else:
+                        field_info = Field(default=default)
+                    
+                    # Make type Optional if not already
+                    if get_origin(field_type) is not Optional:
+                        field_type = Optional[field_type]
+                    
+                    fields[field_name] = (field_type, field_info)
+                    
+                    # Track as generic field - we don't know if it's input or output
+                    # For schema_fields, assume both for compatibility
+                    input_fields[engine_name].add(field_name)
+                    output_fields[engine_name].add(field_name)
+                    
+                logger.debug(f"Extracted fields from get_schema_fields in {engine_name}")
+            except Exception as e:
+                logger.warning(f"Error getting schema_fields from {engine_name}: {e}")
+        
+        # Method 5: Try derive_input_schema and derive_output_schema methods
         if hasattr(engine, "derive_input_schema") and callable(engine.derive_input_schema):
             try:
                 input_schema = engine.derive_input_schema()
@@ -222,6 +339,8 @@ class FieldExtractor:
                         
                         # Track as input field
                         input_fields[engine_name].add(field_name)
+                
+                logger.debug(f"Extracted fields from derive_input_schema in {engine_name}")
             except Exception as e:
                 logger.warning(f"Error deriving input schema from {engine_name}: {e}")
         
@@ -253,10 +372,12 @@ class FieldExtractor:
                         
                         # Track as output field
                         output_fields[engine_name].add(field_name)
+                
+                logger.debug(f"Extracted fields from derive_output_schema in {engine_name}")
             except Exception as e:
                 logger.warning(f"Error deriving output schema from {engine_name}: {e}")
         
-        # Update engine I/O mappings
+        # Update engine I/O mappings based on extracted fields
         engine_io_mappings[engine_name]["inputs"] = list(input_fields[engine_name])
         engine_io_mappings[engine_name]["outputs"] = list(output_fields[engine_name])
         
@@ -276,6 +397,9 @@ class FieldExtractor:
         """
         Extract fields from a dictionary.
         
+        Args:
+            data: Dictionary containing field data
+            
         Returns:
             Tuple of (fields, descriptions, shared_fields, reducer_names,
                     reducer_functions, engine_io_mappings, input_fields,
@@ -337,7 +461,15 @@ class FieldExtractor:
 
     @staticmethod
     def _infer_type(value: Any) -> Any:
-        """Infer the type of a value with special handling for collections."""
+        """
+        Infer the type of a value with special handling for collections.
+        
+        Args:
+            value: Value to infer type from
+            
+        Returns:
+            Inferred type annotation
+        """
         from typing import Optional, Dict, List, Set, Any
         
         if isinstance(value, str):
@@ -349,9 +481,37 @@ class FieldExtractor:
         if isinstance(value, bool):
             return Optional[bool]
         if isinstance(value, list):
+            # Try to infer element type for homogeneous lists
+            if value and all(isinstance(item, type(value[0])) for item in value):
+                elem_type = FieldExtractor._infer_type(value[0])
+                # Extract inner type from Optional
+                if get_origin(elem_type) is Optional:
+                    inner_type = get_args(elem_type)[0]
+                    return Optional[List[inner_type]]
             return Optional[List[Any]]
         if isinstance(value, dict):
+            # Try to infer key/value types for homogeneous dicts
+            if value:
+                keys = list(value.keys())
+                values = list(value.values())
+                if all(isinstance(k, type(keys[0])) for k in keys) and all(isinstance(v, type(values[0])) for v in values):
+                    key_type = FieldExtractor._infer_type(keys[0])
+                    val_type = FieldExtractor._infer_type(values[0])
+                    # Extract inner types from Optional
+                    if get_origin(key_type) is Optional and get_origin(val_type) is Optional:
+                        inner_key = get_args(key_type)[0]
+                        inner_val = get_args(val_type)[0]
+                        return Optional[Dict[inner_key, inner_val]]
             return Optional[Dict[str, Any]]
         if isinstance(value, set):
             return Optional[Set[Any]]
+        
+        # Special handling for common objects
+        try:
+            from langchain_core.messages import BaseMessage
+            if isinstance(value, BaseMessage):
+                return Optional[BaseMessage]
+        except ImportError:
+            pass
+            
         return Optional[Any]
