@@ -12,6 +12,7 @@ Attributes:
 Classes:
     VectorStoreConfig: Main configuration class for vector stores
     VectorStoreProvider: Enumeration of supported vector store providers
+    VectorStoreProviderRegistry: Registry for extending supported providers
 
 Example:
     Basic usage of creating a vector store:
@@ -32,19 +33,45 @@ Example:
     # Create the vector store
     vectorstore = config.create_vectorstore()
     ```
+    
+    Registering a custom vector store provider:
+    ```python
+    from haive.core.engine.vectorstore import VectorStoreProviderRegistry
+    
+    # Direct registration with a class
+    class MyVectorStore(VectorStore):
+        # Implementation of VectorStore methods
+        ...
+    
+    VectorStoreProviderRegistry.register_provider("MyCustomStore", MyVectorStore)
+    
+    # Or with a factory function for lazy loading
+    def get_my_vectorstore_class():
+        from my_package.vectorstore import MyOtherVectorStore
+        return MyOtherVectorStore
+    
+    VectorStoreProviderRegistry.register_provider_factory("MyOtherStore", get_my_vectorstore_class)
+    
+    # Now you can use these custom providers
+    config = VectorStoreConfig(
+        name="custom_vectorstore",
+        vector_store_provider="MyCustomStore"
+    )
+    ```
 """
 
 from __future__ import annotations
 
+import json
 import logging
 from enum import Enum
-from typing import Any, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 from langchain_core.documents import Document
 from langchain_core.retrievers import BaseRetriever
 from langchain_core.runnables import RunnableConfig
 from langchain_core.vectorstores import VectorStore
-from pydantic import BaseModel, ConfigDict, Field, create_model, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, create_model
 
 from haive.core.engine.base import EngineType, InvokableEngine
 from haive.core.models.embeddings.base import BaseEmbeddingConfig, HuggingFaceEmbeddingConfig
@@ -61,8 +88,24 @@ class VectorStoreProvider(str, Enum):
     MILVUS = "Milvus"
     QDRANT = "Qdrant"
     IN_MEMORY = "InMemory"
+    
+    @classmethod
+    def extend(cls, name: str, value: str) -> None:
+        """
+        Extend the enum with a new provider value.
+        
+        Args:
+            name: The enum member name (e.g., 'MY_PROVIDER')
+            value: The string value (e.g., 'MyProvider')
+            
+        Note:
+            This is a workaround to extend an Enum at runtime. For proper type
+            hinting, use the VectorStoreProviderRegistry instead.
+        """
+        cls._member_map_[name] = value
+        cls._value2member_map_[value] = cls._member_map_[name]
 
-class VectorStoreConfig(InvokableEngine[Union[str, dict[str, Any]], list[Document]]):
+class VectorStoreConfig(InvokableEngine[Union[str, Dict[str, Any]], List[Document]]):
     """Configuration model for a vector store engine.
     
     VectorStoreConfig provides a consistent interface for creating and using
@@ -72,7 +115,7 @@ class VectorStoreConfig(InvokableEngine[Union[str, dict[str, Any]], list[Documen
 
     # Core components
     embedding_model: BaseEmbeddingConfig = Field(
-        default=HuggingFaceEmbeddingConfig(model="sentence-transformers/all-mpnet-base-v2"),
+        default_factory=lambda: HuggingFaceEmbeddingConfig(model="sentence-transformers/all-mpnet-base-v2"),
         description="The embedding model to use for the vector store"
     )
     vector_store_provider: VectorStoreProvider = Field(
@@ -81,7 +124,7 @@ class VectorStoreConfig(InvokableEngine[Union[str, dict[str, Any]], list[Documen
     )
 
     # Content and storage
-    documents: list[Document] = Field(
+    documents: List[Document] = Field(
         default_factory=list,
         description="The raw documents to store"
     )
@@ -99,7 +142,7 @@ class VectorStoreConfig(InvokableEngine[Union[str, dict[str, Any]], list[Documen
         default=4,
         description="Default number of documents to retrieve"
     )
-    score_threshold: float | None = Field(
+    score_threshold: Optional[float] = Field(
         default=None,
         description="Score threshold for similarity search"
     )
@@ -109,18 +152,46 @@ class VectorStoreConfig(InvokableEngine[Union[str, dict[str, Any]], list[Documen
     )
 
     # Additional configuration
-    vector_store_kwargs: dict[str, Any] = Field(
+    vector_store_kwargs: Dict[str, Any] = Field(
         default_factory=dict,
         description="Optional kwargs for the vector store"
     )
 
-    model_config = ConfigDict(arbitrary_types_allowed = True, )
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @field_validator("engine_type")
     def validate_engine_type(cls, v):
         if v != EngineType.VECTOR_STORE:
             raise ValueError("engine_type must be VECTOR_STORE")
         return v
+
+    def get_input_fields(self) -> Dict[str, Tuple[Type, Any]]:
+        """
+        Return input field definitions as field_name -> (type, default) pairs.
+        
+        Returns:
+            Dictionary mapping field names to (type, default) tuples
+        """
+        from typing import Any, Dict, Optional, List
+        
+        return {
+            "query": (str, ...),
+            "k": (Optional[int], None),
+            "filter": (Optional[Dict[str, Any]], None),
+            "score_threshold": (Optional[float], None),
+            "search_type": (Optional[str], None),
+        }
+
+    def get_output_fields(self) -> Dict[str, Tuple[Type, Any]]:
+        """
+        Return output field definitions as field_name -> (type, default) pairs.
+        
+        Returns:
+            Dictionary mapping field names to (type, default) tuples
+        """
+        return {
+            "documents": (List[Document], [])
+        }
 
     def add_document(self, document: Document) -> None:
         """Add a single document to the vector store config.
@@ -130,7 +201,7 @@ class VectorStoreConfig(InvokableEngine[Union[str, dict[str, Any]], list[Documen
         """
         self.documents.append(document)
 
-    def add_documents(self, documents: list[Document]) -> None:
+    def add_documents(self, documents: List[Document]) -> None:
         """Add multiple documents to the vector store config.
         
         Args:
@@ -138,7 +209,7 @@ class VectorStoreConfig(InvokableEngine[Union[str, dict[str, Any]], list[Documen
         """
         self.documents.extend(documents)
 
-    def create_runnable(self, runnable_config: RunnableConfig | None = None) -> VectorStore:
+    def create_runnable(self, runnable_config: Optional[RunnableConfig] = None) -> VectorStore:
         """Create a vector store instance with configuration applied.
         
         Args:
@@ -155,17 +226,17 @@ class VectorStoreConfig(InvokableEngine[Union[str, dict[str, Any]], list[Documen
             return self.get_vectorstore(embedding=params["embedding_model"])
 
         # Create vector store with existing configuration
-        return self.instantiate()
+        return self.create_vectorstore()
 
     def similarity_search(
         self,
         query: str,
-        k: int | None = None,
-        score_threshold: float | None = None,
-        filter: dict[str, Any] | None = None,
-        search_type: str | None = None,
-        runnable_config: RunnableConfig | None = None
-    ) -> list[Document]:
+        k: Optional[int] = None,
+        score_threshold: Optional[float] = None,
+        filter: Optional[Dict[str, Any]] = None,
+        search_type: Optional[str] = None,
+        runnable_config: Optional[RunnableConfig] = None
+    ) -> List[Document]:
         """Perform similarity search with configurable parameters.
         
         Args:
@@ -219,9 +290,9 @@ class VectorStoreConfig(InvokableEngine[Union[str, dict[str, Any]], list[Documen
 
     def invoke(
         self,
-        input_data: str | dict[str, Any],
-        runnable_config: RunnableConfig | None = None
-    ) -> list[Document]:
+        input_data: Union[str, Dict[str, Any]],
+        runnable_config: Optional[RunnableConfig] = None
+    ) -> List[Document]:
         """Invoke the vector store with input data.
         
         Args:
@@ -257,34 +328,7 @@ class VectorStoreConfig(InvokableEngine[Union[str, dict[str, Any]], list[Documen
             runnable_config=runnable_config
         )
 
-    def apply_runnable_config(self, runnable_config: RunnableConfig | None = None) -> dict[str, Any]:
-        """Extract parameters from runnable_config relevant to this vector store.
-        
-        Args:
-            runnable_config: Runtime configuration
-            
-        Returns:
-            Dictionary of relevant parameters
-        """
-        # Get common parameters
-        params = super().apply_runnable_config(runnable_config)
-
-        if runnable_config and "configurable" in runnable_config:
-            configurable = runnable_config["configurable"]
-
-            # Extract vector store specific parameters
-            if "k" in configurable:
-                params["k"] = configurable["k"]
-            if "embedding_model" in configurable:
-                params["embedding_model"] = configurable["embedding_model"]
-            if "score_threshold" in configurable:
-                params["score_threshold"] = configurable["score_threshold"]
-            if "search_type" in configurable:
-                params["search_type"] = configurable["search_type"]
-
-        return params
-
-    def instantiate(self, async_mode: bool = False) -> VectorStore:
+    def create_vectorstore(self, async_mode: bool = False) -> VectorStore:
         """Create a vector store instance from this configuration.
         
         Args:
@@ -338,12 +382,18 @@ class VectorStoreConfig(InvokableEngine[Union[str, dict[str, Any]], list[Documen
             **self.vector_store_kwargs
         )
 
-    def _get_vectorstore_class(self) -> type[VectorStore]:
+    def _get_vectorstore_class(self) -> Type[VectorStore]:
         """Get the vector store class based on provider.
         
         Returns:
             VectorStore class
         """
+        # Check if provider is in registry first
+        provider_class = VectorStoreProviderRegistry.get_provider_class(self.vector_store_provider)
+        if provider_class is not None:
+            return provider_class
+            
+        # Fall back to built-in providers
         if self.vector_store_provider == VectorStoreProvider.CHROMA:
             from langchain_community.vectorstores import Chroma
             return Chroma
@@ -372,8 +422,8 @@ class VectorStoreConfig(InvokableEngine[Union[str, dict[str, Any]], list[Documen
 
     def create_retriever(
         self,
-        search_type: str | None = None,
-        search_kwargs: dict[str, Any] | None = None,
+        search_type: Optional[str] = None,
+        search_kwargs: Optional[Dict[str, Any]] = None,
         **kwargs
     ) -> BaseRetriever:
         """Create a retriever from the vector store.
@@ -387,7 +437,7 @@ class VectorStoreConfig(InvokableEngine[Union[str, dict[str, Any]], list[Documen
             Configured retriever
         """
         # Create vector store
-        vectorstore = self.instantiate()
+        vectorstore = self.create_vectorstore()
 
         # Set default search kwargs if not provided
         if search_kwargs is None:
@@ -405,61 +455,6 @@ class VectorStoreConfig(InvokableEngine[Union[str, dict[str, Any]], list[Documen
             **kwargs
         )
 
-    def derive_input_schema(self) -> type[BaseModel]:
-        """Derive input schema for this engine.
-        
-        Returns:
-            Pydantic model for input schema
-        """
-        # Use provided schema if available
-        if self.input_schema:
-            return self.input_schema
-
-        # Create a simple input schema
-        return create_model(
-            f"{self.__class__.__name__}Input",
-            query=(str, ...),
-            k=(Optional[int], None),
-            filter=(Optional[dict[str, Any]], None),
-            score_threshold=(Optional[float], None),
-            search_type=(Optional[str], None)
-        )
-
-    def derive_output_schema(self) -> type[BaseModel]:
-        """Derive output schema for this engine.
-        
-        Returns:
-            Pydantic model for output schema
-        """
-        # Use provided schema if available
-        if self.output_schema:
-            return self.output_schema
-
-        # Create output schema for documents
-        return create_model(
-            f"{self.__class__.__name__}Output",
-            documents=(list[Document], ...)
-        )
-
-    def get_schema_fields(self) -> dict[str, tuple[type, Any]]:
-        """Get schema fields for this engine.
-        
-        Returns:
-            Dictionary mapping field names to (type, default) tuples
-        """
-        from typing import Any, Optional
-
-        fields = {
-            "query": (str, ...),
-            "k": (Optional[int], None),
-            "filter": (Optional[dict[str, Any]], None),
-            "score_threshold": (Optional[float], None),
-            "search_type": (Optional[str], None),
-            "documents": (list[Document], [])
-        }
-
-        return fields
-
     def get_vectorstore(self, embedding=None, async_mode: bool = False) -> VectorStore:
         """Get the vector store with optional embedding override.
         
@@ -476,19 +471,40 @@ class VectorStoreConfig(InvokableEngine[Union[str, dict[str, Any]], list[Documen
             # Set the provided embedding
             self.embedding_model = embedding
             # Create vector store
-            result = self.instantiate(async_mode)
+            result = self.create_vectorstore(async_mode)
             # Restore original embedding
             self.embedding_model = original_embedding
             return result
-        return self.instantiate(async_mode)
+        return self.create_vectorstore(async_mode)
+
+    def extract_params(self) -> Dict[str, Any]:
+        """
+        Extract parameters from this engine for serialization.
+        
+        Returns:
+            Dictionary of engine parameters
+        """
+        params = super().extract_params()
+        
+        # Add vector store specific parameters
+        params.update({
+            "k": self.k,
+            "search_type": self.search_type,
+            "vector_store_provider": self.vector_store_provider,
+        })
+        
+        if self.score_threshold is not None:
+            params["score_threshold"] = self.score_threshold
+            
+        return params
 
     @classmethod
     def create_vs_config_from_documents(
         cls,
-        documents: list[Document],
-        embedding_model: BaseEmbeddingConfig | None = None,
+        documents: List[Document],
+        embedding_model: Optional[BaseEmbeddingConfig] = None,
         **kwargs
-    ) -> VectorStoreConfig:
+    ) -> "VectorStoreConfig":
         """Create a VectorStoreConfig from a list of documents.
         
         Args:
@@ -507,8 +523,8 @@ class VectorStoreConfig(InvokableEngine[Union[str, dict[str, Any]], list[Documen
     @classmethod
     def create_vs_from_documents(
         cls,
-        documents: list[Document],
-        embedding_model: BaseEmbeddingConfig | None = None,
+        documents: List[Document],
+        embedding_model: Optional[BaseEmbeddingConfig] = None,
         **kwargs
     ) -> VectorStore:
         """Create a VectorStore from a list of documents.
@@ -522,7 +538,105 @@ class VectorStoreConfig(InvokableEngine[Union[str, dict[str, Any]], list[Documen
             Instantiated VectorStore
         """
         config = cls.create_vs_config_from_documents(documents, embedding_model, **kwargs)
-        return config.instantiate()
+        return config.create_vectorstore()
+
+
+class VectorStoreProviderRegistry:
+    """Registry for custom vector store providers.
+    
+    This registry allows adding custom vector store providers without modifying the core VectorStoreProvider enum.
+    """
+    # Use class variables without underscore prefixes for Pydantic compatibility
+    providers: Dict[Union[str, VectorStoreProvider], Type[VectorStore]] = {}
+    provider_factories: Dict[Union[str, VectorStoreProvider], Callable[..., Type[VectorStore]]] = {}
+    
+    @classmethod
+    def register_provider(cls, provider_name: Union[str, VectorStoreProvider], provider_class: Type[VectorStore]) -> None:
+        """
+        Register a vector store provider class.
+        
+        Args:
+            provider_name: Name or enum value for the provider
+            provider_class: The VectorStore class to use for this provider
+        """
+        cls.providers[provider_name] = provider_class
+        
+        # If it's a string, try to extend the enum
+        if isinstance(provider_name, str) and not any(provider.value == provider_name for provider in VectorStoreProvider):
+            try:
+                enum_name = provider_name.upper().replace(" ", "_")
+                VectorStoreProvider.extend(enum_name, provider_name)
+                cls.providers[getattr(VectorStoreProvider, enum_name)] = provider_class
+            except (AttributeError, ValueError) as e:
+                logger.warning(f"Could not extend VectorStoreProvider enum: {e}")
+    
+    @classmethod
+    def register_provider_factory(cls, provider_name: Union[str, VectorStoreProvider], 
+                                 factory: Callable[..., Type[VectorStore]]) -> None:
+        """
+        Register a factory function that returns a vector store class.
+        
+        Args:
+            provider_name: Name or enum value for the provider
+            factory: Function that returns a VectorStore class
+        """
+        cls.provider_factories[provider_name] = factory
+        
+        # If it's a string, try to extend the enum
+        if isinstance(provider_name, str) and not any(provider.value == provider_name for provider in VectorStoreProvider):
+            try:
+                enum_name = provider_name.upper().replace(" ", "_")
+                VectorStoreProvider.extend(enum_name, provider_name)
+                cls.provider_factories[getattr(VectorStoreProvider, enum_name)] = factory
+            except (AttributeError, ValueError) as e:
+                logger.warning(f"Could not extend VectorStoreProvider enum: {e}")
+    
+    @classmethod
+    def get_provider_class(cls, provider_name: Union[str, VectorStoreProvider]) -> Optional[Type[VectorStore]]:
+        """
+        Get the vector store class for a provider.
+        
+        Args:
+            provider_name: Name or enum value for the provider
+            
+        Returns:
+            VectorStore class if found, None otherwise
+        """
+        # Check direct registrations first
+        if provider_class := cls.providers.get(provider_name):
+            return provider_class
+            
+        # Check if we have a factory for this provider
+        if factory := cls.provider_factories.get(provider_name):
+            try:
+                provider_class = factory()
+                cls.providers[provider_name] = provider_class  # Cache the result
+                return provider_class
+            except Exception as e:
+                logger.error(f"Error creating vector store class from factory: {e}")
+                
+        return None
+    
+    @classmethod
+    def list_providers(cls) -> List[str]:
+        """
+        List all registered provider names.
+        
+        Returns:
+            List of provider names
+        """
+        providers = set()
+        
+        # Add enum values
+        for provider in VectorStoreProvider:
+            providers.add(provider.value)
+            
+        # Add string keys
+        for provider in list(cls.providers.keys()) + list(cls.provider_factories.keys()):
+            if isinstance(provider, str):
+                providers.add(provider)
+        
+        return sorted(providers)
 
 
 # Shorthand creator functions
@@ -536,7 +650,7 @@ def create_vectorstore(config: VectorStoreConfig, async_mode: bool = False) -> V
     Returns:
         Instantiated vector store
     """
-    return config.instantiate(async_mode=async_mode)
+    return config.create_vectorstore(async_mode=async_mode)
 
 def create_retriever(config: VectorStoreConfig, **kwargs) -> BaseRetriever:
     """Create a retriever from a vector store configuration.
@@ -551,8 +665,8 @@ def create_retriever(config: VectorStoreConfig, **kwargs) -> BaseRetriever:
     return config.create_retriever(**kwargs)
 
 def create_vs_config_from_documents(
-    documents: list[Document],
-    embedding_model: BaseEmbeddingConfig | None = None,
+    documents: List[Document],
+    embedding_model: Optional[BaseEmbeddingConfig] = None,
     **kwargs
 ) -> VectorStoreConfig:
     """Create a VectorStoreConfig from a list of documents.
@@ -568,8 +682,8 @@ def create_vs_config_from_documents(
     return VectorStoreConfig.create_vs_config_from_documents(documents, embedding_model, **kwargs)
 
 def create_vs_from_documents(
-    documents: list[Document],
-    embedding_model: BaseEmbeddingConfig | None = None,
+    documents: List[Document],
+    embedding_model: Optional[BaseEmbeddingConfig] = None,
     **kwargs
 ) -> VectorStore:
     """Create a VectorStore from a list of documents.
@@ -585,8 +699,8 @@ def create_vs_from_documents(
     return VectorStoreConfig.create_vs_from_documents(documents, embedding_model, **kwargs)
 
 def create_retriever_from_documents(
-    documents: list[Document],
-    embedding_model: BaseEmbeddingConfig | None = None,
+    documents: List[Document],
+    embedding_model: Optional[BaseEmbeddingConfig] = None,
     **kwargs
 ) -> BaseRetriever:
     """Create a retriever directly from documents.
