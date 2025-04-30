@@ -39,7 +39,7 @@ class LLMEngine(CoreEngine[LLMConfig]):
     def initialize(self) -> None:
         """Initialize the LLM model if not already initialized."""
         if self._model is None:
-            self._model = self.config.instantiate_llm()
+            self._model = self.config.instantiate()
     
     def cleanup(self) -> None:
         """Clean up resources used by the LLM model."""

@@ -36,11 +36,16 @@ from haive.core.graph.dynamic_graph_builder import DynamicGraph
 from haive.core.graph.node.config import NodeConfig
 from haive.core.graph.node.factory import NodeFactory
 from haive.core.graph.patterns.registry import GraphPatternRegistry
+from haive.core.persistence.types import CheckpointerMode
 from haive.core.persistence.handlers import (
+    setup_checkpointer,
+    setup_async_checkpointer,
     ensure_pool_open,
+    ensure_async_pool_open,
+    close_async_pool_if_needed,
     prepare_merged_input,
     register_thread_if_needed,
-    setup_checkpointer,
+    register_async_thread_if_needed
 )
 from haive.core.schema.schema_composer import SchemaComposer
 from haive.core.schema.state_schema import StateSchema
@@ -73,8 +78,6 @@ except ImportError:
 
 # Set up logging
 logger = logging.getLogger(__name__)
-
-
 
 # Agent registry maps config classes to agent classes
 AGENT_REGISTRY: Dict[Type[AgentConfig], Type[Agent]] = {}
@@ -116,6 +119,9 @@ class Agent(Generic[TConfig], ABC):
         self.config = config
         self.verbose = verbose
         self.rich_logging = rich_logging and RICH_AVAILABLE
+        self._async_context_managers = {}  # Store async context managers
+        self._async_checkpointer = None  # Async checkpointer instance
+        self._checkpoint_mode = getattr(config, 'checkpoint_mode', 'sync') 
         
         # Set up rich UI if available and requested
         if self.rich_logging:
@@ -147,6 +153,12 @@ class Agent(Generic[TConfig], ABC):
         
         # Now we have all prerequisites to build the graph
         self._create_graph_builder()
+        
+        # Create the state graph with the proper schemas
+        self.graph = StateGraph(input=self.input_schema,
+                               output=self.output_schema,
+                               state_schema=self.state_schema,
+                               config_schema=self.config)
         
         # Allow subclass to set up workflow
         logger.info(f"Setting up workflow for {config.name}")
@@ -238,6 +250,7 @@ class Agent(Generic[TConfig], ABC):
         for module in ['haive.core.graph', 'haive.core.engine', 
                        'haive.core.schema',
                        'haive.core.graph.node',
+                       'haive.core.persistence',
                        'haive.core.engine.aug_llm']:
             module_logger = logging.getLogger(module)
             module_logger.setLevel(log_level)
@@ -296,7 +309,8 @@ class Agent(Generic[TConfig], ABC):
                 f"[bold green]Agent {self.config.name} Ready[/bold green]\n"
                 f"[cyan]Workflow nodes:[/cyan] {len(self.graph.nodes) if hasattr(self.graph, 'nodes') else 0}\n"
                 f"[cyan]Schema fields:[/cyan] {len(self.state_schema.model_fields) if hasattr(self.state_schema, 'model_fields') else 0}\n"
-                f"[cyan]Persistence:[/cyan] {type(self.checkpointer).__name__}",
+                f"[cyan]Persistence:[/cyan] {type(self.checkpointer).__name__}\n"
+                f"[cyan]Checkpoint mode:[/cyan] {self._checkpoint_mode}",
                 border_style="green",
                 title="Agent Ready",
                 subtitle=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -707,10 +721,35 @@ class Agent(Generic[TConfig], ABC):
     
     def _setup_persistence(self):
         """Set up persistence with proper checkpointer."""
+        # Determine checkpoint mode
+        if hasattr(self.config, 'checkpoint_mode'):
+            self._checkpoint_mode = self.config.checkpoint_mode
+        elif hasattr(self.config, 'persistence') and hasattr(self.config.persistence, 'mode'):
+            # Use mode from persistence config if available
+            self._checkpoint_mode = 'async' if self.config.persistence.mode == CheckpointerMode.ASYNC else 'sync'
+        
+        is_async_mode = self._checkpoint_mode == 'async'
+        
         if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
-            with self.console.status("[bold blue]Setting up persistence...[/bold blue]"):
-                # Set up checkpointer from persistence configuration
-                self.checkpointer = setup_checkpointer(self.config)
+            with self.console.status(f"[bold blue]Setting up {self._checkpoint_mode} persistence...[/bold blue]"):
+                # Set up checkpointer based on mode
+                if is_async_mode:
+                    # For async mode, we need to initialize but not enter the context yet
+                    # We'll wrap this in a synchronous call for now
+                    try:
+                        import asyncio
+                        self._async_checkpointer_cm = asyncio.run(setup_async_checkpointer(self.config))
+                        
+                        # Store for later, but use a sync checkpointer for now
+                        self.checkpointer = setup_checkpointer(self.config)
+                    except Exception as e:
+                        logger.error(f"Failed to set up async checkpointer: {e}")
+                        logger.warning(f"Falling back to sync checkpointing")
+                        self._checkpoint_mode = 'sync'
+                        self.checkpointer = setup_checkpointer(self.config)
+                else:
+                    # Standard synchronous checkpointer
+                    self.checkpointer = setup_checkpointer(self.config)
                 
                 # Add store if configured
                 self.store = None
@@ -731,15 +770,34 @@ class Agent(Generic[TConfig], ABC):
                 status_icon = "📦"  # Generic storage
                 
             self.console.print(
-                f"[bold]Persistence:[/bold] {status_icon} [{status_color}]{persistence_type}[/{status_color}]"
+                f"[bold]Persistence:[/bold] {status_icon} [{status_color}]{persistence_type}[/{status_color}] "
+                f"[dim]({self._checkpoint_mode} mode)[/dim]"
             )
             
             if hasattr(self, "store") and self.store:
                 self.console.print("[bold]Store:[/bold] ✅ Enabled")
         else:
-            # Set up checkpointer from persistence configuration
-            self.checkpointer = setup_checkpointer(self.config)
-            logger.debug(f"Checkpointer set up for {self.config.name}: {type(self.checkpointer).__name__}")
+            # Set up checkpointer based on mode
+            if is_async_mode:
+                # For async mode, we need to initialize but not enter the context yet
+                # We'll wrap this in a synchronous call for now
+                try:
+                    import asyncio
+                    self._async_checkpointer_cm = asyncio.run(setup_async_checkpointer(self.config))
+                    
+                    # Store for later, but use a sync checkpointer for now
+                    self.checkpointer = setup_checkpointer(self.config)
+                    logger.debug(f"Async checkpointer context manager prepared for {self.config.name}")
+                except Exception as e:
+                    logger.error(f"Failed to set up async checkpointer: {e}")
+                    logger.warning(f"Falling back to sync checkpointing")
+                    self._checkpoint_mode = 'sync'
+                    self.checkpointer = setup_checkpointer(self.config)
+            else:
+                # Standard synchronous checkpointer
+                self.checkpointer = setup_checkpointer(self.config)
+                
+            logger.debug(f"Checkpointer set up for {self.config.name}: {type(self.checkpointer).__name__} ({self._checkpoint_mode} mode)")
             
             # Add store if configured
             self.store = None
@@ -747,6 +805,68 @@ class Agent(Generic[TConfig], ABC):
                 from langgraph.store.base import BaseStore
                 self.store = BaseStore()
                 logger.debug("BaseStore added to agent")
+    
+    async def _get_async_checkpointer(self):
+        """
+        Get async checkpointer instance, creating it if necessary.
+        
+        Returns:
+            Async checkpointer instance
+        """
+        # Check if we already have a live async checkpointer
+        if self._async_checkpointer is not None:
+            return self._async_checkpointer
+            
+        # If we have a context manager, enter it to get the checkpointer
+        if hasattr(self, '_async_checkpointer_cm') and self._async_checkpointer_cm is not None:
+            # Initialize the context manager
+            self._async_ctx = self._async_checkpointer_cm.__aenter__()
+            self._async_checkpointer = await self._async_ctx
+            
+            # Register this in the active context managers
+            context_id = str(uuid.uuid4())
+            self._async_context_managers[context_id] = (self._async_checkpointer_cm, self._async_ctx)
+            
+            return self._async_checkpointer
+            
+        # If no context manager is available, set up a new one
+        try:
+            # Set up new context manager
+            self._async_checkpointer_cm = await setup_async_checkpointer(self.config)
+            
+            # Enter the context manager
+            self._async_ctx = self._async_checkpointer_cm.__aenter__()
+            self._async_checkpointer = await self._async_ctx
+            
+            # Register this in the active context managers
+            context_id = str(uuid.uuid4())
+            self._async_context_managers[context_id] = (self._async_checkpointer_cm, self._async_ctx)
+            
+            return self._async_checkpointer
+        except Exception as e:
+            logger.error(f"Failed to get async checkpointer: {e}")
+            
+            # Fall back to synchronous checkpointer
+            return self.checkpointer
+    
+    async def _cleanup_async_resources(self):
+        """Clean up any active async context managers."""
+        # Clean up each async context manager
+        for context_id, (cm, ctx) in list(self._async_context_managers.items()):
+            try:
+                # Exit the context manager
+                await cm.__aexit__(None, None, None)
+                logger.debug(f"Closed async context manager {context_id}")
+            except Exception as e:
+                logger.error(f"Error closing async context manager {context_id}: {e}")
+                
+            # Remove from active managers
+            del self._async_context_managers[context_id]
+            
+        # Clear the active checkpointer
+        self._async_checkpointer = None
+        self._async_ctx = None
+        self._async_checkpointer_cm = None
     
     def _setup_runtime_config(self):
         """Set up default runtime configuration."""
@@ -807,7 +927,6 @@ class Agent(Generic[TConfig], ABC):
             logger.debug(f"DynamicGraph created for {self.config.name}")
         
         # Initial graph structure will be built in setup_workflow
-        self.graph = None
         self._app = None
     
     def _process_node_configs(self):
@@ -1334,6 +1453,9 @@ class Agent(Generic[TConfig], ABC):
         # Add save_history flag if specified
         if "save_history" in kwargs:
             runtime_config["configurable"]["save_history"] = kwargs.pop("save_history")
+        
+        # Add checkpoint_mode flag if needed
+        runtime_config["configurable"]["checkpoint_mode"] = kwargs.pop("checkpoint_mode", self._checkpoint_mode)
             
         # Add other kwargs
         for key, value in kwargs.items():
@@ -1385,8 +1507,7 @@ class Agent(Generic[TConfig], ABC):
                 if isinstance(output_data, dict):
                     data_dict = output_data
                 elif hasattr(output_data, "model_dump"):
-                    
-# Pydantic v2
+                    # Pydantic v2
                     data_dict = output_data.model_dump()
                 elif hasattr(output_data, "dict"):
                     # Pydantic v1
@@ -1565,6 +1686,7 @@ class Agent(Generic[TConfig], ABC):
                    input_data: TIn, 
                    thread_id: Optional[str] = None,
                    config: Optional[RunnableConfig] = None,
+                   debug: bool = None,
                    **kwargs) -> TOut:
         """
         Asynchronously run the agent with input data.
@@ -1573,21 +1695,29 @@ class Agent(Generic[TConfig], ABC):
             input_data: Input data for the agent
             thread_id: Optional thread ID for persistence
             config: Optional runtime configuration
+            debug: Whether to enable debug mode
             **kwargs: Additional runtime configuration
             
         Returns:
             Output from the agent
         """
         # Default debug to verbose if not specified
-        debug = kwargs.get("debug", self.verbose)
+        if debug is None:
+            debug = self.verbose
             
         # Prepare input data in correct format
         processed_input = self._prepare_input(input_data)
+        
+        # Check if async checkpoint_mode is requested
+        checkpoint_mode = kwargs.get("checkpoint_mode", self._checkpoint_mode)
+        is_async_mode = checkpoint_mode == 'async'
         
         # Prepare runtime configuration
         runtime_config = self._prepare_runnable_config(
             thread_id=thread_id,
             config=config,
+            debug=debug,
+            checkpoint_mode=checkpoint_mode,
             **kwargs
         )
         
@@ -1598,7 +1728,8 @@ class Agent(Generic[TConfig], ABC):
         if self.rich_logging and RICH_AVAILABLE and debug and hasattr(self, "console"):
             self.console.print(Panel.fit(
                 f"[bold blue]Running Agent Async: [green]{self.config.name}[/green][/bold blue]\n"
-                f"[cyan]Thread ID:[/cyan] {thread_id}",
+                f"[cyan]Thread ID:[/cyan] {thread_id}\n"
+                f"[cyan]Checkpoint Mode:[/cyan] {checkpoint_mode}",
                 border_style="blue",
                 title="Async Execution Started",
                 subtitle=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -1607,61 +1738,139 @@ class Agent(Generic[TConfig], ABC):
         # Set up checkpointer if using persistence
         start_time = time.time()
         
-        # Register thread if needed
-        if self.checkpointer and thread_id:
-            register_thread_if_needed(self.checkpointer, thread_id)
-            
-        # Get previous state if available
-        previous_state = None
         try:
-            if self.checkpointer and thread_id:
-                # Get last state for this thread
-                previous_state = self.app.get_state(runtime_config)
+            # Use appropriate checkpointer based on mode
+            if is_async_mode:
+                # Get or create async checkpointer
+                async_checkpointer = await self._get_async_checkpointer()
                 
-                if previous_state and debug:
-                    logger.debug(f"Retrieved previous state for thread {thread_id}")
-        except Exception as e:
-            logger.warning(f"Error retrieving previous state: {e}")
-            
-        # Prepare merged input with previous state if available
-        if previous_state:
-            try:
-                full_input = prepare_merged_input(
-                    processed_input,
-                    previous_state,
-                    runtime_config,
-                    self.input_schema,
-                    self.state_schema
-                )
-                logger.debug("Merged input with previous state")
+                # Register thread if needed
+                await register_async_thread_if_needed(async_checkpointer, thread_id)
                 
-                # Update processed input for running
-                processed_input = full_input
-            except Exception as e:
-                logger.warning(f"Error merging with previous state: {e}")
+                # Get previous state if available
+                previous_state = None
+                try:
+                    # Use app with async checkpointer
+                    # We need to recompile with the async checkpointer
+                    async_app = self.graph.compile(checkpointer=async_checkpointer, store=self.store)
+                    previous_state = async_app.get_state(runtime_config)
+                    
+                    if previous_state and debug:
+                        logger.debug(f"Retrieved previous state for thread {thread_id}")
+                except Exception as e:
+                    logger.warning(f"Error retrieving previous state: {e}")
                 
-        # Run the agent asynchronously
-        try:
-            # Use ainvoke if available
-            if hasattr(self.app, "ainvoke"):
-                result = await self.app.ainvoke(processed_input, runtime_config)
+                # Prepare merged input with previous state if available
+                if previous_state:
+                    try:
+                        full_input = prepare_merged_input(
+                            processed_input,
+                            previous_state,
+                            runtime_config,
+                            self.input_schema,
+                            self.state_schema
+                        )
+                        logger.debug("Merged input with previous state")
+                        
+                        # Update processed input for running
+                        processed_input = full_input
+                    except Exception as e:
+                        logger.warning(f"Error merging with previous state: {e}")
+                
+                # Use ainvoke if available on the async app
+                if hasattr(async_app, "ainvoke"):
+                    result = await async_app.ainvoke(processed_input, runtime_config)
+                else:
+                    # Fall back to threaded execution
+                    loop = asyncio.get_event_loop()
+                    result = await loop.run_in_executor(
+                        None, 
+                        lambda: async_app.invoke(processed_input, runtime_config)
+                    )
+                    
+                # Process the result if needed
+                output = self._process_output(result)
+                
+                # Save state history if configured
+                if runtime_config["configurable"].get("save_history", getattr(self.config, "save_history", True)):
+                    # Use a thread to save state history (could be async but we're keeping it simple)
+                    loop = asyncio.get_event_loop()
+                    await loop.run_in_executor(None, lambda: self.save_state_history(runtime_config))
+                
+                # Return the result
+                return output
             else:
-                # Fall back to threaded execution
-                loop = asyncio.get_event_loop()
-                result = await loop.run_in_executor(
-                    None, 
-                    lambda: self.app.invoke(processed_input, runtime_config)
-                )
+                # Standard sync mode with async function wrapper
                 
-            logger.debug(f"Agent async execution completed successfully")
-            
-            # Process the result if needed
-            output = self._process_output(result)
-            
-            # Save state history if configured
-            if runtime_config["configurable"].get("save_history", getattr(self.config, "save_history", True)):
-                await loop.run_in_executor(None, lambda: self.save_state_history(runtime_config))
+                # Register thread if needed
+                if self.checkpointer and thread_id:
+                    register_thread_if_needed(self.checkpointer, thread_id)
                 
+                # Get previous state if available
+                previous_state = None
+                try:
+                    if self.checkpointer and thread_id:
+                        # Get last state for this thread
+                        previous_state = self.app.get_state(runtime_config)
+                        
+                        if previous_state and debug:
+                            logger.debug(f"Retrieved previous state for thread {thread_id}")
+                except Exception as e:
+                    logger.warning(f"Error retrieving previous state: {e}")
+                    
+                # Prepare merged input with previous state if available
+                if previous_state:
+                    try:
+                        full_input = prepare_merged_input(
+                            processed_input,
+                            previous_state,
+                            runtime_config,
+                            self.input_schema,
+                            self.state_schema
+                        )
+                        logger.debug("Merged input with previous state")
+                        
+                        # Update processed input for running
+                        processed_input = full_input
+                    except Exception as e:
+                        logger.warning(f"Error merging with previous state: {e}")
+                        
+                # Use ainvoke if available
+                if hasattr(self.app, "ainvoke"):
+                    result = await self.app.ainvoke(processed_input, runtime_config)
+                else:
+                    # Fall back to threaded execution
+                    loop = asyncio.get_event_loop()
+                    result = await loop.run_in_executor(
+                        None, 
+                        lambda: self.app.invoke(processed_input, runtime_config)
+                    )
+                    
+                logger.debug(f"Agent async execution completed successfully")
+                
+                # Process the result if needed
+                output = self._process_output(result)
+                
+                # Save state history if configured
+                if runtime_config["configurable"].get("save_history", getattr(self.config, "save_history", True)):
+                    loop = asyncio.get_event_loop()
+                    await loop.run_in_executor(None, lambda: self.save_state_history(runtime_config))
+                
+                # Return the result
+                return output
+                
+        except Exception as e:
+            logger.error(f"Error during async agent execution: {e}")
+            
+            if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
+                self.console.print(Panel.fit(
+                    f"[bold red]Async Execution Error:[/bold red] {str(e)}",
+                    border_style="red",
+                    title="Agent Execution Failed"
+                ))
+                
+            raise
+        finally:
             # Show debug info if enabled
             if self.rich_logging and RICH_AVAILABLE and debug and hasattr(self, "console"):
                 execution_time = time.time() - start_time
@@ -1674,20 +1883,6 @@ class Agent(Generic[TConfig], ABC):
                     title="Agent Async Execution",
                     subtitle=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 ))
-            
-            return output
-            
-        except Exception as e:
-            logger.error(f"Error during async agent execution: {e}")
-            
-            if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
-                self.console.print(Panel.fit(
-                    f"[bold red]Async Execution Error:[/bold red] {str(e)}",
-                    border_style="red",
-                    title="Agent Execution Failed"
-                ))
-                
-            raise
     
     def stream(self, 
                input_data: TIn, 
@@ -1886,6 +2081,7 @@ class Agent(Generic[TConfig], ABC):
                       thread_id: Optional[str] = None,
                       stream_mode: str = "values",
                       config: Optional[RunnableConfig] = None,
+                      debug: bool = None,
                       **kwargs) -> AsyncGenerator[Dict[str, Any], None]:
         """
         Asynchronously stream agent execution with input data.
@@ -1895,13 +2091,15 @@ class Agent(Generic[TConfig], ABC):
             thread_id: Optional thread ID for persistence
             stream_mode: Stream mode (values, updates, debug, etc.)
             config: Optional runtime configuration
+            debug: Whether to enable debug mode
             **kwargs: Additional runtime configuration
             
         Yields:
             Async iterator of state updates during execution
         """
         # Default debug to verbose if not specified
-        debug = kwargs.get("debug", self.verbose)
+        if debug is None:
+            debug = self.verbose
             
         # Prepare input data in correct format
         processed_input = self._prepare_input(input_data)
@@ -1909,10 +2107,16 @@ class Agent(Generic[TConfig], ABC):
         # Add stream_mode to runtime config
         kwargs["stream_mode"] = stream_mode
         
+        # Check if async checkpoint_mode is requested
+        checkpoint_mode = kwargs.get("checkpoint_mode", self._checkpoint_mode)
+        is_async_mode = checkpoint_mode == 'async'
+        
         # Prepare runtime configuration
         runtime_config = self._prepare_runnable_config(
             thread_id=thread_id,
             config=config,
+            debug=debug,
+            checkpoint_mode=checkpoint_mode,
             **kwargs
         )
         
@@ -1924,7 +2128,8 @@ class Agent(Generic[TConfig], ABC):
             self.console.print(Panel.fit(
                 f"[bold blue]Async Streaming Agent: [green]{self.config.name}[/green][/bold blue]\n"
                 f"[cyan]Thread ID:[/cyan] {thread_id}\n"
-                f"[cyan]Stream Mode:[/cyan] {stream_mode}",
+                f"[cyan]Stream Mode:[/cyan] {stream_mode}\n"
+                f"[cyan]Checkpoint Mode:[/cyan] {checkpoint_mode}",
                 border_style="blue",
                 title="Async Streaming Started",
                 subtitle=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -1933,101 +2138,170 @@ class Agent(Generic[TConfig], ABC):
         # Set up checkpointer if using persistence
         start_time = time.time()
         
-        # Register thread if needed
-        if self.checkpointer and thread_id:
-            register_thread_if_needed(self.checkpointer, thread_id)
-            
-        # Get previous state if available
-        previous_state = None
         try:
-            if self.checkpointer and thread_id:
-                # Get last state for this thread
-                previous_state = self.app.get_state(runtime_config)
+            # Use appropriate approach based on checkpoint mode
+            if is_async_mode:
+                # Get or create async checkpointer
+                async_checkpointer = await self._get_async_checkpointer()
                 
-                if previous_state and debug:
-                    logger.debug(f"Retrieved previous state for thread {thread_id}")
-        except Exception as e:
-            logger.warning(f"Error retrieving previous state: {e}")
-            
-        # Prepare merged input with previous state if available
-        if previous_state:
-            try:
-                full_input = prepare_merged_input(
-                    processed_input,
-                    previous_state,
-                    runtime_config,
-                    self.input_schema,
-                    self.state_schema
-                )
-                logger.debug("Merged input with previous state")
+                # Register thread if needed
+                await register_async_thread_if_needed(async_checkpointer, thread_id)
                 
-                # Update processed input for running
-                processed_input = full_input
-            except Exception as e:
-                logger.warning(f"Error merging with previous state: {e}")
-        
-        # Stream execution asynchronously
-        try:
-            # Create async generator to stream results if available
-            if hasattr(self.app, "astream"):
-                stream_gen = self.app.astream(processed_input, runtime_config)
+                # Get previous state if available
+                previous_state = None
+                try:
+                    # Use app with async checkpointer
+                    # We need to recompile with the async checkpointer
+                    async_app = self.graph.compile(checkpointer=async_checkpointer, store=self.store)
+                    previous_state = async_app.get_state(runtime_config)
+                    
+                    if previous_state and debug:
+                        logger.debug(f"Retrieved previous state for thread {thread_id}")
+                except Exception as e:
+                    logger.warning(f"Error retrieving previous state: {e}")
+                
+                # Prepare merged input with previous state if available
+                if previous_state:
+                    try:
+                        full_input = prepare_merged_input(
+                            processed_input,
+                            previous_state,
+                            runtime_config,
+                            self.input_schema,
+                            self.state_schema
+                        )
+                        logger.debug("Merged input with previous state")
+                        
+                        # Update processed input for running
+                        processed_input = full_input
+                    except Exception as e:
+                        logger.warning(f"Error merging with previous state: {e}")
+                
+                # Use astream if available
+                if hasattr(async_app, "astream"):
+                    stream_gen = async_app.astream(processed_input, runtime_config)
+                else:
+                    # Fall back to sync streaming via async wrapper
+                    sync_gen = async_app.stream(processed_input, runtime_config)
+                    
+                    # Convert sync generator to async generator
+                    async def async_wrapper():
+                        for chunk in sync_gen:
+                            yield chunk
+                    
+                    stream_gen = async_wrapper()
+                
+                # Track the final result for state saving
+                final_result = None
+                
+                # Process stream chunks
+                chunk_count = 0
+                async for chunk in stream_gen:
+                    chunk_count += 1
+                    
+                    # Save the final chunk for state saving
+                    final_result = chunk
+                    
+                    # Process the chunk if needed
+                    processed_chunk = self._process_stream_chunk(chunk, stream_mode)
+                    
+                    # Debug if enabled
+                    if self.rich_logging and RICH_AVAILABLE and debug and hasattr(self, "debug_console"):
+                        # Only log every few chunks to avoid overwhelming output
+                        if chunk_count % 5 == 0 or chunk_count < 3:
+                            chunk_type = type(chunk).__name__
+                            self.debug_console.print(f"[dim]Async stream chunk {chunk_count} ({chunk_type})[/dim]")
+                    
+                    # Yield the processed chunk
+                    yield processed_chunk
+                
+                # Save state history if configured and we have a final result
+                if (runtime_config["configurable"].get("save_history", getattr(self.config, "save_history", True)) 
+                    and final_result is not None):
+                    # Run in executor to avoid blocking
+                    loop = asyncio.get_event_loop()
+                    await loop.run_in_executor(None, lambda: self.save_state_history(runtime_config))
             else:
-                # Fallback to sync streaming via thread
-                loop = asyncio.get_event_loop()
-                sync_gen = self.app.stream(processed_input, runtime_config)
+                # Standard sync mode with async wrapper
                 
-                # Convert sync generator to async generator
-                async def async_wrapper():
-                    for chunk in sync_gen:
-                        yield chunk
+                # Register thread if needed
+                if self.checkpointer and thread_id:
+                    register_thread_if_needed(self.checkpointer, thread_id)
+                    
+                # Get previous state if available
+                previous_state = None
+                try:
+                    if self.checkpointer and thread_id:
+                        # Get last state for this thread
+                        previous_state = self.app.get_state(runtime_config)
+                        
+                        if previous_state and debug:
+                            logger.debug(f"Retrieved previous state for thread {thread_id}")
+                except Exception as e:
+                    logger.warning(f"Error retrieving previous state: {e}")
+                    
+                # Prepare merged input with previous state if available
+                if previous_state:
+                    try:
+                        full_input = prepare_merged_input(
+                            processed_input,
+                            previous_state,
+                            runtime_config,
+                            self.input_schema,
+                            self.state_schema
+                        )
+                        logger.debug("Merged input with previous state")
+                        
+                        # Update processed input for running
+                        processed_input = full_input
+                    except Exception as e:
+                        logger.warning(f"Error merging with previous state: {e}")
                 
-                stream_gen = async_wrapper()
-            
-            # Track the final result for state saving
-            final_result = None
-            
-            # Process stream chunks
-            chunk_count = 0
-            async for chunk in stream_gen:
-                chunk_count += 1
+                # Create async generator to stream results
+                if hasattr(self.app, "astream"):
+                    stream_gen = self.app.astream(processed_input, runtime_config)
+                else:
+                    # Fall back to sync streaming via async wrapper
+                    sync_gen = self.app.stream(processed_input, runtime_config)
+                    
+                    # Convert sync generator to async generator
+                    async def async_wrapper():
+                        for chunk in sync_gen:
+                            yield chunk
+                    
+                    stream_gen = async_wrapper()
                 
-                # Save the final chunk for state saving
-                final_result = chunk
+                # Track the final result for state saving
+                final_result = None
                 
-                # Process the chunk if needed
-                processed_chunk = self._process_stream_chunk(chunk, stream_mode)
+                # Process stream chunks
+                chunk_count = 0
+                async for chunk in stream_gen:
+                    chunk_count += 1
+                    
+                    # Save the final chunk for state saving
+                    final_result = chunk
+                    
+                    # Process the chunk if needed
+                    processed_chunk = self._process_stream_chunk(chunk, stream_mode)
+                    
+                    # Debug if enabled
+                    if self.rich_logging and RICH_AVAILABLE and debug and hasattr(self, "debug_console"):
+                        # Only log every few chunks to avoid overwhelming output
+                        if chunk_count % 5 == 0 or chunk_count < 3:
+                            chunk_type = type(chunk).__name__
+                            self.debug_console.print(f"[dim]Async stream chunk {chunk_count} ({chunk_type})[/dim]")
+                    
+                    # Yield the processed chunk
+                    yield processed_chunk
                 
-                # Debug if enabled
-                if self.rich_logging and RICH_AVAILABLE and debug and hasattr(self, "debug_console"):
-                    # Only log every few chunks to avoid overwhelming output
-                    if chunk_count % 5 == 0 or chunk_count < 3:
-                        chunk_type = type(chunk).__name__
-                        self.debug_console.print(f"[dim]Async stream chunk {chunk_count} ({chunk_type})[/dim]")
+                # Save state history if configured and we have a final result
+                if (runtime_config["configurable"].get("save_history", getattr(self.config, "save_history", True)) 
+                    and final_result is not None):
+                    # Run in executor to avoid blocking
+                    loop = asyncio.get_event_loop()
+                    await loop.run_in_executor(None, lambda: self.save_state_history(runtime_config))
                 
-                # Yield the processed chunk
-                yield processed_chunk
-                
-            # Save state history if configured and we have a final result
-            if (runtime_config["configurable"].get("save_history", getattr(self.config, "save_history", True)) 
-                and final_result is not None):
-                # Run in executor to avoid blocking
-                loop = asyncio.get_event_loop()
-                await loop.run_in_executor(None, lambda: self.save_state_history(runtime_config))
-                
-            # Show debug info if enabled
-            if self.rich_logging and RICH_AVAILABLE and debug and hasattr(self, "console"):
-                execution_time = time.time() - start_time
-                
-                # Show completion message
-                self.console.print(Panel.fit(
-                    f"[bold green]Async Streaming Completed[/bold green]\n"
-                    f"[cyan]Execution Time:[/cyan] {execution_time:.2f} seconds\n"
-                    f"[cyan]Total Chunks:[/cyan] {chunk_count}",
-                    border_style="green",
-                    title="Agent Async Streaming",
-                    subtitle=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                ))
-            
         except Exception as e:
             logger.error(f"Error during async streaming execution: {e}")
             
@@ -2039,6 +2313,21 @@ class Agent(Generic[TConfig], ABC):
                 ))
                 
             raise
+            
+        finally:
+            # Show debug info if enabled
+            if self.rich_logging and RICH_AVAILABLE and debug and hasattr(self, "console"):
+                execution_time = time.time() - start_time
+                
+                # Show completion message
+                self.console.print(Panel.fit(
+                    f"[bold green]Async Streaming Completed[/bold green]\n"
+                    f"[cyan]Execution Time:[/cyan] {execution_time:.2f} seconds\n"
+                    f"[cyan]Checkpoint Mode:[/cyan] {checkpoint_mode}",
+                    border_style="green",
+                    title="Agent Async Streaming",
+                    subtitle=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                ))
     
     def save_state_history(self, runnable_config: Optional[RunnableConfig] = None) -> bool:
         """
@@ -2098,6 +2387,36 @@ class Agent(Generic[TConfig], ABC):
                 self.console.print(f"[bold red]Error saving state history: {e}[/bold red]")
             else:
                 logger.error(f"Error saving state history: {e}")
+            return False
+    
+    async def save_state_history_async(self, runnable_config: Optional[RunnableConfig] = None) -> bool:
+        """
+        Asynchronously save the current agent state to a JSON file.
+        
+        Args:
+            runnable_config: Optional runnable configuration
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        if not self.app:
+            logger.error("Cannot save state history: Workflow graph not compiled")
+            return False
+
+        # Use provided runnable config or default
+        runnable_config = runnable_config or self.runnable_config
+
+        try:
+            # Run the synchronous save operation in a thread to make it async
+            loop = asyncio.get_event_loop()
+            result = await loop.run_in_executor(
+                None, 
+                lambda: self.save_state_history(runnable_config)
+            )
+            
+            return result
+        except Exception as e:
+            logger.error(f"Error saving state history asynchronously: {e}")
             return False
     
     def inspect_state(self, thread_id: Optional[str] = None, config: Optional[RunnableConfig] = None) -> None:
@@ -2198,6 +2517,28 @@ class Agent(Generic[TConfig], ABC):
             if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
                 self.console.print(f"[bold red]Error inspecting state: {e}[/bold red]")
     
+    async def inspect_state_async(self, thread_id: Optional[str] = None, config: Optional[RunnableConfig] = None) -> None:
+        """
+        Asynchronously inspect the current state of the agent.
+        
+        Args:
+            thread_id: Optional thread ID for persistence
+            config: Optional runtime configuration
+        """
+        if not self.app:
+            logger.error("Cannot inspect state: Workflow graph not compiled")
+            return
+
+        try:
+            # Run in a thread pool to make it async
+            loop = asyncio.get_event_loop()
+            await loop.run_in_executor(
+                None, 
+                lambda: self.inspect_state(thread_id, config)
+            )
+        except Exception as e:
+            logger.error(f"Error in async state inspection: {e}")
+    
     def reset_state(self, thread_id: Optional[str] = None, config: Optional[RunnableConfig] = None) -> bool:
         """
         Reset the agent's state for a thread.
@@ -2274,6 +2615,74 @@ class Agent(Generic[TConfig], ABC):
             if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
                 self.console.print(f"[bold red]Error resetting state: {e}[/bold red]")
             return False
+    
+    async def reset_state_async(self, thread_id: Optional[str] = None, config: Optional[RunnableConfig] = None) -> bool:
+        """
+        Asynchronously reset the agent's state for a thread.
+        
+        Args:
+            thread_id: Optional thread ID for persistence
+            config: Optional runtime configuration
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        # Check for async mode
+        checkpoint_mode = getattr(self, "_checkpoint_mode", "sync")
+        is_async_mode = checkpoint_mode == 'async'
+        
+        if is_async_mode and hasattr(self, "_async_checkpointer") and self._async_checkpointer:
+            # Use async checkpointer directly
+            
+            # Prepare runtime configuration
+            runtime_config = self._prepare_runnable_config(
+                thread_id=thread_id,
+                config=config
+            )
+            
+            # Extract thread ID from config
+            thread_id = runtime_config["configurable"].get("thread_id", None)
+            if not thread_id:
+                logger.warning("Cannot reset state: No thread ID provided")
+                return False
+                
+            try:
+                # Connect to checkpointer
+                await ensure_async_pool_open(self._async_checkpointer)
+                
+                # Reset state based on checkpointer type
+                if hasattr(self._async_checkpointer, "delete"):
+                    # Use delete method if available
+                    await self._async_checkpointer.delete(thread_id)
+                elif hasattr(self._async_checkpointer, "conn") and self._async_checkpointer.conn:
+                    # Try database approach
+                    conn = self._async_checkpointer.conn
+                    async with conn.connection() as db_conn:
+                        async with db_conn.cursor() as cursor:
+                            # Delete all records for this thread ID
+                            await cursor.execute(
+                                "DELETE FROM checkpoints WHERE thread_id = %s",
+                                (thread_id,)
+                            )
+                
+                logger.info(f"State reset successfully for thread {thread_id} (async)")
+                return True
+                
+            except Exception as e:
+                logger.error(f"Error resetting state asynchronously: {e}")
+                return False
+        else:
+            # Use thread pool for async operation with sync checkpointer
+            try:
+                loop = asyncio.get_event_loop()
+                result = await loop.run_in_executor(
+                    None, 
+                    lambda: self.reset_state(thread_id, config)
+                )
+                return result
+            except Exception as e:
+                logger.error(f"Error in async state reset: {e}")
+                return False
     
     def load_from_state(self, state_data: Union[Dict[str, Any], str], thread_id: Optional[str] = None) -> bool:
         """
@@ -2407,4 +2816,100 @@ class Agent(Generic[TConfig], ABC):
             if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
                 self.console.print(f"[bold red]Error loading state: {e}[/bold red]")
             return False
-
+            
+    async def load_from_state_async(self, state_data: Union[Dict[str, Any], str], thread_id: Optional[str] = None) -> bool:
+        """
+        Asynchronously load agent state from a saved state file or dictionary.
+        
+        Args:
+            state_data: Dictionary or path to JSON file containing state data
+            thread_id: Optional thread ID for persistence
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        # Check for async mode
+        checkpoint_mode = getattr(self, "_checkpoint_mode", "sync")
+        is_async_mode = checkpoint_mode == 'async'
+        
+        if is_async_mode and hasattr(self, "_get_async_checkpointer"):
+            try:
+                # Get async checkpointer
+                async_checkpointer = await self._get_async_checkpointer()
+                
+                # Generate thread ID if not provided
+                if not thread_id:
+                    thread_id = str(uuid.uuid4())
+                
+                # Load state from string path if provided
+                if isinstance(state_data, str) and os.path.exists(state_data):
+                    try:
+                        with open(state_data, 'r') as f:
+                            state_data = json.load(f)
+                    except Exception as e:
+                        logger.error(f"Error loading state file: {e}")
+                        return False
+                
+                # Ensure state is a dictionary
+                if not isinstance(state_data, dict):
+                    logger.error(f"Invalid state data type: {type(state_data)}")
+                    return False
+                
+                # Create runtime config with thread ID
+                runtime_config = self._prepare_runnable_config(thread_id=thread_id)
+                
+                # Process state based on its format
+                if "values" in state_data:
+                    # Handle StateSnapshot-like dict
+                    values = state_data["values"]
+                    
+                    # Use checkpoint save mechanism
+                    if hasattr(async_checkpointer, "save"):
+                        # Use checkpointer directly
+                        await async_checkpointer.save(thread_id, values)
+                    else:
+                        # Fallback to sync approach in thread
+                        await asyncio.get_event_loop().run_in_executor(
+                            None,
+                            lambda: self.load_from_state(state_data, thread_id)
+                        )
+                else:
+                    # Assume the entire dict is the state
+                    if hasattr(async_checkpointer, "save"):
+                        # Use checkpointer directly
+                        await async_checkpointer.save(thread_id, state_data)
+                    else:
+                        # Fallback to sync approach in thread
+                        await asyncio.get_event_loop().run_in_executor(
+                            None,
+                            lambda: self.load_from_state(state_data, thread_id)
+                        )
+                
+                logger.info(f"State loaded successfully for thread {thread_id} (async)")
+                return True
+                
+            except Exception as e:
+                logger.error(f"Error loading state asynchronously: {e}")
+                return False
+        else:
+            # Use thread pool for async operation with sync checkpointer
+            try:
+                loop = asyncio.get_event_loop()
+                result = await loop.run_in_executor(
+                    None, 
+                    lambda: self.load_from_state(state_data, thread_id)
+                )
+                return result
+            except Exception as e:
+                logger.error(f"Error in async state loading: {e}")
+                return False
+                
+    def __del__(self):
+        """Clean up resources when the agent is deleted."""
+        # Clean up async resources if needed
+        if hasattr(self, "_async_context_managers") and self._async_context_managers:
+            try:
+                # We can't use async functions in __del__, so we just log a warning
+                logger.warning("Agent destroyed with active async contexts. Resources may not be properly cleaned up.")
+            except:
+                pass

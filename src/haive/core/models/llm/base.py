@@ -536,7 +536,7 @@ if __name__ == "__main__":
     for provider_config in providers:
         try:
             print(f"\nTesting {provider_config.provider} configuration:")
-            llm = provider_config.instantiate_llm()
+            llm = provider_config.instantiate()
             print(f"{provider_config.provider} LLM instantiated successfully!")
         except Exception as e:
             print(f"Error initializing {provider_config.provider} LLM: {e}")

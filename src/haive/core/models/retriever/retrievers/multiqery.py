@@ -34,7 +34,7 @@ class MultiQueryRetrieverConfig(RetrieverConfig):
         )
         
         # Create the LLM
-        llm = self.llm_config.instantiate_llm()
+        llm = self.llm_config.instantiate()
         
         # Create and return the retriever
         return MultiQueryRetriever.from_llm(

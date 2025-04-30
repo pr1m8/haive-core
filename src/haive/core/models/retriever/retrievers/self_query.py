@@ -32,7 +32,7 @@ class SelfQueryRetrieverConfig(RetrieverConfig):
         vector_store = self.vector_store_config.create_vectorstore()
         
         # Create the LLM
-        llm = self.llm_config.instantiate_llm()
+        llm = self.llm_config.instantiate()
         
         # Convert metadata field info
         metadata_field_info = [

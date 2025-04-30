@@ -72,6 +72,30 @@ class PostgresCheckpointerConfig(CheckpointerConfig[Dict[str, Any]]):
         description="Additional connection keyword arguments"
     )
     
+    # Optional direct connection string
+    connection_string: Optional[str] = Field(
+        default=None,
+        description="Direct connection string (overrides individual parameters)"
+    )
+    
+    # Pipeline mode
+    use_pipeline: bool = Field(
+        default=False,
+        description="Whether to use pipeline mode for better performance"
+    )
+    
+    class Config:
+        arbitrary_types_allowed = True
+    
+    def is_async_mode(self) -> bool:
+        """
+        Check if operating in async mode.
+        
+        Returns:
+            True if async mode, False otherwise
+        """
+        return self.mode == CheckpointerMode.ASYNC
+    
     def get_connection_uri(self) -> str:
         """
         Generate a connection URI for PostgreSQL.
@@ -79,6 +103,11 @@ class PostgresCheckpointerConfig(CheckpointerConfig[Dict[str, Any]]):
         Returns:
             String connection URI
         """
+        # Use direct connection string if provided
+        if self.connection_string:
+            return self.connection_string
+            
+        # Generate from individual parameters
         import urllib.parse
         encoded_pass = urllib.parse.quote_plus(self.db_pass.get_secret_value())
         db_uri = f"postgresql://{self.db_user}:{encoded_pass}@{self.db_host}:{self.db_port}/{self.db_name}"
@@ -104,21 +133,34 @@ class PostgresCheckpointerConfig(CheckpointerConfig[Dict[str, Any]]):
     def create_checkpointer(self) -> Any:
         """
         Create a synchronous PostgreSQL checkpointer.
+        
+        Returns:
+            PostgresSaver instance
         """
         try:
+            # Handle async mode request
+            if self.is_async_mode():
+                raise RuntimeError("Cannot use create_checkpointer for async mode, use create_async_checkpointer instead")
+                
             from psycopg_pool import ConnectionPool
-            from langgraph.checkpoint.postgres import PostgresSaver
+            
+            # Import appropriate checkpointer class
+            if self.storage_mode == CheckpointStorageMode.SHALLOW:
+                try:
+                    from langgraph.checkpoint.postgres import ShallowPostgresSaver as PostgresSaver
+                except ImportError:
+                    from langgraph.checkpoint.postgres import PostgresSaver
+            else:
+                from langgraph.checkpoint.postgres import PostgresSaver
             
             # Create connection pool
             pool = ConnectionPool(
                 conninfo=self.get_connection_uri(),
                 min_size=self.min_pool_size,
                 max_size=self.max_pool_size,
-                kwargs=self.get_connection_kwargs()
+                kwargs=self.get_connection_kwargs(),
+                open=True  # Explicitly open the pool
             )
-            
-            # Explicitly open the pool
-            pool.open()
             
             # Create checkpointer
             checkpointer = PostgresSaver(pool)
@@ -136,16 +178,19 @@ class PostgresCheckpointerConfig(CheckpointerConfig[Dict[str, Any]]):
         except Exception as e:
             logger.error(f"Failed to create PostgreSQL checkpointer: {e}")
             raise RuntimeError(f"Failed to create PostgreSQL checkpointer: {e}")
-            raise RuntimeError(f"Failed to create PostgreSQL checkpointer: {e}")
-    def create_async_checkpointer(self) -> Any:
+    
+    async def create_async_checkpointer(self) -> Any:
         """
-        Create an asynchronous PostgreSQL checkpointer with automatic resource management.
+        Create an asynchronous PostgreSQL checkpointer.
         
-        Returns an async context manager that handles pool lifecycle.
+        Returns:
+            Async PostgreSQL checkpointer
         """
         try:
+            # Force async mode
+            self.mode = CheckpointerMode.ASYNC
+            
             from psycopg_pool import AsyncConnectionPool
-            from contextlib import asynccontextmanager
             
             # Import appropriate checkpointer class
             try:
@@ -154,50 +199,72 @@ class PostgresCheckpointerConfig(CheckpointerConfig[Dict[str, Any]]):
                 else:
                     from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
             except ImportError:
-                logger.error("langgraph-checkpoint-postgres not installed.")
-                raise ImportError("Please install langgraph-checkpoint-postgres")
-            
-            @asynccontextmanager
-            async def async_checkpointer_context():
-                """Context manager that handles pool lifecycle."""
-                # Create pool without opening
-                pool = AsyncConnectionPool(
-                    conninfo=self.get_connection_uri(),
-                    min_size=self.min_pool_size,
-                    max_size=self.max_pool_size,
-                    kwargs=self.get_connection_kwargs(),
-                    open=False  # Don't open in constructor to avoid deprecation warning
-                )
-                
                 try:
-                    # Explicitly open the pool
-                    await pool.open()
-                    
-                    # Create checkpointer
-                    checkpointer = AsyncPostgresSaver(pool)
-                    
-                    # Setup tables if needed
-                    if self.setup_needed:
-                        try:
-                            await checkpointer.setup()
-                            logger.info("PostgreSQL tables set up successfully (async)")
-                        except Exception as e:
-                            logger.warning(f"Error during PostgreSQL async setup: {e}")
-                    
-                    # Yield just the checkpointer for use
-                    yield checkpointer
-                    
-                finally:
-                    # Always clean up the pool
-                    if hasattr(pool, '_opened') and pool._opened:
-                        try:
-                            await pool.close()
-                            logger.debug("PostgreSQL pool closed successfully")
-                        except Exception as e:
-                            logger.warning(f"Error closing PostgreSQL pool: {e}")
+                    # Fall back to langgraph.checkpoint.postgres if aio module not available
+                    from langgraph.checkpoint.postgres import AsyncPostgresSaver
+                except ImportError:
+                    logger.error("AsyncPostgresSaver not available. Please ensure langgraph-checkpoint-postgres is installed.")
+                    raise ImportError("AsyncPostgresSaver not available")
             
-            return async_checkpointer_context
+            # Create connection pool
+            pool = AsyncConnectionPool(
+                conninfo=self.get_connection_uri(),
+                min_size=self.min_pool_size,
+                max_size=self.max_pool_size,
+                kwargs=self.get_connection_kwargs(),
+                open=False  # Don't open in constructor to avoid deprecation warning
+            )
+            
+            # Explicitly open the pool
+            await pool.open()
+            
+            # Create checkpointer
+            checkpointer = AsyncPostgresSaver(pool)
+            
+            # Setup tables if needed
+            if self.setup_needed:
+                try:
+                    await checkpointer.setup()
+                    logger.info("PostgreSQL tables set up successfully (async)")
+                except Exception as e:
+                    logger.warning(f"Error during PostgreSQL async setup: {e}")
+            
+            return checkpointer
             
         except Exception as e:
             logger.error(f"Failed to create async PostgreSQL checkpointer: {e}")
             raise RuntimeError(f"Failed to create async PostgreSQL checkpointer: {e}")
+    
+    async def initialize_async_checkpointer(self) -> Any:
+        """
+        Initialize an async checkpointer context manager.
+        
+        Returns:
+            Async context manager for checkpointer
+        """
+        from contextlib import asynccontextmanager
+        
+        @asynccontextmanager
+        async def async_checkpointer_context():
+            """Context manager for async checkpointer with proper resource management."""
+            checkpointer = None
+            try:
+                # Create the checkpointer
+                checkpointer = await self.create_async_checkpointer()
+                
+                # Yield it for use
+                yield checkpointer
+                
+            finally:
+                # Clean up resources
+                if checkpointer and hasattr(checkpointer, 'conn') and checkpointer.conn:
+                    # Close pool if available
+                    try:
+                        if hasattr(checkpointer.conn, 'close'):
+                            await checkpointer.conn.close()
+                            logger.debug("Async PostgreSQL pool closed successfully")
+                    except Exception as e:
+                        logger.warning(f"Error closing async PostgreSQL pool: {e}")
+        
+        # Return the context manager
+        return async_checkpointer_context()

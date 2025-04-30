@@ -223,6 +223,12 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
         ),
         description="Persistence configuration for state checkpointing"
     )
+    
+    # Add new checkpoint_mode field with default "sync"
+    checkpoint_mode: str = Field(
+        default="sync",
+        description="Checkpoint mode: 'sync', 'async', or 'none'"
+    )
 
     model_config = {
         "arbitrary_types_allowed": True
@@ -468,14 +474,25 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
             if isinstance(node_config.engine, Engine) and node_config.engine not in all_components:
                 all_components.append(node_config.engine)
 
+        # Add components from pattern requirements
+        pattern_components = self._get_pattern_schema_components()
+        for component in pattern_components:
+            if component not in all_components:
+                all_components.append(component)
+
         # Create schema
         schema_name = f"{self.name.replace('-', '_').title()}State"
-        return SchemaComposer.from_components(
+        schema = SchemaComposer.from_components(
             components=all_components,
             name=schema_name,
-            #include_messages=True,
-            #include_runnable_config=False
+            include_messages=True,
+            include_runnable_config=False  # Never include __runnable_config__
         )
+
+        # Enhance schema with pattern-specific fields
+        schema = self._enhance_schema_with_patterns(schema)
+        
+        return schema
     
     def _get_pattern_schema_components(self) -> List[Any]:
         """Get components required by patterns.
@@ -498,9 +515,9 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
                 pattern = registry.get_pattern(pattern_config.name)
                 if pattern:
                     # Extract requirements from pattern metadata
-                    for req in pattern.metadata.required_components:
+                    for req in pattern.metadata.get("required_components", []):
                         # This is a simplified approach - actual implementation would be more sophisticated
-                        component_type = req.type
+                        component_type = req.get("type")
                         if component_type == "llm" and self.engine is None:
                             from haive.core.engine.aug_llm import AugLLMConfig
                             components.append(AugLLMConfig())
@@ -508,11 +525,13 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
                             getattr(c, "engine_type", None) == EngineType.RETRIEVER
                             for c in [self.engine] + list(self.engines.values())
                         ):
-                            from haive.core.engine.retriever import BaseRetrieverConfig
-                            components.append(BaseRetrieverConfig(name="pattern_required_retriever"))
+                            from haive.core.engine.retriever import VectorStoreRetrieverConfig
+                            components.append(VectorStoreRetrieverConfig(name="pattern_required_retriever"))
         except ImportError:
             # Pattern system not available
             logger.debug("Pattern system not available for schema component extraction")
+        except Exception as e:
+            logger.debug(f"Error getting pattern components: {e}")
 
         return components
 
@@ -539,7 +558,7 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
                 pattern = registry.get_pattern(pattern_config.name)
                 if pattern:
                     # Add schema customizations based on pattern type
-                    pattern_type = pattern.metadata.pattern_type
+                    pattern_type = pattern.metadata.get("pattern_type")
 
                     # This is where we would add pattern-specific schema enhancements
                     # For example, RAG patterns might add context fields
@@ -623,7 +642,8 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
 
         schema = SchemaComposer.compose_input_schema(
             components=all_components,
-            name=f"{self.name}Input"
+            name=f"{self.name}Input",
+            include_runnable_config=False  # Never include __runnable_config__
         )
 
         self._input_schema_instance = schema
@@ -689,7 +709,8 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
 
         schema = SchemaComposer.compose_output_schema(
             components=all_components,
-            name=f"{self.name}Output"
+            name=f"{self.name}Output",
+            include_runnable_config=False  # Never include __runnable_config__
         )
 
         self._output_schema_instance = schema

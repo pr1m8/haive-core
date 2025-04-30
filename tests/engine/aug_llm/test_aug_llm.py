@@ -97,7 +97,7 @@ def test_invoke_runs(monkeypatch):
 
     # Fix the monkeypatch path to use the correct import path
     monkeypatch.setattr(
-        "haive.core.models.llm.base.AzureLLMConfig.instantiate_llm",
+        "haive.core.models.llm.base.AzureLLMConfig.instantiate",
         lambda self: RunnableLambda(mock_llm)
     )
 
@@ -125,7 +125,7 @@ def test_invoke_runs(monkeypatch):
 def test_compose_runnable_creates_chain(monkeypatch):
     # Fix the monkeypatch path to use the correct import path
     monkeypatch.setattr(
-        "haive.core.models.llm.base.AzureLLMConfig.instantiate_llm",
+        "haive.core.models.llm.base.AzureLLMConfig.instantiate",
         lambda self: RunnableLambda(lambda x: x)
     )
     config = AugLLMConfig(llm_config=AzureLLMConfig(model="gpt-4o"))
@@ -138,7 +138,7 @@ def test_compose_runnable_creates_chain(monkeypatch):
 def test_apply_runnable_config_overrides(monkeypatch):
     # Fix the monkeypatch path to use the correct import path
     monkeypatch.setattr(
-        "haive.core.models.llm.base.AzureLLMConfig.instantiate_llm",
+        "haive.core.models.llm.base.AzureLLMConfig.instantiate",
         lambda self: RunnableLambda(lambda x: x)
     )
     config = AugLLMConfig(llm_config=AzureLLMConfig(model="gpt-4o"))
