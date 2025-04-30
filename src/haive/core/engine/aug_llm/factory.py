@@ -214,8 +214,11 @@ class AugLLMFactory:
             # Just one component
             return chain_components[0]
         else:
-            # Multiple components to chain
-            return chain(*chain_components)
+            # Manually chain components using the | operator
+            result = chain_components[0]
+            for component in chain_components[1:]:
+                result = result | component
+            return result
             
     def _prepare_prompt_template(self) -> BasePromptTemplate:
         """
