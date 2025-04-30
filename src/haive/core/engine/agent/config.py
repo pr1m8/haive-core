@@ -243,7 +243,7 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
     def ensure_engine(self):
         """Ensure at least one engine is available."""
         if not self.engine and not self.engines and not self.node_configs:
-            from haive.core.engine.aug_llm.base import AugLLMConfig
+            from haive.core.engine.aug_llm import AugLLMConfig
             self.engine = AugLLMConfig()
         return self
 
@@ -502,7 +502,7 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
                         # This is a simplified approach - actual implementation would be more sophisticated
                         component_type = req.type
                         if component_type == "llm" and self.engine is None:
-                            from haive.core.engine.aug_llm.base import AugLLMConfig
+                            from haive.core.engine.aug_llm import AugLLMConfig
                             components.append(AugLLMConfig())
                         elif component_type == "retriever" and not any(
                             getattr(c, "engine_type", None) == EngineType.RETRIEVER
