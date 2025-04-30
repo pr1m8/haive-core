@@ -58,6 +58,8 @@ Example:
         vector_store_provider="MyCustomStore"
     )
     ```
+    
+    TODO: Need to seperate and implement the registry system, similar to retrievers and add base.
 """
 
 from __future__ import annotations
