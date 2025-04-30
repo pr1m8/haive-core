@@ -17,6 +17,12 @@ class StandardCommandHandler:
         """Process result to handle Command/Send pattern."""
         logger.debug(f"Processing result type: {type(result)}")
         
+        # Handle BaseModel results directly if preserve_model is True
+        preserve_model = getattr(config, "preserve_model", True)
+        if isinstance(result, BaseModel) and preserve_model and hasattr(config, "command_goto") and config.command_goto is not None:
+            logger.debug(f"Wrapping preserved BaseModel in Command: {result.__class__.__name__}")
+            return Command(update=result, goto=config.command_goto)
+        
         # Already using Command/Send pattern
         if isinstance(result, Command):
             logger.debug(f"Command object detected: {result}")
@@ -64,6 +70,7 @@ class StandardCommandHandler:
         logger.debug(f"Returning result as-is: {result}")
         return result
 
+
 @register_input_processor("direct")
 class DirectInputProcessor:
     """Processor for direct input (no mapping)."""
@@ -72,13 +79,22 @@ class DirectInputProcessor:
         """Extract input without mapping."""
         logger.debug(f"Direct input processor for {config.name}")
         
+        # Preserve BaseModel state directly
+        if isinstance(state, BaseModel) and getattr(config, "preserve_model", True):
+            logger.debug(f"Preserving BaseModel state directly: {state.__class__.__name__}")
+            return state
+        
         # If using direct messages and they exist, return them
-        if config.use_direct_messages and "messages" in state:
+        if config.use_direct_messages and isinstance(state, dict) and "messages" in state:
             logger.debug(f"Using direct messages: {len(state['messages'])} messages")
             return state["messages"]
+        elif config.use_direct_messages and isinstance(state, BaseModel) and hasattr(state, "messages"):
+            messages = getattr(state, "messages")
+            logger.debug(f"Using direct messages from BaseModel: {len(messages) if messages else 0}")
+            return messages
         
         # Otherwise return the full state
-        logger.debug(f"Returning full state with keys: {list(state.keys())}")
+        logger.debug(f"Returning full state of type: {type(state).__name__}")
         return state
 
 
@@ -95,12 +111,20 @@ class MappedInputProcessor:
             logger.debug("No input mapping, using full state")
             return state
         
-        # Apply mapping
+        # Apply mapping - handle BaseModel state specially
         mapped_input = {}
-        for state_key, input_key in config.input_mapping.items():
-            if state_key in state:
-                mapped_input[input_key] = state[state_key]
-                logger.debug(f"Mapped {state_key} → {input_key}")
+        if isinstance(state, BaseModel):
+            logger.debug(f"Mapping from BaseModel state: {state.__class__.__name__}")
+            for state_key, input_key in config.input_mapping.items():
+                if hasattr(state, state_key):
+                    mapped_input[input_key] = getattr(state, state_key)
+                    logger.debug(f"Mapped BaseModel attr {state_key} → {input_key}")
+        else:
+            # Apply mapping for dict state
+            for state_key, input_key in config.input_mapping.items():
+                if isinstance(state, dict) and state_key in state:
+                    mapped_input[input_key] = state[state_key]
+                    logger.debug(f"Mapped {state_key} → {input_key}")
         
         # If only one field was mapped and we have that value, return it directly
         if len(config.input_mapping) == 1 and len(mapped_input) == 1:
@@ -121,10 +145,157 @@ class StandardOutputProcessor:
         logger.debug(f"Processing output for {config.name}")
         logger.debug(f"Result type: {type(result).__name__}")
         
+        preserve_model = getattr(config, "preserve_model", True)
+        
+        # Return BaseModel results directly if preserve_model is True
+        if isinstance(result, BaseModel) and preserve_model and not config.output_mapping:
+            logger.debug(f"Returning BaseModel directly: {result.__class__.__name__}")
+            return result
+        
+        # If original state is a BaseModel and we want to preserve, make a copy
+        if isinstance(original_state, BaseModel) and preserve_model:
+            if hasattr(original_state, "model_copy"):
+                # Pydantic v2
+                updates = original_state.model_copy(deep=True)
+                logger.debug(f"Created deep copy of original BaseModel: {updates.__class__.__name__}")
+            else:
+                # Pydantic v1
+                updates = original_state.copy(deep=True)
+                logger.debug(f"Created deep copy of original BaseModel: {updates.__class__.__name__}")
+                
+            # Handle different result types
+            if isinstance(result, dict):
+                logger.debug(f"Processing dict result with keys: {list(result.keys())}")
+                
+                # Apply output mapping if exists
+                if config.output_mapping:
+                    logger.debug(f"Applying output mapping: {config.output_mapping}")
+                    for output_key, state_key in config.output_mapping.items():
+                        if output_key in result:
+                            try:
+                                setattr(updates, state_key, result[output_key])
+                                logger.debug(f"Mapped {output_key} → {state_key}")
+                            except AttributeError:
+                                logger.warning(f"Cannot set attribute {state_key} on BaseModel")
+                else:
+                    # No mapping - update BaseModel with dict keys
+                    for key, value in result.items():
+                        try:
+                            setattr(updates, key, value)
+                            logger.debug(f"Set BaseModel attribute: {key}")
+                        except AttributeError:
+                            logger.warning(f"Cannot set attribute {key} on BaseModel")
+            elif isinstance(result, BaseModel):
+                # Try to copy attributes from result to updates
+                logger.debug(f"Processing BaseModel result: {result.__class__.__name__}")
+                
+                # If it's a message, handle it specially
+                if isinstance(result, BaseMessage):
+                    if hasattr(updates, "messages"):
+                        messages = getattr(updates, "messages")
+                        if isinstance(messages, list):
+                            messages.append(result)
+                            logger.debug(f"Added message to BaseModel messages list")
+                        else:
+                            try:
+                                setattr(updates, "messages", [result])
+                                logger.debug(f"Created new messages list on BaseModel")
+                            except AttributeError:
+                                logger.warning(f"Cannot set messages on BaseModel")
+                                
+                    # Also try to set message content
+                    if config.extract_content:
+                        try:
+                            setattr(updates, "content", result.content)
+                            logger.debug(f"Set content from message on BaseModel")
+                        except AttributeError:
+                            logger.warning(f"Cannot set content on BaseModel")
+                
+                # Apply output mapping if exists
+                if config.output_mapping:
+                    logger.debug(f"Applying output mapping: {config.output_mapping}")
+                    for output_key, state_key in config.output_mapping.items():
+                        if hasattr(result, output_key):
+                            try:
+                                setattr(updates, state_key, getattr(result, output_key))
+                                logger.debug(f"Mapped {output_key} → {state_key}")
+                            except AttributeError:
+                                logger.warning(f"Cannot set attribute {state_key} on BaseModel")
+                else:
+                    # No mapping - try to set result model as attribute
+                    model_name = result.__class__.__name__.lower()
+                    try:
+                        setattr(updates, model_name, result)
+                        logger.debug(f"Set BaseModel attribute: {model_name}")
+                    except AttributeError:
+                        logger.warning(f"Cannot set attribute {model_name} on BaseModel")
+                        
+                        # Try to copy all attributes from result to updates
+                        if hasattr(result, "model_fields"):
+                            # Pydantic v2
+                            for key in result.model_fields.keys():
+                                if hasattr(result, key):
+                                    try:
+                                        setattr(updates, key, getattr(result, key))
+                                        logger.debug(f"Copied attribute {key} from result to original model")
+                                    except AttributeError:
+                                        pass
+                        elif hasattr(result, "__fields__"):
+                            # Pydantic v1
+                            for key in result.__fields__:
+                                if hasattr(result, key):
+                                    try:
+                                        setattr(updates, key, getattr(result, key))
+                                        logger.debug(f"Copied attribute {key} from result to original model")
+                                    except AttributeError:
+                                        pass
+            elif isinstance(result, BaseMessage):
+                logger.debug(f"Processing direct BaseMessage: {result.__class__.__name__}")
+                
+                # Add to messages list if it exists
+                if hasattr(updates, "messages"):
+                    messages = getattr(updates, "messages")
+                    if isinstance(messages, list):
+                        messages.append(result)
+                        logger.debug(f"Added message to BaseModel messages list")
+                    else:
+                        try:
+                            setattr(updates, "messages", [result])
+                            logger.debug(f"Created new messages list on BaseModel")
+                        except AttributeError:
+                            logger.warning(f"Cannot set messages on BaseModel")
+                            
+                # Also set specific message type attribute if possible
+                message_type = result.__class__.__name__.lower()
+                try:
+                    setattr(updates, message_type, result)
+                    logger.debug(f"Set message as {message_type} on BaseModel")
+                except AttributeError:
+                    logger.warning(f"Cannot set {message_type} on BaseModel")
+                
+                # Set content if requested
+                if config.extract_content:
+                    try:
+                        setattr(updates, "content", result.content)
+                        logger.debug(f"Set content from message on BaseModel")
+                    except AttributeError:
+                        logger.warning(f"Cannot set content on BaseModel")
+            else:
+                # Other result types - try to set as "result" attribute
+                try:
+                    setattr(updates, "result", result)
+                    logger.debug(f"Set generic result on BaseModel")
+                except AttributeError:
+                    logger.warning(f"Cannot set result on BaseModel")
+                    
+            # Return the updated model
+            return updates
+        
+        # Dictionary-based state handling
         updates = {}
         
         # Start with original state if preserving
-        if config.preserve_state:
+        if config.preserve_state and isinstance(original_state, dict):
             logger.debug("Preserving original state")
             updates = original_state.copy()
         
@@ -159,6 +330,8 @@ class StandardOutputProcessor:
             # Apply output mapping if exists
             if config.output_mapping:
                 logger.debug(f"Applying output mapping: {config.output_mapping}")
+                # src/haive/core/graph/node/handlers.py (continued)
+
                 for output_key, state_key in config.output_mapping.items():
                     # Handle nested keys with dot notation
                     if "." in output_key:
@@ -190,6 +363,8 @@ class StandardOutputProcessor:
                     elif output_key in result:
                         updates[state_key] = result[output_key]
                         logger.debug(f"Mapped {output_key} → {state_key}")
+                    else:
+                        logger.warning(f"Output key '{output_key}' not found in result")
             else:
                 # No mapping - update with all result keys
                 logger.debug("No mapping, updating with all result keys")
@@ -203,21 +378,195 @@ class StandardOutputProcessor:
         return updates
 
 
+# This is a targeted fix for the StructuredOutputProcessor in handlers.py
+
 @register_output_processor("structured")
 class StructuredOutputProcessor:
     """Processor for structured output models."""
     
-    def process_output(self, result: Any, config: Any, original_state: Dict[str, Any]) -> Dict[str, Any]:
+    def process_output(self, result: Any, config: Any, original_state: Dict[str, Any]) -> Any:
         """Process output from structured output models."""
         logger.debug(f"Processing structured output for {config.name}")
         logger.debug(f"Result type: {type(result).__name__}")
         
+        # Check for preserve_model flag with default to True
+        preserve_model = getattr(config, "preserve_model", True)
+        
+        # Special handling for BaseMessages (like AIMessage)
+        # This needs to come BEFORE the general BaseModel handling
+        if isinstance(result, BaseMessage):
+            logger.debug(f"Processing BaseMessage (structured): {result.__class__.__name__}")
+            
+            # Handle BaseModel original state specially
+            if isinstance(original_state, BaseModel) and preserve_model:
+                # Make a copy of the original model
+                if hasattr(original_state, "model_copy"):
+                    updates = original_state.model_copy(deep=True)
+                else:
+                    updates = original_state.copy(deep=True)
+                    
+                # Check if there's a messages list to append to
+                if hasattr(updates, "messages"):
+                    messages = getattr(updates, "messages")
+                    if isinstance(messages, list):
+                        messages.append(result)
+                        logger.debug(f"Added message to existing messages list in BaseModel")
+                    else:
+                        try:
+                            # Try to create a new messages list
+                            setattr(updates, "messages", [result])
+                            logger.debug(f"Created new messages list in BaseModel")
+                        except AttributeError:
+                            logger.warning(f"Cannot set messages on BaseModel")
+                            
+                # Extract content if needed
+                if config.extract_content and hasattr(result, "content"):
+                    try:
+                        setattr(updates, "content", result.content)
+                        logger.debug(f"Extracted content from message to BaseModel")
+                    except AttributeError:
+                        logger.warning(f"Cannot set content on BaseModel")
+                
+                # DO NOT try to set the message as a field with its class name
+                # That's what was causing the error
+                
+                return updates
+            
+            # For dictionary state
+            updates = {}
+            
+            # Start with original state if preserving
+            if config.preserve_state and isinstance(original_state, dict):
+                updates = original_state.copy()
+            
+            # Add to messages list if it exists
+            if "messages" in updates and isinstance(updates["messages"], list):
+                updates["messages"].append(result)
+                logger.debug(f"Added message to existing messages list")
+            else:
+                updates["messages"] = [result]
+                logger.debug(f"Created new messages list")
+                
+            # Extract content if needed
+            if config.extract_content and hasattr(result, "content"):
+                updates["content"] = result.content
+                logger.debug(f"Extracted content from message")
+                
+            # Save as message type if we know it's safe (i.e., not trying with original BaseModel)
+            message_type = result.__class__.__name__.lower()
+            updates[message_type] = result
+            logger.debug(f"Added message as {message_type}")
+            
+            return updates
+            
+        # Return BaseModel result directly if configured and no output mapping
+        if isinstance(result, BaseModel) and preserve_model and not config.output_mapping:
+            logger.debug(f"Returning BaseModel result directly: {result.__class__.__name__}")
+            return result
+        
+        # Handle BaseModel original state specially
+        if isinstance(original_state, BaseModel) and preserve_model:
+            # Create a copy of the original model
+            if hasattr(original_state, "model_copy"):
+                # Pydantic v2
+                updates = original_state.model_copy(deep=True)
+                logger.debug(f"Created deep copy of original BaseModel: {updates.__class__.__name__}")
+            else:
+                # Pydantic v1
+                updates = original_state.copy(deep=True)
+                logger.debug(f"Created deep copy of original BaseModel: {updates.__class__.__name__}")
+                
+            # Handle BaseModel result
+            if isinstance(result, BaseModel):
+                model_name = result.__class__.__name__.lower()
+                logger.debug(f"Processing BaseModel result: {model_name}")
+                
+                # Check if model has the field before trying to set it
+                has_field = False
+                if hasattr(updates, "model_fields"):
+                    has_field = model_name in updates.model_fields
+                elif hasattr(updates, "__fields__"):
+                    has_field = model_name in updates.__fields__
+                
+                # Try to set the entire model as an attribute ONLY if the field exists
+                if has_field:
+                    try:
+                        setattr(updates, model_name, result)
+                        logger.debug(f"Set result model as attribute: {model_name}")
+                    except AttributeError:
+                        logger.warning(f"Cannot set model attribute: {model_name}")
+                else:
+                    logger.debug(f"Skipping model attribute {model_name} as field doesn't exist")
+                    
+                # Handle specific output mapping
+                if config.output_mapping:
+                    logger.debug(f"Applying output mapping to BaseModel result")
+                    for output_key, state_key in config.output_mapping.items():
+                        if hasattr(result, output_key):
+                            try:
+                                value = getattr(result, output_key)
+                                setattr(updates, state_key, value)
+                                logger.debug(f"Mapped {output_key} → {state_key}")
+                            except AttributeError:
+                                logger.warning(f"Cannot set attribute {state_key} on BaseModel")
+                else:
+                    # No mapping - copy all attributes if they exist on the target model
+                    if hasattr(result, "model_fields"):
+                        # Pydantic v2
+                        for key in result.model_fields.keys():
+                            if hasattr(result, key):
+                                # Check if target model has this field
+                                has_key = False
+                                if hasattr(updates, "model_fields"):
+                                    has_key = key in updates.model_fields
+                                elif hasattr(updates, "__fields__"):
+                                    has_key = key in updates.__fields__
+                                
+                                if has_key:
+                                    try:
+                                        value = getattr(result, key)
+                                        setattr(updates, key, value)
+                                        logger.debug(f"Copied attribute {key} from result model")
+                                    except AttributeError:
+                                        logger.warning(f"Cannot set attribute {key} on BaseModel")
+                    elif hasattr(result, "__fields__"):
+                        # Pydantic v1
+                        for key in result.__fields__:
+                            if hasattr(result, key):
+                                # Check if target model has this field
+                                has_key = False
+                                if hasattr(updates, "model_fields"):
+                                    has_key = key in updates.model_fields
+                                elif hasattr(updates, "__fields__"):
+                                    has_key = key in updates.__fields__
+                                
+                                if has_key:
+                                    try:
+                                        value = getattr(result, key)
+                                        setattr(updates, key, value)
+                                        logger.debug(f"Copied attribute {key} from result model")
+                                    except AttributeError:
+                                        logger.warning(f"Cannot set attribute {key} on BaseModel")
+                
+                return updates
+                
+            # Handle other result types with BaseModel original state
+            # In this case, try to set the result as a "result" attribute
+            try:
+                setattr(updates, "result", result)
+                logger.debug(f"Set generic result on BaseModel")
+            except AttributeError:
+                logger.warning(f"Cannot set result on BaseModel")
+                
+            return updates
+        
+        # Standard dictionary handling for non-BaseModel original state
         updates = {}
         
         # Start with original state if preserving
         if config.preserve_state:
             logger.debug("Preserving original state")
-            updates = original_state.copy()
+            updates = original_state.copy() if isinstance(original_state, dict) else {}
         
         # Handle Pydantic model result
         if isinstance(result, BaseModel):
@@ -229,6 +578,12 @@ class StructuredOutputProcessor:
             updates[model_name] = result
             logger.debug(f"Added model as {model_name}")
             
+            # Convert to dict if needed for additional processing
+            if hasattr(result, "model_dump"):
+                result_dict = result.model_dump()
+            else:
+                result_dict = result.dict()
+                
             # Handle specific case for BaseMessage subtypes
             if isinstance(result, BaseMessage):
                 # If we have messages field in state, append the message
@@ -239,32 +594,23 @@ class StructuredOutputProcessor:
                     # Create a new messages list
                     updates["messages"] = [result]
                     logger.debug("Created new messages list with message")
+                    
+                # Extract content if needed
+                if config.extract_content:
+                    updates["content"] = result.content
+                    logger.debug(f"Extracted content from message")
             
             # Extract fields if output mapping exists
             if config.output_mapping:
                 logger.debug(f"Applying output mapping: {config.output_mapping}")
                 for output_key, state_key in config.output_mapping.items():
-                    # Handle nested attributes with dot notation
-                    if "." in output_key:
-                        parts = output_key.split(".")
-                        if parts[0] == model_name:
-                            # Navigate to nested attribute
-                            current = result
-                            for part in parts[1:]:
-                                if hasattr(current, part):
-                                    current = getattr(current, part)
-                                else:
-                                    current = None
-                                    break
-                            
-                            # Set the value if path exists
-                            if current is not None:
-                                updates[state_key] = current
-                                logger.debug(f"Mapped nested attr {output_key} → {state_key}")
-                    # Direct field mapping
-                    elif hasattr(result, output_key):
+                    if hasattr(result, output_key):
                         updates[state_key] = getattr(result, output_key)
                         logger.debug(f"Mapped {output_key} → {state_key}")
+            else:
+                # No specific mapping, also add all fields
+                updates.update(result_dict)
+                logger.debug(f"Added all model fields to updates")
             
             return updates
         

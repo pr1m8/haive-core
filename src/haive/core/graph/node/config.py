@@ -19,6 +19,8 @@ from datetime import datetime
 import os
 import uuid
 
+from haive.core.engine.retriever.retriever import VectorStoreRetrieverConfig, BaseRetrieverConfig
+
 # Import rich if available
 try:
     from rich.console import Console
@@ -82,7 +84,11 @@ class NodeConfig(BaseModel):
         default=True,
         description="Enable rich UI debugging"
     )
-    
+    # Added preserve_model field with default=True
+    preserve_model: bool = Field(
+        default=True,
+        description="Preserve BaseModel instances instead of converting to dict"
+    )
     # Debug log path for persistent logs
     debug_log_path: Optional[str] = Field(
         default=None,
@@ -425,6 +431,52 @@ class NodeConfig(BaseModel):
                             
                         # Default for AugLLM - prefer specific mappings if available
                         return not bool(self.input_mapping)
+                elif engine_type and getattr(engine_type, "value", "") == "retriever":
+                    # For all retriever types, we don't use messages directly
+                    self.debug_log(f"Detected retriever engine: {type(self.engine).__name__}")
+                    
+                    # Auto-derive input mapping if not provided
+                    if not self.input_mapping:
+                        # Map common state fields to retriever fields
+                        if hasattr(self.engine, "input_schema") and self.engine.input_schema:
+                            input_fields = []
+                            # Get field names from input schema
+                            if hasattr(self.engine.input_schema, "model_fields"):
+                                input_fields = list(self.engine.input_schema.model_fields.keys())
+                            elif hasattr(self.engine.input_schema, "__fields__"):
+                                input_fields = list(self.engine.input_schema.__fields__.keys())
+                            
+                            # Create mappings based on schema fields
+                            if "query" in input_fields:
+                                if "query" in self.state_keys:
+                                    self.input_mapping = {"query": "query"}
+                                elif "question" in self.state_keys:
+                                    self.input_mapping = {"question": "query"}
+                                elif "content" in self.state_keys:
+                                    self.input_mapping = {"content": "query"}
+                                else:
+                                    # Default to mapping from 'input' field
+                                    self.input_mapping = {"input": "query"}
+                        else:
+                            # Default input mapping for retrievers
+                            self.input_mapping = {"input": "query"}
+                            
+                        self.debug_log(f"Auto-derived input mapping for retriever: {self.input_mapping}")
+                    
+                    # Auto-derive output mapping if not provided 
+                    if not self.output_mapping:
+                        # Default to mapping 'documents' to state
+                        if isinstance(self.engine, VectorStoreRetrieverConfig):
+                            # Vector store retrievers return documents
+                            self.output_mapping = {"documents": "documents"}
+                        else:
+                            # Generic mapping for any retriever
+                            self.output_mapping = {"documents": "context"}
+                        
+                        self.debug_log(f"Auto-derived output mapping for retriever: {self.output_mapping}")
+                    
+                    # Retrievers don't use messages directly
+                    return False
         except Exception as e:
             self.debug_log(f"Error in _detect_uses_messages_field: {e}", level="error")
             

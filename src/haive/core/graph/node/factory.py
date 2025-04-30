@@ -16,6 +16,7 @@ from haive.core.graph.node.registry import NodeTypeRegistry
 from haive.core.registry.manager import RegistryManager
 from haive.core.config.runnable import RunnableConfigManager
 from haive.core.engine.base import Engine, EngineType
+from pydantic import BaseModel
 
 # Setup enhanced logging with rich if available
 try:
@@ -245,7 +246,8 @@ class NodeFactory:
         output_mapping: Optional[Dict[str, str]] = None,
         runnable_config: Optional[Dict[str, Any]] = None,
         debug: bool = False,
-        async_mode: Optional[bool] = None
+        async_mode: Optional[bool] = None,
+        preserve_model: bool = True  # Default to True for model preservation
     ) -> Callable:
         """
         Create a node function with proper engine handling.
@@ -258,6 +260,7 @@ class NodeFactory:
             runnable_config: Optional default runtime configuration
             debug: Enable debug logging
             async_mode: Whether to create an asynchronous node function
+            preserve_model: Whether to preserve BaseModel instances (default True)
             
         Returns:
             A node function compatible with LangGraph
@@ -275,7 +278,7 @@ class NodeFactory:
                 # Call internal implementation
                 result = cls._create_node_function_impl(
                     config, command_goto, input_mapping, output_mapping,
-                    runnable_config, debug, async_mode, progress, task
+                    runnable_config, debug, async_mode, progress, task, preserve_model
                 )
                 
                 # Mark task as complete
@@ -286,7 +289,7 @@ class NodeFactory:
             # Call without progress tracking
             return cls._create_node_function_impl(
                 config, command_goto, input_mapping, output_mapping,
-                runnable_config, debug, async_mode
+                runnable_config, debug, async_mode, preserve_model=preserve_model
             )
     
     @classmethod
@@ -300,7 +303,8 @@ class NodeFactory:
         debug: bool = False,
         async_mode: Optional[bool] = None,
         progress = None,
-        task = None
+        task = None,
+        preserve_model: bool = True  # Default to True for model preservation
     ) -> Callable:
         """Internal implementation for create_node_function with progress tracking."""
         # Enable verbose logging if debug mode
@@ -335,7 +339,8 @@ class NodeFactory:
                 runnable_config=runnable_config,
                 debug=debug_enabled,
                 rich_debug=cls.rich_debug,
-                async_mode=async_mode  # May be None
+                async_mode=async_mode,  # May be None
+                preserve_model=preserve_model  # Set preserve_model flag
             )
             
             if debug_enabled:
@@ -352,6 +357,12 @@ class NodeFactory:
                 node_config.async_mode = async_mode
                 if debug_enabled:
                     cls.debug_log(f"Set async_mode to {async_mode}")
+                    
+            # Update preserve_model if different from default
+            if preserve_model != getattr(node_config, "preserve_model", True):
+                node_config.preserve_model = preserve_model
+                if debug_enabled:
+                    cls.debug_log(f"Set preserve_model to {preserve_model}")
         
         # Show detailed config if debugging
         if debug_enabled and cls.rich_debug and RICH_AVAILABLE:
@@ -361,6 +372,7 @@ class NodeFactory:
             
             # Add basic properties
             config_table.add_row("name", node_config.name)
+            config_table.add_row("preserve_model", str(getattr(node_config, "preserve_model", True)))
             
             # Add engine info
             if isinstance(node_config.engine, Engine):
@@ -557,6 +569,7 @@ class NodeFactory:
         node_func.__engine_id__ = engine_id
         node_func.__node_type__ = node_type
         node_func.__async_mode__ = node_config.async_mode
+        node_func.__preserve_model__ = node_config.preserve_model  # Store preserve_model setting
         node_func.__debug_id__ = f"node-{uuid.uuid4().hex[:8]}"
         
         # Update progress if available
@@ -575,6 +588,7 @@ class NodeFactory:
                 metadata_table.add_row("name", node_config.name)
                 metadata_table.add_row("node_type", node_type)
                 metadata_table.add_row("async_mode", str(node_config.async_mode))
+                metadata_table.add_row("preserve_model", str(node_config.preserve_model))
                 metadata_table.add_row("engine_id", str(engine_id))
                 metadata_table.add_row("debug_id", node_func.__debug_id__)
                 
@@ -608,12 +622,25 @@ class NodeFactory:
                 debug_console.print(f"[bold]Execution ID:[/bold] {exec_id}")
                 debug_console.print(f"[bold]Node Type:[/bold] {getattr(node_func, '__node_type__', 'unknown')}")
                 debug_console.print(f"[bold]Async Mode:[/bold] {getattr(node_func, '__async_mode__', 'unknown')}")
+                debug_console.print(f"[bold]Preserve Model:[/bold] {getattr(config, 'preserve_model', True)}")
                 
                 # Show state info
                 function_logger.debug(f"Node {config.name} called with state type: {type(state).__name__}")
                 debug_console.print(f"[bold]State Type:[/bold] {type(state).__name__}")
                 
-                if isinstance(state, dict):
+                # Check if state is a BaseModel
+                if isinstance(state, BaseModel):
+                    debug_console.print(f"[bold]State is BaseModel:[/bold] {state.__class__.__name__}")
+                    
+                    # Show some BaseModel details
+                    if hasattr(state, "model_fields"):
+                        field_names = list(state.model_fields.keys())
+                        debug_console.print(f"[bold]Model fields:[/bold] {field_names}")
+                    elif hasattr(state, "__fields__"):
+                        field_names = list(state.__fields__.keys())
+                        debug_console.print(f"[bold]Model fields:[/bold] {field_names}")
+                    
+                elif isinstance(state, dict):
                     function_logger.debug(f"State keys: {list(state.keys())}")
                     debug_console.print(f"[bold]State Keys:[/bold] {list(state.keys())}")
                     
@@ -661,9 +688,21 @@ class NodeFactory:
                     if isinstance(result, Command):
                         debug_console.print(f"[bold]Command:[/bold] goto={result.goto}")
                         if hasattr(result, "update") and result.update:
-                            debug_console.print(f"[bold]Command update keys:[/bold] {list(result.update.keys()) if isinstance(result.update, dict) else 'Not a dict'}")
-                            debug_console.print(f"[bold]Command update:[/bold]")
-                            debug_console.print(Pretty(result.update))
+                            if isinstance(result.update, BaseModel):
+                                debug_console.print(f"[bold]Command update is BaseModel:[/bold] {result.update.__class__.__name__}")
+                                # Show some BaseModel details
+                                if hasattr(result.update, "model_fields"):
+                                    field_names = list(result.update.model_fields.keys())
+                                    debug_console.print(f"[bold]Model fields:[/bold] {field_names}")
+                                elif hasattr(result.update, "__fields__"):
+                                    field_names = list(result.update.__fields__.keys())
+                                    debug_console.print(f"[bold]Model fields:[/bold] {field_names}")
+                            elif isinstance(result.update, dict):
+                                debug_console.print(f"[bold]Command update keys:[/bold] {list(result.update.keys())}")
+                                debug_console.print(f"[bold]Command update:[/bold]")
+                                debug_console.print(Pretty(result.update))
+                            else:
+                                debug_console.print(f"[bold]Command update type:[/bold] {type(result.update).__name__}")
                     elif isinstance(result, Send):
                         debug_console.print(f"[bold]Send:[/bold] node={result.node}")
                         debug_console.print(f"[bold]Send arg:[/bold]")
@@ -675,6 +714,15 @@ class NodeFactory:
                             debug_console.print(Pretty(send.arg))
                         if len(result) > 3:
                             debug_console.print(f"... and {len(result) - 3} more")
+                    elif isinstance(result, BaseModel):
+                        debug_console.print(f"[bold]Result is BaseModel:[/bold] {result.__class__.__name__}")
+                        # Show some BaseModel details
+                        if hasattr(result, "model_fields"):
+                            field_names = list(result.model_fields.keys())
+                            debug_console.print(f"[bold]Model fields:[/bold] {field_names}")
+                        elif hasattr(result, "__fields__"):
+                            field_names = list(result.__fields__.keys())
+                            debug_console.print(f"[bold]Model fields:[/bold] {field_names}")
                     elif isinstance(result, dict):
                         debug_console.print(f"[bold]Result keys:[/bold] {list(result.keys())}")
                         debug_console.print(f"[bold]Result:[/bold]")
@@ -726,6 +774,7 @@ class NodeFactory:
         debug_wrapper.__name__ = f"debug_wrapper_{config.name}"
         debug_wrapper.__wrapper_id__ = wrapper_id
         debug_wrapper.__wrapped__ = node_func
+        debug_wrapper.__preserve_model__ = getattr(config, "preserve_model", True)
         
         return debug_wrapper
 
@@ -750,12 +799,25 @@ class NodeFactory:
                 debug_console.print(f"[bold]Execution ID:[/bold] {exec_id}")
                 debug_console.print(f"[bold]Node Type:[/bold] {getattr(node_func, '__node_type__', 'unknown')}")
                 debug_console.print(f"[bold]Async Mode:[/bold] True")
+                debug_console.print(f"[bold]Preserve Model:[/bold] {getattr(config, 'preserve_model', True)}")
                 
                 # Show state info
                 function_logger.debug(f"Async node {config.name} called with state type: {type(state).__name__}")
                 debug_console.print(f"[bold]State Type:[/bold] {type(state).__name__}")
                 
-                if isinstance(state, dict):
+                # Check if state is a BaseModel
+                if isinstance(state, BaseModel):
+                    debug_console.print(f"[bold]State is BaseModel:[/bold] {state.__class__.__name__}")
+                    
+                    # Show some BaseModel details
+                    if hasattr(state, "model_fields"):
+                        field_names = list(state.model_fields.keys())
+                        debug_console.print(f"[bold]Model fields:[/bold] {field_names}")
+                    elif hasattr(state, "__fields__"):
+                        field_names = list(state.__fields__.keys())
+                        debug_console.print(f"[bold]Model fields:[/bold] {field_names}")
+                    
+                elif isinstance(state, dict):
                     function_logger.debug(f"State keys: {list(state.keys())}")
                     debug_console.print(f"[bold]State Keys:[/bold] {list(state.keys())}")
                     
@@ -831,9 +893,21 @@ class NodeFactory:
                     if isinstance(result, Command):
                         debug_console.print(f"[bold]Command:[/bold] goto={result.goto}")
                         if hasattr(result, "update") and result.update:
-                            debug_console.print(f"[bold]Command update keys:[/bold] {list(result.update.keys()) if isinstance(result.update, dict) else 'Not a dict'}")
-                            debug_console.print(f"[bold]Command update:[/bold]")
-                            debug_console.print(Pretty(result.update))
+                            if isinstance(result.update, BaseModel):
+                                debug_console.print(f"[bold]Command update is BaseModel:[/bold] {result.update.__class__.__name__}")
+                                # Show some BaseModel details
+                                if hasattr(result.update, "model_fields"):
+                                    field_names = list(result.update.model_fields.keys())
+                                    debug_console.print(f"[bold]Model fields:[/bold] {field_names}")
+                                elif hasattr(result.update, "__fields__"):
+                                    field_names = list(result.update.__fields__.keys())
+                                    debug_console.print(f"[bold]Model fields:[/bold] {field_names}")
+                            elif isinstance(result.update, dict):
+                                debug_console.print(f"[bold]Command update keys:[/bold] {list(result.update.keys())}")
+                                debug_console.print(f"[bold]Command update:[/bold]")
+                                debug_console.print(Pretty(result.update))
+                            else:
+                                debug_console.print(f"[bold]Command update type:[/bold] {type(result.update).__name__}")
                     elif isinstance(result, Send):
                         debug_console.print(f"[bold]Send:[/bold] node={result.node}")
                         debug_console.print(f"[bold]Send arg:[/bold]")
@@ -845,6 +919,15 @@ class NodeFactory:
                             debug_console.print(Pretty(send.arg))
                         if len(result) > 3:
                             debug_console.print(f"... and {len(result) - 3} more")
+                    elif isinstance(result, BaseModel):
+                        debug_console.print(f"[bold]Result is BaseModel:[/bold] {result.__class__.__name__}")
+                        # Show some BaseModel details
+                        if hasattr(result, "model_fields"):
+                            field_names = list(result.model_fields.keys())
+                            debug_console.print(f"[bold]Model fields:[/bold] {field_names}")
+                        elif hasattr(result, "__fields__"):
+                            field_names = list(result.__fields__.keys())
+                            debug_console.print(f"[bold]Model fields:[/bold] {field_names}")
                     elif isinstance(result, dict):
                         debug_console.print(f"[bold]Result keys:[/bold] {list(result.keys())}")
                         debug_console.print(f"[bold]Result:[/bold]")
@@ -896,6 +979,7 @@ class NodeFactory:
         async_wrapper.__name__ = f"async_debug_wrapper_{config.name}"
         async_wrapper.__wrapper_id__ = wrapper_id
         async_wrapper.__wrapped__ = node_func
+        async_wrapper.__preserve_model__ = getattr(config, "preserve_model", True)
         
         return async_wrapper
     
@@ -904,7 +988,8 @@ class NodeFactory:
                           item_provider: str,
                           target_node: str,
                           item_key: str = "item",
-                          name: str = "mapping_node") -> Callable:
+                          name: str = "mapping_node",
+                          preserve_model: bool = True) -> Callable:
         """
         Create a node function that maps items to parallel processing.
         
@@ -913,6 +998,7 @@ class NodeFactory:
             target_node: Target node to send items to
             item_key: Key to use for each item in the target
             name: Name for the node
+            preserve_model: Whether to preserve BaseModel instances
             
         Returns:
             Node function that creates Send objects
@@ -929,6 +1015,7 @@ class NodeFactory:
             table.add_row("item_provider", item_provider)
             table.add_row("target_node", target_node)
             table.add_row("item_key", item_key)
+            table.add_row("preserve_model", str(preserve_model))
             
             debug_console.print(table)
         
@@ -937,8 +1024,15 @@ class NodeFactory:
             """Map items from the state to Send objects."""
             cls.debug_log(f"Mapping node called with state type: {type(state).__name__}")
             
-            # Extract items from state
-            if isinstance(state, dict):
+            # Extract items from state - handle BaseModel specially
+            if isinstance(state, BaseModel) and preserve_model:
+                if hasattr(state, item_provider):
+                    items = getattr(state, item_provider)
+                    cls.debug_log(f"Extracted items from BaseModel attribute: {item_provider}")
+                else:
+                    items = []
+                    cls.debug_log(f"BaseModel has no attribute: {item_provider}")
+            elif isinstance(state, dict):
                 items = state.get(item_provider, [])
             elif hasattr(state, "get"):
                 items = state.get(item_provider, [])
@@ -988,7 +1082,8 @@ class NodeFactory:
             node_type="mapping",
             async_mode=False,  # Use synchronous mapping
             debug=cls.debug_mode,
-            rich_debug=cls.rich_debug
+            rich_debug=cls.rich_debug,
+            preserve_model=preserve_model
         )
         
         # Create the node function
@@ -999,7 +1094,8 @@ class NodeFactory:
                             condition_func: Callable,
                             routes: Dict[Any, str],
                             default_route: Optional[str] = None,
-                            name: str = "conditional_node") -> Callable:
+                            name: str = "conditional_node",
+                            preserve_model: bool = True) -> Callable:
         """
         Create a node function that routes based on a condition.
         
@@ -1008,6 +1104,7 @@ class NodeFactory:
             routes: Mapping from condition values to node names
             default_route: Default route if no match (or condition_func returns None)
             name: Name for the node
+            preserve_model: Whether to preserve BaseModel instances
             
         Returns:
             Node function that routes based on condition
@@ -1026,6 +1123,8 @@ class NodeFactory:
                 
             if default_route:
                 table.add_row("DEFAULT", default_route)
+                
+            table.add_row("preserve_model", str(preserve_model))
             
             debug_console.print(table)
             
@@ -1047,6 +1146,9 @@ class NodeFactory:
             cls.debug_log(f"Condition node called with state type: {type(state).__name__}")
             
             try:
+                # Preserve BaseModel state
+                preserve_state = isinstance(state, BaseModel) and preserve_model
+                
                 # Evaluate the condition
                 result = condition_func(state)
                 cls.debug_log(f"Condition function returned: {result}")
@@ -1062,8 +1164,12 @@ class NodeFactory:
                     
                     if cls.rich_debug and RICH_AVAILABLE and cls.debug_mode:
                         debug_console.print(f"[bold green]Routing to:[/bold green] {target_route}")
-                        
-                    return Command(goto=target_route)
+                    
+                    # Return Command with original state if preserving
+                    if preserve_state:
+                        return Command(update=state, goto=target_route)
+                    else:
+                        return Command(goto=target_route)
                 
                 # Fall back to default
                 if default_route:
@@ -1071,8 +1177,12 @@ class NodeFactory:
                     
                     if cls.rich_debug and RICH_AVAILABLE and cls.debug_mode:
                         debug_console.print(f"[bold yellow]No matching route, using default:[/bold yellow] {default_route}")
-                        
-                    return Command(goto=default_route)
+                    
+                    # Return Command with original state if preserving
+                    if preserve_state:
+                        return Command(update=state, goto=default_route)
+                    else:
+                        return Command(goto=default_route)
                     
                 # No route found
                 error_msg = f"No route found for condition result: {result}"
@@ -1082,7 +1192,18 @@ class NodeFactory:
                     debug_console.print(f"[bold red]No route found for condition:[/bold red] {result}")
                     debug_console.print(f"[bold red]Available routes:[/bold red] {list(routes.keys())}")
                     
-                return {"error": error_msg}
+                # Return error but preserve state if needed
+                if preserve_state:
+                    # Try to set error on BaseModel
+                    try:
+                        error_state = state.model_copy() if hasattr(state, "model_copy") else state.copy()
+                        setattr(error_state, "error", error_msg)
+                        return error_state
+                    except:
+                        # Fall back to dict if can't modify model
+                        return {"error": error_msg, "state": state}
+                else:
+                    return {"error": error_msg}
             except Exception as e:
                 error_msg = f"Error in condition function: {str(e)}"
                 cls.debug_log(error_msg, level="error")
@@ -1092,14 +1213,26 @@ class NodeFactory:
                     debug_console.print(f"[bold red]Error in condition function:[/bold red] {str(e)}")
                     debug_console.print_exception()
                     
-                return {"error": error_msg}
+                # Return error but preserve state if needed
+                if isinstance(state, BaseModel) and preserve_model:
+                    # Try to set error on BaseModel
+                    try:
+                        error_state = state.model_copy() if hasattr(state, "model_copy") else state.copy()
+                        setattr(error_state, "error", error_msg)
+                        return error_state
+                    except:
+                        # Fall back to dict if can't modify model
+                        return {"error": error_msg, "state": state}
+                else:
+                    return {"error": error_msg}
         
         # Create node config
         node_config = NodeConfig(
             name=name,
             engine=route_by_condition,
             debug=cls.debug_mode,
-            rich_debug=cls.rich_debug
+            rich_debug=cls.rich_debug,
+            preserve_model=preserve_model
         )
         
         # Create the node function
@@ -1108,13 +1241,15 @@ class NodeFactory:
     @classmethod
     def create_error_handler_node(cls,
                                 fallback_node: str = "END",
-                                name: str = "error_handler") -> Callable:
+                                name: str = "error_handler",
+                                preserve_model: bool = True) -> Callable:
         """
         Create a node function that handles errors.
         
         Args:
             fallback_node: Node to route to after handling error
             name: Name for the node
+            preserve_model: Whether to preserve BaseModel instances
             
         Returns:
             Node function that handles errors
@@ -1126,7 +1261,8 @@ class NodeFactory:
         if cls.rich_debug and RICH_AVAILABLE:
             debug_console.print(Panel.fit(
                 f"[bold]Error Handler Node: {name}[/bold]\n"
-                f"Fallback route: [green]{fallback_node}[/green]",
+                f"Fallback route: [green]{fallback_node}[/green]\n"
+                f"Preserve model: [blue]{preserve_model}[/blue]",
                 border_style="red"
             ))
         
@@ -1151,27 +1287,65 @@ class NodeFactory:
                             debug_console.print(Text(error_info["traceback"], style="dim"))
                     else:
                         debug_console.print(f"[bold red]Error:[/bold red] {error_info}")
+                        
+                # Show BaseModel errors
+                if isinstance(state, BaseModel) and hasattr(state, "error"):
+                    error_info = getattr(state, "error")
+                    debug_console.print(f"[bold red]BaseModel Error:[/bold red] {error_info}")
             
             # Create a new state with error handled flag
-            result = state.copy() if isinstance(state, dict) else {"state": state}
-            result["error_handled"] = True
-            result["handled_at"] = datetime.now().isoformat()
-            cls.debug_log(f"Marked error as handled")
-            
-            # Show routing if rich is available
-            if cls.rich_debug and RICH_AVAILABLE and cls.debug_mode:
-                debug_console.print(f"[bold green]Routing to fallback node:[/bold green] {fallback_node}")
-                debug_console.rule()
+            if isinstance(state, BaseModel) and preserve_model:
+                # Make a copy of the BaseModel
+                try:
+                    if hasattr(state, "model_copy"):
+                        # Pydantic v2
+                        result = state.model_copy(deep=True)
+                    else:
+                        # Pydantic v1
+                        result = state.copy(deep=True)
+                        
+                    # Set error_handled flag
+                    try:
+                        setattr(result, "error_handled", True)
+                        setattr(result, "handled_at", datetime.now().isoformat())
+                        cls.debug_log(f"Marked error as handled in BaseModel")
+                    except AttributeError:
+                        cls.debug_log(f"Could not set error_handled on BaseModel", level="warning")
+                        
+                    # Show routing if rich is available
+                    if cls.rich_debug and RICH_AVAILABLE and cls.debug_mode:
+                        debug_console.print(f"[bold green]Routing BaseModel to fallback node:[/bold green] {fallback_node}")
+                        debug_console.rule()
+                    
+                    # Return Command with original state if preserving
+                    return Command(update=result, goto=fallback_node)
+                except Exception as e:
+                    cls.debug_log(f"Error handling BaseModel state: {e}", level="error")
+                    # Fall back to dict if can't handle BaseModel
+                    result = {"error_handled": True, "handled_at": datetime.now().isoformat()}
+                    return Command(update=result, goto=fallback_node)
+            else:
+                # Handle dict state
+                result = state.copy() if isinstance(state, dict) else {"state": state}
+                result["error_handled"] = True
+                result["handled_at"] = datetime.now().isoformat()
+                cls.debug_log(f"Marked error as handled in dict")
                 
-            # Route to fallback
-            return Command(update=result, goto=fallback_node)
+                # Show routing if rich is available
+                if cls.rich_debug and RICH_AVAILABLE and cls.debug_mode:
+                    debug_console.print(f"[bold green]Routing to fallback node:[/bold green] {fallback_node}")
+                    debug_console.rule()
+                
+                # Return Command with update
+                return Command(update=result, goto=fallback_node)
         
         # Create node config
         node_config = NodeConfig(
             name=name,
             engine=handle_error,
             debug=cls.debug_mode,
-            rich_debug=cls.rich_debug
+            rich_debug=cls.rich_debug,
+            preserve_model=preserve_model
         )
         
         # Create the node function

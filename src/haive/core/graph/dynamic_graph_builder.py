@@ -1622,8 +1622,8 @@ class DynamicGraph:
             logger.info(f"Visualizing graph: {self.name}")
             
             # Create visualizer instance
-            from haive.core.graph.utils.mermaid_visualizer import MermaidVisualizer
-            visualizer = MermaidVisualizer(self)
+            #from haive.core.graph.utils.mermaid_visualizer import MermaidVisualizer
+            #visualizer = MermaidVisualizer(self)
             
             # Generate visualization based on format
             if format.lower() == "png":
@@ -1637,7 +1637,7 @@ class DynamicGraph:
         except ImportError:
             logger.warning("MermaidVisualizer not available, falling back to basic visualization")
             # Fallback to original method if available
-            if hasattr(self, "compiled_graph") and self.compiled_graph is not None:
+            if hasattr(self, "compiled_graph") or self.compiled_graph is not None:
                 try:
                     if output_file is None:
                         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -1821,3 +1821,5 @@ class DynamicGraph:
                 print(f"Visualization error: {str(viz_error)}")
         
         print("\n===== END DEBUG GRAPH =====\n")
+        
+    

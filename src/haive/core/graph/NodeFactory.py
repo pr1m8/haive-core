@@ -15,7 +15,7 @@ from haive.core.config.runnable import RunnableConfigManager
 from haive.core.engine.aug_llm.base import AugLLMConfig
 from haive.core.engine.base import Engine, EngineType, InvokableEngine, NonInvokableEngine
 from haive.core.engine.embeddings import EmbeddingsEngineConfig
-from haive.core.engine.retriever import RetrieverConfig
+from haive.core.engine.retriever import BaseRetrieverConfig
 from haive.core.engine.vectorstore.vectorstore import VectorStoreConfig
 from haive.core.graph.graph_pattern_registry import GraphRegistry
 
@@ -796,7 +796,7 @@ class NodeFactory:
     @classmethod
     def _create_retriever_node(
         cls,
-        engine: RetrieverConfig,
+        engine: BaseRetrieverConfig,
         command_goto: str | None = None,
         input_mapping: dict[str, str] | None = None,
         output_mapping: dict[str, str] | None = None,

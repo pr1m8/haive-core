@@ -144,7 +144,7 @@ class LLMConfig(BaseModel, SecureConfigMixin):
     cache_ttl: Optional[int] = Field(default=300, description="Time-to-live for cache (in seconds).")
     extra_params: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Optional extra parameters.")
 
-    def instantiate_llm(self, **kwargs) -> Any:
+    def instantiate(self, **kwargs) -> Any:
         """
         Abstract method to be implemented by subclasses.
         
@@ -177,7 +177,7 @@ class AzureLLMConfig(LLMConfig):
         description="API key for Azure OpenAI."
     )
 
-    def instantiate_llm(self, **kwargs) -> Any:
+    def instantiate(self, **kwargs) -> Any:
         """
         Instantiate Azure OpenAI Chat model with robust error handling.
         """
@@ -221,7 +221,7 @@ class OpenAILLMConfig(LLMConfig):
     """Configuration for OpenAI models."""
     provider: LLMProvider = LLMProvider.OPENAI
 
-    def instantiate_llm(self, **kwargs) -> Any:
+    def instantiate(self, **kwargs) -> Any:
         """
         Instantiate OpenAI Chat model.
         """
@@ -255,7 +255,7 @@ class AnthropicLLMConfig(LLMConfig):
         default_factory=lambda: SecretStr(os.getenv("ANTHROPIC_API_KEY", "")),
         description="API key for Anthropic."
     )
-    def instantiate_llm(self, **kwargs) -> Any:
+    def instantiate(self, **kwargs) -> Any:
         """
         Instantiate Anthropic Chat model.
         """
@@ -285,7 +285,7 @@ class GeminiLLMConfig(LLMConfig):
         default_factory=lambda: SecretStr(os.getenv("GOOGLE_API_KEY", "")),
         description="API key for Google Gemini."
     )
-    def instantiate_llm(self, **kwargs) -> Any:
+    def instantiate(self, **kwargs) -> Any:
         """
         Instantiate Google Gemini Chat model.
         """
@@ -320,7 +320,7 @@ class DeepSeekLLMConfig(LLMConfig):
         description="API key for DeepSeek."
     )
 
-    def instantiate_llm(self, **kwargs) -> Any:
+    def instantiate(self, **kwargs) -> Any:
         """
         Instantiate DeepSeek Chat model.
         """
@@ -349,7 +349,7 @@ class MistralLLMConfig(LLMConfig):
         default_factory=lambda: SecretStr(os.getenv("MISTRAL_API_KEY", "")),
         description="API key for Mistral."
     )
-    def instantiate_llm(self, **kwargs) -> Any:
+    def instantiate(self, **kwargs) -> Any:
         """
         Instantiate Mistral Chat model.
         """
@@ -379,7 +379,7 @@ class GroqLLMConfig(LLMConfig):
         default_factory=lambda: SecretStr(os.getenv("GROQ_API_KEY", "")),
         description="API key for Groq."
     )
-    def instantiate_llm(self, **kwargs) -> Any:
+    def instantiate(self, **kwargs) -> Any:
         """
         Instantiate Groq Chat model.
         """
@@ -409,7 +409,7 @@ class CohereLLMConfig(LLMConfig):
         default_factory=lambda: SecretStr(os.getenv("COHERE_API_KEY", "")),
         description="API key for Cohere."
     )
-    def instantiate_llm(self, **kwargs) -> Any:
+    def instantiate(self, **kwargs) -> Any:
         """
         Instantiate Cohere Chat model.
         """
@@ -439,7 +439,7 @@ class TogetherAILLMConfig(LLMConfig):
         default_factory=lambda: SecretStr(os.getenv("TOGETHER_AI_API_KEY", "")),
         description="API key for Together AI."
     )
-    def instantiate_llm(self, **kwargs) -> Any:
+    def instantiate(self, **kwargs) -> Any:
         """
         Instantiate Together AI Chat model.
         """
@@ -466,7 +466,7 @@ class FireworksAILLMConfig(LLMConfig):
     """Configuration for Fireworks AI models."""
     provider: LLMProvider = LLMProvider.FIREWORKS_AI
 
-    def instantiate_llm(self, **kwargs) -> Any:
+    def instantiate(self, **kwargs) -> Any:
         """
         Instantiate Fireworks AI Chat model.
         """
@@ -493,7 +493,7 @@ class PerplexityLLMConfig(LLMConfig):
     """Configuration for Perplexity AI models."""
     provider: LLMProvider = LLMProvider.PERPLEXITY
 
-    def instantiate_llm(self, **kwargs) -> Any:
+    def instantiate(self, **kwargs) -> Any:
         """
         Instantiate Perplexity AI Chat model.
         """
