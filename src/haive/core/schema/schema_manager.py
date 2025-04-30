@@ -1,44 +1,26 @@
 """
 StateSchemaManager for creating and manipulating state schemas.
-
-This module provides the StateSchemaManager class which handles the creation
-and modification of state schemas with fine-grained control over fields,
-reducers, shared fields, and more.
 """
 from __future__ import annotations
 import inspect
 import logging
 import operator
 from collections import defaultdict
-from typing import Any, Callable, Dict, List, Optional, Set, Type,\
-    TypeVar, Union, get_origin, get_args, Tuple, TYPE_CHECKING 
+from typing import Any, Callable, Dict, List, Optional, \
+    Set, Type, get_origin, get_args, Tuple, Union, TYPE_CHECKING
 
 from pydantic import BaseModel, Field, create_model
 
 from haive.core.schema.state_schema import StateSchema
-from haive.core.schema.utils import SchemaUtils
-from langgraph.types import Command, Send
 from haive.core.schema.field_extractor import FieldExtractor
-from haive.core.schema.field_definition import FieldDefinition
-
-# Type variables for generic types
-T = TypeVar('T', bound=BaseModel)
-SchemaType = TypeVar('SchemaType', bound=Type[BaseModel])
+if TYPE_CHECKING:
+    from haive.core.schema.schema_composer import SchemaComposer
 
 logger = logging.getLogger(__name__)
-
-if TYPE_CHECKING:
-    from haive.core.schema.schema_composer import SchemaComposer   
 
 class StateSchemaManager:
     """
     Manager for dynamically creating and manipulating state schemas.
-    
-    Provides utilities for:
-    - Building schemas from dicts, pydantic models, or SchemaComposer output
-    - Adding, removing, or modifying fields
-    - Managing field sharing, reducers, and other metadata
-    - Creating node functions with schema validation
     """
 
     def __init__(
@@ -55,26 +37,26 @@ class StateSchemaManager:
             name: Custom schema name
             config: Optional configuration dictionary
         """
-        self.fields: Dict[str, tuple[Any, Any]] = {}
-        self.validators: Dict[str, Callable] = {}
-        self.properties: Dict[str, Callable] = {}
-        self.computed_properties: Dict[str, tuple[Callable, Optional[Callable]]] = {}
-        self.class_methods: Dict[str, Callable] = {}
-        self.static_methods: Dict[str, Callable] = {}
-        self.field_descriptions: Dict[str, str] = {}
-        self.instance_methods: Dict[str, Callable] = {}
-        self.locked: bool = False
-        self.config: Dict[str, Any] = config or {}
+        self.fields = {}
+        self.validators = {}
+        self.properties = {}
+        self.computed_properties = {}
+        self.class_methods = {}
+        self.static_methods = {}
+        self.field_descriptions = {}
+        self.instance_methods = {}
+        self.locked = False
+        self.config = config or {}
         
         # Special field sets for state schema
-        self._shared_fields: Set[str] = set()
-        self._reducer_names: Dict[str, str] = {}  # Field name -> reducer name (serializable)
-        self._reducer_functions: Dict[str, Callable] = {}  # Field name -> reducer function
+        self._shared_fields = set()
+        self._reducer_names = {}  # Field name -> reducer name (serializable)
+        self._reducer_functions = {}  # Field name -> reducer function
         
         # Input/output tracking for engines
-        self._input_fields: Dict[str, Set[str]] = defaultdict(set)  # Engine name -> input fields
-        self._output_fields: Dict[str, Set[str]] = defaultdict(set)  # Engine name -> output fields
-        self._engine_io_mappings: Dict[str, Dict[str, List[str]]] = {}  # Engine name -> IO mapping
+        self._input_fields = defaultdict(set)  # Engine name -> input fields
+        self._output_fields = defaultdict(set)  # Engine name -> output fields
+        self._engine_io_mappings = {}  # Engine name -> IO mapping
         
         # Set default name
         if data is None:
@@ -83,10 +65,10 @@ class StateSchemaManager:
 
         # Extract name from data if not provided
         if name is None:
-            if hasattr(data, "name") and isinstance(data, type) and issubclass(data, BaseModel):
-                self.name = data.__name__
-            elif hasattr(data, "name"):
+            if hasattr(data, "name"):
                 self.name = data.name
+            elif isinstance(data, type):
+                self.name = data.__name__
             else:
                 self.name = "CustomState"
         else:
@@ -99,11 +81,7 @@ class StateSchemaManager:
             self._load_from_model(data)
         elif isinstance(data, BaseModel):
             self._load_from_model(data.__class__)
-        # Add explicit SchemaComposer check before the more generic check
-        elif hasattr(data, "__class__") and data.__class__.__name__ == "SchemaComposer":
-            self._load_from_composer(data)
-        elif hasattr(data, "fields") and (hasattr(data, "reducer_names") or hasattr(data, "reducer_functions")):
-            # This appears to be a SchemaComposer or compatible object
+        elif hasattr(data, "fields") and (hasattr(data, "shared_fields") or hasattr(data, "engine_io_mappings")):
             self._load_from_composer(data)
         else:
             raise TypeError(f"Unsupported data type: {type(data)}")
@@ -116,7 +94,7 @@ class StateSchemaManager:
             model_cls: Pydantic model class to load from
         """
         try:
-            # Use the new field extractor utility
+            # Use the field extractor utility
             fields, descriptions, shared_fields, reducer_names, reducer_functions, engine_io_mappings, input_fields, output_fields = \
                 FieldExtractor.extract_from_model(model_cls)
             
@@ -134,9 +112,6 @@ class StateSchemaManager:
                 
             for engine, fields in output_fields.items():
                 self._output_fields[engine].update(fields)
-            
-            # Log the loaded fields
-            logger.debug(f"Loaded fields: {list(self.fields.keys())}")
             
             # Load methods and validators
             for name, attr in inspect.getmembers(model_cls):
@@ -164,18 +139,41 @@ class StateSchemaManager:
             # Add a placeholder field as fallback
             self.fields["placeholder"] = (str, Field(default=""))
 
-    # In StateSchemaManager._load_from_composer method
     def _load_from_composer(self, composer: Any) -> None:
+        """
+        Load fields and metadata from a SchemaComposer.
+        
+        Args:
+            composer: SchemaComposer instance
+        """
         try:
-            # Existing code...
+            # Extract fields from composer
+            for field_name, field_def in composer.fields.items():
+                field_type, field_info = field_def.to_field_info()
+                self.fields[field_name] = (field_type, field_info)
+                
+                # Extract additional metadata
+                if field_def.description:
+                    self.field_descriptions[field_name] = field_def.description
+                    
+                if field_def.shared:
+                    self._shared_fields.add(field_name)
+                    
+                if field_def.reducer:
+                    self._reducer_functions[field_name] = field_def.reducer
+                    self._reducer_names[field_name] = field_def.get_reducer_name()
             
-            # Explicitly copy engine I/O mappings - deep copy to avoid reference issues
+            # Copy shared fields
+            if hasattr(composer, "shared_fields"):
+                self._shared_fields.update(composer.shared_fields)
+                
+            # Copy engine I/O mappings - deep copy to avoid reference issues
             if hasattr(composer, "engine_io_mappings"):
                 self._engine_io_mappings = {
                     k: v.copy() for k, v in composer.engine_io_mappings.items()
                 }
                 
-            # Explicitly copy input/output fields
+            # Copy input/output fields
             if hasattr(composer, "input_fields"):
                 for engine_name, fields in composer.input_fields.items():
                     self._input_fields[engine_name] = set(fields)
@@ -184,7 +182,7 @@ class StateSchemaManager:
                 for engine_name, fields in composer.output_fields.items():
                     self._output_fields[engine_name] = set(fields)
                     
-            # After copying fields, update engine_io_mappings to ensure consistency
+            # Update engine_io_mappings to ensure consistency
             for engine_name in self._input_fields:
                 if engine_name not in self._engine_io_mappings:
                     self._engine_io_mappings[engine_name] = {
@@ -310,32 +308,14 @@ class StateSchemaManager:
             # Store reducer function in runtime dictionary
             self._reducer_functions[name] = reducer
             
-            # Store serializable name for the reducer
-            field_def = FieldDefinition(name=name, field_type=field_type, reducer=reducer)
-            self._reducer_names[name] = field_def.get_reducer_name()
+            # Use a helper to get a serializable name for the reducer
+            if hasattr(reducer, "__module__") and reducer.__module__ == 'operator':
+                self._reducer_names[name] = f"operator.{reducer.__name__}"
+            elif hasattr(reducer, "__name__"):
+                self._reducer_names[name] = reducer.__name__
+            else:
+                self._reducer_names[name] = str(reducer)
 
-        return self
-
-    def add_computed_property(
-        self,
-        name: str,
-        getter_func: Callable,
-        setter_func: Optional[Callable] = None
-    ) -> "StateSchemaManager":
-        """
-        Add a computed property with getter and optional setter.
-        
-        Args:
-            name: Property name
-            getter_func: Getter function
-            setter_func: Optional setter function
-            
-        Returns:
-            Self for chaining
-        """
-        if self.locked:
-            raise ValueError("Schema is locked and cannot be modified.")
-        self.computed_properties[name] = (getter_func, setter_func)
         return self
 
     def remove_field(self, name: str) -> "StateSchemaManager":
@@ -429,8 +409,12 @@ class StateSchemaManager:
                 self._reducer_functions[name] = new_reducer
                 
                 # Store serializable name for the reducer
-                field_def = FieldDefinition(name=name, field_type=field_type, reducer=new_reducer)
-                self._reducer_names[name] = field_def.get_reducer_name()
+                if hasattr(new_reducer, "__module__") and new_reducer.__module__ == 'operator':
+                    self._reducer_names[name] = f"operator.{new_reducer.__name__}"
+                elif hasattr(new_reducer, "__name__"):
+                    self._reducer_names[name] = new_reducer.__name__
+                else:
+                    self._reducer_names[name] = str(new_reducer)
 
         return self
 
@@ -445,6 +429,143 @@ class StateSchemaManager:
             True if field exists, False otherwise
         """
         return name in self.fields
+
+    def get_model(
+        self,
+        lock: bool = False,
+        as_state_schema: bool = True,
+        name: Optional[str] = None
+    ) -> Type[BaseModel]:
+        """
+        Create a Pydantic model with all configured options.
+        
+        Args:
+            lock: Whether to lock the schema against further modifications
+            as_state_schema: Whether to use StateSchema as the base class
+            name: Optional name for the schema class
+            
+        Returns:
+            Created model class
+        """
+        if lock:
+            self.locked = True
+
+        # Use provided name or default
+        model_name = name or self.name
+
+        # Choose the base class
+        base_class = StateSchema if as_state_schema else BaseModel
+
+        # Create the model with fields
+        model = create_model(model_name, __base__=base_class, **self.fields)
+        
+        # Debug model creation
+        logger.debug(f"Created model {model_name} with fields: {list(getattr(model, '__annotations__', {}))}")
+        
+        # Add shared fields metadata if using StateSchema
+        if as_state_schema:
+            model.__shared_fields__ = list(self._shared_fields)
+
+            # Add reducer metadata
+            model.__serializable_reducers__ = dict(self._reducer_names)
+            
+            # Add actual reducer functions
+            if not hasattr(model, "__reducer_fields__"):
+                model.__reducer_fields__ = {}
+            model.__reducer_fields__.update(self._reducer_functions)
+            
+            # Add engine I/O mappings metadata if available
+            if self._engine_io_mappings:
+                model.__engine_io_mappings__ = self._engine_io_mappings
+                
+            # Add input/output field tracking
+            if self._input_fields:
+                model.__input_fields__ = {k: list(v) for k, v in self._input_fields.items()}
+                
+            if self._output_fields:
+                model.__output_fields__ = {k: list(v) for k, v in self._output_fields.items()}
+
+        # Add validators
+        for name, validator in self.validators.items():
+            setattr(model, name, validator)
+
+        # Add properties
+        for name, (getter, setter) in self.computed_properties.items():
+            prop = property(getter, setter)
+            setattr(model, name, prop)
+            
+        # Add regular properties
+        for name, getter in self.properties.items():
+            prop = property(getter)
+            setattr(model, name, prop)
+
+        # Add instance methods
+        for name, method in self.instance_methods.items():
+            setattr(model, name, method)
+
+        # Add class methods
+        for name, method in self.class_methods.items():
+            setattr(model, name, classmethod(method))
+
+        # Add static methods
+        for name, method in self.static_methods.items():
+            setattr(model, name, staticmethod(method))
+
+        return model
+
+    def mark_as_input_field(self, field_name: str, engine_name: str) -> 'StateSchemaManager':
+        """
+        Mark a field as an input field for an engine.
+        
+        Args:
+            field_name: Name of the field
+            engine_name: Name of the engine
+            
+        Returns:
+            Self for chaining
+        """
+        if field_name in self.fields:
+            self._input_fields[engine_name].add(field_name)
+            self._update_engine_io_mapping(engine_name)
+        return self
+    
+    def mark_as_output_field(self, field_name: str, engine_name: str) -> 'StateSchemaManager':
+        """
+        Mark a field as an output field for an engine.
+        
+        Args:
+            field_name: Name of the field
+            engine_name: Name of the engine
+            
+        Returns:
+            Self for chaining
+        """
+        if field_name in self.fields:
+            self._output_fields[engine_name].add(field_name)
+            self._update_engine_io_mapping(engine_name)
+        return self
+    
+    def _update_engine_io_mapping(self, engine_name: str) -> None:
+        """
+        Update engine I/O mapping for a specific engine.
+        
+        Args:
+            engine_name: Engine name to update mapping for
+        """
+        # Create mapping if it doesn't exist
+        if engine_name not in self._engine_io_mappings:
+            self._engine_io_mappings[engine_name] = {
+                "inputs": [],
+                "outputs": []
+            }
+            
+        # Update inputs from tracked fields
+        if engine_name in self._input_fields:
+            self._engine_io_mappings[engine_name]["inputs"] = list(self._input_fields[engine_name])
+            
+        # Update outputs from tracked fields
+        if engine_name in self._output_fields:
+            self._engine_io_mappings[engine_name]["outputs"] = list(self._output_fields[engine_name])
 
     def merge(
         self,
@@ -545,488 +666,6 @@ class StateSchemaManager:
                 if engine_name not in merged._engine_io_mappings:
                     merged._engine_io_mappings[engine_name] = mapping.copy()
 
-        elif hasattr(other, "fields") and (hasattr(other, "shared_fields") or hasattr(other, "reducer_names")):
-            # Merge from a SchemaComposer-like object
-            for field, (field_type, field_info) in other.fields.items():
-                if field not in merged.fields:
-                    # Ensure field is optional
-                    if get_origin(field_type) is not Optional:
-                        field_type = Optional[field_type]
-                    merged.fields[field] = (field_type, field_info)
-                    
-                    # Copy field description if available
-                    if hasattr(other, "field_descriptions") and field in other.field_descriptions:
-                        merged.field_descriptions[field] = other.field_descriptions[field]
-            
-            # Merge shared fields if available
-            if hasattr(other, "shared_fields"):
-                merged._shared_fields.update(other.shared_fields)
-            
-            # Merge reducers if available
-            if hasattr(other, "reducer_names"):
-                for field, reducer_name in other.reducer_names.items():
-                    if field not in merged._reducer_names:
-                        merged._reducer_names[field] = reducer_name
-                        
-            if hasattr(other, "reducer_functions"):
-                for field, reducer in other.reducer_functions.items():
-                    if field not in merged._reducer_functions:
-                        merged._reducer_functions[field] = reducer
-                        
-            # Merge engine I/O information if available
-            if hasattr(other, "input_fields"):
-                for engine_name, fields in other.input_fields.items():
-                    if engine_name not in merged._input_fields:
-                        merged._input_fields[engine_name] = set(fields)
-                    else:
-                        merged._input_fields[engine_name].update(fields)
-                        
-            if hasattr(other, "output_fields"):
-                for engine_name, fields in other.output_fields.items():
-                    if engine_name not in merged._output_fields:
-                        merged._output_fields[engine_name] = set(fields)
-                    else:
-                        merged._output_fields[engine_name].update(fields)
-                        
-            if hasattr(other, "engine_io_mappings"):
-                for engine_name, mapping in other.engine_io_mappings.items():
-                    if engine_name not in merged._engine_io_mappings:
-                        merged._engine_io_mappings[engine_name] = mapping.copy()
-
-        elif isinstance(other, type) and issubclass(other, BaseModel):
-            # Merge from a Pydantic model class
-            # Get fields - Pydantic v2
-            fields_dict = other.model_fields
-            
-            for field_name, field_info in fields_dict.items():
-                if field_name not in merged.fields:
-                    # Get field type for Pydantic v2
-                    field_type = field_info.annotation
-                    
-                    # Ensure field is optional
-                    if get_origin(field_type) is not Optional:
-                        field_type = Optional[field_type]
-                        
-                    merged.fields[field_name] = (field_type, field_info)
-
-                    # Copy field description
-                    description = field_info.description
-                    if description:
-                        merged.field_descriptions[field_name] = description
-            
-            # Copy shared fields from StateSchema
-            if hasattr(other, "__shared_fields__"):
-                merged._shared_fields.update(other.__shared_fields__)
-
-            # Copy serializable reducers
-            if hasattr(other, "__serializable_reducers__"):
-                for field, reducer_name in other.__serializable_reducers__.items():
-                    if field not in merged._reducer_names:
-                        merged._reducer_names[field] = reducer_name
-
-            # Copy reducer functions
-            if hasattr(other, "__reducer_fields__"):
-                for field, reducer in other.__reducer_fields__.items():
-                    if field not in merged._reducer_functions:
-                        merged._reducer_functions[field] = reducer
-                        
-            # Copy engine I/O information
-            if hasattr(other, "__engine_io_mappings__"):
-                for engine_name, mapping in other.__engine_io_mappings__.items():
-                    if engine_name not in merged._engine_io_mappings:
-                        merged._engine_io_mappings[engine_name] = mapping.copy()
-                        
-            if hasattr(other, "__input_fields__"):
-                for engine_name, fields in other.__input_fields__.items():
-                    if engine_name not in merged._input_fields:
-                        merged._input_fields[engine_name] = set(fields)
-                    else:
-                        merged._input_fields[engine_name].update(fields)
-                        
-            if hasattr(other, "__output_fields__"):
-                for engine_name, fields in other.__output_fields__.items():
-                    if engine_name not in merged._output_fields:
-                        merged._output_fields[engine_name] = set(fields)
-                    else:
-                        merged._output_fields[engine_name].update(fields)
-
-        elif isinstance(other, BaseModel):
-            # Merge from a Pydantic model instance by using its class
-            merged = self.merge(other.__class__)
-
+        # Handle other types appropriately...
+        
         return merged
-
-    def get_model(
-        self,
-        lock: bool = False,
-        as_state_schema: bool = True,
-        name: Optional[str] = None
-    ) -> Type[BaseModel]:
-        """
-        Create a Pydantic model with all configured options.
-        
-        Args:
-            lock: Whether to lock the schema against further modifications
-            as_state_schema: Whether to use StateSchema as the base class
-            name: Optional name for the schema class
-            
-        Returns:
-            Created model class
-        """
-        if lock:
-            self.locked = True
-
-        # Use provided name or default
-        model_name = name or self.name
-
-        # Choose the base class
-        base_class = StateSchema if as_state_schema else BaseModel
-
-        # Create the model with fields
-        model = create_model(model_name, __base__=base_class, **self.fields)
-        
-        # Debug model creation
-        logger.debug(f"Created model {model_name} with fields: {list(getattr(model, '__annotations__', {}))}")
-        logger.debug(f"Model has model_fields: {hasattr(model, 'model_fields')}")
-        
-        # Add shared fields metadata if using StateSchema
-        if as_state_schema:
-            model.__shared_fields__ = list(self._shared_fields)
-
-            # Add reducer metadata
-            model.__serializable_reducers__ = dict(self._reducer_names)
-            
-            # Add actual reducer functions
-            if not hasattr(model, "__reducer_fields__"):
-                model.__reducer_fields__ = {}
-            model.__reducer_fields__.update(self._reducer_functions)
-            
-            # Add engine I/O mappings metadata if available
-            if self._engine_io_mappings:
-                model.__engine_io_mappings__ = self._engine_io_mappings
-                
-            # Add input/output field tracking
-            if self._input_fields:
-                model.__input_fields__ = {k: list(v) for k, v in self._input_fields.items()}
-                
-            if self._output_fields:
-                model.__output_fields__ = {k: list(v) for k, v in self._output_fields.items()}
-
-        # Add validators
-        for name, validator in self.validators.items():
-            setattr(model, name, validator)
-
-        # Add properties
-        for name, (getter, setter) in self.computed_properties.items():
-            prop = property(getter, setter)
-            setattr(model, name, prop)
-            
-        # Add regular properties
-        for name, getter in self.properties.items():
-            prop = property(getter)
-            setattr(model, name, prop)
-
-        # Add instance methods
-        for name, method in self.instance_methods.items():
-            setattr(model, name, method)
-
-        # Add class methods
-        for name, method in self.class_methods.items():
-            setattr(model, name, classmethod(method))
-
-        # Add static methods
-        for name, method in self.static_methods.items():
-            setattr(model, name, staticmethod(method))
-
-        return model
-
-    def pretty_print(self) -> None:
-        """
-        Print the schema as a Python class definition.
-        """
-        print(self.get_pretty_print_output())
-
-    def get_pretty_print_output(self) -> str:
-        """
-        Get the schema as a Python class definition string.
-        
-        Returns:
-            Formatted string representation
-        """
-        lines = [f"class {self.name}(StateSchema):"]
-        lines.append('    """')
-        lines.append(f"    Generated {self.name} schema")
-        lines.append('    """')
-        
-        # Add fields
-        for name, (field_type, field_info) in self.fields.items():
-            # Get type as string
-            type_str = str(field_type).replace("typing.", "")
-            
-            # Get default as string - Pydantic v2
-            if field_info.default_factory is not None:
-                default_str = f"Field(default_factory={field_info.default_factory.__name__})"
-            else:
-                default = field_info.default
-                if default is ...:
-                    default_str = "Field(...)"
-                else:
-                    default_str = f"Field(default={repr(default)})"
-                    
-            # Add description if available
-            if name in self.field_descriptions:
-                desc = self.field_descriptions[name].replace('"', '\\"')
-                default_str = default_str.replace(")", f', description="{desc}")')
-                
-            # Format the field
-            field_line = f"    {name}: {type_str} = {default_str}"
-            lines.append(field_line)
-            
-        # Add shared fields
-        if self._shared_fields:
-            lines.append("")
-            lines.append("    # Shared fields")
-            lines.append(f"    __shared_fields__ = {list(self._shared_fields)}")
-            
-        # Add serializable reducers
-        if self._reducer_names:
-            lines.append("")
-            lines.append("    # Reducers")
-            lines.append(f"    __serializable_reducers__ = {self._reducer_names}")
-            
-        return "\n".join(lines)
-
-    def create_node_function(
-        self,
-        func: Callable,
-        command_goto: Optional[str] = None
-    ) -> Callable:
-        """
-        Create a node function with schema validation.
-        
-        Args:
-            func: Function that takes state and returns updates
-            command_goto: Optional next node to go to
-            
-        Returns:
-            Node function with validation
-        """
-        # Get the model with our current schema
-        model_cls = self.get_model()
-        
-        def node_function(state: Any, config: Optional[Dict[str, Any]] = None) -> Union[Dict[str, Any], Command]:
-            """Wrapper function that validates state and applies reducers."""
-            # Validate input state
-            if not isinstance(state, model_cls):
-                try:
-                    state = model_cls.model_validate(state)
-                except Exception as e:
-                    try:
-                        state = model_cls.from_dict(state)
-                    except Exception as inner_e:
-                        # Last resort: just pass it through
-                        pass
-            
-            # Call the original function
-            result = func(state, config)
-            
-            # Handle different return types
-            if isinstance(result, Command):
-                # Command object - already handles control flow
-                return result
-            elif isinstance(result, dict):
-                # Dictionary update - wrap in Command if goto specified
-                if command_goto:
-                    return Command(update=result, goto=command_goto)
-                else:
-                    return result
-            else:
-                # Other return type - convert to dict with result key
-                update = {"result": result}
-                if command_goto:
-                    return Command(update=update, goto=command_goto)
-                else:
-                    return update
-                    
-        # Return the wrapped function
-        return node_function
-    
-    def create_command(
-        self,
-        update: Dict[str, Any],
-        goto: Optional[Union[str, "END"]] = None,
-        resume: Optional[Any] = None,
-        graph: Optional[str] = None,
-        validate_update: bool = True
-    ) -> Command:
-        """
-        Create a Command object with schema validation.
-        TODO: Review langgraph goto, END edge.
-        Args:
-            update: State updates to apply
-            goto: Next node to go to
-            resume: Value to resume with after an interrupt
-            graph: Graph to send command to (None for current, Command.PARENT for parent)
-            validate_update: Whether to validate the update against schema
-            
-        Returns:
-            Command object
-        """
-        # Validate update against schema if requested
-        if validate_update and update:
-            try:
-                model_cls = self.get_model()
-                # Only validate fields that exist in the schema
-                valid_fields = {k: v for k, v in update.items() if k in model_cls.model_fields}
-                if valid_fields:
-                    # Create a minimal state with just the updates
-                    temp_state = model_cls.from_partial_dict(valid_fields)
-                    # Convert back to dict
-                    validated_update = temp_state.to_dict()
-                    # Preserve fields that weren't in the schema
-                    for k, v in update.items():
-                        if k not in valid_fields:
-                            validated_update[k] = v
-                    update = validated_update
-            except Exception as e:
-                logger.warning(f"Command update validation failed: {e}")
-        
-        # Handle special END case for goto
-        if goto == "END":
-            from langgraph.graph import END
-            goto = END
-        
-        return Command(update=update, goto=goto, resume=resume, graph=graph)
-    
-    def create_send(
-        self, 
-        node: str, 
-        arg: Any,
-        validate_args: bool = True
-    ) -> Send:
-        """
-        Create a Send object for routing to another node.
-        
-        Args:
-            node: Name of the target node
-            arg: State to send to the node
-            validate_args: Whether to validate the arguments against schema
-            
-        Returns:
-            Send object
-        """
-        # Validate arguments if requested
-        if validate_args and isinstance(arg, dict):
-            try:
-                model_cls = self.get_model()
-                # Only validate fields that exist in the schema
-                valid_fields = {k: v for k, v in arg.items() if hasattr(model_cls, k)}
-                if valid_fields:
-                    # Create a minimal state with just the valid fields
-                    temp_state = model_cls.from_partial_dict(valid_fields)
-                    # Convert back to dict
-                    validated_arg = temp_state.to_dict()
-                    # Preserve fields that weren't in the schema
-                    for k, v in arg.items():
-                        if k not in valid_fields:
-                            validated_arg[k] = v
-                    arg = validated_arg
-            except Exception as e:
-                logger.warning(f"Send argument validation failed: {e}")
-        
-        return Send(node, arg)
-
-    def create_sends_from_items(
-        self,
-        items: List[Any],
-        target_node: str,
-        state_factory: Callable[[Any], Dict[str, Any]],
-        validate_args: bool = True
-    ) -> List[Send]:
-        """
-        Create Send objects from a list of items using a state factory.
-        Useful for map operations in map-reduce patterns.
-        
-        Args:
-            items: List of items to process
-            target_node: Node to send all items to
-            state_factory: Function to convert each item to a state dict
-            validate_args: Whether to validate the arguments against schema
-            
-        Returns:
-            List of Send objects
-        """
-        return [self.create_send(target_node, state_factory(item), validate_args) for item in items]
-
-    def add_method(self, name: str, method: Callable) -> "StateSchemaManager":
-        """
-        Add a method to the schema.
-        
-        Args:
-            name: Method name
-            method: Method implementation
-            
-        Returns:
-            Self for chaining
-        """
-        if self.locked:
-            raise ValueError("Schema is locked and cannot be modified.")
-        
-        # Store the method as an instance method
-        self.instance_methods[name] = method
-        
-        return self
-
-    def mark_as_input_field(self, field_name: str, engine_name: str) -> 'StateSchemaManager':
-        """
-        Mark a field as an input field for an engine.
-        
-        Args:
-            field_name: Name of the field
-            engine_name: Name of the engine
-            
-        Returns:
-            Self for chaining
-        """
-        if field_name in self.fields:
-            self._input_fields[engine_name].add(field_name)
-            self._update_engine_io_mapping(engine_name)
-        return self
-    
-    def mark_as_output_field(self, field_name: str, engine_name: str) -> 'StateSchemaManager':
-        """
-        Mark a field as an output field for an engine.
-        
-        Args:
-            field_name: Name of the field
-            engine_name: Name of the engine
-            
-        Returns:
-            Self for chaining
-        """
-        if field_name in self.fields:
-            self._output_fields[engine_name].add(field_name)
-            self._update_engine_io_mapping(engine_name)
-        return self
-    
-    def _update_engine_io_mapping(self, engine_name: str) -> None:
-        """
-        Update engine I/O mapping for a specific engine.
-        
-        Args:
-            engine_name: Engine name to update mapping for
-        """
-        # Create mapping if it doesn't exist
-        if engine_name not in self._engine_io_mappings:
-            self._engine_io_mappings[engine_name] = {
-                "inputs": [],
-                "outputs": []
-            }
-            
-        # Update inputs from tracked fields
-        if engine_name in self._input_fields:
-            self._engine_io_mappings[engine_name]["inputs"] = list(self._input_fields[engine_name])
-            
-        # Update outputs from tracked fields
-        if engine_name in self._output_fields:
-            self._engine_io_mappings[engine_name]["outputs"] = list(self._output_fields[engine_name])
