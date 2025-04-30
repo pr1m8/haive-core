@@ -5,11 +5,11 @@ import asyncio
 from typing import Any, Optional, Dict
 import json 
 from haive.core.persistence.postgres_config import PostgresCheckpointerConfig
-from langgraph.checkpoint.postgres import PostgresSaver, AsyncPostgresSaver, ShallowPostgresSaver, AsyncShallowPostgresSaver
+from langgraph.checkpoint.postgres import PostgresSaver, ShallowPostgresSaver
+from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver, AsyncShallowPostgresSaver
 from psycopg_pool import AsyncConnectionPool,AsyncConnectionPool
 import logging
-    
-from haive.core.persistence.postgres_config import POSTGRES_AVAILABLE
+
 
 logger = logging.getLogger(__name__)
 

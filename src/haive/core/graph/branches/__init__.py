@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Literal, Optional, Tuple, Type, Union, get_t
 
 from pydantic import BaseModel, Field
 
-from haive.core.graph.graph_pattern_registry import register_graph_component
+#from haive.core.graph.graph_pattern_registry import register_graph_component
 
 logger = logging.getLogger(__name__)
 

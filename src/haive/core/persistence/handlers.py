@@ -15,7 +15,7 @@ from typing import Any, Optional, Dict, Union, Type, List, Tuple
 
 from langchain_core.runnables import RunnableConfig
 
-from .types import CheckpointerType, CheckpointTuple, CheckpointMode, SyncMode
+from .types import CheckpointerType, CheckpointStorageMode, CheckpointerMode
 from .base import CheckpointerConfig
 from .memory import MemoryCheckpointerConfig
 from .postgres_config import PostgresCheckpointerConfig
@@ -68,8 +68,8 @@ def setup_checkpointer(config: Any) -> Any:
                 
                 # Create the config
                 postgres_config = PostgresCheckpointerConfig(
-                    checkpoint_mode=CheckpointMode.shallow if use_shallow else CheckpointMode.standard,
-                    sync_mode=SyncMode.async_ if use_async else SyncMode.sync,
+                    checkpoint_mode=CheckpointStorageMode.shallow if use_shallow else CheckpointStorageMode.standard,
+                    sync_mode=CheckpointerMode.async_ if use_async else CheckpointerMode.sync,
                     db_host=config.persistence.get('db_host', 'localhost'),
                     db_port=config.persistence.get('db_port', 5432),
                     db_name=config.persistence.get('db_name', 'postgres'),

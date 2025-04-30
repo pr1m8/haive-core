@@ -155,7 +155,7 @@ class VectorStoreConfig(InvokableEngine[Union[str, dict[str, Any]], list[Documen
             return self.get_vectorstore(embedding=params["embedding_model"])
 
         # Create vector store with existing configuration
-        return self.create_vectorstore()
+        return self.instantiate()
 
     def similarity_search(
         self,
@@ -284,7 +284,7 @@ class VectorStoreConfig(InvokableEngine[Union[str, dict[str, Any]], list[Documen
 
         return params
 
-    def create_vectorstore(self, async_mode: bool = False) -> VectorStore:
+    def instantiate(self, async_mode: bool = False) -> VectorStore:
         """Create a vector store instance from this configuration.
         
         Args:
@@ -387,7 +387,7 @@ class VectorStoreConfig(InvokableEngine[Union[str, dict[str, Any]], list[Documen
             Configured retriever
         """
         # Create vector store
-        vectorstore = self.create_vectorstore()
+        vectorstore = self.instantiate()
 
         # Set default search kwargs if not provided
         if search_kwargs is None:
@@ -476,11 +476,11 @@ class VectorStoreConfig(InvokableEngine[Union[str, dict[str, Any]], list[Documen
             # Set the provided embedding
             self.embedding_model = embedding
             # Create vector store
-            result = self.create_vectorstore(async_mode)
+            result = self.instantiate(async_mode)
             # Restore original embedding
             self.embedding_model = original_embedding
             return result
-        return self.create_vectorstore(async_mode)
+        return self.instantiate(async_mode)
 
     @classmethod
     def create_vs_config_from_documents(
@@ -522,7 +522,7 @@ class VectorStoreConfig(InvokableEngine[Union[str, dict[str, Any]], list[Documen
             Instantiated VectorStore
         """
         config = cls.create_vs_config_from_documents(documents, embedding_model, **kwargs)
-        return config.create_vectorstore()
+        return config.instantiate()
 
 
 # Shorthand creator functions
@@ -536,7 +536,7 @@ def create_vectorstore(config: VectorStoreConfig, async_mode: bool = False) -> V
     Returns:
         Instantiated vector store
     """
-    return config.create_vectorstore(async_mode=async_mode)
+    return config.instantiate(async_mode=async_mode)
 
 def create_retriever(config: VectorStoreConfig, **kwargs) -> BaseRetriever:
     """Create a retriever from a vector store configuration.
