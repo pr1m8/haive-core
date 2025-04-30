@@ -8,13 +8,15 @@ from __future__ import annotations
 import inspect
 import logging
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Set, Type, Union, Callable
+from typing import Any, Dict, List, Optional, \
+    Set, Type, Union, Callable,TYPE_CHECKING
 
 from pydantic import BaseModel, Field, create_model
 
 from haive.core.schema.state_schema import StateSchema
 from haive.core.schema.field_definition import FieldDefinition
-
+if TYPE_CHECKING:
+    from haive.core.schema.schema_manager import StateSchemaManager
 logger = logging.getLogger(__name__)
 
 class SchemaComposer:
@@ -99,7 +101,146 @@ class SchemaComposer:
             
         return self
 
-    def add_fields_from_engine(self, engine: Any) -> 'SchemaComposer':
+    def add_fields_from_dict(self, fields_dict: Dict[str, Any]) -> 'SchemaComposer':
+        """
+        Add fields from a dictionary definition.
+        
+        Args:
+            fields_dict: Dictionary mapping field names to type/value information
+            
+        Returns:
+            Self for chaining
+        """
+        for field_name, field_info in fields_dict.items():
+            # Skip special fields
+            if field_name == "__runnable_config__" or field_name == "runnable_config":
+                logger.warning(f"Skipping special field {field_name}")
+                continue
+                
+            # Handle different field info formats
+            if isinstance(field_info, tuple) and len(field_info) >= 2:
+                # (type, default) format
+                field_type, default = field_info[0], field_info[1]
+                
+                # Look for extra params in a third item
+                description = None
+                shared = False
+                reducer = None
+                if len(field_info) >= 3 and isinstance(field_info[2], dict):
+                    extra_params = field_info[2]
+                    description = extra_params.get("description")
+                    shared = extra_params.get("shared", False)
+                    reducer = extra_params.get("reducer")
+                
+                # Add the field
+                self.add_field(
+                    name=field_name,
+                    field_type=field_type,
+                    default=default,
+                    description=description,
+                    shared=shared,
+                    reducer=reducer
+                )
+            elif isinstance(field_info, dict) and "type" in field_info:
+                # Dictionary with type key
+                field_type = field_info.pop("type")
+                default = field_info.pop("default", None)
+                default_factory = field_info.pop("default_factory", None)
+                description = field_info.pop("description", None)
+                shared = field_info.pop("shared", False)
+                reducer = field_info.pop("reducer", None)
+                
+                # Add the field
+                self.add_field(
+                    name=field_name,
+                    field_type=field_type,
+                    default=default,
+                    default_factory=default_factory,
+                    description=description,
+                    shared=shared,
+                    reducer=reducer
+                )
+            else:
+                # Assume it's a type with no default
+                self.add_field(
+                    name=field_name,
+                    field_type=field_info,
+                    default=None
+                )
+                
+        return self
+
+    def add_fields_from_model(self, model: Type[BaseModel]) -> 'SchemaComposer':
+        """
+        Extract fields from a Pydantic model.
+        
+        Args:
+            model: Pydantic model to extract fields from
+            
+        Returns:
+            Self for chaining
+        """
+        source = model.__name__
+        
+        # Extract fields differently based on Pydantic version
+        if hasattr(model, "model_fields"):
+            # Pydantic v2
+            for field_name, field_info in model.model_fields.items():
+                # Skip special fields and private fields
+                if field_name.startswith("__") or field_name.startswith("_"):
+                    continue
+                    
+                # Get field type and defaults
+                field_type = field_info.annotation
+                
+                # Handle default vs default_factory
+                if field_info.default_factory is not None:
+                    default_factory = field_info.default_factory
+                    default = None
+                else:
+                    default_factory = None
+                    default = field_info.default
+                
+                # Add the field
+                self.add_field(
+                    name=field_name,
+                    field_type=field_type,
+                    default=default,
+                    default_factory=default_factory,
+                    description=field_info.description,
+                    source=source
+                )
+        elif hasattr(model, "__fields__"):
+            # Pydantic v1
+            for field_name, field_info in model.__fields__.items():
+                # Skip special fields and private fields
+                if field_name.startswith("__") or field_name.startswith("_"):
+                    continue
+                    
+                # Get field type and defaults
+                field_type = field_info.type_
+                
+                # Handle default vs default_factory
+                if field_info.default_factory is not None:
+                    default_factory = field_info.default_factory
+                    default = None
+                else:
+                    default_factory = None
+                    default = field_info.default
+                
+                # Add the field
+                self.add_field(
+                    name=field_name,
+                    field_type=field_type,
+                    default=default,
+                    default_factory=default_factory,
+                    description=field_info.description,
+                    source=source
+                )
+                
+        return self
+
+    def _add_fields_from_engine(self, engine: Any) -> 'SchemaComposer':
         """
         Extract fields from an Engine object.
         
@@ -174,7 +315,7 @@ class SchemaComposer:
                         
                         # If field is in the structured model, don't add it directly
                         if hasattr(engine.structured_output_model, "model_fields") and \
-                           field_name in engine.structured_output_model.model_fields:
+                        field_name in engine.structured_output_model.model_fields:
                             # Instead, track it as part of the structured model
                             self.structured_model_fields[model_name].add(field_name)
                             continue
@@ -213,7 +354,7 @@ class SchemaComposer:
                 logger.debug(f"Added {len(output_fields)} output fields from engine {engine_name}")
             except Exception as e:
                 logger.warning(f"Error getting output_fields from {engine_name}: {e}")
-   
+    
         
         # Special handling for structured_output_model - add as a single field
         if hasattr(engine, "structured_output_model") and engine.structured_output_model is not None:
@@ -225,12 +366,17 @@ class SchemaComposer:
             # Store the structured model for reference
             self.structured_models[model_name] = model
             
-            # Add field just for the model itself
+            # Add field just for the model itself with proper typing
             if model_name not in self.fields:
                 from typing import Optional
+                
+                # CRITICAL FIX: Properly construct Optional[model] with type parameter
+                field_type = Optional[model]  # This correctly creates Optional[Plan]
+                
+                # Add the field with proper typing
                 self.add_field(
                     name=model_name,
-                    field_type=Optional[model],  # Use Optional[model] for proper typing
+                    field_type=field_type,  # Use proper parametrized type
                     default=None,
                     description=f"Output in {model.__name__} format",
                     source=f"{source}.structured_output_model"
@@ -251,6 +397,68 @@ class SchemaComposer:
                     logger.debug(f"  - Model field: {field_name}: {field_info.annotation}")
         
         return self
+
+    def build(self) -> Type[StateSchema]:
+        """
+        Build a StateSchema directly from the composer with proper handling of structured models.
+        
+        Returns:
+            Subclass of StateSchema with configured fields and metadata
+        """
+        # Create field definitions for the model
+        field_defs = {}
+        for name, field_def in self.fields.items():
+            field_type, field_info = field_def.to_field_info()
+            field_defs[name] = (field_type, field_info)
+                
+        # Create the base schema
+        schema = create_model(
+            self.name,
+            __base__=StateSchema,
+            **field_defs
+        )
+        
+        # Add shared fields
+        schema.__shared_fields__ = list(self.shared_fields)
+        
+        # Add reducers
+        schema.__serializable_reducers__ = {}
+        schema.__reducer_fields__ = {}
+        
+        for name, field_def in self.fields.items():
+            if field_def.reducer:
+                reducer_name = field_def.get_reducer_name()
+                schema.__serializable_reducers__[name] = reducer_name
+                schema.__reducer_fields__[name] = field_def.reducer
+                
+        # Make sure to deep copy the engine I/O mappings to avoid reference issues
+        schema.__engine_io_mappings__ = {}
+        for engine_name, mapping in self.engine_io_mappings.items():
+            schema.__engine_io_mappings__[engine_name] = mapping.copy()
+        
+        # Same for input/output fields - convert sets to lists and deep copy
+        schema.__input_fields__ = {}
+        for engine_name, fields in self.input_fields.items():
+            schema.__input_fields__[engine_name] = list(fields)
+        
+        schema.__output_fields__ = {}
+        for engine_name, fields in self.output_fields.items():
+            schema.__output_fields__[engine_name] = list(fields)
+        
+        # Add structured model fields metadata safely - use field names instead of class references
+        if self.structured_model_fields:
+            schema.__structured_model_fields__ = {
+                k: list(v) for k, v in self.structured_model_fields.items()
+            }
+            
+        # Add structured models safely - use string identifiers instead of class references
+        if self.structured_models:
+            schema.__structured_models__ = {
+                k: f"{v.__module__}.{v.__name__}" 
+                for k, v in self.structured_models.items()
+            }
+        
+        return schema
 
     def configure_messages_field(self, with_reducer: bool = True, force_add: bool = False) -> 'SchemaComposer':
         """
@@ -318,65 +526,147 @@ class SchemaComposer:
         """
         from haive.core.schema.schema_manager import StateSchemaManager
         return StateSchemaManager(self)
-
-    def build(self) -> Type[StateSchema]:
-        """
-        Build a StateSchema directly from the composer with proper handling of structured models.
+    def add_fields_from_engine(self, engine: Any) -> 'SchemaComposer':
+        """Extract fields from an Engine object."""
+        source = getattr(engine, "name", str(engine))
+        logger.debug(f"Extracting fields from engine: {source}")
         
-        Returns:
-            Subclass of StateSchema with configured fields and metadata
-        """
-        # Create field definitions for the model
-        field_defs = {}
-        for name, field_def in self.fields.items():
-            field_type, field_info = field_def.to_field_info()
-            field_defs[name] = (field_type, field_info)
-                
-        # Create the base schema
-        schema = create_model(
-            self.name,
-            __base__=StateSchema,
-            **field_defs
-        )
+        # Get engine name for tracking
+        engine_name = getattr(engine, "name", str(engine))
         
-        # Add shared fields
-        schema.__shared_fields__ = list(self.shared_fields)
-        
-        # Add reducers
-        schema.__serializable_reducers__ = {}
-        schema.__reducer_fields__ = {}
-        
-        for name, field_def in self.fields.items():
-            if field_def.reducer:
-                reducer_name = field_def.get_reducer_name()
-                schema.__serializable_reducers__[name] = reducer_name
-                schema.__reducer_fields__[name] = field_def.reducer
-                
-        # Make sure to deep copy the engine I/O mappings to avoid reference issues
-        schema.__engine_io_mappings__ = {}
-        for engine_name, mapping in self.engine_io_mappings.items():
-            schema.__engine_io_mappings__[engine_name] = mapping.copy()
-        
-        # Same for input/output fields - convert sets to lists and deep copy
-        schema.__input_fields__ = {}
-        for engine_name, fields in self.input_fields.items():
-            schema.__input_fields__[engine_name] = list(fields)
-        
-        schema.__output_fields__ = {}
-        for engine_name, fields in self.output_fields.items():
-            schema.__output_fields__[engine_name] = list(fields)
-        
-        # Add structured model fields metadata
-        if self.structured_model_fields:
-            schema.__structured_model_fields__ = {
-                k: list(v) for k, v in self.structured_model_fields.items()
+        # Initialize engine IO mapping
+        if engine_name not in self.engine_io_mappings:
+            self.engine_io_mappings[engine_name] = {
+                "inputs": [],
+                "outputs": []
             }
-            
-        # Add structured models themselves
-        if self.structured_models:
-            schema.__structured_models__ = self.structured_models
         
-        return schema
+        # Check for structured output model first
+        if hasattr(engine, "structured_output_model") and engine.structured_output_model is not None:
+            model = engine.structured_output_model
+            model_name = model.__name__.lower()
+            
+            logger.debug(f"Found structured_output_model in {source}: {model.__name__}")
+            
+            # Store structured model
+            self.structured_models[model_name] = model
+            
+            # Track model fields for reference
+            if hasattr(model, "model_fields"):
+                structured_model_fields = set(model.model_fields.keys())
+                logger.debug(f"Found structured model fields: {structured_model_fields}")
+                
+                # Store these fields for reference
+                for field_name in structured_model_fields:
+                    self.structured_model_fields[model_name].add(field_name)
+                    field_info = model.model_fields[field_name]
+                    logger.debug(f"  - Model field: {field_name}: {field_info.annotation}")
+            
+            # Add a single field for the entire model
+            if model_name not in self.fields:
+                from typing import Optional
+                field_type = Optional[model]
+                
+                self.add_field(
+                    name=model_name,
+                    field_type=field_type,
+                    default=None,
+                    description=f"Output in {model.__name__} format",
+                    source=f"{source}.structured_output_model"
+                )
+                
+                # Mark as output field
+                self.output_fields[engine_name].add(model_name)
+                
+                # Update engine mapping
+                if model_name not in self.engine_io_mappings[engine_name]["outputs"]:
+                    self.engine_io_mappings[engine_name]["outputs"].append(model_name)
+        
+        # Extract input fields (unchanged)
+        if hasattr(engine, "get_input_fields") and callable(engine.get_input_fields):
+            try:
+                input_fields = engine.get_input_fields()
+                
+                for field_name, (field_type, field_info) in input_fields.items():
+                    # Skip if already has this field
+                    if field_name in self.fields:
+                        continue
+                        
+                    # Get default and default_factory
+                    if hasattr(field_info, 'default') and field_info.default is not ...:
+                        default = field_info.default
+                    else:
+                        default = None
+                        
+                    default_factory = getattr(field_info, "default_factory", None)
+                    description = getattr(field_info, "description", None)
+                    
+                    # Add the field
+                    self.add_field(
+                        name=field_name,
+                        field_type=field_type,
+                        default=default,
+                        default_factory=default_factory,
+                        description=description,
+                        source=source
+                    )
+                    
+                    # Track as input field
+                    self.input_fields[engine_name].add(field_name)
+                
+                # Update engine IO mapping
+                self.engine_io_mappings[engine_name]["inputs"] = list(self.input_fields[engine_name])
+                
+                logger.debug(f"Added {len(input_fields)} input fields from engine {engine_name}")
+            except Exception as e:
+                logger.warning(f"Error getting input_fields from {engine_name}: {e}")
+        
+        # Extract output fields EXCEPT for structured model fields
+        if hasattr(engine, "get_output_fields") and callable(engine.get_output_fields):
+            try:
+                # CRITICAL FIX: Don't extract output fields if we have a structured model
+                # This prevents the duplication problem
+                if not hasattr(engine, "structured_output_model") or engine.structured_output_model is None:
+                    output_fields = engine.get_output_fields()
+                    
+                    for field_name, (field_type, field_info) in output_fields.items():
+                        # Skip if already has this field
+                        if field_name in self.fields:
+                            # Just mark as output field if already exists
+                            self.output_fields[engine_name].add(field_name)
+                            continue
+                            
+                        # Get default and default_factory
+                        if hasattr(field_info, 'default') and field_info.default is not ...:
+                            default = field_info.default
+                        else:
+                            default = None
+                            
+                        default_factory = getattr(field_info, "default_factory", None)
+                        description = getattr(field_info, "description", None)
+                        
+                        # Add the field
+                        self.add_field(
+                            name=field_name,
+                            field_type=field_type,
+                            default=default,
+                            default_factory=default_factory,
+                            description=description,
+                            source=source
+                        )
+                        
+                        # Track as output field
+                        self.output_fields[engine_name].add(field_name)
+                    
+                    logger.debug(f"Added {len(output_fields)} output fields from engine {engine_name}")
+            except Exception as e:
+                logger.warning(f"Error getting output_fields from {engine_name}: {e}")
+        
+        # Update engine IO mapping outputs
+        self.engine_io_mappings[engine_name]["outputs"] = list(self.output_fields[engine_name])
+        
+        return self
+
     
     @classmethod
     def from_components(cls, components: List[Any], name: str = "ComposedSchema") -> Type[StateSchema]:
@@ -415,6 +705,283 @@ class SchemaComposer:
         
         # Build the schema
         return composer.build()
+
+    @classmethod
+    def compose_input_schema(cls, components: List[Any], name: str = "InputSchema") -> Type[BaseModel]:
+        """
+        Create an input schema from components, focusing on input fields.
+        
+        Args:
+            components: List of components to extract fields from
+            name: Name for the schema
+            
+        Returns:
+            BaseModel subclass optimized for input
+        """
+        composer = cls(name=name)
+        
+        # Process each component
+        for component in components:
+            if component is None:
+                continue
+                
+            # Only extract input fields from engines
+            if hasattr(component, "engine_type") and hasattr(component, "get_input_fields"):
+                try:
+                    # Extract input fields
+                    input_fields = component.get_input_fields()
+                    engine_name = getattr(component, "name", str(component))
+                    
+                    for field_name, (field_type, field_info) in input_fields.items():
+                        # Skip if already has this field
+                        if field_name in composer.fields:
+                            continue
+                            
+                        # Skip special fields
+                        if field_name == "__runnable_config__" or field_name == "runnable_config":
+                            continue
+                            
+                        # Get default and default_factory
+                        if hasattr(field_info, 'default') and field_info.default is not ...:
+                            default = field_info.default
+                        else:
+                            default = None
+                            
+                        default_factory = getattr(field_info, "default_factory", None)
+                        description = getattr(field_info, "description", None)
+                        
+                        # Add the field
+                        composer.add_field(
+                            name=field_name,
+                            field_type=field_type,
+                            default=default,
+                            default_factory=default_factory,
+                            description=description,
+                            source=engine_name
+                        )
+                        
+                        # Track as input field
+                        composer.input_fields[engine_name].add(field_name)
+                    
+                    # Update engine IO mapping
+                    composer.engine_io_mappings[engine_name] = {
+                        "inputs": list(composer.input_fields[engine_name]),
+                        "outputs": []
+                    }
+                except Exception as e:
+                    logger.warning(f"Error extracting input fields from {component}: {e}")
+            
+            # Handle BaseModel components differently - only extract specific input-related fields
+            elif isinstance(component, BaseModel) or (isinstance(component, type) and issubclass(component, BaseModel)):
+                model = component if isinstance(component, type) else component.__class__
+                source = model.__name__
+                
+                # Focus on common input field names
+                input_field_names = ["input", "query", "question", "messages", "text", "content"]
+                
+                # Extract differently based on Pydantic version
+                if hasattr(model, "model_fields"):
+                    # Pydantic v2
+                    for field_name, field_info in model.model_fields.items():
+                        # Only include common input fields and skip special fields
+                        if field_name not in input_field_names or field_name.startswith("__"):
+                            continue
+                            
+                        # Skip runnable_config
+                        if field_name == "__runnable_config__" or field_name == "runnable_config":
+                            continue
+                            
+                        # Get field type and defaults
+                        field_type = field_info.annotation
+                        
+                        # Handle default vs default_factory
+                        if field_info.default_factory is not None:
+                            default_factory = field_info.default_factory
+                            default = None
+                        else:
+                            default_factory = None
+                            default = field_info.default
+                        
+                        # Add the field
+                        composer.add_field(
+                            name=field_name,
+                            field_type=field_type,
+                            default=default,
+                            default_factory=default_factory,
+                            description=field_info.description,
+                            source=source
+                        )
+                elif hasattr(model, "__fields__"):
+                    # Pydantic v1
+                    for field_name, field_info in model.__fields__.items():
+                        # Only include common input fields and skip special fields
+                        if field_name not in input_field_names or field_name.startswith("__"):
+                            continue
+                            
+                        # Skip runnable_config
+                        if field_name == "__runnable_config__" or field_name == "runnable_config":
+                            continue
+                            
+                        # Get field type and defaults
+                        field_type = field_info.type_
+                        
+                        # Handle default vs default_factory
+                        if field_info.default_factory is not None:
+                            default_factory = field_info.default_factory
+                            default = None
+                        else:
+                            default_factory = None
+                            default = field_info.default
+                        
+                        # Add the field
+                        composer.add_field(
+                            name=field_name,
+                            field_type=field_type,
+                            default=default,
+                            default_factory=default_factory,
+                            description=field_info.description,
+                            source=source
+                        )
+        
+        # Add standard input fields if not already present
+        from typing import Optional, List
+        from langchain_core.messages import BaseMessage
+        
+        # Always ensure we have a messages field
+        if "messages" not in composer.fields:
+            composer.add_field(
+                name="messages",
+                field_type=List[BaseMessage],
+                default_factory=list,
+                description="Messages for agent conversation"
+            )
+        
+        # Create model directly instead of using StateSchema as base
+        field_defs = {}
+        for name, field_def in composer.fields.items():
+            field_type, field_info = field_def.to_field_info()
+            field_defs[name] = (field_type, field_info)
+                
+        # Create the input schema
+        return create_model(name, **field_defs)
+
+    @classmethod
+    def compose_output_schema(cls, components: List[Any], name: str = "OutputSchema") -> Type[BaseModel]:
+        """
+        Create an output schema from components, focusing on output fields.
+        
+        Args:
+            components: List of components to extract fields from
+            name: Name for the schema
+            
+        Returns:
+            BaseModel subclass optimized for output
+        """
+        composer = cls(name=name)
+        
+        # Process each component
+        for component in components:
+            if component is None:
+                continue
+                
+            # Only extract output fields from engines
+            if hasattr(component, "engine_type") and hasattr(component, "get_output_fields"):
+                try:
+                    # Extract output fields
+                    output_fields = component.get_output_fields()
+                    engine_name = getattr(component, "name", str(component))
+                    
+                    for field_name, (field_type, field_info) in output_fields.items():
+                        # Skip if already has this field
+                        if field_name in composer.fields:
+                            continue
+                            
+                        # Skip special fields
+                        if field_name == "__runnable_config__" or field_name == "runnable_config":
+                            continue
+                            
+                        # Get default and default_factory
+                        if hasattr(field_info, 'default') and field_info.default is not ...:
+                            default = field_info.default
+                        else:
+                            default = None
+                            
+                        default_factory = getattr(field_info, "default_factory", None)
+                        description = getattr(field_info, "description", None)
+                        
+                        # Add the field
+                        composer.add_field(
+                            name=field_name,
+                            field_type=field_type,
+                            default=default,
+                            default_factory=default_factory,
+                            description=description,
+                            source=engine_name
+                        )
+                        
+                        # Track as output field
+                        composer.output_fields[engine_name].add(field_name)
+                    
+                    # Add structured output model if available
+                    if hasattr(component, "structured_output_model") and component.structured_output_model:
+                        model = component.structured_output_model
+                        model_name = model.__name__.lower()
+                        
+                        # Store the model
+                        composer.structured_models[model_name] = model
+                        
+                        # Add field for the model
+                        from typing import Optional
+                        composer.add_field(
+                            name=model_name,
+                            field_type=Optional[model],
+                            default=None,
+                            description=f"Output in {model.__name__} format",
+                            source=engine_name
+                        )
+                        
+                        # Track as output field
+                        composer.output_fields[engine_name].add(model_name)
+                    
+                    # Update engine IO mapping
+                    composer.engine_io_mappings[engine_name] = {
+                        "inputs": [],
+                        "outputs": list(composer.output_fields[engine_name])
+                    }
+                except Exception as e:
+                    logger.warning(f"Error extracting output fields from {component}: {e}")
+        
+        # Add standard output fields if not already present
+        from typing import Optional, List, Dict, Any
+        from langchain_core.messages import BaseMessage
+        
+        # Always ensure we have a messages field
+        if "messages" not in composer.fields:
+            composer.add_field(
+                name="messages",
+                field_type=List[BaseMessage],
+                default_factory=list,
+                description="Messages from agent conversation"
+            )
+        
+        # Add an output field if no field has "output" in the name
+        has_output_field = any("output" in name.lower() for name in composer.fields)
+        if not has_output_field:
+            composer.add_field(
+                name="output",
+                field_type=str,
+                default="",
+                description="Agent output"
+            )
+        
+        # Create model directly instead of using StateSchema as base
+        field_defs = {}
+        for name, field_def in composer.fields.items():
+            field_type, field_info = field_def.to_field_info()
+            field_defs[name] = (field_type, field_info)
+                
+        # Create the output schema
+        return create_model(name, **field_defs)
 
     @classmethod
     def create_message_state(cls, additional_fields: Optional[Dict[str, Any]] = None, 

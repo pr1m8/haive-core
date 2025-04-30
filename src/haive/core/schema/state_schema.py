@@ -370,253 +370,521 @@ class StateSchema(BaseModel, Generic[T]):
         return cls.to_manager()
     
     @classmethod
-    def create_input_schema(
-        cls,
-        name: str = "Input",
-        message_field: str = "input",
-        include_messages: bool = True,
-        include_config: bool = True,
-        additional_fields: Optional[Dict[str, Any]] = None
-    ) -> Type[BaseModel]:
+    def create_input_schema(cls, name: str = "Input") -> Type[BaseModel]:
         """
-        Create an input schema model based on this state schema.
+        Create an input schema model based on identified input fields.
+        
+        This method generates a Pydantic model containing only the fields
+        that were identified as inputs to engines during schema composition.
         
         Args:
-            name: Schema name
-            message_field: Name of the primary input message field
-            include_messages: Whether to include a messages field
-            include_config: Whether to include a runnable_config field
-            additional_fields: Any additional fields to include
+            name: Name for the schema class
             
         Returns:
-            Input schema model
+            A Pydantic model for input validation
         """
-        from typing import Optional, List, Dict, Any, Union
-        
-        # Set up field dict
-        fields = {}
-        
-        # Add primary input field
-        fields[message_field] = (str, Field(description="Primary input to the agent"))
-        
-        # Add messages field if requested
-        if include_messages:
-            fields["messages"] = (Optional[List[BaseMessage]], Field(
-                default=None,
-                description="List of messages for the conversation"
-            ))
-        
-        # Add runnable_config field if requested
-        if include_config:
-            fields["runnable_config"] = (Optional[Dict[str, Any]], Field(
-                default=None,
-                description="Runtime configuration"
-            ))
-        
-        # Add additional fields
-        if additional_fields:
-            for field_name, field_config in additional_fields.items():
-                if isinstance(field_config, tuple) and len(field_config) >= 2:
-                    field_type, default = field_config[0], field_config[1]
-                    fields[field_name] = (
-                        field_type, 
-                        Field(default=default, description=f"Input field: {field_name}")
-                    )
-                else:
-                    fields[field_name] = (
-                        type(field_config),
-                        Field(default=field_config, description=f"Input field: {field_name}")
-                    )
+        # Collect all input fields across all engines
+        input_fields = {}
+        for engine_name, mapping in cls.__engine_io_mappings__.items():
+            for field_name in mapping.get("inputs", []):
+                # Only include if it exists in our fields
+                if field_name in cls.model_fields:
+                    field_def = cls.model_fields[field_name]
+                    # Extract type and field info directly
+                    field_type = field_def.annotation
+                    
+                    # Create Field with appropriate parameters
+                    if field_def.default_factory is not None:
+                        field_info = Field(
+                            default_factory=field_def.default_factory,
+                            description=field_def.description
+                        )
+                    else:
+                        field_info = Field(
+                            default=field_def.default,
+                            description=field_def.description
+                        )
+                    
+                    input_fields[field_name] = (field_type, field_info)
         
         # Create the model
-        return create_model(name, **fields)
-    
+        input_schema = create_model(name, **input_fields)
+        
+        return input_schema
     @classmethod
-    def create_output_schema(
-        cls,
-        name: str = "Output",
-        message_field: str = "output",
-        include_messages: bool = False,
-        include_metadata: bool = True,
-        structured_output: Optional[Type[BaseModel]] = None,
-        additional_fields: Optional[Dict[str, Any]] = None
-    ) -> Type[BaseModel]:
+    def derive_input_schema(cls, engine_name: Optional[str] = None, name: Optional[str] = None) -> Type[BaseModel]:
         """
-        Create an output schema model based on this state schema.
+        Derive an input schema for the given engine from this state schema.
         
         Args:
-            name: Schema name
-            message_field: Name of the primary output message field
-            include_messages: Whether to include messages in output
-            include_metadata: Whether to include execution metadata
-            structured_output: Optional structured output model
-            additional_fields: Any additional fields to include
+            engine_name: Optional name of the engine to target (default: all inputs)
+            name: Optional name for the schema class
             
         Returns:
-            Output schema model
+            A BaseModel subclass for input validation
         """
-        from typing import Optional, List, Dict, Any, Union
-        
-        # Set up field dict
         fields = {}
         
-        # Add primary output field
-        fields[message_field] = (str, Field(description="Primary output"))
+        # Get input field names
+        if engine_name is not None and hasattr(cls, "__engine_io_mappings__"):
+            if engine_name in cls.__engine_io_mappings__:
+                input_fields = cls.__engine_io_mappings__[engine_name].get("inputs", [])
+            else:
+                input_fields = []
+        elif hasattr(cls, "__input_fields__"):
+            # Collect input fields across all engines
+            input_fields = []
+            for engine_inputs in cls.__input_fields__.values():
+                input_fields.extend(engine_inputs)
+        else:
+            input_fields = []
         
-        # Add messages field if requested
-        if include_messages:
-            fields["messages"] = (Optional[List[BaseMessage]], Field(
-                default=None,
-                description="List of messages from the conversation"
-            ))
+        # Add input fields to schema
+        for field_name in input_fields:
+            if field_name in cls.model_fields:
+                field_info = cls.model_fields[field_name]
+                fields[field_name] = (field_info.annotation, field_info)
         
-        # Add metadata if requested
-        if include_metadata:
-            fields["metadata"] = (Dict[str, Any], Field(
-                default_factory=dict,
-                description="Metadata about the execution"
-            ))
+        # Create model
+        schema_name = name or f"{cls.__name__}Input"
+        return create_model(schema_name, **fields)
+
+    @classmethod
+    def derive_output_schema(cls, engine_name: Optional[str] = None, name: Optional[str] = None) -> Type[BaseModel]:
+        """
+        Derive an output schema for the given engine from this state schema.
         
-        # Add structured output field if provided
-        if structured_output:
-            model_name = structured_output.__name__.lower()
-            fields[model_name] = (Optional[structured_output], Field(
-                default=None,
-                description=f"Structured output in {structured_output.__name__} format"
-            ))
+        Args:
+            engine_name: Optional name of the engine to target (default: all outputs)
+            name: Optional name for the schema class
+            
+        Returns:
+            A BaseModel subclass for output validation
+        """
+        fields = {}
         
-        # Add additional fields
-        if additional_fields:
-            for field_name, field_config in additional_fields.items():
-                if isinstance(field_config, tuple) and len(field_config) >= 2:
-                    field_type, default = field_config[0], field_config[1]
-                    fields[field_name] = (
-                        field_type, 
-                        Field(default=default, description=f"Output field: {field_name}")
-                    )
-                else:
-                    fields[field_name] = (
-                        type(field_config),
-                        Field(default=field_config, description=f"Output field: {field_name}")
-                    )
+        # Get output field names
+        if engine_name is not None and hasattr(cls, "__engine_io_mappings__"):
+            if engine_name in cls.__engine_io_mappings__:
+                output_fields = cls.__engine_io_mappings__[engine_name].get("outputs", [])
+            else:
+                output_fields = []
+        elif hasattr(cls, "__output_fields__"):
+            # Collect output fields across all engines
+            output_fields = []
+            for engine_outputs in cls.__output_fields__.values():
+                output_fields.extend(engine_outputs)
+        else:
+            output_fields = []
+        
+        # Add output fields to schema
+        for field_name in output_fields:
+            if field_name in cls.model_fields:
+                field_info = cls.model_fields[field_name]
+                fields[field_name] = (field_info.annotation, field_info)
+        
+        # Create model
+        schema_name = name or f"{cls.__name__}Output"
+        return create_model(schema_name, **fields)
+
+    @classmethod
+    def derive_engine_mappings(cls, engine_name: str) -> tuple[dict[str, str], dict[str, str]]:
+        """
+        Derive input and output mappings for an engine.
+        
+        Args:
+            engine_name: Name of the engine to create mappings for
+            
+        Returns:
+            Tuple of (input_mapping, output_mapping) dictionaries
+        """
+        input_mapping = {}
+        output_mapping = {}
+        
+        if hasattr(cls, "__engine_io_mappings__") and engine_name in cls.__engine_io_mappings__:
+            # Create identity mappings for all inputs
+            for field in cls.__engine_io_mappings__[engine_name].get("inputs", []):
+                input_mapping[field] = field
+            
+            # Create identity mappings for all outputs
+            for field in cls.__engine_io_mappings__[engine_name].get("outputs", []):
+                output_mapping[field] = field
+        
+        return input_mapping, output_mapping
+    @classmethod
+    def create_output_schema(cls, name: str = "Output") -> Type[BaseModel]:
+        """
+        Create an output schema model based on identified output fields.
+        
+        This method generates a Pydantic model containing only the fields
+        that were identified as outputs from engines during schema composition.
+        
+        Args:
+            name: Name for the schema class
+            
+        Returns:
+            A Pydantic model for output validation
+        """
+        # Collect all output fields across all engines
+        output_fields = {}
+        for engine_name, mapping in cls.__engine_io_mappings__.items():
+            for field_name in mapping.get("outputs", []):
+                # Only include if it exists in our fields
+                if field_name in cls.model_fields:
+                    field_def = cls.model_fields[field_name]
+                    # Extract type and field info directly
+                    field_type = field_def.field_type
+                    
+                    # Create Field with appropriate parameters
+                    if field_def.default_factory is not None:
+                        field_info = Field(
+                            default_factory=field_def.default_factory,
+                            description=field_def.description
+                        )
+                    else:
+                        field_info = Field(
+                            default=field_def.default,
+                            description=field_def.description
+                        )
+                    
+                    output_fields[field_name] = (field_type, field_info)
         
         # Create the model
-        return create_model(name, **fields)
-    
+        output_schema = create_model(name, **output_fields)
+        
+        return output_schema
     @classmethod
-    def pretty_print(cls, include_metadata: bool = True, show_defaults: bool = True) -> str:
+    def pretty_print(cls, include_metadata: bool = True, show_defaults: bool = True, 
+                    include_reducers: bool = True, format_style: str = "detailed") -> str:
         """
         Generate a formatted, readable representation of the schema.
         
         Args:
             include_metadata: Whether to include field sharing, reducers, and engine I/O info
             show_defaults: Whether to show default values for fields
+            include_reducers: Whether to show reducer functions for fields
+            format_style: Output style - "detailed", "compact", or "code"
             
         Returns:
             Formatted string representation of the schema
         """
         output = []
         
-        # Add class definition header
-        output.append(f"# {cls.__name__} Schema Definition")
-        output.append(f"class {cls.__name__}(StateSchema):")
+        # Schema header with more information
+        schema_name = cls.__name__
+        output.append(f"StateSchema: {schema_name}")
         
-        # Add fields by category
-        fields_by_category = {
-            "Standard Fields": [],
-            "Shared Fields": [],
-            "Fields with Reducers": []
-        }
+        # Add description if available
+        if hasattr(cls, "__doc__") and cls.__doc__ and cls.__doc__.strip():
+            doc = cls.__doc__.strip()
+            output.append(f"Description: {doc}")
+        output.append("")
         
-        # Get shared fields and reducer info
+        # Get metadata information if needed
         shared_fields = getattr(cls, "__shared_fields__", [])
+        reducer_functions = getattr(cls, "__reducer_fields__", {})
         reducer_names = getattr(cls, "__serializable_reducers__", {})
+        engine_io_mappings = getattr(cls, "__engine_io_mappings__", {})
+        structured_models = getattr(cls, "__structured_models__", {})
         
-        # Organize fields by category
+        # Process all fields
+        fields_section = []
         for field_name, field_info in cls.model_fields.items():
             # Skip special fields
             if field_name.startswith("__"):
                 continue
-                
-            # Determine field representation
-            field_type = field_info.annotation.__name__ if hasattr(field_info.annotation, "__name__") else str(field_info.annotation)
             
-            # Format default value if requested
-            default_str = ""
-            if show_defaults:
+            # Format field with type and metadata
+            field_type = field_info.annotation
+            type_str = cls._format_full_type(field_type)
+            
+            # Get field description
+            description = getattr(field_info, "description", None) or ""
+            
+            # Format field entry based on style
+            if format_style == "compact":
+                # Compact style - just field and type
+                field_entry = f"{field_name}: {type_str}"
+                if show_defaults:
+                    if field_info.default_factory is not None:
+                        field_entry += f" = Field(default_factory={field_info.default_factory.__name__})"
+                    elif field_info.default is not ...:
+                        field_entry += f" = {repr(field_info.default)}"
+                fields_section.append(field_entry)
+                
+            elif format_style == "code":
+                # Code style - format as Python code
+                field_entry = f"{field_name}: {type_str}"
+                if show_defaults:
+                    if field_info.default_factory is not None:
+                        field_entry += f" = Field(default_factory={field_info.default_factory.__name__})"
+                    elif field_info.default is not ...:
+                        if field_info.default is None:
+                            field_entry += " = None"
+                        else:
+                            field_entry += f" = {repr(field_info.default)}"
+                
+                # Add metadata as comments
+                metadata_parts = []
+                if field_name in shared_fields:
+                    metadata_parts.append("shared")
+                if field_name in reducer_functions:
+                    reducer = reducer_functions[field_name]
+                    reducer_name = getattr(reducer, "__name__", str(reducer))
+                    metadata_parts.append(f"reducer={reducer_name}")
+                if description:
+                    metadata_parts.append(description)
+                    
+                if metadata_parts and include_metadata:
+                    field_entry += f"  # {', '.join(metadata_parts)}"
+                    
+                fields_section.append(field_entry)
+                
+            else:  # Default to detailed style
+                # Detailed style - multi-line with metadata
+                field_parts = [f"• {field_name}: {type_str}"]
+                
+                # Add default value if requested
+                if show_defaults:
+                    if field_info.default_factory is not None:
+                        factory_name = field_info.default_factory.__name__
+                        field_parts.append(f"  Default: Created by {factory_name}()")
+                    elif field_info.default is not ...:
+                        field_parts.append(f"  Default: {repr(field_info.default)}")
+                
+                # Add description if available
+                if description:
+                    field_parts.append(f"  Description: {description}")
+                
+                # Add metadata if requested
+                if include_metadata:
+                    if field_name in shared_fields:
+                        field_parts.append("  Shared: Yes")
+                        
+                    if field_name in reducer_functions and include_reducers:
+                        reducer = reducer_functions[field_name]
+                        reducer_name = getattr(reducer, "__name__", str(reducer))
+                        field_parts.append(f"  Reducer: {reducer_name}")
+                    
+                    # Check if field is part of a structured model
+                    for model_name, model_path in structured_models.items():
+                        if field_name == model_name:
+                            field_parts.append(f"  Structured Model: {model_path}")
+                    
+                    # Check if field is input/output for engines
+                    for engine_name, mapping in engine_io_mappings.items():
+                        if field_name in mapping.get("inputs", []):
+                            field_parts.append(f"  Input for: {engine_name}")
+                        if field_name in mapping.get("outputs", []):
+                            field_parts.append(f"  Output from: {engine_name}")
+                
+                fields_section.append("\n".join(field_parts))
+        
+        # Add fields section
+        output.append("Fields:")
+        output.extend(fields_section)
+        
+        # Add additional metadata sections if requested
+        if include_metadata:
+            # Add shared fields section if any exist
+            if shared_fields:
+                output.append("")
+                output.append("Shared Fields:")
+                for field in shared_fields:
+                    output.append(f"• {field}")
+            
+            # Add reducers section if any exist and requested
+            if reducer_functions and include_reducers:
+                output.append("")
+                output.append("Reducers:")
+                for field, reducer in reducer_functions.items():
+                    reducer_name = getattr(reducer, "__name__", str(reducer))
+                    output.append(f"• {field}: {reducer_name}")
+            
+            # Add engine I/O mappings if any exist
+            if engine_io_mappings:
+                output.append("")
+                output.append("Engine I/O Mappings:")
+                for engine_name, mapping in engine_io_mappings.items():
+                    inputs = mapping.get("inputs", [])
+                    outputs = mapping.get("outputs", [])
+                    
+                    if inputs:
+                        output.append(f"• {engine_name} inputs: {', '.join(inputs)}")
+                    if outputs:
+                        output.append(f"• {engine_name} outputs: {', '.join(outputs)}")
+        
+        # Join all sections
+        return "\n".join(output)
+
+    @classmethod
+    def _format_full_type(cls, annotation):
+        """Format a type annotation with full parameter information."""
+        from typing import get_origin, get_args, Optional, List, Dict, Union, Any
+        
+        # Handle simple types
+        if annotation is str:
+            return "str"
+        if annotation is int:
+            return "int"
+        if annotation is float:
+            return "float"
+        if annotation is bool:
+            return "bool"
+        if annotation is type(None):
+            return "None"
+        
+        # Get origin and arguments for generic types
+        origin = get_origin(annotation)
+        args = get_args(annotation)
+        
+        if origin is None:
+            # Handle direct class references
+            if hasattr(annotation, "__module__") and hasattr(annotation, "__name__"):
+                return f"{annotation.__module__}.{annotation.__name__}"
+            return str(annotation).replace("typing.", "")
+        
+        # Handle specific generic types
+        if origin is Optional:
+            inner_type = cls._format_full_type(args[0])
+            return f"Optional[{inner_type}]"
+        
+        # Special case: detect Union[T, None] and format as Optional[T]
+        if origin is Union and len(args) == 2:
+            # Check if one of the args is None or NoneType
+            if args[1] is None or args[1] is type(None) or str(args[1]) == 'NoneType':
+                inner_type = cls._format_full_type(args[0])
+                return f"Optional[{inner_type}]"
+            elif args[0] is None or args[0] is type(None) or str(args[0]) == 'NoneType':
+                inner_type = cls._format_full_type(args[1])
+                return f"Optional[{inner_type}]"
+        
+        if origin is list or origin is List:
+            if args:
+                inner_type = cls._format_full_type(args[0])
+                return f"List[{inner_type}]"
+            return "List"
+        
+        if origin is dict or origin is Dict:
+            if len(args) == 2:
+                key_type = cls._format_full_type(args[0])
+                value_type = cls._format_full_type(args[1])
+                return f"Dict[{key_type}, {value_type}]"
+            return "Dict"
+        
+        if origin is Union:
+            formatted_args = [cls._format_full_type(arg) for arg in args]
+            return f"Union[{', '.join(formatted_args)}]"
+        
+        # Generic handling for other parameterized types
+        if args:
+            formatted_args = [cls._format_full_type(arg) for arg in args]
+            origin_name = str(origin).replace("typing.", "").replace("<class '", "").replace("'>", "")
+            return f"{origin_name}[{', '.join(formatted_args)}]"
+            
+            # Fallback
+            return str(origin).replace("typing.", "").replace("<class '", "").replace("'>", "")
+    
+    @classmethod
+    def format_schema(schema_cls):
+        output = ["StateSchema:"]
+        
+        # Get shared fields and reducer info
+        shared_fields = getattr(schema_cls, "__shared_fields__", [])
+        reducer_functions = getattr(schema_cls, "__reducer_fields__", {})
+        
+        # Process fields
+        for field_name, field_info in schema_cls.model_fields.items():
+            # Skip special fields
+            if field_name.startswith("__"):
+                continue
+                
+            # Format type 
+            field_type = field_info.annotation
+            type_str = str(field_type).replace("typing.", "")
+            
+            # Check if field has reducer
+            if field_name in reducer_functions:
+                reducer = reducer_functions[field_name]
+                reducer_name = getattr(reducer, "__name__", str(reducer))
+                output.append(f"{field_name}: Annotated[{type_str}, {reducer_name}]")
+            else:
+                # Handle default value
                 if field_info.default_factory is not None:
-                    default_factory_name = field_info.default_factory.__name__ if hasattr(field_info.default_factory, "__name__") else "factory"
-                    default_str = f" = Field(default_factory={default_factory_name})"
+                    default_str = f" = Field(default_factory={field_info.default_factory.__name__})"
                 elif field_info.default is not ...:
                     if field_info.default is None:
                         default_str = " = None"
-                    elif isinstance(field_info.default, str):
-                        default_str = f' = "{field_info.default}"'
                     else:
                         default_str = f" = {field_info.default}"
-            
-            # Create field representation
-            field_repr = f"    {field_name}: {field_type}{default_str}"
-            
-            # Add description if available
-            description = getattr(field_info, "description", None)
-            if description:
-                field_repr = f"    # {description}\n{field_repr}"
-                
-            # Categorize the field
-            if field_name in reducer_names:
-                fields_by_category["Fields with Reducers"].append((field_name, field_repr))
-            elif field_name in shared_fields:
-                fields_by_category["Shared Fields"].append((field_name, field_repr))
-            else:
-                fields_by_category["Standard Fields"].append((field_name, field_repr))
+                else:
+                    default_str = ""
+                    
+                output.append(f"{field_name}: {type_str}{default_str}")
         
-        # Add fields to output by category
-        for category, fields in fields_by_category.items():
-            if fields:
-                output.append("")
-                output.append(f"    # {category}")
-                # Sort fields by name within category
-                for _, field_repr in sorted(fields):
-                    output.append(field_repr)
-        
-        # Add metadata sections if requested
-        if include_metadata:
-            # Add input/output fields by engine
-            engine_io = getattr(cls, "__engine_io_mappings__", {})
-            if engine_io:
-                output.append("")
-                output.append("    # Engine I/O Mappings")
-                for engine_name, mapping in sorted(engine_io.items()):
-                    inputs = mapping.get("inputs", [])
-                    outputs = mapping.get("outputs", [])
-                    if inputs:
-                        output.append(f"    # {engine_name} inputs: {', '.join(inputs)}")
-                    if outputs:
-                        output.append(f"    # {engine_name} outputs: {', '.join(outputs)}")
-            
-            # Add reducer information
-            if reducer_names:
-                output.append("")
-                output.append("    # Reducer Functions")
-                for field_name, reducer_name in sorted(reducer_names.items()):
-                    output.append(f"    # {field_name}: {reducer_name}")
-        
-        # Add method list
-        methods = []
-        for name, attr in inspect.getmembers(cls):
-            if name.startswith("__") or name in cls.model_fields:
-                continue
-            if inspect.isfunction(attr) or inspect.ismethod(attr):
-                methods.append(name)
-        
-        if methods:
-            output.append("")
-            output.append("    # Methods")
-            for method in sorted(methods):
-                output.append(f"    # {method}()")
-                
         return "\n".join(output)
+
+
+    @classmethod
+    def _format_type_annotation(cls, annotation):
+        """Format a type annotation properly, including type parameters."""
+        from typing import get_origin, get_args, Optional, List, Dict, Union, Any, Annotated
+        
+        # Handle simple types
+        if hasattr(annotation, "__name__"):
+            return annotation.__name__
+            
+        # Handle origins like Optional, List, etc.
+        origin = get_origin(annotation)
+        if origin is None:
+            # Fallback for any unhandled cases
+            return str(annotation).replace("typing.", "")
+            
+        # Handle special cases
+        if origin is Union:
+            args = get_args(annotation)
+            # Handle Optional[X] special case (Union[X, None])
+            if len(args) == 2 and args[1] is type(None):
+                inner_type = cls._format_type_annotation(args[0])
+                return f"Optional[{inner_type}]"
+            else:
+                formatted_args = [cls._format_type_annotation(arg) for arg in args]
+                return f"Union[{', '.join(formatted_args)}]"
+                
+        elif origin is list or origin is List:
+            args = get_args(annotation)
+            if args:
+                inner_type = cls._format_type_annotation(args[0])
+                return f"List[{inner_type}]"
+            return "List"
+            
+        elif origin is dict or origin is Dict:
+            args = get_args(annotation)
+            if len(args) == 2:
+                key_type = cls._format_type_annotation(args[0])
+                value_type = cls._format_type_annotation(args[1])
+                return f"Dict[{key_type}, {value_type}]"
+            return "Dict"
+            
+        elif origin is Annotated:
+            args = get_args(annotation)
+            if args:
+                base_type = cls._format_type_annotation(args[0])
+                # Skip the metadata in the Annotated display
+                return base_type
+                
+        # Generic handling for other parameterized types
+        args = get_args(annotation)
+        if not args:
+            return str(origin).replace("typing.", "").replace("class ", "")
+            
+        formatted_args = [cls._format_type_annotation(arg) for arg in args]
+        origin_name = str(origin).replace("typing.", "").replace("class ", "")
+        
+        # Clean up any extra quotes or angle brackets from the string representation
+        origin_name = origin_name.replace("'", "").replace("<", "").replace(">", "")
+        
+        return f"{origin_name}[{', '.join(formatted_args)}]"
     
     def __str__(self) -> str:
         """Enhanced string representation with proper formatting."""
