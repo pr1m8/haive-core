@@ -146,7 +146,7 @@ class Agent(Generic[TConfig], ABC):
         self._initialize_engines()
         
         # 4. Setup persistence (needed for compilation)
-        if config.checkpoint_mode == "async":
+        if config.checkpoint_mode == "sync":
             self._setup_persistence()
         else:
             asyncio.run(self._asetup_persistence())
