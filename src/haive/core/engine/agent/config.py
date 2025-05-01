@@ -179,7 +179,7 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
 
     # Visualization and debugging
     visualize: bool = Field(default=True)
-    output_dir: str = Field(default="resources")
+    output_dir: str = Field(default="resources/graph_images")
     debug: bool = Field(default=False)
     save_history: bool = Field(default=True)
 
@@ -485,8 +485,8 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
         schema = SchemaComposer.from_components(
             components=all_components,
             name=schema_name,
-            include_messages=True,
-            include_runnable_config=False  # Never include __runnable_config__
+            #include_messages=True,
+            #include_runnable_config=False  # Never include __runnable_config__
         )
 
         # Enhance schema with pattern-specific fields

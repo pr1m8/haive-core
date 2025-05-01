@@ -1163,61 +1163,45 @@ class Agent(Generic[TConfig], ABC):
         Args:
             output_path: Optional custom path for visualization output
         """
+        from haive.core.config.constants import GRAPH_IMAGES_DIR
+        
         if not output_path:
-            output_path = self.graph_image_path
-            
+            # Use default path if none provided
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            if not os.path.exists(GRAPH_IMAGES_DIR):
+                os.makedirs(GRAPH_IMAGES_DIR, exist_ok=True)
+            output_path = os.path.join(GRAPH_IMAGES_DIR, f"{self.config.name}_{timestamp}.png")
+                
         logger.debug(f"Visualizing graph for {self.config.name}")
         
-        if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
-            with self.console.status(f"[bold blue]Generating graph visualization...[/bold blue]"):
-                # Use DynamicGraph's visualization capability
-                if hasattr(self.graph_builder, "visualize_graph"):
-                    try:
-                        self.graph_builder.visualize_graph(output_path)
-                        self.console.print(f"[bold green]Graph visualization saved to:[/bold green] {output_path}")
-                        return
-                    except Exception as e:
-                        self.console.print(f"[bold yellow]Error using DynamicGraph visualization: {e}[/bold yellow]")
+        try:
+            # Check if we have a compiled graph
+            if hasattr(self, "app") and self.app:
+                # Generate the Mermaid diagram PNG with xray for detailed visualization
+                png_data = self.app.get_graph(xray=True).draw_mermaid_png()
                 
-                # Fall back to compiled graph visualization if available
-                if self.app and hasattr(self.app, "get_graph"):
-                    try:
-                        # Ensure directory exists
-                        Path(output_path).parent.mkdir(parents=True, exist_ok=True)
-                        
-                        # Generate and save PNG
-                        png_data = self.app.get_graph(xray=True).draw_mermaid_png()
-                        with open(output_path, "wb") as f:
-                            f.write(png_data)
-                            
-                        self.console.print(f"[bold green]Graph visualization saved to:[/bold green] {output_path}")
-                    except Exception as e:
-                        self.console.print(f"[bold red]Error visualizing graph: {e}[/bold red]")
-        else:
-            # Use DynamicGraph's visualization capability
-            if hasattr(self.graph_builder, "visualize_graph"):
+                # Ensure directory exists
+                os.makedirs(os.path.dirname(output_path), exist_ok=True)
+                
+                # Save the PNG data
+                with open(output_path, "wb") as f:
+                    f.write(png_data)
+                    
+                logger.info(f"Graph visualization saved to: {output_path}")
+                
+            # Fall back to graph builder visualization if available  
+            elif hasattr(self, "graph_builder") and hasattr(self.graph_builder, "visualize_graph"):
                 try:
                     self.graph_builder.visualize_graph(output_path)
                     logger.info(f"Graph visualization saved to: {output_path}")
-                    return
                 except Exception as e:
-                    logger.warning(f"Error using DynamicGraph visualization: {e}")
-            
-            # Fall back to compiled graph visualization if available
-            if self.app and hasattr(self.app, "get_graph"):
-                try:
-                    # Ensure directory exists
-                    os.makedirs(os.path.dirname(output_path), exist_ok=True)
-                    
-                    # Generate and save PNG
-                    png_data = self.app.get_graph(xray=True).draw_mermaid_png()
-                    with open(output_path, "wb") as f:
-                        f.write(png_data)
-                        
-                    logger.info(f"Graph visualization saved to: {output_path}")
-                except Exception as e:
-                    logger.error(f"Error visualizing graph: {e}")
-    
+                    logger.warning(f"Error using graph builder visualization: {e}")
+                    logger.warning("Graph visualization requires compilation first")
+            else:
+                logger.warning("Unable to visualize graph: No compiled graph available")
+                logger.warning("Compile the graph first with compile() method")
+        except Exception as e:
+            logger.error(f"Error visualizing graph: {e}")
     def apply_pattern(self, pattern_name: str, **kwargs) -> None:
         """
         Apply a graph pattern to the agent's workflow.

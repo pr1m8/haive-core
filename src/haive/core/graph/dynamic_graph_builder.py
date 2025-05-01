@@ -1460,82 +1460,7 @@ class DynamicGraph:
         except Exception as e:
             logger.error(f"Error analyzing build error: {str(e)}")
     
-    def compile(self, checkpointer=None, **kwargs) -> Any:
-        """
-        Build and compile the graph with validation and diagnostics.
-        
-        Args:
-            checkpointer: Optional checkpointer for state persistence
-            **kwargs: Additional compile parameters
-            
-        Returns:
-            Compiled graph
-        """
-        try:
-            logger.info(f"Compiling graph: {self.name}")
-            
-            # Perform pre-compilation checks
-            validation_issues = self._validate_graph()
-            
-            # Log detailed pre-compilation state
-            if self.debug_level in [DebugLevel.VERBOSE, DebugLevel.TRACE]:
-                self.debug_graph()
-            
-            # Compilation banner
-            logger.info("COMPILING GRAPH WORKFLOW")
-            
-            # Handle validation issues
-            if validation_issues:
-                logger.warning(f"Proceeding with compilation despite {len(validation_issues)} validation issues")
-            
-            # Compile the graph with detailed error trapping
-            try:
-                logger.debug(f"Starting compilation process with checkpointer: {checkpointer is not None}")
-                compiled_graph = self.graph_builder.compile(checkpointer=checkpointer, **kwargs)
-                
-                # Store the compiled graph for future use
-                self.compiled_graph = compiled_graph
-                
-                # Log success
-                logger.info("COMPILATION SUCCESSFUL")
-                logger.info(f"Compiled graph: {self.name}")
-                logger.info(f"Nodes: {len(self.nodes)}")
-                logger.info(f"Edges: {len(self.edges)}")
-                logger.info(f"Branches: {len(self.branches)}")
-                
-                # Visualize if enabled
-                if self.visualize and VISUALIZATION_AVAILABLE:
-                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                    output_dir = "graph_visualizations"
-                    os.makedirs(output_dir, exist_ok=True)
-                    output_file = os.path.join(output_dir, f"{self.name.replace(' ', '_')}_{timestamp}.png")
-                    
-                    try:
-                        self.visualize_graph(output_file)
-                        logger.info(f"Graph visualization saved to: {output_file}")
-                    except Exception as viz_error:
-                        logger.warning(f"Error creating visualization: {str(viz_error)}")
-                
-                return compiled_graph
-                
-            except Exception as compile_error:
-                # Detailed compile error handling
-                self._log_error("Compilation error", compile_error)
-                
-                # Analyze the most common compilation issues with enhanced diagnostics
-                self._analyze_compilation_error(compile_error)
-                
-                raise ValueError(f"Failed to compile graph: {str(compile_error)}") from compile_error
-            
-        except Exception as e:
-            tb = traceback.format_exc()
-            logger.error(f"Error during graph compilation process: {str(e)}\n{tb}")
-            
-            # Debug detailed graph state for troubleshooting
-            logger.error("Graph state at compilation failure:")
-            self.debug_graph()
-            
-            raise ValueError(f"Failed to compile graph: {str(e)}") from e
+    
     
     def _analyze_compilation_error(self, error: Exception) -> None:
         """
@@ -1596,20 +1521,21 @@ class DynamicGraph:
             tb = traceback.format_exc()
             logger.error(f"Traceback: {tb}")
             raise ValueError(f"Failed to analyze compilation error: {str(e)}") from e
-    def visualize_graph(self, output_file=None, open_browser=True, include_legend=True, 
-                   format="html", include_stats=True):
+        
+    def visualize_graph(self, output_file=None, open_browser=False, include_legend=True, 
+                    format="png", include_stats=True):
         """
         Visualize the graph using Mermaid diagrams.
         
         Args:
             output_file: Path to save the visualization (optional)
-            open_browser: Whether to open the visualization
-            include_legend: Whether to include a legend
+            open_browser: Whether to open the visualization in browser
+            include_legend: Whether to include a legend 
             format: Output format ('html' or 'png')
             include_stats: Whether to include graph statistics
             
         Returns:
-            Path to the generated file
+            Path to the generated file or None if visualization failed
         """
         try:
             # Generate timestamp-based filename if none provided
@@ -1621,48 +1547,160 @@ class DynamicGraph:
             
             logger.info(f"Visualizing graph: {self.name}")
             
-            # Create visualizer instance
-            #from haive.core.graph.utils.mermaid_visualizer import MermaidVisualizer
-            #visualizer = MermaidVisualizer(self)
-            
-            # Generate visualization based on format
-            if format.lower() == "png":
-                result_file = visualizer.render_as_png(output_file, open_browser)
+            # Check if we have a compiled graph
+            if hasattr(self, "compiled_graph") and self.compiled_graph is not None:
+                # Import the visualization utility
+                from haive.core.utils.visualize_graph_utils import render_and_display_graph
+                
+                # Use the visualization utility
+                result_file = render_and_display_graph(
+                    compiled_graph=self.compiled_graph,
+                    output_dir=os.path.dirname(output_file),
+                    output_name=os.path.basename(output_file),
+                    open_browser=open_browser,
+                    include_legend=include_legend,
+                    include_stats=include_stats,
+                    format=format
+                )
+                
+                logger.info(f"Graph visualization saved to: {result_file}")
+                return result_file
             else:
-                result_file = visualizer.render_to_file(output_file, open_browser, include_legend, include_stats)
-            
-            logger.info(f"Graph visualization saved to: {result_file}")
-            return result_file
+                # Attempt to visualize uncompiled graph for development purposes
+                logger.warning("Graph has not been compiled yet. Attempting to visualize uncompiled graph.")
+                
+                try:
+                    # Try to use the uncompiled builder's visualization (experimental)
+                    if hasattr(self.graph_builder, "get_graph"):
+                        from haive.core.utils.visualize_graph_utils import render_uncompiled_graph
+                        
+                        result_file = render_uncompiled_graph(
+                            graph_builder=self.graph_builder,
+                            nodes=self.nodes,
+                            edges=self.edges,
+                            output_file=output_file,
+                            include_legend=include_legend
+                        )
+                        
+                        if result_file:
+                            logger.info(f"Uncompiled graph visualization saved to: {result_file}")
+                            logger.warning("This is an experimental visualization of an uncompiled graph and may be incomplete.")
+                            return result_file
+                    
+                    # If we couldn't visualize the uncompiled graph through utilities
+                    logger.warning("Unable to visualize uncompiled graph. Please compile the graph first.")
+                    return None
+                    
+                except Exception as e:
+                    logger.warning(f"Failed to visualize uncompiled graph: {str(e)}")
+                    logger.warning("Please compile the graph first for accurate visualization.")
+                    return None
         
         except ImportError:
-            logger.warning("MermaidVisualizer not available, falling back to basic visualization")
-            # Fallback to original method if available
-            if hasattr(self, "compiled_graph") or self.compiled_graph is not None:
+            logger.warning("Visualization utilities not available, falling back to basic visualization")
+            
+            # Fallback to basic visualization if available
+            if hasattr(self, "compiled_graph") and self.compiled_graph is not None:
                 try:
-                    if output_file is None:
-                        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                        output_dir = "graph_visualizations"
-                        os.makedirs(output_dir, exist_ok=True)
-                        output_file = os.path.join(output_dir, f"{self.name.replace(' ', '_')}_compiled_{timestamp}.png")
-                    
-                    # Use the compiled graph's visualization capabilities
+                    # Use the compiled graph's basic visualization capabilities
                     png_data = self.compiled_graph.get_graph(xray=True).draw_mermaid_png()
                     
                     # Save the PNG data to a file
                     with open(output_file, "wb") as f:
                         f.write(png_data)
                         
-                    logger.info(f"Compiled graph visualization saved to: {output_file}")
+                    logger.info(f"Basic graph visualization saved to: {output_file}")
                     return output_file
                 except Exception as e:
                     logger.warning(f"Error visualizing compiled graph: {str(e)}")
                     return None
             else:
-                logger.warning("Graph has not been compiled and MermaidVisualizer is not available")
+                logger.warning("Graph has not been compiled and visualization utilities are not available")
                 return None
+                
         except Exception as e:
             logger.warning(f"Error visualizing graph: {str(e)}")
             return None
+    def compile(self, checkpointer=None, **kwargs):
+        """
+        Build and compile the graph with validation and diagnostics.
+        
+        Args:
+            checkpointer: Optional checkpointer for state persistence
+            **kwargs: Additional compile parameters
+            
+        Returns:
+            Compiled graph
+        """
+        try:
+            logger.info(f"Compiling graph: {self.name}")
+            
+            # Perform pre-compilation checks
+            validation_issues = self._validate_graph()
+            
+            # Log detailed pre-compilation state
+            if self.debug_level in [DebugLevel.VERBOSE, DebugLevel.TRACE]:
+                self.debug_graph()
+            
+            # Compilation banner
+            logger.info("COMPILING GRAPH WORKFLOW")
+            
+            # Handle validation issues
+            if validation_issues:
+                logger.warning(f"Proceeding with compilation despite {len(validation_issues)} validation issues")
+            
+            # Compile the graph with detailed error trapping
+            try:
+                logger.debug(f"Starting compilation process with checkpointer: {checkpointer is not None}")
+                compiled_graph = self.graph_builder.compile(checkpointer=checkpointer, **kwargs)
+                
+                # Store the compiled graph for future use
+                self.compiled_graph = compiled_graph
+                
+                # Log success
+                logger.info("COMPILATION SUCCESSFUL")
+                logger.info(f"Compiled graph: {self.name}")
+                logger.info(f"Nodes: {len(self.nodes)}")
+                logger.info(f"Edges: {len(self.edges)}")
+                logger.info(f"Branches: {len(self.branches)}")
+                
+                # Visualize if enabled
+                if self.visualize and VISUALIZATION_AVAILABLE:
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    output_dir = "graph_visualizations"
+                    os.makedirs(output_dir, exist_ok=True)
+                    output_file = os.path.join(output_dir, f"{self.name.replace(' ', '_')}_{timestamp}.png")
+                    
+                    try:
+                        result_file = self.visualize_graph(
+                            output_file=output_file, 
+                            open_browser=False
+                        )
+                        if result_file:
+                            logger.info(f"Graph visualization saved to: {result_file}")
+                    except Exception as viz_error:
+                        logger.warning(f"Error creating visualization: {str(viz_error)}")
+                
+                return compiled_graph
+                
+            except Exception as compile_error:
+                # Detailed compile error handling
+                self._log_error("Compilation error", compile_error)
+                
+                # Analyze the most common compilation issues with enhanced diagnostics
+                self._analyze_compilation_error(compile_error)
+                
+                raise ValueError(f"Failed to compile graph: {str(compile_error)}") from compile_error
+            
+        except Exception as e:
+            tb = traceback.format_exc()
+            logger.error(f"Error during graph compilation process: {str(e)}\n{tb}")
+            
+            # Debug detailed graph state for troubleshooting
+            logger.error("Graph state at compilation failure:")
+            self.debug_graph()
+            
+            raise ValueError(f"Failed to compile graph: {str(e)}") from e
     def debug_graph(self):
         """
         Generate comprehensive debug information about the graph state.
