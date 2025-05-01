@@ -1,4 +1,8 @@
 # execution/command_handler.py
+from typing import Any, Optional, List
+from langgraph.types import Command, Send
+from haive.core.schema.state_schema import StateSchema
+
 def process_engine_result(result: Any, command_goto: Optional[Any] = None) -> Any:
     """Process engine result according to Command pattern."""
     # If result is already a Command or Send, pass it through
