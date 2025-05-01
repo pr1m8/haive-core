@@ -1,117 +1,80 @@
-import copy
-from typing import Any, Dict, List, Optional, Union
+# node/tool_node.py
+from typing import Any, List, Optional, Union
 
-from langchain_core.messages import ToolMessage
-from langchain_core.runnables import RunnableConfig
-from langchain_core.tools import BaseTool, BaseToolkit, StructuredTool, Tool
+from langchain.agents.tools import BaseToolkit, Tool
+from langchain.tools import BaseTool, StructuredTool, Tool
+from langgraph.prebuilt import ToolNode
 from langgraph.types import Command
 from pydantic import BaseModel
 
-from haive.core.schema.state_schema import StateSchema
+from haive.core.graph.node.protocols import NodeFunction
 
 
 def create_tool_node(
-    tools: Union[List[Union[BaseTool, Tool, StructuredTool, BaseModel]], BaseToolkit],
+    tools: List[Union[BaseTool, Tool, StructuredTool, BaseModel, BaseToolkit]],
     command_goto: Optional[Any] = None,
     handle_errors: bool = True,
     parallel: bool = True,
     max_workers: int = 4,
-) -> Callable:
+    node_config: Optional[dict] = None,
+    retry_policy: Optional[Any] = None,
+) -> NodeFunction:
     """
-    Create a node function for tool execution.
+    Create a tool execution node.
 
     Args:
-        tools: Tools to use (various types supported)
-        command_goto: Optional destination for command routing
-        handle_errors: Whether to handle errors during tool execution
+        tools: List of tools or toolkits
+        command_goto: Optional destination for Command routing
+        handle_errors: Whether to handle tool errors
         parallel: Whether to execute tools in parallel
         max_workers: Maximum number of parallel workers
+        node_config: Optional node configuration
+        retry_policy: Optional retry policy
 
     Returns:
         Tool node function
     """
-    # Process different tool input types
+    # Process toolkits to extract tools
     processed_tools = []
 
-    # Handle BaseToolkit
-    if isinstance(tools, BaseToolkit):
-        processed_tools.extend(tools.get_tools())
-    # Handle list of tools
-    elif isinstance(tools, list):
-        for tool in tools:
-            # Handle BaseModel -> convert to StructuredTool
-            if isinstance(tool, BaseModel) and not isinstance(tool, BaseTool):
-                from langchain_core.tools import StructuredTool
+    for tool in tools:
+        if isinstance(tool, BaseToolkit):
+            # Extract tools from toolkit
+            processed_tools.extend(tool.get_tools())
+        else:
+            processed_tools.append(tool)
 
-                structured_tool = StructuredTool.from_function(
-                    func=tool.execute if hasattr(tool, "execute") else None,
-                    name=getattr(tool, "name", tool.__class__.__name__),
-                    description=getattr(tool, "description", ""),
-                    args_schema=tool.__class__,
-                )
-                processed_tools.append(structured_tool)
-            else:
-                processed_tools.append(tool)
-    else:
-        raise ValueError(f"Unsupported tool type: {type(tools)}")
+    # Create LangGraph tool node with all params
+    tool_node = ToolNode(
+        tools=processed_tools,
+        handle_tool_error=handle_errors,
+        parallel=parallel,
+        max_workers=max_workers,
+    )
 
-    # Create tool map for lookup
-    tool_map = {tool.name: tool for tool in processed_tools}
+    # Wrap the tool node to handle configuration and command_goto
+    def wrapped_tool_node(state, config=None):
+        # Use node_config as fallback
+        effective_config = config or node_config
 
-    def tool_node(state: StateSchema, config: RunnableConfig) -> Any:
-        # Extract messages and tool calls
-        messages = getattr(state, "messages", [])
-        if not messages:
-            # No messages to process
-            if command_goto:
-                return Command(update=state, goto=command_goto)
-            return state
+        # Call the LangGraph tool node
+        result = tool_node(state, effective_config)
 
-        # Get last message
-        last_message = messages[-1]
+        # Add command_goto if needed
+        if command_goto is not None and not isinstance(result, Command):
+            return Command(update=result, goto=command_goto)
 
-        # Extract tool calls (handle different formats)
-        tool_calls = []
-        if hasattr(last_message, "tool_calls"):
-            tool_calls = last_message.tool_calls
-        elif (
-            hasattr(last_message, "additional_kwargs")
-            and "tool_calls" in last_message.additional_kwargs
-        ):
-            tool_calls = last_message.additional_kwargs["tool_calls"]
+        return result
 
-        if not tool_calls:
-            # No tool calls to process
-            if command_goto:
-                return Command(update=state, goto=command_goto)
-            return state
+    # Apply retry policy if specified
+    if retry_policy:
+        from langgraph.prebuilt import RetryNode
 
-        # Execute tools
-        results = execute_tools(
-            tool_calls, tool_map, parallel, max_workers, handle_errors, config
-        )
+        wrapped_tool_node = RetryNode(wrapped_tool_node, retry_policy)
 
-        # Create tool messages
-        tool_messages = []
-        for result in results:
-            tool_message = ToolMessage(
-                content=result["content"],
-                tool_call_id=result["tool_call_id"],
-                name=result["tool_name"],
-            )
-            tool_messages.append(tool_message)
+    # Add metadata
+    wrapped_tool_node.__tools__ = processed_tools
+    wrapped_tool_node.__node_config__ = node_config
+    wrapped_tool_node.__command_goto__ = command_goto
 
-        # Update messages
-        updated_messages = list(messages)
-        updated_messages.extend(tool_messages)
-
-        # Create updated state
-        updated_state = copy.deepcopy(state)
-        setattr(updated_state, "messages", updated_messages)
-
-        # Return with command_goto if specified
-        if command_goto:
-            return Command(update=updated_state, goto=command_goto)
-        return updated_state
-
-    return tool_node
+    return wrapped_tool_node
