@@ -19,14 +19,14 @@ lint:
   enabled:
     - bandit@1.8.3
     - black@25.1.0
-    - checkov@3.2.413
+    - checkov@3.2.414
     - git-diff-check
     - isort@6.0.1
     - markdownlint@0.44.0
     - osv-scanner@2.0.2
     - oxipng@9.1.5
     - prettier@3.5.3
-    - ruff@0.11.7
+    - ruff@0.11.8
     - taplo@0.9.3
     - trufflehog@3.88.26
     - yamllint@1.37.0
