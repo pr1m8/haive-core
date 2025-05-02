@@ -1,4 +1,5 @@
 import pytest
+
 from haive.core.types.dynamic_literal import Colour, PaintJob
 
 

@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import abc
-import inspect
 import importlib.metadata as _md
+import inspect
 from typing import (
+    Annotated,
     Any,
     ClassVar,
     Dict,
@@ -14,14 +15,12 @@ from typing import (
     Type,
     TypeVar,
     runtime_checkable,
-    Annotated,
 )
 
 from pydantic import (
     BaseModel,
     Field,
     computed_field,
-    model_serializer,
     model_validator,
 )
 from pydantic.functional_validators import BeforeValidator
@@ -30,15 +29,18 @@ from pydantic.functional_validators import BeforeValidator
 BuildT = TypeVar("BuildT")
 C = TypeVar("C")
 
+
 @runtime_checkable
 class Buildable(Protocol[BuildT]):
     def build(self) -> BuildT: ...
+
 
 # ───────────────────────────── Registry Base  ───────────────────────────── #
 class Registered(BaseModel, Generic[BuildT], abc.ABC):
     """
     Registry-aware base class for pluggable, composable components.
     """
+
     model_config = dict(
         extra="forbid",
         frozen=False,
@@ -56,7 +58,8 @@ class Registered(BaseModel, Generic[BuildT], abc.ABC):
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
-        if inspect.isabstract(cls): return
+        if inspect.isabstract(cls):
+            return
         if not hasattr(cls, "NAME"):
             raise TypeError(f"{cls.__name__} must define class attr NAME")
 
@@ -77,7 +80,9 @@ class Registered(BaseModel, Generic[BuildT], abc.ABC):
     @classmethod
     def get_class(cls, name: str) -> Type[Registered]:
         if name not in cls._registry:
-            raise KeyError(f"Unknown component '{name}'. Choices: {cls.list_available()}")
+            raise KeyError(
+                f"Unknown component '{name}'. Choices: {cls.list_available()}"
+            )
         return cls._registry[name]
 
     @classmethod
@@ -98,8 +103,6 @@ class Registered(BaseModel, Generic[BuildT], abc.ABC):
     @abc.abstractmethod
     def build(self) -> BuildT: ...
 
-    from pydantic import model_serializer
-
     @model_serializer(mode="plain")
     def _serialize(self) -> Dict[str, Any]:
         # Use `__dict__` to avoid triggering serialization again
@@ -108,13 +111,14 @@ class Registered(BaseModel, Generic[BuildT], abc.ABC):
         return data
 
 
-
 # ───────────────────────────── Component Spec  ───────────────────────────── #
 def _type_validator(value: str) -> str:
     Registered.get_class(value)
     return value
 
+
 TypeKey = Annotated[str, BeforeValidator(_type_validator)]  # type: ignore
+
 
 class ComponentSpec(BaseModel, Generic[C]):
     """
@@ -122,6 +126,7 @@ class ComponentSpec(BaseModel, Generic[C]):
     (1) A registered component by type + params
     (2) An inline instance (fully defined)
     """
+
     model_config = dict(extra="forbid")
 
     type: Optional[TypeKey] = Field(
@@ -145,6 +150,7 @@ class ComponentSpec(BaseModel, Generic[C]):
         instance = cls(**self.params)
         return instance.build()
 
+
 # ──────────────────────────── Example Components ─────────────────────────── #
 class Tokenizer(Registered[List[str]]):
     NAME = "whitespace-tokenizer"
@@ -162,6 +168,7 @@ class Lowercaser(Registered[str]):
 
     def build(self) -> str:
         return self.text.lower()
+
 
 # ───────────────────────────── Composite Pipeline ─────────────────────────── #
 class TextPipeline(Registered[List[str]]):

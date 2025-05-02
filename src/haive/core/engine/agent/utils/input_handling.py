@@ -11,18 +11,19 @@ logger = logging.getLogger(__name__)
 
 T = TypeVar("T", bound=BaseModel)
 
+
 def process_input(
     input_data: str | list[str] | dict[str, Any] | BaseModel,
     input_schema: type[T] | None = None,
-    runtime_config: RunnableConfig | None = None
+    runtime_config: RunnableConfig | None = None,
 ) -> dict[str, Any]:
     """Process input for the agent based on the input schema.
-    
+
     Args:
         input_data: Input in various formats
         input_schema: Schema for validation
         runtime_config: Optional runtime configuration to include
-        
+
     Returns:
         Processed input compatible with the graph
     """
@@ -49,12 +50,18 @@ def process_input(
         for field_name, field_info in schema_fields.items():
             if field_name not in ["messages", "__runnable_config__"]:
                 # Check if field is a string type
-                field_type = getattr(field_info, "annotation", None) or getattr(field_info, "type_", None)
-                if field_type and ("str" in str(field_type) or "String" in str(field_type)):
+                field_type = getattr(field_info, "annotation", None) or getattr(
+                    field_info, "type_", None
+                )
+                if field_type and (
+                    "str" in str(field_type) or "String" in str(field_type)
+                ):
                     prepared_input[field_name] = input_data
 
     # Handle list of strings
-    elif isinstance(input_data, list) and all(isinstance(item, str) for item in input_data):
+    elif isinstance(input_data, list) and all(
+        isinstance(item, str) for item in input_data
+    ):
         # Create messages list
         messages = [HumanMessage(content=item) for item in input_data]
         prepared_input = {"messages": messages}
@@ -68,8 +75,12 @@ def process_input(
         for field_name, field_info in schema_fields.items():
             if field_name not in ["messages", "__runnable_config__"]:
                 # Check if field is a string type
-                field_type = getattr(field_info, "annotation", None) or getattr(field_info, "type_", None)
-                if field_type and ("str" in str(field_type) or "String" in str(field_type)):
+                field_type = getattr(field_info, "annotation", None) or getattr(
+                    field_info, "type_", None
+                )
+                if field_type and (
+                    "str" in str(field_type) or "String" in str(field_type)
+                ):
                     prepared_input[field_name] = joined_text
 
     # Handle dictionary input
@@ -86,7 +97,9 @@ def process_input(
             # Try to create messages from other fields
             for field in ["input", "query", "content", "text"]:
                 if field in prepared_input and isinstance(prepared_input[field], str):
-                    prepared_input["messages"] = [HumanMessage(content=prepared_input[field])]
+                    prepared_input["messages"] = [
+                        HumanMessage(content=prepared_input[field])
+                    ]
                     break
 
     # Handle Pydantic model input
@@ -114,14 +127,14 @@ def process_input(
             # Try to create messages from other fields
             for field in ["input", "query", "content", "text"]:
                 if field in prepared_input and isinstance(prepared_input[field], str):
-                    prepared_input["messages"] = [HumanMessage(content=prepared_input[field])]
+                    prepared_input["messages"] = [
+                        HumanMessage(content=prepared_input[field])
+                    ]
                     break
 
     # Fallback for other types
     else:
-        prepared_input = {
-            "messages": [HumanMessage(content=str(input_data))]
-        }
+        prepared_input = {"messages": [HumanMessage(content=str(input_data))]}
 
         # Add runtime config if provided
         if runtime_config:
@@ -142,26 +155,29 @@ def process_input(
 
     return prepared_input
 
+
 def prepare_merged_input(
     input_data: str | list[str] | dict[str, Any] | BaseModel,
     previous_state: Any | None = None,
     runtime_config: RunnableConfig | None = None,
     input_schema: type[BaseModel] | None = None,
-    state_schema: type[BaseModel] | None = None
+    state_schema: type[BaseModel] | None = None,
 ) -> Any:
     """Process input data and merge with previous state if available.
-    
+
     Args:
         input_data: Input data in various formats
         previous_state: Previous state from checkpointer
         runtime_config: Runtime configuration
         input_schema: Schema for input validation
         state_schema: Schema for state validation
-        
+
     Returns:
         Processed input data merged with previous state
     """
-    logger.debug(f"Preparing merged input with schemas - Input: {input_schema.__name__ if hasattr(input_schema, '__name__') else type(input_schema)}, State: {state_schema.__name__ if hasattr(state_schema, '__name__') else type(state_schema)}")
+    logger.debug(
+        f"Preparing merged input with schemas - Input: {input_schema.__name__ if hasattr(input_schema, '__name__') else type(input_schema)}, State: {state_schema.__name__ if hasattr(state_schema, '__name__') else type(state_schema)}"
+    )
 
     # Process the input based on schema
     processed_input = process_input(input_data, input_schema, runtime_config)
@@ -224,7 +240,9 @@ def prepare_merged_input(
             for field, reducer in state_schema.__reducer_fields__.items():
                 if field in merged_input and field in previous_values:
                     try:
-                        merged_input[field] = reducer(previous_values[field], merged_input[field])
+                        merged_input[field] = reducer(
+                            previous_values[field], merged_input[field]
+                        )
                     except Exception as e:
                         logger.warning(f"Reducer for {field} failed: {e}")
 

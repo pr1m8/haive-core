@@ -1,6 +1,5 @@
-from typing import Protocol, TypeVar, Callable, runtime_checkable, Any
 from importlib import import_module
-import inspect
+from typing import Any, Callable, Protocol, TypeVar, runtime_checkable
 
 P = TypeVar("P")
 R = TypeVar("R")

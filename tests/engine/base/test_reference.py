@@ -1,29 +1,29 @@
 # tests/test_reference.py
 
-import pytest
-from typing import Dict, Any, Optional
-from pydantic import BaseModel
+from typing import Any, Dict
 
-from haive.core.engine.base import Engine, EngineType, EngineRegistry
+import pytest
+
+from haive.core.engine.base import Engine, EngineRegistry, EngineType
 from haive.core.engine.base.reference import ComponentRef
 
 
 class TestRunnable:
     """Test runnable for reference testing."""
-    
+
     def __init__(self, config: Dict[str, Any]):
         self.config = config
-    
+
     def invoke(self, input_data: Any, **kwargs):
         return f"Processed with {self.config.get('param', 'default')}: {input_data}"
 
 
 class TestEngine(Engine[str, str]):
     """Test engine for reference testing."""
-    
+
     engine_type: EngineType = EngineType.LLM
     param: str = "default"
-    
+
     def create_runnable(self, runnable_config=None):
         params = self.apply_runnable_config(runnable_config) or {}
         config = {"param": params.get("param", self.param)}
@@ -44,13 +44,13 @@ def test_reference_creation():
     assert ref.id == "test_id"
     assert ref.name is None
     assert ref.type is None
-    
+
     # Create reference with name and type
     ref = ComponentRef(name="test_name", type=EngineType.LLM)
     assert ref.id is None
     assert ref.name == "test_name"
     assert ref.type == EngineType.LLM
-    
+
     # Create reference with string type
     ref = ComponentRef(name="test_name", type="llm")
     assert ref.type == EngineType.LLM  # Should convert to enum
@@ -59,15 +59,11 @@ def test_reference_creation():
 def test_from_engine():
     """Test creating reference from engine."""
     # Create engine
-    engine = TestEngine(
-        id="test_id",
-        name="test_engine",
-        engine_type=EngineType.LLM
-    )
-    
+    engine = TestEngine(id="test_id", name="test_engine", engine_type=EngineType.LLM)
+
     # Create reference from engine
     ref = ComponentRef.from_engine(engine)
-    
+
     # Check reference properties
     assert ref.id == "test_id"
     assert ref.name == "test_engine"
@@ -77,18 +73,14 @@ def test_from_engine():
 def test_resolve_by_id():
     """Test resolving reference by ID."""
     # Create and register engine
-    engine = TestEngine(
-        id="test_id",
-        name="test_engine",
-        param="engine_param"
-    ).register()
-    
+    TestEngine(id="test_id", name="test_engine", param="engine_param").register()
+
     # Create reference by ID
     ref = ComponentRef(id="test_id")
-    
+
     # Resolve reference
     component = ref.resolve()
-    
+
     # Check component
     assert component is not None
     result = component.invoke("test")
@@ -98,17 +90,14 @@ def test_resolve_by_id():
 def test_resolve_by_name_and_type():
     """Test resolving reference by name and type."""
     # Create and register engine
-    engine = TestEngine(
-        name="test_engine",
-        param="engine_param"
-    ).register()
-    
+    TestEngine(name="test_engine", param="engine_param").register()
+
     # Create reference by name and type
     ref = ComponentRef(name="test_engine", type=EngineType.LLM)
-    
+
     # Resolve reference
     component = ref.resolve()
-    
+
     # Check component
     assert component is not None
     result = component.invoke("test")
@@ -118,21 +107,18 @@ def test_resolve_by_name_and_type():
 def test_resolve_with_config_overrides():
     """Test resolving reference with config overrides."""
     # Create and register engine
-    engine = TestEngine(
-        name="test_engine",
-        param="engine_param"
-    ).register()
-    
+    TestEngine(name="test_engine", param="engine_param").register()
+
     # Create reference with config overrides
     ref = ComponentRef(
         name="test_engine",
         type=EngineType.LLM,
-        config_overrides={"param": "override_param"}
+        config_overrides={"param": "override_param"},
     )
-    
+
     # Resolve reference
     component = ref.resolve()
-    
+
     # Check component with overrides applied
     assert component is not None
     result = component.invoke("test")
@@ -143,14 +129,14 @@ def test_reference_caching():
     """Test that references cache resolved components."""
     # Create and register engine
     engine = TestEngine(name="test_engine").register()
-    
+
     # Create reference
     ref = ComponentRef.from_engine(engine)
-    
+
     # Resolve multiple times
     component1 = ref.resolve()
     component2 = ref.resolve()
-    
+
     # Should be the same instance
     assert component1 is component2
 
@@ -159,19 +145,19 @@ def test_invalidate_cache():
     """Test invalidating reference cache."""
     # Create and register engine
     engine = TestEngine(name="test_engine").register()
-    
+
     # Create reference
     ref = ComponentRef.from_engine(engine)
-    
+
     # Resolve once
     component1 = ref.resolve()
-    
+
     # Invalidate cache
     ref.invalidate_cache()
-    
+
     # Resolve again
     component2 = ref.resolve()
-    
+
     # Should be different instances
     assert component1 is not component2
 
@@ -180,7 +166,7 @@ def test_resolve_nonexistent():
     """Test resolving nonexistent reference."""
     # Create reference to nonexistent engine
     ref = ComponentRef(id="nonexistent")
-    
+
     # Resolve should return None
     component = ref.resolve()
     assert component is None
@@ -193,23 +179,23 @@ def test_reference_serialization():
         id="test_id",
         name="test_name",
         type=EngineType.LLM,
-        config_overrides={"param": "override"}
+        config_overrides={"param": "override"},
     )
-    
+
     # Resolve (to test cache is not serialized)
-    engine = TestEngine(id="test_id", name="test_name").register()
+    TestEngine(id="test_id", name="test_name").register()
     ref.resolve()
-    
+
     # Serialize to dict
     data = ref.model_dump()
-    
+
     # Check serialized data
     assert data["id"] == "test_id"
     assert data["name"] == "test_name"
     assert data["type"] == "llm"  # Enum converted to string
     assert data["config_overrides"]["param"] == "override"
     assert "_resolved" not in data  # Cache not serialized
-    
+
     # Deserialize
     new_ref = ComponentRef.model_validate(data)
     assert new_ref.id == "test_id"

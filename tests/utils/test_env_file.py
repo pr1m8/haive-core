@@ -28,6 +28,7 @@ def test_env_file(tmp_path):
         f.write("TEST_EMPTY=\n")
     return env_file
 
+
 def test_load_env_file(test_env_file):
     """Test loading environment variables from a file."""
     # Save original environment
@@ -58,6 +59,7 @@ def test_load_env_file(test_env_file):
         # Restore original environment
         os.environ.clear()
         os.environ.update(original_env)
+
 
 def test_get_env_var(test_env_file):
     """Test getting environment variables with type casting."""
@@ -92,6 +94,7 @@ def test_get_env_var(test_env_file):
         os.environ.clear()
         os.environ.update(original_env)
 
+
 def test_load_project_env_files(monkeypatch, tmp_path):
     """Test loading environment from multiple locations."""
     # Create a fake project structure in a temp directory
@@ -119,7 +122,9 @@ def test_load_project_env_files(monkeypatch, tmp_path):
         f.write("COMMON_VAR=local_value\n")  # Highest priority
 
     # Mock __file__ path to point to our temp directory
-    monkeypatch.setattr("haive.core.utils.env_utils.__file__", str(utils_dir / "env_utils.py"))
+    monkeypatch.setattr(
+        "haive.core.utils.env_utils.__file__", str(utils_dir / "env_utils.py")
+    )
 
     # Save original environment
     original_env = os.environ.copy()
@@ -137,12 +142,15 @@ def test_load_project_env_files(monkeypatch, tmp_path):
         assert os.environ.get("ROOT_VAR") == "root_value"
         assert os.environ.get("PACKAGE_VAR") == "package_value"
         assert os.environ.get("LOCAL_VAR") == "local_value"
-        assert os.environ.get("COMMON_VAR") == "local_value"  # Should be overridden by local
+        assert (
+            os.environ.get("COMMON_VAR") == "local_value"
+        )  # Should be overridden by local
 
     finally:
         # Restore original environment
         os.environ.clear()
         os.environ.update(original_env)
+
 
 def test_environment_checks():
     """Test environment check helper functions."""

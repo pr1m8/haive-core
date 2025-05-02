@@ -6,11 +6,12 @@ from pydantic import BaseModel, Field
 
 class RetryPolicy(BaseModel):
     """Base retry policy for tools and structured output."""
+
     max_retries: int = Field(default=3, description="Maximum number of retry attempts")
     delay: float = Field(default=0, description="Delay in seconds between retries")
     errors_to_retry: list[str] = Field(
         default_factory=lambda: ["Exception"],
-        description="Names of exception types to retry on"
+        description="Names of exception types to retry on",
     )
 
     def should_retry(self, attempt: int, error: Exception | None = None) -> bool:
@@ -34,6 +35,7 @@ class RetryPolicy(BaseModel):
 
 class ExponentialBackoffRetry(RetryPolicy):
     """Retry policy with exponential backoff."""
+
     base_delay: float = Field(default=1.0, description="Base delay in seconds")
     max_delay: float = Field(default=60.0, description="Maximum delay in seconds")
     backoff_factor: float = Field(default=2.0, description="Multiplier for each retry")
@@ -46,6 +48,7 @@ class ExponentialBackoffRetry(RetryPolicy):
 
 class LinearBackoffRetry(RetryPolicy):
     """Retry policy with linear backoff."""
+
     base_delay: float = Field(default=1.0, description="Base delay in seconds")
     increment: float = Field(default=1.0, description="Increment for each retry")
 
@@ -62,14 +65,14 @@ def execute_with_retry(
     **kwargs
 ) -> Any:
     """Execute a function with retry logic.
-    
+
     Args:
         func: Function to execute
         *args: Positional arguments for the function
         retry_policy: Retry policy to use
         fallback_result: Result to return if all retries fail
         **kwargs: Keyword arguments for the function
-        
+
     Returns:
         Result of the function or fallback result
     """
@@ -111,14 +114,14 @@ async def execute_with_retry_async(
     **kwargs
 ) -> Any:
     """Execute an async function with retry logic.
-    
+
     Args:
         func: Async function to execute
         *args: Positional arguments for the function
         retry_policy: Retry policy to use
         fallback_result: Result to return if all retries fail
         **kwargs: Keyword arguments for the function
-        
+
     Returns:
         Result of the function or fallback result
     """
@@ -156,15 +159,13 @@ async def execute_with_retry_async(
 
 # Helper functions
 def create_retry_policy(
-    max_retries: int = 3,
-    delay: float = 0,
-    errors_to_retry: list[str] | None = None
+    max_retries: int = 3, delay: float = 0, errors_to_retry: list[str] | None = None
 ) -> RetryPolicy:
     """Create a basic retry policy."""
     return RetryPolicy(
         max_retries=max_retries,
         delay=delay,
-        errors_to_retry=errors_to_retry or ["Exception"]
+        errors_to_retry=errors_to_retry or ["Exception"],
     )
 
 
@@ -173,7 +174,7 @@ def create_exponential_backoff_policy(
     base_delay: float = 1.0,
     max_delay: float = 60.0,
     backoff_factor: float = 2.0,
-    errors_to_retry: list[str] | None = None
+    errors_to_retry: list[str] | None = None,
 ) -> ExponentialBackoffRetry:
     """Create an exponential backoff retry policy."""
     return ExponentialBackoffRetry(
@@ -181,7 +182,7 @@ def create_exponential_backoff_policy(
         base_delay=base_delay,
         max_delay=max_delay,
         backoff_factor=backoff_factor,
-        errors_to_retry=errors_to_retry or ["Exception"]
+        errors_to_retry=errors_to_retry or ["Exception"],
     )
 
 
@@ -189,12 +190,12 @@ def create_linear_backoff_policy(
     max_retries: int = 3,
     base_delay: float = 1.0,
     increment: float = 1.0,
-    errors_to_retry: list[str] | None = None
+    errors_to_retry: list[str] | None = None,
 ) -> LinearBackoffRetry:
     """Create a linear backoff retry policy."""
     return LinearBackoffRetry(
         max_retries=max_retries,
         base_delay=base_delay,
         increment=increment,
-        errors_to_retry=errors_to_retry or ["Exception"]
+        errors_to_retry=errors_to_retry or ["Exception"],
     )

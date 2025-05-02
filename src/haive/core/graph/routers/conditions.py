@@ -14,28 +14,43 @@ from pydantic import BaseModel, Field
 # Set up logging
 logger = logging.getLogger(__name__)
 
+
 class RouteCondition(BaseModel):
     """Base model for routing conditions."""
-    priority: int = Field(default=0, description="Priority of the condition (higher priorities are evaluated first)")
-    description: str | None = Field(default=None, description="Description of the condition")
-    tags: list[str] = Field(default_factory=list, description="Tags for categorizing this condition")
-    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+
+    priority: int = Field(
+        default=0,
+        description="Priority of the condition (higher priorities are evaluated first)",
+    )
+    description: str | None = Field(
+        default=None, description="Description of the condition"
+    )
+    tags: list[str] = Field(
+        default_factory=list, description="Tags for categorizing this condition"
+    )
+    metadata: dict[str, Any] = Field(
+        default_factory=dict, description="Additional metadata"
+    )
 
     def evaluate(self, state: dict[str, Any]) -> bool:
         """Evaluate the condition against the current state.
-        
+
         Args:
             state: Current state to evaluate against
-            
+
         Returns:
             True if condition is met, False otherwise
         """
         raise NotImplementedError("Subclasses must implement evaluate method")
 
+
 class ToolCallCondition(RouteCondition):
     """Routes based on the presence of specific tool calls in the latest AI message."""
+
     tool_names: list[str] = Field(..., description="Names of tools to check for")
-    require_all: bool = Field(default=False, description="Whether all tools must be present")
+    require_all: bool = Field(
+        default=False, description="Whether all tools must be present"
+    )
 
     def evaluate(self, state: dict[str, Any]) -> bool:
         """Check if the latest AI message contains specified tool calls."""
@@ -47,7 +62,9 @@ class ToolCallCondition(RouteCondition):
         # Find the last AI message
         ai_message = None
         for msg in reversed(messages):
-            if isinstance(msg, AIMessage) or (hasattr(msg, "type") and msg.type == "ai"):
+            if isinstance(msg, AIMessage) or (
+                hasattr(msg, "type") and msg.type == "ai"
+            ):
                 ai_message = msg
                 break
 
@@ -60,19 +77,31 @@ class ToolCallCondition(RouteCondition):
             return False
 
         # Extract tool names from calls
-        called_tools = [call.get("name") for call in tool_calls if isinstance(call, dict) and "name" in call]
+        called_tools = [
+            call.get("name")
+            for call in tool_calls
+            if isinstance(call, dict) and "name" in call
+        ]
 
         # Check if required tools are present
         if self.require_all:
             return all(tool in called_tools for tool in self.tool_names)
         return any(tool in called_tools for tool in self.tool_names)
 
+
 class ContentCondition(RouteCondition):
     """Routes based on content in the latest message."""
+
     keywords: list[str] = Field(..., description="Keywords to check for in the message")
-    require_all: bool = Field(default=False, description="Whether all keywords must be present")
-    case_sensitive: bool = Field(default=False, description="Whether keyword matching is case sensitive")
-    message_type: str | None = Field(default=None, description="Type of message to check (human, ai, system, etc.)")
+    require_all: bool = Field(
+        default=False, description="Whether all keywords must be present"
+    )
+    case_sensitive: bool = Field(
+        default=False, description="Whether keyword matching is case sensitive"
+    )
+    message_type: str | None = Field(
+        default=None, description="Type of message to check (human, ai, system, etc.)"
+    )
 
     def evaluate(self, state: dict[str, Any]) -> bool:
         """Check if the latest message contains specified keywords."""
@@ -114,11 +143,15 @@ class ContentCondition(RouteCondition):
             return all(keyword in content for keyword in keywords)
         return any(keyword in content for keyword in keywords)
 
+
 class StateValueCondition(RouteCondition):
     """Routes based on state values."""
+
     key: str = Field(..., description="State key to check")
     value: Any = Field(..., description="Value to compare against")
-    comparison: str = Field(default="==", description="Comparison type: ==, !=, >, <, in, etc.")
+    comparison: str = Field(
+        default="==", description="Comparison type: ==, !=, >, <, in, etc."
+    )
 
     def evaluate(self, state: dict[str, Any]) -> bool:
         """Check if a state value matches the condition."""
@@ -155,9 +188,13 @@ class StateValueCondition(RouteCondition):
         logger.warning(f"Unknown comparison type: {self.comparison}")
         return False
 
+
 class FunctionCondition(RouteCondition):
     """Routes based on a custom function evaluation."""
-    function: Callable[[dict[str, Any]], bool] = Field(..., description="Function to evaluate condition")
+
+    function: Callable[[dict[str, Any]], bool] = Field(
+        ..., description="Function to evaluate condition"
+    )
 
     def evaluate(self, state: dict[str, Any]) -> bool:
         """Evaluate using the provided function."""
@@ -167,9 +204,13 @@ class FunctionCondition(RouteCondition):
             logger.error(f"Error evaluating function condition: {e}")
             return False
 
+
 class CompositeCondition(RouteCondition):
     """Combines multiple conditions using logical operators."""
-    conditions: list[RouteCondition] = Field(..., description="List of conditions to combine")
+
+    conditions: list[RouteCondition] = Field(
+        ..., description="List of conditions to combine"
+    )
     operator: str = Field(default="and", description="Logical operator: and, or, not")
 
     def evaluate(self, state: dict[str, Any]) -> bool:

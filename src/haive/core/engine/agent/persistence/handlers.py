@@ -2,22 +2,22 @@
 import logging
 from typing import Any, Dict, List, Optional, Union
 
-from langchain_core.messages import HumanMessage, BaseMessage
+from langchain_core.messages import HumanMessage
 from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
+
 def process_input(
-    input_data: Union[str, List[str], Dict[str, Any], BaseModel],
-    input_schema=None
+    input_data: Union[str, List[str], Dict[str, Any], BaseModel], input_schema=None
 ) -> Dict[str, Any]:
     """
     Process input for the agent based on the input schema.
-    
+
     Args:
         input_data: Input in various formats
         input_schema: Schema for validation
-        
+
     Returns:
         Processed input compatible with the graph
     """
@@ -32,16 +32,18 @@ def process_input(
     if isinstance(input_data, str):
         # Initialize with messages
         prepared_input = {"messages": [HumanMessage(content=input_data)]}
-        
+
         # Add to other input fields based on schema
         for field_name, field_info in schema_fields.items():
             if field_name != "messages" and field_name != "__runnable_config__":
                 # Only add to text fields
-                field_type = getattr(field_info, "annotation", None) or getattr(field_info, "type_", None)
+                field_type = getattr(field_info, "annotation", None) or getattr(
+                    field_info, "type_", None
+                )
                 type_name = str(field_type)
                 if "str" in type_name or "String" in type_name:
                     prepared_input[field_name] = input_data
-        
+
         # Validate against schema if available
         if input_schema:
             try:
@@ -53,25 +55,29 @@ def process_input(
                 return validated
             except Exception as e:
                 logger.warning(f"Schema validation failed: {e}")
-        
+
         return prepared_input
 
     # Handle list of strings
-    if isinstance(input_data, list) and all(isinstance(item, str) for item in input_data):
+    if isinstance(input_data, list) and all(
+        isinstance(item, str) for item in input_data
+    ):
         # Create messages list
         messages = [HumanMessage(content=item) for item in input_data]
         prepared_input = {"messages": messages}
-        
+
         # Join strings for other text fields
         joined_text = "\n".join(input_data)
         for field_name, field_info in schema_fields.items():
             if field_name != "messages" and field_name != "__runnable_config__":
                 # Only add to text fields
-                field_type = getattr(field_info, "annotation", None) or getattr(field_info, "type_", None)
+                field_type = getattr(field_info, "annotation", None) or getattr(
+                    field_info, "type_", None
+                )
                 type_name = str(field_type)
                 if "str" in type_name or "String" in type_name:
                     prepared_input[field_name] = joined_text
-        
+
         # Validate against schema
         if input_schema:
             try:
@@ -83,14 +89,14 @@ def process_input(
                 return validated
             except Exception as e:
                 logger.warning(f"Schema validation failed: {e}")
-                
+
         return prepared_input
 
     # Handle dictionary input
     if isinstance(input_data, dict):
         # Create a copy to avoid modifying the original
         input_dict = input_data.copy()
-        
+
         # Ensure there's a messages field if not present and required
         if "messages" not in input_dict and "messages" in schema_fields:
             # Try to create messages from other fields
@@ -98,7 +104,7 @@ def process_input(
                 if field in input_dict and isinstance(input_dict[field], str):
                     input_dict["messages"] = [HumanMessage(content=input_dict[field])]
                     break
-        
+
         # Validate against schema if available
         if input_schema:
             try:
@@ -111,7 +117,7 @@ def process_input(
                 return validated
             except Exception as e:
                 logger.warning(f"Schema validation failed: {e}")
-                
+
         return input_dict
 
     # Handle Pydantic model input
@@ -131,9 +137,9 @@ def process_input(
                     model_dict[field] = getattr(input_data, field)
 
         # Ensure there's a messages field if needed by schema
-        if "messages" not in model_dict and 'messages' in schema_fields:
+        if "messages" not in model_dict and "messages" in schema_fields:
             # Try to create messages from other fields
-            for field in ['input', 'query', 'content', 'text']:
+            for field in ["input", "query", "content", "text"]:
                 if field in model_dict and isinstance(model_dict[field], str):
                     model_dict["messages"] = [HumanMessage(content=model_dict[field])]
                     break
@@ -149,13 +155,11 @@ def process_input(
                 return validated
             except Exception as e:
                 logger.warning(f"Schema validation failed: {e}")
-                
+
         return model_dict
 
     # Fallback for other types - convert to string message
-    fallback_input = {
-        "messages": [HumanMessage(content=str(input_data))]
-    }
+    fallback_input = {"messages": [HumanMessage(content=str(input_data))]}
 
     # Validate against schema if available
     if input_schema:
@@ -171,23 +175,24 @@ def process_input(
 
     return fallback_input
 
+
 def prepare_merged_input(
     input_data: Union[str, List[str], Dict[str, Any], BaseModel],
     previous_state: Optional[Any] = None,
     runtime_config: Optional[Dict[str, Any]] = None,
     input_schema=None,
-    state_schema=None
+    state_schema=None,
 ) -> Any:
     """
     Process input data and merge with previous state if available.
-    
+
     Args:
         input_data: Input data in various formats
         previous_state: Previous state from checkpointer
         runtime_config: Runtime configuration
         input_schema: Schema for input validation
         state_schema: Schema for state validation
-        
+
     Returns:
         Processed input data merged with previous state
     """
@@ -201,10 +206,10 @@ def prepare_merged_input(
     # Extract values from StateSnapshot if needed
     previous_values = None
 
-    if hasattr(previous_state, 'values'):
+    if hasattr(previous_state, "values"):
         # For StateSnapshot objects
         previous_values = previous_state.values
-    elif hasattr(previous_state, 'channel_values') and previous_state.channel_values:
+    elif hasattr(previous_state, "channel_values") and previous_state.channel_values:
         # Alternative attribute name
         previous_values = previous_state.channel_values
     elif isinstance(previous_state, dict):
@@ -249,7 +254,9 @@ def prepare_merged_input(
         for field, reducer in state_schema.__reducer_fields__.items():
             if field in merged_input and field in previous_values:
                 try:
-                    merged_input[field] = reducer(previous_values[field], merged_input[field])
+                    merged_input[field] = reducer(
+                        previous_values[field], merged_input[field]
+                    )
                 except Exception as e:
                     logger.warning(f"Reducer for {field} failed: {e}")
 
@@ -267,14 +274,15 @@ def prepare_merged_input(
 
     return merged_input
 
+
 def extract_output(output_data: Any, output_schema=None) -> Dict[str, Any]:
     """
     Extract and validate output from agent result.
-    
+
     Args:
         output_data: Agent output data
         output_schema: Optional schema for validation
-        
+
     Returns:
         Processed output data
     """
@@ -305,30 +313,31 @@ def extract_output(output_data: Any, output_schema=None) -> Dict[str, Any]:
 
     return processed_output
 
+
 def extract_state_snapshot(snapshot: Any) -> Dict[str, Any]:
     """
     Extract state values from a state snapshot.
-    
+
     Args:
         snapshot: State snapshot from checkpointer
-        
+
     Returns:
         Dictionary of state values
     """
     if snapshot is None:
         return {}
-        
+
     # Extract values based on object type
-    if hasattr(snapshot, 'values'):
+    if hasattr(snapshot, "values"):
         # Standard StateSnapshot
         return snapshot.values
-    elif hasattr(snapshot, 'channel_values') and snapshot.channel_values:
+    elif hasattr(snapshot, "channel_values") and snapshot.channel_values:
         # Alternative attribute name in some versions
         return snapshot.channel_values
     elif isinstance(snapshot, dict):
         # Dictionary state
         return snapshot
-    
+
     # Fallback - try to convert to dict
     try:
         if hasattr(snapshot, "model_dump"):
@@ -339,7 +348,7 @@ def extract_state_snapshot(snapshot: Any) -> Dict[str, Any]:
             return snapshot.dict()
     except Exception:
         pass
-    
+
     # Last resort - empty dict
     logger.warning(f"Couldn't extract state from snapshot of type {type(snapshot)}")
     return {}

@@ -42,14 +42,10 @@ class TestGraphPatternRegistry:
 
         # Create pattern
         metadata = PatternMetadata(
-            name="test_pattern",
-            description="A test pattern",
-            pattern_type="test"
+            name="test_pattern", description="A test pattern", pattern_type="test"
         )
 
-        pattern = GraphPattern(
-            metadata=metadata
-        )
+        pattern = GraphPattern(metadata=metadata)
 
         # Register pattern
         registered = registry.register_pattern(pattern)
@@ -70,7 +66,7 @@ class TestGraphPatternRegistry:
             "metadata": {
                 "name": "dict_pattern",
                 "description": "A pattern from dict",
-                "pattern_type": "dict_type"
+                "pattern_type": "dict_type",
             }
         }
 
@@ -98,7 +94,7 @@ class TestGraphPatternRegistry:
             test_function,
             name="func_pattern",
             pattern_type="func_type",
-            description="Function pattern"
+            description="Function pattern",
         )
 
         # Check registration
@@ -122,7 +118,7 @@ class TestGraphPatternRegistry:
             name="test_branch",
             description="A test branch",
             condition_type="test",
-            routes={"condition1": "node1"}
+            routes={"condition1": "node1"},
         )
 
         # Register branch
@@ -144,7 +140,7 @@ class TestGraphPatternRegistry:
             "name": "dict_branch",
             "description": "A branch from dict",
             "condition_type": "dict_type",
-            "routes": {"condition1": "node1"}
+            "routes": {"condition1": "node1"},
         }
 
         # Register branch
@@ -172,7 +168,7 @@ class TestGraphPatternRegistry:
             name="func_branch",
             condition_type="func_type",
             description="Function branch",
-            routes={"result": "target_node"}
+            routes={"result": "target_node"},
         )
 
         # Check registration
@@ -197,7 +193,7 @@ class TestGraphPatternRegistry:
                 name="pattern1",
                 description="First pattern",
                 pattern_type="type1",
-                tags=["tag1", "tag2"]
+                tags=["tag1", "tag2"],
             )
         )
 
@@ -206,7 +202,7 @@ class TestGraphPatternRegistry:
                 name="pattern2",
                 description="Second pattern",
                 pattern_type="type2",
-                tags=["tag2", "tag3"]
+                tags=["tag2", "tag3"],
             )
         )
 
@@ -243,7 +239,7 @@ class TestGraphPatternRegistry:
             description="First branch",
             condition_type="type1",
             routes={"condition1": "node1"},
-            tags=["tag1", "tag2"]
+            tags=["tag1", "tag2"],
         )
 
         branch2 = BranchDefinition(
@@ -251,7 +247,7 @@ class TestGraphPatternRegistry:
             description="Second branch",
             condition_type="type2",
             routes={"condition2": "node2"},
-            tags=["tag2", "tag3"]
+            tags=["tag2", "tag3"],
         )
 
         # Register branches
@@ -283,17 +279,11 @@ class TestGraphPatternRegistry:
 
         # Create a parameter definition
         param_def = ParameterDefinition(
-            type="str",
-            description="A parameter",
-            default="default"
+            type="str", description="A parameter", default="default"
         )
 
         # Create a requirement
-        requirement = {
-            "type": "llm",
-            "count": 1,
-            "optional": False
-        }
+        requirement = {"type": "llm", "count": 1, "optional": False}
 
         # Create pattern
         pattern = GraphPattern(
@@ -303,7 +293,7 @@ class TestGraphPatternRegistry:
                 pattern_type="doc_type",
                 parameters={"param1": param_def},
                 required_components=[requirement],
-                examples=[{"example": "value"}]
+                examples=[{"example": "value"}],
             )
         )
 
@@ -328,9 +318,7 @@ class TestGraphPatternRegistry:
 
         # Create a parameter definition
         param_def = ParameterDefinition(
-            type="str",
-            description="A parameter",
-            default="default"
+            type="str", description="A parameter", default="default"
         )
 
         # Create branch
@@ -341,7 +329,7 @@ class TestGraphPatternRegistry:
             routes={"condition1": "node1", "condition2": "node2"},
             default_route="default_node",
             tags=["tag1", "tag2"],
-            parameters={"param1": param_def}
+            parameters={"param1": param_def},
         )
 
         # Register branch
@@ -374,9 +362,9 @@ class TestGraphPatternRegistry:
             metadata=PatternMetadata(
                 name="save_pattern",
                 description="Pattern for saving",
-                pattern_type="save_type"
+                pattern_type="save_type",
             ),
-            apply_func=apply_func
+            apply_func=apply_func,
         )
 
         # Create branch with simple condition function
@@ -391,7 +379,7 @@ class TestGraphPatternRegistry:
             description="Branch for saving",
             condition_type="save_type",
             routes={"result": "node1"},
-            condition_func=condition_func
+            condition_func=condition_func,
         )
 
         # Register pattern and branch
@@ -453,11 +441,12 @@ class TestDecorators:
 
     def test_register_pattern_decorator(self):
         """Test the register_pattern decorator."""
+
         # Define a function with the decorator
         @register_pattern(
             name="decorator_pattern",
             pattern_type="decorator_type",
-            description="Pattern from decorator"
+            description="Pattern from decorator",
         )
         def pattern_func(graph, param1="default"):
             """Function docstring."""
@@ -475,12 +464,13 @@ class TestDecorators:
 
     def test_register_branch_decorator(self):
         """Test the register_branch decorator."""
+
         # Define a function with the decorator
         @register_branch(
             name="decorator_branch",
             condition_type="decorator_type",
             routes={"result": "target_node"},
-            default_route="default_node"
+            default_route="default_node",
         )
         def branch_func(state, param1="default"):
             """Function docstring."""

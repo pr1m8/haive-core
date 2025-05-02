@@ -13,8 +13,8 @@ F = TypeVar("F", bound=Callable[..., Any])
 
 class ToolInjector:
     """Utility class for creating tools with automatic state and store injection.
-    
-    This class helps create tools that can access graph state and store 
+
+    This class helps create tools that can access graph state and store
     without requiring the agent to provide these values.
     """
 
@@ -24,17 +24,17 @@ class ToolInjector:
         name: str | None = None,
         description: str | None = None,
         state_field: str | None = None,
-        return_direct: bool = False
+        return_direct: bool = False,
     ) -> BaseTool:
         """Create a tool that automatically injects state from the agent.
-        
+
         Args:
             func: The function to wrap as a tool
             name: Optional custom name for the tool
             description: Optional custom description for the tool
             state_field: Optional specific field from state to inject (if None, injects entire state)
             return_direct: Whether the tool should return directly to user without further LLM processing
-            
+
         Returns:
             A BaseTool that automatically receives state
         """
@@ -43,7 +43,7 @@ class ToolInjector:
 
         # Find a suitable parameter to inject state into
         state_param = None
-        for param_name, param in sig.parameters.items():
+        for param_name, _param in sig.parameters.items():
             if param_name == "state" or param_name.endswith("_state"):
                 state_param = param_name
                 break
@@ -96,16 +96,16 @@ class ToolInjector:
         func: F,
         name: str | None = None,
         description: str | None = None,
-        return_direct: bool = False
+        return_direct: bool = False,
     ) -> BaseTool:
         """Create a tool that automatically injects the store from the agent.
-        
+
         Args:
             func: The function to wrap as a tool
             name: Optional custom name for the tool
             description: Optional custom description for the tool
             return_direct: Whether the tool should return directly to user without further LLM processing
-            
+
         Returns:
             A BaseTool that automatically receives the store
         """
@@ -114,7 +114,7 @@ class ToolInjector:
 
         # Find a suitable parameter to inject store into
         store_param = None
-        for param_name, param in sig.parameters.items():
+        for param_name, _param in sig.parameters.items():
             if param_name == "store" or param_name.endswith("_store"):
                 store_param = param_name
                 break
@@ -168,17 +168,17 @@ class ToolInjector:
         name: str | None = None,
         description: str | None = None,
         state_field: str | None = None,
-        return_direct: bool = False
+        return_direct: bool = False,
     ) -> BaseTool:
         """Create a tool that automatically injects both state and store from the agent.
-        
+
         Args:
             func: The function to wrap as a tool
             name: Optional custom name for the tool
             description: Optional custom description for the tool
             state_field: Optional specific field from state to inject (if None, injects entire state)
             return_direct: Whether the tool should return directly to user without further LLM processing
-            
+
         Returns:
             A BaseTool that automatically receives both state and store
         """
@@ -189,7 +189,7 @@ class ToolInjector:
         state_param = None
         store_param = None
 
-        for param_name, param in sig.parameters.items():
+        for param_name, _param in sig.parameters.items():
             if param_name == "state" or param_name.endswith("_state"):
                 state_param = param_name
             elif param_name == "store" or param_name.endswith("_store"):
@@ -250,54 +250,53 @@ class ToolInjector:
 # Convenience decorators
 def state_tool(state_field: str | None = None, return_direct: bool = False):
     """Decorator to create a tool that injects state.
-    
+
     Args:
         state_field: Optional specific field from state to inject
         return_direct: Whether the tool should return directly to user
-        
+
     Returns:
         Decorator function
     """
+
     def decorator(func: F) -> BaseTool:
         return ToolInjector.create_state_tool(
-            func=func,
-            state_field=state_field,
-            return_direct=return_direct
+            func=func, state_field=state_field, return_direct=return_direct
         )
+
     return decorator
 
 
 def store_tool(return_direct: bool = False):
     """Decorator to create a tool that injects store.
-    
+
     Args:
         return_direct: Whether the tool should return directly to user
-        
+
     Returns:
         Decorator function
     """
+
     def decorator(func: F) -> BaseTool:
-        return ToolInjector.create_store_tool(
-            func=func,
-            return_direct=return_direct
-        )
+        return ToolInjector.create_store_tool(func=func, return_direct=return_direct)
+
     return decorator
 
 
 def hybrid_tool(state_field: str | None = None, return_direct: bool = False):
     """Decorator to create a tool that injects both state and store.
-    
+
     Args:
         state_field: Optional specific field from state to inject
         return_direct: Whether the tool should return directly to user
-        
+
     Returns:
         Decorator function
     """
+
     def decorator(func: F) -> BaseTool:
         return ToolInjector.create_hybrid_tool(
-            func=func,
-            state_field=state_field,
-            return_direct=return_direct
+            func=func, state_field=state_field, return_direct=return_direct
         )
+
     return decorator

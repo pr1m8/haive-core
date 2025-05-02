@@ -1,14 +1,13 @@
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
-from pydantic import BaseModel, Field
-from langchain_core.documents import Document
-from langchain_core.embeddings import Embeddings
-from langchain_core.retrievers import BaseRetriever
 from dotenv import load_dotenv
+from langchain_core.retrievers import BaseRetriever
+from pydantic import BaseModel, Field
 
 # Load environment variables
-load_dotenv('.env')
+load_dotenv(".env")
+
 
 class BaseRetrieverConfig(BaseModel):
     """Abstract base class for retriever configuration."""
@@ -18,6 +17,7 @@ class BaseRetrieverConfig(BaseModel):
 
 
 # --- Community Retriever Support ---
+
 
 class CommunityRetrieverType(str, Enum):
     WikipediaRetriever = "WikipediaRetriever"
@@ -36,8 +36,10 @@ class CommunityRetrieverConfig(BaseRetrieverConfig):
 
     def create(self) -> BaseRetriever:
         from langchain_community.retrievers import __getattr__
+
         retriever_cls = __getattr__(self.retriever_type.value)
         return retriever_cls(**self.retriever_kwargs)
+
 
 sample_queries = {
     "WikipediaRetriever": "Large language models",
@@ -52,17 +54,19 @@ sample_queries = {
 
 for retriever_name, query in sample_queries.items():
     print(f"\n🔍 Testing: {retriever_name} | Query: {query}")
-    
+
     try:
         config = CommunityRetrieverConfig(
             retriever_type=CommunityRetrieverType(retriever_name),
-            retriever_kwargs={"search_type": "similarity"}  # Optional per retriever
+            retriever_kwargs={"search_type": "similarity"},  # Optional per retriever
         )
         retriever = config.create()
         docs = retriever.invoke(query)
-        
+
         if docs:
-            print(f"✅ Retrieved {len(docs)} document(s). Sample:\n- {docs[0].page_content[:200]}...")
+            print(
+                f"✅ Retrieved {len(docs)} document(s). Sample:\n- {docs[0].page_content[:200]}..."
+            )
         else:
             print("⚠️ No documents returned.")
     except Exception as e:

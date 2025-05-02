@@ -17,13 +17,16 @@ from langgraph.graph import END, StateGraph, add_messages
 from langgraph.types import Command, Send
 from pydantic import BaseModel, ValidationError
 
-from haive.core.graph.state.StateSchemaManager import StateSchemaManager as SchemaManager
+from haive.core.graph.state.StateSchemaManager import (
+    StateSchemaManager as SchemaManager,
+)
 
 # Set up logging
 logger = logging.getLogger(__name__)
 
 # Type variables for generics
 T = TypeVar("T", bound=BaseModel)
+
 
 class StateSchema(Generic[T]):
     """A specialized schema for LangGraph states with enhanced features:
@@ -37,13 +40,15 @@ class StateSchema(Generic[T]):
     # Registry of predefined schemas
     _schema_registry: ClassVar[dict[str, type[BaseModel]]] = {}
 
-    def __init__(self,
-                 schema_data: dict[str, Any] | type[BaseModel] | SchemaManager | None = None,
-                 name: str | None = None,
-                 config: dict[str, Any] | None = None,
-                 include_standard_fields: bool = True):
+    def __init__(
+        self,
+        schema_data: dict[str, Any] | type[BaseModel] | SchemaManager | None = None,
+        name: str | None = None,
+        config: dict[str, Any] | None = None,
+        include_standard_fields: bool = True,
+    ):
         """Initialize a new StateSchema.
-        
+
         Args:
             schema_data: Base schema definition (dict, model, or SchemaManager)
             name: Name for the schema
@@ -57,7 +62,9 @@ class StateSchema(Generic[T]):
         if isinstance(schema_data, SchemaManager):
             self.schema_manager = schema_data
         else:
-            self.schema_manager = SchemaManager(data=schema_data, name=self.name, config=self.config)
+            self.schema_manager = SchemaManager(
+                data=schema_data, name=self.name, config=self.config
+            )
 
         # Add standard fields if requested
         if include_standard_fields:
@@ -71,44 +78,28 @@ class StateSchema(Generic[T]):
         # Add messages field if not present
         if not self.schema_manager.has_field("messages"):
             self.schema_manager.add_field(
-                "messages",
-                Annotated[Sequence[BaseMessage], add_messages],
-                default=[]
+                "messages", Annotated[Sequence[BaseMessage], add_messages], default=[]
             )
             logger.debug("Added standard messages field")
 
         # Add error tracking field
         if not self.schema_manager.has_field("error"):
-            self.schema_manager.add_field(
-                "error",
-                Optional[str],
-                default=None
-            )
+            self.schema_manager.add_field("error", Optional[str], default=None)
             logger.debug("Added standard error field")
 
         # Add step tracking fields
         if not self.schema_manager.has_field("current_step"):
-            self.schema_manager.add_field(
-                "current_step",
-                int,
-                default=0
-            )
+            self.schema_manager.add_field("current_step", int, default=0)
             logger.debug("Added standard current_step field")
 
         if not self.schema_manager.has_field("max_steps"):
-            self.schema_manager.add_field(
-                "max_steps",
-                int,
-                default=10
-            )
+            self.schema_manager.add_field("max_steps", int, default=10)
             logger.debug("Added standard max_steps field")
 
         # Add memory field for state persistence
         if not self.schema_manager.has_field("memory"):
             self.schema_manager.add_field(
-                "memory",
-                dict[str, Any],
-                default_factory=dict
+                "memory", dict[str, Any], default_factory=dict
             )
             logger.debug("Added standard memory field")
 
@@ -119,7 +110,9 @@ class StateSchema(Generic[T]):
             self._model = self.schema_manager.get_model()
         return self._model
 
-    def add_field(self, name: str, field_type: type, default: Any = None, required: bool = False) -> "StateSchema":
+    def add_field(
+        self, name: str, field_type: type, default: Any = None, required: bool = False
+    ) -> "StateSchema":
         """Add a field to the schema."""
         self.schema_manager.add_field(name, field_type, default, required)
         # Reset model since schema changed
@@ -128,11 +121,7 @@ class StateSchema(Generic[T]):
 
     def add_document_field(self, name: str = "documents") -> "StateSchema":
         """Add a field for document storage."""
-        self.schema_manager.add_field(
-            name,
-            list[dict[str, Any]],
-            default_factory=list
-        )
+        self.schema_manager.add_field(name, list[dict[str, Any]], default_factory=list)
         logger.debug(f"Added document field: {name}")
         # Reset model since schema changed
         self._model = None
@@ -143,27 +132,21 @@ class StateSchema(Generic[T]):
         # Field for tool results
         if not self.schema_manager.has_field("tool_results"):
             self.schema_manager.add_field(
-                "tool_results",
-                list[dict[str, Any]],
-                default_factory=list
+                "tool_results", list[dict[str, Any]], default_factory=list
             )
             logger.debug("Added tool_results field")
 
         # Field for available tools
         if not self.schema_manager.has_field("available_tools"):
             self.schema_manager.add_field(
-                "available_tools",
-                list[str],
-                default_factory=list
+                "available_tools", list[str], default_factory=list
             )
             logger.debug("Added available_tools field")
 
         # Field for tool calls
         if not self.schema_manager.has_field("tool_calls"):
             self.schema_manager.add_field(
-                "tool_calls",
-                list[dict[str, Any]],
-                default_factory=list
+                "tool_calls", list[dict[str, Any]], default_factory=list
             )
             logger.debug("Added tool_calls field")
 
@@ -175,19 +158,13 @@ class StateSchema(Generic[T]):
         """Add fields for output management."""
         # Add standard output field
         if not self.schema_manager.has_field("output"):
-            self.schema_manager.add_field(
-                "output",
-                str,
-                default=""
-            )
+            self.schema_manager.add_field("output", str, default="")
             logger.debug("Added output field")
 
         # Add parsed output field if parser type provided
         if parser_type and not self.schema_manager.has_field("parsed_output"):
             self.schema_manager.add_field(
-                "parsed_output",
-                Optional[parser_type],
-                default=None
+                "parsed_output", Optional[parser_type], default=None
             )
             logger.debug(f"Added parsed_output field with type {parser_type.__name__}")
 
@@ -199,19 +176,13 @@ class StateSchema(Generic[T]):
         """Add fields specific to agent operation."""
         # Add field for agent status
         if not self.schema_manager.has_field("status"):
-            self.schema_manager.add_field(
-                "status",
-                str,
-                default="idle"
-            )
+            self.schema_manager.add_field("status", str, default="idle")
             logger.debug("Added status field")
 
         # Add field for agent config
         if not self.schema_manager.has_field("agent_config"):
             self.schema_manager.add_field(
-                "agent_config",
-                dict[str, Any],
-                default_factory=dict
+                "agent_config", dict[str, Any], default_factory=dict
             )
             logger.debug("Added agent_config field")
 
@@ -232,17 +203,19 @@ class StateSchema(Generic[T]):
             return {**state, "error": error_msg}
 
     # Command creation methods
-    def create_command(self,
-                      state: dict[str, Any],
-                      updates: dict[str, Any] | None = None,
-                      goto: str | Send | None = None) -> Command:
+    def create_command(
+        self,
+        state: dict[str, Any],
+        updates: dict[str, Any] | None = None,
+        goto: str | Send | None = None,
+    ) -> Command:
         """Create a command for state updates and routing.
-        
+
         Args:
             state: Current state
             updates: Fields to update in state
             goto: Where to route next
-            
+
         Returns:
             Command for LangGraph
         """
@@ -259,17 +232,16 @@ class StateSchema(Generic[T]):
 
         return Command(update=updated_state, goto=goto)
 
-    def create_error_command(self,
-                            state: dict[str, Any],
-                            error_message: str,
-                            goto: str | Send | None = None) -> Command:
+    def create_error_command(
+        self, state: dict[str, Any], error_message: str, goto: str | Send | None = None
+    ) -> Command:
         """Create an error command.
-        
+
         Args:
             state: Current state
             error_message: Error message
             goto: Where to route (default: END)
-            
+
         Returns:
             Command with error information
         """
@@ -287,17 +259,19 @@ class StateSchema(Generic[T]):
 
         return Command(update=updated_state, goto=goto)
 
-    def create_message_command(self,
-                              state: dict[str, Any],
-                              message: str | BaseMessage,
-                              goto: str | Send | None = None) -> Command:
+    def create_message_command(
+        self,
+        state: dict[str, Any],
+        message: str | BaseMessage,
+        goto: str | Send | None = None,
+    ) -> Command:
         """Create a command with a new message.
-        
+
         Args:
             state: Current state
             message: Message to add (string or BaseMessage)
             goto: Where to route (default: END)
-            
+
         Returns:
             Command with updated messages
         """
@@ -326,7 +300,9 @@ class StateSchema(Generic[T]):
             updated_state["current_step"] = state["current_step"] + 1
         return updated_state
 
-    def add_to_memory(self, state: dict[str, Any], key: str, value: Any) -> dict[str, Any]:
+    def add_to_memory(
+        self, state: dict[str, Any], key: str, value: Any
+    ) -> dict[str, Any]:
         """Add a value to the memory dict in state."""
         updated_state = {**state}
         if "memory" in state:
@@ -357,8 +333,9 @@ class StateSchema(Generic[T]):
             return None
 
         for message in reversed(state["messages"]):
-            if (isinstance(message, HumanMessage) or
-                (hasattr(message, "type") and message.type == "human")):
+            if isinstance(message, HumanMessage) or (
+                hasattr(message, "type") and message.type == "human"
+            ):
                 return message.content
         return None
 
@@ -368,8 +345,9 @@ class StateSchema(Generic[T]):
             return None
 
         for message in state["messages"]:
-            if (isinstance(message, SystemMessage) or
-                (hasattr(message, "type") and message.type == "system")):
+            if isinstance(message, SystemMessage) or (
+                hasattr(message, "type") and message.type == "system"
+            ):
                 return message.content
         return None
 
@@ -382,7 +360,7 @@ class StateSchema(Generic[T]):
             "fields": {
                 name: str(field_type)
                 for name, (field_type, _) in self.schema_manager.fields.items()
-            }
+            },
         }
 
     def to_json(self) -> str:
@@ -395,15 +373,17 @@ class StateSchema(Generic[T]):
         """Create a StateGraph with this schema."""
         return StateGraph(self.model)
 
-    def create_input_output_graph(self,
-                                 input_model: type[BaseModel] | None = None,
-                                 output_model: type[BaseModel] | None = None) -> StateGraph:
+    def create_input_output_graph(
+        self,
+        input_model: type[BaseModel] | None = None,
+        output_model: type[BaseModel] | None = None,
+    ) -> StateGraph:
         """Create a StateGraph with input and output schemas.
-        
+
         Args:
             input_model: Optional input model
             output_model: Optional output model
-            
+
         Returns:
             StateGraph with input and output schemas
         """

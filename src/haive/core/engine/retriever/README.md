@@ -11,6 +11,7 @@ The Retriever engine is a specialized component in the Haive framework designed 
 The `RetrieverConfig` class extends `InvokableEngine` to establish a standardized interface for retrieval operations. This configuration-driven approach enables:
 
 **Core Features**:
+
 - **Retriever Type Abstraction**: Support for multiple retriever implementations through a type system
 - **Search Configuration**: Customizable search parameters and filtering options
 - **Vector Store Integration**: Seamless integration with vector databases
@@ -252,7 +253,7 @@ class CustomRetrieverType(RetrieverType):
 class CustomRetrieverConfig(RetrieverConfig):
     # Custom fields
     custom_parameter: str = "default"
-    
+
     def instantiate(self) -> BaseRetriever:
         # Custom implementation
         from my_package import CustomRetriever

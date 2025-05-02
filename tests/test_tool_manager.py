@@ -16,7 +16,12 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 # Import the tool manager components
 # Import LangGraph components for testing
 
-from haive.core.graph.ToolManager import ToolConfig, ToolManager, state_tool, tool_manager
+from haive.core.graph.ToolManager import (
+    ToolConfig,
+    ToolManager,
+    state_tool,
+    tool_manager,
+)
 
 
 # Test basic tool registration and execution
@@ -37,7 +42,7 @@ def test_basic_tool_registration():
         calculator,
         name="calculator",
         description="Calculate mathematical expressions",
-        return_direct=True
+        return_direct=True,
     )
 
     # Verify registration
@@ -58,6 +63,7 @@ def test_basic_tool_registration():
 
     return manager
 
+
 # Test tool with configuration
 def test_tool_with_config():
     """Test a tool with custom configuration."""
@@ -70,6 +76,7 @@ def test_tool_with_config():
     def unreliable_function(success_rate: float = 0.5) -> bool:
         """A function that sometimes fails."""
         import random
+
         if random.random() > success_rate:
             raise ValueError("Random failure occurred")
         return True
@@ -80,14 +87,11 @@ def test_tool_with_config():
         description="A tool that sometimes fails",
         max_retries=3,
         retry_delay=0.1,
-        tags=["test", "unreliable"]
+        tags=["test", "unreliable"],
     )
 
     # Register with config
-    tool_obj = manager.create_and_register_tool(
-        unreliable_function,
-        config=config
-    )
+    tool_obj = manager.create_and_register_tool(unreliable_function, config=config)
 
     # Execute with very low success rate
     result = manager.execute_tool("unreliable_tool", kwargs={"success_rate": 0.1})
@@ -107,6 +111,7 @@ def test_tool_with_config():
     assert len(history) == 1
 
     return manager
+
 
 # Test state injection
 def test_state_injection():
@@ -138,14 +143,16 @@ def test_state_injection():
         "messages": [
             MockMessage("Hello"),
             MockMessage("How are you?"),
-            MockMessage("This is the last message")
+            MockMessage("This is the last message"),
         ]
     }
 
     # We can't directly call execute_tool with state injection
     # In a real environment, LangGraph would handle the injection
     # For testing, we can call the tool directly
-    result = tool_manager.execute_tool("extract_last_message", kwargs={"state": mock_state})
+    result = tool_manager.execute_tool(
+        "extract_last_message", kwargs={"state": mock_state}
+    )
 
     print(f"Result: {result}")
 
@@ -158,6 +165,7 @@ def test_state_injection():
     assert config.requires_state
 
     return manager
+
 
 # Test async tools
 async def test_async_tools():
@@ -178,7 +186,7 @@ async def test_async_tools():
         name="async_fetch",
         description="Fetch data from a URL asynchronously",
         is_async=True,
-        timeout=1.0
+        timeout=1.0,
     )
 
     # We need to manually wrap this since our decorators expect sync functions
@@ -187,15 +195,11 @@ async def test_async_tools():
         return await async_fetch(url, delay)
 
     # Create and register
-    tool_obj = manager.create_and_register_tool(
-        wrapped_async_fetch,
-        config=config
-    )
+    tool_obj = manager.create_and_register_tool(wrapped_async_fetch, config=config)
 
     # Execute async tool
     result = await manager.execute_tool_async(
-        "async_fetch",
-        kwargs={"url": "http://example.com", "delay": 0.2}
+        "async_fetch", kwargs={"url": "http://example.com", "delay": 0.2}
     )
 
     # Check result
@@ -211,7 +215,7 @@ async def test_async_tools():
     # Test timeout
     result = await manager.execute_tool_async(
         "async_fetch",
-        kwargs={"url": "http://example.com", "delay": 2.0}  # Delay > timeout
+        kwargs={"url": "http://example.com", "delay": 2.0},  # Delay > timeout
     )
 
     # Should fail with timeout
@@ -222,6 +226,7 @@ async def test_async_tools():
     assert "timeout" in result.error.lower()
 
     return manager
+
 
 # Test tool filtering
 def test_tool_filtering():
@@ -238,18 +243,16 @@ def test_tool_filtering():
         config=ToolConfig(
             name="increment",
             tags=["math", "basic"],
-            allowed_in_states=["calculating", "processing"]
-        )
+            allowed_in_states=["calculating", "processing"],
+        ),
     )
 
     manager.create_and_register_tool(
         lambda x: x - 1,
         name="decrement",
         config=ToolConfig(
-            name="decrement",
-            tags=["math", "basic"],
-            denied_in_states=["finished"]
-        )
+            name="decrement", tags=["math", "basic"], denied_in_states=["finished"]
+        ),
     )
 
     manager.create_and_register_tool(
@@ -258,18 +261,14 @@ def test_tool_filtering():
         config=ToolConfig(
             name="multiply",
             tags=["math", "advanced"],
-            allowed_in_states=["calculating"]
-        )
+            allowed_in_states=["calculating"],
+        ),
     )
 
     manager.create_and_register_tool(
         lambda msg: f"Hello, {msg}!",
         name="greet",
-        config=ToolConfig(
-            name="greet",
-            tags=["text"],
-            single_use=True
-        )
+        config=ToolConfig(name="greet", tags=["text"], single_use=True),
     )
 
     # Get tools by tag
@@ -282,7 +281,9 @@ def test_tool_filtering():
     assert len(basic_tools) == 2
 
     # Get tools requiring all tags
-    advanced_math = manager.get_allowed_tools(tags=["math", "advanced"], require_all_tags=True)
+    advanced_math = manager.get_allowed_tools(
+        tags=["math", "advanced"], require_all_tags=True
+    )
     print(f"Advanced math tools: {list(advanced_math.keys())}")
     assert len(advanced_math) == 1
     assert "multiply" in advanced_math
@@ -309,6 +310,7 @@ def test_tool_filtering():
 
     return manager
 
+
 # Run all tests
 def run_tests():
     """Run all tests."""
@@ -324,6 +326,7 @@ def run_tests():
     asyncio.run(test_async_tools())
 
     print("\n=== All tool manager tests completed successfully ===")
+
 
 if __name__ == "__main__":
     run_tests()

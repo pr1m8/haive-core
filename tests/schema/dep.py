@@ -17,10 +17,12 @@ from haive.core.schema.state_schema import StateSchema
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
+
 # Test fixtures
 @pytest.fixture
 def simple_model_class():
     """Create a simple BaseModel class for testing."""
+
     class SimpleModel(BaseModel):
         name: str
         value: int = 0
@@ -29,19 +31,24 @@ def simple_model_class():
 
     return SimpleModel
 
+
 @pytest.fixture
 def state_schema_class():
     """Create a StateSchema subclass for testing."""
+
     class TestState(StateSchema):
         text: str = "default"
         count: int = 0
         flag: bool = False
-        messages: Annotated[Sequence[BaseMessage], add_messages] = Field(default_factory=list)
+        messages: Annotated[Sequence[BaseMessage], add_messages] = Field(
+            default_factory=list
+        )
 
     TestState.__shared_fields__ = ["count"]
     TestState.__reducer_fields__ = {"messages": add_messages}
 
     return TestState
+
 
 @pytest.fixture
 def sample_dict():
@@ -50,16 +57,14 @@ def sample_dict():
         "text": "sample text",
         "number": 42,
         "flag": True,
-        "nested": {"key": "value"}
+        "nested": {"key": "value"},
     }
+
 
 @pytest.fixture
 def command_sample():
     """Return a sample Command object for testing."""
-    return Command(
-        update={"result": "success"},
-        goto="next_node"
-    )
+    return Command(update={"result": "success"}, goto="next_node")
 
 
 # Tests for StateSchemaManager initialization
@@ -158,14 +163,11 @@ class TestStateSchemaManagerFields:
         logger.info("Testing field addition with description")
 
         manager = StateSchemaManager(name="TestSchema")
-        manager.add_field(
-            "count",
-            int,
-            default=0,
-            description="A counter field"
-        )
+        manager.add_field("count", int, default=0, description="A counter field")
 
-        logger.debug(f"Added field with description: {manager.field_descriptions.get('count')}")
+        logger.debug(
+            f"Added field with description: {manager.field_descriptions.get('count')}"
+        )
         assert "count" in manager.fields
         assert "count" in manager.field_descriptions
         assert manager.field_descriptions["count"] == "A counter field"
@@ -175,11 +177,7 @@ class TestStateSchemaManagerFields:
         logger.info("Testing field addition with default_factory")
 
         manager = StateSchemaManager(name="TestSchema")
-        manager.add_field(
-            "items",
-            list[str],
-            default_factory=list
-        )
+        manager.add_field("items", list[str], default_factory=list)
 
         logger.debug("Added field with default_factory")
         assert "items" in manager.fields
@@ -194,12 +192,7 @@ class TestStateSchemaManagerFields:
         logger.info("Testing field addition with shared=True")
 
         manager = StateSchemaManager(name="TestSchema")
-        manager.add_field(
-            "counter",
-            int,
-            default=0,
-            shared=True
-        )
+        manager.add_field("counter", int, default=0, shared=True)
 
         logger.debug("Added shared field")
         assert "counter" in manager.fields
@@ -216,12 +209,7 @@ class TestStateSchemaManagerFields:
             return a + b
 
         manager = StateSchemaManager(name="TestSchema")
-        manager.add_field(
-            "sum",
-            int,
-            default=0,
-            reducer=add_numbers
-        )
+        manager.add_field("sum", int, default=0, reducer=add_numbers)
 
         logger.debug("Added field with reducer")
         assert "sum" in manager.fields
@@ -236,11 +224,7 @@ class TestStateSchemaManagerFields:
         logger.info("Testing field addition with optional=True")
 
         manager = StateSchemaManager(name="TestSchema")
-        manager.add_field(
-            "maybe",
-            str,
-            optional=True
-        )
+        manager.add_field("maybe", str, optional=True)
 
         logger.debug(f"Added optional field with type: {manager.fields['maybe'][0]}")
         assert "maybe" in manager.fields
@@ -287,7 +271,9 @@ class TestStateSchemaManagerFields:
         manager.modify_field("count", new_default=10, new_description="Modified count")
 
         logger.debug(f"Modified field default: {manager.fields['count'][1].default}")
-        logger.debug(f"Modified field description: {manager.field_descriptions.get('count')}")
+        logger.debug(
+            f"Modified field description: {manager.field_descriptions.get('count')}"
+        )
 
         assert manager.fields["count"][1].default == 10
         assert manager.field_descriptions["count"] == "Modified count"
@@ -319,7 +305,9 @@ class TestStateSchemaManagerMerge:
 
         manager2 = StateSchemaManager(name="Second")
         manager2.add_field("field2", int, default=2)
-        manager2.add_field("common", str, default="second")  # Will be ignored due to first occurrence
+        manager2.add_field(
+            "common", str, default="second"
+        )  # Will be ignored due to first occurrence
 
         logger.debug(f"Manager1 fields: {list(manager1.fields.keys())}")
         logger.debug(f"Manager2 fields: {list(manager2.fields.keys())}")
@@ -471,7 +459,7 @@ class TestStateSchemaManagerModel:
         assert manager.locked is False
 
         logger.debug("Creating model with lock=True")
-        model_cls = manager.get_model(lock=True)
+        manager.get_model(lock=True)
 
         # Check it's locked
         assert manager.locked is True
@@ -514,7 +502,9 @@ class TestStateSchemaManagerModel:
 
         # Test setter
         instance.full_name = "Jane Smith"
-        logger.debug(f"After setting property: {instance.first_name} {instance.last_name}")
+        logger.debug(
+            f"After setting property: {instance.first_name} {instance.last_name}"
+        )
 
         assert instance.first_name == "Jane"
         assert instance.last_name == "Smith"
@@ -528,10 +518,7 @@ class TestNodeAndCommand:
         logger.info("Testing create_command")
 
         manager = StateSchemaManager()
-        command = manager.create_command(
-            update={"result": "success"},
-            goto="next_node"
-        )
+        command = manager.create_command(update={"result": "success"}, goto="next_node")
 
         logger.debug(f"Created command: {command}")
         assert isinstance(command, Command)

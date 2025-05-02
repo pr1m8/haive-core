@@ -1,12 +1,12 @@
 import unittest
 from typing import Any, Optional
 
-from pydantic import Field, create_model
-
 from haive_agents_dep.simple.agent import SimpleAgent
 
 # Import SimpleAgentConfig and SimpleAgent
 from haive_agents_dep.simple.config import SimpleAgentConfig
+from pydantic import Field, create_model
+
 from haive.core.config.runnable import RunnableConfigManager
 
 # Import agent components
@@ -31,8 +31,9 @@ TestStateModel = create_model(
     answer=(Optional[str], None),
     messages=(list[Any], Field(default_factory=list)),
     runnable_config=(dict[str, Any], Field(default_factory=dict)),
-    __config__=type("Config", (), {"arbitrary_types_allowed": True})
+    __config__=type("Config", (), {"arbitrary_types_allowed": True}),
 )
+
 
 class TestEngineIntegration(unittest.TestCase):
     def setUp(self):
@@ -40,27 +41,27 @@ class TestEngineIntegration(unittest.TestCase):
         self.llm_config = AugLLMConfig(
             name="test_llm",
             llm_config={"provider": "azure", "model": "gpt-4o"},
-            prompt_template=None  # Set to None to avoid validation errors
+            prompt_template=None,  # Set to None to avoid validation errors
         )
 
         self.embeddings_config = EmbeddingsEngineConfig(
             name="test_embeddings",
             embedding_config=HuggingFaceEmbeddingConfig(
                 model="sentence-transformers/all-mpnet-base-v2"
-            )
+            ),
         )
 
         self.vectorstore_config = VectorStoreConfig(
             name="test_vectorstore",
             vector_store_provider="FAISS",
-            embedding_model=self.embeddings_config.embedding_config
+            embedding_model=self.embeddings_config.embedding_config,
         )
 
         self.retriever_config = BaseRetrieverConfig.from_retriever_type(
             RetrieverType.VECTOR_STORE,
             name="test_retriever",
             vector_store_config=self.vectorstore_config,
-            k=4
+            k=4,
         )
 
     def test_schema_derivation(self):
@@ -74,10 +75,15 @@ class TestEngineIntegration(unittest.TestCase):
 
         # Test composing schemas from multiple engines
         components = [self.llm_config, self.retriever_config]
-        composed_schema = SchemaComposer.compose_schema(components, name="TestComposedSchema")
+        composed_schema = SchemaComposer.compose_schema(
+            components, name="TestComposedSchema"
+        )
 
         # Check if the composed schema has expected fields - for Pydantic models, we check their fields
-        self.assertTrue(hasattr(composed_schema, "model_fields") or hasattr(composed_schema, "__fields__"))
+        self.assertTrue(
+            hasattr(composed_schema, "model_fields")
+            or hasattr(composed_schema, "__fields__")
+        )
 
         # Get the field names based on Pydantic version
         if hasattr(composed_schema, "model_fields"):  # Pydantic v2
@@ -93,23 +99,16 @@ class TestEngineIntegration(unittest.TestCase):
         """Test building a graph with different engines."""
         # Create a dynamic graph with component-derived schema
         graph = DynamicGraph(
-            name="test_rag_graph",
-            components=[self.retriever_config, self.llm_config]
+            name="test_rag_graph", components=[self.retriever_config, self.llm_config]
         )
 
         # Add retriever node
         graph.add_node(
-            name="retrieve",
-            config=self.retriever_config,
-            command_goto="generate"
+            name="retrieve", config=self.retriever_config, command_goto="generate"
         )
 
         # Add LLM node
-        graph.add_node(
-            name="generate",
-            config=self.llm_config,
-            command_goto="END"
-        )
+        graph.add_node(name="generate", config=self.llm_config, command_goto="END")
 
         # Set entry point
         graph.set_entry_point("retrieve")
@@ -128,14 +127,14 @@ class TestEngineIntegration(unittest.TestCase):
             thread_id="test_thread",
             user_id="test_user",
             model="gpt-4o-mini",
-            temperature=0.7
+            temperature=0.7,
         )
 
         # Set it as the default for a graph
         graph = DynamicGraph(
             name="test_graph_with_config",
             components=[self.llm_config],
-            default_runnable_config=config
+            default_runnable_config=config,
         )
 
         graph.add_node("generate", config=self.llm_config, command_goto="END")
@@ -144,8 +143,7 @@ class TestEngineIntegration(unittest.TestCase):
         # Verify the config is set
         self.assertIsNotNone(graph.default_runnable_config)
         self.assertEqual(
-            graph.default_runnable_config["configurable"]["thread_id"],
-            "test_thread"
+            graph.default_runnable_config["configurable"]["thread_id"], "test_thread"
         )
 
     def test_agent_construction(self):
@@ -156,28 +154,23 @@ class TestEngineIntegration(unittest.TestCase):
 
         messages = [
             SystemMessage(content="You are a helpful assistant."),
-            MessagesPlaceholder(variable_name="messages")
+            MessagesPlaceholder(variable_name="messages"),
         ]
         prompt_template = ChatPromptTemplate.from_messages(messages)
 
         # Create the LLM config
-        llm_config = AzureLLMConfig(
-            model="gpt-4o",
-            parameters={"temperature": 0.7}
-        )
+        llm_config = AzureLLMConfig(model="gpt-4o", parameters={"temperature": 0.7})
 
         # Create the AugLLM config
         aug_llm = AugLLMConfig(
-            name="test_llm",
-            llm_config=llm_config,
-            prompt_template=prompt_template
+            name="test_llm", llm_config=llm_config, prompt_template=prompt_template
         )
 
         # Create the SimpleAgentConfig
         agent_config = SimpleAgentConfig.from_aug_llm(
             aug_llm=aug_llm,
             name="test_simple_agent",
-            visualize=False  # Don't generate visualization for tests
+            visualize=False,  # Don't generate visualization for tests
         )
 
         # Build the agent
@@ -197,6 +190,7 @@ class TestEngineIntegration(unittest.TestCase):
         # Test that we can create a runnable
         runnable = agent_config.create_runnable()
         self.assertIsNotNone(runnable)
+
 
 if __name__ == "__main__":
     unittest.main()

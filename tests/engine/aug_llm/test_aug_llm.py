@@ -13,9 +13,9 @@ from haive.core.models.llm.base import AzureLLMConfig
 # Setup logger with more visible formatting
 logger = logging.getLogger(__name__)
 logging.basicConfig(
-    level=logging.INFO,
-    format="\n%(asctime)s [%(levelname)s] %(name)s:\n%(message)s"
+    level=logging.INFO, format="\n%(asctime)s [%(levelname)s] %(name)s:\n%(message)s"
 )
+
 
 def log_test_result(test_name, result):
     """Format and log test results for better visibility"""
@@ -41,23 +41,29 @@ def log_test_result(test_name, result):
     print(log_msg)
     return result
 
+
 class DummyOutput(BaseModel):
     answer: str
 
 
 def test_basic_init():
     config = AugLLMConfig(llm_config=AzureLLMConfig(model="gpt-4o"))
-    result = {"llm_config": str(config.llm_config), "engine_type": config.engine_type.value}
+    result = {
+        "llm_config": str(config.llm_config),
+        "engine_type": config.engine_type.value,
+    }
     log_test_result("test_basic_init", result)
     assert config.llm_config.model == "gpt-4o"
     assert config.engine_type.value == "llm"
 
 
 def test_prompt_template_input_schema():
-    prompt = ChatPromptTemplate.from_messages([
-        SystemMessage(content="You are helpful"),
-        MessagesPlaceholder(variable_name="messages")
-    ])
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            SystemMessage(content="You are helpful"),
+            MessagesPlaceholder(variable_name="messages"),
+        ]
+    )
     config = AugLLMConfig.from_prompt(prompt)
     schema = config.derive_input_schema()
     result = {"schema_fields": list(schema.model_fields.keys())}
@@ -67,8 +73,7 @@ def test_prompt_template_input_schema():
 
 def test_output_schema_with_structured_output():
     config = AugLLMConfig(
-        llm_config=AzureLLMConfig(model="gpt-4o"),
-        structured_output_model=DummyOutput
+        llm_config=AzureLLMConfig(model="gpt-4o"), structured_output_model=DummyOutput
     )
     schema = config.derive_output_schema()
     result = {"schema_fields": list(schema.model_fields.keys())}
@@ -81,7 +86,7 @@ def test_process_input_string():
     processed = config._process_input("Hello!")
     result = {
         "message_type": type(processed["messages"][0]).__name__,
-        "content": processed["messages"][0].content
+        "content": processed["messages"][0].content,
     }
     log_test_result("test_process_input_string", result)
     assert isinstance(processed["messages"][0], HumanMessage)
@@ -92,28 +97,30 @@ def test_invoke_runs(monkeypatch):
     def mock_llm(input):
         # Create a proper AIMessage as the return value
         from langchain_core.messages import AIMessage
+
         # Return an AIMessage object directly to match the expected return type
         return AIMessage(content="This is a mock response")
 
     # Fix the monkeypatch path to use the correct import path
     monkeypatch.setattr(
         "haive.core.models.llm.base.AzureLLMConfig.instantiate",
-        lambda self: RunnableLambda(mock_llm)
+        lambda self: RunnableLambda(mock_llm),
     )
 
-    prompt = ChatPromptTemplate.from_messages([
-        SystemMessage(content="You are a helpful assistant."),
-        MessagesPlaceholder(variable_name="messages")
-    ])
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            SystemMessage(content="You are a helpful assistant."),
+            MessagesPlaceholder(variable_name="messages"),
+        ]
+    )
     config = AugLLMConfig(
-        llm_config=AzureLLMConfig(model="gpt-4o"),
-        prompt_template=prompt
+        llm_config=AzureLLMConfig(model="gpt-4o"), prompt_template=prompt
     )
 
     result = config.invoke("What's the weather like?")
     log_result = {
         "type": type(result).__name__,
-        "content": result.content if hasattr(result, "content") else str(result)
+        "content": result.content if hasattr(result, "content") else str(result),
     }
     log_test_result("test_invoke_runs", log_result)
 
@@ -126,11 +133,14 @@ def test_compose_runnable_creates_chain(monkeypatch):
     # Fix the monkeypatch path to use the correct import path
     monkeypatch.setattr(
         "haive.core.models.llm.base.AzureLLMConfig.instantiate",
-        lambda self: RunnableLambda(lambda x: x)
+        lambda self: RunnableLambda(lambda x: x),
     )
     config = AugLLMConfig(llm_config=AzureLLMConfig(model="gpt-4o"))
     chain = compose_runnable(config)
-    result = {"has_invoke": hasattr(chain, "invoke"), "chain_type": type(chain).__name__}
+    result = {
+        "has_invoke": hasattr(chain, "invoke"),
+        "chain_type": type(chain).__name__,
+    }
     log_test_result("test_compose_runnable_creates_chain", result)
     assert hasattr(chain, "invoke")
 
@@ -139,7 +149,7 @@ def test_apply_runnable_config_overrides(monkeypatch):
     # Fix the monkeypatch path to use the correct import path
     monkeypatch.setattr(
         "haive.core.models.llm.base.AzureLLMConfig.instantiate",
-        lambda self: RunnableLambda(lambda x: x)
+        lambda self: RunnableLambda(lambda x: x),
     )
     config = AugLLMConfig(llm_config=AzureLLMConfig(model="gpt-4o"))
     rcfg = RunnableConfig(configurable={"temperature": 0.1})
@@ -152,14 +162,15 @@ def test_apply_runnable_config_overrides(monkeypatch):
 def test_invoke_runs_real_llm():
     from haive.core.models.llm.base import AzureLLMConfig
 
-    prompt = ChatPromptTemplate.from_messages([
-        SystemMessage(content="You are a helpful assistant."),
-        MessagesPlaceholder(variable_name="messages")
-    ])
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            SystemMessage(content="You are a helpful assistant."),
+            MessagesPlaceholder(variable_name="messages"),
+        ]
+    )
 
     config = AugLLMConfig(
-        llm_config=AzureLLMConfig(model="gpt-4o"),
-        prompt_template=prompt
+        llm_config=AzureLLMConfig(model="gpt-4o"), prompt_template=prompt
     )
 
     # Actually invoke the real LLM
@@ -167,7 +178,7 @@ def test_invoke_runs_real_llm():
 
     log_result = {
         "type": type(result).__name__,
-        "content": result.content if hasattr(result, "content") else str(result)
+        "content": result.content if hasattr(result, "content") else str(result),
     }
     log_test_result("test_invoke_runs_real_llm", log_result)
 

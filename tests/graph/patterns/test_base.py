@@ -72,10 +72,7 @@ class TestParameterDefinition:
 
     def test_initialization(self):
         """Test basic initialization."""
-        param = ParameterDefinition(
-            type="str",
-            description="A string parameter"
-        )
+        param = ParameterDefinition(type="str", description="A string parameter")
         assert param.type == "str"
         assert param.description == "A string parameter"
         assert param.default is None
@@ -87,9 +84,7 @@ class TestParameterDefinition:
     def test_validation_with_required_parameter(self):
         """Test validation of a required parameter."""
         param = ParameterDefinition(
-            type="str",
-            description="A required parameter",
-            required=True
+            type="str", description="A required parameter", required=True
         )
 
         # Missing required parameter
@@ -99,10 +94,7 @@ class TestParameterDefinition:
 
     def test_validation_with_type_checking(self):
         """Test validation with type checking."""
-        param = ParameterDefinition(
-            type="str",
-            description="A string parameter"
-        )
+        param = ParameterDefinition(type="str", description="A string parameter")
 
         # Correct type
         is_valid, error = param.validate_value("test")
@@ -119,7 +111,7 @@ class TestParameterDefinition:
         param = ParameterDefinition(
             type="str",
             description="A parameter with choices",
-            choices=["option1", "option2"]
+            choices=["option1", "option2"],
         )
 
         # Valid choice
@@ -135,10 +127,7 @@ class TestParameterDefinition:
     def test_validation_with_numeric_constraints(self):
         """Test validation with numeric constraints."""
         param = ParameterDefinition(
-            type="int",
-            description="A numeric parameter",
-            min_value=5,
-            max_value=10
+            type="int", description="A numeric parameter", min_value=5, max_value=10
         )
 
         # Within range
@@ -163,9 +152,7 @@ class TestPatternMetadata:
     def test_initialization(self):
         """Test basic initialization."""
         metadata = PatternMetadata(
-            name="test_pattern",
-            description="A test pattern",
-            pattern_type="test"
+            name="test_pattern", description="A test pattern", pattern_type="test"
         )
         assert metadata.name == "test_pattern"
         assert metadata.description == "A test pattern"
@@ -186,7 +173,7 @@ class TestPatternMetadata:
             name="test_pattern",
             description="A test pattern",
             pattern_type="test",
-            required_components=[requirement]
+            required_components=[requirement],
         )
 
         # Mock component with correct type
@@ -209,7 +196,7 @@ class TestPatternMetadata:
             name="test_pattern",
             description="A test pattern",
             pattern_type="test",
-            required_components=[requirement]
+            required_components=[requirement],
         )
 
         # Mock component with correct type
@@ -227,16 +214,14 @@ class TestPatternMetadata:
     def test_validate_parameters_with_valid_params(self):
         """Test validating parameters with valid values."""
         param_def = ParameterDefinition(
-            type="str",
-            description="A string parameter",
-            required=True
+            type="str", description="A string parameter", required=True
         )
 
         metadata = PatternMetadata(
             name="test_pattern",
             description="A test pattern",
             pattern_type="test",
-            parameters={"param1": param_def}
+            parameters={"param1": param_def},
         )
 
         is_valid, errors = metadata.validate_parameters({"param1": "test_value"})
@@ -246,16 +231,14 @@ class TestPatternMetadata:
     def test_validate_parameters_with_invalid_params(self):
         """Test validating parameters with invalid values."""
         param_def = ParameterDefinition(
-            type="str",
-            description="A string parameter",
-            required=True
+            type="str", description="A string parameter", required=True
         )
 
         metadata = PatternMetadata(
             name="test_pattern",
             description="A test pattern",
             pattern_type="test",
-            parameters={"param1": param_def}
+            parameters={"param1": param_def},
         )
 
         # Missing required parameter
@@ -270,7 +253,7 @@ class TestPatternMetadata:
             name="test_pattern",
             description="A test pattern",
             pattern_type="test",
-            parameters={}
+            parameters={},
         )
 
         # Unknown parameter
@@ -286,14 +269,10 @@ class TestGraphPattern:
     def test_initialization(self):
         """Test basic initialization."""
         metadata = PatternMetadata(
-            name="test_pattern",
-            description="A test pattern",
-            pattern_type="test"
+            name="test_pattern", description="A test pattern", pattern_type="test"
         )
 
-        pattern = GraphPattern(
-            metadata=metadata
-        )
+        pattern = GraphPattern(metadata=metadata)
 
         assert pattern.metadata == metadata
         assert pattern.apply_func is None
@@ -301,14 +280,10 @@ class TestGraphPattern:
     def test_property_accessors(self):
         """Test property accessors."""
         metadata = PatternMetadata(
-            name="test_pattern",
-            description="A test pattern",
-            pattern_type="test"
+            name="test_pattern", description="A test pattern", pattern_type="test"
         )
 
-        pattern = GraphPattern(
-            metadata=metadata
-        )
+        pattern = GraphPattern(metadata=metadata)
 
         assert pattern.name == "test_pattern"
         assert pattern.description == "A test pattern"
@@ -322,12 +297,10 @@ class TestGraphPattern:
             name="test_pattern",
             description="A test pattern",
             pattern_type="test",
-            required_components=[requirement]
+            required_components=[requirement],
         )
 
-        pattern = GraphPattern(
-            metadata=metadata
-        )
+        pattern = GraphPattern(metadata=metadata)
 
         # No components
         is_valid, errors = pattern.validate_for_application([], {})
@@ -338,21 +311,17 @@ class TestGraphPattern:
     def test_validate_for_application_with_invalid_parameters(self):
         """Test validation for application with invalid parameters."""
         param_def = ParameterDefinition(
-            type="str",
-            description="A string parameter",
-            required=True
+            type="str", description="A string parameter", required=True
         )
 
         metadata = PatternMetadata(
             name="test_pattern",
             description="A test pattern",
             pattern_type="test",
-            parameters={"param1": param_def}
+            parameters={"param1": param_def},
         )
 
-        pattern = GraphPattern(
-            metadata=metadata
-        )
+        pattern = GraphPattern(metadata=metadata)
 
         # Missing required parameter
         is_valid, errors = pattern.validate_for_application([], {})
@@ -362,14 +331,10 @@ class TestGraphPattern:
     def test_apply_without_implementation(self):
         """Test applying a pattern without implementation."""
         metadata = PatternMetadata(
-            name="test_pattern",
-            description="A test pattern",
-            pattern_type="test"
+            name="test_pattern", description="A test pattern", pattern_type="test"
         )
 
-        pattern = GraphPattern(
-            metadata=metadata
-        )
+        pattern = GraphPattern(metadata=metadata)
 
         # Mock graph
         graph = Mock()
@@ -384,18 +349,13 @@ class TestGraphPattern:
     def test_apply_with_implementation(self):
         """Test applying a pattern with implementation."""
         metadata = PatternMetadata(
-            name="test_pattern",
-            description="A test pattern",
-            pattern_type="test"
+            name="test_pattern", description="A test pattern", pattern_type="test"
         )
 
         # Mock apply function
         apply_func = Mock(return_value="result")
 
-        pattern = GraphPattern(
-            metadata=metadata,
-            apply_func=apply_func
-        )
+        pattern = GraphPattern(metadata=metadata, apply_func=apply_func)
 
         # Mock graph with required components
         graph = Mock()
@@ -415,9 +375,7 @@ class TestGraphPattern:
     def test_to_dict_serialization(self):
         """Test serialization to dictionary."""
         metadata = PatternMetadata(
-            name="test_pattern",
-            description="A test pattern",
-            pattern_type="test"
+            name="test_pattern", description="A test pattern", pattern_type="test"
         )
 
         # Mock apply function
@@ -427,10 +385,7 @@ class TestGraphPattern:
         apply_func.__name__ = "apply_func"
         apply_func.__module__ = "test_module"
 
-        pattern = GraphPattern(
-            metadata=metadata,
-            apply_func=apply_func
-        )
+        pattern = GraphPattern(metadata=metadata, apply_func=apply_func)
 
         # Convert to dict
         data = pattern.to_dict()
@@ -452,7 +407,7 @@ class TestBranchDefinition:
             name="test_branch",
             description="A test branch",
             condition_type="test",
-            routes={"condition1": "node1", "condition2": "node2"}
+            routes={"condition1": "node1", "condition2": "node2"},
         )
 
         assert branch.name == "test_branch"
@@ -470,7 +425,7 @@ class TestBranchDefinition:
             name="test_branch",
             description="A test branch",
             condition_type="test",
-            routes={"condition1": "node1"}
+            routes={"condition1": "node1"},
         )
 
         # Should raise ValueError because no implementation
@@ -489,7 +444,7 @@ class TestBranchDefinition:
             description="A test branch",
             condition_type="test",
             routes={"condition1": "node1"},
-            condition_factory=condition_factory
+            condition_factory=condition_factory,
         )
 
         # Create condition
@@ -510,7 +465,7 @@ class TestBranchDefinition:
             description="A test branch",
             condition_type="test",
             routes={"condition1": "node1"},
-            condition_func=condition_func
+            condition_func=condition_func,
         )
 
         # Create condition
@@ -522,9 +477,7 @@ class TestBranchDefinition:
     def test_validate_parameters(self):
         """Test parameter validation."""
         param_def = ParameterDefinition(
-            type="str",
-            description="A string parameter",
-            required=True
+            type="str", description="A string parameter", required=True
         )
 
         branch = BranchDefinition(
@@ -532,7 +485,7 @@ class TestBranchDefinition:
             description="A test branch",
             condition_type="test",
             routes={"condition1": "node1"},
-            parameters={"param1": param_def}
+            parameters={"param1": param_def},
         )
 
         # Valid parameters
@@ -556,7 +509,7 @@ class TestBranchDefinition:
             description="A test branch",
             condition_type="test",
             routes={"condition1": "node1", "condition2": "END"},
-            condition_func=condition_func
+            condition_func=condition_func,
         )
 
         # Mock graph
@@ -584,6 +537,7 @@ class TestBranchDefinition:
 
     def test_to_dict_serialization(self):
         """Test serialization to dictionary."""
+
         # Mock condition function
         def condition_func(state):
             return "result"
@@ -596,7 +550,7 @@ class TestBranchDefinition:
             description="A test branch",
             condition_type="test",
             routes={"condition1": "node1"},
-            condition_func=condition_func
+            condition_func=condition_func,
         )
 
         # Convert to dict

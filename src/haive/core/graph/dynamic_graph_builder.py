@@ -1,33 +1,41 @@
 # src/haive/core/graph/dynamic_graph_builder.py
 
-from typing import Any, Dict, List, Optional, Union, Type, Tuple, Callable, Literal, cast
-from pydantic import BaseModel, Field
+import inspect
 import logging
 import os
-import uuid
-import json
-import inspect
 import time
 import traceback
+import uuid
 from datetime import datetime
 from enum import Enum
-from langchain_core.runnables.graph import MermaidDrawMethod
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    Type,
+    Union,
+)
+
+from pydantic import BaseModel, Field
+
 try:
-    import networkx as nx
     import matplotlib.pyplot as plt
+    import networkx as nx
     VISUALIZATION_AVAILABLE = True
 except ImportError:
     VISUALIZATION_AVAILABLE = False
 
-from langgraph.graph import StateGraph, START, END
+from langgraph.graph import END, START, StateGraph
 
-from haive.core.engine.base import Engine, EngineType, EngineRegistry
-from haive.core.schema.schema_composer import SchemaComposer
+from haive.core.config.runnable import RunnableConfigManager
+from haive.core.engine.base import Engine, EngineRegistry
 from haive.core.graph.node.config import NodeConfig
 from haive.core.graph.node.factory import NodeFactory
-from haive.core.config.runnable import RunnableConfigManager
 from haive.core.graph.node.registry import NodeTypeRegistry
-from haive.core.graph.node.protocols import NodeProcessor
+from haive.core.schema.schema_composer import SchemaComposer
 
 # Configure logger with file and console handlers
 logger = logging.getLogger("DynamicGraph")
@@ -358,7 +366,7 @@ class DynamicGraph:
                     self._log_error("Error deriving state schema", e, is_warning=True)
                     
                     # Create minimal backup schema
-                    logger.warning(f"Creating backup minimal schema due to derivation failure")
+                    logger.warning("Creating backup minimal schema due to derivation failure")
                     self.schema_composer = SchemaComposer(name=schema_name)
                     self.schema_composer.add_field("messages", list, default_factory=list)
                     self.schema_composer.add_field("input", str, default="")
@@ -406,7 +414,7 @@ class DynamicGraph:
             New DynamicGraph instance with the specified config
         """
         try:
-            logger.debug(f"Creating new graph with custom runnable config")
+            logger.debug("Creating new graph with custom runnable config")
             
             # Create a new graph with the same settings but different config
             new_graph = DynamicGraph(
@@ -447,7 +455,7 @@ class DynamicGraph:
             Self for chaining
         """
         try:
-            logger.debug(f"Setting default runnable config")
+            logger.debug("Setting default runnable config")
             
             self.default_runnable_config = config
             logger.info("Updated default runnable config")
@@ -874,7 +882,7 @@ class DynamicGraph:
             try:
                 logger.debug(f"Adding edge to StateGraph: {from_node} → {to_node}")
                 self.graph_builder.add_edge(from_node, to_node)
-                logger.debug(f"Successfully added edge to StateGraph")
+                logger.debug("Successfully added edge to StateGraph")
             except Exception as sg_error:
                 self._log_error(f"Error adding edge {from_node} → {to_node} to StateGraph", sg_error)
                 
@@ -972,7 +980,7 @@ class DynamicGraph:
                     condition,
                     routes_with_constants
                 )
-                logger.debug(f"Successfully added conditional edges to StateGraph")
+                logger.debug("Successfully added conditional edges to StateGraph")
             except Exception as sg_error:
                 self._log_error(f"Error adding conditional edges from {from_node} to StateGraph", sg_error)
                 
@@ -1086,7 +1094,7 @@ class DynamicGraph:
         try:
             # Import pattern registry
             from haive.core.graph.patterns.registry import GraphPatternRegistry
-            
+
             # Get pattern registry and ensure registry is initialized
             registry = GraphPatternRegistry.get_instance()
             
@@ -1213,7 +1221,7 @@ class DynamicGraph:
                 if param_match:
                     invalid_param = param_match.group(1)
                     logger.error(f"Invalid parameter: '{invalid_param}'")
-                    logger.error(f"Check pattern documentation for supported parameters")
+                    logger.error("Check pattern documentation for supported parameters")
             
             # Re-raise with context for proper error tracking
             raise ValueError(f"Failed to apply pattern '{pattern_name}': {str(e)}") from e
@@ -1456,7 +1464,7 @@ class DynamicGraph:
                 if node_match:
                     node_name = node_match.group(1)
                     logger.error(f"Node '{node_name}' referenced in edges but not added to graph")
-                    logger.error(f"Add this node first with graph.add_node()")
+                    logger.error("Add this node first with graph.add_node()")
         except Exception as e:
             logger.error(f"Error analyzing build error: {str(e)}")
     
@@ -1550,8 +1558,10 @@ class DynamicGraph:
             # Check if we have a compiled graph
             if hasattr(self, "compiled_graph") and self.compiled_graph is not None:
                 # Import the visualization utility
-                from haive.core.utils.visualize_graph_utils import render_and_display_graph
-                
+                from haive.core.utils.visualize_graph_utils import (
+                    render_and_display_graph,
+                )
+
                 # Use the visualization utility
                 result_file = render_and_display_graph(
                     compiled_graph=self.compiled_graph,
@@ -1572,7 +1582,9 @@ class DynamicGraph:
                 try:
                     # Try to use the uncompiled builder's visualization (experimental)
                     if hasattr(self.graph_builder, "get_graph"):
-                        from haive.core.utils.visualize_graph_utils import render_uncompiled_graph
+                        from haive.core.utils.visualize_graph_utils import (
+                            render_uncompiled_graph,
+                        )
                         
                         result_file = render_uncompiled_graph(
                             graph_builder=self.graph_builder,

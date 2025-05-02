@@ -15,18 +15,18 @@ from haive.core.schema.state_schema import StateSchema
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
+
 # Test fixtures
 @pytest.fixture
 def simple_messages():
     """Return a list of sample messages."""
-    return [
-        HumanMessage(content="Hello, world!"),
-        AIMessage(content="Hi there!")
-    ]
+    return [HumanMessage(content="Hello, world!"), AIMessage(content="Hi there!")]
+
 
 @pytest.fixture
 def test_state_schema_cls():
     """Create a test StateSchema subclass."""
+
     class TestState(StateSchema):
         message: str = "default"
         count: int = 0
@@ -39,11 +39,7 @@ def test_state_schema_cls():
 
         def copy(self):
             """Create a copy of the instance."""
-            return TestState(
-                message=self.message,
-                count=self.count,
-                flag=self.flag
-            )
+            return TestState(message=self.message, count=self.count, flag=self.flag)
 
         @classmethod
         def from_dict(cls, data):
@@ -70,22 +66,30 @@ def test_state_schema_cls():
 
     return TestState
 
+
 @pytest.fixture
 def test_state_with_messages():
     """Create a StateSchema with messages field."""
     return StateSchema.with_messages()
 
+
 @pytest.fixture
 def test_state_with_reducers():
     """Create a StateSchema with reducer fields."""
+
     def add_counts(a: int, b: int) -> int:
         return a + b
 
     class CountState(StateSchema):
         count: Annotated[int, add_counts] = 0
-        messages: Annotated[Sequence[BaseMessage], add_messages] = Field(default_factory=list)
+        messages: Annotated[Sequence[BaseMessage], add_messages] = Field(
+            default_factory=list
+        )
 
-    CountState.__serializable_reducers__ = {"count": "add_counts", "messages": "add_messages"}
+    CountState.__serializable_reducers__ = {
+        "count": "add_counts",
+        "messages": "add_messages",
+    }
 
     CountState.__reducer_fields__ = {"count": add_counts, "messages": add_messages}
 
@@ -103,7 +107,7 @@ class TestStateSchemaCreation:
             __name__="BasicSchema",
             text=(str, "default text"),
             number=(int, 42),
-            items=(list[str], Field(default_factory=list))
+            items=(list[str], Field(default_factory=list)),
         )
 
         logger.debug(f"Created schema class: {schema_cls.__name__}")
@@ -127,12 +131,14 @@ class TestStateSchemaCreation:
         schema_cls = StateSchema.create(
             __name__="ReducerSchema",
             text=(Annotated[str, concat_strings], ""),
-            count=(int, 0)
+            count=(int, 0),
         )
 
         # The current implementation uses __serializable_reducers__ which stores function names
         # rather than function objects
-        logger.debug(f"Created schema with reducer for 'text': {schema_cls.__serializable_reducers__}")
+        logger.debug(
+            f"Created schema with reducer for 'text': {schema_cls.__serializable_reducers__}"
+        )
         assert "text" in schema_cls.__serializable_reducers__
         assert schema_cls.__serializable_reducers__["text"] == "concat_strings"
 
@@ -141,19 +147,25 @@ class TestStateSchemaCreation:
         logger.info("Testing schema with messages")
 
         schema_cls = StateSchema.with_messages()
-        logger.debug(f"Created schema with messages field and reducer: {schema_cls.__serializable_reducers__}")
+        logger.debug(
+            f"Created schema with messages field and reducer: {schema_cls.__serializable_reducers__}"
+        )
 
         # Check that the reducer is registered by name in serializable_reducers
         assert "messages" in schema_cls.__serializable_reducers__
 
         # Accept either name format as valid
         reducer_name = schema_cls.__serializable_reducers__["messages"]
-        assert reducer_name in ["add_messages", "_add_messages"], f"Expected 'add_messages' or '_add_messages', got '{reducer_name}'"
+        assert reducer_name in [
+            "add_messages",
+            "_add_messages",
+        ], f"Expected 'add_messages' or '_add_messages', got '{reducer_name}'"
 
         # Create an instance
         instance = schema_cls()
         assert hasattr(instance, "messages")
         assert instance.messages == []
+
 
 # Tests for StateSchema instance operations
 class TestStateSchemaOperations:
@@ -214,7 +226,9 @@ class TestStateSchemaOperations:
 
             # Create from dict
             if hasattr(test_state_schema_cls, "from_dict"):
-                new_instance = test_state_schema_cls.from_dict({"message": "new", "count": 10})
+                new_instance = test_state_schema_cls.from_dict(
+                    {"message": "new", "count": 10}
+                )
             else:
                 # Fall back to direct creation
                 new_instance = test_state_schema_cls(message="new", count=10)
@@ -289,21 +303,25 @@ class TestStateSchemaOperations:
 
         # Create instances for testing
         instance = test_state_with_reducers(count=5)
-        logger.debug(f"Initial state: count={instance.count}, messages={len(instance.messages)}")
+        logger.debug(
+            f"Initial state: count={instance.count}, messages={len(instance.messages)}"
+        )
 
         # Store original values
         original_count = instance.count
 
         # Get the reducer functions directly
         count_reducer = instance.__reducer_fields__["count"]
-        messages_reducer = instance.__reducer_fields__["messages"]
+        instance.__reducer_fields__["messages"]
 
         # Create update values
         update_data = {"count": 3, "messages": simple_messages}
 
         # Apply update
         instance.update(update_data)
-        logger.debug(f"After update: count={instance.count}, messages={len(instance.messages)}")
+        logger.debug(
+            f"After update: count={instance.count}, messages={len(instance.messages)}"
+        )
 
         # Check if reducers are automatically applied (they likely aren't)
         # If automatic reducer application is implemented, count should be 8 (5+3)
@@ -324,6 +342,7 @@ class TestStateSchemaOperations:
         # Messages may have been merged or replaced
         assert len(instance.messages) > 0
 
+
 # Tests for StateSchema class operations
 class TestStateSchemaClassOps:
 
@@ -337,7 +356,9 @@ class TestStateSchemaClassOps:
 
             # Start with a base schema
             base_cls = StateSchema.create(__name__="BaseState", text=(str, "default"))
-            logger.debug(f"Base schema has fields: {list(base_cls.model_fields.keys())}")
+            logger.debug(
+                f"Base schema has fields: {list(base_cls.model_fields.keys())}"
+            )
 
             # Create a new subclass with the additional field
             class NewSchema(base_cls):
@@ -382,7 +403,9 @@ class TestStateSchemaClassOps:
             reducer_cls = ReducerSchema
 
             # Check if the reducer was registered correctly
-            logger.debug(f"Reducer class has serializable reducers: {reducer_cls.__serializable_reducers__}")
+            logger.debug(
+                f"Reducer class has serializable reducers: {reducer_cls.__serializable_reducers__}"
+            )
             assert "value" in reducer_cls.__serializable_reducers__
             assert reducer_cls.__serializable_reducers__["value"] == "add_nums"
 
@@ -399,7 +422,7 @@ class TestStateSchemaClassOps:
             field_type=int,
             default=0,
             description="A counter field",
-            shared=True
+            shared=True,
         )
 
         logger.debug(f"New schema has fields: {list(new_cls.model_fields.keys())}")
@@ -412,9 +435,7 @@ class TestStateSchemaClassOps:
 
         # Test with default_factory
         list_cls = base_cls.add_field(
-            name="items",
-            field_type=list[str],
-            default_factory=list
+            name="items", field_type=list[str], default_factory=list
         )
 
         instance = list_cls()
@@ -426,20 +447,21 @@ class TestStateSchemaClassOps:
             return a + b
 
         reducer_cls = base_cls.add_field(
-            name="value",
-            field_type=int,
-            default=0,
-            reducer=add_nums
+            name="value", field_type=int, default=0, reducer=add_nums
         )
 
         # Check if the class has __reducer_fields__ attribute for backwards compatibility
         if hasattr(reducer_cls, "__reducer_fields__"):
-            logger.debug(f"Reducer class has function reducers: {reducer_cls.__reducer_fields__}")
+            logger.debug(
+                f"Reducer class has function reducers: {reducer_cls.__reducer_fields__}"
+            )
             assert "value" in reducer_cls.__reducer_fields__
             assert reducer_cls.__reducer_fields__["value"] == add_nums
 
         # Check the serializable reducers which is the new implementation
-        logger.debug(f"Reducer class has serializable reducers: {reducer_cls.__serializable_reducers__}")
+        logger.debug(
+            f"Reducer class has serializable reducers: {reducer_cls.__serializable_reducers__}"
+        )
         assert "value" in reducer_cls.__serializable_reducers__
         assert reducer_cls.__serializable_reducers__["value"] == "add_nums"
 
@@ -484,15 +506,15 @@ class TestStateSchemaClassOps:
         # Implement directly if method doesn't exist
         if not hasattr(StateSchema, "with_shared_field"):
             logger.debug("Implementing with_shared_field directly")
-            schema_cls = StateSchema.create(
-                counter=(int, 0)
-            )
+            schema_cls = StateSchema.create(counter=(int, 0))
             # Add counter to shared fields
             schema_cls.__shared_fields__ = ["counter"]
         else:
             schema_cls = StateSchema.with_shared_field("counter", int, 0)
 
-        logger.debug(f"Created schema with shared field: {schema_cls.__shared_fields__}")
+        logger.debug(
+            f"Created schema with shared field: {schema_cls.__shared_fields__}"
+        )
 
         assert "counter" in schema_cls.__shared_fields__
 
@@ -511,6 +533,7 @@ class TestStateSchemaClassOps:
         assert instance.message == "partial"
         assert instance.count == 0  # Default value
         assert instance.flag is False  # Default value
+
 
 # New tests for modern features
 class TestModernFeatures:
@@ -531,12 +554,17 @@ class TestModernFeatures:
             normal: str = "normal"
 
         # We might need to manually set this for testing
-        if not hasattr(AnnotatedSchema, "__serializable_reducers__") or not AnnotatedSchema.__serializable_reducers__:
+        if (
+            not hasattr(AnnotatedSchema, "__serializable_reducers__")
+            or not AnnotatedSchema.__serializable_reducers__
+        ):
             # Set it manually for testing
             AnnotatedSchema.__serializable_reducers__ = {"text": "join_strings"}
             AnnotatedSchema.__reducer_fields__ = {"text": join_strings}
 
-        logger.debug(f"Serializable reducers: {AnnotatedSchema.__serializable_reducers__}")
+        logger.debug(
+            f"Serializable reducers: {AnnotatedSchema.__serializable_reducers__}"
+        )
 
         # Now the reducer should be registered
         assert "text" in AnnotatedSchema.__serializable_reducers__
@@ -592,7 +620,7 @@ class TestModernFeatures:
                 messages=(Sequence[BaseMessage], Field(default_factory=list)),
                 runnable_config=(dict[str, Any], Field(default_factory=dict)),
                 counter=(int, 0),
-                name=(str, "default")
+                name=(str, "default"),
             )
             # Set shared fields manually
             schema_cls.__shared_fields__ = ["counter"]
@@ -604,14 +632,11 @@ class TestModernFeatures:
                 include_messages=True,
                 include_runnable_config=True,
                 shared_fields=["counter"],
-                base_fields={
-                    "counter": (int, 0),
-                    "name": (str, "default")
-                }
+                base_fields={"counter": (int, 0), "name": (str, "default")},
             )
 
         # Verify fields
-        instance = schema_cls()
+        schema_cls()
         assert "messages" in schema_cls.model_fields
         assert "runnable_config" in schema_cls.model_fields
         assert "counter" in schema_cls.model_fields
@@ -659,6 +684,7 @@ class TestModernFeatures:
 
         none_instance = UnionSchema()
         assert none_instance.value is None
+
 
 if __name__ == "__main__":
     pytest.main(["-v"])

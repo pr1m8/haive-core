@@ -1,18 +1,20 @@
 from __future__ import annotations
 
-from typing import Any, ClassVar, Iterable, Type, TypeVar, Union
 from enum import Enum
-from pydantic import BaseModel
+from typing import Any, ClassVar, Iterable, Type, TypeVar
+
 from pydantic.json_schema import JsonSchemaValue
 from pydantic_core import core_schema
+
 # ─── Type variable for enum subclasses ─── #
-E = TypeVar('E', bound=Enum)
+E = TypeVar("E", bound=Enum)
 
 
 class _DynEnumMeta(type):
     """
     Metaclass for managing DynamicEnum initialization and schema enforcement.
     """
+
     def __new__(mcls, name, bases, ns, **kwargs):
         cls = super().__new__(mcls, name, bases, ns, **kwargs)
         if not ns.get("__abstract__", False):
@@ -26,6 +28,7 @@ class DynamicEnum(str, metaclass=_DynEnumMeta):
     """
     A runtime-extensible enum string type for Pydantic validation.
     """
+
     __abstract__ = True
     START_VALUES: ClassVar[Iterable[str]]
     _values: ClassVar[set[str]]
@@ -71,6 +74,7 @@ class DynamicEnum(str, metaclass=_DynEnumMeta):
             if v not in cls._values:
                 raise ValueError(f"invalid enum value; allowed = {sorted(cls._values)}")
             return v
+
         return core_schema.no_info_plain_validator_function(validate)
 
     # ─── JSON Schema for OpenAPI / docs ─── #
@@ -83,7 +87,6 @@ class DynamicEnum(str, metaclass=_DynEnumMeta):
 
 # ─── Helper: Dynamically create a new DynamicEnum type ─── #
 def create_dynamic_enum(name: str, values: Iterable[str]) -> type[DynamicEnum]:
-    return type(name, (DynamicEnum,), {
-        "START_VALUES": tuple(values),
-        "__qualname__": name
-    })
+    return type(
+        name, (DynamicEnum,), {"START_VALUES": tuple(values), "__qualname__": name}
+    )

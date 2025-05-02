@@ -5,15 +5,20 @@ from pydantic import BaseModel, Field, create_model
 
 
 class StateSchema:
-    """Enhanced schema management system with RunnableConfig awareness.
-    """
+    """Enhanced schema management system with RunnableConfig awareness."""
+
     def __init__(self, name: str = "State", fields: dict[str, Any] = None):
         self.name = name
         self.fields = fields or {}
         self.config_aware_fields = set()
 
-    def add_field(self, name: str, type_hint: type, default: Any = None,
-                 config_aware: bool = False) -> "StateSchema":
+    def add_field(
+        self,
+        name: str,
+        type_hint: type,
+        default: Any = None,
+        config_aware: bool = False,
+    ) -> "StateSchema":
         """Add a field to the schema, with optional config awareness."""
         self.fields[name] = (type_hint, Field(default=default))
 
@@ -46,7 +51,10 @@ class StateSchema:
 
             # Update config-aware fields if they exist in config
             for field in instance._config_aware_fields:
-                if hasattr(config.configurable, field) and getattr(config.configurable, field) is not None:
+                if (
+                    hasattr(config.configurable, field)
+                    and getattr(config.configurable, field) is not None
+                ):
                     setattr(instance, field, getattr(config.configurable, field))
 
             return instance
@@ -56,7 +64,9 @@ class StateSchema:
         return model
 
     @classmethod
-    def from_models(cls, *models: type[BaseModel], name: str = "ComposedState") -> "StateSchema":
+    def from_models(
+        cls, *models: type[BaseModel], name: str = "ComposedState"
+    ) -> "StateSchema":
         """Create a schema from multiple Pydantic models."""
         schema = cls(name=name)
 
@@ -93,7 +103,10 @@ class StateSchema:
         schema = cls(name=schema_name)
 
         # Add fields based on prompt template
-        if hasattr(aug_llm_config, "prompt_template") and aug_llm_config.prompt_template:
+        if (
+            hasattr(aug_llm_config, "prompt_template")
+            and aug_llm_config.prompt_template
+        ):
             # Extract input variables
             input_vars = []
             if hasattr(aug_llm_config.prompt_template, "input_variables"):
@@ -104,12 +117,16 @@ class StateSchema:
                 schema.add_field(var, str, default=None)
 
         # Add fields for structured output
-        if hasattr(aug_llm_config, "structured_output_model") and aug_llm_config.structured_output_model:
+        if (
+            hasattr(aug_llm_config, "structured_output_model")
+            and aug_llm_config.structured_output_model
+        ):
             model_class = aug_llm_config.structured_output_model
             field_name = model_class.__name__.lower()
 
             # Add field for the structured output
             from typing import Optional as OptionalType
+
             schema.add_field(field_name, OptionalType[model_class], default=None)
 
         return schema

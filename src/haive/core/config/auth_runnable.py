@@ -12,7 +12,7 @@ throughout conversation threads and persisted correctly in PostgreSQL.
 
 Classes:
     HaiveRunnableConfigManager: Extended config manager with Supabase auth and PostgreSQL integration
-    
+
 Example:
     ```python
     # Create a config with Supabase authentication
@@ -21,14 +21,14 @@ Example:
         username="john.doe",
         email="john.doe@example.com"
     )
-    
+
     # Add PostgreSQL persistence information
     config = HaiveRunnableConfigManager.add_persistence_info(
         config,
         db_session_id="pgsql-session-123",
         persistence_type="postgres"
     )
-    
+
     # Add engine-specific configuration
     config = HaiveRunnableConfigManager.add_engine_config(
         config,
@@ -51,12 +51,12 @@ from haive.core.config.runnable import RunnableConfigManager
 
 class HaiveRunnableConfigManager(RunnableConfigManager):
     """Enhanced runnable config manager with Supabase authentication and PostgreSQL integration.
-    
+
     Extends the base RunnableConfigManager with methods for Supabase user
     authentication, enhanced session management, and PostgreSQL persistence
     configuration. This class provides a unified interface for managing authentication
     context and database persistence throughout the Haive framework.
-    
+
     Key capabilities:
     - Authentication context management with Supabase user IDs
     - Session tracking with user-agent associations
@@ -73,10 +73,10 @@ class HaiveRunnableConfigManager(RunnableConfigManager):
         tenant_id: str | None = None,
         permissions: list[str] | None = None,
         thread_id: str | None = None,
-        **kwargs
+        **kwargs,
     ) -> RunnableConfig:
         """Create a RunnableConfig with Supabase authentication information.
-        
+
         Args:
             supabase_user_id: The Supabase/Auth0 user ID
             username: Optional username for user identification
@@ -85,7 +85,7 @@ class HaiveRunnableConfigManager(RunnableConfigManager):
             permissions: Optional list of user permissions
             thread_id: Optional thread ID for persistence (generated if not provided)
             **kwargs: Additional parameters to include in configurable section
-            
+
         Returns:
             A properly structured RunnableConfig with authentication information
         """
@@ -120,16 +120,13 @@ class HaiveRunnableConfigManager(RunnableConfigManager):
         return config
 
     @staticmethod
-    def update_auth_info(
-        config: RunnableConfig,
-        **auth_updates
-    ) -> RunnableConfig:
+    def update_auth_info(config: RunnableConfig, **auth_updates) -> RunnableConfig:
         """Update authentication information in an existing config.
-        
+
         Args:
             config: Existing RunnableConfig to update
             **auth_updates: Authentication information to update
-            
+
         Returns:
             Updated RunnableConfig
         """
@@ -157,10 +154,10 @@ class HaiveRunnableConfigManager(RunnableConfigManager):
         agent_type: str | None = None,
         session_data: dict[str, Any] | None = None,
         thread_id: str | None = None,
-        **kwargs
+        **kwargs,
     ) -> RunnableConfig:
         """Create a session configuration for agent interaction.
-        
+
         Args:
             supabase_user_id: The Supabase/Auth0 user ID
             agent_id: Unique identifier for the agent
@@ -168,7 +165,7 @@ class HaiveRunnableConfigManager(RunnableConfigManager):
             session_data: Optional additional session data
             thread_id: Optional thread ID (generated if not provided)
             **kwargs: Additional parameters
-            
+
         Returns:
             RunnableConfig with session information
         """
@@ -176,7 +173,7 @@ class HaiveRunnableConfigManager(RunnableConfigManager):
         config = HaiveRunnableConfigManager.create_with_auth(
             supabase_user_id=supabase_user_id,
             thread_id=thread_id or str(uuid.uuid4()),
-            **kwargs
+            **kwargs,
         )
 
         # Add session information
@@ -184,7 +181,7 @@ class HaiveRunnableConfigManager(RunnableConfigManager):
             "agent_id": agent_id,
             "session_id": str(uuid.uuid4()),
             "started_at": datetime.now().isoformat(),
-            "status": "active"
+            "status": "active",
         }
 
         # Add optional fields
@@ -201,10 +198,10 @@ class HaiveRunnableConfigManager(RunnableConfigManager):
     @staticmethod
     def get_auth_info(config: RunnableConfig) -> dict[str, Any]:
         """Extract authentication information from a RunnableConfig.
-        
+
         Args:
             config: RunnableConfig to extract from
-            
+
         Returns:
             Authentication information dictionary or empty dict if not found
         """
@@ -215,10 +212,10 @@ class HaiveRunnableConfigManager(RunnableConfigManager):
     @staticmethod
     def get_supabase_user_id(config: RunnableConfig) -> str | None:
         """Extract Supabase user ID from a RunnableConfig.
-        
+
         Args:
             config: RunnableConfig to extract from
-            
+
         Returns:
             Supabase user ID if present, otherwise None
         """
@@ -228,11 +225,11 @@ class HaiveRunnableConfigManager(RunnableConfigManager):
     @staticmethod
     def has_permission(config: RunnableConfig, permission: str) -> bool:
         """Check if the configuration has a specific permission.
-        
+
         Args:
             config: RunnableConfig to check
             permission: Permission to check for
-            
+
         Returns:
             True if the permission is present, False otherwise
         """
@@ -243,11 +240,11 @@ class HaiveRunnableConfigManager(RunnableConfigManager):
     @staticmethod
     def add_permissions(config: RunnableConfig, *permissions: str) -> RunnableConfig:
         """Add permissions to the configuration.
-        
+
         Args:
             config: RunnableConfig to update
             *permissions: Permissions to add
-            
+
         Returns:
             Updated RunnableConfig
         """
@@ -272,10 +269,10 @@ class HaiveRunnableConfigManager(RunnableConfigManager):
     @staticmethod
     def get_session_info(config: RunnableConfig) -> dict[str, Any]:
         """Extract session information from a RunnableConfig.
-        
+
         Args:
             config: RunnableConfig to extract from
-            
+
         Returns:
             Session information dictionary or empty dict if not found
         """
@@ -286,11 +283,11 @@ class HaiveRunnableConfigManager(RunnableConfigManager):
     @staticmethod
     def update_session_status(config: RunnableConfig, status: str) -> RunnableConfig:
         """Update session status in the configuration.
-        
+
         Args:
             config: RunnableConfig to update
             status: New session status
-            
+
         Returns:
             Updated RunnableConfig
         """
@@ -309,14 +306,16 @@ class HaiveRunnableConfigManager(RunnableConfigManager):
         return result
 
     @staticmethod
-    def add_engine_by_id(config: RunnableConfig, engine_id: str, **params) -> RunnableConfig:
+    def add_engine_by_id(
+        config: RunnableConfig, engine_id: str, **params
+    ) -> RunnableConfig:
         """Add configuration specifically targeting an engine by ID.
-        
+
         Args:
             config: RunnableConfig to update
             engine_id: Engine ID to target
             **params: Parameters for the engine
-            
+
         Returns:
             Updated RunnableConfig
         """
@@ -329,10 +328,10 @@ class HaiveRunnableConfigManager(RunnableConfigManager):
         persistence_type: str = "postgres",
         db_pool_id: str | None = None,
         checkpoint_ns: str = "",
-        **persistence_params
+        **persistence_params,
     ) -> RunnableConfig:
         """Add PostgreSQL persistence information to a config.
-        
+
         Args:
             config: Existing RunnableConfig to update
             db_session_id: Optional database session identifier
@@ -340,7 +339,7 @@ class HaiveRunnableConfigManager(RunnableConfigManager):
             db_pool_id: Optional connection pool identifier
             checkpoint_ns: Checkpoint namespace for organizing checkpoints
             **persistence_params: Additional persistence parameters
-            
+
         Returns:
             Updated RunnableConfig with persistence information
         """
@@ -381,24 +380,28 @@ class HaiveRunnableConfigManager(RunnableConfigManager):
     @staticmethod
     def get_persistence_info(config: RunnableConfig) -> dict[str, Any]:
         """Extract persistence information from a RunnableConfig.
-        
+
         Args:
             config: RunnableConfig to extract from
-            
+
         Returns:
             Persistence information dictionary or empty dict if not found
         """
-        if config and "configurable" in config and "persistence" in config["configurable"]:
+        if (
+            config
+            and "configurable" in config
+            and "persistence" in config["configurable"]
+        ):
             return config["configurable"]["persistence"]
         return {}
 
     @staticmethod
     def is_postgres_persistence(config: RunnableConfig) -> bool:
         """Check if a config is using PostgreSQL persistence.
-        
+
         Args:
             config: RunnableConfig to check
-            
+
         Returns:
             True if PostgreSQL persistence is configured, False otherwise
         """
@@ -411,22 +414,24 @@ class HaiveRunnableConfigManager(RunnableConfigManager):
         user_id: str | None = None,
         db_connection_info: dict[str, Any] | None = None,
         checkpoint_ns: str = "",
-        **kwargs
+        **kwargs,
     ) -> RunnableConfig:
         """Create a config with PostgreSQL persistence configuration.
-        
+
         Args:
             thread_id: Optional thread ID (generated if not provided)
             user_id: Optional user ID for authentication context
             db_connection_info: Optional database connection parameters
             checkpoint_ns: Checkpoint namespace for organizing checkpoints
             **kwargs: Additional parameters to include in configurable section
-            
+
         Returns:
             RunnableConfig with PostgreSQL persistence configuration
         """
         # Create base config
-        config = RunnableConfigManager.create(thread_id=thread_id, user_id=user_id, **kwargs)
+        config = RunnableConfigManager.create(
+            thread_id=thread_id, user_id=user_id, **kwargs
+        )
 
         # Add persistence information
         db_info = db_connection_info or {}
@@ -438,7 +443,7 @@ class HaiveRunnableConfigManager(RunnableConfigManager):
             "db_name": db_info.get("database", "postgres"),
             "db_user": db_info.get("user", "postgres"),
             "setup_needed": db_info.get("setup_needed", True),
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
         # Add to configurable section
@@ -448,13 +453,15 @@ class HaiveRunnableConfigManager(RunnableConfigManager):
         return config
 
     @staticmethod
-    def update_checkpoint_id(config: RunnableConfig, checkpoint_id: str) -> RunnableConfig:
+    def update_checkpoint_id(
+        config: RunnableConfig, checkpoint_id: str
+    ) -> RunnableConfig:
         """Update the checkpoint ID in a config.
-        
+
         Args:
             config: RunnableConfig to update
             checkpoint_id: New checkpoint ID
-            
+
         Returns:
             Updated RunnableConfig
         """
@@ -472,10 +479,10 @@ class HaiveRunnableConfigManager(RunnableConfigManager):
     @staticmethod
     def get_checkpoint_id(config: RunnableConfig) -> str | None:
         """Extract checkpoint ID from a RunnableConfig.
-        
+
         Args:
             config: RunnableConfig to extract from
-            
+
         Returns:
             Checkpoint ID if present, otherwise None
         """
@@ -484,10 +491,10 @@ class HaiveRunnableConfigManager(RunnableConfigManager):
     @staticmethod
     def get_checkpoint_ns(config: RunnableConfig) -> str:
         """Extract checkpoint namespace from a RunnableConfig.
-        
+
         Args:
             config: RunnableConfig to extract from
-            
+
         Returns:
             Checkpoint namespace or empty string if not found
         """
@@ -498,20 +505,22 @@ class HaiveRunnableConfigManager(RunnableConfigManager):
         thread_id: str,
         checkpoint_id: str | None = None,
         checkpoint_ns: str = "",
-        **kwargs
+        **kwargs,
     ) -> RunnableConfig:
         """Create a minimal config for checkpoint operations with thread ID.
-        
+
         Args:
             thread_id: Thread ID for the conversation
             checkpoint_id: Optional specific checkpoint ID
             checkpoint_ns: Checkpoint namespace
             **kwargs: Additional parameters
-            
+
         Returns:
             RunnableConfig suitable for checkpoint operations
         """
-        config = {"configurable": {"thread_id": thread_id, "checkpoint_ns": checkpoint_ns}}
+        config = {
+            "configurable": {"thread_id": thread_id, "checkpoint_ns": checkpoint_ns}
+        }
 
         if checkpoint_id:
             config["configurable"]["checkpoint_id"] = checkpoint_id
@@ -525,13 +534,14 @@ class HaiveRunnableConfigManager(RunnableConfigManager):
     @staticmethod
     def serialize_to_json(config: RunnableConfig) -> str:
         """Serialize a RunnableConfig to a JSON string.
-        
+
         Args:
             config: RunnableConfig to serialize
-            
+
         Returns:
             JSON string representation
         """
+
         # Use a custom encoder function to handle datetime objects
         def encoder(obj):
             if isinstance(obj, datetime):
@@ -543,10 +553,10 @@ class HaiveRunnableConfigManager(RunnableConfigManager):
     @staticmethod
     def deserialize_from_json(json_str: str) -> RunnableConfig:
         """Deserialize a RunnableConfig from a JSON string.
-        
+
         Args:
             json_str: JSON string to deserialize
-            
+
         Returns:
             Deserialized RunnableConfig
         """
