@@ -10,15 +10,17 @@ from pydantic import BaseModel, Field
 
 class ToolConfig(BaseModel):
     """Configuration for a tool with routing and retry behavior."""
+
     tool: BaseTool | StructuredTool | Callable = Field(
         ..., description="The tool implementation"
     )
     route_to: str | None = Field(
-        default=None, description="Where to route after this tool is used (node name or 'END')"
+        default=None,
+        description="Where to route after this tool is used (node name or 'END')",
     )
     return_direct: bool = Field(
         default=False,
-        description="Whether to return directly to user without further LLM processing"
+        description="Whether to return directly to user without further LLM processing",
     )
     timeout: float | None = Field(
         default=None, description="Timeout in seconds for this tool"
@@ -33,6 +35,7 @@ class ToolConfig(BaseModel):
 
 class NodeConfig(BaseModel):
     """Configuration for a custom node in the agent graph."""
+
     node_function: Callable = Field(..., description="The node function")
     node_name: str = Field(..., description="Name for this node")
     routes_to: str | dict[str, str] | Any = Field(
@@ -47,10 +50,10 @@ def configure_tool(
     return_direct: bool = False,
     timeout: float | None = None,
     retry_policy: RetryPolicy | None = None,
-    fallback_response: str | None = None
+    fallback_response: str | None = None,
 ) -> ToolConfig:
     """Configure a tool with routing, retry, and other settings.
-    
+
     Args:
         tool: The tool implementation (BaseTool, StructuredTool, or callable)
         route_to: Node name to route to after this tool is used
@@ -58,7 +61,7 @@ def configure_tool(
         timeout: Timeout in seconds for this tool
         retry_policy: Retry policy for this tool
         fallback_response: Fallback message if tool execution fails
-        
+
     Returns:
         ToolConfig instance
     """
@@ -68,38 +71,36 @@ def configure_tool(
         return_direct=return_direct,
         timeout=timeout,
         retry_policy=retry_policy,
-        fallback_response=fallback_response
+        fallback_response=fallback_response,
     )
 
 
 def create_node_config(
-    node_function: Callable,
-    node_name: str,
-    routes_to: str | dict[str, str] | Any
+    node_function: Callable, node_name: str, routes_to: str | dict[str, str] | Any
 ) -> NodeConfig:
     """Create a configuration for a custom node.
-    
+
     Args:
         node_function: Function that implements the node
         node_name: Name for this node
         routes_to: Where this node routes to (string, mapping, or router)
-        
+
     Returns:
         NodeConfig instance
     """
     return NodeConfig(
-        node_function=node_function,
-        node_name=node_name,
-        routes_to=routes_to
+        node_function=node_function, node_name=node_name, routes_to=routes_to
     )
 
 
-def process_tools(tools: list[BaseTool | StructuredTool | Callable | ToolConfig]) -> tuple[list[Any], dict[str, ToolConfig]]:
+def process_tools(
+    tools: list[BaseTool | StructuredTool | Callable | ToolConfig],
+) -> tuple[list[Any], dict[str, ToolConfig]]:
     """Process a list of tools, extracting configurations.
-    
+
     Args:
         tools: List of tools and tool configs
-        
+
     Returns:
         Tuple of (processed_tools, tool_configs)
     """

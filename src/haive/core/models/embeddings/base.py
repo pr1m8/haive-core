@@ -1,16 +1,18 @@
 import os
+from typing import Any, Dict, Optional
+
+import torch
 from dotenv import load_dotenv
-from pydantic import BaseModel, Field, SecretStr, field_validator
-from typing import Optional, Dict, Any
-from langchain_openai import AzureOpenAIEmbeddings
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.embeddings import CacheBackedEmbeddings
 from langchain.storage import LocalFileStore
-import torch
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_openai import AzureOpenAIEmbeddings
+from pydantic import BaseModel, Field, SecretStr, field_validator
+
 from haive.core.config.constants import EMBEDDINGS_CACHE_DIR
 from haive.core.models.embeddings.provider_types import EmbeddingProvider
 
-load_dotenv('.env')
+load_dotenv(".env")
 
 
 class SecureConfigMixin:
@@ -49,9 +51,17 @@ class BaseEmbeddingConfig(BaseModel, SecureConfigMixin):
 class AzureEmbeddingConfig(BaseEmbeddingConfig):
     provider: EmbeddingProvider = EmbeddingProvider.AZURE
 
-    api_version: str = Field(default_factory=lambda: os.getenv("AZURE_OPENAI_API_VERSION", "2024-02-15-preview"))
-    api_base: str = Field(default_factory=lambda: os.getenv("AZURE_OPENAI_API_BASE", ""))
-    api_type: str = Field(default_factory=lambda: os.getenv("AZURE_OPENAI_API_TYPE", "azure"))
+    api_version: str = Field(
+        default_factory=lambda: os.getenv(
+            "AZURE_OPENAI_API_VERSION", "2024-02-15-preview"
+        )
+    )
+    api_base: str = Field(
+        default_factory=lambda: os.getenv("AZURE_OPENAI_API_BASE", "")
+    )
+    api_type: str = Field(
+        default_factory=lambda: os.getenv("AZURE_OPENAI_API_TYPE", "azure")
+    )
 
     def instantiate(self, **kwargs) -> AzureOpenAIEmbeddings:
         return AzureOpenAIEmbeddings(
@@ -59,7 +69,7 @@ class AzureEmbeddingConfig(BaseEmbeddingConfig):
             api_key=self.get_api_key(),
             api_version=self.api_version,
             azure_endpoint=self.api_base,
-            **kwargs
+            **kwargs,
         )
 
     def get_api_key(self) -> str:
@@ -69,7 +79,11 @@ class AzureEmbeddingConfig(BaseEmbeddingConfig):
 class HuggingFaceEmbeddingConfig(BaseEmbeddingConfig):
     provider: EmbeddingProvider = EmbeddingProvider.HUGGINGFACE
 
-    model_kwargs: Optional[Dict[str, Any]] = Field(default_factory=lambda: {"device": "cuda" if torch.cuda.is_available() else "cpu"})
+    model_kwargs: Optional[Dict[str, Any]] = Field(
+        default_factory=lambda: {
+            "device": "cuda" if torch.cuda.is_available() else "cpu"
+        }
+    )
     encode_kwargs: Optional[Dict[str, Any]] = Field(default_factory=dict)
     query_encode_kwargs: Optional[Dict[str, Any]] = Field(default_factory=dict)
     multi_process: bool = False
@@ -86,7 +100,7 @@ class HuggingFaceEmbeddingConfig(BaseEmbeddingConfig):
                 multi_process=self.multi_process,
                 cache_folder=self.cache_folder,
                 show_progress=self.show_progress,
-                **kwargs
+                **kwargs,
             )
 
             if self.use_cache:
@@ -95,11 +109,11 @@ class HuggingFaceEmbeddingConfig(BaseEmbeddingConfig):
                     embedder,
                     document_embedding_cache=store,
                     query_embedding_cache=True,
-                    namespace=self.model
+                    namespace=self.model,
                 )
             return embedder
 
-        except Exception as e:
+        except Exception:
             try:
                 torch.cuda.empty_cache()
                 torch.cuda.ipc_collect()
@@ -110,7 +124,7 @@ class HuggingFaceEmbeddingConfig(BaseEmbeddingConfig):
                     multi_process=self.multi_process,
                     cache_folder=self.cache_folder,
                     show_progress=self.show_progress,
-                    **kwargs
+                    **kwargs,
                 )
                 if self.use_cache:
                     store = LocalFileStore(self.cache_folder)
@@ -118,12 +132,13 @@ class HuggingFaceEmbeddingConfig(BaseEmbeddingConfig):
                         embedder,
                         document_embedding_cache=store,
                         query_embedding_cache=True,
-                        namespace=self.model
+                        namespace=self.model,
                     )
                 return embedder
             except Exception as e:
                 print(f"Error instantiating HuggingFaceEmbeddings: {e}")
                 raise e
+
 
 # Factory function
 def create_embeddings(config: BaseEmbeddingConfig) -> Any:

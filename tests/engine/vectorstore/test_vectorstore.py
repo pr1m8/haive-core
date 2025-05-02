@@ -5,16 +5,22 @@ import logging
 from langchain_core.documents import Document
 from langchain_core.vectorstores import InMemoryVectorStore
 
-from haive.core.engine.vectorstore.vectorstore import VectorStoreConfig, VectorStoreProvider
+from haive.core.engine.vectorstore.vectorstore import (
+    VectorStoreConfig,
+    VectorStoreProvider,
+)
 from haive.core.models.embeddings.base import HuggingFaceEmbeddingConfig
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
+
 def make_default_config(docs: list[Document] | None = None) -> VectorStoreConfig:
-    used_docs = docs if docs is not None else [
-        Document(page_content="The capital of France is Paris.")
-    ]
+    used_docs = (
+        docs
+        if docs is not None
+        else [Document(page_content="The capital of France is Paris.")]
+    )
     logger.info(f"[make_default_config] Initializing with {len(used_docs)} document(s)")
     for i, doc in enumerate(used_docs):
         logger.info(f" - Doc {i}: {doc.page_content}")
@@ -28,11 +34,13 @@ def make_default_config(docs: list[Document] | None = None) -> VectorStoreConfig
         ),
     )
 
+
 def test_create_vectorstore_returns_inmemory():
     config = make_default_config()
     vs = config.instantiate()
     logger.info(f"✅ Created vector store: {vs.__class__.__name__}")
     assert isinstance(vs, InMemoryVectorStore)
+
 
 def test_similarity_search_returns_results():
     config = make_default_config()
@@ -44,12 +52,14 @@ def test_similarity_search_returns_results():
     assert all(isinstance(doc, Document) for doc in results)
     assert len(results) > 0
 
+
 def test_invoke_returns_documents():
     config = make_default_config()
     results = config.invoke("Paris")
     logger.info(f"✅ Retrieved {len(results)} documents from invoke")
     assert isinstance(results, list)
     assert all(isinstance(doc, Document) for doc in results)
+
 
 def test_input_output_schemas():
     config = make_default_config()
@@ -59,6 +69,7 @@ def test_input_output_schemas():
     logger.info(f"✅ Output schema fields: {list(output_schema.model_fields.keys())}")
     assert "query" in input_schema.model_fields
     assert "documents" in output_schema.model_fields
+
 
 def test_add_documents():
     config = make_default_config(docs=[])

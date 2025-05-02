@@ -4,11 +4,13 @@ import logging
 import uuid
 from typing import Any
 
-from langchain_core.messages import HumanMessage
 from haive.agents.simple.config import SimpleAgentConfig
+from langchain_core.messages import HumanMessage
+
 from haive.core.engine.aug_llm.base import AugLLMConfig
 
 logger = logging.getLogger(__name__)
+
 
 def debug_state_inspection():
     """Debug test that inspects state directly."""
@@ -18,14 +20,10 @@ def debug_state_inspection():
 
     # Create a simple agent
     aug_llm = AugLLMConfig(
-        name="debug_llm",
-        system_prompt="You are a helpful assistant for debugging."
+        name="debug_llm", system_prompt="You are a helpful assistant for debugging."
     )
 
-    agent_config = SimpleAgentConfig(
-        name="DebugAgent",
-        engine=aug_llm
-    )
+    agent_config = SimpleAgentConfig(name="DebugAgent", engine=aug_llm)
 
     agent = agent_config.build_agent()
 
@@ -68,6 +66,7 @@ def debug_state_inspection():
 
     logger.info("DEBUG TEST COMPLETED")
 
+
 def extract_messages(state: Any) -> list:
     """Extract messages from state, regardless of format."""
     if state is None:
@@ -95,6 +94,7 @@ def extract_messages(state: Any) -> list:
 
     return []
 
+
 def print_state_deeply(state: Any, level: int = 0):
     """Print state recursively with type information."""
     indent = "  " * level
@@ -121,7 +121,9 @@ def print_state_deeply(state: Any, level: int = 0):
             logger.info(f"{indent}  .values ({type(state.values).__name__}):")
             print_state_deeply(state.values, level + 2)
         elif hasattr(state, "channel_values") and state.channel_values:
-            logger.info(f"{indent}  .channel_values ({type(state.channel_values).__name__}):")
+            logger.info(
+                f"{indent}  .channel_values ({type(state.channel_values).__name__}):"
+            )
             print_state_deeply(state.channel_values, level + 2)
         elif hasattr(state, "state") and state.state:
             logger.info(f"{indent}  .state ({type(state.state).__name__}):")
@@ -146,6 +148,7 @@ def print_state_deeply(state: Any, level: int = 0):
         # For tuples that might be messages, show components
         if isinstance(state, tuple) and len(state) >= 2:
             logger.info(f"{indent}  Tuple components: {state[0]}, {state[1]}")
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

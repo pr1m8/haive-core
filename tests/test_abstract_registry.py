@@ -29,13 +29,19 @@ def test_basic_registry():
     print("\n=== Testing Basic Registry Operations ===")
 
     # Create a new registry
-    registry = AbstractRegistry[str, Any](name="test_registry", description="Registry for testing")
+    registry = AbstractRegistry[str, Any](
+        name="test_registry", description="Registry for testing"
+    )
 
     # Register some items
     registry.register("item1", "Value 1", tags=["test", "example"])
     registry.register("item2", {"name": "Value 2"}, tags=["test", "dict"])
-    registry.register("item3", lambda x: x*2, tags=["function"],
-                     metadata={"description": "Doubles input"})
+    registry.register(
+        "item3",
+        lambda x: x * 2,
+        tags=["function"],
+        metadata={"description": "Doubles input"},
+    )
 
     # Verify registration
     assert registry.has("item1")
@@ -71,10 +77,13 @@ def test_basic_registry():
     assert metadata["description"] == "Doubles input"
 
     # Update an item
-    registry.update("item1", "Updated Value 1",
-                  update_metadata={"updated": True},
-                  add_tags=["updated"],
-                  remove_tags=["example"])
+    registry.update(
+        "item1",
+        "Updated Value 1",
+        update_metadata={"updated": True},
+        add_tags=["updated"],
+        remove_tags=["example"],
+    )
 
     # Verify update
     assert registry.get("item1") == "Updated Value 1"
@@ -98,6 +107,7 @@ def test_basic_registry():
     print(f"Registry statistics: {stats}")
 
     return registry
+
 
 # Test dependencies
 def test_registry_dependencies():
@@ -135,6 +145,7 @@ def test_registry_dependencies():
     registry.remove("base")  # This should log a warning about dependents
 
     return registry
+
 
 # Test registry decorator
 def test_registry_decorator():
@@ -178,6 +189,7 @@ def test_registry_decorator():
 
     return registry
 
+
 # Test specialized registries
 def test_specialized_registries():
     """Test the specialized registry types."""
@@ -193,12 +205,9 @@ def test_specialized_registries():
     @register_schema("user_schema", tags=["user"])
     class UserSchema:
         """Schema for user data."""
+
         def __init__(self):
-            self.fields = {
-                "name": str,
-                "email": str,
-                "age": int
-            }
+            self.fields = {"name": str, "email": str, "age": int}
 
     # Test node registry
     @register_node("process_node", tags=["process"])
@@ -213,10 +222,18 @@ def test_specialized_registries():
         return ["node1", "node2", "node3"]
 
     # Verify registrations
-    print(f"Tool registry items: {list(registry_manager.get_registry('tools').get_all().keys())}")
-    print(f"Schema registry items: {list(registry_manager.get_registry('schemas').get_all().keys())}")
-    print(f"Node registry items: {list(registry_manager.get_registry('nodes').get_all().keys())}")
-    print(f"Graph registry items: {list(registry_manager.get_registry('graphs').get_all().keys())}")
+    print(
+        f"Tool registry items: {list(registry_manager.get_registry('tools').get_all().keys())}"
+    )
+    print(
+        f"Schema registry items: {list(registry_manager.get_registry('schemas').get_all().keys())}"
+    )
+    print(
+        f"Node registry items: {list(registry_manager.get_registry('nodes').get_all().keys())}"
+    )
+    print(
+        f"Graph registry items: {list(registry_manager.get_registry('graphs').get_all().keys())}"
+    )
 
     # Test registry manager
     all_registries = registry_manager.list_registries()
@@ -231,6 +248,7 @@ def test_specialized_registries():
     assert "linear_workflow" in workflow_items
 
     return registry_manager
+
 
 # Test registry events with listeners
 def test_registry_events():
@@ -267,6 +285,7 @@ def test_registry_events():
     assert len(events) == 3  # Still 3 events, not 4
 
     return registry
+
 
 if __name__ == "__main__":
     # Run all tests

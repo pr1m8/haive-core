@@ -21,8 +21,9 @@ MODULES_TO_SCAN = [
     ("langchain_community.tools", "__call__"),
     ("haive.tak.tools", "__call__"),
     ("haive.tak.toolkits", "__call__"),
-    #("langchain_text_splitters", None),
+    # ("langchain_text_splitters", None),
 ]
+
 
 @pytest.mark.parametrize("module_path, method_required", MODULES_TO_SCAN)
 def test_discovery_and_metadata(module_path, method_required):
@@ -40,7 +41,9 @@ def test_discovery_and_metadata(module_path, method_required):
         assert isinstance(meta["docstring"], str)
         print(f"✅ {meta['class_name']} from {mod}")
         if meta.get("env_required"):
-            print(f"🔐 Requires: {meta['env_required']}, missing: {meta['env_missing']}")
+            print(
+                f"🔐 Requires: {meta['env_required']}, missing: {meta['env_missing']}"
+            )
 
     # Export results to JSON
     module_tag = module_path.replace(".", "_")

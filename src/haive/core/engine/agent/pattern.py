@@ -15,44 +15,34 @@ logger = logging.getLogger(__name__)
 
 class PatternConfig(BaseModel):
     """Configuration for a pattern to be applied to an agent.
-    
+
     This allows detailed configuration of pattern application,
     including parameters, application order, and conditions.
     """
-    name: str = Field(
-        description="Name of the pattern to apply"
-    )
+
+    name: str = Field(description="Name of the pattern to apply")
     parameters: dict[str, Any] = Field(
-        default_factory=dict,
-        description="Parameters for pattern application"
+        default_factory=dict, description="Parameters for pattern application"
     )
     order: int | None = Field(
-        default=None,
-        description="Order to apply pattern (lower numbers first)"
+        default=None, description="Order to apply pattern (lower numbers first)"
     )
     condition: str | None = Field(
-        default=None,
-        description="Condition for pattern application"
+        default=None, description="Condition for pattern application"
     )
-    enabled: bool = Field(
-        default=True,
-        description="Whether this pattern is enabled"
-    )
+    enabled: bool = Field(default=True, description="Whether this pattern is enabled")
     metadata: dict[str, Any] = Field(
-        default_factory=dict,
-        description="Additional metadata"
+        default_factory=dict, description="Additional metadata"
     )
 
-    model_config = {
-        "arbitrary_types_allowed": True
-    }
+    model_config = {"arbitrary_types_allowed": True}
 
     def merge_with(self, other: "PatternConfig") -> "PatternConfig":
         """Merge this pattern configuration with another.
-        
+
         Args:
             other: The other pattern config to merge with
-            
+
         Returns:
             New merged pattern config
         """
@@ -67,15 +57,17 @@ class PatternConfig(BaseModel):
             name=self.name,
             parameters=merged_params,
             order=other.order if other.order is not None else self.order,
-            condition=other.condition if other.condition is not None else self.condition,
+            condition=(
+                other.condition if other.condition is not None else self.condition
+            ),
             enabled=other.enabled,
-            metadata={**self.metadata, **other.metadata}
+            metadata={**self.metadata, **other.metadata},
         )
 
 
 class PatternManager:
     """Manager for pattern application and tracking.
-    
+
     This class handles pattern ordering, validation, parameter resolution,
     and application tracking.
     """
@@ -92,10 +84,10 @@ class PatternManager:
         parameters: dict[str, Any] | None = None,
         order: int | None = None,
         condition: str | None = None,
-        enabled: bool = True
+        enabled: bool = True,
     ) -> None:
         """Add a pattern to be applied.
-        
+
         Args:
             pattern_name: Name of the pattern in the registry
             parameters: Parameters for pattern application
@@ -106,6 +98,7 @@ class PatternManager:
         # Check if pattern exists in registry
         try:
             from haive.core.graph.patterns.registry import GraphPatternRegistry
+
             registry = GraphPatternRegistry.get_instance()
             if not registry.get_pattern(pattern_name):
                 logger.warning(f"Pattern '{pattern_name}' not found in registry")
@@ -126,7 +119,7 @@ class PatternManager:
                 parameters=parameters or {},
                 order=order,
                 condition=condition,
-                enabled=enabled
+                enabled=enabled,
             )
 
             # Replace with merged configuration
@@ -134,17 +127,19 @@ class PatternManager:
             self.patterns.append(existing_pattern.merge_with(new_pattern))
         else:
             # Add new pattern
-            self.patterns.append(PatternConfig(
-                name=pattern_name,
-                parameters=parameters or {},
-                order=order,
-                condition=condition,
-                enabled=enabled
-            ))
+            self.patterns.append(
+                PatternConfig(
+                    name=pattern_name,
+                    parameters=parameters or {},
+                    order=order,
+                    condition=condition,
+                    enabled=enabled,
+                )
+            )
 
     def set_pattern_parameters(self, pattern_name: str, **parameters) -> None:
         """Set global parameters for a pattern.
-        
+
         Args:
             pattern_name: Name of the pattern
             **parameters: Parameter values
@@ -164,7 +159,7 @@ class PatternManager:
 
     def disable_pattern(self, pattern_name: str) -> None:
         """Disable a pattern.
-        
+
         Args:
             pattern_name: Name of the pattern to disable
         """
@@ -175,7 +170,7 @@ class PatternManager:
 
     def enable_pattern(self, pattern_name: str) -> None:
         """Enable a pattern.
-        
+
         Args:
             pattern_name: Name of the pattern to enable
         """
@@ -186,14 +181,13 @@ class PatternManager:
 
     def get_pattern_order(self) -> list[str]:
         """Get ordered list of patterns to apply.
-        
+
         Returns:
             List of pattern names in application order
         """
         # Sort patterns by order (None values last)
         sorted_patterns = sorted(
-            self.patterns,
-            key=lambda p: (p.order is None, p.order or 999999)
+            self.patterns, key=lambda p: (p.order is None, p.order or 999999)
         )
 
         # Filter enabled patterns
@@ -201,10 +195,10 @@ class PatternManager:
 
     def get_pattern_parameters(self, pattern_name: str) -> dict[str, Any]:
         """Get combined parameters for a pattern.
-        
+
         Args:
             pattern_name: Name of the pattern
-            
+
         Returns:
             Combined parameters from pattern config and global parameters
         """
@@ -221,10 +215,10 @@ class PatternManager:
 
     def is_pattern_applied(self, pattern_name: str) -> bool:
         """Check if a pattern has been applied.
-        
+
         Args:
             pattern_name: Name of the pattern to check
-            
+
         Returns:
             True if the pattern has been applied
         """
@@ -232,7 +226,7 @@ class PatternManager:
 
     def mark_pattern_applied(self, pattern_name: str) -> None:
         """Mark a pattern as applied.
-        
+
         Args:
             pattern_name: Name of the pattern to mark
         """
@@ -240,7 +234,7 @@ class PatternManager:
 
     def patterns_as_list(self) -> list[PatternConfig]:
         """Get all pattern configurations as a list.
-        
+
         Returns:
             List of pattern configurations
         """
@@ -248,7 +242,7 @@ class PatternManager:
 
     def parameters_as_dict(self) -> dict[str, dict[str, Any]]:
         """Get all pattern parameters as a dictionary.
-        
+
         Returns:
             Dictionary mapping pattern names to parameter dictionaries
         """
@@ -256,7 +250,7 @@ class PatternManager:
 
     def applied_patterns_as_set(self) -> set[str]:
         """Get all applied patterns as a set.
-        
+
         Returns:
             Set of applied pattern names
         """
@@ -264,7 +258,7 @@ class PatternManager:
 
     def validate_patterns(self) -> list[str]:
         """Validate that all patterns exist in the registry.
-        
+
         Returns:
             List of invalid pattern names
         """
@@ -272,6 +266,7 @@ class PatternManager:
 
         try:
             from haive.core.graph.patterns.registry import GraphPatternRegistry
+
             registry = GraphPatternRegistry.get_instance()
 
             for pattern in self.patterns:
@@ -284,7 +279,7 @@ class PatternManager:
 
     def get_required_components(self) -> list[Any]:
         """Get components required by patterns.
-        
+
         Returns:
             List of component requirements
         """
@@ -292,6 +287,7 @@ class PatternManager:
 
         try:
             from haive.core.graph.patterns.registry import GraphPatternRegistry
+
             registry = GraphPatternRegistry.get_instance()
 
             for pattern in self.patterns:
@@ -310,26 +306,30 @@ class PatternManager:
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to a dictionary for serialization.
-        
+
         Returns:
             Dictionary representation
         """
         return {
             "patterns": [
-                pattern.model_dump() if hasattr(pattern, "model_dump") else pattern.dict()
+                (
+                    pattern.model_dump()
+                    if hasattr(pattern, "model_dump")
+                    else pattern.dict()
+                )
                 for pattern in self.patterns
             ],
             "pattern_parameters": self.pattern_parameters,
-            "applied_patterns": list(self._applied_patterns)
+            "applied_patterns": list(self._applied_patterns),
         }
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "PatternManager":
         """Create from a dictionary representation.
-        
+
         Args:
             data: Dictionary representation
-            
+
         Returns:
             New PatternManager instance
         """

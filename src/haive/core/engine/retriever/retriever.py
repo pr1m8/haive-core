@@ -22,28 +22,27 @@ Example:
     ```python
     from haive.core.engine.retriever import VectorStoreRetrieverConfig
     from haive.core.engine.vectorstore import VectorStoreConfig
-    
+
     # Create vector store config
     vs_config = VectorStoreConfig(...)
-    
+
     # Create retriever config
     retriever_config = VectorStoreRetrieverConfig(
         name="my_retriever",
         vector_store_config=vs_config,
         k=4
     )
-    
+
     # Create and use the retriever
     retriever = retriever_config.instantiate()
     docs = retriever.get_relevant_documents("query")
     ```
 """
 
-import logging
 import importlib
+import logging
 import pkgutil
 import sys
-from pathlib import Path
 from typing import Any, ClassVar, Dict, List, Optional, Tuple, Type, Union
 
 from langchain_core.documents import Document
@@ -61,19 +60,29 @@ logger = logging.getLogger(__name__)
 # Input and output schemas as BaseModels
 class RetrieverInput(BaseModel):
     """Schema for retriever input."""
+
     query: str = Field(description="Query string for retrieval")
-    k: Optional[int] = Field(default=None, description="Number of documents to retrieve")
-    filter: Optional[Dict[str, Any]] = Field(default=None, description="Filter criteria for retrieval")
-    search_type: Optional[str] = Field(default=None, description="Type of search to perform")
-    score_threshold: Optional[float] = Field(default=None, description="Minimum similarity score threshold")
-    
+    k: Optional[int] = Field(
+        default=None, description="Number of documents to retrieve"
+    )
+    filter: Optional[Dict[str, Any]] = Field(
+        default=None, description="Filter criteria for retrieval"
+    )
+    search_type: Optional[str] = Field(
+        default=None, description="Type of search to perform"
+    )
+    score_threshold: Optional[float] = Field(
+        default=None, description="Minimum similarity score threshold"
+    )
+
     model_config = ConfigDict(extra="allow")
 
 
 class RetrieverOutput(BaseModel):
     """Schema for retriever output."""
+
     documents: List[Document] = Field(description="Retrieved documents")
-    
+
     model_config = ConfigDict(extra="allow")
 
 
@@ -114,40 +123,34 @@ class BaseRetrieverConfig(InvokableEngine[RetrieverInput, RetrieverOutput]):
         docs = retriever.get_relevant_documents("query")
         ```
     """
+
     engine_type: EngineType = Field(default=EngineType.RETRIEVER)
     retriever_type: RetrieverType = Field(
-        description="The type of retriever to use",
-        default=RetrieverType.VECTOR_STORE
+        description="The type of retriever to use", default=RetrieverType.VECTOR_STORE
     )
-    
+
     # Common retriever parameters
     search_type: str = Field(
-        default="similarity",
-        description="Search type ('similarity', 'mmr', etc.)"
+        default="similarity", description="Search type ('similarity', 'mmr', etc.)"
     )
     search_kwargs: Dict[str, Any] = Field(
-        default_factory=dict,
-        description="Additional search parameters"
+        default_factory=dict, description="Additional search parameters"
     )
-    k: int = Field(
-        default=4,
-        description="Number of documents to retrieve"
-    )
+    k: int = Field(default=4, description="Number of documents to retrieve")
     filter: Optional[Dict[str, Any]] = Field(
-        default=None,
-        description="Filter to apply to vector store search"
+        default=None, description="Filter to apply to vector store search"
     )
 
     # Schema definitions
     input_schema: Type[BaseModel] = Field(
         default=RetrieverInput,
         description="Input schema for this retriever",
-        exclude=True
+        exclude=True,
     )
     output_schema: Type[BaseModel] = Field(
         default=RetrieverOutput,
         description="Output schema for this retriever",
-        exclude=True
+        exclude=True,
     )
 
     # Registry for retriever types
@@ -162,10 +165,10 @@ class BaseRetrieverConfig(InvokableEngine[RetrieverInput, RetrieverOutput]):
         if v != EngineType.RETRIEVER:
             raise ValueError("engine_type must be RETRIEVER")
         return v
-    
+
     def get_input_fields(self) -> Dict[str, Tuple[Type, Any]]:
         """Return input field definitions from the RetrieverInput model.
-        
+
         Returns:
             Dictionary mapping field names to (type, default) tuples
         """
@@ -173,10 +176,10 @@ class BaseRetrieverConfig(InvokableEngine[RetrieverInput, RetrieverOutput]):
         for name, field_info in self.input_schema.model_fields.items():
             fields[name] = (field_info.annotation, field_info.default)
         return fields
-    
+
     def get_output_fields(self) -> Dict[str, Tuple[Type, Any]]:
         """Return output field definitions from the RetrieverOutput model.
-        
+
         Returns:
             Dictionary mapping field names to (type, default) tuples
         """
@@ -185,12 +188,14 @@ class BaseRetrieverConfig(InvokableEngine[RetrieverInput, RetrieverOutput]):
             fields[name] = (field_info.annotation, field_info.default)
         return fields
 
-    def create_runnable(self, runnable_config: Optional[RunnableConfig] = None) -> BaseRetriever:
+    def create_runnable(
+        self, runnable_config: Optional[RunnableConfig] = None
+    ) -> BaseRetriever:
         """Create a retriever with configuration applied.
-        
+
         Args:
             runnable_config: Optional runtime configuration
-            
+
         Returns:
             Instantiated retriever
         """
@@ -219,24 +224,26 @@ class BaseRetrieverConfig(InvokableEngine[RetrieverInput, RetrieverOutput]):
 
         # Create the retriever with updated configuration
         return self.instantiate()
-    
+
     def instantiate(self) -> BaseRetriever:
         """Create the retriever instance.
-        
+
         Returns:
             Instantiated retriever
-        
+
         Raises:
             NotImplementedError: If not implemented by subclass
         """
         raise NotImplementedError("Subclasses must implement instantiate method")
 
-    def apply_runnable_config(self, runnable_config: Optional[RunnableConfig] = None) -> Dict[str, Any]:
+    def apply_runnable_config(
+        self, runnable_config: Optional[RunnableConfig] = None
+    ) -> Dict[str, Any]:
         """Extract parameters from runnable_config relevant to this retriever.
-        
+
         Args:
             runnable_config: Runtime configuration
-            
+
         Returns:
             Dictionary of relevant parameters
         """
@@ -259,77 +266,87 @@ class BaseRetrieverConfig(InvokableEngine[RetrieverInput, RetrieverOutput]):
     @classmethod
     def register(cls, retriever_type: RetrieverType):
         """Register a retriever config implementation.
-        
+
         Args:
             retriever_type: Type of retriever to register
-            
+
         Returns:
             Decorator function
         """
+
         def decorator(subclass):
-            logger.debug(f"Registering retriever type {retriever_type} with class {subclass.__name__}")
+            logger.debug(
+                f"Registering retriever type {retriever_type} with class {subclass.__name__}"
+            )
             cls._registry[retriever_type] = subclass
             return subclass
+
         return decorator
 
     @classmethod
-    def get_config_class(cls, retriever_type: RetrieverType) -> Type["BaseRetrieverConfig"]:
+    def get_config_class(
+        cls, retriever_type: RetrieverType
+    ) -> Type["BaseRetrieverConfig"]:
         """Get the appropriate config class for the retriever type.
-        
+
         Args:
             retriever_type: Type of retriever
-            
+
         Returns:
             Retriever config class
         """
         # Ensure all retriever types are loaded
         cls._ensure_retrievers_loaded()
-        
+
         if retriever_type not in cls._registry:
-            logger.warning(f"No registered config for {retriever_type}, using base config")
+            logger.warning(
+                f"No registered config for {retriever_type}, using base config"
+            )
             return cls
         return cls._registry[retriever_type]
 
     @classmethod
-    def from_retriever_type(cls, retriever_type: RetrieverType, **kwargs) -> "BaseRetrieverConfig":
+    def from_retriever_type(
+        cls, retriever_type: RetrieverType, **kwargs
+    ) -> "BaseRetrieverConfig":
         """Create the appropriate config for the given retriever type.
-        
+
         Args:
             retriever_type: Type of retriever to create
             **kwargs: Additional parameters for the config
-            
+
         Returns:
             Configured retriever config
         """
         config_class = cls.get_config_class(retriever_type)
         return config_class(retriever_type=retriever_type, **kwargs)
-    
+
     @classmethod
     def _ensure_retrievers_loaded(cls):
         """Ensure all retriever implementations are loaded.
-        
+
         This method automatically imports all modules in the retriever package
         to ensure all retriever implementations are registered.
         """
         if cls._initialized:
             return
-            
+
         # Get the current module
         current_module = sys.modules[__name__]
         package_name = current_module.__name__
-        
+
         # Find the parent package
         parent_package = ".".join(package_name.split(".")[:-1])
         retriever_package = f"{parent_package}.retriever"
-        
+
         try:
             # Import the retriever package
             retriever_pkg = importlib.import_module(retriever_package)
-            
+
             # Get the package path
             if hasattr(retriever_pkg, "__path__"):
                 package_path = retriever_pkg.__path__
-                
+
                 # Discover and import all modules in the package
                 for _, name, is_pkg in pkgutil.walk_packages(package_path):
                     if not is_pkg:
@@ -337,10 +354,12 @@ class BaseRetrieverConfig(InvokableEngine[RetrieverInput, RetrieverOutput]):
                             importlib.import_module(f"{retriever_package}.{name}")
                             logger.debug(f"Loaded retriever module: {name}")
                         except ImportError as e:
-                            logger.warning(f"Failed to import retriever module {name}: {e}")
-            
+                            logger.warning(
+                                f"Failed to import retriever module {name}: {e}"
+                            )
+
             cls._initialized = True
-            
+
         except (ImportError, AttributeError) as e:
             logger.warning(f"Failed to load retriever modules: {e}")
             # Continue without loading modules
@@ -387,37 +406,34 @@ class VectorStoreRetrieverConfig(BaseRetrieverConfig):
         docs = retriever.get_relevant_documents("query")
         ```
     """
+
     retriever_type: RetrieverType = Field(
-        default=RetrieverType.VECTOR_STORE,
-        description="The type of retriever"
+        default=RetrieverType.VECTOR_STORE, description="The type of retriever"
     )
 
     # Required vector store configuration
     vector_store_config: VectorStoreConfig = Field(
         ...,  # This makes it required
-        description="Configuration for the vector store to retrieve from"
+        description="Configuration for the vector store to retrieve from",
     )
 
     # Search configuration
     k: int = Field(
         default=4,
         ge=1,  # minimum of 1 document
-        description="Number of documents to retrieve"
+        description="Number of documents to retrieve",
     )
 
     search_type: str = Field(
-        default="similarity",
-        description="Search type: 'similarity', 'mmr', etc."
+        default="similarity", description="Search type: 'similarity', 'mmr', etc."
     )
 
     search_kwargs: Dict[str, Any] = Field(
-        default_factory=dict,
-        description="Additional search parameters"
+        default_factory=dict, description="Additional search parameters"
     )
 
     filter: Optional[Dict[str, Any]] = Field(
-        default=None,
-        description="Filter to apply to vector store search"
+        default=None, description="Filter to apply to vector store search"
     )
 
     @field_validator("retriever_type")
@@ -429,7 +445,7 @@ class VectorStoreRetrieverConfig(BaseRetrieverConfig):
 
     def instantiate(self) -> BaseRetriever:
         """Create a VectorStoreRetriever instance based on this configuration.
-        
+
         Returns:
             Instantiated retriever
         """
@@ -448,9 +464,9 @@ class VectorStoreRetrieverConfig(BaseRetrieverConfig):
             retriever = self.vector_store_config.create_retriever(
                 search_type=self.search_type,
                 search_kwargs=search_kwargs,
-                **extra_kwargs
+                **extra_kwargs,
             )
-            
+
             return retriever
         except Exception as e:
             logger.error(f"Error creating retriever: {str(e)}")
@@ -459,51 +475,47 @@ class VectorStoreRetrieverConfig(BaseRetrieverConfig):
 
 # Convenience factory functions
 
+
 def create_retriever_config(
     retriever_type: Union[RetrieverType, str],
     name: str,
     description: Optional[str] = None,
-    **kwargs
+    **kwargs,
 ) -> BaseRetrieverConfig:
     """Factory function to create appropriate retriever configuration.
-    
+
     Args:
         retriever_type: Type of retriever to create
         name: Name identifier for this retriever
         description: Description of the retriever
         **kwargs: Additional parameters specific to retriever type
-        
+
     Returns:
         Appropriate retriever configuration object
     """
     # Ensure all retrievers are loaded
     BaseRetrieverConfig._ensure_retrievers_loaded()
-    
+
     # Convert string to enum if needed
     if isinstance(retriever_type, str):
         retriever_type = RetrieverType(retriever_type)
 
     # Create the configuration with common parameters
-    config_params = {
-        "name": name,
-        "description": description,
-        **kwargs
-    }
+    config_params = {"name": name, "description": description, **kwargs}
 
     # Create and return the appropriate configuration using the registry
     return BaseRetrieverConfig.from_retriever_type(retriever_type, **config_params)
 
 
 def create_retriever_from_vectorstore(
-    vector_store_config: VectorStoreConfig,
-    **kwargs
+    vector_store_config: VectorStoreConfig, **kwargs
 ) -> BaseRetriever:
     """Create a retriever from a vector store configuration.
-    
+
     Args:
         vector_store_config: Vector store configuration
         **kwargs: Additional parameters for the retriever
-        
+
     Returns:
         Instantiated retriever
     """
@@ -511,7 +523,7 @@ def create_retriever_from_vectorstore(
     retriever_config = VectorStoreRetrieverConfig(
         name=f"retriever_{vector_store_config.name}",
         vector_store_config=vector_store_config,
-        **kwargs
+        **kwargs,
     )
 
     # Instantiate retriever

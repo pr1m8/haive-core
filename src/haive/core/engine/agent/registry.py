@@ -14,30 +14,36 @@ logger = logging.getLogger(__name__)
 # Global registry mapping config classes to agent classes
 AGENT_REGISTRY: dict[type, type] = {}
 
+
 def register_agent(config_class: type):
     """Register an agent class with its configuration class.
-    
+
     Args:
         config_class: The agent config class to register
-        
+
     Returns:
         A decorator function that registers the agent class
     """
+
     def decorator(agent_class: type):
         AGENT_REGISTRY[config_class] = agent_class
-        logger.debug(f"Registered agent {agent_class.__name__} for config {config_class.__name__}")
+        logger.debug(
+            f"Registered agent {agent_class.__name__} for config {config_class.__name__}"
+        )
         return agent_class
+
     return decorator
+
 
 def resolve_agent_class(config_class: type) -> type | None:
     """Resolve an agent class for a given config class.
-    
+
     First checks the registry, then tries to resolve by naming convention,
     looking in the same module or sibling modules.
-    
+
     Args:
         config_class: The agent config class to find an implementation for
-        
+
     Returns:
         The agent class if found, None otherwise
     """
@@ -57,12 +63,13 @@ def resolve_agent_class(config_class: type) -> type | None:
 
     return agent_class
 
+
 def _resolve_agent_class_by_name(config_class: type) -> type | None:
     """Try to resolve agent class by naming convention.
-    
+
     Args:
         config_class: The agent config class to find an implementation for
-        
+
     Returns:
         The agent class if found, None otherwise
     """
@@ -93,12 +100,13 @@ def _resolve_agent_class_by_name(config_class: type) -> type | None:
 
     return None
 
+
 def register_agents_from_module(module_path: str) -> int:
     """Register all agents from a module.
-    
+
     Args:
         module_path: The module path to scan for agents
-        
+
     Returns:
         Number of agents registered
     """
@@ -117,7 +125,9 @@ def register_agents_from_module(module_path: str) -> int:
                     if config_class and isinstance(config_class, type):
                         AGENT_REGISTRY[config_class] = obj
                         count += 1
-                        logger.debug(f"Registered agent {obj.__name__} for config {config_class.__name__}")
+                        logger.debug(
+                            f"Registered agent {obj.__name__} for config {config_class.__name__}"
+                        )
 
         return count
     except ImportError as e:

@@ -6,8 +6,7 @@ import networkx as nx
 
 
 class StateGraphManager:
-    """A manager for extracting metadata and modifying a StateGraph.
-    """
+    """A manager for extracting metadata and modifying a StateGraph."""
 
     def __init__(self, graph: Any):
         """Initialize the StateGraphManager.
@@ -20,8 +19,7 @@ class StateGraphManager:
         self.needs_recompile = False  # Track modifications requiring recompilation
 
     def extract_metadata(self) -> dict[str, Any]:
-        """Extract metadata from the StateGraph, including conditional branches.
-        """
+        """Extract metadata from the StateGraph, including conditional branches."""
         metadata = {
             "entry_point": getattr(self.graph, "entry_point", None),
             "finish_point": getattr(self.graph, "finish_point", None),
@@ -32,12 +30,14 @@ class StateGraphManager:
             "input_schema": getattr(self.graph, "input", None),
             "output_schema": getattr(self.graph, "output", None),
             "compiled": getattr(self.graph, "compiled", False),
-            "support_multiple_edges": getattr(self.graph, "support_multiple_edges", True),
+            "support_multiple_edges": getattr(
+                self.graph, "support_multiple_edges", True
+            ),
         }
 
         branches = getattr(self.graph, "branches", {})
         for node, conditions in branches.items():
-            for condition_name, branch_obj in conditions.items():
+            for _condition_name, branch_obj in conditions.items():
                 if hasattr(branch_obj, "ends"):
                     for condition, target in branch_obj.ends.items():
                         metadata["conditional_edges"][node].append(
@@ -66,10 +66,10 @@ class StateGraphManager:
             self.graph.edges.remove((src, dst))
             self.needs_recompile = True
 
-    #def insert_node(self, node: str, between: Tuple[str, str], func: callable = None):
+    # def insert_node(self, node: str, between: Tuple[str, str], func: callable = None):
     def insert_node(self, node: str, between: tuple[str, str], func: callable = None):
         """Insert a new node between two existing nodes, using LangGraph's `add_node` and `add_edge` methods.
-    
+
         Args:
             node (str): The name of the new node.
             between (Tuple[str, str]): A tuple (src, dst) indicating where to insert the node.
@@ -78,8 +78,10 @@ class StateGraphManager:
         src, dst = between
 
         if src not in self.graph.nodes or dst not in self.graph.nodes:
-            self.graph.add_node(node,func)
-            raise ValueError(f"Cannot insert node: {src} or {dst} does not exist in the graph.")
+            self.graph.add_node(node, func)
+            raise ValueError(
+                f"Cannot insert node: {src} or {dst} does not exist in the graph."
+            )
 
         print(f"📌 Inserting `{node}` between `{src}` → `{dst}`")
 
@@ -90,7 +92,9 @@ class StateGraphManager:
         if func is None:
             func = getattr(self.graph, node, None)  # Try extracting from existing graph
             if not callable(func):
-                raise ValueError(f"No callable function found for `{node}`. Provide `func` explicitly.")
+                raise ValueError(
+                    f"No callable function found for `{node}`. Provide `func` explicitly."
+                )
 
         # ✅ Add the new node with its function in LangGraph
         self.graph.add_node(func, node)
@@ -101,18 +105,15 @@ class StateGraphManager:
 
         self.needs_recompile = True
 
-
-
-
-
-
     def insert_start_node(self, node: str):
         """Insert a node into the branch between `__start__` and the first connected node."""
         # Retrieve edges originating from `__start__`
         start_edges = [edge for edge in self.graph.edges if edge[0] == "__start__"]
 
         if not start_edges:
-            raise ValueError("No existing start edges found. Ensure `__start__` is connected in the graph.")
+            raise ValueError(
+                "No existing start edges found. Ensure `__start__` is connected in the graph."
+            )
 
         # Pick the first transition from `__start__`
         _, first_node = start_edges[0]
@@ -129,15 +130,15 @@ class StateGraphManager:
 
         self.needs_recompile = True
 
-
-
     def insert_end_node(self, node: str):
         """Insert a node into the branch before `END`."""
         # Retrieve edges that connect to `END`
         end_edges = [edge for edge in self.graph.edges if edge[1] == "END"]
 
         if not end_edges:
-            raise ValueError("No existing end edges found. Ensure `END` is connected in the graph.")
+            raise ValueError(
+                "No existing end edges found. Ensure `END` is connected in the graph."
+            )
 
         # Pick the first transition to `END`
         last_node, _ = end_edges[0]
@@ -148,13 +149,11 @@ class StateGraphManager:
         self.add_node(node)
 
         # Remove old edge and insert new edges
-        #self.remove_edge(last_node, "END")
-        #self.graph.edges.add((last_node, node))
-        #self.graph.edges.add((node, "END"))
+        # self.remove_edge(last_node, "END")
+        # self.graph.edges.add((last_node, node))
+        # self.graph.edges.add((node, "END"))
 
-        #self.needs_recompile = True
-
-
+        # self.needs_recompile = True
 
     def update_branch(self, node: str, condition: str, target: str):
         """Update a conditional branch using defaultdict."""
@@ -209,35 +208,65 @@ class StateGraphManager:
 
         # **Draw Solid Edges (State Transitions)**
         nx.draw_networkx_edges(
-            G, pos, edgelist=solid_edges,
-            edge_color="black", width=2, alpha=0.8,
-            arrows=True, arrowstyle="-|>", arrowsize=20,  # 🔥 Force arrows
-            connectionstyle="arc3,rad=0.1"
+            G,
+            pos,
+            edgelist=solid_edges,
+            edge_color="black",
+            width=2,
+            alpha=0.8,
+            arrows=True,
+            arrowstyle="-|>",
+            arrowsize=20,  # 🔥 Force arrows
+            connectionstyle="arc3,rad=0.1",
         )
 
         # **Draw Dashed Conditional Edges (Branching Paths)**
         nx.draw_networkx_edges(
-            G, pos, edgelist=dashed_edges,
-            edge_color="red", style="dashed", width=2,
-            arrows=True, arrowstyle="-|>", arrowsize=20,  # 🔥 Force arrows
-            connectionstyle="arc3,rad=0.3"
+            G,
+            pos,
+            edgelist=dashed_edges,
+            edge_color="red",
+            style="dashed",
+            width=2,
+            arrows=True,
+            arrowstyle="-|>",
+            arrowsize=20,  # 🔥 Force arrows
+            connectionstyle="arc3,rad=0.3",
         )
 
         # **Draw Nodes**
-        nx.draw_networkx_nodes(G, pos, node_color="lightblue", node_size=2800, edgecolors="black")
+        nx.draw_networkx_nodes(
+            G, pos, node_color="lightblue", node_size=2800, edgecolors="black"
+        )
         nx.draw_networkx_labels(G, pos, font_size=12, font_weight="bold")
 
         # **Draw Conditional Labels**
-        nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_color="red", font_size=10)
+        nx.draw_networkx_edge_labels(
+            G, pos, edge_labels=edge_labels, font_color="red", font_size=10
+        )
 
         # ✅ Highlight entry and finish points
         entry = self.metadata["entry_point"]
         finish = self.metadata["finish_point"]
 
         if entry:
-            nx.draw_networkx_nodes(G, pos, nodelist=[entry], node_color="green", node_size=3000, edgecolors="black")  # Entry point
+            nx.draw_networkx_nodes(
+                G,
+                pos,
+                nodelist=[entry],
+                node_color="green",
+                node_size=3000,
+                edgecolors="black",
+            )  # Entry point
         if finish and finish in self.metadata["nodes"]:
-            nx.draw_networkx_nodes(G, pos, nodelist=[finish], node_color="red", node_size=3000, edgecolors="black")  # Finish point
+            nx.draw_networkx_nodes(
+                G,
+                pos,
+                nodelist=[finish],
+                node_color="red",
+                node_size=3000,
+                edgecolors="black",
+            )  # Finish point
 
         # ✅ Save and display
         plt.title("State Graph Visualization", fontsize=14, fontweight="bold")
@@ -253,12 +282,12 @@ class StateGraphManager:
     @staticmethod
     def attach_to_graph(graph):
         """Create a manager and attach it to a StateGraph.
-        
+
         This modifies the graph object to add a get_manager method.
-        
+
         Args:
             graph: StateGraph to attach to
-            
+
         Returns:
             The modified graph
         """

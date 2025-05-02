@@ -53,7 +53,9 @@ sys.modules["src.haive.core.engine.aug_llm"] = mock_aug_llm_module
 mock_state_schema_manager = MagicMock()
 mock_schema_manager_module = MagicMock()
 mock_schema_manager_module.StateSchemaManager = mock_state_schema_manager
-sys.modules["src.haive.core.graph.schema.StateSchemaManager"] = mock_schema_manager_module
+sys.modules["src.haive.core.graph.schema.StateSchemaManager"] = (
+    mock_schema_manager_module
+)
 
 # Mock SchemaComposer
 mock_schema_composer = MagicMock()
@@ -74,7 +76,9 @@ mock_graph_editor_module.StateGraphEditor = mock_state_graph_editor
 sys.modules["src.haive.core.graph.StateGraphEditor"] = mock_graph_editor_module
 
 # Import path handling to ensure proper imports
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../../")))
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../../"))
+)
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -86,9 +90,11 @@ class ComponentRef(BaseModel):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
+
 # Create a mock for the DynamicGraph class we'll test
 # This is a fixed version of the MockDynamicGraph class for tests
 # tests/core/graph/test_graph_builder.py
+
 
 class MockDynamicGraph(BaseModel):
     name: str = "test_graph"
@@ -129,7 +135,9 @@ class MockDynamicGraph(BaseModel):
         self.graph_editor = mock_state_graph_editor.return_value
 
     def _lookup_engine(self, name, engine_type=None):
-        return next((e for e in self.components if hasattr(e, "name") and e.name == name), None)
+        return next(
+            (e for e in self.components if hasattr(e, "name") and e.name == name), None
+        )
 
     def with_runnable_config(self, runnable_config):
         new_graph = MockDynamicGraph(
@@ -140,7 +148,7 @@ class MockDynamicGraph(BaseModel):
             state_schema=self.state_model,
             build_type=self.build_type,
             default_runnable_config=runnable_config,
-            visualize=self.visualize
+            visualize=self.visualize,
         )
         return new_graph
 
@@ -159,8 +167,16 @@ class MockDynamicGraph(BaseModel):
 
         return self
 
-    def add_node(self, name, config, command_goto=None, input_mapping=None,
-                output_mapping=None, runnable_config=None, metadata=None):
+    def add_node(
+        self,
+        name,
+        config,
+        command_goto=None,
+        input_mapping=None,
+        output_mapping=None,
+        runnable_config=None,
+        metadata=None,
+    ):
         # Store engine if it has a name
         if hasattr(config, "name"):
             self.engines[name] = config
@@ -173,30 +189,33 @@ class MockDynamicGraph(BaseModel):
             input_mapping=input_mapping,
             output_mapping=output_mapping,
             runnable_config=runnable_config,
-            metadata=metadata
+            metadata=metadata,
         )
 
         return self
 
-    def add_config_node(self, name="set_config", runnable_config=None, command_goto=None):
+    def add_config_node(
+        self, name="set_config", runnable_config=None, command_goto=None
+    ):
         # Create a node function using NodeFactory
         # This now explicitly calls the factory method to pass the test assertion
         node_fn = mock_node_factory.create_runnable_config_node(
             runnable_config=runnable_config or self.default_runnable_config,
-            command_goto=command_goto
+            command_goto=command_goto,
         )
 
         # Add to graph editor
-        self.graph_editor.add_node(
-            name=name,
-            engine=node_fn,
-            command_goto=command_goto
-        )
+        self.graph_editor.add_node(name=name, engine=node_fn, command_goto=command_goto)
 
         return self
 
-    def add_structured_output_node(self, name="structured_output", model=None,
-                               command_goto="END", runnable_config=None):
+    def add_structured_output_node(
+        self,
+        name="structured_output",
+        model=None,
+        command_goto="END",
+        runnable_config=None,
+    ):
         model_to_use = model or self.structured_output_model
 
         # Create a node function using NodeFactory
@@ -204,23 +223,25 @@ class MockDynamicGraph(BaseModel):
         node_fn = mock_node_factory.create_structured_output_node(
             model=model_to_use,
             command_goto=command_goto,
-            runnable_config=runnable_config or self.default_runnable_config
+            runnable_config=runnable_config or self.default_runnable_config,
         )
 
         # Add to graph editor
-        self.graph_editor.add_node(
-            name=name,
-            engine=node_fn,
-            command_goto=command_goto
-        )
+        self.graph_editor.add_node(name=name, engine=node_fn, command_goto=command_goto)
 
         return self
 
-    def add_tool_node(self, name, tools, post_processor=None,
-                     command_goto=None, runnable_config=None):
+    def add_tool_node(
+        self, name, tools, post_processor=None, command_goto=None, runnable_config=None
+    ):
         # Add tool_results field if not present
-        if hasattr(self.schema_manager, "fields") and "tool_results" not in self.schema_manager.fields:
-            self.schema_manager.add_field("tool_results", list[dict[str, Any]], default_factory=list)
+        if (
+            hasattr(self.schema_manager, "fields")
+            and "tool_results" not in self.schema_manager.fields
+        ):
+            self.schema_manager.add_field(
+                "tool_results", list[dict[str, Any]], default_factory=list
+            )
 
         # Create a node function using NodeFactory
         # This now explicitly calls the factory method to pass the test assertion
@@ -228,15 +249,11 @@ class MockDynamicGraph(BaseModel):
             tools=tools,
             post_processor=post_processor,
             command_goto=command_goto,
-            runnable_config=runnable_config or self.default_runnable_config
+            runnable_config=runnable_config or self.default_runnable_config,
         )
 
         # Add to graph editor
-        self.graph_editor.add_node(
-            name=name,
-            engine=node_fn,
-            command_goto=command_goto
-        )
+        self.graph_editor.add_node(name=name, engine=node_fn, command_goto=command_goto)
 
         return self
 
@@ -250,10 +267,12 @@ class MockDynamicGraph(BaseModel):
             self.graph_editor.add_conditional_edges(
                 from_node,
                 condition_or_branch.evaluator,
-                condition_or_branch.destinations
+                condition_or_branch.destinations,
             )
         else:
-            self.graph_editor.add_conditional_edges(from_node, condition_or_branch, routes)
+            self.graph_editor.add_conditional_edges(
+                from_node, condition_or_branch, routes
+            )
         return self
 
     def set_entry_point(self, node_name):
@@ -294,15 +313,21 @@ class MockDynamicGraph(BaseModel):
             "build_type": self.build_type,
             "components": [],
             "custom_fields": self.custom_fields,
-            "default_runnable_config": str(self.default_runnable_config) if self.default_runnable_config else None
+            "default_runnable_config": (
+                str(self.default_runnable_config)
+                if self.default_runnable_config
+                else None
+            ),
         }
 
         for component in self.components:
             if hasattr(component, "name"):
-                result["components"].append({
-                    "name": component.name,
-                    "type": getattr(component, "engine_type", None)
-                })
+                result["components"].append(
+                    {
+                        "name": component.name,
+                        "type": getattr(component, "engine_type", None),
+                    }
+                )
 
         if hasattr(self.graph_editor, "to_dict"):
             result["graph_editor"] = self.graph_editor.to_dict()
@@ -314,17 +339,20 @@ class MockDynamicGraph(BaseModel):
         return cls(
             name=data.get("name", "restored_graph"),
             description=data.get("description"),
-            components=[ComponentRef(**comp) if isinstance(comp, dict) else comp
-                       for comp in data.get("components", [])],
+            components=[
+                ComponentRef(**comp) if isinstance(comp, dict) else comp
+                for comp in data.get("components", [])
+            ],
             custom_fields=data.get("custom_fields"),
             default_runnable_config={"configurable": {"temperature": 0.7}},
             visualize=data.get("visualize", True),
-            build_type=data.get("build_type")
+            build_type=data.get("build_type"),
         )
 
     def visualize(self, filename=None):
         if hasattr(self.graph_editor, "visualize"):
             self.graph_editor.visualize(filename)
+
 
 # Update the mock with our fixed class
 
@@ -356,24 +384,24 @@ class StateModel(BaseModel):
     output: str | None = None
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
+
 # Use real engine for testing
 class RealEngine(AugLLMConfig):
     def __init__(self, name="test_engine", engine_type=EngineType.LLM):
         llm_config = AzureLLMConfig(
-            model="gpt-4o",
-            api_key="test-key",
-            api_version="2023-07-01-preview"
+            model="gpt-4o", api_key="test-key", api_version="2023-07-01-preview"
         )
         super().__init__(
             name=name,
             engine_type=engine_type,
             llm_config=llm_config,
-            system_message="You are a helpful AI assistant."
+            system_message="You are a helpful AI assistant.",
         )
 
     def create_runnable(self, runnable_config=None):
         # For tests, return a simple function that mimics the LLM behavior
         return lambda x: x
+
 
 # Test class
 class DynamicGraphTests(unittest.TestCase):
@@ -381,7 +409,9 @@ class DynamicGraphTests(unittest.TestCase):
     def setUp(self):
         # Create test engines
         self.llm_engine = RealEngine(name="llm_engine", engine_type=EngineType.LLM)
-        self.retriever_engine = RealEngine(name="retriever_engine", engine_type=EngineType.RETRIEVER)
+        self.retriever_engine = RealEngine(
+            name="retriever_engine", engine_type=EngineType.RETRIEVER
+        )
 
     def test_init_with_components(self):
         """Test initializing with components"""
@@ -389,7 +419,7 @@ class DynamicGraphTests(unittest.TestCase):
         graph = MockDynamicGraph(
             name="test_graph",
             components=[self.llm_engine, self.retriever_engine],
-            visualize=False
+            visualize=False,
         )
 
         # Check that engines were stored
@@ -401,9 +431,7 @@ class DynamicGraphTests(unittest.TestCase):
         """Test initializing with custom state schema"""
         # Create DynamicGraph with state schema
         graph = MockDynamicGraph(
-            name="test_graph",
-            state_schema=StateModel,
-            visualize=False
+            name="test_graph", state_schema=StateModel, visualize=False
         )
 
         # Check schema initialization
@@ -414,9 +442,7 @@ class DynamicGraphTests(unittest.TestCase):
         """Test with_runnable_config method"""
         # Create base graph
         base_graph = MockDynamicGraph(
-            name="base_graph",
-            components=[self.llm_engine],
-            visualize=False
+            name="base_graph", components=[self.llm_engine], visualize=False
         )
 
         # Create custom config
@@ -434,10 +460,7 @@ class DynamicGraphTests(unittest.TestCase):
     def test_set_default_runnable_config(self):
         """Test set_default_runnable_config method"""
         # Create graph
-        graph = MockDynamicGraph(
-            name="test_graph",
-            visualize=False
-        )
+        graph = MockDynamicGraph(name="test_graph", visualize=False)
 
         # Set default config
         custom_config = {"configurable": {"temperature": 0.7}}
@@ -455,7 +478,7 @@ class DynamicGraphTests(unittest.TestCase):
         graph = MockDynamicGraph(
             name="test_graph",
             default_runnable_config={"configurable": {"temperature": 0.5}},
-            visualize=False
+            visualize=False,
         )
 
         # Update config
@@ -463,7 +486,9 @@ class DynamicGraphTests(unittest.TestCase):
 
         # Check that config was updated
         self.assertEqual(graph.default_runnable_config["configurable"]["top_k"], 3)
-        self.assertEqual(graph.default_runnable_config["configurable"]["temperature"], 0.5)
+        self.assertEqual(
+            graph.default_runnable_config["configurable"]["temperature"], 0.5
+        )
 
         # Check that method returns self for chaining
         self.assertIs(result, graph)
@@ -471,10 +496,7 @@ class DynamicGraphTests(unittest.TestCase):
     def test_add_node(self):
         """Test add_node method"""
         # Create graph
-        graph = MockDynamicGraph(
-            name="test_graph",
-            visualize=False
-        )
+        graph = MockDynamicGraph(name="test_graph", visualize=False)
 
         # Reset mocks
         mock_state_graph_editor.reset_mock()
@@ -486,7 +508,7 @@ class DynamicGraphTests(unittest.TestCase):
             command_goto="next_node",
             input_mapping={"state_input": "engine_input"},
             output_mapping={"engine_output": "state_output"},
-            runnable_config={"configurable": {"temperature": 0.7}}
+            runnable_config={"configurable": {"temperature": 0.7}},
         )
 
         # Check that node was added to graph editor
@@ -499,7 +521,9 @@ class DynamicGraphTests(unittest.TestCase):
         self.assertEqual(kwargs["command_goto"], "next_node")
         self.assertEqual(kwargs["input_mapping"], {"state_input": "engine_input"})
         self.assertEqual(kwargs["output_mapping"], {"engine_output": "state_output"})
-        self.assertEqual(kwargs["runnable_config"], {"configurable": {"temperature": 0.7}})
+        self.assertEqual(
+            kwargs["runnable_config"], {"configurable": {"temperature": 0.7}}
+        )
 
         # Check that engine was stored
         self.assertEqual(graph.engines["test_node"], self.llm_engine)
@@ -510,10 +534,7 @@ class DynamicGraphTests(unittest.TestCase):
     def test_add_config_node(self):
         """Test add_config_node method"""
         # Create graph
-        graph = MockDynamicGraph(
-            name="test_graph",
-            visualize=False
-        )
+        graph = MockDynamicGraph(name="test_graph", visualize=False)
 
         # Reset mocks
         mock_state_graph_editor.reset_mock()
@@ -523,7 +544,7 @@ class DynamicGraphTests(unittest.TestCase):
         result = graph.add_config_node(
             name="set_config",
             runnable_config={"configurable": {"temperature": 0.7}},
-            command_goto="next_node"
+            command_goto="next_node",
         )
 
         # Check that NodeFactory.create_runnable_config_node was called
@@ -537,6 +558,7 @@ class DynamicGraphTests(unittest.TestCase):
 
     def test_add_structured_output_node(self):
         """Test add_structured_output_node method"""
+
         # Create model for structured output
         class ResponseFormat(BaseModel):
             answer: str
@@ -544,10 +566,7 @@ class DynamicGraphTests(unittest.TestCase):
             model_config = ConfigDict(arbitrary_types_allowed=True)
 
         # Create graph
-        graph = MockDynamicGraph(
-            name="test_graph",
-            visualize=False
-        )
+        graph = MockDynamicGraph(name="test_graph", visualize=False)
 
         # Reset mocks
         mock_state_graph_editor.reset_mock()
@@ -558,8 +577,7 @@ class DynamicGraphTests(unittest.TestCase):
 
         # Add structured output node
         result = graph.add_structured_output_node(
-            name="format_output",
-            command_goto="END"
+            name="format_output", command_goto="END"
         )
 
         # Check that NodeFactory.create_structured_output_node was called
@@ -574,10 +592,7 @@ class DynamicGraphTests(unittest.TestCase):
     def test_add_tool_node(self):
         """Test add_tool_node method"""
         # Create graph
-        graph = MockDynamicGraph(
-            name="test_graph",
-            visualize=False
-        )
+        graph = MockDynamicGraph(name="test_graph", visualize=False)
 
         # Reset mocks
         mock_state_graph_editor.reset_mock()
@@ -592,7 +607,7 @@ class DynamicGraphTests(unittest.TestCase):
             name="tools",
             tools=mock_tools,
             post_processor=mock_post_processor,
-            command_goto="next_node"
+            command_goto="next_node",
         )
 
         # Check that tool_results field was added
@@ -612,10 +627,7 @@ class DynamicGraphTests(unittest.TestCase):
     def test_add_edge(self):
         """Test add_edge method"""
         # Create graph
-        graph = MockDynamicGraph(
-            name="test_graph",
-            visualize=False
-        )
+        graph = MockDynamicGraph(name="test_graph", visualize=False)
 
         # Reset mocks
         mock_state_graph_editor.reset_mock()
@@ -624,7 +636,9 @@ class DynamicGraphTests(unittest.TestCase):
         result = graph.add_edge("node1", "node2")
 
         # Check that edge was added to graph editor
-        mock_state_graph_editor.return_value.add_edge.assert_called_once_with("node1", "node2")
+        mock_state_graph_editor.return_value.add_edge.assert_called_once_with(
+            "node1", "node2"
+        )
 
         # Check that method returns self for chaining
         self.assertIs(result, graph)
@@ -632,10 +646,7 @@ class DynamicGraphTests(unittest.TestCase):
     def test_add_conditional_edges(self):
         """Test add_conditional_edges method"""
         # Create graph
-        graph = MockDynamicGraph(
-            name="test_graph",
-            visualize=False
-        )
+        graph = MockDynamicGraph(name="test_graph", visualize=False)
 
         # Reset mocks
         mock_state_graph_editor.reset_mock()
@@ -661,10 +672,7 @@ class DynamicGraphTests(unittest.TestCase):
     def test_set_entry_point(self):
         """Test set_entry_point method"""
         # Create graph
-        graph = MockDynamicGraph(
-            name="test_graph",
-            visualize=False
-        )
+        graph = MockDynamicGraph(name="test_graph", visualize=False)
 
         # Reset mocks
         mock_state_graph_editor.reset_mock()
@@ -673,7 +681,9 @@ class DynamicGraphTests(unittest.TestCase):
         result = graph.set_entry_point("start_node")
 
         # Check that entry point was set in graph editor
-        mock_state_graph_editor.return_value.set_entry_point.assert_called_once_with("start_node")
+        mock_state_graph_editor.return_value.set_entry_point.assert_called_once_with(
+            "start_node"
+        )
 
         # Check that method returns self for chaining
         self.assertIs(result, graph)
@@ -688,7 +698,7 @@ class DynamicGraphTests(unittest.TestCase):
         graph = MockDynamicGraph(
             name="test_graph",
             default_runnable_config={"configurable": {"thread_id": "test-thread"}},
-            visualize=False
+            visualize=False,
         )
 
         # Reset mocks
@@ -711,7 +721,7 @@ class DynamicGraphTests(unittest.TestCase):
             description="Test graph description",
             components=[self.llm_engine, self.retriever_engine],
             default_runnable_config={"configurable": {"thread_id": "test-thread"}},
-            visualize=True
+            visualize=True,
         )
 
         # Get dictionary representation
@@ -727,6 +737,7 @@ class DynamicGraphTests(unittest.TestCase):
 
         # Check default runnable config
         self.assertIsNotNone(result["default_runnable_config"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -7,11 +7,15 @@ from langchain_core.retrievers import BaseRetriever
 from langchain_core.runnables import RunnableConfig
 
 from haive.core.engine.retriever import VectorStoreRetrieverConfig
-from haive.core.engine.vectorstore.vectorstore import VectorStoreConfig, VectorStoreProvider
+from haive.core.engine.vectorstore.vectorstore import (
+    VectorStoreConfig,
+    VectorStoreProvider,
+)
 from haive.core.models.embeddings.base import HuggingFaceEmbeddingConfig
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
+
 
 def make_retriever_config(docs=None) -> VectorStoreRetrieverConfig:
     docs = docs or [Document(page_content="The Eiffel Tower is in Paris.")]
@@ -27,12 +31,11 @@ def make_retriever_config(docs=None) -> VectorStoreRetrieverConfig:
         embedding_model=HuggingFaceEmbeddingConfig(
             model="sentence-transformers/all-MiniLM-L6-v2"
             # cache_folder is now handled by the default in HuggingFaceEmbeddingConfig
-        )
+        ),
     )
 
     return VectorStoreRetrieverConfig(
-        name="retriever_test",
-        vector_store_config=vectorstore
+        name="retriever_test", vector_store_config=vectorstore
     )
 
 

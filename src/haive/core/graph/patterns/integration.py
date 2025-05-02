@@ -14,10 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 def apply_pattern_to_graph(
-    graph: Any,
-    pattern_name: str,
-    verify_compatibility: bool = True,
-    **kwargs
+    graph: Any, pattern_name: str, verify_compatibility: bool = True, **kwargs
 ) -> Any:
     """Apply a registered pattern to a graph with enhanced verification."""
     # Get registry using singleton
@@ -43,7 +40,10 @@ def apply_pattern_to_graph(
         result = pattern.apply(graph, **kwargs)
 
         # Track applied pattern if graph supports it
-        if hasattr(graph, "applied_patterns") and pattern_name not in graph.applied_patterns:
+        if (
+            hasattr(graph, "applied_patterns")
+            and pattern_name not in graph.applied_patterns
+        ):
             graph.applied_patterns.append(pattern_name)
 
         return result
@@ -53,19 +53,16 @@ def apply_pattern_to_graph(
 
 
 def apply_branch_to_graph(
-    graph: Any,
-    branch_name: str,
-    source_node: str,
-    **kwargs
+    graph: Any, branch_name: str, source_node: str, **kwargs
 ) -> Any:
     """Apply a registered branch to a graph.
-    
+
     Args:
         graph: Graph to apply the branch to
         branch_name: Name of branch to apply
         source_node: Source node for the branch
         **kwargs: Branch parameters
-        
+
     Returns:
         Modified graph
     """
@@ -82,20 +79,18 @@ def apply_branch_to_graph(
 
 
 def create_pattern_node_config(
-    pattern_name: str,
-    node_name: str,
-    **pattern_params
+    pattern_name: str, node_name: str, **pattern_params
 ) -> Any:
     """Create a NodeConfig based on a pattern.
-    
+
     Note: This requires importing NodeConfig, which is done dynamically
     to avoid circular imports.
-    
+
     Args:
         pattern_name: Pattern to use as template
         node_name: Name for the node
         **pattern_params: Pattern parameters
-        
+
     Returns:
         NodeConfig instance
     """
@@ -103,7 +98,9 @@ def create_pattern_node_config(
     try:
         from haive.core.graph.node.config import NodeConfig
     except ImportError:
-        logger.error("Cannot import NodeConfig, integration with NodeFactory unavailable")
+        logger.error(
+            "Cannot import NodeConfig, integration with NodeFactory unavailable"
+        )
         raise ImportError("NodeConfig not available")
 
     registry = GraphPatternRegistry.get_instance()
@@ -115,7 +112,9 @@ def create_pattern_node_config(
     # Validate pattern parameters
     is_valid, errors = pattern.metadata.validate_parameters(pattern_params)
     if not is_valid:
-        error_msg = f"Invalid parameters for pattern {pattern_name}: {', '.join(errors)}"
+        error_msg = (
+            f"Invalid parameters for pattern {pattern_name}: {', '.join(errors)}"
+        )
         logger.error(error_msg)
         raise ValueError(error_msg)
 
@@ -140,8 +139,8 @@ def create_pattern_node_config(
         metadata={
             "pattern": pattern_name,
             "pattern_type": pattern.metadata.pattern_type,
-            "pattern_params": pattern_params
-        }
+            "pattern_params": pattern_params,
+        },
     )
 
     return node_config
@@ -149,7 +148,7 @@ def create_pattern_node_config(
 
 def register_node_factory_integration():
     """Register integration with the NodeFactory.
-    
+
     This adds a method to NodeFactory to create nodes from patterns.
     """
     try:
@@ -157,19 +156,22 @@ def register_node_factory_integration():
 
         # Only add if not already present
         if not hasattr(NodeFactory, "create_pattern_node"):
+
             @classmethod
             def create_pattern_node(cls, pattern_name, node_name, **pattern_params):
                 """Create a node function based on a pattern.
-                
+
                 Args:
                     pattern_name: Pattern to use as template
                     node_name: Name for the node
                     **pattern_params: Pattern parameters
-                    
+
                 Returns:
                     Node function
                 """
-                node_config = create_pattern_node_config(pattern_name, node_name, **pattern_params)
+                node_config = create_pattern_node_config(
+                    pattern_name, node_name, **pattern_params
+                )
                 return cls.create_node_function(node_config)
 
             # Add method to NodeFactory
@@ -182,7 +184,7 @@ def register_node_factory_integration():
 
 def register_dynamic_graph_integration():
     """Register integration with the DynamicGraph.
-    
+
     This enhances the apply_pattern method in DynamicGraph.
     """
     try:
@@ -192,14 +194,16 @@ def register_dynamic_graph_integration():
         original_method = getattr(DynamicGraph, "apply_pattern", None)
 
         # Define enhanced method
-        def enhanced_apply_pattern(self, pattern_name, verify_compatibility=True, **kwargs):
+        def enhanced_apply_pattern(
+            self, pattern_name, verify_compatibility=True, **kwargs
+        ):
             """Apply a registered pattern with enhanced verification.
-            
+
             Args:
                 pattern_name: Name of pattern to apply
                 verify_compatibility: Whether to verify component compatibility
                 **kwargs: Pattern parameters
-                
+
             Returns:
                 Self for chaining
             """
@@ -208,7 +212,9 @@ def register_dynamic_graph_integration():
                 try:
                     return original_method(self, pattern_name, **kwargs)
                 except Exception as e:
-                    logger.debug(f"Original apply_pattern failed: {e}, trying enhanced version")
+                    logger.debug(
+                        f"Original apply_pattern failed: {e}, trying enhanced version"
+                    )
 
             # Use enhanced implementation
             apply_pattern_to_graph(self, pattern_name, verify_compatibility, **kwargs)
@@ -220,14 +226,15 @@ def register_dynamic_graph_integration():
 
         # Add branch application method if not present
         if not hasattr(DynamicGraph, "apply_branch"):
+
             def apply_branch(self, branch_name, source_node, **kwargs):
                 """Apply a registered branch to this graph.
-                
+
                 Args:
                     branch_name: Name of branch to apply
                     source_node: Source node for the branch
                     **kwargs: Branch parameters
-                    
+
                 Returns:
                     Self for chaining
                 """
@@ -243,15 +250,14 @@ def register_dynamic_graph_integration():
 
 
 def check_component_compatibility(
-    components: list[Any],
-    pattern_name: str
+    components: list[Any], pattern_name: str
 ) -> tuple[bool, list[str]]:
     """Check if components are compatible with a pattern.
-    
+
     Args:
         components: List of components to check
         pattern_name: Name of pattern to check against
-        
+
     Returns:
         Tuple of (is_compatible, missing_components)
     """
@@ -267,10 +273,10 @@ def check_component_compatibility(
 
 def find_compatible_patterns(components: list[Any]) -> list[str]:
     """Find patterns compatible with the given components.
-    
+
     Args:
         components: List of components to check
-        
+
     Returns:
         List of compatible pattern names
     """
@@ -284,27 +290,33 @@ def find_compatible_patterns(components: list[Any]) -> list[str]:
 
     return compatible_patterns
 
+
 # Add to src/haive/core/graph/patterns/integration.py
+
 
 def register_callable_processor():
     """Register the callable processor explicitly."""
     try:
-        from haive.core.graph.node.registry import NodeTypeRegistry
         from haive.core.graph.node.processors import CallableNodeProcessor
-        
+        from haive.core.graph.node.registry import NodeTypeRegistry
+
         # Get registry
         registry = NodeTypeRegistry.get_instance()
-        
+
         # Register callable processor
         registry.register_node_processor("callable", CallableNodeProcessor())
-        
+
         logger.info("Registered callable proWScessor")
     except ImportError as e:
         logger.warning(f"Could not register callable processor: {e}")
+
+
 def register_integrations():
     """Register all integrations."""
     register_node_factory_integration()
     register_dynamic_graph_integration()
     register_callable_processor()  # Add this line
+
+
 # Uncomment to auto-register when module is imported
 # register_integrations()

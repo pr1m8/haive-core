@@ -1,23 +1,27 @@
 from enum import Enum
-from typing import Dict, Any, Optional
+from typing import Dict
+
 
 class CheckpointerType(str, Enum):
     """Types of checkpointers available in the system."""
+
     MEMORY = "memory"
     POSTGRES = "postgres"
     MYSQL = "mysql"
     SQLITE = "sqlite"
     REDIS = "redis"
 
+
 class CheckpointerMode(str, Enum):
     """Operational modes for checkpointers."""
+
     SYNC = "sync"
     ASYNC = "async"
-    
+
     # Special handling for async mode
     # This is needed because 'async' is a Python keyword
     async_ = "async"
-    
+
     def __eq__(self, other):
         """Custom equality to handle async_ special case."""
         if isinstance(other, str):
@@ -27,15 +31,17 @@ class CheckpointerMode(str, Enum):
                 return True
         return super().__eq__(other)
 
+
 class CheckpointStorageMode(str, Enum):
     """Storage modes for checkpointers."""
-    FULL = "full"         # Store full history
-    SHALLOW = "shallow"   # Store only the most recent state
-    CHAIN = "chain"       # Store checkpoints in a chain/linked list
-    
+
+    FULL = "full"  # Store full history
+    SHALLOW = "shallow"  # Store only the most recent state
+    CHAIN = "chain"  # Store checkpoints in a chain/linked list
+
     # For compatibility with earlier versions
     STANDARD = "full"
-    
+
     def __eq__(self, other):
         """Custom equality to handle compatibility modes."""
         if isinstance(other, str):
@@ -45,14 +51,15 @@ class CheckpointStorageMode(str, Enum):
                 return True
         return super().__eq__(other)
 
+
 class ConnectionOptions:
     """Common connection options for database-backed checkpointers."""
-    
+
     @staticmethod
     def get_postgres_ssl_modes() -> Dict[str, str]:
         """
         Get valid PostgreSQL SSL modes.
-        
+
         Returns:
             Dictionary of SSL mode names to descriptions
         """
@@ -62,7 +69,7 @@ class ConnectionOptions:
             "prefer": "Prefer SSL connection but accept non-SSL",
             "require": "Require SSL connection",
             "verify-ca": "Verify server certificate",
-            "verify-full": "Verify server certificate and hostname"
+            "verify-full": "Verify server certificate and hostname",
         }
 
     @staticmethod
@@ -72,11 +79,11 @@ class ConnectionOptions:
         dbname: str = "postgres",
         user: str = "postgres",
         password: str = "postgres",
-        ssl_mode: str = "disable"
+        ssl_mode: str = "disable",
     ) -> str:
         """
         Create a PostgreSQL DSN connection string.
-        
+
         Args:
             host: Database host
             port: Database port
@@ -84,10 +91,11 @@ class ConnectionOptions:
             user: Username
             password: Password
             ssl_mode: SSL mode
-            
+
         Returns:
             PostgreSQL connection string
         """
         import urllib.parse
+
         encoded_pass = urllib.parse.quote_plus(password)
         return f"postgresql://{user}:{encoded_pass}@{host}:{port}/{dbname}?sslmode={ssl_mode}"

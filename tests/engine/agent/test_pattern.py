@@ -16,7 +16,7 @@ class TestPatternConfig:
             order=1,
             condition="context.ready == True",
             enabled=True,
-            metadata={"author": "test"}
+            metadata={"author": "test"},
         )
 
         assert pattern.name == "test_pattern"
@@ -31,13 +31,13 @@ class TestPatternConfig:
         pattern1 = PatternConfig(
             name="test_pattern",
             parameters={"param1": "value1", "common": "original"},
-            order=1
+            order=1,
         )
 
         pattern2 = PatternConfig(
             name="test_pattern",
             parameters={"param2": "value2", "common": "override"},
-            condition="x > 0"
+            condition="x > 0",
         )
 
         # Merge patterns
@@ -64,16 +64,12 @@ class TestPatternManager:
         """Test adding patterns to the manager."""
         # Add a simple pattern
         pattern_manager.add_pattern(
-            pattern_name="test_pattern",
-            parameters={"param1": "value1"},
-            order=1
+            pattern_name="test_pattern", parameters={"param1": "value1"}, order=1
         )
 
         # Add a second pattern
         pattern_manager.add_pattern(
-            pattern_name="second_pattern",
-            parameters={"param2": "value2"},
-            order=2
+            pattern_name="second_pattern", parameters={"param2": "value2"}, order=2
         )
 
         # Verify patterns were added
@@ -85,16 +81,14 @@ class TestPatternManager:
         """Test updating an existing pattern."""
         # Add initial pattern
         pattern_manager.add_pattern(
-            pattern_name="test_pattern",
-            parameters={"param1": "value1"},
-            order=1
+            pattern_name="test_pattern", parameters={"param1": "value1"}, order=1
         )
 
         # Update the same pattern
         pattern_manager.add_pattern(
             pattern_name="test_pattern",
             parameters={"param2": "value2"},
-            condition="x > 0"
+            condition="x > 0",
         )
 
         # Should have merged the configurations
@@ -110,33 +104,34 @@ class TestPatternManager:
         """Test setting global pattern parameters."""
         # Add a pattern
         pattern_manager.add_pattern(
-            pattern_name="test_pattern",
-            parameters={"specific": "value"}
+            pattern_name="test_pattern", parameters={"specific": "value"}
         )
 
         # Set global parameters
         pattern_manager.set_pattern_parameters(
-            "test_pattern",
-            global_param="global_value",
-            override="global_override"
+            "test_pattern", global_param="global_value", override="global_override"
         )
 
         # Add another pattern with specific parameter that overrides global
         pattern_manager.add_pattern(
             pattern_name="test_pattern_2",
-            parameters={"specific": "value2", "override": "specific_override"}
+            parameters={"specific": "value2", "override": "specific_override"},
         )
 
         # Set global parameters for the second pattern too
         pattern_manager.set_pattern_parameters(
-            "test_pattern_2",
-            global_param="global_value2",
-            override="global_override"
+            "test_pattern_2", global_param="global_value2", override="global_override"
         )
 
         # Check global parameters
-        assert pattern_manager.pattern_parameters["test_pattern"]["global_param"] == "global_value"
-        assert pattern_manager.pattern_parameters["test_pattern"]["override"] == "global_override"
+        assert (
+            pattern_manager.pattern_parameters["test_pattern"]["global_param"]
+            == "global_value"
+        )
+        assert (
+            pattern_manager.pattern_parameters["test_pattern"]["override"]
+            == "global_override"
+        )
 
         # Check combined parameters
         params1 = pattern_manager.get_pattern_parameters("test_pattern")
@@ -214,20 +209,15 @@ class TestPatternManager:
         """Test serialization to/from dictionary."""
         # Add patterns
         pattern_manager.add_pattern(
-            "test_pattern",
-            parameters={"param1": "value1"},
-            order=1
+            "test_pattern", parameters={"param1": "value1"}, order=1
         )
         pattern_manager.add_pattern(
-            "second_pattern",
-            parameters={"param2": "value2"},
-            order=2
+            "second_pattern", parameters={"param2": "value2"}, order=2
         )
 
         # Set global parameters
         pattern_manager.set_pattern_parameters(
-            "test_pattern",
-            global_param="global_value"
+            "test_pattern", global_param="global_value"
         )
 
         # Mark applied
@@ -249,7 +239,10 @@ class TestPatternManager:
         # Verify contents
         assert len(new_manager.patterns) == 2
         assert new_manager.patterns[0].name == "test_pattern"
-        assert new_manager.pattern_parameters["test_pattern"]["global_param"] == "global_value"
+        assert (
+            new_manager.pattern_parameters["test_pattern"]["global_param"]
+            == "global_value"
+        )
         assert new_manager.is_pattern_applied("test_pattern")
 
     @patch("haive.core.graph.patterns.registry.GraphPatternRegistry")

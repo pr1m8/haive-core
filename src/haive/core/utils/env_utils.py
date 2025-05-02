@@ -11,16 +11,16 @@ logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
 
+
 def load_env_file(
-    filepath: str | Path | None = None,
-    override: bool = False
+    filepath: str | Path | None = None, override: bool = False
 ) -> dict[str, str]:
     """Load environment variables from a .env file.
-    
+
     Args:
         filepath: Path to the .env file. If None, will try to find .env in parent directories.
         override: Whether to override existing environment variables.
-        
+
     Returns:
         Dictionary of loaded environment variables.
     """
@@ -55,7 +55,7 @@ def load_env_file(
     loaded_vars = {}
 
     # Use dotenv to load the file
-    dotenv_result = load_dotenv(filepath, override=override)
+    load_dotenv(filepath, override=override)
 
     # Get loaded variables for return value
     with open(filepath) as f:
@@ -74,23 +74,24 @@ def load_env_file(
 
     return loaded_vars
 
+
 def get_env_var(
     name: str,
     default: Any = None,
     cast_to: type[T] | None = None,
-    required: bool = False
+    required: bool = False,
 ) -> str | T | None:
     """Get an environment variable with optional casting and default value.
-    
+
     Args:
         name: Name of the environment variable
         default: Default value if variable is not set
         cast_to: Type to cast the value to (int, float, bool, etc.)
         required: Whether the variable is required (raises error if missing)
-        
+
     Returns:
         The environment variable value, cast to the specified type if provided
-        
+
     Raises:
         ValueError: If required is True and the variable is not set
     """
@@ -110,19 +111,22 @@ def get_env_var(
                 return cast_to(value.lower() in ("true", "yes", "1", "y"))
             return cast_to(value)
         except (ValueError, TypeError) as e:
-            logger.warning(f"Failed to cast environment variable '{name}' to {cast_to.__name__}: {e}")
+            logger.warning(
+                f"Failed to cast environment variable '{name}' to {cast_to.__name__}: {e}"
+            )
             return default
 
     return value
 
+
 def load_project_env_files() -> dict[str, str]:
     """Load environment variables from multiple locations in the project.
-    
+
     Searches for and loads .env files in this priority order:
     1. Project root .env (base settings)
     2. Package-specific .env (can override root settings)
     3. Local development .env (highest priority, not in version control)
-    
+
     Returns:
         Dictionary of loaded environment variables
     """
@@ -140,8 +144,9 @@ def load_project_env_files() -> dict[str, str]:
         loaded_vars.update(load_env_file(root_env))
 
     # Find which package we're in
-    package_dir = module_path.parent.parent.parent.parent  # src/haive.core/utils → src/haive.core → src → packages/haive-core
-    package_name = package_dir.name
+    package_dir = (
+        module_path.parent.parent.parent.parent
+    )  # src/haive.core/utils → src/haive.core → src → packages/haive-core
 
     # Load package-specific .env
     package_env = package_dir / ".env"
@@ -155,17 +160,21 @@ def load_project_env_files() -> dict[str, str]:
 
     return loaded_vars
 
+
 def is_production() -> bool:
     """Check if the application is running in production mode."""
     return get_env_var("ENV", "development").lower() == "production"
+
 
 def is_development() -> bool:
     """Check if the application is running in development mode."""
     return get_env_var("ENV", "development").lower() == "development"
 
+
 def is_test() -> bool:
     """Check if the application is running in test mode."""
     return get_env_var("ENV", "development").lower() == "test"
+
 
 def is_testing() -> bool:
     """Alias for is_test(). Check if the application is running in test mode."""

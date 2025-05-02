@@ -20,7 +20,7 @@ from haive.core.graph.ToolManager import tool_manager
 # Import our components
 from haive.core.registry.registy import register_node
 
-#from haive.core.graph.GraphBuilder import NodeType, NodeConfig
+# from haive.core.graph.GraphBuilder import NodeType, NodeConfig
 # Set up logging
 logger = logging.getLogger(__name__)
 
@@ -28,34 +28,52 @@ logger = logging.getLogger(__name__)
 T = TypeVar("T", bound=Callable)
 R = TypeVar("R")
 
+
 class RetryPolicy(BaseModel):
     """Policies for retrying node execution on failure."""
+
     max_retries: int = Field(default=3, description="Maximum number of retry attempts")
-    retry_delay: float = Field(default=0.5, description="Delay between retries in seconds")
-    retry_backoff: bool = Field(default=False, description="Whether to use exponential backoff")
-    retry_on_exceptions: list[str] = Field(default_factory=list, description="Exception types to retry on")
-    retry_status_codes: list[int] = Field(default_factory=list, description="HTTP status codes to retry on")
+    retry_delay: float = Field(
+        default=0.5, description="Delay between retries in seconds"
+    )
+    retry_backoff: bool = Field(
+        default=False, description="Whether to use exponential backoff"
+    )
+    retry_on_exceptions: list[str] = Field(
+        default_factory=list, description="Exception types to retry on"
+    )
+    retry_status_codes: list[int] = Field(
+        default_factory=list, description="HTTP status codes to retry on"
+    )
     retry_condition: Callable[[Any, Exception], bool] | None = Field(
         default=None, description="Custom condition for retry"
     )
 
+
 class ValidationMode(str, Enum):
     """Validation modes for node input/output."""
-    NONE = "none"         # No validation
-    WARN = "warn"         # Log warnings but continue
-    STRICT = "strict"     # Raise exceptions on validation failures
+
+    NONE = "none"  # No validation
+    WARN = "warn"  # Log warnings but continue
+    STRICT = "strict"  # Raise exceptions on validation failures
+
 
 class NodeType(str, Enum):
     """Types of nodes for different purposes."""
+
     PROCESSING = "processing"  # Standard processing node
-    TOOL = "tool"              # Tool execution node
-    ROUTER = "router"          # Routing decision node
-    INTERRUPT = "interrupt"    # Interrupt handler node
-    COMPOSITE = "composite"    # Node containing a subgraph
+    TOOL = "tool"  # Tool execution node
+    ROUTER = "router"  # Routing decision node
+    INTERRUPT = "interrupt"  # Interrupt handler node
+    COMPOSITE = "composite"  # Node containing a subgraph
+
 
 class RoutingConfig(BaseModel):
     """Configuration for node routing behavior."""
-    default_destination: str = Field(..., description="Default destination if no other routing applies")
+
+    default_destination: str = Field(
+        ..., description="Default destination if no other routing applies"
+    )
     condition_map: dict[Any, str] = Field(
         default_factory=dict, description="Map of condition values to destinations"
     )
@@ -63,45 +81,69 @@ class RoutingConfig(BaseModel):
         default=None, description="Function that determines routing"
     )
     allowed_destinations: list[str] = Field(
-        default_factory=list, description="List of allowed destinations (for validation)"
+        default_factory=list,
+        description="List of allowed destinations (for validation)",
     )
-    is_dynamic: bool = Field(default=False, description="Whether routing is determined at runtime")
-    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional routing metadata")
+    is_dynamic: bool = Field(
+        default=False, description="Whether routing is determined at runtime"
+    )
+    metadata: dict[str, Any] = Field(
+        default_factory=dict, description="Additional routing metadata"
+    )
+
 
 class ToolInjectionConfig(BaseModel):
     """Configuration for tool injection into nodes."""
-    tool_names: list[str] = Field(default_factory=list, description="Names of tools to inject")
+
+    tool_names: list[str] = Field(
+        default_factory=list, description="Names of tools to inject"
+    )
     tool_filter: Callable[[dict[str, Any]], list[str]] | None = Field(
         default=None, description="Dynamic filter for tools based on state"
     )
-    inject_descriptions: bool = Field(default=True, description="Whether to inject tool descriptions")
-    pass_metadata: bool = Field(default=False, description="Whether to pass tool metadata to the node")
-    execution_mode: str = Field(default="async", description="Tool execution mode: sync or async")
+    inject_descriptions: bool = Field(
+        default=True, description="Whether to inject tool descriptions"
+    )
+    pass_metadata: bool = Field(
+        default=False, description="Whether to pass tool metadata to the node"
+    )
+    execution_mode: str = Field(
+        default="async", description="Tool execution mode: sync or async"
+    )
     state_key: str = Field(default="tools", description="State key for tool results")
+
 
 class InputTransform(BaseModel):
     """Transform for node input mapping."""
+
     source_key: str = Field(..., description="Source key in state")
     target_key: str = Field(..., description="Target key for node function")
     transform_function: Callable[[Any], Any] | None = Field(
         default=None, description="Function to transform the value"
     )
     required: bool = Field(default=True, description="Whether this input is required")
-    default_value: Any = Field(default=None, description="Default value if key is missing")
+    default_value: Any = Field(
+        default=None, description="Default value if key is missing"
+    )
+
 
 class OutputTransform(BaseModel):
     """Transform for node output mapping."""
+
     source_key: str = Field(..., description="Source key from node output")
     target_key: str = Field(..., description="Target key in state")
     transform_function: Callable[[Any], Any] | None = Field(
         default=None, description="Function to transform the value"
     )
     condition: Callable[[dict[str, Any]], bool] | None = Field(
-        default=None, description="Condition to determine whether to apply this transform"
+        default=None,
+        description="Condition to determine whether to apply this transform",
     )
+
 
 class NodeHooks(BaseModel):
     """Lifecycle hooks for node execution."""
+
     before_execution: Callable[[dict[str, Any]], dict[str, Any]] | None = Field(
         default=None, description="Hook called before node execution"
     )
@@ -115,51 +157,77 @@ class NodeHooks(BaseModel):
         default=None, description="Hook called on execution timeout"
     )
 
+
 class NodeConfig(BaseModel):
     """Comprehensive configuration for a node."""
+
     name: str = Field(..., description="Name of the node")
     description: str | None = Field(default=None, description="Description of the node")
     function: Callable = Field(..., description="Node function")
     node_type: NodeType = Field(default=NodeType.PROCESSING, description="Type of node")
 
     # Input/output configuration
-    input_mapping: list[InputTransform] = Field(default_factory=list, description="Input mapping configuration")
-    output_mapping: list[OutputTransform] = Field(default_factory=list, description="Output mapping configuration")
+    input_mapping: list[InputTransform] = Field(
+        default_factory=list, description="Input mapping configuration"
+    )
+    output_mapping: list[OutputTransform] = Field(
+        default_factory=list, description="Output mapping configuration"
+    )
 
     # State validation
-    validation_mode: ValidationMode = Field(default=ValidationMode.WARN, description="Validation mode")
-    validate_schema: type[BaseModel] | None = Field(default=None, description="Schema for validation")
+    validation_mode: ValidationMode = Field(
+        default=ValidationMode.WARN, description="Validation mode"
+    )
+    validate_schema: type[BaseModel] | None = Field(
+        default=None, description="Schema for validation"
+    )
 
     # Routing configuration
-    routing: RoutingConfig | None = Field(default=None, description="Routing configuration")
+    routing: RoutingConfig | None = Field(
+        default=None, description="Routing configuration"
+    )
 
     # Tool integration
-    tool_injection: ToolInjectionConfig | None = Field(default=None, description="Tool injection configuration")
+    tool_injection: ToolInjectionConfig | None = Field(
+        default=None, description="Tool injection configuration"
+    )
 
     # Execution controls
-    timeout: float | None = Field(default=None, description="Timeout for node execution in seconds")
-    retry_policy: RetryPolicy | None = Field(default=None, description="Retry policy for node execution")
-    is_async: bool = Field(default=False, description="Whether the node function is async")
-    requires_state: bool = Field(default=False, description="Whether the node requires state injection")
-    requires_store: bool = Field(default=False, description="Whether the node requires store injection")
+    timeout: float | None = Field(
+        default=None, description="Timeout for node execution in seconds"
+    )
+    retry_policy: RetryPolicy | None = Field(
+        default=None, description="Retry policy for node execution"
+    )
+    is_async: bool = Field(
+        default=False, description="Whether the node function is async"
+    )
+    requires_state: bool = Field(
+        default=False, description="Whether the node requires state injection"
+    )
+    requires_store: bool = Field(
+        default=False, description="Whether the node requires store injection"
+    )
 
     # Lifecycle hooks
     hooks: NodeHooks | None = Field(default=None, description="Node lifecycle hooks")
 
     # Additional metadata
     tags: list[str] = Field(default_factory=list, description="Tags for the node")
-    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+    metadata: dict[str, Any] = Field(
+        default_factory=dict, description="Additional metadata"
+    )
+
 
 model_config = ConfigDict(
-
-        arbitrary_types_allowed = True,
-
+    arbitrary_types_allowed=True,
 )
+
 
 # Factory for creating different node types
 class EnhancedNodeFactory:
     """Enhanced factory for creating and managing nodes with advanced capabilities.
-    
+
     This factory supports:
     - Different node types (processing, tool, router, etc.)
     - Input/output transformation
@@ -179,10 +247,10 @@ class EnhancedNodeFactory:
 
     def create_node(self, config: NodeConfig) -> Callable:
         """Create a node function based on the provided configuration.
-        
+
         Args:
             config: Configuration for the node
-            
+
         Returns:
             Node function compatible with LangGraph
         """
@@ -196,8 +264,8 @@ class EnhancedNodeFactory:
             metadata={
                 "description": config.description or "",
                 "node_type": config.node_type,
-                **config.metadata
-            }
+                **config.metadata,
+            },
         )
 
         # Create node based on type
@@ -215,7 +283,9 @@ class EnhancedNodeFactory:
             # Custom node type
             node_func = self._custom_node_types[config.node_type](config)
         else:
-            logger.warning(f"Unknown node type: {config.node_type}. Using processing node.")
+            logger.warning(
+                f"Unknown node type: {config.node_type}. Using processing node."
+            )
             node_func = self._create_processing_node(config)
 
         logger.info(f"Created node: {config.name} ({config.node_type})")
@@ -225,13 +295,17 @@ class EnhancedNodeFactory:
         """Create a standard processing node."""
         # Determine if we need async
         if config.is_async:
+
             async def node_function(state: dict[str, Any]) -> Command:
                 """Async node function wrapper."""
                 return await self._execute_node_async(state, config)
+
             return node_function
+
         def node_function(state: dict[str, Any]) -> Command:
             """Sync node function wrapper."""
             return self._execute_node_sync(state, config)
+
         return node_function
 
     def _create_tool_node(self, config: NodeConfig) -> Callable:
@@ -242,20 +316,26 @@ class EnhancedNodeFactory:
 
         # Determine if we need async
         if config.is_async:
+
             async def node_function(state: dict[str, Any]) -> Command:
                 """Async tool node function wrapper."""
                 return await self._execute_tool_node_async(state, config)
+
             return node_function
+
         def node_function(state: dict[str, Any]) -> Command:
             """Sync tool node function wrapper."""
             return self._execute_tool_node_sync(state, config)
+
         return node_function
 
     def _create_router_node(self, config: NodeConfig) -> Callable:
         """Create a routing decision node."""
         # Ensure routing config is present
         if not config.routing:
-            raise ValueError(f"Router node {config.name} requires routing configuration")
+            raise ValueError(
+                f"Router node {config.name} requires routing configuration"
+            )
 
         def node_function(state: dict[str, Any]) -> str | Send | Command:
             """Router node function wrapper."""
@@ -265,7 +345,9 @@ class EnhancedNodeFactory:
                     try:
                         state = config.hooks.before_execution(state) or state
                     except Exception as e:
-                        logger.error(f"Error in before_execution hook for node {config.name}: {e}")
+                        logger.error(
+                            f"Error in before_execution hook for node {config.name}: {e}"
+                        )
 
                 # Process inputs
                 inputs = self._process_inputs(state, config)
@@ -295,7 +377,10 @@ class EnhancedNodeFactory:
                         destination = config.routing.default_destination
 
                 # Validate destination if allowed destinations specified
-                if config.routing.allowed_destinations and destination not in config.routing.allowed_destinations:
+                if (
+                    config.routing.allowed_destinations
+                    and destination not in config.routing.allowed_destinations
+                ):
                     logger.warning(
                         f"Router {config.name} routed to invalid destination: {destination}. "
                         f"Using default: {config.routing.default_destination}"
@@ -310,7 +395,9 @@ class EnhancedNodeFactory:
                             # Return Command with updated state and destination
                             return Command(update=hook_result, goto=destination)
                     except Exception as e:
-                        logger.error(f"Error in after_execution hook for node {config.name}: {e}")
+                        logger.error(
+                            f"Error in after_execution hook for node {config.name}: {e}"
+                        )
 
                 # Return the destination
                 return destination
@@ -323,9 +410,14 @@ class EnhancedNodeFactory:
                     try:
                         error_result = config.hooks.on_error(state, e)
                         if error_result:
-                            return Command(update=error_result, goto=config.routing.default_destination)
+                            return Command(
+                                update=error_result,
+                                goto=config.routing.default_destination,
+                            )
                     except Exception as hook_error:
-                        logger.error(f"Error in on_error hook for node {config.name}: {hook_error}")
+                        logger.error(
+                            f"Error in on_error hook for node {config.name}: {hook_error}"
+                        )
 
                 # Return default destination
                 return config.routing.default_destination
@@ -359,7 +451,9 @@ class EnhancedNodeFactory:
         try:
             # Validate state if schema provided
             if config.validate_schema and config.validation_mode != ValidationMode.NONE:
-                self._validate_state(state, config.validate_schema, config.validation_mode)
+                self._validate_state(
+                    state, config.validate_schema, config.validation_mode
+                )
 
             # Apply before execution hook if present
             if config.hooks and config.hooks.before_execution:
@@ -368,7 +462,9 @@ class EnhancedNodeFactory:
                     if modified_state:
                         state = modified_state
                 except Exception as e:
-                    logger.error(f"Error in before_execution hook for node {config.name}: {e}")
+                    logger.error(
+                        f"Error in before_execution hook for node {config.name}: {e}"
+                    )
 
             # Process inputs
             inputs = self._process_inputs(state, config)
@@ -385,10 +481,12 @@ class EnhancedNodeFactory:
                         result = self._execute_with_timeout(
                             config.function,
                             config.timeout,
-                            inputs if inputs is not None else state
+                            inputs if inputs is not None else state,
                         )
                     else:
-                        result = config.function(inputs if inputs is not None else state)
+                        result = config.function(
+                            inputs if inputs is not None else state
+                        )
 
                     # Execution succeeded
                     break
@@ -408,7 +506,10 @@ class EnhancedNodeFactory:
                         should_retry = True
                         if config.retry_policy.retry_on_exceptions:
                             exception_name = type(e).__name__
-                            if exception_name not in config.retry_policy.retry_on_exceptions:
+                            if (
+                                exception_name
+                                not in config.retry_policy.retry_on_exceptions
+                            ):
                                 should_retry = False
 
                         # Custom retry condition
@@ -416,14 +517,16 @@ class EnhancedNodeFactory:
                             should_retry = config.retry_policy.retry_condition(state, e)
 
                         if not should_retry:
-                            logger.info(f"Not retrying node {config.name}: condition not met")
+                            logger.info(
+                                f"Not retrying node {config.name}: condition not met"
+                            )
                             break
 
                         # Wait before retrying
                         retry_delay = config.retry_policy.retry_delay
                         if config.retry_policy.retry_backoff:
                             # Exponential backoff
-                            retry_delay = retry_delay * (2 ** attempt)
+                            retry_delay = retry_delay * (2**attempt)
 
                         if retry_delay > 0:
                             time.sleep(retry_delay)
@@ -442,11 +545,15 @@ class EnhancedNodeFactory:
                 # Apply after execution hook if present
                 if config.hooks and config.hooks.after_execution:
                     try:
-                        hook_result = config.hooks.after_execution(updated_state, result)
+                        hook_result = config.hooks.after_execution(
+                            updated_state, result
+                        )
                         if hook_result:
                             updated_state = hook_result
                     except Exception as e:
-                        logger.error(f"Error in after_execution hook for node {config.name}: {e}")
+                        logger.error(
+                            f"Error in after_execution hook for node {config.name}: {e}"
+                        )
 
                 # Determine next node
                 goto = self._get_next_node(updated_state, result, config)
@@ -464,7 +571,9 @@ class EnhancedNodeFactory:
                     if hook_result:
                         error_state = hook_result
                 except Exception as hook_error:
-                    logger.error(f"Error in on_error hook for node {config.name}: {hook_error}")
+                    logger.error(
+                        f"Error in on_error hook for node {config.name}: {hook_error}"
+                    )
 
             # Determine error routing
             goto = END
@@ -497,7 +606,9 @@ class EnhancedNodeFactory:
                 f"with {retries} retries"
             )
 
-    async def _execute_node_async(self, state: dict[str, Any], config: NodeConfig) -> Command:
+    async def _execute_node_async(
+        self, state: dict[str, Any], config: NodeConfig
+    ) -> Command:
         """Execute an asynchronous node with all the configured behaviors."""
         start_time = time.time()
         retries = 0
@@ -505,7 +616,9 @@ class EnhancedNodeFactory:
         try:
             # Validate state if schema provided
             if config.validate_schema and config.validation_mode != ValidationMode.NONE:
-                self._validate_state(state, config.validate_schema, config.validation_mode)
+                self._validate_state(
+                    state, config.validate_schema, config.validation_mode
+                )
 
             # Apply before execution hook if present
             if config.hooks and config.hooks.before_execution:
@@ -514,7 +627,9 @@ class EnhancedNodeFactory:
                     if modified_state:
                         state = modified_state
                 except Exception as e:
-                    logger.error(f"Error in before_execution hook for node {config.name}: {e}")
+                    logger.error(
+                        f"Error in before_execution hook for node {config.name}: {e}"
+                    )
 
             # Process inputs
             inputs = self._process_inputs(state, config)
@@ -531,10 +646,12 @@ class EnhancedNodeFactory:
                         result = await self._execute_async_with_timeout(
                             config.function,
                             config.timeout,
-                            inputs if inputs is not None else state
+                            inputs if inputs is not None else state,
                         )
                     else:
-                        result = await config.function(inputs if inputs is not None else state)
+                        result = await config.function(
+                            inputs if inputs is not None else state
+                        )
 
                     # Execution succeeded
                     break
@@ -554,7 +671,10 @@ class EnhancedNodeFactory:
                         should_retry = True
                         if config.retry_policy.retry_on_exceptions:
                             exception_name = type(e).__name__
-                            if exception_name not in config.retry_policy.retry_on_exceptions:
+                            if (
+                                exception_name
+                                not in config.retry_policy.retry_on_exceptions
+                            ):
                                 should_retry = False
 
                         # Custom retry condition
@@ -562,14 +682,16 @@ class EnhancedNodeFactory:
                             should_retry = config.retry_policy.retry_condition(state, e)
 
                         if not should_retry:
-                            logger.info(f"Not retrying node {config.name}: condition not met")
+                            logger.info(
+                                f"Not retrying node {config.name}: condition not met"
+                            )
                             break
 
                         # Wait before retrying
                         retry_delay = config.retry_policy.retry_delay
                         if config.retry_policy.retry_backoff:
                             # Exponential backoff
-                            retry_delay = retry_delay * (2 ** attempt)
+                            retry_delay = retry_delay * (2**attempt)
 
                         if retry_delay > 0:
                             await asyncio.sleep(retry_delay)
@@ -588,11 +710,15 @@ class EnhancedNodeFactory:
                 # Apply after execution hook if present
                 if config.hooks and config.hooks.after_execution:
                     try:
-                        hook_result = config.hooks.after_execution(updated_state, result)
+                        hook_result = config.hooks.after_execution(
+                            updated_state, result
+                        )
                         if hook_result:
                             updated_state = hook_result
                     except Exception as e:
-                        logger.error(f"Error in after_execution hook for node {config.name}: {e}")
+                        logger.error(
+                            f"Error in after_execution hook for node {config.name}: {e}"
+                        )
 
                 # Determine next node
                 goto = self._get_next_node(updated_state, result, config)
@@ -610,7 +736,9 @@ class EnhancedNodeFactory:
                     if hook_result:
                         error_state = hook_result
                 except Exception as hook_error:
-                    logger.error(f"Error in on_error hook for node {config.name}: {hook_error}")
+                    logger.error(
+                        f"Error in on_error hook for node {config.name}: {hook_error}"
+                    )
 
             # Determine error routing
             goto = END
@@ -643,12 +771,16 @@ class EnhancedNodeFactory:
                 f"with {retries} retries"
             )
 
-    def _execute_tool_node_sync(self, state: dict[str, Any], config: NodeConfig) -> Command:
+    def _execute_tool_node_sync(
+        self, state: dict[str, Any], config: NodeConfig
+    ) -> Command:
         """Execute a synchronous tool node."""
         try:
             # Validate state if schema provided
             if config.validate_schema and config.validation_mode != ValidationMode.NONE:
-                self._validate_state(state, config.validate_schema, config.validation_mode)
+                self._validate_state(
+                    state, config.validate_schema, config.validation_mode
+                )
 
             # Apply before execution hook if present
             if config.hooks and config.hooks.before_execution:
@@ -657,14 +789,20 @@ class EnhancedNodeFactory:
                     if modified_state:
                         state = modified_state
                 except Exception as e:
-                    logger.error(f"Error in before_execution hook for node {config.name}: {e}")
+                    logger.error(
+                        f"Error in before_execution hook for node {config.name}: {e}"
+                    )
 
             # Get tools to inject
             tool_names = self._get_tool_names(state, config)
 
             # Get tool descriptions if configured
             tool_descriptions = None
-            if config.tool_injection and config.tool_injection.inject_descriptions and tool_names:
+            if (
+                config.tool_injection
+                and config.tool_injection.inject_descriptions
+                and tool_names
+            ):
                 tool_descriptions = tool_manager.get_tool_descriptions(tool_names)
 
             # Process inputs
@@ -674,10 +812,14 @@ class EnhancedNodeFactory:
 
             # Add tool information to inputs
             if tool_names:
-                tool_key = config.tool_injection.state_key if config.tool_injection else "tools"
+                tool_key = (
+                    config.tool_injection.state_key
+                    if config.tool_injection
+                    else "tools"
+                )
                 inputs[tool_key] = {
                     "names": tool_names,
-                    "descriptions": tool_descriptions
+                    "descriptions": tool_descriptions,
                 }
 
                 # Add tool metadata if configured
@@ -691,7 +833,9 @@ class EnhancedNodeFactory:
 
             # Execute the function
             if config.timeout:
-                result = self._execute_with_timeout(config.function, config.timeout, inputs)
+                result = self._execute_with_timeout(
+                    config.function, config.timeout, inputs
+                )
             else:
                 result = config.function(inputs)
 
@@ -705,7 +849,9 @@ class EnhancedNodeFactory:
                     if hook_result:
                         updated_state = hook_result
                 except Exception as e:
-                    logger.error(f"Error in after_execution hook for node {config.name}: {e}")
+                    logger.error(
+                        f"Error in after_execution hook for node {config.name}: {e}"
+                    )
 
             # Determine next node
             goto = self._get_next_node(updated_state, result, config)
@@ -727,7 +873,9 @@ class EnhancedNodeFactory:
                     if hook_result:
                         error_state = hook_result
                 except Exception as hook_error:
-                    logger.error(f"Error in on_error hook for node {config.name}: {hook_error}")
+                    logger.error(
+                        f"Error in on_error hook for node {config.name}: {hook_error}"
+                    )
 
             # Determine error routing
             goto = END
@@ -736,12 +884,16 @@ class EnhancedNodeFactory:
 
             return Command(update=error_state, goto=goto)
 
-    async def _execute_tool_node_async(self, state: dict[str, Any], config: NodeConfig) -> Command:
+    async def _execute_tool_node_async(
+        self, state: dict[str, Any], config: NodeConfig
+    ) -> Command:
         """Execute an asynchronous tool node."""
         try:
             # Validate state if schema provided
             if config.validate_schema and config.validation_mode != ValidationMode.NONE:
-                self._validate_state(state, config.validate_schema, config.validation_mode)
+                self._validate_state(
+                    state, config.validate_schema, config.validation_mode
+                )
 
             # Apply before execution hook if present
             if config.hooks and config.hooks.before_execution:
@@ -750,25 +902,35 @@ class EnhancedNodeFactory:
                     if modified_state:
                         state = modified_state
                 except Exception as e:
-                    logger.error(f"Error in before_execution hook for node {config.name}: {e}")
+                    logger.error(
+                        f"Error in before_execution hook for node {config.name}: {e}"
+                    )
 
             # Get tools to inject
             tool_names = self._get_tool_names(state, config)
 
             # Get tool descriptions if configured
             tool_descriptions = None
-            if config.tool_injection and config.tool_injection.inject_descriptions and tool_names:
+            if (
+                config.tool_injection
+                and config.tool_injection.inject_descriptions
+                and tool_names
+            ):
                 tool_descriptions = tool_manager.get_tool_descriptions(tool_names)
 
             # Process inputs
             inputs = self._process_inputs(state, config)
-            if inputs is None:# Add tool information to inputs
+            if inputs is None:  # Add tool information to inputs
                 inputs = dict(state)
             if tool_names:
-                tool_key = config.tool_injection.state_key if config.tool_injection else "tools"
+                tool_key = (
+                    config.tool_injection.state_key
+                    if config.tool_injection
+                    else "tools"
+                )
                 inputs[tool_key] = {
                     "names": tool_names,
-                    "descriptions": tool_descriptions
+                    "descriptions": tool_descriptions,
                 }
 
                 # Add tool metadata if configured
@@ -782,7 +944,9 @@ class EnhancedNodeFactory:
 
             # Execute the function
             if config.timeout:
-                result = await self._execute_async_with_timeout(config.function, config.timeout, inputs)
+                result = await self._execute_async_with_timeout(
+                    config.function, config.timeout, inputs
+                )
             else:
                 result = await config.function(inputs)
 
@@ -796,7 +960,9 @@ class EnhancedNodeFactory:
                     if hook_result:
                         updated_state = hook_result
                 except Exception as e:
-                    logger.error(f"Error in after_execution hook for node {config.name}: {e}")
+                    logger.error(
+                        f"Error in after_execution hook for node {config.name}: {e}"
+                    )
 
             # Determine next node
             goto = self._get_next_node(updated_state, result, config)
@@ -818,7 +984,9 @@ class EnhancedNodeFactory:
                     if hook_result:
                         error_state = hook_result
                 except Exception as hook_error:
-                    logger.error(f"Error in on_error hook for node {config.name}: {hook_error}")
+                    logger.error(
+                        f"Error in on_error hook for node {config.name}: {hook_error}"
+                    )
 
             # Determine error routing
             goto = END
@@ -828,13 +996,15 @@ class EnhancedNodeFactory:
             return Command(update=error_state, goto=goto)
 
     # Helper methods
-    def _process_inputs(self, state: dict[str, Any], config: NodeConfig) -> dict[str, Any] | None:
+    def _process_inputs(
+        self, state: dict[str, Any], config: NodeConfig
+    ) -> dict[str, Any] | None:
         """Process inputs according to input mapping configuration.
-        
+
         Args:
             state: Current state
             config: Node configuration
-            
+
         Returns:
             Processed inputs or None if no mapping
         """
@@ -856,7 +1026,9 @@ class EnhancedNodeFactory:
                     try:
                         value = mapping.transform_function(value)
                     except Exception as e:
-                        logger.error(f"Error in input transform for {mapping.source_key}: {e}")
+                        logger.error(
+                            f"Error in input transform for {mapping.source_key}: {e}"
+                        )
 
                 # Add to inputs
                 inputs[mapping.target_key] = value
@@ -876,14 +1048,16 @@ class EnhancedNodeFactory:
 
         return inputs
 
-    def _process_output(self, state: dict[str, Any], result: Any, config: NodeConfig) -> dict[str, Any]:
+    def _process_output(
+        self, state: dict[str, Any], result: Any, config: NodeConfig
+    ) -> dict[str, Any]:
         """Process outputs according to output mapping configuration.
-        
+
         Args:
             state: Current state
             result: Function result
             config: Node configuration
-            
+
         Returns:
             Updated state
         """
@@ -909,6 +1083,7 @@ class EnhancedNodeFactory:
                 # If we have messages field, add as AI message
                 if "messages" in updated_state:
                     from langchain_core.messages import AIMessage
+
                     updated_state["messages"] = list(updated_state["messages"])
                     updated_state["messages"].append(AIMessage(content=result))
             elif hasattr(result, "content"):
@@ -950,7 +1125,9 @@ class EnhancedNodeFactory:
                 try:
                     value = mapping.transform_function(value)
                 except Exception as e:
-                    logger.error(f"Error in output transform for {mapping.source_key}: {e}")
+                    logger.error(
+                        f"Error in output transform for {mapping.source_key}: {e}"
+                    )
                     continue
 
             # Update state
@@ -958,14 +1135,16 @@ class EnhancedNodeFactory:
 
         return updated_state
 
-    def _get_next_node(self, state: dict[str, Any], result: Any, config: NodeConfig) -> str:
+    def _get_next_node(
+        self, state: dict[str, Any], result: Any, config: NodeConfig
+    ) -> str:
         """Determine the next node based on routing configuration.
-        
+
         Args:
             state: Current state
             result: Function result
             config: Node configuration
-            
+
         Returns:
             Next node name or END
         """
@@ -987,11 +1166,11 @@ class EnhancedNodeFactory:
 
     def _get_tool_names(self, state: dict[str, Any], config: NodeConfig) -> list[str]:
         """Get the names of tools to inject based on configuration.
-        
+
         Args:
             state: Current state
             config: Node configuration
-            
+
         Returns:
             List of tool names
         """
@@ -1012,14 +1191,19 @@ class EnhancedNodeFactory:
 
         return tool_names
 
-    def _validate_state(self, state: dict[str, Any], schema: type[BaseModel], validation_mode: ValidationMode) -> None:
+    def _validate_state(
+        self,
+        state: dict[str, Any],
+        schema: type[BaseModel],
+        validation_mode: ValidationMode,
+    ) -> None:
         """Validate state against a schema.
-        
+
         Args:
             state: State to validate
             schema: Validation schema
             validation_mode: Validation mode
-            
+
         Raises:
             ValidationError: If validation fails and mode is STRICT
         """
@@ -1039,14 +1223,18 @@ class EnhancedNodeFactory:
             future = executor.submit(func, arg)
             return future.result(timeout=timeout)
 
-    async def _execute_async_with_timeout(self, func: Callable, timeout: float, arg: Any) -> Any:
+    async def _execute_async_with_timeout(
+        self, func: Callable, timeout: float, arg: Any
+    ) -> Any:
         """Execute an async function with a timeout."""
         return await asyncio.wait_for(func(arg), timeout=timeout)
 
     # Custom node type registration
-    def register_node_type(self, node_type: str, factory: Callable[[NodeConfig], Callable]) -> None:
+    def register_node_type(
+        self, node_type: str, factory: Callable[[NodeConfig], Callable]
+    ) -> None:
         """Register a custom node type.
-        
+
         Args:
             node_type: Name of the node type
             factory: Factory function to create nodes of this type
@@ -1055,19 +1243,17 @@ class EnhancedNodeFactory:
         logger.info(f"Registered custom node type: {node_type}")
 
     # Node configurator methods
-    def create_processing_config(self,
-                               name: str,
-                               function: Callable,
-                               description: str | None = None,
-                               **kwargs) -> NodeConfig:
+    def create_processing_config(
+        self, name: str, function: Callable, description: str | None = None, **kwargs
+    ) -> NodeConfig:
         """Create a processing node configuration.
-        
+
         Args:
             name: Node name
             function: Node function
             description: Optional description
             **kwargs: Additional configuration
-            
+
         Returns:
             NodeConfig instance
         """
@@ -1076,24 +1262,26 @@ class EnhancedNodeFactory:
             function=function,
             description=description,
             node_type=NodeType.PROCESSING,
-            **kwargs
+            **kwargs,
         )
 
-    def create_tool_config(self,
-                         name: str,
-                         function: Callable,
-                         tool_names: list[str],
-                         description: str | None = None,
-                         **kwargs) -> NodeConfig:
+    def create_tool_config(
+        self,
+        name: str,
+        function: Callable,
+        tool_names: list[str],
+        description: str | None = None,
+        **kwargs,
+    ) -> NodeConfig:
         """Create a tool node configuration.
-        
+
         Args:
             name: Node name
             function: Node function
             tool_names: Names of tools to inject
             description: Optional description
             **kwargs: Additional configuration
-            
+
         Returns:
             NodeConfig instance
         """
@@ -1104,18 +1292,20 @@ class EnhancedNodeFactory:
             description=description,
             node_type=NodeType.TOOL,
             tool_injection=tool_injection,
-            **kwargs
+            **kwargs,
         )
 
-    def create_router_config(self,
-                           name: str,
-                           function: Callable,
-                           default_destination: str,
-                           condition_map: dict[Any, str] | None = None,
-                           description: str | None = None,
-                           **kwargs) -> NodeConfig:
+    def create_router_config(
+        self,
+        name: str,
+        function: Callable,
+        default_destination: str,
+        condition_map: dict[Any, str] | None = None,
+        description: str | None = None,
+        **kwargs,
+    ) -> NodeConfig:
         """Create a router node configuration.
-        
+
         Args:
             name: Node name
             function: Router function
@@ -1123,13 +1313,12 @@ class EnhancedNodeFactory:
             condition_map: Optional mapping from result values to destinations
             description: Optional description
             **kwargs: Additional configuration
-            
+
         Returns:
             NodeConfig instance
         """
         routing = RoutingConfig(
-            default_destination=default_destination,
-            condition_map=condition_map or {}
+            default_destination=default_destination, condition_map=condition_map or {}
         )
         return NodeConfig(
             name=name,
@@ -1137,18 +1326,20 @@ class EnhancedNodeFactory:
             description=description,
             node_type=NodeType.ROUTER,
             routing=routing,
-            **kwargs
+            **kwargs,
         )
 
-    def create_conditional_router_config(self,
-                                      name: str,
-                                      condition_function: Callable[[dict[str, Any]], Any],
-                                      default_destination: str,
-                                      condition_map: dict[Any, str],
-                                      description: str | None = None,
-                                      **kwargs) -> NodeConfig:
+    def create_conditional_router_config(
+        self,
+        name: str,
+        condition_function: Callable[[dict[str, Any]], Any],
+        default_destination: str,
+        condition_map: dict[Any, str],
+        description: str | None = None,
+        **kwargs,
+    ) -> NodeConfig:
         """Create a conditional router node configuration.
-        
+
         Args:
             name: Node name
             condition_function: Function to determine routing
@@ -1156,14 +1347,14 @@ class EnhancedNodeFactory:
             condition_map: Mapping from condition values to destinations
             description: Optional description
             **kwargs: Additional configuration
-            
+
         Returns:
             NodeConfig instance
         """
         routing = RoutingConfig(
             default_destination=default_destination,
             condition_map=condition_map,
-            condition_function=condition_function
+            condition_function=condition_function,
         )
 
         # For conditional routers, the function is simple - it just returns the condition result
@@ -1173,27 +1364,30 @@ class EnhancedNodeFactory:
         return NodeConfig(
             name=name,
             function=router_func,
-            description=description or f"Conditional router based on {condition_function.__name__}",
+            description=description
+            or f"Conditional router based on {condition_function.__name__}",
             node_type=NodeType.ROUTER,
             routing=routing,
-            **kwargs
+            **kwargs,
         )
 
-    def create_interrupt_config(self,
-                              name: str,
-                              function: Callable,
-                              return_to: str,
-                              description: str | None = None,
-                              **kwargs) -> NodeConfig:
+    def create_interrupt_config(
+        self,
+        name: str,
+        function: Callable,
+        return_to: str,
+        description: str | None = None,
+        **kwargs,
+    ) -> NodeConfig:
         """Create an interrupt handler node configuration.
-        
+
         Args:
             name: Node name
             function: Handler function
             return_to: Node to return to after handling
             description: Optional description
             **kwargs: Additional configuration
-            
+
         Returns:
             NodeConfig instance
         """
@@ -1204,23 +1398,26 @@ class EnhancedNodeFactory:
             description=description,
             node_type=NodeType.INTERRUPT,
             routing=routing,
-            **kwargs
+            **kwargs,
         )
+
 
 # Create a global instance
 node_factory = EnhancedNodeFactory()
 
+
 # Decorator for registering nodes
 def node(name: str | None = None, **config_kwargs):
     """Decorator to create and register a node.
-    
+
     Args:
         name: Optional name for the node (defaults to function name)
         **config_kwargs: Additional configuration for the node
-        
+
     Returns:
         Decorator function
     """
+
     def decorator(func: Callable) -> Callable:
         # Determine name
         node_name = name or func.__name__
@@ -1230,10 +1427,7 @@ def node(name: str | None = None, **config_kwargs):
 
         # Create node config
         config = NodeConfig(
-            name=node_name,
-            function=func,
-            description=description,
-            **config_kwargs
+            name=node_name, function=func, description=description, **config_kwargs
         )
 
         # Create and register the node
@@ -1243,28 +1437,30 @@ def node(name: str | None = None, **config_kwargs):
 
     return decorator
 
+
 # Specialized decorators for specific node types
 def processing_node(name: str | None = None, **config_kwargs):
     """Decorator to create a processing node.
-    
+
     Args:
         name: Optional name for the node
         **config_kwargs: Additional configuration
-        
+
     Returns:
         Decorator function
     """
     config_kwargs["node_type"] = NodeType.PROCESSING
     return node(name, **config_kwargs)
 
+
 def tool_node(tool_names: list[str], name: str | None = None, **config_kwargs):
     """Decorator to create a tool node.
-    
+
     Args:
         tool_names: Names of tools to inject
         name: Optional name for the node
         **config_kwargs: Additional configuration
-        
+
     Returns:
         Decorator function
     """
@@ -1272,34 +1468,39 @@ def tool_node(tool_names: list[str], name: str | None = None, **config_kwargs):
     config_kwargs["tool_injection"] = ToolInjectionConfig(tool_names=tool_names)
     return node(name, **config_kwargs)
 
-def router_node(default_destination: str, condition_map: dict[Any, str] | None = None,
-               name: str | None = None, **config_kwargs):
+
+def router_node(
+    default_destination: str,
+    condition_map: dict[Any, str] | None = None,
+    name: str | None = None,
+    **config_kwargs,
+):
     """Decorator to create a router node.
-    
+
     Args:
         default_destination: Default destination
         condition_map: Optional mapping from values to destinations
         name: Optional name for the node
         **config_kwargs: Additional configuration
-        
+
     Returns:
         Decorator function
     """
     config_kwargs["node_type"] = NodeType.ROUTER
     config_kwargs["routing"] = RoutingConfig(
-        default_destination=default_destination,
-        condition_map=condition_map or {}
+        default_destination=default_destination, condition_map=condition_map or {}
     )
     return node(name, **config_kwargs)
 
+
 def interrupt_node(return_to: str, name: str | None = None, **config_kwargs):
     """Decorator to create an interrupt handler node.
-    
+
     Args:
         return_to: Node to return to after handling
         name: Optional name for the node
         **config_kwargs: Additional configuration
-        
+
     Returns:
         Decorator function
     """

@@ -8,28 +8,32 @@ from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 
+
 class GraphPattern(BaseModel):
     """Serializable graph pattern definition."""
+
     name: str = Field(description="Unique name for this pattern")
     description: str | None = Field(default=None, description="Pattern description")
     pattern_type: str = Field(description="Type of pattern")
-    parameters: dict[str, Any] = Field(default_factory=dict, description="Pattern parameters")
-    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+    parameters: dict[str, Any] = Field(
+        default_factory=dict, description="Pattern parameters"
+    )
+    metadata: dict[str, Any] = Field(
+        default_factory=dict, description="Additional metadata"
+    )
 
     # Internal function reference (not serialized)
     apply_func: Callable | None = Field(default=None, exclude=True)
 
-    model_config = {
-        "arbitrary_types_allowed": True
-    }
+    model_config = {"arbitrary_types_allowed": True}
 
     def apply(self, graph: Any, **kwargs) -> Any:
         """Apply this pattern to a graph.
-        
+
         Args:
             graph: The graph to apply the pattern to
             **kwargs: Override parameters
-            
+
         Returns:
             The modified graph
         """
@@ -43,28 +47,34 @@ class GraphPattern(BaseModel):
         # Apply the pattern
         return self.apply_func(graph, **params)
 
+
 class BranchDefinition(BaseModel):
     """Serializable branch definition."""
+
     name: str = Field(description="Unique name for this branch")
     description: str | None = Field(default=None, description="Branch description")
     condition_type: str = Field(description="Type of condition")
-    routes: dict[str, str] = Field(description="Mapping of condition values to node names")
-    default_route: str | None = Field(default=None, description="Default route if no condition matches")
-    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+    routes: dict[str, str] = Field(
+        description="Mapping of condition values to node names"
+    )
+    default_route: str | None = Field(
+        default=None, description="Default route if no condition matches"
+    )
+    metadata: dict[str, Any] = Field(
+        default_factory=dict, description="Additional metadata"
+    )
 
     # Internal function reference (not serialized)
     condition_func: Callable | None = Field(default=None, exclude=True)
 
-    model_config = {
-        "arbitrary_types_allowed": True
-    }
+    model_config = {"arbitrary_types_allowed": True}
 
     def create_condition(self, **kwargs) -> Callable:
         """Create a condition function from this branch definition.
-        
+
         Args:
             **kwargs: Override parameters
-            
+
         Returns:
             A condition function that can be used in conditional edges
         """
@@ -84,8 +94,10 @@ class BranchDefinition(BaseModel):
         # Use the provided condition function
         return self.condition_func
 
+
 class GraphPatternRegistry:
     """Registry for reusable graph patterns and branches."""
+
     _instance = None
 
     @classmethod
@@ -101,10 +113,10 @@ class GraphPatternRegistry:
 
     def register_pattern(self, pattern: GraphPattern | dict[str, Any]) -> GraphPattern:
         """Register a pattern in the registry.
-        
+
         Args:
             pattern: Pattern instance or dictionary of pattern data
-            
+
         Returns:
             The registered pattern
         """
@@ -116,12 +128,14 @@ class GraphPatternRegistry:
         logger.info(f"Registered pattern '{pattern.name}'")
         return pattern
 
-    def register_branch(self, branch: BranchDefinition | dict[str, Any]) -> BranchDefinition:
+    def register_branch(
+        self, branch: BranchDefinition | dict[str, Any]
+    ) -> BranchDefinition:
         """Register a branch in the registry.
-        
+
         Args:
             branch: Branch instance or dictionary of branch data
-            
+
         Returns:
             The registered branch
         """
@@ -135,10 +149,10 @@ class GraphPatternRegistry:
 
     def get_pattern(self, name: str) -> GraphPattern | None:
         """Get a pattern by name.
-        
+
         Args:
             name: Name of the pattern
-            
+
         Returns:
             Pattern if found, None otherwise
         """
@@ -146,10 +160,10 @@ class GraphPatternRegistry:
 
     def get_branch(self, name: str) -> BranchDefinition | None:
         """Get a branch by name.
-        
+
         Args:
             name: Name of the branch
-            
+
         Returns:
             Branch if found, None otherwise
         """
@@ -157,7 +171,7 @@ class GraphPatternRegistry:
 
     def list_patterns(self) -> list[str]:
         """List all pattern names.
-        
+
         Returns:
             List of pattern names
         """
@@ -165,7 +179,7 @@ class GraphPatternRegistry:
 
     def list_branches(self) -> list[str]:
         """List all branch names.
-        
+
         Returns:
             List of branch names
         """
@@ -177,46 +191,58 @@ class GraphPatternRegistry:
         self.branches = {}
         logger.debug("Registry cleared")
 
+
 # Pattern registration decorator
-def register_pattern(name: str, pattern_type: str, description: str = None, **default_params):
+def register_pattern(
+    name: str, pattern_type: str, description: str = None, **default_params
+):
     """Decorator to register a function as a graph pattern.
-    
+
     Args:
         name: Unique name for the pattern
         pattern_type: Type of pattern
         description: Optional description
         **default_params: Default parameters for the pattern
-        
+
     Returns:
         Decorator function
     """
+
     def decorator(func):
         pattern = GraphPattern(
             name=name,
             pattern_type=pattern_type,
             description=description,
             parameters=default_params,
-            _apply_func=func
+            _apply_func=func,
         )
         GraphPatternRegistry.get_instance().register_pattern(pattern)
         return func
+
     return decorator
 
+
 # Branch registration decorator
-def register_branch(name: str, condition_type: str, routes: dict[str, str],
-                   default_route: str = None, description: str = None):
+def register_branch(
+    name: str,
+    condition_type: str,
+    routes: dict[str, str],
+    default_route: str = None,
+    description: str = None,
+):
     """Decorator to register a function as a branch condition.
-    
+
     Args:
         name: Unique name for the branch
         condition_type: Type of condition
         routes: Mapping of condition values to node names
         default_route: Default route if no condition matches
         description: Optional description
-        
+
     Returns:
         Decorator function
     """
+
     def decorator(func):
         branch = BranchDefinition(
             name=name,
@@ -224,33 +250,36 @@ def register_branch(name: str, condition_type: str, routes: dict[str, str],
             routes=routes,
             default_route=default_route,
             description=description,
-            _condition_func=func
+            _condition_func=func,
         )
         GraphPatternRegistry.get_instance().register_branch(branch)
         return func
+
     return decorator
 
+
 # Register some common patterns
+
 
 @register_pattern(
     name="error_handling",
     pattern_type="exception_handler",
     description="Add error handling to a graph",
     error_node="handle_error",
-    fallback_node="fallback"
+    fallback_node="fallback",
 )
 def apply_error_handling(graph, error_node: str, fallback_node: str, **kwargs):
     """Apply error handling pattern to a graph.
-    
+
     This adds exception handling to all nodes, routing to an error handler node
     on exceptions.
-    
+
     Args:
         graph: The graph to modify
         error_node: Node to route to on errors
         fallback_node: Node to route to if error handling fails
         **kwargs: Additional parameters
-        
+
     Returns:
         Modified graph
     """
@@ -266,24 +295,25 @@ def apply_error_handling(graph, error_node: str, fallback_node: str, **kwargs):
     logger.info(f"Applied error handling pattern with handler '{error_node}'")
     return graph
 
+
 @register_pattern(
     name="persistence",
     pattern_type="state_persistence",
     description="Add state persistence to a graph",
     storage_type="memory",
-    auto_save=True
+    auto_save=True,
 )
 def apply_persistence(graph, storage_type: str, auto_save: bool, **kwargs):
     """Apply persistence pattern to a graph.
-    
+
     This adds state persistence capabilities to the graph.
-    
+
     Args:
         graph: The graph to modify
         storage_type: Type of storage to use
         auto_save: Whether to automatically save state
         **kwargs: Additional parameters
-        
+
     Returns:
         Modified graph
     """
@@ -293,23 +323,24 @@ def apply_persistence(graph, storage_type: str, auto_save: bool, **kwargs):
     logger.info(f"Applied persistence pattern with storage '{storage_type}'")
     return graph
 
+
 @register_branch(
     name="intent_router",
     condition_type="nlp_classifier",
     routes={
         "question": "answer_node",
         "command": "execute_node",
-        "chitchat": "respond_node"
+        "chitchat": "respond_node",
     },
     default_route="fallback_node",
-    description="Route based on detected intent"
+    description="Route based on detected intent",
 )
 def intent_router(state):
     """Route based on intent in state.
-    
+
     Args:
         state: Current state
-        
+
     Returns:
         Intent for routing
     """

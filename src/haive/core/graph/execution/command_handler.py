@@ -1,9 +1,7 @@
 # execution/command_handler.py
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 from langgraph.types import Command, Send
-
-from haive.core.schema.state_schema import StateSchema
 
 
 def process_engine_result(result: Any, command_goto: Optional[Any] = None) -> Any:

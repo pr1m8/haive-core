@@ -11,6 +11,7 @@ The VectorStore engine is a specialized component within the Haive framework tha
 The `VectorStoreConfig` class extends `InvokableEngine` to provide a unified interface for vector stores. This configuration-based approach enables:
 
 **Core Features**:
+
 - **Provider Abstraction**: Support for multiple vector database backends (FAISS, Chroma, Pinecone, etc.)
 - **Embedding Integration**: Seamless integration with embedding models
 - **Document Management**: Methods for adding and retrieving documents
@@ -253,7 +254,7 @@ from haive.core.config.runnable import RunnableConfigManager
 # Create base configuration
 config = RunnableConfigManager.create(thread_id="conversation-123")
 
-# Add vector store specific configuration 
+# Add vector store specific configuration
 config = RunnableConfigManager.add_engine_config(
     config,
     vs_config.id,  # Target by ID for most specific override
@@ -297,7 +298,7 @@ class ExtendedVectorStoreProvider(VectorStoreProvider):
 # Subclass VectorStoreConfig
 class CustomVectorStoreConfig(VectorStoreConfig):
     vector_store_provider: ExtendedVectorStoreProvider = ExtendedVectorStoreProvider.CUSTOM_DB
-    
+
     # Override the class getter
     def _get_vectorstore_class(self):
         if self.vector_store_provider == ExtendedVectorStoreProvider.CUSTOM_DB:

@@ -13,7 +13,12 @@ from pydantic import BaseModel
 
 from haive.core.config.runnable import RunnableConfigManager
 from haive.core.engine.aug_llm.base import AugLLMConfig
-from haive.core.engine.base import Engine, EngineType, InvokableEngine, NonInvokableEngine
+from haive.core.engine.base import (
+    Engine,
+    EngineType,
+    InvokableEngine,
+    NonInvokableEngine,
+)
 from haive.core.engine.embeddings import EmbeddingsEngineConfig
 from haive.core.engine.retriever import BaseRetrieverConfig
 from haive.core.engine.vectorstore.vectorstore import VectorStoreConfig
@@ -21,15 +26,17 @@ from haive.core.graph.graph_pattern_registry import GraphRegistry
 
 logger = logging.getLogger(__name__)
 
+
 @runtime_checkable
 class NodeFunction(Protocol):
     """Protocol for node functions."""
-    def __call__(self, state: Any, config: dict[str, Any] | None = None) -> Any:
-        ...
+
+    def __call__(self, state: Any, config: dict[str, Any] | None = None) -> Any: ...
+
 
 class NodeFactory:
     """Factory for creating node functions with comprehensive engine support.
-    
+
     Handles creation of node functions from different engine types,
     ensuring proper input/output mapping and runtime configuration.
     """
@@ -43,7 +50,7 @@ class NodeFactory:
         command_goto: str | None = None,
         input_mapping: dict[str, str] | None = None,
         output_mapping: dict[str, str] | None = None,
-        runnable_config: RunnableConfig | None = None
+        runnable_config: RunnableConfig | None = None,
     ) -> NodeFunction:
         """Create a node function with enhanced engine handling."""
         # Always import EngineType at the start of the method
@@ -75,7 +82,9 @@ class NodeFactory:
                     if component.name == config:
                         if component.metadata.get("source_module"):
                             try:
-                                module = importlib.import_module(component.metadata["source_module"])
+                                module = importlib.import_module(
+                                    component.metadata["source_module"]
+                                )
                                 class_obj = getattr(module, component.name)
                                 if issubclass(class_obj, Engine):
                                     config = class_obj()
@@ -105,7 +114,7 @@ class NodeFactory:
                         command_goto,
                         input_mapping,
                         output_mapping,
-                        runnable_config
+                        runnable_config,
                     )
                 if config.engine_type == EngineType.VECTOR_STORE:
                     return cls._create_vectorstore_node(
@@ -113,7 +122,7 @@ class NodeFactory:
                         command_goto,
                         input_mapping,
                         output_mapping,
-                        runnable_config
+                        runnable_config,
                     )
                 if config.engine_type == EngineType.RETRIEVER:
                     return cls._create_retriever_node(
@@ -121,7 +130,7 @@ class NodeFactory:
                         command_goto,
                         input_mapping,
                         output_mapping,
-                        runnable_config
+                        runnable_config,
                     )
                 if config.engine_type == EngineType.AGENT:
                     return cls._create_agent_node(
@@ -129,14 +138,10 @@ class NodeFactory:
                         command_goto,
                         input_mapping,
                         output_mapping,
-                        runnable_config
+                        runnable_config,
                     )
                 return cls._create_invokable_engine_node(
-                    config,
-                    command_goto,
-                    input_mapping,
-                    output_mapping,
-                    runnable_config
+                    config, command_goto, input_mapping, output_mapping, runnable_config
                 )
 
             # Non-invokable engines
@@ -148,36 +153,25 @@ class NodeFactory:
                         command_goto,
                         input_mapping,
                         output_mapping,
-                        runnable_config
+                        runnable_config,
                     )
                 return cls._create_non_invokable_engine_node(
-                    config,
-                    command_goto,
-                    input_mapping,
-                    output_mapping,
-                    runnable_config
+                    config, command_goto, input_mapping, output_mapping, runnable_config
                 )
 
             # Generic engine fallback
             return cls._create_generic_engine_node(
-                config,
-                command_goto,
-                input_mapping,
-                output_mapping,
-                runnable_config
+                config, command_goto, input_mapping, output_mapping, runnable_config
             )
 
         # Callable config
         if callable(config):
             # Ensure the callable is config-aware
-            return cls._ensure_config_aware(
-                config,
-                command_goto,
-                runnable_config
-            )
+            return cls._ensure_config_aware(config, command_goto, runnable_config)
 
         # Unsupported config type
         raise ValueError(f"Unsupported node configuration type: {type(config)}")
+
     @classmethod
     def create_node_function(
         cls,
@@ -185,7 +179,7 @@ class NodeFactory:
         command_goto: str | None = None,
         input_mapping: dict[str, str] | None = None,
         output_mapping: dict[str, str] | None = None,
-        runnable_config: RunnableConfig | None = None
+        runnable_config: RunnableConfig | None = None,
     ) -> NodeFunction:
         """Create a node function with enhanced engine handling."""
         # Import EngineType at method level to ensure it's always available
@@ -217,7 +211,9 @@ class NodeFactory:
                     if component.name == config:
                         if component.metadata.get("source_module"):
                             try:
-                                module = importlib.import_module(component.metadata["source_module"])
+                                module = importlib.import_module(
+                                    component.metadata["source_module"]
+                                )
                                 class_obj = getattr(module, component.name)
                                 if issubclass(class_obj, Engine):
                                     config = class_obj()
@@ -247,7 +243,7 @@ class NodeFactory:
                         command_goto,
                         input_mapping,
                         output_mapping,
-                        runnable_config
+                        runnable_config,
                     )
                 if config.engine_type == EngineType.VECTOR_STORE:
                     return cls._create_vectorstore_node(
@@ -255,7 +251,7 @@ class NodeFactory:
                         command_goto,
                         input_mapping,
                         output_mapping,
-                        runnable_config
+                        runnable_config,
                     )
                 if config.engine_type == EngineType.RETRIEVER:
                     return cls._create_retriever_node(
@@ -263,7 +259,7 @@ class NodeFactory:
                         command_goto,
                         input_mapping,
                         output_mapping,
-                        runnable_config
+                        runnable_config,
                     )
                 if config.engine_type == EngineType.AGENT:
                     return cls._create_agent_node(
@@ -271,14 +267,10 @@ class NodeFactory:
                         command_goto,
                         input_mapping,
                         output_mapping,
-                        runnable_config
+                        runnable_config,
                     )
                 return cls._create_invokable_engine_node(
-                    config,
-                    command_goto,
-                    input_mapping,
-                    output_mapping,
-                    runnable_config
+                    config, command_goto, input_mapping, output_mapping, runnable_config
                 )
 
             # Non-invokable engines
@@ -290,36 +282,25 @@ class NodeFactory:
                         command_goto,
                         input_mapping,
                         output_mapping,
-                        runnable_config
+                        runnable_config,
                     )
                 return cls._create_non_invokable_engine_node(
-                    config,
-                    command_goto,
-                    input_mapping,
-                    output_mapping,
-                    runnable_config
+                    config, command_goto, input_mapping, output_mapping, runnable_config
                 )
 
             # Generic engine fallback
             return cls._create_generic_engine_node(
-                config,
-                command_goto,
-                input_mapping,
-                output_mapping,
-                runnable_config
+                config, command_goto, input_mapping, output_mapping, runnable_config
             )
 
         # Callable config
         if callable(config):
             # Ensure the callable is config-aware
-            return cls._ensure_config_aware(
-                config,
-                command_goto,
-                runnable_config
-            )
+            return cls._ensure_config_aware(config, command_goto, runnable_config)
 
         # Unsupported config type
         raise ValueError(f"Unsupported node configuration type: {type(config)}")
+
     @classmethod
     def create_node_function(
         cls,
@@ -327,13 +308,14 @@ class NodeFactory:
         command_goto: str | None = None,
         input_mapping: dict[str, str] | None = None,
         output_mapping: dict[str, str] | None = None,
-        runnable_config: RunnableConfig | None = None
+        runnable_config: RunnableConfig | None = None,
     ) -> NodeFunction:
         """Create a node function with enhanced engine handling."""
         # Handle string references to engines
         if isinstance(config, str):
             # Try to resolve from engine registry
             from haive.core.engine.base import EngineRegistry, EngineType
+
             registry = EngineRegistry.get_instance()
 
             resolved = False
@@ -352,7 +334,9 @@ class NodeFactory:
                     if component.name == config:
                         if component.metadata.get("source_module"):
                             try:
-                                module = importlib.import_module(component.metadata["source_module"])
+                                module = importlib.import_module(
+                                    component.metadata["source_module"]
+                                )
                                 class_obj = getattr(module, component.name)
                                 if issubclass(class_obj, Engine):
                                     config = class_obj()
@@ -382,7 +366,7 @@ class NodeFactory:
                         command_goto,
                         input_mapping,
                         output_mapping,
-                        runnable_config
+                        runnable_config,
                     )
                 if config.engine_type == EngineType.VECTOR_STORE:
                     return cls._create_vectorstore_node(
@@ -390,7 +374,7 @@ class NodeFactory:
                         command_goto,
                         input_mapping,
                         output_mapping,
-                        runnable_config
+                        runnable_config,
                     )
                 if config.engine_type == EngineType.RETRIEVER:
                     return cls._create_retriever_node(
@@ -398,7 +382,7 @@ class NodeFactory:
                         command_goto,
                         input_mapping,
                         output_mapping,
-                        runnable_config
+                        runnable_config,
                     )
                 if config.engine_type == EngineType.AGENT:
                     return cls._create_agent_node(
@@ -406,14 +390,10 @@ class NodeFactory:
                         command_goto,
                         input_mapping,
                         output_mapping,
-                        runnable_config
+                        runnable_config,
                     )
                 return cls._create_invokable_engine_node(
-                    config,
-                    command_goto,
-                    input_mapping,
-                    output_mapping,
-                    runnable_config
+                    config, command_goto, input_mapping, output_mapping, runnable_config
                 )
 
             # Non-invokable engines
@@ -425,52 +405,41 @@ class NodeFactory:
                         command_goto,
                         input_mapping,
                         output_mapping,
-                        runnable_config
+                        runnable_config,
                     )
                 return cls._create_non_invokable_engine_node(
-                    config,
-                    command_goto,
-                    input_mapping,
-                    output_mapping,
-                    runnable_config
+                    config, command_goto, input_mapping, output_mapping, runnable_config
                 )
 
             # Generic engine fallback
             return cls._create_generic_engine_node(
-                config,
-                command_goto,
-                input_mapping,
-                output_mapping,
-                runnable_config
+                config, command_goto, input_mapping, output_mapping, runnable_config
             )
 
         # Callable config
         if callable(config):
             # Ensure the callable is config-aware
-            return cls._ensure_config_aware(
-                config,
-                command_goto,
-                runnable_config
-            )
+            return cls._ensure_config_aware(config, command_goto, runnable_config)
 
         # Unsupported config type
         raise ValueError(f"Unsupported node configuration type: {type(config)}")
+
     @classmethod
     def create_tool_node(
         cls,
         tools: list[Any],
         post_processor: Callable | None = None,
         command_goto: str | None = None,
-        runnable_config: RunnableConfig | None = None
+        runnable_config: RunnableConfig | None = None,
     ) -> NodeFunction:
         """Create a tool node with config awareness.
-        
+
         Args:
             tools: List of tools to use
             post_processor: Optional function to process tool results
             command_goto: Optional next node to go to
             runnable_config: Optional default runtime configuration
-            
+
         Returns:
             A node function for tool execution
         """
@@ -515,19 +484,18 @@ class NodeFactory:
 
     @classmethod
     def create_runnable_config_node(
-        cls,
-        runnable_config: RunnableConfig,
-        command_goto: str | None = None
+        cls, runnable_config: RunnableConfig, command_goto: str | None = None
     ) -> NodeFunction:
         """Create a node that sets runnable_config in the state.
-        
+
         Args:
             runnable_config: Configuration to set
             command_goto: Optional next node to go to
-            
+
         Returns:
             A node function that sets config in state
         """
+
         def node_function(state, config=None):
             """Set runnable_config in state."""
             # Create a merged config
@@ -546,18 +514,19 @@ class NodeFactory:
         cls,
         model: type[BaseModel],
         command_goto: str | None = None,
-        runnable_config: RunnableConfig | None = None
+        runnable_config: RunnableConfig | None = None,
     ) -> NodeFunction:
         """Create a node that formats the output according to a schema.
-        
+
         Args:
             model: Pydantic model to use for structuring output
             command_goto: Optional next node to go to
             runnable_config: Optional default runtime configuration
-            
+
         Returns:
             A node function that structures output
         """
+
         def node_function(state, config=None):
             """Process state into structured output."""
             try:
@@ -566,12 +535,16 @@ class NodeFactory:
                 if not messages:
                     return Command(
                         update={"error": "No messages found in state"},
-                        goto=command_goto
+                        goto=command_goto,
                     )
 
                 # Get the last message content
                 last_message = messages[-1]
-                content = last_message.content if hasattr(last_message, "content") else str(last_message)
+                content = (
+                    last_message.content
+                    if hasattr(last_message, "content")
+                    else str(last_message)
+                )
 
                 # Store raw output
                 result = {"raw_output": content}
@@ -616,8 +589,7 @@ class NodeFactory:
             except Exception as e:
                 logger.error(f"Error in structured output processor: {e!s}")
                 return Command(
-                    update={"error": f"Processing error: {e!s}"},
-                    goto=command_goto
+                    update={"error": f"Processing error: {e!s}"}, goto=command_goto
                 )
 
         return node_function
@@ -629,29 +601,37 @@ class NodeFactory:
         command_goto: str | None = None,
         input_mapping: dict[str, str] | None = None,
         output_mapping: dict[str, str] | None = None,
-        runnable_config: RunnableConfig | None = None
+        runnable_config: RunnableConfig | None = None,
     ) -> NodeFunction:
         """Create a node function for an invokable engine.
-        
+
         Args:
             engine: Invokable engine to use
             command_goto: Optional next node to go to
             input_mapping: Optional mapping from state keys to engine input keys
             output_mapping: Optional mapping from engine output keys to state keys
             runnable_config: Optional default runtime configuration
-            
+
         Returns:
             A node function for the engine
         """
         # Create specialized node based on engine type
         if engine.engine_type == EngineType.LLM:
-            return cls._create_llm_node(engine, command_goto, input_mapping, output_mapping, runnable_config)
+            return cls._create_llm_node(
+                engine, command_goto, input_mapping, output_mapping, runnable_config
+            )
         if engine.engine_type == EngineType.VECTOR_STORE:
-            return cls._create_vectorstore_node(engine, command_goto, input_mapping, output_mapping, runnable_config)
+            return cls._create_vectorstore_node(
+                engine, command_goto, input_mapping, output_mapping, runnable_config
+            )
         if engine.engine_type == EngineType.RETRIEVER:
-            return cls._create_retriever_node(engine, command_goto, input_mapping, output_mapping, runnable_config)
+            return cls._create_retriever_node(
+                engine, command_goto, input_mapping, output_mapping, runnable_config
+            )
         if engine.engine_type == EngineType.AGENT:
-            return cls._create_agent_node(engine, command_goto, input_mapping, output_mapping, runnable_config)
+            return cls._create_agent_node(
+                engine, command_goto, input_mapping, output_mapping, runnable_config
+            )
 
         # Generic invokable engine node
         def node_function(state, config: RunnableConfig | None = None):
@@ -687,20 +667,21 @@ class NodeFactory:
         command_goto: str | None = None,
         input_mapping: dict[str, str] | None = None,
         output_mapping: dict[str, str] | None = None,
-        runnable_config: RunnableConfig | None = None
+        runnable_config: RunnableConfig | None = None,
     ) -> NodeFunction:
         """Create a node function for an LLM engine.
-        
+
         Args:
             engine: LLM engine to use
             command_goto: Optional next node to go to
             input_mapping: Optional mapping from state keys to engine input keys
             output_mapping: Optional mapping from engine output keys to state keys
             runnable_config: Optional default runtime configuration
-            
+
         Returns:
             A node function for the LLM
         """
+
         def node_function(state, config: RunnableConfig | None = None):
             """LLM node function."""
             logger.debug("LLM node called with state")
@@ -738,20 +719,21 @@ class NodeFactory:
         command_goto: str | None = None,
         input_mapping: dict[str, str] | None = None,
         output_mapping: dict[str, str] | None = None,
-        runnable_config: RunnableConfig | None = None
+        runnable_config: RunnableConfig | None = None,
     ) -> NodeFunction:
         """Create a node function for a vector store engine.
-        
+
         Args:
             engine: Vector store engine to use
             command_goto: Optional next node to go to
             input_mapping: Optional mapping from state keys to engine input keys
             output_mapping: Optional mapping from engine output keys to state keys
             runnable_config: Optional default runtime configuration
-            
+
         Returns:
             A node function for the vector store
         """
+
         def node_function(state, config: RunnableConfig | None = None):
             """Vector store node function."""
             logger.debug("Vector store node called with state")
@@ -774,7 +756,11 @@ class NodeFactory:
                 elif hasattr(state, "messages") and state.messages:
                     # Use the last message as query
                     last_message = state.messages[-1]
-                    content = last_message.content if hasattr(last_message, "content") else str(last_message)
+                    content = (
+                        last_message.content
+                        if hasattr(last_message, "content")
+                        else str(last_message)
+                    )
                     input_data = {"query": content}
 
             # Invoke the vector store
@@ -786,7 +772,9 @@ class NodeFactory:
                 return cls._create_error_command(state, str(e), command_goto)
 
             # Process result into state update
-            state_update = cls._process_vectorstore_result(documents, state, output_mapping)
+            state_update = cls._process_vectorstore_result(
+                documents, state, output_mapping
+            )
 
             # Return with command
             return Command(update=state_update, goto=command_goto)
@@ -800,20 +788,21 @@ class NodeFactory:
         command_goto: str | None = None,
         input_mapping: dict[str, str] | None = None,
         output_mapping: dict[str, str] | None = None,
-        runnable_config: RunnableConfig | None = None
+        runnable_config: RunnableConfig | None = None,
     ) -> NodeFunction:
         """Create a node function for a retriever engine.
-        
+
         Args:
             engine: Retriever engine to use
             command_goto: Optional next node to go to
             input_mapping: Optional mapping from state keys to engine input keys
             output_mapping: Optional mapping from engine output keys to state keys
             runnable_config: Optional default runtime configuration
-            
+
         Returns:
             A node function for the retriever
         """
+
         def node_function(state, config: RunnableConfig | None = None):
             """Retriever node function."""
             logger.debug("Retriever node called with state")
@@ -836,7 +825,11 @@ class NodeFactory:
                 elif hasattr(state, "messages") and state.messages:
                     # Use the last message as query
                     last_message = state.messages[-1]
-                    content = last_message.content if hasattr(last_message, "content") else str(last_message)
+                    content = (
+                        last_message.content
+                        if hasattr(last_message, "content")
+                        else str(last_message)
+                    )
                     input_data = {"query": content}
 
             # Invoke the retriever
@@ -848,7 +841,9 @@ class NodeFactory:
                 return cls._create_error_command(state, str(e), command_goto)
 
             # Process result into state update
-            state_update = cls._process_vectorstore_result(documents, state, output_mapping)
+            state_update = cls._process_vectorstore_result(
+                documents, state, output_mapping
+            )
 
             # Return with command
             return Command(update=state_update, goto=command_goto)
@@ -862,20 +857,21 @@ class NodeFactory:
         command_goto: str | None = None,
         input_mapping: dict[str, str] | None = None,
         output_mapping: dict[str, str] | None = None,
-        runnable_config: RunnableConfig | None = None
+        runnable_config: RunnableConfig | None = None,
     ) -> NodeFunction:
         """Create a node function for an agent engine.
-        
+
         Args:
             engine: Agent engine to use
             command_goto: Optional next node to go to
             input_mapping: Optional mapping from state keys to engine input keys
             output_mapping: Optional mapping from engine output keys to state keys
             runnable_config: Optional default runtime configuration
-            
+
         Returns:
             A node function for the agent
         """
+
         def node_function(state, config: RunnableConfig | None = None):
             """Agent node function."""
             logger.debug("Agent node called with state")
@@ -909,23 +905,25 @@ class NodeFactory:
         command_goto: str | None = None,
         input_mapping: dict[str, str] | None = None,
         output_mapping: dict[str, str] | None = None,
-        runnable_config: RunnableConfig | None = None
+        runnable_config: RunnableConfig | None = None,
     ) -> NodeFunction:
         """Create a node function for a non-invokable engine.
-        
+
         Args:
             engine: Non-invokable engine to use
             command_goto: Optional next node to go to
             input_mapping: Optional mapping from state keys to engine input keys
             output_mapping: Optional mapping from engine output keys to state keys
             runnable_config: Optional default runtime configuration
-            
+
         Returns:
             A node function for the engine
         """
         # Create specialized node based on engine type
         if engine.engine_type == EngineType.EMBEDDINGS:
-            return cls._create_embeddings_node(engine, command_goto, input_mapping, output_mapping, runnable_config)
+            return cls._create_embeddings_node(
+                engine, command_goto, input_mapping, output_mapping, runnable_config
+            )
 
         # Generic non-invokable engine node
         def node_function(state, config: RunnableConfig | None = None):
@@ -964,20 +962,21 @@ class NodeFactory:
         command_goto: str | None = None,
         input_mapping: dict[str, str] | None = None,
         output_mapping: dict[str, str] | None = None,
-        runnable_config: RunnableConfig | None = None
+        runnable_config: RunnableConfig | None = None,
     ) -> NodeFunction:
         """Create a node function for an embeddings engine.
-        
+
         Args:
             engine: Embeddings engine to use
             command_goto: Optional next node to go to
             input_mapping: Optional mapping from state keys to engine input keys
             output_mapping: Optional mapping from engine output keys to state keys
             runnable_config: Optional default runtime configuration
-            
+
         Returns:
             A node function for the embeddings engine
         """
+
         def node_function(state, config: RunnableConfig | None = None):
             """Embeddings node function."""
             logger.debug("Embeddings node called with state")
@@ -992,23 +991,39 @@ class NodeFactory:
                 # Process based on input type
                 if isinstance(input_data, str):
                     # Single text
-                    result = engine.embed_query(input_data, runnable_config=merged_config)
-                elif isinstance(input_data, list) and all(isinstance(x, str) for x in input_data):
+                    result = engine.embed_query(
+                        input_data, runnable_config=merged_config
+                    )
+                elif isinstance(input_data, list) and all(
+                    isinstance(x, str) for x in input_data
+                ):
                     # List of texts
-                    result = engine.embed_documents(input_data, runnable_config=merged_config)
+                    result = engine.embed_documents(
+                        input_data, runnable_config=merged_config
+                    )
                 elif isinstance(input_data, dict):
                     # Dictionary with text or documents
                     if "text" in input_data:
-                        result = engine.embed_query(input_data["text"], runnable_config=merged_config)
+                        result = engine.embed_query(
+                            input_data["text"], runnable_config=merged_config
+                        )
                     elif "documents" in input_data or "texts" in input_data:
                         docs = input_data.get("documents") or input_data.get("texts")
-                        result = engine.embed_documents(docs, runnable_config=merged_config)
+                        result = engine.embed_documents(
+                            docs, runnable_config=merged_config
+                        )
                     else:
-                        raise ValueError(f"Unsupported input format for embeddings: {input_data.keys()}")
+                        raise ValueError(
+                            f"Unsupported input format for embeddings: {input_data.keys()}"
+                        )
                 else:
-                    raise ValueError(f"Unsupported input type for embeddings: {type(input_data)}")
+                    raise ValueError(
+                        f"Unsupported input type for embeddings: {type(input_data)}"
+                    )
 
-                logger.debug(f"Embeddings generated with shape: {len(result) if isinstance(result, list) else 'unknown'}")
+                logger.debug(
+                    f"Embeddings generated with shape: {len(result) if isinstance(result, list) else 'unknown'}"
+                )
             except Exception as e:
                 logger.error(f"Error generating embeddings: {e}")
                 return cls._create_error_command(state, str(e), command_goto)
@@ -1039,11 +1054,15 @@ class NodeFactory:
             first_value = input_data[first_key]
             if isinstance(first_value, str):
                 return instance.embed_query(first_value)
-            if isinstance(first_value, list) and all(isinstance(x, str) for x in first_value):
+            if isinstance(first_value, list) and all(
+                isinstance(x, str) for x in first_value
+            ):
                 return instance.embed_documents(first_value)
         elif isinstance(input_data, str):
             return instance.embed_query(input_data)
-        elif isinstance(input_data, list) and all(isinstance(x, str) for x in input_data):
+        elif isinstance(input_data, list) and all(
+            isinstance(x, str) for x in input_data
+        ):
             return instance.embed_documents(input_data)
 
         # If we can't figure it out, try returning the instance
@@ -1056,20 +1075,21 @@ class NodeFactory:
         command_goto: str | None = None,
         input_mapping: dict[str, str] | None = None,
         output_mapping: dict[str, str] | None = None,
-        runnable_config: RunnableConfig | None = None
+        runnable_config: RunnableConfig | None = None,
     ) -> NodeFunction:
         """Create a generic node function for an engine.
-        
+
         Args:
             engine: Engine to use
             command_goto: Optional next node to go to
             input_mapping: Optional mapping from state keys to engine input keys
             output_mapping: Optional mapping from engine output keys to state keys
             runnable_config: Optional default runtime configuration
-            
+
         Returns:
             A node function for the engine
         """
+
         def node_function(state, config: RunnableConfig | None = None):
             """Generic engine node."""
             logger.debug("Generic engine node called with state")
@@ -1107,11 +1127,11 @@ class NodeFactory:
     @classmethod
     def _extract_input(cls, state, input_mapping: dict[str, str]) -> Any:
         """Extract input from state based on mapping.
-        
+
         Args:
             state: State to extract from
             input_mapping: Mapping from state keys to input keys
-            
+
         Returns:
             Extracted input
         """
@@ -1158,14 +1178,16 @@ class NodeFactory:
         return engine_input
 
     @classmethod
-    def _process_result(cls, result, state, output_mapping: dict[str, str]) -> dict[str, Any]:
+    def _process_result(
+        cls, result, state, output_mapping: dict[str, str]
+    ) -> dict[str, Any]:
         """Process result into state update.
-        
+
         Args:
             result: Result to process
             state: Current state
             output_mapping: Mapping from result keys to state keys
-            
+
         Returns:
             State update dictionary
         """
@@ -1195,13 +1217,23 @@ class NodeFactory:
                 state_update["output"] = result.content
 
             # Handle messages list
-            if hasattr(state, "messages") or (isinstance(state, dict) and "messages" in state):
-                messages = state.messages if hasattr(state, "messages") else state["messages"]
+            if hasattr(state, "messages") or (
+                isinstance(state, dict) and "messages" in state
+            ):
+                messages = (
+                    state.messages if hasattr(state, "messages") else state["messages"]
+                )
                 state_update["messages"] = messages + [result]
-        elif isinstance(result, list) and all(hasattr(item, "content") for item in result):
+        elif isinstance(result, list) and all(
+            hasattr(item, "content") for item in result
+        ):
             # List of messages
-            if hasattr(state, "messages") or (isinstance(state, dict) and "messages" in state):
-                messages = state.messages if hasattr(state, "messages") else state["messages"]
+            if hasattr(state, "messages") or (
+                isinstance(state, dict) and "messages" in state
+            ):
+                messages = (
+                    state.messages if hasattr(state, "messages") else state["messages"]
+                )
                 state_update["messages"] = messages + result
         elif isinstance(result, str):
             # String result
@@ -1214,8 +1246,12 @@ class NodeFactory:
                 state_update["output"] = result
 
             # Add as message if messages exist
-            if hasattr(state, "messages") or (isinstance(state, dict) and "messages" in state):
-                messages = state.messages if hasattr(state, "messages") else state["messages"]
+            if hasattr(state, "messages") or (
+                isinstance(state, dict) and "messages" in state
+            ):
+                messages = (
+                    state.messages if hasattr(state, "messages") else state["messages"]
+                )
                 state_update["messages"] = messages + [AIMessage(content=result)]
         # Simple value
         elif output_mapping:
@@ -1229,14 +1265,16 @@ class NodeFactory:
         return state_update
 
     @classmethod
-    def _process_vectorstore_result(cls, documents, state, output_mapping: dict[str, str]) -> dict[str, Any]:
+    def _process_vectorstore_result(
+        cls, documents, state, output_mapping: dict[str, str]
+    ) -> dict[str, Any]:
         """Process document results into state update.
-        
+
         Args:
             documents: List of documents
             state: Current state
             output_mapping: Mapping from result keys to state keys
-            
+
         Returns:
             State update dictionary
         """
@@ -1245,18 +1283,32 @@ class NodeFactory:
 
         # Map documents to the appropriate field
         if output_mapping:
-            doc_field = next((state_key for output_key, state_key in output_mapping.items()
-                             if output_key == "documents"), "documents")
+            doc_field = next(
+                (
+                    state_key
+                    for output_key, state_key in output_mapping.items()
+                    if output_key == "documents"
+                ),
+                "documents",
+            )
         else:
             doc_field = "documents"
 
         state_update[doc_field] = documents
 
         # Handle context field if in mapping or requested
-        if output_mapping and any(output_key == "context" for output_key in output_mapping.values()):
+        if output_mapping and any(
+            output_key == "context" for output_key in output_mapping.values()
+        ):
             # Get the state key for context
-            context_field = next((state_key for output_key, state_key in output_mapping.items()
-                                 if output_key == "context"), "context")
+            context_field = next(
+                (
+                    state_key
+                    for output_key, state_key in output_mapping.items()
+                    if output_key == "context"
+                ),
+                "context",
+            )
 
             # Extract text from documents
             context = "\n\n".join([doc.page_content for doc in documents])
@@ -1265,14 +1317,16 @@ class NodeFactory:
         return state_update
 
     @classmethod
-    def _process_embeddings_result(cls, result, state, output_mapping: dict[str, str]) -> dict[str, Any]:
+    def _process_embeddings_result(
+        cls, result, state, output_mapping: dict[str, str]
+    ) -> dict[str, Any]:
         """Process embeddings results into state update.
-        
+
         Args:
             result: Embeddings result
             state: Current state
             output_mapping: Mapping from result keys to state keys
-            
+
         Returns:
             State update dictionary
         """
@@ -1281,8 +1335,14 @@ class NodeFactory:
 
         # Map embeddings to the appropriate field
         if output_mapping:
-            embedding_field = next((state_key for output_key, state_key in output_mapping.items()
-                                  if output_key == "embeddings"), "embeddings")
+            embedding_field = next(
+                (
+                    state_key
+                    for output_key, state_key in output_mapping.items()
+                    if output_key == "embeddings"
+                ),
+                "embeddings",
+            )
         else:
             embedding_field = "embeddings"
 
@@ -1291,14 +1351,16 @@ class NodeFactory:
         return state_update
 
     @classmethod
-    def _create_error_command(cls, state, error_message: str, command_goto: str | None = None) -> Command:
+    def _create_error_command(
+        cls, state, error_message: str, command_goto: str | None = None
+    ) -> Command:
         """Create an error command.
-        
+
         Args:
             state: Current state
             error_message: Error message
             command_goto: Optional next node to go to
-            
+
         Returns:
             Command with error information
         """
@@ -1308,8 +1370,12 @@ class NodeFactory:
         state_update = {"error": error_message}
 
         # Add error message to messages if present
-        if hasattr(state, "messages") or (isinstance(state, dict) and "messages" in state):
-            messages = state.messages if hasattr(state, "messages") else state["messages"]
+        if hasattr(state, "messages") or (
+            isinstance(state, dict) and "messages" in state
+        ):
+            messages = (
+                state.messages if hasattr(state, "messages") else state["messages"]
+            )
             error_msg = AIMessage(content=f"Error: {error_message}")
             state_update["messages"] = messages + [error_msg]
 
@@ -1320,15 +1386,15 @@ class NodeFactory:
         cls,
         func: Callable,
         command_goto: str | None = None,
-        runnable_config: RunnableConfig | None = None
+        runnable_config: RunnableConfig | None = None,
     ) -> NodeFunction:
         """Ensure a function is config-aware.
-        
+
         Args:
             func: Function to wrap
             command_goto: Optional next node to go to
             runnable_config: Optional default runtime configuration
-            
+
         Returns:
             Config-aware node function
         """
@@ -1338,6 +1404,7 @@ class NodeFactory:
 
         # If it already accepts config, create wrapper that merges configs
         if accepts_config:
+
             @wraps(func)
             def config_wrapper(state, config=None):
                 # Merge configs
@@ -1378,14 +1445,14 @@ class NodeFactory:
     def _merge_configs(
         cls,
         base_config: RunnableConfig | None = None,
-        override_config: RunnableConfig | None = None
+        override_config: RunnableConfig | None = None,
     ) -> RunnableConfig | None:
         """Merge two RunnableConfigs.
-        
+
         Args:
             base_config: Base configuration
             override_config: Configuration to override with
-            
+
         Returns:
             Merged configuration or None if both inputs are None
         """
@@ -1403,18 +1470,15 @@ class NodeFactory:
 
     @classmethod
     def _extract_from_config(
-        cls,
-        config: RunnableConfig | None,
-        key: str,
-        default: Any = None
+        cls, config: RunnableConfig | None, key: str, default: Any = None
     ) -> Any:
         """Extract a value from RunnableConfig's configurable section.
-        
+
         Args:
             config: RunnableConfig to extract from
             key: Key to extract
             default: Default value if not found
-            
+
         Returns:
             Extracted value or default
         """
@@ -1425,10 +1489,10 @@ class NodeFactory:
     @classmethod
     def _derive_input_mapping(cls, component: Any) -> dict[str, str]:
         """Derive input mapping based on component type.
-        
+
         Args:
             component: Component to derive mapping for
-            
+
         Returns:
             Input mapping dictionary
         """
@@ -1450,10 +1514,15 @@ class NodeFactory:
                 if component.engine_type == EngineType.LLM:
                     # For LLMs, include messages and common prompt variables
                     mapping["messages"] = "messages"
-                    if hasattr(component, "prompt_template") and hasattr(component.prompt_template, "input_variables"):
+                    if hasattr(component, "prompt_template") and hasattr(
+                        component.prompt_template, "input_variables"
+                    ):
                         for var in component.prompt_template.input_variables:
                             mapping[var] = var
-                elif component.engine_type in [EngineType.VECTOR_STORE, EngineType.RETRIEVER]:
+                elif component.engine_type in [
+                    EngineType.VECTOR_STORE,
+                    EngineType.RETRIEVER,
+                ]:
                     # For search engines, map query
                     mapping["query"] = "query"
                     mapping["question"] = "query"
@@ -1477,10 +1546,10 @@ class NodeFactory:
     @classmethod
     def _derive_output_mapping(cls, component: Any) -> dict[str, str]:
         """Derive output mapping based on component type.
-        
+
         Args:
             component: Component to derive mapping for
-            
+
         Returns:
             Output mapping dictionary
         """
@@ -1506,14 +1575,20 @@ class NodeFactory:
 
             # Handle special cases by engine type
             if isinstance(component, InvokableEngine):
-                if component.engine_type in [EngineType.VECTOR_STORE, EngineType.RETRIEVER]:
+                if component.engine_type in [
+                    EngineType.VECTOR_STORE,
+                    EngineType.RETRIEVER,
+                ]:
                     mapping["documents"] = "documents"
                     mapping["context"] = "context"
                 elif component.engine_type == EngineType.LLM:
                     mapping["content"] = "output"
 
                     # If it has structured output, use that name
-                    if hasattr(component, "structured_output_model") and component.structured_output_model:
+                    if (
+                        hasattr(component, "structured_output_model")
+                        and component.structured_output_model
+                    ):
                         model_name = component.structured_output_model.__name__.lower()
                         mapping[model_name] = model_name
 

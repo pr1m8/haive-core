@@ -24,6 +24,7 @@ from pydantic import ConfigDict
 
 class NodeConfig(BaseModel):
     """Configuration for a node in the graph."""
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     name: str
@@ -41,12 +42,16 @@ class NodeConfig(BaseModel):
             return END
         return v
 
+
 class EdgeConfig(BaseModel):
     """Configuration for an edge in the graph."""
+
     from_node: str | list[str]
     to_node: str
 
-    model_config = ConfigDict(arbitrary_types_allowed = True, )
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+    )
 
     @field_validator("to_node")
     def validate_to_node(cls, v):
@@ -57,11 +62,14 @@ class EdgeConfig(BaseModel):
 
 class BranchConfig(BaseModel):
     """Configuration for a conditional branch in the graph."""
+
     source_node: str
     condition: Callable | str
     destinations: dict[str, str]
 
-    model_config = ConfigDict(arbitrary_types_allowed = True, )
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+    )
 
     @field_validator("destinations")
     def validate_destinations(cls, destinations):
@@ -76,10 +84,11 @@ class BranchConfig(BaseModel):
 
 class StateGraphEditor(BaseModel):
     """Editor for manipulating StateGraph instances.
-    
+
     This component provides methods for adding/removing nodes and edges,
     as well as visualizing and modifying the graph structure.
     """
+
     name: str = Field(default_factory=lambda: f"graph_{uuid.uuid4().hex[:8]}")
     description: str | None = None
     state_schema: type[Any] | None = None
@@ -96,12 +105,16 @@ class StateGraphEditor(BaseModel):
     # Internal state
     state_graph: StateGraph | None = Field(default=None, exclude=True)
 
-    model_config = ConfigDict(arbitrary_types_allowed = True, )
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+    )
 
     @model_validator(mode="after")
     def validate_schemas(self):
         """Ensure schemas are set correctly."""
-        if self.state_schema is None and (self.input_schema is not None or self.output_schema is not None):
+        if self.state_schema is None and (
+            self.input_schema is not None or self.output_schema is not None
+        ):
             if self.input_schema is not None:
                 self.state_schema = self.input_schema
             elif self.output_schema is not None:
@@ -116,7 +129,7 @@ class StateGraphEditor(BaseModel):
                 self.state_graph = StateGraph(
                     self.state_schema,
                     input=self.input_schema,
-                    output=self.output_schema
+                    output=self.output_schema,
                 )
             else:
                 self.state_graph = StateGraph(self.state_schema)
@@ -141,10 +154,10 @@ class StateGraphEditor(BaseModel):
         input_mapping: dict[str, str] | None = None,
         output_mapping: dict[str, str] | None = None,
         runnable_config: RunnableConfig | None = None,
-        metadata: dict[str, Any] | None = None
+        metadata: dict[str, Any] | None = None,
     ) -> "StateGraphEditor":
         """Add a node to the graph.
-        
+
         Args:
             name: Name of the node
             engine: Engine configuration or callable function
@@ -153,7 +166,7 @@ class StateGraphEditor(BaseModel):
             output_mapping: Optional mapping from engine output keys to state keys
             runnable_config: Optional runtime configuration specific to this node
             metadata: Optional metadata for the node
-            
+
         Returns:
             Self for chaining
         """
@@ -165,7 +178,7 @@ class StateGraphEditor(BaseModel):
             input_mapping=input_mapping,
             output_mapping=output_mapping,
             runnable_config=runnable_config,
-            metadata=metadata
+            metadata=metadata,
         )
 
         # Add to StateGraph if initialized
@@ -176,6 +189,7 @@ class StateGraphEditor(BaseModel):
             resolved_engine = engine
             if isinstance(engine, str):
                 from haive.core.engine.base import EngineRegistry, EngineType
+
                 registry = EngineRegistry.get_instance()
                 for engine_type in EngineType:
                     found_engine = registry.get(engine_type, engine)
@@ -183,7 +197,9 @@ class StateGraphEditor(BaseModel):
                         resolved_engine = found_engine
                         break
                 if resolved_engine == engine:  # Not found
-                    logger.warning(f"Engine '{engine}' not found in registry, using as-is")
+                    logger.warning(
+                        f"Engine '{engine}' not found in registry, using as-is"
+                    )
 
             # Create node function
             if resolved_engine is not None:
@@ -192,14 +208,16 @@ class StateGraphEditor(BaseModel):
                     command_goto=END if command_goto == "END" else command_goto,
                     input_mapping=input_mapping,
                     output_mapping=output_mapping,
-                    runnable_config=runnable_config
+                    runnable_config=runnable_config,
                 )
 
                 # Add to graph
                 self.state_graph.add_node(name, node_fn)
                 logger.info(f"Added node '{name}' to StateGraph")
             else:
-                logger.warning(f"Cannot add node '{name}' to StateGraph: No engine specified")
+                logger.warning(
+                    f"Cannot add node '{name}' to StateGraph: No engine specified"
+                )
 
         # Set as entry point if first node
         if self.entry_point is None:
@@ -212,46 +230,44 @@ class StateGraphEditor(BaseModel):
 
     def add_edge(self, from_node: str | list[str], to_node: str) -> "StateGraphEditor":
         """Add an edge between nodes.
-        
+
         Args:
             from_node: Source node name or list of source node names
             to_node: Target node name or END
-            
+
         Returns:
             Self for chaining
         """
         # Add to edge config
-        self.edges.append(EdgeConfig(
-            from_node=from_node,
-            to_node=to_node
-        ))
+        self.edges.append(EdgeConfig(from_node=from_node, to_node=to_node))
 
         # Add to StateGraph if initialized
         if self.state_graph is not None:
             if isinstance(from_node, str):
-                self.state_graph.add_edge(from_node, END if to_node == "END" else to_node)
+                self.state_graph.add_edge(
+                    from_node, END if to_node == "END" else to_node
+                )
                 logger.info(f"Added edge from '{from_node}' to '{to_node}'")
             else:
                 # Use sequential add_edge for multiple sources
                 for node in from_node:
-                    self.state_graph.add_edge(node, END if to_node == "END" else to_node)
+                    self.state_graph.add_edge(
+                        node, END if to_node == "END" else to_node
+                    )
                 logger.info(f"Added edge from {from_node} to '{to_node}'")
 
         return self
 
     def add_conditional_edges(
-        self,
-        source_node: str,
-        condition: Callable | str,
-        destinations: dict[str, str]
+        self, source_node: str, condition: Callable | str, destinations: dict[str, str]
     ) -> "StateGraphEditor":
         """Add conditional edges based on a condition function.
-        
+
         Args:
             source_node: Source node name
-            condition: Condition function or string reference 
+            condition: Condition function or string reference
             destinations: Mapping from condition results to target nodes
-            
+
         Returns:
             Self for chaining
         """
@@ -264,11 +280,13 @@ class StateGraphEditor(BaseModel):
                 validated_destinations[key] = value
 
         # Add to branch config
-        self.branches.append(BranchConfig(
-            source_node=source_node,
-            condition=condition,
-            destinations=validated_destinations
-        ))
+        self.branches.append(
+            BranchConfig(
+                source_node=source_node,
+                condition=condition,
+                destinations=validated_destinations,
+            )
+        )
 
         # Add to StateGraph if initialized
         if self.state_graph is not None:
@@ -278,17 +296,18 @@ class StateGraphEditor(BaseModel):
                 # Try to import from module
                 try:
                     import importlib
+
                     module_path, func_name = condition.rsplit(".", 1)
                     module = importlib.import_module(module_path)
                     resolved_condition = getattr(module, func_name)
                 except (ValueError, ImportError, AttributeError):
-                    logger.warning(f"Could not resolve condition '{condition}', using as-is")
+                    logger.warning(
+                        f"Could not resolve condition '{condition}', using as-is"
+                    )
 
             # Add to graph
             self.state_graph.add_conditional_edges(
-                source_node,
-                resolved_condition,
-                validated_destinations
+                source_node, resolved_condition, validated_destinations
             )
             logger.info(f"Added conditional edges from '{source_node}'")
 
@@ -296,10 +315,10 @@ class StateGraphEditor(BaseModel):
 
     def set_entry_point(self, node_name: str) -> "StateGraphEditor":
         """Set the entry point for the graph.
-        
+
         Args:
             node_name: Name of the entry point node
-            
+
         Returns:
             Self for chaining
         """
@@ -314,7 +333,7 @@ class StateGraphEditor(BaseModel):
 
     def build_graph(self) -> StateGraph:
         """Build and return the StateGraph with all configured components.
-        
+
         Returns:
             Built StateGraph instance
         """
@@ -333,6 +352,7 @@ class StateGraphEditor(BaseModel):
                 resolved_engine = node_config.engine
                 if isinstance(resolved_engine, str):
                     from haive.core.engine.base import EngineRegistry, EngineType
+
                     registry = EngineRegistry.get_instance()
                     for engine_type in EngineType:
                         found_engine = registry.get(engine_type, resolved_engine)
@@ -347,7 +367,7 @@ class StateGraphEditor(BaseModel):
                         command_goto=node_config.command_goto,
                         input_mapping=node_config.input_mapping,
                         output_mapping=node_config.output_mapping,
-                        runnable_config=node_config.runnable_config
+                        runnable_config=node_config.runnable_config,
                     )
 
                     # Add to graph
@@ -369,18 +389,21 @@ class StateGraphEditor(BaseModel):
                 # Try to import from module
                 try:
                     import importlib
+
                     module_path, func_name = resolved_condition.rsplit(".", 1)
                     module = importlib.import_module(module_path)
                     resolved_condition = getattr(module, func_name)
                 except (ValueError, ImportError, AttributeError):
-                    logger.warning(f"Could not resolve condition '{resolved_condition}', using as-is")
+                    logger.warning(
+                        f"Could not resolve condition '{resolved_condition}', using as-is"
+                    )
                     continue
 
             # Add to graph
             graph.add_conditional_edges(
                 branch_config.source_node,
                 resolved_condition,
-                branch_config.destinations
+                branch_config.destinations,
             )
 
         # Set entry point
@@ -391,10 +414,10 @@ class StateGraphEditor(BaseModel):
 
     def compile(self, **kwargs) -> Any:
         """Compile the StateGraph.
-        
+
         Args:
             **kwargs: Additional keyword arguments to pass to StateGraph.compile()
-            
+
         Returns:
             Compiled graph instance
         """
@@ -405,7 +428,7 @@ class StateGraphEditor(BaseModel):
 
     def to_dict(self) -> dict[str, Any]:
         """Convert the editor configuration to a dictionary for serialization.
-        
+
         Returns:
             Dictionary representation
         """
@@ -414,12 +437,14 @@ class StateGraphEditor(BaseModel):
             "description": self.description,
             "state_schema": self.state_schema.__name__ if self.state_schema else None,
             "input_schema": self.input_schema.__name__ if self.input_schema else None,
-            "output_schema": self.output_schema.__name__ if self.output_schema else None,
+            "output_schema": (
+                self.output_schema.__name__ if self.output_schema else None
+            ),
             "entry_point": self.entry_point,
             "compiled": self.compiled,
             "nodes": {},
             "edges": [],
-            "branches": []
+            "branches": [],
         }
 
         # Convert nodes to serializable format
@@ -468,10 +493,10 @@ class StateGraphEditor(BaseModel):
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "StateGraphEditor":
         """Create a StateGraphEditor from a dictionary.
-        
+
         Args:
             data: Dictionary representation
-            
+
         Returns:
             New StateGraphEditor instance
         """
@@ -496,7 +521,7 @@ class StateGraphEditor(BaseModel):
             state_schema=schemas.get("state_schema"),
             input_schema=schemas.get("input_schema"),
             output_schema=schemas.get("output_schema"),
-            entry_point=data.get("entry_point")
+            entry_point=data.get("entry_point"),
         )
 
         # Add nodes
@@ -545,7 +570,7 @@ class StateGraphEditor(BaseModel):
 
     def visualize(self, filename: str | None = None) -> None:
         """Visualize the graph structure.
-        
+
         Args:
             filename: Optional filename to save the visualization
         """
@@ -555,6 +580,7 @@ class StateGraphEditor(BaseModel):
         # Generate visualization
         try:
             from haive.core.utils.visualize_graph_utils import render_and_display_graph
+
             render_and_display_graph(graph, output_name=filename)
             logger.info(f"Graph visualization saved to {filename}")
         except ImportError:

@@ -1,11 +1,10 @@
 # retrievers/svm.py
 
+from langchain.retrievers import SVMRetriever
 from langchain_core.documents import Document
 
-from haive.core.models.embeddings.base import BaseEmbeddingConfig
-
 from haive.core.engine.retriever.retriever import BaseRetrieverConfig
-from langchain.retrievers import SVMRetriever
+from haive.core.models.embeddings.base import BaseEmbeddingConfig
 
 
 class SVMRetrieverConfig(BaseRetrieverConfig):

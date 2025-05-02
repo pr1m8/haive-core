@@ -5,14 +5,17 @@ import pprint
 from typing import Any, Literal
 
 import pytest
-from langchain_core.messages import SystemMessage
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+from langchain_core.output_parsers import (
+    JsonOutputParser,
+    PydanticOutputParser,
+    StrOutputParser,
+)
 from langchain_core.prompts import (
     ChatPromptTemplate,
     HumanMessagePromptTemplate,
     MessagesPlaceholder,
 )
-from langchain_core.output_parsers import JsonOutputParser,PydanticOutputParser,StrOutputParser
-from langchain_core.messages import HumanMessage, AIMessage
 from langchain_core.tools import StructuredTool, tool
 from pydantic import BaseModel, Field
 
@@ -24,7 +27,7 @@ from .conftest import WeatherQuery, check_api_keys, skip_if_no_api_keys
 # Define the decorator
 skip_if_no_api_keys = pytest.mark.skipif(
     check_api_keys() == False,  # Make sure check_api_keys() is defined
-    reason="No API keys available for LLM testing"
+    reason="No API keys available for LLM testing",
 )
 # Import your existing fixtures here
 # from tests.core.engine.test_aug_llm_config import azure_llm_config, check_api_keys, skip_if_no_api_keys, simple_chat_prompt, structured_chat_prompt, weather_tool, calculator_tool
@@ -33,8 +36,10 @@ skip_if_no_api_keys = pytest.mark.skipif(
 # New structured output models
 # --------------------------------
 
+
 class ProductReview(BaseModel):
     """Model for a product review."""
+
     product_name: str = Field(description="Name of the product")
     rating: int = Field(description="Rating from 1-5 stars", ge=1, le=5)
     pros: list[str] = Field(description="List of positive aspects")
@@ -44,42 +49,60 @@ class ProductReview(BaseModel):
         description="Overall recommendation"
     )
 
+
 class UserProfile(BaseModel):
     """Model for a user profile."""
+
     username: str = Field(description="User's handle")
     name: str | None = Field(None, description="User's full name")
     age: int | None = Field(None, description="User's age")
     interests: list[str] = Field(default_factory=list, description="User's interests")
     bio: str | None = Field(None, description="User's biography")
-    contact_info: dict[str, str] | None = Field(None, description="User's contact information")
-    preferences: dict[str, Any] = Field(default_factory=dict, description="User's preferences")
+    contact_info: dict[str, str] | None = Field(
+        None, description="User's contact information"
+    )
+    preferences: dict[str, Any] = Field(
+        default_factory=dict, description="User's preferences"
+    )
+
 
 class RecipeIngredient(BaseModel):
     """Model for a recipe ingredient."""
+
     name: str = Field(description="Ingredient name")
     quantity: float | None = Field(None, description="Amount needed")
     unit: str | None = Field(None, description="Unit of measurement")
     notes: str | None = Field(None, description="Special notes about this ingredient")
 
+
 class RecipeStep(BaseModel):
     """Model for a recipe step."""
+
     number: int = Field(description="Step number")
     instruction: str = Field(description="Step instruction")
-    time_minutes: int | None = Field(None, description="Time needed for this step in minutes")
+    time_minutes: int | None = Field(
+        None, description="Time needed for this step in minutes"
+    )
+
 
 class Recipe(BaseModel):
     """Model for a complete recipe."""
+
     title: str = Field(description="Recipe title")
     description: str | None = Field(None, description="Recipe description")
-    prep_time_minutes: int | None = Field(None, description="Preparation time in minutes")
+    prep_time_minutes: int | None = Field(
+        None, description="Preparation time in minutes"
+    )
     cook_time_minutes: int | None = Field(None, description="Cooking time in minutes")
     servings: int | None = Field(None, description="Number of servings")
     ingredients: list[RecipeIngredient] = Field(description="List of ingredients")
     steps: list[RecipeStep] = Field(description="List of steps")
     tags: list[str] | None = Field(None, description="Recipe tags")
 
+
 class MovieReview(BaseModel):
     """Model for a movie review."""
+
     movie_title: str = Field(description="Title of the movie")
     year: int | None = Field(None, description="Release year")
     director: str | None = Field(None, description="Movie director")
@@ -91,15 +114,19 @@ class MovieReview(BaseModel):
         description="Overall recommendation"
     )
 
+
 # --------------------------------
 # Additional fixtures for testing
 # --------------------------------
 
+
 @pytest.fixture
 def complex_chat_prompt():
     """Create a more complex chat prompt with multiple components."""
-    return ChatPromptTemplate.from_messages([
-        SystemMessage(content="""
+    return ChatPromptTemplate.from_messages(
+        [
+            SystemMessage(
+                content="""
         You are a specialized assistant with varied capabilities.
         
         When analyzing content, provide detailed breakdowns.
@@ -107,52 +134,62 @@ def complex_chat_prompt():
         When explaining, use simple language and examples.
         
         Always format your responses clearly using markdown when appropriate.
-        """),
-        MessagesPlaceholder(variable_name="context", optional=True),
-        MessagesPlaceholder(variable_name="examples", optional=True),
-        MessagesPlaceholder(variable_name="messages"),
-        HumanMessagePromptTemplate.from_template(
-            "Additional instructions: {instructions}"
-        )
-    ])
+        """
+            ),
+            MessagesPlaceholder(variable_name="context", optional=True),
+            MessagesPlaceholder(variable_name="examples", optional=True),
+            MessagesPlaceholder(variable_name="messages"),
+            HumanMessagePromptTemplate.from_template(
+                "Additional instructions: {instructions}"
+            ),
+        ]
+    )
+
 
 @pytest.fixture
 def custom_template_with_variables():
     """Create a chat template with multiple variables."""
-    return ChatPromptTemplate.from_messages([
-        SystemMessage(content="""
+    return ChatPromptTemplate.from_messages(
+        [
+            SystemMessage(
+                content="""
         You are a helpful assistant that provides information about {topic}.
         Your tone should be {tone} and you should focus on {focus_area}.
-        """),
-        HumanMessagePromptTemplate.from_template(
-            "I want to know about {query}. Remember to include {important_aspect}."
-        ),
-        MessagesPlaceholder(variable_name="additional_context", optional=True),
-        MessagesPlaceholder(variable_name="messages", optional=True)
-    ])
+        """
+            ),
+            HumanMessagePromptTemplate.from_template(
+                "I want to know about {query}. Remember to include {important_aspect}."
+            ),
+            MessagesPlaceholder(variable_name="additional_context", optional=True),
+            MessagesPlaceholder(variable_name="messages", optional=True),
+        ]
+    )
+
 
 @pytest.fixture
 def json_parser():
     """Create a JSON output parser."""
     return JsonOutputParser()
 
+
 @pytest.fixture
 def advanced_weather_tool():
     """Create a more advanced weather tool with multiple parameters."""
+
     def get_weather_forecast(
         location: str,
         days: int = 1,
         include_hourly: bool = False,
-        units: Literal["celsius", "fahrenheit"] = "celsius"
+        units: Literal["celsius", "fahrenheit"] = "celsius",
     ) -> dict[str, Any]:
         """Get detailed weather forecast for a location.
-        
+
         Args:
             location: City or location name
             days: Number of days to forecast (1-7)
             include_hourly: Whether to include hourly breakdown
             units: Temperature units (celsius or fahrenheit)
-        
+
         Returns:
             Weather forecast data
         """
@@ -162,12 +199,12 @@ def advanced_weather_tool():
             "London": 60,
             "Tokyo": 70,
             "Sydney": 80,
-            "Paris": 65
+            "Paris": 65,
         }.get(location, 70)
 
         # Convert if needed
         if units == "celsius":
-            base_temp = round((base_temp - 32) * 5/9)
+            base_temp = round((base_temp - 32) * 5 / 9)
 
         # Generate forecasts for requested days
         forecasts = []
@@ -180,18 +217,24 @@ def advanced_weather_tool():
                 "high_temp": base_temp + temp_adjustment + 5,
                 "low_temp": base_temp + temp_adjustment - 5,
                 "conditions": ["Sunny", "Cloudy", "Rainy", "Partly Cloudy"][i % 4],
-                "precipitation_chance": [10, 30, 60, 20][i % 4]
+                "precipitation_chance": [10, 30, 60, 20][i % 4],
             }
 
             # Add hourly if requested
             if include_hourly:
                 hourly = []
                 for hour in range(0, 24, 3):  # Every 3 hours
-                    hourly.append({
-                        "time": f"{hour:02d}:00",
-                        "temp": base_temp + temp_adjustment + (5 if 10 <= hour <= 16 else 0),
-                        "conditions": ["Sunny", "Cloudy", "Rainy", "Partly Cloudy"][(i + hour//6) % 4]
-                    })
+                    hourly.append(
+                        {
+                            "time": f"{hour:02d}:00",
+                            "temp": base_temp
+                            + temp_adjustment
+                            + (5 if 10 <= hour <= 16 else 0),
+                            "conditions": ["Sunny", "Cloudy", "Rainy", "Partly Cloudy"][
+                                (i + hour // 6) % 4
+                            ],
+                        }
+                    )
                 daily_forecast["hourly"] = hourly
 
             forecasts.append(daily_forecast)
@@ -200,28 +243,30 @@ def advanced_weather_tool():
             "location": location,
             "units": units,
             "days": days,
-            "forecasts": forecasts
+            "forecasts": forecasts,
         }
 
     return StructuredTool.from_function(get_weather_forecast)
 
+
 @pytest.fixture
 def recipe_search_tool():
     """Create a recipe search tool."""
+
     def search_recipes(
         query: str,
         cuisine: str | None = None,
         max_results: int = 3,
-        diet_restrictions: list[str] | None = None
+        diet_restrictions: list[str] | None = None,
     ) -> list[dict[str, Any]]:
         """Search for recipes based on criteria.
-        
+
         Args:
             query: Search terms
             cuisine: Type of cuisine (Italian, Mexican, etc.)
             max_results: Maximum number of results to return
             diet_restrictions: List of dietary restrictions
-            
+
         Returns:
             List of matching recipes
         """
@@ -232,36 +277,42 @@ def recipe_search_tool():
                 "title": "Spaghetti Carbonara",
                 "cuisine": "Italian",
                 "ingredients": ["pasta", "eggs", "bacon", "cheese", "pepper"],
-                "diet_tags": ["contains_gluten", "contains_dairy"]
+                "diet_tags": ["contains_gluten", "contains_dairy"],
             },
             {
                 "id": "r2",
                 "title": "Chicken Tacos",
                 "cuisine": "Mexican",
                 "ingredients": ["tortillas", "chicken", "salsa", "cheese", "lettuce"],
-                "diet_tags": ["contains_gluten", "contains_dairy"]
+                "diet_tags": ["contains_gluten", "contains_dairy"],
             },
             {
                 "id": "r3",
                 "title": "Vegetable Curry",
                 "cuisine": "Indian",
                 "ingredients": ["rice", "vegetables", "curry paste", "coconut milk"],
-                "diet_tags": ["vegan", "gluten_free"]
+                "diet_tags": ["vegan", "gluten_free"],
             },
             {
                 "id": "r4",
                 "title": "Greek Salad",
                 "cuisine": "Greek",
-                "ingredients": ["tomatoes", "cucumber", "feta cheese", "olives", "olive oil"],
-                "diet_tags": ["vegetarian", "gluten_free"]
+                "ingredients": [
+                    "tomatoes",
+                    "cucumber",
+                    "feta cheese",
+                    "olives",
+                    "olive oil",
+                ],
+                "diet_tags": ["vegetarian", "gluten_free"],
             },
             {
                 "id": "r5",
                 "title": "Beef Stir Fry",
                 "cuisine": "Chinese",
                 "ingredients": ["beef", "vegetables", "soy sauce", "rice"],
-                "diet_tags": ["gluten_free"]
-            }
+                "diet_tags": ["gluten_free"],
+            },
         ]
 
         # Filter by search terms
@@ -287,7 +338,9 @@ def recipe_search_tool():
                     if restriction.startswith("no_"):
                         # Check that recipe doesn't have this tag
                         restricted_item = restriction[3:]  # Remove "no_" prefix
-                        if any(tag.endswith(restricted_item) for tag in recipe["diet_tags"]):
+                        if any(
+                            tag.endswith(restricted_item) for tag in recipe["diet_tags"]
+                        ):
                             diet_match = False
                             break
                     # Check that recipe has this tag
@@ -304,9 +357,11 @@ def recipe_search_tool():
 
     return StructuredTool.from_function(search_recipes)
 
+
 # --------------------------------
 # Schema pretty printing tests
 # --------------------------------
+
 
 @skip_if_no_api_keys
 def test_schema_pretty_printing(azure_llm_config, structured_chat_prompt):
@@ -316,33 +371,37 @@ def test_schema_pretty_printing(azure_llm_config, structured_chat_prompt):
         name="person_extractor",
         llm_config=azure_llm_config,
         prompt_template=structured_chat_prompt,
-        structured_output_model=UserProfile
+        structured_output_model=UserProfile,
     )
 
     recipe_analyzer = AugLLMConfig(
         name="recipe_analyzer",
         llm_config=azure_llm_config,
         prompt_template=structured_chat_prompt,
-        structured_output_model=Recipe
+        structured_output_model=Recipe,
     )
 
     movie_reviewer = AugLLMConfig(
         name="movie_reviewer",
         llm_config=azure_llm_config,
         prompt_template=structured_chat_prompt,
-        structured_output_model=MovieReview
+        structured_output_model=MovieReview,
     )
 
     # Create schemas for these engines
-    user_schema = SchemaComposer.create_model([person_extractor], name="UserProfileSchema")
+    user_schema = SchemaComposer.create_model(
+        [person_extractor], name="UserProfileSchema"
+    )
     recipe_schema = SchemaComposer.create_model([recipe_analyzer], name="RecipeSchema")
-    movie_schema = SchemaComposer.create_model([movie_reviewer], name="MovieReviewSchema")
+    movie_schema = SchemaComposer.create_model(
+        [movie_reviewer], name="MovieReviewSchema"
+    )
 
     # Pretty print the schemas and their fields
     for schema_name, schema in [
         ("UserProfile", user_schema),
         ("Recipe", recipe_schema),
-        ("MovieReview", movie_schema)
+        ("MovieReview", movie_schema),
     ]:
         print(f"\n{'='*20} {schema_name} Schema {'='*20}")
 
@@ -365,7 +424,7 @@ def test_schema_pretty_printing(azure_llm_config, structured_chat_prompt):
                 age=30,
                 interests=["coding", "hiking", "reading"],
                 bio="Software developer with a passion for AI",
-                preferences={"theme": "dark", "notifications": True}
+                preferences={"theme": "dark", "notifications": True},
             )
         elif schema_name == "Recipe":
             instance = schema(
@@ -377,14 +436,22 @@ def test_schema_pretty_printing(azure_llm_config, structured_chat_prompt):
                 ingredients=[
                     {"name": "flour", "quantity": 2.0, "unit": "cups"},
                     {"name": "chocolate chips", "quantity": 1.0, "unit": "cup"},
-                    {"name": "butter", "quantity": 0.5, "unit": "cup"}
+                    {"name": "butter", "quantity": 0.5, "unit": "cup"},
                 ],
                 steps=[
-                    {"number": 1, "instruction": "Mix dry ingredients", "time_minutes": 2},
-                    {"number": 2, "instruction": "Add chocolate chips", "time_minutes": 1},
-                    {"number": 3, "instruction": "Bake at 350°F", "time_minutes": 10}
+                    {
+                        "number": 1,
+                        "instruction": "Mix dry ingredients",
+                        "time_minutes": 2,
+                    },
+                    {
+                        "number": 2,
+                        "instruction": "Add chocolate chips",
+                        "time_minutes": 1,
+                    },
+                    {"number": 3, "instruction": "Bake at 350°F", "time_minutes": 10},
                 ],
-                tags=["dessert", "baking", "cookies"]
+                tags=["dessert", "baking", "cookies"],
             )
         elif schema_name == "MovieReview":
             instance = schema(
@@ -395,7 +462,7 @@ def test_schema_pretty_printing(azure_llm_config, structured_chat_prompt):
                 review_text="A mind-bending masterpiece with stunning visuals.",
                 pros=["Innovative concept", "Great acting", "Amazing visuals"],
                 cons=["Complex plot may confuse some viewers"],
-                recommendation="Must See"
+                recommendation="Must See",
             )
 
         # Pretty print the instance
@@ -408,11 +475,10 @@ def test_schema_pretty_printing(azure_llm_config, structured_chat_prompt):
 
     # Create a combined schema
     combined_schema = SchemaComposer.compose_schema(
-        [person_extractor, recipe_analyzer, movie_reviewer],
-        name="CombinedSchema"
+        [person_extractor, recipe_analyzer, movie_reviewer], name="CombinedSchema"
     )
 
-    print("\n" + "="*20 + " Combined Schema " + "="*20)
+    print("\n" + "=" * 20 + " Combined Schema " + "=" * 20)
     print(f"\nFields in {combined_schema.__name__}:")
     for field_name, field_info in combined_schema.model_fields.items():
         field_type = field_info.annotation
@@ -420,16 +486,15 @@ def test_schema_pretty_printing(azure_llm_config, structured_chat_prompt):
 
     # Test StateSchema creation
     state_schema = SchemaComposer.create_model(
-        [person_extractor, recipe_analyzer, movie_reviewer],
-        name="ContentAnalysisState"
+        [person_extractor, recipe_analyzer, movie_reviewer], name="ContentAnalysisState"
     )
-    print('-'*100)
-    print('State Schema')
+    print("-" * 100)
+    print("State Schema")
     state_schema.pretty_print()
     print(state_schema)
-    print('-'*100)
+    print("-" * 100)
 
-    print("\n" + "="*20 + " State Schema " + "="*20)
+    print("\n" + "=" * 20 + " State Schema " + "=" * 20)
     print(f"\nFields in {state_schema.__name__}:")
     for field_name, field_info in state_schema.model_fields.items():
         field_type = field_info.annotation
@@ -442,36 +507,40 @@ def test_schema_pretty_printing(azure_llm_config, structured_chat_prompt):
     # No assertions needed - this test is for demonstration purposes
     assert True
 
+
 # --------------------------------
 # Various input format tests
 # --------------------------------
 
+
 @skip_if_no_api_keys
-def test_various_input_formats(azure_llm_config, complex_chat_prompt, custom_template_with_variables):
+def test_various_input_formats(
+    azure_llm_config, complex_chat_prompt, custom_template_with_variables
+):
     """Test AugLLMConfig with various input formats."""
     # Create AugLLM with complex input structure
     aug_llm = AugLLMConfig(
         name="flexible_assistant",
         llm_config=azure_llm_config,
-        prompt_template=complex_chat_prompt
+        prompt_template=complex_chat_prompt,
     )
-
-
 
     # Test 1: Simple string input
     result1 = aug_llm.create_runnable().invoke("Tell me about quantum computing")
-    print("\n" + "="*20 + " Result from string input " + "="*20)
+    print("\n" + "=" * 20 + " Result from string input " + "=" * 20)
     print(result1.content if hasattr(result1, "content") else result1)
 
     # Test 2: Message list input
     messages_input = [
         HumanMessage(content="What are the main cloud providers?"),
-        AIMessage(content="The main cloud providers include AWS, Microsoft Azure, and Google Cloud Platform."),
-        HumanMessage(content="Tell me more about Azure specifically")
+        AIMessage(
+            content="The main cloud providers include AWS, Microsoft Azure, and Google Cloud Platform."
+        ),
+        HumanMessage(content="Tell me more about Azure specifically"),
     ]
 
     result2 = aug_llm.invoke({"messages": messages_input})
-    print("\n" + "="*20 + " Result from message list input " + "="*20)
+    print("\n" + "=" * 20 + " Result from message list input " + "=" * 20)
     print(result2.content if hasattr(result2, "content") else result2)
 
     # Test 3: Complex input with all template variables
@@ -481,16 +550,18 @@ def test_various_input_formats(azure_llm_config, complex_chat_prompt, custom_tem
         ],
         "examples": [
             HumanMessage(content="What services does Azure offer?"),
-            AIMessage(content="Azure offers compute, storage, database, AI, analytics, and many other services.")
+            AIMessage(
+                content="Azure offers compute, storage, database, AI, analytics, and many other services."
+            ),
         ],
         "messages": [
             HumanMessage(content="How do Azure Functions compare to AWS Lambda?")
         ],
-        "instructions": "Compare pricing, features, and integration capabilities"
+        "instructions": "Compare pricing, features, and integration capabilities",
     }
 
     result3 = aug_llm.invoke(complex_input)
-    print("\n" + "="*20 + " Result from complex input " + "="*20)
+    print("\n" + "=" * 20 + " Result from complex input " + "=" * 20)
     print(result3.content if hasattr(result3, "content") else result3)
 
     # Test 4: Custom template with variables
@@ -498,9 +569,8 @@ def test_various_input_formats(azure_llm_config, complex_chat_prompt, custom_tem
     custom_llm = AugLLMConfig(
         name="custom_template_llm",
         llm_config=azure_llm_config,
-        prompt_template=custom_template
+        prompt_template=custom_template,
     )
-
 
     custom_input = {
         "topic": "artificial intelligence",
@@ -510,11 +580,11 @@ def test_various_input_formats(azure_llm_config, complex_chat_prompt, custom_tem
         "important_aspect": "bias and fairness",
         "additional_context": [
             SystemMessage(content="Large language models have revolutionized NLP.")
-        ]
+        ],
     }
 
     result4 = custom_llm.invoke(custom_input)
-    print("\n" + "="*20 + " Result from custom template " + "="*20)
+    print("\n" + "=" * 20 + " Result from custom template " + "=" * 20)
     print(result4.content if hasattr(result4, "content") else result4)
 
     # All tests should produce reasonable results
@@ -523,12 +593,16 @@ def test_various_input_formats(azure_llm_config, complex_chat_prompt, custom_tem
     assert result3 is not None
     assert result4 is not None
 
+
 # --------------------------------
 # Output parser tests
 # --------------------------------
 
+
 @skip_if_no_api_keys
-def test_different_output_parsers(azure_llm_config, structured_chat_prompt, json_parser):
+def test_different_output_parsers(
+    azure_llm_config, structured_chat_prompt, json_parser
+):
     """Test AugLLMConfig with different output parsers."""
     # Test 1: String output parser
     str_parser = StrOutputParser()
@@ -536,11 +610,11 @@ def test_different_output_parsers(azure_llm_config, structured_chat_prompt, json
         name="string_output_llm",
         llm_config=azure_llm_config,
         prompt_template=structured_chat_prompt,
-        output_parser=str_parser
+        output_parser=str_parser,
     )
 
     str_result = str_llm.invoke("List 3 programming languages")
-    print("\n" + "="*20 + " String Parser Result " + "="*20)
+    print("\n" + "=" * 20 + " String Parser Result " + "=" * 20)
     print(str_result)
     assert isinstance(str_result, str)
 
@@ -550,20 +624,24 @@ def test_different_output_parsers(azure_llm_config, structured_chat_prompt, json
     Return ONLY valid JSON with no explanations or narrative text.
     """
 
-    json_prompt = ChatPromptTemplate.from_messages([
-        SystemMessage(content=system_prompt),
-        MessagesPlaceholder(variable_name="messages")
-    ])
+    json_prompt = ChatPromptTemplate.from_messages(
+        [
+            SystemMessage(content=system_prompt),
+            MessagesPlaceholder(variable_name="messages"),
+        ]
+    )
 
     json_llm = AugLLMConfig(
         name="json_output_llm",
         llm_config=azure_llm_config,
         prompt_template=json_prompt,
-        output_parser=json_parser
+        output_parser=json_parser,
     )
 
-    json_result = json_llm.invoke("Generate a list of 3 users with name, age, and email fields")
-    print("\n" + "="*20 + " JSON Parser Result " + "="*20)
+    json_result = json_llm.invoke(
+        "Generate a list of 3 users with name, age, and email fields"
+    )
+    print("\n" + "=" * 20 + " JSON Parser Result " + "=" * 20)
     print(json.dumps(json_result, indent=2))
     assert isinstance(json_result, (dict, list))
 
@@ -575,16 +653,18 @@ def test_different_output_parsers(azure_llm_config, structured_chat_prompt, json
     {pydantic_parser.get_format_instructions()}
     """
 
-    pydantic_prompt = ChatPromptTemplate.from_messages([
-        SystemMessage(content=system_prompt),
-        MessagesPlaceholder(variable_name="messages")
-    ])
+    pydantic_prompt = ChatPromptTemplate.from_messages(
+        [
+            SystemMessage(content=system_prompt),
+            MessagesPlaceholder(variable_name="messages"),
+        ]
+    )
 
     pydantic_llm = AugLLMConfig(
         name="pydantic_output_llm",
         llm_config=azure_llm_config,
         prompt_template=pydantic_prompt,
-        output_parser=pydantic_parser
+        output_parser=pydantic_parser,
     )
 
     review_text = """
@@ -596,7 +676,7 @@ def test_different_output_parsers(azure_llm_config, structured_chat_prompt, json
     """
 
     pydantic_result = pydantic_llm.invoke(review_text)
-    print("\n" + "="*20 + " Pydantic Parser Result " + "="*20)
+    print("\n" + "=" * 20 + " Pydantic Parser Result " + "=" * 20)
     print(pydantic_result.model_dump_json(indent=2))
     assert isinstance(pydantic_result, ProductReview)
 
@@ -613,40 +693,44 @@ def test_different_output_parsers(azure_llm_config, structured_chat_prompt, json
     Format each key point on a new line starting with a dash (-).
     """
 
-    custom_prompt = ChatPromptTemplate.from_messages([
-        SystemMessage(content=system_prompt),
-        MessagesPlaceholder(variable_name="messages")
-    ])
+    custom_prompt = ChatPromptTemplate.from_messages(
+        [
+            SystemMessage(content=system_prompt),
+            MessagesPlaceholder(variable_name="messages"),
+        ]
+    )
 
     # Create with custom postprocessing
     custom_llm = AugLLMConfig(
         name="custom_processor_llm",
         llm_config=azure_llm_config,
         prompt_template=custom_prompt,
-        postprocess=extract_key_points
+        postprocess=extract_key_points,
     )
 
-    custom_result = custom_llm.invoke("""
+    custom_result = custom_llm.invoke(
+        """
     Summarize the key features of modern smartphones, including 
     cameras, processors, displays, and battery technology.
-    """)
+    """
+    )
 
-    print("\n" + "="*20 + " Custom Processor Result " + "="*20)
+    print("\n" + "=" * 20 + " Custom Processor Result " + "=" * 20)
     for i, point in enumerate(custom_result, 1):
         print(f"{i}. {point}")
 
     assert isinstance(custom_result, list)
     assert len(custom_result) > 0
 
+
 # --------------------------------
 # Advanced tools and structured output tests
 # --------------------------------
 
+
 @skip_if_no_api_keys
 def test_advanced_tools_with_structured_output(
-    azure_llm_config,
-    advanced_weather_tool,
-    recipe_search_tool
+    azure_llm_config, advanced_weather_tool, recipe_search_tool
 ):
     """Test using advanced tools with structured output models."""
     # Create system prompt that encourages tool use
@@ -656,10 +740,12 @@ def test_advanced_tools_with_structured_output(
     Provide results in a structured format.
     """
 
-    tool_prompt = ChatPromptTemplate.from_messages([
-        SystemMessage(content=system_prompt),
-        MessagesPlaceholder(variable_name="messages")
-    ])
+    tool_prompt = ChatPromptTemplate.from_messages(
+        [
+            SystemMessage(content=system_prompt),
+            MessagesPlaceholder(variable_name="messages"),
+        ]
+    )
 
     # Create different AugLLM configs for different scenarios
 
@@ -669,14 +755,16 @@ def test_advanced_tools_with_structured_output(
         llm_config=azure_llm_config,
         prompt_template=tool_prompt,
         tools=[advanced_weather_tool],
-        structured_output_model=WeatherQuery
+        structured_output_model=WeatherQuery,
     )
 
     # Test weather forecast query
-    weather_query = "What's the weather forecast for Tokyo for the next 3 days in celsius?"
+    weather_query = (
+        "What's the weather forecast for Tokyo for the next 3 days in celsius?"
+    )
     weather_result = weather_llm.invoke(weather_query)
 
-    print("\n" + "="*20 + " Weather Forecast Tool With Structured Output " + "="*20)
+    print("\n" + "=" * 20 + " Weather Forecast Tool With Structured Output " + "=" * 20)
     print(f"Query: {weather_query}")
     print(f"Structured Output: {weather_result.model_dump()}")
 
@@ -687,24 +775,26 @@ def test_advanced_tools_with_structured_output(
     Provide your response as a fully structured recipe.
     """
 
-    recipe_prompt = ChatPromptTemplate.from_messages([
-        SystemMessage(content=recipe_system_prompt),
-        MessagesPlaceholder(variable_name="messages")
-    ])
+    recipe_prompt = ChatPromptTemplate.from_messages(
+        [
+            SystemMessage(content=recipe_system_prompt),
+            MessagesPlaceholder(variable_name="messages"),
+        ]
+    )
 
     recipe_llm = AugLLMConfig(
         name="recipe_llm",
         llm_config=azure_llm_config,
         prompt_template=recipe_prompt,
         tools=[recipe_search_tool],
-        structured_output_model=Recipe
+        structured_output_model=Recipe,
     )
 
     # Test recipe search query
     recipe_query = "Find me a vegetarian recipe"
     recipe_result = recipe_llm.invoke(recipe_query)
 
-    print("\n" + "="*20 + " Recipe Tool With Structured Output " + "="*20)
+    print("\n" + "=" * 20 + " Recipe Tool With Structured Output " + "=" * 20)
     print(f"Query: {recipe_query}")
     print(f"Structured Output: {json.dumps(recipe_result.model_dump(), indent=2)}")
 
@@ -715,44 +805,63 @@ def test_advanced_tools_with_structured_output(
     Format your response as a structured product review.
     """
 
-    combined_prompt = ChatPromptTemplate.from_messages([
-        SystemMessage(content=combined_system_prompt),
-        MessagesPlaceholder(variable_name="messages")
-    ])
+    combined_prompt = ChatPromptTemplate.from_messages(
+        [
+            SystemMessage(content=combined_system_prompt),
+            MessagesPlaceholder(variable_name="messages"),
+        ]
+    )
 
     # Create a simple product info lookup tool
     @tool
     def get_product_info(product_name: str) -> dict[str, Any]:
-        """Look up information about a product.
-        """
+        """Look up information about a product."""
         # Simulated product database
         products = {
             "iphone": {
                 "name": "iPhone 15 Pro",
                 "category": "Smartphone",
                 "price": 999,
-                "features": ["A17 chip", "48MP camera", "Titanium design", "USB-C port"],
-                "release_date": "2023-09-22"
+                "features": [
+                    "A17 chip",
+                    "48MP camera",
+                    "Titanium design",
+                    "USB-C port",
+                ],
+                "release_date": "2023-09-22",
             },
             "macbook": {
                 "name": "MacBook Air M2",
                 "category": "Laptop",
                 "price": 1199,
-                "features": ["M2 chip", "13.6-inch display", "18 hour battery", "1080p camera"],
-                "release_date": "2022-07-15"
+                "features": [
+                    "M2 chip",
+                    "13.6-inch display",
+                    "18 hour battery",
+                    "1080p camera",
+                ],
+                "release_date": "2022-07-15",
             },
             "airpods": {
                 "name": "AirPods Pro 2",
                 "category": "Earbuds",
                 "price": 249,
-                "features": ["Active noise cancellation", "Adaptive transparency", "Spatial audio", "H2 chip"],
-                "release_date": "2022-09-23"
-            }
+                "features": [
+                    "Active noise cancellation",
+                    "Adaptive transparency",
+                    "Spatial audio",
+                    "H2 chip",
+                ],
+                "release_date": "2022-09-23",
+            },
         }
 
         # Case-insensitive lookup
         for key, info in products.items():
-            if product_name.lower() in key.lower() or key.lower() in product_name.lower():
+            if (
+                product_name.lower() in key.lower()
+                or key.lower() in product_name.lower()
+            ):
                 return info
 
         return {"error": f"Product '{product_name}' not found"}
@@ -763,14 +872,14 @@ def test_advanced_tools_with_structured_output(
         llm_config=azure_llm_config,
         prompt_template=combined_prompt,
         tools=[get_product_info],
-        structured_output_model=ProductReview
+        structured_output_model=ProductReview,
     )
 
     # Test product review generation
     product_query = "Write a review of the latest iPhone"
     product_result = combined_llm.invoke(product_query)
 
-    print("\n" + "="*20 + " Product Review Tool With Structured Output " + "="*20)
+    print("\n" + "=" * 20 + " Product Review Tool With Structured Output " + "=" * 20)
     print(f"Query: {product_query}")
     print(f"Structured Output: {json.dumps(product_result.model_dump(), indent=2)}")
 
@@ -780,8 +889,10 @@ def test_advanced_tools_with_structured_output(
     assert isinstance(product_result, ProductReview)
 
     # Enhanced schema creation - show how the schema builder works with tools and structured outputs
-    print("\n" + "="*20 + " Schema From Tool Configs " + "="*20)
-    combined_schema = SchemaComposer.create_model([weather_llm, recipe_llm, combined_llm], name="ToolsSchema")
+    print("\n" + "=" * 20 + " Schema From Tool Configs " + "=" * 20)
+    combined_schema = SchemaComposer.create_model(
+        [weather_llm, recipe_llm, combined_llm], name="ToolsSchema"
+    )
 
     # Print model fields
     print(f"\nFields in {combined_schema.__name__}:")

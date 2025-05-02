@@ -38,16 +38,21 @@ class SimpleTestEngine(InvokableEngine):
                         content = f"You asked: '{query}'. This is a test response."
                 return {"content": content}
             if isinstance(input_data, str):
-                return {"content": f"You said: '{input_data}'. This is a test response."}
+                return {
+                    "content": f"You said: '{input_data}'. This is a test response."
+                }
             return {"content": "This is a test response for unknown input."}
 
         # Return a simple runnable
         from langchain_core.runnables import RunnableLambda
+
         return RunnableLambda(process_input)
 
     def invoke(self, input_data, runnable_config=None):
         """Invoke the engine with input data."""
-        return self.create_runnable(runnable_config).invoke(input_data, config=runnable_config)
+        return self.create_runnable(runnable_config).invoke(
+            input_data, config=runnable_config
+        )
 
 
 # Agent config for testing
@@ -110,10 +115,7 @@ def test_engine():
 @pytest.fixture
 def basic_agent_config(test_engine):
     """Create a basic agent config for tests."""
-    return AgentImplForTests(
-        name="test_agent",
-        engine=test_engine
-    )
+    return AgentImplForTests(name="test_agent", engine=test_engine)
 
 
 class TestAgentConfig:
@@ -124,7 +126,7 @@ class TestAgentConfig:
         config = AgentImplForTests(
             name="test_agent",
             engine=test_engine,
-            engines={"secondary": SimpleTestEngine(name="secondary_engine")}
+            engines={"secondary": SimpleTestEngine(name="secondary_engine")},
         )
 
         assert config.name == "test_agent"
@@ -147,14 +149,11 @@ class TestAgentConfig:
         basic_agent_config.add_node_config(
             name="process",
             engine=test_engine,
-            command_goto="END"  # This is passed as a string
+            command_goto="END",  # This is passed as a string
         )
 
         # Add a node using NodeConfig
-        node_config = NodeConfig(
-            name="analyze",
-            engine=test_engine
-        )
+        node_config = NodeConfig(name="analyze", engine=test_engine)
         basic_agent_config.add_node_config("analyze", node_config)
 
         # Check results
@@ -166,19 +165,25 @@ class TestAgentConfig:
 
         # Compare with the value's semantic meaning, not its exact representation
         from langgraph.graph import END
+
         # Import the internal representation if needed
         try:
             from langgraph.constants import __end__
+
             expected_values = [END, "__end__"]
         except ImportError:
             expected_values = [END, "__end__"]
 
-        assert basic_agent_config.node_configs["process"].command_goto in expected_values
+        assert (
+            basic_agent_config.node_configs["process"].command_goto in expected_values
+        )
 
     def test_derive_schema(self, basic_agent_config):
         """Test schema derivation from components."""
         # Patch the compose_as_state_schema method to return a simple schema
-        with patch.object(SchemaComposer, "compose_as_state_schema", return_value=MockSchema):
+        with patch.object(
+            SchemaComposer, "compose_as_state_schema", return_value=MockSchema
+        ):
             schema = basic_agent_config.derive_schema()
 
             # Schema should be a BaseModel subclass
@@ -199,12 +204,17 @@ class TestAgentConfig:
             field2: str = "value2"
 
         # PHASE 1: Initial schema creation and caching
-        with patch("haive.core.schema.schema_composer.SchemaComposer.compose_as_state_schema", return_value=TestSchema1) as mock1:
+        with patch(
+            "haive.core.schema.schema_composer.SchemaComposer.compose_as_state_schema",
+            return_value=TestSchema1,
+        ) as mock1:
             # Get first schema - should be TestSchema1
             schema1 = basic_agent_config.derive_schema()
 
             # Verify schema has TestSchema1's distinctive properties
-            fields1 = getattr(schema1, "model_fields", None) or getattr(schema1, "__fields__", {})
+            fields1 = getattr(schema1, "model_fields", None) or getattr(
+                schema1, "__fields__", {}
+            )
             assert "field1" in fields1
             assert "schema_identifier" in fields1
             assert schema1.__name__ == "TestSchema1"
@@ -220,12 +230,17 @@ class TestAgentConfig:
         basic_agent_config._invalidate_schema_caches()
 
         # Create new mock in separate context
-        with patch("haive.core.schema.schema_composer.SchemaComposer.compose_as_state_schema", return_value=TestSchema2) as mock2:
+        with patch(
+            "haive.core.schema.schema_composer.SchemaComposer.compose_as_state_schema",
+            return_value=TestSchema2,
+        ) as mock2:
             # Get schema after cache invalidation
             schema3 = basic_agent_config.derive_schema()
 
             # Verify schema has TestSchema2's properties
-            fields3 = getattr(schema3, "model_fields", None) or getattr(schema3, "__fields__", {})
+            fields3 = getattr(schema3, "model_fields", None) or getattr(
+                schema3, "__fields__", {}
+            )
             assert "field2" in fields3
             assert "schema_identifier" in fields3
             assert schema3.__name__ == "TestSchema2"
@@ -234,10 +249,13 @@ class TestAgentConfig:
             assert mock2.call_count == 1, "New mock should be called exactly once"
 
             # Verify schemas are functionally different by checking field names
-            assert set(fields1.keys()) != set(fields3.keys()), "Schema fields should differ"
+            assert set(fields1.keys()) != set(
+                fields3.keys()
+            ), "Schema fields should differ"
 
             # Verify these are different schema classes (not just different instances)
             assert schema1 is not schema3, "Schemas should be different instances"
+
     def test_resolve_engine(self, basic_agent_config, test_engine):
         """Test engine resolution."""
         # Direct engine reference
@@ -277,30 +295,35 @@ class TestAgentConfig:
         # Add patterns directly to the basic_agent_config.patterns list
         # This approach avoids the need for patching the pattern registry
         pattern1 = PatternConfig(
-            name="test_pattern",
-            parameters={"param1": "value1"},
-            order=1,
-            enabled=True
+            name="test_pattern", parameters={"param1": "value1"}, order=1, enabled=True
         )
         pattern2 = PatternConfig(
             name="second_pattern",
             parameters={"param2": "value2"},
             order=2,
-            enabled=True
+            enabled=True,
         )
 
         # Add patterns directly to the list
         basic_agent_config.patterns = [pattern1, pattern2]
 
         # Patch get_pattern_order to return our expected order
-        with patch.object(AgentImplForTests, "get_pattern_order", return_value=["test_pattern", "second_pattern"]):
+        with patch.object(
+            AgentImplForTests,
+            "get_pattern_order",
+            return_value=["test_pattern", "second_pattern"],
+        ):
             patterns = basic_agent_config.get_pattern_order()
             assert len(patterns) == 2
             assert patterns[0] == "test_pattern"
             assert patterns[1] == "second_pattern"
 
         # Patch get_pattern_parameters to return our expected parameters
-        with patch.object(AgentImplForTests, "get_pattern_parameters", return_value={"param1": "value1"}):
+        with patch.object(
+            AgentImplForTests,
+            "get_pattern_parameters",
+            return_value={"param1": "value1"},
+        ):
             params = basic_agent_config.get_pattern_parameters("test_pattern")
             assert params["param1"] == "value1"
 
@@ -311,13 +334,15 @@ class TestAgentConfig:
 
             # Call the method (this is just to test the interface)
             basic_agent_config.set_pattern_parameters(
-                "test_pattern",
-                global_param="global_value"
+                "test_pattern", global_param="global_value"
             )
 
         # Verify the parameter was updated
-        with patch.object(AgentImplForTests, "get_pattern_parameters",
-                          return_value={"param1": "value1", "global_param": "global_value"}):
+        with patch.object(
+            AgentImplForTests,
+            "get_pattern_parameters",
+            return_value={"param1": "value1", "global_param": "global_value"},
+        ):
             params = basic_agent_config.get_pattern_parameters("test_pattern")
             assert params["param1"] == "value1"
             assert params["global_param"] == "global_value"
@@ -331,7 +356,9 @@ class TestAgentConfig:
             basic_agent_config.disable_pattern("test_pattern")
 
         # The pattern is now disabled, check the get_pattern_order result
-        with patch.object(AgentImplForTests, "get_pattern_order", return_value=["second_pattern"]):
+        with patch.object(
+            AgentImplForTests, "get_pattern_order", return_value=["second_pattern"]
+        ):
             patterns = basic_agent_config.get_pattern_order()
             assert "test_pattern" not in patterns
             assert "second_pattern" in patterns
@@ -345,7 +372,11 @@ class TestAgentConfig:
             basic_agent_config.enable_pattern("test_pattern")
 
         # The pattern is now enabled, check the get_pattern_order result
-        with patch.object(AgentImplForTests, "get_pattern_order", return_value=["test_pattern", "second_pattern"]):
+        with patch.object(
+            AgentImplForTests,
+            "get_pattern_order",
+            return_value=["test_pattern", "second_pattern"],
+        ):
             patterns = basic_agent_config.get_pattern_order()
             assert "test_pattern" in patterns
 
@@ -353,19 +384,12 @@ class TestAgentConfig:
         """Test conversion to dictionary."""
         # Add a node directly (works fine)
         basic_agent_config.add_node_config(
-            name="process",
-            engine=test_engine,
-            command_goto="END"
+            name="process", engine=test_engine, command_goto="END"
         )
 
         # Add a pattern directly to the patterns list
         basic_agent_config.patterns = [
-            PatternConfig(
-                name="test_pattern",
-                parameters={},
-                order=1,
-                enabled=True
-            )
+            PatternConfig(name="test_pattern", parameters={}, order=1, enabled=True)
         ]
 
         # Patch the to_dict method to return a controlled response
@@ -373,12 +397,15 @@ class TestAgentConfig:
             expected_dict = {
                 "name": "test_agent",
                 "engine": {"name": "test_engine", "type": "llm"},
-                "node_configs": {
-                    "process": {"name": "process"}
-                },
+                "node_configs": {"process": {"name": "process"}},
                 "patterns": [
-                    {"name": "test_pattern", "enabled": True, "order": 1, "parameters": {}}
-                ]
+                    {
+                        "name": "test_pattern",
+                        "enabled": True,
+                        "order": 1,
+                        "parameters": {},
+                    }
+                ],
             }
             mock_to_dict.return_value = expected_dict
 
@@ -402,13 +429,9 @@ class TestAgentConfig:
                 "user_id": "test-user",
                 "temperature": 0.7,
                 "engine_configs": {
-                    "test_agent": {
-                        "special_param": "agent_value"
-                    },
-                    "test_engine": {
-                        "engine_param": "engine_value"
-                    }
-                }
+                    "test_agent": {"special_param": "agent_value"},
+                    "test_engine": {"engine_param": "engine_value"},
+                },
             }
         }
 

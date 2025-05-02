@@ -1,6 +1,9 @@
 from enum import Enum
+
+
 class EngineType(str, Enum):
     """Types of engines the system can use."""
+
     LLM = "llm"
     VECTOR_STORE = "vector_store"
     RETRIEVER = "retriever"

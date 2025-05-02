@@ -7,15 +7,15 @@ from pathlib import Path
 def setup_test_logger(
     test_file_path: str | Path,
     test_name: str | None = None,
-    log_dir: str = "logs/tests"
+    log_dir: str = "logs/tests",
 ) -> logging.Logger:
     """Set up a logger for tests with file-specific log files.
-    
+
     Args:
         test_file_path: Path to the test file
         test_name: Optional specific test name
         log_dir: Base directory for log files
-        
+
     Returns:
         Configured logger
     """

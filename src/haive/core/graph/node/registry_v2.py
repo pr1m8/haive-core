@@ -1,8 +1,8 @@
 import functools
 import inspect
-from typing import Any, Callable, Optional, Type, TypeVar, Union, cast, overload
+from typing import Any, Callable, Optional, TypeVar, Union, cast, overload
 
-from langgraph.types import Command, Send
+from langgraph.types import Command
 
 from haive.core.graph.node.protocols import (
     AsyncNodeFunction,

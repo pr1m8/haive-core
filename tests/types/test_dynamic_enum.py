@@ -1,5 +1,7 @@
 from pydantic import BaseModel, ValidationError
+
 from haive.core.types.dynamic_enum import DynamicEnum, create_dynamic_enum
+
 
 # ─── Example subclass ─── #
 class AnimalType(DynamicEnum):
@@ -41,6 +43,7 @@ def test_json_schema():
 
 def test_dynamic_enum_factory():
     PlanetType = create_dynamic_enum("PlanetType", ["earth", "mars", "venus"])
+
     class Mission(BaseModel):
         destination: PlanetType
 

@@ -7,13 +7,14 @@ from langchain_core.runnables import RunnableConfig
 
 logger = logging.getLogger(__name__)
 
+
 def apply_config_to_app(app: Any, config: RunnableConfig | None = None) -> Any:
     """Apply a config to an app after compilation.
-    
+
     Args:
         app: The compiled application
         config: The config to apply
-        
+
     Returns:
         The app with config applied
     """
@@ -30,14 +31,17 @@ def apply_config_to_app(app: Any, config: RunnableConfig | None = None) -> Any:
 
     return app
 
-def prepare_compile_kwargs(checkpointer=None, default_config=None, **kwargs) -> dict[str, Any]:
+
+def prepare_compile_kwargs(
+    checkpointer=None, default_config=None, **kwargs
+) -> dict[str, Any]:
     """Prepare kwargs for StateGraph.compile() method, filtering out unsupported parameters.
-    
+
     Args:
         checkpointer: Optional checkpoint saver
         default_config: Config that won't be passed to compile but will be applied after
         **kwargs: Additional compilation parameters
-        
+
     Returns:
         Dictionary of supported compile kwargs
     """

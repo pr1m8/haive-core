@@ -1,12 +1,14 @@
-import os
 import importlib
 import inspect
-from typing import Any, Dict, List, Optional, Type, Union, Tuple, Callable
-from pydantic import BaseModel, Field, field_validator
+from typing import Any, Dict, List, Optional, Union
+
 from langchain.schema import Document
+from pydantic import BaseModel, Field
+
 
 class DynamicModuleType(str):
     """Enum for dynamically loaded module types (retrievers, tools, etc.)."""
+
     pass  # Populated dynamically
 
 
@@ -34,35 +36,57 @@ def get_available_classes(module_names: List[str]) -> Dict[str, Dict[str, Any]]:
                     continue
 
                 # ✅ Extract class metadata
-                docstring = cls.__doc__.strip() if cls.__doc__ else "No description available."
-                parent_classes = [base.__name__ for base in cls.__bases__ if base.__name__ != "object"]
+                docstring = (
+                    cls.__doc__.strip() if cls.__doc__ else "No description available."
+                )
+                parent_classes = [
+                    base.__name__ for base in cls.__bases__ if base.__name__ != "object"
+                ]
 
                 # ✅ Extract init args with types
                 init_args = {}
                 try:
                     signature = inspect.signature(cls)
                     for param_name, param in signature.parameters.items():
-                        param_type = param.annotation.__name__ if param.annotation != inspect.Parameter.empty else "Unknown"
+                        param_type = (
+                            param.annotation.__name__
+                            if param.annotation != inspect.Parameter.empty
+                            else "Unknown"
+                        )
                         init_args[param_name] = param_type
                 except ValueError:
                     pass  # Some classes have dynamic signatures
 
                 # ✅ Detect API dependencies (e.g., `api_key`, `api_wrapper`, `resource`)
                 missing_dependencies = [
-                    arg for arg in init_args.keys()
-                    if "api" in arg.lower() or "wrapper" in arg.lower() or "resource" in arg.lower()
+                    arg
+                    for arg in init_args.keys()
+                    if "api" in arg.lower()
+                    or "wrapper" in arg.lower()
+                    or "resource" in arg.lower()
                 ]
 
                 # ✅ Detect `args_schema` and extract its fields
                 args_schema = None
                 schema_fields = {}
                 if hasattr(cls, "args_schema"):
-                    schema_cls = getattr(cls, "args_schema")
-                    if inspect.isclass(schema_cls) and issubclass(schema_cls, BaseModel):
+                    schema_cls = cls.args_schema
+                    if inspect.isclass(schema_cls) and issubclass(
+                        schema_cls, BaseModel
+                    ):
                         schema_fields = {
                             field_name: {
-                                "description": field_info.description if field_info.description else "No description available.",
-                                "type": field_info.annotation.__name__ if hasattr(field_info, "annotation") and field_info.annotation else "Unknown",
+                                "description": (
+                                    field_info.description
+                                    if field_info.description
+                                    else "No description available."
+                                ),
+                                "type": (
+                                    field_info.annotation.__name__
+                                    if hasattr(field_info, "annotation")
+                                    and field_info.annotation
+                                    else "Unknown"
+                                ),
                             }
                             for field_name, field_info in schema_cls.model_fields.items()
                         }
@@ -87,11 +111,16 @@ class DynamicModuleConfig(BaseModel):
     """
     Configuration for dynamically loading LangChain components (retrievers, tools, API wrappers, etc.).
     """
+
     module_names: List[str] = Field(
         description="List of module paths for dynamic loading (e.g., ['langchain_community.retrievers', 'langchain.retrievers'])"
     )
-    class_type: Optional[str] = Field(None, description="Specific class to load from the modules.")
-    init_kwargs: Dict[str, Any] = Field(default_factory=dict, description="Initialization arguments.")
+    class_type: Optional[str] = Field(
+        None, description="Specific class to load from the modules."
+    )
+    init_kwargs: Dict[str, Any] = Field(
+        default_factory=dict, description="Initialization arguments."
+    )
 
     def get_available_classes(self) -> Dict[str, Any]:
         """
@@ -111,7 +140,9 @@ class DynamicModuleConfig(BaseModel):
         """
         available_classes = self.get_available_classes()
         if class_type not in available_classes:
-            raise ValueError(f"Invalid class '{class_type}'. Available: {list(available_classes.keys())}")
+            raise ValueError(
+                f"Invalid class '{class_type}'. Available: {list(available_classes.keys())}"
+            )
         self.class_type = class_type
 
     def load_instance(self) -> Any:
@@ -127,10 +158,14 @@ class DynamicModuleConfig(BaseModel):
                 if hasattr(module, self.class_type):
                     component_class = getattr(module, self.class_type)
 
-                    if "model_rebuild" in dir(component_class):  # ✅ Handle Pydantic validation issues
+                    if "model_rebuild" in dir(
+                        component_class
+                    ):  # ✅ Handle Pydantic validation issues
                         component_class.model_rebuild()
 
-                    return component_class(**self.init_kwargs)  # ✅ Instantiate dynamically
+                    return component_class(
+                        **self.init_kwargs
+                    )  # ✅ Instantiate dynamically
 
             except ImportError:
                 continue  # Skip to the next module
@@ -142,7 +177,9 @@ class DynamicModuleConfig(BaseModel):
                     "Check if required init arguments are missing."
                 )
 
-        raise ImportError(f"Class '{self.class_type}' not found in any of the modules: {self.module_names}")
+        raise ImportError(
+            f"Class '{self.class_type}' not found in any of the modules: {self.module_names}"
+        )
 
     def get_class_metadata(self) -> Dict[str, Any]:
         """
@@ -153,7 +190,9 @@ class DynamicModuleConfig(BaseModel):
 
         available_classes = self.get_available_classes()
         if self.class_type not in available_classes:
-            raise ValueError(f"Class '{self.class_type}' not found in the given modules.")
+            raise ValueError(
+                f"Class '{self.class_type}' not found in the given modules."
+            )
 
         return available_classes[self.class_type]
 
@@ -171,7 +210,9 @@ class DynamicModuleConfig(BaseModel):
 
 
 # ✅ Example Usage - Works for **Retrievers, Toolkits, and Any LangChain Components**
-config = DynamicModuleConfig(module_names=["langchain_community.retrievers", "langchain.retrievers"])
+config = DynamicModuleConfig(
+    module_names=["langchain_community.retrievers", "langchain.retrievers"]
+)
 
 # 🎯 Step 1: Retrieve available classes
 available_classes = config.get_available_classes()
@@ -192,7 +233,7 @@ print(f"📜 Args Schema Fields: {metadata['args_schema_fields']}")
 
 # 🎯 Step 4: Load instance (handles missing args)
 try:
-    docs = [Document(page_content="Hello, world!",metadata={"source":"test"})]
+    docs = [Document(page_content="Hello, world!", metadata={"source": "test"})]
     config.init_kwargs = {"docs": docs, "k": 3}
     instance = config.load_instance()
     try:

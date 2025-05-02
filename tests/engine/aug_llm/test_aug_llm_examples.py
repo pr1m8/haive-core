@@ -19,41 +19,45 @@ from haive.core.models.llm.base import AzureLLMConfig
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 # Skip tests if API keys aren't available
 def check_api_keys():
     """Check if necessary API keys are available in environment."""
     api_keys = {
         "AZURE_OPENAI_API_KEY": os.getenv("AZURE_OPENAI_API_KEY"),
-        "OPENAI_API_KEY": os.getenv("OPENAI_API_KEY")
+        "OPENAI_API_KEY": os.getenv("OPENAI_API_KEY"),
     }
 
     return any(api_keys.values())
 
+
 # Test skipping decorator
 skip_if_no_api_keys = pytest.mark.skipif(
-    not check_api_keys(),
-    reason="No API keys available for LLM testing"
+    not check_api_keys(), reason="No API keys available for LLM testing"
 )
+
 
 # Test fixtures
 @pytest.fixture
 def azure_llm_config():
     """Create Azure LLM config for testing."""
     return AzureLLMConfig(
-        model="gpt-4o",
-        temperature=0.0,  # Deterministic for testing
-        max_tokens=1000
+        model="gpt-4o", temperature=0.0, max_tokens=1000  # Deterministic for testing
     )
+
 
 # --------------------------------
 # Generic Task Templates
 # --------------------------------
 
+
 @pytest.fixture
 def summarization_prompt():
     """Create a summarization prompt template with content placeholder."""
-    return ChatPromptTemplate.from_messages([
-        SystemMessage(content="""
+    return ChatPromptTemplate.from_messages(
+        [
+            SystemMessage(
+                content="""
         You are a summarization expert. Provide a concise summary of the content below.
         Focus on the main points and key takeaways.
         
@@ -62,15 +66,22 @@ def summarization_prompt():
         - Highlight the most important information
         - Omit unnecessary details
         - Be objective and factual
-        """),
-        HumanMessagePromptTemplate.from_template("Please summarize the following content:\n\n{content}")
-    ])
+        """
+            ),
+            HumanMessagePromptTemplate.from_template(
+                "Please summarize the following content:\n\n{content}"
+            ),
+        ]
+    )
+
 
 @pytest.fixture
 def analysis_prompt():
     """Create an analysis prompt template with content placeholder."""
-    return ChatPromptTemplate.from_messages([
-        SystemMessage(content="""
+    return ChatPromptTemplate.from_messages(
+        [
+            SystemMessage(
+                content="""
         You are an analytical assistant. Provide a detailed analysis of the content below.
         
         Your analysis should:
@@ -78,15 +89,22 @@ def analysis_prompt():
         - Evaluate the strengths and weaknesses
         - Consider implications and potential applications
         - Be organized with clear subheadings
-        """),
-        HumanMessagePromptTemplate.from_template("Please analyze the following content:\n\n{content}")
-    ])
+        """
+            ),
+            HumanMessagePromptTemplate.from_template(
+                "Please analyze the following content:\n\n{content}"
+            ),
+        ]
+    )
+
 
 @pytest.fixture
 def extraction_prompt():
     """Create an extraction prompt template with content placeholder."""
-    return ChatPromptTemplate.from_messages([
-        SystemMessage(content="""
+    return ChatPromptTemplate.from_messages(
+        [
+            SystemMessage(
+                content="""
         You are a data extraction specialist. Extract the following types of information 
         from the content below:
         
@@ -97,34 +115,48 @@ def extraction_prompt():
         5. Key metrics or statistics
         
         Format your response as a structured list with categories.
-        """),
-        HumanMessagePromptTemplate.from_template("Extract information from the following content:\n\n{content}")
-    ])
+        """
+            ),
+            HumanMessagePromptTemplate.from_template(
+                "Extract information from the following content:\n\n{content}"
+            ),
+        ]
+    )
+
 
 @pytest.fixture
 def qa_prompt():
     """Create a Q&A prompt template with content and question placeholders."""
-    return ChatPromptTemplate.from_messages([
-        SystemMessage(content="""
+    return ChatPromptTemplate.from_messages(
+        [
+            SystemMessage(
+                content="""
         You are a question answering assistant. Answer the question based only on the 
         provided content. If the content doesn't contain the answer, say 'I don't have 
         enough information to answer this question.'
         
         Keep your answers concise and to the point.
-        """),
-        HumanMessagePromptTemplate.from_template("""
+        """
+            ),
+            HumanMessagePromptTemplate.from_template(
+                """
         Content:
         {content}
         
         Question: {question}
-        """)
-    ])
+        """
+            ),
+        ]
+    )
+
 
 @pytest.fixture
 def comparison_prompt():
     """Create a comparison prompt template."""
-    return ChatPromptTemplate.from_messages([
-        SystemMessage(content="""
+    return ChatPromptTemplate.from_messages(
+        [
+            SystemMessage(
+                content="""
         You are a comparison specialist. Compare and contrast the items provided.
         
         Your response should:
@@ -132,8 +164,10 @@ def comparison_prompt():
         - Evaluate relative strengths and weaknesses
         - Provide a balanced assessment
         - End with a brief recommendation if appropriate
-        """),
-        HumanMessagePromptTemplate.from_template("""
+        """
+            ),
+            HumanMessagePromptTemplate.from_template(
+                """
         Compare the following:
         
         Item 1: {item1}
@@ -141,32 +175,44 @@ def comparison_prompt():
         Item 2: {item2}
         
         Comparison criteria: {criteria}
-        """)
-    ])
+        """
+            ),
+        ]
+    )
+
 
 @pytest.fixture
 def translation_prompt():
     """Create a translation prompt template."""
-    return ChatPromptTemplate.from_messages([
-        SystemMessage(content="""
+    return ChatPromptTemplate.from_messages(
+        [
+            SystemMessage(
+                content="""
         You are a translation assistant. Translate the provided text from the source 
         language to the target language.
         
         Maintain the meaning, tone, and style of the original as much as possible.
-        """),
-        HumanMessagePromptTemplate.from_template("""
+        """
+            ),
+            HumanMessagePromptTemplate.from_template(
+                """
         Text to translate: {text}
         
         Source language: {source_language}
         Target language: {target_language}
-        """)
-    ])
+        """
+            ),
+        ]
+    )
+
 
 @pytest.fixture
 def code_generation_prompt():
     """Create a code generation prompt template."""
-    return ChatPromptTemplate.from_messages([
-        SystemMessage(content="""
+    return ChatPromptTemplate.from_messages(
+        [
+            SystemMessage(
+                content="""
         You are a coding assistant. Generate code based on the requirements provided.
         
         Your code should be:
@@ -174,39 +220,52 @@ def code_generation_prompt():
         - Properly commented
         - Following best practices for the language
         - Ready to use
-        """),
-        HumanMessagePromptTemplate.from_template("""
+        """
+            ),
+            HumanMessagePromptTemplate.from_template(
+                """
         Requirements: {requirements}
         
         Programming language: {language}
         
         Additional specifications: {specifications}
-        """)
-    ])
+        """
+            ),
+        ]
+    )
+
 
 @pytest.fixture
 def format_conversion_prompt():
     """Create a format conversion prompt template."""
-    return ChatPromptTemplate.from_messages([
-        SystemMessage(content="""
+    return ChatPromptTemplate.from_messages(
+        [
+            SystemMessage(
+                content="""
         You are a format conversion assistant. Convert the provided content from the 
         source format to the target format.
         
         Maintain all the information from the original content while adapting to the 
         new format's conventions and requirements.
-        """),
-        HumanMessagePromptTemplate.from_template("""
+        """
+            ),
+            HumanMessagePromptTemplate.from_template(
+                """
         Content to convert:
         {content}
         
         Source format: {source_format}
         Target format: {target_format}
-        """)
-    ])
+        """
+            ),
+        ]
+    )
+
 
 # --------------------------------
 # Test Sample Content
 # --------------------------------
+
 
 @pytest.fixture
 def sample_article():
@@ -233,6 +292,7 @@ def sample_article():
     As we look ahead to 2024, the pace of innovation in machine learning shows no signs of slowing down. The integration of AI into everyday applications continues to accelerate, bringing both exciting opportunities and important challenges for researchers, developers, policymakers, and society as a whole.
     """
 
+
 @pytest.fixture
 def sample_product_comparison():
     """Sample product comparison text for testing."""
@@ -255,8 +315,9 @@ def sample_product_comparison():
         - Android 13 with One UI 5.1
         - Starting price: $1,199
         """,
-        "criteria": "Camera quality, performance, display, battery life, and value for money."
+        "criteria": "Camera quality, performance, display, battery life, and value for money.",
     }
+
 
 @pytest.fixture
 def sample_business_data():
@@ -307,6 +368,7 @@ def sample_business_data():
     - Board meeting scheduled for November 10, 2023 at headquarters
     """
 
+
 @pytest.fixture
 def sample_code_requirements():
     """Sample code generation requirements."""
@@ -330,12 +392,14 @@ def sample_code_requirements():
         - Include type hints
         - Add docstring and comments
         - Include a simple example of how to call the function
-        """
+        """,
     }
+
 
 # --------------------------------
 # Task-specific tests
 # --------------------------------
+
 
 @skip_if_no_api_keys
 def test_summarization_example(azure_llm_config, summarization_prompt, sample_article):
@@ -345,13 +409,13 @@ def test_summarization_example(azure_llm_config, summarization_prompt, sample_ar
         name="content_summarizer",
         llm_config=azure_llm_config,
         prompt_template=summarization_prompt,
-        output_parser=StrOutputParser()
+        output_parser=StrOutputParser(),
     )
 
     # Test with sample article
     summary = summarizer.invoke({"content": sample_article})
 
-    print("\n" + "="*20 + " Article Summary " + "="*20)
+    print("\n" + "=" * 20 + " Article Summary " + "=" * 20)
     print(summary)
 
     # Test with custom content
@@ -367,20 +431,19 @@ def test_summarization_example(azure_llm_config, summarization_prompt, sample_ar
 
     custom_summary = summarizer.invoke({"content": custom_content})
 
-    print("\n" + "="*20 + " IoT Summary " + "="*20)
+    print("\n" + "=" * 20 + " IoT Summary " + "=" * 20)
     print(custom_summary)
 
     assert len(summary) > 0
     assert len(custom_summary) > 0
+
 
 @skip_if_no_api_keys
 def test_qa_example(azure_llm_config, qa_prompt, sample_article):
     """Test AugLLMConfig for question answering on specific content."""
     # Create AugLLM for question answering
     qa_system = AugLLMConfig(
-        name="content_qa",
-        llm_config=azure_llm_config,
-        prompt_template=qa_prompt
+        name="content_qa", llm_config=azure_llm_config, prompt_template=qa_prompt
     )
 
     # Test with different questions
@@ -392,13 +455,10 @@ def test_qa_example(azure_llm_config, qa_prompt, sample_article):
         "What year is the article focusing on?",
     ]
 
-    print("\n" + "="*20 + " Q&A Examples " + "="*20)
+    print("\n" + "=" * 20 + " Q&A Examples " + "=" * 20)
 
     for question in questions:
-        answer = qa_system.invoke({
-            "content": sample_article,
-            "question": question
-        })
+        answer = qa_system.invoke({"content": sample_article, "question": question})
 
         content = answer.content if hasattr(answer, "content") else answer
         print(f"\nQ: {question}\nA: {content}\n")
@@ -407,22 +467,27 @@ def test_qa_example(azure_llm_config, qa_prompt, sample_article):
         assert content is not None
         assert len(content) > 0
 
+
 @skip_if_no_api_keys
-def test_data_extraction_example(azure_llm_config, extraction_prompt, sample_business_data):
+def test_data_extraction_example(
+    azure_llm_config, extraction_prompt, sample_business_data
+):
     """Test AugLLMConfig for data extraction from specific content."""
     # Create AugLLM for data extraction
     extractor = AugLLMConfig(
         name="data_extractor",
         llm_config=azure_llm_config,
-        prompt_template=extraction_prompt
+        prompt_template=extraction_prompt,
     )
 
     # Extract data from the business report
     extracted_data = extractor.invoke({"content": sample_business_data})
 
-    content = extracted_data.content if hasattr(extracted_data, "content") else extracted_data
+    content = (
+        extracted_data.content if hasattr(extracted_data, "content") else extracted_data
+    )
 
-    print("\n" + "="*20 + " Extracted Business Data " + "="*20)
+    print("\n" + "=" * 20 + " Extracted Business Data " + "=" * 20)
     print(content)
 
     # Define structured output model for extraction
@@ -438,13 +503,13 @@ def test_data_extraction_example(azure_llm_config, extraction_prompt, sample_bus
         name="structured_data_extractor",
         llm_config=azure_llm_config,
         prompt_template=extraction_prompt,
-        structured_output_model=BusinessDataExtraction
+        structured_output_model=BusinessDataExtraction,
     )
 
     # Extract structured data
     structured_data = structured_extractor.invoke({"content": sample_business_data})
 
-    print("\n" + "="*20 + " Structured Business Data Extraction " + "="*20)
+    print("\n" + "=" * 20 + " Structured Business Data Extraction " + "=" * 20)
     print(f"People: {structured_data.people}")
     print(f"Organizations: {structured_data.organizations}")
     print(f"Locations: {structured_data.locations}")
@@ -456,14 +521,17 @@ def test_data_extraction_example(azure_llm_config, extraction_prompt, sample_bus
     assert len(structured_data.organizations) > 0
     assert len(structured_data.metrics) > 0
 
+
 @skip_if_no_api_keys
-def test_comparison_example(azure_llm_config, comparison_prompt, sample_product_comparison):
+def test_comparison_example(
+    azure_llm_config, comparison_prompt, sample_product_comparison
+):
     """Test AugLLMConfig for product comparison."""
     # Create AugLLM for comparison
     comparator = AugLLMConfig(
         name="product_comparator",
         llm_config=azure_llm_config,
-        prompt_template=comparison_prompt
+        prompt_template=comparison_prompt,
     )
 
     # Compare the products
@@ -471,21 +539,25 @@ def test_comparison_example(azure_llm_config, comparison_prompt, sample_product_
 
     content = comparison.content if hasattr(comparison, "content") else comparison
 
-    print("\n" + "="*20 + " Product Comparison " + "="*20)
+    print("\n" + "=" * 20 + " Product Comparison " + "=" * 20)
     print(content)
 
     # Try another comparison
     custom_comparison = {
         "item1": "Python programming language",
         "item2": "JavaScript programming language",
-        "criteria": "Learning curve, performance, versatility, and job market demand."
+        "criteria": "Learning curve, performance, versatility, and job market demand.",
     }
 
     lang_comparison = comparator.invoke(custom_comparison)
 
-    lang_content = lang_comparison.content if hasattr(lang_comparison, "content") else lang_comparison
+    lang_content = (
+        lang_comparison.content
+        if hasattr(lang_comparison, "content")
+        else lang_comparison
+    )
 
-    print("\n" + "="*20 + " Programming Language Comparison " + "="*20)
+    print("\n" + "=" * 20 + " Programming Language Comparison " + "=" * 20)
     print(lang_content)
 
     # Basic validation
@@ -494,36 +566,43 @@ def test_comparison_example(azure_llm_config, comparison_prompt, sample_product_
     assert len(content) > 0
     assert len(lang_content) > 0
 
+
 @skip_if_no_api_keys
-def test_code_generation_example(azure_llm_config, code_generation_prompt, sample_code_requirements):
+def test_code_generation_example(
+    azure_llm_config, code_generation_prompt, sample_code_requirements
+):
     """Test AugLLMConfig for code generation."""
     # Create AugLLM for code generation
     code_generator = AugLLMConfig(
         name="code_generator",
         llm_config=azure_llm_config,
-        prompt_template=code_generation_prompt
+        prompt_template=code_generation_prompt,
     )
 
     # Generate code based on requirements
     generated_code = code_generator.invoke(sample_code_requirements)
 
-    content = generated_code.content if hasattr(generated_code, "content") else generated_code
+    content = (
+        generated_code.content if hasattr(generated_code, "content") else generated_code
+    )
 
-    print("\n" + "="*20 + " Generated Python Code " + "="*20)
+    print("\n" + "=" * 20 + " Generated Python Code " + "=" * 20)
     print(content)
 
     # Try a simpler code generation task
     simple_task = {
         "requirements": "Create a function that checks if a string is a palindrome.",
         "language": "Python",
-        "specifications": "Keep it simple and efficient."
+        "specifications": "Keep it simple and efficient.",
     }
 
     simple_code = code_generator.invoke(simple_task)
 
-    simple_content = simple_code.content if hasattr(simple_code, "content") else simple_code
+    simple_content = (
+        simple_code.content if hasattr(simple_code, "content") else simple_code
+    )
 
-    print("\n" + "="*20 + " Simple Function Generation " + "="*20)
+    print("\n" + "=" * 20 + " Simple Function Generation " + "=" * 20)
     print(simple_content)
 
     # Basic validation
@@ -532,6 +611,7 @@ def test_code_generation_example(azure_llm_config, code_generation_prompt, sampl
     assert "pandas" in content
     assert "palindrome" in simple_content.lower()
 
+
 @skip_if_no_api_keys
 def test_format_conversion_example(azure_llm_config, format_conversion_prompt):
     """Test AugLLMConfig for format conversion."""
@@ -539,7 +619,7 @@ def test_format_conversion_example(azure_llm_config, format_conversion_prompt):
     converter = AugLLMConfig(
         name="format_converter",
         llm_config=azure_llm_config,
-        prompt_template=format_conversion_prompt
+        prompt_template=format_conversion_prompt,
     )
 
     # Convert markdown to HTML
@@ -563,15 +643,21 @@ def test_format_conversion_example(azure_llm_config, format_conversion_prompt):
     Contact: [project-team@example.com](mailto:project-team@example.com)
     """
 
-    html_conversion = converter.invoke({
-        "content": markdown_content,
-        "source_format": "Markdown",
-        "target_format": "HTML"
-    })
+    html_conversion = converter.invoke(
+        {
+            "content": markdown_content,
+            "source_format": "Markdown",
+            "target_format": "HTML",
+        }
+    )
 
-    html_content = html_conversion.content if hasattr(html_conversion, "content") else html_conversion
+    html_content = (
+        html_conversion.content
+        if hasattr(html_conversion, "content")
+        else html_conversion
+    )
 
-    print("\n" + "="*20 + " Markdown to HTML Conversion " + "="*20)
+    print("\n" + "=" * 20 + " Markdown to HTML Conversion " + "=" * 20)
     print(html_content)
 
     # Convert JSON to YAML
@@ -597,15 +683,17 @@ def test_format_conversion_example(azure_llm_config, format_conversion_prompt):
     }
     """
 
-    yaml_conversion = converter.invoke({
-        "content": json_content,
-        "source_format": "JSON",
-        "target_format": "YAML"
-    })
+    yaml_conversion = converter.invoke(
+        {"content": json_content, "source_format": "JSON", "target_format": "YAML"}
+    )
 
-    yaml_content = yaml_conversion.content if hasattr(yaml_conversion, "content") else yaml_conversion
+    yaml_content = (
+        yaml_conversion.content
+        if hasattr(yaml_conversion, "content")
+        else yaml_conversion
+    )
 
-    print("\n" + "="*20 + " JSON to YAML Conversion " + "="*20)
+    print("\n" + "=" * 20 + " JSON to YAML Conversion " + "=" * 20)
     print(yaml_content)
 
     # Basic validation
@@ -614,6 +702,7 @@ def test_format_conversion_example(azure_llm_config, format_conversion_prompt):
     assert "server:" in yaml_content
     assert "host: example.com" in yaml_content
 
+
 @skip_if_no_api_keys
 def test_translation_example(azure_llm_config, translation_prompt):
     """Test AugLLMConfig for language translation."""
@@ -621,46 +710,66 @@ def test_translation_example(azure_llm_config, translation_prompt):
     translator = AugLLMConfig(
         name="translator",
         llm_config=azure_llm_config,
-        prompt_template=translation_prompt
+        prompt_template=translation_prompt,
     )
 
     # Translate English to Spanish
-    spanish_translation = translator.invoke({
-        "text": "Machine learning is transforming how we interact with technology every day.",
-        "source_language": "English",
-        "target_language": "Spanish"
-    })
+    spanish_translation = translator.invoke(
+        {
+            "text": "Machine learning is transforming how we interact with technology every day.",
+            "source_language": "English",
+            "target_language": "Spanish",
+        }
+    )
 
-    spanish_content = spanish_translation.content if hasattr(spanish_translation, "content") else spanish_translation
+    spanish_content = (
+        spanish_translation.content
+        if hasattr(spanish_translation, "content")
+        else spanish_translation
+    )
 
-    print("\n" + "="*20 + " English to Spanish Translation " + "="*20)
+    print("\n" + "=" * 20 + " English to Spanish Translation " + "=" * 20)
     print(spanish_content)
 
     # Translate English to French
-    french_translation = translator.invoke({
-        "text": "The artificial intelligence revolution has only just begun.",
-        "source_language": "English",
-        "target_language": "French"
-    })
+    french_translation = translator.invoke(
+        {
+            "text": "The artificial intelligence revolution has only just begun.",
+            "source_language": "English",
+            "target_language": "French",
+        }
+    )
 
-    french_content = french_translation.content if hasattr(french_translation, "content") else french_translation
+    french_content = (
+        french_translation.content
+        if hasattr(french_translation, "content")
+        else french_translation
+    )
 
-    print("\n" + "="*20 + " English to French Translation " + "="*20)
+    print("\n" + "=" * 20 + " English to French Translation " + "=" * 20)
     print(french_content)
 
     # Translate with tone guidance
-    formal_translation = translator.invoke({
-        "text": "Hey there! Can you help me figure out how to use this app?",
-        "source_language": "English",
-        "target_language": "Japanese",
-        "messages": [
-            HumanMessage(content="Please maintain a formal, respectful tone in the translation.")
-        ]
-    })
+    formal_translation = translator.invoke(
+        {
+            "text": "Hey there! Can you help me figure out how to use this app?",
+            "source_language": "English",
+            "target_language": "Japanese",
+            "messages": [
+                HumanMessage(
+                    content="Please maintain a formal, respectful tone in the translation."
+                )
+            ],
+        }
+    )
 
-    formal_content = formal_translation.content if hasattr(formal_translation, "content") else formal_translation
+    formal_content = (
+        formal_translation.content
+        if hasattr(formal_translation, "content")
+        else formal_translation
+    )
 
-    print("\n" + "="*20 + " English to Formal Japanese Translation " + "="*20)
+    print("\n" + "=" * 20 + " English to Formal Japanese Translation " + "=" * 20)
     print(formal_content)
 
     # Basic validation
@@ -671,6 +780,7 @@ def test_translation_example(azure_llm_config, translation_prompt):
     assert len(french_content) > 0
     assert len(formal_content) > 0
 
+
 @skip_if_no_api_keys
 def test_analysis_example(azure_llm_config, analysis_prompt, sample_article):
     """Test AugLLMConfig for content analysis."""
@@ -678,7 +788,7 @@ def test_analysis_example(azure_llm_config, analysis_prompt, sample_article):
     analyzer = AugLLMConfig(
         name="content_analyzer",
         llm_config=azure_llm_config,
-        prompt_template=analysis_prompt
+        prompt_template=analysis_prompt,
     )
 
     # Analyze the article
@@ -686,12 +796,14 @@ def test_analysis_example(azure_llm_config, analysis_prompt, sample_article):
 
     content = analysis.content if hasattr(analysis, "content") else analysis
 
-    print("\n" + "="*20 + " Article Analysis " + "="*20)
+    print("\n" + "=" * 20 + " Article Analysis " + "=" * 20)
     print(content)
 
     # Create custom analysis prompt for SWOT analysis
-    swot_prompt = ChatPromptTemplate.from_messages([
-        SystemMessage(content="""
+    swot_prompt = ChatPromptTemplate.from_messages(
+        [
+            SystemMessage(
+                content="""
         You are a business analyst specialized in SWOT analysis. Analyze the provided 
         business information and create a complete SWOT analysis with the following sections:
         
@@ -701,15 +813,17 @@ def test_analysis_example(azure_llm_config, analysis_prompt, sample_article):
         4. Threats: External negative factors
         
         For each section, provide 3-5 bullet points with brief explanations.
-        """),
-        HumanMessagePromptTemplate.from_template("Perform a SWOT analysis for the following business:\n\n{business_info}")
-    ])
+        """
+            ),
+            HumanMessagePromptTemplate.from_template(
+                "Perform a SWOT analysis for the following business:\n\n{business_info}"
+            ),
+        ]
+    )
 
     # Create SWOT analyzer
     swot_analyzer = AugLLMConfig(
-        name="swot_analyzer",
-        llm_config=azure_llm_config,
-        prompt_template=swot_prompt
+        name="swot_analyzer", llm_config=azure_llm_config, prompt_template=swot_prompt
     )
 
     # Sample business info
@@ -731,9 +845,11 @@ def test_analysis_example(azure_llm_config, analysis_prompt, sample_article):
     # Perform SWOT analysis
     swot_analysis = swot_analyzer.invoke({"business_info": business_info})
 
-    swot_content = swot_analysis.content if hasattr(swot_analysis, "content") else swot_analysis
+    swot_content = (
+        swot_analysis.content if hasattr(swot_analysis, "content") else swot_analysis
+    )
 
-    print("\n" + "="*20 + " SWOT Analysis " + "="*20)
+    print("\n" + "=" * 20 + " SWOT Analysis " + "=" * 20)
     print(swot_content)
 
     # Basic validation

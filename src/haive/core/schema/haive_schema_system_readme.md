@@ -78,7 +78,7 @@ class SimpleState(StateSchema):
     messages: List[BaseMessage] = Field(default_factory=list)
     query: str = Field(default="")
     result: str = Field(default="")
-    
+
     # Only messages will be shared with parent graphs
     __shared_fields__ = ["messages"]
 ```
@@ -92,7 +92,7 @@ class StateWithReducers(StateSchema):
     messages: List[BaseMessage] = Field(default_factory=list)
     context: List[str] = Field(default_factory=list)
     count: int = Field(default=0)
-    
+
     # Define reducer functions for each field
     __reducer_fields__ = {
         "messages": add_messages,  # From langgraph.graph
@@ -110,7 +110,7 @@ class RAGState(StateSchema):
     query: str = Field(default="")
     context: List[str] = Field(default_factory=list)
     answer: str = Field(default="")
-    
+
     # Map engines to their inputs and outputs
     __engine_io_mappings__ = {
         "retriever": {
@@ -126,20 +126,20 @@ class RAGState(StateSchema):
 
 ### Key Methods
 
-| Method | Description |
-|--------|-------------|
-| `to_dict()` | Convert state to dictionary |
-| `to_json()` | Convert state to JSON string |
-| `from_dict(data)` | Create state from dictionary |
-| `from_json(json_str)` | Create state from JSON string |
-| `apply_reducers(other)` | Apply updates using reducer functions |
-| `add_message(message)` | Add a single message to messages field |
-| `add_messages(messages)` | Add multiple messages to messages field |
-| `prepare_for_engine(engine_name)` | Extract fields relevant to an engine |
-| `pretty_print()` | Format state for display |
-| `to_command(goto)` | Convert to LangGraph Command |
-| `display_schema()` | Show schema information |
-| `to_python_code()` | Generate Python code representation |
+| Method                            | Description                             |
+| --------------------------------- | --------------------------------------- |
+| `to_dict()`                       | Convert state to dictionary             |
+| `to_json()`                       | Convert state to JSON string            |
+| `from_dict(data)`                 | Create state from dictionary            |
+| `from_json(json_str)`             | Create state from JSON string           |
+| `apply_reducers(other)`           | Apply updates using reducer functions   |
+| `add_message(message)`            | Add a single message to messages field  |
+| `add_messages(messages)`          | Add multiple messages to messages field |
+| `prepare_for_engine(engine_name)` | Extract fields relevant to an engine    |
+| `pretty_print()`                  | Format state for display                |
+| `to_command(goto)`                | Convert to LangGraph Command            |
+| `display_schema()`                | Show schema information                 |
+| `to_python_code()`                | Generate Python code representation     |
 
 ## SchemaComposer
 
@@ -189,28 +189,28 @@ ConversationState = composer.build()
 # Extract fields from a list of components (engines, models, etc.)
 components = [retriever_engine, llm_engine, memory_engine]
 StateSchema = SchemaComposer.from_components(
-    components, 
+    components,
     name="RAGState"
 )
 ```
 
 ### Key Methods
 
-| Method | Description |
-|--------|-------------|
-| `add_field(name, field_type, ...)` | Add a field with comprehensive options |
-| `add_fields_from_model(model)` | Extract fields from a Pydantic model |
-| `add_fields_from_components(components)` | Extract fields from components |
-| `add_fields_from_engine(engine)` | Extract fields from an engine |
-| `add_fields_from_dict(fields_dict)` | Add fields from a dictionary |
-| `configure_messages_field(...)` | Set up messages field with reducer |
-| `build(use_annotated=True)` | Build a StateSchema class |
-| `to_manager()` | Convert to a StateSchemaManager |
-| `merge(first, second)` | Merge two composers into a new one |
-| `from_components(components)` | Create schema from components |
-| `compose_input_schema(components)` | Create input schema from components |
-| `compose_output_schema(components)` | Create output schema from components |
-| `create_message_state(additional_fields)` | Create schema with messages field |
+| Method                                    | Description                            |
+| ----------------------------------------- | -------------------------------------- |
+| `add_field(name, field_type, ...)`        | Add a field with comprehensive options |
+| `add_fields_from_model(model)`            | Extract fields from a Pydantic model   |
+| `add_fields_from_components(components)`  | Extract fields from components         |
+| `add_fields_from_engine(engine)`          | Extract fields from an engine          |
+| `add_fields_from_dict(fields_dict)`       | Add fields from a dictionary           |
+| `configure_messages_field(...)`           | Set up messages field with reducer     |
+| `build(use_annotated=True)`               | Build a StateSchema class              |
+| `to_manager()`                            | Convert to a StateSchemaManager        |
+| `merge(first, second)`                    | Merge two composers into a new one     |
+| `from_components(components)`             | Create schema from components          |
+| `compose_input_schema(components)`        | Create input schema from components    |
+| `compose_output_schema(components)`       | Create output schema from components   |
+| `create_message_state(additional_fields)` | Create schema with messages field      |
 
 ## StateSchemaManager
 
@@ -255,19 +255,19 @@ DynamicState = manager.get_model()
 
 ### Key Methods
 
-| Method | Description |
-|--------|-------------|
-| `add_field(name, field_type, ...)` | Add a field with options |
-| `remove_field(name)` | Remove a field |
-| `modify_field(name, ...)` | Update field properties |
-| `has_field(name)` | Check if field exists |
-| `get_model(...)` | Create Pydantic model |
-| `mark_as_input_field(field, engine)` | Mark field as engine input |
+| Method                                | Description                 |
+| ------------------------------------- | --------------------------- |
+| `add_field(name, field_type, ...)`    | Add a field with options    |
+| `remove_field(name)`                  | Remove a field              |
+| `modify_field(name, ...)`             | Update field properties     |
+| `has_field(name)`                     | Check if field exists       |
+| `get_model(...)`                      | Create Pydantic model       |
+| `mark_as_input_field(field, engine)`  | Mark field as engine input  |
 | `mark_as_output_field(field, engine)` | Mark field as engine output |
-| `to_composer()` | Convert to SchemaComposer |
-| `merge(other)` | Merge with another schema |
-| `add_method(method, ...)` | Add a method to the schema |
-| `from_components(components)` | Create from components |
+| `to_composer()`                       | Convert to SchemaComposer   |
+| `merge(other)`                        | Merge with another schema   |
+| `add_method(method, ...)`             | Add a method to the schema  |
+| `from_components(components)`         | Create from components      |
 
 ## FieldDefinition
 
@@ -396,7 +396,7 @@ class ParentState(StateSchema):
 class ChildState(StateSchema):
     messages: List[BaseMessage] = Field(default_factory=list)  # Shared with parent
     context: List[str] = Field(default_factory=list)
-    
+
     __shared_fields__ = ["messages"]  # Only messages is shared
 ```
 
@@ -412,7 +412,7 @@ class ReducerState(StateSchema):
     messages: List[BaseMessage] = Field(default_factory=list)
     context: List[str] = Field(default_factory=list)
     counter: int = Field(default=0)
-    
+
     __reducer_fields__ = {
         "messages": add_messages,
         "context": operator.add,     # Concatenate lists
@@ -554,7 +554,7 @@ def get_input_fields(self) -> Dict[str, Tuple[Type, Any]]:
         "query": (str, Field(default="")),
         "history": (List[Tuple[str, str]], Field(default_factory=list))
     }
-    
+
 def get_output_fields(self) -> Dict[str, Tuple[Type, Any]]:
     """Define output field requirements."""
     return {
@@ -582,6 +582,7 @@ state.merge_engine_output("llm", engine_output)
 ## Best Practices
 
 1. **Define Schemas Declaratively** when possible for clarity:
+
    ```python
    class MyState(StateSchema):
        messages: List[BaseMessage] = Field(default_factory=list)
@@ -589,26 +590,31 @@ state.merge_engine_output("llm", engine_output)
    ```
 
 2. **Use SchemaComposer for Dynamic Composition** when building schemas at runtime:
+
    ```python
    schema = SchemaComposer.from_components(components)
    ```
 
 3. **Always Configure Message Fields with Reducers** to ensure proper concatenation:
+
    ```python
    composer.configure_messages_field(with_reducer=True)
    ```
 
 4. **Use Appropriate Reducers** for different field types:
+
    - `add_messages` for message lists
    - `operator.add` for regular lists and numbers
    - Custom reducers for complex types
 
 5. **Mark Shared Fields Explicitly** to control state flow between graphs:
+
    ```python
    schema.__shared_fields__ = ["messages", "context"]
    ```
 
 6. **Use Engine I/O Mappings** to track field relationships:
+
    ```python
    schema.__engine_io_mappings__ = {
        "retriever": {"inputs": ["query"], "outputs": ["context"]}
@@ -616,6 +622,7 @@ state.merge_engine_output("llm", engine_output)
    ```
 
 7. **Validate Fields** before creating instances:
+
    ```python
    try:
        state = MyState.model_validate(data)

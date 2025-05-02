@@ -87,6 +87,7 @@ class RetrieverType(str, Enum):
         )
         ```
     """
+
     # Base vector store retrievers
     VECTOR_STORE = "VectorStoreRetriever"
 

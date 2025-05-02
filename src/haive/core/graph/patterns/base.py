@@ -14,46 +14,43 @@ from pydantic import BaseModel, Field
 logger = logging.getLogger(__name__)
 
 # Type aliases for clarity
-ComponentType = Literal["engine", "processor", "retriever", "llm", "embeddings", "vectorstore", "tool"]
+ComponentType = Literal[
+    "engine", "processor", "retriever", "llm", "embeddings", "vectorstore", "tool"
+]
 
 
 class ComponentRequirement(BaseModel):
     """Defines a requirement for a component needed by a pattern.
-    
+
     Component requirements can specify types, capabilities, and other attributes
     that must be present for a pattern to be applied successfully.
     """
-    type: ComponentType = Field(
-        description="Type of component required"
-    )
+
+    type: ComponentType = Field(description="Type of component required")
     count: int = Field(
         default=1,
         ge=1,
-        description="Minimum number of components of this type required"
+        description="Minimum number of components of this type required",
     )
     optional: bool = Field(
-        default=False,
-        description="Whether this component is optional"
+        default=False, description="Whether this component is optional"
     )
     capabilities: list[str] = Field(
-        default_factory=list,
-        description="Specific capabilities required"
+        default_factory=list, description="Specific capabilities required"
     )
     name: str | None = Field(
-        default=None,
-        description="Specific component name (if required)"
+        default=None, description="Specific component name (if required)"
     )
     description: str | None = Field(
-        default=None,
-        description="Description of how this component is used"
+        default=None, description="Description of how this component is used"
     )
 
     def validate_component(self, component: Any) -> bool:
         """Validate if a component meets this requirement.
-        
+
         Args:
             component: Component to validate
-            
+
         Returns:
             True if the component meets this requirement
         """
@@ -76,42 +73,32 @@ class ComponentRequirement(BaseModel):
 
 class ParameterDefinition(BaseModel):
     """Definition of a parameter for patterns and branches.
-    
+
     Includes type information, validation rules, and documentation.
     """
-    type: str = Field(
-        description="Parameter type (str, int, bool, etc.)"
-    )
-    default: Any = Field(
-        default=None,
-        description="Default value for the parameter"
-    )
-    description: str = Field(
-        description="Description of the parameter"
-    )
+
+    type: str = Field(description="Parameter type (str, int, bool, etc.)")
+    default: Any = Field(default=None, description="Default value for the parameter")
+    description: str = Field(description="Description of the parameter")
     required: bool = Field(
-        default=False,
-        description="Whether this parameter is required"
+        default=False, description="Whether this parameter is required"
     )
     choices: list[Any] | None = Field(
-        default=None,
-        description="Valid choices for this parameter (if applicable)"
+        default=None, description="Valid choices for this parameter (if applicable)"
     )
     min_value: Any | None = Field(
-        default=None,
-        description="Minimum value (for numeric parameters)"
+        default=None, description="Minimum value (for numeric parameters)"
     )
     max_value: Any | None = Field(
-        default=None,
-        description="Maximum value (for numeric parameters)"
+        default=None, description="Maximum value (for numeric parameters)"
     )
 
     def validate_value(self, value: Any) -> tuple[bool, str | None]:
         """Validate a parameter value against this definition.
-        
+
         Args:
             value: Value to validate
-            
+
         Returns:
             Tuple of (is_valid, error_message)
         """
@@ -144,64 +131,49 @@ class ParameterDefinition(BaseModel):
 
 class PatternMetadata(BaseModel):
     """Enhanced metadata for graph patterns.
-    
+
     Provides comprehensive information about a pattern, including its
     requirements, parameters, and documentation.
     """
-    name: str = Field(
-        description="Unique pattern identifier"
-    )
-    description: str = Field(
-        description="Description of what the pattern does"
-    )
-    version: str = Field(
-        default="1.0.0",
-        description="Semantic version"
-    )
-    pattern_type: str = Field(
-        description="Category/type of pattern"
-    )
+
+    name: str = Field(description="Unique pattern identifier")
+    description: str = Field(description="Description of what the pattern does")
+    version: str = Field(default="1.0.0", description="Semantic version")
+    pattern_type: str = Field(description="Category/type of pattern")
 
     # Component requirements
     required_components: list[ComponentRequirement] = Field(
-        default_factory=list,
-        description="Components required for this pattern"
+        default_factory=list, description="Components required for this pattern"
     )
 
     # Parameter definitions with validation
     parameters: dict[str, ParameterDefinition] = Field(
         default_factory=dict,
-        description="Parameter definitions with types and validation"
+        description="Parameter definitions with types and validation",
     )
 
     # Dependencies
     dependencies: list[str] = Field(
-        default_factory=list,
-        description="Other patterns this pattern depends on"
+        default_factory=list, description="Other patterns this pattern depends on"
     )
 
     # Application constraints
     constraints: dict[str, Any] = Field(
-        default_factory=dict,
-        description="Constraints on pattern application"
+        default_factory=dict, description="Constraints on pattern application"
     )
 
     # Documentation
     examples: list[dict[str, Any]] = Field(
-        default_factory=list,
-        description="Usage examples"
+        default_factory=list, description="Usage examples"
     )
-    tags: list[str] = Field(
-        default_factory=list,
-        description="Tags for categorization"
-    )
+    tags: list[str] = Field(default_factory=list, description="Tags for categorization")
 
     def check_required_components(self, components: list[Any]) -> list[str]:
         """Check if the required components are available.
-        
+
         Args:
             components: List of available components
-            
+
         Returns:
             List of missing component requirements
         """
@@ -222,10 +194,10 @@ class PatternMetadata(BaseModel):
 
     def validate_parameters(self, params: dict[str, Any]) -> tuple[bool, list[str]]:
         """Validate parameter values against their definitions.
-        
+
         Args:
             params: Parameter values to validate
-            
+
         Returns:
             Tuple of (is_valid, error_messages)
         """
@@ -247,20 +219,18 @@ class PatternMetadata(BaseModel):
 
         return len(errors) == 0, errors
 
+
 class GraphPattern(BaseModel):
     """Defines a reusable graph pattern."""
-    metadata: PatternMetadata = Field(
-        description="Pattern metadata"
-    )
+
+    metadata: PatternMetadata = Field(description="Pattern metadata")
     apply_func: Callable | None = Field(
         default=None,
         exclude=True,
-        description="Function that applies this pattern to a graph"
+        description="Function that applies this pattern to a graph",
     )
 
-    model_config = {
-        "arbitrary_types_allowed": True
-    }
+    model_config = {"arbitrary_types_allowed": True}
 
     @property
     def name(self) -> str:
@@ -273,21 +243,27 @@ class GraphPattern(BaseModel):
         # Compare the actual function objects using __func__
         instance_method = getattr(self.__class__, "apply", None)
         base_method = getattr(GraphPattern, "apply", None)
-        
-        if instance_method is not base_method and instance_method.__func__ is not base_method.__func__:
+
+        if (
+            instance_method is not base_method
+            and instance_method.__func__ is not base_method.__func__
+        ):
             # This is an instance that has overridden the apply method
             # so we should use the instance method directly
             logger.debug(f"Using overridden apply method for pattern {self.name}")
             try:
                 result = instance_method(self, graph, **kwargs)
                 # Track pattern application
-                if hasattr(graph, "applied_patterns") and self.name not in graph.applied_patterns:
+                if (
+                    hasattr(graph, "applied_patterns")
+                    and self.name not in graph.applied_patterns
+                ):
                     graph.applied_patterns.append(self.name)
                 return result
             except Exception as e:
                 logger.error(f"Error in overridden apply method for {self.name}: {e}")
                 raise
-        
+
         if self.apply_func is None:
             raise ValueError(f"Pattern {self.name} has no implementation")
 
@@ -301,7 +277,10 @@ class GraphPattern(BaseModel):
 
         try:
             result = self.apply_func(graph, **kwargs)
-            if hasattr(graph, "applied_patterns") and self.name not in graph.applied_patterns:
+            if (
+                hasattr(graph, "applied_patterns")
+                and self.name not in graph.applied_patterns
+            ):
                 graph.applied_patterns.append(self.name)
             return result
         except Exception as e:
@@ -310,7 +289,7 @@ class GraphPattern(BaseModel):
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to a serializable dictionary.
-        
+
         Returns:
             Dictionary representation
         """
@@ -329,13 +308,15 @@ class GraphPattern(BaseModel):
         return result
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any], func_resolver: Callable | None = None) -> "GraphPattern":
+    def from_dict(
+        cls, data: dict[str, Any], func_resolver: Callable | None = None
+    ) -> "GraphPattern":
         """Create from a serialized dictionary.
-        
+
         Args:
             data: Dictionary representation
             func_resolver: Optional function to resolve function references
-            
+
         Returns:
             New GraphPattern instance
         """
@@ -348,13 +329,14 @@ class GraphPattern(BaseModel):
             if func_resolver:
                 # Use the provided resolver
                 apply_func = func_resolver(
-                    pattern_data["apply_func_module"],
-                    pattern_data["apply_func_name"]
+                    pattern_data["apply_func_module"], pattern_data["apply_func_name"]
                 )
             else:
                 # Try to import directly
                 try:
-                    module = __import__(pattern_data["apply_func_module"], fromlist=[""])
+                    module = __import__(
+                        pattern_data["apply_func_module"], fromlist=[""]
+                    )
                     apply_func = getattr(module, pattern_data["apply_func_name"])
                 except (ImportError, AttributeError) as e:
                     logger.warning(f"Could not resolve function: {e}")
@@ -376,11 +358,11 @@ class GraphPattern(BaseModel):
 
     def create_node_config(self, node_name: str, **kwargs) -> Any:
         """Create a NodeConfig based on this pattern.
-        
+
         Args:
             node_name: Name for the node
             **kwargs: Configuration parameters
-            
+
         Returns:
             NodeConfig instance
         """
@@ -388,95 +370,80 @@ class GraphPattern(BaseModel):
         # The actual implementation would need to handle this properly
         raise NotImplementedError("This method should be implemented by subclasses")
 
-    def validate_for_application(self, components: list[Any], params: dict[str, Any]) -> tuple[bool, list[str]]:
+    def validate_for_application(
+        self, components: list[Any], params: dict[str, Any]
+    ) -> tuple[bool, list[str]]:
         """Validate that a pattern can be applied with the provided components and parameters.
-        
+
         Args:
             components: List of components to check requirements against
             params: Parameter values to validate
-            
+
         Returns:
             Tuple of (is_valid, error_messages)
         """
         errors = []
-        
+
         # Check component requirements
         component_errors = self.metadata.check_required_components(components)
         if component_errors:
             errors.extend(component_errors)
-        
+
         # Check parameter values
         param_valid, param_errors = self.metadata.validate_parameters(params)
         if not param_valid:
             errors.extend(param_errors)
-        
+
         return len(errors) == 0, errors
 
 
 class BranchDefinition(BaseModel):
     """Enhanced branch definition with metadata.
-    
+
     Defines a reusable branch condition that can be applied to graphs.
     """
-    name: str = Field(
-        description="Unique branch identifier"
-    )
-    description: str = Field(
-        description="What this branch condition does"
-    )
-    condition_type: str = Field(
-        description="Type of condition logic"
-    )
+
+    name: str = Field(description="Unique branch identifier")
+    description: str = Field(description="What this branch condition does")
+    condition_type: str = Field(description="Type of condition logic")
 
     # Enhanced routing
     routes: dict[str, str] = Field(
         description="Mapping of condition values to node names"
     )
     default_route: str = Field(
-        default="END",
-        description="Default route if no condition matches"
+        default="END", description="Default route if no condition matches"
     )
 
     # Parameter template for customization
     parameters: dict[str, ParameterDefinition] = Field(
-        default_factory=dict,
-        description="Parameters for condition configuration"
+        default_factory=dict, description="Parameters for condition configuration"
     )
 
     # Branch function factory
     condition_factory: Callable | None = Field(
         default=None,
         exclude=True,
-        description="Function that creates condition functions"
+        description="Function that creates condition functions",
     )
 
     # Condition implementation
     condition_func: Callable | None = Field(
-        default=None,
-        exclude=True,
-        description="Actual condition function"
+        default=None, exclude=True, description="Actual condition function"
     )
 
     # Metadata
-    tags: list[str] = Field(
-        default_factory=list,
-        description="Tags for categorization"
-    )
-    version: str = Field(
-        default="1.0.0",
-        description="Semantic version"
-    )
+    tags: list[str] = Field(default_factory=list, description="Tags for categorization")
+    version: str = Field(default="1.0.0", description="Semantic version")
 
-    model_config = {
-        "arbitrary_types_allowed": True
-    }
+    model_config = {"arbitrary_types_allowed": True}
 
     def create_condition(self, **kwargs) -> Callable:
         """Create a condition function with parameters.
-        
+
         Args:
             **kwargs: Parameter values
-            
+
         Returns:
             Configured condition function
         """
@@ -488,10 +455,10 @@ class BranchDefinition(BaseModel):
 
     def validate_parameters(self, params: dict[str, Any]) -> tuple[bool, list[str]]:
         """Validate parameter values against their definitions.
-        
+
         Args:
             params: Parameter values to validate
-            
+
         Returns:
             Tuple of (is_valid, error_messages)
         """
@@ -515,12 +482,12 @@ class BranchDefinition(BaseModel):
 
     def apply_to_graph(self, graph: Any, source_node: str, **kwargs) -> Any:
         """Apply this branch directly to a graph.
-        
+
         Args:
             graph: Graph to add branch to
             source_node: Source node for branching
             **kwargs: Parameter values
-            
+
         Returns:
             Modified graph
         """
@@ -554,7 +521,7 @@ class BranchDefinition(BaseModel):
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to a serializable dictionary.
-        
+
         Returns:
             Dictionary representation
         """
@@ -567,23 +534,33 @@ class BranchDefinition(BaseModel):
 
         # Add function names if available
         if self.condition_factory:
-            result["condition_factory_name"] = getattr(self.condition_factory, "__name__", None)
-            result["condition_factory_module"] = getattr(self.condition_factory, "__module__", None)
+            result["condition_factory_name"] = getattr(
+                self.condition_factory, "__name__", None
+            )
+            result["condition_factory_module"] = getattr(
+                self.condition_factory, "__module__", None
+            )
 
         if self.condition_func:
-            result["condition_func_name"] = getattr(self.condition_func, "__name__", None)
-            result["condition_func_module"] = getattr(self.condition_func, "__module__", None)
+            result["condition_func_name"] = getattr(
+                self.condition_func, "__name__", None
+            )
+            result["condition_func_module"] = getattr(
+                self.condition_func, "__module__", None
+            )
 
         return result
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any], func_resolver: Callable | None = None) -> "BranchDefinition":
+    def from_dict(
+        cls, data: dict[str, Any], func_resolver: Callable | None = None
+    ) -> "BranchDefinition":
         """Create from a serialized dictionary.
-        
+
         Args:
             data: Dictionary representation
             func_resolver: Optional function to resolve function references
-            
+
         Returns:
             New BranchDefinition instance
         """
@@ -595,36 +572,52 @@ class BranchDefinition(BaseModel):
         condition_func = None
 
         # Resolve condition factory
-        if "condition_factory_name" in branch_data and "condition_factory_module" in branch_data:
+        if (
+            "condition_factory_name" in branch_data
+            and "condition_factory_module" in branch_data
+        ):
             if func_resolver:
                 condition_factory = func_resolver(
                     branch_data["condition_factory_module"],
-                    branch_data["condition_factory_name"]
+                    branch_data["condition_factory_name"],
                 )
             else:
                 try:
-                    module = __import__(branch_data["condition_factory_module"], fromlist=[""])
-                    condition_factory = getattr(module, branch_data["condition_factory_name"])
+                    module = __import__(
+                        branch_data["condition_factory_module"], fromlist=[""]
+                    )
+                    condition_factory = getattr(
+                        module, branch_data["condition_factory_name"]
+                    )
                 except (ImportError, AttributeError) as e:
                     logger.warning(f"Could not resolve condition factory: {e}")
 
         # Resolve condition function
-        if "condition_func_name" in branch_data and "condition_func_module" in branch_data:
+        if (
+            "condition_func_name" in branch_data
+            and "condition_func_module" in branch_data
+        ):
             if func_resolver:
                 condition_func = func_resolver(
                     branch_data["condition_func_module"],
-                    branch_data["condition_func_name"]
+                    branch_data["condition_func_name"],
                 )
             else:
                 try:
-                    module = __import__(branch_data["condition_func_module"], fromlist=[""])
+                    module = __import__(
+                        branch_data["condition_func_module"], fromlist=[""]
+                    )
                     condition_func = getattr(module, branch_data["condition_func_name"])
                 except (ImportError, AttributeError) as e:
                     logger.warning(f"Could not resolve condition function: {e}")
 
         # Remove function reference fields
-        for field in ["condition_factory_name", "condition_factory_module",
-                     "condition_func_name", "condition_func_module"]:
+        for field in [
+            "condition_factory_name",
+            "condition_factory_module",
+            "condition_func_name",
+            "condition_func_module",
+        ]:
             if field in branch_data:
                 del branch_data[field]
 

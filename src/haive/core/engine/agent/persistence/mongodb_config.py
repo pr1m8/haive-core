@@ -1,6 +1,6 @@
 # src/haive/core/engine/agent/persistence/mongodb_config.py
-from typing import Literal, Optional
 import logging
+from typing import Literal
 
 from pydantic import Field
 
@@ -13,13 +13,18 @@ logger = logging.getLogger(__name__)
 try:
     from langgraph.checkpoint.mongodb import MongoDBSaver
     from langgraph.checkpoint.mongodb.aio import AsyncMongoDBSaver
+
     MONGODB_AVAILABLE = True
 except ImportError:
     MONGODB_AVAILABLE = False
-    logger.warning("MongoDB dependencies not available. Install with: pip install langgraph-checkpoint-mongodb")
+    logger.warning(
+        "MongoDB dependencies not available. Install with: pip install langgraph-checkpoint-mongodb"
+    )
+
 
 class MongoDBCheckpointerConfig(CheckpointerConfig):
     """Configuration for MongoDB-based checkpointing."""
+
     type: Literal[CheckpointerType.mongodb] = Field(default=CheckpointerType.mongodb)
     connection_string: str = Field(default="mongodb://localhost:27017/")
     database: str = Field(default="haive")
@@ -28,13 +33,16 @@ class MongoDBCheckpointerConfig(CheckpointerConfig):
 
     def create_checkpointer(self):
         """Create a MongoDB checkpointer.
-        
+
         Returns:
             MongoDBSaver instance or MemorySaver fallback
         """
         if not MONGODB_AVAILABLE:
-            logger.warning("MongoDB dependencies not available, falling back to memory checkpointer")
+            logger.warning(
+                "MongoDB dependencies not available, falling back to memory checkpointer"
+            )
             from langgraph.checkpoint.memory import MemorySaver
+
             return MemorySaver()
 
         try:
@@ -42,17 +50,18 @@ class MongoDBCheckpointerConfig(CheckpointerConfig):
             return MongoDBSaver.from_conn_string(
                 self.connection_string,
                 database=self.database,
-                collection=self.collection
+                collection=self.collection,
             )
         except Exception as e:
             logger.error(f"Error creating MongoDB checkpointer: {e}")
             logger.warning("Falling back to memory checkpointer")
             from langgraph.checkpoint.memory import MemorySaver
+
             return MemorySaver()
 
     async def acreate_checkpointer(self):
         """Asynchronously create a MongoDB checkpointer.
-        
+
         Returns:
             AsyncMongoDBSaver instance or MemorySaver fallback
         """
@@ -65,10 +74,11 @@ class MongoDBCheckpointerConfig(CheckpointerConfig):
             return await AsyncMongoDBSaver.from_conn_string(
                 self.connection_string,
                 database=self.database,
-                collection=self.collection
+                collection=self.collection,
             )
         except Exception as e:
             logger.error(f"Error creating async MongoDB checkpointer: {e}")
             logger.warning("Falling back to memory checkpointer")
             from langgraph.checkpoint.memory import MemorySaver
+
             return MemorySaver()

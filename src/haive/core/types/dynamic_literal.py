@@ -8,9 +8,9 @@ from typing import (
     Iterable,
     Literal,
     TypeVar,
+    cast,
     get_args,
     get_origin,
-    cast,
 )
 
 from pydantic import BaseModel
@@ -59,13 +59,15 @@ class DynamicLiteral(str, Generic[T], metaclass=_DynLitMeta):
         def _validate(v: Any) -> str:
             caller = inspect.stack()[2].function
             if not isinstance(v, str):
-                print(f"[Validation ❌] {caller}: Expected str, got {type(v).__name__} → {v!r}")
+                print(
+                    f"[Validation ❌] {caller}: Expected str, got {type(v).__name__} → {v!r}"
+                )
                 raise TypeError("string required")
             if v not in cls._values:
-                print(f"[Validation ❌] {caller}: '{v}' not in allowed values {sorted(cls._values)}")
-                raise ValueError(
-                    f"invalid literal; allowed = {sorted(cls._values)!r}"
+                print(
+                    f"[Validation ❌] {caller}: '{v}' not in allowed values {sorted(cls._values)}"
                 )
+                raise ValueError(f"invalid literal; allowed = {sorted(cls._values)!r}")
             print(f"[Validation ✅] {caller}: accepted → {v!r}")
             return v
 
@@ -83,14 +85,12 @@ class DynamicLiteral(str, Generic[T], metaclass=_DynLitMeta):
 
 
 def create_dynamic_literal(name: str, values: Iterable[str]) -> type[DynamicLiteral]:
-    attrs = {
-        "START_VALUES": tuple(values),
-        "__qualname__": name
-    }
+    attrs = {"START_VALUES": tuple(values), "__qualname__": name}
     return type(name, (DynamicLiteral,), attrs)
 
 
 # ──────────────────────────────── Demo Subclass ────────────────────────────────
+
 
 class Colour(DynamicLiteral):
     START_VALUES = ("red", "green", "blue")
@@ -117,5 +117,13 @@ if __name__ == "__main__":
     except Exception as e:
         print("❌ Expected error →", e)
 
-    print("📜 JSON schema enum:", PaintJob.model_json_schema()["properties"]["base"]["enum"])
-    print("🔎 Literal type:", get_origin(Colour.literal_type()), "→", get_args(Colour.literal_type()))
+    print(
+        "📜 JSON schema enum:",
+        PaintJob.model_json_schema()["properties"]["base"]["enum"],
+    )
+    print(
+        "🔎 Literal type:",
+        get_origin(Colour.literal_type()),
+        "→",
+        get_args(Colour.literal_type()),
+    )
