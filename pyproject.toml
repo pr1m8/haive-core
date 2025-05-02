@@ -2,14 +2,10 @@
 name = "haive-core"
 version = "0.1.0"
 description = "haive-core for Haive framework"
-authors = [
-    "pr1m8 <william.astley@algebraicwealth.com>",
-]
+authors = ["pr1m8 <william.astley@algebraicwealth.com>"]
 license = "MIT"
 readme = "README.md"
-packages = [
-    { include = "haive", from = "src" },
-]
+packages = [{ include = "haive", from = "src" }]
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.13"
@@ -98,14 +94,10 @@ pytest-clarity = "^1.0.1"
 
 [tool.poetry.dependencies.faiss-gpu-cu12]
 version = "^1.10.0"
-extras = [
-    "fix-cuda",
-]
+extras = ["fix-cuda"]
 
 [tool.poetry.dependencies.unstructured]
-extras = [
-    "all",
-]
+extras = ["all"]
 version = "^0.17.2"
 
 [tool.poetry.dependencies.secure-smtplib]
@@ -129,7 +121,5 @@ pytest-sugar = "^1.0.0"
 pytest-asyncio = "^0.26.0"
 
 [build-system]
-requires = [
-    "poetry-core>=1.0.0",
-]
+requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
