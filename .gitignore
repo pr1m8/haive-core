@@ -127,3 +127,5 @@ token.json
 venv/
 .secrets/
 docker/nginx/sites-enabled/
+# Trunk output files
+.trunk/out/
