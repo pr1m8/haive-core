@@ -20,7 +20,7 @@ install(show_locals=True)
 console = Console()
 
 # Import Haive core components
-from haive.core.engine.aug_llm.base import AugLLMConfig
+from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.engine.base import (
     Engine,
     EngineType,

@@ -34,7 +34,8 @@ from haive.core.config.runnable import RunnableConfigManager
 from haive.core.engine.base import Engine, EngineRegistry
 from haive.core.graph.node.config import NodeConfig
 from haive.core.graph.node.factory import NodeFactory
-from haive.core.graph.node.registry import NodeTypeRegistry
+
+#from haive.core.graph.node.registry import NodeTypeRegistry
 from haive.core.schema.schema_composer import SchemaComposer
 
 # Configure logger with file and console handlers
@@ -228,15 +229,15 @@ class DynamicGraph:
             logger.debug("Initializing node registry...")
             
             # Get the NodeTypeRegistry instance
-            self.node_registry = NodeTypeRegistry.get_instance()
+            #self.node_registry = NodeTypeRegistry.get_instance()
             
             # Ensure default processors are registered
             if not self.node_registry.node_processors:
-                logger.debug("Registering default node processors...")
+                #logger.debug("Registering default node processors...")
                 self.node_registry.register_default_processors()
-                
+
             # Set up NodeFactory to use our registry
-            NodeFactory.set_registry(self.node_registry)
+            #NodeFactory.set_registry(self.node_registry)
             
             logger.debug("Node registry and factory initialized successfully")
         except Exception as e:

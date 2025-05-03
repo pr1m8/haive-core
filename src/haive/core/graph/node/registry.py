@@ -1,383 +1,158 @@
-# python# src/haive/core/graph/node/registry.py
-# Remove NodeConfig import and add decorators at module level
+# src/haive/core/graph/node/registry.py
+"""
+Node registry for managing and accessing nodes.
 
-from __future__ import annotations
+This module provides a registry for node configurations, allowing nodes to be
+registered, looked up, and managed throughout the application.
+"""
 
 import logging
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional, Type
 
-from haive.core.graph.node.protocols import (
-    CommandHandler,
-    InputProcessor,
-    NodeProcessor,
-    OutputProcessor,
-)
+from haive.core.graph.node.config import NodeConfig
+from haive.core.graph.node.types import NodeType
 from haive.core.registry.base import AbstractRegistry
 
 logger = logging.getLogger(__name__)
 
 
-# Define decorators directly at module level
-def register_node_processor(node_type):
-    """Decorator to register node processors."""
-
-    def decorator(cls):
-        registry = NodeTypeRegistry.get_instance()
-        registry.register_node_processor(node_type, cls())
-        return cls
-
-    return decorator
-
-
-def register_command_handler(handler_type):
-    """Decorator to register command handlers."""
-
-    def decorator(cls):
-        registry = NodeTypeRegistry.get_instance()
-        registry.register_command_handler(handler_type, cls())
-        return cls
-
-    return decorator
-
-
-def register_input_processor(processor_type):
-    """Decorator to register input processors."""
-
-    def decorator(cls):
-        registry = NodeTypeRegistry.get_instance()
-        registry.register_input_processor(processor_type, cls())
-        return cls
-
-    return decorator
-
-
-def register_output_processor(processor_type):
-    """Decorator to register output processors."""
-
-    def decorator(cls):
-        registry = NodeTypeRegistry.get_instance()
-        registry.register_output_processor(processor_type, cls())
-        return cls
-
-    return decorator
-
-
-class NodeTypeRegistry(AbstractRegistry[NodeProcessor]):
+class NodeRegistry(AbstractRegistry[NodeConfig]):
     """
-    Registry for node types, processors, and handlers.
+    Registry for node configurations and types.
 
-    This registry enables the extensible node factory system by allowing
-    registration of processors for different node types, command handlers,
-    and input/output processors.
+    This registry keeps track of all registered node configurations
+    and implements the AbstractRegistry interface from the Haive framework.
+
+    It provides methods for:
+    - Registering node configurations
+    - Looking up nodes by ID, name, or type
+    - Listing all nodes or nodes of a specific type
+    - Registering custom node types
     """
 
     _instance = None
 
     @classmethod
-    def get_instance(cls) -> "NodeTypeRegistry":
+    def get_instance(cls) -> "NodeRegistry":
         """Get the singleton instance of the registry."""
         if cls._instance is None:
             cls._instance = cls()
         return cls._instance
 
     def __init__(self):
-        """Initialize the registry."""
-        self.node_processors: Dict[str, NodeProcessor] = {}
-        self.command_handlers: Dict[str, CommandHandler] = {}
-        self.input_processors: Dict[str, InputProcessor] = {}
-        self.output_processors: Dict[str, OutputProcessor] = {}
-        self.items: Dict[str, NodeProcessor] = {}  # Required by AbstractRegistry
+        """Initialize the registry with empty storage."""
+        self.nodes_by_id: Dict[str, NodeConfig] = {}
+        self.nodes_by_type: Dict[NodeType, Dict[str, NodeConfig]] = {
+            node_type: {} for node_type in NodeType
+        }
+        self.custom_node_types: Dict[str, Type[NodeConfig]] = {}
 
-    def register(self, item: NodeProcessor, id: Optional[str] = None) -> NodeProcessor:
+    def register(self, item: NodeConfig) -> NodeConfig:
         """
-        Register an item in the registry.
+        Register a node configuration.
 
         Args:
-            item: Item to register
-            id: Optional ID for the item
+            item: Node configuration to register
 
         Returns:
-            The registered item
+            The registered node configuration
         """
-        item_id = id or f"processor_{len(self.items)}"
-        self.items[item_id] = item
+        self.nodes_by_id[item.id] = item
+        self.nodes_by_type[item.node_type][item.name] = item
+        logger.debug(f"Registered node config: {item.name} (id: {item.id})")
         return item
 
-    def register_node_processor(self, node_type: str, processor: NodeProcessor) -> None:
+    def get(self, item_type: NodeType, name: str) -> Optional[NodeConfig]:
         """
-        Register a processor for a specific node type.
+        Get a node configuration by type and name.
 
         Args:
-            node_type: Node type identifier
-            processor: Processor implementation
-        """
-        self.node_processors[node_type] = processor
-        # Also register in AbstractRegistry items
-        self.register(processor, f"node_processor_{node_type}")
-        logger.debug(f"Registered node processor for {node_type}")
-
-    def register_command_handler(
-        self, handler_type: str, handler: CommandHandler
-    ) -> None:
-        """
-        Register a command handler.
-
-        Args:
-            handler_type: Handler type identifier
-            handler: Handler implementation
-        """
-        self.command_handlers[handler_type] = handler
-        logger.debug(f"Registered command handler for {handler_type}")
-
-    def register_input_processor(
-        self, processor_type: str, processor: InputProcessor
-    ) -> None:
-        """
-        Register an input processor.
-
-        Args:
-            processor_type: Processor type identifier
-            processor: Processor implementation
-        """
-        self.input_processors[processor_type] = processor
-        logger.debug(f"Registered input processor for {processor_type}")
-
-    def register_output_processor(
-        self, processor_type: str, processor: OutputProcessor
-    ) -> None:
-        """
-        Register an output processor.
-
-        Args:
-            processor_type: Processor type identifier
-            processor: Processor implementation
-        """
-        self.output_processors[processor_type] = processor
-        logger.debug(f"Registered output processor for {processor_type}")
-
-    def get(self, item_type: Any, name: str) -> Optional[NodeProcessor]:
-        """
-        Get an item by type and name.
-
-        Args:
-            item_type: Type of item
-            name: Name of item
+            item_type: Node type
+            name: Node name
 
         Returns:
-            Item if found, None otherwise
+            Node configuration if found, None otherwise
         """
-        # For node processors, use the specific dictionary
-        if name in self.node_processors:
-            return self.node_processors[name]
+        return self.nodes_by_type[item_type].get(name)
 
-        # Otherwise check the general items
-        return self.items.get(name)
-
-    def find_by_id(self, id: str) -> Optional[NodeProcessor]:
+    def find_by_id(self, id: str) -> Optional[NodeConfig]:
         """
-        Find an item by ID.
+        Find a node configuration by ID.
 
         Args:
-            id: Item ID
+            id: Node ID
 
         Returns:
-            Item if found, None otherwise
+            Node configuration if found, None otherwise
         """
-        return self.items.get(id)
+        return self.nodes_by_id.get(id)
 
-    def list(self, item_type: Any = None) -> List[str]:
+    def find_by_name(self, name: str) -> Optional[NodeConfig]:
         """
-        List all items of a type.
+        Find a node configuration by name (searches all types).
 
         Args:
-            item_type: Optional type to filter by
+            name: Node name
 
         Returns:
-            List of item names
+            Node configuration if found, None otherwise
         """
-        if item_type == "node_processor":
-            return list(self.node_processors.keys())
-        elif item_type == "command_handler":
-            return list(self.command_handlers.keys())
-        elif item_type == "input_processor":
-            return list(self.input_processors.keys())
-        elif item_type == "output_processor":
-            return list(self.output_processors.keys())
-        else:
-            return list(self.items.keys())
-
-    def get_all(self, item_type: Any = None) -> Dict[str, NodeProcessor]:
-        """
-        Get all items of a type.
-
-        Args:
-            item_type: Optional type to filter by
-
-        Returns:
-            Dictionary of items
-        """
-        if item_type == "node_processor":
-            return self.node_processors
-        elif item_type == "command_handler":
-            return cast(Dict[str, NodeProcessor], self.command_handlers)
-        elif item_type == "input_processor":
-            return cast(Dict[str, NodeProcessor], self.input_processors)
-        elif item_type == "output_processor":
-            return cast(Dict[str, NodeProcessor], self.output_processors)
-        else:
-            return self.items
-
-    def clear(self) -> None:
-        """Clear the registry."""
-        self.node_processors.clear()
-        self.command_handlers.clear()
-        self.input_processors.clear()
-        self.output_processors.clear()
-        self.items.clear()
-
-    def get_node_processor(self, node_type: str) -> Optional[NodeProcessor]:
-        """
-        Get a processor for a node type.
-
-        Args:
-            node_type: Node type identifier
-
-        Returns:
-            Processor if found, None otherwise
-        """
-        return self.node_processors.get(node_type)
-
-    def get_command_handler(self, handler_type: str) -> Optional[CommandHandler]:
-        """
-        Get a command handler.
-
-        Args:
-            handler_type: Handler type identifier
-
-        Returns:
-            Handler if found, None otherwise
-        """
-        return self.command_handlers.get(handler_type)
-
-    def get_input_processor(self, processor_type: str) -> Optional[InputProcessor]:
-        """
-        Get an input processor.
-
-        Args:
-            processor_type: Processor type identifier
-
-        Returns:
-            Processor if found, None otherwise
-        """
-        return self.input_processors.get(processor_type)
-
-    def get_output_processor(self, processor_type: str) -> Optional[OutputProcessor]:
-        """
-        Get an output processor.
-
-        Args:
-            processor_type: Processor type identifier
-
-        Returns:
-            Processor if found, None otherwise
-        """
-        return self.output_processors.get(processor_type)
-
-    def find_processor_for_engine(self, engine: Any) -> Optional[NodeProcessor]:
-        """
-        Find the first processor that can handle an engine.
-
-        Args:
-            engine: Engine to process
-
-        Returns:
-            Processor if found, None otherwise
-        """
-        for processor in self.node_processors.values():
-            try:
-                if processor.can_process(engine):
-                    return processor
-            except Exception as e:
-                logger.debug(f"Error checking processor compatibility: {e}")
-                continue
+        for node_type in NodeType:
+            if node_config := self.get(node_type, name):
+                return node_config
         return None
 
-    def register_default_processors(self) -> None:
-        """Register the default set of processors."""
-        # Import processors directly using direct imports
-        # instead of importing from a module that might cause circular imports
-        try:
-            # Create processor instances directly
-            from haive.core.graph.node.handlers import (
-                DirectInputProcessor,
-                MappedInputProcessor,
-                StandardCommandHandler,
-                StandardOutputProcessor,
-                StructuredOutputProcessor,
-            )
-            from haive.core.graph.node.processors import (
-                AsyncInvokableNodeProcessor,
-                AsyncNodeProcessor,
-                CallableNodeProcessor,
-                GenericNodeProcessor,
-                InvokableNodeProcessor,
-                MappingNodeProcessor,
-            )
-
-            # Register processors directly
-            self.node_processors["invokable"] = InvokableNodeProcessor()
-            self.node_processors["async_invokable"] = AsyncInvokableNodeProcessor()
-            self.node_processors["callable"] = CallableNodeProcessor()
-            self.node_processors["async"] = AsyncNodeProcessor()
-            self.node_processors["mapping"] = MappingNodeProcessor()
-            self.node_processors["generic"] = GenericNodeProcessor()
-
-            # Register command handlers
-            self.command_handlers["standard"] = StandardCommandHandler()
-
-            # Register input processors
-            self.input_processors["direct"] = DirectInputProcessor()
-            self.input_processors["mapped"] = MappedInputProcessor()
-
-            # Register output processors
-            self.output_processors["standard"] = StandardOutputProcessor()
-            self.output_processors["structured"] = StructuredOutputProcessor()
-
-            logger.info("Default processors registered successfully")
-        except Exception as e:
-            logger.warning(f"Error registering processors: {str(e)}")
-            logger.warning("Default processors not registered")
-
-    def to_dict(self) -> Dict[str, Any]:
+    def list(self, item_type: NodeType) -> List[str]:
         """
-        Convert registry to a serializable dictionary.
-
-        Returns:
-            Dictionary representation
-        """
-        # We can only serialize the registered types, not the actual objects
-        serialized = {
-            "node_processors": list(self.node_processors.keys()),
-            "command_handlers": list(self.command_handlers.keys()),
-            "input_processors": list(self.input_processors.keys()),
-            "output_processors": list(self.output_processors.keys()),
-        }
-        return serialized
-
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "NodeTypeRegistry":
-        """
-        Create registry from dictionary representation.
+        List all node names of a specific type.
 
         Args:
-            data: Dictionary representation
+            item_type: Node type
 
         Returns:
-            Populated registry
+            List of node names
         """
-        registry = cls()
+        return list(self.nodes_by_type[item_type].keys())
 
-        # Register default processors to populate the registry
-        registry.register_default_processors()
+    def get_all(self, item_type: NodeType) -> Dict[str, NodeConfig]:
+        """
+        Get all nodes of a specific type.
 
-        return registry
+        Args:
+            item_type: Node type
+
+        Returns:
+            Dictionary mapping node names to configurations
+        """
+        return self.nodes_by_type[item_type]
+
+    def list_all_names(self) -> List[str]:
+        """
+        List all registered node names across all types.
+
+        Returns:
+            List of all node names
+        """
+        names = []
+        for node_type in NodeType:
+            names.extend(self.list(node_type))
+        return names
+
+    def register_custom_node_type(
+        self, name: str, config_class: Type[NodeConfig]
+    ) -> None:
+        """
+        Register a custom node configuration class.
+
+        Args:
+            name: Name of the custom node type
+            config_class: Custom NodeConfig class
+        """
+        self.custom_node_types[name] = config_class
+        logger.debug(f"Registered custom node type: {name}")
+
+    def clear(self) -> None:
+        """Clear all registrations."""
+        self.nodes_by_id = {}
+        self.nodes_by_type = {node_type: {} for node_type in NodeType}
+        self.custom_node_types = {}
