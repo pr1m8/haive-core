@@ -2,7 +2,7 @@
 AugLLM configuration system for enhanced LLM chains.
 
 Provides a structured way to configure and create LLM chains with prompts,
-tools, output parsers, and structured output models.
+tools, output parsers, and structured output models with rich debugging.
 """
 
 import inspect
@@ -37,11 +37,16 @@ from langchain_core.prompts import (
 from langchain_core.runnables import Runnable, RunnableConfig
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel, Field, model_validator
+from rich import print as rprint
+from rich.console import Console
+from rich.panel import Panel
+from rich.table import Table
 
 from haive.core.engine.base import EngineType, InvokableEngine
 from haive.core.models.llm.base import AzureLLMConfig, LLMConfig
 
 logger = logging.getLogger(__name__)
+console = Console()
 
 
 class AugLLMConfig(
@@ -74,19 +79,16 @@ class AugLLMConfig(
         default=None, description="System message for chat models"
     )
 
-    # Optional variables for prompt templates
-    optional_variables: List[str] = Field(
-        default_factory=list, description="Optional variables for the prompt template"
-    )
-
     # Message placeholder configuration
     messages_placeholder_name: str = Field(
         default="messages",
         description="Name of the messages placeholder in chat templates",
     )
     add_messages_placeholder: bool = Field(
-        default=True,
-        description="Whether to automatically add MessagesPlaceholder if not present",
+        default=True, description="Whether to automatically add MessagesPlaceholder"
+    )
+    force_messages_optional: bool = Field(
+        default=True, description="Force messages placeholder to be optional"
     )
 
     # Few-shot components
@@ -185,6 +187,11 @@ class AugLLMConfig(
         default_factory=dict, description="Partial variables for the prompt template"
     )
 
+    # Optional variables for templates
+    optional_variables: List[str] = Field(
+        default_factory=list, description="Optional variables for the prompt template"
+    )
+
     # Message field detection
     uses_messages_field: Optional[bool] = Field(
         default=None,
@@ -193,36 +200,58 @@ class AugLLMConfig(
 
     model_config = {"arbitrary_types_allowed": True}
 
+    def __init__(self, **kwargs):
+        """Initialize with debug logging."""
+        super().__init__(**kwargs)
+
+    def _debug_log(self, title: str, content: Dict[str, Any]):
+        """Pretty print debug information."""
+        table = Table(title=title, title_justify="left", show_header=False)
+        table.add_column("Property", style="cyan")
+        table.add_column("Value", style="yellow")
+
+        for key, value in content.items():
+            if value is not None:
+                formatted_value = str(value)
+                if len(formatted_value) > 100:
+                    formatted_value = formatted_value[:97] + "..."
+                table.add_row(key, formatted_value)
+
+        console.print(Panel(table, expand=False))
+
     @model_validator(mode="after")
     def validate_and_setup(self):
         """Validate configuration and set up components after initialization."""
-        # Auto-detect uses_messages_field if not explicitly set
-        if self.uses_messages_field is None:
-            self.uses_messages_field = self._detect_uses_messages_field()
+        # Debug logging
+        self._debug_log(
+            "AugLLMConfig Initialization",
+            {
+                "name": self.name,
+                "system_message": self.system_message is not None,
+                "prompt_template": (
+                    type(self.prompt_template).__name__
+                    if self.prompt_template
+                    else None
+                ),
+                "force_messages_optional": self.force_messages_optional,
+                "add_messages_placeholder": self.add_messages_placeholder,
+                "messages_placeholder_name": self.messages_placeholder_name,
+                "tools": len(self.tools),
+                "pydantic_tools": len(self.pydantic_tools),
+            },
+        )
 
-        # Handle messages placeholder in template
-        self._ensure_messages_placeholder()
+        # Create prompt template components if needed
+        self._create_prompt_template_if_needed()
+
+        # Ensure messages placeholder is properly handled
+        self._ensure_messages_placeholder_handling()
 
         # Apply partial variables to the prompt template if needed
-        if self.prompt_template and self.partial_variables:
-            self._apply_partial_variables()
+        self._apply_partial_variables()
 
         # Apply optional variables to the prompt template
         self._apply_optional_variables()
-
-        # Create a FewShotPromptTemplate if examples and example_prompt are provided but no prompt_template
-        if (
-            self.examples
-            and self.example_prompt
-            and not self.prompt_template
-            and self.prefix
-            and self.suffix
-        ):
-            self._create_few_shot_template()
-
-        # Create a simple chat template with system message if only system_message is provided
-        elif self.system_message and not self.prompt_template:
-            self._create_chat_template_from_system()
 
         # Set up output parser if structured_output_model is provided but no output_parser
         if self.structured_output_model and not self.output_parser:
@@ -232,56 +261,168 @@ class AugLLMConfig(
         elif self.pydantic_tools and not self.output_parser:
             self._setup_pydantic_tools_parser()
 
+        # Auto-detect uses_messages_field if not explicitly set
+        if self.uses_messages_field is None:
+            self.uses_messages_field = self._detect_uses_messages_field()
+
+        # Debug final state
+        self._debug_log(
+            "Final Configuration",
+            {
+                "uses_messages_field": self.uses_messages_field,
+                "messages_optional": self.force_messages_optional,
+                "optional_variables": self.optional_variables,
+                "prompt_template": self._get_prompt_template_info(),
+            },
+        )
+
         return self
 
-    def _apply_partial_variables(self):
-        """Apply partial variables to the prompt template."""
-        if hasattr(self.prompt_template, "partial_variables"):
-            # Create a new partial_variables dict to avoid modifying the original
-            existing_partials = (
-                getattr(self.prompt_template, "partial_variables", {}) or {}
-            )
-            updated_partials = {**existing_partials, **self.partial_variables}
-            self.prompt_template.partial_variables = updated_partials
-
-    def _apply_optional_variables(self):
-        """Apply optional variables to the prompt template."""
-        if not self.optional_variables or not self.prompt_template:
+    def _create_prompt_template_if_needed(self):
+        """Create appropriate prompt template based on available components."""
+        if self.prompt_template is not None:
             return
 
-        # If messages_placeholder is not required, add it to optional variables
-        if (
-            not self.add_messages_placeholder
-            and self.messages_placeholder_name not in self.optional_variables
-        ):
-            self.optional_variables.append(self.messages_placeholder_name)
+        # Create FewShotPromptTemplate if components are available
+        if self.examples and self.example_prompt and self.prefix and self.suffix:
+            rprint("[green]Creating FewShotPromptTemplate[/green]")
+            self._create_few_shot_template()
 
-        # Apply to PromptTemplate
-        if isinstance(self.prompt_template, PromptTemplate):
-            # Set optional_variables if supported
-            if hasattr(self.prompt_template, "optional_variables"):
-                self.prompt_template.optional_variables = self.optional_variables
+        # Create ChatPromptTemplate from system message
+        elif self.system_message:
+            rprint("[green]Creating ChatPromptTemplate from system message[/green]")
+            self._create_chat_template_from_system()
 
-        # Apply to FewShotPromptTemplate
+        # Create default ChatPromptTemplate
+        elif self.add_messages_placeholder and not self.prompt_template:
+            rprint("[green]Creating default ChatPromptTemplate[/green]")
+            self._create_default_chat_template()
+
+    def _ensure_messages_placeholder_handling(self):
+        """Ensure messages placeholder is properly handled based on configuration."""
+        if not self.prompt_template:
+            return
+
+        if isinstance(self.prompt_template, ChatPromptTemplate):
+            rprint("[blue]Handling messages placeholder for ChatPromptTemplate[/blue]")
+            self._handle_chat_template_messages_placeholder()
+
         elif isinstance(self.prompt_template, FewShotPromptTemplate):
-            # Set optional_variables if supported
-            if hasattr(self.prompt_template, "optional_variables"):
-                self.prompt_template.optional_variables = self.optional_variables
+            rprint(
+                "[blue]FewShotPromptTemplate detected - messages not applicable[/blue]"
+            )
+            self.uses_messages_field = False
 
-        # Apply to ChatPromptTemplate - needs special handling
-        elif isinstance(self.prompt_template, ChatPromptTemplate):
-            # For ChatPromptTemplate, we need to handle the optional messages placeholder
-            if self.messages_placeholder_name in self.optional_variables:
-                # Find any MessagesPlaceholder and mark it as optional
-                for i, msg in enumerate(self.prompt_template.messages):
-                    if (
-                        isinstance(msg, MessagesPlaceholder)
-                        and getattr(msg, "variable_name", "")
-                        == self.messages_placeholder_name
-                    ):
-                        # Set optional flag if available
-                        if hasattr(msg, "optional"):
-                            msg.optional = True
+        else:
+            rprint("[blue]Checking for messages variables in template[/blue]")
+            self._check_template_for_messages_variables()
+
+    def _handle_chat_template_messages_placeholder(self):
+        """Handle messages placeholder in ChatPromptTemplate."""
+        messages = list(self.prompt_template.messages)
+        has_messages_placeholder = False
+        messages_placeholder_index = -1
+
+        # Check existing placeholders
+        for i, msg in enumerate(messages):
+            if (
+                isinstance(msg, MessagesPlaceholder)
+                and getattr(msg, "variable_name", "") == self.messages_placeholder_name
+            ):
+                has_messages_placeholder = True
+                messages_placeholder_index = i
+                rprint(
+                    f"[yellow]Found existing messages placeholder at index {i}[/yellow]"
+                )
+                break
+
+        # Add placeholder if needed
+        if not has_messages_placeholder and self.add_messages_placeholder:
+            should_be_optional = (
+                self.force_messages_optional
+                or self.messages_placeholder_name in self.optional_variables
+            )
+
+            new_placeholder = MessagesPlaceholder(
+                variable_name=self.messages_placeholder_name,
+                optional=should_be_optional,
+            )
+            messages.append(new_placeholder)
+            rprint(
+                f"[green]Added messages placeholder (optional={should_be_optional})[/green]"
+            )
+
+            # Create new template
+            self._update_chat_template_messages(messages)
+
+        # Update existing placeholder if needed
+        elif has_messages_placeholder:
+            placeholder = messages[messages_placeholder_index]
+            should_be_optional = (
+                self.force_messages_optional
+                or self.messages_placeholder_name in self.optional_variables
+            )
+
+            if (
+                hasattr(placeholder, "optional")
+                and placeholder.optional != should_be_optional
+            ):
+                rprint(
+                    f"[cyan]Updating messages placeholder optional status: {should_be_optional}[/cyan]"
+                )
+                messages[messages_placeholder_index] = MessagesPlaceholder(
+                    variable_name=self.messages_placeholder_name,
+                    optional=should_be_optional,
+                )
+                self._update_chat_template_messages(messages)
+
+    def _update_chat_template_messages(self, messages: List[Any]):
+        """Update ChatPromptTemplate with new messages list."""
+        partial_vars = getattr(self.prompt_template, "partial_variables", {}) or {}
+        self.prompt_template = ChatPromptTemplate.from_messages(messages)
+
+        if partial_vars:
+            self.prompt_template = self.prompt_template.partial(**partial_vars)
+
+        self.uses_messages_field = True
+
+    def _create_default_chat_template(self):
+        """Create a default ChatPromptTemplate with optional messages placeholder."""
+        should_be_optional = (
+            self.force_messages_optional
+            or self.messages_placeholder_name in self.optional_variables
+        )
+
+        messages = [
+            MessagesPlaceholder(
+                variable_name=self.messages_placeholder_name,
+                optional=should_be_optional,
+            )
+        ]
+
+        self.prompt_template = ChatPromptTemplate.from_messages(messages)
+        self.uses_messages_field = True
+
+    def _create_chat_template_from_system(self):
+        """Create a ChatPromptTemplate from system_message."""
+        messages = [SystemMessage(content=self.system_message)]
+
+        # Only add MessagesPlaceholder if add_messages_placeholder is True
+        if self.add_messages_placeholder:
+            should_be_optional = (
+                self.force_messages_optional
+                or self.messages_placeholder_name in self.optional_variables
+            )
+
+            messages.append(
+                MessagesPlaceholder(
+                    variable_name=self.messages_placeholder_name,
+                    optional=should_be_optional,
+                )
+            )
+
+        self.prompt_template = ChatPromptTemplate.from_messages(messages)
+        self.uses_messages_field = True
 
     def _create_few_shot_template(self):
         """Create a FewShotPromptTemplate from examples and example_prompt."""
@@ -298,27 +439,152 @@ class AugLLMConfig(
         # Few-shot prompts typically don't use messages
         self.uses_messages_field = False
 
-    def _create_chat_template_from_system(self):
-        """Create a ChatPromptTemplate from system_message."""
-        messages = [SystemMessage(content=self.system_message)]
-
-        # Only add MessagesPlaceholder if add_messages_placeholder is True
-        if self.add_messages_placeholder:
-            is_optional = self.messages_placeholder_name in self.optional_variables
-            messages.append(
-                MessagesPlaceholder(
-                    variable_name=self.messages_placeholder_name, optional=is_optional
+    def _check_template_for_messages_variables(self):
+        """Check if the template uses messages variables."""
+        # Check input variables
+        if hasattr(self.prompt_template, "input_variables"):
+            input_vars = getattr(self.prompt_template, "input_variables", [])
+            if self.messages_placeholder_name in input_vars:
+                self.uses_messages_field = True
+                rprint(
+                    f"[yellow]Found {self.messages_placeholder_name} in input variables[/yellow]"
                 )
-            )
+                return
 
-        self.prompt_template = ChatPromptTemplate.from_messages(messages)
-        self.uses_messages_field = True
+        # Default to false for non-chat templates
+        self.uses_messages_field = False
+        rprint("[yellow]No message variables found in template[/yellow]")
+
+    def _apply_partial_variables(self):
+        """Apply partial variables to the prompt template."""
+        if not self.prompt_template or not self.partial_variables:
+            return
+
+        rprint("[cyan]Applying partial variables to template[/cyan]")
+
+        try:
+            if hasattr(self.prompt_template, "partial"):
+                self.prompt_template = self.prompt_template.partial(
+                    **self.partial_variables
+                )
+                rprint("[green]Successfully applied partial variables[/green]")
+
+                # Debug log
+                self._debug_log(
+                    "Applied Partial Variables",
+                    {
+                        "variables": self.partial_variables,
+                        "template_type": type(self.prompt_template).__name__,
+                    },
+                )
+            else:
+                rprint("[yellow]Template does not support partial variables[/yellow]")
+        except Exception as e:
+            rprint(f"[red]Error applying partial variables: {e}[/red]")
+
+    def _apply_optional_variables(self):
+        """Apply optional variables to the prompt template."""
+        if not self.optional_variables or not self.prompt_template:
+            return
+
+        rprint("[cyan]Applying optional variables to template[/cyan]")
+
+        # For ChatPromptTemplate, handle message placeholder optionality
+        if isinstance(self.prompt_template, ChatPromptTemplate):
+            if self.messages_placeholder_name in self.optional_variables:
+                self._handle_chat_template_messages_placeholder()
+
+        # For other template types
+        else:
+            if hasattr(self.prompt_template, "optional_variables"):
+                if not hasattr(self.prompt_template.optional_variables, "extend"):
+                    self.prompt_template.optional_variables = list(
+                        self.prompt_template.optional_variables
+                    )
+
+                for var in self.optional_variables:
+                    if var not in self.prompt_template.optional_variables:
+                        self.prompt_template.optional_variables.append(var)
+
+                rprint(
+                    f"[green]Applied optional variables: {self.optional_variables}[/green]"
+                )
+
+    def _detect_uses_messages_field(self) -> bool:
+        """Detect if this LLM configuration uses a messages field."""
+        rprint("[blue]Auto-detecting messages field usage[/blue]")
+
+        # Check for explicit configuration
+        if not self.add_messages_placeholder:
+            rprint(
+                "[yellow]add_messages_placeholder is False - checking template[/yellow]"
+            )
+            if isinstance(self.prompt_template, ChatPromptTemplate):
+                for msg in self.prompt_template.messages:
+                    if (
+                        isinstance(msg, MessagesPlaceholder)
+                        and getattr(msg, "variable_name", "")
+                        == self.messages_placeholder_name
+                    ):
+                        rprint("[green]Found messages placeholder in template[/green]")
+                        return True
+            return False
+
+        # Default to True for tools and system_message
+        if self.tools or self.system_message:
+            rprint("[green]Tools or system message present - using messages[/green]")
+            return True
+
+        # Check prompt template type
+        if self.prompt_template:
+            if isinstance(self.prompt_template, ChatPromptTemplate):
+                rprint("[green]ChatPromptTemplate - using messages[/green]")
+                return True
+            elif isinstance(self.prompt_template, FewShotPromptTemplate):
+                rprint("[yellow]FewShotPromptTemplate - not using messages[/yellow]")
+                return False
+            else:
+                # Check for messages in input variables
+                if hasattr(self.prompt_template, "input_variables"):
+                    if (
+                        self.messages_placeholder_name
+                        in self.prompt_template.input_variables
+                    ):
+                        rprint(
+                            f"[green]Found {self.messages_placeholder_name} in template variables[/green]"
+                        )
+                        return True
+
+        # Default to True for safety
+        rprint("[green]Default to True for safety[/green]")
+        return True
+
+    def _get_prompt_template_info(self) -> str:
+        """Get detailed information about the prompt template."""
+        if not self.prompt_template:
+            return "None"
+
+        info = f"{type(self.prompt_template).__name__}"
+
+        if isinstance(self.prompt_template, ChatPromptTemplate):
+            msg_count = len(self.prompt_template.messages)
+            has_placeholder = any(
+                isinstance(msg, MessagesPlaceholder)
+                and getattr(msg, "variable_name", "") == self.messages_placeholder_name
+                for msg in self.prompt_template.messages
+            )
+            info += f" ({msg_count} messages, placeholder={has_placeholder})"
+
+        return info
 
     def _setup_output_parser(self):
         """Set up output parser for structured output."""
+        rprint("[cyan]Setting up output parser[/cyan]")
+
         if self.parse_raw_output:
             # Use a string parser to get raw output
             self.output_parser = StrOutputParser()
+            rprint("[green]Configured StrOutputParser[/green]")
         elif self.parser_type == "pydantic" and self.include_format_instructions:
             # Create a PydanticOutputParser for the model
             self.output_parser = PydanticOutputParser(
@@ -329,12 +595,15 @@ class AugLLMConfig(
             if self.include_format_instructions:
                 format_instructions = self.output_parser.get_format_instructions()
                 self.partial_variables["format_instructions"] = format_instructions
+                rprint("[green]Added format instructions to partial variables[/green]")
 
                 # Apply to prompt template if it exists
                 self._apply_partial_variables()
 
     def _setup_pydantic_tools_parser(self):
         """Set up parser for pydantic tools."""
+        rprint("[cyan]Setting up pydantic tools parser[/cyan]")
+
         if self.parser_type == "pydantic_tools":
             # Create PydanticToolsParser
             self.output_parser = PydanticToolsParser(tools=self.pydantic_tools)
@@ -345,172 +614,65 @@ class AugLLMConfig(
             ):
                 format_instructions = self.output_parser.get_format_instructions()
                 self.partial_variables["format_instructions"] = format_instructions
+                rprint("[green]Added format instructions for pydantic tools[/green]")
 
                 # Apply to prompt template if it exists
                 self._apply_partial_variables()
 
-    def _ensure_messages_placeholder(self):
-        """Ensure chat templates have a MessagesPlaceholder if needed."""
-        if not self.prompt_template or not isinstance(
-            self.prompt_template, ChatPromptTemplate
-        ):
-            return
-
-        if not self.add_messages_placeholder:
-            return
-
-        # Check if a MessagesPlaceholder is already present
-        has_messages_placeholder = False
-        for msg in self.prompt_template.messages:
-            if (
-                isinstance(msg, MessagesPlaceholder)
-                and getattr(msg, "variable_name", "") == self.messages_placeholder_name
-            ):
-                has_messages_placeholder = True
-                # Check if it needs to be marked optional
-                if (
-                    self.messages_placeholder_name in self.optional_variables
-                    and hasattr(msg, "optional")
-                ):
-                    msg.optional = True
-                break
-
-        # Add MessagesPlaceholder if not present and auto-add is enabled
-        if not has_messages_placeholder and self.add_messages_placeholder:
-            new_messages = list(self.prompt_template.messages)
-            is_optional = self.messages_placeholder_name in self.optional_variables
-
-            # Create with optional flag if needed
-            new_placeholder = MessagesPlaceholder(
-                variable_name=self.messages_placeholder_name, optional=is_optional
-            )
-            new_messages.append(new_placeholder)
-
-            # Create new template with the messages
-            partial_vars = getattr(self.prompt_template, "partial_variables", None)
-            self.prompt_template = ChatPromptTemplate.from_messages(
-                new_messages, partial_variables=partial_vars
-            )
-            self.uses_messages_field = True
-
-    def _detect_uses_messages_field(self) -> bool:
-        """Detect if this LLM configuration uses a messages field.
-
-        Returns:
-            True if messages field is detected, False otherwise
-        """
-        # If explicitly set to not add messages placeholder, don't assume we use messages
-        # unless there's already a messages placeholder
-        if self.add_messages_placeholder is False:
-            # Only check for existing messages placeholder
-            if self.prompt_template and isinstance(
-                self.prompt_template, ChatPromptTemplate
-            ):
-                for msg in self.prompt_template.messages:
-                    if (
-                        isinstance(msg, MessagesPlaceholder)
-                        and getattr(msg, "variable_name", "")
-                        == self.messages_placeholder_name
-                    ):
-                        return True
-            return self.messages_placeholder_name in self.optional_variables
-
-        # Default to True for tools and system_message
-        if self.tools or self.system_message:
-            return True
-
-        # Check if prompt_template contains MessagesPlaceholder
-        if self.prompt_template:
-            # Handle different template types differently
-            if isinstance(self.prompt_template, ChatPromptTemplate):
-                # Check all messages for a MessagesPlaceholder
-                for msg in self.prompt_template.messages:
-                    if isinstance(msg, MessagesPlaceholder):
-                        return True
-                    # Check for variable_name attribute that might be "messages"
-                    if (
-                        hasattr(msg, "variable_name")
-                        and msg.variable_name == self.messages_placeholder_name
-                    ):
-                        return True
-                    # Check nested message prompts
-                    if hasattr(msg, "prompt") and hasattr(
-                        msg.prompt, "input_variables"
-                    ):
-                        if self.messages_placeholder_name in msg.prompt.input_variables:
-                            return True
-
-                # Default to True for chat templates
-                return True
-
-            if isinstance(self.prompt_template, FewShotPromptTemplate):
-                # FewShotPromptTemplate does not typically use messages
-                return False
-
-            # Check prompt template input variables
-            if hasattr(self.prompt_template, "input_variables"):
-                if (
-                    self.messages_placeholder_name
-                    in self.prompt_template.input_variables
-                ):
-                    return True
-
-        # Default to True - safer to assume we use messages
-        return True
-
     def _get_input_variables(self) -> Set[str]:
-        """Get all input variables required by the prompt template, excluding partials and optionals.
+        """Get all input variables required by the prompt template, excluding partials and optionals."""
+        all_vars = set()
 
-        Returns:
-            Set of required input variable names
-        """
+        # No template = just messages if used
         if not self.prompt_template:
             return (
                 {self.messages_placeholder_name} if self.uses_messages_field else set()
             )
 
-        # Get all input variables from the template
-        all_vars = set()
-
         # Direct input_variables attribute
         if hasattr(self.prompt_template, "input_variables"):
-            all_vars.update(self.prompt_template.input_variables)
+            vars_list = getattr(self.prompt_template, "input_variables", [])
+            all_vars.update(vars_list)
+            rprint(f"[cyan]Template input variables: {vars_list}[/cyan]")
 
         # Chat templates message variables
         if isinstance(self.prompt_template, ChatPromptTemplate):
-            for msg in self.prompt_template.messages:
+            for i, msg in enumerate(self.prompt_template.messages):
                 # Check message prompt templates
                 if hasattr(msg, "prompt") and hasattr(msg.prompt, "input_variables"):
-                    all_vars.update(msg.prompt.input_variables)
+                    msg_vars = msg.prompt.input_variables
+                    all_vars.update(msg_vars)
+                    rprint(f"[cyan]Message {i} variables: {msg_vars}[/cyan]")
+
                 # Check variable_name for placeholders
                 if hasattr(msg, "variable_name"):
                     var_name = getattr(msg, "variable_name")
-                    # Only add if not optional
-                    if not getattr(msg, "optional", False):
+                    # Only add if not optional or if forced
+                    if (
+                        not getattr(msg, "optional", False)
+                        or not self.force_messages_optional
+                    ):
                         all_vars.add(var_name)
-
-        # Few-shot template variables
-        if isinstance(self.prompt_template, FewShotPromptTemplate):
-            if hasattr(self.prompt_template, "input_variables"):
-                all_vars.update(self.prompt_template.input_variables)
+                        rprint(
+                            f"[cyan]Placeholder variable: {var_name} (optional={getattr(msg, 'optional', False)})[/cyan]"
+                        )
 
         # Remove partial variables
-        partial_vars = set()
+        partial_vars = set(self.partial_variables.keys())
         if hasattr(self.prompt_template, "partial_variables"):
-            partial_vars.update(
-                getattr(self.prompt_template, "partial_variables", {}).keys()
-            )
-        partial_vars.update(self.partial_variables.keys())
+            template_partials = getattr(self.prompt_template, "partial_variables", {})
+            partial_vars.update(template_partials.keys())
 
         # Remove optional variables
         optional_vars = set(self.optional_variables)
         if hasattr(self.prompt_template, "optional_variables"):
-            optional_vars.update(
-                getattr(self.prompt_template, "optional_variables", [])
-            )
+            template_optionals = getattr(self.prompt_template, "optional_variables", [])
+            optional_vars.update(template_optionals)
 
-        # Return variables that aren't partials or optionals
+        # Remove partials and optionals
         result = all_vars - partial_vars - optional_vars
+
+        rprint(f"[green]Final required variables: {result}[/green]")
 
         # If empty, default to messages for safety based on uses_messages_field
         if (
@@ -518,6 +680,9 @@ class AugLLMConfig(
             and self.uses_messages_field
             and self.messages_placeholder_name not in optional_vars
         ):
+            rprint(
+                f"[yellow]No variables found - defaulting to {self.messages_placeholder_name}[/yellow]"
+            )
             return {self.messages_placeholder_name}
 
         return result
@@ -541,18 +706,23 @@ class AugLLMConfig(
 
         # Add messages field if needed (as required or optional)
         if self.uses_messages_field:
-            if self.messages_placeholder_name in self.optional_variables:
+            if (
+                self.force_messages_optional
+                or self.messages_placeholder_name in self.optional_variables
+            ):
                 # Optional messages field
                 fields[self.messages_placeholder_name] = (
                     OptionalType[ListType[BaseMessage]],
                     None,
                 )
+                rprint(f"[green]Messages field marked as optional[/green]")
             else:
                 # Required messages field
                 fields[self.messages_placeholder_name] = (
                     ListType[BaseMessage],
                     Field(default_factory=list),
                 )
+                rprint(f"[green]Messages field marked as required[/green]")
 
         # Add fields for all required variables
         for var in required_vars:
@@ -566,6 +736,7 @@ class AugLLMConfig(
                     var_type = self.prompt_template.input_types[var]
 
                 fields[var] = (var_type, Field(...))  # Required field
+                rprint(f"[cyan]Added required field: {var}[/cyan]")
 
         # Add optional variables as optional fields
         for var in self.optional_variables:
@@ -579,6 +750,13 @@ class AugLLMConfig(
                     var_type = self.prompt_template.input_types[var]
 
                 fields[var] = (OptionalType[var_type], None)
+                rprint(f"[cyan]Added optional field: {var}[/cyan]")
+
+        # Debug final fields
+        self._debug_log(
+            "Input Fields",
+            {name: f"{type_info[0]}" for name, type_info in fields.items()},
+        )
 
         return fields
 
@@ -677,6 +855,12 @@ class AugLLMConfig(
                 Field(default_factory=list),
             )
 
+        # Debug output fields
+        self._debug_log(
+            "Output Fields",
+            {name: f"{type_info[0]}" for name, type_info in fields.items()},
+        )
+
         return fields
 
     def create_runnable(
@@ -735,11 +919,15 @@ class AugLLMConfig(
                 "parser_type",
                 "pydantic_tools",
                 "add_messages_placeholder",
+                "force_messages_optional",
             ]
 
             for param in aug_llm_params:
                 if param in configurable:
                     params[param] = configurable[param]
+
+        # Debug extracted params
+        self._debug_log("Runtime Config Parameters", params)
 
         return params
 
@@ -747,11 +935,14 @@ class AugLLMConfig(
         self, input_data: Union[str, Dict[str, Any], List[BaseMessage]]
     ) -> Dict[str, Any]:
         """Process input into a format usable by the runnable."""
+        rprint("[blue]Processing input data[/blue]")
+
         # Find input variables required by the prompt template
         required_vars = self._get_input_variables()
 
         # Handle dictionary input
         if isinstance(input_data, dict):
+            rprint("[green]Input is already a dictionary[/green]")
             # Simply return the input dict - all needed fields should be there
             return input_data
 
@@ -760,15 +951,20 @@ class AugLLMConfig(
             result = {}
 
             # If we need messages
-            if self.uses_messages_field:
+            if (
+                self.uses_messages_field
+                and self.messages_placeholder_name not in result
+            ):
                 result[self.messages_placeholder_name] = [
                     HumanMessage(content=input_data)
                 ]
+                rprint(f"[green]Added string to messages field[/green]")
 
             # For other variables, use the string directly
             for var in required_vars:
                 if var != self.messages_placeholder_name:
                     result[var] = input_data
+                    rprint(f"[cyan]Added string to field: {var}[/cyan]")
 
             return result
 
@@ -777,9 +973,11 @@ class AugLLMConfig(
             isinstance(item, BaseMessage) for item in input_data
         ):
             result = {self.messages_placeholder_name: input_data}
+            rprint(f"[green]Added message list to messages field[/green]")
             return result
 
         # Default case - convert to human message
+        rprint("[yellow]Converting unknown input to human message[/yellow]")
         return {self.messages_placeholder_name: [HumanMessage(content=str(input_data))]}
 
     def add_system_message(self, content: str) -> "AugLLMConfig":
@@ -791,6 +989,8 @@ class AugLLMConfig(
         Returns:
             Self for chaining
         """
+        rprint(f"[blue]Adding/updating system message[/blue]")
+
         # Update system_message property
         self.system_message = content
 
@@ -805,35 +1005,22 @@ class AugLLMConfig(
                     # Replace existing system message
                     new_messages.append(SystemMessage(content=content))
                     has_system = True
+                    rprint("[yellow]Updated existing system message[/yellow]")
                 else:
                     new_messages.append(msg)
 
             # Add system message if none exists
             if not has_system:
                 new_messages.insert(0, SystemMessage(content=content))
+                rprint("[green]Added new system message[/green]")
 
             # Create new template with updated messages
-            partial_vars = getattr(self.prompt_template, "partial_variables", None)
-            self.prompt_template = ChatPromptTemplate.from_messages(
-                new_messages, partial_variables=partial_vars
-            )
+            self._update_chat_template_messages(new_messages)
         else:
             # Create chat template if none exists
-            messages = [SystemMessage(content=content)]
+            rprint("[green]Creating new chat template with system message[/green]")
+            self._create_chat_template_from_system()
 
-            # Only add MessagesPlaceholder if auto-add is enabled
-            if self.add_messages_placeholder:
-                is_optional = self.messages_placeholder_name in self.optional_variables
-                messages.append(
-                    MessagesPlaceholder(
-                        variable_name=self.messages_placeholder_name,
-                        optional=is_optional,
-                    )
-                )
-
-            self.prompt_template = ChatPromptTemplate.from_messages(messages)
-
-        # Update uses_messages_field
         self.uses_messages_field = True
 
         return self
@@ -847,16 +1034,16 @@ class AugLLMConfig(
         Returns:
             Self for chaining
         """
+        rprint(f"[blue]Adding human message[/blue]")
+
         if isinstance(self.prompt_template, ChatPromptTemplate):
             # Add to existing chat template
             new_messages = list(self.prompt_template.messages)
             new_messages.append(HumanMessage(content=content))
+            rprint("[green]Added human message to existing template[/green]")
 
             # Create new template
-            partial_vars = getattr(self.prompt_template, "partial_variables", None)
-            self.prompt_template = ChatPromptTemplate.from_messages(
-                new_messages, partial_variables=partial_vars
-            )
+            self._update_chat_template_messages(new_messages)
         else:
             # Create new chat template
             messages = []
@@ -866,17 +1053,20 @@ class AugLLMConfig(
 
             # Only add MessagesPlaceholder if auto-add is enabled
             if self.add_messages_placeholder:
-                is_optional = self.messages_placeholder_name in self.optional_variables
+                should_be_optional = (
+                    self.force_messages_optional
+                    or self.messages_placeholder_name in self.optional_variables
+                )
                 messages.append(
                     MessagesPlaceholder(
                         variable_name=self.messages_placeholder_name,
-                        optional=is_optional,
+                        optional=should_be_optional,
                     )
                 )
 
             self.prompt_template = ChatPromptTemplate.from_messages(messages)
+            rprint("[green]Created new chat template with human message[/green]")
 
-        # Update uses_messages_field
         self.uses_messages_field = True
 
         return self
@@ -895,6 +1085,8 @@ class AugLLMConfig(
         """
         if not isinstance(self.prompt_template, ChatPromptTemplate):
             raise ValueError("Can only replace messages in a ChatPromptTemplate")
+
+        rprint(f"[blue]Replacing message at index {index}[/blue]")
 
         # Convert string to message if needed
         if isinstance(message, str):
@@ -921,11 +1113,8 @@ class AugLLMConfig(
             new_messages = list(self.prompt_template.messages)
             new_messages[index] = message
 
-            # Create new template
-            partial_vars = getattr(self.prompt_template, "partial_variables", None)
-            self.prompt_template = ChatPromptTemplate.from_messages(
-                new_messages, partial_variables=partial_vars
-            )
+            self._update_chat_template_messages(new_messages)
+            rprint(f"[green]Replaced message at index {index}[/green]")
 
         return self
 
@@ -941,15 +1130,14 @@ class AugLLMConfig(
         if not isinstance(self.prompt_template, ChatPromptTemplate):
             raise ValueError("Can only remove messages from a ChatPromptTemplate")
 
+        rprint(f"[blue]Removing message at index {index}[/blue]")
+
         if index < len(self.prompt_template.messages):
             new_messages = list(self.prompt_template.messages)
             removed = new_messages.pop(index)
 
             # Create new template
-            partial_vars = getattr(self.prompt_template, "partial_variables", None)
-            self.prompt_template = ChatPromptTemplate.from_messages(
-                new_messages, partial_variables=partial_vars
-            )
+            self._update_chat_template_messages(new_messages)
 
             # Update uses_messages_field if we removed the MessagesPlaceholder
             if (
@@ -958,10 +1146,12 @@ class AugLLMConfig(
             ):
                 # Re-add the placeholder if add_messages_placeholder is True
                 if self.add_messages_placeholder:
-                    self._ensure_messages_placeholder()
+                    self._ensure_messages_placeholder_handling()
                 else:
                     # Check if there's still a messages placeholder
                     self.uses_messages_field = self._detect_uses_messages_field()
+
+            rprint(f"[green]Removed message at index {index}[/green]")
 
         return self
 
@@ -976,20 +1166,7 @@ class AugLLMConfig(
         """
         if var_name not in self.optional_variables:
             self.optional_variables.append(var_name)
-
-            # Update for the messages placeholder if it matches
-            if var_name == self.messages_placeholder_name and isinstance(
-                self.prompt_template, ChatPromptTemplate
-            ):
-                # Find and update the MessagesPlaceholder
-                for msg in self.prompt_template.messages:
-                    if (
-                        isinstance(msg, MessagesPlaceholder)
-                        and getattr(msg, "variable_name", "") == var_name
-                        and hasattr(msg, "optional")
-                    ):
-                        msg.optional = True
-                        break
+            rprint(f"[blue]Added optional variable: {var_name}[/blue]")
 
             # Apply optional variables to prompt template
             self._apply_optional_variables()
@@ -1008,6 +1185,8 @@ class AugLLMConfig(
         Returns:
             Self for chaining
         """
+        rprint("[blue]Configuring with structured output[/blue]")
+
         # Set the structured output model
         self.structured_output_model = model
         self.parser_type = "pydantic"
@@ -1030,6 +1209,8 @@ class AugLLMConfig(
         Returns:
             Self for chaining
         """
+        rprint("[blue]Configuring with pydantic tools[/blue]")
+
         # Set the pydantic tools
         self.pydantic_tools = tool_models
         self.parser_type = "pydantic_tools"
@@ -1073,6 +1254,8 @@ class AugLLMConfig(
         # Use default LLM config if none provided
         if llm_config is None:
             llm_config = AzureLLMConfig(model="gpt-4o")
+
+        rprint(f"[blue]Creating AugLLMConfig from {type(prompt).__name__}[/blue]")
 
         # Handle partial variables if provided in kwargs
         partial_variables = kwargs.pop("partial_variables", {})
@@ -1118,6 +1301,8 @@ class AugLLMConfig(
             optional_variables=optional_variables,
             **kwargs,
         )
+
+        rprint("[green]Successfully created AugLLMConfig from prompt[/green]")
         return config
 
     @classmethod
@@ -1137,6 +1322,8 @@ class AugLLMConfig(
         # Use default LLM config if none provided
         if llm_config is None:
             llm_config = AzureLLMConfig(model="gpt-4o")
+
+        rprint("[blue]Creating AugLLMConfig from system prompt string[/blue]")
 
         # Get messages placeholder name and optional flag
         messages_placeholder_name = kwargs.pop("messages_placeholder_name", "messages")
@@ -1199,6 +1386,8 @@ class AugLLMConfig(
         # Use default LLM config if none provided
         if llm_config is None:
             llm_config = AzureLLMConfig(model="gpt-4o")
+
+        rprint("[blue]Creating AugLLMConfig with few-shot examples[/blue]")
 
         # Extract partial_variables from kwargs if provided
         partial_variables = kwargs.pop("partial_variables", {})
@@ -1265,6 +1454,10 @@ class AugLLMConfig(
         if llm_config is None:
             llm_config = AzureLLMConfig(model="gpt-4o")
 
+        rprint(
+            "[blue]Creating AugLLMConfig with system message and few-shot examples[/blue]"
+        )
+
         # Extract partial_variables from kwargs if provided
         partial_variables = kwargs.pop("partial_variables", {})
         example_separator = kwargs.pop("example_separator", "\n\n")
@@ -1329,6 +1522,8 @@ class AugLLMConfig(
         # Use default LLM config if none provided
         if llm_config is None:
             llm_config = AzureLLMConfig(model="gpt-4o")
+
+        rprint("[blue]Creating AugLLMConfig with few-shot chat examples[/blue]")
 
         # Extract partial_variables from kwargs if provided
         partial_variables = kwargs.pop("partial_variables", {})
@@ -1414,6 +1609,8 @@ class AugLLMConfig(
         if llm_config is None:
             llm_config = AzureLLMConfig(model="gpt-4o")
 
+        rprint("[blue]Creating AugLLMConfig with tools[/blue]")
+
         # Get messages placeholder configuration
         messages_placeholder_name = kwargs.pop("messages_placeholder_name", "messages")
         optional_variables = kwargs.pop("optional_variables", [])
@@ -1474,6 +1671,8 @@ class AugLLMConfig(
         # Use default LLM config if none provided
         if llm_config is None:
             llm_config = AzureLLMConfig(model="gpt-4o")
+
+        rprint("[blue]Creating AugLLMConfig with pydantic tools[/blue]")
 
         # Get messages placeholder configuration
         messages_placeholder_name = kwargs.pop("messages_placeholder_name", "messages")
