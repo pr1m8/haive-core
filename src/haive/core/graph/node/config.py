@@ -130,6 +130,53 @@ class NodeConfig(BaseModel):
 
     model_config = {"arbitrary_types_allowed": True, "validate_assignment": True}
 
+    def to_dict(self) -> Dict[str, Any]:
+        """
+        Convert this node config to a dictionary representation.
+
+        Returns:
+            Dictionary representation of this node config
+        """
+        # Use model_dump for serialization
+        data = self.model_dump(exclude={"engine", "callable_func", "condition"})
+
+        # Handle engine reference
+        if self.engine:
+            if hasattr(self.engine, "to_dict"):
+                data["engine"] = self.engine.to_dict()
+            elif hasattr(self.engine, "model_dump"):
+                data["engine"] = self.engine.model_dump()
+            else:
+                data["engine"] = {
+                    "name": getattr(self.engine, "name", "unknown"),
+                    "type": getattr(self.engine, "engine_type", "unknown"),
+                }
+
+        # Handle specific fields that need serialization
+        # Add state_schema class name if present
+        if self.state_schema:
+            data["state_schema"] = (
+                f"{self.state_schema.__module__}.{self.state_schema.__name__}"
+            )
+
+        # Add input_schema class name if present
+        if self.input_schema:
+            data["input_schema"] = (
+                f"{self.input_schema.__module__}.{self.input_schema.__name__}"
+            )
+
+        # Add output_schema class name if present
+        if self.output_schema:
+            data["output_schema"] = (
+                f"{self.output_schema.__module__}.{self.output_schema.__name__}"
+            )
+
+        # Convert CommandGoto.END to string representation
+        if self.command_goto == END:
+            data["command_goto"] = "END"
+
+        return data
+
     @model_validator(mode="after")
     def validate_and_determine_node_type(self) -> "NodeConfig":
         """
@@ -194,6 +241,35 @@ class NodeConfig(BaseModel):
                     self.output_schema = schema.create_output_schema()
             except Exception as e:
                 logger.warning(f"Could not auto-generate schema from engine: {e}")
+
+        # Extract input/output mappings from engine I/O schema if they exist
+        if self.engine and not self.input_fields and not self.output_fields:
+            try:
+                engine_name = getattr(self.engine, "name", "default")
+
+                # Check if state schema has engine I/O mappings
+                if hasattr(self.state_schema, "__engine_io_mappings__"):
+                    io_mappings = getattr(
+                        self.state_schema, "__engine_io_mappings__", {}
+                    )
+                    if engine_name in io_mappings:
+                        mapping = io_mappings[engine_name]
+
+                        # Extract input fields
+                        if "inputs" in mapping and not self.input_fields:
+                            input_fields = mapping["inputs"]
+                            # Create identity mapping
+                            self.input_fields = {field: field for field in input_fields}
+
+                        # Extract output fields
+                        if "outputs" in mapping and not self.output_fields:
+                            output_fields = mapping["outputs"]
+                            # Create identity mapping
+                            self.output_fields = {
+                                field: field for field in output_fields
+                            }
+            except Exception as e:
+                logger.warning(f"Could not extract I/O mappings from schema: {e}")
 
         return self
 

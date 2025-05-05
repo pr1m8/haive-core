@@ -79,37 +79,31 @@ class NodeFactory:
         input_mapping = config.get_input_mapping()
         output_mapping = config.get_output_mapping()
 
-        # Get input/output mappings from schema if empty
-        if not input_mapping and config.input_schema:
-            input_fields = config.input_schema.model_fields.keys()
-            input_mapping = {field: field for field in input_fields}
-
-        if not output_mapping and config.output_schema:
-            output_fields = config.output_schema.model_fields.keys()
-            output_mapping = {field: field for field in output_fields}
-
-            # For structured output models, add mapping for result key
-            if (
-                hasattr(engine, "structured_output_model")
-                and engine.structured_output_model
-            ):
-                model_name = engine.structured_output_model.__name__.lower()
-                if model_name not in output_mapping.values():
-                    output_mapping["result"] = model_name
+        # Get engine-specific ID or name for lookup
+        engine_id = (
+            engine_id or getattr(engine, "name", None) or getattr(engine, "id", None)
+        )
 
         def node_function(state, config=None):
             """Node function that uses engine's invoke method."""
             try:
-                # Extract input from state
-                input_data = cls._extract_input(state, input_mapping)
-
+                # Extract input from state using the fixed _extract_input method
+                input_data = cls._extract_input(state, input_mapping, engine_id)
+                # print(engine.prompt_template)
+                # breakpoint()
                 # Create a fresh runnable with appropriate config
-                runnable = engine.create_runnable(config)
+                runnable = engine.create_runnable()
+                print(runnable)
 
                 # Invoke the runnable
                 result = runnable.invoke(input_data)
+                print(result)
+                print(output_mapping)
+                print(type(result))
 
-                # Process output
+                # print()
+                logger.debug(f"Result: {result}")
+                # Process output using the fixed _process_output method - ONLY PASS 2 REQUIRED ARGS
                 processed_output = cls._process_output(result, output_mapping)
 
                 # Handle structured output models (special case)
@@ -118,70 +112,17 @@ class NodeFactory:
                     and engine.structured_output_model
                 ):
                     model_name = engine.structured_output_model.__name__.lower()
-                    # If result contains the model instance but not in the expected key
-                    if model_name not in processed_output and isinstance(
-                        result, engine.structured_output_model
-                    ):
-                        processed_output[model_name] = result
-                    elif "result" in processed_output and isinstance(
-                        processed_output["result"], engine.structured_output_model
-                    ):
-                        processed_output[model_name] = processed_output["result"]
-                        del processed_output["result"]
+                    # If result is the model instance, ensure it's correctly mapped
+                    if isinstance(result, engine.structured_output_model):
+                        # Check if already properly placed
+                        if model_name not in processed_output:
+                            processed_output[model_name] = result
 
                 # Return with Command for routing
                 return Command(update=processed_output, goto=command_goto)
             except Exception as e:
                 logger.error(f"Error in node {engine_id or 'unknown'}: {e}")
                 return Command(update={"error": str(e)}, goto=command_goto)
-
-        # Add async support if engine has ainvoke
-        if hasattr(engine, "ainvoke"):
-
-            async def async_node_function(state, config=None):
-                """Async node function that uses engine's ainvoke method."""
-                try:
-                    # Extract input from state
-                    input_data = cls._extract_input(state, input_mapping)
-
-                    # Create a fresh runnable with appropriate config
-                    runnable = engine.create_runnable(config)
-
-                    # Use ainvoke for async
-                    if hasattr(runnable, "ainvoke"):
-                        result = await runnable.ainvoke(input_data)
-                    else:
-                        # Fallback to sync in async wrapper
-                        result = await asyncio.to_thread(runnable.invoke, input_data)
-
-                    # Process output
-                    processed_output = cls._process_output(result, output_mapping)
-
-                    # Handle structured output models (special case)
-                    if (
-                        hasattr(engine, "structured_output_model")
-                        and engine.structured_output_model
-                    ):
-                        model_name = engine.structured_output_model.__name__.lower()
-                        # If result contains the model instance but not in the expected key
-                        if model_name not in processed_output and isinstance(
-                            result, engine.structured_output_model
-                        ):
-                            processed_output[model_name] = result
-                        elif "result" in processed_output and isinstance(
-                            processed_output["result"], engine.structured_output_model
-                        ):
-                            processed_output[model_name] = processed_output["result"]
-                            del processed_output["result"]
-
-                    # Return with Command for routing
-                    return Command(update=processed_output, goto=command_goto)
-                except Exception as e:
-                    logger.error(f"Error in async node {engine_id or 'unknown'}: {e}")
-                    return Command(update={"error": str(e)}, goto=command_goto)
-
-            # Set async invoke method
-            node_function.ainvoke = async_node_function
 
         # Add metadata
         node_function.__node_config__ = config
@@ -753,85 +694,101 @@ class NodeFactory:
         return node_function
 
     @classmethod
-    def _extract_input(cls, state: Any, input_mapping: Dict[str, str]) -> Any:
+    def _extract_input(
+        cls, state: Any, input_mapping: Dict[str, str], engine_id: Optional[str] = None
+    ) -> Any:
         """
-        Extract input from state based on mapping.
+        Extract input from state based on mapping with engine I/O awareness.
 
         Args:
             state: State object (dict, BaseModel, etc.)
             input_mapping: Mapping from state keys to input keys
+            engine_id: Optional engine ID to look up in I/O mappings
 
         Returns:
             Extracted input
         """
-        # If no mapping provided, return state as is
-        if not input_mapping:
-            # For dictionary state, we can just return it directly
+        # Try to use engine I/O mappings if available
+        if engine_id:
+            # First check if state has I/O mappings
+            state_io_mappings = None
+            if hasattr(state, "__engine_io_mappings__"):
+                state_io_mappings = getattr(state, "__engine_io_mappings__", {})
+            elif isinstance(state, dict) and "__engine_io_mappings__" in state:
+                state_io_mappings = state["__engine_io_mappings__"]
+
+            # If we found mappings and this engine is in them
+            if state_io_mappings and engine_id in state_io_mappings:
+                engine_mapping = state_io_mappings[engine_id]
+                input_fields = engine_mapping.get("inputs", [])
+
+                if input_fields:
+                    # Extract just the input fields for this engine
+                    engine_input = {}
+
+                    # Get the state as a dict for easier access
+                    if isinstance(state, dict):
+                        state_dict = state
+                    elif hasattr(state, "model_dump"):
+                        state_dict = state.model_dump()
+                    elif hasattr(state, "dict"):
+                        state_dict = state.dict()
+                    else:
+                        # Try attribute access
+                        state_dict = {}
+                        for field in input_fields:
+                            if hasattr(state, field):
+                                state_dict[field] = getattr(state, field)
+
+                    # Extract each input field
+                    for field in input_fields:
+                        if field in state_dict:
+                            engine_input[field] = state_dict[field]
+
+                    # If only one field is expected and we have exactly one field, return it directly
+                    if len(input_fields) == 1 and len(engine_input) == 1:
+                        return list(engine_input.values())[0]
+
+                    # Otherwise return the dictionary
+                    return engine_input
+
+        # Fallback: use input_mapping if provided
+        if input_mapping:
+            # Get the state as a dict for mapping
             if isinstance(state, dict):
-                return state
-
-            # For BaseModel state, convert to dict
-            if hasattr(state, "model_dump"):
-                return state.model_dump()
+                state_dict = state
+            elif hasattr(state, "model_dump"):
+                state_dict = state.model_dump()
             elif hasattr(state, "dict"):
-                return state.dict()
+                state_dict = state.dict()
+            else:
+                # Try attribute access
+                state_dict = {}
+                for state_key in input_mapping.keys():
+                    if hasattr(state, state_key):
+                        state_dict[state_key] = getattr(state, state_key)
 
-            # For any other object, try to extract all attributes
-            return state
+            # Apply the mapping
+            mapped_input = {}
+            for state_key, input_key in input_mapping.items():
+                if state_key in state_dict:
+                    mapped_input[input_key] = state_dict[state_key]
 
-        # Handle dictionary state
+            # If only one key was mapped, return the value directly
+            if len(input_mapping) == 1 and len(mapped_input) == 1:
+                return list(mapped_input.values())[0]
+
+            return mapped_input
+
+        # Final fallback: return state as-is
         if isinstance(state, dict):
-            mapped_input = {}
-            for state_key, input_key in input_mapping.items():
-                if state_key in state:
-                    mapped_input[input_key] = state[state_key]
-
-            # If only one key was mapped, return the value directly
-            if len(input_mapping) == 1 and len(mapped_input) == 1:
-                return list(mapped_input.values())[0]
-
-            return mapped_input
-
-        # Handle BaseModel state
-        if hasattr(state, "model_dump"):
-            # Pydantic v2
-            state_dict = state.model_dump()
-            mapped_input = {}
-            for state_key, input_key in input_mapping.items():
-                if state_key in state_dict:
-                    mapped_input[input_key] = state_dict[state_key]
-
-            # If only one key was mapped, return the value directly
-            if len(input_mapping) == 1 and len(mapped_input) == 1:
-                return list(mapped_input.values())[0]
-
-            return mapped_input
+            return state
+        elif hasattr(state, "model_dump"):
+            return state.model_dump()
         elif hasattr(state, "dict"):
-            # Pydantic v1
-            state_dict = state.dict()
-            mapped_input = {}
-            for state_key, input_key in input_mapping.items():
-                if state_key in state_dict:
-                    mapped_input[input_key] = state_dict[state_key]
-
-            # If only one key was mapped, return the value directly
-            if len(input_mapping) == 1 and len(mapped_input) == 1:
-                return list(mapped_input.values())[0]
-
-            return mapped_input
-
-        # Try attribute access for any other object
-        mapped_input = {}
-        for state_key, input_key in input_mapping.items():
-            if hasattr(state, state_key):
-                mapped_input[input_key] = getattr(state, state_key)
-
-        # If only one key was mapped, return the value directly
-        if len(input_mapping) == 1 and len(mapped_input) == 1:
-            return list(mapped_input.values())[0]
-
-        # Return mapped input or empty dict if nothing was mapped
-        return mapped_input
+            return state.dict()
+        else:
+            return state
 
     @classmethod
     def _process_output(

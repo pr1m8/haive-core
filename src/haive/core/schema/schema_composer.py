@@ -18,6 +18,7 @@ from typing import (
     List,
     Optional,
     Set,
+    Tuple,
     Type,
     TypeVar,
 )
@@ -616,6 +617,56 @@ class SchemaComposer:
 
         return schema
 
+    def create_input_schema(self) -> Type[BaseModel]:
+        """
+        Create an input schema model from the composed fields.
+
+        Returns:
+            Input schema model containing only input fields
+        """
+        # Get all input field definitions
+        input_field_defs = {}
+
+        for name, field_def in self.fields.items():
+            # Include if it's an input field for any engine or 'messages' field
+            if field_def.input_for or name == "messages":
+                field_type, field_info = field_def.to_field_info()
+                input_field_defs[name] = (field_type, field_info)
+
+        # Create the input schema
+        input_schema = create_model(
+            f"{self.name}Input",
+            __doc__=f"Input schema for {self.name}",
+            **input_field_defs,
+        )
+
+        return input_schema
+
+    def create_output_schema(self) -> Type[BaseModel]:
+        """
+        Create an output schema model from the composed fields.
+
+        Returns:
+            Output schema model containing only output fields
+        """
+        # Get all output field definitions
+        output_field_defs = {}
+
+        for name, field_def in self.fields.items():
+            # Include if it's an output field for any engine or 'messages' field
+            if field_def.output_from or name == "messages":
+                field_type, field_info = field_def.to_field_info()
+                output_field_defs[name] = (field_type, field_info)
+
+        # Create the output schema
+        output_schema = create_model(
+            f"{self.name}Output",
+            __doc__=f"Output schema for {self.name}",
+            **output_field_defs,
+        )
+
+        return output_schema
+
     def to_manager(self) -> "StateSchemaManager":
         """
         Convert to a StateSchemaManager for further manipulation.
@@ -769,7 +820,7 @@ class SchemaComposer:
         composer.add_fields_from_components(components)
 
         # Ensure messages field is properly configured
-        composer.configure_messages_field(with_reducer=True, force_add=True)
+        composer.configure_messages_field(with_reducer=True, force_add=False)
 
         # Build and return the schema
         return composer.build()
@@ -946,3 +997,333 @@ class SchemaComposer:
 
         # Build schema
         return composer.build()
+
+    def build_inheritance_schemas(
+        self, use_annotated: bool = True
+    ) -> Tuple[Type[BaseModel], Type[BaseModel], Type[StateSchema]]:
+        """
+        Build input, output, and combined state schemas using inheritance.
+
+        This creates three related schemas:
+        1. InputState - containing only input fields
+        2. OutputState - containing only output fields
+        3. CombinedState - inheriting from both and StateSchema
+
+        Args:
+            use_annotated: Whether to use Annotated types for metadata
+
+        Returns:
+            Tuple of (InputState, OutputState, CombinedState)
+        """
+        # Separate input and output fields
+        input_fields = {}
+        output_fields = {}
+
+        for name, field_def in self.fields.items():
+            if use_annotated:
+                field_type, field_info = field_def.to_annotated_field()
+            else:
+                field_type, field_info = field_def.to_field_info()
+
+            # A field can be both input and output
+            if field_def.input_for or name == "messages":
+                input_fields[name] = (field_type, field_info)
+
+            if field_def.output_from:
+                output_fields[name] = (field_type, field_info)
+
+        # Create input schema (not using StateSchema)
+        input_schema = create_model(
+            f"{self.name}InputState",
+            __doc__=f"Input state for {self.name}",
+            **input_fields,
+        )
+
+        # Create output schema (not using StateSchema)
+        output_schema = create_model(
+            f"{self.name}OutputState",
+            __doc__=f"Output state for {self.name}",
+            **output_fields,
+        )
+
+        # Create combined schema inheriting from both and StateSchema
+        combined_schema = create_model(
+            self.name,
+            __base__=(input_schema, output_schema, StateSchema),
+            __doc__=f"Combined state for {self.name}",
+        )
+
+        # Add shared fields, reducers, and other metadata to combined schema
+        combined_schema.__shared_fields__ = list(self.shared_fields)
+        combined_schema.__serializable_reducers__ = {}
+        combined_schema.__reducer_fields__ = {}
+
+        for name, field_def in self.fields.items():
+            if field_def.reducer:
+                reducer_name = field_def.get_reducer_name()
+                combined_schema.__serializable_reducers__[name] = reducer_name
+                combined_schema.__reducer_fields__[name] = field_def.reducer
+
+        # Copy engine I/O mappings
+        combined_schema.__engine_io_mappings__ = {}
+        for engine_name, mapping in self.engine_io_mappings.items():
+            combined_schema.__engine_io_mappings__[engine_name] = mapping.copy()
+
+        # Copy input/output fields
+        combined_schema.__input_fields__ = {}
+        for engine_name, fields in self.input_fields.items():
+            combined_schema.__input_fields__[engine_name] = list(fields)
+
+        combined_schema.__output_fields__ = {}
+        for engine_name, fields in self.output_fields.items():
+            combined_schema.__output_fields__[engine_name] = list(fields)
+
+        return input_schema, output_schema, combined_schema
+
+    def compose_state_from_io(
+        self, input_schema: Type[BaseModel], output_schema: Type[BaseModel]
+    ) -> Type[StateSchema]:
+        """
+        Compose a state schema from separate input and output schemas.
+
+        This reverses the traditional flow where input/output schemas are derived from a state schema.
+        Instead, it takes existing input and output schemas and creates a combined state schema.
+
+        Args:
+            input_schema: The input schema model
+            output_schema: The output schema model
+
+        Returns:
+            A StateSchema combining fields from both input and output schemas
+        """
+        logger.info(
+            f"Composing state schema from input schema {input_schema.__name__} and output schema {output_schema.__name__}"
+        )
+
+        # Create a fresh composer
+        composed_schema = create_model(
+            self.name,
+            __base__=(input_schema, output_schema, StateSchema),
+            __doc__=f"State schema composed from {input_schema.__name__} and {output_schema.__name__}",
+        )
+
+        # Add shared fields
+        composed_schema.__shared_fields__ = list(self.shared_fields)
+        logger.info(f"Added shared fields: {composed_schema.__shared_fields__}")
+
+        # Add reducers
+        composed_schema.__serializable_reducers__ = {}
+        composed_schema.__reducer_fields__ = {}
+
+        for name, field_def in self.fields.items():
+            if field_def.reducer:
+                reducer_name = field_def.get_reducer_name()
+                composed_schema.__serializable_reducers__[name] = reducer_name
+                composed_schema.__reducer_fields__[name] = field_def.reducer
+                logger.info(f"Added reducer for field '{name}': {reducer_name}")
+
+        # Log state of engine I/O mappings in composer
+        logger.info(f"Engine I/O mappings in composer: {self.engine_io_mappings}")
+
+        # Copy engine I/O mappings
+        composed_schema.__engine_io_mappings__ = {}
+        for engine_name, mapping in self.engine_io_mappings.items():
+            composed_schema.__engine_io_mappings__[engine_name] = mapping.copy()
+            logger.info(f"Copied engine I/O mapping for '{engine_name}': {mapping}")
+
+        # Copy input/output fields metadata
+        composed_schema.__input_fields__ = {}
+        for engine_name, fields in self.input_fields.items():
+            composed_schema.__input_fields__[engine_name] = list(fields)
+            logger.info(f"Copied input fields for '{engine_name}': {fields}")
+
+        composed_schema.__output_fields__ = {}
+        for engine_name, fields in self.output_fields.items():
+            composed_schema.__output_fields__[engine_name] = list(fields)
+            logger.info(f"Copied output fields for '{engine_name}': {fields}")
+
+        # Add structured model fields metadata
+        if self.structured_model_fields:
+            composed_schema.__structured_model_fields__ = {
+                k: list(v) for k, v in self.structured_model_fields.items()
+            }
+
+        # Add structured models
+        if self.structured_models:
+            composed_schema.__structured_models__ = {
+                k: f"{v.__module__}.{v.__name__}"
+                for k, v in self.structured_models.items()
+            }
+
+        # Verify engine I/O mappings have been properly transferred
+        logger.info(
+            f"Final engine I/O mappings in composed schema: {composed_schema.__engine_io_mappings__}"
+        )
+
+        # Check for specific engines and fields
+        if "default" in composed_schema.__engine_io_mappings__:
+            logger.info(
+                f"Default engine mapping: {composed_schema.__engine_io_mappings__['default']}"
+            )
+            if "inputs" in composed_schema.__engine_io_mappings__["default"]:
+                logger.info(
+                    f"Default engine inputs: {composed_schema.__engine_io_mappings__['default']['inputs']}"
+                )
+            if "outputs" in composed_schema.__engine_io_mappings__["default"]:
+                logger.info(
+                    f"Default engine outputs: {composed_schema.__engine_io_mappings__['default']['outputs']}"
+                )
+
+        return composed_schema
+
+    def build_with_inheritance(self) -> Type[StateSchema]:
+        """
+        Build a combined schema using inheritance pattern with input and output schemas.
+
+        This creates a schema that inherits from both input and output schemas,
+        similar to the pattern in the RAG agent implementation.
+
+        Returns:
+            StateSchema that inherits from input and output schemas
+        """
+        # Build the input and output schemas first
+        input_schema = self.create_input_schema()
+        output_schema = self.create_output_schema()
+
+        # Create the combined schema by composing from input and output schemas
+        return self.compose_state_from_io(input_schema, output_schema)
+
+    @classmethod
+    def create_inheritance_schemas(
+        cls,
+        components: List[Any],
+        name: str = "ComposedSchema",
+        include_messages_field: bool = True,
+    ) -> Tuple[Type[BaseModel], Type[BaseModel], Type[StateSchema]]:
+        """
+        Create input, output, and combined schemas using inheritance pattern.
+
+        Args:
+            components: List of components to extract fields from
+            name: Base name for the schemas
+            include_messages_field: Whether to ensure a messages field exists
+
+        Returns:
+            Tuple of (InputState, OutputState, CombinedState)
+        """
+        composer = cls(name=name)
+
+        # Process each component
+        composer.add_fields_from_components(
+            components, include_messages_field=include_messages_field
+        )
+
+        # Ensure messages field is properly configured
+        if include_messages_field:
+            composer.configure_messages_field(with_reducer=True, force_add=True)
+
+        # Build and return the schema inheritance structure
+        return composer.build_inheritance_schemas()
+
+    @classmethod
+    def create_state_from_io_schemas(
+        cls,
+        input_schema: Type[BaseModel],
+        output_schema: Type[BaseModel],
+        name: str = "ComposedSchema",
+    ) -> Type[StateSchema]:
+        """
+        Create a state schema by combining existing input and output schemas.
+
+        This method provides a direct way to create a state schema from pre-existing
+        input and output schemas, rather than deriving them from components.
+
+        Args:
+            input_schema: Existing input schema model
+            output_schema: Existing output schema model
+            name: Name for the resulting schema
+
+        Returns:
+            A StateSchema combining both input and output schemas
+        """
+        logger.info(
+            f"Creating state schema from input schema {input_schema.__name__} and output schema {output_schema.__name__}"
+        )
+        composer = cls(name=name)
+
+        # Add fields from both schemas
+        composer.add_fields_from_model(input_schema)
+        composer.add_fields_from_model(output_schema)
+
+        # Mark fields from input_schema as inputs for the 'default' engine
+        logger.info(
+            f"Adding input fields from {input_schema.__name__} to default engine"
+        )
+        for field_name in input_schema.model_fields:
+            if field_name in composer.fields:
+                field_def = composer.fields[field_name]
+                logger.info(f"Marking field '{field_name}' as input for default engine")
+                if not field_def.input_for:
+                    field_def.input_for = ["default"]
+                    # Explicitly update composer's engine_io_mappings
+                    if "default" not in composer.engine_io_mappings:
+                        composer.engine_io_mappings["default"] = {
+                            "inputs": [],
+                            "outputs": [],
+                        }
+                    if (
+                        field_name
+                        not in composer.engine_io_mappings["default"]["inputs"]
+                    ):
+                        composer.engine_io_mappings["default"]["inputs"].append(
+                            field_name
+                        )
+                        # Update input_fields tracking
+                        composer.input_fields["default"].add(field_name)
+
+        # Mark fields from output_schema as outputs from the 'default' engine
+        logger.info(
+            f"Adding output fields from {output_schema.__name__} to default engine"
+        )
+        for field_name in output_schema.model_fields:
+            if field_name in composer.fields:
+                field_def = composer.fields[field_name]
+                logger.info(
+                    f"Marking field '{field_name}' as output from default engine"
+                )
+                if not field_def.output_from:
+                    field_def.output_from = ["default"]
+                    # Explicitly update composer's engine_io_mappings
+                    if "default" not in composer.engine_io_mappings:
+                        composer.engine_io_mappings["default"] = {
+                            "inputs": [],
+                            "outputs": [],
+                        }
+                    if (
+                        field_name
+                        not in composer.engine_io_mappings["default"]["outputs"]
+                    ):
+                        composer.engine_io_mappings["default"]["outputs"].append(
+                            field_name
+                        )
+                        # Update output_fields tracking
+                        composer.output_fields["default"].add(field_name)
+
+        # Ensure messages field is properly configured if it exists
+        if "messages" in composer.fields:
+            composer.configure_messages_field(with_reducer=True, force_add=False)
+
+        # Log the state of engine_io_mappings before composing
+        logger.info(
+            f"Engine I/O mappings before composing: {composer.engine_io_mappings}"
+        )
+
+        # Compose and return the state schema
+        state_schema = composer.compose_state_from_io(input_schema, output_schema)
+
+        # Log the state of engine_io_mappings after composing
+        logger.info(
+            f"Engine I/O mappings in composed schema: {state_schema.__engine_io_mappings__}"
+        )
+
+        return state_schema

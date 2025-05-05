@@ -1861,7 +1861,7 @@ class Agent(Generic[TConfig], ABC):
         self,
         input_data: TIn,
         thread_id: Optional[str] = None,
-        debug: bool = None,
+        debug: bool = True,
         config: Optional[RunnableConfig] = None,
         **kwargs,
     ) -> TOut:
@@ -1969,9 +1969,13 @@ class Agent(Generic[TConfig], ABC):
 
         # Run the agent
         try:
-            result = self.app.invoke(processed_input, runtime_config)
+            print(processed_input)
+            print(runtime_config)
+            print(input_data)
+            print(self.app)
+            result = self.app.invoke(input_data, runtime_config, debug=debug)
             logger.debug("Agent execution completed successfully")
-
+            print(result)
             # Process the result if needed
             output = self._process_output(result)
 

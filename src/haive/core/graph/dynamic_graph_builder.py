@@ -232,9 +232,9 @@ class DynamicGraph:
             #self.node_registry = NodeTypeRegistry.get_instance()
             
             # Ensure default processors are registered
-            if not self.node_registry.node_processors:
+            #if not self.node_registry.node_processors:
                 #logger.debug("Registering default node processors...")
-                self.node_registry.register_default_processors()
+                #self.node_registry.register_default_processors()
 
             # Set up NodeFactory to use our registry
             #NodeFactory.set_registry(self.node_registry)
@@ -556,7 +556,7 @@ class DynamicGraph:
                     output_mapping=output_mapping,
                     runnable_config=runnable_config,
                     debug=debug or self.debug_level in [DebugLevel.VERBOSE, DebugLevel.TRACE],
-                    registry=self.node_registry,
+                    #registry=self.node_registry,
                     **kwargs
                 )
                 logger.debug(f"Created NodeConfig: {node_config.name}")
@@ -568,16 +568,16 @@ class DynamicGraph:
                     node_config.command_goto = END
             
             # Set registry reference 
-            node_config.registry = self.node_registry
+            #node_config.registry = self.node_registry
             
             # Resolve engine reference
             logger.debug(f"Resolving engine reference for node: {name}")
-            engine, engine_id = node_config.resolve_engine(self.node_registry)
+            engine, engine_id = node_config.get_engine()
             logger.debug(f"Resolved engine: {type(engine).__name__}, id: {engine_id}")
             
             # Create node function using NodeFactory
             logger.debug(f"Creating node function with NodeFactory for: {name}")
-            node_function = NodeFactory.create_node_function(node_config)
+            node_function = NodeFactory().create_node_function(node_config)
             
             # Add to StateGraph
             try:
@@ -595,7 +595,7 @@ class DynamicGraph:
             
             # Update node function storage
             self.metadata.setdefault("node_functions", {})[name] = {
-                "type": node_config.determine_node_type(), 
+                "type": node_config.node_type, 
                 "created_at": datetime.now().isoformat()
             }
             

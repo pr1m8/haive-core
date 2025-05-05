@@ -498,3 +498,128 @@ def test_schema_composer_input_output_schema():
     # Display with rich UI
     SchemaUI.display_schema(input_schema, "Input Schema")
     SchemaUI.display_schema(output_schema, "Output Schema")
+
+
+def test_schema_composer_state_from_io():
+    """Test SchemaComposer for composing state schema from input and output schemas."""
+    logger.info("Testing composition of state schema from input and output schemas")
+
+    # Define input schema directly
+    class QueryInputSchema(BaseModel):
+        """Input schema for a query-based system."""
+
+        messages: List[BaseMessage] = Field(default_factory=list)
+        query: str = Field(default="", description="User query")
+        context: List[str] = Field(
+            default_factory=list, description="Context documents"
+        )
+
+    # Define output schema directly
+    class ResponseOutputSchema(BaseModel):
+        """Output schema for a response-based system."""
+
+        messages: List[BaseMessage] = Field(default_factory=list)
+        response: str = Field(default="", description="Generated response")
+        sources: List[Dict[str, Any]] = Field(
+            default_factory=list, description="Source documents"
+        )
+        confidence: float = Field(default=0.0, description="Confidence score")
+
+    # Compose state schema from input and output schemas
+    logger.info("Composing state schema from input and output schemas")
+    state_schema = SchemaComposer.create_state_from_io_schemas(
+        QueryInputSchema, ResponseOutputSchema, name="ComposedStateSchema"
+    )
+
+    # Log state schema details
+    logger.info(f"Composed state schema: {state_schema.__name__}")
+    logger.info(f"State schema fields: {list(state_schema.model_fields.keys())}")
+
+    # Display engine I/O mappings
+    if hasattr(state_schema, "__engine_io_mappings__"):
+        logger.info(f"Engine I/O mappings: {state_schema.__engine_io_mappings__}")
+
+    # Verify the composed schema inherits from both input and output schemas
+    assert issubclass(state_schema, StateSchema)
+    assert issubclass(state_schema, QueryInputSchema)
+    assert issubclass(state_schema, ResponseOutputSchema)
+
+    # Verify all fields are present
+    assert "messages" in state_schema.model_fields
+    assert "query" in state_schema.model_fields
+    assert "context" in state_schema.model_fields
+    assert "response" in state_schema.model_fields
+    assert "sources" in state_schema.model_fields
+    assert "confidence" in state_schema.model_fields
+
+    # Create an instance to test functionality
+    state = state_schema(
+        query="What is the capital of France?",
+        context=["France is a country in Europe.", "Paris is a city in France."],
+    )
+
+    # Test updating the state
+    state.response = "The capital of France is Paris."
+    state.sources = [
+        {"url": "wikipedia.org", "content": "Paris is the capital of France."}
+    ]
+    state.confidence = 0.95
+
+    # Verify state values
+    assert state.query == "What is the capital of France?"
+    assert len(state.context) == 2
+    assert state.response == "The capital of France is Paris."
+    assert len(state.sources) == 1
+    assert state.confidence == 0.95
+
+    # Test with messages
+    state.messages.append(HumanMessage(content="Tell me about Paris"))
+    state.messages.append(AIMessage(content="Paris is the capital of France"))
+    assert len(state.messages) == 2
+
+    # Display with rich UI
+    SchemaUI.display_schema(state_schema, "Composed State Schema")
+
+    # Test creating a schema composer and directly using compose_state_from_io
+    logger.info("Testing direct use of compose_state_from_io method")
+    composer = SchemaComposer(name="DirectComposedSchema")
+
+    # Configure messages field with reducer
+    try:
+        from langgraph.graph import add_messages
+
+        reducer = add_messages
+    except ImportError:
+
+        def reducer(a, b):
+            return (a or []) + (b or [])
+
+    # Add messages field with reducer
+    composer.add_field(
+        name="messages",
+        field_type=List[BaseMessage],
+        default_factory=list,
+        description="Messages for conversation",
+        reducer=reducer,
+        shared=True,
+    )
+
+    # Directly compose a state schema
+    direct_state_schema = composer.compose_state_from_io(
+        QueryInputSchema, ResponseOutputSchema
+    )
+
+    # Verify the composition worked with the reducer
+    assert "messages" in direct_state_schema.__serializable_reducers__
+    assert "messages" in direct_state_schema.__reducer_fields__
+    assert "messages" in direct_state_schema.__shared_fields__
+
+    # Log info about the directly composed schema
+    logger.info(f"Direct composed schema: {direct_state_schema.__name__}")
+    logger.info(f"Shared fields: {direct_state_schema.__shared_fields__}")
+    logger.info(
+        f"Reducer fields: {list(direct_state_schema.__serializable_reducers__.keys())}"
+    )
+
+    # Display with rich UI
+    SchemaUI.display_schema(direct_state_schema, "Directly Composed State Schema")

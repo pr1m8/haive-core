@@ -3,7 +3,8 @@
 import logging
 from typing import Dict, List, Optional, TypeVar
 
-from haive.core.engine.base import Engine, EngineType
+from haive.core.engine.base import Engine
+from haive.core.engine.base.types import EngineType
 from haive.core.registry.base import AbstractRegistry
 
 E = TypeVar("E", bound=Engine)
