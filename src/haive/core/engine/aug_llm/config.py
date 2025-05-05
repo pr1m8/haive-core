@@ -687,6 +687,8 @@ class AugLLMConfig(
 
         return result
 
+    # Option 2: If you prefer to modify the engine code, here's a cleaner get_input_fields() method
+
     def get_input_fields(self) -> Dict[str, Tuple[Type, Any]]:
         """
         Get schema fields based on prompt template and configuration.
@@ -696,61 +698,70 @@ class AugLLMConfig(
         Returns:
             Dictionary mapping field names to (type, default) tuples
         """
+        from typing import Any as AnyType
         from typing import List as ListType
         from typing import Optional as OptionalType
 
         fields = {}
 
-        # Get required input variables, excluding partials and optionals
+        # Get required input variables
         required_vars = self._get_input_variables()
 
-        # Add messages field if needed (as required or optional)
+        # Get type information from prompt template if available
+        input_types = {}
+        if (
+            hasattr(self.prompt_template, "input_types")
+            and self.prompt_template.input_types
+        ):
+            input_types = self.prompt_template.input_types
+            rprint(f"[cyan]Found input types in prompt template: {input_types}[/cyan]")
+
+        # Handle messages field specially
         if self.uses_messages_field:
-            if (
+            is_optional = (
                 self.force_messages_optional
                 or self.messages_placeholder_name in self.optional_variables
-            ):
-                # Optional messages field
+            )
+
+            if is_optional:
                 fields[self.messages_placeholder_name] = (
                     OptionalType[ListType[BaseMessage]],
-                    None,
+                    Field(default_factory=list),
+                    # None
                 )
-                rprint(f"[green]Messages field marked as optional[/green]")
+                rprint(f"[green]Messages field added as optional[/green]")
             else:
-                # Required messages field
                 fields[self.messages_placeholder_name] = (
                     ListType[BaseMessage],
                     Field(default_factory=list),
                 )
-                rprint(f"[green]Messages field marked as required[/green]")
+                rprint(f"[green]Messages field added as required[/green]")
 
-        # Add fields for all required variables
+        # Process all other required variables
         for var in required_vars:
             if var != self.messages_placeholder_name and var not in fields:
-                # Try to get type information from prompt template
-                var_type = str  # Default type
-                if (
-                    hasattr(self.prompt_template, "input_types")
-                    and var in self.prompt_template.input_types
-                ):
-                    var_type = self.prompt_template.input_types[var]
+                # Look for type in input_types
+                if var in input_types:
+                    var_type = input_types[var]
+                    rprint(
+                        f"[green]Using type from prompt template for {var}: {var_type}[/green]"
+                    )
+                else:
+                    var_type = AnyType
+                    rprint(f"[yellow]Using Any type for {var}[/yellow]")
 
-                fields[var] = (var_type, Field(...))  # Required field
-                rprint(f"[cyan]Added required field: {var}[/cyan]")
+                # Add field
+                fields[var] = (var_type, Field(...))
 
-        # Add optional variables as optional fields
+        # Process optional variables
         for var in self.optional_variables:
-            if var not in fields and var != self.messages_placeholder_name:
-                # Try to get type information from prompt template
-                var_type = str  # Default type
-                if (
-                    hasattr(self.prompt_template, "input_types")
-                    and var in self.prompt_template.input_types
-                ):
-                    var_type = self.prompt_template.input_types[var]
-
+            if var != self.messages_placeholder_name and var not in fields:
+                # Get type directly from input_types or default to Any
+                var_type = input_types.get(var, AnyType)
                 fields[var] = (OptionalType[var_type], None)
-                rprint(f"[cyan]Added optional field: {var}[/cyan]")
+                rprint(
+                    f"[cyan]Added optional field: {var} with type Optional[{var_type}][/cyan]"
+                )
 
         # Debug final fields
         self._debug_log(
