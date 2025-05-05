@@ -1,6 +1,13 @@
+"""
+Base LLM configuration with model metadata support.
+
+This module provides base classes and implementations for LLM providers
+with support for model metadata, context windows, and capabilities.
+"""
+
 import os
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field, SecretStr, field_validator
@@ -22,7 +29,14 @@ from langchain_community.cache import SQLiteCache
 
 set_llm_cache(SQLiteCache(database_path=str(CACHE_FILE)))
 
+import logging
+
 from haive.core.models.llm.provider_types import LLMProvider
+
+# Import model metadata functions - using correct path
+from haive.core.models.metadata import add_metadata_methods
+
+logger = logging.getLogger(__name__)
 
 
 class SecureConfigMixin:
@@ -56,7 +70,7 @@ class SecureConfigMixin:
         if not provider:
             return SecretStr("")
 
-        print(f"Validating API key for provider: {provider}")
+        logger.debug(f"Validating API key for provider: {provider}")
 
         # Create mapping for both enum values and string values
         env_key_map = {
@@ -90,22 +104,24 @@ class SecureConfigMixin:
         env_key = env_key_map.get(provider_value.lower())
 
         if env_key:
-            print(f"Looking for environment variable: {env_key}")
+            logger.debug(f"Looking for environment variable: {env_key}")
             api_key = os.getenv(env_key)
             if api_key and api_key.strip():
-                print(
+                logger.debug(
                     f"Found API key for {provider_value} in {env_key} (length: {len(api_key)})"
                 )
                 return SecretStr(api_key)
             else:
-                print(f"WARNING: Environment variable {env_key} not found or empty")
+                logger.warning(f"Environment variable {env_key} not found or empty")
         else:
-            print(
-                f"WARNING: No environment mapping found for provider: {provider_value}"
+            logger.warning(
+                f"No environment mapping found for provider: {provider_value}"
             )
 
         # If no key found, return an empty SecretStr
-        print(f"No API key found for {provider_value}, returning empty SecretStr")
+        logger.debug(
+            f"No API key found for {provider_value}, returning empty SecretStr"
+        )
         return SecretStr("")
 
     def get_api_key(self) -> Optional[str]:
@@ -118,8 +134,8 @@ class SecureConfigMixin:
         try:
             # Check if api_key attribute exists and is not None
             if not hasattr(self, "api_key") or self.api_key is None:
-                print(
-                    f"WARNING: No API key attribute found for {getattr(self, 'provider', 'unknown provider')}"
+                logger.warning(
+                    f"No API key attribute found for {getattr(self, 'provider', 'unknown provider')}"
                 )
                 return None
 
@@ -128,14 +144,14 @@ class SecureConfigMixin:
 
             # Check if the key is actually empty
             if not key_value or key_value.strip() == "":
-                print(
-                    f"WARNING: API key for {getattr(self, 'provider', 'unknown provider')} is empty"
+                logger.warning(
+                    f"API key for {getattr(self, 'provider', 'unknown provider')} is empty"
                 )
                 return None
 
             return key_value
         except Exception as e:
-            print(f"Error retrieving API key: {e}")
+            logger.error(f"Error retrieving API key: {e}")
 
             # If we're in a testing environment, use fake keys for development
             if (
@@ -148,7 +164,7 @@ class SecureConfigMixin:
                     if hasattr(provider_value, "value")
                     else str(provider_value)
                 )
-                print(
+                logger.debug(
                     f"Using fake test key for {provider_str} in development environment"
                 )
                 return f"test_key_{provider_str}"
@@ -176,6 +192,21 @@ class LLMConfig(BaseModel, SecureConfigMixin):
         default_factory=dict, description="Optional extra parameters."
     )
 
+    def model_post_init(self, __context: Any) -> None:
+        """
+        Post-initialization hook to load model metadata.
+
+        This automatically runs after the model is initialized.
+        """
+        logger.debug(f"Loading metadata for {self.model} from {self.provider}")
+
+        # Check model capabilities after initialization
+        context_window = self.get_context_window()
+        pricing = self.get_token_pricing()
+
+        logger.debug(f"Model {self.model} context window: {context_window}")
+        logger.debug(f"Model {self.model} pricing: {pricing}")
+
     def instantiate(self, **kwargs) -> Any:
         """
         Abstract method to be implemented by subclasses.
@@ -184,6 +215,13 @@ class LLMConfig(BaseModel, SecureConfigMixin):
             NotImplementedError: If not overridden by a subclass
         """
         raise NotImplementedError("This method should be overridden in subclasses.")
+
+    def create_graph_transformer(self) -> Any:
+        """Creates an LLMGraphTransformer instance using the LLM."""
+        from langchain_experimental.graph_transformers import LLMGraphTransformer
+
+        llm = self.instantiate()
+        return LLMGraphTransformer(llm=llm)
 
 
 class AzureLLMConfig(LLMConfig):
@@ -217,13 +255,13 @@ class AzureLLMConfig(LLMConfig):
         """
         from langchain_openai import AzureChatOpenAI
 
-        # Debug output (can keep this)
-        print("Debug - Attempting to instantiate Azure OpenAI model:")
-        print(f"- Model/deployment: {self.model}")
-        print(f"- API version: {self.api_version}")
-        print(f"- API base: {self.api_base}")
-        print(f"- API type: {self.api_type}")
-        print(f"- API key available: {'Yes' if self.get_api_key() else 'No'}")
+        # Debug output
+        logger.debug("Attempting to instantiate Azure OpenAI model:")
+        logger.debug(f"- Model/deployment: {self.model}")
+        logger.debug(f"- API version: {self.api_version}")
+        logger.debug(f"- API base: {self.api_base}")
+        logger.debug(f"- API type: {self.api_type}")
+        logger.debug(f"- API key available: {'Yes' if self.get_api_key() else 'No'}")
 
         # Validate required parameters
         if not self.get_api_key():
@@ -249,7 +287,7 @@ class AzureLLMConfig(LLMConfig):
                 **kwargs,
             )
         except Exception as e:
-            print(f"Failed to instantiate Azure OpenAI model: {str(e)}")
+            logger.error(f"Failed to instantiate Azure OpenAI model: {str(e)}")
             raise RuntimeError(
                 f"Failed to instantiate Azure OpenAI model: {str(e)}"
             ) from e
@@ -586,27 +624,6 @@ class PerplexityLLMConfig(LLMConfig):
             ) from e
 
 
-# Example usage and testing
-if __name__ == "__main__":
-    # Demonstration of configuration and instantiation for different providers
-    providers = [
-        AzureLLMConfig(model="gpt-4o"),
-        OpenAILLMConfig(model="gpt-3.5-turbo"),
-        AnthropicLLMConfig(model="claude-3-opus-20240229"),
-        GeminiLLMConfig(model="gemini-pro"),
-        DeepSeekLLMConfig(model="deepseek-chat"),
-        MistralLLMConfig(model="mistral-large-latest"),
-        GroqLLMConfig(model="llama-3-70b-chat"),
-        CohereLLMConfig(model="command-r"),
-        TogetherAILLMConfig(model="mistralai/Mistral-7B-Instruct-v0.2"),
-        FireworksAILLMConfig(model="accounts/fireworks/models/llama-v2-7b-chat"),
-        PerplexityLLMConfig(model="llama-3-sonar-large-32k-chat"),
-    ]
-
-    for provider_config in providers:
-        try:
-            print(f"\nTesting {provider_config.provider} configuration:")
-            llm = provider_config.instantiate()
-            print(f"{provider_config.provider} LLM instantiated successfully!")
-        except Exception as e:
-            print(f"Error initializing {provider_config.provider} LLM: {e}")
+# Add model metadata methods to the base LLMConfig class
+# This will make them available to all subclasses automatically
+add_metadata_methods(LLMConfig)
