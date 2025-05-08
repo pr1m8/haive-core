@@ -428,10 +428,6 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
     def derive_schema(self) -> Type[BaseModel]:
         """Derive state schema from components and engines using SchemaComposer.
 
-        This method now uses the new IO-to-state approach where the state schema
-        is composed from separate input and output schemas, rather than deriving
-        input/output schemas from the state schema.
-
         Returns:
             A state schema class (with no __runnable_config__ field)
         """
@@ -464,25 +460,11 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
     def _generate_schema_without_caching(self) -> Type[BaseModel]:
         """Generate schema directly without caching.
 
-        Uses the new IO-to-state approach where input and output schemas are derived first,
-        then combined to create the state schema.
+        This is used internally by derive_schema and in testing contexts.
 
         Returns:
             Generated state schema
         """
-        # Check if state schema is directly provided
-        if self.state_schema is not None:
-            if isinstance(self.state_schema, type) and issubclass(
-                self.state_schema, BaseModel
-            ):
-                return self.state_schema
-
-            if isinstance(self.state_schema, dict):
-                # Create schema from dictionary using SchemaComposer
-                composer = SchemaComposer(name=f"{self.name}State")
-                composer.add_fields_from_dict(self.state_schema)
-                return composer.build()
-
         # Get all components including engines
         all_components = []
         if self.engine:
@@ -503,18 +485,13 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
             if component not in all_components:
                 all_components.append(component)
 
-        # Create schema name
+        # Create schema
         schema_name = f"{self.name.replace('-', '_').title()}State"
-
-        # First derive input schema
-        input_schema = self.derive_input_schema_from_components(all_components)
-
-        # Then derive output schema
-        output_schema = self.derive_output_schema_from_components(all_components)
-
-        # Now compose the state schema from these input and output schemas
-        schema = SchemaComposer.create_state_from_io_schemas(
-            input_schema=input_schema, output_schema=output_schema, name=schema_name
+        schema = SchemaComposer.from_components(
+            components=all_components,
+            name=schema_name,
+            # include_messages=True,
+            # include_runnable_config=False  # Never include __runnable_config__
         )
 
         # Enhance schema with pattern-specific fields
@@ -522,65 +499,99 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
 
         return schema
 
-    def derive_input_schema_from_components(
-        self, components: List[Any]
-    ) -> Type[BaseModel]:
-        """Derive input schema from components.
-
-        Args:
-            components: List of components to derive input schema from
+    def _get_pattern_schema_components(self) -> List[Any]:
+        """Get components required by patterns.
 
         Returns:
-            Generated input schema
+            List of components required by patterns
         """
-        if self.input_schema is not None:
-            if isinstance(self.input_schema, type) and issubclass(
-                self.input_schema, BaseModel
-            ):
-                return self.input_schema
+        components = []
 
-            if isinstance(self.input_schema, dict):
-                # Create schema from dictionary
-                composer = SchemaComposer(name=f"{self.name}Input")
-                composer.add_fields_from_dict(self.input_schema)
-                return composer.build()
+        # Load pattern registry if needed
+        try:
+            from haive.core.graph.patterns.registry import GraphPatternRegistry
 
-        # Use SchemaComposer to create input schema from components
-        input_schema = SchemaComposer.compose_input_schema(
-            components=components, name=f"{self.name}Input"
-        )
+            registry = GraphPatternRegistry.get_instance()
 
-        return input_schema
+            # Check each pattern for required components
+            for pattern_config in self.patterns:
+                if not pattern_config.enabled:
+                    continue
 
-    def derive_output_schema_from_components(
-        self, components: List[Any]
-    ) -> Type[BaseModel]:
-        """Derive output schema from components.
+                pattern = registry.get_pattern(pattern_config.name)
+                if pattern:
+                    # Extract requirements from pattern metadata
+                    for req in pattern.metadata.get("required_components", []):
+                        # This is a simplified approach - actual implementation would be more sophisticated
+                        component_type = req.get("type")
+                        if component_type == "llm" and self.engine is None:
+                            from haive.core.engine.aug_llm import AugLLMConfig
+
+                            components.append(AugLLMConfig())
+                        elif component_type == "retriever" and not any(
+                            getattr(c, "engine_type", None) == EngineType.RETRIEVER
+                            for c in [self.engine] + list(self.engines.values())
+                        ):
+                            from haive.core.engine.retriever import (
+                                VectorStoreRetrieverConfig,
+                            )
+
+                            components.append(
+                                VectorStoreRetrieverConfig(
+                                    name="pattern_required_retriever"
+                                )
+                            )
+        except ImportError:
+            # Pattern system not available
+            logger.debug("Pattern system not available for schema component extraction")
+        except Exception as e:
+            logger.debug(f"Error getting pattern components: {e}")
+
+        return components
+
+    def _enhance_schema_with_patterns(self, schema: Type[BaseModel]) -> Type[BaseModel]:
+        """Enhance schema with pattern-specific fields and reducers.
 
         Args:
-            components: List of components to derive output schema from
+            schema: Base schema to enhance
 
         Returns:
-            Generated output schema
+            Enhanced schema
         """
-        if self.output_schema is not None:
-            if isinstance(self.output_schema, type) and issubclass(
-                self.output_schema, BaseModel
-            ):
-                return self.output_schema
+        manager = self.get_schema_manager(schema)
 
-            if isinstance(self.output_schema, dict):
-                # Create schema from dictionary
-                composer = SchemaComposer(name=f"{self.name}Output")
-                composer.add_fields_from_dict(self.output_schema)
-                return composer.build()
+        try:
+            from haive.core.graph.patterns.registry import GraphPatternRegistry
 
-        # Use SchemaComposer to create output schema from components
-        output_schema = SchemaComposer.compose_output_schema(
-            components=components, name=f"{self.name}Output"
-        )
+            registry = GraphPatternRegistry.get_instance()
 
-        return output_schema
+            # Process each pattern
+            for pattern_config in self.patterns:
+                if not pattern_config.enabled:
+                    continue
+
+                pattern = registry.get_pattern(pattern_config.name)
+                if pattern:
+                    # Add schema customizations based on pattern type
+                    pattern_type = pattern.metadata.get("pattern_type")
+
+                    # This is where we would add pattern-specific schema enhancements
+                    # For example, RAG patterns might add context fields
+                    if pattern_type == "retrieval":
+                        if not manager.has_field("context"):
+                            manager.add_field(
+                                "context", List[Dict[str, Any]], default_factory=list
+                            )
+                    elif pattern_type == "agent":
+                        if not manager.has_field("tools"):
+                            manager.add_field(
+                                "tools", List[Dict[str, Any]], default_factory=list
+                            )
+        except ImportError:
+            # Pattern system not available
+            logger.debug("Pattern system not available for schema enhancement")
+
+        return manager.get_model()
 
     def derive_input_schema(self) -> Type[BaseModel]:
         """Derive input schema for this agent.
@@ -613,7 +624,7 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
                 composer = SchemaComposer(name=f"{self.name}Input")
                 composer.add_fields_from_dict(self.input_schema)
 
-                schema = composer.build()
+                schema = composer  # .build()
                 self._input_schema_instance = schema
                 return schema
 
@@ -642,15 +653,11 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
             all_components.append(self.engine)
         all_components.extend(self.engines.values())
 
-        # Add components from node configs
-        for node_config in getattr(self, "node_configs", {}).values():
-            if (
-                isinstance(node_config.engine, Engine)
-                and node_config.engine not in all_components
-            ):
-                all_components.append(node_config.engine)
-
-        schema = self.derive_input_schema_from_components(all_components)
+        schema = SchemaComposer.compose_input_schema(
+            components=all_components,
+            name=f"{self.name}Input",
+            # include_runnable_config=False  # Never include __runnable_config__
+        )
 
         self._input_schema_instance = schema
         return schema
@@ -686,7 +693,7 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
                 composer = SchemaComposer(name=f"{self.name}Output")
                 composer.add_fields_from_dict(self.output_schema)
 
-                schema = composer.build()
+                schema = composer  # .build()
                 self._output_schema_instance = schema
                 return schema
 
@@ -717,15 +724,11 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
             all_components.append(self.engine)
         all_components.extend(self.engines.values())
 
-        # Add components from node configs
-        for node_config in getattr(self, "node_configs", {}).values():
-            if (
-                isinstance(node_config.engine, Engine)
-                and node_config.engine not in all_components
-            ):
-                all_components.append(node_config.engine)
-
-        schema = self.derive_output_schema_from_components(all_components)
+        schema = SchemaComposer.compose_output_schema(
+            components=all_components,
+            name=f"{self.name}Output",
+            # include_runnable_config=False  # Never include __runnable_config__
+        )
 
         self._output_schema_instance = schema
         return schema
@@ -1429,97 +1432,3 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
         logger.info(
             f"Registered agent class {agent_class.__name__} for config {cls.__name__}"
         )
-
-    def _get_pattern_schema_components(self) -> List[Any]:
-        """Get components required by patterns.
-
-        Returns:
-            List of components required by patterns
-        """
-        components = []
-
-        # Load pattern registry if needed
-        try:
-            from haive.core.graph.patterns.registry import GraphPatternRegistry
-
-            registry = GraphPatternRegistry.get_instance()
-
-            # Check each pattern for required components
-            for pattern_config in self.patterns:
-                if not pattern_config.enabled:
-                    continue
-
-                pattern = registry.get_pattern(pattern_config.name)
-                if pattern:
-                    # Extract requirements from pattern metadata
-                    for req in pattern.metadata.get("required_components", []):
-                        # This is a simplified approach - actual implementation would be more sophisticated
-                        component_type = req.get("type")
-                        if component_type == "llm" and self.engine is None:
-                            from haive.core.engine.aug_llm import AugLLMConfig
-
-                            components.append(AugLLMConfig())
-                        elif component_type == "retriever" and not any(
-                            getattr(c, "engine_type", None) == EngineType.RETRIEVER
-                            for c in [self.engine] + list(self.engines.values())
-                        ):
-                            from haive.core.engine.retriever import (
-                                VectorStoreRetrieverConfig,
-                            )
-
-                            components.append(
-                                VectorStoreRetrieverConfig(
-                                    name="pattern_required_retriever"
-                                )
-                            )
-        except ImportError:
-            # Pattern system not available
-            logger.debug("Pattern system not available for schema component extraction")
-        except Exception as e:
-            logger.debug(f"Error getting pattern components: {e}")
-
-        return components
-
-    def _enhance_schema_with_patterns(self, schema: Type[BaseModel]) -> Type[BaseModel]:
-        """Enhance schema with pattern-specific fields and reducers.
-
-        Args:
-            schema: Base schema to enhance
-
-        Returns:
-            Enhanced schema
-        """
-        manager = self.get_schema_manager(schema)
-
-        try:
-            from haive.core.graph.patterns.registry import GraphPatternRegistry
-
-            registry = GraphPatternRegistry.get_instance()
-
-            # Process each pattern
-            for pattern_config in self.patterns:
-                if not pattern_config.enabled:
-                    continue
-
-                pattern = registry.get_pattern(pattern_config.name)
-                if pattern:
-                    # Add schema customizations based on pattern type
-                    pattern_type = pattern.metadata.get("pattern_type")
-
-                    # This is where we would add pattern-specific schema enhancements
-                    # For example, RAG patterns might add context fields
-                    if pattern_type == "retrieval":
-                        if not manager.has_field("context"):
-                            manager.add_field(
-                                "context", List[Dict[str, Any]], default_factory=list
-                            )
-                    elif pattern_type == "agent":
-                        if not manager.has_field("tools"):
-                            manager.add_field(
-                                "tools", List[Dict[str, Any]], default_factory=list
-                            )
-        except ImportError:
-            # Pattern system not available
-            logger.debug("Pattern system not available for schema enhancement")
-
-        return manager.get_model()

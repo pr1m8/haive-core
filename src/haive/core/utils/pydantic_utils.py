@@ -532,3 +532,46 @@ def schema_to_code(schema: Any) -> str:
 
     # Default case
     return f"# Unable to generate code for schema of type {type(schema)}"
+
+
+def stringify_pydantic_model(
+    model: BaseModel,
+    pretty: bool = False,
+    exclude: Optional[set] = None,
+    include: Optional[set] = None,
+    indent: int = 2,
+) -> str:
+    """
+    Universal stringifier for any Pydantic model.
+
+    Args:
+        model: The Pydantic model to stringify
+        pretty: Whether to format with indentation
+        exclude: Fields to exclude from serialization
+        include: Fields to include in serialization
+        indent: Number of spaces for indentation if pretty=True
+
+    Returns:
+        String representation of the model
+    """
+    if hasattr(model, "model_dump_json"):
+        # Pydantic v2
+        if pretty:
+            return model.model_dump_json(
+                indent=indent, exclude=exclude, include=include
+            )
+        else:
+            return model.model_dump_json(exclude=exclude, include=include)
+    elif hasattr(model, "json"):
+        # Pydantic v1 fallback
+        if pretty:
+            return model.json(indent=indent, exclude=exclude, include=include)
+        else:
+            return model.json(exclude=exclude, include=include)
+    else:
+        # Fallback to string representation
+        return str(model)
+
+
+# Usage example
+# stringified = stringify_pydantic_model(model, pretty=True)

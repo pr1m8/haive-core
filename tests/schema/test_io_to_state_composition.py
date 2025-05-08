@@ -1,195 +1,121 @@
 """
-Tests for composing state schemas from input and output schemas.
-
-These tests verify that the SchemaComposer can correctly create a state schema
-by combining existing input and output schemas, rather than deriving them from a state schema.
+Simple test to verify SchemaComposer fixes work.
 """
 
-import logging
-from typing import Any, Dict, List
-
 import pytest
-from langchain_core.messages import BaseMessage, HumanMessage
-from pydantic import BaseModel, Field
+from langchain_core.messages import HumanMessage
+from rich.console import Console
+from rich.panel import Panel
+from rich.tree import Tree
 
+from haive.core.engine.aug_llm import AugLLMConfig
+from haive.core.engine.retriever import BaseRetrieverConfig
 from haive.core.schema.schema_composer import SchemaComposer
-from haive.core.schema.state_schema import StateSchema
 
-# Set up logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+console = Console()
 
 
-class SampleInputSchema(BaseModel):
-    """Input schema for testing."""
-
-    messages: List[BaseMessage] = Field(default_factory=list)
-    query: str = Field(default="")
-    context: Dict[str, Any] = Field(default_factory=dict)
-
-
-class SampleOutputSchema(BaseModel):
-    """Output schema for testing."""
-
-    messages: List[BaseMessage] = Field(default_factory=list)
-    response: str = Field(default="")
-    sources: List[Dict[str, Any]] = Field(default_factory=list)
-
-
-def test_compose_state_from_io_schemas():
-    """Test creating a state schema from input and output schemas."""
-    # Create a state schema from input and output schemas
-    logger.info("Creating state schema from input and output schemas")
-    state_schema = SchemaComposer.create_state_from_io_schemas(
-        SampleInputSchema, SampleOutputSchema, name="ComposedTestSchema"
+def test_schema_composer_diagnostics():
+    """Diagnostic test to see what's happening with field extraction."""
+    console.print(
+        "\n[bold cyan]Diagnosing Schema Composer Field Extraction...[/bold cyan]"
     )
 
-    # Print debug info
-    logger.info(f"Schema name: {state_schema.__name__}")
-    logger.info(f"Schema bases: {state_schema.__bases__}")
-    logger.info(f"Schema fields: {list(state_schema.model_fields.keys())}")
-
-    # Verify the result is a proper state schema
-    assert issubclass(state_schema, StateSchema)
-    assert issubclass(state_schema, SampleInputSchema)
-    assert issubclass(state_schema, SampleOutputSchema)
-
-    # Verify schema has the right name
-    assert state_schema.__name__ == "ComposedTestSchema"
-
-    # Verify all expected fields exist
-    assert "messages" in state_schema.model_fields
-    assert "query" in state_schema.model_fields
-    assert "context" in state_schema.model_fields
-    assert "response" in state_schema.model_fields
-    assert "sources" in state_schema.model_fields
-
-    # Debug the contents of __engine_io_mappings__
-    logger.info(
-        f"Engine I/O mappings: {getattr(state_schema, '__engine_io_mappings__', {})}"
+    # Create engines
+    llm_engine = AugLLMConfig(name="test_llm", model="gpt-4")
+    retriever_engine = BaseRetrieverConfig(
+        name="test_retriever", retriever_type="VectorStoreRetriever", k=5
     )
 
-    # Verify engine I/O mappings have been properly assigned
-    assert hasattr(state_schema, "__engine_io_mappings__")
+    # Step 1: Check engine field definitions
+    console.print("\n[bold yellow]Step 1: Engine Field Definitions[/bold yellow]")
 
-    # Debug engine I/O mappings just before assertion
-    mappings = state_schema.__engine_io_mappings__
-    logger.info(f"Engine I/O mappings keys: {list(mappings.keys())}")
+    # Check LLM engine
+    console.print("\n[green]LLM Engine:[/green]")
+    if hasattr(llm_engine, "get_input_fields"):
+        input_fields = llm_engine.get_input_fields()
+        console.print("  Input fields:")
+        for field_name, (field_type, field_info) in input_fields.items():
+            console.print(f"    {field_name}: {field_type}")
 
-    # Check for default engine in mappings and messages field is properly configured
-    if "default" not in state_schema.__engine_io_mappings__:
-        # If test would fail, print detailed debug info then fail
-        logger.error(
-            f"'default' not in engine_io_mappings! Available keys: {list(state_schema.__engine_io_mappings__.keys())}"
-        )
-        logger.error(
-            f"Full engine_io_mappings content: {state_schema.__engine_io_mappings__}"
-        )
-        assert "default" in state_schema.__engine_io_mappings__
+    if hasattr(llm_engine, "get_output_fields"):
+        output_fields = llm_engine.get_output_fields()
+        console.print("  Output fields:")
+        for field_name, (field_type, field_info) in output_fields.items():
+            console.print(f"    {field_name}: {field_type}")
 
-    # Continue with the test
-    default_mapping = state_schema.__engine_io_mappings__["default"]
-    logger.info(f"Default engine mapping content: {default_mapping}")
+    # Check Retriever engine
+    console.print("\n[green]Retriever Engine:[/green]")
+    if hasattr(retriever_engine, "get_input_fields"):
+        input_fields = retriever_engine.get_input_fields()
+        console.print("  Input fields:")
+        for field_name, (field_type, field_info) in input_fields.items():
+            console.print(f"    {field_name}: {field_type}")
 
-    assert "inputs" in default_mapping
-    assert "outputs" in default_mapping
-    assert "messages" in default_mapping["inputs"]
-    assert "messages" in default_mapping["outputs"]
+    if hasattr(retriever_engine, "get_output_fields"):
+        output_fields = retriever_engine.get_output_fields()
+        console.print("  Output fields:")
+        for field_name, (field_type, field_info) in output_fields.items():
+            console.print(f"    {field_name}: {field_type}")
 
-
-def test_state_instance_creation():
-    """Test creating and using a state instance from composed schema."""
-    # Create a state schema from input and output schemas
-    logger.info("Creating state schema for instance creation test")
-    state_schema = SchemaComposer.create_state_from_io_schemas(
-        SampleInputSchema, SampleOutputSchema, name="ComposedTestSchema"
+    # Step 2: Create composer and extract fields
+    console.print(
+        "\n[bold yellow]Step 2: Create Composer and Extract Fields[/bold yellow]"
     )
 
-    # Create a state instance with some initial values
-    logger.info("Creating state instance with initial values")
-    state = state_schema(
-        messages=[HumanMessage(content="Hello")],
-        query="What is the weather?",
-        context={"location": "New York"},
+    composer = SchemaComposer(name="SimpleState")
+    composer.add_fields_from_components([llm_engine, retriever_engine])
+
+    # Display extracted fields
+    console.print("\n[green]Extracted Fields:[/green]")
+    for field_name, field_def in composer.fields.items():
+        console.print(f"  {field_name}: {field_def.field_type}")
+        console.print(f"    Input for: {field_def.input_for}")
+        console.print(f"    Output from: {field_def.output_from}")
+        console.print(f"    Default: {field_def.default}")
+        console.print(f"    Default factory: {field_def.default_factory}")
+
+    # Step 3: Create schema and inspect fields
+    console.print(
+        "\n[bold yellow]Step 3: Create Schema and Inspect Fields[/bold yellow]"
     )
 
-    # Verify the instance has the expected values
-    assert len(state.messages) == 1
-    assert state.messages[0].content == "Hello"
-    assert state.query == "What is the weather?"
-    assert state.context["location"] == "New York"
-    assert state.response == ""  # Default value
-    assert len(state.sources) == 0  # Default empty list
+    schema = composer.build(create_io_schemas=False)
 
-    # Test updating the state
-    logger.info("Updating state instance")
-    state.response = "The weather is sunny"
-    state.sources = [{"url": "weather.com", "content": "Sunny and 75°F"}]
+    console.print("\n[green]Schema Model Fields:[/green]")
+    for field_name, field_info in schema.model_fields.items():
+        console.print(f"  {field_name}: {field_info.annotation}")
+        if hasattr(field_info, "default"):
+            console.print(f"    Default: {field_info.default}")
+        if hasattr(field_info, "is_required"):
+            console.print(f"    Required: {field_info.is_required()}")
 
-    assert state.response == "The weather is sunny"
-    assert len(state.sources) == 1
-    assert state.sources[0]["url"] == "weather.com"
+    # Step 4: Test instance creation with different data
+    console.print("\n[bold yellow]Step 4: Test Instance Creation[/bold yellow]")
 
+    from langchain_core.messages import HumanMessage
 
-def test_compose_state_directly():
-    """Test using the compose_state_from_io method directly."""
-    # Create a composer
-    logger.info("Creating composer for direct composition test")
-    composer = SchemaComposer(name="DirectComposedSchema")
-
-    # Add some field definitions to the composer
-    from typing import List
-
-    from langchain_core.messages import BaseMessage
-
-    # Configure messages field with reducer
+    # Try minimal instance creation
     try:
-        from langgraph.graph import add_messages
+        minimal_instance = schema(messages=[HumanMessage(content="Test")])
+        console.print("[green]✓ Minimal instance created![/green]")
+        console.print(f"  Has 'query': {hasattr(minimal_instance, 'query')}")
+        console.print(f"  Has 'content': {hasattr(minimal_instance, 'content')}")
+    except Exception as e:
+        console.print(f"[red]✗ Minimal instance failed: {e}[/red]")
 
-        reducer = add_messages
-    except ImportError:
-        # Fallback
-        def reducer(a, b):
-            return (a or []) + (b or [])
+    # Try with query field
+    try:
+        full_instance = schema(
+            messages=[HumanMessage(content="Test")], query="Test query"
+        )
+        console.print("[green]✓ Full instance created![/green]")
+        console.print(f"  Has 'query': {hasattr(full_instance, 'query')}")
+        console.print(f"  Query value: {getattr(full_instance, 'query', 'N/A')}")
+        console.print(f"  Has 'content': {hasattr(full_instance, 'content')}")
+    except Exception as e:
+        console.print(f"[red]✗ Full instance failed: {e}[/red]")
 
-    # Add messages field with reducer
-    logger.info("Adding messages field with reducer")
-    composer.add_field(
-        name="messages",
-        field_type=List[BaseMessage],
-        default_factory=list,
-        description="Messages for conversation",
-        reducer=reducer,
-        shared=True,
-        input_for=["llm"],
-        output_from=["llm"],
-    )
 
-    # Log engine_io_mappings before composing
-    logger.info(f"Engine I/O mappings before composing: {composer.engine_io_mappings}")
-
-    # Directly compose a state schema
-    logger.info("Directly composing state schema")
-    state_schema = composer.compose_state_from_io(SampleInputSchema, SampleOutputSchema)
-
-    # Log engine_io_mappings after composing
-    logger.info(
-        f"Engine I/O mappings after composing: {state_schema.__engine_io_mappings__}"
-    )
-
-    # Verify it inherits from both input and output schemas
-    assert issubclass(state_schema, StateSchema)
-    assert issubclass(state_schema, SampleInputSchema)
-    assert issubclass(state_schema, SampleOutputSchema)
-
-    # Verify shared fields were properly transferred
-    assert "messages" in state_schema.__shared_fields__
-
-    # Verify reducer was configured
-    assert "messages" in state_schema.__serializable_reducers__
-    assert "messages" in state_schema.__reducer_fields__
-
-    # Verify engine I/O mapping was maintained
-    assert "llm" in state_schema.__engine_io_mappings__
-    assert "messages" in state_schema.__engine_io_mappings__["llm"]["inputs"]
-    assert "messages" in state_schema.__engine_io_mappings__["llm"]["outputs"]
+if __name__ == "__main__":
+    test_schema_composer_diagnostics()

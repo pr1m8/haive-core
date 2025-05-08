@@ -19,7 +19,7 @@ from langchain_core.prompts import (
 from langchain_core.tools import StructuredTool, tool
 from pydantic import BaseModel, Field
 
-from haive.core.engine.aug_llm.base import AugLLMConfig
+from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.schema.schema_composer import SchemaComposer
 
 from .conftest import WeatherQuery, check_api_keys, skip_if_no_api_keys

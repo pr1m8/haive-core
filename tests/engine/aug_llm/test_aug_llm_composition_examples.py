@@ -13,7 +13,7 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 
-from haive.core.engine.aug_llm.base import AugLLMConfig
+from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.models.llm.base import AzureLLMConfig
 from haive.core.schema.schema_composer import SchemaComposer
 from haive.core.schema.state_schema import StateSchema
@@ -542,7 +542,7 @@ def test_auto_detect_schema_from_configs(
     # Step 4: Compare with schema from SchemaComposer
     print("\n" + "=" * 20 + " Comparison with SchemaComposer " + "=" * 20)
 
-    composer_schema = SchemaComposer.create_model(
+    composer_schema = SchemaComposer.from_components(
         all_configs,
         name="ComposerStateSchema",
         # include_messages=True,

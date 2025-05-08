@@ -4,6 +4,7 @@ import inspect
 import logging
 from functools import wraps
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
@@ -18,6 +19,8 @@ from typing import (
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
+if TYPE_CHECKING:
+    from haive.core.registry.base import AbstractRegistry
 
 
 def register_component(
