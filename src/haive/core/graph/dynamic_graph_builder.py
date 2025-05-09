@@ -115,7 +115,7 @@ class DynamicGraph:
     
     def __init__(
         self,
-        name: str,
+        name: Union[str,int] = None,
         components: List[Any] = None,
         state_schema: Optional[Type[BaseModel]] = None,
         input_schema: Optional[Type[BaseModel]] = None,
@@ -146,7 +146,7 @@ class DynamicGraph:
                         f"debug_level={debug_level}, visualize={visualize}")
             
             self.id = kwargs.get("id", str(uuid.uuid4()))
-            self.name = name
+            self.name = name if name else self.id
             self.description = description
             self.components = components or []
             self.visualize = visualize
@@ -546,7 +546,7 @@ class DynamicGraph:
                 command_goto = END
             
             # Create NodeConfig if not already
-            if not isinstance(config, NodeConfig):
+            if not isinstance(config, NodeConfig) and isinstance(config, Engine):
                 logger.debug(f"Creating NodeConfig for {name}")
                 node_config = NodeConfig(
                     name=name,
@@ -560,6 +560,13 @@ class DynamicGraph:
                     **kwargs
                 )
                 logger.debug(f"Created NodeConfig: {node_config.name}")
+            elif isinstance(config,Callable):
+                logger.debug(f"Creating NodeConfig for {name} from callable")
+                node_config = NodeConfig(
+                    name=name,
+                    callable_func=config,
+                    command_goto=command_goto,
+                )
             else:
                 logger.debug(f"Using provided NodeConfig: {config.name}")
                 node_config = config
@@ -577,6 +584,10 @@ class DynamicGraph:
             
             # Create node function using NodeFactory
             logger.debug(f"Creating node function with NodeFactory for: {name}")
+            #print('--------------------------------')
+            #print(node_config)
+            #print('--------------------------------')
+            #breakpoint()
             node_function = NodeFactory().create_node_function(node_config)
             
             # Add to StateGraph
