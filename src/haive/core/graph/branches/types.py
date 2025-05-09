@@ -3,26 +3,12 @@ Type definitions for the Branch system.
 """
 
 from enum import Enum
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Generic,
-    List,
-    Optional,
-    Protocol,
-    TypeVar,
-    Union,
-)
+from typing import Any, Dict, Generic, List, Optional, Protocol, TypeVar, Union
 
-from langchain_core.runnables import RunnableConfig
-from langgraph.types import Command, Send
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, Field
 
-# Type variables for improved type checking
-StateLike = TypeVar("StateLike")
-ConfigLike = TypeVar("ConfigLike")
-BranchResult = TypeVar("BranchResult", str, Send, List[Send], Command)
+# Import common types
+from haive.core.graph.common.types import ConfigLike, NodeOutput, StateLike
 
 
 class ComparisonType(str, Enum):
@@ -58,33 +44,41 @@ class BranchMode(str, Enum):
     DYNAMIC = "dynamic"  # Dynamic output based on state
 
 
-class BranchCallable(Protocol, Generic[StateLike, ConfigLike]):
+class BranchProtocol(Protocol, Generic[StateLike, ConfigLike]):
     """Protocol for branch callables."""
 
     def __call__(
         self, state: StateLike, config: Optional[ConfigLike] = None
-    ) -> BranchResult: ...
+    ) -> NodeOutput: ...
 
 
-class BranchResultModel(BaseModel):
+class BranchResult(BaseModel):
     """Structured result from a branch evaluation."""
 
     next_node: Optional[str] = None
-    send_objects: List[Send] = Field(default_factory=list)
-    command_object: Optional[Command] = None
+    send_objects: List[Any] = Field(default_factory=list)  # Use Any instead of Send
+    command_object: Optional[Any] = None  # Use Any instead of Command
     output_mapping: Optional[Dict[str, str]] = None
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_config = {"arbitrary_types_allowed": True}
 
     @property
     def is_send(self) -> bool:
         """Whether the result contains Send objects."""
-        return len(self.send_objects) > 0
+        from langgraph.types import Send
+
+        return len(self.send_objects) > 0 and all(
+            isinstance(obj, Send) for obj in self.send_objects
+        )
 
     @property
     def is_command(self) -> bool:
         """Whether the result contains a Command object."""
-        return self.command_object is not None
+        from langgraph.types import Command
+
+        return self.command_object is not None and isinstance(
+            self.command_object, Command
+        )
 
     @property
     def has_mapping(self) -> bool:

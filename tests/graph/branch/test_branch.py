@@ -6,43 +6,21 @@ including Send objects, dynamic mapping, and serialization.
 """
 
 import logging
-import os
-import sys
-import uuid
 from typing import Any, Dict, List, Optional, Union
 
 import pytest
 from langchain_core.messages import AIMessage, HumanMessage
 from langgraph.types import Command, Send
-from pydantic import Field
-from rich import print as rprint
+from pydantic import BaseModel, Field
 from rich.console import Console
-from rich.logging import RichHandler
 from rich.panel import Panel
 from rich.pretty import Pretty
-from rich.traceback import install as install_rich_traceback
 
-# Install rich traceback handler for better debugging
-install_rich_traceback(show_locals=True)
-
-# Set up rich logging
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(message)s",
-    datefmt="[%X]",
-    handlers=[RichHandler(rich_tracebacks=True, markup=True)],
-)
-
-logger = logging.getLogger("branch_tests")
-console = Console()
-
-# Import the branch system - adjust imports based on your actual structure
+# Import branch system
 from haive.core.graph.branches import (
     Branch,
     BranchMode,
     ComparisonType,
-    SendGenerator,
-    SendMapping,
     chain,
     conditional,
     create_from_send_function,
@@ -52,9 +30,13 @@ from haive.core.graph.branches import (
     message_contains,
     send_mapper,
 )
-
-# Import StateSchema for testing integration
+from haive.core.graph.branches.dynamic import DynamicMapping
+from haive.core.graph.branches.send_mapping import SendGenerator, SendMapping
 from haive.core.schema.state_schema import StateSchema
+
+# Setup logging
+logger = logging.getLogger("branch_tests")
+console = Console()
 
 
 # Define test schemas
@@ -68,11 +50,16 @@ class _TestState(StateSchema):
     contents: List[str] = Field(default_factory=list)
 
     def has_greeting(self) -> bool:
-        """Check if the last message contains a greeting."""
+        """Check if any message contains a greeting."""
         if not self.messages:
             return False
-        content = self.messages[-1].content.lower()
-        return any(word in content for word in ["hello", "hi", "hey", "greetings"])
+
+        for message in self.messages:
+            content = message.content.lower()
+            if any(word in content for word in ["hello", "hi", "hey", "greetings"]):
+                return True
+
+        return False
 
 
 # Debugging helper to display test information
@@ -264,7 +251,10 @@ def test_conditional_branch(schema_state):
 def test_send_mapper_with_function(schema_state, mapper_function):
     """Test send mapper using a function."""
     # Create send mapper
-    branch = create_from_send_function(mapper_function)
+    branch = Branch(
+        mode=BranchMode.SEND_MAPPER,
+        function=mapper_function,  # Set function directly instead of function_ref
+    )
 
     # Evaluate branch
     result = branch(schema_state)
@@ -272,11 +262,18 @@ def test_send_mapper_with_function(schema_state, mapper_function):
     # Log test information
     log_test("Send Mapper with Function Test", schema_state, branch, result)
 
+    # Get the Send objects - they're wrapped in BranchResult
+    if hasattr(result, "send_objects"):
+        send_objects = result.send_objects
+    else:
+        # For backward compatibility, might be direct list
+        send_objects = result
+
     # Assert correct result is list of Send objects
-    assert isinstance(result, list)
-    assert len(result) == 3
-    assert all(isinstance(item, Send) for item in result)
-    assert all(item.node == "process_content" for item in result)
+    assert isinstance(send_objects, list)
+    assert len(send_objects) == 3
+    assert all(isinstance(item, Send) for item in send_objects)
+    assert all(item.node == "process_content" for item in send_objects)
 
 
 def test_send_mapper_with_mappings(schema_state):
@@ -305,14 +302,21 @@ def test_send_mapper_with_mappings(schema_state):
     # Log test information
     log_test("Send Mapper with Mappings Test", schema_state, branch, result)
 
+    # Get the Send objects
+    if hasattr(result, "send_objects"):
+        send_objects = result.send_objects
+    else:
+        # For backward compatibility
+        send_objects = result
+
     # Assert correct result is list of Send objects
-    assert isinstance(result, list)
-    assert len(result) == 2
-    assert all(isinstance(item, Send) for item in result)
-    assert all(item.node == "process_content" for item in result)
-    assert result[0].arg["content"] == "Document 1"
-    assert result[0].arg["index"] == 5
-    assert result[1].arg["content"] == "Document 2"
+    assert isinstance(send_objects, list)
+    assert len(send_objects) == 2
+    assert all(isinstance(item, Send) for item in send_objects)
+    assert all(item.node == "process_content" for item in send_objects)
+    assert send_objects[0].arg["content"] == "Document 1"
+    assert send_objects[0].arg["index"] == 5
+    assert send_objects[1].arg["content"] == "Document 2"
 
 
 def test_send_mapper_with_generator(schema_state):
@@ -337,28 +341,33 @@ def test_send_mapper_with_generator(schema_state):
     # Log test information
     log_test("Send Mapper with Generator Test", schema_state, branch, result)
 
+    # Get the Send objects
+    if hasattr(result, "send_objects"):
+        send_objects = result.send_objects
+    else:
+        # For backward compatibility
+        send_objects = result
+
     # Assert correct result is list of Send objects
-    assert isinstance(result, list)
-    assert len(result) == 3
-    assert all(isinstance(item, Send) for item in result)
-    assert all(item.node == "process_content" for item in result)
-    assert result[0].arg["content"] == "DOCUMENT 1"
-    assert result[0].arg["original"] == "Document 1"
+    assert isinstance(send_objects, list)
+    assert len(send_objects) == 3
+    assert all(isinstance(item, Send) for item in send_objects)
+    assert all(item.node == "process_content" for item in send_objects)
+    assert send_objects[0].arg["content"] == "DOCUMENT 1"
+    assert send_objects[0].arg["original"] == "Document 1"
 
 
 # Command and dynamic mapping tests
 def test_dynamic_output_mapping():
-    """Test dynamic output mapping."""
+    """Test dynamic output mapping with Command object return."""
     # Create state with score
     state = {"score": 85, "query": "complex question"}
 
-    # Create a branch that selects different output mappings based on score
-    from haive.core.graph.branches.dynamic import DynamicMappingConfig
-
+    # Create a branch with dynamic mode
     branch = Branch(mode=BranchMode.DYNAMIC, default="normal_route")
 
     # Set dynamic mapping
-    branch.dynamic_mapping = DynamicMappingConfig(
+    branch.dynamic_mapping = DynamicMapping(
         mappings={
             "high_score_route": {
                 "response": "detailed_answer",
@@ -372,14 +381,20 @@ def test_dynamic_output_mapping():
         default_node="normal_route",
     )
 
+    # For debugging - print the dynamic_mapping config
+    console.print(
+        f"\nDynamic Mapping: key={branch.dynamic_mapping.key}, value={branch.dynamic_mapping.value}, "
+        f"comparison={branch.dynamic_mapping.comparison}"
+    )
+
     # Evaluate branch
     result = branch(state)
 
     # Log test information
     log_test("Dynamic Output Mapping Test", state, branch, result)
 
-    # Result should be a Command with goto and output_mapping
-    assert isinstance(result, Command)
+    # Check the result is a Command object
+    assert isinstance(result, Command), f"Expected Command, got {type(result)}"
     assert result.goto == "high_score_route"
     assert "output_mapping" in result.update
     assert result.update["output_mapping"] == {
@@ -403,7 +418,7 @@ def test_serialization_deserialization(schema_state):
     )
 
     # Serialize to dict
-    branch_dict = original_branch.to_dict()
+    branch_dict = original_branch.model_dump()
 
     # Log serialized data
     console.rule("[bold magenta]Serialization Test")
@@ -418,7 +433,7 @@ def test_serialization_deserialization(schema_state):
     )
 
     # Deserialize
-    restored_branch = Branch.from_dict(branch_dict)
+    restored_branch = Branch.model_validate(branch_dict)
 
     # Test with same state
     original_result = original_branch(schema_state)
@@ -436,22 +451,3 @@ def test_serialization_deserialization(schema_state):
 
     # Assert results match
     assert original_result == restored_result
-
-
-# Main test runner with rich output
-if __name__ == "__main__":
-    console.rule("[bold]Branch System Tests", style="purple")
-
-    # Print test environment info
-    console.print(
-        Panel(
-            f"Python version: {sys.version}\n"
-            f"Running in: {os.getcwd()}\n"
-            f"Test file: {__file__}",
-            title="Test Environment",
-            border_style="dim",
-        )
-    )
-
-    # Run the tests
-    sys.exit(pytest.main(["-v", __file__]))

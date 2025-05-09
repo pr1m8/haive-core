@@ -5,11 +5,12 @@ Send mapping functionality for routing and state transformation.
 import logging
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from langgraph.types import Send
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, Field
+
+from haive.core.graph.common.field_utils import extract_field
 
 # Import from common utilities
-from haive.core.graph.common import extract_field
+from haive.core.graph.common.types import StateLike
 
 logger = logging.getLogger(__name__)
 
@@ -17,9 +18,6 @@ logger = logging.getLogger(__name__)
 class SendMapping(BaseModel):
     """
     Mapping configuration for generating Send objects.
-
-    This class defines how to extract data from state and format it
-    for Send objects targeting specific nodes.
     """
 
     target: str = Field(..., description="Target node name")
@@ -34,18 +32,12 @@ class SendMapping(BaseModel):
         None, description="Transformations to apply to fields"
     )
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_config = {"arbitrary_types_allowed": True}
 
-    def create_send(self, state: Any) -> Optional[Send]:
-        """
-        Create a Send object from state using this mapping.
+    def create_send(self, state: StateLike) -> Optional[Any]:
+        """Create a Send object from state using this mapping."""
+        from langgraph.types import Send
 
-        Args:
-            state: State object to extract values from
-
-        Returns:
-            Send object or None if condition not met
-        """
         # Check condition if specified
         if self.condition is not None:
             field_value = extract_field(state, self.condition)
@@ -79,9 +71,6 @@ class SendMapping(BaseModel):
 class SendGenerator(BaseModel):
     """
     Generator for Send objects based on lists or collections.
-
-    This enables mapping a single state field that contains multiple items
-    into multiple Send objects.
     """
 
     target: str = Field(..., description="Target node name")
@@ -95,18 +84,12 @@ class SendGenerator(BaseModel):
         None, description="Function to filter items"
     )
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_config = {"arbitrary_types_allowed": True}
 
-    def create_sends(self, state: Any) -> List[Send]:
-        """
-        Create multiple Send objects from a collection in state.
+    def create_sends(self, state: StateLike) -> List[Any]:
+        """Create multiple Send objects from a collection in state."""
+        from langgraph.types import Send
 
-        Args:
-            state: State object
-
-        Returns:
-            List of Send objects
-        """
         # Extract collection
         collection = extract_field(state, self.collection_field)
         if not collection or not isinstance(collection, (list, tuple, set)):
@@ -150,18 +133,10 @@ class SendMappingList(BaseModel):
     mappings: List[SendMapping] = Field(default_factory=list)
     generators: List[SendGenerator] = Field(default_factory=list)
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_config = {"arbitrary_types_allowed": True}
 
-    def create_sends(self, state: Any) -> List[Send]:
-        """
-        Apply all mappings and generators to state.
-
-        Args:
-            state: State object
-
-        Returns:
-            List of Send objects
-        """
+    def create_sends(self, state: StateLike) -> List[Any]:
+        """Apply all mappings and generators to state."""
         sends = []
 
         # Apply standard mappings
