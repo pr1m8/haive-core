@@ -3,6 +3,7 @@ Core Branch implementation for dynamic routing.
 """
 
 import logging
+import uuid
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 from langgraph.types import Command, Send
@@ -33,6 +34,12 @@ class Branch(BaseModel):
     Enhanced branch for dynamic routing based on state values.
     """
 
+    # Identity fields
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str = Field(default_factory=lambda: f"branch_{uuid.uuid4().hex[:8]}")
+    source_node: Optional[str] = None
+
+    # Core branch fields
     key: Optional[str] = None
     value: Any = None
     comparison: Union[ComparisonType, str] = ComparisonType.EQUALS

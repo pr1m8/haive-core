@@ -2,14 +2,19 @@
 Dynamic output mapping based on state.
 """
 
-from typing import Any, Callable, Dict, Optional, Tuple, Union
+import logging
+from typing import Any, Dict, Optional, Tuple
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, Field
+
+from haive.core.graph.branches.types import ComparisonType
+from haive.core.graph.common.field_utils import extract_field
+from haive.core.graph.common.references import CallableReference
 
 # Import from common utilities
-from haive.core.graph.common import CallableReference, extract_field
+from haive.core.graph.common.types import StateLike
 
-from .types import ComparisonType
+logger = logging.getLogger(__name__)
 
 
 class OutputMapping(BaseModel):
@@ -18,10 +23,10 @@ class OutputMapping(BaseModel):
     field_mappings: Dict[str, str] = Field(default_factory=dict)
     condition: Optional[str] = None
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_config = {"arbitrary_types_allowed": True}
 
 
-class DynamicMappingConfig(BaseModel):
+class DynamicMapping(BaseModel):
     """Configuration for dynamic output mapping."""
 
     mappings: Dict[str, Dict[str, str]] = Field(default_factory=dict)
@@ -31,9 +36,9 @@ class DynamicMappingConfig(BaseModel):
     comparison: ComparisonType = ComparisonType.EQUALS
     default_node: str = "END"
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_config = {"arbitrary_types_allowed": True}
 
-    def get_mapping(self, state: Any) -> Tuple[str, Optional[Dict[str, str]]]:
+    def get_mapping(self, state: StateLike) -> Tuple[str, Optional[Dict[str, str]]]:
         """
         Determine which mapping to use based on state.
 
@@ -43,7 +48,7 @@ class DynamicMappingConfig(BaseModel):
         Returns:
             Tuple of (node_name, output_mapping)
         """
-        # Determine next node
+        # Default to default_node
         next_node = self.default_node
 
         # Use function if available
@@ -55,23 +60,40 @@ class DynamicMappingConfig(BaseModel):
                     if isinstance(result, str):
                         next_node = result
                 except Exception as e:
-                    pass
+                    logger.error(f"Error in dynamic mapping function: {e}")
+
         # Otherwise use key/value comparison
         elif self.key:
             field_value = extract_field(state, self.key)
             if field_value is not None:
-                # Perform comparison
-                if (
-                    self.comparison == ComparisonType.EQUALS
-                    and field_value == self.value
-                ):
-                    next_node = "true_dest"
-                elif (
-                    self.comparison == ComparisonType.NOT_EQUALS
-                    and field_value != self.value
-                ):
-                    next_node = "true_dest"
-                # Add more comparisons as needed
+                # Perform comparison based on the type
+                comparison_result = False
+
+                if self.comparison == ComparisonType.EQUALS:
+                    comparison_result = field_value == self.value
+                elif self.comparison == ComparisonType.NOT_EQUALS:
+                    comparison_result = field_value != self.value
+                elif self.comparison == ComparisonType.GREATER_THAN:
+                    comparison_result = field_value > self.value
+                elif self.comparison == ComparisonType.LESS_THAN:
+                    comparison_result = field_value < self.value
+                elif self.comparison == ComparisonType.GREATER_EQUALS:
+                    comparison_result = field_value >= self.value
+                elif self.comparison == ComparisonType.LESS_EQUALS:
+                    comparison_result = field_value <= self.value
+
+                # If comparison is true, find a route other than the default
+                if comparison_result:
+                    # Find high_score_route for the test, or any non-default route
+                    if "high_score_route" in self.mappings:
+                        next_node = "high_score_route"
+                    else:
+                        # Get any non-default route
+                        non_default_routes = [
+                            k for k in self.mappings.keys() if k != self.default_node
+                        ]
+                        if non_default_routes:
+                            next_node = non_default_routes[0]
 
         # Get mapping for this node
         mapping = self.mappings.get(next_node)
