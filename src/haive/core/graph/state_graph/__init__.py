@@ -4,6 +4,7 @@ Graph serialization framework for Haive.
 This package provides tools for serializing, modifying, and managing LangGraph StateGraph objects.
 """
 
+"""
 # Base models
 from .base import SerializableModel
 
@@ -53,3 +54,4 @@ __all__ = [
     # Decorators
     "register_pattern",
 ]
+"""
