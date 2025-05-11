@@ -217,7 +217,7 @@ vs_config = VectorStoreConfig(
 
 ```python
 from haive.core.graph.dynamic_graph_builder import DynamicGraph
-from haive.core.engine.aug_llm.base import AugLLMConfig
+from haive.core.engine.aug_llm import AugLLMConfig
 from langgraph.graph import START, END
 
 # Create engines
