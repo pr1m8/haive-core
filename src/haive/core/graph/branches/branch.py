@@ -1,10 +1,13 @@
 """
 Core Branch implementation for dynamic routing.
+
+This module provides a unified Branch class that replaces the need for
+separate ConditionalEdge objects, consolidating all routing logic.
 """
 
 import logging
 import uuid
-from typing import Any, Callable, Dict, List, Optional, Set, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 from langgraph.types import Command, Send
 from pydantic import BaseModel, Field, model_validator
@@ -15,15 +18,17 @@ from haive.core.graph.branches.send_mapping import (
     SendMapping,
     SendMappingList,
 )
-from haive.core.graph.branches.types import BranchMode, BranchResult, ComparisonType
+from haive.core.graph.branches.types import (
+    BranchMode,
+    BranchResult,
+    ComparisonType,
+)
 from haive.core.graph.common.field_utils import (
     extract_base_field,
     extract_field,
     get_last_message_content,
 )
 from haive.core.graph.common.references import CallableReference
-
-# Import from common utilities
 from haive.core.graph.common.types import ConfigLike, NodeOutput, StateLike
 
 logger = logging.getLogger(__name__)
@@ -31,44 +36,43 @@ logger = logging.getLogger(__name__)
 
 class Branch(BaseModel):
     """
-    Enhanced branch for dynamic routing based on state values.
+    Unified branch for dynamic routing based on state values.
+
+    This class combines the functionality of branch routing and conditional edges,
+    providing a single unified interface for graph routing.
     """
 
-    # Identity fields
+    # Core identification
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str = Field(default_factory=lambda: f"branch_{uuid.uuid4().hex[:8]}")
-    source_node: Optional[str] = None
 
-    # Core branch fields
-    key: Optional[str] = None
-    value: Any = None
-    comparison: Union[ComparisonType, str] = ComparisonType.EQUALS
-    function_ref: Optional[CallableReference] = None
+    # Connection information (replaces ConditionalEdge)
+    source_node: str
     destinations: Dict[Union[bool, str], str] = Field(
         default_factory=lambda: {True: "continue", False: "END"}
     )
     default: str = "END"
+
+    # Evaluation properties
+    mode: BranchMode = BranchMode.DIRECT
+    key: Optional[str] = None
+    value: Any = None
+    comparison: Union[ComparisonType, str] = ComparisonType.EQUALS
+    function: Optional[Callable] = None
+    function_ref: Optional[CallableReference] = None
     allow_none: bool = False
     message_key: str = "messages"
-    mode: BranchMode = BranchMode.DIRECT
 
-    # For Send operations
+    # Advanced features
     send_mappings: List[SendMapping] = Field(default_factory=list)
     send_generators: List[SendGenerator] = Field(default_factory=list)
-
-    # For dynamic mapping
     dynamic_mapping: Optional[DynamicMapping] = None
-
-    # For chain branches
     chain_branches: List["Branch"] = Field(default_factory=list)
-
-    # For condition branches
     condition_ref: Optional[CallableReference] = None
     true_branch: Optional[Union[str, "Branch"]] = None
     false_branch: Optional[Union[str, "Branch"]] = None
 
-    # Internal properties - not serialized
-    function: Optional[Callable] = None
+    # Implementation details
     send_mapping_list: Optional[SendMappingList] = None
 
     model_config = {"arbitrary_types_allowed": True}
@@ -86,7 +90,7 @@ class Branch(BaseModel):
                 self.function = resolved
 
         # Set up send mapping list
-        if not self.send_mapping_list:
+        if not self.send_mapping_list and (self.send_mappings or self.send_generators):
             self.send_mapping_list = SendMappingList(
                 mappings=self.send_mappings, generators=self.send_generators
             )
@@ -97,9 +101,6 @@ class Branch(BaseModel):
         self, state: StateLike, config: Optional[ConfigLike] = None
     ) -> NodeOutput:
         """Make Branch directly callable for use in conditional edges."""
-        # Import here to avoid circular imports
-        from langgraph.types import Command
-
         # Special handling for dynamic branch with dynamic_mapping
         if self.mode == BranchMode.DYNAMIC and self.dynamic_mapping:
             # Get the next node and mapping

@@ -28,7 +28,7 @@ from langgraph.types import Command, RetryPolicy, Send
 from pydantic import BaseModel, Field, model_validator
 
 # Import Branch implementation
-from haive.core.graph.branches import Branch
+from haive.core.graph.branches.branch import Branch
 from haive.core.graph.branches.types import BranchMode, BranchResult, ComparisonType
 from haive.core.graph.common.references import CallableReference
 from haive.core.graph.common.types import ConfigLike, NodeOutput, StateLike
@@ -70,24 +70,11 @@ class EdgeType(str, Enum):
     DYNAMIC = "dynamic"  # Created dynamically at runtime
 
 
-# Edge types
 # Simple edge: (source_node_name, target_node_name)
 SimpleEdge = Tuple[str, str]
 
-
-# Conditional edge with branch reference
-class ConditionalEdge(BaseModel):
-    """Conditional edge that uses a branch for routing."""
-
-    source: str
-    branch_id: str
-    targets: Dict[str, str]  # condition result -> target node
-
-    model_config = {"frozen": True}
-
-
-# Complete edge type
-Edge = Union[SimpleEdge, ConditionalEdge]
+# Complete edge type - now just simple edges
+Edge = SimpleEdge
 
 
 class Node(BaseModel, Generic[StateLike, ConfigLike, NodeOutput]):
@@ -142,7 +129,7 @@ class BaseGraph(BaseModel):
 
     Provides comprehensive graph management capabilities including:
     - Node management (add, remove, update)
-    - Edge management (direct and conditional)
+    - Edge management (direct and branch-based)
     - Branch management
     - Graph validation
     - Serialization
@@ -154,7 +141,7 @@ class BaseGraph(BaseModel):
     description: Optional[str] = None
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
-    # Core graph components
+    # Core graph components - branches now handle conditional routing
     nodes: Dict[str, Node] = Field(default_factory=dict)
     edges: List[Edge] = Field(default_factory=list)
     branches: Dict[str, Branch] = Field(default_factory=dict)
@@ -184,26 +171,26 @@ class BaseGraph(BaseModel):
         self.nodes = nodes_by_name
 
         # Validate edges
-        for edge in self.edges:
-            if isinstance(edge, tuple):
-                source, target = edge
-                if source not in self.nodes and source != START_NODE:
-                    raise ValueError(f"Edge source '{source}' not found in nodes")
-                if target not in self.nodes and target != END_NODE:
-                    raise ValueError(f"Edge target '{target}' not found in nodes")
-            elif isinstance(edge, ConditionalEdge):
-                source = edge.source
-                branch_id = edge.branch_id
+        for source, target in self.edges:
+            if source not in self.nodes and source != START_NODE:
+                raise ValueError(f"Edge source '{source}' not found in nodes")
+            if target not in self.nodes and target != END_NODE:
+                raise ValueError(f"Edge target '{target}' not found in nodes")
 
-                if source not in self.nodes and source != START_NODE:
-                    raise ValueError(f"Edge source '{source}' not found in nodes")
-                if branch_id not in self.branches:
-                    raise ValueError(f"Branch '{branch_id}' not found in branches")
+        # Validate branches
+        for branch_id, branch in self.branches.items():
+            if (
+                branch.source_node not in self.nodes
+                and branch.source_node != START_NODE
+            ):
+                raise ValueError(
+                    f"Branch source '{branch.source_node}' not found in nodes"
+                )
 
-                # Validate targets
-                for target in edge.targets.values():
-                    if target not in self.nodes and target != END_NODE:
-                        raise ValueError(f"Edge target '{target}' not found in nodes")
+            # Validate targets in destinations
+            for target in branch.destinations.values():
+                if target != END_NODE and target not in self.nodes:
+                    raise ValueError(f"Branch target '{target}' not found in nodes")
 
         return self
 
@@ -260,7 +247,7 @@ class BaseGraph(BaseModel):
                 node_data.update(
                     {
                         "node_type": NodeType.ENGINE,
-                        "metadata": {"engine": node_like},
+                        "metadata": {"engine": node_like, "callable": node_like},
                         **kwargs,
                     }
                 )
@@ -273,7 +260,10 @@ class BaseGraph(BaseModel):
                             if callable(node_like)
                             else NodeType.ENGINE
                         ),
-                        "metadata": {"object": node_like},
+                        "metadata": {
+                            "object": node_like,
+                            "callable": node_like if callable(node_like) else None,
+                        },
                         **kwargs,
                     }
                 )
@@ -330,16 +320,9 @@ class BaseGraph(BaseModel):
         # Remove node
         del self.nodes[node_name]
 
-        # Remove associated edges
+        # Remove associated direct edges
         self.edges = [
-            edge
-            for edge in self.edges
-            if (
-                isinstance(edge, tuple)
-                and edge[0] != node_name
-                and edge[1] != node_name
-            )
-            or (isinstance(edge, ConditionalEdge) and edge.source != node_name)
+            edge for edge in self.edges if edge[0] != node_name and edge[1] != node_name
         ]
 
         # Remove associated branches
@@ -350,6 +333,17 @@ class BaseGraph(BaseModel):
 
         for branch_id in branch_ids_to_remove:
             del self.branches[branch_id]
+
+        # Update any branch destinations that pointed to this node
+        for branch in self.branches.values():
+            for condition, target in list(branch.destinations.items()):
+                if target == node_name:
+                    # Remove or set to default
+                    del branch.destinations[condition]
+
+            # Update default if needed
+            if branch.default == node_name:
+                branch.default = END_NODE
 
         logger.debug(f"Removed node '{node_name}' from graph '{self.name}'")
         self.updated_at = datetime.now()
@@ -396,15 +390,15 @@ class BaseGraph(BaseModel):
         self,
         node_name: str,
         new_node: Union[Node, Dict, Any],
-        preserve_edges: bool = True,
+        preserve_connections: bool = True,
     ) -> "BaseGraph":
         """
-        Replace a node while optionally preserving its edges.
+        Replace a node while optionally preserving its connections.
 
         Args:
             node_name: Name of the node to replace
             new_node: New node to insert
-            preserve_edges: Whether to preserve existing edges
+            preserve_connections: Whether to preserve existing connections
 
         Returns:
             Self for method chaining
@@ -412,22 +406,25 @@ class BaseGraph(BaseModel):
         if node_name not in self.nodes:
             raise ValueError(f"Node '{node_name}' not found in graph")
 
-        # Store existing edges if needed
+        # Store existing connections if needed
         incoming_edges = []
         outgoing_edges = []
-        conditional_edges = []
+        source_branches = []
 
-        if preserve_edges:
-            for edge in self.edges:
-                if isinstance(edge, tuple):
-                    source, target = edge
-                    if source == node_name:
-                        outgoing_edges.append((source, target))
-                    elif target == node_name:
-                        incoming_edges.append((source, target))
-                elif isinstance(edge, ConditionalEdge):
-                    if edge.source == node_name:
-                        conditional_edges.append(edge)
+        if preserve_connections:
+            # Get direct edges
+            for source, target in self.edges:
+                if source == node_name:
+                    outgoing_edges.append((source, target))
+                elif target == node_name:
+                    incoming_edges.append((source, target))
+
+            # Get branches where this is the source
+            source_branches = [
+                branch
+                for branch in self.branches.values()
+                if branch.source_node == node_name
+            ]
 
         # Remove the old node
         self.remove_node(node_name)
@@ -441,12 +438,17 @@ class BaseGraph(BaseModel):
                 self.add_node(new_node_copy)
             else:
                 self.add_node(new_node)
+        elif callable(new_node):
+            # Direct callable
+            self.add_node(node_name, new_node)
+            # Ensure the callable is in metadata
+            self.nodes[node_name].metadata["callable"] = new_node
         else:
             # For other types, use the specified name
             self.add_node(node_name, new_node)
 
-        # Restore edges if needed
-        if preserve_edges:
+        # Restore connections if needed
+        if preserve_connections:
             # Restore direct edges
             for source, target in incoming_edges:
                 self.add_edge(source, node_name)
@@ -454,11 +456,10 @@ class BaseGraph(BaseModel):
             for source, target in outgoing_edges:
                 self.add_edge(node_name, target)
 
-            # Restore conditional edges
-            for edge in conditional_edges:
-                branch = self.branches.get(edge.branch_id)
-                if branch:
-                    self.add_conditional_edge(node_name, branch, edge.targets)
+            # Restore branches
+            for branch in source_branches:
+                branch.source_node = node_name
+                self.add_branch(branch)
 
         logger.debug(f"Replaced node '{node_name}' in graph '{self.name}'")
         return self
@@ -471,7 +472,7 @@ class BaseGraph(BaseModel):
         **kwargs,
     ) -> "BaseGraph":
         """
-        Insert a new node after an existing node, redirecting all outgoing edges.
+        Insert a new node after an existing node, redirecting all outgoing connections.
 
         Args:
             target_node: Name of the existing node
@@ -487,16 +488,11 @@ class BaseGraph(BaseModel):
 
         # Get outgoing edges from target node
         outgoing_edges = []
-        conditional_edges = []
+        outgoing_branches = []
 
-        for edge in self.edges:
-            if isinstance(edge, tuple):
-                source, target = edge
-                if source == target_node:
-                    outgoing_edges.append((source, target))
-            elif isinstance(edge, ConditionalEdge):
-                if edge.source == target_node:
-                    conditional_edges.append(edge)
+        for source, target in self.edges:
+            if source == target_node:
+                outgoing_edges.append((source, target))
 
         # Add the new node
         if isinstance(new_node, str):
@@ -515,6 +511,12 @@ class BaseGraph(BaseModel):
             new_node_name = f"{target_node}_after_{uuid.uuid4().hex[:6]}"
             self.add_node(new_node_name, new_node, **kwargs)
 
+        # Get any branches from the target node
+        branches_to_update = []
+        for branch_id, branch in self.branches.items():
+            if branch.source_node == target_node:
+                branches_to_update.append(branch)
+
         # Remove original outgoing edges
         for edge in outgoing_edges:
             self.remove_edge(edge[0], edge[1])
@@ -526,15 +528,18 @@ class BaseGraph(BaseModel):
         for _, target in outgoing_edges:
             self.add_edge(new_node_name, target)
 
-        # Handle conditional edges
-        for edge in conditional_edges:
-            # Remove the original conditional edge
-            self.edges = [e for e in self.edges if e != edge]
+        # Update branches - create new branches from the new node
+        for branch in branches_to_update:
+            # Remove old branch
+            self.remove_branch(branch.id)
 
-            # Add a new edge from new node to targets
-            branch = self.branches.get(edge.branch_id)
-            if branch:
-                self.add_conditional_edge(new_node_name, branch, edge.targets)
+            # Create new branch from new node
+            new_branch = branch.model_copy(deep=True)
+            new_branch.id = str(uuid.uuid4())  # New ID for new branch
+            new_branch.source_node = new_node_name
+
+            # Add the new branch
+            self.add_branch(new_branch)
 
         logger.debug(
             f"Inserted node '{new_node_name}' after '{target_node}' in graph '{self.name}'"
@@ -549,7 +554,7 @@ class BaseGraph(BaseModel):
         **kwargs,
     ) -> "BaseGraph":
         """
-        Insert a new node before an existing node, redirecting all incoming edges.
+        Insert a new node before an existing node, redirecting all incoming connections.
 
         Args:
             target_node: Name of the existing node
@@ -563,14 +568,23 @@ class BaseGraph(BaseModel):
         if target_node not in self.nodes:
             raise ValueError(f"Target node '{target_node}' not found in graph")
 
-        # Get incoming edges to target node
+        # Get incoming direct edges to target node
         incoming_edges = []
 
-        for edge in self.edges:
-            if isinstance(edge, tuple):
-                source, target = edge
-                if target == target_node:
-                    incoming_edges.append((source, target))
+        for source, target in self.edges:
+            if target == target_node:
+                incoming_edges.append((source, target))
+
+        # Get incoming branch connections
+        incoming_branches = []
+        for branch_id, branch in self.branches.items():
+            for condition, dest in branch.destinations.items():
+                if dest == target_node:
+                    incoming_branches.append((branch, condition))
+
+            # Check default too
+            if branch.default == target_node:
+                incoming_branches.append((branch, "default"))
 
         # Add the new node
         if isinstance(new_node, str):
@@ -600,6 +614,13 @@ class BaseGraph(BaseModel):
         # Add edge from new node to target
         self.add_edge(new_node_name, target_node)
 
+        # Update branch destinations to point to the new node
+        for branch, condition in incoming_branches:
+            if condition == "default":
+                branch.default = new_node_name
+            else:
+                branch.destinations[condition] = new_node_name
+
         logger.debug(
             f"Inserted node '{new_node_name}' before '{target_node}' in graph '{self.name}'"
         )
@@ -623,11 +644,16 @@ class BaseGraph(BaseModel):
         Returns:
             Self for method chaining
         """
-        # Get all nodes connected from START
+        # Get all nodes connected directly from START
         start_edges = [
-            edge
-            for edge in self.edges
-            if (isinstance(edge, tuple) and edge[0] == START_NODE)
+            (source, target) for source, target in self.edges if source == START_NODE
+        ]
+
+        # Get all nodes connected from START via branches
+        start_branches = [
+            branch
+            for branch in self.branches.values()
+            if branch.source_node == START_NODE
         ]
 
         # Add the prelude node
@@ -647,7 +673,7 @@ class BaseGraph(BaseModel):
             prelude_name = f"prelude_{uuid.uuid4().hex[:6]}"
             self.add_node(prelude_name, prelude_node, **kwargs)
 
-        # Remove existing START edges
+        # Remove existing START direct edges
         for edge in start_edges:
             self.remove_edge(START_NODE, edge[1])
 
@@ -657,6 +683,19 @@ class BaseGraph(BaseModel):
         # Add edges from prelude to original start nodes
         for _, target in start_edges:
             self.add_edge(prelude_name, target)
+
+        # Handle branches from START
+        for branch in start_branches:
+            # Create new branch from prelude node with same destinations
+            new_branch = branch.model_copy(deep=True)
+            new_branch.id = str(uuid.uuid4())
+            new_branch.source_node = prelude_name
+
+            # Add the new branch
+            self.add_branch(new_branch)
+
+            # Remove the old branch
+            self.remove_branch(branch.id)
 
         logger.debug(f"Added prelude node '{prelude_name}' to graph '{self.name}'")
         return self
@@ -678,12 +717,21 @@ class BaseGraph(BaseModel):
         Returns:
             Self for method chaining
         """
-        # Get all nodes connecting to END
+        # Get all nodes connecting directly to END
         end_edges = [
-            edge
-            for edge in self.edges
-            if (isinstance(edge, tuple) and edge[1] == END_NODE)
+            (source, target) for source, target in self.edges if target == END_NODE
         ]
+
+        # Get all branches pointing to END
+        end_branch_destinations = []
+        for branch in self.branches.values():
+            for condition, target in branch.destinations.items():
+                if target == END_NODE:
+                    end_branch_destinations.append((branch, condition))
+
+            # Check default too
+            if branch.default == END_NODE:
+                end_branch_destinations.append((branch, "default"))
 
         # Add the postlude node
         if isinstance(postlude_node, str):
@@ -712,6 +760,13 @@ class BaseGraph(BaseModel):
 
         # Add edge from postlude to END
         self.add_edge(postlude_name, END_NODE)
+
+        # Update branch destinations
+        for branch, condition in end_branch_destinations:
+            if condition == "default":
+                branch.default = postlude_name
+            else:
+                branch.destinations[condition] = postlude_name
 
         logger.debug(f"Added postlude node '{postlude_name}' to graph '{self.name}'")
         return self
@@ -928,51 +983,6 @@ class BaseGraph(BaseModel):
         self.updated_at = datetime.now()
         return self
 
-    def add_conditional_edge(
-        self, source: str, branch: Union[Branch, str], targets: Dict[str, str]
-    ) -> "BaseGraph":
-        """
-        Add a conditional edge to the graph.
-
-        Args:
-            source: Source node name
-            branch: Branch object or branch ID
-            targets: Mapping of condition results to target nodes
-
-        Returns:
-            Self for method chaining
-        """
-        # Validate source
-        if source != START_NODE and source not in self.nodes:
-            raise ValueError(f"Source node '{source}' not found in graph")
-
-        # Get or create branch
-        if isinstance(branch, Branch):
-            # Add the branch if not already present
-            if branch.id not in self.branches:
-                self.branches[branch.id] = branch
-            branch_id = branch.id
-        else:
-            # Use existing branch
-            branch_id = branch
-            if branch_id not in self.branches:
-                raise ValueError(f"Branch '{branch_id}' not found in graph")
-
-        # Validate targets
-        for condition, target in targets.items():
-            if target != END_NODE and target not in self.nodes:
-                raise ValueError(f"Target node '{target}' not found in graph")
-
-        # Create edge
-        edge = ConditionalEdge(source=source, branch_id=branch_id, targets=targets)
-
-        # Add edge
-        self.edges.append(edge)
-        logger.debug(f"Added conditional edge from {source} using branch '{branch_id}'")
-
-        self.updated_at = datetime.now()
-        return self
-
     def remove_edge(self, source: str, target: Optional[str] = None) -> "BaseGraph":
         """
         Remove an edge from the graph.
@@ -984,59 +994,65 @@ class BaseGraph(BaseModel):
         Returns:
             Self for method chaining
         """
-        # Handle direct edges
         if target:
             # Remove specific direct edge
             self.edges = [
                 edge
                 for edge in self.edges
-                if not (
-                    isinstance(edge, tuple) and edge[0] == source and edge[1] == target
-                )
+                if not (edge[0] == source and edge[1] == target)
             ]
             logger.debug(f"Removed edge {source} -> {target} from graph '{self.name}'")
         else:
             # Remove all edges from source
-            self.edges = [
-                edge
-                for edge in self.edges
-                if (isinstance(edge, tuple) and edge[0] != source)
-                or (isinstance(edge, ConditionalEdge) and edge.source != source)
-            ]
+            self.edges = [edge for edge in self.edges if edge[0] != source]
             logger.debug(f"Removed all edges from {source} in graph '{self.name}'")
 
         self.updated_at = datetime.now()
         return self
 
     def get_edges(
-        self, source: Optional[str] = None, target: Optional[str] = None
-    ) -> List[Edge]:
+        self,
+        source: Optional[str] = None,
+        target: Optional[str] = None,
+        include_branches: bool = True,
+    ) -> List[Tuple[str, str]]:
         """
         Get edges matching criteria.
 
         Args:
             source: Filter by source node
             target: Filter by target node
+            include_branches: Include edges from branches
 
         Returns:
-            List of matching edges
+            List of matching edges as (source, target) tuples
         """
         result = []
 
-        for edge in self.edges:
-            if isinstance(edge, tuple):
-                edge_source, edge_target = edge
+        # Direct edges
+        for edge_source, edge_target in self.edges:
+            # Apply filters
+            source_match = source is None or edge_source == source
+            target_match = target is None or edge_target == target
 
-                # Apply filters
-                source_match = source is None or edge_source == source
-                target_match = target is None or edge_target == target
+            if source_match and target_match:
+                result.append((edge_source, edge_target))
 
-                if source_match and target_match:
-                    result.append(edge)
+        # Branch-based edges
+        if include_branches:
+            for branch in self.branches.values():
+                # Check source filter
+                if source is not None and branch.source_node != source:
+                    continue
 
-            elif isinstance(edge, ConditionalEdge) and source is not None:
-                if edge.source == source:
-                    result.append(edge)
+                # Add all destinations that match target filter
+                for dest in branch.destinations.values():
+                    if target is None or dest == target:
+                        result.append((branch.source_node, dest))
+
+                # Check default destination
+                if branch.default and (target is None or branch.default == target):
+                    result.append((branch.source_node, branch.default))
 
         return result
 
@@ -1046,7 +1062,7 @@ class BaseGraph(BaseModel):
         branch_or_name: Union[Branch, str],
         source_node: Optional[str] = None,
         condition: Optional[Any] = None,
-        routes: Optional[Dict[str, str]] = None,
+        routes: Optional[Dict[Union[bool, str], str]] = None,
         branch_type: Optional[BranchType] = None,
         **kwargs,
     ) -> "BaseGraph":
@@ -1069,6 +1085,11 @@ class BaseGraph(BaseModel):
             branch = branch_or_name
 
             # Validate source node
+            if branch.source_node is None:
+                if source_node is None:
+                    raise ValueError("Branch must have a source_node")
+                branch.source_node = source_node
+
             if (
                 branch.source_node != START_NODE
                 and branch.source_node not in self.nodes
@@ -1076,6 +1097,15 @@ class BaseGraph(BaseModel):
                 raise ValueError(
                     f"Source node '{branch.source_node}' not found in graph"
                 )
+
+            # Validate destination nodes
+            for dest in branch.destinations.values():
+                if dest != END_NODE and dest not in self.nodes:
+                    raise ValueError(f"Destination node '{dest}' not found in graph")
+
+            # Validate default node
+            if branch.default != END_NODE and branch.default not in self.nodes:
+                raise ValueError(f"Default node '{branch.default}' not found in graph")
 
             # Add the branch
             self.branches[branch.id] = branch
@@ -1092,10 +1122,7 @@ class BaseGraph(BaseModel):
             if source_node != START_NODE and source_node not in self.nodes:
                 raise ValueError(f"Source node '{source_node}' not found in graph")
 
-            # Create branch with original Branch class
-            from haive.core.graph.branches import Branch
-
-            # Create the branch
+            # Create branch data
             branch_data = {"name": branch_name, "source_node": source_node, **kwargs}
 
             # Handle condition based on type
@@ -1123,11 +1150,21 @@ class BaseGraph(BaseModel):
             if routes:
                 branch_data["destinations"] = routes
 
+            # Validate routes
+            if "destinations" in branch_data:
+                for dest in branch_data["destinations"].values():
+                    if dest != END_NODE and dest not in self.nodes:
+                        raise ValueError(
+                            f"Destination node '{dest}' not found in graph"
+                        )
+
             # Create branch
             branch = Branch(**branch_data)
             self.branches[branch.id] = branch
 
-        logger.debug(f"Added branch '{branch.name}' to graph '{self.name}'")
+        logger.debug(
+            f"Added branch '{branch.name}' from node '{branch.source_node}' to graph '{self.name}'"
+        )
         self.updated_at = datetime.now()
         return self
 
@@ -1152,10 +1189,22 @@ class BaseGraph(BaseModel):
         Returns:
             Self for method chaining
         """
-        from haive.core.graph.branches import Branch
+        # Validate source node
+        if source_node != START_NODE and source_node not in self.nodes:
+            raise ValueError(f"Source node '{source_node}' not found in graph")
+
+        # Validate target nodes
+        for dest in routes.values():
+            if dest != END_NODE and dest not in self.nodes:
+                raise ValueError(f"Destination node '{dest}' not found in graph")
+
+        # Validate default route
+        if default_route != END_NODE and default_route not in self.nodes:
+            raise ValueError(f"Default node '{default_route}' not found in graph")
 
         # Create branch
         branch = Branch(
+            id=str(uuid.uuid4()),
             name=name or f"func_branch_{uuid.uuid4().hex[:6]}",
             source_node=source_node,
             function=condition,
@@ -1168,7 +1217,9 @@ class BaseGraph(BaseModel):
         # Add to graph
         self.branches[branch.id] = branch
 
-        logger.debug(f"Added function branch '{branch.name}' to graph '{self.name}'")
+        logger.debug(
+            f"Added function branch '{branch.name}' from {source_node} to graph '{self.name}'"
+        )
         return self
 
     def add_key_value_branch(
@@ -1196,10 +1247,22 @@ class BaseGraph(BaseModel):
         Returns:
             Self for method chaining
         """
-        from haive.core.graph.branches import Branch
+        # Validate source node
+        if source_node != START_NODE and source_node not in self.nodes:
+            raise ValueError(f"Source node '{source_node}' not found in graph")
+
+        # Validate target nodes
+        if true_dest != END_NODE and true_dest not in self.nodes:
+            raise ValueError(f"True destination node '{true_dest}' not found in graph")
+
+        if false_dest != END_NODE and false_dest not in self.nodes:
+            raise ValueError(
+                f"False destination node '{false_dest}' not found in graph"
+            )
 
         # Create branch
         branch = Branch(
+            id=str(uuid.uuid4()),
             name=name or f"kv_branch_{uuid.uuid4().hex[:6]}",
             source_node=source_node,
             key=key,
@@ -1213,7 +1276,9 @@ class BaseGraph(BaseModel):
         # Add to graph
         self.branches[branch.id] = branch
 
-        logger.debug(f"Added key-value branch '{branch.name}' to graph '{self.name}'")
+        logger.debug(
+            f"Added key-value branch '{branch.name}' from {source_node} to graph '{self.name}'"
+        )
         return self
 
     def remove_branch(self, branch_id: str) -> "BaseGraph":
@@ -1231,13 +1296,6 @@ class BaseGraph(BaseModel):
 
         # Remove branch
         del self.branches[branch_id]
-
-        # Remove associated conditional edges
-        self.edges = [
-            edge
-            for edge in self.edges
-            if not (isinstance(edge, ConditionalEdge) and edge.branch_id == branch_id)
-        ]
 
         logger.debug(f"Removed branch '{branch_id}' from graph '{self.name}'")
         self.updated_at = datetime.now()
@@ -1265,12 +1323,30 @@ class BaseGraph(BaseModel):
             if hasattr(branch, key):
                 setattr(branch, key, value)
 
+        # Validate connections if source/destinations were updated
+        if "source_node" in updates:
+            source = updates["source_node"]
+            if source != START_NODE and source not in self.nodes:
+                raise ValueError(f"Updated source node '{source}' not found in graph")
+
+        if "destinations" in updates:
+            for dest in updates["destinations"].values():
+                if dest != END_NODE and dest not in self.nodes:
+                    raise ValueError(
+                        f"Updated destination node '{dest}' not found in graph"
+                    )
+
+        if "default" in updates:
+            default = updates["default"]
+            if default != END_NODE and default not in self.nodes:
+                raise ValueError(f"Updated default node '{default}' not found in graph")
+
         self.updated_at = datetime.now()
         return self
 
     def replace_branch(self, branch_id: str, new_branch: Branch) -> "BaseGraph":
         """
-        Replace a branch while preserving connections.
+        Replace a branch with a new one.
 
         Args:
             branch_id: ID of the branch to replace
@@ -1282,15 +1358,21 @@ class BaseGraph(BaseModel):
         if branch_id not in self.branches:
             raise ValueError(f"Branch '{branch_id}' not found in graph")
 
-        # Get the original branch
-        original_branch = self.branches[branch_id]
+        # Validate new branch
+        if (
+            new_branch.source_node != START_NODE
+            and new_branch.source_node not in self.nodes
+        ):
+            raise ValueError(
+                f"Source node '{new_branch.source_node}' not found in graph"
+            )
 
-        # Store any edges using this branch
-        conditional_edges = [
-            edge
-            for edge in self.edges
-            if isinstance(edge, ConditionalEdge) and edge.branch_id == branch_id
-        ]
+        for dest in new_branch.destinations.values():
+            if dest != END_NODE and dest not in self.nodes:
+                raise ValueError(f"Destination node '{dest}' not found in graph")
+
+        if new_branch.default != END_NODE and new_branch.default not in self.nodes:
+            raise ValueError(f"Default node '{new_branch.default}' not found in graph")
 
         # Update the branch ID to match if needed
         if new_branch.id != branch_id:
@@ -1306,10 +1388,10 @@ class BaseGraph(BaseModel):
 
     def get_branches_for_node(self, node_name: str) -> List[Branch]:
         """
-        Get all branches associated with a node.
+        Get all branches with a given source node.
 
         Args:
-            node_name: Name of the node
+            node_name: Name of the source node
 
         Returns:
             List of branch objects
@@ -1357,36 +1439,18 @@ class BaseGraph(BaseModel):
         """
         try:
             # Check for START node connections
-            start_connections = [
-                edge
-                for edge in self.edges
-                if (isinstance(edge, tuple) and edge[0] == START_NODE)
-                or (isinstance(edge, ConditionalEdge) and edge.source == START_NODE)
-            ]
+            start_edges = self.get_edges(source=START_NODE, include_branches=True)
 
-            if not start_connections:
+            if not start_edges:
                 logger.warning(
                     f"Graph '{self.name}' has no connections from START node"
                 )
                 return False
 
             # Check for END node connections
-            end_connections = [
-                edge
-                for edge in self.edges
-                if (isinstance(edge, tuple) and edge[1] == END_NODE)
-            ]
+            end_edges = self.get_edges(target=END_NODE, include_branches=True)
 
-            end_in_branches = False
-            for branch in self.branches.values():
-                if (
-                    END_NODE in branch.destinations.values()
-                    or branch.default == END_NODE
-                ):
-                    end_in_branches = True
-                    break
-
-            if not end_connections and not end_in_branches:
+            if not end_edges:
                 logger.warning(f"Graph '{self.name}' has no connections to END node")
                 return False
 
@@ -1409,28 +1473,18 @@ class BaseGraph(BaseModel):
         Returns:
             Dictionary with 'in' and 'out' lists of connected nodes
         """
+        # Get all edges involving this node
+        all_edges = self.get_edges(include_branches=True)
+
         incoming = []
         outgoing = []
 
-        # Check direct edges
-        for edge in self.edges:
-            if isinstance(edge, tuple):
-                source, target = edge
-                if target == node_name:
-                    incoming.append(source)
-                if source == node_name:
-                    outgoing.append(target)
-
-        # Check conditional edges
-        for edge in self.edges:
-            if isinstance(edge, ConditionalEdge):
-                if edge.source == node_name:
-                    outgoing.extend(list(set(edge.targets.values())))
-
-                # Check if node is a target
-                for target in edge.targets.values():
-                    if target == node_name:
-                        incoming.append(edge.source)
+        # Process each edge
+        for source, target in all_edges:
+            if target == node_name:
+                incoming.append(source)
+            if source == node_name:
+                outgoing.append(target)
 
         return {"in": list(set(incoming)), "out": list(set(outgoing))}
 
@@ -1460,12 +1514,10 @@ class BaseGraph(BaseModel):
 
             visited.add(current)
 
-            # Find all outgoing connections
-            for edge in self.edges:
-                if isinstance(edge, tuple) and edge[0] == current:
-                    queue.append(edge[1])
-                elif isinstance(edge, ConditionalEdge) and edge.source == current:
-                    queue.extend(edge.targets.values())
+            # Find all outgoing connections including branches
+            for src, dest in self.get_edges(source=current, include_branches=True):
+                if dest not in visited:
+                    queue.append(dest)
 
         return False
 
@@ -1504,20 +1556,12 @@ class BaseGraph(BaseModel):
 
             visited.add(node)
 
-            # Get all outgoing connections
-            for edge in self.edges:
-                if isinstance(edge, tuple) and edge[0] == node:
-                    next_node = edge[1]
-                    if next_node not in visited:
-                        path.append(next_node)
-                        dfs(next_node, path)
-                        path.pop()
-                elif isinstance(edge, ConditionalEdge) and edge.source == node:
-                    for target in edge.targets.values():
-                        if target not in visited:
-                            path.append(target)
-                            dfs(target, path)
-                            path.pop()
+            # Get all outgoing connections including branches
+            for src, dest in self.get_edges(source=node, include_branches=True):
+                if dest not in visited:
+                    path.append(dest)
+                    dfs(dest, path)
+                    path.pop()
 
             visited.remove(node)
 
@@ -1536,15 +1580,9 @@ class BaseGraph(BaseModel):
         Returns:
             List of node names
         """
-        nodes = []
-
-        for edge in self.edges:
-            if isinstance(edge, tuple) and edge[0] == START_NODE:
-                nodes.append(edge[1])
-            elif isinstance(edge, ConditionalEdge) and edge.source == START_NODE:
-                nodes.extend(edge.targets.values())
-
-        return list(set(nodes))
+        # Get all outgoing connections from START
+        start_edges = self.get_edges(source=START_NODE, include_branches=True)
+        return list({edge[1] for edge in start_edges})
 
     def get_end_nodes(self) -> List[str]:
         """
@@ -1553,18 +1591,9 @@ class BaseGraph(BaseModel):
         Returns:
             List of node names
         """
-        nodes = []
-
-        for edge in self.edges:
-            if isinstance(edge, tuple) and edge[1] == END_NODE:
-                nodes.append(edge[0])
-
-        # Check branches too
-        for branch in self.branches.values():
-            if END_NODE in branch.destinations.values() or branch.default == END_NODE:
-                nodes.append(branch.source_node)
-
-        return list(set(nodes))
+        # Get all incoming connections to END
+        end_edges = self.get_edges(target=END_NODE, include_branches=True)
+        return list({edge[0] for edge in end_edges})
 
     def get_orphan_nodes(self) -> List[str]:
         """
@@ -1645,37 +1674,29 @@ class BaseGraph(BaseModel):
                     )
                     graph_builder.add_node(name, lambda state: state)
 
-            # Add edges
-            for edge in self.edges:
-                if isinstance(edge, tuple):
-                    source, target = edge
-                    # Convert START/END constants
-                    source_actual = START if source == START_NODE else source
-                    target_actual = END if target == END_NODE else target
+            # Add direct edges
+            for source, target in self.edges:
+                # Convert START/END constants
+                source_actual = START if source == START_NODE else source
+                target_actual = END if target == END_NODE else target
 
-                    graph_builder.add_edge(source_actual, target_actual)
+                graph_builder.add_edge(source_actual, target_actual)
 
-            # Add conditional edges
+            # Add branches
             for branch_id, branch in self.branches.items():
-                # Find conditional edges using this branch
-                for edge in self.edges:
-                    if (
-                        isinstance(edge, ConditionalEdge)
-                        and edge.branch_id == branch_id
-                    ):
-                        # Create the edge function
-                        def create_edge_func(branch_obj):
-                            def edge_func(state):
-                                return branch_obj.evaluate(state)
+                # Create the edge function
+                def create_edge_func(branch_obj):
+                    def edge_func(state):
+                        return branch_obj.evaluate(state)
 
-                            return edge_func
+                    return edge_func
 
-                        # Add the conditional edge
-                        graph_builder.add_conditional_edges(
-                            branch.source_node,
-                            create_edge_func(branch),
-                            branch.destinations,
-                        )
+                # Add the conditional edge
+                source_node = branch.source_node
+                if source_node != START_NODE and source_node in self.nodes:
+                    graph_builder.add_conditional_edges(
+                        source_node, create_edge_func(branch), branch.destinations
+                    )
 
             return graph_builder
 
@@ -1752,28 +1773,43 @@ class BaseGraph(BaseModel):
                 for source_node, conditions in state_graph.branches.items():
                     for condition_name, branch_obj in conditions.items():
                         # Extract routes
-                        routes = {}
+                        destinations = {}
                         if hasattr(branch_obj, "ends"):
                             for condition, target in branch_obj.ends.items():
                                 # Convert __end__ to END_NODE
                                 target_actual = (
                                     END_NODE if target == "__end__" else target
                                 )
-                                routes[condition] = target_actual
+                                destinations[condition] = target_actual
 
-                        # Create branch
-                        from haive.core.graph.branches import Branch
+                        # Create branch function
+                        branch_func = None
+                        if hasattr(branch_obj, "condition"):
+                            branch_func = branch_obj.condition
 
+                        # Create Branch object
+                        branch_id = str(uuid.uuid4())
                         branch = Branch(
+                            id=branch_id,
                             name=f"branch_{condition_name}_{uuid.uuid4().hex[:6]}",
                             source_node=source_node,
-                            destinations=routes,
-                            default="END",
+                            function=branch_func,
+                            function_ref=(
+                                CallableReference.from_callable(branch_func)
+                                if branch_func
+                                else None
+                            ),
+                            destinations=destinations,
+                            default=END_NODE,
+                            mode=(
+                                BranchMode.FUNCTION
+                                if branch_func
+                                else BranchMode.DIRECT
+                            ),
                         )
 
-                        # Add the branch and conditional edge
-                        graph.add_branch(branch)
-                        graph.add_conditional_edge(source_node, branch, routes)
+                        # Add the branch
+                        graph.branches[branch_id] = branch
 
             return graph
 
@@ -1880,24 +1916,34 @@ class BaseGraph(BaseModel):
 
         # Add direct edges
         lines.append("    %% Direct edges")
-        for edge in self.edges:
-            if isinstance(edge, tuple):
-                source, target = edge
-                lines.append(f"    {source} --> {target};")
+        for source, target in self.edges:
+            lines.append(f"    {source} --> {target};")
 
-        # Add conditional edges
+        # Add branch edges
         if self.branches:
-            lines.append("    %% Conditional edges")
+            lines.append("    %% Branch connections")
 
-            for edge in self.edges:
-                if isinstance(edge, ConditionalEdge):
-                    source = edge.source
-                    branch_id = edge.branch_id
-                    branch = self.branches.get(branch_id)
+            for branch_id, branch in self.branches.items():
+                source = branch.source_node
 
-                    if branch:
-                        lines.append(f"    %% Branch: {branch.name}")
-                        for condition, target in edge.targets.items():
-                            lines.append(f'    {source} -->|"{condition}"| {target};')
+                if branch.mode == BranchMode.FUNCTION:
+                    lines.append(f"    %% Function Branch: {branch.name}")
+                elif branch.mode == BranchMode.DIRECT:
+                    lines.append(f"    %% Direct Branch: {branch.name}")
+                elif branch.mode == BranchMode.SEND_MAPPER:
+                    lines.append(f"    %% Send Mapper Branch: {branch.name}")
+                else:
+                    lines.append(f"    %% Branch: {branch.name}")
+
+                # Draw connections for destinations
+                for condition, target in branch.destinations.items():
+                    condition_str = str(condition)
+                    if len(condition_str) > 15:
+                        condition_str = condition_str[:12] + "..."
+                    lines.append(f'    {source} -->|"{condition_str}"| {target};')
+
+                # Draw default connection if different from destinations
+                if branch.default not in branch.destinations.values():
+                    lines.append(f'    {source} -->|"default"| {branch.default};')
 
         return "\n".join(lines)

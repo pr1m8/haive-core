@@ -5,7 +5,7 @@ Dynamic output mapping based on state.
 import logging
 from typing import Any, Dict, Optional, Tuple
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from haive.core.graph.branches.types import ComparisonType
 from haive.core.graph.common.field_utils import extract_field
@@ -37,6 +37,14 @@ class DynamicMapping(BaseModel):
     default_node: str = "END"
 
     model_config = {"arbitrary_types_allowed": True}
+
+    @model_validator(mode="after")
+    def validate_mappings(self):
+        for key, mapping_data in self.mappings.items():
+            if "mapping" in mapping_data and isinstance(mapping_data["mapping"], dict):
+                # No conversion needed now - we accept dict directly
+                pass
+        return self
 
     def get_mapping(self, state: StateLike) -> Tuple[str, Optional[Dict[str, str]]]:
         """

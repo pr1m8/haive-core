@@ -1,3 +1,4 @@
+# haive/core/graph/common/types.py
 from enum import Enum
 from typing import (
     Any,
@@ -14,19 +15,33 @@ from typing import (
 
 from langchain_core.runnables import RunnableConfig
 from langgraph.types import Command, RetryPolicy, Send
-from pydantic import BaseModel, Field, computed_field, field_validator, model_validator
+from pydantic import BaseModel
 
 from haive.core.schema.state_schema import StateSchema
 
+# Core type definitions
 NodeLike = TypeVar("NodeLike", bound=Any)
 NodeOutput = TypeVar(
-    "NodeOutput", bound=[Union[Command, Send, List[Send], str, BaseModel, Dict]]
+    "NodeOutput", bound=Union[Command, Send, List[Send], str, BaseModel, Dict[str, Any]]
 )
-StateLike = TypeVar("StateLike", bound=Union[Dict, BaseModel, StateSchema])
-ConfigLike = TypeVar("ConfigLike", bound=Union[RunnableConfig, Dict, BaseModel])
-NodeCallable = TypeVar(
-    "NodeCallable", bound=Callable[[StateLike, Optional[ConfigLike]], NodeOutput]
+StateLike = TypeVar("StateLike", bound=Union[Dict[str, Any], BaseModel, StateSchema])
+ConfigLike = TypeVar(
+    "ConfigLike", bound=Union[RunnableConfig, Dict[str, Any], BaseModel]
 )
-BaseEdge = TypeVar("Base_Edge", bound=Union[Tuple[str, str], Tuple[NodeLike, NodeLike]])
-# Branch = Typ
-# Edge_Type = TypeVar("Node_Callable",bound=Union[Node_Callable,Base_Edge])
+NodeCallable = Callable[[StateLike, Optional[ConfigLike]], NodeOutput]
+BaseEdge = Union[Tuple[str, str], Tuple[NodeLike, NodeLike]]
+StateType = Union[Dict[str, Any], BaseModel, StateSchema]
+ConfigType = Union[RunnableConfig, Dict[str, Any], BaseModel]
+
+
+# Node type enum - moved from BaseGraph to common types
+class NodeType(str, Enum):
+    """Types of nodes in a graph."""
+
+    ENGINE = "engine"
+    CALLABLE = "callable"
+    TOOL = "tool"
+    VALIDATION = "validation"
+    BRANCH = "branch"
+    SEND = "send"
+    CUSTOM = "custom"

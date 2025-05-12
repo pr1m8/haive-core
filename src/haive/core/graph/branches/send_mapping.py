@@ -20,14 +20,13 @@ class SendMapping(BaseModel):
     Mapping configuration for generating Send objects.
     """
 
-    target: str = Field(..., description="Target node name")
+    node: str = Field(..., description="Target node name")
     fields: Dict[str, str] = Field(
         default_factory=dict, description="Field mapping from state to Send arg"
     )
     condition: Optional[str] = Field(
-        None, description="Optional field to check before creating Send"
+        None, description="Optional condition expression to evaluate"
     )
-    condition_value: Any = Field(None, description="Expected value for condition field")
     transform: Optional[Dict[str, Callable]] = Field(
         None, description="Transformations to apply to fields"
     )
@@ -39,15 +38,14 @@ class SendMapping(BaseModel):
         from langgraph.types import Send
 
         # Check condition if specified
-        if self.condition is not None:
-            field_value = extract_field(state, self.condition)
-
-            # If condition_value is None, check for existence
-            if self.condition_value is None:
-                if field_value is None:
+        if self.condition:
+            try:
+                # Simple condition check - could be expanded to full expression evaluation
+                condition_value = extract_field(state, self.condition)
+                if not condition_value:
                     return None
-            # Otherwise check for equality
-            elif field_value != self.condition_value:
+            except Exception as e:
+                logger.error(f"Error evaluating condition {self.condition}: {e}")
                 return None
 
         # Extract and transform values for Send
@@ -65,7 +63,7 @@ class SendMapping(BaseModel):
 
             arg[target_field] = value
 
-        return Send(self.target, arg)
+        return Send(self.node, arg)
 
 
 class SendGenerator(BaseModel):
@@ -73,12 +71,12 @@ class SendGenerator(BaseModel):
     Generator for Send objects based on lists or collections.
     """
 
-    target: str = Field(..., description="Target node name")
+    target_node: str = Field(..., description="Target node name")
     collection_field: str = Field(
         ..., description="State field containing the collection"
     )
-    item_mapping: Dict[str, Union[str, Callable]] = Field(
-        default_factory=dict, description="Mapping for each item"
+    item_field: str = Field(
+        "item", description="Field name for the item in the send object"
     )
     filter_function: Optional[Callable[[Any], bool]] = Field(
         None, description="Function to filter items"
@@ -103,26 +101,8 @@ class SendGenerator(BaseModel):
             if self.filter_function and not self.filter_function(item):
                 continue
 
-            # Generate arguments
-            arg = {}
-            for target_field, source in self.item_mapping.items():
-                if callable(source):
-                    # If source is a function, call it with the item
-                    try:
-                        arg[target_field] = source(item)
-                    except Exception as e:
-                        logger.error(
-                            f"Error calling mapping function for {target_field}: {e}"
-                        )
-                        arg[target_field] = None
-                elif isinstance(source, str) and "." in source:
-                    # If source is a dot path, apply it to the item
-                    arg[target_field] = extract_field(item, source.split(".", 1)[1])
-                else:
-                    # Otherwise use the item directly
-                    arg[target_field] = item
-
-            sends.append(Send(self.target, arg))
+            # Create Send object for this item
+            sends.append(Send(self.target_node, {self.item_field: item}))
 
         return sends
 
