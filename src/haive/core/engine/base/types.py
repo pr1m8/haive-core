@@ -13,3 +13,4 @@ class EngineType(str, Enum):
     DOCUMENT_LOADER = "document_loader"
     DOCUMENT_TRANSFORMER = "document_transformer"
     DOCUMENT_SPLITTER = "document_splitter"
+    OUTPUT_PARSER = "output_parser"

@@ -84,6 +84,7 @@ class HuggingFaceEmbeddingConfig(BaseEmbeddingConfig):
             "device": "cuda" if torch.cuda.is_available() else "cpu"
         }
     )
+    model: str = Field(default="sentence-transformers/all-MiniLM-L6-v2")
     encode_kwargs: Optional[Dict[str, Any]] = Field(default_factory=dict)
     query_encode_kwargs: Optional[Dict[str, Any]] = Field(default_factory=dict)
     multi_process: bool = False

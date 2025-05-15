@@ -1,7 +1,8 @@
 import logging
 import uuid
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type, Union
 
+from langchain_core.tools import BaseTool
 from langgraph.graph import END
 from langgraph.types import RetryPolicy
 from pydantic import BaseModel, Field, model_validator
@@ -35,7 +36,9 @@ class NodeConfig(BaseModel):
         default=None,  # Will be determined based on engine/options
         description="Type of node (determined automatically if not specified)",
     )
-
+    schemas: Sequence[Union[BaseTool, Type[BaseModel], Callable]] = Field(
+        default_factory=list, description="The schemas to use for the node"
+    )
     # Engine/Callable (one of these must be set)
     engine: Optional[Engine] = Field(
         default=None, description="Engine instance to use for this node"
@@ -191,9 +194,12 @@ class NodeConfig(BaseModel):
             self.engine is None
             and self.engine_name is None
             and self.callable_func is None
+            and self.tools is None
+            and self.schemas is None
+            # and self.node_type is not NodeType.VALIDATION
         ):
             raise ValueError(
-                "At least one of engine, engine_name, or callable_func must be set"
+                "At least one of engine, engine_name, tools,schemas or callable_func must be set"
             )
 
         # Convert input_fields and output_fields to dictionaries if they're lists

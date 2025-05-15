@@ -78,8 +78,7 @@ def register_component(
                 except Exception as e:
                     logger.warning(f"Failed to auto-register {cls.__name__}: {e}")
 
-            # Enable method chaining
-            return self
+            # REMOVED: return self - __init__ should not return anything
 
         # Replace __init__
         cls.__init__ = new_init
@@ -179,11 +178,17 @@ def register_component(
                     break
 
         # If we have a component type and it's not already attached
-        if comp_type is not None and not hasattr(reg_item, "component_type"):
+        if comp_type is not None:
             # If it's a dict, add component_type
             if isinstance(reg_item, dict):
                 reg_item["component_type"] = comp_type
-            # If it's an object, add component_type attribute
+            # For objects with engine_type but not component_type
+            elif hasattr(reg_item, "engine_type") and not hasattr(
+                reg_item, "component_type"
+            ):
+                # This is fine - engine_type serves the same purpose
+                pass
+            # If it's an object without component_type, try to add it
             elif not hasattr(reg_item, "component_type"):
                 try:
                     setattr(reg_item, "component_type", comp_type)

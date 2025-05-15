@@ -1,212 +1,94 @@
-# src/haive/core/graph/tool_node_config.py
+# src/haive/core/graph/node/tool.py
 
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type, Union
 
-from langchain_core.tools import BaseTool, StructuredTool, Tool
+from langchain_core.messages import BaseMessage
+from langchain_core.tools import BaseTool, BaseToolkit, StructuredTool, Tool
 from langgraph.prebuilt import ToolNode
-from pydantic import Field
+from langgraph.types import Command
+from pydantic import BaseModel, Field, field_validator, model_validator
 
-from haive.core.graph.node.config import NodeConfig
+from haive.core.graph.node.base_config import NodeConfig
+from haive.core.graph.node.types import CommandGoto, NodeType
 
 
 class ToolNodeConfig(NodeConfig):
     """
-    NodeConfig for tool execution with rich debugging support.
+    Configuration for a tool node in a graph.
 
-    This extends NodeConfig with additional capabilities for defining,
-    configuring, and inspecting tools in a graph.
+    Tool nodes execute LangChain tools and handle tool calls from LLM messages.
     """
 
-    # Tool configurations
-    tools: List[Union[BaseTool, Dict[str, Any]]] = Field(
-        default_factory=list, description="Tools to be used in this node"
+    # Override node_type from base class
+    node_type: NodeType = Field(default=NodeType.TOOL, description="The type of node")
+
+    # Tool-specific fields
+    tools: Sequence[
+        Union[Type[BaseTool], Type[BaseModel], Callable, StructuredTool]
+    ] = Field(
+        default_factory=list,
+        description="The schemas to use for validation (BaseTool, Type[BaseModel], or Callable)",
+    )
+    tags: Optional[List[str]] = Field(
+        default=None, description="Optional tags for the tool node"
+    )
+    handle_tool_errors: Union[
+        bool, str, Callable[..., str], Tuple[Type[Exception], ...]
+    ] = Field(default=True, description="How to handle tool errors")
+    messages_key: str = Field(
+        default="messages", description="The key to use for the messages field"
     )
 
-    single_tool_mode: bool = Field(
-        default=False, description="Whether this node handles only a specific tool"
-    )
-
-    filter_by_tool_name: Optional[str] = Field(
-        default=None, description="Only execute tools with this name"
-    )
-
-    skip_parsing: bool = Field(
-        default=False, description="Skip automatic input parsing"
-    )
-
-    parallel_execution: bool = Field(
-        default=True, description="Execute multiple tool calls in parallel"
-    )
-
-    tool_error_handling: Optional[str] = Field(
-        default=None,
-        description="How to handle tool errors: 'ignore', 'return', or 'raise'",
-    )
-
-    # Override model config
-    model_config = {"arbitrary_types_allowed": True}
-
-    def create_runnable(self, runnable_config=None) -> Any:
+    def __call__(
+        self, state: Dict[str, Any], config: Optional[Dict[str, Any]] = None
+    ) -> Command:
         """
-        Create a ToolNode runnable for this configuration.
+        Execute the tool node with the given state and configuration.
 
         Args:
-            runnable_config: Optional runtime configuration
+            state: The current state of the graph
+            config: Optional runtime configuration
 
         Returns:
-            Configured ToolNode
+            A Command with state update including tool execution results
         """
-        # Resolve tools if needed
-        tools = self._resolve_tools()
+        # Create the tool node
+        tool_node = ToolNode(
+            tools=self.tools,
+            name=self.name,
+            tags=self.tags,
+            handle_tool_errors=self.handle_tool_errors,
+            messages_key=self.messages_key,
+        )
 
-        # Create ToolNode with appropriate options
-        if self.filter_by_tool_name:
-            # Filter tools by name
-            filtered_tools = [
-                t for t in tools if getattr(t, "name", None) == self.filter_by_tool_name
-            ]
-            tool_node = ToolNode(tools=filtered_tools)
-            self.debug_log(
-                f"Created ToolNode with filtered tools: {[getattr(t, 'name', 'unnamed') for t in filtered_tools]}"
-            )
-        else:
-            # Use all tools
-            tool_node = ToolNode(tools=tools)
-            self.debug_log(
-                f"Created ToolNode with all tools: {[getattr(t, 'name', 'unnamed') for t in tools]}"
-            )
+        # Execute the tool node
+        result = tool_node.invoke(state)
+        result_messages = result.get(self.messages_key, [])
 
-        return tool_node
+        # Create the update with the new messages
+        update = {self.messages_key: result_messages}
 
-    def _resolve_tools(self) -> List[BaseTool]:
-        """
-        Resolve tool references to actual tool objects.
-
-        Returns:
-            List of resolved tool objects
-        """
-        resolved_tools = []
-
-        for tool in self.tools:
-            if isinstance(tool, (BaseTool, StructuredTool, Tool)):
-                # Already a tool object
-                resolved_tools.append(tool)
-                continue
-
-            if isinstance(tool, dict):
-                # Tool configuration dictionary
-                try:
-                    if "name" in tool and "func" in tool:
-                        # Create Tool from function and config
-                        resolved_tool = Tool(
-                            name=tool["name"],
-                            description=tool.get("description", ""),
-                            func=tool["func"],
-                        )
-                        resolved_tools.append(resolved_tool)
-                        self.debug_log(f"Created Tool from config: {tool['name']}")
-                    else:
-                        self.debug_log(
-                            f"Skipping invalid tool config - missing required fields: {tool}",
-                            level="warning",
-                        )
-                except Exception as e:
-                    self.debug_log(
-                        f"Error creating tool from config: {e}", level="error"
-                    )
-                    continue
-            elif callable(tool):
-                # Callable function
-                try:
-                    # Try to get tool name from function name
-                    name = getattr(tool, "__name__", "tool")
-                    # Try to get docstring as description
-                    description = (
-                        getattr(tool, "__doc__", "") or f"Tool function {name}"
-                    )
-
-                    # Create Tool
-                    resolved_tool = Tool(name=name, description=description, func=tool)
-                    resolved_tools.append(resolved_tool)
-                    self.debug_log(f"Created Tool from callable: {name}")
-                except Exception as e:
-                    self.debug_log(
-                        f"Error creating tool from callable: {e}", level="error"
-                    )
-                    continue
-            else:
-                self.debug_log(f"Unsupported tool type: {type(tool)}", level="warning")
-
-        if not resolved_tools:
-            self.debug_log("No tools were resolved", level="warning")
-
-        return resolved_tools
+        # Return a Command with the update and next node
+        return Command(update=update, goto=self.command_goto)
 
     @classmethod
     def from_tools(
         cls,
-        tools: List[Union[BaseTool, Dict[str, Any], Callable]],
-        name: Optional[str] = None,
-        filter_by_tool_name: Optional[str] = None,
-        parallel_execution: bool = True,
-        **kwargs,
-    ) -> "ToolNodeConfig":
+        tools: Sequence[
+            Union[
+                BaseTool, Callable, StructuredTool, Tool, BaseToolkit, Type[BaseModel]
+            ]
+        ],
+        **kwargs
+    ):
         """
-        Create a ToolNodeConfig from a list of tools.
+        Create a tool node configuration from a list of tools.
 
         Args:
-            tools: List of tools or tool configurations
-            name: Optional name for the node
-            filter_by_tool_name: Optional tool name filter
-            parallel_execution: Whether to execute tools in parallel
-            **kwargs: Additional NodeConfig parameters
+            tools: List of tools to use in this node
+            **kwargs: Additional configuration parameters
 
         Returns:
             Configured ToolNodeConfig
         """
-        return cls(
-            name=name or "tool_node",
-            tools=tools,
-            filter_by_tool_name=filter_by_tool_name,
-            parallel_execution=parallel_execution,
-            **kwargs,
-        )
-
-    @classmethod
-    def for_single_tool(
-        cls,
-        tool: Union[BaseTool, Dict[str, Any], Callable],
-        name: Optional[str] = None,
-        **kwargs,
-    ) -> "ToolNodeConfig":
-        """
-        Create a ToolNodeConfig for a single tool.
-
-        Args:
-            tool: The tool to use
-            name: Optional name for the node
-            **kwargs: Additional NodeConfig parameters
-
-        Returns:
-            Configured ToolNodeConfig for single tool
-        """
-        # Extract tool name for the node name if not provided
-        if not name and isinstance(tool, BaseTool):
-            name = f"{tool.name}_node"
-        elif not name and isinstance(tool, dict) and "name" in tool:
-            name = f"{tool['name']}_node"
-        elif not name and callable(tool):
-            name = f"{getattr(tool, '__name__', 'tool')}_node"
-        else:
-            name = name or "single_tool_node"
-
-        # Create config
-        return cls(
-            name=name,
-            tools=[tool],
-            single_tool_mode=True,
-            filter_by_tool_name=(
-                getattr(tool, "name", None) if isinstance(tool, BaseTool) else None
-            ),
-            **kwargs,
-        )
+        return cls(tools=tools, **kwargs)

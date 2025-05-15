@@ -303,6 +303,16 @@ class BaseGraph(BaseModel):
         self.updated_at = datetime.now()
         return self
 
+    def add_tool_node(
+        self, node_name: str, node_type: NodeType, **kwargs
+    ) -> "BaseGraph":
+        """
+        Add a tool node to the graph.
+        """
+        node_obj = Node(name=node_name, node_type=node_type, **kwargs)
+        self.add_node(node_obj)
+        return self
+
     def remove_node(self, node_name: str) -> "BaseGraph":
         """
         Remove a node from the graph.

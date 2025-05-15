@@ -12,7 +12,7 @@ from langgraph.types import Command
 from pydantic import BaseModel
 
 from haive.core.config.runnable import RunnableConfigManager
-from haive.core.engine.aug_llm.base import AugLLMConfig
+from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.engine.base import (
     Engine,
     EngineType,

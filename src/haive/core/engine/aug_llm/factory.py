@@ -67,6 +67,8 @@ class AugLLMFactory:
                 "force_messages_optional": self.aug_config.force_messages_optional,
                 "messages_in_optional_vars": self.aug_config.messages_placeholder_name
                 in self.aug_config.optional_variables,
+                "use_tool_for_format_instructions": self.aug_config.use_tool_for_format_instructions,
+                "tool_is_base_model": self.aug_config.tool_is_base_model,
             },
         )
 
@@ -111,6 +113,7 @@ class AugLLMFactory:
             "pydantic_tools",
             "add_messages_placeholder",
             "force_messages_optional",
+            "use_tool_for_format_instructions",
         ]:
             if param in self.config_params:
                 setattr(self.aug_config, param, self.config_params[param])
@@ -141,16 +144,8 @@ class AugLLMFactory:
         if "system_message" in self.config_params and self.aug_config.prompt_template:
             self._update_system_message_in_prompt()
 
-        # Update format instructions if parser changed
-        if any(
-            param in self.config_params
-            for param in [
-                "structured_output_model",
-                "pydantic_tools",
-                "include_format_instructions",
-            ]
-        ):
-            self._update_parser_instructions()
+        # Update format instructions if needed
+        self._update_format_instructions()
 
         # Apply optional variables if changed
         if "optional_variables" in self.config_params:
@@ -167,9 +162,71 @@ class AugLLMFactory:
         ):
             self.aug_config._handle_chat_template_messages_placeholder()
 
+        # Handle BaseModel tools for format instructions if flag was set
+        if (
+            "use_tool_for_format_instructions" in self.config_params
+            and self.config_params["use_tool_for_format_instructions"]
+        ):
+            self._handle_basemodel_tools_for_format()
+
         # Debug summary
         if override_summary:
             self._debug_log("Applied Runtime Overrides", override_summary)
+
+    def _handle_basemodel_tools_for_format(self):
+        """Process BaseModel tools to extract format instructions if enabled."""
+        # Skip if no tools or tool format instructions disabled
+        if not self.aug_config.tools:
+            return
+
+        # Look for BaseModel types in tools
+        basemodel_tools = [
+            tool
+            for tool in self.aug_config.tools
+            if isinstance(tool, type) and issubclass(tool, BaseModel)
+        ]
+
+        # If there's exactly one BaseModel tool, use it for format instructions
+        if len(basemodel_tools) == 1:
+            model = basemodel_tools[0]
+            # Set flags
+            self.aug_config.tool_is_base_model = True
+
+            # Auto-enable use_tool_for_format_instructions if not explicitly set to False
+            if (
+                "use_tool_for_format_instructions" in self.config_params
+                and self.config_params["use_tool_for_format_instructions"]
+            ) or self.aug_config.use_tool_for_format_instructions is None:
+                self.aug_config.use_tool_for_format_instructions = True
+
+            if self.aug_config.use_tool_for_format_instructions:
+                rprint(
+                    f"[green]Using BaseModel tool {model.__name__} for format instructions[/green]"
+                )
+
+                # Create temporary parser to get format instructions
+                temp_parser = PydanticOutputParser(pydantic_object=model)
+                if hasattr(temp_parser, "get_format_instructions"):
+                    format_instructions = temp_parser.get_format_instructions()
+                    self.aug_config.partial_variables["format_instructions"] = (
+                        format_instructions
+                    )
+                    rprint(
+                        "[green]Added format instructions from BaseModel tool[/green]"
+                    )
+
+                # Move this model to pydantic_tools if it's not already there
+                if model not in self.aug_config.pydantic_tools:
+                    self.aug_config.pydantic_tools.append(model)
+                    rprint(f"[green]Added {model.__name__} to pydantic_tools[/green]")
+
+        # If multiple BaseModel tools, log a warning
+        elif len(basemodel_tools) > 1:
+            self.aug_config.tool_is_base_model = False
+            if self.aug_config.use_tool_for_format_instructions:
+                rprint(
+                    f"[yellow]Multiple BaseModel tools found ({len(basemodel_tools)}). Specify which one to use.[/yellow]"
+                )
 
     def _update_system_message_in_prompt(self):
         """Update system message in prompt template if changed in config params."""
@@ -211,66 +268,62 @@ class AugLLMFactory:
             new_messages, partial_variables=partial_vars
         )
 
-    def _update_parser_instructions(self):
-        """Update parser format instructions if relevant settings changed."""
-        # Only update if instructions should be included
+    def _update_format_instructions(self):
+        """Update format instructions based on configuration changes."""
+        # Skip if format instructions are disabled or already in partial_variables
         if not self.aug_config.include_format_instructions:
             rprint("[yellow]Format instructions disabled - skipping update[/yellow]")
             return
 
-        rprint("[blue]Updating parser format instructions[/blue]")
+        # Set up based on configuration
+        self._setup_format_instructions()
 
-        # Handle Pydantic output parsing
+    def _setup_format_instructions(self):
+        """Set up format instructions based on configuration without affecting structured output."""
+        rprint("[blue]Setting up format instructions[/blue]")
+
+        # Skip if format instructions already exist
+        if "format_instructions" in self.aug_config.partial_variables:
+            rprint("[yellow]Format instructions already exist - skipping[/yellow]")
+            return
+
+        # Case 1: Structured output model exists
         if (
-            self.aug_config.parser_type == "pydantic"
-            and self.aug_config.structured_output_model
+            self.aug_config.structured_output_model
+            and not self.aug_config.parse_raw_output
         ):
-            rprint("[cyan]Updating PydanticOutputParser[/cyan]")
-            # Create/update parser
-            self.aug_config.output_parser = PydanticOutputParser(
+            rprint(
+                "[cyan]Getting format instructions from structured_output_model[/cyan]"
+            )
+            temp_parser = PydanticOutputParser(
                 pydantic_object=self.aug_config.structured_output_model
             )
-
-            # Update format instructions
-            if hasattr(self.aug_config.output_parser, "get_format_instructions"):
-                format_instructions = (
-                    self.aug_config.output_parser.get_format_instructions()
-                )
+            if hasattr(temp_parser, "get_format_instructions"):
                 self.aug_config.partial_variables["format_instructions"] = (
-                    format_instructions
-                )
-                rprint("[green]Updated format instructions for Pydantic parser[/green]")
-
-                # Apply to prompt template if it exists
-                if self.aug_config.prompt_template:
-                    self.aug_config._apply_partial_variables()
-
-        # Handle Pydantic tools parsing
-        elif (
-            self.aug_config.parser_type == "pydantic_tools"
-            and self.aug_config.pydantic_tools
-        ):
-            rprint("[cyan]Updating PydanticToolsParser[/cyan]")
-            # Create/update parser
-            self.aug_config.output_parser = PydanticToolsParser(
-                tools=self.aug_config.pydantic_tools
-            )
-
-            # Update format instructions
-            if hasattr(self.aug_config.output_parser, "get_format_instructions"):
-                format_instructions = (
-                    self.aug_config.output_parser.get_format_instructions()
-                )
-                self.aug_config.partial_variables["format_instructions"] = (
-                    format_instructions
+                    temp_parser.get_format_instructions()
                 )
                 rprint(
-                    "[green]Updated format instructions for Pydantic Tools parser[/green]"
+                    "[green]Added format instructions from structured_output_model[/green]"
                 )
 
-                # Apply to prompt template if it exists
-                if self.aug_config.prompt_template:
-                    self.aug_config._apply_partial_variables()
+        # Case 2: Pydantic tools exist
+        elif self.aug_config.pydantic_tools and not self.aug_config.parse_raw_output:
+            rprint("[cyan]Getting format instructions from pydantic_tools[/cyan]")
+            temp_parser = PydanticToolsParser(tools=self.aug_config.pydantic_tools)
+            if hasattr(temp_parser, "get_format_instructions"):
+                self.aug_config.partial_variables["format_instructions"] = (
+                    temp_parser.get_format_instructions()
+                )
+                rprint("[green]Added format instructions from pydantic_tools[/green]")
+
+        # Case 3: Single BaseModel tool - handled in _handle_basemodel_tools_for_format
+
+        # Apply instructions to template if it exists
+        if (
+            "format_instructions" in self.aug_config.partial_variables
+            and self.aug_config.prompt_template
+        ):
+            self.aug_config._apply_partial_variables()
 
     def create_runnable(self) -> Runnable:
         """
@@ -373,7 +426,23 @@ class AugLLMFactory:
 
         # Resolve tool instances if needed
         tool_instances = []
+        basemodel_tools = []
+
         for i, tool in enumerate(tools):
+            # Check if this is a BaseModel type for format instructions
+            if isinstance(tool, type) and issubclass(tool, BaseModel):
+                basemodel_tools.append(tool)
+                # Skip adding as actual tool if it's just for format instructions
+                if (
+                    self.aug_config.tool_is_base_model
+                    and len(basemodel_tools) == 1
+                    and self.aug_config.use_tool_for_format_instructions
+                ):
+                    rprint(
+                        f"[cyan]Skipping BaseModel {tool.__name__} as tool instance (used for format instructions)[/cyan]"
+                    )
+                    continue
+
             if isinstance(tool, str):
                 # Look up tool by name
                 try:
@@ -414,10 +483,15 @@ class AugLLMFactory:
         # Bind tools to the LLM
         bind_kwargs = self.aug_config.bind_tools_kwargs.copy()
         if self.aug_config.force_tool_choice:
+            # Force specific tool
             bind_kwargs["tool_choice"] = self.aug_config.force_tool_choice
             rprint(
-                f"[cyan]Forcing tool choice: {self.aug_config.force_tool_choice}[/cyan]"
+                f"[cyan]Forcing specific tool: {self.aug_config.force_tool_choice}[/cyan]"
             )
+        else:
+            # Force using a tool but don't specify which one
+            bind_kwargs["tool_choice"] = "auto"
+            rprint("[cyan]Forcing tool use (automatic selection)[/cyan]")
 
         # Use bind_tools method if available
         if hasattr(llm, "bind_tools"):
@@ -488,6 +562,11 @@ class AugLLMFactory:
             # Instead, we'll chain with the dedicated parser
             if isinstance(self.aug_config.output_parser, PydanticToolsParser):
                 return llm | self.aug_config.output_parser
+
+            # Create parser if needed
+            else:
+                parser = PydanticToolsParser(tools=self.aug_config.pydantic_tools)
+                return llm | parser
 
         # Handle custom output parser
         elif self.aug_config.output_parser and not isinstance(
@@ -582,6 +661,9 @@ class AugLLMFactory:
                 "has_postprocess": bool(self.aug_config.postprocess),
                 "custom_runnables": len(self.aug_config.custom_runnables or []),
                 "messages_optional": True,  # Always true with our changes
+                "has_format_instructions": "format_instructions"
+                in self.aug_config.partial_variables,
+                "tool_is_base_model": self.aug_config.tool_is_base_model,
             },
         )
 

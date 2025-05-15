@@ -17,7 +17,7 @@ from langgraph.prebuilt.tool_node import InjectedState, InjectedStore
 from pydantic import BaseModel, Field
 
 # Import our registry system
-from haive.core.registry.registy import register_tool, tool_registry
+from haive.core.registry.decorators import register_tool, tool_registry
 
 # Set up logging
 logger = logging.getLogger(__name__)

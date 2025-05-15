@@ -2,7 +2,8 @@
 
 from typing import Any, Callable, Dict, List, Optional
 
-from langchain_community.retrievers import BM25Retriever, default_preprocessing_func
+from langchain_community.retrievers import BM25Retriever
+from langchain_community.retrievers.bm25 import default_preprocessing_func
 from langchain_core.documents import Document
 from pydantic import Field
 

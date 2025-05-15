@@ -42,8 +42,8 @@ class NodeType(str, Enum):
     CALLABLE = "callable"  # Nodes created from callable functions
     TOOL = "tool"  # Tool nodes for handling tool calls
     VALIDATION = "validation"  # Validation nodes for schema validation
-    BRANCH = "branch"  # Branch nodes for conditional routing
-    SEND = "send"  # Send nodes for dynamic routing
+    # BRANCH = "branch"  # Branch nodes for conditional routing
+    # SEND = "send"  # Send nodes for dynamic routing
     CUSTOM = "custom"  # Custom node types
 
 

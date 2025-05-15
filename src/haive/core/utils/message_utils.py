@@ -13,6 +13,40 @@ from langchain_core.messages import (
 from langchain_core.tools import BaseTool, StructuredTool, Tool
 
 
+def has_tool_call(message: AIMessage):
+    """
+    Check if an AI message contains any tool calls.
+
+    Args:
+        message (AIMessage): The AI message object to check
+
+    Returns:
+        bool: True if the message has tool calls, False otherwise
+    """
+    return hasattr(message, "tool_calls")
+
+
+from langchain_core.messages import ToolMessage
+
+
+def has_tool_error(tool_message: ToolMessage):
+    """
+    Check if a tool message contains an error.
+
+    Args:
+        tool_message (ToolMessage): The tool message object to check
+
+    Returns:
+        bool: True if the message indicates a tool error, False otherwise
+    """
+    # Check if additional_kwargs exists and contains 'is_error' key
+    if hasattr(tool_message, "additional_kwargs") and isinstance(
+        tool_message.additional_kwargs, dict
+    ):
+        return tool_message.additional_kwargs.get("is_error", False)
+    return False
+
+
 def add_messages(left, right):
     """Add two lists of messages together."""
     if not isinstance(left, list):

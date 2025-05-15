@@ -1,16 +1,11 @@
 """
 Branch system for dynamic routing based on state values.
-
-This module provides the Branch class and various factory methods
-for creating branches for different routing scenarios.
 """
 
-from typing import Any, Callable, Dict, List, Optional, Set, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
-from langgraph.types import Send
-
-from haive.core.graph.branches.branch import Branch, BranchConfig
-from haive.core.graph.branches.dynamic import DynamicMappingConfig
+from haive.core.graph.branches.branch import Branch
+from haive.core.graph.branches.dynamic import DynamicMapping
 from haive.core.graph.branches.send_mapping import (
     SendGenerator,
     SendMapping,
@@ -18,30 +13,22 @@ from haive.core.graph.branches.send_mapping import (
 )
 from haive.core.graph.branches.types import (
     BranchMode,
-    BranchResultModel,
+    BranchProtocol,
+    BranchResult,
     ComparisonType,
 )
+from haive.core.graph.common.field_utils import (
+    extract_base_field,
+    extract_field,
+    get_field_value,
+)
+from haive.core.graph.common.references import CallableReference
 
-# Import common utilities we want to re-export
-from haive.core.graph.common import extract_field, get_field_value
+# Import from common utilities
+from haive.core.graph.common.types import ConfigLike, NodeOutput, StateLike
 
-# Re-export key classes
-__all__ = [
-    "Branch",
-    "BranchConfig",
-    "ComparisonType",
-    "BranchMode",
-    "BranchResultModel",
-    "SendMapping",
-    "SendGenerator",
-    "SendMappingList",
-    "extract_field",
-    "get_field_value",
-]
 
 # Factory functions for common branch types
-
-
 def key_equals(
     key: str, value: Any, true_dest: str = "continue", false_dest: str = "END"
 ) -> Branch:
@@ -66,13 +53,13 @@ def key_exists(
 
 
 def from_function(
-    function: Callable[[Any], Union[bool, str]],
+    function: Callable[[StateLike], Union[bool, str]],
     destinations: Optional[Dict[Union[bool, str], str]] = None,
     default: str = "END",
 ) -> Branch:
     """Create a Branch from a function."""
     return Branch(
-        function=function,
+        function_ref=CallableReference.from_callable(function),
         destinations=destinations,
         default=default,
         mode=BranchMode.FUNCTION,
@@ -81,23 +68,23 @@ def from_function(
 
 def chain(*branches: Branch, default: str = "END") -> Branch:
     """Chain multiple branches together, evaluating them in sequence."""
-    branch = Branch(mode=BranchMode.CHAIN, default=default)
-    branch._chain_branches = list(branches)
-    return branch
+    return Branch(chain_branches=list(branches), mode=BranchMode.CHAIN, default=default)
 
 
 def conditional(
-    condition: Callable[[Any], bool],
+    condition: Callable[[StateLike], bool],
     if_true: Union[str, Branch],
     if_false: Union[str, Branch],
     default: str = "END",
 ) -> Branch:
     """Create a Branch with conditional evaluation."""
-    branch = Branch(mode=BranchMode.CONDITION, default=default)
-    branch._condition = condition
-    branch._true_branch = if_true
-    branch._false_branch = if_false
-    return branch
+    return Branch(
+        condition_ref=CallableReference.from_callable(condition),
+        true_branch=if_true,
+        false_branch=if_false,
+        mode=BranchMode.CONDITION,
+        default=default,
+    )
 
 
 def message_contains(
@@ -116,41 +103,23 @@ def message_contains(
 
 
 def send_mapper(
-    function: Optional[Callable[[Any], List[Send]]] = None,
+    function: Optional[Callable[[StateLike], List[Any]]] = None,
     mappings: Optional[List[SendMapping]] = None,
     generators: Optional[List[SendGenerator]] = None,
 ) -> Branch:
-    """
-    Create a Branch that generates Send objects.
+    """Create a Branch that generates Send objects."""
+    function_ref = CallableReference.from_callable(function) if function else None
 
-    Args:
-        function: Function that takes state and returns Send objects
-        mappings: List of SendMapping configurations
-        generators: List of SendGenerator configurations
-
-    Returns:
-        Branch configured as a Send mapper
-    """
-    branch = Branch(function=function, mode=BranchMode.SEND_MAPPER)
-
-    # Set up send mapping list
-    branch.send_mapping_list = SendMappingList(
-        mappings=mappings or [], generators=generators or []
+    return Branch(
+        function_ref=function_ref,
+        send_mappings=mappings or [],
+        send_generators=generators or [],
+        mode=BranchMode.SEND_MAPPER,
     )
 
-    return branch
 
-
-def create_from_send_function(mapper_function: Callable[[Any], List[Send]]) -> Branch:
-    """
-    Create a Send mapper branch from a function that returns Send objects.
-
-    This is a convenience method for the common map_summaries pattern.
-
-    Args:
-        mapper_function: Function that returns list of Send objects
-
-    Returns:
-        Branch configured as a Send mapper
-    """
+def create_from_send_function(
+    mapper_function: Callable[[StateLike], List[Any]],
+) -> Branch:
+    """Create a Send mapper branch from a function that returns Send objects."""
     return send_mapper(function=mapper_function)
