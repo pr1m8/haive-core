@@ -6,7 +6,7 @@ import pytest
 from langgraph.graph import END, START
 from pydantic import BaseModel, Field
 
-from haive.core.engine.aug_llm.base import AugLLMConfig
+from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.graph.dynamic_graph_builder import DynamicGraph
 from haive.core.graph.node.config import NodeConfig
 from haive.core.graph.node.factory import NodeFactory

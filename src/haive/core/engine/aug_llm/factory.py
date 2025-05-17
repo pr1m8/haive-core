@@ -2,10 +2,11 @@
 Factory for creating LLM chain runnables from AugLLMConfig.
 
 Provides a clean separation between configuration and runnable creation,
-with special focus on flexible message handling and output parsing.
+with special focus on flexible message handling, tool binding, and output parsing.
 """
 
 import inspect
+import json
 import logging
 from typing import Any, Callable, Dict, List, Optional, Type, Union
 
@@ -19,6 +20,7 @@ from langchain_core.output_parsers.openai_tools import PydanticToolsParser
 from langchain_core.prompts import (
     BasePromptTemplate,
     ChatPromptTemplate,
+    FewShotChatMessagePromptTemplate,
     MessagesPlaceholder,
     SystemMessagePromptTemplate,
 )
@@ -29,10 +31,6 @@ from rich import print as rprint
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
-
-# Local imports will be used in actual implementation
-# from haive.core.engine.aug_llm.config import AugLLMConfig
-# from haive.core.engine.base import EngineRegistry, EngineType
 
 logger = logging.getLogger(__name__)
 console = Console()
@@ -55,6 +53,7 @@ class AugLLMFactory:
         # Apply runtime config overrides if any
         self._apply_config_params()
 
+        # Log initialization state
         self._debug_log(
             "AugLLMFactory Initialization",
             {
@@ -69,6 +68,10 @@ class AugLLMFactory:
                 in self.aug_config.optional_variables,
                 "use_tool_for_format_instructions": self.aug_config.use_tool_for_format_instructions,
                 "tool_is_base_model": self.aug_config.tool_is_base_model,
+                "force_tool_use": self.aug_config.force_tool_use,
+                "force_tool_choice": self.aug_config.force_tool_choice,
+                "tool_choice_mode": self.aug_config.tool_choice_mode,
+                "structured_output_version": self.aug_config.structured_output_version,
             },
         )
 
@@ -107,6 +110,8 @@ class AugLLMFactory:
             "parse_raw_output",
             "messages_placeholder_name",
             "force_tool_choice",
+            "force_tool_use",
+            "tool_choice_mode",
             "optional_variables",
             "include_format_instructions",
             "parser_type",
@@ -114,6 +119,8 @@ class AugLLMFactory:
             "add_messages_placeholder",
             "force_messages_optional",
             "use_tool_for_format_instructions",
+            "structured_output_version",
+            "output_field_name",
         ]:
             if param in self.config_params:
                 setattr(self.aug_config, param, self.config_params[param])
@@ -128,10 +135,11 @@ class AugLLMFactory:
             override_summary["partial_variables"] = "updated"
             rprint("[cyan]Updated partial variables[/cyan]")
 
-        # MODIFIED: Make sure messages is in optional variables
+        # Ensure messages is in optional variables when required
         if (
             self.aug_config.messages_placeholder_name
             not in self.aug_config.optional_variables
+            and self.aug_config.force_messages_optional
         ):
             self.aug_config.optional_variables.append(
                 self.aug_config.messages_placeholder_name
@@ -145,7 +153,23 @@ class AugLLMFactory:
             self._update_system_message_in_prompt()
 
         # Update format instructions if needed
-        self._update_format_instructions()
+        if (
+            "include_format_instructions" in self.config_params
+            or "structured_output_model" in self.config_params
+        ):
+            self.aug_config._setup_format_instructions()
+
+        # Process tools if they were updated
+        if "tools" in self.config_params or "pydantic_tools" in self.config_params:
+            self.aug_config._process_tools()
+
+        # Configure tool choice if settings changed
+        if (
+            "force_tool_use" in self.config_params
+            or "force_tool_choice" in self.config_params
+            or "tool_choice_mode" in self.config_params
+        ):
+            self.aug_config._configure_tool_choice()
 
         # Apply optional variables if changed
         if "optional_variables" in self.config_params:
@@ -167,66 +191,11 @@ class AugLLMFactory:
             "use_tool_for_format_instructions" in self.config_params
             and self.config_params["use_tool_for_format_instructions"]
         ):
-            self._handle_basemodel_tools_for_format()
+            self.aug_config._process_tools()
 
         # Debug summary
         if override_summary:
             self._debug_log("Applied Runtime Overrides", override_summary)
-
-    def _handle_basemodel_tools_for_format(self):
-        """Process BaseModel tools to extract format instructions if enabled."""
-        # Skip if no tools or tool format instructions disabled
-        if not self.aug_config.tools:
-            return
-
-        # Look for BaseModel types in tools
-        basemodel_tools = [
-            tool
-            for tool in self.aug_config.tools
-            if isinstance(tool, type) and issubclass(tool, BaseModel)
-        ]
-
-        # If there's exactly one BaseModel tool, use it for format instructions
-        if len(basemodel_tools) == 1:
-            model = basemodel_tools[0]
-            # Set flags
-            self.aug_config.tool_is_base_model = True
-
-            # Auto-enable use_tool_for_format_instructions if not explicitly set to False
-            if (
-                "use_tool_for_format_instructions" in self.config_params
-                and self.config_params["use_tool_for_format_instructions"]
-            ) or self.aug_config.use_tool_for_format_instructions is None:
-                self.aug_config.use_tool_for_format_instructions = True
-
-            if self.aug_config.use_tool_for_format_instructions:
-                rprint(
-                    f"[green]Using BaseModel tool {model.__name__} for format instructions[/green]"
-                )
-
-                # Create temporary parser to get format instructions
-                temp_parser = PydanticOutputParser(pydantic_object=model)
-                if hasattr(temp_parser, "get_format_instructions"):
-                    format_instructions = temp_parser.get_format_instructions()
-                    self.aug_config.partial_variables["format_instructions"] = (
-                        format_instructions
-                    )
-                    rprint(
-                        "[green]Added format instructions from BaseModel tool[/green]"
-                    )
-
-                # Move this model to pydantic_tools if it's not already there
-                if model not in self.aug_config.pydantic_tools:
-                    self.aug_config.pydantic_tools.append(model)
-                    rprint(f"[green]Added {model.__name__} to pydantic_tools[/green]")
-
-        # If multiple BaseModel tools, log a warning
-        elif len(basemodel_tools) > 1:
-            self.aug_config.tool_is_base_model = False
-            if self.aug_config.use_tool_for_format_instructions:
-                rprint(
-                    f"[yellow]Multiple BaseModel tools found ({len(basemodel_tools)}). Specify which one to use.[/yellow]"
-                )
 
     def _update_system_message_in_prompt(self):
         """Update system message in prompt template if changed in config params."""
@@ -268,63 +237,6 @@ class AugLLMFactory:
             new_messages, partial_variables=partial_vars
         )
 
-    def _update_format_instructions(self):
-        """Update format instructions based on configuration changes."""
-        # Skip if format instructions are disabled or already in partial_variables
-        if not self.aug_config.include_format_instructions:
-            rprint("[yellow]Format instructions disabled - skipping update[/yellow]")
-            return
-
-        # Set up based on configuration
-        self._setup_format_instructions()
-
-    def _setup_format_instructions(self):
-        """Set up format instructions based on configuration without affecting structured output."""
-        rprint("[blue]Setting up format instructions[/blue]")
-
-        # Skip if format instructions already exist
-        if "format_instructions" in self.aug_config.partial_variables:
-            rprint("[yellow]Format instructions already exist - skipping[/yellow]")
-            return
-
-        # Case 1: Structured output model exists
-        if (
-            self.aug_config.structured_output_model
-            and not self.aug_config.parse_raw_output
-        ):
-            rprint(
-                "[cyan]Getting format instructions from structured_output_model[/cyan]"
-            )
-            temp_parser = PydanticOutputParser(
-                pydantic_object=self.aug_config.structured_output_model
-            )
-            if hasattr(temp_parser, "get_format_instructions"):
-                self.aug_config.partial_variables["format_instructions"] = (
-                    temp_parser.get_format_instructions()
-                )
-                rprint(
-                    "[green]Added format instructions from structured_output_model[/green]"
-                )
-
-        # Case 2: Pydantic tools exist
-        elif self.aug_config.pydantic_tools and not self.aug_config.parse_raw_output:
-            rprint("[cyan]Getting format instructions from pydantic_tools[/cyan]")
-            temp_parser = PydanticToolsParser(tools=self.aug_config.pydantic_tools)
-            if hasattr(temp_parser, "get_format_instructions"):
-                self.aug_config.partial_variables["format_instructions"] = (
-                    temp_parser.get_format_instructions()
-                )
-                rprint("[green]Added format instructions from pydantic_tools[/green]")
-
-        # Case 3: Single BaseModel tool - handled in _handle_basemodel_tools_for_format
-
-        # Apply instructions to template if it exists
-        if (
-            "format_instructions" in self.aug_config.partial_variables
-            and self.aug_config.prompt_template
-        ):
-            self.aug_config._apply_partial_variables()
-
     def create_runnable(self) -> Runnable:
         """
         Create the complete runnable chain with proper message handling.
@@ -334,10 +246,11 @@ class AugLLMFactory:
         """
         rprint("[bold blue]Creating runnable chain[/bold blue]")
 
-        # MODIFIED: Last check to ensure messages are optional
+        # Final check to ensure messages are optional if required
         if (
             self.aug_config.messages_placeholder_name
             not in self.aug_config.optional_variables
+            and self.aug_config.force_messages_optional
         ):
             self.aug_config.optional_variables.append(
                 self.aug_config.messages_placeholder_name
@@ -346,10 +259,20 @@ class AugLLMFactory:
                 f"[yellow]Added {self.aug_config.messages_placeholder_name} to optional_variables during runnable creation[/yellow]"
             )
 
-        # Force chat templates to have optional messages placeholder
-        if isinstance(self.aug_config.prompt_template, ChatPromptTemplate):
+        # Force chat templates to have optional messages placeholder if required
+        if (
+            isinstance(self.aug_config.prompt_template, ChatPromptTemplate)
+            and self.aug_config.force_messages_optional
+        ):
             self.aug_config._handle_chat_template_messages_placeholder()
             rprint("[green]Enforced optional messages in chat template[/green]")
+
+        # Handle FewShotChatMessagePromptTemplate if present
+        elif isinstance(
+            self.aug_config.prompt_template, FewShotChatMessagePromptTemplate
+        ):
+            rprint("[green]Processing FewShotChatMessagePromptTemplate[/green]")
+            # Special handling is done in config
 
         # Initialize LLM with any runtime parameters
         llm_params = {}
@@ -427,53 +350,98 @@ class AugLLMFactory:
         # Resolve tool instances if needed
         tool_instances = []
         basemodel_tools = []
+        failed_tools = []
 
         for i, tool in enumerate(tools):
-            # Check if this is a BaseModel type for format instructions
-            if isinstance(tool, type) and issubclass(tool, BaseModel):
-                basemodel_tools.append(tool)
-                # Skip adding as actual tool if it's just for format instructions
-                if (
-                    self.aug_config.tool_is_base_model
-                    and len(basemodel_tools) == 1
-                    and self.aug_config.use_tool_for_format_instructions
-                ):
-                    rprint(
-                        f"[cyan]Skipping BaseModel {tool.__name__} as tool instance (used for format instructions)[/cyan]"
-                    )
-                    continue
+            try:
+                # Case 1: Tool is a BaseModel type for function/schema definition
+                if isinstance(tool, type) and issubclass(tool, BaseModel):
+                    basemodel_tools.append(tool)
+                    tool_instances.append(
+                        tool
+                    )  # v2 structured output needs it as a tool
+                    rprint(f"[green]Adding BaseModel {tool.__name__} as tool[/green]")
 
-            if isinstance(tool, str):
-                # Look up tool by name
-                try:
-                    # The import would be from haive.core.engine.tool import ToolRegistry in real code
-                    # This is a placeholder - in actual implementation this would be proper registry lookup
-                    tool_instance = {
-                        "name": tool,
-                        "description": f"Mock tool for {tool}",
-                    }
-                    tool_instances.append(tool_instance)
-                    rprint(f"[green]Resolved tool {i+1}: {tool}[/green]")
-                except (ImportError, AttributeError):
-                    # Fallback - just skip this tool
-                    rprint(f"[red]Failed to resolve tool {i+1}: {tool}[/red]")
-                    continue
-            elif isinstance(tool, type) and hasattr(tool, "description"):
-                # Instantiate tool class
-                kwargs = self.aug_config.tool_kwargs.get(
-                    getattr(tool, "__name__", "Tool"), {}
-                )
-                tool_instances.append(tool(**kwargs))
-                rprint(
-                    f"[green]Instantiated tool {i+1}: {getattr(tool, '__name__', 'Unknown')}[/green]"
-                )
-            else:
-                # Assume it's already a tool instance
-                tool_instances.append(tool)
-                tool_class_name = (
-                    tool.__class__.__name__ if hasattr(tool, "__class__") else "Unknown"
-                )
-                rprint(f"[green]Using tool instance {i+1}: {tool_class_name}[/green]")
+                    # If using v2 structured output, ensure proper field names
+                    if (
+                        self.aug_config.structured_output_version == "v2"
+                        and tool == self.aug_config.structured_output_model
+                    ):
+                        if self.aug_config.output_field_name and hasattr(
+                            tool, "__name__"
+                        ):
+                            rprint(
+                                f"[cyan]Using custom output field: {self.aug_config.output_field_name}[/cyan]"
+                            )
+
+                # Case 2: Tool is a BaseTool instance or needs instantiation
+                elif isinstance(tool, BaseTool) or (
+                    isinstance(tool, type) and issubclass(tool, BaseTool)
+                ):
+                    # If it's a class, instantiate it
+                    if isinstance(tool, type):
+                        # Get tool kwargs from config or use empty dict
+                        kwargs = self.aug_config.tool_kwargs.get(
+                            getattr(tool, "__name__", "Tool"), {}
+                        )
+                        try:
+                            tool_instances.append(tool(**kwargs))
+                            rprint(
+                                f"[green]Instantiated tool {i+1}: {getattr(tool, '__name__', 'Unknown')}[/green]"
+                            )
+                        except Exception as e:
+                            rprint(
+                                f"[red]Failed to instantiate tool {getattr(tool, '__name__', 'Unknown')}: {e}[/red]"
+                            )
+                            failed_tools.append((tool, str(e)))
+                    else:
+                        # Already an instance
+                        tool_instances.append(tool)
+                        tool_class_name = tool.__class__.__name__
+                        rprint(
+                            f"[green]Using tool instance {i+1}: {tool_class_name}[/green]"
+                        )
+
+                # Case 3: Tool is a string (reference to a tool)
+                elif isinstance(tool, str):
+                    # Look up tool by name
+                    try:
+                        # The import would be from haive.core.engine.tool import ToolRegistry in real code
+                        # This is a placeholder - in actual implementation this would be proper registry lookup
+                        tool_instance = {
+                            "name": tool,
+                            "description": f"Mock tool for {tool}",
+                        }
+                        tool_instances.append(tool_instance)
+                        rprint(f"[green]Resolved tool {i+1}: {tool}[/green]")
+                    except (ImportError, AttributeError) as e:
+                        # Fallback - just skip this tool
+                        rprint(f"[red]Failed to resolve tool {i+1}: {tool} - {e}[/red]")
+                        failed_tools.append((tool, f"Tool resolution failed: {str(e)}"))
+                        continue
+
+                # Case 4: Callable function
+                elif callable(tool) and not isinstance(tool, type):
+                    # Add function name as tool name
+                    func_name = getattr(tool, "__name__", "unnamed_function")
+                    tool_instances.append(tool)
+                    rprint(f"[green]Added callable tool {i+1}: {func_name}[/green]")
+
+                # Case 5: Other tool types (log warning)
+                else:
+                    tool_type = type(tool).__name__
+                    rprint(f"[yellow]Unrecognized tool type: {tool_type}[/yellow]")
+                    failed_tools.append((tool, f"Unrecognized tool type: {tool_type}"))
+            except Exception as e:
+                rprint(f"[red]Unexpected error processing tool {i+1}: {e}[/red]")
+                failed_tools.append((tool, f"Unexpected error: {str(e)}"))
+
+        # Log any failed tools
+        if failed_tools:
+            rprint(f"[yellow]Failed to process {len(failed_tools)} tools[/yellow]")
+            for failed_tool, error in failed_tools:
+                tool_name = getattr(failed_tool, "__name__", str(failed_tool))
+                rprint(f"[yellow]  - {tool_name}: {error}[/yellow]")
 
         # Check if we found any valid tools
         if not tool_instances:
@@ -482,26 +450,66 @@ class AugLLMFactory:
 
         # Bind tools to the LLM
         bind_kwargs = self.aug_config.bind_tools_kwargs.copy()
-        if self.aug_config.force_tool_choice:
+
+        # Set tool_choice based on configuration
+        if self.aug_config.force_tool_choice and isinstance(
+            self.aug_config.force_tool_choice, str
+        ):
             # Force specific tool
-            bind_kwargs["tool_choice"] = self.aug_config.force_tool_choice
+            bind_kwargs["tool_choice"] = {
+                "type": "function",
+                "function": {"name": self.aug_config.force_tool_choice},
+            }
             rprint(
                 f"[cyan]Forcing specific tool: {self.aug_config.force_tool_choice}[/cyan]"
             )
-        else:
-            # Force using a tool but don't specify which one
+        elif self.aug_config.tool_choice_mode == "required":
+            # Force using any tool
+            bind_kwargs["tool_choice"] = "required"
+            rprint("[cyan]Forcing tool use (any tool)[/cyan]")
+        elif self.aug_config.tool_choice_mode == "auto":
+            # Auto tool choice
             bind_kwargs["tool_choice"] = "auto"
-            rprint("[cyan]Forcing tool use (automatic selection)[/cyan]")
+            rprint("[cyan]Setting tool_choice to 'auto'[/cyan]")
+        elif self.aug_config.tool_choice_mode == "none":
+            # Disable tool usage
+            bind_kwargs["tool_choice"] = "none"
+            rprint("[cyan]Setting tool_choice to 'none' (disabled)[/cyan]")
 
         # Use bind_tools method if available
         if hasattr(llm, "bind_tools"):
-            rprint("[cyan]Using bind_tools method[/cyan]")
-            return llm.bind_tools(tool_instances, **bind_kwargs)
+            rprint(
+                f"[cyan]Using bind_tools method with {len(tool_instances)} tools[/cyan]"
+            )
+            try:
+                return llm.bind_tools(tool_instances, **bind_kwargs)
+            except Exception as e:
+                rprint(f"[red]Error binding tools: {e}[/red]")
+                # Try with fewer kwargs in case of compatibility issues
+                try:
+                    # Simplified binding with just tool_choice
+                    if "tool_choice" in bind_kwargs:
+                        return llm.bind_tools(
+                            tool_instances, tool_choice=bind_kwargs["tool_choice"]
+                        )
+                    else:
+                        return llm.bind_tools(tool_instances)
+                except Exception as e2:
+                    rprint(f"[red]Failed simplified tool binding: {e2}[/red]")
+                    return llm
 
         # Fallback - try with_tools for OpenAI compatibility
         rprint("[yellow]Falling back to with_tools method[/yellow]")
         if hasattr(llm, "with_tools"):
-            return llm.with_tools(tool_instances, **bind_kwargs)
+            try:
+                return llm.with_tools(tool_instances, **bind_kwargs)
+            except Exception as e:
+                rprint(f"[red]Error with fallback tool binding: {e}[/red]")
+                # Very simplified binding attempt
+                try:
+                    return llm.with_tools(tool_instances)
+                except Exception as e3:
+                    rprint(f"[red]Cannot bind tools with minimal args: {e3}[/red]")
 
         # If no tool binding method available, return original LLM with warning
         rprint("[red]No tool binding method available on LLM[/red]")
@@ -518,16 +526,53 @@ class AugLLMFactory:
         """
         rprint("[blue]Configuring structured output[/blue]")
 
-        # Handle Pydantic output model with function calling
-        if (
-            self.aug_config.structured_output_model
-            and not self.aug_config.parse_raw_output
-            and self.aug_config.parser_type == "pydantic"
+        # If parse_raw_output is True, use StrOutputParser regardless of other settings
+        if self.aug_config.parse_raw_output:
+            rprint("[cyan]Using StrOutputParser for raw output[/cyan]")
+            return llm | StrOutputParser()
+
+        # Version-specific structured output handling
+        if self.aug_config.structured_output_version == "v2" and (
+            self.aug_config.structured_output_model or self.aug_config.pydantic_tools
         ):
 
-            rprint(
-                "[cyan]Using Pydantic structured output with function calling[/cyan]"
-            )
+            rprint("[cyan]Using v2 structured output (tool-based approach)[/cyan]")
+
+            # In v2, the tools have already been bound to the LLM in _initialize_llm_with_tools
+            # We need to ensure the output is properly parsed
+            if self.aug_config.output_parser:
+                # Use existing parser if provided
+                rprint(
+                    f"[green]Using existing parser: {type(self.aug_config.output_parser).__name__}[/green]"
+                )
+                return llm | self.aug_config.output_parser
+            elif self.aug_config.pydantic_tools:
+                # Create parser for pydantic tools
+                parser = PydanticToolsParser(tools=self.aug_config.pydantic_tools)
+                rprint("[green]Created PydanticToolsParser for v2 output[/green]")
+                return llm | parser
+            elif self.aug_config.structured_output_model:
+                # Create parser for single model
+                parser = PydanticToolsParser(
+                    tools=[self.aug_config.structured_output_model]
+                )
+                rprint(
+                    "[green]Created PydanticToolsParser for structured_output_model[/green]"
+                )
+                return llm | parser
+            else:
+                # Fallback to string output
+                rprint(
+                    "[yellow]No parser available for v2 - using StrOutputParser[/yellow]"
+                )
+                return llm | StrOutputParser()
+
+        # Handle v1 Pydantic output model with function calling
+        elif (
+            self.aug_config.structured_output_model
+            and self.aug_config.parser_type == "pydantic"
+        ):
+            rprint("[cyan]Using v1 Pydantic structured output[/cyan]")
 
             # Use with_structured_output for best support
             try:
@@ -545,18 +590,23 @@ class AugLLMFactory:
             except Exception as e:
                 rprint(f"[red]Failed to configure structured output: {e}[/red]")
                 # Fallback - chain with output parser
-                if self.aug_config.output_parser:
-                    rprint("[yellow]Falling back to output parser chain[/yellow]")
-                    return llm | self.aug_config.output_parser
-                return llm
+
+            # If we got here, we need to create or use an output parser
+            if self.aug_config.output_parser:
+                rprint("[yellow]Using existing output parser[/yellow]")
+                return llm | self.aug_config.output_parser
+            else:
+                rprint("[yellow]Creating PydanticOutputParser[/yellow]")
+                parser = PydanticOutputParser(
+                    pydantic_object=self.aug_config.structured_output_model
+                )
+                return llm | parser
 
         # Handle Pydantic tools
         elif (
             self.aug_config.pydantic_tools
             and self.aug_config.parser_type == "pydantic_tools"
-            and not self.aug_config.parse_raw_output
         ):
-
             rprint("[cyan]Using Pydantic tools parser[/cyan]")
             # Using with_structured_output doesn't work well for tool parsing
             # Instead, we'll chain with the dedicated parser
@@ -569,18 +619,11 @@ class AugLLMFactory:
                 return llm | parser
 
         # Handle custom output parser
-        elif self.aug_config.output_parser and not isinstance(
-            self.aug_config.output_parser, PydanticToolsParser
-        ):
+        elif self.aug_config.output_parser:
             rprint(
                 f"[cyan]Using custom output parser: {type(self.aug_config.output_parser).__name__}[/cyan]"
             )
             return llm | self.aug_config.output_parser
-
-        # If parse_raw_output is True, use StrOutputParser regardless
-        elif self.aug_config.parse_raw_output:
-            rprint("[cyan]Using StrOutputParser for raw output[/cyan]")
-            return llm | StrOutputParser()
 
         # Default - just return the LLM as is
         rprint(
@@ -611,8 +654,8 @@ class AugLLMFactory:
 
             # Add messages placeholder if needed
             if self.aug_config.add_messages_placeholder:
-                # MODIFIED: Always make messages optional
-                is_optional = True
+                # Make messages optional based on config
+                is_optional = self.aug_config.force_messages_optional
                 messages.append(
                     MessagesPlaceholder(
                         variable_name=self.aug_config.messages_placeholder_name,
@@ -656,15 +699,95 @@ class AugLLMFactory:
         self._debug_log(
             "Chain Composition",
             {
-                "has_prompt_template": bool(self.aug_config.prompt_template),
+                "prompt_template_type": type(self.aug_config.prompt_template).__name__,
                 "has_preprocess": bool(self.aug_config.preprocess),
                 "has_postprocess": bool(self.aug_config.postprocess),
                 "custom_runnables": len(self.aug_config.custom_runnables or []),
-                "messages_optional": True,  # Always true with our changes
+                "messages_optional": self.aug_config.force_messages_optional,
                 "has_format_instructions": "format_instructions"
                 in self.aug_config.partial_variables,
                 "tool_is_base_model": self.aug_config.tool_is_base_model,
+                "structured_output_version": self.aug_config.structured_output_version,
             },
         )
 
         return chain
+
+    def _generate_schema_instructions(self, model: Type[BaseModel]) -> str:
+        """Generate schema-based instructions for a model.
+
+        Args:
+            model: The Pydantic model
+
+        Returns:
+            Formatted instructions string
+        """
+        # Get the schema
+        schema = model.schema()
+
+        # Format JSON with indentation
+        schema_json = json.dumps(schema, indent=2)
+
+        # Format instructions
+        return f"""You must format your response as JSON that matches this schema:
+
+```json
+{schema_json}
+```
+
+The output should be valid JSON that conforms to the {model.__name__} schema.
+"""
+
+    def _create_pydantic_model_tool(self, model: Type[BaseModel]) -> BaseTool:
+        """Create a tool from a Pydantic model for structured output.
+
+        Args:
+            model: The Pydantic model to convert to a tool
+
+        Returns:
+            Created tool
+        """
+        from langchain_core.tools import BaseTool, StructuredTool
+
+        model_name = model.__name__.lower()
+        model_description = getattr(
+            model, "__doc__", f"Create a {model.__name__} object"
+        )
+
+        # Define a function that will validate against the model
+        def model_func(**kwargs):
+            try:
+                # Validate with the model
+                result = model(**kwargs)
+                # Return as dict for JSON serialization
+                return result.dict() if hasattr(result, "dict") else result.model_dump()
+            except Exception as e:
+                return {"error": f"Failed to create {model_name}: {str(e)}"}
+
+        # Get parameter schema from model
+        if hasattr(model, "schema"):
+            param_schema = model.schema().get("properties", {})
+        else:
+            param_schema = {}
+
+        # Try to create a structured tool if possible
+        try:
+            tool = StructuredTool.from_function(
+                func=model_func, name=model_name, description=model_description
+            )
+            return tool
+        except Exception as e:
+            rprint(f"[yellow]Failed to create structured tool from model: {e}[/yellow]")
+
+            # Fallback to simple BaseTool
+            class PydanticModelTool(BaseTool):
+                name = model_name
+                description = model_description
+
+                def _run(self, **kwargs):
+                    return model_func(**kwargs)
+
+                async def _arun(self, **kwargs):
+                    return model_func(**kwargs)
+
+            return PydanticModelTool()

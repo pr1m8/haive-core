@@ -47,7 +47,7 @@ class Branch(BaseModel):
     name: str = Field(default_factory=lambda: f"branch_{uuid.uuid4().hex[:8]}")
 
     # Connection information (replaces ConditionalEdge)
-    source_node: str
+    source_node: Optional[str] = Field(default=None)
     destinations: Dict[Union[bool, str], str] = Field(
         default_factory=lambda: {True: "continue", False: "END"}
     )
@@ -114,6 +114,40 @@ class Branch(BaseModel):
 
         # Regular branch evaluation for other modes
         return self.evaluate(state)
+
+    # TODO: Replace Temporary Adaptor
+    def evaluator(self, state: Dict[str, Any]) -> str:
+        """
+        Evaluate the branch condition and return the next node.
+
+        Args:
+            state: Current graph state
+
+        Returns:
+            Name of the next node
+        """
+        try:
+            result = self.function(state)
+
+            # Look up the destination
+            if result in self.destinations:
+                return self.destinations[result]
+
+            # Use default if no match
+            if self.default is not None:
+                return self.default
+
+            # No match and no default - use first destination as fallback
+            if self.destinations:
+                return next(iter(self.destinations.values()))
+
+            # No destinations - return empty string
+            return ""
+
+        except Exception as e:
+            # Log and return default or fallback
+            print(f"Error evaluating branch: {e}")
+            return self.default if self.default else ""
 
     def evaluate(self, state: StateLike) -> NodeOutput:
         """Evaluate the branch against state."""

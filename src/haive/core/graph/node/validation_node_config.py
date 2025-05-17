@@ -23,9 +23,9 @@ class ValidationNodeConfig(NodeConfig):
     messages_key: str = Field(
         default="messages", description="The key to use for the messages field"
     )
-    schemas: Sequence[Union[BaseTool, Type[BaseModel], Callable]] = Field(
-        default_factory=list, description="The schemas to use for the node"
-    )
+    schemas: Sequence[
+        Union[Type[BaseTool], Type[BaseModel], Callable, StructuredTool, BaseModel]
+    ] = Field(default_factory=list, description="The schemas to use for the node")
     tags: Optional[List[str]] = Field(
         default=None, description="Optional tags for the validation node"
     )

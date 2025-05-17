@@ -9,6 +9,7 @@ from typing import (
     Optional,
     Sequence,
     Tuple,
+    Type,
     TypeVar,
     Union,
 )
@@ -20,13 +21,19 @@ from pydantic import BaseModel
 from haive.core.schema.state_schema import StateSchema
 
 # Core type definitions
+# CHECK:
 NodeLike = TypeVar("NodeLike", bound=Any)
 NodeOutput = TypeVar(
-    "NodeOutput", bound=Union[Command, Send, List[Send], str, BaseModel, Dict[str, Any]]
+    "NodeOutput",
+    bound=Union[
+        Command, Send, List[Send], str, Type[BaseModel], BaseModel, Dict[str, Any]
+    ],
 )
-StateLike = TypeVar("StateLike", bound=Union[Dict[str, Any], BaseModel, StateSchema])
+StateLike = TypeVar(
+    "StateLike", bound=Union[Dict[str, Any], Type[BaseModel], BaseModel, StateSchema]
+)
 ConfigLike = TypeVar(
-    "ConfigLike", bound=Union[RunnableConfig, Dict[str, Any], BaseModel]
+    "ConfigLike", bound=Union[RunnableConfig, Dict[str, Any], Type[BaseModel]]
 )
 NodeCallable = Callable[[StateLike, Optional[ConfigLike]], NodeOutput]
 BaseEdge = Union[Tuple[str, str], Tuple[NodeLike, NodeLike]]
@@ -42,6 +49,7 @@ class NodeType(str, Enum):
     CALLABLE = "callable"
     TOOL = "tool"
     VALIDATION = "validation"
-    BRANCH = "branch"
-    SEND = "send"
+    # BRANCH = "branch"
+    # SEND = "send"
     CUSTOM = "custom"
+    SUBGRAPH = "subgraph"

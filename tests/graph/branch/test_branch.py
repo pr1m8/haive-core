@@ -10,6 +10,7 @@ from typing import Any, Dict, List, Optional, Union
 
 import pytest
 from langchain_core.messages import AIMessage, HumanMessage
+from langgraph.prebuilt import ValidationNode
 from langgraph.types import Command, Send
 from pydantic import BaseModel, Field
 from rich.console import Console

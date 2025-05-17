@@ -6,18 +6,21 @@ tools, output parsers, and structured output models with rich debugging.
 """
 
 import inspect
+import json
 import logging
 from typing import (
     Any,
     Callable,
     Dict,
     List,
+    Literal,
     Optional,
     Sequence,
     Set,
     Tuple,
     Type,
     Union,
+    cast,
 )
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
@@ -30,6 +33,7 @@ from langchain_core.output_parsers.openai_tools import PydanticToolsParser
 from langchain_core.prompts import (
     BasePromptTemplate,
     ChatPromptTemplate,
+    FewShotChatMessagePromptTemplate,
     FewShotPromptTemplate,
     MessagesPlaceholder,
     PromptTemplate,
@@ -48,6 +52,11 @@ from haive.core.models.llm.base import AzureLLMConfig, LLMConfig
 
 logger = logging.getLogger(__name__)
 console = Console()
+
+# Literal types for better type safety
+ParserType = Literal["pydantic", "pydantic_tools", "str", "json", "custom"]
+StructuredOutputVersion = Literal["v1", "v2"]
+ToolChoiceMode = Literal["auto", "required", "optional", "none"]
 
 
 class AugLLMConfig(
@@ -114,7 +123,7 @@ class AugLLMConfig(
 
     # Tools
     tools: Sequence[
-        Union[Type[BaseTool], Type[BaseModel], Callable, StructuredTool]
+        Union[Type[BaseTool], Type[BaseModel], Callable, StructuredTool, BaseModel]
     ] = Field(default_factory=list, description="The tools to use for the node")
     pydantic_tools: List[Type[BaseModel]] = Field(
         default_factory=list, description="Pydantic models for tool schemas"
@@ -130,9 +139,24 @@ class AugLLMConfig(
         description="Whether a tool is a BaseModel type (detected automatically)",
     )
 
+    # Tool selection options
+    force_tool_use: bool = Field(
+        default=False, description="Whether to force the LLM to use a tool (any tool)"
+    )
+    force_tool_choice: Optional[Union[bool, str, List[str]]] = Field(
+        default=None, description="Force specific tool(s) to be used"
+    )
+    tool_choice_mode: ToolChoiceMode = Field(
+        default="auto", description="Tool choice mode to use for binding tools"
+    )
+
     # Output handling
     structured_output_model: Optional[Type[BaseModel]] = Field(
         default=None, description="Pydantic model for structured output"
+    )
+    structured_output_version: StructuredOutputVersion = Field(
+        default="v1",
+        description="Version of structured output handling: v1 (traditional), v2 (tool-based)",
     )
     output_parser: Optional[BaseOutputParser] = Field(
         default=None, description="Parser for LLM output"
@@ -144,9 +168,14 @@ class AugLLMConfig(
     include_format_instructions: bool = Field(
         default=True, description="Whether to include format instructions in the prompt"
     )
-    parser_type: str = Field(
+    parser_type: ParserType = Field(
         default="pydantic",
-        description="Parser type: 'pydantic', 'pydantic_tools', or 'custom'",
+        description="Parser type: 'pydantic', 'pydantic_tools', 'str', 'json', or 'custom'",
+    )
+
+    # Output field naming
+    output_field_name: Optional[str] = Field(
+        default=None, description="Custom name for the primary output field in schema"
     )
 
     # Tool configuration
@@ -158,9 +187,6 @@ class AugLLMConfig(
     )
     bind_tools_config: Dict[str, Any] = Field(
         default_factory=dict, description="Configuration for bind_tools"
-    )
-    force_tool_choice: Optional[str] = Field(
-        default=None, description="Force the LLM to use this specific tool"
     )
 
     # Pre/post processing
@@ -201,9 +227,6 @@ class AugLLMConfig(
     # Optional variables for templates
     optional_variables: List[str] = Field(
         default_factory=list, description="Optional variables for the prompt template"
-    )
-    force_tool_use: bool = Field(
-        default=False, description="Whether to force the LLM to use a tool (any tool)"
     )
 
     # Message field detection
@@ -253,11 +276,15 @@ class AugLLMConfig(
                 "tools": len(self.tools),
                 "pydantic_tools": len(self.pydantic_tools),
                 "use_tool_for_format_instructions": self.use_tool_for_format_instructions,
+                "force_tool_use": self.force_tool_use,
+                "force_tool_choice": self.force_tool_choice,
+                "tool_choice_mode": self.tool_choice_mode,
+                "structured_output_version": self.structured_output_version,
             },
         )
 
-        # Check for BaseModel in tools
-        self._detect_basemodel_tools()
+        # Check for BaseModel in tools and validate tool configuration
+        self._process_tools()
 
         # Create prompt template components if needed
         self._create_prompt_template_if_needed()
@@ -275,18 +302,10 @@ class AugLLMConfig(
         self._setup_format_instructions()
 
         # Set up output parser if structured_output_model is provided but no output_parser
-        if (
-            self.structured_output_model
-            and not self.output_parser
-            and not self.parse_raw_output
-        ):
-            self._setup_output_parser()
+        self._setup_output_handling()
 
-        # Setup pydantic tools parser if needed
-        elif (
-            self.pydantic_tools and not self.output_parser and not self.parse_raw_output
-        ):
-            self._setup_pydantic_tools_parser()
+        # Configure tool choice options
+        self._configure_tool_choice()
 
         # Auto-detect uses_messages_field if not explicitly set
         if self.uses_messages_field is None:
@@ -304,58 +323,422 @@ class AugLLMConfig(
                 in self.partial_variables,
                 "tool_is_base_model": self.tool_is_base_model,
                 "use_tool_for_format_instructions": self.use_tool_for_format_instructions,
+                "tool_choice_mode": self.tool_choice_mode,
+                "force_tool_use": self.force_tool_use,
+                "force_tool_choice": self.force_tool_choice,
+                "structured_output_version": self.structured_output_version,
+                "output_field_name": self.output_field_name,
             },
         )
 
         return self
 
-    def _detect_basemodel_tools(self):
-        """Detect if any of the tools are BaseModel types that can be used for format instructions."""
-        # Skip if no tools or no instructions requested
-        if not self.tools or not self.include_format_instructions:
+    def _process_tools(self):
+        """Process tools, detect BaseModel tools, and validate tool configuration."""
+        # Skip if no tools
+        if not self.tools:
             return
 
-        # Check for BaseModel types in tools
-        basemodel_tools = [
-            tool
-            for tool in self.tools
-            if isinstance(tool, type) and issubclass(tool, BaseModel)
-        ]
+        # 1. Check for BaseModel types in tools
+        basemodel_tools = []
+        tool_names = []
 
-        # If there's exactly one BaseModel tool, automatically use it for format instructions
+        # Process each tool to detect types and names
+        for tool in self.tools:
+            # Case 1: Tool is a BaseModel type
+            if isinstance(tool, type) and issubclass(tool, BaseModel):
+                basemodel_tools.append(tool)
+                tool_names.append(getattr(tool, "__name__", "UnnamedModel"))
+
+                # Add to pydantic_tools if not already there
+                if tool not in self.pydantic_tools:
+                    self.pydantic_tools.append(tool)
+                    rprint(
+                        f"[green]Added BaseModel {tool.__name__} to pydantic_tools[/green]"
+                    )
+
+            # Case 2: Tool is a BaseTool instance or type
+            elif isinstance(tool, BaseTool) or (
+                isinstance(tool, type) and issubclass(tool, BaseTool)
+            ):
+                # Get tool name
+                if isinstance(tool, type):
+                    # For tool classes, use class name or first declared class attribute
+                    tool_names.append(getattr(tool, "name", tool.__name__))
+                else:
+                    # For tool instances, use name property
+                    tool_names.append(getattr(tool, "name", "unnamed_tool"))
+
+            # Case 3: Tool is a string (reference to a tool)
+            elif isinstance(tool, str):
+                tool_names.append(tool)
+
+            # Case 4: Callable function
+            elif callable(tool) and not isinstance(tool, type):
+                # Add function name as tool name
+                func_name = getattr(tool, "__name__", "unnamed_function")
+                tool_names.append(func_name)
+
+            # Case 5: Other tool types (log warning)
+            else:
+                tool_type = type(tool).__name__
+                rprint(f"[yellow]Unrecognized tool type: {tool_type}[/yellow]")
+
+        # Set flag if a single BaseModel tool is found (for format instructions)
         if len(basemodel_tools) == 1:
             self.tool_is_base_model = True
+
             # Auto-enable format instructions unless explicitly disabled
-            if (
-                not hasattr(self, "use_tool_for_format_instructions")
-                or self.use_tool_for_format_instructions is None
-            ):
+            if self.use_tool_for_format_instructions is None:
                 self.use_tool_for_format_instructions = True
-
-            rprint(
-                f"[green]Found single BaseModel tool: {basemodel_tools[0].__name__} (auto-enable format instructions)[/green]"
-            )
-
-            # Create temporary parser to get format instructions
-            temp_parser = PydanticOutputParser(pydantic_object=basemodel_tools[0])
-            if hasattr(temp_parser, "get_format_instructions"):
-                format_instructions = temp_parser.get_format_instructions()
-                self.partial_variables["format_instructions"] = format_instructions
-                rprint("[green]Added format instructions from BaseModel tool[/green]")
-
-            # Move this model to pydantic_tools if it's not already there
-            if basemodel_tools[0] not in self.pydantic_tools:
-                self.pydantic_tools.append(basemodel_tools[0])
                 rprint(
-                    f"[green]Added {basemodel_tools[0].__name__} to pydantic_tools[/green]"
+                    f"[green]Auto-enabled format instructions from {basemodel_tools[0].__name__}[/green]"
                 )
 
         # If multiple BaseModel tools, log a warning
         elif len(basemodel_tools) > 1:
+            tool_names_str = ", ".join([t.__name__ for t in basemodel_tools])
+            rprint(f"[yellow]Multiple BaseModel tools found: {tool_names_str}[/yellow]")
+
+        # Store discovered tool names for later validation
+        self.metadata["tool_names"] = tool_names
+        self.metadata["has_basemodel_tools"] = bool(basemodel_tools)
+
+    def _configure_tool_choice(self):
+        """Configure tool choice based on available tools and settings."""
+        # Skip if no tools
+        if not self.tools:
+            self.force_tool_use = False
+            self.force_tool_choice = None
+            self.tool_choice_mode = "none"
+            return
+
+        # Get discovered tool names
+        tool_names = self.metadata.get("tool_names", [])
+
+        # Handle Boolean force_tool_choice - convert to 'auto' mode
+        if isinstance(self.force_tool_choice, bool):
+            if self.force_tool_choice:
+                self.tool_choice_mode = "required"
+                self.force_tool_use = True
+                # Convert to 'auto' (any tool)
+                self.force_tool_choice = None
+            else:
+                self.tool_choice_mode = "optional"
+                self.force_tool_use = False
+                self.force_tool_choice = None
             rprint(
-                f"[yellow]Multiple BaseModel tools found ({len(basemodel_tools)}). Specify which one to use.[/yellow]"
+                f"[yellow]Converted boolean force_tool_choice to mode: {self.tool_choice_mode}[/yellow]"
             )
-            self.tool_is_base_model = False
+
+        # Handle string force_tool_choice - specific tool name
+        elif isinstance(self.force_tool_choice, str):
+            self.force_tool_use = True
+            self.tool_choice_mode = "required"
+
+            # Validate tool name exists when possible
+            if tool_names and self.force_tool_choice not in tool_names:
+                rprint(
+                    f"[yellow]Warning: Specified force_tool_choice '{self.force_tool_choice}' not found in detected tool names: {tool_names}[/yellow]"
+                )
+
+        # Handle list force_tool_choice - not directly supported, use first item
+        elif (
+            isinstance(self.force_tool_choice, (list, tuple)) and self.force_tool_choice
+        ):
+            self.force_tool_use = True
+            self.tool_choice_mode = "required"
+            self.force_tool_choice = self.force_tool_choice[0]
+            rprint(
+                f"[yellow]Multiple forced tools not supported - using first item: {self.force_tool_choice}[/yellow]"
+            )
+
+        # Handle force_tool_use without specific choice
+        elif self.force_tool_use and not self.force_tool_choice:
+            self.tool_choice_mode = "required"
+
+            # For single tool scenarios, auto-select that tool
+            if len(tool_names) == 1:
+                self.force_tool_choice = tool_names[0]
+                rprint(
+                    f"[green]Auto-configured force_tool_choice to use: {self.force_tool_choice}[/green]"
+                )
+
+        # Set bind_tools_kwargs based on mode
+        if self.tool_choice_mode == "required":
+            self.bind_tools_kwargs["tool_choice"] = "required"
+            if self.force_tool_choice:
+                self.bind_tools_kwargs["tool_choice"] = {
+                    "type": "function",
+                    "function": {"name": self.force_tool_choice},
+                }
+        elif self.tool_choice_mode == "auto":
+            self.bind_tools_kwargs["tool_choice"] = "auto"
+        elif self.tool_choice_mode == "none":
+            self.bind_tools_kwargs["tool_choice"] = "none"
+
+    def _setup_output_handling(self):
+        """Set up output handling based on configuration."""
+        # Case 1: Raw output parsing requested
+        if self.parse_raw_output:
+            rprint("[yellow]Using StrOutputParser for raw output[/yellow]")
+            self.output_parser = StrOutputParser()
+            self.parser_type = "str"
+            return
+
+        # Case 2: Structured output model exists but no parser yet
+        if self.structured_output_model and not self.output_parser:
+            # Check if we're using v2 structured output
+            if self.structured_output_version == "v2":
+                # For v2, configure for tool-based approach
+                rprint(
+                    f"[cyan]Using structured output v2 with model: {self.structured_output_model.__name__}[/cyan]"
+                )
+
+                # Ensure the model is in tools list if not already
+                if self.structured_output_model not in self.tools:
+                    self.tools = list(self.tools) if self.tools else []
+                    self.tools.append(self.structured_output_model)
+                    rprint(
+                        f"[green]Added {self.structured_output_model.__name__} to tools[/green]"
+                    )
+
+                # Ensure model is in pydantic_tools
+                if self.structured_output_model not in self.pydantic_tools:
+                    self.pydantic_tools.append(self.structured_output_model)
+
+                # Set parser type
+                self.parser_type = "pydantic_tools"
+
+                # Force tool usage for this model
+                self.force_tool_use = True
+                self.tool_choice_mode = "required"
+
+                # Only set force_tool_choice if we have a single model and no specific choice yet
+                if not self.force_tool_choice and len(self.pydantic_tools) == 1:
+                    # Use model name or a lowercase variant to match tool naming conventions
+                    model_name = self.structured_output_model.__name__.lower()
+                    self.force_tool_choice = model_name
+                    rprint(
+                        f"[green]Auto-set force_tool_choice to '{model_name}'[/green]"
+                    )
+
+                # Create output parser for v2
+                self.output_parser = PydanticToolsParser(
+                    tools=[self.structured_output_model]
+                )
+
+            else:
+                # For v1, use traditional Pydantic output parser
+                rprint(
+                    f"[cyan]Using structured output v1 with model: {self.structured_output_model.__name__}[/cyan]"
+                )
+                self.parser_type = "pydantic"
+                self.output_parser = PydanticOutputParser(
+                    pydantic_object=self.structured_output_model
+                )
+
+        # Case 3: Pydantic tools exist but no parser yet
+        elif self.pydantic_tools and not self.output_parser:
+            rprint("[cyan]Setting up pydantic tools parser[/cyan]")
+            self.parser_type = "pydantic_tools"
+            self.output_parser = PydanticToolsParser(tools=self.pydantic_tools)
+
+    def _setup_format_instructions(self):
+        """Set up format instructions based on configuration without affecting structured output."""
+        if (
+            not self.include_format_instructions
+            or "format_instructions" in self.partial_variables
+        ):
+            return
+
+        rprint("[blue]Setting up format instructions[/blue]")
+
+        # Case 1: Structured output model exists
+        if self.structured_output_model and not self.parse_raw_output:
+            try:
+                # For v2, generate simple schema-based instructions
+                if self.structured_output_version == "v2":
+                    # Generate schema-based instructions for the model
+                    schema = self.structured_output_model.schema()
+                    model_name = self.structured_output_model.__name__
+                    instructions = self._format_model_schema(model_name, schema)
+                    self.partial_variables["format_instructions"] = instructions
+                    rprint(
+                        f"[green]Added schema-based instructions for {model_name} (v2)[/green]"
+                    )
+                else:
+                    # For v1, try PydanticOutputParser
+                    temp_parser = PydanticOutputParser(
+                        pydantic_object=self.structured_output_model
+                    )
+                    if hasattr(temp_parser, "get_format_instructions"):
+                        self.partial_variables["format_instructions"] = (
+                            temp_parser.get_format_instructions()
+                        )
+                        rprint(
+                            "[green]Added format instructions from structured_output_model (v1)[/green]"
+                        )
+                    else:
+                        # Fallback to schema-based instructions
+                        schema = self.structured_output_model.schema()
+                        model_name = self.structured_output_model.__name__
+                        instructions = self._format_model_schema(model_name, schema)
+                        self.partial_variables["format_instructions"] = instructions
+                        rprint(
+                            f"[green]Added schema-based instructions for {model_name} (v1 fallback)[/green]"
+                        )
+            except Exception as e:
+                rprint(f"[yellow]Error setting up format instructions: {e}[/yellow]")
+
+        # Case 2: Pydantic tools exist
+        elif self.pydantic_tools and not self.parse_raw_output:
+            try:
+                # Generate schema-based instructions for all tools
+                tool_instructions = []
+                for tool_model in self.pydantic_tools:
+                    schema = tool_model.schema()
+                    model_name = tool_model.__name__
+                    tool_instructions.append(
+                        self._format_model_schema(model_name, schema, as_section=True)
+                    )
+
+                # Combine instructions
+                if len(tool_instructions) == 1:
+                    self.partial_variables["format_instructions"] = tool_instructions[0]
+                else:
+                    combined = (
+                        "You must respond using one of the following formats:\n\n"
+                        + "\n\n".join(tool_instructions)
+                    )
+                    self.partial_variables["format_instructions"] = combined
+
+                rprint(
+                    f"[green]Added schema-based instructions for {len(self.pydantic_tools)} tools[/green]"
+                )
+            except Exception as e:
+                rprint(
+                    f"[yellow]Error setting up format instructions for tools: {e}[/yellow]"
+                )
+
+        # Apply instructions to template if it exists
+        if "format_instructions" in self.partial_variables and self.prompt_template:
+            self._apply_partial_variables()
+
+    def _format_model_schema(
+        self, model_name: str, schema: Dict[str, Any], as_section: bool = False
+    ) -> str:
+        """Format a model schema as instructions.
+
+        Args:
+            model_name: Name of the model
+            schema: JSON schema dictionary
+            as_section: Whether to format as a section (for multiple tools)
+
+        Returns:
+            Formatted instructions
+        """
+        # Format JSON with indentation
+        schema_json = json.dumps(schema, indent=2)
+
+        # Create header if needed
+        header = f"## {model_name}\n" if as_section else ""
+
+        # Format instructions
+        return f"""{header}You must format your response as JSON that matches this schema:
+
+```json
+{schema_json}
+```
+
+The output should be valid JSON that conforms to the {model_name} schema.
+"""
+
+    def get_format_instructions(
+        self, model: Optional[Type[BaseModel]] = None, as_tools: bool = False
+    ) -> str:
+        """
+        Get format instructions for a model without changing the config.
+
+        Args:
+            model: Optional Pydantic model. If None, uses structured_output_model or first pydantic_tool
+            as_tools: Whether to format as tools (using PydanticToolsParser)
+
+        Returns:
+            Format instructions string
+        """
+        # Figure out which model to use
+        target_model = model
+        if target_model is None:
+            if self.structured_output_model:
+                target_model = self.structured_output_model
+            elif self.pydantic_tools:
+                if as_tools:
+                    # Use all tools
+                    tool_instructions = []
+                    for tool_model in self.pydantic_tools:
+                        schema = tool_model.schema()
+                        model_name = tool_model.__name__
+                        tool_instructions.append(
+                            self._format_model_schema(
+                                model_name, schema, as_section=True
+                            )
+                        )
+
+                    # Combine instructions
+                    if len(tool_instructions) == 1:
+                        return tool_instructions[0]
+                    else:
+                        return (
+                            "You must respond using one of the following formats:\n\n"
+                            + "\n\n".join(tool_instructions)
+                        )
+                else:
+                    # Use first tool
+                    target_model = self.pydantic_tools[0]
+            elif (
+                len(self.tools) == 1
+                and isinstance(self.tools[0], type)
+                and issubclass(self.tools[0], BaseModel)
+            ):
+                target_model = self.tools[0]
+
+        if not target_model:
+            rprint("[yellow]No model available for format instructions[/yellow]")
+            return ""
+
+        # Generate schema-based instructions for the model
+        try:
+            schema = target_model.schema()
+            model_name = target_model.__name__
+            return self._format_model_schema(model_name, schema)
+        except Exception as e:
+            rprint(f"[yellow]Error generating format instructions: {e}[/yellow]")
+            return ""
+
+    def add_format_instructions(
+        self,
+        model: Optional[Type[BaseModel]] = None,
+        as_tools: bool = False,
+        var_name: str = "format_instructions",
+    ) -> "AugLLMConfig":
+        """
+        Add format instructions to partial_variables without changing structured output configuration.
+
+        Args:
+            model: Optional Pydantic model. If None, uses existing configuration
+            as_tools: Whether to format as tools
+            var_name: Name of the partial variable to add
+
+        Returns:
+            Self for chaining
+        """
+        instructions = self.get_format_instructions(model, as_tools)
+        if instructions:
+            self.partial_variables[var_name] = instructions
+            self._apply_partial_variables()
+            rprint(f"[green]Added format instructions to {var_name}[/green]")
+        return self
 
     def _create_prompt_template_if_needed(self):
         """Create appropriate prompt template based on available components."""
@@ -366,6 +749,11 @@ class AugLLMConfig(
         if self.examples and self.example_prompt and self.prefix and self.suffix:
             rprint("[green]Creating FewShotPromptTemplate[/green]")
             self._create_few_shot_template()
+
+        # Handle FewShotChatMessagePromptTemplate scenario
+        elif self.examples and isinstance(self.example_prompt, ChatPromptTemplate):
+            rprint("[green]Creating FewShotChatMessagePromptTemplate[/green]")
+            self._create_few_shot_chat_template()
 
         # Create ChatPromptTemplate from system message
         elif self.system_message:
@@ -385,6 +773,13 @@ class AugLLMConfig(
         if isinstance(self.prompt_template, ChatPromptTemplate):
             rprint("[blue]Handling messages placeholder for ChatPromptTemplate[/blue]")
             self._handle_chat_template_messages_placeholder()
+
+        elif isinstance(self.prompt_template, FewShotChatMessagePromptTemplate):
+            rprint(
+                "[blue]Handling messages placeholder for FewShotChatMessagePromptTemplate[/blue]"
+            )
+            # This template type handles messages differently
+            self.uses_messages_field = True
 
         elif isinstance(self.prompt_template, FewShotPromptTemplate):
             rprint(
@@ -465,178 +860,6 @@ class AugLLMConfig(
 
         self.uses_messages_field = True
 
-    def _setup_format_instructions(self):
-        """Set up format instructions based on configuration without affecting structured output."""
-        if (
-            not self.include_format_instructions
-            or "format_instructions" in self.partial_variables
-        ):
-            return
-
-        rprint("[blue]Setting up format instructions[/blue]")
-
-        # Case 1: Structured output model exists - get instructions without setting output parser
-        if self.structured_output_model and not self.parse_raw_output:
-            temp_parser = PydanticOutputParser(
-                pydantic_object=self.structured_output_model
-            )
-            if hasattr(temp_parser, "get_format_instructions"):
-                self.partial_variables["format_instructions"] = (
-                    temp_parser.get_format_instructions()
-                )
-                rprint(
-                    "[green]Added format instructions from structured_output_model[/green]"
-                )
-
-        # Case 2: Pydantic tools exist - get instructions without parser
-        elif self.pydantic_tools and not self.parse_raw_output:
-            temp_parser = PydanticToolsParser(tools=self.pydantic_tools)
-            if hasattr(temp_parser, "get_format_instructions"):
-                self.partial_variables["format_instructions"] = (
-                    temp_parser.get_format_instructions()
-                )
-                rprint("[green]Added format instructions from pydantic_tools[/green]")
-
-        # Case 3: Single BaseModel tool - already handled in _detect_basemodel_tools
-
-        # Apply instructions to template if it exists
-        if "format_instructions" in self.partial_variables and self.prompt_template:
-            self._apply_partial_variables()
-
-    def get_format_instructions(
-        self, model: Optional[Type[BaseModel]] = None, as_tools: bool = False
-    ) -> str:
-        """
-        Get format instructions for a model without changing the config.
-
-        Args:
-            model: Optional Pydantic model. If None, uses structured_output_model or first pydantic_tool
-            as_tools: Whether to format as tools (using PydanticToolsParser)
-
-        Returns:
-            Format instructions string
-        """
-        # Figure out which model to use
-        target_model = model
-        if target_model is None:
-            if self.structured_output_model:
-                target_model = self.structured_output_model
-            elif self.pydantic_tools:
-                if as_tools:
-                    # Use all tools
-                    temp_parser = PydanticToolsParser(tools=self.pydantic_tools)
-                    if hasattr(temp_parser, "get_format_instructions"):
-                        return temp_parser.get_format_instructions()
-                    return ""
-                else:
-                    # Use first tool
-                    target_model = self.pydantic_tools[0]
-            elif (
-                len(self.tools) == 1
-                and isinstance(self.tools[0], type)
-                and issubclass(self.tools[0], BaseModel)
-            ):
-                target_model = self.tools[0]
-
-        if not target_model:
-            rprint("[yellow]No model available for format instructions[/yellow]")
-            return ""
-
-        # Create temporary parser
-        if as_tools:
-            temp_parser = PydanticToolsParser(tools=[target_model])
-        else:
-            temp_parser = PydanticOutputParser(pydantic_object=target_model)
-
-        # Get instructions
-        if hasattr(temp_parser, "get_format_instructions"):
-            instructions = temp_parser.get_format_instructions()
-            rprint(
-                f"[green]Generated format instructions for {target_model.__name__}[/green]"
-            )
-            return instructions
-
-        return ""
-
-    def add_format_instructions(
-        self,
-        model: Optional[Type[BaseModel]] = None,
-        as_tools: bool = False,
-        var_name: str = "format_instructions",
-    ) -> "AugLLMConfig":
-        """
-        Add format instructions to partial_variables without changing structured output configuration.
-
-        Args:
-            model: Optional Pydantic model. If None, uses existing configuration
-            as_tools: Whether to format as tools
-            var_name: Name of the partial variable to add
-
-        Returns:
-            Self for chaining
-        """
-        instructions = self.get_format_instructions(model, as_tools)
-        if instructions:
-            self.partial_variables[var_name] = instructions
-            self._apply_partial_variables()
-            rprint(f"[green]Added format instructions to {var_name}[/green]")
-        return self
-
-    def _configure_tool_choice(self):
-        """Configure tool choice based on available tools and settings."""
-        # Skip if no tools configured
-        if not self.tools:
-            self.force_tool_use = False
-            self.force_tool_choice = None
-            return
-
-        # If force_tool_use is True but no specific choice, handle automatically
-        if self.force_tool_use and not self.force_tool_choice:
-            # For single tool scenarios, auto-select that tool
-            if len(self.tools) == 1:
-                tool = self.tools[0]
-                # Get tool identifier (name, id, or class name)
-                if isinstance(tool, str):
-                    self.force_tool_choice = tool
-                elif hasattr(tool, "name"):
-                    self.force_tool_choice = tool.name
-                elif hasattr(tool, "id"):
-                    self.force_tool_choice = tool.id
-                else:
-                    # Fallback to class name
-                    tool_class = tool if isinstance(tool, type) else tool.__class__
-                    self.force_tool_choice = getattr(
-                        tool_class, "__name__", "unknown_tool"
-                    )
-
-                rprint(
-                    f"[green]Auto-configured force_tool_choice to use: {self.force_tool_choice}[/green]"
-                )
-            else:
-                # Multiple tools but no specific choice - set to "auto" in bind_tools_kwargs
-                rprint(
-                    "[yellow]Multiple tools with force_tool_use=True but no specific choice - will use 'auto'[/yellow]"
-                )
-                self.bind_tools_kwargs["tool_choice"] = "auto"
-
-        # If force_tool_choice is a string, validate it exists in tools list when possible
-        elif isinstance(self.force_tool_choice, str):
-            # Resolve tool names/ids when possible to validate the choice
-            tool_identifiers = set()
-            for tool in self.tools:
-                if isinstance(tool, str):
-                    tool_identifiers.add(tool)
-                elif hasattr(tool, "name"):
-                    tool_identifiers.add(tool.name)
-                elif hasattr(tool, "id"):
-                    tool_identifiers.add(tool.id)
-
-            # Warn if specified tool may not exist
-            if tool_identifiers and self.force_tool_choice not in tool_identifiers:
-                rprint(
-                    f"[yellow]Warning: Specified force_tool_choice '{self.force_tool_choice}' not found in detected tool identifiers: {tool_identifiers}[/yellow]"
-                )
-
     def _create_default_chat_template(self):
         """Create a default ChatPromptTemplate with optional messages placeholder."""
         should_be_optional = (
@@ -689,6 +912,40 @@ class AugLLMConfig(
         )
         # Few-shot prompts typically don't use messages
         self.uses_messages_field = False
+
+    def _create_few_shot_chat_template(self):
+        """Create a FewShotChatMessagePromptTemplate using example_prompt."""
+        # Get system message if available
+        prefix_messages = []
+        if self.system_message:
+            prefix_messages = [SystemMessage(content=self.system_message)]
+
+        # Build few shot template
+        few_shot_prompt = FewShotChatMessagePromptTemplate(
+            examples=self.examples,
+            example_prompt=self.example_prompt,
+        )
+
+        # Build full message sequence
+        messages = prefix_messages + [few_shot_prompt]
+
+        # Add messages placeholder if requested
+        if self.add_messages_placeholder:
+            should_be_optional = (
+                self.force_messages_optional
+                or self.messages_placeholder_name in self.optional_variables
+            )
+            messages.append(
+                MessagesPlaceholder(
+                    variable_name=self.messages_placeholder_name,
+                    optional=should_be_optional,
+                )
+            )
+
+        # Create complete prompt
+        self.prompt_template = ChatPromptTemplate.from_messages(messages)
+        self.uses_messages_field = True
+        rprint("[green]Created FewShotChatMessagePromptTemplate[/green]")
 
     def _check_template_for_messages_variables(self):
         """Check if the template uses messages variables."""
@@ -791,6 +1048,11 @@ class AugLLMConfig(
             if isinstance(self.prompt_template, ChatPromptTemplate):
                 rprint("[green]ChatPromptTemplate - using messages[/green]")
                 return True
+            elif isinstance(self.prompt_template, FewShotChatMessagePromptTemplate):
+                rprint(
+                    "[green]FewShotChatMessagePromptTemplate - using messages[/green]"
+                )
+                return True
             elif isinstance(self.prompt_template, FewShotPromptTemplate):
                 rprint("[yellow]FewShotPromptTemplate - not using messages[/yellow]")
                 return False
@@ -825,55 +1087,11 @@ class AugLLMConfig(
                 for msg in self.prompt_template.messages
             )
             info += f" ({msg_count} messages, placeholder={has_placeholder})"
+        elif isinstance(self.prompt_template, FewShotChatMessagePromptTemplate):
+            example_count = len(getattr(self.prompt_template, "examples", []))
+            info += f" ({example_count} examples)"
 
         return info
-
-    def _setup_output_parser(self):
-        """Set up output parser for structured output."""
-        rprint("[cyan]Setting up output parser[/cyan]")
-
-        if self.parse_raw_output:
-            # Use a string parser to get raw output
-            self.output_parser = StrOutputParser()
-            rprint("[green]Configured StrOutputParser[/green]")
-        elif self.parser_type == "pydantic" and self.include_format_instructions:
-            # Create a PydanticOutputParser for the model
-            self.output_parser = PydanticOutputParser(
-                pydantic_object=self.structured_output_model
-            )
-
-            # Add format instructions to partial variables if not already added
-            if (
-                self.include_format_instructions
-                and "format_instructions" not in self.partial_variables
-            ):
-                format_instructions = self.output_parser.get_format_instructions()
-                self.partial_variables["format_instructions"] = format_instructions
-                rprint("[green]Added format instructions to partial variables[/green]")
-
-                # Apply to prompt template if it exists
-                self._apply_partial_variables()
-
-    def _setup_pydantic_tools_parser(self):
-        """Set up parser for pydantic tools."""
-        rprint("[cyan]Setting up pydantic tools parser[/cyan]")
-
-        if self.parser_type == "pydantic_tools":
-            # Create PydanticToolsParser
-            self.output_parser = PydanticToolsParser(tools=self.pydantic_tools)
-
-            # Add format instructions if needed
-            if (
-                self.include_format_instructions
-                and hasattr(self.output_parser, "get_format_instructions")
-                and "format_instructions" not in self.partial_variables
-            ):
-                format_instructions = self.output_parser.get_format_instructions()
-                self.partial_variables["format_instructions"] = format_instructions
-                rprint("[green]Added format instructions for pydantic tools[/green]")
-
-                # Apply to prompt template if it exists
-                self._apply_partial_variables()
 
     def _get_input_variables(self) -> Set[str]:
         """Get all input variables required by the prompt template, excluding partials and optionals."""
@@ -913,6 +1131,15 @@ class AugLLMConfig(
                             f"[cyan]Placeholder variable: {var_name} (optional={getattr(msg, 'optional', False)})[/cyan]"
                         )
 
+        # Few shot chat template variables
+        elif isinstance(self.prompt_template, FewShotChatMessagePromptTemplate):
+            if hasattr(self.prompt_template, "example_prompt") and hasattr(
+                self.prompt_template.example_prompt, "input_variables"
+            ):
+                example_vars = self.prompt_template.example_prompt.input_variables
+                all_vars.update(example_vars)
+                rprint(f"[cyan]Few shot example variables: {example_vars}[/cyan]")
+
         # Remove partial variables
         partial_vars = set(self.partial_variables.keys())
         if hasattr(self.prompt_template, "partial_variables"):
@@ -942,8 +1169,6 @@ class AugLLMConfig(
             return {self.messages_placeholder_name}
 
         return result
-
-    # Option 2: If you prefer to modify the engine code, here's a cleaner get_input_fields() method
 
     def get_input_fields(self) -> Dict[str, Tuple[Type, Any]]:
         """
@@ -983,7 +1208,6 @@ class AugLLMConfig(
                 fields[self.messages_placeholder_name] = (
                     OptionalType[ListType[BaseMessage]],
                     Field(default_factory=list),
-                    # None
                 )
                 rprint(f"[green]Messages field added as optional[/green]")
             else:
@@ -1036,13 +1260,41 @@ class AugLLMConfig(
         Returns:
             Dictionary mapping field names to (type, default) tuples
         """
+        from typing import Any as AnyType
         from typing import Dict
         from typing import List as ListType
         from typing import Optional as OptionalType
 
         fields = {}
 
-        # Use structured_output_model if available and not parsing raw
+        # Use structured output v2 (tool-based approach)
+        if self.structured_output_version == "v2" and (
+            self.structured_output_model or self.pydantic_tools
+        ):
+            # For v2, we return a tool result
+            tool_name = self.output_field_name or "tool_result"
+
+            # Determine the model to use
+            if self.structured_output_model:
+                fields[tool_name] = (self.structured_output_model, None)
+            elif self.pydantic_tools:
+                # Use a union of all tool models or the first one
+                if len(self.pydantic_tools) == 1:
+                    fields[tool_name] = (self.pydantic_tools[0], None)
+                else:
+                    # Multiple tools - use the custom name with Dict for now
+                    fields[tool_name] = (Dict[str, AnyType], None)
+
+            # Always include a messages field for v2 since we're using tool calling
+            fields[self.messages_placeholder_name] = (
+                ListType[BaseMessage],
+                Field(default_factory=list),
+            )
+
+            rprint(f"[green]Using v2 output schema with field: {tool_name}[/green]")
+            return fields
+
+        # Use structured_output_model if available and not parsing raw (v1 approach)
         if self.structured_output_model and not self.parse_raw_output:
             # Extract fields from the model
             if hasattr(self.structured_output_model, "model_fields"):
@@ -1054,7 +1306,7 @@ class AugLLMConfig(
                     fields[field_name] = (field_info.annotation, field_info.default)
             else:
                 # Fallback to using the model as a single field
-                model_name = (
+                model_name = self.output_field_name or (
                     getattr(self.structured_output_model, "__name__", "").lower()
                     or "result"
                 )
@@ -1062,15 +1314,20 @@ class AugLLMConfig(
 
         # Handle Pydantic tools if specified
         elif self.pydantic_tools and self.parser_type == "pydantic_tools":
-            # Get fields from all tool models
-            for tool_model in self.pydantic_tools:
-                if hasattr(tool_model, "model_fields"):
-                    # Pydantic v2 - get a representative field to include in output
+            # Get fields from all tool models or use a single field
+            if self.output_field_name:
+                # Use custom field name for all tools
+                fields[self.output_field_name] = (Dict[str, AnyType], None)
+            else:
+                # Create a field for each tool model
+                for tool_model in self.pydantic_tools:
                     model_name = getattr(tool_model, "__name__", "").lower()
                     fields[model_name] = (tool_model, None)
 
         # Handle output parser types if structured_output_model not used or parsing raw
         elif self.output_parser or self.parse_raw_output:
+            # Get default field name
+            field_name = self.output_field_name or "content"
             parser_name = (
                 type(self.output_parser).__name__ if self.output_parser else ""
             )
@@ -1079,17 +1336,21 @@ class AugLLMConfig(
             if (
                 parser_name in ["StrOutputParser", "StringOutputParser"]
                 or self.parse_raw_output
+                or self.parser_type == "str"
             ):
-                fields["content"] = (str, None)
+                fields[field_name] = (str, None)
 
             # JSON-based parsers
-            elif parser_name in ["JsonOutputParser", "JSONLinesOutputParser"]:
-                fields["result"] = (Dict[str, Any], None)
+            elif (
+                parser_name in ["JsonOutputParser", "JSONLinesOutputParser"]
+                or self.parser_type == "json"
+            ):
+                fields[field_name] = (Dict[str, AnyType], None)
 
             # PydanticOutputParser
-            elif parser_name == "PydanticOutputParser" and hasattr(
-                self.output_parser, "pydantic_object"
-            ):
+            elif (
+                parser_name == "PydanticOutputParser" or self.parser_type == "pydantic"
+            ) and hasattr(self.output_parser, "pydantic_object"):
                 # Extract from PydanticOutputParser
                 pydantic_model = self.output_parser.pydantic_object
                 if hasattr(pydantic_model, "model_fields"):  # Pydantic v2
@@ -1097,30 +1358,40 @@ class AugLLMConfig(
                         fields[field_name] = (field_info.annotation, field_info.default)
 
             # PydanticToolsParser
-            elif parser_name == "PydanticToolsParser" and hasattr(
-                self.output_parser, "tools"
-            ):
-                # For each tool model, add its fields
-                for tool_model in self.output_parser.tools:
-                    if hasattr(tool_model, "model_fields"):
+            elif (
+                parser_name == "PydanticToolsParser"
+                or self.parser_type == "pydantic_tools"
+            ) and hasattr(self.output_parser, "tools"):
+                # Use custom field name if provided
+                if self.output_field_name:
+                    fields[self.output_field_name] = (Dict[str, AnyType], None)
+                else:
+                    # For each tool model, add its fields
+                    for tool_model in self.output_parser.tools:
                         model_name = getattr(tool_model, "__name__", "").lower()
                         fields[model_name] = (tool_model, None)
 
             # List-based parsers
             elif parser_name in ["ListOutputParser", "CSVOutputParser"]:
-                fields["items"] = (ListType[Any], None)
+                list_field = self.output_field_name or "items"
+                fields[list_field] = (ListType[AnyType], None)
 
             # Default parser output
             else:
-                fields["output"] = (Any, None)
+                fields[field_name] = (AnyType, None)
 
         # Default output fields
         if not fields:
-            fields["content"] = (OptionalType[str], None)
-            fields[self.messages_placeholder_name] = (
-                ListType[BaseMessage],
-                Field(default_factory=list),
-            )
+            # Use a simple content field
+            content_field = self.output_field_name or "content"
+            fields[content_field] = (OptionalType[str], None)
+
+            # Include messages field if using messages
+            if self.uses_messages_field:
+                fields[self.messages_placeholder_name] = (
+                    ListType[BaseMessage],
+                    Field(default_factory=list),
+                )
 
         # Debug output fields
         self._debug_log(
@@ -1175,6 +1446,8 @@ class AugLLMConfig(
             aug_llm_params = [
                 "tools",
                 "force_tool_choice",
+                "force_tool_use",
+                "tool_choice_mode",
                 "temperature",
                 "max_tokens",
                 "system_message",
@@ -1188,6 +1461,8 @@ class AugLLMConfig(
                 "add_messages_placeholder",
                 "force_messages_optional",
                 "use_tool_for_format_instructions",
+                "structured_output_version",
+                "output_field_name",
             ]
 
             for param in aug_llm_params:
@@ -1442,37 +1717,92 @@ class AugLLMConfig(
         return self
 
     def with_structured_output(
-        self, model: Type[BaseModel], include_instructions: bool = True
+        self,
+        model: Type[BaseModel],
+        include_instructions: bool = True,
+        version: str = "v1",
     ) -> "AugLLMConfig":
         """Configure with Pydantic structured output.
 
         Args:
             model: Pydantic model for structured output
             include_instructions: Whether to include format instructions in prompt
+            version: Version of structured output handling - "v1" (traditional) or "v2" (tool-based)
 
         Returns:
             Self for chaining
         """
-        rprint("[blue]Configuring with structured output[/blue]")
+        rprint(f"[blue]Configuring with structured output (version {version})[/blue]")
 
         # Set the structured output model
         self.structured_output_model = model
-        self.parser_type = "pydantic"
         self.include_format_instructions = include_instructions
 
-        # Create and configure parser if needed
-        self._setup_output_parser()
+        # Validate version
+        if version not in ["v1", "v2"]:
+            rprint(f"[yellow]Invalid version '{version}' - defaulting to 'v1'[/yellow]")
+            version = "v1"
+
+        self.structured_output_version = cast(StructuredOutputVersion, version)
+
+        # Configure based on version
+        if version == "v2":
+            # For v2, use pydantic_tools approach
+            self.parser_type = "pydantic_tools"
+
+            # Add model to pydantic_tools if not already there
+            if model not in self.pydantic_tools:
+                self.pydantic_tools.append(model)
+
+            # Add to tools if not already there
+            if model not in self.tools:
+                self.tools = list(self.tools) if self.tools else []
+                self.tools.append(model)
+
+            # Set up tool-based parsing
+            self.output_parser = PydanticToolsParser(tools=[model])
+
+            # Configure tool choice to use this model
+            self.force_tool_use = True
+            self.tool_choice_mode = "required"
+
+            # Auto-configure force_tool_choice if not set
+            if not self.force_tool_choice:
+                model_name = model.__name__.lower()
+                self.force_tool_choice = model_name
+                rprint(f"[green]Auto-set force_tool_choice to '{model_name}'[/green]")
+
+            rprint("[green]Set up tool-based structured output (v2)[/green]")
+        else:
+            # For v1, use traditional approach
+            self.parser_type = "pydantic"
+            self.output_parser = PydanticOutputParser(pydantic_object=model)
+            rprint("[green]Set up traditional structured output (v1)[/green]")
+
+        # Add format instructions if requested
+        if include_instructions:
+            instructions = self.get_format_instructions(model)
+            if instructions:
+                self.partial_variables["format_instructions"] = instructions
+                rprint(f"[green]Added format instructions for {version} output[/green]")
+
+                # Apply to template if it exists
+                self._apply_partial_variables()
 
         return self
 
     def with_pydantic_tools(
-        self, tool_models: List[Type[BaseModel]], include_instructions: bool = True
+        self,
+        tool_models: List[Type[BaseModel]],
+        include_instructions: bool = True,
+        force_use: bool = False,
     ) -> "AugLLMConfig":
         """Configure with Pydantic tools output parsing.
 
         Args:
             tool_models: List of Pydantic models for tool schemas
             include_instructions: Whether to include format instructions in prompt
+            force_use: Whether to force the LLM to use these tools
 
         Returns:
             Self for chaining
@@ -1481,11 +1811,39 @@ class AugLLMConfig(
 
         # Set the pydantic tools
         self.pydantic_tools = tool_models
+
+        # Add to tools list if not already there
+        self.tools = list(self.tools) if self.tools else []
+        for model in tool_models:
+            if model not in self.tools:
+                self.tools.append(model)
+
         self.parser_type = "pydantic_tools"
         self.include_format_instructions = include_instructions
 
+        # Configure tool use if requested
+        if force_use:
+            self.force_tool_use = True
+            self.tool_choice_mode = "required"
+
+            # If single tool, set it as the forced choice
+            if len(tool_models) == 1:
+                model_name = tool_models[0].__name__.lower()
+                self.force_tool_choice = model_name
+                rprint(f"[green]Forcing use of tool: {model_name}[/green]")
+
         # Setup parser
-        self._setup_pydantic_tools_parser()
+        self.output_parser = PydanticToolsParser(tools=tool_models)
+
+        # Add format instructions if needed
+        if include_instructions:
+            instructions = self.get_format_instructions(None, True)
+            if instructions:
+                self.partial_variables["format_instructions"] = instructions
+                rprint("[green]Added format instructions for pydantic tools[/green]")
+
+                # Apply to template if it exists
+                self._apply_partial_variables()
 
         return self
 
@@ -1515,6 +1873,88 @@ class AugLLMConfig(
             self._apply_partial_variables()
             rprint(f"[green]Added format instructions to {var_name}[/green]")
 
+        return self
+
+    def with_tools(
+        self,
+        tools: List[
+            Union[
+                Type[BaseTool], Type[BaseModel], Callable, StructuredTool, BaseTool, str
+            ]
+        ],
+        force_use: bool = False,
+        specific_tool: Optional[str] = None,
+    ) -> "AugLLMConfig":
+        """
+        Configure with specified tools.
+
+        Args:
+            tools: List of tools to make available
+            force_use: Whether to force the LLM to use a tool (any tool)
+            specific_tool: Force a specific tool to be used (by name)
+
+        Returns:
+            Self for chaining
+        """
+        rprint("[blue]Configuring with tools[/blue]")
+
+        # Set tools
+        self.tools = tools
+
+        # Process tools to detect types and validate
+        self._process_tools()
+
+        # Configure tool choice
+        self.force_tool_use = force_use
+
+        if specific_tool:
+            self.force_tool_choice = specific_tool
+            self.tool_choice_mode = "required"
+            rprint(f"[green]Forcing use of specific tool: {specific_tool}[/green]")
+        elif force_use:
+            self.tool_choice_mode = "required"
+            rprint("[green]Forcing use of any tool[/green]")
+
+        # Configure tool choice settings
+        self._configure_tool_choice()
+
+        return self
+
+    def add_prompt_template(
+        self, prompt_template: BasePromptTemplate
+    ) -> "AugLLMConfig":
+        """
+        Add a prompt template to the configuration.
+
+        Args:
+            prompt_template: Prompt template to use
+
+        Returns:
+            Self for chaining
+        """
+        rprint(f"[blue]Adding prompt template: {type(prompt_template).__name__}[/blue]")
+
+        # Set prompt template
+        self.prompt_template = prompt_template
+
+        # Handle messages placeholder if it's a chat template
+        if isinstance(prompt_template, ChatPromptTemplate):
+            self._handle_chat_template_messages_placeholder()
+
+        # Apply partial variables if any
+        if self.partial_variables:
+            self._apply_partial_variables()
+
+        # Apply optional variables if any
+        if self.optional_variables:
+            self._apply_optional_variables()
+
+        # Update uses_messages_field detection
+        self.uses_messages_field = self._detect_uses_messages_field()
+
+        rprint(
+            f"[green]Added prompt template: {type(prompt_template).__name__}[/green]"
+        )
         return self
 
     @classmethod
@@ -1585,6 +2025,8 @@ class AugLLMConfig(
                     and msg.role == "system"
                     for msg in prompt.messages
                 )
+            elif isinstance(prompt, FewShotChatMessagePromptTemplate):
+                uses_messages = True
             else:
                 uses_messages = False
 
@@ -1719,7 +2161,81 @@ class AugLLMConfig(
             **kwargs,
         )
 
-    # @field_validator("tool
+    @classmethod
+    def from_few_shot_chat(
+        cls,
+        examples: List[Dict[str, Any]],
+        example_prompt: ChatPromptTemplate,
+        system_message: Optional[str] = None,
+        llm_config: Optional[LLMConfig] = None,
+        **kwargs,
+    ):
+        """Create with few-shot examples for chat templates.
+
+        Args:
+            examples: List of examples as dictionaries
+            example_prompt: Chat template for formatting examples
+            system_message: Optional system message
+            llm_config: LLM configuration (optional)
+            **kwargs: Additional parameters
+
+        Returns:
+            AugLLMConfig instance
+        """
+        # Use default LLM config if none provided
+        if llm_config is None:
+            llm_config = AzureLLMConfig(model="gpt-4o")
+
+        rprint("[blue]Creating AugLLMConfig with few-shot chat examples[/blue]")
+
+        # Extract partial_variables from kwargs if provided
+        partial_variables = kwargs.pop("partial_variables", {})
+        messages_placeholder_name = kwargs.pop("messages_placeholder_name", "messages")
+
+        # Extract optional variables
+        optional_variables = kwargs.pop("optional_variables", [])
+        add_messages_placeholder = kwargs.pop("add_messages_placeholder", True)
+
+        # Build few shot template
+        few_shot_prompt = FewShotChatMessagePromptTemplate(
+            examples=examples,
+            example_prompt=example_prompt,
+        )
+
+        # Create messages list
+        messages = []
+        if system_message:
+            messages.append(SystemMessage(content=system_message))
+
+        # Add few-shot examples
+        messages.append(few_shot_prompt)
+
+        # Add messages placeholder if needed
+        if add_messages_placeholder:
+            is_optional = messages_placeholder_name in optional_variables
+            messages.append(
+                MessagesPlaceholder(
+                    variable_name=messages_placeholder_name, optional=is_optional
+                )
+            )
+
+        # Create prompt template
+        prompt = ChatPromptTemplate.from_messages(messages)
+
+        return cls(
+            prompt_template=prompt,
+            examples=examples,
+            example_prompt=example_prompt,
+            system_message=system_message,
+            llm_config=llm_config,
+            uses_messages_field=True,
+            messages_placeholder_name=messages_placeholder_name,
+            partial_variables=partial_variables,
+            optional_variables=optional_variables,
+            add_messages_placeholder=add_messages_placeholder,
+            **kwargs,
+        )
+
     @classmethod
     def from_system_and_few_shot(
         cls,
@@ -1794,96 +2310,6 @@ class AugLLMConfig(
         )
 
     @classmethod
-    def from_few_shot_chat(
-        cls,
-        examples: List[Dict[str, Any]],
-        system_message: Optional[str] = None,
-        human_template: Optional[str] = None,
-        ai_template: Optional[str] = None,
-        llm_config: Optional[LLMConfig] = None,
-        **kwargs,
-    ):
-        """Create with few-shot examples for a chat prompt.
-
-        Args:
-            examples: List of example dictionaries
-            system_message: Optional system message
-            human_template: Template for human messages
-            ai_template: Template for AI responses
-            llm_config: Optional LLM configuration
-            **kwargs: Additional parameters
-
-        Returns:
-            AugLLMConfig instance
-        """
-        # Use default LLM config if none provided
-        if llm_config is None:
-            llm_config = AzureLLMConfig(model="gpt-4o")
-
-        rprint("[blue]Creating AugLLMConfig with few-shot chat examples[/blue]")
-
-        # Extract partial_variables from kwargs if provided
-        partial_variables = kwargs.pop("partial_variables", {})
-        messages_placeholder_name = kwargs.pop("messages_placeholder_name", "messages")
-
-        # Extract optional variables
-        optional_variables = kwargs.pop("optional_variables", [])
-        add_messages_placeholder = kwargs.pop("add_messages_placeholder", True)
-
-        # Create messages for the prompt
-        messages = []
-
-        # Add system message if provided
-        if system_message:
-            messages.append(SystemMessage(content=system_message))
-
-        # Process examples if templates are provided
-        if examples and (human_template or ai_template):
-            for example in examples:
-                if human_template:
-                    # Create a formatted human message
-                    human_content = human_template
-                    for key, value in example.items():
-                        if isinstance(value, str):
-                            placeholder = "{" + key + "}"
-                            human_content = human_content.replace(placeholder, value)
-                    messages.append(HumanMessage(content=human_content))
-
-                if ai_template:
-                    # Create a formatted AI message
-                    ai_content = ai_template
-                    for key, value in example.items():
-                        if isinstance(value, str):
-                            placeholder = "{" + key + "}"
-                            ai_content = ai_content.replace(placeholder, value)
-                    messages.append(AIMessage(content=ai_content))
-
-        # Add messages placeholder for user input if auto-add is enabled
-        if add_messages_placeholder:
-            is_optional = messages_placeholder_name in optional_variables
-            messages.append(
-                MessagesPlaceholder(
-                    variable_name=messages_placeholder_name, optional=is_optional
-                )
-            )
-
-        # Create prompt template
-        prompt = ChatPromptTemplate.from_messages(messages)
-
-        return cls(
-            prompt_template=prompt,
-            examples=examples,
-            system_message=system_message,
-            llm_config=llm_config,
-            uses_messages_field=True,
-            messages_placeholder_name=messages_placeholder_name,
-            partial_variables=partial_variables,
-            optional_variables=optional_variables,
-            add_messages_placeholder=add_messages_placeholder,
-            **kwargs,
-        )
-
-    @classmethod
     def from_tools(
         cls,
         tools: List[Union[BaseTool, Type[BaseTool], str, Type[BaseModel]]],
@@ -1891,7 +2317,8 @@ class AugLLMConfig(
         llm_config: Optional[LLMConfig] = None,
         use_tool_for_format_instructions: Optional[
             bool
-        ] = None,  # Changed to Optional to allow auto-detection
+        ] = None,  # Optional to allow auto-detection
+        force_tool_use: bool = False,
         **kwargs,
     ):
         """Create with specified tools.
@@ -1900,7 +2327,8 @@ class AugLLMConfig(
             tools: List of tools to make available
             system_message: Optional system message
             llm_config: LLM configuration (optional)
-            use_tool_for_format_instructions: Whether to use a BaseModel tool for format instructions (auto-detect if None)
+            use_tool_for_format_instructions: Whether to use a BaseModel tool for format instructions
+            force_tool_use: Whether to force the LLM to use a tool
             **kwargs: Additional parameters
 
         Returns:
@@ -1917,6 +2345,10 @@ class AugLLMConfig(
         optional_variables = kwargs.pop("optional_variables", [])
         add_messages_placeholder = kwargs.pop("add_messages_placeholder", True)
 
+        # Get tool choice configuration
+        force_tool_choice = kwargs.pop("force_tool_choice", None)
+        tool_choice_mode = kwargs.pop("tool_choice_mode", "auto")
+
         # Create messages list
         messages = []
         if system_message:
@@ -1936,7 +2368,7 @@ class AugLLMConfig(
             ChatPromptTemplate.from_messages(messages) if messages else None
         )
 
-        # Create instance - use_tool_for_format_instructions will be auto-detected by _detect_basemodel_tools
+        # Create instance
         instance = cls(
             tools=tools,
             prompt_template=prompt_template,
@@ -1946,7 +2378,10 @@ class AugLLMConfig(
             messages_placeholder_name=messages_placeholder_name,
             optional_variables=optional_variables,
             add_messages_placeholder=add_messages_placeholder,
-            use_tool_for_format_instructions=use_tool_for_format_instructions,  # Can be None for auto-detection
+            use_tool_for_format_instructions=use_tool_for_format_instructions,
+            force_tool_use=force_tool_use,
+            force_tool_choice=force_tool_choice,
+            tool_choice_mode=tool_choice_mode,
             **kwargs,
         )
 
@@ -1959,6 +2394,7 @@ class AugLLMConfig(
         system_message: Optional[str] = None,
         llm_config: Optional[LLMConfig] = None,
         include_instructions: bool = True,
+        force_tool_use: bool = False,
         **kwargs,
     ):
         """Create with Pydantic tool models.
@@ -1968,6 +2404,7 @@ class AugLLMConfig(
             system_message: Optional system message
             llm_config: LLM configuration (optional)
             include_instructions: Whether to include format instructions
+            force_tool_use: Whether to force the LLM to use these tools
             **kwargs: Additional parameters
 
         Returns:
@@ -1984,6 +2421,16 @@ class AugLLMConfig(
         optional_variables = kwargs.pop("optional_variables", [])
         add_messages_placeholder = kwargs.pop("add_messages_placeholder", True)
 
+        # Tool choice configuration
+        force_tool_choice = kwargs.pop("force_tool_choice", None)
+        tool_choice_mode = kwargs.pop("tool_choice_mode", "auto")
+
+        if force_tool_use:
+            tool_choice_mode = "required"
+            # If there's only one tool, set it as the forced choice
+            if len(tool_models) == 1:
+                force_tool_choice = tool_models[0].__name__.lower()
+
         # Create messages list
         messages = []
         if system_message:
@@ -2003,18 +2450,13 @@ class AugLLMConfig(
             ChatPromptTemplate.from_messages(messages) if messages else None
         )
 
-        # Create parser if instructions should be included
-        temp_parser = PydanticToolsParser(tools=tool_models)
-
         # Prepare partial variables with format instructions if needed
         partial_variables = kwargs.pop("partial_variables", {})
-        if include_instructions and hasattr(temp_parser, "get_format_instructions"):
-            partial_variables["format_instructions"] = (
-                temp_parser.get_format_instructions()
-            )
 
-        return cls(
+        # Create instance first
+        instance = cls(
             pydantic_tools=tool_models,
+            tools=tool_models,  # Also add as tools for consistency
             parser_type="pydantic_tools",
             prompt_template=prompt_template,
             system_message=system_message,
@@ -2025,8 +2467,17 @@ class AugLLMConfig(
             include_format_instructions=include_instructions,
             optional_variables=optional_variables,
             add_messages_placeholder=add_messages_placeholder,
+            force_tool_use=force_tool_use,
+            force_tool_choice=force_tool_choice,
+            tool_choice_mode=tool_choice_mode,
             **kwargs,
         )
+
+        # Add format instructions if needed - using the instance's method to avoid error
+        if include_instructions:
+            instance.add_format_instructions(None, True)
+
+        return instance
 
     @classmethod
     def from_format_instructions(
@@ -2059,40 +2510,123 @@ class AugLLMConfig(
             f"[blue]Creating AugLLMConfig with format instructions from {model.__name__}[/blue]"
         )
 
-        # Get format instructions without setting model as structured output
-        if as_tool:
-            temp_parser = PydanticToolsParser(tools=[model])
-        else:
-            temp_parser = PydanticOutputParser(pydantic_object=model)
-
-        # Get format instructions
-        if hasattr(temp_parser, "get_format_instructions"):
-            format_instructions = temp_parser.get_format_instructions()
-
-            # Prepare partial variables
-            partial_variables = kwargs.pop("partial_variables", {})
-            partial_variables[var_name] = format_instructions
-
-            # Create config
-            config = cls.from_system_prompt(
-                system_message=system_message or "",
-                llm_config=llm_config,
-                partial_variables=partial_variables,
-                **kwargs,
-            )
-
-            rprint(
-                f"[green]Created config with format instructions in {var_name}[/green]"
-            )
-            return config
-
-        # Fallback if format instructions not available
-        rprint(
-            "[yellow]Could not get format instructions, creating regular config[/yellow]"
-        )
-        return cls.from_system_prompt(
+        # Create the config first
+        config = cls.from_system_prompt(
             system_message=system_message or "", llm_config=llm_config, **kwargs
         )
+
+        # Add format instructions using instance method
+        config.add_format_instructions(model, as_tool, var_name)
+        return config
+
+    @classmethod
+    def from_structured_output_v2(
+        cls,
+        model: Type[BaseModel],
+        system_message: Optional[str] = None,
+        llm_config: Optional[LLMConfig] = None,
+        include_instructions: bool = True,
+        output_field_name: Optional[str] = None,
+        **kwargs,
+    ):
+        """Create with v2 structured output using the tool-based approach.
+
+        Args:
+            model: Pydantic model for structured output
+            system_message: Optional system message
+            llm_config: LLM configuration
+            include_instructions: Whether to add format instructions
+            output_field_name: Custom name for the output field
+            **kwargs: Additional parameters
+
+        Returns:
+            AugLLMConfig instance
+        """
+        # Use default LLM config if none provided
+        if llm_config is None:
+            llm_config = AzureLLMConfig(model="gpt-4o")
+
+        rprint(
+            f"[blue]Creating AugLLMConfig with v2 structured output using {model.__name__}[/blue]"
+        )
+
+        # Ensure proper settings for v2
+        kwargs["structured_output_version"] = "v2"
+        kwargs["structured_output_model"] = model
+        kwargs["force_tool_use"] = True
+        kwargs["tool_choice_mode"] = "required"
+
+        # Auto-set tool name if not specified
+        if "force_tool_choice" not in kwargs:
+            kwargs["force_tool_choice"] = model.__name__.lower()
+
+        # Set output field name if specified
+        if output_field_name:
+            kwargs["output_field_name"] = output_field_name
+
+        # Create messages list
+        messages = []
+        if system_message:
+            messages.append(SystemMessage(content=system_message))
+
+        # Get message parameters
+        messages_placeholder_name = kwargs.pop("messages_placeholder_name", "messages")
+        add_messages_placeholder = kwargs.pop("add_messages_placeholder", True)
+        force_messages_optional = kwargs.pop("force_messages_optional", True)
+
+        # Add MessagesPlaceholder if auto-add is enabled
+        if add_messages_placeholder:
+            optional_variables = kwargs.get("optional_variables", [])
+            is_optional = (
+                force_messages_optional
+                or messages_placeholder_name in optional_variables
+            )
+
+            # Ensure optional_variables list includes messages_placeholder_name if needed
+            if is_optional and messages_placeholder_name not in optional_variables:
+                optional_variables.append(messages_placeholder_name)
+                kwargs["optional_variables"] = optional_variables
+
+            # Add the placeholder
+            messages.append(
+                MessagesPlaceholder(
+                    variable_name=messages_placeholder_name, optional=is_optional
+                )
+            )
+
+        # Create prompt template
+        if messages:
+            prompt_template = ChatPromptTemplate.from_messages(messages)
+            kwargs["prompt_template"] = prompt_template
+
+        # Now create the config
+        instance = cls(
+            llm_config=llm_config,
+            include_format_instructions=include_instructions,
+            system_message=system_message,
+            messages_placeholder_name=messages_placeholder_name,
+            add_messages_placeholder=add_messages_placeholder,
+            force_messages_optional=force_messages_optional,
+            **kwargs,
+        )
+
+        # Add the model to tools explicitly
+        if model not in instance.tools:
+            instance.tools = list(instance.tools) if instance.tools else []
+            instance.tools.append(model)
+
+        # Add to pydantic_tools
+        if model not in instance.pydantic_tools:
+            instance.pydantic_tools.append(model)
+
+        # Force setting up output handling
+        instance._setup_output_handling()
+
+        # Add format instructions if needed
+        if include_instructions:
+            instance.add_format_instructions(model)
+
+        return instance
 
     def instantiate_llm(self) -> Any:
         """Instantiate the LLM based on the configuration."""

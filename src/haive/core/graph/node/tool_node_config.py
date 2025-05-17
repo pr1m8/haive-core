@@ -24,7 +24,7 @@ class ToolNodeConfig(NodeConfig):
 
     # Tool-specific fields
     tools: Sequence[
-        Union[Type[BaseTool], Type[BaseModel], Callable, StructuredTool]
+        Union[Type[BaseTool], Type[BaseModel], Callable, StructuredTool, BaseModel]
     ] = Field(
         default_factory=list,
         description="The schemas to use for validation (BaseTool, Type[BaseModel], or Callable)",
