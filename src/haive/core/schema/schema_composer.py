@@ -1257,3 +1257,176 @@ class SchemaComposer:
 
         # Build the final schema
         return self.build()
+
+    # src/haive/core/schema/schema_composer.py
+
+    # Add this method to the SchemaComposer class
+
+    def extract_tool_schemas(self, tools: List[Any]) -> None:
+        """
+        Extract input and output schemas from tools.
+
+        Args:
+            tools: List of tools to analyze
+        """
+        for tool in tools:
+            # Get tool name
+            tool_name = getattr(tool, "name", None)
+            if not tool_name and hasattr(tool, "__name__"):
+                tool_name = tool.__name__
+
+            if not tool_name:
+                continue
+
+            # Extract input schema
+            input_schema = None
+
+            # Check for args_schema on instance or class
+            if hasattr(tool, "args_schema"):
+                input_schema = tool.args_schema
+
+            # For class types, try to instantiate
+            elif isinstance(tool, type):
+                if issubclass(tool, BaseTool):
+                    try:
+                        instance = tool()
+                        if hasattr(instance, "args_schema"):
+                            input_schema = instance.args_schema
+                    except Exception:
+                        pass
+
+            # For BaseModel types
+            if isinstance(tool, type) and issubclass(tool, BaseModel):
+                input_schema = tool
+
+            # Add input schema field if found
+            if (
+                input_schema
+                and isinstance(input_schema, type)
+                and issubclass(input_schema, BaseModel)
+            ):
+                # Add to tool_schemas dictionary in state
+                self.add_field(
+                    name=f"tool_schemas.{tool_name}",
+                    field_type=Type[BaseModel],
+                    default=input_schema,
+                    description=f"Schema for {tool_name}",
+                )
+
+                # Try to find matching output schema
+                output_class_name = None
+                input_class_name = input_schema.__name__
+
+                # Common naming patterns for output schemas
+                possible_names = [
+                    f"{tool_name.capitalize()}Result",
+                    f"{tool_name.capitalize()}Output",
+                    f"{input_class_name}Result",
+                    f"{input_class_name}Output",
+                    f"{input_class_name.replace('Input', '')}Result",
+                    f"{input_class_name.replace('Query', '')}Result",
+                ]
+
+                # Look in surrounding module
+                if hasattr(input_schema, "__module__"):
+                    module = sys.modules.get(input_schema.__module__)
+                    if module:
+                        for name in possible_names:
+                            if hasattr(module, name):
+                                output_class = getattr(module, name)
+                                if isinstance(output_class, type) and issubclass(
+                                    output_class, BaseModel
+                                ):
+                                    # Add to output_schemas
+                                    self.add_field(
+                                        name=f"output_schemas.{name}",
+                                        field_type=Type[BaseModel],
+                                        default=output_class,
+                                        description=f"Output schema for {tool_name}",
+                                    )
+
+                                    # Add tool_name attribute to schema
+                                    setattr(output_class, "tool_name", tool_name)
+                                    break
+
+        # Add tool field to track tool instances
+        self.add_field(
+            name="tools",
+            field_type=Dict[str, Any],
+            default_factory=dict,
+            description="Tool instances indexed by name",
+        )
+
+    # Also add this method to SchemaComposer
+
+    @classmethod
+    def from_tools(
+        cls, tools: List[Any], name: str = "ToolsState", **kwargs
+    ) -> "SchemaComposer":
+        """
+        Create a schema composer from a list of tools.
+
+        Args:
+            tools: List of tools to analyze
+            name: Name for the schema
+            **kwargs: Additional parameters for SchemaComposer
+
+        Returns:
+            SchemaComposer with tool schemas
+        """
+        # Create composer with standard message capabilities
+        composer = cls(name=name, **kwargs)
+
+        # Configure for tools
+        composer.configure_messages_field(with_reducer=True)
+
+        # Add fields for tool state
+        composer.add_field(
+            name="tools",
+            field_type=Dict[str, Any],
+            default_factory=dict,
+            description="Tool instances indexed by name",
+        )
+
+        composer.add_field(
+            name="tool_schemas",
+            field_type=Dict[str, Type[BaseModel]],
+            default_factory=dict,
+            description="Tool schemas indexed by name",
+        )
+
+        composer.add_field(
+            name="output_schemas",
+            field_type=Dict[str, Type[BaseModel]],
+            default_factory=dict,
+            description="Output schemas indexed by name",
+        )
+
+        composer.add_field(
+            name="tool_calls",
+            field_type=List[Dict[str, Any]],
+            default_factory=list,
+            description="Current tool calls",
+            reducer=operator.add,
+        )
+
+        composer.add_field(
+            name="validated_tool_calls",
+            field_type=List[Dict[str, Any]],
+            default_factory=list,
+            description="Validated tool calls",
+            reducer=operator.add,
+        )
+
+        composer.add_field(
+            name="completed_tool_calls",
+            field_type=List[Dict[str, Any]],
+            default_factory=list,
+            description="Completed tool calls",
+            reducer=operator.add,
+        )
+
+        # Extract schemas from tools
+        composer.extract_tool_schemas(tools)
+
+        return composer
