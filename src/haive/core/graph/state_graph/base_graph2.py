@@ -2871,12 +2871,56 @@ class BaseGraph(BaseModel, ValidationMixin):
 
             # Direct debug function - doesn't wrap, just adds a print
             def log_function_call(func, name):
+                import inspect
+
+                # Check the function signature to see how many parameters it accepts
+                sig = inspect.signature(func)
+                param_count = len(sig.parameters)
+
+                console.print(
+                    f"Node [yellow]{name}[/yellow]: Function accepts {param_count} parameter(s)"
+                )
+
                 def inner(state, config=None):
-                    result = func(state, config)
-                    console.print(
-                        f"[bold cyan]Node {name} called[/bold cyan] → returns: [green]{result}[/green] [dim]({type(result)})[/dim]"
-                    )
-                    return result
+                    try:
+                        # Call with appropriate number of parameters
+                        if param_count == 1:
+                            # Function only accepts state (one parameter)
+                            console.print(
+                                f"[bold]Calling {name}[/bold] with 1 parameter (state only)"
+                            )
+                            result = func(state)
+                        else:
+                            # Function accepts both state and config
+                            console.print(
+                                f"[bold]Calling {name}[/bold] with 2 parameters (state and config)"
+                            )
+                            result = func(state, config)
+
+                        # Log the result
+                        console.print(
+                            f"[bold cyan]Node {name} returned:[/bold cyan] [yellow]{type(result).__name__}[/yellow]"
+                        )
+
+                        # Special debug for Command objects
+                        from langgraph.types import Command
+
+                        if isinstance(result, Command):
+                            console.print(
+                                Panel.fit(
+                                    f"[bold yellow]Command Details:[/bold yellow]\n"
+                                    + f"Type: {type(result).__name__}\n"
+                                    + f"Update: {getattr(result, 'update', None)}\n"
+                                    + f"Branch: {getattr(result, 'branch', None)}\n"
+                                    + f"Raw: {result}",
+                                    border_style="yellow",
+                                )
+                            )
+
+                        return result
+                    except Exception as e:
+                        console.print(f"[bold red]Error in {name}:[/bold red] {str(e)}")
+                        raise
 
                 return inner
 
@@ -2948,13 +2992,65 @@ class BaseGraph(BaseModel, ValidationMixin):
                     f"Branch from [yellow]{source}[/yellow] with conditions: {list(destinations.keys())}"
                 )
 
-                # Direct function handling - no wrapping
+                # Check branch function and add parameter-aware wrapper if needed
                 if branch.mode == BranchMode.FUNCTION and branch.function:
-                    graph_builder.add_conditional_edges(
-                        source, branch.function, destinations
-                    )
+                    # Check branch function signature
+                    import inspect
+
+                    try:
+                        sig = inspect.signature(branch.function)
+                        param_count = len(sig.parameters)
+
+                        # Create parameter-aware branch function
+                        def branch_wrapper(branch_func, param_count, branch_name):
+                            def wrapper(state, config=None):
+                                try:
+                                    # Call with appropriate parameter count
+                                    if param_count == 1:
+                                        console.print(
+                                            f"[bold]Calling branch {branch_name}[/bold] with 1 parameter"
+                                        )
+                                        result = branch_func(state)
+                                    else:
+                                        console.print(
+                                            f"[bold]Calling branch {branch_name}[/bold] with 2 parameters"
+                                        )
+                                        result = branch_func(state, config)
+
+                                    console.print(
+                                        f"[bold cyan]Branch returned:[/bold cyan] [yellow]{result}[/yellow]"
+                                    )
+                                    return result
+                                except Exception as e:
+                                    # Provide nice error handling for branches
+                                    console.print(
+                                        f"[bold red]Error in branch {branch_name}:[/bold red] {str(e)}"
+                                    )
+                                    # Default to False on error (could be configurable)
+                                    return False
+
+                            return wrapper
+
+                        # Create wrapped branch function
+                        branch_func = branch_wrapper(
+                            branch.function, param_count, branch.name
+                        )
+
+                        # Add conditional edges with the wrapped function
+                        graph_builder.add_conditional_edges(
+                            source, branch_func, destinations
+                        )
+                    except Exception as e:
+                        # If anything goes wrong with signature inspection, use original function
+                        console.print(
+                            f"[yellow]Warning: Could not inspect branch function: {str(e)}[/yellow]"
+                        )
+                        graph_builder.add_conditional_edges(
+                            source, branch.function, destinations
+                        )
                 else:
                     # Use branch object's __call__ method
+                    console.print(f"Using branch object directly for {branch.name}")
                     graph_builder.add_conditional_edges(source, branch, destinations)
 
             console.print("\n[bold green]LangGraph conversion complete![/bold green]")

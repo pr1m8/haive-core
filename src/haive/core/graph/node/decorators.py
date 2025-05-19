@@ -33,7 +33,7 @@ def register_node(
     input_mapping: Optional[Dict[str, str]] = None,
     output_mapping: Optional[Dict[str, str]] = None,
     retry_policy: Optional[RetryPolicy] = None,
-    **kwargs
+    **kwargs,
 ):
     """
     Decorator to register a function as a node.
@@ -67,7 +67,7 @@ def register_node(
             input_fields=input_mapping,
             output_fields=output_mapping,
             retry_policy=retry_policy,
-            **kwargs
+            **kwargs,
         )
 
         # Create node function
@@ -197,3 +197,71 @@ def send_node(
         send_targets=send_targets,
         send_field=send_field,
     )
+
+
+# Add a new debug decorator
+def debug_node(name=None):
+    """
+    Decorator to add detailed debug logging to a node function.
+    Logs input state and output result but does not modify the function behavior.
+
+    Args:
+        name: Name for the node in logs (defaults to function name)
+
+    Returns:
+        Decorated function
+    """
+    from rich.console import Console
+    from rich.panel import Panel
+    from rich.pretty import Pretty
+
+    console = Console()
+
+    def decorator(func):
+        func_name = name or func.__name__
+
+        def wrapper(state, config=None):
+            # Log input
+            console.print(
+                Panel.fit(
+                    f"[bold cyan]Node {func_name} Input:[/bold cyan]\n{Pretty(state)}",
+                    border_style="cyan",
+                )
+            )
+
+            # Call original function
+            result = func(state, config)
+
+            # Log output
+            result_display = Pretty(result)
+            console.print(
+                Panel.fit(
+                    f"[bold green]Node {func_name} Output:[/bold green]\n{result_display}",
+                    border_style="green",
+                )
+            )
+
+            # Special handling for Command objects
+            from langgraph.types import Command
+
+            if isinstance(result, Command):
+                console.print(
+                    Panel.fit(
+                        f"[bold yellow]Command Object Detected:[/bold yellow]\n"
+                        + f"Type: {type(result).__name__}\n"
+                        + f"Attributes: {dir(result)}\n"
+                        + f"Update: {getattr(result, 'update', None)}\n"
+                        + f"Branch: {getattr(result, 'branch', None)}",
+                        border_style="yellow",
+                    )
+                )
+
+            # Return original result unchanged
+            return result
+
+        # Preserve function metadata
+        from functools import wraps
+
+        return wraps(func)(wrapper)
+
+    return decorator
