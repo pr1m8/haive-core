@@ -5,6 +5,7 @@ Dynamic output mapping based on state.
 import logging
 from typing import Any, Dict, Optional, Tuple
 
+from langgraph.graph import END
 from pydantic import BaseModel, Field, model_validator
 
 from haive.core.graph.branches.types import ComparisonType
@@ -34,7 +35,7 @@ class DynamicMapping(BaseModel):
     key: Optional[str] = None
     value: Optional[Any] = None
     comparison: ComparisonType = ComparisonType.EQUALS
-    default_node: str = "END"
+    default_node: str = END
 
     model_config = {"arbitrary_types_allowed": True}
 

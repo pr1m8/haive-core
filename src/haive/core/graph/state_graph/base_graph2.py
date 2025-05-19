@@ -9,6 +9,8 @@ import logging
 import uuid
 from datetime import datetime
 from enum import Enum
+
+# NEED TO CLEAN UP
 from typing import (
     Any,
     Callable,
@@ -19,18 +21,21 @@ from typing import (
     Optional,
     Set,
     Tuple,
+    Type,
     TypeVar,
     Union,
 )
 
+from gradio import Theme
 from langchain_core.runnables import RunnableConfig
-from langgraph.graph import END, START
+from langgraph.graph import END, START  # Import the actual constants
 from langgraph.types import Command, RetryPolicy, Send
 from pydantic import BaseModel, Field, model_validator
 
 # Import Branch implementation
 from haive.core.graph.branches.branch import Branch
 from haive.core.graph.branches.types import BranchMode, BranchResult, ComparisonType
+from haive.core.graph.common.field_utils import extract_field
 from haive.core.graph.common.references import CallableReference
 from haive.core.graph.common.types import ConfigLike, NodeOutput, NodeType, StateLike
 from haive.core.graph.node.config import NodeConfig
@@ -38,6 +43,16 @@ from haive.core.graph.node.decorators import send_node
 from haive.core.graph.state_graph.graph_path import GraphPath
 from haive.core.schema.state_schema import StateSchema
 
+# Define a type for branch result types
+BranchResultType = Union[
+    str,  # Node name
+    bool,  # Boolean condition
+    List[str],  # List of node names
+    List[Send],  # List of Send objects
+    Send,  # Single Send object
+    Command,  # Command object
+    None,  # Default case
+]
 # Setup logging
 logger = logging.getLogger(__name__)
 
@@ -137,6 +152,12 @@ class BaseGraph(BaseModel):
     edges: List[Edge] = Field(default_factory=list)
     branches: Dict[str, Branch] = Field(default_factory=dict)
 
+    # Entry and end points
+    entry_point: Optional[str] = None
+    finish_point: Optional[str] = None
+    conditional_entries: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
+    conditional_exits: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
+
     # Configuration
     state_schema: Optional[Any] = None
     default_config: Optional[RunnableConfig] = None
@@ -169,11 +190,22 @@ class BaseGraph(BaseModel):
         if len(node_names) != len(non_none_nodes):
             raise ValueError("Node names must be unique")
 
+        # Validate entry/end points
+        if self.entry_point and self.entry_point not in self.nodes:
+            raise ValueError(f"Entry point '{self.entry_point}' not found in nodes")
+
+        if self.finish_point and self.finish_point not in self.nodes:
+            raise ValueError(f"Finish point '{self.finish_point}' not found in nodes")
+
         # Initialize additional structures if not present
         if not hasattr(self, "subgraphs"):
             self.subgraphs = {}
         if not hasattr(self, "node_types"):
             self.node_types = {}
+        if not hasattr(self, "conditional_entries"):
+            self.conditional_entries = {}
+        if not hasattr(self, "conditional_exits"):
+            self.conditional_exits = {}
 
         # Track node types for non-None nodes
         for name, node in non_none_nodes.items():
@@ -439,6 +471,247 @@ class BaseGraph(BaseModel):
 
         # Store the type
         self.node_types[node_name] = determined_type
+
+    def set_entry_point(self, node_name: str) -> "BaseGraph":
+        """
+        Set the entry point of the graph.
+
+        Args:
+            node_name: Name of the node to set as the entry point
+
+        Returns:
+            Self for method chaining
+        """
+        if node_name not in self.nodes:
+            raise ValueError(f"Node '{node_name}' not found in graph")
+
+        # Store the entry point
+        self.entry_point = node_name
+
+        # Add edge from START to entry point if not already present
+        if not any(src == START and dst == node_name for src, dst in self.edges):
+            self.add_edge(START, node_name)
+
+        logger.debug(f"Set entry point to '{node_name}' in graph '{self.name}'")
+        self.updated_at = datetime.now()
+        return self
+
+    def set_end_point(self, node_name: str) -> "BaseGraph":
+        """
+        Set the end point of the graph.
+
+        Args:
+            node_name: Name of the node to set as the end point
+
+        Returns:
+            Self for method chaining
+        """
+        if node_name not in self.nodes:
+            raise ValueError(f"Node '{node_name}' not found in graph")
+
+        # Store the end point
+        self.finish_point = node_name
+
+        # Add edge from end point to END if not already present
+        if not any(src == node_name and dst == END for src, dst in self.edges):
+            self.add_edge(node_name, END)
+
+        logger.debug(f"Set end point to '{node_name}' in graph '{self.name}'")
+        self.updated_at = datetime.now()
+        return self
+
+    def set_conditional_entry(
+        self,
+        condition: Callable[[StateLike, Optional[ConfigLike]], bool],
+        entry_node: str,
+        default_entry: Optional[str] = None,
+    ) -> "BaseGraph":
+        """
+        Set a conditional entry point for the graph.
+
+        Args:
+            condition: Function that takes state and config, returns boolean
+            entry_node: Node to enter if condition is True
+            default_entry: Node to enter if condition is False (uses self.entry_point if None)
+
+        Returns:
+            Self for method chaining
+        """
+        if entry_node not in self.nodes:
+            raise ValueError(f"Entry node '{entry_node}' not found in graph")
+
+        if default_entry and default_entry not in self.nodes:
+            raise ValueError(f"Default entry node '{default_entry}' not found in graph")
+
+        # Generate ID for this conditional entry
+        entry_id = str(uuid.uuid4())
+
+        # Store condition and nodes
+        self.conditional_entries[entry_id] = {
+            "condition": condition,
+            "true_entry": entry_node,
+            "false_entry": default_entry or self.entry_point,
+            "function_ref": CallableReference.from_callable(condition),
+        }
+
+        # Add edges from START to both entry nodes
+        if not any(src == START and dst == entry_node for src, dst in self.edges):
+            self.add_edge(START, entry_node)
+
+        false_node = default_entry or self.entry_point
+        if false_node and not any(
+            src == START and dst == false_node for src, dst in self.edges
+        ):
+            self.add_edge(START, false_node)
+
+        logger.debug(
+            f"Added conditional entry point to '{entry_node}' in graph '{self.name}'"
+        )
+        self.updated_at = datetime.now()
+        return self
+
+    def set_conditional_exit(
+        self,
+        node_name: str,
+        condition: Callable[[StateLike, Optional[ConfigLike]], bool],
+        exit_if_true: bool = True,
+    ) -> "BaseGraph":
+        """
+        Set a conditional exit point for the graph.
+
+        Args:
+            node_name: Name of the node to set as conditional exit
+            condition: Function that takes state and config, returns boolean
+            exit_if_true: Whether to exit when condition is True (default) or False
+
+        Returns:
+            Self for method chaining
+        """
+        if node_name not in self.nodes:
+            raise ValueError(f"Node '{node_name}' not found in graph")
+
+        # Generate ID for this conditional exit
+        exit_id = str(uuid.uuid4())
+
+        # Store condition and configuration
+        self.conditional_exits[exit_id] = {
+            "node": node_name,
+            "condition": condition,
+            "exit_if_true": exit_if_true,
+            "function_ref": CallableReference.from_callable(condition),
+        }
+
+        # Add edge from node to END if not already present
+        if not any(src == node_name and dst == END for src, dst in self.edges):
+            self.add_edge(node_name, END)
+
+        logger.debug(
+            f"Added conditional exit point at '{node_name}' in graph '{self.name}'"
+        )
+        self.updated_at = datetime.now()
+        return self
+
+    def remove_conditional_entry(self, entry_id: str) -> "BaseGraph":
+        """
+        Remove a conditional entry point.
+
+        Args:
+            entry_id: ID of the conditional entry to remove
+
+        Returns:
+            Self for method chaining
+        """
+        if entry_id not in self.conditional_entries:
+            raise ValueError(f"Conditional entry '{entry_id}' not found")
+
+        # Remove the conditional entry
+        del self.conditional_entries[entry_id]
+
+        logger.debug(
+            f"Removed conditional entry point '{entry_id}' from graph '{self.name}'"
+        )
+        self.updated_at = datetime.now()
+        return self
+
+    def remove_conditional_exit(self, exit_id: str) -> "BaseGraph":
+        """
+        Remove a conditional exit point.
+
+        Args:
+            exit_id: ID of the conditional exit to remove
+
+        Returns:
+            Self for method chaining
+        """
+        if exit_id not in self.conditional_exits:
+            raise ValueError(f"Conditional exit '{exit_id}' not found")
+
+        # Remove the conditional exit
+        del self.conditional_exits[exit_id]
+
+        logger.debug(
+            f"Removed conditional exit point '{exit_id}' from graph '{self.name}'"
+        )
+        self.updated_at = datetime.now()
+        return self
+
+    def get_conditional_entries(self) -> Dict[str, Dict[str, Any]]:
+        """
+        Get all conditional entry points.
+
+        Returns:
+            Dictionary of conditional entries indexed by ID
+        """
+        return self.conditional_entries
+
+    def get_conditional_exits(self) -> Dict[str, Dict[str, Any]]:
+        """
+        Get all conditional exit points.
+
+        Returns:
+            Dictionary of conditional exits indexed by ID
+        """
+        return self.conditional_exits
+
+    @property
+    def entry_points(self) -> Dict[str, Any]:
+        """
+        Unified property that returns all entry points (regular and conditional).
+
+        Returns:
+            Dictionary containing all entry points information
+        """
+        result = {"primary": self.entry_point, "conditional": self.conditional_entries}
+
+        # Get all nodes with edges from START
+        start_connections = []
+        for src, dst in self.edges:
+            if src == START and dst not in start_connections:
+                start_connections.append(dst)
+
+        result["all_start_connections"] = start_connections
+
+        return result
+
+    @property
+    def exit_points(self) -> Dict[str, Any]:
+        """
+        Unified property that returns all exit points (regular and conditional).
+
+        Returns:
+            Dictionary containing all exit points information
+        """
+        result = {"primary": self.finish_point, "conditional": self.conditional_exits}
+
+        # Get all nodes with edges to END
+        end_connections = []
+        for src, dst in self.edges:
+            if dst == END and src not in end_connections:
+                end_connections.append(src)
+
+        result["all_end_connections"] = end_connections
+
+        return result
 
     def add_tool_node(
         self, node_name: str, node_type: NodeType = NodeType.TOOL, **kwargs
@@ -1895,88 +2168,214 @@ class BaseGraph(BaseModel):
         self.updated_at = datetime.now()
         return self
 
-    # Compatibility method for tests
     def add_conditional_edges(
-        self, source_node, condition, destinations=None, default="END"
-    ):
+        self,
+        source_node: str,
+        condition: Union[
+            Branch, Callable[[StateLike, Optional[ConfigLike]], BranchResultType], Any
+        ],
+        destinations: Optional[
+            Union[str, List[str], Dict[Union[bool, str, int], str]]
+        ] = None,
+        default: Union[str, Literal["END"]] = END,
+    ) -> "BaseGraph":
         """
         Add conditional edges from a source node based on a condition.
 
         Args:
             source_node: Source node name
-            condition: Function, Branch object, or condition value
-            destinations: Mapping of condition results to target nodes (optional if condition is a Branch)
-            default: Default destination (optional if condition is a Branch)
+            condition: A function that takes (state, optional config) and returns a node name,
+                      boolean, list of nodes, list of Send objects, Send object, Command object,
+                      or a Branch object itself
+            destinations: Target node(s) - can be:
+                - A single node name string (which will be mapped to True)
+                - A list of node names (which will be mapped by index)
+                - A dictionary mapping condition results to target nodes
+            default: Default destination if no condition matches (defaults to END)
 
         Returns:
             Self for method chaining
         """
+        from langgraph.graph import END, START
+        from rich import print as rprint
+        from rich.console import Console
+        from rich.panel import Panel
+        from rich.table import Table
+
+        console = Console()
+
+        # Convert special node names to LangGraph constants
+        source_node = START if source_node == "__start__" else source_node
+        default = END if default == "__end__" else default
+
+        # Debug header
+        console.print(
+            Panel.fit(
+                "[bold blue]Adding Conditional Edges[/bold blue]", border_style="blue"
+            )
+        )
+
+        # Log input parameters
+        console.print("\n[bold]Input Parameters:[/bold]")
+        console.print(f"Source Node: [yellow]{source_node}[/yellow]")
+        console.print(f"Condition Type: [yellow]{type(condition).__name__}[/yellow]")
+        console.print(f"Destinations: [yellow]{destinations}[/yellow]")
+        console.print(f"Default: [yellow]{default}[/yellow]")
+
         # Validate source node
         if source_node != START and source_node not in self.nodes:
             raise ValueError(f"Source node '{source_node}' not found in graph")
 
         # Handle Branch objects
         if isinstance(condition, Branch):
+            console.print("\n[bold green]Handling Branch object[/bold green]")
             branch = condition
-
-            # Set source node on the branch
             branch.source_node = source_node
-
-            # Use branch's destinations if none provided
             if destinations is None:
                 destinations = branch.destinations
             else:
-                # Update branch with provided destinations
+                if isinstance(destinations, str):
+                    destinations = {True: destinations}
+                elif isinstance(destinations, list):
+                    destinations = {
+                        True: destinations[0],
+                        False: destinations[1] if len(destinations) > 1 else None,
+                    }
                 branch.destinations = destinations
-
-            # Use provided default or keep branch's default
-            if default != "END" or branch.default is None:
+            # Only set default if it's not END and we don't have a list of destinations
+            if default != END and not isinstance(destinations, list):
                 branch.default = default
-
-            # Add the branch to the graph
-            branch_id = branch.id
-            self.branches[branch_id] = branch
-
-            logger.debug(
-                f"Added conditional edges from {source_node} with {len(destinations)} destinations"
-            )
-            self.updated_at = datetime.now()
+            self.branches[branch.id] = branch
             return self
 
-        # Handle function or value conditions (create a new Branch)
+        # Convert destinations to dictionary format
+        console.print("\n[bold]Processing Destinations:[/bold]")
+        if isinstance(destinations, str):
+            console.print(f"String destination: [yellow]{destinations}[/yellow]")
+            destinations = {True: destinations}
+        elif isinstance(destinations, list):
+            console.print(f"List destinations: [yellow]{destinations}[/yellow]")
+            if len(destinations) >= 2:
+                destinations = {True: destinations[0], False: destinations[1]}
+                console.print(f"Mapped to: [green]{destinations}[/green]")
+            elif destinations:
+                # For single destination, map True to the destination and False to END
+                destinations = {True: destinations[0], False: END}
+                console.print(
+                    f"Single destination mapped to: [green]{destinations}[/green]"
+                )
+            else:
+                destinations = {True: "continue", False: END}
+                console.print(f"Empty list mapped to: [green]{destinations}[/green]")
+        elif destinations is None:
+            destinations = {True: "continue", False: END}
+            console.print(f"None destinations mapped to: [green]{destinations}[/green]")
+
+        # Convert any special node names in destinations
+        converted_destinations = {}
+        for key, value in destinations.items():
+            converted_destinations[key] = END if value == "__end__" else value
+
+        # Generate branch ID and name
         branch_id = str(uuid.uuid4())
         branch_name = f"branch_{branch_id[:8]}"
 
-        # Determine branch mode and parameters
-        if callable(condition):
-            # Function-based branch
-            branch = Branch(
-                id=branch_id,
-                name=branch_name,
-                source_node=source_node,
-                function=condition,
-                destinations=destinations or {},
-                default=default,
-                mode=BranchMode.FUNCTION,
-            )
-        else:
-            # Value-based branch
-            branch = Branch(
-                id=branch_id,
-                name=branch_name,
-                source_node=source_node,
-                value=condition,
-                destinations=destinations or {},
-                default=default,
-                mode=BranchMode.DIRECT,
-            )
+        # Create a wrapper function to handle different return types
+        def wrapped_function(state, config=None):
+            try:
+                if callable(condition):
+                    import inspect
 
-        # Add the branch to the graph
+                    sig = inspect.signature(condition)
+
+                    if len(sig.parameters) >= 2:
+                        result = condition(state, config)
+                    else:
+                        result = condition(state)
+
+                    if result is None:
+                        return False
+
+                    if isinstance(result, (Send, Command)):
+                        return result
+
+                    if isinstance(result, list) and all(
+                        isinstance(item, Send) for item in result
+                    ):
+                        return result
+
+                    # For boolean results, map to destinations
+                    if isinstance(result, bool):
+                        return converted_destinations.get(result, default)
+
+                    # For string results, return directly if it's a valid destination
+                    if (
+                        isinstance(result, str)
+                        and result in converted_destinations.values()
+                    ):
+                        return result
+
+                    # For numeric results, use as index into list destinations
+                    if (
+                        isinstance(result, (int, float))
+                        and result in converted_destinations
+                    ):
+                        return converted_destinations[result]
+
+                    return default
+                else:
+                    field_value = (
+                        extract_field(state, self.key)
+                        if hasattr(self, "key") and self.key
+                        else None
+                    )
+                    comparison_result = (
+                        self._compare(field_value, condition)
+                        if hasattr(self, "_compare")
+                        else False
+                    )
+                    return converted_destinations.get(comparison_result, default)
+            except Exception as e:
+                logger.error(f"Error in branch condition: {e}")
+                return default
+
+        # Create branch
+        branch = Branch(
+            id=branch_id,
+            name=branch_name,
+            source_node=source_node,
+            function=wrapped_function,
+            destinations=converted_destinations,
+            mode=BranchMode.FUNCTION,
+        )
+
+        # Log branch details
+        console.print("\n[bold]Created Branch:[/bold]")
+        branch_table = Table(show_header=True, header_style="bold magenta")
+        branch_table.add_column("Property")
+        branch_table.add_column("Value")
+
+        branch_table.add_row("ID", branch.id)
+        branch_table.add_row("Name", branch.name)
+        branch_table.add_row("Source Node", branch.source_node)
+        branch_table.add_row("Destinations", str(branch.destinations))
+        branch_table.add_row("Mode", str(branch.mode))
+
+        console.print(branch_table)
+
+        # Add the branch
         self.branches[branch_id] = branch
 
-        logger.debug(
-            f"Added conditional edges from {source_node} with {len(destinations or {})} destinations"
-        )
+        # Remove any direct edges between source and destinations to avoid duplication
+        for target in converted_destinations.values():
+            if (source_node, target) in self.edges:
+                self.edges = [
+                    e
+                    for e in self.edges
+                    if not (e[0] == source_node and e[1] == target)
+                ]
+
+        console.print("\n[bold green]Branch added successfully![/bold green]")
         self.updated_at = datetime.now()
         return self
 
@@ -2437,118 +2836,83 @@ class BaseGraph(BaseModel):
         return self
 
     # Integration with LangGraph StateGraph
-    def to_langgraph(self, state_schema: Any = None) -> Any:
-        """
-        Convert this graph to a LangGraph StateGraph.
-
-        Args:
-            state_schema: Optional schema for the StateGraph (dict or StateSchema)
-
-        Returns:
-            StateGraph instance
-        """
+    def to_langgraph(self, state_schema: Optional[Type[BaseModel]] = None) -> Any:
+        """Convert to LangGraph StateGraph."""
         try:
             from langgraph.graph import StateGraph
 
-            # Create StateGraph
-            graph_builder = StateGraph(state_schema or self.state_schema or dict)
+            # Create graph builder
+            graph_builder = StateGraph(state_schema or dict)
 
-            # Add nodes for non-None nodes
-            for name, node in self.nodes.items():
-                if node is None:
+            # Add nodes
+            for node_name, node in self.nodes.items():
+                # Skip special nodes
+                if node_name in ["__start__", "__end__"]:
                     continue
 
-                # Extract action from metadata
+                # Get the action from metadata
                 action = None
-
-                # Handle NodeConfig directly
-                if (
-                    hasattr(node, "__class__")
-                    and "NodeConfig" in node.__class__.__name__
-                ):
-                    # Use NodeConfig directly
-                    if hasattr(node, "__call__"):
-                        action = node
-                    # Try to find action in metadata or attributes
-                    elif hasattr(node, "metadata") and "callable" in node.metadata:
+                if node is not None:
+                    if hasattr(node, "metadata") and "callable" in node.metadata:
                         action = node.metadata["callable"]
-                    elif hasattr(node, "engine") and node.engine:
-                        action = node.engine
-                else:
-                    # Node object - look for action in metadata
-                    if hasattr(node, "metadata"):
-                        if "callable" in node.metadata:
-                            action = node.metadata["callable"]
-                        elif "engine" in node.metadata:
-                            engine = node.metadata["engine"]
-                            if hasattr(engine, "create_runnable"):
-                                action = engine.create_runnable()
-                            else:
-                                action = engine
-                        elif "object" in node.metadata:
-                            obj = node.metadata["object"]
-                            if callable(obj):
-                                action = obj
+                    elif hasattr(node, "function"):
+                        action = node.function
+                    elif callable(node):
+                        action = node
 
-                # Convert retry policy if present
-                retry = None
-                if hasattr(node, "retry_policy") and node.retry_policy:
-                    retry = node.retry_policy
-
-                # Convert command_goto if present
-                destinations = None
-                if hasattr(node, "command_goto") and node.command_goto:
-                    if isinstance(node.command_goto, str):
-                        destinations = (node.command_goto,)
-                    elif isinstance(node.command_goto, list):
-                        destinations = tuple(node.command_goto)
+                if not action:
+                    raise ValueError(f"Node {node_name} has no callable action")
 
                 # Add the node
-                if action:
-                    metadata = getattr(node, "metadata", {})
-                    graph_builder.add_node(
-                        name,
-                        action,
-                        metadata=metadata,
-                        retry=retry,
-                        destinations=destinations,
-                    )
-                else:
-                    # Placeholder node (warning: will not work in final graph)
-                    logger.warning(
-                        f"No action found for node '{name}', adding placeholder"
-                    )
-                    graph_builder.add_node(name, lambda state: state)
+                graph_builder.add_node(node_name, action)
 
             # Add direct edges
-            for source, target in self.edges:
+            for edge in self.edges:
+                source = START if edge[0] == "__start__" else edge[0]
+                target = END if edge[1] == "__end__" else edge[1]
                 graph_builder.add_edge(source, target)
 
             # Add branches
-            for branch_id, branch in self.branches.items():
-                # Create the edge function
-                def create_edge_func(branch_obj):
+            for branch in self.branches.values():
+                # Convert source node
+                source_node = (
+                    START if branch.source_node == "__start__" else branch.source_node
+                )
+
+                # Convert destinations
+                destinations = {}
+                for key, value in branch.destinations.items():
+                    if value == "__end__":
+                        destinations[key] = END
+                    else:
+                        destinations[key] = value
+
+                # Create edge function
+                def create_edge_func(b):
                     def edge_func(state):
-                        return branch_obj.evaluate(state)
+                        result = b.evaluate(state)
+                        if isinstance(result, BranchResult):
+                            if result.is_send:
+                                return result.send_objects
+                            if result.is_command:
+                                return result.command_object
+                            if result.has_mapping:
+                                return result.next_node
+                        return result
 
                     return edge_func
 
                 # Add the conditional edge
-                source_node = branch.source_node
-                if (
-                    source_node != START
-                    and source_node in self.nodes
-                    and self.nodes[source_node] is not None
-                ):
-                    graph_builder.add_conditional_edges(
-                        source_node, create_edge_func(branch), branch.destinations
-                    )
+                graph_builder.add_conditional_edges(
+                    source_node, create_edge_func(branch), destinations
+                )
 
             return graph_builder
 
         except ImportError:
-            logger.error("LangGraph not installed or not found")
-            raise ImportError("LangGraph must be installed to convert to StateGraph")
+            raise ImportError(
+                "LangGraph not installed. Install with: pip install langgraph"
+            )
 
     @classmethod
     def from_langgraph(
@@ -2579,7 +2943,7 @@ class BaseGraph(BaseModel):
             # Convert nodes
             for node_name, node_spec in state_graph.nodes.items():
                 # Skip special nodes
-                if node_name in ["__start__", "__end__"]:
+                if node_name in [START, END]:
                     continue
 
                 # Extract node properties
@@ -2731,80 +3095,119 @@ class BaseGraph(BaseModel):
         # Convert to graph
         return serializable.to_graph()
 
-    def to_mermaid(self) -> str:
+    def to_mermaid(self, include_subgraphs: bool = True, theme: str = "default") -> str:
         """
         Generate a Mermaid graph diagram string.
+
+        Args:
+            include_subgraphs: Whether to visualize subgraphs as clusters
+            theme: Mermaid theme name (default, forest, dark, neutral)
 
         Returns:
             Mermaid diagram as string
         """
-        lines = ["graph TD;"]
+        from haive.core.graph.state_graph.graph_visualizer import GraphVisualizer
 
-        # Add nodes
-        lines.append("    %% Nodes")
-        for name, node in self.nodes.items():
-            # Skip None nodes
-            if node is None:
-                continue
+        return GraphVisualizer.generate_mermaid(
+            self, include_subgraphs=include_subgraphs, theme=theme
+        )
 
-            # Determine node color based on type
-            node_type = self.node_types.get(name, NodeType.CALLABLE)
-            color = "#FFFFFF"  # Default white
+    def visualize(
+        self,
+        output_path: Optional[str] = None,
+        include_subgraphs: bool = True,
+        highlight_nodes: Optional[List[str]] = None,
+        highlight_paths: Optional[List[List[str]]] = None,
+        save_png: bool = True,
+        width: str = "100%",
+        theme: str = "default",
+    ) -> str:
+        """
+        Generate and display a visualization of the graph.
 
-            if node_type == NodeType.ENGINE:
-                color = "#90EE90"  # Light green for engine nodes
-            elif node_type == NodeType.TOOL:
-                color = "#FFD700"  # Gold for tool nodes
-            elif node_type == NodeType.VALIDATION:
-                color = "#B0E0E6"  # Light blue for validation nodes
-            elif node_type == NodeType.SUBGRAPH:
-                color = "#FFA07A"  # Light salmon for subgraphs
-            elif node_type == NodeType.CALLABLE:
-                color = "#F5F5DC"  # Beige for callable nodes
+        This method attempts multiple rendering approaches based on the environment,
+        with fallbacks to ensure something is always displayed.
 
-            # Add style
-            lines.append(
-                f'    {name}["{name} ({node_type.value})"] style fill:{color};'
+        Args:
+            output_path: Optional path to save the diagram
+            include_subgraphs: Whether to visualize subgraphs as clusters
+            highlight_nodes: List of node names to highlight
+            highlight_paths: List of paths to highlight (each path is a list of node names)
+            save_png: Whether to save the diagram as PNG
+            width: Width of the displayed diagram
+            theme: Mermaid theme to use
+
+        Returns:
+            The generated Mermaid code
+        """
+        from haive.core.graph.state_graph.graph_visualizer import GraphVisualizer
+        from haive.core.utils.mermaid_utils import Environment, detect_environment
+
+        # Combine nodes from highlight_paths with highlight_nodes
+        all_highlight_nodes = highlight_nodes or []
+        if highlight_paths:
+            for path in highlight_paths:
+                all_highlight_nodes.extend(path)
+
+        # Generate the Mermaid code
+        mermaid_code = GraphVisualizer.generate_mermaid(
+            self,
+            include_subgraphs=include_subgraphs,
+            highlight_nodes=all_highlight_nodes if all_highlight_nodes else None,
+            theme=theme,
+        )
+
+        try:
+            # Display using the visualizer
+            GraphVisualizer.display_graph(
+                self,
+                output_path=output_path,
+                include_subgraphs=include_subgraphs,
+                highlight_nodes=highlight_nodes,
+                highlight_paths=highlight_paths,
+                save_png=save_png,
+                width=width,
+                theme=Theme,
             )
+        except Exception as e:
+            # Get the current environment
+            env = detect_environment()
 
-        # Add special nodes
-        lines.append(
-            f'    {START}["{START}"] style fill:#5D8AA8,color:white,font-weight:bold;'
-        )
-        lines.append(
-            f'    {END}["{END}"] style fill:#FF6347,color:white,font-weight:bold;'
-        )
+            # Provide helpful error message based on environment
+            print(f"Error displaying graph: {e}")
+            print(f"Detected environment: {env}")
 
-        # Add direct edges
-        lines.append("    %% Direct edges")
-        for source, target in self.edges:
-            lines.append(f"    {source} --> {target};")
+            if env == Environment.JUPYTER_LAB:
+                print("\nTry these options:")
+                print(
+                    "1. Install JupyterLab Mermaid extension: jupyter labextension install @jupyterlab/mermaid"
+                )
+                print("2. Run this in a cell to display using HTML:")
+                print("   from IPython.display import HTML")
+                print(
+                    "   HTML(f'''<div class=\"mermaid\">{my_graph.to_mermaid()}</div>''')"
+                )
+                print(
+                    '   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>'
+                )
+                print("   <script>mermaid.initialize({startOnLoad:true});</script>''')")
+            elif env == Environment.JUPYTER_NOTEBOOK:
+                print("\nTry these options:")
+                print("1. Run this in a cell to display using HTML:")
+                print("   from IPython.display import HTML")
+                print(
+                    "   HTML(f'''<div class=\"mermaid\">{my_graph.to_mermaid()}</div>"
+                )
+                print(
+                    '   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>'
+                )
+                print("   <script>mermaid.initialize({startOnLoad:true});</script>''')")
+            elif env == Environment.VSCODE_NOTEBOOK:
+                print("\nTry these options:")
+                print("1. Install Mermaid Preview extension for VSCode")
+                print(
+                    "2. Save the diagram and view manually: my_graph.save_visualization('diagram.png')"
+                )
 
-        # Add branch edges
-        if self.branches:
-            lines.append("    %% Branch connections")
-
-            for branch_id, branch in self.branches.items():
-                source = branch.source_node
-
-                if branch.mode == BranchMode.FUNCTION:
-                    lines.append(f"    %% Function Branch: {branch.name}")
-                elif branch.mode == BranchMode.DIRECT:
-                    lines.append(f"    %% Direct Branch: {branch.name}")
-                elif branch.mode == BranchMode.SEND_MAPPER:
-                    lines.append(f"    %% Send Mapper Branch: {branch.name}")
-                else:
-                    lines.append(f"    %% Branch: {branch.name}")
-
-                # Draw connections for destinations
-                for condition, target in branch.destinations.items():
-                    condition_str = str(condition)
-                    if len(condition_str) > 15:
-                        condition_str = condition_str[:12] + "..."
-                    lines.append(f'    {source} -->|"{condition_str}"| {target};')
-
-                # Draw default connection if different from destinations
-                if branch.default not in branch.destinations.values():
-                    lines.append(f'    {source} -->|"default"| {branch.default};')
-
-        return "\n".join(lines)
+        # Always return the Mermaid code for reference
+        return mermaid_code

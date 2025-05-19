@@ -9,6 +9,7 @@ import logging
 import uuid
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
+from langgraph.graph import END
 from langgraph.types import Command, Send
 from pydantic import BaseModel, Field, model_validator
 
@@ -49,9 +50,9 @@ class Branch(BaseModel):
     # Connection information (replaces ConditionalEdge)
     source_node: Optional[str] = Field(default=None)
     destinations: Dict[Union[bool, str], str] = Field(
-        default_factory=lambda: {True: "continue", False: "END"}
+        default_factory=lambda: {True: "continue", False: END}
     )
-    default: str = "END"
+    default: Optional[str] = None
 
     # Evaluation properties
     mode: BranchMode = BranchMode.DIRECT
@@ -95,6 +96,25 @@ class Branch(BaseModel):
                 mappings=self.send_mappings, generators=self.send_generators
             )
 
+        return self
+
+    @model_validator(mode="after")
+    def validate_destinations_and_default(self) -> "Branch":
+        """Validate destinations and set default if needed."""
+        if not self.destinations:
+            self.destinations = {True: "continue", False: END}
+        elif len(self.destinations) == 1:
+            # If only one destination is provided, map it to True and END to False
+            true_dest = next(iter(self.destinations.values()))
+            self.destinations = {True: true_dest, False: END}
+        # Only set default if we have multiple destinations and no default is set
+        # AND we don't have a list of destinations (True/False mapping)
+        elif (
+            len(self.destinations) > 1
+            and self.default is None
+            and not all(isinstance(k, bool) for k in self.destinations.keys())
+        ):
+            self.default = END
         return self
 
     def __call__(
