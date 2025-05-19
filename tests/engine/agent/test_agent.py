@@ -7,7 +7,7 @@ from pydantic import Field
 
 from haive.core.engine.agent.agent import Agent, register_agent
 from haive.core.engine.agent.config import AgentConfig
-from haive.core.engine.aug_llm.base import AugLLMConfig
+from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.engine.base import EngineType
 from haive.core.graph.node.config import NodeConfig
 
