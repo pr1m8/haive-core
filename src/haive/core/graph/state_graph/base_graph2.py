@@ -41,6 +41,9 @@ from haive.core.graph.common.types import ConfigLike, NodeOutput, NodeType, Stat
 from haive.core.graph.node.config import NodeConfig
 from haive.core.graph.node.decorators import send_node
 from haive.core.graph.state_graph.graph_path import GraphPath
+
+# Import mixins
+from haive.core.graph.state_graph.validation_mixin import ValidationMixin
 from haive.core.schema.state_schema import StateSchema
 
 # Define a type for branch result types
@@ -127,7 +130,7 @@ class Node(BaseModel, Generic[StateLike, ConfigLike, NodeOutput]):
         }
 
 
-class BaseGraph(BaseModel):
+class BaseGraph(BaseModel, ValidationMixin):
     """
     Base class for graph management in the Haive framework.
 
@@ -152,11 +155,19 @@ class BaseGraph(BaseModel):
     edges: List[Edge] = Field(default_factory=list)
     branches: Dict[str, Branch] = Field(default_factory=dict)
 
-    # Entry and end points
-    entry_point: Optional[str] = None
-    finish_point: Optional[str] = None
+    # Entry and finish points - consistent plurals
+    entry_points: List[str] = Field(default_factory=list)
+    finish_points: List[str] = Field(default_factory=list)
     conditional_entries: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
     conditional_exits: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
+
+    # Keep backward compatibility fields for singular points
+    entry_point: Optional[str] = Field(
+        default=None, description="Deprecated: Use entry_points instead"
+    )
+    finish_point: Optional[str] = Field(
+        default=None, description="Deprecated: Use finish_points instead"
+    )
 
     # Configuration
     state_schema: Optional[Any] = None
@@ -171,6 +182,14 @@ class BaseGraph(BaseModel):
     updated_at: datetime = Field(default_factory=datetime.now)
 
     model_config = {"arbitrary_types_allowed": True}
+
+    # Validation configuration - required by ValidationMixin
+    allow_cycles: bool = Field(
+        default=False, description="Whether to allow cycles in the graph"
+    )
+    require_end_path: bool = Field(
+        default=True, description="Whether all nodes must have a path to END"
+    )
 
     @model_validator(mode="after")
     def validate_graph(self) -> "BaseGraph":
@@ -191,11 +210,13 @@ class BaseGraph(BaseModel):
             raise ValueError("Node names must be unique")
 
         # Validate entry/end points
-        if self.entry_point and self.entry_point not in self.nodes:
-            raise ValueError(f"Entry point '{self.entry_point}' not found in nodes")
+        if self.entry_points and self.entry_points[0] not in self.nodes:
+            raise ValueError(f"Entry point '{self.entry_points[0]}' not found in nodes")
 
-        if self.finish_point and self.finish_point not in self.nodes:
-            raise ValueError(f"Finish point '{self.finish_point}' not found in nodes")
+        if self.finish_points and self.finish_points[0] not in self.nodes:
+            raise ValueError(
+                f"Finish point '{self.finish_points[0]}' not found in nodes"
+            )
 
         # Initialize additional structures if not present
         if not hasattr(self, "subgraphs"):
@@ -474,10 +495,10 @@ class BaseGraph(BaseModel):
 
     def set_entry_point(self, node_name: str) -> "BaseGraph":
         """
-        Set the entry point of the graph.
+        Set an entry point of the graph.
 
         Args:
-            node_name: Name of the node to set as the entry point
+            node_name: Name of the node to set as an entry point
 
         Returns:
             Self for method chaining
@@ -485,7 +506,11 @@ class BaseGraph(BaseModel):
         if node_name not in self.nodes:
             raise ValueError(f"Node '{node_name}' not found in graph")
 
-        # Store the entry point
+        # Store the entry point in the list if not already there
+        if node_name not in self.entry_points:
+            self.entry_points.append(node_name)
+
+        # For backward compatibility
         self.entry_point = node_name
 
         # Add edge from START to entry point if not already present
@@ -496,12 +521,13 @@ class BaseGraph(BaseModel):
         self.updated_at = datetime.now()
         return self
 
-    def set_end_point(self, node_name: str) -> "BaseGraph":
+    # Rename for consistency
+    def set_finish_point(self, node_name: str) -> "BaseGraph":
         """
-        Set the end point of the graph.
+        Set a finish point of the graph.
 
         Args:
-            node_name: Name of the node to set as the end point
+            node_name: Name of the node to set as a finish point
 
         Returns:
             Self for method chaining
@@ -509,16 +535,35 @@ class BaseGraph(BaseModel):
         if node_name not in self.nodes:
             raise ValueError(f"Node '{node_name}' not found in graph")
 
-        # Store the end point
+        # Store the finish point in the list if not already there
+        if node_name not in self.finish_points:
+            self.finish_points.append(node_name)
+
+        # For backward compatibility
         self.finish_point = node_name
 
-        # Add edge from end point to END if not already present
+        # Add edge from finish point to END if not already present
         if not any(src == node_name and dst == END for src, dst in self.edges):
             self.add_edge(node_name, END)
 
-        logger.debug(f"Set end point to '{node_name}' in graph '{self.name}'")
+        logger.debug(f"Set finish point to '{node_name}' in graph '{self.name}'")
         self.updated_at = datetime.now()
         return self
+
+    # Backward compatibility alias
+    def set_end_point(self, node_name: str) -> "BaseGraph":
+        """
+        Deprecated: Use set_finish_point instead.
+
+        Set a finish point of the graph.
+
+        Args:
+            node_name: Name of the node to set as a finish point
+
+        Returns:
+            Self for method chaining
+        """
+        return self.set_finish_point(node_name)
 
     def set_conditional_entry(
         self,
@@ -674,14 +719,14 @@ class BaseGraph(BaseModel):
         return self.conditional_exits
 
     @property
-    def entry_points(self) -> Dict[str, Any]:
+    def all_entry_points(self) -> Dict[str, Any]:
         """
-        Unified property that returns all entry points (regular and conditional).
+        Property that returns all entry points (regular and conditional).
 
         Returns:
             Dictionary containing all entry points information
         """
-        result = {"primary": self.entry_point, "conditional": self.conditional_entries}
+        result = {"primary": self.entry_points, "conditional": self.conditional_entries}
 
         # Get all nodes with edges from START
         start_connections = []
@@ -693,15 +738,16 @@ class BaseGraph(BaseModel):
 
         return result
 
+    # Rename for consistency
     @property
-    def exit_points(self) -> Dict[str, Any]:
+    def all_finish_points(self) -> Dict[str, Any]:
         """
-        Unified property that returns all exit points (regular and conditional).
+        Property that returns all finish points (regular and conditional).
 
         Returns:
-            Dictionary containing all exit points information
+            Dictionary containing all finish points information
         """
-        result = {"primary": self.finish_point, "conditional": self.conditional_exits}
+        result = {"primary": self.finish_points, "conditional": self.conditional_exits}
 
         # Get all nodes with edges to END
         end_connections = []
@@ -712,6 +758,22 @@ class BaseGraph(BaseModel):
         result["all_end_connections"] = end_connections
 
         return result
+
+    # Backward compatibility aliases
+    @property
+    def entry_points_data(self) -> Dict[str, Any]:
+        """Deprecated: Use all_entry_points instead."""
+        return self.all_entry_points
+
+    @property
+    def exit_points(self) -> Dict[str, Any]:
+        """Deprecated: Use all_finish_points instead."""
+        return self.all_finish_points
+
+    @property
+    def all_exit_points(self) -> Dict[str, Any]:
+        """Deprecated: Use all_finish_points instead."""
+        return self.all_finish_points
 
     def add_tool_node(
         self, node_name: str, node_type: NodeType = NodeType.TOOL, **kwargs
@@ -2007,6 +2069,16 @@ class BaseGraph(BaseModel):
 
         return no_end_path
 
+    def find_nodes_without_finish_path(self):
+        """
+        Find nodes that can't reach a finish point.
+        Alias for find_nodes_without_end_path for API consistency.
+
+        Returns:
+            List of node names that can't reach a finish point
+        """
+        return self.find_nodes_without_end_path()
+
     def get_source_nodes(self):
         """
         Get nodes that have no incoming edges (other than START).
@@ -2204,10 +2276,6 @@ class BaseGraph(BaseModel):
 
         console = Console()
 
-        # Convert special node names to LangGraph constants
-        source_node = START if source_node == "__start__" else source_node
-        default = END if default == "__end__" else default
-
         # Debug header
         console.print(
             Panel.fit(
@@ -2231,151 +2299,91 @@ class BaseGraph(BaseModel):
             console.print("\n[bold green]Handling Branch object[/bold green]")
             branch = condition
             branch.source_node = source_node
-            if destinations is None:
-                destinations = branch.destinations
-            else:
+
+            # Process destinations based on type
+            if destinations is not None:
                 if isinstance(destinations, str):
-                    destinations = {True: destinations}
+                    # Single string maps to True
+                    branch.destinations = {True: destinations}
                 elif isinstance(destinations, list):
-                    destinations = {
-                        True: destinations[0],
-                        False: destinations[1] if len(destinations) > 1 else None,
-                    }
-                branch.destinations = destinations
-            # Only set default if it's not END and we don't have a list of destinations
-            if default != END and not isinstance(destinations, list):
+                    if len(destinations) >= 2:
+                        # Two or more destinations map to True/False
+                        branch.destinations = {
+                            True: destinations[0],
+                            False: destinations[1],
+                        }
+                    elif len(destinations) == 1:
+                        # Single destination in list maps True to destination, False to END
+                        branch.destinations = {True: destinations[0], False: END}
+                    else:
+                        # Empty list uses default {True: "continue", False: END}
+                        branch.destinations = {True: "continue", False: END}
+                elif isinstance(destinations, dict):
+                    # Dictionary maps directly
+                    branch.destinations = destinations
+            else:
+                # Empty list uses default {True: "continue", False: END}
+                branch.destinations = {True: "continue", False: END}
+
+            # Only set default if it's explicitly provided and not the built-in END
+            if default != END and branch.default is None:
                 branch.default = default
+
             self.branches[branch.id] = branch
+            console.print(f"[green]Added branch with ID: {branch.id}[/green]")
             return self
 
-        # Convert destinations to dictionary format
+        # Create destination mapping based on input type
         console.print("\n[bold]Processing Destinations:[/bold]")
+        destination_map = {}
+
         if isinstance(destinations, str):
             console.print(f"String destination: [yellow]{destinations}[/yellow]")
-            destinations = {True: destinations}
+            destination_map = {True: destinations, False: default}
+
         elif isinstance(destinations, list):
             console.print(f"List destinations: [yellow]{destinations}[/yellow]")
             if len(destinations) >= 2:
-                destinations = {True: destinations[0], False: destinations[1]}
-                console.print(f"Mapped to: [green]{destinations}[/green]")
+                # Map first element to True, second to False
+                destination_map = {True: destinations[0], False: destinations[1]}
             elif destinations:
-                # For single destination, map True to the destination and False to END
-                destinations = {True: destinations[0], False: END}
-                console.print(
-                    f"Single destination mapped to: [green]{destinations}[/green]"
-                )
+                # Single element maps True, False gets default
+                destination_map = {True: destinations[0], False: default}
             else:
-                destinations = {True: "continue", False: END}
-                console.print(f"Empty list mapped to: [green]{destinations}[/green]")
+                # Empty list uses general default
+                destination_map = {True: "continue", False: default}
+
+        elif isinstance(destinations, dict):
+            # Use dictionary directly
+            destination_map = destinations
+
         elif destinations is None:
-            destinations = {True: "continue", False: END}
-            console.print(f"None destinations mapped to: [green]{destinations}[/green]")
+            # Default mapping
+            destination_map = {True: "continue", False: default}
 
-        # Convert any special node names in destinations
-        converted_destinations = {}
-        for key, value in destinations.items():
-            converted_destinations[key] = END if value == "__end__" else value
+        console.print(f"Final destination map: [green]{destination_map}[/green]")
 
-        # Generate branch ID and name
+        # Create a new Branch
         branch_id = str(uuid.uuid4())
         branch_name = f"branch_{branch_id[:8]}"
 
-        # Create a wrapper function to handle different return types
-        def wrapped_function(state, config=None):
-            try:
-                if callable(condition):
-                    import inspect
-
-                    sig = inspect.signature(condition)
-
-                    if len(sig.parameters) >= 2:
-                        result = condition(state, config)
-                    else:
-                        result = condition(state)
-
-                    if result is None:
-                        return False
-
-                    if isinstance(result, (Send, Command)):
-                        return result
-
-                    if isinstance(result, list) and all(
-                        isinstance(item, Send) for item in result
-                    ):
-                        return result
-
-                    # For boolean results, map to destinations
-                    if isinstance(result, bool):
-                        return converted_destinations.get(result, default)
-
-                    # For string results, return directly if it's a valid destination
-                    if (
-                        isinstance(result, str)
-                        and result in converted_destinations.values()
-                    ):
-                        return result
-
-                    # For numeric results, use as index into list destinations
-                    if (
-                        isinstance(result, (int, float))
-                        and result in converted_destinations
-                    ):
-                        return converted_destinations[result]
-
-                    return default
-                else:
-                    field_value = (
-                        extract_field(state, self.key)
-                        if hasattr(self, "key") and self.key
-                        else None
-                    )
-                    comparison_result = (
-                        self._compare(field_value, condition)
-                        if hasattr(self, "_compare")
-                        else False
-                    )
-                    return converted_destinations.get(comparison_result, default)
-            except Exception as e:
-                logger.error(f"Error in branch condition: {e}")
-                return default
-
-        # Create branch
+        # Create branch with the mapped destinations
         branch = Branch(
             id=branch_id,
             name=branch_name,
             source_node=source_node,
-            function=wrapped_function,
-            destinations=converted_destinations,
-            mode=BranchMode.FUNCTION,
+            function=condition if callable(condition) else None,
+            mode=BranchMode.FUNCTION if callable(condition) else BranchMode.DIRECT,
+            destinations=destination_map,
         )
-
-        # Log branch details
-        console.print("\n[bold]Created Branch:[/bold]")
-        branch_table = Table(show_header=True, header_style="bold magenta")
-        branch_table.add_column("Property")
-        branch_table.add_column("Value")
-
-        branch_table.add_row("ID", branch.id)
-        branch_table.add_row("Name", branch.name)
-        branch_table.add_row("Source Node", branch.source_node)
-        branch_table.add_row("Destinations", str(branch.destinations))
-        branch_table.add_row("Mode", str(branch.mode))
-
-        console.print(branch_table)
 
         # Add the branch
         self.branches[branch_id] = branch
 
-        # Remove any direct edges between source and destinations to avoid duplication
-        for target in converted_destinations.values():
-            if (source_node, target) in self.edges:
-                self.edges = [
-                    e
-                    for e in self.edges
-                    if not (e[0] == source_node and e[1] == target)
-                ]
-
-        console.print("\n[bold green]Branch added successfully![/bold green]")
+        # Log success
+        console.print(
+            f"\n[bold green]Branch '{branch_name}' added successfully![/bold green]"
+        )
         self.updated_at = datetime.now()
         return self
 
@@ -2840,73 +2848,116 @@ class BaseGraph(BaseModel):
         """Convert to LangGraph StateGraph."""
         try:
             from langgraph.graph import StateGraph
+            from rich.console import Console
+            from rich.panel import Panel
 
-            # Create graph builder
-            graph_builder = StateGraph(state_schema or dict)
+            console = Console()
+            console.print(
+                Panel.fit(
+                    "[bold blue]Converting to LangGraph StateGraph[/bold blue]",
+                    border_style="blue",
+                )
+            )
 
-            # Add nodes
+            # Use provided schema or the one from the graph
+            schema = state_schema or self.state_schema or dict
+            console.print(
+                f"Schema: [yellow]{schema.__name__ if hasattr(schema, '__name__') else schema}[/yellow]"
+            )
+
+            # SIMPLE: Create StateGraph with the schema
+            graph_builder = StateGraph(schema)
+            console.print("[green]✓[/green] Created StateGraph")
+
+            # Direct debug function - doesn't wrap, just adds a print
+            def log_function_call(func, name):
+                def inner(state, config=None):
+                    result = func(state, config)
+                    console.print(
+                        f"[bold cyan]Node {name} called[/bold cyan] → returns: [green]{result}[/green] [dim]({type(result)})[/dim]"
+                    )
+                    return result
+
+                return inner
+
+            # SIMPLE: Add nodes with direct callable functions - no complex extraction
+            console.print("\n[bold]Adding Nodes:[/bold]")
             for node_name, node in self.nodes.items():
-                # Skip special nodes
-                if node_name in ["__start__", "__end__"]:
+                # Skip special nodes and None nodes
+                if node_name in [START, END] or node is None:
                     continue
 
-                # Get the action from metadata
                 action = None
-                if node is not None:
-                    if hasattr(node, "metadata") and "callable" in node.metadata:
-                        action = node.metadata["callable"]
-                    elif hasattr(node, "function"):
-                        action = node.function
-                    elif callable(node):
-                        action = node
 
-                if not action:
-                    raise ValueError(f"Node {node_name} has no callable action")
+                # Extract the callable with simple priority rules
+                if callable(node):
+                    # 1. Node is directly callable
+                    action = node
+                    console.print(
+                        f"Node [yellow]{node_name}[/yellow]: Using direct callable"
+                    )
+                elif (
+                    hasattr(node, "metadata")
+                    and "callable" in node.metadata
+                    and callable(node.metadata["callable"])
+                ):
+                    # 2. Node has callable in metadata
+                    action = node.metadata["callable"]
+                    console.print(
+                        f"Node [yellow]{node_name}[/yellow]: Using metadata callable"
+                    )
+                elif hasattr(node, "__call__") and callable(node.__call__):
+                    # 3. Node has __call__ method
+                    action = node
+                    console.print(
+                        f"Node [yellow]{node_name}[/yellow]: Using __call__ method"
+                    )
+                else:
+                    # Fallback
+                    console.print(
+                        f"Node [yellow]{node_name}[/yellow]: No callable found, using pass-through"
+                    )
+                    action = lambda state, config=None: state
 
-                # Add the node
+                # Add logger for debugging if not in production
+                import os
+
+                if os.environ.get("PRODUCTION") != "true":
+                    action = log_function_call(action, node_name)
+
+                # Add node directly to graph
                 graph_builder.add_node(node_name, action)
 
-            # Add direct edges
-            for edge in self.edges:
-                source = START if edge[0] == "__start__" else edge[0]
-                target = END if edge[1] == "__end__" else edge[1]
+            # SIMPLE: Add direct edges
+            console.print("\n[bold]Adding Edges:[/bold]")
+            for source, target in self.edges:
                 graph_builder.add_edge(source, target)
+                console.print(f"[green]→[/green] {source} → {target}")
 
-            # Add branches
-            for branch in self.branches.values():
-                # Convert source node
-                source_node = (
-                    START if branch.source_node == "__start__" else branch.source_node
-                )
+            # SIMPLE: Add branches
+            console.print("\n[bold]Adding Branches:[/bold]")
+            for branch_id, branch in self.branches.items():
+                source = branch.source_node
 
-                # Convert destinations
+                # Extract destinations
                 destinations = {}
                 for key, value in branch.destinations.items():
-                    if value == "__end__":
-                        destinations[key] = END
-                    else:
-                        destinations[key] = value
+                    destinations[key] = value
 
-                # Create edge function
-                def create_edge_func(b):
-                    def edge_func(state):
-                        result = b.evaluate(state)
-                        if isinstance(result, BranchResult):
-                            if result.is_send:
-                                return result.send_objects
-                            if result.is_command:
-                                return result.command_object
-                            if result.has_mapping:
-                                return result.next_node
-                        return result
-
-                    return edge_func
-
-                # Add the conditional edge
-                graph_builder.add_conditional_edges(
-                    source_node, create_edge_func(branch), destinations
+                console.print(
+                    f"Branch from [yellow]{source}[/yellow] with conditions: {list(destinations.keys())}"
                 )
 
+                # Direct function handling - no wrapping
+                if branch.mode == BranchMode.FUNCTION and branch.function:
+                    graph_builder.add_conditional_edges(
+                        source, branch.function, destinations
+                    )
+                else:
+                    # Use branch object's __call__ method
+                    graph_builder.add_conditional_edges(source, branch, destinations)
+
+            console.print("\n[bold green]LangGraph conversion complete![/bold green]")
             return graph_builder
 
         except ImportError:
@@ -3211,3 +3262,179 @@ class BaseGraph(BaseModel):
 
         # Always return the Mermaid code for reference
         return mermaid_code
+
+    # Implementation of ValidationMixin required methods
+    def analyze_cycles(self) -> List[List[str]]:
+        """Find all cycles in the graph."""
+        cycles = []
+        visited = set()
+        path = []
+        path_set = set()
+
+        def dfs(node):
+            if node in path_set:
+                # Found a cycle, extract it
+                cycle_start = path.index(node)
+                cycles.append(path[cycle_start:] + [node])
+                return
+
+            if node in visited:
+                return
+
+            visited.add(node)
+            path.append(node)
+            path_set.add(node)
+
+            # Follow direct edges
+            for src, dst in self.edges:
+                if src == node and dst != END:
+                    dfs(dst)
+
+            # Follow branch destinations
+            for branch in self.branches.values():
+                if branch.source_node == node:
+                    for dest in branch.destinations.values():
+                        if dest != END:
+                            dfs(dest)
+
+                    if branch.default and branch.default != END:
+                        dfs(branch.default)
+
+            path.pop()
+            path_set.remove(node)
+
+        # Start DFS from each node
+        for node in self.nodes:
+            if node not in visited:
+                dfs(node)
+
+        return cycles
+
+    def find_orphan_nodes(self) -> List[str]:
+        """Find nodes with no incoming or outgoing edges."""
+        orphans = []
+
+        for node_name in self.nodes:
+            # Skip special nodes and None nodes
+            if node_name in [START, END] or self.nodes[node_name] is None:
+                continue
+
+            # Check if node has any incoming edges
+            has_incoming = False
+            for _, dst in self.edges:
+                if dst == node_name:
+                    has_incoming = True
+                    break
+
+            for branch in self.branches.values():
+                for dest in branch.destinations.values():
+                    if dest == node_name:
+                        has_incoming = True
+                        break
+                if branch.default == node_name:
+                    has_incoming = True
+                    break
+
+            # Check if node has any outgoing edges
+            has_outgoing = False
+            for src, _ in self.edges:
+                if src == node_name:
+                    has_outgoing = True
+                    break
+
+            for branch in self.branches.values():
+                if branch.source_node == node_name:
+                    has_outgoing = True
+                    break
+
+            # If node has neither incoming nor outgoing edges, it's an orphan
+            if not has_incoming and not has_outgoing:
+                orphans.append(node_name)
+
+        return orphans
+
+    def find_dangling_edges(self) -> List[Tuple[str, str]]:
+        """Find edges pointing to non-existent nodes."""
+        dangling = []
+
+        # Check direct edges
+        for src, dst in self.edges:
+            if src != START and src not in self.nodes:
+                dangling.append((src, dst))
+            if dst != END and dst not in self.nodes:
+                dangling.append((src, dst))
+
+        # Check branch destinations
+        for branch in self.branches.values():
+            src = branch.source_node
+            if src != START and src not in self.nodes:
+                for dest in branch.destinations.values():
+                    dangling.append((src, dest))
+            else:
+                for dest in branch.destinations.values():
+                    if dest != END and dest not in self.nodes:
+                        dangling.append((src, dest))
+
+                if (
+                    branch.default
+                    and branch.default != END
+                    and branch.default not in self.nodes
+                ):
+                    dangling.append((src, branch.default))
+
+        return dangling
+
+    def has_entry_point(self) -> bool:
+        """Check if the graph has an entry point."""
+        # Check for direct edges from START
+        for src, _ in self.edges:
+            if src == START:
+                return True
+
+        # Check for branches from START
+        for branch in self.branches.values():
+            if branch.source_node == START:
+                return True
+
+        return False
+
+    # Add compile method that validates first
+    def compile(self, raise_on_validation_error: bool = False) -> Any:
+        """
+        Validate and compile the graph to a runnable LangGraph StateGraph.
+
+        Args:
+            raise_on_validation_error: Whether to raise an exception on validation errors
+
+        Returns:
+            Compiled LangGraph StateGraph
+
+        Raises:
+            ValueError: If validation fails and raise_on_validation_error is True
+        """
+        # Run graph validation
+        issues = self.validate_graph()
+
+        if issues:
+            from rich.console import Console
+
+            console = Console()
+
+            console.print("\n[bold red]Graph Validation Issues:[/bold red]")
+            for issue in issues:
+                console.print(f"[red]- {issue}[/red]")
+
+            if raise_on_validation_error:
+                raise ValueError(f"Graph validation failed with {len(issues)} issues")
+
+            console.print(
+                "\n[yellow]Proceeding with compilation despite validation issues[/yellow]"
+            )
+
+        # Convert to LangGraph
+        graph = self.to_langgraph()
+
+        # Compile the graph
+        compiled_graph = graph.compile()
+
+        return compiled_graph
