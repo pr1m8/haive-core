@@ -53,3 +53,4 @@ class NodeType(str, Enum):
     # SEND = "send"
     CUSTOM = "custom"
     SUBGRAPH = "subgraph"
+    PARSER = "parser"
