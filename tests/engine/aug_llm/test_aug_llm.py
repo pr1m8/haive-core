@@ -7,7 +7,7 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnableConfig, RunnableLambda
 from pydantic import BaseModel
 
-from haive.core.engine.aug_llm.base import AugLLMConfig, compose_runnable
+from haive.core.engine.aug_llm import AugLLMConfig, compose_runnable
 from haive.core.models.llm.base import AzureLLMConfig
 
 # Setup logger with more visible formatting

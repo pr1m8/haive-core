@@ -9,7 +9,7 @@ from haive.core.engine.agent.config import AgentConfig
 from haive.core.engine.agent.persistence.postgres_config import (
     PostgresCheckpointerConfig,
 )
-from haive.core.engine.aug_llm.base import AugLLMConfig
+from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.schema.state_schema import StateSchema
 
 

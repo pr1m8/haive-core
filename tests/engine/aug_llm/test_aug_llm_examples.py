@@ -12,7 +12,7 @@ from langchain_core.prompts import (
 )
 from pydantic import BaseModel, Field
 
-from haive.core.engine.aug_llm.base import AugLLMConfig
+from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.models.llm.base import AzureLLMConfig
 
 # Set up logging

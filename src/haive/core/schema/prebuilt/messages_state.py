@@ -14,7 +14,6 @@ from langchain_core.messages import (
 from langchain_core.messages.utils import (
     convert_to_openai_messages,
     messages_from_dict,
-    messages_to_dict,
 )
 from langgraph.graph import add_messages
 from langgraph.types import Send
@@ -47,7 +46,7 @@ class MessagesState(StateSchema):
     @model_validator(mode="before")
     def validate_message_format(cls, data: Any) -> Any:
         """Automatically convert message dicts to proper Message objects"""
-        if "messages" in data:
+        if isinstance(data, dict) and "messages" in data:
             data["messages"] = convert_to_messages(data["messages"])
         return data
 
@@ -110,44 +109,55 @@ class MessagesState(StateSchema):
                 - exclude_types: List of message types to exclude
                 - include_names: List of message names to include
                 - exclude_names: List of message names to exclude
-                - content_filter: String to filter by content
-                - limit: Maximum number of messages to return
+                - include_ids: List of message IDs to include
+                - exclude_ids: List of message IDs to exclude
+                - exclude_tool_calls: Tool call IDs to exclude
         """
-        return filter_messages(self.messages, **filter_kwargs)
+        # Extract limit parameter if provided (not supported by filter_messages)
+        limit = filter_kwargs.pop("limit", None)
+
+        # Apply filter_messages with supported parameters
+        filtered_messages = filter_messages(self.messages, **filter_kwargs)
+
+        # Apply limit manually if specified
+        if limit is not None and limit > 0:
+            return filtered_messages[-limit:]
+
+        return filtered_messages
 
     # Type-specific message getters
 
     def get_last_human_message(self) -> Optional[HumanMessage]:
         """Get the last human message."""
-        human_msgs = self.get_filtered_messages(include_types=[HumanMessage], limit=1)
-        return human_msgs[0] if human_msgs else None
+        human_msgs = self.get_filtered_messages(include_types=[HumanMessage])
+        return human_msgs[-1] if human_msgs else None
 
     def get_last_ai_message(self) -> Optional[AIMessage]:
         """Get the last AI message."""
-        ai_msgs = self.get_filtered_messages(include_types=[AIMessage], limit=1)
-        return ai_msgs[0] if ai_msgs else None
+        ai_msgs = self.get_filtered_messages(include_types=[AIMessage])
+        return ai_msgs[-1] if ai_msgs else None
 
     def get_last_tool_message(self) -> Optional[ToolMessage]:
         """Get the last tool message."""
-        tool_msgs = self.get_filtered_messages(include_types=[ToolMessage], limit=1)
-        return tool_msgs[0] if tool_msgs else None
+        tool_msgs = self.get_filtered_messages(include_types=[ToolMessage])
+        return tool_msgs[-1] if tool_msgs else None
 
     # Simple message type checks
 
     def is_last_message_from_ai(self) -> bool:
         """Check if the last message is from the AI."""
         last_msg = self.get_last_message()
-        return last_msg and last_msg.type == "ai"
+        return last_msg is not None and last_msg.type == "ai"
 
     def is_last_message_from_human(self) -> bool:
         """Check if the last message is from a human."""
         last_msg = self.get_last_message()
-        return last_msg and last_msg.type == "human"
+        return last_msg is not None and last_msg.type == "human"
 
     def is_last_message_from_tool(self) -> bool:
         """Check if the last message is from a tool."""
         last_msg = self.get_last_message()
-        return last_msg and last_msg.type == "tool"
+        return last_msg is not None and last_msg.type == "tool"
 
     # Tool-related utilities
 
@@ -159,7 +169,7 @@ class MessagesState(StateSchema):
 
         tool_calls = getattr(last_ai, "tool_calls", None)
         if tool_calls:
-            return True
+            return bool(tool_calls)
 
         return bool(getattr(last_ai, "additional_kwargs", {}).get("tool_calls"))
 

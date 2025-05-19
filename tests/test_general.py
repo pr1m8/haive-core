@@ -10,7 +10,7 @@ from pydantic import Field, create_model
 from haive.core.config.runnable import RunnableConfigManager
 
 # Import agent components
-from haive.core.engine.aug_llm.base import AugLLMConfig
+from haive.core.engine.aug_llm import AugLLMConfig
 
 # Import core engine classes
 from haive.core.engine.embeddings import EmbeddingsEngineConfig
