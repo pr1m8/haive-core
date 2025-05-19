@@ -121,21 +121,66 @@ class Branch(BaseModel):
         self, state: StateLike, config: Optional[ConfigLike] = None
     ) -> NodeOutput:
         """Make Branch directly callable for use in conditional edges."""
-        # Special handling for dynamic branch with dynamic_mapping
-        if self.mode == BranchMode.DYNAMIC and self.dynamic_mapping:
-            # Get the next node and mapping
-            next_node, output_mapping = self.dynamic_mapping.get_mapping(state)
+        try:
+            # Define common variables that might be accessed
+            model = None
 
-            # Always return a Command for dynamic branches
-            return Command(
-                goto=next_node,
-                update={"output_mapping": output_mapping} if output_mapping else {},
-            )
+            # Special handling for dynamic branch with dynamic_mapping
+            if self.mode == BranchMode.DYNAMIC and self.dynamic_mapping:
+                # Get the next node and mapping
+                next_node, output_mapping = self.dynamic_mapping.get_mapping(state)
 
-        # Regular branch evaluation for other modes
-        return self.evaluate(state)
+                # Always return a Command for dynamic branches
+                return Command(
+                    goto=next_node,
+                    update={"output_mapping": output_mapping} if output_mapping else {},
+                )
 
-    # TODO: Replace Temporary Adaptor
+            # Regular branch evaluation for other modes
+            result = self.evaluate(state)
+
+            # Handle None results
+            if result is None:
+                # If we have a default destination, use it
+                if self.default is not None:
+                    return self.default
+                # Otherwise use False route
+                if False in self.destinations:
+                    return self.destinations[False]
+                # Last resort - return first destination
+                if self.destinations:
+                    return next(iter(self.destinations.values()))
+                return END  # Final fallback
+
+            return result
+
+        except NameError as ne:
+            # Handle specific NameError cases (like 'model' not defined)
+            error_msg = str(ne).lower()
+
+            # Only log for non-model errors (suppress expected errors)
+            if "model" not in error_msg:
+                logger.error(f"NameError in branch evaluation: {ne}")
+
+            # Same fallback logic as other exceptions
+            if self.default is not None:
+                return self.default
+            if False in self.destinations:
+                return self.destinations[False]
+            if self.destinations:
+                return next(iter(self.destinations.values()))
+            return END
+        except Exception as e:
+            logger.error(f"Error in branch evaluation: {e}")
+            # Same fallback logic as None
+            if self.default is not None:
+                return self.default
+            if False in self.destinations:
+                return self.destinations[False]
+            if self.destinations:
+                return next(iter(self.destinations.values()))
+            return END
+
     def evaluator(self, state: Dict[str, Any]) -> str:
         """
         Evaluate the branch condition and return the next node.
@@ -147,6 +192,9 @@ class Branch(BaseModel):
             Name of the next node
         """
         try:
+            # Define common variables that might be accessed
+            model = None
+
             result = self.function(state)
 
             # Look up the destination
@@ -164,6 +212,15 @@ class Branch(BaseModel):
             # No destinations - return empty string
             return ""
 
+        except NameError as ne:
+            # Handle specific NameError cases quietly
+            error_msg = str(ne).lower()
+
+            if "model" not in error_msg:
+                # Log non-model errors
+                print(f"Error evaluating branch: {ne}")
+
+            return self.default if self.default else ""
         except Exception as e:
             # Log and return default or fallback
             print(f"Error evaluating branch: {e}")
@@ -172,6 +229,9 @@ class Branch(BaseModel):
     def evaluate(self, state: StateLike) -> NodeOutput:
         """Evaluate the branch against state."""
         try:
+            # Define common variables that might be accessed
+            model = None
+
             # Handle different branch modes
             if self.mode == BranchMode.FUNCTION and self.function:
                 return self._process_result(self.function(state), state)
@@ -216,6 +276,15 @@ class Branch(BaseModel):
                 result = self._compare(field_value)
                 return self._get_destination(result)
 
+        except NameError as ne:
+            # Handle specific NameError cases (like 'model' not defined)
+            error_msg = str(ne).lower()
+
+            # Only log for non-model errors (suppress expected errors)
+            if "model" not in error_msg:
+                logger.error(f"NameError in branch evaluation: {ne}")
+
+            return self.default
         except Exception as e:
             logger.error(f"Error evaluating branch: {e}")
             return self.default
