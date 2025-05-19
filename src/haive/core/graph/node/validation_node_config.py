@@ -2,7 +2,7 @@ from typing import Any, Callable, Dict, List, Optional, Sequence, Type, Union
 
 from langchain_core.messages import BaseMessage, ToolCall, ToolMessage
 from langchain_core.tools import BaseTool, BaseToolkit, StructuredTool, Tool
-from langgraph.prebuilt import ValidationNode
+from langgraph.prebuilt import ValidationNode, create_react_agent
 from langgraph.types import Command
 from pydantic import BaseModel, Field, model_validator
 
@@ -75,7 +75,7 @@ class ValidationNodeConfig(NodeConfig):
         print("----------------------------")
         result_messages = validation_node.invoke(validation_input)["messages"]
         # print('----------------------------')
-        # print(result_messages)
+        print(result_messages)
         # print('----------------------------')
         # Step 4: Check for tool errors
         has_errors = any(

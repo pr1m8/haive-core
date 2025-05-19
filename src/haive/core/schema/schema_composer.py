@@ -9,9 +9,12 @@ from __future__ import annotations
 
 import inspect
 import logging
+import operator
+import sys
 from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Type, Union
 
+from langchain_core.tools import BaseTool, StructuredTool
 from pydantic import BaseModel, Field, create_model
 
 from haive.core.schema.field_definition import FieldDefinition

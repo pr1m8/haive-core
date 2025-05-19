@@ -45,6 +45,7 @@ class NodeType(str, Enum):
     # BRANCH = "branch"  # Branch nodes for conditional routing
     # SEND = "send"  # Send nodes for dynamic routing
     CUSTOM = "custom"  # Custom node types
+    PARSER = "parser"  # Parser nodes for parsing tool results
 
 
 # Command destination types for better type checking

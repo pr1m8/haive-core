@@ -46,10 +46,10 @@ class NodeFactory:
             return cls._create_tool_node(config)
         elif config.node_type == NodeType.VALIDATION:
             return cls._create_validation_node(config)
-        elif config.node_type == NodeType.BRANCH:
-            return cls._create_branch_node(config)
-        elif config.node_type == NodeType.SEND:
-            return cls._create_send_node(config)
+        # elif config.node_type == NodeType.BRANCH:
+        # return cls._create_branch_node(config)
+        # elif config.node_type == NodeType.SEND:
+        # return cls._create_send_node(config)
         elif isinstance(engine, InvokableEngine):
             return cls._create_invokable_engine_node(config, engine, engine_id)
         elif isinstance(engine, NonInvokableEngine):

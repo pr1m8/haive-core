@@ -1,15 +1,27 @@
+# src/haive/core/schema/prebuilt/tool_state.py
+
 import operator
 import uuid
-from typing import Annotated, Any, ClassVar, Dict, List, Optional, Type, Union
+from typing import (
+    Annotated,
+    Any,
+    Callable,
+    ClassVar,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Type,
+    Union,
+)
 
-from langchain_core.messages import BaseMessage
-from langchain_core.tools import BaseTool, BaseToolkit
-from langgraph.graph import add_messages
-from langgraph.types import Send
-from pydantic import BaseModel, Field, model_validator
+from langchain_core.messages import AIMessage, BaseMessage, ToolMessage
+from langchain_core.tools import BaseTool, BaseToolkit, StructuredTool, Tool
+from langgraph.graph import END, add_messages
+from langgraph.types import Command, Send
+from pydantic import BaseModel, Field, ValidationError, model_validator
 
 from haive.core.schema.prebuilt.messages_state import MessagesState
-from haive.core.schema.schema_composer import SchemaComposer
 from haive.core.schema.state_schema import StateSchema
 
 
@@ -19,18 +31,18 @@ class ToolState(MessagesState):
     Extends MessagesState with tool tracking, validation, and routing capabilities.
     """
 
-    # Tool storage - actual tool instances
-    tools: Dict[str, Type[BaseTool]] = Field(
+    # Tool storage - actual tool instances with name indexing
+    tools: Dict[str, Union[Type[BaseTool], StructuredTool, Tool, Callable]] = Field(
         default_factory=dict, description="Available tools indexed by tool name"
     )
 
-    # Tool schemas for validation - models/schemas defining tool parameters
+    # Tool schemas for validation - defaults to tools unless explicitly provided
     tool_schemas: Dict[str, Union[Type[BaseTool], Type[BaseModel]]] = Field(
         default_factory=dict,
-        description="Tool schemas for validation indexed by tool name",
+        description="Tool schemas for validation (defaults to tools unless explicitly provided)",
     )
 
-    # Engine tracking
+    # Engine tracking (for integration with engine system)
     engines: Dict[str, Any] = Field(
         default_factory=dict, description="Engines used in this workflow"
     )
@@ -53,6 +65,11 @@ class ToolState(MessagesState):
         default_factory=list, description="Tool calls that have been executed"
     )
 
+    # Storage for Pydantic model instances created during tool execution
+    model_instances: Dict[str, BaseModel] = Field(
+        default_factory=dict, description="Pydantic model instances created by tools"
+    )
+
     # Execution tracking
     validation_attempts: Dict[str, int] = Field(
         default_factory=dict, description="Track validation attempts by tool call ID"
@@ -71,13 +88,19 @@ class ToolState(MessagesState):
         default=3, description="Maximum execution attempts before giving up"
     )
 
-    # Routing field - replaces Command.goto
-    __goto__: Optional[Union[str, List[str], Send, List[Send]]] = Field(
-        default=None, description="Dynamic routing directive"
-    )
+    # Version (for compatibility with different routing strategies)
+    version: str = Field(default="v2", description="Version of tool handling to use")
 
-    # Configuration for state schema
-    __shared_fields__ = ["messages", "tools", "engines", "__goto__"]
+    # Configuration for structured response (for tools that return structured data)
+    response_format: Optional[Type[BaseModel]] = Field(
+        default=None, description="Optional response format for structured outputs"
+    )
+    direct_parse_tools: Dict[str, Type[BaseModel]] = Field(
+        default_factory=dict,
+        description="Tools that should parse directly without execution",
+    )
+    # Configuration
+    __shared_fields__ = ["messages", "tools", "engines"]
 
     __serializable_reducers__ = {
         "messages": "add_messages",
@@ -94,9 +117,46 @@ class ToolState(MessagesState):
         "invalid_tool_calls": operator.add,
         "completed_tool_calls": operator.add,
     }
+    output_schemas: Dict[str, Type[BaseModel]] = Field(
+        default_factory=dict,
+        description="Output schemas for structured parsing by tool name",
+    )
+
+    def register_direct_parse_model(
+        self, model: Type[BaseModel], tool_name: Optional[str] = None
+    ) -> None:
+        """
+        Register a model that should be directly parsed from LLM output
+        without tool execution.
+
+        Args:
+            model: Pydantic model class
+            tool_name: Optional tool name to associate with
+        """
+        model_name = model.__name__
+        self.output_schemas[model_name] = model
+
+        # Mark for direct parsing
+        self.direct_parse_tools[model_name] = model
+
+        # Store tool association if provided
+        if tool_name:
+            setattr(model, "tool_name", tool_name)
 
     # Initialize tool system
-    def initialize_tools(self, tools: List[Union[Type[BaseTool], BaseToolkit]]) -> None:
+    def initialize_tools(
+        self,
+        tools: Sequence[
+            Union[
+                Type[BaseTool],
+                StructuredTool,
+                Tool,
+                BaseToolkit,
+                Callable,
+                Type[BaseModel],
+            ]
+        ],
+    ) -> None:
         """
         Initialize tool system with tools and schemas.
 
@@ -114,57 +174,117 @@ class ToolState(MessagesState):
                 # Direct tool
                 self._register_tool(tool_item)
 
-    def _register_tool(self, tool: Union[Type[BaseTool], BaseTool]) -> None:
+    def register_output_schema(self, schema_name: str, schema: Type[BaseModel]) -> None:
+        """
+        Register an output schema for parsing tool results.
+
+        Args:
+            schema_name: Name to identify this schema
+            schema: Pydantic model class for parsing
+        """
+        self.output_schemas[schema_name] = schema
+
+    def register_tool_with_output(
+        self,
+        tool: Union[BaseTool, StructuredTool],
+        output_schema: Optional[Type[BaseModel]] = None,
+    ) -> None:
+        """Register a tool with optional output schema for parsing."""
+        # Register tool as normal
+        self._register_tool(tool)
+
+        # If output schema provided, store it
+        if output_schema:
+            tool_name = getattr(tool, "name", None)
+            if tool_name:
+                self.output_schemas[tool_name] = output_schema
+
+    def register_validation_schema(
+        self, tool_name: str, schema: Type[BaseModel]
+    ) -> None:
+        """
+        Register an explicit validation schema for a tool.
+
+        Args:
+            tool_name: Name of the tool to associate with schema
+            schema: Pydantic model to use for validation
+        """
+        self.tool_schemas[tool_name] = schema
+
+    def _register_tool(
+        self,
+        tool: Union[Type[BaseTool], StructuredTool, Tool, Callable, Type[BaseModel]],
+    ) -> None:
         """
         Register a single tool in the state.
 
         Args:
             tool: Tool to register
         """
-        # Handle tool instance vs tool class
+        # Handle different tool types
         if isinstance(tool, type):
-            # Tool class - create instance
-            tool_instance = tool()
-            tool_class = tool
-        else:
+            # Tool class or BaseModel class
+            if issubclass(tool, BaseModel):
+                # This is a Pydantic model class for validation
+                tool_name = getattr(tool, "__name__", f"model_{uuid.uuid4().hex[:8]}")
+                self.tools[tool_name] = tool
+                self.tool_schemas[tool_name] = tool
+            elif issubclass(tool, BaseTool):
+                # This is a tool class - create instance
+                try:
+                    tool_instance = tool()
+                    tool_name = getattr(tool_instance, "name", None) or getattr(
+                        tool, "__name__", None
+                    )
+                    if not tool_name:
+                        tool_name = f"tool_{uuid.uuid4().hex[:8]}"
+
+                    self.tools[tool_name] = tool
+
+                    # For BaseTool classes, check if they have args_schema
+                    args_schema = getattr(tool_instance, "args_schema", None)
+                    if (
+                        args_schema
+                        and isinstance(args_schema, type)
+                        and issubclass(args_schema, BaseModel)
+                    ):
+                        self.tool_schemas[tool_name] = args_schema
+                    else:
+                        # Default to using the tool itself as schema
+                        self.tool_schemas[tool_name] = tool
+
+                except Exception as e:
+                    # If we can't instantiate, just store the class
+                    tool_name = getattr(
+                        tool, "__name__", f"tool_{uuid.uuid4().hex[:8]}"
+                    )
+                    self.tools[tool_name] = tool
+                    self.tool_schemas[tool_name] = tool
+        elif isinstance(tool, (StructuredTool, Tool)):
             # Tool instance
-            tool_instance = tool
-            tool_class = tool.__class__
+            tool_name = getattr(tool, "name", None)
+            if not tool_name:
+                tool_name = f"tool_{uuid.uuid4().hex[:8]}"
 
-        # Generate tool ID if needed
-        tool_name = getattr(tool_instance, "name", None)
-        if not tool_name:
-            tool_name = f"tool_{uuid.uuid4().hex[:8]}"
+            self.tools[tool_name] = tool
 
-        # Store tool and schema
-        self.tools[tool_name] = tool_instance
-        self.tool_schemas[tool_name] = tool_class
+            # Get schema if available
+            schema = getattr(tool, "args_schema", None)
+            if schema and isinstance(schema, type) and issubclass(schema, BaseModel):
+                self.tool_schemas[tool_name] = schema
+            else:
+                # Default to using the tool itself
+                self.tool_schemas[tool_name] = type(tool)
+        elif callable(tool):
+            # Function tool
+            tool_name = getattr(tool, "__name__", f"func_{uuid.uuid4().hex[:8]}")
+            self.tools[tool_name] = tool
+            # No schema for callables by default
+        else:
+            # Unknown type
+            tool_name = getattr(tool, "name", f"unknown_{uuid.uuid4().hex[:8]}")
+            self.tools[tool_name] = tool
 
-    def register_engine(self, engine: Any, engine_id: Optional[str] = None) -> str:
-        """
-        Register an engine in the state.
-
-        Args:
-            engine: Engine to register
-            engine_id: Optional ID for the engine (generated if not provided)
-
-        Returns:
-            Engine ID
-        """
-        # Use provided ID or generate one
-        if not engine_id:
-            engine_id = getattr(engine, "id", f"engine_{uuid.uuid4().hex[:8]}")
-
-        # Store engine
-        self.engines[engine_id] = engine
-
-        # Register any tools from the engine
-        if hasattr(engine, "tools") and engine.tools:
-            self.initialize_tools(engine.tools)
-
-        return engine_id
-
-    # Tool call management
     def extract_tool_calls(self) -> List[Dict[str, Any]]:
         """
         Extract tool calls from the last AI message.
@@ -193,7 +313,7 @@ class ToolState(MessagesState):
         for call in extracted_calls:
             # Ensure it's a dictionary
             if isinstance(call, dict):
-                call_dict = call
+                call_dict = call.copy()
             else:
                 # Convert to dictionary
                 call_dict = {"name": getattr(call, "name", "unknown_tool")}
@@ -217,6 +337,146 @@ class ToolState(MessagesState):
         new_calls = self.extract_tool_calls()
         if new_calls:
             self.tool_calls.extend(new_calls)
+
+    def validate_tool_call(
+        self, tool_call: Dict[str, Any]
+    ) -> Union[Dict[str, Any], None]:
+        """
+        Validate a tool call against its schema.
+
+        Args:
+            tool_call: Tool call to validate
+
+        Returns:
+            Validated tool call or None if validation failed
+        """
+        # Get tool name and arguments
+        tool_name = tool_call.get("name")
+        args = tool_call.get("args", {})
+        call_id = tool_call.get("id", f"call_{uuid.uuid4().hex[:8]}")
+
+        # Ensure tool call has an ID
+        if "id" not in tool_call:
+            tool_call["id"] = call_id
+
+        # Return immediately if no tool name
+        if not tool_name:
+            self.add_invalid_call(tool_call, "Missing tool name")
+            return None
+
+        # Check if tool exists
+        if tool_name not in self.tools:
+            self.add_invalid_call(tool_call, f"Unknown tool: {tool_name}")
+            return None
+
+        # Initialize validated call with copy of original
+        validated_call = tool_call.copy()
+        validated_call["validated"] = False
+
+        # Get the tool instance or class
+        tool = self.tools[tool_name]
+
+        # Get the validation schema (explicit schema or tool itself)
+        schema = self.tool_schemas.get(tool_name)
+
+        # Check if we can get tool type information
+        if hasattr(tool, "tool_type"):
+            validated_call["tool_type"] = getattr(tool, "tool_type")
+
+        # If no schema and we have a tool, just mark as validated
+        if not schema:
+            validated_call["validated"] = True
+            return validated_call
+
+        try:
+            # Normalize arguments if they're a string (handle JSON strings)
+            if isinstance(args, str):
+                try:
+                    import json
+
+                    args_dict = json.loads(args)
+                except json.JSONDecodeError:
+                    args_dict = {"input": args}
+            else:
+                args_dict = args
+
+            # Handle different schema types
+            if isinstance(schema, type) and issubclass(schema, BaseModel):
+                # Pydantic model validation
+                validated_model = schema(**args_dict)
+
+                # Update validated call
+                validated_call["args"] = validated_model.model_dump()
+                validated_call["validated"] = True
+                validated_call["model_type"] = schema.__name__
+
+                # Store model instance for later reference
+                self.model_instances[call_id] = validated_model
+
+            elif isinstance(schema, type) and issubclass(schema, BaseTool):
+                # Try to create a tool instance for validation
+                try:
+                    # Some tools may need args for initialization
+                    tool_instance = schema()
+
+                    # Check for args_schema
+                    args_schema = getattr(tool_instance, "args_schema", None)
+                    if (
+                        args_schema
+                        and isinstance(args_schema, type)
+                        and issubclass(args_schema, BaseModel)
+                    ):
+                        # Validate with args schema
+                        validated_model = args_schema(**args_dict)
+
+                        # Update validated call
+                        validated_call["args"] = validated_model.model_dump()
+                        validated_call["validated"] = True
+                        validated_call["model_type"] = args_schema.__name__
+
+                        # Store model instance
+                        self.model_instances[call_id] = validated_model
+                    else:
+                        # No schema but it's a valid tool type
+                        validated_call["validated"] = True
+                except Exception as e:
+                    # Failed to instantiate the tool
+                    self.add_invalid_call(tool_call, f"Failed to create tool: {str(e)}")
+                    return None
+            else:
+                # For any other case, mark as validated
+                validated_call["validated"] = True
+
+            # Check for output schemas that match this tool
+            for schema_name, output_schema in self.output_schemas.items():
+                # Match by tool_name attribute
+                if (
+                    hasattr(output_schema, "tool_name")
+                    and getattr(output_schema, "tool_name") == tool_name
+                ):
+                    validated_call["output_schema"] = schema_name
+                    break
+
+            # Check if this is a direct parse model (no execution needed)
+            if "model_type" in validated_call:
+                model_type = validated_call["model_type"]
+                if model_type in self.direct_parse_tools:
+                    validated_call["direct_parse"] = True
+                    # Ensure output schema is set if not already
+                    if "output_schema" not in validated_call:
+                        validated_call["output_schema"] = model_type
+
+            # Validation succeeded
+            return validated_call
+
+        except ValidationError as e:
+            # Validation failed with a Pydantic error
+            self.add_invalid_call(tool_call, str(e))
+            return None
+        except Exception as e:
+            # Other unexpected error
+            self.add_invalid_call(tool_call, f"Validation error: {str(e)}")
+            return None
 
     def add_validated_call(self, tool_call: Dict[str, Any]) -> None:
         """
@@ -311,86 +571,146 @@ class ToolState(MessagesState):
         """
         return self.execution_attempts.get(call_id, 0) >= self.max_execution_attempts
 
-    # Routing helpers
-    def route_to_validation(self) -> None:
-        """Set routing to validation node."""
-        self.__goto__ = "validation"
-
-    def route_to_execution(self) -> None:
-        """Set routing to tool execution node."""
-        # If we have multiple validated calls, send them in parallel
-        if len(self.validated_tool_calls) > 1:
-            # Create Send objects for each tool call
-            sends = [Send("tool_executor", call) for call in self.validated_tool_calls]
-            self.__goto__ = sends
-        elif len(self.validated_tool_calls) == 1:
-            # Just route to execution
-            self.__goto__ = "tool_executor"
-        else:
-            # No validated calls, go back to agent
-            self.__goto__ = "agent"
-
-    def route_to_agent(self) -> None:
-        """Set routing back to agent."""
-        self.__goto__ = "agent"
-
-    def route_to_end(self) -> None:
-        """Set routing to end."""
-        self.__goto__ = "__end__"
-
-    # Flow control
-    def process_tool_flow(self) -> None:
-        """
-        Process the tool flow and set appropriate routing.
-        """
-        # Extract new tool calls
-        self.update_tool_calls()
-
-        # If we have pending tool calls, go to validation
-        if self.tool_calls:
-            self.route_to_validation()
-        # If we have validated tool calls, go to execution
-        elif self.validated_tool_calls:
-            self.route_to_execution()
-        # If we have completed or invalid calls, go to agent
-        elif self.completed_tool_calls or self.invalid_tool_calls:
-            self.route_to_agent()
-        # Otherwise, we're done
-        else:
-            self.route_to_end()
-
-    # Utility methods
-    def has_pending_tools(self) -> bool:
-        """Check if there are pending tool calls."""
+    def needs_validation(self) -> bool:
+        """Check if there are tool calls that need validation."""
         return len(self.tool_calls) > 0
 
-    def has_validated_tools(self) -> bool:
-        """Check if there are validated tool calls."""
+    def needs_execution(self) -> bool:
+        """Check if there are validated tool calls that need execution."""
         return len(self.validated_tool_calls) > 0
 
-    def has_invalid_tools(self) -> bool:
-        """Check if there are invalid tool calls."""
-        return len(self.invalid_tool_calls) > 0
+    def has_structured_output_tools(self) -> bool:
+        """Check if any of the validated tools produce structured output."""
+        for call in self.validated_tool_calls:
+            if "model_type" in call:
+                return True
+        return False
 
-    def has_completed_tools(self) -> bool:
-        """Check if there are completed tool calls."""
-        return len(self.completed_tool_calls) > 0
+    def need_output_parsing(self) -> bool:
+        """Check if any completed tools require output parsing."""
+        for call in self.completed_tool_calls:
+            if "model_type" in call:
+                return True
+        return False
 
-    def get_tool_by_name(self, tool_name: str) -> Optional[BaseTool]:
-        """Get a tool by name."""
-        return self.tools.get(tool_name)
-
-    def get_tool_schema_by_name(self, tool_name: str) -> Optional[Type]:
-        """Get a tool schema by name."""
-        return self.tool_schemas.get(tool_name)
-
-    def clear_tool_status(self) -> None:
+    def should_continue(self) -> Union[str, List[Send]]:
         """
-        Clear all tool call tracking.
+        Determine next steps based on the current state.
+        Similar to the function in your example.
+
+        Returns:
+            Routing directive (node name or Send objects)
         """
-        self.tool_calls = []
-        self.validated_tool_calls = []
-        self.invalid_tool_calls = []
-        self.completed_tool_calls = []
-        self.validation_attempts = {}
-        self.execution_attempts = {}
+        messages = self.messages
+
+        if not messages:
+            return END
+
+        last_message = messages[-1]
+
+        # If there's no AI message with tool calls, we're done
+        if not isinstance(last_message, AIMessage) or not getattr(
+            last_message, "tool_calls", None
+        ):
+            return (
+                END if self.response_format is None else "generate_structured_response"
+            )
+
+        # Update tool calls
+        self.update_tool_calls()
+
+        # If we have pending calls, they need validation
+        if self.needs_validation():
+            return "validation"
+
+        # If we have validated calls, they need execution
+        if self.needs_execution():
+            if self.version == "v1":
+                return "tools"
+            elif self.version == "v2":
+                # Create Send objects for parallel execution
+                return [
+                    Send("tools", tool_call) for tool_call in self.validated_tool_calls
+                ]
+
+        # If we have completed calls that need parsing, go to parsing node
+        if self.need_output_parsing():
+            return "output_parsing"
+
+        # Otherwise, we're done with tools, go back to agent
+        return "agent" if self.invalid_tool_calls or self.completed_tool_calls else END
+
+    def route_based_on_tool_state(self) -> Union[str, List[Union[str, Send]]]:
+        """
+        Make routing decision based on current tool state.
+
+        Returns:
+            Either a node name or Send objects
+        """
+        # Check if we need validation first
+        if self.needs_validation():
+            return "validation"
+
+        # Check if we need execution
+        if self.needs_execution():
+            # For multiple tools, use parallel execution with Send
+            if len(self.validated_tool_calls) > 1:
+                return [
+                    Send("tools", tool_call) for tool_call in self.validated_tool_calls
+                ]
+            # For single tool, just route to tools node
+            elif len(self.validated_tool_calls) == 1:
+                return "tools"
+
+        # Check if we need output parsing
+        if self.need_output_parsing():
+            return "output_parsing"
+
+        # Otherwise, go back to agent or end
+        return "agent" if self.invalid_tool_calls or self.completed_tool_calls else END
+
+    # Define validation node logic
+    def validate_all_tool_calls(self) -> Command:
+        """
+        Validate all pending tool calls and prepare routing.
+
+        Returns:
+            Command with update and routing
+        """
+        # Make sure we have the latest tool calls
+        self.update_tool_calls()
+
+        # Validate each tool call
+        for tool_call in list(self.tool_calls):
+            validated_call = self.validate_tool_call(tool_call)
+            if validated_call:
+                self.add_validated_call(validated_call)
+
+        # Determine next step
+        next_step = self.route_based_on_tool_state()
+
+        # Return Command with updated state and routing
+        return Command(goto=next_step)
+
+    # Output parsing node logic
+    def parse_tool_outputs(self) -> Command:
+        """
+        Parse outputs from completed tools that produced structured data.
+
+        Returns:
+            Command with parsed models and routing
+        """
+        updates = {}
+
+        # Process all completed tool calls
+        for call in self.completed_tool_calls:
+            if "model_type" in call and call.get("id") in self.model_instances:
+                # Get the model instance
+                model = self.model_instances[call["id"]]
+                model_name = model.__class__.__name__
+
+                # Add to updates
+                updates[model_name] = model
+
+        # Return Command with updates and go back to agent
+        return Command(update=updates, goto="agent")
