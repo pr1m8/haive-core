@@ -120,6 +120,10 @@ mypy = "^1.15.0"
 pytest-sugar = "^1.0.0"
 pytest-asyncio = "^0.26.0"
 
+
+[tool.poetry.group.chat-models.dependencies]
+langchain-google-vertexai = "^2.0.24"
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"

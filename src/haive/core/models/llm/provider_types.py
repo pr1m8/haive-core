@@ -1,12 +1,14 @@
+# src/haive/core/models/provider_types.py
+
 from enum import Enum
 
 
 class LLMProvider(str, Enum):
-    """Enumeration of supported LLM providers."""
+    """Types of LLM providers supported by the system."""
 
     OPENAI = "openai"
     ANTHROPIC = "anthropic"
-    HUGGING_FACE = "huggingface"
+    HUGGINGFACE = "huggingface"
     AZURE = "azure"
     DEEPSEEK = "deepseek"
     GEMINI = "gemini"
@@ -20,17 +22,8 @@ class LLMProvider(str, Enum):
     PETALS = "petals"
     REPLICATE = "replicate"
     TOGETHER_AI = "together_ai"
-    MISTRALAI = "mistralai"
-    GROQ = "groq"
     FIREWORKS_AI = "fireworks_ai"
     PERPLEXITY = "perplexity"
-
-    # Override string representation for better compatibility
-    def __str__(self):
-        return self.value
-
-    # Enable direct string comparison
-    def __eq__(self, other):
-        if isinstance(other, str):
-            return self.value == other
-        return super().__eq__(other)
+    MISTRALAI = "mistralai"
+    GROQ = "groq"
+    VERTEX_AI = "vertex_ai"

@@ -5,176 +5,57 @@ This module provides base classes and implementations for LLM providers
 with support for model metadata, context windows, and capabilities.
 """
 
+import logging
 import os
-from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from dotenv import load_dotenv
-from pydantic import BaseModel, Field, SecretStr, field_validator
+from pydantic import BaseModel, Field, SecretStr, model_post_init
 
-# Load environment variables from .env file
-load_dotenv(".env")
-
-# Define a relative cache path
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
-CACHE_DIR = BASE_DIR / "lc_cache"
-CACHE_FILE = CACHE_DIR / ".langchain_cache.db"
-
-# Ensure cache directory exists
-CACHE_DIR.mkdir(parents=True, exist_ok=True)
-
-# Set LangChain cache
-from langchain.globals import set_llm_cache
-from langchain_community.cache import SQLiteCache
-
-set_llm_cache(SQLiteCache(database_path=str(CACHE_FILE)))
-
-import logging
-
+# Import the mixins
+from haive.core.common.secure_config_mixin import SecureConfigMixin
 from haive.core.models.llm.provider_types import LLMProvider
-
-# Import model metadata functions - using correct path
-from haive.core.models.metadata import add_metadata_methods
+from haive.core.models.metadata_mixin import ModelMetadataMixin
 
 logger = logging.getLogger(__name__)
 
+# Load environment variables from .env file if present
+try:
+    from dotenv import load_dotenv
 
-class SecureConfigMixin:
+    load_dotenv(".env")
+except ImportError:
+    logger.debug("dotenv module not available, skipping .env file loading")
+
+# Set up LangChain cache if needed
+try:
+    # Define a relative cache path
+    from pathlib import Path
+
+    from langchain.globals import set_llm_cache
+    from langchain_community.cache import SQLiteCache
+
+    BASE_DIR = Path(__file__).resolve().parent.parent.parent
+    CACHE_DIR = BASE_DIR / "lc_cache"
+    CACHE_FILE = CACHE_DIR / ".langchain_cache.db"
+
+    # Ensure cache directory exists
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Set cache
+    set_llm_cache(SQLiteCache(database_path=str(CACHE_FILE)))
+except ImportError:
+    logger.debug("LangChain cache modules not available, skipping cache setup")
+
+
+class LLMConfig(BaseModel, SecureConfigMixin, ModelMetadataMixin):
     """
-    A mixin to provide secure and flexible configuration for API keys.
-    """
+    Base configuration for Language Model providers with security and metadata support.
 
-    @field_validator("api_key", mode="after")
-    @classmethod
-    def _validate_api_key(cls, v, values):
-        """
-        Dynamically set the API key with robust fallback mechanism.
-
-        1. Use explicitly provided value
-        2. Try environment variable based on provider
-        3. Fall back to default/empty
-        """
-        import os
-
-        from pydantic import SecretStr
-
-        # If a value is already set and not empty, return it
-        if v is not None and v != "":
-            # If it's not a SecretStr, convert it
-            if not isinstance(v, SecretStr):
-                return SecretStr(str(v))
-            return v
-
-        # Determine the environment variable based on provider
-        provider = values.get("provider")
-        if not provider:
-            return SecretStr("")
-
-        logger.debug(f"Validating API key for provider: {provider}")
-
-        # Create mapping for both enum values and string values
-        env_key_map = {
-            # Using .value to handle enum objects
-            "azure": "AZURE_OPENAI_API_KEY",
-            "openai": "OPENAI_API_KEY",
-            "anthropic": "ANTHROPIC_API_KEY",
-            "gemini": "GEMINI_API_KEY",
-            "deepseek": "DEEPSEEK_API_KEY",
-            "mistralai": "MISTRAL_API_KEY",
-            "groq": "GROQ_API_KEY",
-            "cohere": "COHERE_API_KEY",
-            "together_ai": "TOGETHER_AI_API_KEY",
-            "fireworks_ai": "FIREWORKS_AI_API_KEY",
-            "perplexity": "PERPLEXITY_API_KEY",
-            "huggingface": "HUGGING_FACE_API_KEY",
-            "ai21": "AI21_API_KEY",
-            "aleph_alpha": "ALEPH_ALPHA_API_KEY",
-            "gooseai": "GOOSEAI_API_KEY",
-            "mosaicml": "MOSAICML_API_KEY",
-            "nlp_cloud": "NLP_CLOUD_API_KEY",
-            "openlm": "OPENLM_API_KEY",
-            "petals": "PETALS_API_KEY",
-            "replicate": "REPLICATE_API_KEY",
-        }
-
-        # Get provider value - handle both enum and string
-        provider_value = provider.value if hasattr(provider, "value") else str(provider)
-
-        # Try to get API key from environment variables
-        env_key = env_key_map.get(provider_value.lower())
-
-        if env_key:
-            logger.debug(f"Looking for environment variable: {env_key}")
-            api_key = os.getenv(env_key)
-            if api_key and api_key.strip():
-                logger.debug(
-                    f"Found API key for {provider_value} in {env_key} (length: {len(api_key)})"
-                )
-                return SecretStr(api_key)
-            else:
-                logger.warning(f"Environment variable {env_key} not found or empty")
-        else:
-            logger.warning(
-                f"No environment mapping found for provider: {provider_value}"
-            )
-
-        # If no key found, return an empty SecretStr
-        logger.debug(
-            f"No API key found for {provider_value}, returning empty SecretStr"
-        )
-        return SecretStr("")
-
-    def get_api_key(self) -> Optional[str]:
-        """
-        Safely retrieve the API key with improved error handling.
-
-        Returns:
-            Optional[str]: The API key value, or None if not set
-        """
-        try:
-            # Check if api_key attribute exists and is not None
-            if not hasattr(self, "api_key") or self.api_key is None:
-                logger.warning(
-                    f"No API key attribute found for {getattr(self, 'provider', 'unknown provider')}"
-                )
-                return None
-
-            # Try to get the secret value
-            key_value = self.api_key.get_secret_value()
-
-            # Check if the key is actually empty
-            if not key_value or key_value.strip() == "":
-                logger.warning(
-                    f"API key for {getattr(self, 'provider', 'unknown provider')} is empty"
-                )
-                return None
-
-            return key_value
-        except Exception as e:
-            logger.error(f"Error retrieving API key: {e}")
-
-            # If we're in a testing environment, use fake keys for development
-            if (
-                os.getenv("ENVIRONMENT") == "development"
-                or os.getenv("TESTING") == "true"
-            ):
-                provider_value = getattr(self, "provider", "")
-                provider_str = (
-                    provider_value.value
-                    if hasattr(provider_value, "value")
-                    else str(provider_value)
-                )
-                logger.debug(
-                    f"Using fake test key for {provider_str} in development environment"
-                )
-                return f"test_key_{provider_str}"
-
-            return None
-
-
-class LLMConfig(BaseModel, SecureConfigMixin):
-    """
-    Base configuration for Language Model providers with secure key handling.
+    This class provides:
+    1. Secure API key handling with environment variable fallbacks
+    2. Model metadata access (context windows, capabilities, pricing)
+    3. Common configuration parameters
+    4. Graph transformation utilities
     """
 
     provider: LLMProvider = Field(description="The provider of the LLM.")
@@ -192,7 +73,10 @@ class LLMConfig(BaseModel, SecureConfigMixin):
         default_factory=dict, description="Optional extra parameters."
     )
 
-    def model_post_init(self, __context: Any) -> None:
+    model_config = {"arbitrary_types_allowed": True}
+
+    @model_post_init
+    def _post_init(self, __context: Any) -> None:
         """
         Post-initialization hook to load model metadata.
 
@@ -201,11 +85,14 @@ class LLMConfig(BaseModel, SecureConfigMixin):
         logger.debug(f"Loading metadata for {self.model} from {self.provider}")
 
         # Check model capabilities after initialization
-        context_window = self.get_context_window()
-        pricing = self.get_token_pricing()
+        try:
+            context_window = self.get_context_window()
+            logger.debug(f"Model {self.model} context window: {context_window}")
 
-        logger.debug(f"Model {self.model} context window: {context_window}")
-        logger.debug(f"Model {self.model} pricing: {pricing}")
+            pricing = self.get_token_pricing()
+            logger.debug(f"Model {self.model} pricing: {pricing}")
+        except Exception as e:
+            logger.warning(f"Error loading model metadata: {e}")
 
     def instantiate(self, **kwargs) -> Any:
         """
@@ -253,7 +140,13 @@ class AzureLLMConfig(LLMConfig):
         """
         Instantiate Azure OpenAI Chat model with robust error handling.
         """
-        from langchain_openai import AzureChatOpenAI
+        try:
+            from langchain_openai import AzureChatOpenAI
+        except ImportError:
+            raise RuntimeError(
+                "langchain-openai is not installed. "
+                "Please install it with 'pip install langchain-openai'"
+            )
 
         # Debug output
         logger.debug("Attempting to instantiate Azure OpenAI model:")
@@ -280,9 +173,10 @@ class AzureLLMConfig(LLMConfig):
             # Use the new parameter names
             return AzureChatOpenAI(
                 deployment_name=self.model,
-                api_key=self.get_api_key(),  # Changed from openai_api_key
-                api_version=self.api_version,  # Changed from openai_api_version
-                azure_endpoint=self.api_base,  # Changed from openai_api_base
+                api_key=self.get_api_key(),
+                api_version=self.api_version,
+                azure_endpoint=self.api_base,
+                cache=self.cache_enabled,
                 **(self.extra_params or {}),
                 **kwargs,
             )
@@ -302,7 +196,13 @@ class OpenAILLMConfig(LLMConfig):
         """
         Instantiate OpenAI Chat model.
         """
-        from langchain_openai import OpenAIChat
+        try:
+            from langchain_openai import ChatOpenAI
+        except ImportError:
+            raise RuntimeError(
+                "langchain-openai is not installed. "
+                "Please install it with 'pip install langchain-openai'"
+            )
 
         # Validate API key
         if not self.get_api_key():
@@ -312,9 +212,10 @@ class OpenAILLMConfig(LLMConfig):
             )
 
         try:
-            return OpenAIChat(
+            return ChatOpenAI(
                 model_name=self.model,
                 openai_api_key=self.get_api_key(),
+                cache=self.cache_enabled,
                 **(self.extra_params or {}),
                 **kwargs,
             )
@@ -339,7 +240,13 @@ class AnthropicLLMConfig(LLMConfig):
         """
         Instantiate Anthropic Chat model.
         """
-        from langchain_anthropic import ChatAnthropic
+        try:
+            from langchain_anthropic import ChatAnthropic
+        except ImportError:
+            raise RuntimeError(
+                "langchain-anthropic is not installed. "
+                "Please install it with 'pip install langchain-anthropic'"
+            )
 
         # Validate API key
         if not self.get_api_key():
@@ -352,6 +259,7 @@ class AnthropicLLMConfig(LLMConfig):
             return ChatAnthropic(
                 model=self.model,
                 api_key=self.get_api_key(),
+                cache=self.cache_enabled,
                 **(self.extra_params or {}),
                 **kwargs,
             )
@@ -365,6 +273,7 @@ class GeminiLLMConfig(LLMConfig):
     """Configuration for Google Gemini models."""
 
     provider: LLMProvider = LLMProvider.GEMINI
+    model: str = Field(default="gemini-1.5-pro", description="Gemini model name.")
     api_key: SecretStr = Field(
         default_factory=lambda: SecretStr(os.getenv("GOOGLE_API_KEY", "")),
         description="API key for Google Gemini.",
@@ -374,19 +283,26 @@ class GeminiLLMConfig(LLMConfig):
         """
         Instantiate Google Gemini Chat model.
         """
-        from langchain_google_genai import ChatGoogleGenerativeAI
+        try:
+            from langchain_google_genai import ChatGoogleGenerativeAI
+        except ImportError:
+            raise RuntimeError(
+                "langchain-google-genai is not installed. "
+                "Please install it with 'pip install langchain-google-genai'"
+            )
 
         # Validate API key
         if not self.get_api_key():
             raise ValueError(
                 "Google Gemini API key is required. "
-                "Please set GEMINI_API_KEY environment variable or provide an API key."
+                "Please set GOOGLE_API_KEY or GEMINI_API_KEY environment variable or provide an API key."
             )
 
         try:
             return ChatGoogleGenerativeAI(
                 model=self.model,
                 api_key=self.get_api_key(),
+                cache=self.cache_enabled,
                 **(self.extra_params or {}),
                 **kwargs,
             )
@@ -408,7 +324,13 @@ class DeepSeekLLMConfig(LLMConfig):
         """
         Instantiate DeepSeek Chat model.
         """
-        from langchain_deepseek import ChatDeepSeek
+        try:
+            from langchain_deepseek import ChatDeepSeek
+        except ImportError:
+            raise RuntimeError(
+                "langchain-deepseek is not installed. "
+                "Please install it with 'pip install langchain-deepseek'"
+            )
 
         # Validate API key
         if not self.get_api_key():
@@ -421,6 +343,7 @@ class DeepSeekLLMConfig(LLMConfig):
             return ChatDeepSeek(
                 model=self.model,
                 api_key=self.get_api_key(),
+                cache=self.cache_enabled,
                 **(self.extra_params or {}),
                 **kwargs,
             )
@@ -432,6 +355,9 @@ class MistralLLMConfig(LLMConfig):
     """Configuration for Mistral models."""
 
     provider: LLMProvider = LLMProvider.MISTRALAI
+    model: str = Field(
+        default="mistral-large-latest", description="Mistral model name."
+    )
     api_key: SecretStr = Field(
         default_factory=lambda: SecretStr(os.getenv("MISTRAL_API_KEY", "")),
         description="API key for Mistral.",
@@ -441,7 +367,13 @@ class MistralLLMConfig(LLMConfig):
         """
         Instantiate Mistral Chat model.
         """
-        from langchain_mistralai import ChatMistralAI
+        try:
+            from langchain_mistralai import ChatMistralAI
+        except ImportError:
+            raise RuntimeError(
+                "langchain-mistralai is not installed. "
+                "Please install it with 'pip install langchain-mistralai'"
+            )
 
         # Validate API key
         if not self.get_api_key():
@@ -454,6 +386,7 @@ class MistralLLMConfig(LLMConfig):
             return ChatMistralAI(
                 model=self.model,
                 api_key=self.get_api_key(),
+                cache=self.cache_enabled,
                 **(self.extra_params or {}),
                 **kwargs,
             )
@@ -465,6 +398,7 @@ class GroqLLMConfig(LLMConfig):
     """Configuration for Groq models."""
 
     provider: LLMProvider = LLMProvider.GROQ
+    model: str = Field(default="llama3-70b-8192", description="Groq model name.")
     api_key: SecretStr = Field(
         default_factory=lambda: SecretStr(os.getenv("GROQ_API_KEY", "")),
         description="API key for Groq.",
@@ -474,7 +408,13 @@ class GroqLLMConfig(LLMConfig):
         """
         Instantiate Groq Chat model.
         """
-        from langchain_groq import ChatGroq
+        try:
+            from langchain_groq import ChatGroq
+        except ImportError:
+            raise RuntimeError(
+                "langchain-groq is not installed. "
+                "Please install it with 'pip install langchain-groq'"
+            )
 
         # Validate API key
         if not self.get_api_key():
@@ -487,6 +427,7 @@ class GroqLLMConfig(LLMConfig):
             return ChatGroq(
                 model=self.model,
                 api_key=self.get_api_key(),
+                cache=self.cache_enabled,
                 **(self.extra_params or {}),
                 **kwargs,
             )
@@ -498,6 +439,7 @@ class CohereLLMConfig(LLMConfig):
     """Configuration for Cohere models."""
 
     provider: LLMProvider = LLMProvider.COHERE
+    model: str = Field(default="command", description="Cohere model name.")
     api_key: SecretStr = Field(
         default_factory=lambda: SecretStr(os.getenv("COHERE_API_KEY", "")),
         description="API key for Cohere.",
@@ -507,7 +449,13 @@ class CohereLLMConfig(LLMConfig):
         """
         Instantiate Cohere Chat model.
         """
-        from langchain_cohere import ChatCohere
+        try:
+            from langchain_cohere import ChatCohere
+        except ImportError:
+            raise RuntimeError(
+                "langchain-cohere is not installed. "
+                "Please install it with 'pip install langchain-cohere'"
+            )
 
         # Validate API key
         if not self.get_api_key():
@@ -520,6 +468,7 @@ class CohereLLMConfig(LLMConfig):
             return ChatCohere(
                 model=self.model,
                 api_key=self.get_api_key(),
+                cache=self.cache_enabled,
                 **(self.extra_params or {}),
                 **kwargs,
             )
@@ -531,6 +480,9 @@ class TogetherAILLMConfig(LLMConfig):
     """Configuration for Together AI models."""
 
     provider: LLMProvider = LLMProvider.TOGETHER_AI
+    model: str = Field(
+        default="meta-llama/Llama-3-70b-chat-hf", description="Together AI model name."
+    )
     api_key: SecretStr = Field(
         default_factory=lambda: SecretStr(os.getenv("TOGETHER_AI_API_KEY", "")),
         description="API key for Together AI.",
@@ -540,7 +492,13 @@ class TogetherAILLMConfig(LLMConfig):
         """
         Instantiate Together AI Chat model.
         """
-        from langchain_together import ChatTogether
+        try:
+            from langchain_together import ChatTogether
+        except ImportError:
+            raise RuntimeError(
+                "langchain-together is not installed. "
+                "Please install it with 'pip install langchain-together'"
+            )
 
         # Validate API key
         if not self.get_api_key():
@@ -553,6 +511,7 @@ class TogetherAILLMConfig(LLMConfig):
             return ChatTogether(
                 model=self.model,
                 api_key=self.get_api_key(),
+                cache=self.cache_enabled,
                 **(self.extra_params or {}),
                 **kwargs,
             )
@@ -566,12 +525,25 @@ class FireworksAILLMConfig(LLMConfig):
     """Configuration for Fireworks AI models."""
 
     provider: LLMProvider = LLMProvider.FIREWORKS_AI
+    model: str = Field(
+        default="fireworks/llama-v3-70b-chat", description="Fireworks AI model name."
+    )
+    api_key: SecretStr = Field(
+        default_factory=lambda: SecretStr(os.getenv("FIREWORKS_AI_API_KEY", "")),
+        description="API key for Fireworks AI.",
+    )
 
     def instantiate(self, **kwargs) -> Any:
         """
         Instantiate Fireworks AI Chat model.
         """
-        from langchain_fireworks import ChatFireworks
+        try:
+            from langchain_fireworks import ChatFireworks
+        except ImportError:
+            raise RuntimeError(
+                "langchain-fireworks is not installed. "
+                "Please install it with 'pip install langchain-fireworks'"
+            )
 
         # Validate API key
         if not self.get_api_key():
@@ -584,6 +556,7 @@ class FireworksAILLMConfig(LLMConfig):
             return ChatFireworks(
                 model=self.model,
                 api_key=self.get_api_key(),
+                cache=self.cache_enabled,
                 **(self.extra_params or {}),
                 **kwargs,
             )
@@ -597,6 +570,13 @@ class PerplexityLLMConfig(LLMConfig):
     """Configuration for Perplexity AI models."""
 
     provider: LLMProvider = LLMProvider.PERPLEXITY
+    model: str = Field(
+        default="sonar-medium-online", description="Perplexity model name."
+    )
+    api_key: SecretStr = Field(
+        default_factory=lambda: SecretStr(os.getenv("PERPLEXITY_API_KEY", "")),
+        description="API key for Perplexity.",
+    )
 
     def instantiate(self, **kwargs) -> Any:
         """
@@ -615,6 +595,7 @@ class PerplexityLLMConfig(LLMConfig):
             return ChatPerplexity(
                 model=self.model,
                 api_key=self.get_api_key(),
+                cache=self.cache_enabled,
                 **(self.extra_params or {}),
                 **kwargs,
             )
@@ -624,6 +605,407 @@ class PerplexityLLMConfig(LLMConfig):
             ) from e
 
 
-# Add model metadata methods to the base LLMConfig class
-# This will make them available to all subclasses automatically
-add_metadata_methods(LLMConfig)
+class HuggingFaceLLMConfig(LLMConfig):
+    """Configuration for Hugging Face models."""
+
+    provider: LLMProvider = LLMProvider.HUGGINGFACE
+    model: str = Field(..., description="Model ID on Hugging Face Hub.")
+    api_key: SecretStr = Field(
+        default_factory=lambda: SecretStr(os.getenv("HUGGING_FACE_API_KEY", "")),
+        description="API key for Hugging Face.",
+    )
+    endpoint_url: Optional[str] = Field(
+        default=None, description="Optional Hugging Face Inference Endpoint URL"
+    )
+
+    def instantiate(self, **kwargs) -> Any:
+        """
+        Instantiate Hugging Face model.
+        """
+        try:
+            from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
+        except ImportError:
+            raise RuntimeError(
+                "langchain-huggingface is not installed. "
+                "Please install it with 'pip install langchain-huggingface'"
+            )
+        # Validate API key
+        if not self.get_api_key():
+            raise ValueError(
+                "Hugging Face API key is required. "
+                "Please set HUGGING_FACE_API_KEY environment variable or provide an API key."
+            )
+
+        try:
+            # Use HuggingFace Hub directly or Inference endpoint based on configuration
+            if self.endpoint_url:
+                from langchain_huggingface import ChatHuggingFace
+
+                return ChatHuggingFace(
+                    model=self.model,
+                    api_key=self.get_api_key(),
+                    endpoint_url=self.endpoint_url,
+                    cache=self.cache_enabled,
+                    **(self.extra_params or {}),
+                    **kwargs,
+                )
+            else:
+                from langchain_huggingface import HuggingFaceEndpoint
+
+                return HuggingFaceEndpoint(
+                    repo_id=self.model,
+                    huggingfacehub_api_token=self.get_api_key(),
+                    cache=self.cache_enabled,
+                    **(self.extra_params or {}),
+                    **kwargs,
+                )
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed to instantiate Hugging Face model: {str(e)}"
+            ) from e
+
+
+class AI21LLMConfig(LLMConfig):
+    """Configuration for AI21 models."""
+
+    provider: LLMProvider = LLMProvider.AI21
+    model: str = Field(default="j2-ultra", description="AI21 model name.")
+    api_key: SecretStr = Field(
+        default_factory=lambda: SecretStr(os.getenv("AI21_API_KEY", "")),
+        description="API key for AI21.",
+    )
+
+    def instantiate(self, **kwargs) -> Any:
+        """
+        Instantiate AI21 Chat model.
+        """
+        try:
+            from langchain_ai21 import ChatAI21
+        except ImportError:
+            raise RuntimeError(
+                "langchain-ai21 is not installed. "
+                "Please install it with 'pip install langchain-ai21'"
+            )
+
+        # Validate API key
+        if not self.get_api_key():
+            raise ValueError(
+                "AI21 API key is required. "
+                "Please set AI21_API_KEY environment variable or provide an API key."
+            )
+
+        try:
+            return ChatAI21(
+                model=self.model,
+                api_key=self.get_api_key(),
+                cache=self.cache_enabled,
+                **(self.extra_params or {}),
+                **kwargs,
+            )
+        except Exception as e:
+            raise RuntimeError(f"Failed to instantiate AI21 model: {str(e)}") from e
+
+
+class AlephAlphaLLMConfig(LLMConfig):
+    """Configuration for Aleph Alpha models."""
+
+    provider: LLMProvider = LLMProvider.ALEPH_ALPHA
+    model: str = Field(default="luminous-base", description="Aleph Alpha model name.")
+    api_key: SecretStr = Field(
+        default_factory=lambda: SecretStr(os.getenv("ALEPH_ALPHA_API_KEY", "")),
+        description="API key for Aleph Alpha.",
+    )
+
+    def instantiate(self, **kwargs) -> Any:
+        """
+        Instantiate Aleph Alpha Chat model.
+        """
+        from langchain_community.chat_models import ChatAlephAlpha
+
+        # Validate API key
+        if not self.get_api_key():
+            raise ValueError(
+                "Aleph Alpha API key is required. "
+                "Please set ALEPH_ALPHA_API_KEY environment variable or provide an API key."
+            )
+
+        try:
+            return ChatAlephAlpha(
+                model=self.model,
+                aleph_alpha_api_key=self.get_api_key(),
+                cache=self.cache_enabled,
+                **(self.extra_params or {}),
+                **kwargs,
+            )
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed to instantiate Aleph Alpha model: {str(e)}"
+            ) from e
+
+
+class GooseAILLMConfig(LLMConfig):
+    """Configuration for GooseAI models."""
+
+    provider: LLMProvider = LLMProvider.GOOSEAI
+    model: str = Field(default="gpt-neo-20b", description="GooseAI model name.")
+    api_key: SecretStr = Field(
+        default_factory=lambda: SecretStr(os.getenv("GOOSEAI_API_KEY", "")),
+        description="API key for GooseAI.",
+    )
+
+    def instantiate(self, **kwargs) -> Any:
+        """
+        Instantiate GooseAI Chat model.
+        """
+        try:
+            from langchain_community.chat_models import ChatGooseAI
+        except ImportError:
+            raise RuntimeError(
+                "langchain-community is not installed. "
+                "Please install it with 'pip install langchain-community'"
+            )
+
+        # Validate API key
+        if not self.get_api_key():
+            raise ValueError(
+                "GooseAI API key is required. "
+                "Please set GOOSEAI_API_KEY environment variable or provide an API key."
+            )
+
+        try:
+            return ChatGooseAI(
+                model=self.model,
+                gooseai_api_key=self.get_api_key(),
+                cache=self.cache_enabled,
+                **(self.extra_params or {}),
+                **kwargs,
+            )
+        except Exception as e:
+            raise RuntimeError(f"Failed to instantiate GooseAI model: {str(e)}") from e
+
+
+class MosaicMLLLMConfig(LLMConfig):
+    """Configuration for MosaicML models."""
+
+    provider: LLMProvider = LLMProvider.MOSAICML
+    model: str = Field(default="mpt-7b", description="MosaicML model name.")
+    api_key: SecretStr = Field(
+        default_factory=lambda: SecretStr(os.getenv("MOSAICML_API_KEY", "")),
+        description="API key for MosaicML.",
+    )
+
+    def instantiate(self, **kwargs) -> Any:
+        """
+        Instantiate MosaicML Chat model.
+        """
+        from langchain_community.chat_models import ChatMosaicML
+
+        # Validate API key
+        if not self.get_api_key():
+            raise ValueError(
+                "MosaicML API key is required. "
+                "Please set MOSAICML_API_KEY environment variable or provide an API key."
+            )
+
+        try:
+            return ChatMosaicML(
+                model=self.model,
+                mosaicml_api_key=self.get_api_key(),
+                cache=self.cache_enabled,
+                **(self.extra_params or {}),
+                **kwargs,
+            )
+        except Exception as e:
+            raise RuntimeError(f"Failed to instantiate MosaicML model: {str(e)}") from e
+
+
+class NLPCloudLLMConfig(LLMConfig):
+    """Configuration for NLP Cloud models."""
+
+    provider: LLMProvider = LLMProvider.NLP_CLOUD
+    model: str = Field(
+        default="finetuned-gpt-neox-20b", description="NLP Cloud model name."
+    )
+    api_key: SecretStr = Field(
+        default_factory=lambda: SecretStr(os.getenv("NLP_CLOUD_API_KEY", "")),
+        description="API key for NLP Cloud.",
+    )
+
+    def instantiate(self, **kwargs) -> Any:
+        """
+        Instantiate NLP Cloud Chat model.
+        """
+        try:
+            from langchain_nlpcloud import ChatNLPCloud
+        except ImportError:
+            raise RuntimeError(
+                "langchain-nlpcloud is not installed. "
+                "Please install it with 'pip install langchain-nlpcloud'"
+            )
+
+        # Validate API key
+        if not self.get_api_key():
+            raise ValueError(
+                "NLP Cloud API key is required. "
+                "Please set NLP_CLOUD_API_KEY environment variable or provide an API key."
+            )
+
+        try:
+            return ChatNLPCloud(
+                model=self.model,
+                api_key=self.get_api_key(),
+                cache=self.cache_enabled,
+                **(self.extra_params or {}),
+                **kwargs,
+            )
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed to instantiate NLP Cloud model: {str(e)}"
+            ) from e
+
+
+class OpenLMLLMConfig(LLMConfig):
+    """Configuration for OpenLM models."""
+
+    provider: LLMProvider = LLMProvider.OPENLM
+    model: str = Field(default="open-llama-3b", description="OpenLM model name.")
+    api_key: SecretStr = Field(
+        default_factory=lambda: SecretStr(os.getenv("OPENLM_API_KEY", "")),
+        description="API key for OpenLM.",
+    )
+
+    def instantiate(self, **kwargs) -> Any:
+        """
+        Instantiate OpenLM Chat model.
+        """
+        from langchain_community.chat_models import ChatOpenLM
+
+        # Validate API key
+        if not self.get_api_key():
+            raise ValueError(
+                "OpenLM API key is required. "
+                "Please set OPENLM_API_KEY environment variable or provide an API key."
+            )
+
+        try:
+            return ChatOpenLM(
+                model=self.model,
+                openlm_api_key=self.get_api_key(),
+                cache=self.cache_enabled,
+                **(self.extra_params or {}),
+                **kwargs,
+            )
+        except Exception as e:
+            raise RuntimeError(f"Failed to instantiate OpenLM model: {str(e)}") from e
+
+
+class PetalsLLMConfig(LLMConfig):
+    """Configuration for Petals distributed models."""
+
+    provider: LLMProvider = LLMProvider.PETALS
+    model: str = Field(default="bigscience/bloom", description="Petals model name.")
+    # No API key needed for Petals distributed inference
+
+    def instantiate(self, **kwargs) -> Any:
+        """
+        Instantiate Petals Chat model.
+        """
+        from langchain_community.chat_models import ChatPetals
+
+        try:
+            return ChatPetals(
+                model=self.model,
+                cache=self.cache_enabled,
+                **(self.extra_params or {}),
+                **kwargs,
+            )
+        except Exception as e:
+            raise RuntimeError(f"Failed to instantiate Petals model: {str(e)}") from e
+
+
+class ReplicateLLMConfig(LLMConfig):
+    """Configuration for Replicate models."""
+
+    provider: LLMProvider = LLMProvider.REPLICATE
+    model: str = Field(
+        default="meta/llama-2-70b-chat",
+        description="Replicate model name (org/model:version).",
+    )
+    api_key: SecretStr = Field(
+        default_factory=lambda: SecretStr(os.getenv("REPLICATE_API_KEY", "")),
+        description="API key for Replicate.",
+    )
+
+    def instantiate(self, **kwargs) -> Any:
+        """
+        Instantiate Replicate Chat model.
+        """
+        from langchain_community.chat_models import ChatReplicate
+
+        # Validate API key
+        if not self.get_api_key():
+            raise ValueError(
+                "Replicate API key is required. "
+                "Please set REPLICATE_API_KEY environment variable or provide an API key."
+            )
+
+        try:
+            return ChatReplicate(
+                model=self.model,
+                replicate_api_token=self.get_api_key(),
+                cache=self.cache_enabled,
+                **(self.extra_params or {}),
+                **kwargs,
+            )
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed to instantiate Replicate model: {str(e)}"
+            ) from e
+
+
+class VertexAILLMConfig(LLMConfig):
+    """Configuration for Google Vertex AI models."""
+
+    provider: LLMProvider = LLMProvider.VERTEX_AI
+    model: str = Field(default="gemini-1.5-pro", description="Vertex AI model name.")
+    project: Optional[str] = Field(
+        default_factory=lambda: os.getenv("GOOGLE_CLOUD_PROJECT", ""),
+        description="Google Cloud Project ID.",
+    )
+    location: str = Field(
+        default="us-central1", description="Google Cloud region/location."
+    )
+    # No direct API key for Vertex AI - uses Google Cloud auth
+
+    def instantiate(self, **kwargs) -> Any:
+        """
+        Instantiate Google Vertex AI Chat model.
+        """
+        try:
+            from langchain_google_vertexai import ChatVertexAI
+        except ImportError:
+            raise RuntimeError(
+                "langchain-google-vertexai is not installed. "
+                "Please install it with 'pip install langchain-google-vertexai'"
+            )
+
+        # Validate project
+        if not self.project:
+            raise ValueError(
+                "Google Cloud Project ID is required. "
+                "Please set GOOGLE_CLOUD_PROJECT environment variable or provide a project ID."
+            )
+
+        try:
+            return ChatVertexAI(
+                model_name=self.model,
+                project=self.project,
+                location=self.location,
+                cache=self.cache_enabled,
+                **(self.extra_params or {}),
+                **kwargs,
+            )
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed to instantiate Vertex AI model: {str(e)}"
+            ) from e

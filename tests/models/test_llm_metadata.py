@@ -1,610 +1,475 @@
-"""
-Tests for model metadata functionality in LLM configurations.
-
-This module tests the metadata features added to the LLM configuration classes
-with enhanced logging and clarity for better test diagnostics.
-"""
+# tests/test_llm_metadata.py
 
 import json
 import logging
 import os
-import tempfile
-from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 import pytest
-from pydantic import SecretStr
+from rich.console import Console
+from rich.logging import RichHandler
+from rich.panel import Panel
+from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.table import Table
+from rich.text import Text
+from rich.traceback import install
+from rich.tree import Tree
 
-# Setup logging for better test diagnostics
-logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-test_logger = logging.getLogger("llm_metadata_tests")
+# Install rich traceback handler for better error visualization
+install()
 
+# Import the LLM config classes
 from haive.core.models.llm.base import (
     AnthropicLLMConfig,
-    GeminiLLMConfig,
-    LLMConfig,
+    AzureLLMConfig,
+    MistralLLMConfig,
     OpenAILLMConfig,
 )
-from haive.core.models.llm.provider_types import LLMProvider
 
-# Import the modules to test - using the correct path
-from haive.core.models.metadata import (
-    add_metadata_methods,
-    get_context_window,
-    get_model_metadata,
-    get_token_pricing,
-    model_supports_feature,
+# Configure rich logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(message)s",
+    datefmt="[%X]",
+    handlers=[RichHandler(rich_tracebacks=True, markup=True)],
 )
 
+logger = logging.getLogger("llm_metadata_test")
+console = Console()
 
-# Print test banner for better visibility
-def print_test_banner(test_name):
-    """Print a visible banner around test name for easier test log reading."""
-    banner = "=" * 80
-    test_logger.info(f"\n{banner}\nRUNNING TEST: {test_name}\n{banner}")
-
-
-# Use a test cache directory to avoid interfering with real cache
-@pytest.fixture(scope="function")
-def temp_cache_dir():
-    """Create a temporary directory for cache files."""
-    with tempfile.TemporaryDirectory() as tmpdirname:
-        cache_dir = Path(tmpdirname)
-        test_logger.info(f"Created temporary cache directory: {cache_dir}")
-
-        # Patch the cache file path
-        with patch(
-            "haive.core.models.metadata._METADATA_CACHE_FILE",
-            cache_dir / "model_metadata.json",
-        ):
-            # Reset the global cache for each test
-            from haive.core.models.metadata import (
-                _METADATA_LAST_UPDATED,
-                _MODEL_METADATA_CACHE,
-            )
-
-            _MODEL_METADATA_CACHE.clear()
-            _METADATA_LAST_UPDATED = None
-            test_logger.info("Reset metadata cache and last updated timestamp")
-            yield cache_dir
-
-
-# Sample metadata that matches what's actually being downloaded
-@pytest.fixture
-def sample_metadata():
-    """Sample metadata that matches real values."""
-    metadata = {
-        "gpt-4": {
-            "max_tokens": 4096,
-            "max_input_tokens": 8192,
-            "max_output_tokens": 4096,
-            "input_cost_per_token": 0.00003,
-            "output_cost_per_token": 0.00006,
-            "litellm_provider": "openai",
-            "mode": "chat",
-            "supports_function_calling": True,
-            "supports_prompt_caching": True,
-            "supports_system_messages": True,
-            "supports_tool_choice": True,
-        },
-        "gpt-4-turbo": {
-            "max_tokens": 4096,
-            "max_input_tokens": 128000,
-            "max_output_tokens": 4096,
-            "input_cost_per_token": 0.00001,
-            "output_cost_per_token": 0.00003,
-            "litellm_provider": "openai",
-            "mode": "chat",
-            "supports_function_calling": True,
-            "supports_vision": True,
-            "supports_prompt_caching": True,
-            "supports_system_messages": True,
-            "supports_tool_choice": True,
-        },
-        "claude-3-opus-20240229": {
-            "max_tokens": 4096,
-            "max_input_tokens": 200000,
-            "max_output_tokens": 4096,
-            "input_cost_per_token": 0.000015,
-            "output_cost_per_token": 0.000075,
-            "litellm_provider": "anthropic",
-            "mode": "chat",
-            "supports_function_calling": True,
-            "supports_vision": True,
-            "supports_system_messages": True,
-        },
-        "gemini-1.5-pro": {
-            "max_tokens": 4096,
-            "max_input_tokens": 1000000,
-            "max_output_tokens": 4096,
-            "input_cost_per_token": 0.000005,
-            "output_cost_per_token": 0.000005,
-            "litellm_provider": "gemini",
-            "mode": "chat",
-            "supports_function_calling": True,
-            "supports_vision": True,
-            "supports_system_messages": True,
-        },
-    }
-
-    test_logger.info(f"Created sample metadata with {len(metadata)} models")
-    return metadata
+# Define model configurations to test
+MODEL_CONFIGS = [
+    # Azure GPT-4o
+    {
+        "class": AzureLLMConfig,
+        "provider": "azure",
+        "model": "gpt-4o",
+        "name": "Azure GPT-4o",
+        "env_var": "AZURE_OPENAI_API_KEY",
+    },
+    # Azure GPT-4 Turbo
+    {
+        "class": AzureLLMConfig,
+        "provider": "azure",
+        "model": "gpt-4-turbo",
+        "name": "Azure GPT-4 Turbo",
+        "env_var": "AZURE_OPENAI_API_KEY",
+    },
+    # Claude models
+    {
+        "class": AnthropicLLMConfig,
+        "provider": "anthropic",
+        "model": "claude-3-opus-20240229",
+        "name": "Claude 3 Opus",
+        "env_var": "ANTHROPIC_API_KEY",
+    },
+    {
+        "class": AnthropicLLMConfig,
+        "provider": "anthropic",
+        "model": "claude-3-sonnet-20240229",
+        "name": "Claude 3 Sonnet",
+        "env_var": "ANTHROPIC_API_KEY",
+    },
+    {
+        "class": AnthropicLLMConfig,
+        "provider": "anthropic",
+        "model": "claude-3-haiku-20240307",
+        "name": "Claude 3 Haiku",
+        "env_var": "ANTHROPIC_API_KEY",
+    },
+    # Mistral models
+    {
+        "class": MistralLLMConfig,
+        "provider": "mistralai",
+        "model": "mistral-large-latest",
+        "name": "Mistral Large",
+        "env_var": "MISTRAL_API_KEY",
+    },
+    {
+        "class": MistralLLMConfig,
+        "provider": "mistralai",
+        "model": "mistral-medium-latest",
+        "name": "Mistral Medium",
+        "env_var": "MISTRAL_API_KEY",
+    },
+    {
+        "class": MistralLLMConfig,
+        "provider": "mistralai",
+        "model": "mistral-small-latest",
+        "name": "Mistral Small",
+        "env_var": "MISTRAL_API_KEY",
+    },
+    # Add OpenAI for comparison
+    {
+        "class": OpenAILLMConfig,
+        "provider": "openai",
+        "model": "gpt-4o",
+        "name": "OpenAI GPT-4o",
+        "env_var": "OPENAI_API_KEY",
+    },
+]
 
 
-@pytest.fixture
-def setup_metadata_cache(temp_cache_dir, sample_metadata):
-    """Set up the metadata cache with sample data."""
-    cache_file = temp_cache_dir / "model_metadata.json"
-    with open(cache_file, "w") as f:
-        json.dump(sample_metadata, f)
-
-    test_logger.info(f"Saved sample metadata to cache file: {cache_file}")
-
-    # Force a reload from the cache
-    from haive.core.models.metadata import _load_metadata_from_cache
-
-    loaded_metadata = _load_metadata_from_cache()
-    test_logger.info(f"Loaded metadata from cache with {len(loaded_metadata)} models")
-
-    return sample_metadata
+# Helper functions for testing
+def check_env_var(env_var: str) -> bool:
+    """Check if an environment variable is set and not empty."""
+    return bool(os.getenv(env_var, "").strip())
 
 
-# Add unittest.mock import here
-from unittest.mock import MagicMock, patch
+def format_pricing(price: float) -> str:
+    """Format price as a string."""
+    if price == 0:
+        return "$0"
+    elif price < 0.0001:
+        return f"${price:.8f}"
+    elif price < 0.01:
+        return f"${price:.6f}"
+    else:
+        return f"${price:.4f}"
 
 
-def test_get_model_metadata(setup_metadata_cache):
-    """Test retrieving model metadata."""
-    print_test_banner("test_get_model_metadata")
+def display_model_metadata_table(models_data: List[Dict[str, Any]]) -> None:
+    """Display a rich table with model metadata."""
+    table = Table(title="LLM Model Metadata Comparison")
 
-    # Use real function (no mocking)
-    metadata = get_model_metadata("gpt-4")
+    # Add columns
+    table.add_column("Model", style="cyan")
+    table.add_column("Provider", style="magenta")
+    table.add_column("Context Window", justify="right", style="green")
+    table.add_column("Max Input", justify="right", style="blue")
+    table.add_column("Max Output", justify="right", style="blue")
+    table.add_column("Input Cost", justify="right", style="yellow")
+    table.add_column("Output Cost", justify="right", style="yellow")
 
-    # Print the actual metadata for clarity
-    test_logger.info(f"Retrieved metadata for gpt-4: {json.dumps(metadata, indent=2)}")
+    # Add rows
+    for data in models_data:
+        table.add_row(
+            data["name"],
+            data["provider"],
+            str(data["context_window"]),
+            str(data["max_input"]),
+            str(data["max_output"]),
+            format_pricing(data["input_cost"]),
+            format_pricing(data["output_cost"]),
+        )
 
-    # Verify we get expected values
-    assert (
-        metadata["max_tokens"] == 4096
-    ), f"Expected max_tokens to be 4096, got {metadata.get('max_tokens')}"
-    assert (
-        metadata["input_cost_per_token"] == 0.00003
-    ), f"Expected input_cost to be 0.00003, got {metadata.get('input_cost_per_token')}"
-    assert (
-        metadata["litellm_provider"] == "openai"
-    ), f"Expected litellm_provider to be 'openai', got {metadata.get('litellm_provider')}"
-
-    # Test with provider
-    metadata = get_model_metadata("gpt-4", "openai")
-    test_logger.info(
-        f"Retrieved metadata for gpt-4 with provider 'openai': {metadata.get('litellm_provider')}"
-    )
-    assert metadata["litellm_provider"] == "openai"
-
-    # Test non-existent model
-    metadata = get_model_metadata("non-existent-model")
-    test_logger.info(f"Retrieved metadata for non-existent model: {metadata}")
-    assert metadata == {}
+    console.print(table)
 
 
-def test_get_context_window(setup_metadata_cache):
-    """Test getting context window size."""
-    print_test_banner("test_get_context_window")
+def display_model_capabilities(models_data: List[Dict[str, Any]]) -> None:
+    """Display a table of model capabilities."""
+    capabilities = [
+        "vision",
+        "function_calling",
+        "parallel_function_calling",
+        "system_messages",
+        "tool_choice",
+        "response_schema",
+        "web_search",
+        "pdf_input",
+        "audio_input",
+        "audio_output",
+        "prompt_caching",
+        "native_streaming",
+        "reasoning",
+    ]
 
-    # Test model with max_tokens
-    context_window = get_context_window("gpt-4")
-    test_logger.info(f"Context window for gpt-4: {context_window}")
-    assert (
-        context_window == 4096
-    ), f"Expected context window of 4096, got {context_window}"
+    table = Table(title="LLM Model Capabilities")
 
-    # Test model with input/output tokens
-    context_window = get_context_window("gpt-4-turbo")
-    test_logger.info(f"Context window for gpt-4-turbo: {context_window}")
-    assert (
-        context_window == 4096
-    ), f"Expected context window of 4096, got {context_window}"
+    # Add columns
+    table.add_column("Model", style="cyan")
+    for capability in capabilities:
+        table.add_column(capability.replace("_", " ").title(), justify="center")
 
-    # Test non-existent model
-    context_window = get_context_window("non-existent-model")
-    test_logger.info(f"Context window for non-existent model: {context_window}")
-    assert context_window == 0, f"Expected context window of 0, got {context_window}"
+    # Add rows
+    for data in models_data:
+        row_data = [data["name"]]
+        for capability in capabilities:
+            supported = data["capabilities"].get(capability, False)
+            row_data.append("✓" if supported else "✗")
+        table.add_row(*row_data)
 
-
-def test_get_token_pricing(setup_metadata_cache):
-    """Test getting token pricing."""
-    print_test_banner("test_get_token_pricing")
-
-    # Test normal model
-    input_cost, output_cost = get_token_pricing("gpt-4")
-    test_logger.info(
-        f"Token pricing for gpt-4: input=${input_cost}, output=${output_cost}"
-    )
-    assert input_cost == 0.00003, f"Expected input cost of 0.00003, got {input_cost}"
-    assert output_cost == 0.00006, f"Expected output cost of 0.00006, got {output_cost}"
-
-    # Test with provider
-    input_cost, output_cost = get_token_pricing("claude-3-opus-20240229", "anthropic")
-    test_logger.info(
-        f"Token pricing for claude-3-opus with provider 'anthropic': input=${input_cost}, output=${output_cost}"
-    )
-    assert input_cost == 0.000015, f"Expected input cost of 0.000015, got {input_cost}"
-    assert (
-        output_cost == 0.000075
-    ), f"Expected output cost of 0.000075, got {output_cost}"
-
-    # Test non-existent model
-    input_cost, output_cost = get_token_pricing("non-existent-model")
-    test_logger.info(
-        f"Token pricing for non-existent model: input=${input_cost}, output=${output_cost}"
-    )
-    assert input_cost == 0.0, f"Expected input cost of 0.0, got {input_cost}"
-    assert output_cost == 0.0, f"Expected output cost of 0.0, got {output_cost}"
+    console.print(table)
 
 
-def test_model_supports_feature(setup_metadata_cache):
-    """Test checking feature support."""
-    print_test_banner("test_model_supports_feature")
+def display_metadata_tree(model_name: str, metadata: Dict[str, Any]) -> None:
+    """Display the raw metadata as a tree."""
+    tree = Tree(f"[bold cyan]{model_name} Raw Metadata[/bold cyan]")
 
-    # Test supported feature
-    result = model_supports_feature("gpt-4", "function_calling")
-    test_logger.info(f"gpt-4 supports function_calling: {result}")
-    assert result is True, "Expected gpt-4 to support function_calling"
+    def _add_dict_to_tree(tree_node, data):
+        if isinstance(data, dict):
+            for key, value in data.items():
+                if isinstance(value, dict):
+                    branch = tree_node.add(f"[yellow]{key}[/yellow]")
+                    _add_dict_to_tree(branch, value)
+                elif isinstance(value, list):
+                    branch = tree_node.add(
+                        f"[yellow]{key}[/yellow] (list, {len(value)} items)"
+                    )
+                    for i, item in enumerate(value):
+                        if isinstance(item, (dict, list)):
+                            sub_branch = branch.add(f"[blue]Item {i}[/blue]")
+                            _add_dict_to_tree(sub_branch, item)
+                        else:
+                            branch.add(f"[blue]Item {i}:[/blue] {item}")
+                else:
+                    tree_node.add(f"[green]{key}[/green]: {value}")
 
-    # Test unsupported feature
-    # Note: If the real metadata differs, adjust this test
-    result = model_supports_feature("gpt-4", "vision")
-    test_logger.info(f"gpt-4 supports vision: {result}")
-    assert result is False, "Expected gpt-4 to not support vision"
-
-    # Test model with vision support
-    result = model_supports_feature("gpt-4-turbo", "vision")
-    test_logger.info(f"gpt-4-turbo supports vision: {result}")
-    assert result is True, "Expected gpt-4-turbo to support vision"
-
-    # Test non-existent feature
-    result = model_supports_feature("gpt-4", "non_existent_feature")
-    test_logger.info(f"gpt-4 supports non_existent_feature: {result}")
-    assert result is False, "Expected gpt-4 to not support non_existent_feature"
-
-    # Test non-existent model
-    result = model_supports_feature("non-existent-model", "vision")
-    test_logger.info(f"non-existent-model supports vision: {result}")
-    assert result is False, "Expected non-existent-model to not support vision"
+    _add_dict_to_tree(tree, metadata)
+    console.print(tree)
 
 
-# Tests for the LLMConfig integration
-def test_add_metadata_methods():
-    """Test adding metadata methods to a class."""
-    print_test_banner("test_add_metadata_methods")
+# Pytest fixtures
+@pytest.fixture(scope="module")
+def available_models():
+    """Return a list of available models based on environment variables."""
+    available = []
 
-    # Create a simple class
-    class TestConfig:
-        provider = "test"
-        model = "test-model"
+    for config in MODEL_CONFIGS:
+        if check_env_var(config["env_var"]):
+            available.append(config)
+        else:
+            logger.warning(f"Skipping {config['name']} - {config['env_var']} not set")
 
-    # Add metadata methods
-    add_metadata_methods(TestConfig)
-
-    # Check if methods were added
-    for method in ["get_context_window", "get_token_pricing", "supports_feature"]:
-        assert hasattr(TestConfig, method), f"Method {method} not added to class"
-        test_logger.info(f"Method '{method}' successfully added to class")
-
-    # Check property getters
-    for prop in [
-        "supports_vision",
-        "supports_function_calling",
-        "supports_system_messages",
-    ]:
-        prop_descriptor = getattr(TestConfig, prop, None)
-        assert prop_descriptor is not None, f"Property {prop} not added to class"
-        assert isinstance(prop_descriptor, property), f"{prop} is not a property"
-        test_logger.info(f"Property '{prop}' successfully added to class")
+    return available
 
 
-# For the LLMConfig tests, we'll need to patch the model_post_init method to avoid
-# it calling metadata methods during initialization
-@pytest.fixture
-def patch_model_post_init():
-    """Patch the model_post_init method to avoid calling metadata during initialization."""
-    with patch.object(LLMConfig, "model_post_init", lambda self, _: None):
-        test_logger.info("Patched LLMConfig.model_post_init to do nothing during tests")
-        yield
+# Tests
+@pytest.mark.parametrize(
+    "model_config", MODEL_CONFIGS, ids=[m["name"] for m in MODEL_CONFIGS]
+)
+def test_model_metadata_access(model_config):
+    """Test metadata access for each model."""
+    env_var = model_config["env_var"]
 
+    # Skip if API key not available
+    if not check_env_var(env_var):
+        pytest.skip(f"Skipping {model_config['name']} - {env_var} not set")
 
-def test_llm_config_get_context_window(patch_model_post_init, setup_metadata_cache):
-    """Test the get_context_window method on LLMConfig."""
-    print_test_banner("test_llm_config_get_context_window")
+    # Create the config
+    config_class = model_config["class"]
+    model = model_config["model"]
 
-    # Create config without triggering model_post_init
-    config = OpenAILLMConfig(model="gpt-4-turbo", api_key=SecretStr("test-key"))
-    test_logger.info(f"Created OpenAILLMConfig for model: {config.model}")
+    logger.info(f"Testing metadata access for {model_config['name']} ({model})")
 
-    # Call method directly
+    # Create the config with progress spinner
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+    ) as progress:
+        task = progress.add_task(f"Creating {model_config['name']} config...", total=1)
+        config = config_class(model=model)
+        progress.update(task, completed=1)
+
+    # Get metadata
+    raw_metadata = config._get_model_metadata()
+
+    # Log and assert
+    logger.info(f"Retrieved metadata for {model_config['name']}")
+
+    # Display raw metadata tree for debugging
+    display_metadata_tree(model_config["name"], raw_metadata)
+
+    # Assert basic data is present
+    console.print(Panel(f"[bold]Basic Metadata for {model_config['name']}[/bold]"))
+
     context_window = config.get_context_window()
-    test_logger.info(f"Retrieved context window for {config.model}: {context_window}")
+    console.print(f"Context Window: [cyan]{context_window}[/cyan] tokens")
+    assert context_window > 0, "Context window should be greater than 0"
 
-    # Verify result matches our test data
-    assert (
-        context_window == 4096
-    ), f"Expected context window of 4096, got {context_window}"
+    max_input = config.get_max_input_tokens()
+    console.print(f"Max Input: [cyan]{max_input}[/cyan] tokens")
+    assert max_input > 0, "Max input tokens should be greater than 0"
 
+    max_output = config.get_max_output_tokens()
+    console.print(f"Max Output: [cyan]{max_output}[/cyan] tokens")
+    assert max_output > 0, "Max output tokens should be greater than 0"
 
-def test_llm_config_get_token_pricing(patch_model_post_init, setup_metadata_cache):
-    """Test the get_token_pricing method on LLMConfig."""
-    print_test_banner("test_llm_config_get_token_pricing")
-
-    # Create config
-    config = OpenAILLMConfig(model="gpt-4-turbo", api_key=SecretStr("test-key"))
-    test_logger.info(f"Created OpenAILLMConfig for model: {config.model}")
-
-    # Test method
+    # Check pricing
     input_cost, output_cost = config.get_token_pricing()
-    test_logger.info(
-        f"Token pricing for {config.model}: input=${input_cost}, output=${output_cost}"
+    console.print(f"Input cost per token: [green]{format_pricing(input_cost)}[/green]")
+    console.print(
+        f"Output cost per token: [green]{format_pricing(output_cost)}[/green]"
     )
 
-    # Verify result matches our test data
-    assert input_cost == 0.00001, f"Expected input cost of 0.00001, got {input_cost}"
-    assert output_cost == 0.00003, f"Expected output cost of 0.00003, got {output_cost}"
-
-
-def test_llm_config_supports_feature(patch_model_post_init, setup_metadata_cache):
-    """Test the supports_feature method on LLMConfig."""
-    print_test_banner("test_llm_config_supports_feature")
-
-    # Create config
-    config = AnthropicLLMConfig(
-        model="claude-3-opus-20240229", api_key=SecretStr("test-key")
-    )
-    test_logger.info(f"Created AnthropicLLMConfig for model: {config.model}")
-
-    # Test method
-    result = config.supports_feature("vision")
-    test_logger.info(f"{config.model} supports vision: {result}")
-
-    # Verify result matches our test data
-    assert result is True, f"Expected {config.model} to support vision"
-
-
-def test_llm_config_property_getters(patch_model_post_init, setup_metadata_cache):
-    """Test the property getters for feature support."""
-    print_test_banner("test_llm_config_property_getters")
-
-    # Create config
-    config = GeminiLLMConfig(model="gemini-1.5-pro", api_key=SecretStr("test-key"))
-    test_logger.info(f"Created GeminiLLMConfig for model: {config.model}")
-
-    # Test properties
-    vision_support = config.supports_vision
-    test_logger.info(f"{config.model} supports vision: {vision_support}")
-    assert vision_support is True, f"Expected {config.model} to support vision"
-
-    function_support = config.supports_function_calling
-    test_logger.info(f"{config.model} supports function_calling: {function_support}")
-    assert (
-        function_support is True
-    ), f"Expected {config.model} to support function_calling"
-
-    system_support = config.supports_system_messages
-    test_logger.info(f"{config.model} supports system_messages: {system_support}")
-    assert system_support is True, f"Expected {config.model} to support system_messages"
-
-
-# Integration tests
-def test_model_post_init_hook(setup_metadata_cache):
-    """Test the model_post_init hook loads metadata."""
-    print_test_banner("test_model_post_init_hook")
-
-    with patch("haive.core.models.llm.base.logger") as mock_logger:
-        # Create config (this will trigger model_post_init)
-        config = OpenAILLMConfig(model="gpt-4", api_key=SecretStr("test-key"))
-        test_logger.info(f"Created OpenAILLMConfig for model: {config.model}")
-
-        # Verify log calls were made
-        call_count = mock_logger.debug.call_count
-        test_logger.info(
-            f"Logger.debug was called {call_count} times during initialization"
-        )
-        assert call_count >= 1, f"Expected at least 1 debug log call, got {call_count}"
-
-        # We should be able to get context window
-        assert hasattr(
-            config, "get_context_window"
-        ), "Config missing get_context_window method"
-        window = config.get_context_window()
-        test_logger.info(f"Context window for {config.model}: {window}")
-        assert window == 4096, f"Expected context window of 4096, got {window}"
-
-
-def test_different_provider_configs(patch_model_post_init, setup_metadata_cache):
-    """Test metadata works with different provider configs."""
-    print_test_banner("test_different_provider_configs")
-
-    # Create configs
-    openai_config = OpenAILLMConfig(model="gpt-4", api_key=SecretStr("test"))
-    anthropic_config = AnthropicLLMConfig(
-        model="claude-3-opus-20240229", api_key=SecretStr("test")
-    )
-    gemini_config = GeminiLLMConfig(model="gemini-1.5-pro", api_key=SecretStr("test"))
-
-    test_logger.info(
-        f"Created configs for models: {openai_config.model}, {anthropic_config.model}, {gemini_config.model}"
-    )
-
-    # Test context windows
-    openai_window = openai_config.get_context_window()
-    test_logger.info(f"Context window for {openai_config.model}: {openai_window}")
-    assert (
-        openai_window == 4096
-    ), f"Expected context window of 4096 for {openai_config.model}, got {openai_window}"
-
-    anthropic_window = anthropic_config.get_context_window()
-    test_logger.info(f"Context window for {anthropic_config.model}: {anthropic_window}")
-    assert (
-        anthropic_window == 4096
-    ), f"Expected context window of 4096 for {anthropic_config.model}, got {anthropic_window}"
-
-    gemini_window = gemini_config.get_context_window()
-    test_logger.info(f"Context window for {gemini_config.model}: {gemini_window}")
-    assert (
-        gemini_window == 4096
-    ), f"Expected context window of 4096 for {gemini_config.model}, got {gemini_window}"
-
-    # Test pricing
-    openai_pricing = openai_config.get_token_pricing()
-    test_logger.info(
-        f"Token pricing for {openai_config.model}: input=${openai_pricing[0]}, output=${openai_pricing[1]}"
-    )
-    assert openai_pricing == (
-        0.00003,
-        0.00006,
-    ), f"Expected (0.00003, 0.00006) for {openai_config.model}, got {openai_pricing}"
-
-    anthropic_pricing = anthropic_config.get_token_pricing()
-    test_logger.info(
-        f"Token pricing for {anthropic_config.model}: input=${anthropic_pricing[0]}, output=${anthropic_pricing[1]}"
-    )
-    assert anthropic_pricing == (
-        0.000015,
-        0.000075,
-    ), f"Expected (0.000015, 0.000075) for {anthropic_config.model}, got {anthropic_pricing}"
-
-    gemini_pricing = gemini_config.get_token_pricing()
-    test_logger.info(
-        f"Token pricing for {gemini_config.model}: input=${gemini_pricing[0]}, output=${gemini_pricing[1]}"
-    )
-    assert gemini_pricing == (
-        0.000005,
-        0.000005,
-    ), f"Expected (0.000005, 0.000005) for {gemini_config.model}, got {gemini_pricing}"
-
-    # Test feature support
-    openai_vision = openai_config.supports_vision
-    test_logger.info(f"{openai_config.model} supports vision: {openai_vision}")
-    assert (
-        openai_vision is False
-    ), f"Expected {openai_config.model} to not support vision"
-
-    openai_function = openai_config.supports_function_calling
-    test_logger.info(
-        f"{openai_config.model} supports function_calling: {openai_function}"
-    )
-    assert (
-        openai_function is True
-    ), f"Expected {openai_config.model} to support function_calling"
-
-    anthropic_vision = anthropic_config.supports_vision
-    test_logger.info(f"{anthropic_config.model} supports vision: {anthropic_vision}")
-    assert (
-        anthropic_vision is True
-    ), f"Expected {anthropic_config.model} to support vision"
-
-    gemini_vision = gemini_config.supports_vision
-    test_logger.info(f"{gemini_config.model} supports vision: {gemini_vision}")
-    assert gemini_vision is True, f"Expected {gemini_config.model} to support vision"
-
-
-# Error handling tests
-def test_metadata_error_handling():
-    """Test error handling in metadata functions."""
-    print_test_banner("test_metadata_error_handling")
-
-    # Reset module cache to ensure clean state
-    from haive.core.models.metadata import _METADATA_LAST_UPDATED, _MODEL_METADATA_CACHE
-
-    _MODEL_METADATA_CACHE.clear()
-    _METADATA_LAST_UPDATED = None
-    test_logger.info("Reset metadata cache and last updated timestamp")
-
-    # Use a non-existent cache path to simulate missing file
-    with patch(
-        "haive.core.models.metadata._METADATA_CACHE_FILE",
-        Path("/nonexistent/path/metadata.json"),
-    ):
-        # Also patch download to fail
-        with patch("haive.core.models.metadata._download_metadata", return_value={}):
-            test_logger.info(
-                "Patched metadata file path and download function to simulate failure"
-            )
-
-            # Test functions should return defaults
-            metadata = get_model_metadata("gpt-4")
-            test_logger.info(
-                f"Retrieved metadata for gpt-4 with simulated failure: {metadata}"
-            )
-            assert metadata == {}, f"Expected empty dict, got {metadata}"
-
-            context_window = get_context_window("gpt-4")
-            test_logger.info(
-                f"Retrieved context window for gpt-4 with simulated failure: {context_window}"
-            )
-            assert context_window == 0, f"Expected 0, got {context_window}"
-
-            pricing = get_token_pricing("gpt-4")
-            test_logger.info(
-                f"Retrieved token pricing for gpt-4 with simulated failure: {pricing}"
-            )
-            assert pricing == (0.0, 0.0), f"Expected (0.0, 0.0), got {pricing}"
-
-            feature_support = model_supports_feature("gpt-4", "vision")
-            test_logger.info(
-                f"Checked if gpt-4 supports vision with simulated failure: {feature_support}"
-            )
-            assert feature_support is False, f"Expected False, got {feature_support}"
-
-
-def test_download_fallback_to_cache(temp_cache_dir):
-    """Test fallback to cache when download fails."""
-    print_test_banner("test_download_fallback_to_cache")
-
-    cache_file = temp_cache_dir / "model_metadata.json"
-
-    # Create cache file with test data
-    cache_data = {
-        "gpt-4": {
-            "max_tokens": 4096,
-            "input_cost_per_token": 0.00003,
-            "output_cost_per_token": 0.00006,
-        }
+    # Check capabilities using property access
+    console.print("\n[bold]Capabilities:[/bold]")
+    capabilities = {
+        "vision": config.supports_vision,
+        "function_calling": config.supports_function_calling,
+        "parallel_function_calling": config.supports_parallel_function_calling,
+        "system_messages": config.supports_system_messages,
+        "tool_choice": config.supports_tool_choice,
+        "response_schema": config.supports_response_schema,
+        "web_search": config.supports_web_search,
+        "pdf_input": config.supports_pdf_input,
+        "audio_input": config.supports_audio_input,
+        "audio_output": config.supports_audio_output,
+        "prompt_caching": config.supports_prompt_caching,
+        "native_streaming": config.supports_native_streaming,
+        "reasoning": config.supports_reasoning,
     }
 
-    with open(cache_file, "w") as f:
-        json.dump(cache_data, f)
+    for capability, supported in capabilities.items():
+        icon = "✓" if supported else "✗"
+        color = "green" if supported else "red"
+        console.print(
+            f"  {icon} [bold {color}]{capability.replace('_', ' ').title()}[/bold {color}]"
+        )
 
-    test_logger.info(
-        f"Created test cache file with data: {json.dumps(cache_data, indent=2)}"
+    # Check for deprecation
+    deprecation_date = config.get_deprecation_date()
+    if deprecation_date:
+        console.print(
+            f"\n[bold red]⚠️ Model will be deprecated on: {deprecation_date}[/bold red]"
+        )
+
+    # Check additional data if available
+    if config.supports_web_search:
+        search_costs = config.get_search_context_costs()
+        if search_costs:
+            console.print("\n[bold]Web Search Context Costs:[/bold]")
+            for size, cost in search_costs.items():
+                console.print(f"  {size}: [yellow]{format_pricing(cost)}[/yellow]")
+
+    # Return collected data for the comparison test
+    return {
+        "name": model_config["name"],
+        "provider": model_config["provider"],
+        "model": model,
+        "context_window": context_window,
+        "max_input": max_input,
+        "max_output": max_output,
+        "input_cost": input_cost,
+        "output_cost": output_cost,
+        "capabilities": capabilities,
+        "raw_metadata": raw_metadata,
+        "deprecation_date": deprecation_date,
+    }
+
+
+def test_compare_models(available_models):
+    """Compare metadata across all available models."""
+    if len(available_models) < 2:
+        pytest.skip("Need at least 2 models with API keys for comparison")
+
+    # Collect data for all models
+    models_data = []
+
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+    ) as progress:
+        task = progress.add_task(
+            "Collecting model data for comparison...", total=len(available_models)
+        )
+
+        for model_config in available_models:
+            # Create the config
+            config_class = model_config["class"]
+            model = model_config["model"]
+            config = config_class(model=model)
+
+            # Get metadata
+            context_window = config.get_context_window()
+            max_input = config.get_max_input_tokens()
+            max_output = config.get_max_output_tokens()
+            input_cost, output_cost = config.get_token_pricing()
+
+            # Get capabilities
+            capabilities = {
+                "vision": config.supports_vision,
+                "function_calling": config.supports_function_calling,
+                "parallel_function_calling": config.supports_parallel_function_calling,
+                "system_messages": config.supports_system_messages,
+                "tool_choice": config.supports_tool_choice,
+                "response_schema": config.supports_response_schema,
+                "web_search": config.supports_web_search,
+                "pdf_input": config.supports_pdf_input,
+                "audio_input": config.supports_audio_input,
+                "audio_output": config.supports_audio_output,
+                "prompt_caching": config.supports_prompt_caching,
+                "native_streaming": config.supports_native_streaming,
+                "reasoning": config.supports_reasoning,
+            }
+
+            # Collect data
+            models_data.append(
+                {
+                    "name": model_config["name"],
+                    "provider": model_config["provider"],
+                    "model": model,
+                    "context_window": context_window,
+                    "max_input": max_input,
+                    "max_output": max_output,
+                    "input_cost": input_cost,
+                    "output_cost": output_cost,
+                    "capabilities": capabilities,
+                }
+            )
+
+            progress.update(task, advance=1)
+
+    # Display comparison tables
+    console.print(
+        Panel(Text("Model Metadata Comparison", style="bold cyan", justify="center"))
     )
+    display_model_metadata_table(models_data)
 
-    # Mock download to fail
-    with patch(
-        "haive.core.models.metadata._download_metadata",
-        side_effect=Exception("Download failed"),
-    ):
-        test_logger.info("Patched download function to fail with exception")
-
-        # Reset module cache
-        from haive.core.models.metadata import (
-            _METADATA_LAST_UPDATED,
-            _MODEL_METADATA_CACHE,
+    console.print("\n")
+    console.print(
+        Panel(
+            Text("Model Capabilities Comparison", style="bold cyan", justify="center")
         )
+    )
+    display_model_capabilities(models_data)
 
-        _MODEL_METADATA_CACHE.clear()
-        _METADATA_LAST_UPDATED = None
-        test_logger.info("Reset metadata cache and last updated timestamp")
-
-        # Should fall back to cache
-        metadata = get_model_metadata("gpt-4")
-        test_logger.info(
-            f"Retrieved metadata for gpt-4 with download failure (fallback to cache): {metadata}"
+    # Export comparison to JSON
+    try:
+        with open("model_comparison.json", "w") as f:
+            json.dump(models_data, f, indent=2, default=str)
+        console.print(
+            f"\n[green]Exported comparison data to model_comparison.json[/green]"
         )
-        assert (
-            metadata["max_tokens"] == 4096
-        ), f"Expected max_tokens of 4096, got {metadata.get('max_tokens')}"
+    except Exception as e:
+        console.print(f"\n[red]Failed to export comparison data: {e}[/red]")
 
 
 if __name__ == "__main__":
-    pytest.main(["-v"])
+    # When run directly, execute specific tests
+    console.print(
+        Panel(Text("LLM Metadata Test Suite", style="bold cyan", justify="center"))
+    )
+
+    # Get available models
+    available = []
+    for config in MODEL_CONFIGS:
+        if check_env_var(config["env_var"]):
+            available.append(config)
+        else:
+            console.print(
+                f"[yellow]Skipping {config['name']} - {config['env_var']} not set[/yellow]"
+            )
+
+    if not available:
+        console.print(
+            "[bold red]No API keys found! Set at least one of AZURE_OPENAI_API_KEY, ANTHROPIC_API_KEY, or MISTRAL_API_KEY[/bold red]"
+        )
+        exit(1)
+
+    # Run individual tests
+    model_data = []
+    for model in available:
+        try:
+            result = test_model_metadata_access(model)
+            if result:
+                model_data.append(result)
+            console.print("\n" + "-" * 80 + "\n")
+        except Exception as e:
+            console.print(f"[bold red]Error testing {model['name']}: {e}[/bold red]")
+
+    # Run comparison if we have multiple models
+    if len(model_data) >= 2:
+        test_compare_models(available)
