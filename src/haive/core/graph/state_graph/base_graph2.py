@@ -5,6 +5,7 @@ Provides a comprehensive system for building, manipulating, and executing
 graphs with consistent interfaces, serialization support, and dynamic composition.
 """
 
+import inspect
 import logging
 import uuid
 from datetime import datetime
@@ -373,16 +374,8 @@ class BaseGraph(BaseModel, ValidationMixin):
                     }
                 )
             elif isinstance(node_like, BaseGraph):
-                # Subgraph
-                node_data.update(
-                    {
-                        "node_type": NodeType.SUBGRAPH,
-                        "metadata": {"subgraph": node_like.name},
-                        **kwargs,
-                    }
-                )
-                # Add to subgraphs
-                self.subgraphs[name] = node_like
+                # Subgraph - use add_subgraph method for proper handling
+                return self.add_subgraph(name, node_like, **kwargs)
             else:
                 # Generic object
                 node_data.update(
@@ -811,11 +804,11 @@ class BaseGraph(BaseModel, ValidationMixin):
         # Store subgraph
         self.subgraphs[name] = subgraph
 
-        # Create node
+        # Create node - this represents the subgraph as a single node in the main graph
         node_obj = Node(
             name=name,
             node_type=NodeType.SUBGRAPH,
-            metadata={"subgraph": subgraph.name},
+            metadata={"subgraph": subgraph.name, "subgraph_id": subgraph.id},
             **kwargs,
         )
 
@@ -2249,46 +2242,70 @@ class BaseGraph(BaseModel, ValidationMixin):
         destinations: Optional[
             Union[str, List[str], Dict[Union[bool, str, int], str]]
         ] = None,
-        default: Union[str, Literal["END"]] = END,
+        default: Union[str, Literal["END"], None] = END,
+        create_missing_nodes: bool = False,
     ) -> "BaseGraph":
         """
         Add conditional edges from a source node based on a condition.
 
+        This method supports multiple ways to handle True/False routing:
+
+        1. **Boolean destinations**: Use True/False as keys
+           ```python
+           graph.add_conditional_edges(
+               'agent_node',
+               has_tool_calls,
+               {True: 'validation', False: END}
+           )
+           ```
+
+        2. **String destinations with optional boolean fallbacks**:
+           String keys like 'has_tool_calls'/'no_tool_calls' can optionally
+           get True/False fallbacks added by setting add_boolean_fallbacks=True
+           ```python
+           graph.add_conditional_edges(
+               'agent_node',
+               has_tool_calls,
+               {'has_tool_calls': 'validation', 'no_tool_calls': END},
+               add_boolean_fallbacks=True
+           )
+           # With add_boolean_fallbacks=True, adds: {True: 'validation', False: END}
+           ```
+
+        3. **List format**: First item = True destination, Second item = False destination
+           ```python
+           graph.add_conditional_edges(
+               'agent_node',
+               has_tool_calls,
+               ['validation', END]  # validation when True, END when False
+           )
+           ```
+
+        **Alternative**: For simple boolean routing, consider using `add_boolean_conditional_edges()`
+        which provides cleaner syntax for True/False conditions.
+
         Args:
             source_node: Source node name
-            condition: A function that takes (state, optional config) and returns a node name,
+            condition: A function, Branch, NodeConfig or any object that can determine branching.
+                      For callables, takes (state, optional config) and returns a node name,
                       boolean, list of nodes, list of Send objects, Send object, Command object,
                       or a Branch object itself
             destinations: Target node(s) - can be:
                 - A single node name string (which will be mapped to True)
                 - A list of node names (which will be mapped by index)
                 - A dictionary mapping condition results to target nodes
-            default: Default destination if no condition matches (defaults to END)
+            default: Default destination if no condition matches (defaults to END).
+                    IMPORTANT: When destinations is a dictionary, no default is ever added.
+            create_missing_nodes: Whether to create missing destination nodes automatically (defaults to False)
+            add_boolean_fallbacks: Whether to automatically add True/False keys for string-keyed destinations (defaults to False)
 
         Returns:
             Self for method chaining
         """
+        import logging
+
+        logger = logging.getLogger(__name__)
         from langgraph.graph import END, START
-        from rich import print as rprint
-        from rich.console import Console
-        from rich.panel import Panel
-        from rich.table import Table
-
-        console = Console()
-
-        # Debug header
-        console.print(
-            Panel.fit(
-                "[bold blue]Adding Conditional Edges[/bold blue]", border_style="blue"
-            )
-        )
-
-        # Log input parameters
-        console.print("\n[bold]Input Parameters:[/bold]")
-        console.print(f"Source Node: [yellow]{source_node}[/yellow]")
-        console.print(f"Condition Type: [yellow]{type(condition).__name__}[/yellow]")
-        console.print(f"Destinations: [yellow]{destinations}[/yellow]")
-        console.print(f"Default: [yellow]{default}[/yellow]")
 
         # Validate source node
         if source_node != START and source_node not in self.nodes:
@@ -2296,7 +2313,6 @@ class BaseGraph(BaseModel, ValidationMixin):
 
         # Handle Branch objects
         if isinstance(condition, Branch):
-            console.print("\n[bold green]Handling Branch object[/bold green]")
             branch = condition
             branch.source_node = source_node
 
@@ -2319,30 +2335,58 @@ class BaseGraph(BaseModel, ValidationMixin):
                         # Empty list uses default {True: "continue", False: END}
                         branch.destinations = {True: "continue", False: END}
                 elif isinstance(destinations, dict):
-                    # Dictionary maps directly
+                    # Dictionary maps directly - NO MODIFICATION
                     branch.destinations = destinations
-            else:
-                # Empty list uses default {True: "continue", False: END}
-                branch.destinations = {True: "continue", False: END}
 
-            # Only set default if it's explicitly provided and not the built-in END
-            if default != END and branch.default is None:
+                    # NO DEFAULT - EVER
+                    branch.default = None
+            else:
+                # No destinations provided - use default {True: "continue", False: END}
+                branch.destinations = {True: "continue", False: END}
                 branch.default = default
 
+            # Validate destination nodes exist or create them if requested
+            if not create_missing_nodes:
+                for dest_name in branch.destinations.values():
+                    if dest_name != END and dest_name not in self.nodes:
+                        raise ValueError(
+                            f"Destination node '{dest_name}' not found in graph. "
+                            f"Use create_missing_nodes=True to create it automatically."
+                        )
+
             self.branches[branch.id] = branch
-            console.print(f"[green]Added branch with ID: {branch.id}[/green]")
+            logger.debug(f"Added branch with ID: {branch.id}")
             return self
 
+        # Extract function name or condition info for debugging
+        if (
+            hasattr(condition, "__class__")
+            and "NodeConfig" in condition.__class__.__name__
+        ):
+            condition_name = getattr(
+                condition, "name", f"branch_condition_{uuid.uuid4().hex[:8]}"
+            )
+            logger.debug(f"Using NodeConfig '{condition_name}' as branch controller")
+        else:
+            condition_name = getattr(
+                condition, "__name__", f"branch_condition_{uuid.uuid4().hex[:8]}"
+            )
+            logger.debug(f"Using function '{condition_name}' as branch controller")
+
         # Create destination mapping based on input type
-        console.print("\n[bold]Processing Destinations:[/bold]")
         destination_map = {}
 
-        if isinstance(destinations, str):
-            console.print(f"String destination: [yellow]{destinations}[/yellow]")
-            destination_map = {True: destinations, False: default}
+        # Set default based on destination type
+        if isinstance(destinations, dict):
+            # NEVER use a default with dictionary destinations
+            use_default = None
+        else:
+            use_default = default
 
+        # Build destination map based on input type
+        if isinstance(destinations, str):
+            destination_map = {True: destinations, False: default}
         elif isinstance(destinations, list):
-            console.print(f"List destinations: [yellow]{destinations}[/yellow]")
             if len(destinations) >= 2:
                 # Map first element to True, second to False
                 destination_map = {True: destinations[0], False: destinations[1]}
@@ -2352,40 +2396,318 @@ class BaseGraph(BaseModel, ValidationMixin):
             else:
                 # Empty list uses general default
                 destination_map = {True: "continue", False: default}
-
         elif isinstance(destinations, dict):
-            # Use dictionary directly
+            # Use dictionary exactly as provided - NO MODIFICATIONS
             destination_map = destinations
-
         elif destinations is None:
             # Default mapping
             destination_map = {True: "continue", False: default}
 
-        console.print(f"Final destination map: [green]{destination_map}[/green]")
+        # Validate destination nodes exist or create them if requested
+        if not create_missing_nodes:
+            for dest_key, dest_name in destination_map.items():
+                if (
+                    dest_name != END
+                    and dest_name != "continue"
+                    and dest_name not in self.nodes
+                ):
+                    raise ValueError(
+                        f"Destination node '{dest_name}' for condition '{dest_key}' not found in graph. "
+                        f"Use create_missing_nodes=True to create it automatically."
+                    )
 
         # Create a new Branch
         branch_id = str(uuid.uuid4())
         branch_name = f"branch_{branch_id[:8]}"
+
+        metadata = {"condition_object": condition} if not callable(condition) else {}
+
+        # Create wrapper for callable conditions to log results and handle None returns
+        if callable(condition):
+            function_to_use = self._create_branch_wrapper(
+                condition, destination_map, use_default
+            )
+            function_ref = CallableReference.from_callable(function_to_use)
+        else:
+            function_to_use = condition
+            function_ref = None
+
+        # Log the key information for debugging
+        if callable(condition) and hasattr(condition, "__name__"):
+            logging.info(f"Using branch function: {condition.__name__}")
+        elif hasattr(condition, "__class__"):
+            logging.info(f"Using condition of type: {condition.__class__.__name__}")
+
+        # Special handling for ValidationNodeConfig
+        if (
+            hasattr(condition, "__class__")
+            and "ValidationNodeConfig" in condition.__class__.__name__
+        ):
+            logging.info("Detected ValidationNodeConfig - ensuring correct routing")
+            metadata["is_validation_node"] = True
+
+            # Ensure ValidationNodeConfig function knows to return exact routing keys
+            function_to_use = self._create_validation_wrapper(
+                condition, destination_map
+            )
+            function_ref = CallableReference.from_callable(function_to_use)
 
         # Create branch with the mapped destinations
         branch = Branch(
             id=branch_id,
             name=branch_name,
             source_node=source_node,
-            function=condition if callable(condition) else None,
+            function=function_to_use,
+            function_ref=function_ref,
+            metadata=metadata,
             mode=BranchMode.FUNCTION if callable(condition) else BranchMode.DIRECT,
             destinations=destination_map,
+            default=use_default,
+        )
+
+        # Log the finalized branch configuration for debugging
+        logger.debug(
+            f"Branch configuration: source={source_node}, destinations={destination_map}, default={use_default}"
         )
 
         # Add the branch
         self.branches[branch_id] = branch
 
-        # Log success
-        console.print(
-            f"\n[bold green]Branch '{branch_name}' added successfully![/bold green]"
-        )
+        logger.debug(f"Branch '{branch_name}' added successfully!")
         self.updated_at = datetime.now()
         return self
+
+    def _create_validation_wrapper(self, validation_config, destination_map):
+        """Special wrapper for ValidationNodeConfig to ensure correct routing.
+
+        ValidationNodeConfig is a common source of routing issues because it can return
+        complex results that don't directly match routing keys.
+        """
+        from langgraph.types import Send
+
+        # Get a list of valid string keys for routing
+        valid_keys = list(destination_map.keys())
+        logging.info(f"Valid routing keys: {valid_keys}")
+
+        def validation_wrapper(state, config=None):
+            try:
+                # ValidationNodeConfig uses __call__ method, not process_validation
+                if hasattr(validation_config, "__call__"):
+                    # Call the ValidationNodeConfig directly
+                    result = validation_config(state, config)
+                    logging.info(
+                        f"ValidationNodeConfig result: {type(result).__name__}"
+                    )
+
+                    # Handle Send objects directly - this is the primary return type
+                    if isinstance(result, list) and all(
+                        isinstance(item, Send) for item in result
+                    ):
+                        logging.info(
+                            f"ValidationNodeConfig returned {len(result)} Send objects"
+                        )
+                        return result
+                    elif isinstance(result, Send):
+                        logging.info(
+                            f"ValidationNodeConfig returned single Send object to {result.node}"
+                        )
+                        return result
+
+                    # Handle Command objects
+                    if (
+                        hasattr(result, "__class__")
+                        and "Command" in result.__class__.__name__
+                    ):
+                        logging.info(f"ValidationNodeConfig returned Command object")
+                        return result
+
+                    # If result is already a string in our routing map, use it directly
+                    if isinstance(result, str) and result in destination_map:
+                        logging.info(
+                            f"ValidationNodeConfig returned string key: {result}"
+                        )
+                        return result
+
+                    # Handle special case where ValidationNodeConfig returns "no_tool_calls"
+                    if isinstance(result, str) and result == "no_tool_calls":
+                        # Look for a key that maps to END or similar
+                        for key, dest in destination_map.items():
+                            if dest == "END" or str(dest).upper() == "END":
+                                logging.info(
+                                    f"Converting 'no_tool_calls' to routing key: {key}"
+                                )
+                                return key
+                        # If no END destination found, return the string as-is
+                        logging.info(
+                            f"ValidationNodeConfig returned no_tool_calls, returning as-is"
+                        )
+                        return result
+
+                    # Check for validation results dictionary
+                    if isinstance(result, dict):
+                        # Look for has_errors, has_tools, parse_output keys
+                        for key in ["has_errors", "has_tools", "parse_output"]:
+                            if key in result and result[key] and key in destination_map:
+                                logging.info(f"Found validation key: {key}")
+                                return key
+
+                        # Look for any True values that match routing keys
+                        for key, value in result.items():
+                            if value is True and key in destination_map:
+                                logging.info(f"Found True key: {key}")
+                                return key
+
+                    # For any validation failure, default to 'has_errors' if available
+                    if "has_errors" in destination_map:
+                        logging.info("Defaulting to has_errors")
+                        return "has_errors"
+
+                    # Last resort - return first routing key
+                    if valid_keys:
+                        logging.warning(
+                            f"No routing match found - using first key: {valid_keys[0]}"
+                        )
+                        return valid_keys[0]
+
+                    return False
+
+                # If validation_config doesn't have __call__, just return first key
+                if valid_keys:
+                    logging.warning("ValidationNodeConfig doesn't have __call__ method")
+                    return valid_keys[0]
+                return False
+
+            except Exception as e:
+                logging.error(f"Error in validation function: {e}")
+                import traceback
+
+                traceback.print_exc()
+                # For errors, route to has_errors if available
+                if "has_errors" in destination_map:
+                    return "has_errors"
+                return False
+
+        return validation_wrapper
+
+    def _create_branch_wrapper(self, func, destination_map, default_dest):
+        """Wrapper for branch functions that handles boolean to string conversion."""
+        import inspect
+
+        from langgraph.types import Send
+
+        param_count = len(inspect.signature(func).parameters)
+
+        # Check if we have a boolean function with string destinations
+        has_boolean_keys = any(isinstance(k, bool) for k in destination_map.keys())
+        has_string_keys = any(isinstance(k, str) for k in destination_map.keys())
+
+        def wrapper(state, config=None):
+            try:
+                # Call with appropriate number of parameters
+                if param_count == 1:
+                    result = func(state)
+                else:
+                    result = func(state, config)
+
+                # Log the raw result for debugging
+                logger.debug(
+                    f"Branch function returned: {result} (type: {type(result).__name__})"
+                )
+
+                # CRITICAL FIX: Add detailed debugging for has_tool_calls function
+                if hasattr(func, "__name__") and "has_tool_calls" in func.__name__:
+                    logger.info(f"=== DEBUGGING has_tool_calls function ===")
+                    logger.info(f"Function result: {result} (type: {type(result)})")
+                    logger.info(
+                        f"Available routing keys: {list(destination_map.keys())}"
+                    )
+                    logger.info(f"State type: {type(state)}")
+
+                    # Debug the state content
+                    if hasattr(state, "messages"):
+                        messages = state.messages
+                        logger.info(f"State has {len(messages)} messages")
+                        if messages:
+                            last_msg = messages[-1]
+                            logger.info(f"Last message type: {type(last_msg)}")
+                            logger.info(f"Last message: {last_msg}")
+
+                            # Check for tool_calls specifically
+                            if hasattr(last_msg, "tool_calls"):
+                                tool_calls = getattr(last_msg, "tool_calls", None)
+                                logger.info(f"tool_calls attribute: {tool_calls}")
+
+                            if hasattr(last_msg, "additional_kwargs"):
+                                additional_kwargs = getattr(
+                                    last_msg, "additional_kwargs", {}
+                                )
+                                logger.info(f"additional_kwargs: {additional_kwargs}")
+                                if "tool_calls" in additional_kwargs:
+                                    logger.info(
+                                        f"tool_calls in additional_kwargs: {additional_kwargs['tool_calls']}"
+                                    )
+
+                    logger.info(f"=== END DEBUGGING ===")
+
+                # Handle boolean to string conversion if needed
+                if (
+                    isinstance(result, bool)
+                    and has_string_keys
+                    and not has_boolean_keys
+                ):
+                    # Convert boolean to string for routing
+                    if result is True:
+                        # Look for common "true" patterns
+                        for key in destination_map.keys():
+                            if key in [
+                                "has_tool_calls",
+                                "has_tools",
+                                "true",
+                                "yes",
+                                "continue",
+                            ]:
+                                logger.debug(f"Converting True to string key: {key}")
+                                return key
+                        # Fallback: use first key
+                        first_key = list(destination_map.keys())[0]
+                        logger.debug(f"Converting True to first key: {first_key}")
+                        return first_key
+                    else:  # result is False
+                        # Look for common "false" patterns
+                        for key in destination_map.keys():
+                            if key in [
+                                "no_tool_calls",
+                                "no_tools",
+                                "false",
+                                "no",
+                                "end",
+                            ]:
+                                logger.debug(f"Converting False to string key: {key}")
+                                return key
+                        # Fallback: use last key or default
+                        if default_dest and default_dest in destination_map.values():
+                            # Find the key that maps to default_dest
+                            for k, v in destination_map.items():
+                                if v == default_dest:
+                                    logger.debug(
+                                        f"Converting False to default key: {k}"
+                                    )
+                                    return k
+                        # Last resort: use last key
+                        last_key = list(destination_map.keys())[-1]
+                        logger.debug(f"Converting False to last key: {last_key}")
+                        return last_key
+
+                # Return result as-is if no conversion needed
+                return result
+            except Exception as e:
+                logging.error(f"Error in branch function: {e}")
+                import traceback
+
+                traceback.print_exc()
+                return False
+
+        return wrapper
 
     @property
     def conditional_edges(self):
@@ -2991,6 +3313,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                 console.print(
                     f"Branch from [yellow]{source}[/yellow] with conditions: {list(destinations.keys())}"
                 )
+                console.print(f"[dim]Destinations dict: {destinations}[/dim]")
 
                 # Check branch function and add parameter-aware wrapper if needed
                 if branch.mode == BranchMode.FUNCTION and branch.function:
@@ -3001,57 +3324,154 @@ class BaseGraph(BaseModel, ValidationMixin):
                         sig = inspect.signature(branch.function)
                         param_count = len(sig.parameters)
 
+                        # Check if this is a ValidationNodeConfig for special handling
+                        is_validation_node = getattr(branch, "metadata", {}).get(
+                            "is_validation_node", False
+                        )
+                        if is_validation_node:
+                            console.print(
+                                f"[bold magenta]Special handling for ValidationNodeConfig in '{branch.name}'[/bold magenta]"
+                            )
+
                         # Create parameter-aware branch function
-                        def branch_wrapper(branch_func, param_count, branch_name):
+                        def branch_wrapper(
+                            branch_func, param_count, branch_name, dest_dict
+                        ):
                             def wrapper(state, config=None):
                                 try:
                                     # Call with appropriate parameter count
                                     if param_count == 1:
-                                        console.print(
-                                            f"[bold]Calling branch {branch_name}[/bold] with 1 parameter"
-                                        )
                                         result = branch_func(state)
                                     else:
-                                        console.print(
-                                            f"[bold]Calling branch {branch_name}[/bold] with 2 parameters"
-                                        )
                                         result = branch_func(state, config)
 
-                                    console.print(
-                                        f"[bold cyan]Branch returned:[/bold cyan] [yellow]{result}[/yellow]"
-                                    )
+                                    # Handle Send objects correctly
+                                    if isinstance(result, list) and all(
+                                        isinstance(item, Send) for item in result
+                                    ):
+                                        console.print(
+                                            f"[cyan]Branch returning list of {len(result)} Send objects[/cyan]"
+                                        )
+                                        return result
+                                    elif isinstance(result, Send):
+                                        console.print(
+                                            f"[cyan]Branch returning Send object to {result.target}[/cyan]"
+                                        )
+                                        return result
+
+                                    # Special handling for ValidationNodeConfig results
+                                    if is_validation_node and isinstance(result, dict):
+                                        # Try to extract routing keys
+                                        for key in [
+                                            "has_errors",
+                                            "has_tools",
+                                            "parse_output",
+                                        ]:
+                                            if (
+                                                key in result
+                                                and result[key]
+                                                and key in dest_dict
+                                            ):
+                                                console.print(
+                                                    f"[green]Found validation key: {key}[/green]"
+                                                )
+                                                return key
+
+                                        # Look for any True values that match routing keys
+                                        for key, value in result.items():
+                                            if value is True and key in dest_dict:
+                                                console.print(
+                                                    f"[green]Found True key: {key}[/green]"
+                                                )
+                                                return key
+
+                                        # For validation failure, use has_errors if available
+                                        if "has_errors" in dest_dict:
+                                            console.print(
+                                                f"[yellow]Using has_errors for validation result[/yellow]"
+                                            )
+                                            return "has_errors"
+
+                                    # Return other results directly
                                     return result
                                 except Exception as e:
-                                    # Provide nice error handling for branches
                                     console.print(
-                                        f"[bold red]Error in branch {branch_name}:[/bold red] {str(e)}"
+                                        f"[bold red]Error in branch: {str(e)}[/bold red]"
                                     )
-                                    # Default to False on error (could be configurable)
                                     return False
 
                             return wrapper
 
                         # Create wrapped branch function
                         branch_func = branch_wrapper(
-                            branch.function, param_count, branch.name
+                            branch.function, param_count, branch.name, destinations
                         )
 
                         # Add conditional edges with the wrapped function
-                        graph_builder.add_conditional_edges(
-                            source, branch_func, destinations
-                        )
+                        # SIMPLIFIED: Just use the basic LangGraph API without complications
+                        try:
+                            console.print(
+                                f"[dim]Adding conditional edges: {source} -> {destinations}[/dim]"
+                            )
+
+                            # Use the simplest possible call to LangGraph
+                            graph_builder.add_conditional_edges(
+                                source, branch_func, destinations
+                            )
+                            console.print(
+                                f"[green]✓ Successfully added conditional edges for {source}[/green]"
+                            )
+
+                        except Exception as e:
+                            console.print(
+                                f"[red]✗ Error adding conditional edges for {source}: {e}[/red]"
+                            )
+                            console.print(f"[red]  Destinations: {destinations}[/red]")
+                            console.print(f"[red]  Function: {branch_func}[/red]")
+                            raise
                     except Exception as e:
                         # If anything goes wrong with signature inspection, use original function
                         console.print(
                             f"[yellow]Warning: Could not inspect branch function: {str(e)}[/yellow]"
                         )
-                        graph_builder.add_conditional_edges(
-                            source, branch.function, destinations
+                        console.print(
+                            f"[yellow]Falling back to original function[/yellow]"
                         )
+
+                        try:
+                            graph_builder.add_conditional_edges(
+                                source, branch.function, destinations
+                            )
+                            console.print(
+                                f"[green]✓ Successfully added conditional edges for {source} (fallback)[/green]"
+                            )
+                        except Exception as fallback_error:
+                            console.print(
+                                f"[red]✗ Fallback also failed for {source}: {fallback_error}[/red]"
+                            )
+                            console.print(f"[red]  Destinations: {destinations}[/red]")
+                            console.print(
+                                f"[red]  Original function: {branch.function}[/red]"
+                            )
+                            raise
                 else:
                     # Use branch object's __call__ method
                     console.print(f"Using branch object directly for {branch.name}")
-                    graph_builder.add_conditional_edges(source, branch, destinations)
+
+                    try:
+                        graph_builder.add_conditional_edges(
+                            source, branch, destinations
+                        )
+                        console.print(
+                            f"[green]✓ Successfully added conditional edges for {source} (branch object)[/green]"
+                        )
+                    except Exception as e:
+                        console.print(
+                            f"[red]✗ Error using branch object for {source}: {e}[/red]"
+                        )
+                        console.print(f"[red]  Destinations: {destinations}[/red]")
+                        console.print(f"[red]  Branch: {branch}[/red]")
+                        raise
 
             console.print("\n[bold green]LangGraph conversion complete![/bold green]")
             return graph_builder
@@ -3242,13 +3662,21 @@ class BaseGraph(BaseModel, ValidationMixin):
         # Convert to graph
         return serializable.to_graph()
 
-    def to_mermaid(self, include_subgraphs: bool = True, theme: str = "default") -> str:
+    def to_mermaid(
+        self,
+        include_subgraphs: bool = True,
+        theme: str = "default",
+        subgraph_mode: str = "cluster",
+        show_default_branches: bool = False,
+    ) -> str:
         """
         Generate a Mermaid graph diagram string.
 
         Args:
             include_subgraphs: Whether to visualize subgraphs as clusters
             theme: Mermaid theme name (default, forest, dark, neutral)
+            subgraph_mode: How to render subgraphs ("cluster", "inline", or "separate")
+            show_default_branches: Whether to show default branches
 
         Returns:
             Mermaid diagram as string
@@ -3256,7 +3684,11 @@ class BaseGraph(BaseModel, ValidationMixin):
         from haive.core.graph.state_graph.graph_visualizer import GraphVisualizer
 
         return GraphVisualizer.generate_mermaid(
-            self, include_subgraphs=include_subgraphs, theme=theme
+            self,
+            include_subgraphs=include_subgraphs,
+            theme=theme,
+            subgraph_mode=subgraph_mode,
+            show_default_branches=show_default_branches,
         )
 
     def visualize(
@@ -3268,6 +3700,8 @@ class BaseGraph(BaseModel, ValidationMixin):
         save_png: bool = True,
         width: str = "100%",
         theme: str = "default",
+        subgraph_mode: str = "cluster",
+        show_default_branches: bool = False,
     ) -> str:
         """
         Generate and display a visualization of the graph.
@@ -3282,7 +3716,9 @@ class BaseGraph(BaseModel, ValidationMixin):
             highlight_paths: List of paths to highlight (each path is a list of node names)
             save_png: Whether to save the diagram as PNG
             width: Width of the displayed diagram
-            theme: Mermaid theme to use
+            theme: Mermaid theme to use (e.g., "default", "forest", "dark", "neutral")
+            subgraph_mode: How to render subgraphs ("cluster", "inline", or "separate")
+            show_default_branches: Whether to show default branches
 
         Returns:
             The generated Mermaid code
@@ -3290,19 +3726,58 @@ class BaseGraph(BaseModel, ValidationMixin):
         from haive.core.graph.state_graph.graph_visualizer import GraphVisualizer
         from haive.core.utils.mermaid_utils import Environment, detect_environment
 
+        logger = logging.getLogger(__name__)
+        logger.debug(
+            f"Visualizing graph: {self.name} (nodes: {len(self.nodes)}, edges: {len(self.edges)})"
+        )
+
+        # Log some debug info about subgraphs if they exist
+        if include_subgraphs and self.subgraphs:
+            subgraph_info = ", ".join(
+                [
+                    f"{name} ({len(sg.nodes)} nodes)"
+                    for name, sg in self.subgraphs.items()
+                ]
+            )
+            logger.debug(f"Including {len(self.subgraphs)} subgraphs: {subgraph_info}")
+
         # Combine nodes from highlight_paths with highlight_nodes
         all_highlight_nodes = highlight_nodes or []
         if highlight_paths:
             for path in highlight_paths:
                 all_highlight_nodes.extend(path)
+            logger.debug(f"Highlighting {len(all_highlight_nodes)} nodes")
 
         # Generate the Mermaid code
-        mermaid_code = GraphVisualizer.generate_mermaid(
-            self,
-            include_subgraphs=include_subgraphs,
-            highlight_nodes=all_highlight_nodes if all_highlight_nodes else None,
-            theme=theme,
-        )
+        try:
+            mermaid_code = GraphVisualizer.generate_mermaid(
+                self,
+                include_subgraphs=include_subgraphs,
+                highlight_nodes=all_highlight_nodes if all_highlight_nodes else None,
+                theme=theme,
+            )
+            logger.debug(f"Generated Mermaid code: {len(mermaid_code)} characters")
+        except Exception as e:
+            logger.error(f"Error generating Mermaid code: {str(e)}")
+            # Try again with subgraphs disabled as a fallback
+            if include_subgraphs and self.subgraphs:
+                logger.warning("Retrying visualization with subgraphs disabled")
+                try:
+                    mermaid_code = GraphVisualizer.generate_mermaid(
+                        self,
+                        include_subgraphs=False,
+                        highlight_nodes=(
+                            all_highlight_nodes if all_highlight_nodes else None
+                        ),
+                        theme=theme,
+                    )
+                except Exception as e2:
+                    logger.error(
+                        f"Failed to generate Mermaid code even without subgraphs: {str(e2)}"
+                    )
+                    return f"Error generating graph visualization: {str(e)}"
+            else:
+                return f"Error generating graph visualization: {str(e)}"
 
         try:
             # Display using the visualizer
@@ -3314,13 +3789,18 @@ class BaseGraph(BaseModel, ValidationMixin):
                 highlight_paths=highlight_paths,
                 save_png=save_png,
                 width=width,
-                theme=Theme,
+                theme=theme,  # Pass the string value directly
+                subgraph_mode=subgraph_mode,
+                show_default_branches=show_default_branches,
             )
+            if output_path and save_png:
+                logger.info(f"Graph visualization saved to: {output_path}")
         except Exception as e:
             # Get the current environment
             env = detect_environment()
 
             # Provide helpful error message based on environment
+            logger.error(f"Error displaying graph: {e}")
             print(f"Error displaying graph: {e}")
             print(f"Detected environment: {env}")
 
@@ -3534,3 +4014,298 @@ class BaseGraph(BaseModel, ValidationMixin):
         compiled_graph = graph.compile()
 
         return compiled_graph
+
+    def add_boolean_conditional_edges(
+        self,
+        source_node: str,
+        condition: Callable[[Any], bool],
+        true_destination: str,
+        false_destination: str = END,
+        also_accept_strings: bool = True,
+    ) -> "BaseGraph":
+        """
+        Add conditional edges that explicitly handle boolean results.
+
+        This is a convenience method for the common case where you have a condition
+        that returns True/False and you want clear routing.
+
+        Args:
+            source_node: Source node name
+            condition: Function that returns True or False
+            true_destination: Where to go when condition returns True
+            false_destination: Where to go when condition returns False
+            also_accept_strings: Whether to also accept string equivalents like 'has_tool_calls'/'no_tool_calls'
+
+        Returns:
+            Self for method chaining
+
+        Example:
+            ```python
+            graph.add_boolean_conditional_edges(
+                'agent_node',
+                has_tool_calls,  # Function that returns True/False
+                'validation',    # Go here when True
+                END             # Go here when False
+            )
+            ```
+        """
+        # ALWAYS start with boolean keys as primary routing
+        destinations = {True: true_destination, False: false_destination}
+
+        # If requested, also add string-based keys for common patterns
+        if also_accept_strings:
+            # Add common string patterns that might be returned instead of booleans
+            if (
+                "tool" in true_destination.lower()
+                or "validation" in true_destination.lower()
+            ):
+                destinations["has_tool_calls"] = true_destination
+                destinations["no_tool_calls"] = false_destination
+                destinations["has_tools"] = true_destination
+                destinations["no_tools"] = false_destination
+
+            # Add generic positive/negative strings
+            destinations["yes"] = true_destination
+            destinations["no"] = false_destination
+            destinations["true"] = true_destination
+            destinations["false"] = false_destination
+
+        logger.debug(f"Boolean conditional edges destinations: {destinations}")
+
+        return self.add_conditional_edges(
+            source_node=source_node,
+            condition=condition,
+            destinations=destinations,
+            default=None,  # No default since we have explicit True/False handling
+        )
+
+    def debug_conditional_routing(self, source_node: str) -> None:
+        """
+        Debug conditional routing for a specific node.
+
+        This shows how boolean and string results will be routed for debugging purposes.
+
+        Args:
+            source_node: The node to debug routing for
+        """
+        from rich.console import Console
+        from rich.panel import Panel
+        from rich.table import Table
+
+        console = Console()
+
+        # Find all branches for this node
+        node_branches = self.get_branches_for_node(source_node)
+
+        if not node_branches:
+            console.print(
+                f"[yellow]No conditional routing found for node '{source_node}'[/yellow]"
+            )
+            return
+
+        console.print(
+            f"\n[bold blue]Conditional Routing Debug for '{source_node}'[/bold blue]"
+        )
+
+        for i, branch in enumerate(node_branches):
+            console.print(f"\n[cyan]Branch {i+1}: {branch.name}[/cyan]")
+
+            # Create a table showing the routing
+            table = Table(
+                title="Routing Map", show_header=True, header_style="bold magenta"
+            )
+            table.add_column("Condition Result", style="cyan")
+            table.add_column("Destination", style="green")
+            table.add_column("Type", style="yellow")
+
+            # Show all destinations
+            for condition_result, destination in branch.destinations.items():
+                result_type = (
+                    "Boolean" if isinstance(condition_result, bool) else "String"
+                )
+                table.add_row(str(condition_result), destination, result_type)
+
+            # Show default if exists
+            if branch.default:
+                table.add_row("(default)", branch.default, "Default")
+
+            console.print(table)
+
+            # Show function info if available
+            if branch.function:
+                func_name = getattr(branch.function, "__name__", "Unknown")
+                console.print(f"[dim]Condition function: {func_name}[/dim]")
+
+        # Show helpful tips
+        tips_panel = Panel.fit(
+            "[bold]Tips for Boolean Routing:[/bold]\n"
+            "• Functions returning True/False will use boolean keys (True, False)\n"
+            "• String-based keys automatically get boolean fallbacks\n"
+            "• Use graph.add_boolean_conditional_edges() for explicit True/False routing\n"
+            "• Enable debug logging: logger.setLevel(logging.DEBUG)",
+            title="💡 Routing Tips",
+            border_style="blue",
+        )
+        console.print(tips_panel)
+
+
+# Utility functions for common graph operations
+def has_tool_calls_fixed(state) -> bool:
+    """
+    FIXED VERSION: Check if the last AI message has tool calls.
+
+    This function properly checks for tool calls in various message formats
+    and handles edge cases that the original function missed.
+
+    Args:
+        state: The state object containing messages
+
+    Returns:
+        bool: True if the last AI message has tool calls, False otherwise
+    """
+    from langchain_core.messages import AIMessage
+
+    # Get messages from state
+    messages = None
+    if hasattr(state, "messages"):
+        messages = state.messages
+    elif isinstance(state, dict) and "messages" in state:
+        messages = state["messages"]
+    else:
+        logger.debug("No messages found in state")
+        return False
+
+    # Check if messages exist and are not empty
+    if not messages:
+        logger.debug("Messages list is empty")
+        return False
+
+    # Get the last message
+    last_msg = messages[-1]
+    logger.debug(f"Last message type: {type(last_msg)}")
+
+    # Check if it's an AIMessage
+    if not isinstance(last_msg, AIMessage):
+        logger.debug(f"Last message is not AIMessage, it's {type(last_msg)}")
+        return False
+
+    # Check for tool_calls attribute first (most common case)
+    if hasattr(last_msg, "tool_calls"):
+        tool_calls = getattr(last_msg, "tool_calls", None)
+        logger.debug(f"tool_calls attribute: {tool_calls}")
+
+        # Check if tool_calls exists and is non-empty
+        if tool_calls:
+            logger.debug(f"Found {len(tool_calls)} tool calls")
+            return True
+        else:
+            logger.debug("tool_calls attribute exists but is empty/None")
+
+    # Check additional_kwargs as fallback
+    if hasattr(last_msg, "additional_kwargs"):
+        additional_kwargs = getattr(last_msg, "additional_kwargs", {})
+        if isinstance(additional_kwargs, dict) and "tool_calls" in additional_kwargs:
+            tool_calls_in_kwargs = additional_kwargs["tool_calls"]
+            logger.debug(f"tool_calls in additional_kwargs: {tool_calls_in_kwargs}")
+
+            if tool_calls_in_kwargs:
+                logger.debug(
+                    f"Found {len(tool_calls_in_kwargs)} tool calls in additional_kwargs"
+                )
+                return True
+            else:
+                logger.debug("tool_calls in additional_kwargs is empty/None")
+
+    logger.debug("No tool calls found")
+    return False
+
+
+def create_debug_has_tool_calls(original_func):
+    """
+    Create a debug wrapper around a has_tool_calls function to help diagnose issues.
+
+    Args:
+        original_func: The original has_tool_calls function
+
+    Returns:
+        A wrapped function with detailed debugging
+    """
+
+    def debug_wrapper(state):
+        from langchain_core.messages import AIMessage
+
+        print(f"\n=== DEBUGGING has_tool_calls ===")
+        print(f"State type: {type(state)}")
+
+        # Check state structure
+        if hasattr(state, "messages"):
+            messages = state.messages
+            print(f"State.messages: {len(messages)} messages")
+        elif isinstance(state, dict) and "messages" in state:
+            messages = state["messages"]
+            print(f"State['messages']: {len(messages)} messages")
+        else:
+            print("ERROR: No messages found in state!")
+            return False
+
+        if not messages:
+            print("ERROR: Messages list is empty!")
+            return False
+
+        # Examine the last message
+        last_msg = messages[-1]
+        print(f"Last message type: {type(last_msg)}")
+        print(f"Last message content preview: {str(last_msg)[:200]}...")
+
+        if isinstance(last_msg, AIMessage):
+            print("✓ Last message is AIMessage")
+
+            # Check tool_calls attribute
+            if hasattr(last_msg, "tool_calls"):
+                tool_calls = getattr(last_msg, "tool_calls", None)
+                print(f"tool_calls attribute: {tool_calls}")
+                print(f"tool_calls type: {type(tool_calls)}")
+                print(f"tool_calls bool: {bool(tool_calls)}")
+
+                if tool_calls:
+                    print(f"✓ Found {len(tool_calls)} tool calls")
+                    for i, call in enumerate(tool_calls):
+                        print(f"  Tool call {i}: {call}")
+                else:
+                    print("✗ tool_calls is empty/None")
+            else:
+                print("✗ No tool_calls attribute")
+
+            # Check additional_kwargs
+            if hasattr(last_msg, "additional_kwargs"):
+                additional_kwargs = getattr(last_msg, "additional_kwargs", {})
+                print(f"additional_kwargs: {additional_kwargs}")
+
+                if "tool_calls" in additional_kwargs:
+                    tool_calls_kwargs = additional_kwargs["tool_calls"]
+                    print(f"tool_calls in additional_kwargs: {tool_calls_kwargs}")
+                    print(f"tool_calls_kwargs bool: {bool(tool_calls_kwargs)}")
+                else:
+                    print("✗ No tool_calls in additional_kwargs")
+            else:
+                print("✗ No additional_kwargs")
+        else:
+            print(f"✗ Last message is not AIMessage: {type(last_msg)}")
+
+        # Call original function and compare
+        original_result = original_func(state)
+        fixed_result = has_tool_calls_fixed(state)
+
+        print(f"Original function result: {original_result}")
+        print(f"Fixed function result: {fixed_result}")
+
+        if original_result != fixed_result:
+            print(f"⚠️  MISMATCH! Original: {original_result}, Fixed: {fixed_result}")
+        else:
+            print(f"✓ Results match: {original_result}")
+
+        print(f"=== END DEBUGGING ===\n")
+
+        return original_result
+
+    return debug_wrapper
