@@ -123,9 +123,37 @@ class SecureConfigMixin:
 
             # Check if the key is actually empty
             if not key_value or key_value.strip() == "":
-                logger.warning(
-                    f"API key for {getattr(self, 'provider', 'unknown provider')} is empty"
+                # Enhanced logging for debugging
+                provider_value = getattr(self, "provider", "unknown")
+                provider_str = (
+                    provider_value.value
+                    if hasattr(provider_value, "value")
+                    else str(provider_value)
                 )
+
+                # Get the expected environment variable name for this provider
+                env_key_map = {
+                    # Using .value to handle enum objects
+                    "azure": "AZURE_OPENAI_API_KEY",
+                    "openai": "OPENAI_API_KEY",
+                    "anthropic": "ANTHROPIC_API_KEY",
+                    "gemini": "GEMINI_API_KEY",
+                    "google": "GOOGLE_API_KEY",
+                }
+
+                env_var = env_key_map.get(
+                    provider_str.lower(), f"{provider_str.upper()}_API_KEY"
+                )
+                logger.warning(
+                    f"API key for {provider_str} is empty. Please ensure the {env_var} environment variable is set."
+                )
+
+                # For Azure, provide additional helpful info
+                if provider_str.lower() == "azure":
+                    logger.warning(
+                        f"For Azure OpenAI, make sure both AZURE_OPENAI_API_KEY and AZURE_OPENAI_ENDPOINT are set."
+                    )
+
                 return None
 
             return key_value
