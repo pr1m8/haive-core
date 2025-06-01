@@ -1,6 +1,4 @@
-from typing import Union
-
-from pydantic import Field, HttpUrl, field_validator, model_validator
+from pydantic import Field, HttpUrl, field_validator
 
 from haive.core.engine.loaders.sources.remote.base import URLSource
 from haive.core.engine.loaders.sources.types import SourceType

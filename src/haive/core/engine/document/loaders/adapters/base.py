@@ -6,7 +6,7 @@ loader adapters inherit from, establishing a consistent interface.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Type
+from typing import List
 
 from langchain_core.documents import Document
 

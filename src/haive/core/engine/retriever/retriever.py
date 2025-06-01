@@ -38,12 +38,11 @@ Example:
     docs = retriever.get_relevant_documents("query")
     ```
 """
-
 import importlib
 import logging
 import pkgutil
 import sys
-from typing import Any, ClassVar, Dict, List, Optional, Tuple, Type, Union
+from typing import Any, ClassVar, Dict, Optional, Sequence, Tuple, Type, Union
 
 from langchain_core.documents import Document
 from langchain_core.retrievers import BaseRetriever
@@ -81,9 +80,19 @@ class RetrieverInput(BaseModel):
 class RetrieverOutput(BaseModel):
     """Schema for retriever output."""
 
-    documents: List[Document] = Field(description="Retrieved documents")
+    documents: Optional[Sequence[Document]] = Field(
+        default_factory=list, description="Retrieved documents"
+    )
 
     model_config = ConfigDict(extra="allow")
+
+    @field_validator("documents", mode="before")
+    @classmethod
+    def validate_documents(cls, v):
+        """Validate that the documents are a list."""
+        if v is None:
+            return []
+        return v
 
 
 class BaseRetrieverConfig(InvokableEngine[RetrieverInput, RetrieverOutput]):

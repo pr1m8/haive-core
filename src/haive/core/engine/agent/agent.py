@@ -131,6 +131,9 @@ class Agent(Generic[TConfig], ABC):
         self._async_context_managers = {}  # Store async context managers
         self._async_checkpointer = None  # Async checkpointer instance
         self._checkpoint_mode = getattr(config, "checkpoint_mode", "sync")
+        self._async_setup_pending = False  # Track if async setup is pending
+
+        self._async_setup_task = None  # Store async setup task
 
         # Set up rich UI if available and requested
         if self.rich_logging:
@@ -158,7 +161,22 @@ class Agent(Generic[TConfig], ABC):
         if config.checkpoint_mode == "sync":
             self._setup_persistence()
         else:
-            asyncio.run(self._asetup_persistence())
+            # Check if we're already in an event loop
+            try:
+                asyncio.get_running_loop()
+                # We're in an event loop, so we need to handle this differently
+                # Set up a basic sync checkpointer as fallback and mark async setup as pending
+                self._setup_persistence()  # Set up sync fallback first
+                self._async_setup_pending = True
+                self._async_setup_task = None
+                logger.warning(
+                    "Agent initialized in async context with async checkpoint mode. "
+                    "Call await agent._complete_async_setup() before using the agent."
+                )
+            except RuntimeError:
+                # No event loop running, safe to use asyncio.run()
+                asyncio.run(self._asetup_persistence())
+                self._async_setup_pending = False
 
         # 5. Setup runtime configuration
         self._setup_runtime_config()
@@ -993,6 +1011,34 @@ class Agent(Generic[TConfig], ABC):
                     status.update(
                         "[bold blue]Async checkpointer created successfully[/bold blue]"
                     )
+
+                    # Verify it's actually an async checkpointer
+                    if hasattr(self._async_checkpointer, "__class__"):
+                        checkpointer_name = self._async_checkpointer.__class__.__name__
+                        if "Async" not in checkpointer_name:
+                            self.console.print(
+                                f"[bold yellow]Warning: Expected async checkpointer but got {checkpointer_name}[/bold yellow]"
+                            )
+                            logger.warning(
+                                f"Expected async checkpointer but got {checkpointer_name}"
+                            )
+                        else:
+                            logger.info(
+                                f"Successfully created async checkpointer: {checkpointer_name}"
+                            )
+
+                except (NotImplementedError, AttributeError) as e:
+                    self.console.print(
+                        f"[bold yellow]Async checkpointer not supported: {e}[/bold yellow]"
+                    )
+                    self.console.print(
+                        "[yellow]Using synchronous checkpointer for async operations[/yellow]"
+                    )
+                    logger.warning(f"Async checkpointer not supported: {e}")
+                    logger.info(
+                        "Will use synchronous checkpointer for async operations"
+                    )
+                    self._async_checkpointer = None
                 except Exception as e:
                     self.console.print(
                         f"[bold red]Error creating async checkpointer: {e}[/bold red]"
@@ -1002,6 +1048,7 @@ class Agent(Generic[TConfig], ABC):
                     )
                     logger.error(f"Failed to create async checkpointer: {e}")
                     logger.warning("Falling back to synchronous checkpointer")
+                    self._async_checkpointer = None
 
                 # Add store if configured
                 self.store = None
@@ -1042,6 +1089,19 @@ class Agent(Generic[TConfig], ABC):
             # Create the async checkpointer
             try:
                 self._async_checkpointer = await setup_async_checkpointer(self.config)
+
+                # Verify it's actually an async checkpointer
+                if hasattr(self._async_checkpointer, "__class__"):
+                    checkpointer_name = self._async_checkpointer.__class__.__name__
+                    if "Async" not in checkpointer_name:
+                        logger.warning(
+                            f"Expected async checkpointer but got {checkpointer_name}"
+                        )
+                    else:
+                        logger.info(
+                            f"Successfully created async checkpointer: {checkpointer_name}"
+                        )
+
                 logger.info(
                     f"Async checkpointer created successfully for {self.config.name}"
                 )
@@ -1069,7 +1129,11 @@ class Agent(Generic[TConfig], ABC):
             hasattr(self, "_async_checkpointer")
             and self._async_checkpointer is not None
         ):
+            checkpointer_name = self._async_checkpointer.__class__.__name__
+            logger.debug(f"Using existing async checkpointer: {checkpointer_name}")
             return self._async_checkpointer
+
+        logger.info("Creating new async checkpointer...")
 
         try:
             # Get the persistence config
@@ -1082,6 +1146,16 @@ class Agent(Generic[TConfig], ABC):
                     self._async_checkpointer = (
                         await persistence_config.create_async_checkpointer()
                     )
+
+                    # Verify the checkpointer type
+                    if self._async_checkpointer:
+                        checkpointer_name = self._async_checkpointer.__class__.__name__
+                        logger.info(f"Created async checkpointer: {checkpointer_name}")
+                        if "Async" not in checkpointer_name:
+                            logger.warning(
+                                f"Expected async checkpointer but got {checkpointer_name}"
+                            )
+
                     return self._async_checkpointer
         except Exception as e:
             logger.error(
@@ -1094,6 +1168,18 @@ class Agent(Generic[TConfig], ABC):
 
             logger.info("Creating async checkpointer using setup_async_checkpointer")
             self._async_checkpointer = await setup_async_checkpointer(self.config)
+
+            # Verify the checkpointer type
+            if self._async_checkpointer:
+                checkpointer_name = self._async_checkpointer.__class__.__name__
+                logger.info(
+                    f"Created async checkpointer via setup function: {checkpointer_name}"
+                )
+                if "Async" not in checkpointer_name:
+                    logger.warning(
+                        f"Expected async checkpointer but got {checkpointer_name}"
+                    )
+
             return self._async_checkpointer
         except Exception as e:
             logger.error(f"Error setting up async checkpointer: {e}")
@@ -1117,6 +1203,42 @@ class Agent(Generic[TConfig], ABC):
         self._async_checkpointer = None
         self._async_ctx = None
         self._async_checkpointer_cm = None
+
+    async def _complete_async_setup(self):
+        """Complete async setup that was deferred during initialization."""
+        if not self._async_setup_pending:
+            return  # Already completed or not needed
+
+        try:
+            # Set up the async persistence (this will create _async_checkpointer)
+            await self._asetup_persistence()
+            self._async_setup_pending = False
+
+            # Verify we got an async checkpointer
+            if hasattr(self, "_async_checkpointer") and self._async_checkpointer:
+                checkpointer_name = self._async_checkpointer.__class__.__name__
+                if "Async" in checkpointer_name:
+                    logger.info(
+                        f"Async setup completed successfully with {checkpointer_name}"
+                    )
+                else:
+                    logger.warning(
+                        f"Expected async checkpointer but got {checkpointer_name}"
+                    )
+            else:
+                logger.warning(
+                    "Async setup completed but no async checkpointer was created"
+                )
+
+            # Note: We keep the sync checkpointer as fallback, but async operations
+            # will use the _async_checkpointer when available
+        except Exception as e:
+            logger.error(f"Error completing async setup: {e}")
+            # Don't raise - keep the sync checkpointer as fallback
+            self._async_setup_pending = False
+            logger.warning(
+                "Falling back to sync checkpointer due to async setup failure"
+            )
 
     def _setup_runtime_config(self):
         """Set up default runtime configuration."""
@@ -1972,8 +2094,18 @@ class Agent(Generic[TConfig], ABC):
             logger.debug(processed_input)
             logger.debug(runtime_config)
             logger.debug(input_data)
-            # logger.debug(self.app)
-            result = self.app.invoke(processed_input, runtime_config)
+            print("--------------------------------")
+            print(processed_input)
+            print(runtime_config)
+            print(input_data)
+            print("--------------------------------")
+            logger.debug(f"Attempting to invoke app with input data: {processed_input}")
+            processed_input = (
+                processed_input.model_dump()
+                if hasattr(processed_input, "model_dump")
+                else processed_input
+            )
+            result = self.app.invoke(processed_input, runtime_config, debug=debug)
             logger.debug("Agent execution completed successfully")
             print(result)
             # Process the result if needed
@@ -2058,6 +2190,10 @@ class Agent(Generic[TConfig], ABC):
         Returns:
             Output from the agent
         """
+        # Complete async setup if pending
+        if self._async_setup_pending:
+            await self._complete_async_setup()
+
         # Default debug to verbose if not specified
         if debug is None:
             debug = self.verbose
@@ -2116,10 +2252,37 @@ class Agent(Generic[TConfig], ABC):
                 # Get previous state if available using async checkpointer
                 previous_state = None
                 try:
+                    # Log the checkpointer being used
+                    if self._async_checkpointer:
+                        checkpointer_name = self._async_checkpointer.__class__.__name__
+                        logger.info(
+                            f"Using async checkpointer for graph compilation: {checkpointer_name}"
+                        )
+                        if "Async" not in checkpointer_name:
+                            logger.error(
+                                f"ERROR: Expected async checkpointer but got {checkpointer_name}"
+                            )
+                    else:
+                        logger.error("ERROR: No async checkpointer available!")
+
                     # Create async app with the async checkpointer
                     async_app = self.graph.compile(
                         checkpointer=self._async_checkpointer, store=self.store
                     )
+
+                    # Verify the compiled app's checkpointer
+                    if hasattr(async_app, "checkpointer") and async_app.checkpointer:
+                        app_checkpointer_name = (
+                            async_app.checkpointer.__class__.__name__
+                        )
+                        logger.info(
+                            f"Compiled app using checkpointer: {app_checkpointer_name}"
+                        )
+                        if "Async" not in app_checkpointer_name:
+                            logger.error(
+                                f"ERROR: App compiled with sync checkpointer: {app_checkpointer_name}"
+                            )
+
                     previous_state = await async_app.get_state(runtime_config)
 
                     if previous_state and debug:
@@ -2146,6 +2309,11 @@ class Agent(Generic[TConfig], ABC):
 
                 # Use ainvoke with async app
                 try:
+                    # Log execution details
+                    logger.info(
+                        f"Executing async app with checkpointer: {async_app.checkpointer.__class__.__name__ if hasattr(async_app, 'checkpointer') and async_app.checkpointer else 'None'}"
+                    )
+
                     # Run with async app and async checkpointer
                     result = await async_app.ainvoke(
                         processed_input, runtime_config, debug=debug
@@ -2515,6 +2683,10 @@ class Agent(Generic[TConfig], ABC):
         Yields:
             Async iterator of state updates during execution
         """
+        # Complete async setup if pending
+        if self._async_setup_pending:
+            await self._complete_async_setup()
+
         # Default debug to verbose if not specified
         if debug is None:
             debug = self.verbose

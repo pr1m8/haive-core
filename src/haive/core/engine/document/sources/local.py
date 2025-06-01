@@ -2,12 +2,11 @@ import mimetypes
 import os
 from datetime import datetime
 from pathlib import Path
-from typing import Any, ClassVar, Dict, List, Optional, Type, Union
+from typing import Any, ClassVar, Dict, List, Union
 
 from pydantic import DirectoryPath, Field, FilePath, computed_field, model_validator
 
 from haive.core.engine.loaders.sources.base import BaseSource
-from haive.core.engine.loaders.sources.local.types import LocalSourceFileType
 from haive.core.engine.loaders.sources.types import SourceType
 
 

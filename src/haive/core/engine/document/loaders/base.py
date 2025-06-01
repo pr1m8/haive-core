@@ -1,11 +1,11 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Any, ClassVar, Dict, List, Optional, Protocol, Tuple, Type, Union
+from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 from langchain_core.documents import Document
 from langchain_core.runnables import RunnableConfig
-from pydantic import BaseModel, Field, computed_field
+from pydantic import Field, computed_field
 
 from haive.core.engine.base import EngineType, InvokableEngine
 from haive.core.engine.loaders.base import BaseDocumentLoader
@@ -241,7 +241,7 @@ class DocumentLoaderEngine(
         params = self.apply_runnable_config(runnable_config) or {}
 
         # Get loading options
-        recursive = params.get("recursive", self.recursive)
+        params.get("recursive", self.recursive)
         use_subsources = params.get("use_subsources", self.use_subsources)
         max_documents = params.get("max_documents", self.max_documents)
 

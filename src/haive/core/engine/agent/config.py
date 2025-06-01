@@ -23,8 +23,6 @@ from typing import (
     Type,
     TypeVar,
     Union,
-    get_args,
-    get_origin,
 )
 
 from langchain_core.runnables import RunnableConfig
@@ -268,20 +266,22 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
         Returns:
             Dictionary mapping field names to (type, default) tuples
         """
-        # Derive input schema and extract fields
-        input_schema = self.derive_input_schema()
+        # Check if we have an explicit input_schema defined
+        if self.input_schema is not None:
+            return {
+                name: (field_info.annotation, field_info.default)
+                for name, field_info in self.input_schema.model_fields.items()
+            }
 
-        fields = {}
-        # Handle Pydantic v2
-        if hasattr(input_schema, "model_fields"):
-            for name, field_info in input_schema.model_fields.items():
-                fields[name] = (field_info.annotation, field_info.default)
-        # Handle Pydantic v1
-        elif hasattr(input_schema, "__fields__"):
-            for name, field_info in input_schema.__fields__.items():
-                fields[name] = (field_info.type_, field_info.default)
+        # Fallback to state_schema if available
+        if hasattr(self, "state_schema") and self.state_schema is not None:
+            return {
+                name: (field_info.annotation, field_info.default)
+                for name, field_info in self.state_schema.model_fields.items()
+            }
 
-        return fields
+        # Return empty dict if no schema available
+        return {}
 
     def get_output_fields(self) -> Dict[str, tuple[Type, Any]]:
         """Return output field definitions as field_name -> (type, default) pairs.
@@ -291,20 +291,22 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
         Returns:
             Dictionary mapping field names to (type, default) tuples
         """
-        # Derive output schema and extract fields
-        output_schema = self.derive_output_schema()
+        # Check if we have an explicit output_schema defined
+        if self.output_schema is not None:
+            return {
+                name: (field_info.annotation, field_info.default)
+                for name, field_info in self.output_schema.model_fields.items()
+            }
 
-        fields = {}
-        # Handle Pydantic v2
-        if hasattr(output_schema, "model_fields"):
-            for name, field_info in output_schema.model_fields.items():
-                fields[name] = (field_info.annotation, field_info.default)
-        # Handle Pydantic v1
-        elif hasattr(output_schema, "__fields__"):
-            for name, field_info in output_schema.__fields__.items():
-                fields[name] = (field_info.type_, field_info.default)
+        # Fallback to state_schema if available
+        if hasattr(self, "state_schema") and self.state_schema is not None:
+            return {
+                name: (field_info.annotation, field_info.default)
+                for name, field_info in self.state_schema.model_fields.items()
+            }
 
-        return fields
+        # Return empty dict if no schema available
+        return {}
 
     def add_node_config(
         self, name: str, engine: Union[Engine, str, "NodeConfig"], **kwargs
@@ -593,12 +595,13 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
 
         return manager.get_model()
 
+    """
     def derive_input_schema(self) -> Type[BaseModel]:
-        """Derive input schema for this agent.
+        Derive input schema for this agent.
 
         Returns:
             Input schema as BaseModel subclass
-        """
+        
         # Return cached instance if available
         if self._input_schema_instance:
             return self._input_schema_instance
@@ -663,11 +666,11 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
         return schema
 
     def derive_output_schema(self) -> Type[BaseModel]:
-        """Derive output schema for this agent.
+        Derive output schema for this agent.
 
         Returns:
             Output schema as BaseModel subclass
-        """
+        
         # Return cached instance if available
         if self._output_schema_instance:
             return self._output_schema_instance
@@ -732,6 +735,7 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
 
         self._output_schema_instance = schema
         return schema
+    """
 
     def resolve_engine(self, engine_ref=None) -> Engine:
         """Resolve an engine reference to an actual engine.

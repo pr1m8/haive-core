@@ -5,12 +5,11 @@ This module provides an engine for transforming documents using various strategi
 such as HTML conversion, document reordering, deduplication, and more.
 """
 
-from enum import Enum
-from typing import Any, Dict, List, Literal, Optional, Tuple, Type, Union
+from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
-from langchain_core.documents import BaseDocumentTransformer, Document
+from langchain_core.documents import Document
 from langchain_core.runnables import RunnableConfig
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import ConfigDict, Field
 
 from haive.core.engine.base import EngineType, InvokableEngine
 from haive.core.engine.document.transformers.types import DocTransformerType

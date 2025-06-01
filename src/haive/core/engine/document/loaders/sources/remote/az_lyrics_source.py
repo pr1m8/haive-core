@@ -1,4 +1,3 @@
-from langchain_community.document_loaders import SitemapLoader
 from pydantic import Field
 
 from haive.core.engine.loaders.sources.remote.base import URLSource

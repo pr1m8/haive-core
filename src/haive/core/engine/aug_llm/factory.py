@@ -5,24 +5,20 @@ Provides a clean separation between configuration and runnable creation,
 with special focus on flexible message handling, tool binding, and output parsing.
 """
 
-import inspect
 import json
 import logging
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from typing import Any, Dict, Optional, Type
 
-from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
+from langchain_core.messages import SystemMessage
 from langchain_core.output_parsers import (
-    BaseOutputParser,
     PydanticOutputParser,
     StrOutputParser,
 )
 from langchain_core.output_parsers.openai_tools import PydanticToolsParser
 from langchain_core.prompts import (
-    BasePromptTemplate,
     ChatPromptTemplate,
     FewShotChatMessagePromptTemplate,
     MessagesPlaceholder,
-    SystemMessagePromptTemplate,
 )
 from langchain_core.runnables import Runnable, RunnableLambda
 from langchain_core.tools import BaseTool
@@ -516,14 +512,7 @@ class AugLLMFactory:
         return llm
 
     def _configure_structured_output(self, llm: Runnable) -> Runnable:
-        """Configure structured output parsing based on configuration.
-
-        Args:
-            llm: Base LLM runnable
-
-        Returns:
-            LLM with structured output configuration
-        """
+        """Configure structured output parsing based on configuration."""
         rprint("[blue]Configuring structured output[/blue]")
 
         # If parse_raw_output is True, use StrOutputParser regardless of other settings
@@ -531,48 +520,23 @@ class AugLLMFactory:
             rprint("[cyan]Using StrOutputParser for raw output[/cyan]")
             return llm | StrOutputParser()
 
-        # Version-specific structured output handling
-        if self.aug_config.structured_output_version == "v2" and (
-            self.aug_config.structured_output_model or self.aug_config.pydantic_tools
-        ):
+        # ✅ FIX: v2 structured output = NO PARSER, just return LLM with bound tools
+        if self.aug_config.structured_output_version == "v2":
+            rprint(
+                "[cyan]V2 structured output: tool binding + format instructions (NO PARSER)[/cyan]"
+            )
+            rprint("[green]Returning raw LLM to get AIMessage with tool_calls[/green]")
+            # Tools already bound in _initialize_llm_with_tools()
+            # Format instructions already added in config
+            # Return raw LLM to get AIMessage with tool_calls
+            return llm
 
-            rprint("[cyan]Using v2 structured output (tool-based approach)[/cyan]")
-
-            # In v2, the tools have already been bound to the LLM in _initialize_llm_with_tools
-            # We need to ensure the output is properly parsed
-            if self.aug_config.output_parser:
-                # Use existing parser if provided
-                rprint(
-                    f"[green]Using existing parser: {type(self.aug_config.output_parser).__name__}[/green]"
-                )
-                return llm | self.aug_config.output_parser
-            elif self.aug_config.pydantic_tools:
-                # Create parser for pydantic tools
-                parser = PydanticToolsParser(tools=self.aug_config.pydantic_tools)
-                rprint("[green]Created PydanticToolsParser for v2 output[/green]")
-                return llm | parser
-            elif self.aug_config.structured_output_model:
-                # Create parser for single model
-                parser = PydanticToolsParser(
-                    tools=[self.aug_config.structured_output_model]
-                )
-                rprint(
-                    "[green]Created PydanticToolsParser for structured_output_model[/green]"
-                )
-                return llm | parser
-            else:
-                # Fallback to string output
-                rprint(
-                    "[yellow]No parser available for v2 - using StrOutputParser[/yellow]"
-                )
-                return llm | StrOutputParser()
-
-        # Handle v1 Pydantic output model with function calling
+        # ✅ Handle v1 structured output with traditional parsing
         elif (
             self.aug_config.structured_output_model
-            and self.aug_config.parser_type == "pydantic"
+            and self.aug_config.structured_output_version == "v1"
         ):
-            rprint("[cyan]Using v1 Pydantic structured output[/cyan]")
+            rprint("[cyan]Using v1 structured output with parsing[/cyan]")
 
             # Use with_structured_output for best support
             try:
@@ -581,54 +545,52 @@ class AugLLMFactory:
                         self.aug_config.structured_output_model,
                         method="function_calling",  # Explicitly use function_calling
                     )
-                    rprint("[green]Successfully configured structured output[/green]")
+                    rprint(
+                        "[green]Successfully configured v1 structured output[/green]"
+                    )
                     return configured_llm
                 else:
                     rprint(
-                        "[yellow]with_structured_output not available - falling back to chain with parser[/yellow]"
+                        "[yellow]with_structured_output not available - falling back to parser[/yellow]"
                     )
             except Exception as e:
                 rprint(f"[red]Failed to configure structured output: {e}[/red]")
-                # Fallback - chain with output parser
 
-            # If we got here, we need to create or use an output parser
+            # Fallback to PydanticOutputParser for v1
             if self.aug_config.output_parser:
-                rprint("[yellow]Using existing output parser[/yellow]")
+                rprint("[yellow]Using existing output parser for v1[/yellow]")
                 return llm | self.aug_config.output_parser
             else:
-                rprint("[yellow]Creating PydanticOutputParser[/yellow]")
+                rprint("[yellow]Creating PydanticOutputParser for v1[/yellow]")
                 parser = PydanticOutputParser(
                     pydantic_object=self.aug_config.structured_output_model
                 )
                 return llm | parser
 
-        # Handle Pydantic tools
+        # ✅ Handle explicit pydantic tools (NOT structured output, separate use case)
         elif (
             self.aug_config.pydantic_tools
             and self.aug_config.parser_type == "pydantic_tools"
+            and not self.aug_config.structured_output_model
         ):
-            rprint("[cyan]Using Pydantic tools parser[/cyan]")
-            # Using with_structured_output doesn't work well for tool parsing
-            # Instead, we'll chain with the dedicated parser
+            rprint(
+                "[cyan]Using PydanticToolsParser for explicit pydantic tools (not structured output)[/cyan]"
+            )
             if isinstance(self.aug_config.output_parser, PydanticToolsParser):
                 return llm | self.aug_config.output_parser
-
-            # Create parser if needed
             else:
                 parser = PydanticToolsParser(tools=self.aug_config.pydantic_tools)
                 return llm | parser
 
-        # Handle custom output parser
+        # ✅ Handle custom output parser
         elif self.aug_config.output_parser:
             rprint(
                 f"[cyan]Using custom output parser: {type(self.aug_config.output_parser).__name__}[/cyan]"
             )
             return llm | self.aug_config.output_parser
 
-        # Default - just return the LLM as is
-        rprint(
-            "[yellow]No output parsing configuration - returning LLM unchanged[/yellow]"
-        )
+        # ✅ Default - no parsing, return raw LLM
+        rprint("[yellow]No output parsing configuration - returning raw LLM[/yellow]")
         return llm
 
     def _build_chain(self, llm: Runnable) -> Runnable:
@@ -766,9 +728,9 @@ The output should be valid JSON that conforms to the {model.__name__} schema.
 
         # Get parameter schema from model
         if hasattr(model, "schema"):
-            param_schema = model.schema().get("properties", {})
+            model.schema().get("properties", {})
         else:
-            param_schema = {}
+            pass
 
         # Try to create a structured tool if possible
         try:

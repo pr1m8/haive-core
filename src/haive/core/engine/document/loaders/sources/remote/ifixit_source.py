@@ -1,6 +1,5 @@
 from pydantic import Field
 
-from haive.core.engine.loaders.sources.local.types import LocalSourceFileType
 from haive.core.engine.loaders.sources.remote.base import URLSource
 from haive.core.engine.loaders.sources.types import SourceType
 

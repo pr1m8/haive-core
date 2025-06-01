@@ -1,6 +1,5 @@
 from typing import List
 
-from langchain_community.document_loaders import DocumentTransformer
 from langchain_core.documents import Document
 from pydantic import BaseModel, Field
 
