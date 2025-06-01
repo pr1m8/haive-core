@@ -2,16 +2,14 @@
 
 import json
 import logging
-import threading
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, model_validator
 from rich.console import Console
 from rich.panel import Panel
 from rich.syntax import Syntax
 from rich.table import Table
-from rich.text import Text
 from rich.tree import Tree
 
 from haive.core.engine.base import Engine, EngineType
@@ -224,7 +222,7 @@ class EngineStateMixin(BaseModel):
 
         if hasattr(engine, "provider"):
             old_provider = getattr(engine, "provider", "unknown")
-            setattr(engine, "provider", provider)
+            engine.provider = provider
             logger.info(
                 f"Changed engine '{name}' provider from '{old_provider}' to '{provider}'"
             )

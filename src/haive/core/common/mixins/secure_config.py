@@ -151,7 +151,7 @@ class SecureConfigMixin:
                 # For Azure, provide additional helpful info
                 if provider_str.lower() == "azure":
                     logger.warning(
-                        f"For Azure OpenAI, make sure both AZURE_OPENAI_API_KEY and AZURE_OPENAI_ENDPOINT are set."
+                        "For Azure OpenAI, make sure both AZURE_OPENAI_API_KEY and AZURE_OPENAI_ENDPOINT are set."
                     )
 
                 return None

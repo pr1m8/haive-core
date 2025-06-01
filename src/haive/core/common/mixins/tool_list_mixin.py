@@ -5,9 +5,9 @@ import inspect
 from typing import Any, Callable, Dict, List, Optional, Sequence, Type, Union
 
 from langchain_core.tools import BaseTool, BaseToolkit, StructuredTool
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, model_validator
 
-from haive.core.common.named_dict import NamedDict
+from haive.core.common.structures.named_dict import NamedDict
 
 
 class ToolList(NamedDict):
