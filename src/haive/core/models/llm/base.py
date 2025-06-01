@@ -7,12 +7,12 @@ with support for model metadata, context windows, and capabilities.
 
 import logging
 import os
-from typing import Any, ClassVar, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field, SecretStr, field_validator, model_validator
 
 # Import the mixins
-from haive.core.common.secure_config_mixin import SecureConfigMixin
+from haive.core.common.mixins.secure_config import SecureConfigMixin
 from haive.core.models.llm.provider_types import LLMProvider
 from haive.core.models.metadata_mixin import ModelMetadataMixin
 
@@ -34,7 +34,7 @@ except ImportError:
 try:
     from dotenv import load_dotenv
 
-    load_dotenv(".env")
+    load_dotenv()
 except ImportError:
     logger.debug("dotenv module not available, skipping .env file loading")
 
@@ -72,8 +72,11 @@ class LLMConfig(BaseModel, SecureConfigMixin, ModelMetadataMixin):
 
     provider: LLMProvider = Field(description="The provider of the LLM.")
     model: str = Field(..., description="The model to be used, e.g., gpt-4.")
+    name: Optional[str] = Field(
+        default=None, description="Friendly display name for this model."
+    )
     api_key: SecretStr = Field(
-        default=SecretStr(""), description="API key for LLM provider."
+        default_factory=lambda: SecretStr(""), description="API key for LLM provider."
     )
     cache_enabled: bool = Field(
         default=True, description="Enable or disable response caching."
@@ -87,6 +90,17 @@ class LLMConfig(BaseModel, SecureConfigMixin, ModelMetadataMixin):
     debug: bool = Field(default=False, description="Enable detailed debug output.")
 
     model_config = {"arbitrary_types_allowed": True}
+    model_alias: Optional[str] = Field(default=None, description="Alias for the model.")
+
+    @model_validator(mode="after")
+    def set_default_name(self) -> "LLMConfig":
+        """
+        Set a default name for the model if not provided.
+        """
+        if self.name is None:
+            # Default to model ID if no name provided
+            self.name = self.model
+        return self
 
     @model_validator(mode="after")
     def load_model_metadata(self) -> "LLMConfig":
@@ -221,24 +235,13 @@ class LLMConfig(BaseModel, SecureConfigMixin, ModelMetadataMixin):
             "reasoning": self.supports_reasoning,
         }
 
-        # Use the display_name attribute if it exists, otherwise use a prettier version of model ID
-        display_name = getattr(self, "display_name", None)
-        if display_name is None:
-            # Try to create a more friendly name from the model ID
-            model_parts = self.model.split("-")
-            if len(model_parts) > 2 and model_parts[0] in ["gpt", "claude"]:
-                # For models like claude-3-opus-20240229 or gpt-4o
-                if model_parts[0] == "claude":
-                    display_name = f"Claude {model_parts[1]} {model_parts[2].title()}"
-                elif "gpt" in model_parts[0]:
-                    display_name = f"GPT-{model_parts[1]}"
-            else:
-                # Fallback to model ID
-                display_name = self.model
-
         return {
-            "name": display_name,
-            "provider": self.provider.value,
+            "name": self.name,
+            "provider": (
+                self.provider.value
+                if hasattr(self.provider, "value")
+                else str(self.provider)
+            ),
             "model": self.model,
             "context_window": context_window,
             "max_input": max_input,
@@ -273,20 +276,22 @@ class AzureLLMConfig(LLMConfig):
     provider: LLMProvider = LLMProvider.AZURE
     model: str = Field(default="gpt-4o", description="Azure deployment name (model).")
     api_version: str = Field(
-        default="2024-02-15-preview",
+        default_factory=lambda: os.getenv(
+            "AZURE_OPENAI_API_VERSION", "2024-02-15-preview"
+        ),
         description="Azure API version.",
     )
     api_base: str = Field(
-        default="",
+        default_factory=lambda: os.getenv("AZURE_OPENAI_ENDPOINT", ""),
         description="Azure API base URL.",
     )
     api_type: str = Field(
-        default="azure",
+        default_factory=lambda: os.getenv("OPENAI_API_TYPE", "azure"),
         description="API type for Azure.",
     )
-    # Direct loading of API key
+    # Direct loading of API key from environment
     api_key: SecretStr = Field(
-        default=SecretStr(""),
+        default_factory=lambda: SecretStr(os.getenv("AZURE_OPENAI_API_KEY", "")),
         description="API key for Azure OpenAI.",
     )
 
@@ -333,13 +338,7 @@ class AzureLLMConfig(LLMConfig):
         """
         Instantiate Azure OpenAI Chat model with robust error handling.
         """
-        try:
-            from langchain_openai import AzureChatOpenAI
-        except ImportError:
-            raise RuntimeError(
-                "langchain-openai is not installed. "
-                "Please install it with 'pip install langchain-openai'"
-            )
+        from langchain_openai import AzureChatOpenAI
 
         # Debug output
         logger.debug("Attempting to instantiate Azure OpenAI model:")
@@ -366,9 +365,9 @@ class AzureLLMConfig(LLMConfig):
             # Use the new parameter names
             return AzureChatOpenAI(
                 deployment_name=self.model,
-                api_key=self.get_api_key(),
-                api_version=self.api_version,
-                azure_endpoint=self.api_base,
+                api_key=self.get_api_key(),  # Changed from openai_api_key
+                api_version=self.api_version,  # Changed from openai_api_version
+                azure_endpoint=self.api_base,  # Changed from openai_api_base
                 cache=self.cache_enabled,
                 **(self.extra_params or {}),
                 **kwargs,
@@ -385,7 +384,7 @@ class OpenAILLMConfig(LLMConfig):
 
     provider: LLMProvider = LLMProvider.OPENAI
     api_key: SecretStr = Field(
-        default=SecretStr(""),
+        default_factory=lambda: SecretStr(os.getenv("OPENAI_API_KEY", "")),
         description="API key for OpenAI.",
     )
 
@@ -398,17 +397,19 @@ class OpenAILLMConfig(LLMConfig):
             return SecretStr(env_value)
         return v
 
+    @classmethod
+    def get_models(cls) -> List[str]:
+        """Get all available OpenAI models."""
+        from openai import OpenAI
+
+        client = OpenAI()
+        return client.models.list().data
+
     def instantiate(self, **kwargs) -> Any:
         """
         Instantiate OpenAI Chat model.
         """
-        try:
-            from langchain_openai import ChatOpenAI
-        except ImportError:
-            raise RuntimeError(
-                "langchain-openai is not installed. "
-                "Please install it with 'pip install langchain-openai'"
-            )
+        from langchain_openai import OpenAIChat
 
         # Validate API key
         if not self.get_api_key():
@@ -418,7 +419,7 @@ class OpenAILLMConfig(LLMConfig):
             )
 
         try:
-            return ChatOpenAI(
+            return OpenAIChat(
                 model_name=self.model,
                 openai_api_key=self.get_api_key(),
                 cache=self.cache_enabled,
@@ -434,11 +435,11 @@ class AnthropicLLMConfig(LLMConfig):
 
     provider: LLMProvider = LLMProvider.ANTHROPIC
     model: str = Field(
-        default="claude-3-opus-20240229",
+        default_factory=lambda: os.getenv("ANTHROPIC_MODEL", "claude-3-opus-20240229"),
         description="Anthropic model name.",
     )
     api_key: SecretStr = Field(
-        default=SecretStr(""),
+        default_factory=lambda: SecretStr(os.getenv("ANTHROPIC_API_KEY", "")),
         description="API key for Anthropic.",
     )
 
@@ -461,17 +462,19 @@ class AnthropicLLMConfig(LLMConfig):
             return SecretStr(env_value)
         return v
 
+    @classmethod
+    def get_models(cls) -> List[str]:
+        """Get all available Anthropic models."""
+        from anthropic import Anthropic
+
+        client = Anthropic()
+        return client.models.list().data
+
     def instantiate(self, **kwargs) -> Any:
         """
         Instantiate Anthropic Chat model.
         """
-        try:
-            from langchain_anthropic import ChatAnthropic
-        except ImportError:
-            raise RuntimeError(
-                "langchain-anthropic is not installed. "
-                "Please install it with 'pip install langchain-anthropic'"
-            )
+        from langchain_anthropic import ChatAnthropic
 
         # Validate API key
         if not self.get_api_key():
@@ -500,7 +503,7 @@ class GeminiLLMConfig(LLMConfig):
     provider: LLMProvider = LLMProvider.GEMINI
     model: str = Field(default="gemini-1.5-pro", description="Gemini model name.")
     api_key: SecretStr = Field(
-        default=SecretStr(""),
+        default_factory=lambda: SecretStr(os.getenv("GEMINI_API_KEY", "")),
         description="API key for Google Gemini.",
     )
 
@@ -509,7 +512,7 @@ class GeminiLLMConfig(LLMConfig):
     def load_api_key(cls, v: SecretStr) -> SecretStr:
         """Load API key from environment if not provided."""
         if v.get_secret_value() == "":
-            env_value = os.getenv("GOOGLE_API_KEY", "")
+            env_value = os.getenv("GEMINI_API_KEY", "")
             return SecretStr(env_value)
         return v
 
@@ -517,19 +520,13 @@ class GeminiLLMConfig(LLMConfig):
         """
         Instantiate Google Gemini Chat model.
         """
-        try:
-            from langchain_google_genai import ChatGoogleGenerativeAI
-        except ImportError:
-            raise RuntimeError(
-                "langchain-google-genai is not installed. "
-                "Please install it with 'pip install langchain-google-genai'"
-            )
+        from langchain_google_genai import ChatGoogleGenerativeAI
 
         # Validate API key
         if not self.get_api_key():
             raise ValueError(
                 "Google Gemini API key is required. "
-                "Please set GOOGLE_API_KEY or GEMINI_API_KEY environment variable or provide an API key."
+                "Please set GEMINI_API_KEY environment variable or provide an API key."
             )
 
         try:
@@ -550,30 +547,23 @@ class DeepSeekLLMConfig(LLMConfig):
     provider: LLMProvider = LLMProvider.DEEPSEEK
     model: str = Field(default="deepseek-chat", description="DeepSeek model name.")
     api_key: SecretStr = Field(
-        default=SecretStr(""),
+        default_factory=lambda: SecretStr(os.getenv("DEEPSEEK_API_KEY", "")),
         description="API key for DeepSeek.",
     )
 
-    @field_validator("api_key")
     @classmethod
-    def load_api_key(cls, v: SecretStr) -> SecretStr:
-        """Load API key from environment if not provided."""
-        if v.get_secret_value() == "":
-            env_value = os.getenv("DEEPSEEK_API_KEY", "")
-            return SecretStr(env_value)
-        return v
+    def get_models(cls) -> List[str]:
+        """Get all available DeepSeek models."""
+        from deepseek import DeepSeekAPI
+
+        client = DeepSeekAPI(api_key=os.getenv("DEEPSEEK_API_KEY", ""))
+        return client.get_models()
 
     def instantiate(self, **kwargs) -> Any:
         """
         Instantiate DeepSeek Chat model.
         """
-        try:
-            from langchain_deepseek import ChatDeepSeek
-        except ImportError:
-            raise RuntimeError(
-                "langchain-deepseek is not installed. "
-                "Please install it with 'pip install langchain-deepseek'"
-            )
+        from langchain_deepseek import ChatDeepSeek
 
         # Validate API key
         if not self.get_api_key():
@@ -602,7 +592,7 @@ class MistralLLMConfig(LLMConfig):
         default="mistral-large-latest", description="Mistral model name."
     )
     api_key: SecretStr = Field(
-        default=SecretStr(""),
+        default_factory=lambda: SecretStr(os.getenv("MISTRAL_API_KEY", "")),
         description="API key for Mistral.",
     )
 
@@ -615,17 +605,19 @@ class MistralLLMConfig(LLMConfig):
             return SecretStr(env_value)
         return v
 
+    @classmethod
+    def get_models(cls) -> List[str]:
+        """Get all available Mistral models."""
+        from mistralai import Mistral
+
+        client = Mistral(api_key=os.getenv("MISTRAL_API_KEY", ""))
+        return client.models.list()
+
     def instantiate(self, **kwargs) -> Any:
         """
         Instantiate Mistral Chat model.
         """
-        try:
-            from langchain_mistralai import ChatMistralAI
-        except ImportError:
-            raise RuntimeError(
-                "langchain-mistralai is not installed. "
-                "Please install it with 'pip install langchain-mistralai'"
-            )
+        from langchain_mistralai import ChatMistralAI
 
         # Validate API key
         if not self.get_api_key():
@@ -652,7 +644,7 @@ class GroqLLMConfig(LLMConfig):
     provider: LLMProvider = LLMProvider.GROQ
     model: str = Field(default="llama3-70b-8192", description="Groq model name.")
     api_key: SecretStr = Field(
-        default=SecretStr(""),
+        default_factory=lambda: SecretStr(os.getenv("GROQ_API_KEY", "")),
         description="API key for Groq.",
     )
 
@@ -669,13 +661,7 @@ class GroqLLMConfig(LLMConfig):
         """
         Instantiate Groq Chat model.
         """
-        try:
-            from langchain_groq import ChatGroq
-        except ImportError:
-            raise RuntimeError(
-                "langchain-groq is not installed. "
-                "Please install it with 'pip install langchain-groq'"
-            )
+        from langchain_groq import ChatGroq
 
         # Validate API key
         if not self.get_api_key():
@@ -702,7 +688,7 @@ class CohereLLMConfig(LLMConfig):
     provider: LLMProvider = LLMProvider.COHERE
     model: str = Field(default="command", description="Cohere model name.")
     api_key: SecretStr = Field(
-        default=SecretStr(""),
+        default_factory=lambda: SecretStr(os.getenv("COHERE_API_KEY", "")),
         description="API key for Cohere.",
     )
 
@@ -719,13 +705,7 @@ class CohereLLMConfig(LLMConfig):
         """
         Instantiate Cohere Chat model.
         """
-        try:
-            from langchain_cohere import ChatCohere
-        except ImportError:
-            raise RuntimeError(
-                "langchain-cohere is not installed. "
-                "Please install it with 'pip install langchain-cohere'"
-            )
+        from langchain_cohere import ChatCohere
 
         # Validate API key
         if not self.get_api_key():
@@ -754,7 +734,7 @@ class TogetherAILLMConfig(LLMConfig):
         default="meta-llama/Llama-3-70b-chat-hf", description="Together AI model name."
     )
     api_key: SecretStr = Field(
-        default=SecretStr(""),
+        default_factory=lambda: SecretStr(os.getenv("TOGETHER_AI_API_KEY", "")),
         description="API key for Together AI.",
     )
 
@@ -771,13 +751,7 @@ class TogetherAILLMConfig(LLMConfig):
         """
         Instantiate Together AI Chat model.
         """
-        try:
-            from langchain_together import ChatTogether
-        except ImportError:
-            raise RuntimeError(
-                "langchain-together is not installed. "
-                "Please install it with 'pip install langchain-together'"
-            )
+        from langchain_together import ChatTogether
 
         # Validate API key
         if not self.get_api_key():
@@ -808,7 +782,7 @@ class FireworksAILLMConfig(LLMConfig):
         default="fireworks/llama-v3-70b-chat", description="Fireworks AI model name."
     )
     api_key: SecretStr = Field(
-        default=SecretStr(""),
+        default_factory=lambda: SecretStr(os.getenv("FIREWORKS_AI_API_KEY", "")),
         description="API key for Fireworks AI.",
     )
 
@@ -825,13 +799,7 @@ class FireworksAILLMConfig(LLMConfig):
         """
         Instantiate Fireworks AI Chat model.
         """
-        try:
-            from langchain_fireworks import ChatFireworks
-        except ImportError:
-            raise RuntimeError(
-                "langchain-fireworks is not installed. "
-                "Please install it with 'pip install langchain-fireworks'"
-            )
+        from langchain_fireworks import ChatFireworks
 
         # Validate API key
         if not self.get_api_key():
@@ -862,8 +830,8 @@ class PerplexityLLMConfig(LLMConfig):
         default="sonar-medium-online", description="Perplexity model name."
     )
     api_key: SecretStr = Field(
-        default=SecretStr(""),
-        description="API key for Perplexity.",
+        default_factory=lambda: SecretStr(os.getenv("PERPLEXITY_API_KEY", "")),
+        description="API key for Perplexity AI.",
     )
 
     @field_validator("api_key")
@@ -908,7 +876,7 @@ class HuggingFaceLLMConfig(LLMConfig):
     provider: LLMProvider = LLMProvider.HUGGINGFACE
     model: str = Field(..., description="Model ID on Hugging Face Hub.")
     api_key: SecretStr = Field(
-        default=SecretStr(""),
+        default_factory=lambda: SecretStr(os.getenv("HUGGING_FACE_API_KEY", "")),
         description="API key for Hugging Face.",
     )
     endpoint_url: Optional[str] = Field(
@@ -977,7 +945,7 @@ class AI21LLMConfig(LLMConfig):
     provider: LLMProvider = LLMProvider.AI21
     model: str = Field(default="j2-ultra", description="AI21 model name.")
     api_key: SecretStr = Field(
-        default=SecretStr(""),
+        default_factory=lambda: SecretStr(os.getenv("AI21_API_KEY", "")),
         description="API key for AI21.",
     )
 
@@ -1027,7 +995,7 @@ class AlephAlphaLLMConfig(LLMConfig):
     provider: LLMProvider = LLMProvider.ALEPH_ALPHA
     model: str = Field(default="luminous-base", description="Aleph Alpha model name.")
     api_key: SecretStr = Field(
-        default=SecretStr(""),
+        default_factory=lambda: SecretStr(os.getenv("ALEPH_ALPHA_API_KEY", "")),
         description="API key for Aleph Alpha.",
     )
 
@@ -1073,7 +1041,7 @@ class GooseAILLMConfig(LLMConfig):
     provider: LLMProvider = LLMProvider.GOOSEAI
     model: str = Field(default="gpt-neo-20b", description="GooseAI model name.")
     api_key: SecretStr = Field(
-        default=SecretStr(""),
+        default_factory=lambda: SecretStr(os.getenv("GOOSEAI_API_KEY", "")),
         description="API key for GooseAI.",
     )
 
@@ -1123,7 +1091,7 @@ class MosaicMLLLMConfig(LLMConfig):
     provider: LLMProvider = LLMProvider.MOSAICML
     model: str = Field(default="mpt-7b", description="MosaicML model name.")
     api_key: SecretStr = Field(
-        default=SecretStr(""),
+        default_factory=lambda: SecretStr(os.getenv("MOSAICML_API_KEY", "")),
         description="API key for MosaicML.",
     )
 
@@ -1169,7 +1137,7 @@ class NLPCloudLLMConfig(LLMConfig):
         default="finetuned-gpt-neox-20b", description="NLP Cloud model name."
     )
     api_key: SecretStr = Field(
-        default=SecretStr(""),
+        default_factory=lambda: SecretStr(os.getenv("NLP_CLOUD_API_KEY", "")),
         description="API key for NLP Cloud.",
     )
 
@@ -1221,7 +1189,7 @@ class OpenLMLLMConfig(LLMConfig):
     provider: LLMProvider = LLMProvider.OPENLM
     model: str = Field(default="open-llama-3b", description="OpenLM model name.")
     api_key: SecretStr = Field(
-        default=SecretStr(""),
+        default_factory=lambda: SecretStr(os.getenv("OPENLM_API_KEY", "")),
         description="API key for OpenLM.",
     )
 
@@ -1384,3 +1352,36 @@ class VertexAILLMConfig(LLMConfig):
             raise RuntimeError(
                 f"Failed to instantiate Vertex AI model: {str(e)}"
             ) from e
+
+
+# TODO: CONVERT OT LIST AND ADD SUPP FOR GEMINI
+"""
+To convert a ModelList object from the Mistral AI Python client into a list of model names like ['mistral-ocr-2505'], use this code:
+
+python
+# Assuming `model_list` is your ModelList instance
+model_names = [model.id for model in model_list.data]
+This works because:
+
+ModelList objects have a data attribute containing model entries
+
+Each model entry has an id field with the model name string
+
+List comprehension efficiently extracts these IDs
+
+Example with full context:
+
+python
+from mistralai import Mistral
+
+client = Mistral(api_key="your_api_key")
+model_list = client.models.list()  # Returns ModelList object
+
+# Convert to list of model names
+model_names = [model.id for model in model_list.data]
+print(model_names)  # Output: ['mistral-ocr-2505', 'mistral-small-2503', ...]
+"""
+# print(AnthropicLLMConfig.get_models()[:10])
+# print(OpenAILLMConfig.get_models()[:10])
+# print(MistralLLMConfig.get_models(),type(MistralLLMConfig.get_models()))
+# print(DeepSeekLLMConfig.get_models()) -> deepseek-chat,deepseek-reasoner

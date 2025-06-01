@@ -7,7 +7,7 @@ and capability information.
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 
 from haive.core.models.metadata import get_model_metadata
 
@@ -50,18 +50,8 @@ class ModelMetadataMixin:
             return output_tokens
 
         # Default fallback based on common models
-        model_name = getattr(self, "model", "").lower()
-        if "gpt-3.5" in model_name:
-            return 16384
-        if "gpt-4o" in model_name:
-            return 128000
-        if "gpt-4" in model_name:
-            return 8192
-        if "claude" in model_name:
-            return 100000
-
-        # Default fallback
-        return 4096
+        getattr(self, "model", "").lower()
+        return 0
 
     def get_max_input_tokens(self) -> int:
         """
@@ -200,23 +190,23 @@ class ModelMetadataMixin:
 
     def _get_model_metadata(self) -> Dict[str, Any]:
         """
-        Get the metadata for this model.
-
-        This method checks the provider and model name to retrieve
-        the appropriate metadata.
+        Get metadata for the current model, using alias if available.
 
         Returns:
-            Dict[str, Any]: Model metadata dictionary
+            Dictionary of model metadata
         """
-        provider_value = getattr(self, "provider", None)
-        if hasattr(provider_value, "value"):
-            provider_value = provider_value.value
+
+        # Use model_alias if available, otherwise use model name
+        model_name_for_lookup = getattr(self, "model_alias", None) or self.model
+
+        # Get provider value, handling different formats
+        if hasattr(self.provider, "value"):
+            provider_value = self.provider.value
         else:
-            provider_value = str(provider_value) if provider_value else None
+            provider_value = str(self.provider)
 
-        model_name = getattr(self, "model", "")
-
-        return get_model_metadata(model_name, provider_value)
+        # Use the imported function for actual lookup
+        return get_model_metadata(model_name_for_lookup, provider_value)
 
     # Property getters for common capabilities
     @property

@@ -7,10 +7,9 @@ model metadata from LiteLLM's model_prices_and_context_window.json.
 
 import json
 import logging
-import os
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Optional
 
 import requests
 
