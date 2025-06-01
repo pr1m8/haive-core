@@ -1,716 +1,283 @@
-# src/haive/core/schema/prebuilt/tool_state.py
+import logging
+from typing import Any, Dict, List, Optional
 
-import operator
-import uuid
-from typing import (
-    Annotated,
-    Any,
-    Callable,
-    ClassVar,
-    Dict,
-    List,
-    Optional,
-    Sequence,
-    Type,
-    Union,
-)
-
-from langchain_core.messages import AIMessage, BaseMessage, ToolMessage
-from langchain_core.tools import BaseTool, BaseToolkit, StructuredTool, Tool
-from langgraph.graph import END, add_messages
-from langgraph.types import Command, Send
-from pydantic import BaseModel, Field, ValidationError, model_validator
+from langchain_core.tools import BaseTool
+from pydantic import Field, computed_field, model_validator
 
 from haive.core.schema.prebuilt.messages_state import MessagesState
-from haive.core.schema.state_schema import StateSchema
+
+logger = logging.getLogger(__name__)
 
 
 class ToolState(MessagesState):
     """
-    State schema for tool management and execution.
-    Extends MessagesState with tool tracking, validation, and routing capabilities.
+    State schema for tool-based agents with proper Pydantic v2 patterns.
+
+    Inherits from MessagesState for message handling and adds tool-specific functionality.
+    Follows the same tool routes pattern as AugLLMConfig.
     """
 
-    # Tool storage - actual tool instances with name indexing
-    tools: Dict[str, Union[Type[BaseTool], StructuredTool, Tool, Callable]] = Field(
-        default_factory=dict, description="Available tools indexed by tool name"
+    # Tool-related fields - matching AugLLMConfig pattern
+    tools: List[Any] = Field(default_factory=list, description="Available tools")
+    tool_routes: Dict[str, str] = Field(
+        default_factory=dict, description="Mapping of tool names to their routes/types"
+    )
+    name_attrs: List[str] = Field(
+        default_factory=lambda: ["name", "__name__", "func_name"],
+        description="Attributes to check for tool names",
+    )
+    content: Optional[str] = Field(default=None, description="Content field")
+    output_schemas: Dict[str, Any] = Field(
+        default_factory=dict, description="Output schemas for tools"
     )
 
-    # Tool schemas for validation - defaults to tools unless explicitly provided
-    tool_schemas: Dict[str, Union[Type[BaseTool], Type[BaseModel]]] = Field(
-        default_factory=dict,
-        description="Tool schemas for validation (defaults to tools unless explicitly provided)",
-    )
-
-    # Engine tracking (for integration with engine system)
-    engines: Dict[str, Any] = Field(
-        default_factory=dict, description="Engines used in this workflow"
-    )
-
-    # Tool calls tracking with reducers
-    tool_calls: Annotated[List[Dict[str, Any]], operator.add] = Field(
-        default_factory=list, description="Current active tool calls"
-    )
-
-    validated_tool_calls: Annotated[List[Dict[str, Any]], operator.add] = Field(
-        default_factory=list, description="Tool calls that have been validated"
-    )
-
-    invalid_tool_calls: Annotated[List[Dict[str, Any]], operator.add] = Field(
-        default_factory=list,
-        description="Tool calls that failed validation with errors",
-    )
-
-    completed_tool_calls: Annotated[List[Dict[str, Any]], operator.add] = Field(
-        default_factory=list, description="Tool calls that have been executed"
-    )
-
-    # Storage for Pydantic model instances created during tool execution
-    model_instances: Dict[str, BaseModel] = Field(
-        default_factory=dict, description="Pydantic model instances created by tools"
-    )
-
-    # Execution tracking
-    validation_attempts: Dict[str, int] = Field(
-        default_factory=dict, description="Track validation attempts by tool call ID"
-    )
-
-    execution_attempts: Dict[str, int] = Field(
-        default_factory=dict, description="Track execution attempts by tool call ID"
-    )
-
-    # Limits
-    max_validation_attempts: int = Field(
-        default=3, description="Maximum validation attempts before giving up"
-    )
-
-    max_execution_attempts: int = Field(
-        default=3, description="Maximum execution attempts before giving up"
-    )
-
-    # Version (for compatibility with different routing strategies)
-    version: str = Field(default="v2", description="Version of tool handling to use")
-
-    # Configuration for structured response (for tools that return structured data)
-    response_format: Optional[Type[BaseModel]] = Field(
-        default=None, description="Optional response format for structured outputs"
-    )
-    direct_parse_tools: Dict[str, Type[BaseModel]] = Field(
-        default_factory=dict,
-        description="Tools that should parse directly without execution",
-    )
-    # Configuration
-    __shared_fields__ = ["messages", "tools", "engines"]
-
-    __serializable_reducers__ = {
-        "messages": "add_messages",
-        "tool_calls": "operator.add",
-        "validated_tool_calls": "operator.add",
-        "invalid_tool_calls": "operator.add",
-        "completed_tool_calls": "operator.add",
-    }
-
-    __reducer_fields__ = {
-        "messages": add_messages,
-        "tool_calls": operator.add,
-        "validated_tool_calls": operator.add,
-        "invalid_tool_calls": operator.add,
-        "completed_tool_calls": operator.add,
-    }
-    output_schemas: Dict[str, Type[BaseModel]] = Field(
-        default_factory=dict,
-        description="Output schemas for structured parsing by tool name",
-    )
-
-    def register_direct_parse_model(
-        self, model: Type[BaseModel], tool_name: Optional[str] = None
-    ) -> None:
+    @model_validator(mode="after")
+    def sync_tools_and_update_routes(self) -> "ToolState":
         """
-        Register a model that should be directly parsed from LLM output
-        without tool execution.
+        Sync tools from engines and update tool routes after model creation.
 
-        Args:
-            model: Pydantic model class
-            tool_name: Optional tool name to associate with
+        This runs after the parent validator, so engines are already set up.
         """
-        model_name = model.__name__
-        self.output_schemas[model_name] = model
+        # Call parent validator first
+        super().setup_engines_and_tools()
 
-        # Mark for direct parsing
-        self.direct_parse_tools[model_name] = model
+        # Now sync tool routes based on the current tools
+        self._sync_tool_routes()
 
-        # Store tool association if provided
-        if tool_name:
-            setattr(model, "tool_name", tool_name)
+        return self
 
-    # Initialize tool system
-    def initialize_tools(
-        self,
-        tools: Sequence[
-            Union[
-                Type[BaseTool],
-                StructuredTool,
-                Tool,
-                BaseToolkit,
-                Callable,
-                Type[BaseModel],
-            ]
-        ],
-    ) -> None:
-        """
-        Initialize tool system with tools and schemas.
+    def _sync_tool_routes(self) -> None:
+        """Synchronize tool_routes with current tools - matches AugLLMConfig pattern."""
+        new_routes = {}
 
-        Args:
-            tools: List of tools or toolkits to initialize
-        """
-        # Process tools and toolkits
-        for tool_item in tools:
-            if isinstance(tool_item, BaseToolkit):
-                # Get tools from toolkit
-                toolkit_tools = tool_item.get_tools()
-                for tool in toolkit_tools:
-                    self._register_tool(tool)
-            else:
-                # Direct tool
-                self._register_tool(tool_item)
+        for i, tool in enumerate(self.tools):
+            # Determine tool name
+            tool_name = self._get_tool_name(tool, i)
 
-    def register_output_schema(self, schema_name: str, schema: Type[BaseModel]) -> None:
-        """
-        Register an output schema for parsing tool results.
+            # Determine route/type - matching AugLLMConfig categorization
+            route = self._get_tool_route(tool)
 
-        Args:
-            schema_name: Name to identify this schema
-            schema: Pydantic model class for parsing
-        """
-        self.output_schemas[schema_name] = schema
+            new_routes[tool_name] = route
+            logger.debug(f"Mapped tool '{tool_name}' to route '{route}'")
 
-    def register_tool_with_output(
-        self,
-        tool: Union[BaseTool, StructuredTool],
-        output_schema: Optional[Type[BaseModel]] = None,
-    ) -> None:
-        """Register a tool with optional output schema for parsing."""
-        # Register tool as normal
-        self._register_tool(tool)
+        self.tool_routes = new_routes
 
-        # If output schema provided, store it
-        if output_schema:
-            tool_name = getattr(tool, "name", None)
-            if tool_name:
-                self.output_schemas[tool_name] = output_schema
-
-    def register_validation_schema(
-        self, tool_name: str, schema: Type[BaseModel]
-    ) -> None:
-        """
-        Register an explicit validation schema for a tool.
-
-        Args:
-            tool_name: Name of the tool to associate with schema
-            schema: Pydantic model to use for validation
-        """
-        self.tool_schemas[tool_name] = schema
-
-    def _register_tool(
-        self,
-        tool: Union[Type[BaseTool], StructuredTool, Tool, Callable, Type[BaseModel]],
-    ) -> None:
-        """
-        Register a single tool in the state.
-
-        Args:
-            tool: Tool to register
-        """
-        # Handle different tool types
-        if isinstance(tool, type):
-            # Tool class or BaseModel class
-            if issubclass(tool, BaseModel):
-                # This is a Pydantic model class for validation
-                tool_name = getattr(tool, "__name__", f"model_{uuid.uuid4().hex[:8]}")
-                self.tools[tool_name] = tool
-                self.tool_schemas[tool_name] = tool
-            elif issubclass(tool, BaseTool):
-                # This is a tool class - create instance
-                try:
-                    tool_instance = tool()
-                    tool_name = getattr(tool_instance, "name", None) or getattr(
-                        tool, "__name__", None
-                    )
-                    if not tool_name:
-                        tool_name = f"tool_{uuid.uuid4().hex[:8]}"
-
-                    self.tools[tool_name] = tool
-
-                    # For BaseTool classes, check if they have args_schema
-                    args_schema = getattr(tool_instance, "args_schema", None)
-                    if (
-                        args_schema
-                        and isinstance(args_schema, type)
-                        and issubclass(args_schema, BaseModel)
-                    ):
-                        self.tool_schemas[tool_name] = args_schema
-                    else:
-                        # Default to using the tool itself as schema
-                        self.tool_schemas[tool_name] = tool
-
-                except Exception as e:
-                    # If we can't instantiate, just store the class
-                    tool_name = getattr(
-                        tool, "__name__", f"tool_{uuid.uuid4().hex[:8]}"
-                    )
-                    self.tools[tool_name] = tool
-                    self.tool_schemas[tool_name] = tool
-        elif isinstance(tool, (StructuredTool, Tool)):
-            # Tool instance
-            tool_name = getattr(tool, "name", None)
-            if not tool_name:
-                tool_name = f"tool_{uuid.uuid4().hex[:8]}"
-
-            self.tools[tool_name] = tool
-
-            # Get schema if available
-            schema = getattr(tool, "args_schema", None)
-            if schema and isinstance(schema, type) and issubclass(schema, BaseModel):
-                self.tool_schemas[tool_name] = schema
-            else:
-                # Default to using the tool itself
-                self.tool_schemas[tool_name] = type(tool)
-        elif callable(tool):
-            # Function tool
-            tool_name = getattr(tool, "__name__", f"func_{uuid.uuid4().hex[:8]}")
-            self.tools[tool_name] = tool
-            # No schema for callables by default
+    def _get_tool_name(self, tool: Any, index: int) -> str:
+        """Extract tool name from various possible attributes."""
+        if hasattr(tool, "name"):
+            return tool.name
+        elif isinstance(tool, type) and hasattr(tool, "__name__"):
+            return tool.__name__
+        elif hasattr(tool, "__name__"):
+            return tool.__name__
         else:
-            # Unknown type
-            tool_name = getattr(tool, "name", f"unknown_{uuid.uuid4().hex[:8]}")
-            self.tools[tool_name] = tool
+            return f"tool_{index}"
 
-    def extract_tool_calls(self) -> List[Dict[str, Any]]:
-        """
-        Extract tool calls from the last AI message.
-
-        Returns:
-            List of tool call dictionaries
-        """
-        # Get the most recent AI message
-        ai_message = self.get_last_ai_message()
-        if not ai_message:
-            return []
-
-        # Check for tool_calls attribute
-        extracted_calls = []
-        if hasattr(ai_message, "tool_calls") and ai_message.tool_calls:
-            extracted_calls = ai_message.tool_calls
-
-        # Check in additional_kwargs
-        elif hasattr(
-            ai_message, "additional_kwargs"
-        ) and ai_message.additional_kwargs.get("tool_calls"):
-            extracted_calls = ai_message.additional_kwargs["tool_calls"]
-
-        # Normalize and add IDs if missing
-        normalized_calls = []
-        for call in extracted_calls:
-            # Ensure it's a dictionary
-            if isinstance(call, dict):
-                call_dict = call.copy()
-            else:
-                # Convert to dictionary
-                call_dict = {"name": getattr(call, "name", "unknown_tool")}
-                if hasattr(call, "args"):
-                    call_dict["args"] = call.args
-                if hasattr(call, "id"):
-                    call_dict["id"] = call.id
-
-            # Ensure it has an ID
-            if "id" not in call_dict:
-                call_dict["id"] = f"call_{uuid.uuid4().hex[:8]}"
-
-            normalized_calls.append(call_dict)
-
-        return normalized_calls
-
-    def update_tool_calls(self) -> None:
-        """
-        Update tool_calls from the last AI message.
-        """
-        new_calls = self.extract_tool_calls()
-        if new_calls:
-            self.tool_calls.extend(new_calls)
-
-    def validate_tool_call(
-        self, tool_call: Dict[str, Any]
-    ) -> Union[Dict[str, Any], None]:
-        """
-        Validate a tool call against its schema.
-
-        Args:
-            tool_call: Tool call to validate
-
-        Returns:
-            Validated tool call or None if validation failed
-        """
-        # Get tool name and arguments
-        tool_name = tool_call.get("name")
-        args = tool_call.get("args", {})
-        call_id = tool_call.get("id", f"call_{uuid.uuid4().hex[:8]}")
-
-        # Ensure tool call has an ID
-        if "id" not in tool_call:
-            tool_call["id"] = call_id
-
-        # Return immediately if no tool name
-        if not tool_name:
-            self.add_invalid_call(tool_call, "Missing tool name")
-            return None
-
-        # Check if tool exists
-        if tool_name not in self.tools:
-            self.add_invalid_call(tool_call, f"Unknown tool: {tool_name}")
-            return None
-
-        # Initialize validated call with copy of original
-        validated_call = tool_call.copy()
-        validated_call["validated"] = False
-
-        # Get the tool instance or class
-        tool = self.tools[tool_name]
-
-        # Get the validation schema (explicit schema or tool itself)
-        schema = self.tool_schemas.get(tool_name)
-
-        # Check if we can get tool type information
-        if hasattr(tool, "tool_type"):
-            validated_call["tool_type"] = getattr(tool, "tool_type")
-
-        # If no schema and we have a tool, just mark as validated
-        if not schema:
-            validated_call["validated"] = True
-            return validated_call
-
-        try:
-            # Normalize arguments if they're a string (handle JSON strings)
-            if isinstance(args, str):
-                try:
-                    import json
-
-                    args_dict = json.loads(args)
-                except json.JSONDecodeError:
-                    args_dict = {"input": args}
-            else:
-                args_dict = args
-
-            # Handle different schema types
-            if isinstance(schema, type) and issubclass(schema, BaseModel):
-                # Pydantic model validation
-                validated_model = schema(**args_dict)
-
-                # Update validated call
-                validated_call["args"] = validated_model.model_dump()
-                validated_call["validated"] = True
-                validated_call["model_type"] = schema.__name__
-
-                # Store model instance for later reference
-                self.model_instances[call_id] = validated_model
-
-            elif isinstance(schema, type) and issubclass(schema, BaseTool):
-                # Try to create a tool instance for validation
-                try:
-                    # Some tools may need args for initialization
-                    tool_instance = schema()
-
-                    # Check for args_schema
-                    args_schema = getattr(tool_instance, "args_schema", None)
-                    if (
-                        args_schema
-                        and isinstance(args_schema, type)
-                        and issubclass(args_schema, BaseModel)
-                    ):
-                        # Validate with args schema
-                        validated_model = args_schema(**args_dict)
-
-                        # Update validated call
-                        validated_call["args"] = validated_model.model_dump()
-                        validated_call["validated"] = True
-                        validated_call["model_type"] = args_schema.__name__
-
-                        # Store model instance
-                        self.model_instances[call_id] = validated_model
-                    else:
-                        # No schema but it's a valid tool type
-                        validated_call["validated"] = True
-                except Exception as e:
-                    # Failed to instantiate the tool
-                    self.add_invalid_call(tool_call, f"Failed to create tool: {str(e)}")
-                    return None
-            else:
-                # For any other case, mark as validated
-                validated_call["validated"] = True
-
-            # Check for output schemas that match this tool
-            for schema_name, output_schema in self.output_schemas.items():
-                # Match by tool_name attribute
-                if (
-                    hasattr(output_schema, "tool_name")
-                    and getattr(output_schema, "tool_name") == tool_name
-                ):
-                    validated_call["output_schema"] = schema_name
-                    break
-
-            # Check if this is a direct parse model (no execution needed)
-            if "model_type" in validated_call:
-                model_type = validated_call["model_type"]
-                if model_type in self.direct_parse_tools:
-                    validated_call["direct_parse"] = True
-                    # Ensure output schema is set if not already
-                    if "output_schema" not in validated_call:
-                        validated_call["output_schema"] = model_type
-
-            # Validation succeeded
-            return validated_call
-
-        except ValidationError as e:
-            # Validation failed with a Pydantic error
-            self.add_invalid_call(tool_call, str(e))
-            return None
-        except Exception as e:
-            # Other unexpected error
-            self.add_invalid_call(tool_call, f"Validation error: {str(e)}")
-            return None
-
-    def add_validated_call(self, tool_call: Dict[str, Any]) -> None:
-        """
-        Add a validated tool call.
-
-        Args:
-            tool_call: Validated tool call dictionary
-        """
-        # Add to validated calls
-        self.validated_tool_calls.append(tool_call)
-
-        # Remove from pending calls if present
-        self._remove_from_pending(tool_call)
-
-    def add_invalid_call(self, tool_call: Dict[str, Any], error: str) -> None:
-        """
-        Add an invalid tool call with error.
-
-        Args:
-            tool_call: Invalid tool call dictionary
-            error: Error message
-        """
-        # Add error to the call
-        tool_call_with_error = tool_call.copy()
-        tool_call_with_error["error"] = error
-
-        # Add to invalid calls
-        self.invalid_tool_calls.append(tool_call_with_error)
-
-        # Remove from pending calls if present
-        self._remove_from_pending(tool_call)
-
-        # Track validation attempt
-        call_id = tool_call.get("id", "unknown")
-        self.validation_attempts[call_id] = self.validation_attempts.get(call_id, 0) + 1
-
-    def add_completed_call(self, tool_call: Dict[str, Any], result: Any) -> None:
-        """
-        Add a completed tool call with result.
-
-        Args:
-            tool_call: Executed tool call dictionary
-            result: Execution result
-        """
-        # Add result to the call
-        completed_call = tool_call.copy()
-        completed_call["result"] = result
-
-        # Add to completed calls
-        self.completed_tool_calls.append(completed_call)
-
-        # Remove from validated calls if present
-        self._remove_from_validated(tool_call)
-
-    def _remove_from_pending(self, tool_call: Dict[str, Any]) -> None:
-        """Remove a tool call from pending list."""
-        call_id = tool_call.get("id")
-        if call_id:
-            self.tool_calls = [
-                call for call in self.tool_calls if call.get("id") != call_id
-            ]
-
-    def _remove_from_validated(self, tool_call: Dict[str, Any]) -> None:
-        """Remove a tool call from validated list."""
-        call_id = tool_call.get("id")
-        if call_id:
-            self.validated_tool_calls = [
-                call for call in self.validated_tool_calls if call.get("id") != call_id
-            ]
-
-    def exceeded_validation_attempts(self, call_id: str) -> bool:
-        """
-        Check if validation attempts exceeded for a call.
-
-        Args:
-            call_id: Tool call ID
-
-        Returns:
-            True if max attempts exceeded
-        """
-        return self.validation_attempts.get(call_id, 0) >= self.max_validation_attempts
-
-    def exceeded_execution_attempts(self, call_id: str) -> bool:
-        """
-        Check if execution attempts exceeded for a call.
-
-        Args:
-            call_id: Tool call ID
-
-        Returns:
-            True if max attempts exceeded
-        """
-        return self.execution_attempts.get(call_id, 0) >= self.max_execution_attempts
-
-    def needs_validation(self) -> bool:
-        """Check if there are tool calls that need validation."""
-        return len(self.tool_calls) > 0
-
-    def needs_execution(self) -> bool:
-        """Check if there are validated tool calls that need execution."""
-        return len(self.validated_tool_calls) > 0
-
-    def has_structured_output_tools(self) -> bool:
-        """Check if any of the validated tools produce structured output."""
-        for call in self.validated_tool_calls:
-            if "model_type" in call:
-                return True
-        return False
-
-    def need_output_parsing(self) -> bool:
-        """Check if any completed tools require output parsing."""
-        for call in self.completed_tool_calls:
-            if "model_type" in call:
-                return True
-        return False
-
-    def should_continue(self) -> Union[str, List[Send]]:
-        """
-        Determine next steps based on the current state.
-        Similar to the function in your example.
-
-        Returns:
-            Routing directive (node name or Send objects)
-        """
-        messages = self.messages
-
-        if not messages:
-            return END
-
-        last_message = messages[-1]
-
-        # If there's no AI message with tool calls, we're done
-        if not isinstance(last_message, AIMessage) or not getattr(
-            last_message, "tool_calls", None
+    def _get_tool_route(self, tool: Any) -> str:
+        """Determine the route type for a tool."""
+        if isinstance(tool, type) and self._is_basemodel_subclass(tool):
+            return "pydantic_model"
+        elif isinstance(tool, BaseTool) or (
+            isinstance(tool, type) and issubclass(tool, BaseTool)
         ):
-            return (
-                END if self.response_format is None else "generate_structured_response"
+            return "langchain_tool"
+        elif callable(tool):
+            return "function"
+        else:
+            return "unknown"
+
+    def _is_basemodel_subclass(self, tool: Any) -> bool:
+        """Check if tool is a BaseModel subclass."""
+        try:
+            from pydantic import BaseModel
+
+            return isinstance(tool, type) and issubclass(tool, BaseModel)
+        except Exception:
+            return False
+
+    @computed_field
+    @property
+    def tool_types(self) -> Dict[str, str]:
+        """
+        Computed field for backward compatibility.
+
+        Maps the new tool_routes to the old tool_types interface:
+        - pydantic_model → parse_output
+        - langchain_tool → tool_node
+        - function → tool_node
+        - unknown → tool_node
+        """
+        legacy_mapping = {
+            "pydantic_model": "parse_output",
+            "langchain_tool": "tool_node",
+            "function": "tool_node",
+            "unknown": "tool_node",
+        }
+
+        return {
+            tool_name: legacy_mapping.get(route, "tool_node")
+            for tool_name, route in self.tool_routes.items()
+        }
+
+    def add_tool(self, tool: Any, route: Optional[str] = None) -> None:
+        """
+        Add a tool and update tool routes - matches AugLLMConfig pattern.
+
+        Args:
+            tool: Tool to add
+            route: Optional explicit route/type (pydantic_model, langchain_tool, function, unknown)
+        """
+        if tool not in self.tools:
+            self.tools.append(tool)
+
+            # Determine tool name
+            tool_name = self._get_tool_name(tool, len(self.tools))
+
+            # Set route - use explicit route if provided, otherwise auto-determine
+            if route:
+                self.tool_routes[tool_name] = route
+            else:
+                self.tool_routes[tool_name] = self._get_tool_route(tool)
+
+            logger.debug(
+                f"Added tool '{tool_name}' with route '{self.tool_routes[tool_name]}'"
             )
 
-        # Update tool calls
-        self.update_tool_calls()
-
-        # If we have pending calls, they need validation
-        if self.needs_validation():
-            return "validation"
-
-        # If we have validated calls, they need execution
-        if self.needs_execution():
-            if self.version == "v1":
-                return "tools"
-            elif self.version == "v2":
-                # Create Send objects for parallel execution
-                return [
-                    Send("tools", tool_call) for tool_call in self.validated_tool_calls
-                ]
-
-        # If we have completed calls that need parsing, go to parsing node
-        if self.need_output_parsing():
-            return "output_parsing"
-
-        # Otherwise, we're done with tools, go back to agent
-        return "agent" if self.invalid_tool_calls or self.completed_tool_calls else END
-
-    def route_based_on_tool_state(self) -> Union[str, List[Union[str, Send]]]:
+    def remove_tool(self, tool: Any) -> None:
         """
-        Make routing decision based on current tool state.
+        Remove a tool and update tool routes.
+
+        Args:
+            tool: Tool to remove
+        """
+        if tool in self.tools:
+            self.tools.remove(tool)
+
+            # Find and remove from tool_routes
+            tool_name = None
+            for i, t in enumerate(self.tools):
+                if t == tool:
+                    tool_name = self._get_tool_name(t, i)
+                    break
+
+            if tool_name and tool_name in self.tool_routes:
+                del self.tool_routes[tool_name]
+                logger.debug(f"Removed tool '{tool_name}'")
+
+            # Re-sync to ensure consistency
+            self._sync_tool_routes()
+
+    def get_tool_by_name(self, tool_name: str) -> Optional[Any]:
+        """
+        Get a tool by its name.
+
+        Args:
+            tool_name: Name of tool to retrieve
 
         Returns:
-            Either a node name or Send objects
+            Tool if found, None otherwise
         """
-        # Check if we need validation first
-        if self.needs_validation():
-            return "validation"
+        for i, tool in enumerate(self.tools):
+            if self._get_tool_name(tool, i) == tool_name:
+                return tool
+        return None
 
-        # Check if we need execution
-        if self.needs_execution():
-            # For multiple tools, use parallel execution with Send
-            if len(self.validated_tool_calls) > 1:
-                return [
-                    Send("tools", tool_call) for tool_call in self.validated_tool_calls
-                ]
-            # For single tool, just route to tools node
-            elif len(self.validated_tool_calls) == 1:
-                return "tools"
-
-        # Check if we need output parsing
-        if self.need_output_parsing():
-            return "output_parsing"
-
-        # Otherwise, go back to agent or end
-        return "agent" if self.invalid_tool_calls or self.completed_tool_calls else END
-
-    # Define validation node logic
-    def validate_all_tool_calls(self) -> Command:
+    def get_tools_by_route(self, route: str) -> List[Any]:
         """
-        Validate all pending tool calls and prepare routing.
+        Get all tools of a specific route type.
+
+        Args:
+            route: Route type to retrieve (pydantic_model, langchain_tool, function, unknown)
 
         Returns:
-            Command with update and routing
+            List of tools of the specified route type
         """
-        # Make sure we have the latest tool calls
-        self.update_tool_calls()
+        result = []
+        for tool_name, tool_route in self.tool_routes.items():
+            if tool_route == route:
+                tool = self.get_tool_by_name(tool_name)
+                if tool:
+                    result.append(tool)
+        return result
 
-        # Validate each tool call
-        for tool_call in list(self.tool_calls):
-            validated_call = self.validate_tool_call(tool_call)
-            if validated_call:
-                self.add_validated_call(validated_call)
-
-        # Determine next step
-        next_step = self.route_based_on_tool_state()
-
-        # Return Command with updated state and routing
-        return Command(goto=next_step)
-
-    # Output parsing node logic
-    def parse_tool_outputs(self) -> Command:
+    def get_tools_by_type(self, tool_type: str) -> List[Any]:
         """
-        Parse outputs from completed tools that produced structured data.
+        Get all tools of a specific type (legacy interface).
+
+        Args:
+            tool_type: Type of tools to retrieve (parse_output, tool_node)
 
         Returns:
-            Command with parsed models and routing
+            List of tools of the specified type
         """
-        updates = {}
+        # Convert legacy type to routes
+        type_to_routes = {
+            "parse_output": ["pydantic_model"],
+            "tool_node": ["langchain_tool", "function", "unknown"],
+        }
 
-        # Process all completed tool calls
-        for call in self.completed_tool_calls:
-            if "model_type" in call and call.get("id") in self.model_instances:
-                # Get the model instance
-                model = self.model_instances[call["id"]]
-                model_name = model.__class__.__name__
+        routes = type_to_routes.get(tool_type, [])
+        result = []
+        for route in routes:
+            result.extend(self.get_tools_by_route(route))
+        return result
 
-                # Add to updates
-                updates[model_name] = model
+    def has_tool_route(self, route: str) -> bool:
+        """
+        Check if any tools of a specific route exist.
 
-        # Return Command with updates and go back to agent
-        return Command(update=updates, goto="agent")
+        Args:
+            route: Route to check for (pydantic_model, langchain_tool, function, unknown)
+
+        Returns:
+            True if any tools of this route exist
+        """
+        return route in self.tool_routes.values()
+
+    def has_tool_type(self, tool_type: str) -> bool:
+        """
+        Check if any tools of a specific type exist (legacy interface).
+
+        Args:
+            tool_type: Type to check for (parse_output, tool_node)
+
+        Returns:
+            True if any tools of this type exist
+        """
+        return tool_type in self.tool_types.values()
+
+    def refresh_tool_routes(self) -> None:
+        """
+        Manually refresh tool routes if needed.
+        """
+        self._sync_tool_routes()
+
+    def update_tool_types(self) -> None:
+        """
+        Legacy interface - now calls refresh_tool_routes.
+        """
+        self.refresh_tool_routes()
+
+    def get_tool_route(self, tool_name: str) -> Optional[str]:
+        """
+        Get the route of a specific tool.
+
+        Args:
+            tool_name: Name of the tool
+
+        Returns:
+            Tool route if found (pydantic_model, langchain_tool, function, unknown), None otherwise
+        """
+        return self.tool_routes.get(tool_name)
+
+    def get_tool_type(self, tool_name: str) -> Optional[str]:
+        """
+        Get the type of a specific tool (legacy interface).
+
+        Args:
+            tool_name: Name of the tool
+
+        Returns:
+            Tool type if found (parse_output, tool_node), None otherwise
+        """
+        return self.tool_types.get(tool_name)

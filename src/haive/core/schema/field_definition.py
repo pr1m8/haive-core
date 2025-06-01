@@ -5,11 +5,8 @@ The FieldDefinition class represents a complete field definition including type,
 default value, metadata, and additional properties.
 """
 
-import inspect
 import logging
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
-
-from pydantic import BaseModel, Field
 
 from haive.core.schema.field_utils import create_annotated_field, create_field
 

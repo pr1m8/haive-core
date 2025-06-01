@@ -27,9 +27,24 @@ from typing import (
 
 from langchain_core.messages import BaseMessage
 from langchain_core.runnables import RunnableConfig
-from pydantic import BaseModel, create_model
+from pydantic import BaseModel, create_model, model_validator
+from rich.console import Console
+from rich.logging import RichHandler
+from rich.panel import Panel
+from rich.syntax import Syntax
+from rich.table import Table
+from rich.tree import Tree
+
+# Set up rich logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(message)s",
+    datefmt="[%X]",
+    handlers=[RichHandler(rich_tracebacks=True)],
+)
 
 logger = logging.getLogger(__name__)
+console = Console()
 
 if TYPE_CHECKING:
     from haive.core.schema.schema_manager import StateSchemaManager
@@ -49,6 +64,7 @@ class StateSchema(BaseModel, Generic[T]):
     - Serialization and deserialization support
     - State manipulation utilities
     - Pretty printing and visualization
+    - Engine access and tools management
 
     Field sharing and reducers are critical for proper state handling in nested graphs,
     enabling parent and child graphs to share and update state properly.
@@ -94,6 +110,112 @@ class StateSchema(BaseModel, Generic[T]):
                 data.pop(field)
 
         return data
+
+    @model_validator(mode="after")
+    def setup_engines_and_tools(self) -> "StateSchema":
+        """
+        Setup engines and sync their tools if present.
+
+        This validator runs after the model is created and:
+        1. Finds all engine fields in the state
+        2. If engine has tools and state has tools field, syncs them
+        3. Sets up parent-child relationships for nested state schemas
+        """
+        logger.debug(f"Setting up engines for {self.__class__.__name__}")
+
+        # Track engines for debugging
+        found_engines = []
+
+        # Find engine fields
+        for field_name, field_value in self.__dict__.items():
+            # Skip None values and non-engine fields
+            if field_value is None:
+                continue
+
+            # Check if field is an engine
+            if hasattr(field_value, "engine_type"):
+                engine_name = getattr(field_value, "name", field_name)
+                found_engines.append(engine_name)
+
+                # If engine has tools and we have a tools field, sync them
+                if hasattr(field_value, "tools") and hasattr(self, "tools"):
+                    engine_tools = getattr(field_value, "tools", [])
+                    logger.debug(
+                        f"Found engine '{engine_name}' with {len(engine_tools)} tools"
+                    )
+
+                    # Add engine tools to our tools list if not already there
+                    for tool in engine_tools:
+                        if tool not in self.tools:
+                            tool_name = getattr(tool, "name", str(tool))
+                            logger.debug(
+                                f"Adding tool '{tool_name}' from engine '{engine_name}'"
+                            )
+                            self.tools.append(tool)
+
+            # Check if field is another StateSchema for recursive handling
+            elif isinstance(field_value, StateSchema):
+                nested_schema_name = field_value.__class__.__name__
+                logger.debug(
+                    f"Found nested schema '{nested_schema_name}' in field '{field_name}'"
+                )
+
+                # Handle shared fields between parent and child schemas
+                self._sync_shared_fields(field_value, field_name)
+
+        if found_engines:
+            logger.debug(
+                f"Found engines in {self.__class__.__name__}: {', '.join(found_engines)}"
+            )
+
+        return self
+
+    def _sync_shared_fields(self, child_schema: "StateSchema", field_name: str) -> None:
+        """
+        Sync shared fields between parent and child schemas.
+
+        Args:
+            child_schema: Child StateSchema instance
+            field_name: Field name in the parent schema
+        """
+        # Get shared fields from child schema
+        child_shared = getattr(child_schema.__class__, "__shared_fields__", [])
+
+        for shared_field in child_shared:
+            # Check if child has this field
+            if hasattr(child_schema, shared_field):
+                # Get child field value
+                child_value = getattr(child_schema, shared_field)
+
+                # Check if parent has this field
+                if hasattr(self, shared_field):
+                    # Get parent field value
+                    parent_value = getattr(self, shared_field)
+
+                    # Check for reducers
+                    reducer_fields = getattr(self.__class__, "__reducer_fields__", {})
+
+                    if shared_field in reducer_fields:
+                        # Apply reducer to combine values
+                        reducer = reducer_fields[shared_field]
+                        try:
+                            combined_value = reducer(parent_value, child_value)
+                            # Update both parent and child
+                            setattr(self, shared_field, combined_value)
+                            setattr(child_schema, shared_field, combined_value)
+                            logger.debug(
+                                f"Synced shared field '{shared_field}' between parent and '{field_name}' using reducer"
+                            )
+                        except Exception as e:
+                            logger.warning(
+                                f"Error applying reducer for shared field '{shared_field}': {e}"
+                            )
+                    else:
+                        # Default to parent value for now (will be overridden by reducer later if needed)
+                        setattr(child_schema, shared_field, parent_value)
+                        logger.debug(
+                            f"Synced shared field '{shared_field}' from parent to '{field_name}'"
+                        )
 
     def dict(self, **kwargs) -> Dict[str, Any]:
         """
@@ -196,6 +318,178 @@ class StateSchema(BaseModel, Generic[T]):
         # Create instance with Pydantic v2 method
         return cls.model_validate(full_data)
 
+    def get_engine(self, name: str) -> Optional[Any]:
+        """
+        Get an engine by name from any engine fields.
+
+        Args:
+            name: Name of the engine to retrieve
+
+        Returns:
+            Engine instance if found, None otherwise
+        """
+        logger.debug(f"Looking for engine: {name}")
+
+        # First try by field name
+        if hasattr(self, name):
+            field_value = getattr(self, name)
+            if hasattr(field_value, "engine_type"):
+                logger.debug(f"Found engine '{name}' by field name")
+                return field_value
+
+        # Then try by engine name attribute
+        for field_name, field_value in self.__dict__.items():
+            if field_value is None:
+                continue
+
+            if hasattr(field_value, "engine_type"):
+                engine_name = getattr(field_value, "name", "")
+                if engine_name == name:
+                    logger.debug(f"Found engine '{name}' in field '{field_name}'")
+                    return field_value
+
+        logger.debug(f"Engine '{name}' not found")
+        return None
+
+    def get_engines(self) -> Dict[str, Any]:
+        """
+        Get all engines in this state.
+
+        Returns:
+            Dictionary mapping engine names to engine instances
+        """
+        engines = {}
+
+        for field_name, field_value in self.__dict__.items():
+            if field_value is None:
+                continue
+
+            if hasattr(field_value, "engine_type"):
+                engine_name = getattr(field_value, "name", field_name)
+                engines[engine_name] = field_value
+
+        return engines
+
+    def has_engine(self, name: str) -> bool:
+        """
+        Check if an engine exists in this state.
+
+        Args:
+            name: Name of the engine to check
+
+        Returns:
+            True if engine exists, False otherwise
+        """
+        return self.get_engine(name) is not None
+
+    def get_state_values(
+        self, keys: Union[List[str], Dict[str, str], None] = None
+    ) -> Dict[str, Any]:
+        """
+        Extract specified state values into a dictionary.
+
+        Args:
+            keys: Can be:
+                - List[str]: List of field names to extract
+                - Dict[str, str]: Mapping of output keys to state field names
+                - None: Extract all fields
+
+        Returns:
+            Dictionary containing the requested state values
+        """
+        result = {}
+
+        # Handle dictionary mapping case
+        if isinstance(keys, dict):
+            for output_key, field_name in keys.items():
+                if hasattr(self, field_name):
+                    result[output_key] = getattr(self, field_name)
+                else:
+                    # Optional: add warning/default handling for missing fields
+                    logger.debug(f"Field not found: {field_name}")
+                    result[output_key] = None
+            return result
+
+        # Handle list of keys case
+        elif isinstance(keys, list):
+            for field_name in keys:
+                if hasattr(self, field_name):
+                    result[field_name] = getattr(self, field_name)
+
+        # Handle None case - extract all fields
+        else:
+            # Use model_dump to get all fields
+            result = self.model_dump()
+
+            # Filter out internal fields and other excluded fields
+            excluded_fields = ["tool_types_dict"]
+            for field in list(result.keys()):
+                if field.startswith("__") or field in excluded_fields:
+                    result.pop(field, None)
+
+        return result
+
+    @classmethod
+    def extract_values(
+        cls,
+        state: Union["StateSchema", Dict[str, Any]],
+        keys: Union[List[str], Dict[str, str], None] = None,
+    ) -> Dict[str, Any]:
+        """
+        Class method to extract values from a state object or dictionary.
+
+        Args:
+            state: State object or dictionary to extract values from
+            keys: Can be:
+                - List[str]: List of field names to extract
+                - Dict[str, str]: Mapping of output keys to state field names
+                - None: Extract all fields
+
+        Returns:
+            Dictionary containing the requested values
+        """
+        # Log extraction request
+        key_str = str(keys) if keys else "all fields"
+        logger.debug(f"Extracting values ({key_str}) from {type(state).__name__}")
+
+        # If state is already a StateSchema instance, use its get_state_values method
+        if isinstance(state, cls):
+            return state.get_state_values(keys)
+
+        # If state is a dictionary
+        if isinstance(state, dict):
+            result = {}
+
+            # Handle dictionary mapping case
+            if isinstance(keys, dict):
+                for output_key, field_name in keys.items():
+                    result[output_key] = state.get(field_name)
+                return result
+
+            # Handle list of keys case
+            elif isinstance(keys, list):
+                for field_name in keys:
+                    if field_name in state:
+                        result[field_name] = state[field_name]
+                return result
+
+            # Handle None case - return all fields
+            else:
+                # Make a copy to avoid modifying the original
+                result = state.copy()
+
+                # Filter out internal fields
+                excluded_fields = ["tool_types_dict"]
+                for field in list(result.keys()):
+                    if field.startswith("__") or field in excluded_fields:
+                        result.pop(field, None)
+
+                return result
+
+        # If state is neither a StateSchema nor a dict, return empty dict
+        logger.warning(f"Cannot extract values from {type(state).__name__}")
+        return {}
+
     def get(self, key: str, default: Any = None) -> Any:
         """
         Safely get a field value with a default.
@@ -275,15 +569,19 @@ class StateSchema(BaseModel, Generic[T]):
                     # Apply reducer and set the result
                     reduced_value = reducer(current_value, value)
                     setattr(self, key, reduced_value)
+                    logger.debug(f"Applied reducer for field '{key}'")
                     continue  # Skip to next field after successful reduction
                 except Exception as e:
-                    logger.warning(f"Error applying reducer for {key}: {e}")
+                    logger.warning(
+                        f"Error applying reducer for {key}: {e}", exc_info=True
+                    )
                     # Fall through to special handling or simple assignment
 
             # Special handling for list values - concat them when both are lists
             if isinstance(current_value, list) and isinstance(value, list):
                 merged_list = current_value + value
                 setattr(self, key, merged_list)
+                logger.debug(f"Merged lists for field '{key}'")
                 continue
 
             # Special handling for dictionary values - merge them instead of replacing
@@ -291,10 +589,12 @@ class StateSchema(BaseModel, Generic[T]):
                 merged_dict = current_value.copy()
                 merged_dict.update(value)
                 setattr(self, key, merged_dict)
+                logger.debug(f"Merged dictionaries for field '{key}'")
                 continue
 
             # Simple assignment (no reducer or reducer failed)
             setattr(self, key, value)
+            logger.debug(f"Simple assignment for field '{key}'")
 
         return self
 
@@ -803,8 +1103,20 @@ class StateSchema(BaseModel, Generic[T]):
             if engine_name in self.__class__.__input_fields__:
                 input_fields = self.__class__.__input_fields__[engine_name]
 
-        # If no input fields specified, return empty dict
+        # If no input fields specified, try to use get_engine to find the engine
         if not input_fields:
+            engine = self.get_engine(engine_name)
+            if engine and hasattr(engine, "input_schema"):
+                # If engine has an input schema, use its fields
+                if hasattr(engine.input_schema, "model_fields"):
+                    input_fields = list(engine.input_schema.model_fields.keys())
+                    logger.debug(
+                        f"Using input fields from engine {engine_name} input schema: {input_fields}"
+                    )
+
+        # If still no input fields, return empty dict
+        if not input_fields:
+            logger.debug(f"No input fields found for engine {engine_name}")
             return {}
 
         # Extract values for input fields
@@ -829,6 +1141,9 @@ class StateSchema(BaseModel, Generic[T]):
         Returns:
             Self for chaining
         """
+        # Log the merge operation
+        logger.debug(f"Merging output from engine '{engine_name}'")
+
         # Filter output to include only fields that are outputs from this engine
         filtered_output = {}
 
@@ -840,17 +1155,45 @@ class StateSchema(BaseModel, Generic[T]):
                 for field_name in output_fields:
                     if field_name in output:
                         filtered_output[field_name] = output[field_name]
+                        logger.debug(
+                            f"Including field '{field_name}' from engine output (from mappings)"
+                        )
         elif hasattr(self.__class__, "__output_fields__"):
             if engine_name in self.__class__.__output_fields__:
                 output_fields = self.__class__.__output_fields__[engine_name]
                 for field_name in output_fields:
                     if field_name in output:
                         filtered_output[field_name] = output[field_name]
+                        logger.debug(
+                            f"Including field '{field_name}' from engine output (from fields)"
+                        )
+
+        # If no output fields specified, try to use get_engine to find the engine
+        if not filtered_output:
+            engine = self.get_engine(engine_name)
+            if engine and hasattr(engine, "output_schema"):
+                # If engine has an output schema, use all fields from output
+                logger.debug(
+                    f"Using all output fields from engine '{engine_name}' (has output schema)"
+                )
+                filtered_output = output
+            else:
+                # No filtering, use all fields
+                logger.debug(
+                    f"Using all output fields from engine '{engine_name}' (no filtering)"
+                )
+                filtered_output = output
 
         # Apply update with or without reducers
         if apply_reducers:
+            logger.debug(
+                f"Applying reducers to engine output (fields: {list(filtered_output.keys())})"
+            )
             return self.apply_reducers(filtered_output)
         else:
+            logger.debug(
+                f"Updating with engine output without reducers (fields: {list(filtered_output.keys())})"
+            )
             return self.update(filtered_output)
 
     # Configuration integration
@@ -907,35 +1250,35 @@ class StateSchema(BaseModel, Generic[T]):
         Args:
             title: Optional title for the display
         """
-        try:
-            from rich.console import Console
-            from rich.panel import Panel
-            from rich.tree import Tree
+        display_title = title or f"{self.__class__.__name__} Instance"
 
-            console = Console()
-            display_title = title or f"{self.__class__.__name__} Instance"
+        # Create tree representation
+        tree = Tree(f"[bold blue]{self.__class__.__name__}[/bold blue]")
 
-            # Create tree representation
-            tree = Tree(f"{self.__class__.__name__}:")
+        # Add fields
+        for field_name, field_value in self.model_dump().items():
+            # Format field value
+            formatted_value = self._format_field_value(field_value)
 
-            # Add fields
-            for field_name, field_value in self.model_dump().items():
-                # Format field value
-                formatted_value = self._format_field_value(field_value)
-                # Add to tree
-                tree.add(f"{field_name}: {formatted_value}")
+            # Determine field style based on type
+            field_style = "green"
+            if isinstance(field_value, list):
+                field_style = "yellow"
+            elif isinstance(field_value, dict):
+                field_style = "cyan"
+            elif isinstance(field_value, (int, float)):
+                field_style = "magenta"
 
-            # Create panel with tree
-            panel = Panel(tree, title=display_title, border_style="blue")
+            # Add to tree with styled field name
+            tree.add(
+                f"[bold {field_style}]{field_name}[/bold {field_style}]: {formatted_value}"
+            )
 
-            # Print to console
-            console.print(panel)
+        # Create panel with tree
+        panel = Panel(tree, title=display_title, border_style="blue")
 
-        except ImportError:
-            # Fall back to simple print if rich is not available
-            print(f"--- {title or self.__class__.__name__} ---")
-            for field_name, field_value in self.model_dump().items():
-                print(f"{field_name}: {field_value}")
+        # Print to console
+        console.print(panel)
 
     @staticmethod
     def _format_field_value(value: Any) -> str:
@@ -949,33 +1292,37 @@ class StateSchema(BaseModel, Generic[T]):
             Formatted string representation
         """
         if value is None:
-            return "None"
+            return "[dim]None[/dim]"
         elif isinstance(value, str):
             if len(value) > 100:
-                return f'"{value[:97]}..."'
-            return f'"{value}"'
-        elif isinstance(value, (int, float, bool)):
-            return str(value)
+                return f'[green]"{value[:97]}..."[/green]'
+            return f'[green]"{value}"[/green]'
+        elif isinstance(value, int):
+            return f"[magenta]{value}[/magenta]"
+        elif isinstance(value, float):
+            return f"[magenta]{value:.6g}[/magenta]"
+        elif isinstance(value, bool):
+            return f"[cyan]{value}[/cyan]"
         elif isinstance(value, list):
             if not value:
-                return "[]"
+                return "[dim][]"
             if len(value) > 5:
                 items_str = ", ".join(str(v)[:20] for v in value[:3])
-                return f"[{items_str}, ... ({len(value)} items)]"
-            return f"[{', '.join(str(v)[:50] for v in value)}]"
+                return f"[yellow][{items_str}, ... ({len(value)} items)][/yellow]"
+            return f"[yellow][{', '.join(str(v)[:50] for v in value)}][/yellow]"
         elif isinstance(value, dict):
             if not value:
-                return "{}"
+                return "[dim]{}"
             if len(value) > 3:
                 items = list(value.items())[:3]
                 items_str = ", ".join(f"{k}: {str(v)[:20]}" for k, v in items)
-                return f"{{{items_str}, ... ({len(value)} items)}}"
-            return f"{{{', '.join(f'{k}: {str(v)[:50]}' for k, v in value.items())}}}"
+                return f"[cyan]{{{items_str}, ... ({len(value)} items)}}[/cyan]"
+            return f"[cyan]{{{', '.join(f'{k}: {str(v)[:50]}' for k, v in value.items())}}}[/cyan]"
         elif hasattr(value, "__class__"):
             class_name = value.__class__.__name__
             if hasattr(value, "model_dump"):
-                return f"{class_name}(...)"
-            return f"<{class_name}>"
+                return f"[blue]{class_name}(...)[/blue]"
+            return f"[blue]<{class_name}>[/blue]"
         return str(value)
 
         # Add these methods to the StateSchema class
@@ -1021,118 +1368,93 @@ class StateSchema(BaseModel, Generic[T]):
         Args:
             title: Optional title for the display
         """
-        try:
-            from rich.console import Console
-            from rich.panel import Panel
-            from rich.table import Table
-            from rich.tree import Tree
+        schema_name = cls.__name__
+        display_title = title or f"{schema_name} Schema"
 
-            console = Console()
-            schema_name = cls.__name__
-            display_title = title or f"{schema_name} Schema"
+        # Create main tree
+        tree = Tree(
+            f"[bold blue]class {schema_name}([/bold blue][italic]{cls.__base__.__name__}[/italic][bold blue])[/bold blue]:"
+        )
 
-            # Create main tree
-            tree = Tree(f"class {schema_name}({cls.__base__.__name__}):")
+        # Add fields
+        fields_node = tree.add("[bold cyan]Fields:[/bold cyan]")
+        for field_name, field_info in cls.model_fields.items():
+            # Skip special fields
+            if field_name.startswith("__"):
+                continue
 
-            # Add fields
-            fields_node = tree.add("Fields:")
-            for field_name, field_info in cls.model_fields.items():
-                # Skip special fields
-                if field_name.startswith("__"):
-                    continue
+            # Format field type
+            field_type = field_info.annotation
+            type_str = str(field_type).replace("typing.", "")
 
-                # Format field type
-                field_type = field_info.annotation
-                type_str = str(field_type).replace("typing.", "")
-
-                # Format default value
-                if field_info.default_factory is not None:
-                    factory_name = getattr(
-                        field_info.default_factory, "__name__", "factory"
-                    )
-                    default_str = f"default_factory={factory_name}"
+            # Format default value
+            if field_info.default_factory is not None:
+                factory_name = getattr(
+                    field_info.default_factory, "__name__", "factory"
+                )
+                default_str = f"default_factory={factory_name}"
+            else:
+                default = field_info.default
+                if default is ...:
+                    default_str = "[red]required[/red]"
                 else:
-                    default = field_info.default
-                    if default is ...:
-                        default_str = "required"
-                    else:
-                        default_str = f"default={repr(default)}"
+                    default_str = f"default={repr(default)}"
 
-                # Add description if available
-                if field_info.description:
-                    desc_str = f" # {field_info.description}"
-                else:
-                    desc_str = ""
+            # Add description if available
+            if field_info.description:
+                desc_str = f" [dim]# {field_info.description}[/dim]"
+            else:
+                desc_str = ""
 
-                # Add to tree
-                fields_node.add(f"{field_name}: {type_str} ({default_str}){desc_str}")
+            # Add to tree with proper styling
+            fields_node.add(
+                f"[green]{field_name}[/green]: [yellow]{type_str}[/yellow] ({default_str}){desc_str}"
+            )
 
-            # Add shared fields
-            if cls.__shared_fields__:
-                shared_node = tree.add("Shared Fields:")
-                for field in cls.__shared_fields__:
-                    shared_node.add(field)
+        # Add shared fields
+        if cls.__shared_fields__:
+            shared_node = tree.add("[bold magenta]Shared Fields:[/bold magenta]")
+            for field in cls.__shared_fields__:
+                shared_node.add(f"[green]{field}[/green]")
 
-            # Add reducers
-            if cls.__serializable_reducers__:
-                reducers_node = tree.add("Reducers:")
-                for field, reducer in cls.__serializable_reducers__.items():
-                    reducers_node.add(f"{field}: {reducer}")
+        # Add reducers
+        if cls.__serializable_reducers__:
+            reducers_node = tree.add("[bold yellow]Reducers:[/bold yellow]")
+            for field, reducer in cls.__serializable_reducers__.items():
+                reducers_node.add(f"[green]{field}[/green]: [blue]{reducer}[/blue]")
 
-            # Add engine I/O mappings
-            if cls.__engine_io_mappings__:
-                io_node = tree.add("Engine I/O Mappings:")
-                for engine, mapping in cls.__engine_io_mappings__.items():
-                    engine_node = io_node.add(f"{engine}:")
-                    if mapping.get("inputs"):
-                        engine_node.add(f"Inputs: {mapping['inputs']}")
-                    if mapping.get("outputs"):
-                        engine_node.add(f"Outputs: {mapping['outputs']}")
+        # Add engine I/O mappings
+        if cls.__engine_io_mappings__:
+            io_node = tree.add("[bold cyan]Engine I/O Mappings:[/bold cyan]")
+            for engine, mapping in cls.__engine_io_mappings__.items():
+                engine_node = io_node.add(f"[bold]{engine}[/bold]:")
+                if mapping.get("inputs"):
+                    engine_node.add(f"[blue]Inputs[/blue]: {mapping['inputs']}")
+                if mapping.get("outputs"):
+                    engine_node.add(f"[green]Outputs[/green]: {mapping['outputs']}")
 
-            # Add structured output models information
-            if hasattr(cls, "__structured_models__") and cls.__structured_models__:
-                structured_node = tree.add("Structured Models:")
-                for model_name, model_path in cls.__structured_models__.items():
-                    structured_node.add(f"{model_name}: {model_path}")
+        # Add structured output models information
+        if hasattr(cls, "__structured_models__") and cls.__structured_models__:
+            structured_node = tree.add("[bold green]Structured Models:[/bold green]")
+            for model_name, model_path in cls.__structured_models__.items():
+                structured_node.add(
+                    f"[yellow]{model_name}[/yellow]: [blue]{model_path}[/blue]"
+                )
 
-                    # Add fields if we have them
-                    if (
-                        hasattr(cls, "__structured_model_fields__")
-                        and model_name in cls.__structured_model_fields__
-                    ):
-                        fields = cls.__structured_model_fields__[model_name]
-                        fields_str = ", ".join(fields)
-                        structured_node.add(f"  Fields: {fields_str}")
+                # Add fields if we have them
+                if (
+                    hasattr(cls, "__structured_model_fields__")
+                    and model_name in cls.__structured_model_fields__
+                ):
+                    fields = cls.__structured_model_fields__[model_name]
+                    fields_str = ", ".join(fields)
+                    structured_node.add(f"  [dim]Fields: {fields_str}[/dim]")
 
-            # Create panel with tree
-            panel = Panel(tree, title=display_title, border_style="green")
+        # Create panel with tree
+        panel = Panel(tree, title=display_title, border_style="green")
 
-            # Print to console
-            console.print(panel)
-
-        except ImportError:
-            # Fall back to simple print if rich is not available
-            print(f"--- {title or cls.__name__} Schema ---")
-            print(f"class {cls.__name__}({cls.__base__.__name__}):")
-            print("  Fields:")
-            for field_name, field_info in cls.model_fields.items():
-                if not field_name.startswith("__"):
-                    print(f"    {field_name}: {field_info.annotation}")
-
-            if cls.__shared_fields__:
-                print("  Shared Fields:")
-                for field in cls.__shared_fields__:
-                    print(f"    {field}")
-
-            if cls.__serializable_reducers__:
-                print("  Reducers:")
-                for field, reducer in cls.__serializable_reducers__.items():
-                    print(f"    {field}: {reducer}")
-
-            if hasattr(cls, "__structured_models__") and cls.__structured_models__:
-                print("  Structured Models:")
-                for model_name, model_path in cls.__structured_models__.items():
-                    print(f"    {model_name}: {model_path}")
+        # Print to console
+        console.print(panel)
 
     @classmethod
     def to_python_code(cls) -> str:
@@ -1258,28 +1580,18 @@ class StateSchema(BaseModel, Generic[T]):
         Args:
             title: Optional title for the display
         """
-        try:
-            from rich.console import Console
-            from rich.panel import Panel
-            from rich.syntax import Syntax
+        code = cls.to_python_code()
 
-            console = Console()
-            code = cls.to_python_code()
+        # Create syntax highlighted code
+        syntax = Syntax(code, "python", theme="monokai", line_numbers=True)
 
-            # Create syntax highlighted code
-            syntax = Syntax(code, "python", theme="monokai", line_numbers=True)
+        # Create panel with syntax
+        panel = Panel(
+            syntax, title=title or f"{cls.__name__} Code", border_style="yellow"
+        )
 
-            # Create panel with syntax
-            panel = Panel(
-                syntax, title=title or f"{cls.__name__} Code", border_style="yellow"
-            )
-
-            # Print to console
-            console.print(panel)
-        except ImportError:
-            # Fall back to simple print if rich is not available
-            print(f"--- {title or cls.__name__} Code ---")
-            print(cls.to_python_code())
+        # Print to console
+        console.print(panel)
 
     @classmethod
     def compare_with(
@@ -1292,73 +1604,57 @@ class StateSchema(BaseModel, Generic[T]):
             other: Other schema to compare with
             title: Optional title for the comparison
         """
-        try:
-            from rich.console import Console
-            from rich.table import Table
+        table = Table(title=title or "Schema Comparison")
 
-            console = Console()
-            table = Table(title=title or "Schema Comparison")
+        # Add columns
+        table.add_column("Field", style="cyan")
+        table.add_column(cls.__name__, style="green")
+        table.add_column(other.__name__, style="blue")
 
-            # Add columns
-            table.add_column("Field", style="cyan")
-            table.add_column(cls.__name__, style="green")
-            table.add_column(other.__name__, style="blue")
+        # Get all field names
+        all_fields = set(cls.model_fields.keys()) | set(other.model_fields.keys())
+        all_fields = {field for field in all_fields if not field.startswith("__")}
 
-            # Get all field names
-            all_fields = set(cls.model_fields.keys()) | set(other.model_fields.keys())
-            all_fields = {field for field in all_fields if not field.startswith("__")}
+        # Add rows for each field
+        for field_name in sorted(all_fields):
+            cls_field = cls.model_fields.get(field_name)
+            other_field = other.model_fields.get(field_name)
 
-            # Add rows for each field
-            for field_name in sorted(all_fields):
-                cls_field = cls.model_fields.get(field_name)
-                other_field = other.model_fields.get(field_name)
+            # Format fields
+            cls_str = (
+                cls._format_field_info(cls_field)
+                if cls_field
+                else "[dim]Not present[/dim]"
+            )
+            other_str = (
+                cls._format_field_info(other_field)
+                if other_field
+                else "[dim]Not present[/dim]"
+            )
 
-                # Format fields
-                cls_str = (
-                    cls._format_field_info(cls_field) if cls_field else "Not present"
-                )
-                other_str = (
-                    cls._format_field_info(other_field)
-                    if other_field
-                    else "Not present"
-                )
+            # Add row
+            table.add_row(field_name, cls_str, other_str)
 
-                # Add row
-                table.add_row(field_name, cls_str, other_str)
+        # Add metadata comparison
+        table.add_section()
 
-            # Add metadata comparison
-            table.add_section()
+        # Compare shared fields
+        cls_shared = cls.__shared_fields__
+        other_shared = other.__shared_fields__
+        table.add_row("Shared Fields", str(cls_shared), str(other_shared))
 
-            # Compare shared fields
-            cls_shared = cls.__shared_fields__
-            other_shared = other.__shared_fields__
-            table.add_row("Shared Fields", str(cls_shared), str(other_shared))
+        # Compare reducers
+        cls_reducers = cls.__serializable_reducers__
+        other_reducers = other.__serializable_reducers__
+        table.add_row("Reducers", str(cls_reducers), str(other_reducers))
 
-            # Compare reducers
-            cls_reducers = cls.__serializable_reducers__
-            other_reducers = other.__serializable_reducers__
-            table.add_row("Reducers", str(cls_reducers), str(other_reducers))
+        # Compare engine I/O mappings
+        cls_io = cls.__engine_io_mappings__
+        other_io = other.__engine_io_mappings__
+        table.add_row("Engine I/O", str(cls_io), str(other_io))
 
-            # Print table
-            console.print(table)
-
-        except ImportError:
-            # Fall back to simple print if rich is not available
-            print(f"--- Schema Comparison: {cls.__name__} vs {other.__name__} ---")
-            print("Fields in both:")
-            for field in set(cls.model_fields.keys()) & set(other.model_fields.keys()):
-                if not field.startswith("__"):
-                    print(f"  {field}")
-
-            print(f"Fields only in {cls.__name__}:")
-            for field in set(cls.model_fields.keys()) - set(other.model_fields.keys()):
-                if not field.startswith("__"):
-                    print(f"  {field}")
-
-            print(f"Fields only in {other.__name__}:")
-            for field in set(other.model_fields.keys()) - set(cls.model_fields.keys()):
-                if not field.startswith("__"):
-                    print(f"  {field}")
+        # Print table
+        console.print(table)
 
     @staticmethod
     def _format_field_info(field_info: Any) -> str:
@@ -1384,8 +1680,86 @@ class StateSchema(BaseModel, Generic[T]):
         else:
             default = field_info.default
             if default is ...:
-                default_str = "required"
+                default_str = "[red]required[/red]"
             else:
                 default_str = f"default={repr(default)}"
 
-        return f"{type_str} ({default_str})"
+        return f"[yellow]{type_str}[/yellow] ({default_str})"
+
+    @classmethod
+    def as_table(cls) -> Table:
+        """
+        Create a rich table representation of the schema.
+
+        Returns:
+            Rich Table object
+        """
+        table = Table(title=f"{cls.__name__} Schema")
+
+        # Add columns
+        table.add_column("Field", style="cyan")
+        table.add_column("Type", style="yellow")
+        table.add_column("Default", style="green")
+        table.add_column("Description", style="blue")
+        table.add_column("Annotations", style="magenta")
+
+        # Add rows for each field
+        for field_name, field_info in cls.model_fields.items():
+            # Skip special fields
+            if field_name.startswith("__"):
+                continue
+
+            # Format field type
+            field_type = field_info.annotation
+            type_str = str(field_type).replace("typing.", "")
+
+            # Format default value
+            if field_info.default_factory is not None:
+                factory_name = getattr(
+                    field_info.default_factory, "__name__", "factory"
+                )
+                default_str = f"default_factory={factory_name}"
+            else:
+                default = field_info.default
+                if default is ...:
+                    default_str = "required"
+                else:
+                    default_str = repr(default)
+
+            # Get description
+            description = field_info.description or ""
+
+            # Build annotations string
+            annotations = []
+
+            # Check if field is shared
+            if field_name in cls.__shared_fields__:
+                annotations.append("shared")
+
+            # Check if field has reducer
+            if field_name in cls.__serializable_reducers__:
+                annotations.append(
+                    f"reducer={cls.__serializable_reducers__[field_name]}"
+                )
+
+            # Check if field is input/output for any engine
+            for engine_name, mapping in cls.__engine_io_mappings__.items():
+                if field_name in mapping.get("inputs", []):
+                    annotations.append(f"input({engine_name})")
+                if field_name in mapping.get("outputs", []):
+                    annotations.append(f"output({engine_name})")
+
+            # Add row
+            table.add_row(
+                field_name, type_str, default_str, description, ", ".join(annotations)
+            )
+
+        return table
+
+    @classmethod
+    def display_table(cls) -> None:
+        """
+        Display schema as a table.
+        """
+        table = cls.as_table()
+        console.print(table)

@@ -1,4 +1,4 @@
-from typing import Annotated, Any, ClassVar, Dict, List, Optional, Sequence, Type, Union
+from typing import Annotated, Any, ClassVar, Dict, List, Optional, Union
 
 import tiktoken
 from langchain_core.messages import (
@@ -51,6 +51,33 @@ class MessagesState(StateSchema):
         return data
 
     # Basic message handling
+    @model_validator(mode="after")
+    def ensure_system_before_human(cls, instance: "MessagesState") -> "MessagesState":
+        """
+        Ensure system messages come before human messages.
+        If a human message is followed by a system message, flip their order.
+        """
+        if len(instance.messages) < 2:
+            return instance
+
+        # Look for adjacent human->system pairs and flip them
+        messages = instance.messages
+        i = 0
+        while i < len(messages) - 1:
+            current_msg = messages[i]
+            next_msg = messages[i + 1]
+
+            # If we find human followed by system, swap them
+            if isinstance(current_msg, HumanMessage) and isinstance(
+                next_msg, SystemMessage
+            ):
+                messages[i], messages[i + 1] = messages[i + 1], messages[i]
+                # Skip the next position since we just swapped
+                i += 2
+            else:
+                i += 1
+
+        return instance
 
     def add_message(self, message: Union[BaseMessage, Dict]) -> None:
         """Add a message to the conversation."""
