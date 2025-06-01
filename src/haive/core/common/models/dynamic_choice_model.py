@@ -33,7 +33,7 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.tree import Tree
 
-from haive.core.common.types.general_protocols import Nameable
+from haive.core.common.types.protocols.general_protocols import Nameable
 
 console = Console()
 logger = logging.getLogger(__name__)
