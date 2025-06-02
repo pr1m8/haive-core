@@ -7,10 +7,9 @@ Logging mixins that integrate with the Rich logging system.
 import functools
 import logging
 import time
-from typing import Any, Callable, Dict, Optional, TypeVar, Union
+from typing import Any, Callable, Dict, Optional, TypeVar
 
 from pydantic import BaseModel, PrivateAttr, computed_field, model_validator
-from rich.text import Text
 
 from haive.core.logging.manager import get_logging_manager
 

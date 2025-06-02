@@ -7,11 +7,9 @@ Manages Rich console output, file logging, and project-wide configuration.
 """
 
 import logging
-import os
-import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Optional, Union
 
 from rich.console import Console
 from rich.logging import RichHandler
@@ -315,11 +313,11 @@ class LoggingManager:
         banner_text.append(" 🚀", style="bright_yellow")
 
         info_text = Text()
-        info_text.append(f"Log Level: ", style="dim")
+        info_text.append("Log Level: ", style="dim")
         info_text.append(
             f"{logging.getLevelName(self.log_level)}", style="bright_green"
         )
-        info_text.append(f" | Log Directory: ", style="dim")
+        info_text.append(" | Log Directory: ", style="dim")
         info_text.append(f"{self.log_dir}", style="bright_cyan")
 
         panel = Panel(

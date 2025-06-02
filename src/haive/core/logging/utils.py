@@ -4,19 +4,16 @@
 Utility functions for the Haive logging system.
 """
 
-import functools
 import logging
-import time
-import traceback
 from contextlib import contextmanager
-from typing import Any, Callable, Dict, Optional, TypeVar
+from typing import Any, Dict, Optional, TypeVar
 
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
 from rich.traceback import Traceback
 
-from haive.core.logging.manager import get_logging_manager
+from .manager import get_logging_manager
 
 T = TypeVar("T")
 
@@ -115,19 +112,13 @@ def log_context(logger: logging.Logger, context: Dict[str, Any]):
         logger: Logger to add context to
         context: Context dictionary to add
     """
-    # Store original filter
-    original_filter = logger.filter
 
     def context_filter(record):
         # Add context to record
         if not hasattr(record, "context"):
             record.context = {}
         record.context.update(context)
-
-        # Apply original filter if it exists
-        if original_filter and callable(original_filter):
-            return original_filter(record)
-        return True
+        return True  # Always allow the record through
 
     try:
         logger.addFilter(context_filter)

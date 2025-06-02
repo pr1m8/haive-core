@@ -6,12 +6,10 @@ Rich formatters for beautiful console and file logging.
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from rich.console import Console
-from rich.logging import RichHandler
 from rich.text import Text
-from rich.traceback import Traceback
 
 
 class RichFormatter(logging.Formatter):

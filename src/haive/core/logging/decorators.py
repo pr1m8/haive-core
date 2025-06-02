@@ -7,10 +7,9 @@ Decorators for automatic logging with Rich formatting.
 import functools
 import logging
 import time
-import traceback
 from typing import Any, Callable, Dict, Optional, TypeVar, Union
 
-from haive.core.logging.utils import get_logger, log_exception
+from .utils import get_logger
 
 T = TypeVar("T")
 
