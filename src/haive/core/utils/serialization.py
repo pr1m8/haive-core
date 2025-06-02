@@ -1,6 +1,5 @@
 # In haive/core/utils/serialization.py
-import inspect
-from typing import Any, Dict, List
+from typing import Any
 
 
 def ensure_json_serializable(data: Any) -> Any:

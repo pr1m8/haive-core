@@ -9,7 +9,7 @@ import os
 import subprocess
 import tempfile
 from enum import Enum
-from typing import Optional, Union
+from typing import Optional
 
 
 class Environment(str, Enum):

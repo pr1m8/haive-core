@@ -13,6 +13,28 @@ from langchain_core.messages import (
 from langchain_core.tools import BaseTool, StructuredTool, Tool
 
 
+def has_tool_calls(state) -> bool:
+    """Check if the last AI message has tool calls."""
+    # Get last AI message, return False if none exists
+    print(state)
+
+    # Check if state has messages attribute
+    if not hasattr(state, "messages") or not state.messages:
+        return False
+
+    last_msg = state.messages[-1]
+
+    # Check if it's an AIMessage
+    if not isinstance(last_msg, AIMessage):
+        return False
+
+    # Check for tool_calls attribute and if it's non-empty
+    tool_calls = getattr(last_msg, "tool_calls", None)
+
+    # Return True only if tool_calls exists and is non-empty
+    return bool(tool_calls)
+
+
 def has_tool_call(message: AIMessage):
     """
     Check if an AI message contains any tool calls.
@@ -24,9 +46,6 @@ def has_tool_call(message: AIMessage):
         bool: True if the message has tool calls, False otherwise
     """
     return hasattr(message, "tool_calls")
-
-
-from langchain_core.messages import ToolMessage
 
 
 def has_tool_error(tool_message: ToolMessage):
