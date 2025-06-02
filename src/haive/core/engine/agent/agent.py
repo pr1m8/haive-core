@@ -351,7 +351,8 @@ class Agent(Generic[TConfig], ABC):
                 f"[cyan]Workflow nodes:[/cyan] {len(self.graph.nodes) if hasattr(self.graph, 'nodes') else 0}\n"
                 f"[cyan]Schema fields:[/cyan] {len(self.state_schema.model_fields) if hasattr(self.state_schema, 'model_fields') else 0}\n"
                 f"[cyan]Persistence:[/cyan] {type(self.checkpointer).__name__}\n"
-                f"[cyan]Checkpoint mode:[/cyan] {self._checkpoint_mode}",
+                f"[cyan]Checkpoint mode:[/cyan] {self._checkpoint_mode}\n"
+                f"[cyan]Runnable config:[/cyan] {self.config.runnable_config}",
                 border_style="green",
                 title="Agent Ready",
                 subtitle=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -2484,6 +2485,11 @@ class Agent(Generic[TConfig], ABC):
         runtime_config = self._prepare_runnable_config(
             thread_id=thread_id, config=config, debug=debug, **kwargs
         )
+        if self.config.runnable_config is not None:
+            recursion_limit = self.config.runnable_config["configurable"].get(
+                "recursion_limit", 25
+            )
+            kwargs["recursion_limit"] = recursion_limit
 
         # Extract thread_id for persistence
         thread_id = runtime_config["configurable"].get("thread_id")

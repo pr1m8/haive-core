@@ -188,9 +188,9 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
 
     # Runtime settings
     runnable_config: RunnableConfig = Field(
-        default_factory=lambda: RunnableConfigManager.create(
-            thread_id=str(uuid.uuid4()), recursion_limit=200
-        )
+        default={
+            "configurable": {"thread_id": str(uuid.uuid4()), "recursion_limit": 200}
+        }
     )
 
     # Storage
