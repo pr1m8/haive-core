@@ -185,15 +185,50 @@ class PostgresCheckpointerConfig(CheckpointerConfig[Dict[str, Any]]):
                     )
                 else:
                     from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
-            except ImportError:
+
+                logger.info(
+                    "Successfully imported AsyncPostgresSaver from langgraph.checkpoint.postgres.aio"
+                )
+            except ImportError as e:
+                logger.error(
+                    f"Failed to import AsyncPostgresSaver from aio module: {e}"
+                )
+
+                # Try alternative import paths
                 try:
-                    # Fall back to langgraph.checkpoint.postgres if aio module not available
+                    # Some versions might have it in the main postgres module
                     from langgraph.checkpoint.postgres import AsyncPostgresSaver
-                except ImportError:
-                    logger.error(
-                        "AsyncPostgresSaver not available. Please ensure langgraph-checkpoint-postgres is installed."
+
+                    logger.info(
+                        "Successfully imported AsyncPostgresSaver from langgraph.checkpoint.postgres"
                     )
-                    raise ImportError("AsyncPostgresSaver not available")
+                except ImportError:
+                    try:
+                        # Try langgraph_checkpoint_postgres package
+                        from langgraph_checkpoint_postgres.aio import AsyncPostgresSaver
+
+                        logger.info(
+                            "Successfully imported AsyncPostgresSaver from langgraph_checkpoint_postgres.aio"
+                        )
+                    except ImportError:
+                        try:
+                            from langgraph_checkpoint_postgres import AsyncPostgresSaver
+
+                            logger.info(
+                                "Successfully imported AsyncPostgresSaver from langgraph_checkpoint_postgres"
+                            )
+                        except ImportError:
+                            logger.error(
+                                "AsyncPostgresSaver not available in any known location. "
+                                "Please ensure langgraph-checkpoint-postgres is installed with async support."
+                            )
+                            # Fall back to sync checkpointer with warning
+                            logger.warning(
+                                "Falling back to sync PostgresSaver for async operations (not recommended)"
+                            )
+                            from langgraph.checkpoint.postgres import (
+                                PostgresSaver as AsyncPostgresSaver,
+                            )
 
             # Create connection pool
             pool = AsyncConnectionPool(
@@ -222,6 +257,18 @@ class PostgresCheckpointerConfig(CheckpointerConfig[Dict[str, Any]]):
 
         except Exception as e:
             logger.error(f"Failed to create async PostgreSQL checkpointer: {e}")
+            logger.error(f"Connection URI: {self.get_connection_uri()}")
+            logger.error(f"Storage mode: {self.storage_mode}")
+            logger.error(f"Mode: {self.mode}")
+
+            # Try to provide more specific error information
+            if "AsyncPostgresSaver" in str(e):
+                logger.error("AsyncPostgresSaver import or creation failed")
+            if "pool" in str(e).lower():
+                logger.error("Connection pool creation failed")
+            if "connection" in str(e).lower():
+                logger.error("Database connection failed")
+
             raise RuntimeError(f"Failed to create async PostgreSQL checkpointer: {e}")
 
     async def initialize_async_checkpointer(self) -> Any:

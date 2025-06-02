@@ -1,6 +1,5 @@
 # src/haive/core/registry/decorators.py
 
-import inspect
 import logging
 from functools import wraps
 from typing import (
@@ -13,7 +12,6 @@ from typing import (
     Type,
     TypeVar,
     Union,
-    get_type_hints,
 )
 
 logger = logging.getLogger(__name__)
@@ -191,7 +189,7 @@ def register_component(
             # If it's an object without component_type, try to add it
             elif not hasattr(reg_item, "component_type"):
                 try:
-                    setattr(reg_item, "component_type", comp_type)
+                    reg_item.component_type = comp_type
                 except (AttributeError, TypeError):
                     # Can't modify the object, may be immutable
                     pass
