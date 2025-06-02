@@ -1,9 +1,7 @@
 import logging
 from typing import List
 
-import pytest
 from langchain_core.messages import HumanMessage
-from langgraph.types import Command
 from pydantic import BaseModel, Field
 
 from haive.core.engine.aug_llm import AugLLMConfig
@@ -146,7 +144,7 @@ def test_node_with_engine_specific_config():
     )
 
     # Create node function
-    node_function = NodeFactory().create_node_function(node_config)
+    NodeFactory().create_node_function(node_config)
 
     # Verify that config overrides were properly set
     assert (
@@ -157,9 +155,7 @@ def test_node_with_engine_specific_config():
     ), "Temperature override not set correctly"
 
     # Create test state
-    test_state = state_schema(
-        messages=[HumanMessage(content="What is the capital of France?")]
-    )
+    state_schema(messages=[HumanMessage(content="What is the capital of France?")])
 
     # Create a config with engine-specific settings
     test_config = {
@@ -248,7 +244,7 @@ def test_node_schema_integration():
     logger.debug(f"Auto-extracted output mappings: {output_mappings}")
 
     # Create node function
-    node_function = NodeFactory.create_node_function(node_config)
+    NodeFactory.create_node_function(node_config)
 
     # Verify mappings are correct
     assert (
