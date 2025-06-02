@@ -3,17 +3,15 @@ Type definitions for the Branch system.
 """
 
 from enum import Enum
-from typing import Any, Dict, Generic, List, Optional, Protocol, Union
+from typing import Any, Dict, Generic, List, Optional, Protocol
 
 from pydantic import BaseModel, Field
 
 # Import common types
 from haive.core.graph.common.types import (
     ConfigLike,
-    ConfigType,
     NodeOutput,
     StateLike,
-    StateType,
 )
 
 

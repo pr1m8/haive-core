@@ -3,7 +3,7 @@ Send mapping functionality for routing and state transformation.
 """
 
 import logging
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
