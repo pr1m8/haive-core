@@ -473,6 +473,7 @@ class VectorStoreRetrieverConfig(BaseRetrieverConfig):
             retriever = self.vector_store_config.create_retriever(
                 search_type=self.search_type,
                 search_kwargs=search_kwargs,
+                # prompt_template=self.prompt_template,
                 **extra_kwargs,
             )
 
