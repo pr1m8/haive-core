@@ -5,31 +5,25 @@ These tests verify that our OutputParserEngine works correctly standalone
 and when integrated into LangChain chains.
 """
 
-import asyncio
-import json
-from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Optional
 
 import pytest
 
 # Mock LLM for testing
 from langchain_core.language_models.fake import FakeListLLM
 from langchain_core.messages import AIMessage, HumanMessage
-from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from pydantic import BaseModel, Field
 
 # Import our parser engine
 from haive.core.engine.output_parser.base import (
-    OutputParserEngine,
     OutputParserType,
     create_json_parser,
     create_list_parser,
     create_output_parser_engine,
     create_pydantic_parser,
     create_str_parser,
-    create_structured_parser,
 )
 
 
@@ -376,7 +370,7 @@ def test_parser_with_runnable_map():
 
 def test_parser_chain_with_lcel_branching():
     """Test parser in a chain with branching logic using LCEL."""
-    from langchain_core.runnables import RunnableBranch, RunnablePassthrough
+    from langchain_core.runnables import RunnableBranch
 
     # Create parsers
     json_parser = create_output_parser_engine(parser_type=OutputParserType.JSON)

@@ -252,7 +252,7 @@ def test_schema_composer_with_engine():
         try:
             input_fields = aug_llm.get_input_fields()
             console.print("\n[bold]Engine Input Fields:[/bold]")
-            for field_name, (field_type, field_info) in input_fields.items():
+            for field_name, (field_type, _field_info) in input_fields.items():
                 console.print(f"  {field_name}: {field_type}")
         except Exception as e:
             console.print(f"Error getting input fields: {e}")
@@ -261,7 +261,7 @@ def test_schema_composer_with_engine():
         try:
             output_fields = aug_llm.get_output_fields()
             console.print("\n[bold]Engine Output Fields:[/bold]")
-            for field_name, (field_type, field_info) in output_fields.items():
+            for field_name, (field_type, _field_info) in output_fields.items():
                 console.print(f"  {field_name}: {field_type}")
         except Exception as e:
             console.print(f"Error getting output fields: {e}")
@@ -317,7 +317,7 @@ def test_schema_composer_input_output_schema():
     console.print("\n[yellow]Creating output schema...[/yellow]")
 
     # Add debugging to understand what's happening in compose_output_schema
-    composer = SchemaComposer(name="DebugOutputSchema")
+    SchemaComposer(name="DebugOutputSchema")
 
     # Manually add fields to see what should be there
     console.print("\n[bold]Manual Output Field Addition (for debugging):[/bold]")
@@ -369,7 +369,7 @@ def test_schema_composer_input_output_schema():
         "searchresult" in k for k in output_schema.model_fields.keys()
     )
 
-    console.print(f"\nOutput schema contains:")
+    console.print("\nOutput schema contains:")
     console.print(f"  - 'content' field: {has_content}")
     console.print(f"  - SearchResult field: {has_searchresult}")
     console.print(f"  - All fields: {list(output_schema.model_fields.keys())}")
@@ -574,7 +574,7 @@ def test_schema_composer_complete_workflow():
     instance.messages.append(HumanMessage(content="Test message"))
     instance.messages.append(AIMessage(content="Response message"))
 
-    console.print(f"\n[green]Instance state:[/green]")
+    console.print("\n[green]Instance state:[/green]")
     console.print(f"  Task ID: {instance.task_id}")
     console.print(f"  Messages: {len(instance.messages)}")
 
