@@ -1,12 +1,6 @@
-from typing import Any, Callable, ClassVar, Dict, List, Optional, Type
-from uuid import uuid4
-
-from pydantic import BaseModel, Field
+from typing import Any, ClassVar, Dict, List, Optional
 
 from haive.core.registry.base import AbstractRegistry
-
-from ..base import SerializableModel
-from ..models.function_ref import FunctionReference
 
 
 class PatternRegistry(AbstractRegistry[PatternDefinition]):

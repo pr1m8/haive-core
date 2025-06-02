@@ -6,19 +6,14 @@ enabling graphs to be stored, loaded, and exchanged with minimal information los
 """
 
 import importlib
-import inspect
 import json
 import logging
 import uuid
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Type, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
-from pydantic import BaseModel, ConfigDict, Field, computed_field, model_validator
+from pydantic import BaseModel, ConfigDict, Field
 
-from haive.core.graph.branches import Branch
-from haive.core.graph.branches.dynamic import DynamicMapping
-from haive.core.graph.branches.send_mapping import SendGenerator, SendMapping
-from haive.core.graph.branches.types import BranchMode, ComparisonType
 from haive.core.graph.common.references import CallableReference
 from haive.core.utils.serialization import ensure_json_serializable
 
@@ -307,11 +302,9 @@ class SerializableGraph(BaseModel):
                 branch_data["chain_branches_ids"] = []
                 for chain_branch in branch.chain_branches:
                     # Use ID if it exists in our branches
-                    found = False
                     for bid, b in graph.branches.items():
                         if b is chain_branch:
                             branch_data["chain_branches_ids"].append(bid)
-                            found = True
                             break
 
             # Handle true/false branches
@@ -336,9 +329,7 @@ class SerializableGraph(BaseModel):
 
     def to_graph(self):
         """Convert serializable representation back to a BaseGraph."""
-        from haive.core.graph.branches import Branch, BranchMode, ComparisonType
-        from haive.core.graph.branches.dynamic import DynamicMapping
-        from haive.core.graph.branches.send_mapping import SendGenerator, SendMapping
+        from haive.core.graph.branches import BranchMode, ComparisonType
         from haive.core.graph.state_graph.base_graph import BaseGraph, Node, NodeType
 
         # Create basic graph
@@ -409,9 +400,8 @@ class SerializableGraph(BaseModel):
                     function = branch_data.function_ref.resolve()
 
                 # Resolve condition reference if available
-                condition = None
                 if branch_data.condition_ref:
-                    condition = branch_data.condition_ref.resolve()
+                    branch_data.condition_ref.resolve()
 
                 # Convert comparison enum
                 comparison = branch_data.comparison

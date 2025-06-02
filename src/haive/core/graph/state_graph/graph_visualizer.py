@@ -1,8 +1,8 @@
 """
-Graph visualization utilities for Haive graphs.
+Enhanced graph visualization utilities for Haive graphs with proper subgraph support.
 
-This module provides enhanced visualization capabilities for Haive graphs,
-including Mermaid diagram generation with custom styling.
+This module provides improved visualization with embedded subgraphs (x-ray view),
+safer professional colors, and better branch handling.
 """
 
 import os
@@ -22,30 +22,136 @@ from haive.core.utils.mermaid_utils import (
 
 class GraphVisualizer:
     """
-    Visualization utilities for Haive graph structures.
+    Enhanced visualization utilities with proper subgraph embedding support.
 
-    This class provides methods to generate and display visual representations
-    of graph structures using Mermaid diagrams.
+    Provides elegant, accessible graph visualizations with embedded subgraphs
+    that show internal structure (x-ray view) and safe, professional colors.
     """
 
-    # Color scheme for different node types
+    # Safe, accessible color scheme (WCAG AA compliant)
     NODE_COLORS = {
-        NodeType.ENGINE: "#90EE90",  # Light green
-        NodeType.TOOL: "#FFD700",  # Gold
-        NodeType.VALIDATION: "#B0E0E6",  # Light blue
-        NodeType.SUBGRAPH: "#FFA07A",  # Light salmon
-        NodeType.CALLABLE: "#F5F5DC",  # Beige
-        NodeType.CUSTOM: "#DDA0DD",  # Plum
-        # Add more colors if more node types are added to the NodeType enum
+        NodeType.ENGINE: "#2563EB",  # Safe blue
+        NodeType.TOOL: "#DC2626",  # Safe red
+        NodeType.VALIDATION: "#059669",  # Safe green
+        NodeType.SUBGRAPH: "#7C3AED",  # Safe purple
+        NodeType.CALLABLE: "#0891B2",  # Safe cyan
+        NodeType.CUSTOM: "#BE185D",  # Safe magenta
     }
 
-    # Special node colors
-    START_COLOR = "#5D8AA8"  # Blue
-    END_COLOR = "#FF6347"  # Tomato red
+    # Safe special node colors
+    START_COLOR = "#065F46"  # Dark green
+    END_COLOR = "#991B1B"  # Dark red
+    HIGHLIGHT_COLOR = "#B45309"  # Safe orange
+
+    # Professional styling
+    BACKGROUND_COLOR = "#F9FAFB"
+    EDGE_COLOR = "#374151"
+    BORDER_COLOR = "#D1D5DB"
+    SUBGRAPH_BG = "#F3F4F6"
+    SUBGRAPH_BORDER = "#9CA3AF"
 
     # Edge styles
-    DIRECT_EDGE_STYLE = "stroke:#333,stroke-width:2px;"
-    BRANCH_EDGE_STYLE = "stroke:#333,stroke-width:1.5px,stroke-dasharray:5 5;"
+    DIRECT_EDGE_STYLE = f"stroke:{EDGE_COLOR},stroke-width:2px;"
+    BRANCH_EDGE_STYLE = f"stroke:#7C3AED,stroke-width:2px,stroke-dasharray:8 4;"
+    SUBGRAPH_STYLE = f"fill:{SUBGRAPH_BG},stroke:{SUBGRAPH_BORDER},stroke-width:2px,stroke-dasharray:3 3;"
+
+    @classmethod
+    def _sanitize_node_name(cls, name: str) -> str:
+        """Create a clean, readable node name for display."""
+        if name in ["__start__", "START"]:
+            return "START"
+        if name in ["__end__", "END"]:
+            return "END"
+
+        # Clean up common patterns
+        clean_name = name.replace("_", " ").strip()
+        clean_name = clean_name.title()
+
+        # Handle common agent patterns
+        replacements = {
+            "Agent Node": "Agent",
+            "Tool Node": "Tools",
+            "Parse Output": "Parser",
+            "Validation Node": "Validator",
+            "Engine Node": "Engine",
+        }
+
+        for old, new in replacements.items():
+            clean_name = clean_name.replace(old, new)
+
+        return clean_name
+
+    @classmethod
+    def _get_safe_node_id(cls, node_name: str, prefix: str = "") -> str:
+        """Create a safe, unique node ID for Mermaid."""
+        safe_id = str(node_name)
+
+        # Replace problematic characters
+        replacements = {" ": "_", "-": "_", ".": "_", "/": "_", "\\": "_", ":": "_"}
+        for old, new in replacements.items():
+            safe_id = safe_id.replace(old, new)
+
+        # Handle special cases
+        if safe_id in ["__start__", "START"]:
+            safe_id = "START"
+        elif safe_id in ["__end__", "END"]:
+            safe_id = "END"
+
+        # Ensure valid identifier
+        if safe_id and safe_id[0].isdigit():
+            safe_id = f"n_{safe_id}"
+
+        # Handle reserved keywords
+        reserved = [
+            "subgraph",
+            "end",
+            "classDef",
+            "class",
+            "click",
+            "style",
+            "graph",
+            "flowchart",
+        ]
+        if safe_id.lower() in reserved:
+            safe_id = f"node_{safe_id}"
+
+        # Add prefix for uniqueness
+        if prefix:
+            safe_id = f"{prefix}_{safe_id}"
+
+        return safe_id
+
+    @classmethod
+    def _format_condition_label(cls, condition: str) -> str:
+        """Format condition labels for better readability."""
+        condition_str = str(condition)
+
+        # Handle boolean values
+        if condition_str.lower() == "true":
+            return "✓ Yes"
+        elif condition_str.lower() == "false":
+            return "✗ No"
+
+        # Handle common patterns
+        replacements = {
+            "has_errors": "❌ Has Errors",
+            "no_errors": "✅ No Errors",
+            "tool_node": "🔧 Use Tools",
+            "parse_output": "📝 Parse Output",
+            "no_tools": "➡️ Continue",
+            "validation_passed": "✅ Valid",
+            "validation_failed": "❌ Invalid",
+            "default": "📍 Default",
+        }
+
+        if condition_str in replacements:
+            return replacements[condition_str]
+
+        # Truncate long conditions
+        if len(condition_str) > 15:
+            return condition_str[:12] + "..."
+
+        return condition_str.replace("_", " ").title()
 
     @classmethod
     def generate_mermaid(
@@ -53,516 +159,315 @@ class GraphVisualizer:
         graph: Any,
         include_subgraphs: bool = True,
         highlight_nodes: Optional[List[str]] = None,
-        highlight_color: str = "#FF69B4",
-        theme: str = "default",
+        highlight_color: str = None,
+        theme: str = "base",
         subgraph_mode: str = "cluster",
-        show_default_branches: bool = False,
+        show_default_branches: bool = True,
+        direction: str = "TD",
+        compact_mode: bool = False,
     ) -> str:
         """
-        Generate a Mermaid diagram for a graph.
+        Generate an elegant Mermaid diagram with proper subgraph embedding.
 
         Args:
             graph: Graph object (BaseGraph instance)
-            include_subgraphs: Whether to visualize subgraphs as clusters
+            include_subgraphs: Whether to visualize subgraphs as embedded clusters
             highlight_nodes: List of node names to highlight
             highlight_color: Color to use for highlighted nodes
-            theme: Mermaid theme name (default, forest, dark, neutral)
-            subgraph_mode: How to render subgraphs ("cluster", "inline", or "separate")
+            theme: Mermaid theme name
+            subgraph_mode: How to render subgraphs ("cluster" shows embedded view)
             show_default_branches: Whether to show default branches
+            direction: Graph direction (TD, TB, LR, RL)
+            compact_mode: Whether to use compact styling
 
         Returns:
-            Mermaid diagram code as string
+            Mermaid diagram code with embedded subgraphs
         """
         from langgraph.graph import END, START
 
-        # Initialize Mermaid code with directives and styling
+        highlight_color = highlight_color or cls.HIGHLIGHT_COLOR
+
+        # Initialize with clean styling
         lines = [
-            f'%%{{ init: {{ "theme": "{theme}", "flowchart": {{ "curve": "basis" }} }} }}%%',
-            "flowchart TD;",
-            "    %% Node styling classes",
+            f'%%{{ init: {{ "theme": "{theme}", "flowchart": {{ "curve": "basis", "padding": 15, "nodeSpacing": 50, "rankSpacing": 80 }} }} }}%%',
+            f"flowchart {direction};",
+            "    %% === SAFE PROFESSIONAL STYLING ===",
         ]
 
-        # Define node type classes
+        # Add accessible node type classes
         node_type_classes = {}
         for node_type, color in cls.NODE_COLORS.items():
             class_name = f"nodeType{node_type.value.capitalize()}"
             node_type_classes[node_type] = class_name
             lines.append(
-                f"    classDef {class_name} fill:{color},stroke:#333,stroke-width:1px;"
+                f"    classDef {class_name} fill:{color},stroke:white,stroke-width:2px,color:white,font-weight:500,font-size:13px,font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;"
             )
 
         # Add special node classes
         lines.append(
-            f"    classDef startNode fill:{cls.START_COLOR},color:white,font-weight:bold;"
+            f"    classDef startNode fill:{cls.START_COLOR},stroke:white,stroke-width:2px,color:white,font-weight:bold,font-size:14px;"
         )
         lines.append(
-            f"    classDef endNode fill:{cls.END_COLOR},color:white,font-weight:bold;"
+            f"    classDef endNode fill:{cls.END_COLOR},stroke:white,stroke-width:2px,color:white,font-weight:bold,font-size:14px;"
         )
         lines.append(
-            f"    classDef highlightNode fill:{highlight_color},stroke:#fff,stroke-width:2px,color:white;"
+            f"    classDef highlightNode fill:{highlight_color},stroke:white,stroke-width:3px,color:white,font-weight:bold;"
+        )
+        lines.append(
+            f"    classDef subgraphNode fill:{cls.SUBGRAPH_BG},stroke:{cls.SUBGRAPH_BORDER},stroke-width:2px,color:{cls.EDGE_COLOR};"
         )
 
-        # Set for tracking processed node IDs to avoid duplicates
+        # Track processed items
         processed_nodes = set()
         processed_edges = set()
-        subgraph_node_names = set()  # Track which nodes belong to subgraphs
+        subgraph_containers = set()
 
-        # Helper function to get safe node ID for Mermaid
-        def get_safe_node_id(node_name: str, prefix: str = "") -> str:
-            # Replace characters that might cause issues in Mermaid
-            safe_id = node_name.replace(" ", "_").replace("-", "_")
-
-            # Check if it starts with a number, prefix with n_ if it does
-            if safe_id and safe_id[0].isdigit():
-                safe_id = f"n_{safe_id}"
-
-            # Handle reserved Mermaid keywords
-            reserved_keywords = [
-                "subgraph",
-                "end",
-                "classDef",
-                "class",
-                "click",
-                "style",
-            ]
-            if safe_id.lower() in reserved_keywords:
-                safe_id = f"node_{safe_id}"
-
-            # Add prefix if provided
-            if prefix:
-                safe_id = f"{prefix}_{safe_id}"
-
-            return safe_id
-
-        def add_subgraph_cluster(sg_name: str, subgraph: Any) -> None:
-            """Add a subgraph as a Mermaid cluster with proper START/END handling."""
-            subgraph_id = f"cluster_{get_safe_node_id(sg_name)}"
-
-            lines.append(f'    subgraph {subgraph_id}["{sg_name}"]')
-            lines.append(f"        direction TB")
-
-            # Add subgraph START and END nodes first
-            sg_start_id = get_safe_node_id(START, f"sg_{sg_name}")
-            sg_end_id = get_safe_node_id(END, f"sg_{sg_name}")
-
-            lines.append(f'        {sg_start_id}["START"]:::startNode;')
-            lines.append(f'        {sg_end_id}["END"]:::endNode;')
-            processed_nodes.add(sg_start_id)
-            processed_nodes.add(sg_end_id)
-
-            # Add subgraph nodes (excluding START/END)
-            for sub_node_name, sub_node in subgraph.nodes.items():
-                if sub_node is None or sub_node_name in (START, END):
-                    continue
-
-                # Create unique ID for subgraph nodes
-                safe_id = get_safe_node_id(sub_node_name, f"sg_{sg_name}")
-
-                # Get node type and class
-                if (
-                    hasattr(subgraph, "node_types")
-                    and sub_node_name in subgraph.node_types
-                ):
-                    node_type = subgraph.node_types[sub_node_name]
-                    class_name = node_type_classes.get(node_type, "nodeTypeCallable")
-                else:
-                    node_type = getattr(sub_node, "node_type", NodeType.CALLABLE)
-                    class_name = node_type_classes.get(node_type, "nodeTypeCallable")
-
-                # Add node with class
-                lines.append(f'        {safe_id}["{sub_node_name}"]:::{class_name};')
-                processed_nodes.add(safe_id)
-
-            # Add subgraph edges
-            for source, target in subgraph.edges:
-                source_id = get_safe_node_id(source, f"sg_{sg_name}")
-                target_id = get_safe_node_id(target, f"sg_{sg_name}")
-
-                edge_key = f"{source_id}->{target_id}"
-                if edge_key not in processed_edges:
-                    lines.append(f"        {source_id} --> {target_id};")
-                    processed_edges.add(edge_key)
-
-            # Add subgraph branches
-            if hasattr(subgraph, "branches") and subgraph.branches:
-                for branch_id, branch in subgraph.branches.items():
-                    source = branch.source_node
-                    source_id = get_safe_node_id(source, f"sg_{sg_name}")
-
-                    # Draw connections for destinations with dotted lines
-                    for condition, target in branch.destinations.items():
-                        target_id = get_safe_node_id(target, f"sg_{sg_name}")
-
-                        edge_key = f"{source_id}-->{target_id}"
-                        if edge_key not in processed_edges:
-                            # Format condition string
-                            condition_str = str(condition)
-                            if len(condition_str) > 15:
-                                condition_str = condition_str[:12] + "..."
-
-                            # Add branch edge with dash style
-                            lines.append(
-                                f'        {source_id} -.->|"{condition_str}"| {target_id};'
-                            )
-                            processed_edges.add(edge_key)
-
-                    # Draw default connection if different from destinations and if enabled
-                    if (
-                        show_default_branches
-                        and hasattr(branch, "default")
-                        and branch.default
-                    ):
-                        target_id = get_safe_node_id(branch.default, f"sg_{sg_name}")
-
-                        # Skip if this is already connected by a specific condition
-                        is_duplicate = False
-                        for dest in branch.destinations.values():
-                            if dest == branch.default:
-                                is_duplicate = True
-                                break
-
-                        if not is_duplicate:
-                            edge_key = f"{source_id}-->{target_id}"
-                            if edge_key not in processed_edges:
-                                lines.append(
-                                    f'        {source_id} -.->|"default"| {target_id};'
-                                )
-                                processed_edges.add(edge_key)
-
-            lines.append("    end")
-
-            # Add subgraph style
-            lines.append(
-                f"    style {subgraph_id} fill:#f0f0f0,stroke:#666,stroke-width:2px,stroke-dasharray:5 5;"
-            )
-
-        def add_subgraph_inline(sg_name: str, subgraph: Any) -> None:
-            """Add subgraph nodes inline with main graph (no clustering)."""
-            # Add subgraph nodes with prefixed IDs
-            for sub_node_name, sub_node in subgraph.nodes.items():
-                if sub_node is None or sub_node_name in (START, END):
-                    continue
-
-                # Create unique ID for subgraph nodes
-                safe_id = get_safe_node_id(sub_node_name, f"sg_{sg_name}")
-
-                # Get node type and class
-                if (
-                    hasattr(subgraph, "node_types")
-                    and sub_node_name in subgraph.node_types
-                ):
-                    node_type = subgraph.node_types[sub_node_name]
-                    class_name = node_type_classes.get(node_type, "nodeTypeCallable")
-                else:
-                    node_type = getattr(sub_node, "node_type", NodeType.CALLABLE)
-                    class_name = node_type_classes.get(node_type, "nodeTypeCallable")
-
-                # Add node with class and subgraph indicator
-                lines.append(
-                    f'    {safe_id}["{sub_node_name} ({sg_name})"]:::{class_name};'
-                )
-                processed_nodes.add(safe_id)
-
-        # Process subgraphs first if enabled
+        # First, handle embedded subgraphs if enabled
         if include_subgraphs and hasattr(graph, "subgraphs") and graph.subgraphs:
-            lines.append("    %% Subgraphs")
+            lines.append("    %% === EMBEDDED SUBGRAPHS (X-RAY VIEW) ===")
 
             for sg_name, subgraph in graph.subgraphs.items():
                 if subgraph_mode == "cluster":
-                    add_subgraph_cluster(sg_name, subgraph)
-                elif subgraph_mode == "inline":
-                    add_subgraph_inline(sg_name, subgraph)
+                    cls._add_embedded_subgraph(
+                        lines,
+                        sg_name,
+                        subgraph,
+                        node_type_classes,
+                        processed_nodes,
+                        processed_edges,
+                    )
+                    subgraph_containers.add(sg_name)
 
-                # Track subgraph node names for connection handling
-                for sub_node_name in subgraph.nodes.keys():
-                    if sub_node_name not in (START, END):
-                        subgraph_node_names.add(f"{sg_name}.{sub_node_name}")
+        lines.append("    %% === MAIN GRAPH NODES ===")
 
-        # Add main graph nodes (excluding subgraph containers and nodes that exist in subgraphs)
-        lines.append("    %% Main Graph Nodes")
+        # Add START and END nodes
+        start_id = cls._get_safe_node_id(START)
+        end_id = cls._get_safe_node_id(END)
 
-        # Collect all node names that exist in subgraphs to avoid duplicates
-        subgraph_node_names = set()
-        if include_subgraphs and hasattr(graph, "subgraphs"):
-            for sg_name, subgraph in graph.subgraphs.items():
-                if hasattr(subgraph, "nodes"):
-                    for sub_node_name in subgraph.nodes.keys():
-                        if sub_node_name not in (START, END):
-                            subgraph_node_names.add(sub_node_name)
+        lines.append(
+            f'    {start_id}["{cls._sanitize_node_name("START")}"]:::startNode;'
+        )
+        lines.append(f'    {end_id}["{cls._sanitize_node_name("END")}"]:::endNode;')
+        processed_nodes.update([start_id, end_id])
 
+        # Add main graph nodes (excluding subgraph containers)
         for name, node in graph.nodes.items():
-            # Skip None nodes
-            if node is None:
+            if node is None or name in (START, END):
                 continue
 
-            # Skip special nodes (will be added separately)
-            if name in (START, END):
+            # Skip subgraph container nodes - they're handled as embedded subgraphs
+            if name in subgraph_containers:
                 continue
 
-            # Handle subgraph container nodes
-            if (
-                include_subgraphs
-                and hasattr(graph, "subgraphs")
-                and name in graph.subgraphs
-            ):
-                # This is a subgraph container node, add it as a subgraph type
-                safe_id = get_safe_node_id(name)
-                lines.append(f'    {safe_id}["{name}"]:::nodeTypeSubgraph;')
-                processed_nodes.add(safe_id)
-                continue
-
-            # Skip nodes that exist in subgraphs to avoid duplicates
-            # These nodes will be shown inside the subgraph clusters
-            if include_subgraphs and name in subgraph_node_names:
-                continue
-
-            # For regular nodes, add them to the main graph
-            safe_id = get_safe_node_id(name)
-
-            # Skip if already processed (e.g., as part of a subgraph)
+            safe_id = cls._get_safe_node_id(name)
             if safe_id in processed_nodes:
                 continue
 
-            # Get node type and class
+            display_name = cls._sanitize_node_name(name)
+
+            # Get node type and styling
             if hasattr(graph, "node_types") and name in graph.node_types:
                 node_type = graph.node_types[name]
-                class_name = node_type_classes.get(node_type, "nodeTypeCallable")
+                class_name = node_type_classes.get(node_type, "nodeTypeEngine")
             else:
-                node_type = getattr(node, "node_type", NodeType.CALLABLE)
-                class_name = node_type_classes.get(node_type, "nodeTypeCallable")
+                class_name = node_type_classes.get(NodeType.ENGINE, "nodeTypeEngine")
 
-            # Add node with class
-            lines.append(f'    {safe_id}["{name}"]:::{class_name};')
+            lines.append(f'    {safe_id}["{display_name}"]:::{class_name};')
             processed_nodes.add(safe_id)
 
-        # Add main graph START and END nodes
-        start_id = get_safe_node_id(START)
-        end_id = get_safe_node_id(END)
+        lines.append("    %% === MAIN GRAPH EDGES ===")
 
-        lines.append(f'    {start_id}["START"]:::startNode;')
-        lines.append(f'    {end_id}["END"]:::endNode;')
-
-        # Add main graph direct edges
-        lines.append("    %% Main Graph Direct Edges")
+        # Add direct edges (excluding subgraph internal edges)
         for source, target in graph.edges:
-            # Skip edges where source or target are in subgraphs (they'll be handled by bridge connections)
-            if include_subgraphs and (
-                source in subgraph_node_names or target in subgraph_node_names
-            ):
+            # Skip edges that connect to subgraph containers - handle separately
+            if source in subgraph_containers or target in subgraph_containers:
                 continue
 
-            source_id = get_safe_node_id(source)
-            target_id = get_safe_node_id(target)
+            source_id = cls._get_safe_node_id(source)
+            target_id = cls._get_safe_node_id(target)
 
             edge_key = f"{source_id}->{target_id}"
             if edge_key not in processed_edges:
                 lines.append(f"    {source_id} --> {target_id};")
                 processed_edges.add(edge_key)
 
-        # Add main graph branch edges
+        # Handle subgraph bridge connections
+        if include_subgraphs and subgraph_containers:
+            lines.append("    %% === SUBGRAPH BRIDGE CONNECTIONS ===")
+            cls._add_subgraph_bridges(
+                lines, graph, subgraph_containers, processed_edges
+            )
+
+        # Add branch edges with better styling
         if hasattr(graph, "branches") and graph.branches:
-            lines.append("    %% Main Graph Branch Connections")
+            lines.append("    %% === CONDITIONAL BRANCHES ===")
+            cls._add_branch_edges(lines, graph, subgraph_containers, processed_edges)
 
-            for branch_id, branch in graph.branches.items():
-                source = branch.source_node
-
-                # Skip branches where the source is in a subgraph (they'll be handled within the subgraph)
-                if include_subgraphs and source in subgraph_node_names:
-                    continue
-
-                source_id = get_safe_node_id(source)
-
-                # Add branch mode comment
-                if hasattr(branch, "mode"):
-                    lines.append(f"    %% {branch.mode} Branch: {branch.name}")
-                else:
-                    lines.append(f"    %% Branch: {branch.name}")
-
-                # Draw connections for destinations with dotted lines
-                for condition, target in branch.destinations.items():
-                    # Handle subgraph destinations - these will be handled by bridge connections
-                    if (
-                        include_subgraphs
-                        and hasattr(graph, "subgraphs")
-                        and target in graph.subgraphs
-                    ):
-                        continue
-
-                    # Skip destinations that exist in subgraphs (they're shown in subgraph clusters)
-                    if include_subgraphs and target in subgraph_node_names:
-                        continue
-
-                    target_id = get_safe_node_id(target)
-
-                    edge_key = f"{source_id}-->{target_id}"
-                    if edge_key not in processed_edges:
-                        # Format condition string
-                        condition_str = str(condition)
-                        if len(condition_str) > 15:
-                            condition_str = condition_str[:12] + "..."
-
-                        # Add branch edge with dash style
-                        lines.append(
-                            f'    {source_id} -.->|"{condition_str}"| {target_id};'
-                        )
-                        processed_edges.add(edge_key)
-
-                # Draw default connection if different from destinations and if enabled
-                if (
-                    show_default_branches
-                    and hasattr(branch, "default")
-                    and branch.default
-                ):
-                    target_id = get_safe_node_id(branch.default)
-
-                    # Skip if this is already connected by a specific condition
-                    is_duplicate = False
-                    for dest in branch.destinations.values():
-                        if dest == branch.default:
-                            is_duplicate = True
-                            break
-
-                    if not is_duplicate:
-                        edge_key = f"{source_id}-->{target_id}"
-                        if edge_key not in processed_edges:
-                            lines.append(
-                                f'    {source_id} -.->|"default"| {target_id};'
-                            )
-                            processed_edges.add(edge_key)
-
-        # Add bridge connections between main graph and subgraphs
-        if include_subgraphs and hasattr(graph, "subgraphs") and graph.subgraphs:
-            lines.append("    %% Main Graph to Subgraph Bridge Connections")
-
-            for sg_name, subgraph in graph.subgraphs.items():
-                if subgraph_mode == "cluster":
-                    # Get subgraph START and END node IDs
-                    sg_start_id = get_safe_node_id(START, f"sg_{sg_name}")
-                    sg_end_id = get_safe_node_id(END, f"sg_{sg_name}")
-                    subgraph_container_id = get_safe_node_id(sg_name)
-
-                    # Bridge: Connect subgraph container to subgraph START
-                    # This shows how main graph flow enters the subgraph
-                    bridge_entry_key = f"{subgraph_container_id}->{sg_start_id}"
-                    if bridge_entry_key not in processed_edges:
-                        lines.append(f"    {subgraph_container_id} --> {sg_start_id};")
-                        processed_edges.add(bridge_entry_key)
-
-                    # Bridge: Connect subgraph END back to main graph
-                    # Find what the subgraph container connects to in main graph
-                    for source, target in graph.edges:
-                        if source == sg_name:
-                            target_id = get_safe_node_id(target)
-                            bridge_exit_key = f"{sg_end_id}->{target_id}"
-                            if bridge_exit_key not in processed_edges:
-                                lines.append(f"    {sg_end_id} --> {target_id};")
-                                processed_edges.add(bridge_exit_key)
-
-                    # Handle direct edges TO subgraph nodes: redirect them to subgraph container
-                    for source, target in graph.edges:
-                        if (
-                            target in subgraph_node_names
-                            and source not in subgraph_node_names
-                        ):
-                            source_id = get_safe_node_id(source)
-                            bridge_to_subgraph_key = (
-                                f"{source_id}->{subgraph_container_id}"
-                            )
-                            if bridge_to_subgraph_key not in processed_edges:
-                                lines.append(
-                                    f"    {source_id} --> {subgraph_container_id};"
-                                )
-                                processed_edges.add(bridge_to_subgraph_key)
-
-                    # Handle direct edges FROM subgraph nodes: redirect them from subgraph END
-                    for source, target in graph.edges:
-                        if (
-                            source in subgraph_node_names
-                            and target not in subgraph_node_names
-                        ):
-                            target_id = get_safe_node_id(target)
-                            bridge_from_subgraph_key = f"{sg_end_id}->{target_id}"
-                            if bridge_from_subgraph_key not in processed_edges:
-                                lines.append(f"    {sg_end_id} --> {target_id};")
-                                processed_edges.add(bridge_from_subgraph_key)
-
-                    # Handle branch connections: if main graph branches to subgraph,
-                    # connect those branches to subgraph container
-                    for branch_id, branch in graph.branches.items():
-                        if (
-                            branch.source_node not in subgraph_node_names
-                        ):  # Only main graph branches
-                            for condition, target in branch.destinations.items():
-                                if target == sg_name:
-                                    source_id = get_safe_node_id(branch.source_node)
-                                    bridge_branch_key = f"{source_id}-->{sg_start_id}"
-                                    if bridge_branch_key not in processed_edges:
-                                        condition_str = str(condition)
-                                        if len(condition_str) > 15:
-                                            condition_str = condition_str[:12] + "..."
-                                        lines.append(
-                                            f'    {source_id} -.->|"{condition_str}"| {sg_start_id};'
-                                        )
-                                        processed_edges.add(bridge_branch_key)
-                                elif target in subgraph_node_names:
-                                    # Branch to a node that's in a subgraph - redirect to subgraph container
-                                    source_id = get_safe_node_id(branch.source_node)
-                                    bridge_branch_key = (
-                                        f"{source_id}-->{subgraph_container_id}"
-                                    )
-                                    if bridge_branch_key not in processed_edges:
-                                        condition_str = str(condition)
-                                        if len(condition_str) > 15:
-                                            condition_str = condition_str[:12] + "..."
-                                        lines.append(
-                                            f'    {source_id} -.->|"{condition_str}"| {subgraph_container_id};'
-                                        )
-                                        processed_edges.add(bridge_branch_key)
-                        else:
-                            # Handle branches FROM subgraph nodes TO main graph nodes
-                            # These need to be bridge connections from subgraph END
-                            for condition, target in branch.destinations.items():
-                                # Only handle targets that are NOT in subgraphs (main graph nodes)
-                                if (
-                                    target not in subgraph_node_names
-                                    and target not in (START, END)
-                                ):
-                                    target_id = get_safe_node_id(target)
-                                    bridge_branch_key = f"{sg_end_id}-->{target_id}"
-                                    if bridge_branch_key not in processed_edges:
-                                        condition_str = str(condition)
-                                        if len(condition_str) > 15:
-                                            condition_str = condition_str[:12] + "..."
-                                        lines.append(
-                                            f'    {sg_end_id} -.->|"{condition_str}"| {target_id};'
-                                        )
-                                        processed_edges.add(bridge_branch_key)
-                                elif target == END:
-                                    # Special case: branch from subgraph to main graph END
-                                    end_id = get_safe_node_id(END)
-                                    bridge_branch_key = f"{sg_end_id}-->{end_id}"
-                                    if bridge_branch_key not in processed_edges:
-                                        condition_str = str(condition)
-                                        if len(condition_str) > 15:
-                                            condition_str = condition_str[:12] + "..."
-                                        lines.append(
-                                            f'    {sg_end_id} -.->|"{condition_str}"| {end_id};'
-                                        )
-                                        processed_edges.add(bridge_branch_key)
-
-        # Apply highlights if any
+        # Apply highlights
         if highlight_nodes:
+            lines.append("    %% === HIGHLIGHTS ===")
             highlight_list = []
             for node in highlight_nodes:
-                safe_id = get_safe_node_id(node)
-                if safe_id in processed_nodes or safe_id in [start_id, end_id]:
+                safe_id = cls._get_safe_node_id(node)
+                if safe_id in processed_nodes:
                     highlight_list.append(safe_id)
 
             if highlight_list:
-                lines.append("    %% Highlight specified nodes")
                 lines.append(f"    class {','.join(highlight_list)} highlightNode;")
 
         return "\n".join(lines)
+
+    @classmethod
+    def _add_embedded_subgraph(
+        cls,
+        lines: List[str],
+        sg_name: str,
+        subgraph: Any,
+        node_type_classes: Dict,
+        processed_nodes: Set,
+        processed_edges: Set,
+    ):
+        """Add an embedded subgraph cluster with x-ray view of internal structure."""
+        from langgraph.graph import END, START
+
+        subgraph_id = f"cluster_{cls._get_safe_node_id(sg_name)}"
+
+        lines.append(
+            f'    subgraph {subgraph_id}[" 📦 {cls._sanitize_node_name(sg_name)} "]'
+        )
+        lines.append(f"        direction TB")
+
+        # Add subgraph internal START and END
+        sg_start_id = cls._get_safe_node_id(START, f"sg_{sg_name}")
+        sg_end_id = cls._get_safe_node_id(END, f"sg_{sg_name}")
+
+        lines.append(f'        {sg_start_id}["⭐ START"]:::startNode;')
+        lines.append(f'        {sg_end_id}["🏁 END"]:::endNode;')
+        processed_nodes.update([sg_start_id, sg_end_id])
+
+        # Add subgraph internal nodes
+        for sub_node_name, sub_node in subgraph.nodes.items():
+            if sub_node is None or sub_node_name in (START, END):
+                continue
+
+            safe_id = cls._get_safe_node_id(sub_node_name, f"sg_{sg_name}")
+            display_name = cls._sanitize_node_name(sub_node_name)
+
+            # Get node type
+            if hasattr(subgraph, "node_types") and sub_node_name in subgraph.node_types:
+                node_type = subgraph.node_types[sub_node_name]
+                class_name = node_type_classes.get(node_type, "nodeTypeEngine")
+            else:
+                class_name = node_type_classes.get(NodeType.ENGINE, "nodeTypeEngine")
+
+            lines.append(f'        {safe_id}["{display_name}"]:::{class_name};')
+            processed_nodes.add(safe_id)
+
+        # Add subgraph internal edges
+        for source, target in subgraph.edges:
+            source_id = cls._get_safe_node_id(source, f"sg_{sg_name}")
+            target_id = cls._get_safe_node_id(target, f"sg_{sg_name}")
+
+            edge_key = f"{source_id}->{target_id}"
+            if edge_key not in processed_edges:
+                lines.append(f"        {source_id} --> {target_id};")
+                processed_edges.add(edge_key)
+
+        # Add subgraph internal branches
+        if hasattr(subgraph, "branches") and subgraph.branches:
+            for branch_id, branch in subgraph.branches.items():
+                source = branch.source_node
+                source_id = cls._get_safe_node_id(source, f"sg_{sg_name}")
+
+                destinations = getattr(branch, "destinations", {})
+                for condition, target in destinations.items():
+                    target_id = cls._get_safe_node_id(target, f"sg_{sg_name}")
+                    condition_label = cls._format_condition_label(condition)
+
+                    edge_key = f"{source_id}-->{target_id}_{condition}"
+                    if edge_key not in processed_edges:
+                        lines.append(
+                            f'        {source_id} -.->|"{condition_label}"| {target_id};'
+                        )
+                        processed_edges.add(edge_key)
+
+        lines.append("    end")
+
+        # Style the subgraph
+        lines.append(f"    style {subgraph_id} {cls.SUBGRAPH_STYLE}")
+
+    @classmethod
+    def _add_subgraph_bridges(
+        cls,
+        lines: List[str],
+        graph: Any,
+        subgraph_containers: Set,
+        processed_edges: Set,
+    ):
+        """Add bridge connections between main graph and embedded subgraphs."""
+        from langgraph.graph import END, START
+
+        for sg_name in subgraph_containers:
+            sg_start_id = cls._get_safe_node_id(START, f"sg_{sg_name}")
+            sg_end_id = cls._get_safe_node_id(END, f"sg_{sg_name}")
+
+            # Find edges TO this subgraph
+            for source, target in graph.edges:
+                if target == sg_name:
+                    source_id = cls._get_safe_node_id(source)
+                    edge_key = f"{source_id}->{sg_start_id}"
+                    if edge_key not in processed_edges:
+                        lines.append(f"    {source_id} --> {sg_start_id};")
+                        processed_edges.add(edge_key)
+
+            # Find edges FROM this subgraph
+            for source, target in graph.edges:
+                if source == sg_name:
+                    target_id = cls._get_safe_node_id(target)
+                    edge_key = f"{sg_end_id}->{target_id}"
+                    if edge_key not in processed_edges:
+                        lines.append(f"    {sg_end_id} --> {target_id};")
+                        processed_edges.add(edge_key)
+
+    @classmethod
+    def _add_branch_edges(
+        cls,
+        lines: List[str],
+        graph: Any,
+        subgraph_containers: Set,
+        processed_edges: Set,
+    ):
+        """Add conditional branch edges with proper styling."""
+        for branch_id, branch in graph.branches.items():
+            source = branch.source_node
+            source_id = cls._get_safe_node_id(source)
+
+            # Add branch comment
+            branch_name = getattr(branch, "name", branch_id)
+            lines.append(f"    %% Branch: {branch_name}")
+
+            # Handle destinations
+            destinations = getattr(branch, "destinations", {})
+            if hasattr(branch, "condition_map"):
+                destinations = branch.condition_map
+            elif hasattr(branch, "routes"):
+                destinations = branch.routes
+
+            for condition, target in destinations.items():
+                # Handle subgraph targets
+                if target in subgraph_containers:
+                    target_id = cls._get_safe_node_id("START", f"sg_{target}")
+                else:
+                    target_id = cls._get_safe_node_id(target)
+
+                condition_label = cls._format_condition_label(condition)
+
+                edge_key = f"{source_id}-->{target_id}_{condition}"
+                if edge_key not in processed_edges:
+                    lines.append(
+                        f'    {source_id} -.->|"{condition_label}"| {target_id};'
+                    )
+                    processed_edges.add(edge_key)
 
     @classmethod
     def display_graph(
@@ -574,24 +479,30 @@ class GraphVisualizer:
         highlight_paths: Optional[List[List[str]]] = None,
         save_png: bool = False,
         width: str = "100%",
-        theme: str = "default",
+        theme: str = "base",
         subgraph_mode: str = "cluster",
-        show_default_branches: bool = False,
+        show_default_branches: bool = True,
+        direction: str = "TD",
+        compact_mode: bool = False,
+        title: Optional[str] = None,
     ) -> str:
         """
-        Generate and display a Mermaid diagram for a graph.
+        Generate and display an elegant Mermaid diagram with embedded subgraphs.
 
         Args:
             graph: Graph object (BaseGraph instance)
             output_path: Optional path to save the diagram
-            include_subgraphs: Whether to visualize subgraphs as clusters
+            include_subgraphs: Whether to visualize subgraphs as embedded clusters
             highlight_nodes: List of node names to highlight
-            highlight_paths: List of paths to highlight (each path is a list of node names)
+            highlight_paths: List of paths to highlight
             save_png: Whether to save the diagram as PNG
             width: Width of the displayed diagram
             theme: Mermaid theme to use
-            subgraph_mode: How to render subgraphs ("cluster", "inline", or "separate")
+            subgraph_mode: How to render subgraphs ("cluster" for embedded view)
             show_default_branches: Whether to show default branches
+            direction: Graph direction (TD, TB, LR, RL)
+            compact_mode: Whether to use compact styling
+            title: Optional title for the graph
         """
         # Combine nodes from highlight_paths with highlight_nodes
         all_highlight_nodes = highlight_nodes or []
@@ -608,14 +519,24 @@ class GraphVisualizer:
             theme=theme,
             subgraph_mode=subgraph_mode,
             show_default_branches=show_default_branches,
+            direction=direction,
+            compact_mode=compact_mode,
         )
 
-        # Generate a default output path if saving but no path provided
+        # Add title if provided
+        if title:
+            title_line = f"    %% {title}"
+            mermaid_lines = mermaid_code.split("\n")
+            mermaid_lines.insert(2, title_line)
+            mermaid_code = "\n".join(mermaid_lines)
+
+        # Generate output path
         if save_png and not output_path:
             graph_name = getattr(graph, "name", f"graph_{uuid.uuid4().hex[:8]}")
+            clean_name = graph_name.replace(" ", "_").replace("/", "_")
             output_dir = os.path.join(os.getcwd(), "graph_images")
             os.makedirs(output_dir, exist_ok=True)
-            output_path = os.path.join(output_dir, f"{graph_name}.png")
+            output_path = os.path.join(output_dir, f"{clean_name}.png")
 
         # Display the diagram
         display_mermaid(
@@ -623,3 +544,57 @@ class GraphVisualizer:
         )
 
         return mermaid_code
+
+    @classmethod
+    def debug_graph_structure(cls, graph: Any) -> Dict[str, Any]:
+        """Debug helper to understand graph structure including subgraphs."""
+        info = {
+            "nodes": {},
+            "edges": [],
+            "branches": {},
+            "node_types": {},
+            "subgraphs": {},
+        }
+
+        # Analyze main graph
+        if hasattr(graph, "nodes"):
+            for name, node in graph.nodes.items():
+                info["nodes"][name] = {
+                    "type": type(node).__name__ if node else "None",
+                    "has_node_type": hasattr(node, "node_type") if node else False,
+                }
+
+        if hasattr(graph, "edges"):
+            info["edges"] = list(graph.edges)
+
+        if hasattr(graph, "branches"):
+            for branch_id, branch in graph.branches.items():
+                info["branches"][branch_id] = {
+                    "source": getattr(branch, "source_node", "unknown"),
+                    "destinations": getattr(branch, "destinations", {}),
+                    "default": getattr(branch, "default", None),
+                    "type": type(branch).__name__,
+                }
+
+        if hasattr(graph, "node_types"):
+            info["node_types"] = dict(graph.node_types)
+
+        # Analyze subgraphs
+        if hasattr(graph, "subgraphs"):
+            for sg_name, subgraph in graph.subgraphs.items():
+                sg_info = {
+                    "nodes": (
+                        list(subgraph.nodes.keys())
+                        if hasattr(subgraph, "nodes")
+                        else []
+                    ),
+                    "edges": list(subgraph.edges) if hasattr(subgraph, "edges") else [],
+                    "branches": (
+                        list(subgraph.branches.keys())
+                        if hasattr(subgraph, "branches")
+                        else []
+                    ),
+                }
+                info["subgraphs"][sg_name] = sg_info
+
+        return info

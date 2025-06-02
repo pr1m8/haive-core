@@ -5,7 +5,6 @@ Provides a comprehensive system for building, manipulating, and executing
 graphs with consistent interfaces, serialization support, and dynamic composition.
 """
 
-import inspect
 import logging
 import uuid
 from datetime import datetime
@@ -20,14 +19,11 @@ from typing import (
     List,
     Literal,
     Optional,
-    Set,
     Tuple,
     Type,
-    TypeVar,
     Union,
 )
 
-from gradio import Theme
 from langchain_core.runnables import RunnableConfig
 from langgraph.graph import END, START  # Import the actual constants
 from langgraph.types import Command, RetryPolicy, Send
@@ -35,17 +31,14 @@ from pydantic import BaseModel, Field, model_validator
 
 # Import Branch implementation
 from haive.core.graph.branches.branch import Branch
-from haive.core.graph.branches.types import BranchMode, BranchResult, ComparisonType
-from haive.core.graph.common.field_utils import extract_field
+from haive.core.graph.branches.types import BranchMode, ComparisonType
 from haive.core.graph.common.references import CallableReference
 from haive.core.graph.common.types import ConfigLike, NodeOutput, NodeType, StateLike
 from haive.core.graph.node.config import NodeConfig
-from haive.core.graph.node.decorators import send_node
 from haive.core.graph.state_graph.graph_path import GraphPath
 
 # Import mixins
 from haive.core.graph.state_graph.validation_mixin import ValidationMixin
-from haive.core.schema.state_schema import StateSchema
 
 # Define a type for branch result types
 BranchResultType = Union[
@@ -59,6 +52,7 @@ BranchResultType = Union[
 ]
 # Setup logging
 logger = logging.getLogger(__name__)
+import inspect
 
 
 class BranchType(str, Enum):
@@ -243,7 +237,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                 raise ValueError(f"Edge target '{target}' not found in nodes")
 
         # Validate branches
-        for branch_id, branch in self.branches.items():
+        for _branch_id, branch in self.branches.items():
             if branch.source_node != START and branch.source_node not in self.nodes:
                 raise ValueError(
                     f"Branch source '{branch.source_node}' not found in nodes"
@@ -1040,7 +1034,6 @@ class BaseGraph(BaseModel, ValidationMixin):
 
         # Get outgoing edges from target node
         outgoing_edges = []
-        outgoing_branches = []
 
         for source, target in self.edges:
             if source == target_node:
@@ -1067,7 +1060,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                 new_node, "name", f"{target_node}_after_{uuid.uuid4().hex[:6]}"
             )
             # If name not set in NodeConfig, set it
-            if not hasattr(new_node, "name") or not getattr(new_node, "name"):
+            if not hasattr(new_node, "name") or not new_node.name:
                 if hasattr(new_node, "model_copy"):
                     node_copy = new_node.model_copy(deep=True)
                     node_copy.name = new_node_name
@@ -1090,7 +1083,7 @@ class BaseGraph(BaseModel, ValidationMixin):
 
         # Get any branches from the target node
         branches_to_update = []
-        for branch_id, branch in self.branches.items():
+        for _branch_id, branch in self.branches.items():
             if branch.source_node == target_node:
                 branches_to_update.append(branch)
 
@@ -1154,7 +1147,7 @@ class BaseGraph(BaseModel, ValidationMixin):
 
         # Get incoming branch connections
         incoming_branches = []
-        for branch_id, branch in self.branches.items():
+        for _branch_id, branch in self.branches.items():
             for condition, dest in branch.destinations.items():
                 if dest == target_node:
                     incoming_branches.append((branch, condition))
@@ -1184,7 +1177,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                 new_node, "name", f"{target_node}_before_{uuid.uuid4().hex[:6]}"
             )
             # If name not set in NodeConfig, set it
-            if not hasattr(new_node, "name") or not getattr(new_node, "name"):
+            if not hasattr(new_node, "name") or not new_node.name:
                 if hasattr(new_node, "model_copy"):
                     node_copy = new_node.model_copy(deep=True)
                     node_copy.name = new_node_name
@@ -1854,7 +1847,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                     )
 
             # Try branches/conditional edges
-            for branch_id, branch in self.branches.items():
+            for _branch_id, branch in self.branches.items():
                 if branch.source_node == current:
                     stats["branches_explored"] += 1
 
@@ -2020,7 +2013,7 @@ class BaseGraph(BaseModel, ValidationMixin):
             reachable.add(node)
 
             # Follow direct edges
-            for src, dst in self.get_edges(source=node):
+            for _src, dst in self.get_edges(source=node):
                 dfs(dst)
 
             # Follow conditional edges
@@ -2492,7 +2485,7 @@ class BaseGraph(BaseModel, ValidationMixin):
         def validation_wrapper(state, config=None):
             try:
                 # ValidationNodeConfig uses __call__ method, not process_validation
-                if hasattr(validation_config, "__call__"):
+                if callable(validation_config):
                     # Call the ValidationNodeConfig directly
                     result = validation_config(state, config)
                     logging.info(
@@ -2518,7 +2511,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                         hasattr(result, "__class__")
                         and "Command" in result.__class__.__name__
                     ):
-                        logging.info(f"ValidationNodeConfig returned Command object")
+                        logging.info("ValidationNodeConfig returned Command object")
                         return result
 
                     # If result is already a string in our routing map, use it directly
@@ -2539,7 +2532,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                                 return key
                         # If no END destination found, return the string as-is
                         logging.info(
-                            f"ValidationNodeConfig returned no_tool_calls, returning as-is"
+                            "ValidationNodeConfig returned no_tool_calls, returning as-is"
                         )
                         return result
 
@@ -2591,9 +2584,6 @@ class BaseGraph(BaseModel, ValidationMixin):
 
     def _create_branch_wrapper(self, func, destination_map, default_dest):
         """Wrapper for branch functions that handles boolean to string conversion."""
-        import inspect
-
-        from langgraph.types import Send
 
         param_count = len(inspect.signature(func).parameters)
 
@@ -2616,7 +2606,7 @@ class BaseGraph(BaseModel, ValidationMixin):
 
                 # CRITICAL FIX: Add detailed debugging for has_tool_calls function
                 if hasattr(func, "__name__") and "has_tool_calls" in func.__name__:
-                    logger.info(f"=== DEBUGGING has_tool_calls function ===")
+                    logger.info("=== DEBUGGING has_tool_calls function ===")
                     logger.info(f"Function result: {result} (type: {type(result)})")
                     logger.info(
                         f"Available routing keys: {list(destination_map.keys())}"
@@ -2647,7 +2637,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                                         f"tool_calls in additional_kwargs: {additional_kwargs['tool_calls']}"
                                     )
 
-                    logger.info(f"=== END DEBUGGING ===")
+                    logger.info("=== END DEBUGGING ===")
 
                 # Handle boolean to string conversion if needed
                 if (
@@ -3005,7 +2995,7 @@ class BaseGraph(BaseModel, ValidationMixin):
             visited.add(current)
 
             # Find all outgoing connections including branches
-            for src, dest in self.get_edges(source=current, include_branches=True):
+            for _src, dest in self.get_edges(source=current, include_branches=True):
                 if dest not in visited:
                     queue.append(dest)
 
@@ -3105,7 +3095,7 @@ class BaseGraph(BaseModel, ValidationMixin):
 
         # Copy branches/conditional edges
         if hasattr(other_graph, "branches"):
-            for branch_id, branch in other_graph.branches.items():
+            for _branch_id, branch in other_graph.branches.items():
                 # Convert node names
                 new_src = (
                     f"{prefix}_{branch.source_node}"
@@ -3166,8 +3156,24 @@ class BaseGraph(BaseModel, ValidationMixin):
         return self
 
     # Integration with LangGraph StateGraph
-    def to_langgraph(self, state_schema: Optional[Type[BaseModel]] = None) -> Any:
-        """Convert to LangGraph StateGraph."""
+    def to_langgraph(
+        self,
+        state_schema: Optional[Type[BaseModel]] = None,
+        input_schema: Optional[Type[BaseModel]] = None,
+        output_schema: Optional[Type[BaseModel]] = None,
+        config_schema: Optional[Type[BaseModel]] = None,
+        **kwargs,
+    ) -> Any:
+        """
+        Convert to LangGraph StateGraph with proper schema handling.
+
+        Schema Resolution Logic:
+        1. If state_schema provided: use it, default input/output to state_schema
+        2. If input_schema and output_schema provided: use them, create PassThroughState for state_schema
+        3. If only input_schema provided: use it for both input and state, output defaults to state
+        4. If only output_schema provided: use it for both output and state, input defaults to state
+        5. If none provided: use self.state_schema or dict
+        """
         try:
             from langgraph.graph import StateGraph
             from rich.console import Console
@@ -3181,14 +3187,87 @@ class BaseGraph(BaseModel, ValidationMixin):
                 )
             )
 
-            # Use provided schema or the one from the graph
-            schema = state_schema or self.state_schema or dict
-            console.print(
-                f"Schema: [yellow]{schema.__name__ if hasattr(schema, '__name__') else schema}[/yellow]"
-            )
+            # Schema resolution logic
+            resolved_state_schema = None
+            resolved_input_schema = None
+            resolved_output_schema = None
+            resolved_config_schema = config_schema  # Optional, can be None
 
-            # SIMPLE: Create StateGraph with the schema
-            graph_builder = StateGraph(schema)
+            # Case 1: state_schema is provided
+            if state_schema is not None:
+                resolved_state_schema = state_schema
+                resolved_input_schema = input_schema or state_schema  # Default to state
+                resolved_output_schema = (
+                    output_schema or state_schema
+                )  # Default to state
+                console.print(
+                    f"[green]Using provided state_schema: {state_schema.__name__}[/green]"
+                )
+
+            # Case 2: Both input and output provided, but no state
+            elif input_schema is not None and output_schema is not None:
+                resolved_input_schema = input_schema
+                resolved_output_schema = output_schema
+
+                # Create pass-through state schema
+                class PassThroughState(BaseModel):
+                    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+                resolved_state_schema = PassThroughState
+                console.print(
+                    f"[yellow]Created PassThroughState, input: {input_schema.__name__}, output: {output_schema.__name__}[/yellow]"
+                )
+
+            # Case 3: Only input_schema provided
+            elif input_schema is not None:
+                resolved_input_schema = input_schema
+                resolved_state_schema = input_schema  # Use input as state
+                resolved_output_schema = (
+                    output_schema or input_schema
+                )  # Default output to input/state
+                console.print(
+                    f"[cyan]Using input_schema as state: {input_schema.__name__}[/cyan]"
+                )
+
+            # Case 4: Only output_schema provided
+            elif output_schema is not None:
+                resolved_output_schema = output_schema
+                resolved_state_schema = output_schema  # Use output as state
+                resolved_input_schema = (
+                    input_schema or output_schema
+                )  # Default input to output/state
+                console.print(
+                    f"[cyan]Using output_schema as state: {output_schema.__name__}[/cyan]"
+                )
+
+            # Case 5: Nothing provided, use graph's state_schema or dict
+            else:
+                resolved_state_schema = getattr(self, "state_schema", dict)
+                resolved_input_schema = resolved_state_schema
+                resolved_output_schema = resolved_state_schema
+                schema_name = (
+                    resolved_state_schema.__name__
+                    if hasattr(resolved_state_schema, "__name__")
+                    else str(resolved_state_schema)
+                )
+                console.print(f"[dim]Using default schema: {schema_name}[/dim]")
+
+            # Log final schema resolution
+            console.print("[bold]Final schemas:[/bold]")
+            console.print(
+                f"  State: {resolved_state_schema.__name__ if hasattr(resolved_state_schema, '__name__') else resolved_state_schema}"
+            )
+            console.print(
+                f"  Input: {resolved_input_schema.__name__ if hasattr(resolved_input_schema, '__name__') else resolved_input_schema}"
+            )
+            console.print(
+                f"  Output: {resolved_output_schema.__name__ if hasattr(resolved_output_schema, '__name__') else resolved_output_schema}"
+            )
+            if resolved_config_schema:
+                console.print(f"  Config: {resolved_config_schema.__name__}")
+
+            # Create StateGraph with resolved state schema
+            graph_builder = StateGraph(resolved_state_schema)
             console.print("[green]✓[/green] Created StateGraph")
 
             # Direct debug function - doesn't wrap, just adds a print
@@ -3230,7 +3309,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                         if isinstance(result, Command):
                             console.print(
                                 Panel.fit(
-                                    f"[bold yellow]Command Details:[/bold yellow]\n"
+                                    "[bold yellow]Command Details:[/bold yellow]\n"
                                     + f"Type: {type(result).__name__}\n"
                                     + f"Update: {getattr(result, 'update', None)}\n"
                                     + f"Branch: {getattr(result, 'branch', None)}\n"
@@ -3272,7 +3351,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                     console.print(
                         f"Node [yellow]{node_name}[/yellow]: Using metadata callable"
                     )
-                elif hasattr(node, "__call__") and callable(node.__call__):
+                elif callable(node) and callable(node.__call__):
                     # 3. Node has __call__ method
                     action = node
                     console.print(
@@ -3283,7 +3362,9 @@ class BaseGraph(BaseModel, ValidationMixin):
                     console.print(
                         f"Node [yellow]{node_name}[/yellow]: No callable found, using pass-through"
                     )
-                    action = lambda state, config=None: state
+
+                    def action(state, config=None):
+                        return state
 
                 # Add logger for debugging if not in production
                 import os
@@ -3302,7 +3383,7 @@ class BaseGraph(BaseModel, ValidationMixin):
 
             # SIMPLE: Add branches
             console.print("\n[bold]Adding Branches:[/bold]")
-            for branch_id, branch in self.branches.items():
+            for _branch_id, branch in self.branches.items():
                 source = branch.source_node
 
                 # Extract destinations
@@ -3388,7 +3469,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                                         # For validation failure, use has_errors if available
                                         if "has_errors" in dest_dict:
                                             console.print(
-                                                f"[yellow]Using has_errors for validation result[/yellow]"
+                                                "[yellow]Using has_errors for validation result[/yellow]"
                                             )
                                             return "has_errors"
 
@@ -3435,7 +3516,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                             f"[yellow]Warning: Could not inspect branch function: {str(e)}[/yellow]"
                         )
                         console.print(
-                            f"[yellow]Falling back to original function[/yellow]"
+                            "[yellow]Falling back to original function[/yellow]"
                         )
 
                         try:
@@ -4234,7 +4315,7 @@ def create_debug_has_tool_calls(original_func):
     def debug_wrapper(state):
         from langchain_core.messages import AIMessage
 
-        print(f"\n=== DEBUGGING has_tool_calls ===")
+        print("\n=== DEBUGGING has_tool_calls ===")
         print(f"State type: {type(state)}")
 
         # Check state structure
@@ -4304,7 +4385,7 @@ def create_debug_has_tool_calls(original_func):
         else:
             print(f"✓ Results match: {original_result}")
 
-        print(f"=== END DEBUGGING ===\n")
+        print("=== END DEBUGGING ===\n")
 
         return original_result
 

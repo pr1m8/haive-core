@@ -1,10 +1,10 @@
 # src/haive/core/graph/graph_mixin.py
 
-from typing import Any, Dict, Generic, Optional, Type
+from typing import Any, Dict, Generic, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from haive.core.graph.common.types import C, ConfigLike, StateLike, T
+from haive.core.graph.common.types import C, T
 
 
 class GraphSchemaMixin(BaseModel, Generic[T, C]):

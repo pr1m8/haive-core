@@ -1,11 +1,8 @@
-from typing import Any, Dict, List, Optional, Tuple, Type, Union
-
-from pydantic import BaseModel
+from typing import Any, List, Optional, Tuple, Type, Union
 
 from ..models.graph_model import GraphModel
-from ..models.node_model import NodeModel
 from ..models.type_ref import TypeReference
-from .pattern_registry import PatternDefinition, PatternRegistry
+from .pattern_registry import PatternRegistry
 
 
 class GraphBuilder:

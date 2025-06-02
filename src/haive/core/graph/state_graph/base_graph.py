@@ -15,24 +15,20 @@ from typing import (
     Dict,
     Generic,
     List,
-    Literal,
     Optional,
-    Set,
     Tuple,
-    TypeVar,
     Union,
 )
 
 from langchain_core.runnables import RunnableConfig
-from langgraph.types import Command, RetryPolicy, Send
+from langgraph.types import RetryPolicy
 from pydantic import BaseModel, Field, model_validator
 
 # Import Branch implementation
 from haive.core.graph.branches.branch import Branch
-from haive.core.graph.branches.types import BranchMode, BranchResult, ComparisonType
+from haive.core.graph.branches.types import BranchMode, ComparisonType
 from haive.core.graph.common.references import CallableReference
 from haive.core.graph.common.types import ConfigLike, NodeOutput, StateLike
-from haive.core.schema.state_schema import StateSchema
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -178,7 +174,7 @@ class BaseGraph(BaseModel):
                 raise ValueError(f"Edge target '{target}' not found in nodes")
 
         # Validate branches
-        for branch_id, branch in self.branches.items():
+        for _branch_id, branch in self.branches.items():
             if (
                 branch.source_node not in self.nodes
                 and branch.source_node != START_NODE
@@ -498,7 +494,6 @@ class BaseGraph(BaseModel):
 
         # Get outgoing edges from target node
         outgoing_edges = []
-        outgoing_branches = []
 
         for source, target in self.edges:
             if source == target_node:
@@ -523,7 +518,7 @@ class BaseGraph(BaseModel):
 
         # Get any branches from the target node
         branches_to_update = []
-        for branch_id, branch in self.branches.items():
+        for _branch_id, branch in self.branches.items():
             if branch.source_node == target_node:
                 branches_to_update.append(branch)
 
@@ -587,7 +582,7 @@ class BaseGraph(BaseModel):
 
         # Get incoming branch connections
         incoming_branches = []
-        for branch_id, branch in self.branches.items():
+        for _branch_id, branch in self.branches.items():
             for condition, dest in branch.destinations.items():
                 if dest == target_node:
                     incoming_branches.append((branch, condition))
@@ -896,7 +891,7 @@ class BaseGraph(BaseModel):
         branch_ends = []
 
         # Add each branch
-        for i, branch_sequence in enumerate(branches):
+        for _i, branch_sequence in enumerate(branches):
             # Add the sequence
             self.add_sequence(branch_sequence, **kwargs)
 
@@ -1525,7 +1520,7 @@ class BaseGraph(BaseModel):
             visited.add(current)
 
             # Find all outgoing connections including branches
-            for src, dest in self.get_edges(source=current, include_branches=True):
+            for _src, dest in self.get_edges(source=current, include_branches=True):
                 if dest not in visited:
                     queue.append(dest)
 
@@ -1567,7 +1562,7 @@ class BaseGraph(BaseModel):
             visited.add(node)
 
             # Get all outgoing connections including branches
-            for src, dest in self.get_edges(source=node, include_branches=True):
+            for _src, dest in self.get_edges(source=node, include_branches=True):
                 if dest not in visited:
                     path.append(dest)
                     dfs(dest, path)
@@ -1693,7 +1688,7 @@ class BaseGraph(BaseModel):
                 graph_builder.add_edge(source_actual, target_actual)
 
             # Add branches
-            for branch_id, branch in self.branches.items():
+            for _branch_id, branch in self.branches.items():
                 # Create the edge function
                 def create_edge_func(branch_obj):
                     def edge_func(state):
@@ -1933,7 +1928,7 @@ class BaseGraph(BaseModel):
         if self.branches:
             lines.append("    %% Branch connections")
 
-            for branch_id, branch in self.branches.items():
+            for _branch_id, branch in self.branches.items():
                 source = branch.source_node
 
                 if branch.mode == BranchMode.FUNCTION:

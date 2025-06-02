@@ -1,5 +1,5 @@
 import functools
-from typing import Any, Callable, Dict, Optional
+from typing import Callable
 
 from ..models.function_ref import FunctionReference
 from .pattern_registry import PatternDefinition, PatternRegistry

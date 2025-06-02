@@ -1,57 +1,35 @@
 """
-Graph serialization framework for Haive.
+Haive Graph System
 
-This package provides tools for serializing, modifying, and managing LangGraph StateGraph objects.
+This package provides a comprehensive graph implementation for the Haive framework,
+with flexible node and branch management, visualization, and LangGraph integration.
 """
 
 """
-# Base models
-from .base import SerializableModel
+# Base graph implementation
+from haive.core.graph.state_graph.base_graph2 import BaseGraph
+from haive.core.graph.state_graph.schema_graph import SchemaGraph
 
-# Builders and editors
-from .builder.graph_builder import GraphBuilder
-from .editor.graph_editor import GraphEditor
-from .models.branch_model import BranchModel
-from .models.edge_model import EdgeModel, EdgeType
+# Core components
+from haive.core.graph.state_graph.components import Node, Branch
 
-# Core models
-from .models.function_ref import FunctionReference
-from .models.graph_model import GraphModel
-from .models.node_model import NodeModel
-from .models.type_ref import TypeReference
+# Conversion utilities
+from haive.core.graph.state_graph.conversion import convert_to_langgraph
 
-# Pattern decorators
-from .registry.decorators import register_pattern
-
-# Registries
-from .registry.graph_registry import GraphRegistry
-from .registry.pattern_registry import PatternDefinition, PatternRegistry
-
-# Set up registries for the models
-NodeModel._registry = GraphRegistry.get_instance()
-BranchModel._registry = GraphRegistry.get_instance()
-GraphModel._registry = GraphRegistry.get_instance()
-PatternDefinition._registry = PatternRegistry.get_instance()
+# Visualization
+from haive.core.graph.state_graph.graph_visualizer import GraphVisualizer
 
 __all__ = [
-    # Base
-    "SerializableModel",
-    # Models
-    "FunctionReference",
-    "TypeReference",
-    "NodeModel",
-    "EdgeModel",
-    "EdgeType",
-    "BranchModel",
-    "GraphModel",
-    # Registries
-    "GraphRegistry",
-    "PatternRegistry",
-    "PatternDefinition",
-    # Builders
-    "GraphBuilder",
-    "GraphEditor",
-    # Decorators
-    "register_pattern",
+    # Core classes
+    "BaseGraph",
+    "SchemaGraph",
+    "Node",
+    "Branch",
+    
+    # Conversion
+    "convert_to_langgraph",
+    
+    # Visualization
+    "GraphVisualizer",
 ]
 """

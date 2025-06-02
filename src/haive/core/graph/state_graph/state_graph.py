@@ -1,5 +1,3 @@
-import json
-from copy import deepcopy
 from datetime import datetime
 from typing import (
     Any,
@@ -8,7 +6,6 @@ from typing import (
     Dict,
     Generic,
     List,
-    Literal,
     Optional,
     Set,
     Tuple,
@@ -524,7 +521,7 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
         for src, branch_dict in self.branches.items():
             if src == node:
                 # Outgoing branches
-                for branch_name, branch in branch_dict.items():
+                for _branch_name, branch in branch_dict.items():
                     if branch.ends:
                         for target in branch.ends.values():
                             if target not in result["outgoing_branches"]:
@@ -533,7 +530,7 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
                         result["outgoing_branches"].append(branch.then)
             else:
                 # Incoming branches
-                for branch_name, branch in branch_dict.items():
+                for _branch_name, branch in branch_dict.items():
                     targets = list(branch.ends.values()) if branch.ends else []
                     if branch.then:
                         targets.append(branch.then)
@@ -593,7 +590,7 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
 
             # Add neighbors from branches
             if current in self.branches:
-                for branch_name, branch in self.branches[current].items():
+                for _branch_name, branch in self.branches[current].items():
                     if branch.ends:
                         for dst in branch.ends.values():
                             if dst not in visited:
@@ -639,7 +636,7 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
             if src not in self.nodes:
                 raise ValueError(f"Branch from non-existent node '{src}'")
 
-            for branch_name, branch in branch_dict.items():
+            for _branch_name, branch in branch_dict.items():
                 if branch.ends:
                     for end in branch.ends.values():
                         if end != "__end__" and end not in self.nodes:
@@ -700,7 +697,6 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
     @classmethod
     def from_state_graph(cls, graph: Any) -> "StateGraphSerializable":
         """Create a serializable representation from a StateGraph."""
-        from collections import defaultdict
 
         serializable = cls(
             edges=set(graph.edges),
