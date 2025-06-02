@@ -1725,70 +1725,77 @@ class DynamicGraph:
             self.debug_graph()
             
             raise ValueError(f"Failed to compile graph: {str(e)}") from e
-    def debug_graph(self):
+    def debug_graph(self) -> str:
         """
-        Generate comprehensive debug information about the graph state.
+        Print comprehensive debug information about the graph state.
         
-        This method provides detailed debugging information about the current state
+        This method displays a detailed overview of the current state
         of the DynamicGraph, including nodes, edges, connections, and potential issues.
         """
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        print(f"\n===== DEBUG GRAPH: {self.name} ({timestamp}) =====")
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        logger.debug(f"\n===== DEBUG GRAPH: {self.name} ({timestamp}) =====")
         
-        # Graph overview
-        print(f"Graph ID: {self.id}")
-        print(f"Name: {self.name}")
-        print(f"Description: {self.description}")
-        print(f"State Model: {getattr(self.state_model, '__name__', 'None')}")
-        print(f"Debug Level: {self.debug_level}")
+        # Basic info
+        logger.debug(f"Graph ID: {self.id}")
+        logger.debug(f"Name: {self.name}")
+        logger.debug(f"Description: {self.description}")
+        logger.debug(f"State Model: {getattr(self.state_model, '__name__', 'None')}")
+        logger.debug(f"Debug Level: {self.debug_level}")
         
-        # Components and engines
-        print(f"\n--- Components ({len(self.components)}) ---")
+        # Components
+        logger.debug(f"\n--- Components ({len(self.components)}) ---")
         for i, component in enumerate(self.components):
+            component_name = getattr(component, '__name__', str(component))
             component_type = type(component).__name__
-            component_name = getattr(component, "name", f"Component-{i}")
-            print(f"  {i+1}. {component_name} ({component_type})")
+            logger.debug(f"  {i+1}. {component_name} ({component_type})")
         
         # Registered engines
-        print(f"\n--- Registered Engines ({len(self.engines)}) ---")
-        for name, engine in self.engines.items():
-            engine_type = getattr(engine, "engine_type", "unknown")
-            engine_id = getattr(engine, "id", "no-id")
-            print(f"  {name} (ID: {engine_id}, Type: {engine_type})")
+        logger.debug(f"\n--- Registered Engines ({len(self.engines)}) ---")
+        for name, engine_id in self.engines.items():
+            if engine_id in self.engine_objects:
+                engine_type = type(self.engine_objects[engine_id]).__name__
+                logger.debug(f"  {name} (ID: {engine_id}, Type: {engine_type})")
         
         # Nodes
-        print(f"\n--- Nodes ({len(self.nodes)}) ---")
+        logger.debug(f"\n--- Nodes ({len(self.nodes)}) ---")
+        node_status = {}
         for name, node_config in self.nodes.items():
-            node_type = getattr(node_config, "node_type", "unknown")
-            if hasattr(node_config, "determine_node_type"):
-                node_type = node_config.determine_node_type()
+            # Determine node status
+            has_incoming = any(edge.target == name for edge in self.edges if edge.source != "START")
+            has_outgoing = any(edge.source == name for edge in self.edges)
+            
+            if not has_incoming and name != self.entry_point:
+                status = NodeStatus.UNREACHABLE
+            elif not has_outgoing and node_config.command_goto != "END":
+                status = NodeStatus.DEAD_END
+            else:
+                status = NodeStatus.CONNECTED
                 
-            engine_name = "None"
-            engine_type = "None"
-            if isinstance(node_config.engine, Engine):
-                engine_name = node_config.engine.name
-                engine_type = getattr(node_config.engine, "engine_type", "unknown")
-            elif callable(node_config.engine):
-                engine_name = getattr(node_config.engine, "__name__", "callable")
-                engine_type = "function"
+            node_status[name] = status
             
-            status = self.node_statuses.get(name, NodeStatus.ADDED)
-            goto = getattr(node_config, "command_goto", None)
-            goto_str = "END" if goto is END else str(goto) if goto else "None"
+            # Get node details
+            node_type = node_config.type
+            engine_name = node_config.engine or 'None'
+            engine_type = 'N/A'
+            if engine_name in self.engines and self.engines[engine_name] in self.engine_objects:
+                engine_type = type(self.engine_objects[self.engines[engine_name]]).__name__
             
-            print(f"  {name} ({status.value}):")
-            print(f"    Type: {node_type}")
-            print(f"    Engine: {engine_name} ({engine_type})")
-            print(f"    Command Goto: {goto_str}")
+            goto_str = node_config.command_goto or 'None'
             
-            # Print mappings if they exist
+            logger.debug(f"  {name} ({status.value}):")
+            logger.debug(f"    Type: {node_type}")
+            logger.debug(f"    Engine: {engine_name} ({engine_type})")
+            logger.debug(f"    Command Goto: {goto_str}")
+            
+            # Log mappings if they exist
             if node_config.input_mapping:
-                print(f"    Input Mapping: {node_config.input_mapping}")
+                logger.debug(f"    Input Mapping: {node_config.input_mapping}")
             if node_config.output_mapping:
-                print(f"    Output Mapping: {node_config.output_mapping}")
+                logger.debug(f"    Output Mapping: {node_config.output_mapping}")
         
         # Edges
-        print(f"\n--- Edges ({len(self.edges)}) ---")
+        logger.debug(f"\n--- Edges ({len(self.edges)}) ---")
+        
         # Group edges by source
         edges_by_source = {}
         for edge in self.edges:
@@ -1796,92 +1803,102 @@ class DynamicGraph:
                 edges_by_source[edge.source] = []
             edges_by_source[edge.source].append(edge)
         
-        # Print edges organized by source
-        for source, edges in edges_by_source.items():
-            print(f"  From {source}:")
+        # Log edges organized by source
+        for source, edges in sorted(edges_by_source.items()):
+            logger.debug(f"  From {source}:")
             for edge in edges:
                 target = edge.target
-                if edge.condition:
-                    condition_name = getattr(edge.condition, "__name__", "condition")
-                    print(f"    → {target} [conditional: {condition_name}]")
+                condition_name = edge.condition_name
+                if condition_name:
+                    logger.debug(f"    → {target} [conditional: {condition_name}]")
                 else:
-                    print(f"    → {target}")
+                    logger.debug(f"    → {target}")
         
         # Check for START edges
-        start_edges = [edge for edge in self.edges 
-                    if edge.source in ["START", "__start__", str(START)]]
+        start_edges = [e for e in self.edges if e.source == "START"]
         if not start_edges:
-            print("\nWARNING: No START edges found - this will cause compilation failure")
+            logger.debug("\nWARNING: No START edges found - this will cause compilation failure")
         else:
-            print(f"\nFound {len(start_edges)} START edge(s)")
+            logger.debug(f"\nFound {len(start_edges)} START edge(s)")
         
         # Check for END edges
-        end_edges = [edge for edge in self.edges 
-                    if edge.target in ["END", "__end__", str(END)]]
-        if not end_edges:
-            print("\nWARNING: No END edges found - graph may loop indefinitely")
+        end_edges = [e for e in self.edges if e.target == "END"]
+        end_goto_nodes = [n for n, cfg in self.nodes.items() if cfg.command_goto == "END"]
+        if not end_edges and not end_goto_nodes:
+            logger.debug("\nWARNING: No END edges found - graph may loop indefinitely")
         else:
-            print(f"\nFound {len(end_edges)} END edge(s):")
+            logger.debug(f"\nFound {len(end_edges)} END edge(s):")
             for edge in end_edges:
-                print(f"  {edge.source} → END")
-        
-        # Check for nodes with command_goto=END
-        end_goto_nodes = [name for name, config in self.nodes.items() 
-                        if getattr(config, "command_goto", None) is END]
-        if end_goto_nodes:
-            print(f"\nNodes with command_goto=END: {len(end_goto_nodes)}")
-            for node in end_goto_nodes:
-                print(f"  {node}")
-        
-        # Check for unreachable nodes
-        reachable_nodes = set()
-        for edge in start_edges:
-            reachable_nodes.add(edge.target)
-        
-        # Iteratively add nodes reachable from current set
-        new_nodes_found = True
-        while new_nodes_found:
-            new_nodes_found = False
-            for edge in self.edges:
-                if edge.source in reachable_nodes and edge.target not in ["END", "__end__", str(END)]:
-                    if edge.target not in reachable_nodes:
-                        reachable_nodes.add(edge.target)
-                        new_nodes_found = True
-        
-        unreachable_nodes = set(self.nodes.keys()) - reachable_nodes
-        if unreachable_nodes:
-            print(f"\nWARNING: Found {len(unreachable_nodes)} unreachable node(s):")
-            for node in unreachable_nodes:
-                print(f"  {node}")
-        
-        # Check for existing errors
-        if self.errors:
-            print(f"\n--- Errors ({len(self.errors)}) ---")
-            for i, error in enumerate(self.errors):
-                print(f"  {i+1}. {error.split('\n')[0]}")
-        
-        # Check if graph has been compiled
-        compiled = hasattr(self, "compiled_graph") and self.compiled_graph is not None
-        print(f"\nCompilation Status: {'COMPILED' if compiled else 'NOT COMPILED'}")
-        
-        # Generate visualization if possible
-        if VISUALIZATION_AVAILABLE:
-            try:
-                from haive.core.graph.utils.mermaid_visualizer import visualize_graph
-                output_dir = "debug_visualizations"
-                os.makedirs(output_dir, exist_ok=True)
-                output_file = os.path.join(output_dir, f"{self.name.replace(' ', '_')}_{timestamp}.html")
+                logger.debug(f"  {edge.source} → END")
                 
-                print(f"\nGenerating debug visualization: {output_file}")
-                visualize_graph(
-                    graph=self,
-                    output_file=output_file,
-                    open_browser=False
-                )
-                print(f"Debug visualization saved to: {output_file}")
-            except Exception as viz_error:
-                print(f"Visualization error: {str(viz_error)}")
+        # List nodes with command_goto=END
+        if end_goto_nodes:
+            logger.debug(f"\nNodes with command_goto=END: {len(end_goto_nodes)}")
+            for node in end_goto_nodes:
+                logger.debug(f"  {node}")
         
-        print("\n===== END DEBUG GRAPH =====\n")
+        # Analyze graph connectivity
+        all_node_names = set(self.nodes.keys())
+        entry_nodes = set()
+        
+        # Add entry point
+        if self.entry_point:
+            entry_nodes.add(self.entry_point)
+            
+        # Add targets of START edges
+        for edge in self.edges:
+            if edge.source == "START":
+                entry_nodes.add(edge.target)
+        
+        # Find reachable nodes
+        reachable = set()
+        to_visit = list(entry_nodes)
+        
+        while to_visit:
+            current = to_visit.pop()
+            if current in reachable:
+                continue
+            reachable.add(current)
+            
+            # Add all targets of edges from current node
+            for edge in self.edges:
+                if edge.source == current and edge.target != "END":
+                    if edge.target not in reachable:
+                        to_visit.append(edge.target)
+                        
+        # Find unreachable nodes
+        unreachable_nodes = all_node_names - reachable
+        if unreachable_nodes:
+            logger.debug(f"\nWARNING: Found {len(unreachable_nodes)} unreachable node(s):")
+            for node in sorted(unreachable_nodes):
+                logger.debug(f"  {node}")
+        
+        # Errors
+        if self.errors:
+            logger.debug(f"\n--- Errors ({len(self.errors)}) ---")
+            for i, error in enumerate(self.errors):
+                logger.debug(f"  {i+1}. {error.split('\n')[0]}")
+        
+        # Compilation status
+        compiled = hasattr(self, '_compiled_graph') and self._compiled_graph is not None
+        logger.debug(f"\nCompilation Status: {'COMPILED' if compiled else 'NOT COMPILED'}")
+        
+        # Optionally generate visualization
+        if self.visualize:
+            try:
+                # Generate unique filename
+                timestamp_file = datetime.now().strftime("%Y%m%d_%H%M%S")
+                output_file = f"debug_graph_{self.name}_{timestamp_file}.html"
+                
+                logger.debug(f"\nGenerating debug visualization: {output_file}")
+                
+                # Use existing visualization method
+                if hasattr(self, 'visualize_graph'):
+                    self.visualize_graph(output_file=output_file)
+                    logger.debug(f"Debug visualization saved to: {output_file}")
+            except Exception as viz_error:
+                logger.debug(f"Visualization error: {str(viz_error)}")
+        
+        logger.debug("\n===== END DEBUG GRAPH =====\n")
         
     

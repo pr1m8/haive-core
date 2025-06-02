@@ -1,14 +1,12 @@
 # src/haive/core/graph/state_graph/patterns/implementations.py
 
 import logging
-from abc import ABC
 from typing import Any, ClassVar, Dict, List, Optional
 
 from langgraph.graph import END, START
 
-from haive.core.graph.branches.branch import Branch
 from haive.core.graph.common.types import NodeLike
-from haive.core.graph.state_graph.patterns.base import GraphPattern
+from haive.core.graph.state_graph.pattern.base import GraphPattern
 
 logger = logging.getLogger(__name__)
 

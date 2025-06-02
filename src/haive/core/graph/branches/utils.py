@@ -5,7 +5,7 @@ Utility functions for working with branches.
 import inspect
 import logging
 import re
-from typing import Any, Dict, List, Optional, Set, Union
+from typing import Any, Set
 
 logger = logging.getLogger(__name__)
 
