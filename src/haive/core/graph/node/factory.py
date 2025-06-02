@@ -3,18 +3,16 @@
 import asyncio
 import inspect
 import logging
-from functools import wraps
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from typing import Any, Callable, Dict, Optional
 
-from langchain_core.runnables import RunnableConfig
 from langgraph.graph import END
 from langgraph.prebuilt import ToolNode, ValidationNode
 from langgraph.types import Command, Send
 from pydantic import BaseModel
 
-from haive.core.engine.base import Engine, InvokableEngine, NonInvokableEngine
+from haive.core.engine.base import InvokableEngine, NonInvokableEngine
 from haive.core.graph.node.config import NodeConfig
-from haive.core.graph.node.types import CommandGoto, NodeType
+from haive.core.graph.node.types import NodeType
 
 logger = logging.getLogger(__name__)
 
@@ -163,7 +161,7 @@ class NodeFactory:
             """Node function that instantiates the engine."""
             try:
                 # Extract input from state
-                input_data = cls._extract_input(state, input_mapping)
+                cls._extract_input(state, input_mapping)
 
                 # Just instantiate the engine
                 instance = engine.instantiate(config)

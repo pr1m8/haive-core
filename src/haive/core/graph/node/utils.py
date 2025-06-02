@@ -6,9 +6,8 @@ This module provides convenience functions for creating different types of nodes
 and extracting information from schemas for node integration.
 """
 
-import inspect
 import logging
-from typing import Any, Callable, Dict, List, Optional, Type, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 from langgraph.types import RetryPolicy
 from pydantic import BaseModel

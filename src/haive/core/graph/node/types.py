@@ -11,7 +11,6 @@ throughout the node system, providing type safety and standardization.
 from enum import Enum
 from typing import (
     Any,
-    Callable,
     Dict,
     List,
     Literal,
@@ -23,7 +22,6 @@ from typing import (
 )
 
 from langchain_core.runnables import RunnableConfig
-from langgraph.graph import END
 from langgraph.types import Command, Send
 from pydantic import BaseModel
 

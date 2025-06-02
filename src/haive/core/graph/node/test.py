@@ -1,9 +1,9 @@
 # test_node_factory.py
 
 import uuid
-from typing import List, Optional
+from typing import List
 
-from langchain_core.messages import BaseMessage, HumanMessage
+from langchain_core.messages import HumanMessage
 from langgraph.graph import END
 from pydantic import BaseModel, Field
 

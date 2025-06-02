@@ -7,7 +7,7 @@ registered, looked up, and managed throughout the application.
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Type
+from typing import Dict, List, Optional, Type
 
 from haive.core.graph.node.config import NodeConfig
 from haive.core.graph.node.types import NodeType

@@ -7,11 +7,9 @@ of nodes from functions, with proper configuration and registration.
 """
 
 import logging
-from functools import wraps
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
-from langgraph.types import RetryPolicy, Send
-from pydantic import BaseModel
+from langgraph.types import RetryPolicy
 
 from haive.core.graph.node.config import NodeConfig
 from haive.core.graph.node.factory import NodeFactory
@@ -247,7 +245,7 @@ def debug_node(name=None):
             if isinstance(result, Command):
                 console.print(
                     Panel.fit(
-                        f"[bold yellow]Command Object Detected:[/bold yellow]\n"
+                        "[bold yellow]Command Object Detected:[/bold yellow]\n"
                         + f"Type: {type(result).__name__}\n"
                         + f"Attributes: {dir(result)}\n"
                         + f"Update: {getattr(result, 'update', None)}\n"
@@ -260,7 +258,6 @@ def debug_node(name=None):
             return result
 
         # Preserve function metadata
-        from functools import wraps
 
         return wraps(func)(wrapper)
 
