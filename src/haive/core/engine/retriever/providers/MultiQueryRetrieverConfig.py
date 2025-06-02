@@ -1,13 +1,20 @@
 # src/haive/core/engine/retriever/multi_query.py
 
-from typing import Optional
+"""MultiQuery Retriever implementation for the Haive framework.
 
-from langchain.retrievers import MultiQueryRetriever
+This module provides a configuration class for the MultiQuery retriever,
+which generates multiple query variations using an LLM and combines the results.
+"""
+
+from typing import Any, Dict, List, Optional, Tuple, Type
+
+from langchain_core.documents import Document
 from langchain_core.prompts import PromptTemplate
 from pydantic import Field, model_validator
 
 from haive.core.engine.aug_llm import AugLLMConfig
-from haive.core.engine.retriever import BaseRetrieverConfig, RetrieverType
+from haive.core.engine.retriever.retriever import BaseRetrieverConfig
+from haive.core.engine.retriever.types import RetrieverType
 from haive.core.engine.vectorstore import VectorStoreConfig
 
 # Default prompt template
@@ -29,6 +36,35 @@ class MultiQueryRetrieverConfig(BaseRetrieverConfig):
     """Configuration for MultiQuery retriever.
 
     This retriever generates multiple query variations using an LLM and combines the results.
+    It's particularly useful for improving recall by rephrasing queries to capture
+    different aspects of the user's information need.
+
+    Attributes:
+        retriever_config: Base retriever configuration (optional)
+        vector_store_config: Vector store configuration (alternative to retriever_config)
+        llm_config: LLM configuration for generating query variations
+        prompt: Prompt template for generating query variations
+        include_original: Whether to include the original query in the search
+
+    Example:
+        ```python
+        from haive.core.engine.retriever.multi_query import MultiQueryRetrieverConfig
+        from haive.core.engine.aug_llm import AugLLMConfig
+        from haive.core.engine.vectorstore import VectorStoreConfig
+
+        llm_config = AugLLMConfig(...)
+        vs_config = VectorStoreConfig(...)
+
+        config = MultiQueryRetrieverConfig(
+            name="multi_query_retriever",
+            vector_store_config=vs_config,
+            llm_config=llm_config,
+            include_original=True
+        )
+
+        retriever = config.instantiate()
+        docs = retriever.get_relevant_documents("query")
+        ```
     """
 
     retriever_type: RetrieverType = Field(
@@ -45,7 +81,7 @@ class MultiQueryRetrieverConfig(BaseRetrieverConfig):
     )
 
     llm_config: AugLLMConfig = Field(
-        ..., description="LLM configuration for generating query variations"  # Required
+        ..., description="LLM configuration for generating query variations"
     )
 
     prompt: PromptTemplate = Field(
@@ -58,16 +94,52 @@ class MultiQueryRetrieverConfig(BaseRetrieverConfig):
     )
 
     @model_validator(mode="after")
-    def validate_config(cls, values):
+    def validate_config(self):
         """Validate that at least one retriever source is provided."""
-        if values.retriever_config is None and values.vector_store_config is None:
+        if self.retriever_config is None and self.vector_store_config is None:
             raise ValueError(
                 "Either retriever_config or vector_store_config must be provided"
             )
-        return values
+        return self
 
-    def instantiate(self) -> MultiQueryRetriever:
-        """Create a MultiQuery retriever from this configuration."""
+    def get_input_fields(self) -> Dict[str, Tuple[Type, Any]]:
+        """Return input field definitions for MultiQuery retriever."""
+        return {
+            "query": (str, Field(description="Query string for retrieval")),
+            "k": (
+                Optional[int],
+                Field(default=None, description="Number of documents to retrieve"),
+            ),
+        }
+
+    def get_output_fields(self) -> Dict[str, Tuple[Type, Any]]:
+        """Return output field definitions for MultiQuery retriever."""
+        return {
+            "documents": (
+                List[Document],
+                Field(
+                    default_factory=list, description="Multi-query retrieved documents"
+                ),
+            ),
+        }
+
+    def instantiate(self):
+        """Create a MultiQuery retriever from this configuration.
+
+        Returns:
+            Instantiated MultiQuery retriever
+
+        Raises:
+            ImportError: If MultiQueryRetriever is not available
+            ValueError: If configuration is invalid
+        """
+        try:
+            from langchain.retrievers import MultiQueryRetriever
+        except ImportError:
+            raise ImportError(
+                "MultiQueryRetriever not available in current LangChain version"
+            )
+
         # Get the base retriever
         if self.retriever_config is not None:
             retriever = self.retriever_config.instantiate()
