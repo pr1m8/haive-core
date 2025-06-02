@@ -1,11 +1,11 @@
 from collections import defaultdict
 from typing import Any, ClassVar, Dict, Generic, List, Optional, Set, Tuple, TypeVar
 
-from pydantic import Field, computed_field, field_validator, model_validator
+from pydantic import Field, computed_field, model_validator
 
 from ..base import SerializableModel
 from .branch_model import BranchModel
-from .edge_model import EdgeModel, EdgeType
+from .edge_model import EdgeModel
 from .node_model import NodeModel
 from .type_ref import TypeReference
 

@@ -1,5 +1,4 @@
-from typing import Any, ClassVar, Dict, List, Optional, Type
-from uuid import uuid4
+from typing import Any, ClassVar, Dict, List, Optional
 
 from haive.core.registry.base import AbstractRegistry
 
