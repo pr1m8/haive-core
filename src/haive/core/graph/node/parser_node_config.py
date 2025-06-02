@@ -1,188 +1,154 @@
-# src/haive/core/graph/node/parser.py
-
-import json
 import logging
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Optional
 
+from langchain_core.messages import ToolMessage
 from langgraph.types import Command
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field
+from rich.console import Console
 
+from haive.core.graph.common.types import ConfigLike, NodeType, StateLike
 from haive.core.graph.node.base_config import NodeConfig
-from haive.core.graph.node.types import NodeType
 
 logger = logging.getLogger(__name__)
+console = Console()
 
 
 class ParserNodeConfig(NodeConfig):
-    """
-    Configuration for a parser node that converts tool outputs to structured Pydantic models.
-    """
+    """Configuration for a node that parses tool outputs into Pydantic models."""
 
-    # Override node_type for this specific node type
-    node_type: NodeType = Field(
-        default=NodeType.PARSER, description="Type of node (always PARSER)"
-    )
-
-    # Parser configuration
-    model_registry_key: str = Field(
-        default="output_schemas",
-        description="Key in state to find output model registry",
-    )
-
-    parsed_models_key: str = Field(
-        default="parsed_models", description="Key in state to store parsed models"
-    )
-
-    fallback_node: Optional[str] = Field(
-        default="agent", description="Node to route to if parsing fails"
+    node_type: NodeType = Field(default=NodeType.PARSER)
+    messages_key: str = Field(default="messages")
+    agent_node: str = Field(
+        default="agent", description="Node to return to after parsing"
     )
 
     def __call__(
-        self, state: Dict[str, Any], config: Optional[Dict[str, Any]] = None
+        self, state: StateLike, config: Optional[ConfigLike] = None
     ) -> Command:
-        """
-        Parse input using the appropriate output schema.
+        """Parse the tool message into a Pydantic model."""
+        # Ensure we have a valid command_goto
+        goto_node = self.command_goto or self.agent_node
 
-        Args:
-            state: The current state, either complete state or a tool call
-            config: Optional runtime configuration
+        # Extract tool information from state
+        # Handle both dict-like and object-like state access
+        tool_name = (
+            getattr(state, "tool_name", state.get("tool_name", None))
+            if hasattr(state, "get")
+            else getattr(state, "tool_name", None)
+        )
+        tool = (
+            getattr(state, "tool", state.get("tool", None))
+            if hasattr(state, "get")
+            else getattr(state, "tool", None)
+        )
+        tool_call = (
+            getattr(state, "tool_call", state.get("tool_call", None))
+            if hasattr(state, "get")
+            else getattr(state, "tool_call", None)
+        )
+        tool_message = (
+            getattr(state, "tool_message", state.get("tool_message", None))
+            if hasattr(state, "get")
+            else getattr(state, "tool_message", None)
+        )
+        messages = (
+            getattr(state, self.messages_key, state.get(self.messages_key, []))
+            if hasattr(state, "get")
+            else getattr(state, self.messages_key, [])
+        )
 
-        Returns:
-            Command with parsed model and routing
-        """
-        # Determine if state is a full state dict or just a tool call
-        if isinstance(state, dict) and "id" in state and "name" in state:
-            # This is a single tool call from Send
-            tool_call = state
-            # Create an empty updates dict
-            updates = {}
+        # Log what we received for debugging
+        logger.debug(
+            f"ParserNode received - Tool: {tool_name}, Message: {tool_message}"
+        )
 
-            # Try to parse the tool call result
-            parsed_model = self._parse_tool_call(tool_call, state)
-            if parsed_model is not None:
-                # Get model class name
-                model_name = parsed_model.__class__.__name__
-                updates[model_name] = parsed_model
+        if not tool or not tool_name:
+            logger.error("Missing required tool information")
+            return Command(update={"error": "Missing tool information"}, goto=goto_node)
 
-                # Return Command with model update
-                return Command(update=updates, goto=self.command_goto)
-            else:
-                # Parsing failed, route to fallback
-                return Command(goto=self.fallback_node)
-        else:
-            # This is a complete state dict
-            tool_calls = state.get("completed_tool_calls", [])
-            updates = {}
-
-            # Parse each completed tool call
-            for tool_call in tool_calls:
-                parsed_model = self._parse_tool_call(tool_call, state)
-                if parsed_model is not None:
-                    # Get model class name
-                    model_name = parsed_model.__class__.__name__
-                    updates[model_name] = parsed_model
-
-            # Return Command with all parsed models
-            return Command(update=updates, goto=self.command_goto)
-
-    def _parse_tool_call(
-        self, tool_call: Dict[str, Any], full_state: Dict[str, Any]
-    ) -> Optional[BaseModel]:
-        """
-        Parse a single tool call using the appropriate output schema.
-
-        Args:
-            tool_call: The tool call to parse
-            full_state: Full state containing schemas
-
-        Returns:
-            Parsed Pydantic model or None if parsing failed
-        """
         try:
-            # Get tool name and result
-            tool_name = tool_call.get("name")
-            result = tool_call.get("result")
-            output_schema_name = tool_call.get("output_schema")
+            # Get content from tool message
+            if tool_message and hasattr(tool_message, "content"):
+                content = tool_message.content
 
-            if not result:
-                logger.warning(f"No result found in tool call {tool_call.get('id')}")
-                return None
-
-            # Get output schema - try multiple approaches
-            output_schema = None
-
-            # 1. Try from output_schema attribute on tool call
-            if output_schema_name:
-                # Get from state's registry
-                schema_registry = {}
-                if hasattr(full_state, self.model_registry_key):
-                    schema_registry = getattr(full_state, self.model_registry_key)
-                elif self.model_registry_key in full_state:
-                    schema_registry = full_state[self.model_registry_key]
-
-                # Get schema from registry
-                output_schema = schema_registry.get(output_schema_name)
-
-            # 2. Try direct from model type in tool call
-            if not output_schema and "model_type" in tool_call:
-                model_type = tool_call["model_type"]
-                # Try to find in schema registry
-                schema_registry = {}
-                if hasattr(full_state, self.model_registry_key):
-                    schema_registry = getattr(full_state, self.model_registry_key)
-                elif self.model_registry_key in full_state:
-                    schema_registry = full_state[self.model_registry_key]
-
-                # Look for the model type in registry
-                output_schema = schema_registry.get(model_type)
-
-            # 3. Try by tool name
-            if not output_schema and tool_name:
-                # Try to find in registry by tool name
-                schema_registry = {}
-                if hasattr(full_state, self.model_registry_key):
-                    schema_registry = getattr(full_state, self.model_registry_key)
-                elif self.model_registry_key in full_state:
-                    schema_registry = full_state[self.model_registry_key]
-
-                # Look through registry for schemas with matching tool_name attribute
-                for schema_name, schema in schema_registry.items():
-                    if hasattr(schema, "tool_name") and schema.tool_name == tool_name:
-                        output_schema = schema
-                        break
-
-            # If no schema found, cannot parse
-            if not output_schema:
-                logger.warning(f"No output schema found for tool {tool_name}")
-                return None
-
-            # Parse result with schema using Pydantic
-            if isinstance(result, str):
-                # Try to parse as JSON first
+                # Try to parse as JSON
                 try:
-                    result_dict = json.loads(result)
+                    import json
+
+                    json_data = json.loads(content)
+
+                    # Create model instance from JSON
+                    if isinstance(tool, type) and issubclass(tool, BaseModel):
+                        model_instance = tool.model_validate(json_data)
+                    else:
+                        model_instance = json_data
                 except json.JSONDecodeError:
-                    # Not valid JSON, use as raw text
-                    result_dict = {"text": result}
-            elif isinstance(result, dict):
-                result_dict = result
+                    # Not valid JSON, try using PydanticOutputParser
+                    if isinstance(tool, type) and issubclass(tool, BaseModel):
+                        from langchain.output_parsers import PydanticOutputParser
+
+                        parser = PydanticOutputParser(pydantic_object=tool)
+                        model_instance = parser.parse(content)
+                    else:
+                        model_instance = {"content": content}
+
+            # Fallback to tool_call args if no tool message or parsing failed
+            elif tool_call and (
+                hasattr(tool_call, "args")
+                or isinstance(tool_call, dict)
+                and "args" in tool_call
+            ):
+                args = (
+                    tool_call.args if hasattr(tool_call, "args") else tool_call["args"]
+                )
+
+                if isinstance(tool, type) and issubclass(tool, BaseModel):
+                    model_instance = tool.model_validate(args)
+                else:
+                    model_instance = args
+
             else:
-                # Other types, convert to string and use as text
-                result_dict = {"text": str(result)}
+                return Command(
+                    update={"error": f"No valid content found for parsing {tool_name}"},
+                    goto=goto_node,
+                )
 
-            # Use Pydantic parsing (respecting v1 vs v2)
-            if hasattr(output_schema, "model_validate"):
-                # Pydantic v2
-                parsed_model = output_schema.model_validate(result_dict)
-            else:
-                # Pydantic v1
-                parsed_model = output_schema.parse_obj(result_dict)
+            # Determine field name for the parsed model
+            field_name = (
+                tool.__name__.lower()
+                if hasattr(tool, "__name__")
+                else tool_name.lower()
+            )
 
-            return parsed_model
+            # Create update dictionary with parsed model
+            update_dict = {field_name: model_instance}
 
-        except ValidationError as e:
-            logger.warning(f"Validation error parsing result: {e}")
-            return None
+            # Add result message to messages if needed
+            if messages:
+                new_messages = list(messages)
+
+                # Use existing tool message or create a new one
+                if not tool_message:
+                    tool_id = (
+                        getattr(tool_call, "id", f"call_{tool_name}_autogen")
+                        if hasattr(tool_call, "id")
+                        else tool_call.get("id", f"call_{tool_name}_autogen")
+                    )
+                    tool_message = ToolMessage(
+                        content=str(model_instance),
+                        name=tool_name,
+                        tool_call_id=tool_id,
+                    )
+
+                new_messages.append(tool_message)
+                update_dict[self.messages_key] = new_messages
+
+            logger.info(f"Successfully parsed {tool_name}")
+            return Command(update=update_dict, goto=goto_node)
+
         except Exception as e:
-            logger.error(f"Error parsing tool result: {e}")
-            return None
+            logger.exception(f"Error parsing {tool_name}: {str(e)}")
+            return Command(
+                update={"error": f"Failed to parse {tool_name}: {str(e)}"},
+                goto=goto_node,
+            )

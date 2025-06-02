@@ -2,14 +2,13 @@
 
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type, Union
 
-from langchain_core.messages import BaseMessage
 from langchain_core.tools import BaseTool, BaseToolkit, StructuredTool, Tool
 from langgraph.prebuilt import ToolNode
 from langgraph.types import Command
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field
 
 from haive.core.graph.node.base_config import NodeConfig
-from haive.core.graph.node.types import CommandGoto, NodeType
+from haive.core.graph.node.types import NodeType
 
 
 class ToolNodeConfig(NodeConfig):
@@ -38,6 +37,7 @@ class ToolNodeConfig(NodeConfig):
     messages_key: str = Field(
         default="messages", description="The key to use for the messages field"
     )
+    # use_state:bool = Field(default=False, description="Whether to use the state for the tool node")
 
     def __call__(
         self, state: Dict[str, Any], config: Optional[Dict[str, Any]] = None

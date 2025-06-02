@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, List, Optional, Sequence, Union
+from typing import Callable, List, Optional, Sequence, Union
 
 from langchain_core.tools import BaseTool, BaseToolkit, StructuredTool, Tool
 from langgraph.prebuilt import ToolNode
@@ -48,7 +48,7 @@ class ToolNodeConfig(NodeConfig):
             elif callable(tool_item):
                 # Convert callable to a tool
                 try:
-                    from langchain.tools import tool
+                    from langchain_core.tools import tool
 
                     resolved_tools.append(tool(tool_item))
                 except Exception as e:
