@@ -7,7 +7,7 @@ Extracts potential environment variables from source code.
 import logging
 import os
 import re
-from typing import Any, Dict, Optional, Set
+from typing import Dict, Optional, Set
 
 logger = logging.getLogger(__name__)
 

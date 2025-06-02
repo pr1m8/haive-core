@@ -6,7 +6,7 @@ Extracts method signatures, parameters, type hints, and other metadata from clas
 
 import inspect
 import logging
-from typing import Any, Callable, Dict, List, Optional, Type, get_type_hints
+from typing import Callable, Dict, Optional, Type, get_type_hints
 
 from ..models.component import MethodInfo, ParameterInfo
 

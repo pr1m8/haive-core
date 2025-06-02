@@ -7,7 +7,7 @@ Defines Pydantic models for representing discovered components and their metadat
 import uuid
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set, Type, Union
+from typing import Any, Dict, List, Optional, Set
 
 from pydantic import BaseModel, Field, computed_field
 

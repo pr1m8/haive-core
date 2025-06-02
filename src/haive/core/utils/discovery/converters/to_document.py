@@ -4,9 +4,8 @@ Conversion utilities for turning components into Documents.
 Converts discovered components into LangChain Documents for vectorization and retrieval.
 """
 
-import json
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, List, Optional
 
 try:
     from langchain_core.documents import Document
@@ -152,9 +151,9 @@ class DocumentConverter:
                 signature = method.signature_str or f"{name}(...)"
                 lines.append(f"### `{name}`")
                 lines.append("")
-                lines.append(f"```python")
+                lines.append("```python")
                 lines.append(f"def {signature}")
-                lines.append(f"```")
+                lines.append("```")
                 lines.append("")
 
                 # Method description
@@ -226,7 +225,7 @@ class DocumentConverter:
             return desc
 
         # Check in other methods
-        for method_name, method in metadata.methods.items():
+        for _method_name, method in metadata.methods.items():
             if param_name in method.parameters:
                 param = method.parameters[param_name]
                 desc = param.description or ""
