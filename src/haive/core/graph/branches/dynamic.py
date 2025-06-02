@@ -41,7 +41,7 @@ class DynamicMapping(BaseModel):
 
     @model_validator(mode="after")
     def validate_mappings(self):
-        for key, mapping_data in self.mappings.items():
+        for _key, mapping_data in self.mappings.items():
             if "mapping" in mapping_data and isinstance(mapping_data["mapping"], dict):
                 # No conversion needed now - we accept dict directly
                 pass

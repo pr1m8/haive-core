@@ -7,10 +7,10 @@ separate ConditionalEdge objects, consolidating all routing logic.
 
 import logging
 import uuid
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 from langgraph.graph import END
-from langgraph.types import Command, Send
+from langgraph.types import Command
 from pydantic import BaseModel, Field, model_validator
 
 from haive.core.graph.branches.dynamic import DynamicMapping
@@ -104,9 +104,14 @@ class Branch(BaseModel):
         if not self.destinations:
             self.destinations = {True: "continue", False: END}
         elif len(self.destinations) == 1:
-            # If only one destination is provided, map it to True and END to False
-            true_dest = next(iter(self.destinations.values()))
-            self.destinations = {True: true_dest, False: END}
+            # Only convert to boolean mapping if the key is already a boolean
+            # or if the key is a generic string like "continue"
+            single_key = next(iter(self.destinations.keys()))
+            if isinstance(single_key, bool) or single_key in ["continue", "default"]:
+                # If only one destination is provided with a boolean/generic key, map it to True and END to False
+                true_dest = next(iter(self.destinations.values()))
+                self.destinations = {True: true_dest, False: END}
+            # Otherwise, preserve the original string key and don't add boolean fallbacks
         # Only set default if we have multiple destinations and no default is set
         # AND we don't have a list of destinations (True/False mapping)
         elif (
@@ -123,7 +128,6 @@ class Branch(BaseModel):
         """Make Branch directly callable for use in conditional edges."""
         try:
             # Define common variables that might be accessed
-            model = None
 
             # Special handling for dynamic branch with dynamic_mapping
             if self.mode == BranchMode.DYNAMIC and self.dynamic_mapping:
@@ -193,7 +197,6 @@ class Branch(BaseModel):
         """
         try:
             # Define common variables that might be accessed
-            model = None
 
             result = self.function(state)
 
@@ -230,7 +233,6 @@ class Branch(BaseModel):
         """Evaluate the branch against state."""
         try:
             # Define common variables that might be accessed
-            model = None
 
             # Handle different branch modes
             if self.mode == BranchMode.FUNCTION and self.function:
@@ -291,7 +293,7 @@ class Branch(BaseModel):
 
     def _process_result(self, result: Any, state: StateLike) -> NodeOutput:
         """Process the result of a branch evaluation."""
-        from langgraph.types import Command, Send
+        from langgraph.types import Command
 
         # Handle Send objects
         if isinstance(result, Send):
