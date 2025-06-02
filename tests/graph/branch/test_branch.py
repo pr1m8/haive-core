@@ -6,13 +6,12 @@ including Send objects, dynamic mapping, and serialization.
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, List, Optional, Union
 
 import pytest
 from langchain_core.messages import AIMessage, HumanMessage
-from langgraph.prebuilt import ValidationNode
 from langgraph.types import Command, Send
-from pydantic import BaseModel, Field
+from pydantic import Field
 from rich.console import Console
 from rich.panel import Panel
 from rich.pretty import Pretty
@@ -24,7 +23,6 @@ from haive.core.graph.branches import (
     ComparisonType,
     chain,
     conditional,
-    create_from_send_function,
     from_function,
     key_equals,
     key_exists,

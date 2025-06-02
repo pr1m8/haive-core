@@ -3,7 +3,7 @@
 import json
 import logging
 import os
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List
 
 import pytest
 from rich.console import Console
@@ -198,7 +198,7 @@ def display_metadata_tree(model_name: str, metadata: Dict[str, Any]) -> None:
 
     def _add_dict_to_tree(tree_node, data):
         if isinstance(data, dict):
-            for key, value in data.items():
+            for key, value in sorted(data.items()):
                 if isinstance(value, dict):
                     branch = tree_node.add(f"[yellow]{key}[/yellow]")
                     _add_dict_to_tree(branch, value)
@@ -249,8 +249,9 @@ def test_model_metadata_access(model_config):
     # Create the config
     config_class = model_config["class"]
     model = model_config["model"]
+    display_name = model_config["name"]  # Get the friendly name from model_config
 
-    logger.info(f"Testing metadata access for {model_config['name']} ({model})")
+    logger.info(f"Testing metadata access for {display_name} ({model})")
 
     # Create the config with progress spinner
     with Progress(
@@ -258,8 +259,9 @@ def test_model_metadata_access(model_config):
         TextColumn("[progress.description]{task.description}"),
         console=console,
     ) as progress:
-        task = progress.add_task(f"Creating {model_config['name']} config...", total=1)
-        config = config_class(model=model)
+        task = progress.add_task(f"Creating {display_name} config...", total=1)
+        # Pass the name parameter when creating the config
+        config = config_class(model=model, name=display_name, debug=True)
         progress.update(task, completed=1)
 
     # Get metadata
@@ -333,20 +335,22 @@ def test_model_metadata_access(model_config):
             for size, cost in search_costs.items():
                 console.print(f"  {size}: [yellow]{format_pricing(cost)}[/yellow]")
 
-    # Return collected data for the comparison test
-    return {
-        "name": model_config["name"],
-        "provider": model_config["provider"],
-        "model": model,
-        "context_window": context_window,
-        "max_input": max_input,
-        "max_output": max_output,
-        "input_cost": input_cost,
-        "output_cost": output_cost,
-        "capabilities": capabilities,
-        "raw_metadata": raw_metadata,
-        "deprecation_date": deprecation_date,
-    }
+    # Instead of returning, collect data for the comparison and assert it's valid
+    metadata = config.format_metadata_for_display()
+
+    # Assert key metadata properties
+    assert metadata["name"] == model_config["name"], "Name should match"
+    assert metadata["provider"] == model_config["provider"], "Provider should match"
+    assert metadata["model"] == model, "Model should match"
+    assert metadata["context_window"] == context_window, "Context window should match"
+    assert metadata["max_input"] == max_input, "Max input should match"
+    assert metadata["max_output"] == max_output, "Max output should match"
+    assert metadata["input_cost"] == input_cost, "Input cost should match"
+    assert metadata["output_cost"] == output_cost, "Output cost should match"
+    assert metadata["capabilities"] == capabilities, "Capabilities should match"
+    assert (
+        metadata["deprecation_date"] == deprecation_date
+    ), "Deprecation date should match"
 
 
 def test_compare_models(available_models):
@@ -372,43 +376,9 @@ def test_compare_models(available_models):
             model = model_config["model"]
             config = config_class(model=model)
 
-            # Get metadata
-            context_window = config.get_context_window()
-            max_input = config.get_max_input_tokens()
-            max_output = config.get_max_output_tokens()
-            input_cost, output_cost = config.get_token_pricing()
-
-            # Get capabilities
-            capabilities = {
-                "vision": config.supports_vision,
-                "function_calling": config.supports_function_calling,
-                "parallel_function_calling": config.supports_parallel_function_calling,
-                "system_messages": config.supports_system_messages,
-                "tool_choice": config.supports_tool_choice,
-                "response_schema": config.supports_response_schema,
-                "web_search": config.supports_web_search,
-                "pdf_input": config.supports_pdf_input,
-                "audio_input": config.supports_audio_input,
-                "audio_output": config.supports_audio_output,
-                "prompt_caching": config.supports_prompt_caching,
-                "native_streaming": config.supports_native_streaming,
-                "reasoning": config.supports_reasoning,
-            }
-
-            # Collect data
-            models_data.append(
-                {
-                    "name": model_config["name"],
-                    "provider": model_config["provider"],
-                    "model": model,
-                    "context_window": context_window,
-                    "max_input": max_input,
-                    "max_output": max_output,
-                    "input_cost": input_cost,
-                    "output_cost": output_cost,
-                    "capabilities": capabilities,
-                }
-            )
+            # Get metadata formatted for display
+            metadata = config.format_metadata_for_display()
+            models_data.append(metadata)
 
             progress.update(task, advance=1)
 
@@ -431,10 +401,15 @@ def test_compare_models(available_models):
         with open("model_comparison.json", "w") as f:
             json.dump(models_data, f, indent=2, default=str)
         console.print(
-            f"\n[green]Exported comparison data to model_comparison.json[/green]"
+            "\n[green]Exported comparison data to model_comparison.json[/green]"
         )
     except Exception as e:
         console.print(f"\n[red]Failed to export comparison data: {e}[/red]")
+
+    # Assert we have data from all models
+    assert len(models_data) == len(
+        available_models
+    ), "Should have data for all available models"
 
 
 if __name__ == "__main__":
@@ -463,13 +438,11 @@ if __name__ == "__main__":
     model_data = []
     for model in available:
         try:
-            result = test_model_metadata_access(model)
-            if result:
-                model_data.append(result)
+            test_model_metadata_access(model)  # Just call, don't store result
             console.print("\n" + "-" * 80 + "\n")
         except Exception as e:
             console.print(f"[bold red]Error testing {model['name']}: {e}[/bold red]")
 
     # Run comparison if we have multiple models
-    if len(model_data) >= 2:
+    if len(available) >= 2:
         test_compare_models(available)

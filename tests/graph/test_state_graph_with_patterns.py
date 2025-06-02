@@ -1,24 +1,21 @@
 # tests/graph/test_state_graph_with_patterns.py
 
 import logging
-import operator
-from typing import Annotated, Any, ClassVar, Dict, List, Optional, Sequence
+from typing import Annotated, Any, ClassVar, Dict, List, Optional
 
 import pytest
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
+from langchain_core.messages import BaseMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph import END, START, add_messages
 from pydantic import BaseModel, Field
 
 from haive.core.engine.aug_llm import AugLLMConfig
-from haive.core.graph.branches.branch import Branch
 from haive.core.graph.common.types import NodeLike, NodeType
-from haive.core.graph.node.base_config import NodeConfig
 from haive.core.graph.node.engine_node import EngineNodeConfig
 from haive.core.graph.node.tool_node_config import ToolNodeConfig
 from haive.core.graph.node.validation_node_config import ValidationNodeConfig
 from haive.core.graph.state_graph.base_graph2 import BaseGraph
-from haive.core.graph.state_graph.patterns.base import GraphPattern
+from haive.core.graph.state_graph.pattern.base import GraphPattern
 from haive.core.graph.state_graph.schema_graph import SchemaGraph
 from haive.core.schema.state_schema import StateSchema
 
@@ -109,7 +106,9 @@ def test_conditional_branching():
     graph.add_edge("process_b", END)
 
     # Add conditional branching
-    branch_condition = lambda state: "a" if state.get("route") == "a" else "b"
+    def branch_condition(state):
+        return "a" if state.get("route") == "a" else "b"
+
     graph.add_conditional_edges(
         "check", branch_condition, {"a": "process_a", "b": "process_b"}
     )
@@ -417,7 +416,7 @@ def test_react_pattern():
     """Test building a graph using imported ReactPattern."""
     try:
         # Import the ReactPattern to test
-        from haive.core.graph.state_graph.patterns.implementations import ReactPattern
+        from haive.core.graph.state_graph.pattern.implementations import ReactPattern
 
         # Create a test prompt template
         prompt = ChatPromptTemplate.from_messages(
@@ -466,10 +465,16 @@ def test_react_pattern():
 # Test creating custom pattern
 def test_custom_pattern():
     """Test creating and using a custom pattern."""
+
     # Create implementations
-    query_node = lambda state: {"query": state.get("input", "")}
-    retrieve_node = lambda state: {"context": [f"Doc about {state.get('query')}"]}
-    answer_node = lambda state: {"response": f"Answer based on {state.get('context')}"}
+    def query_node(state):
+        return {"query": state.get("input", "")}
+
+    def retrieve_node(state):
+        return {"context": [f"Doc about {state.get('query')}"]}
+
+    def answer_node(state):
+        return {"response": f"Answer based on {state.get('context')}"}
 
     # Create pattern
     pattern = QAPattern()
@@ -500,11 +505,19 @@ def test_custom_pattern():
 # Test pattern inheritance
 def test_pattern_inheritance():
     """Test pattern inheritance with edge overrides."""
+
     # Create implementations
-    query_node = lambda state: {"query": state.get("input", "")}
-    retrieve_node = lambda state: {"context": [f"Doc about {state.get('query')}"]}
-    rerank_node = lambda state: {"context": state.get("context", [])[:2]}
-    answer_node = lambda state: {"response": f"Answer based on {state.get('context')}"}
+    def query_node(state):
+        return {"query": state.get("input", "")}
+
+    def retrieve_node(state):
+        return {"context": [f"Doc about {state.get('query')}"]}
+
+    def rerank_node(state):
+        return {"context": state.get("context", [])[:2]}
+
+    def answer_node(state):
+        return {"response": f"Answer based on {state.get('context')}"}
 
     # Create pattern
     pattern = AdvancedQAPattern()

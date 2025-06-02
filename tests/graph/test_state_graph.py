@@ -1,20 +1,16 @@
 # tests/test_graph.py
 
-import operator
 import uuid
 from typing import Annotated, Any, Dict, List, Optional, Sequence
 
-import pytest
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
+from langchain_core.messages import AIMessage, BaseMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph import END, START, add_messages
 from pydantic import BaseModel, Field
 
-from haive.core import graph
 from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.graph.branches.branch import Branch, BranchMode
 from haive.core.graph.common.types import NodeType
-from haive.core.graph.node.base_config import NodeConfig
 from haive.core.graph.node.engine_node import EngineNodeConfig
 from haive.core.graph.node.tool_node_config import ToolNodeConfig
 from haive.core.graph.node.validation_node_config import ValidationNodeConfig
@@ -346,10 +342,10 @@ def test_node_config_graph():
     print(f"Added edge: {START} → agent")
 
     graph.add_edge("agent", "validate")
-    print(f"Added edge: agent → validate")
+    print("Added edge: agent → validate"e")
 
     graph.add_edge("tools", "agent")  # Loop back to agent
-    print(f"Added edge: tools → agent")
+    print("Added edge: tools → agent"t")
 
     graph.add_edge("execute_plan", END)
     print(f"Added edge: execute_plan → {END}")

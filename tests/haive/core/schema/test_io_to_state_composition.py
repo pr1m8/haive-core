@@ -7,7 +7,6 @@ by combining existing input and output schemas, rather than deriving them from a
 
 from typing import Any, Dict, List
 
-import pytest
 from langchain_core.messages import BaseMessage, HumanMessage
 from pydantic import BaseModel, Field
 

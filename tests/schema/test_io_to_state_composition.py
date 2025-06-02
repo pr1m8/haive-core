@@ -2,11 +2,7 @@
 Simple test to verify SchemaComposer fixes work.
 """
 
-import pytest
-from langchain_core.messages import HumanMessage
 from rich.console import Console
-from rich.panel import Panel
-from rich.tree import Tree
 
 from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.engine.retriever import BaseRetrieverConfig
@@ -92,8 +88,6 @@ def test_schema_composer_diagnostics():
 
     # Step 4: Test instance creation with different data
     console.print("\n[bold yellow]Step 4: Test Instance Creation[/bold yellow]")
-
-    from langchain_core.messages import HumanMessage
 
     # Try minimal instance creation
     try:

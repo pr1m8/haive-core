@@ -5,16 +5,12 @@ Provides comprehensive tests for all major functionality without using mocks.
 """
 
 import json
-import os
-import sys
 import unittest
-from datetime import datetime
 
 import pytest
 
 from haive.core.graph.branches import Branch, BranchMode, ComparisonType
 from haive.core.graph.branches.dynamic import DynamicMapping
-from haive.core.graph.common.references import CallableReference
 from haive.core.graph.state_graph.base_graph import (
     END_NODE,
     START_NODE,
@@ -22,7 +18,7 @@ from haive.core.graph.state_graph.base_graph import (
     Node,
     NodeType,
 )
-from haive.core.graph.state_graph.serializable import SerializableGraph, TypeReference
+from haive.core.graph.state_graph.serializable import SerializableGraph
 
 
 # State fixture for condition testing
