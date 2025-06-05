@@ -1295,116 +1295,68 @@ class AugLLMConfig(
     def _compute_output_fields(self) -> Dict[str, Tuple[Type, Any]]:
         """Compute output fields based on configuration."""
         from typing import Any as AnyType
-        from typing import (
-            Dict,
-        )
+        from typing import Dict
         from typing import List as ListType
         from typing import Optional as OptionalType
 
         fields = {}
 
-        # Handle v2 structured output (tool-based)
-        if self.structured_output_version == "v2" and (
-            self.structured_output_model or self.pydantic_tools
-        ):
-
-            tool_name = self.output_field_name or self.output_key or "tool_result"
-
-            if self.structured_output_model:
-                fields[tool_name] = (self.structured_output_model, None)
-            elif self.pydantic_tools:
-                if len(self.pydantic_tools) == 1:
-                    fields[tool_name] = (self.pydantic_tools[0], None)
-                else:
-                    fields[tool_name] = (Dict[str, AnyType], None)
-
-            # Always include messages for v2
+        # Case 1: V2 structured output (tool-based) - ONLY MESSAGES
+        if self.structured_output_version == "v2":
             fields[self.messages_placeholder_name] = (
                 ListType[BaseMessage],
                 Field(default_factory=list),
             )
-
             return fields
 
-        # Handle v1 structured output
-        if (
-            self.structured_output_model
-            and self.structured_output_version == "v1"
-            and not self.parse_raw_output
-        ):
-
-            if hasattr(self.structured_output_model, "model_fields"):
-                for (
-                    field_name,
-                    field_info,
-                ) in self.structured_output_model.model_fields.items():
-                    fields[field_name] = (field_info.annotation, field_info.default)
-            else:
-                model_name = (
-                    self.output_field_name
-                    or self.output_key
-                    or (
-                        getattr(self.structured_output_model, "__name__", "").lower()
-                        or "result"
-                    )
-                )
-                fields[model_name] = (self.structured_output_model, None)
-
-        # Handle pydantic tools output (when not part of structured output)
-        elif (
-            self.pydantic_tools
-            and self.parser_type == "pydantic_tools"
-            and not self.structured_output_model
-        ):
-            if self.output_field_name or self.output_key:
-                field_name = self.output_field_name or self.output_key
-                fields[field_name] = (Dict[str, AnyType], None)
-            else:
-                for tool_model in self.pydantic_tools:
-                    model_name = getattr(tool_model, "__name__", "").lower()
-                    fields[model_name] = (tool_model, None)
-
-        # Handle explicit output parser or raw output
-        elif self.output_parser or self.parse_raw_output:
-            field_name = self.output_field_name or self.output_key or "content"
-
-            if self.parser_type == "str" or self.parse_raw_output:
+        # Case 2: We have an output parser (v1 or explicit parser)
+        if self.output_parser:
+            # Handle different parser types
+            if self.parser_type == "str" or isinstance(
+                self.output_parser, StrOutputParser
+            ):
+                field_name = self.output_field_name or self.output_key or "content"
                 fields[field_name] = (str, None)
+
             elif self.parser_type == "json":
+                field_name = self.output_field_name or self.output_key or "content"
                 fields[field_name] = (Dict[str, AnyType], None)
-            elif self.parser_type == "pydantic" and self.output_parser:
+
+            elif self.parser_type == "pydantic" and hasattr(
+                self.output_parser, "pydantic_object"
+            ):
                 # Extract fields from PydanticOutputParser
-                if hasattr(self.output_parser, "pydantic_object"):
-                    pydantic_model = self.output_parser.pydantic_object
-                    if hasattr(pydantic_model, "model_fields"):
-                        for (
-                            field_name,
-                            field_info,
-                        ) in pydantic_model.model_fields.items():
-                            fields[field_name] = (
-                                field_info.annotation,
-                                field_info.default,
-                            )
-                    else:
-                        model_name = (
-                            self.output_field_name or self.output_key or "result"
-                        )
-                        fields[model_name] = (pydantic_model, None)
+                pydantic_model = self.output_parser.pydantic_object
+                if hasattr(pydantic_model, "model_fields"):
+                    for field_name, field_info in pydantic_model.model_fields.items():
+                        fields[field_name] = (field_info.annotation, field_info.default)
                 else:
-                    fields[field_name] = (AnyType, None)
+                    model_name = self.output_field_name or self.output_key or "result"
+                    fields[model_name] = (pydantic_model, None)
+
+            elif self.parser_type == "pydantic_tools":
+                field_name = self.output_field_name or self.output_key or "tool_result"
+                fields[field_name] = (Dict[str, AnyType], None)
+
             else:
+                # Custom parser
+                field_name = self.output_field_name or self.output_key or "content"
                 fields[field_name] = (AnyType, None)
 
-        # Default output if nothing else specified
-        if not fields:
-            content_field = self.output_field_name or self.output_key or "content"
-            fields[content_field] = (OptionalType[str], None)
-
+            # Also include messages for parsers that work with messages
             if self.uses_messages_field:
                 fields[self.messages_placeholder_name] = (
                     ListType[BaseMessage],
                     Field(default_factory=list),
                 )
+
+            return fields
+
+        # Case 3: No parser, no v2 - just messages
+        fields[self.messages_placeholder_name] = (
+            ListType[BaseMessage],
+            Field(default_factory=list),
+        )
 
         return fields
 
