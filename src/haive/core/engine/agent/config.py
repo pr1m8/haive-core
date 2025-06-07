@@ -19,10 +19,13 @@ from typing import (
     Dict,
     Generic,
     List,
+    Literal,
     Optional,
     Type,
     TypeVar,
     Union,
+    get_args,
+    get_origin,
 )
 
 from langchain_core.runnables import RunnableConfig
@@ -64,6 +67,7 @@ if TYPE_CHECKING:
 
 # Set up logging
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.WARNING)
 
 # Type variables for generics
 TIn = TypeVar("TIn")
@@ -254,7 +258,8 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
     @model_validator(mode="after")
     def ensure_state_schema(self):
         """Ensure state schema is derived if not provided."""
-        if self.state_schema is None:
+        # Only auto-generate schema if explicitly requested AND no schema is provided
+        if self.state_schema is None and getattr(self, "set_schema", False):
             self.state_schema = self.derive_schema()
         return self
 
@@ -595,13 +600,12 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
 
         return manager.get_model()
 
-    """
     def derive_input_schema(self) -> Type[BaseModel]:
-        Derive input schema for this agent.
+        """Derive input schema for this agent.
 
         Returns:
             Input schema as BaseModel subclass
-        
+        """
         # Return cached instance if available
         if self._input_schema_instance:
             return self._input_schema_instance
@@ -666,11 +670,11 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
         return schema
 
     def derive_output_schema(self) -> Type[BaseModel]:
-        Derive output schema for this agent.
+        """Derive output schema for this agent.
 
         Returns:
             Output schema as BaseModel subclass
-        
+        """
         # Return cached instance if available
         if self._output_schema_instance:
             return self._output_schema_instance
@@ -735,7 +739,6 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
 
         self._output_schema_instance = schema
         return schema
-    """
 
     def resolve_engine(self, engine_ref=None) -> Engine:
         """Resolve an engine reference to an actual engine.

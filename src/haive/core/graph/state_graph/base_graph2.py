@@ -3770,6 +3770,7 @@ class BaseGraph(BaseModel, ValidationMixin):
             theme=theme,
             subgraph_mode=subgraph_mode,
             show_default_branches=show_default_branches,
+            debug=True,
         )
 
     def visualize(
@@ -3783,6 +3784,7 @@ class BaseGraph(BaseModel, ValidationMixin):
         theme: str = "default",
         subgraph_mode: str = "cluster",
         show_default_branches: bool = False,
+        debug: bool = False,
     ) -> str:
         """
         Generate and display a visualization of the graph.
@@ -3800,6 +3802,7 @@ class BaseGraph(BaseModel, ValidationMixin):
             theme: Mermaid theme to use (e.g., "default", "forest", "dark", "neutral")
             subgraph_mode: How to render subgraphs ("cluster", "inline", or "separate")
             show_default_branches: Whether to show default branches
+            debug: Whether to enable debug output
 
         Returns:
             The generated Mermaid code
@@ -3808,19 +3811,58 @@ class BaseGraph(BaseModel, ValidationMixin):
         from haive.core.utils.mermaid_utils import Environment, detect_environment
 
         logger = logging.getLogger(__name__)
+
+        if debug:
+            print(f"DEBUG: Starting visualization for graph: {self.name}")
+            print(f"DEBUG: Graph type: {type(self).__name__}")
+            print(f"DEBUG: Has nodes attr: {hasattr(self, 'nodes')}")
+            print(f"DEBUG: Has edges attr: {hasattr(self, 'edges')}")
+            print(f"DEBUG: Has subgraphs attr: {hasattr(self, 'subgraphs')}")
+
+            if hasattr(self, "nodes"):
+                nodes_count = len(self.nodes) if self.nodes is not None else 0
+                print(f"DEBUG: Nodes count: {nodes_count}")
+                if self.nodes:
+                    print(f"DEBUG: Node names: {list(self.nodes.keys())}")
+                    # Check each node for graph attributes
+                    for name, node in self.nodes.items():
+                        print(
+                            f"DEBUG: Node '{name}': type={type(node).__name__}, has_graph={hasattr(node, 'graph') if node else False}"
+                        )
+                        if node and hasattr(node, "graph"):
+                            print(
+                                f"DEBUG:   - Node '{name}' graph: {type(node.graph).__name__ if node.graph else None}"
+                            )
+
+            if hasattr(self, "edges"):
+                edges_count = len(self.edges) if self.edges is not None else 0
+                print(f"DEBUG: Edges count: {edges_count}")
+                if self.edges:
+                    print(f"DEBUG: Edges: {list(self.edges)}")
+
+            if hasattr(self, "subgraphs"):
+                subgraphs_count = (
+                    len(self.subgraphs) if self.subgraphs is not None else 0
+                )
+                print(f"DEBUG: Subgraphs count: {subgraphs_count}")
+                if self.subgraphs:
+                    print(f"DEBUG: Subgraph names: {list(self.subgraphs.keys())}")
+
         logger.debug(
-            f"Visualizing graph: {self.name} (nodes: {len(self.nodes)}, edges: {len(self.edges)})"
+            f"Visualizing graph: {self.name} (nodes: {len(self.nodes) if self.nodes else 0}, edges: {len(self.edges) if self.edges else 0})"
         )
 
         # Log some debug info about subgraphs if they exist
-        if include_subgraphs and self.subgraphs:
+        if include_subgraphs and hasattr(self, "subgraphs") and self.subgraphs:
             subgraph_info = ", ".join(
                 [
-                    f"{name} ({len(sg.nodes)} nodes)"
+                    f"{name} ({len(sg.nodes) if hasattr(sg, 'nodes') and sg.nodes else 0} nodes)"
                     for name, sg in self.subgraphs.items()
                 ]
             )
             logger.debug(f"Including {len(self.subgraphs)} subgraphs: {subgraph_info}")
+            if debug:
+                print(f"DEBUG: Subgraph info: {subgraph_info}")
 
         # Combine nodes from highlight_paths with highlight_nodes
         all_highlight_nodes = highlight_nodes or []
@@ -3829,20 +3871,59 @@ class BaseGraph(BaseModel, ValidationMixin):
                 all_highlight_nodes.extend(path)
             logger.debug(f"Highlighting {len(all_highlight_nodes)} nodes")
 
+        # Run debug structure analysis first if debug is enabled
+        if debug:
+            print("DEBUG: Running structure analysis...")
+            try:
+                debug_info = GraphVisualizer.debug_graph_structure(self)
+                print("DEBUG: Structure analysis results:")
+                for key, value in debug_info.items():
+                    print(f"DEBUG:   {key}: {value}")
+            except Exception as e:
+                print(f"DEBUG: Error in structure analysis: {e}")
+                import traceback
+
+                traceback.print_exc()
+
         # Generate the Mermaid code
         try:
+            if debug:
+                print("DEBUG: Attempting to generate Mermaid code...")
+
             mermaid_code = GraphVisualizer.generate_mermaid(
                 self,
                 include_subgraphs=include_subgraphs,
                 highlight_nodes=all_highlight_nodes if all_highlight_nodes else None,
                 theme=theme,
+                subgraph_mode=subgraph_mode,
+                show_default_branches=show_default_branches,
+                direction="TD",
+                compact_mode=False,
+                # debug=debug,
             )
+
+            if debug:
+                print(
+                    f"DEBUG: Successfully generated Mermaid code: {len(mermaid_code)} characters"
+                )
+
             logger.debug(f"Generated Mermaid code: {len(mermaid_code)} characters")
+
         except Exception as e:
+            if debug:
+                print(f"DEBUG: Error generating Mermaid code: {e}")
+                import traceback
+
+                traceback.print_exc()
+
             logger.error(f"Error generating Mermaid code: {str(e)}")
+
             # Try again with subgraphs disabled as a fallback
-            if include_subgraphs and self.subgraphs:
+            if include_subgraphs and hasattr(self, "subgraphs") and self.subgraphs:
                 logger.warning("Retrying visualization with subgraphs disabled")
+                if debug:
+                    print("DEBUG: Retrying with subgraphs disabled...")
+
                 try:
                     mermaid_code = GraphVisualizer.generate_mermaid(
                         self,
@@ -3851,16 +3932,32 @@ class BaseGraph(BaseModel, ValidationMixin):
                             all_highlight_nodes if all_highlight_nodes else None
                         ),
                         theme=theme,
+                        debug=debug,
                     )
+                    if debug:
+                        print(
+                            "DEBUG: Successfully generated Mermaid code without subgraphs"
+                        )
                 except Exception as e2:
+                    if debug:
+                        print(f"DEBUG: Failed even without subgraphs: {e2}")
+                        import traceback
+
+                        traceback.print_exc()
+
                     logger.error(
                         f"Failed to generate Mermaid code even without subgraphs: {str(e2)}"
                     )
                     return f"Error generating graph visualization: {str(e)}"
             else:
+                if debug:
+                    print("DEBUG: No subgraphs to disable, returning error")
                 return f"Error generating graph visualization: {str(e)}"
 
         try:
+            if debug:
+                print("DEBUG: Attempting to display graph...")
+
             # Display using the visualizer
             GraphVisualizer.display_graph(
                 self,
@@ -3873,14 +3970,25 @@ class BaseGraph(BaseModel, ValidationMixin):
                 theme=theme,  # Pass the string value directly
                 subgraph_mode=subgraph_mode,
                 show_default_branches=show_default_branches,
+                # debug=debug,
             )
+
             if output_path and save_png:
                 logger.info(f"Graph visualization saved to: {output_path}")
+                if debug:
+                    print(f"DEBUG: Graph saved to: {output_path}")
+
         except Exception as e:
             # Get the current environment
             env = detect_environment()
 
             # Provide helpful error message based on environment
+            if debug:
+                print(f"DEBUG: Error displaying graph: {e}")
+                import traceback
+
+                traceback.print_exc()
+
             logger.error(f"Error displaying graph: {e}")
             print(f"Error displaying graph: {e}")
             print(f"Detected environment: {env}")

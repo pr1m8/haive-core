@@ -54,11 +54,13 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.tree import Tree
 
+from haive.core.common.mixins.tool_route_mixin import ToolRouteMixin
 from haive.core.engine.base import EngineType, InvokableEngine
 from haive.core.models.llm.base import AzureLLMConfig, LLMConfig
 
 logger = logging.getLogger(__name__)
 console = Console()
+logger.setLevel(logging.CRITICAL)
 
 # Create a module-level flag to control debug output
 DEBUG_OUTPUT = os.getenv("HAIVE_DEBUG_CONFIG", "").lower() in ("true", "1", "yes")
@@ -87,10 +89,11 @@ ToolChoiceMode = Literal["auto", "required", "optional", "none"]
 
 
 class AugLLMConfig(
+    ToolRouteMixin,
     InvokableEngine[
         Union[str, Dict[str, Any], List[BaseMessage]],
         Union[BaseMessage, Dict[str, Any]],
-    ]
+    ],
 ):
     """
     Configuration for creating enhanced LLM chains with flexible message handling.
@@ -155,10 +158,7 @@ class AugLLMConfig(
         Union[Type[BaseTool], Type[BaseModel], Callable, StructuredTool, BaseModel]
     ] = Field(default_factory=list, description="The tools to use for the node")
 
-    # Tool routes (renamed from tool_types for ToolListMixin compatibility)
-    tool_routes: Dict[str, str] = Field(
-        default_factory=dict, description="Mapping of tool names to their routes/types"
-    )
+    # Tool routes (provided by ToolRouteMixin)
     schemas: Sequence[
         Union[Type[BaseTool], Type[BaseModel], Callable, StructuredTool, BaseModel]
     ] = Field(default_factory=list, description="Schemas for tools")
@@ -316,35 +316,23 @@ class AugLLMConfig(
         self._sync_tool_routes()
 
     def _sync_tool_routes(self):
-        """Synchronize tool_routes with current tools."""
-        new_routes = {}
+        """Synchronize tool_routes with current tools using mixin functionality."""
+        if not self.tools:
+            self.clear_tool_routes()
+            return
 
-        for i, tool in enumerate(self.tools):
-            # Determine tool name
-            if hasattr(tool, "name"):
-                tool_name = tool.name
-            elif isinstance(tool, type) and hasattr(tool, "__name__"):
-                tool_name = tool.__name__
-            elif hasattr(tool, "__name__"):
-                tool_name = tool.__name__
-            else:
-                tool_name = f"tool_{i}"
+        # Use the mixin's method to sync routes from tools
+        self.sync_tool_routes_from_tools(self.tools)
 
-            # Determine route/type
-            if isinstance(tool, type) and issubclass(tool, BaseModel):
-                route = "pydantic_model"
-            elif isinstance(tool, BaseTool) or (
-                isinstance(tool, type) and issubclass(tool, BaseTool)
-            ):
-                route = "langchain_tool"
-            elif callable(tool):
-                route = "function"
-            else:
-                route = "unknown"
-
-            new_routes[tool_name] = route
-
-        self.tool_routes = new_routes
+        # Add specific metadata for structured output
+        if self.structured_output_model:
+            for tool_name, route in self.tool_routes.items():
+                if route == "pydantic_model":
+                    metadata = self.get_tool_metadata(tool_name) or {}
+                    metadata["is_structured_output"] = (
+                        tool_name == self.structured_output_model.__name__
+                    )
+                    self.set_tool_route(tool_name, route, metadata)
 
     def _debug_initialization_summary(self):
         """Show rich initialization summary."""
@@ -2120,6 +2108,163 @@ The output should be valid JSON that conforms to the {model_name} schema."""
     def instantiate_llm(self) -> Any:
         """Instantiate the LLM based on the configuration."""
         return self.llm_config.instantiate()
+
+    # Specialized tool creation for AugLLMConfig
+    def _create_tool_implementation(self, name: str, description: str, **kwargs) -> Any:
+        """
+        Create tool implementation specialized for AugLLMConfig.
+
+        Can create:
+        - LLM function tools that invoke the configured LLM
+        - Retriever tools if configured as retriever
+        - Pydantic tools from structured output models
+        """
+        # Check if this should be a retriever tool
+        route = self.get_tool_route(name)
+        if route == "retriever" and hasattr(self, "instantiate"):
+            return self._create_retriever_tool(name, description, **kwargs)
+
+        # Check if this should be a pydantic tool based on structured output
+        if self.structured_output_model and route == "pydantic_model":
+            return self._create_structured_output_tool(name, description, **kwargs)
+
+        # Default: create an LLM function tool
+        return self._create_llm_function_tool(name, description, **kwargs)
+
+    def _create_llm_function_tool(self, name: str, description: str, **kwargs) -> Any:
+        """Create a function tool that invokes this LLM configuration."""
+        try:
+            from langchain_core.tools import StructuredTool
+            from pydantic import BaseModel, Field
+
+            # Create input schema based on LLM's input fields
+            input_fields = self.get_input_fields()
+
+            # Create a dynamic input model
+            class LLMInput(BaseModel):
+                pass
+
+            # Add fields from input_fields
+            for field_name, (field_type, field_default) in input_fields.items():
+                if field_default is not None:
+                    setattr(
+                        LLMInput,
+                        field_name,
+                        Field(
+                            default=field_default, description=f"Input for {field_name}"
+                        ),
+                    )
+                else:
+                    setattr(
+                        LLMInput,
+                        field_name,
+                        Field(description=f"Input for {field_name}"),
+                    )
+
+            # Create the function that invokes the LLM
+            def llm_function(**inputs):
+                """Invoke the configured LLM with inputs."""
+                runnable = self.create_runnable()
+                return runnable.invoke(inputs)
+
+            # Set function metadata
+            llm_function.__name__ = name
+            llm_function.__doc__ = description
+
+            return StructuredTool.from_function(
+                func=llm_function,
+                name=name,
+                description=description,
+                args_schema=LLMInput,
+                **kwargs,
+            )
+        except ImportError:
+            raise ImportError("langchain_core.tools is required for LLM function tools")
+
+    def _create_structured_output_tool(
+        self, name: str, description: str, **kwargs
+    ) -> Any:
+        """Create a tool from the structured output model."""
+        if not self.structured_output_model:
+            raise ValueError("No structured output model configured")
+
+        # For structured output models, return the model class itself
+        # but add tool metadata
+        tool_class = self.structured_output_model
+
+        # Add metadata
+        metadata = {
+            "llm_config": self.name or "anonymous",
+            "version": self.structured_output_version,
+            "tool_type": "structured_output",
+        }
+
+        self.set_tool_route(name, "structured_output", metadata)
+
+        return tool_class
+
+    # Enhanced tool management methods
+    def add_tool_with_route(
+        self,
+        tool: Any,
+        route: str,
+        name: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> "AugLLMConfig":
+        """Add a tool with explicit route and metadata."""
+        # Add to tools list
+        if tool not in self.tools:
+            self.tools = list(self.tools) + [tool]
+
+        # Determine tool name
+        tool_name = name or (
+            getattr(tool, "name", None)
+            or getattr(tool, "__name__", f"tool_{len(self.tools)}")
+        )
+
+        # Set route and metadata
+        self.set_tool_route(tool_name, route, metadata)
+
+        debug_print(f"➕ [green]Added tool with route: {tool_name} -> {route}[/green]")
+
+        # Re-sync tool routes to update mappings
+        self._sync_tool_routes()
+        return self
+
+    def create_tool_from_config(
+        self,
+        config: Any,
+        name: Optional[str] = None,
+        route: Optional[str] = None,
+        **kwargs,
+    ) -> Any:
+        """
+        Create a tool from another config object.
+
+        Args:
+            config: Configuration object that has a to_tool method
+            name: Tool name
+            route: Tool route to set
+            **kwargs: Additional kwargs for tool creation
+
+        Returns:
+            Created tool
+        """
+        if not hasattr(config, "to_tool"):
+            raise ValueError(
+                f"Config {type(config).__name__} does not support to_tool conversion"
+            )
+
+        # Create the tool
+        tool = config.to_tool(name=name, **kwargs)
+
+        # Add to our tools with route
+        if route:
+            self.add_tool_with_route(tool, route, name)
+        else:
+            self.add_tool(tool, name)
+
+        return tool
 
     # Class method constructors
     @classmethod

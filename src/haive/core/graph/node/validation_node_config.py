@@ -4,12 +4,14 @@ from typing import Any, Callable, Dict, List, Optional, Union
 
 from langchain_core.messages import AIMessage, ToolCall, ToolMessage
 from langchain_core.tools import BaseTool
+from langgraph.graph import END
 from langgraph.prebuilt import ValidationNode
 from langgraph.types import Command, Send
 from pydantic import BaseModel, Field
 from rich.console import Console
 from rich.panel import Panel
 
+from haive.core.common.mixins.tool_route_mixin import ToolRouteMixin
 from haive.core.graph.common.types import ConfigLike, StateLike
 from haive.core.graph.node.base_config import NodeConfig
 from haive.core.graph.node.types import NodeType
@@ -42,6 +44,11 @@ def has_tool_error(message: ToolMessage) -> bool:
     if isinstance(content, dict):
         error_keys = ["error", "errors", "exception", "validation_error"]
         return any(key in content for key in error_keys)
+
+    # Check additional_kwargs for error indicators
+    if hasattr(message, "additional_kwargs") and message.additional_kwargs:
+        if message.additional_kwargs.get("is_error"):
+            return True
 
     return False
 
@@ -108,8 +115,6 @@ def get_tool_args(tool_call: Any) -> Dict[str, Any]:
             # Try to parse arguments from string if needed
             args = tool_call["function"]["arguments"]
             if isinstance(args, str):
-                import json
-
                 try:
                     return json.loads(args)
                 except:
@@ -120,7 +125,6 @@ def get_tool_args(tool_call: Any) -> Dict[str, Any]:
     return {}
 
 
-# Helper function to safely get tool ID from various formats
 def get_tool_id(tool_call):
     """Extract tool ID from either ToolCall object or dictionary."""
     if hasattr(tool_call, "id"):
@@ -132,7 +136,7 @@ def get_tool_id(tool_call):
     return f"id_{id(tool_call)}"
 
 
-class ValidationNodeConfig(NodeConfig):
+class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
     """
     Configuration for a validation node that routes tool calls to appropriate nodes.
     """
@@ -150,8 +154,10 @@ class ValidationNodeConfig(NodeConfig):
     format_error: Optional[Callable] = Field(
         default=None, description="Custom formatter for validation errors"
     )
+
+    # Node routing configuration - these should match actual nodes in your graph
     agent_node: str = Field(
-        default="agent_node", description="Node to return to for validation errors"
+        default="agent", description="Node to return to for validation errors"
     )
     tool_node: str = Field(
         default="tool_node", description="Node for executing standard tools"
@@ -160,48 +166,62 @@ class ValidationNodeConfig(NodeConfig):
         default="parse_output", description="Node for parsing Pydantic models"
     )
     retriever_node: str = Field(
-        default="retriever_node", description="Node for retriever tools"
+        default="retriever", description="Node for retriever tools"
     )
+
     tools: List[Any] = Field(
         default_factory=list, description="List of available tools"
     )
-    tool_routes: Dict[str, str] = Field(
-        default_factory=dict, description="Mapping of tool names to routes"
+    # tool_routes now provided by ToolRouteMixin
+
+    # Available nodes in the graph (for validation)
+    available_nodes: List[str] = Field(
+        default_factory=list, description="List of nodes available in the graph"
     )
 
-    def _sync_tool_routes(self):
-        """Synchronize tool_routes with current tools."""
-        new_routes = {}
+    def validate_node_exists(self, node_name: str) -> str:
+        """
+        Validate that a node exists in the graph, return fallback if not.
 
-        for i, tool in enumerate(self.tools):
-            # Determine tool name
-            if hasattr(tool, "name"):
-                tool_name = tool.name
-            elif isinstance(tool, type) and hasattr(tool, "__name__"):
-                tool_name = tool.__name__
-            elif hasattr(tool, "__name__"):
-                tool_name = tool.__name__
-            else:
-                tool_name = f"tool_{i}"
+        Args:
+            node_name: The node name to validate
 
-            # Determine route/type
-            if isinstance(tool, type) and issubclass(tool, BaseModel):
-                route = "pydantic_model"
-            elif isinstance(tool, BaseTool) or (
-                isinstance(tool, type) and issubclass(tool, BaseTool)
-            ):
-                route = "langchain_tool"
-            elif callable(tool):
-                route = "function"
-            else:
-                route = "unknown"
+        Returns:
+            Valid node name or fallback to agent_node
+        """
+        if not self.available_nodes:
+            # If no available nodes specified, trust the provided name
+            return node_name
 
-            new_routes[tool_name] = route
+        if node_name in self.available_nodes:
+            return node_name
 
-        self.tool_routes = new_routes
+        # Fallback logic
+        logger.warning(
+            f"Node '{node_name}' not found in graph. Available nodes: {self.available_nodes}"
+        )
+
+        # Try fallbacks in order of preference
+        fallback_options = [self.agent_node, "agent", "START"]
+        for fallback in fallback_options:
+            if fallback in self.available_nodes:
+                logger.info(f"Using fallback node: {fallback}")
+                return fallback
+
+        # If no fallbacks work, return the original name and let LangGraph handle the error
+        logger.error(
+            f"No valid fallback found. Returning original node name: {node_name}"
+        )
+        return node_name
 
     def _get_node_for_route(self, route: str) -> str:
-        """Map tool route to appropriate node."""
+        """Map tool route to appropriate node with validation."""
+        # First check if this is a direct agent node route (for transfer tools)
+        if route.startswith("agent_") or route in ["research", "math", "writer"]:
+            # This is a direct agent route - validate it exists and return
+            return self.validate_node_exists(route)
+
+        # Standard route mapping for other tool types
         route_mapping = {
             "pydantic_model": self.parser_node,
             "langchain_tool": self.tool_node,
@@ -209,7 +229,69 @@ class ValidationNodeConfig(NodeConfig):
             "retriever": self.retriever_node,
             "unknown": self.tool_node,  # Default fallback
         }
-        return route_mapping.get(route, self.tool_node)
+
+        target_node = route_mapping.get(route, self.tool_node)
+        # Validate the node exists
+        return self.validate_node_exists(target_node)
+
+    def _sync_tools_and_schemas(self) -> None:
+        """Sync tool routes from both tools and schemas."""
+        all_tools = []
+
+        # Add schemas first (they take priority for routing)
+        if self.schemas:
+            all_tools.extend(self.schemas)
+
+        # Add tools (may override schema routes if same name)
+        if self.tools:
+            # Only add tools that aren't already in schemas
+            schema_names = {
+                getattr(s, "__name__", getattr(s, "name", str(s))) for s in self.schemas
+            }
+            for tool in self.tools:
+                tool_name = getattr(tool, "__name__", getattr(tool, "name", str(tool)))
+                if tool_name not in schema_names:
+                    all_tools.append(tool)
+
+        # Sync routes using the mixin but override for transfer tools
+        if all_tools:
+            self.sync_tool_routes_from_tools(all_tools)
+
+            # Override routing for transfer tools - they should route to agent nodes directly
+            transfer_routes = {}
+            for tool_name, route in self.tool_routes.items():
+                if tool_name.startswith("transfer_to_"):
+                    # Extract the agent name from the transfer tool name
+                    agent_name = tool_name.replace("transfer_to_", "")
+                    agent_node_name = f"agent_{agent_name}"
+
+                    # Check if this agent node exists in our available nodes
+                    if self.available_nodes and agent_node_name in self.available_nodes:
+                        transfer_routes[tool_name] = f"agent_{agent_name}"
+                        console.print(
+                            f"[green]Mapped transfer tool {tool_name} -> {agent_node_name}[/green]"
+                        )
+                    else:
+                        # Fallback to the agent name itself
+                        transfer_routes[tool_name] = agent_name
+                        console.print(
+                            f"[yellow]Mapped transfer tool {tool_name} -> {agent_name} (fallback)[/yellow]"
+                        )
+
+            # Update the routes for transfer tools
+            if transfer_routes:
+                self.tool_routes.update(transfer_routes)
+                console.print(
+                    f"[cyan]Updated {len(transfer_routes)} transfer tool routes[/cyan]"
+                )
+
+            console.print(
+                f"[cyan]ValidationNodeConfig synced routes for {len(all_tools)} tools[/cyan]"
+            )
+        else:
+            console.print(
+                "[yellow]ValidationNodeConfig: No tools or schemas to sync[/yellow]"
+            )
 
     def __call__(
         self, state: StateLike, config: Optional[ConfigLike] = None
@@ -219,6 +301,9 @@ class ValidationNodeConfig(NodeConfig):
         """
         console.print("\n[bold blue]===== VALIDATION NODE START =====[/bold blue]")
 
+        # Sync tools and schemas to ensure routes are up to date
+        self._sync_tools_and_schemas()
+
         # Debug initial state
         debug_panel = Panel(
             f"State type: {type(state)}\n"
@@ -226,31 +311,43 @@ class ValidationNodeConfig(NodeConfig):
             f"Message count: {len(state.messages) if hasattr(state, 'messages') and state.messages else 0}\n"
             f"Config: {config}\n"
             f"Tools available: {len(self.tools)}\n"
+            f"Schemas available: {len(self.schemas)}\n"  # Added schemas count
+            f"Available nodes: {self.available_nodes}\n"
             f"Current tool_routes: {self.tool_routes}",
             title="Validation Node Debug Info",
             border_style="blue",
         )
         console.print(debug_panel)
 
-        # Sync tool routes with current tools
-        console.print("[yellow]Syncing tool routes...[/yellow]")
-        old_routes = self.tool_routes.copy()
-        self._sync_tool_routes()
+        # Build a mapping of tool names to actual tool classes/schemas
+        tool_name_mapping = {}
 
-        if old_routes != self.tool_routes:
-            console.print(
-                f"[green]Tool routes updated:[/green] {old_routes} -> {self.tool_routes}"
-            )
-        else:
-            console.print(f"[dim]Tool routes unchanged: {self.tool_routes}[/dim]")
+        # First, check schemas (these are likely Pydantic models)
+        for schema in self.schemas:
+            if hasattr(schema, "__name__"):
+                tool_name_mapping[schema.__name__] = schema
+            # Also check for 'name' attribute
+            if hasattr(schema, "name"):
+                tool_name_mapping[schema.name] = schema
+
+        # Then check tools (might override schemas if same name)
+        for tool in self.tools:
+            if hasattr(tool, "name"):
+                tool_name_mapping[tool.name] = tool
+            elif hasattr(tool, "__name__"):
+                tool_name_mapping[tool.__name__] = tool
+
+        console.print(
+            f"[cyan]Tool name mapping: {list(tool_name_mapping.keys())}[/cyan]"
+        )
 
         # Get messages from state
-        messages = state.messages
-        if not messages:
+        if not hasattr(state, "messages") or not state.messages:
             console.print("[red]❌ No messages found in state[/red]")
             logger.warning("No messages found in state")
             return "no_tool_calls"
 
+        messages = state.messages
         console.print(f"[green]✓ Found {len(messages)} messages[/green]")
 
         # Check for tool calls in the last message
@@ -319,7 +416,7 @@ class ValidationNodeConfig(NodeConfig):
                 f"\n[bold cyan]--- Processing Tool {i+1}/{len(tool_calls)}: {tool_name} ---[/bold cyan]"
             )
 
-            logger.info(f"Validating tool call: {tool_name}")
+            logger.info(f"Processing tool call: {tool_name}")
 
             # Create standardized tool call
             standardized_tool_call = tool_call
@@ -333,6 +430,64 @@ class ValidationNodeConfig(NodeConfig):
                 )
             else:
                 console.print("[green]Tool call already standardized[/green]")
+
+            # Check if this is a transfer tool that should skip validation
+            route = self.tool_routes.get(tool_name, "unknown")
+            is_transfer_tool = tool_name.startswith("transfer_to_")
+
+            if is_transfer_tool:
+                console.print(
+                    f"[magenta]🚀 Transfer tool detected - skipping validation[/magenta]"
+                )
+
+                # Transfer tools skip validation and go directly to destination
+                destination = self._get_node_for_route(route)
+
+                console.print(f"[green]✓ Transfer tool {tool_name}[/green]")
+                console.print(
+                    f"[cyan]Route: {route} -> Destination: {destination}[/cyan]"
+                )
+
+                if destination not in tool_groups:
+                    tool_groups[destination] = []
+
+                # Find the actual tool class
+                tool_class = tool_name_mapping.get(tool_name)
+
+                # Create a mock validated message for transfer tools
+                validated_messages = messages[:-1] + [
+                    AIMessage(content="", tool_calls=[standardized_tool_call])
+                ]
+
+                tool_groups[destination].append(
+                    {
+                        "tool_call": standardized_tool_call,
+                        "tool_name": tool_name,
+                        "tool_class": tool_class,
+                        "route": route,
+                        "validated_messages": validated_messages,
+                        "is_transfer": True,  # Mark as transfer tool
+                    }
+                )
+
+                validation_result = {
+                    "tool_name": tool_name,
+                    "has_error": False,
+                    "message_count": len(validated_messages),
+                    "route": route,
+                    "destination": destination,
+                    "group_size": len(tool_groups[destination]),
+                    "skipped_validation": True,
+                }
+
+                logger.info(
+                    f"Transfer tool [{tool_name}] routed to [{destination}] (no validation)"
+                )
+                validation_results.append(validation_result)
+                continue
+
+            # Regular validation for non-transfer tools
+            console.print(f"[yellow]Running validation for {tool_name}[/yellow]")
 
             # Create temporary message with just this tool call for validation
             temp_message = AIMessage(content="", tool_calls=[standardized_tool_call])
@@ -406,7 +561,6 @@ class ValidationNodeConfig(NodeConfig):
                         ]
                 else:
                     # This tool call is valid - group by destination
-                    route = self.tool_routes.get(tool_name, "function")
                     destination = self._get_node_for_route(route)
 
                     console.print(f"[green]✓ Tool {tool_name} is valid[/green]")
@@ -417,10 +571,26 @@ class ValidationNodeConfig(NodeConfig):
                     if destination not in tool_groups:
                         tool_groups[destination] = []
 
+                    # Find the actual tool/schema class
+                    tool_class = tool_name_mapping.get(tool_name)
+                    if not tool_class:
+                        console.print(
+                            f"[yellow]Warning: Could not find tool class for {tool_name}[/yellow]"
+                        )
+                        # As a fallback, check if it's in schemas or tools directly
+                        for schema in self.schemas:
+                            if (
+                                getattr(schema, "__name__", None) == tool_name
+                                or getattr(schema, "name", None) == tool_name
+                            ):
+                                tool_class = schema
+                                break
+
                     tool_groups[destination].append(
                         {
                             "tool_call": standardized_tool_call,
                             "tool_name": tool_name,
+                            "tool_class": tool_class,  # Store the actual tool class
                             "route": route,
                             "validated_messages": validated_messages,
                         }
@@ -467,11 +637,22 @@ class ValidationNodeConfig(NodeConfig):
 
         for result in validation_results:
             status = "❌ ERROR" if result["has_error"] else "✓ VALID"
+
+            # Special status for transfer tools
+            if result.get("skipped_validation"):
+                status = "🚀 TRANSFER"
+
             route = result.get("route", "N/A")
             dest = result.get("destination", "N/A")
-            details = result.get(
-                "error_content", f"Group size: {result.get('group_size', 'N/A')}"
-            )
+
+            # Special details for transfer tools
+            if result.get("skipped_validation"):
+                details = "Routed directly (no validation)"
+            else:
+                details = result.get(
+                    "error_content", f"Group size: {result.get('group_size', 'N/A')}"
+                )
+
             summary_table.add_row(result["tool_name"], status, route, dest, details)
 
         console.print(summary_table)
@@ -489,16 +670,20 @@ class ValidationNodeConfig(NodeConfig):
         console.print("\n[bold yellow]===== ROUTING DECISION =====[/bold yellow]")
 
         if not all_valid and not tool_groups:
-            # All tools had validation errors
+            # All tools had validation errors - route back to agent with error info
             console.print(
-                "[red]🚨 All tools failed validation - returning 'has_errors'[/red]"
+                "[red]🚨 All tools failed validation - returning to agent[/red]"
             )
-            logger.warning("All tool calls failed validation, returning error status")
-            return "has_errors"
+            logger.warning("All tool calls failed validation, returning to agent")
+
+            # Add error messages to state and route back to agent
+            error_update = {self.messages_key: error_messages}
+
+            validated_agent_node = self.validate_node_exists(self.agent_node)
+            return Command(update=error_update, goto=validated_agent_node)
 
         elif not all_valid and tool_groups:
-            # Mixed results - this is problematic for the conversation flow
-            # We'll execute valid tools but note that some failed
+            # Mixed results - execute valid tools but log warnings
             console.print(
                 f"[orange1]⚠️ Mixed results - executing {len(tool_groups)} valid groups, some tools failed[/orange1]"
             )
@@ -539,11 +724,18 @@ class ValidationNodeConfig(NodeConfig):
                         None,
                     )
 
-                    if validated_tool_msg:
+                    console.print(
+                        f"[cyan]  Tool class for {tool_info['tool_name']}: {tool_info.get('tool_class')}[/cyan]"
+                    )
+
+                    if validated_tool_msg and tool_info.get("tool_class"):
                         send_obj = Send(
                             node=destination,
                             arg={
                                 "tool_name": tool_info["tool_name"],
+                                "tool": tool_info[
+                                    "tool_class"
+                                ],  # Use the stored tool class
                                 "tool_call": tool_info["tool_call"],
                                 "tool_message": validated_tool_msg,
                                 self.messages_key: tool_info["validated_messages"],
@@ -551,12 +743,17 @@ class ValidationNodeConfig(NodeConfig):
                         )
                         sends.append(send_obj)
                         console.print(
-                            f"[green]  ✓ Created send for {tool_info['tool_name']}[/green]"
+                            f"[green]  ✓ Created send for {tool_info['tool_name']} with tool class[/green]"
                         )
                     else:
-                        console.print(
-                            f"[red]  ❌ No validated message found for {tool_info['tool_name']}[/red]"
-                        )
+                        if not validated_tool_msg:
+                            console.print(
+                                f"[red]  ❌ No validated message found for {tool_info['tool_name']}[/red]"
+                            )
+                        if not tool_info.get("tool_class"):
+                            console.print(
+                                f"[red]  ❌ No tool class found for {tool_info['tool_name']}[/red]"
+                            )
 
                 console.print(
                     f"[bold green]Returning {len(sends)} Send objects for parser node[/bold green]"
@@ -610,11 +807,18 @@ class ValidationNodeConfig(NodeConfig):
                             None,
                         )
 
-                        if validated_tool_msg:
+                        console.print(
+                            f"[cyan]  Tool class for {tool_info['tool_name']}: {tool_info.get('tool_class')}[/cyan]"
+                        )
+
+                        if validated_tool_msg and tool_info.get("tool_class"):
                             send_obj = Send(
                                 node=destination,
                                 arg={
                                     "tool_name": tool_info["tool_name"],
+                                    "tool": tool_info[
+                                        "tool_class"
+                                    ],  # Use the stored tool class
                                     "tool_call": tool_info["tool_call"],
                                     "tool_message": validated_tool_msg,
                                     self.messages_key: tool_info["validated_messages"],
@@ -622,7 +826,7 @@ class ValidationNodeConfig(NodeConfig):
                             )
                             sends.append(send_obj)
                             console.print(
-                                f"[green]    ✓ Added send for {tool_info['tool_name']}[/green]"
+                                f"[green]    ✓ Added send for {tool_info['tool_name']} with tool class[/green]"
                             )
                 else:
                     # Combine tools for this destination
@@ -646,4 +850,8 @@ class ValidationNodeConfig(NodeConfig):
             console.print(
                 f"[bold green]Returning {len(sends)} Send objects for multiple destinations[/bold green]"
             )
-            return Command(update={}, goto=sends)
+            return sends
+
+        # Fallback case - no tool calls to route
+        console.print("[yellow]No valid tool calls to route - returning END[/yellow]")
+        return END

@@ -41,7 +41,7 @@ class MessagesState(StateSchema):
     __reducer_fields__ = {"messages": add_messages}
 
     # Proper class variable (not a model field)
-    tokenizer: ClassVar = tiktoken.get_encoding("cl100k_base")
+    # tokenizer: ClassVar = tiktoken.get_encoding("cl100k_base")
 
     @model_validator(mode="before")
     def validate_message_format(cls, data: Any) -> Any:

@@ -1,375 +1,7 @@
-# src/haive/core/graph/node/engine_node.py
-
 import logging
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
-from langgraph.types import Command, RetryPolicy, Send
-from pydantic import BaseModel, Field, model_validator
-from rich.console import Console
-
-from haive.core.engine.base import Engine
-from haive.core.graph.common.types import ConfigLike, StateLike
-from haive.core.graph.node.base_config import NodeConfig
-from haive.core.graph.node.types import NodeType
-
-logger = logging.getLogger(__name__)
-console = Console()
-
-
-class EngineNodeConfig(NodeConfig):
-    """
-    Configuration for an engine-based node.
-    """
-
-    # Override node_type for this specific node type
-    node_type: NodeType = Field(
-        default=NodeType.ENGINE, description="Type of node (always ENGINE)"
-    )
-
-    # Engine reference
-    engine: Optional[Engine] = Field(
-        default=None, description="Engine instance to use for this node"
-    )
-    engine_name: Optional[str] = Field(
-        default=None, description="Name of engine to look up in registry"
-    )
-
-    # Schema integration
-    state_schema: Optional[Type[BaseModel]] = Field(
-        default=None, description="State schema class for this node"
-    )
-
-    # Input/Output mapping
-    input_fields: Optional[Union[List[str], Dict[str, str]]] = Field(
-        default=None,
-        description="List of input fields or mapping from state keys to node input keys",
-    )
-    output_fields: Optional[Union[List[str], Dict[str, str]]] = Field(
-        default=None,
-        description="List of output fields or mapping from node output keys to state keys",
-    )
-
-    # Execution options
-    retry_policy: Optional[RetryPolicy] = Field(
-        default=None, description="Retry policy for node execution"
-    )
-
-    # Routing options
-    use_send: bool = Field(
-        default=False, description="Whether to use Send instead of Command for routing"
-    )
-
-    # Debug option
-    debug: bool = Field(default=False, description="Enable debug output")
-
-    @model_validator(mode="after")
-    def validate_engine_node(self) -> "EngineNodeConfig":
-        """Ensure engine is specified properly."""
-        if self.engine is None and self.engine_name is None:
-            raise ValueError(
-                "Either engine or engine_name must be specified for EngineNodeConfig"
-            )
-
-        # Normalize input/output fields to dictionaries
-        if isinstance(self.input_fields, list):
-            self.input_fields = {field: field for field in self.input_fields}
-
-        if isinstance(self.output_fields, list):
-            self.output_fields = {field: field for field in self.output_fields}
-
-        return self
-
-    def __call__(self, state: StateLike, config: Optional[ConfigLike] = None) -> Any:
-        """Execute the engine with the given state and configuration."""
-        # First extract inputs and execute the engine
-        raw_result = self.execute_engine(state, config)
-
-        # Then wrap the results in Command or Send
-        return self.wrap_result(raw_result, state)
-
-    def execute_engine(
-        self, state: StateLike, config: Optional[ConfigLike] = None
-    ) -> Any:
-        """Execute the engine and return raw result."""
-        # Resolve the engine
-        engine, engine_id = self.get_engine()
-        if engine is None:
-            raise ValueError(f"Could not resolve engine for node {self.name}")
-
-        # Extract input based on mapping
-        input_data = self.extract_input(state)
-
-        if self.debug:
-            console.print(
-                f"[cyan]Node {self.name}[/] extracted input: {list(input_data.keys() if isinstance(input_data, dict) else ['<non-dict>'])}"
-            )
-
-        # Apply config overrides
-        merged_config = self._merge_configs(config, engine_id)
-
-        try:
-            # Invoke the engine
-            if self.debug:
-                console.print(
-                    f"[cyan]Node {self.name}[/] invoking engine {getattr(engine, 'name', 'unknown')}"
-                )
-            print(f"[cyan]input_data: {input_data}")
-            if engine.input_schema:
-                input_data = engine.input_schema.model_validate(input_data)
-            result = engine.invoke(input_data, merged_config)
-
-            if self.debug:
-                result_type = type(result).__name__
-                console.print(f"[green]Engine returned result type:[/] {result_type}")
-
-            return result
-        except Exception as e:
-            # Handle errors according to retry policy
-            logger.error(f"Error executing engine node {self.name}: {e}")
-            raise
-
-    def wrap_result(self, result: Any, state: StateLike) -> Union[Command, Send]:
-        """Wrap the engine result in Command or Send."""
-        # If result is already a Command or Send, return it
-        if isinstance(result, Command) or isinstance(result, Send):
-            return result
-
-        # Get engine output fields from schema if available
-        engine_name = getattr(self.engine, "name", None)
-        engine_outputs = []
-
-        if hasattr(state, "__engine_io_mappings__") and engine_name:
-            mappings = getattr(state, "__engine_io_mappings__", {})
-            if engine_name in mappings:
-                engine_outputs = mappings[engine_name].get("outputs", [])
-                if self.debug:
-                    console.print(
-                        f"[cyan]Found engine outputs in schema:[/] {engine_outputs}"
-                    )
-
-        # Prepare update dictionary based on output fields and schema
-        update_dict = {}
-
-        # Case 1: Message-like result for an LLM - add to messages list
-        if self._is_message_result(result) and (
-            "messages" in engine_outputs or not engine_outputs
-        ):
-            if hasattr(state, "messages"):
-                messages = list(getattr(state, "messages", []))
-                if isinstance(result, list):
-                    messages.extend(result)
-                else:
-                    messages.append(result)
-                update_dict["messages"] = messages
-                if self.debug:
-                    console.print("[green]Added message result to messages list[/]")
-
-        # Case 2: Dictionary result - apply mapping or use schema outputs
-        elif isinstance(result, dict):
-            output_mapping = self.get_output_mapping()
-
-            # If we have explicit output mapping, use it
-            if output_mapping:
-                for result_key, state_key in output_mapping.items():
-                    if result_key in result:
-                        update_dict[state_key] = result[result_key]
-                        if self.debug:
-                            console.print(
-                                f"[green]Mapped output:[/] {result_key} → {state_key}"
-                            )
-
-            # If engine outputs from schema, use those (if not already mapped)
-            elif engine_outputs:
-                for output_field in engine_outputs:
-                    if output_field in result:
-                        update_dict[output_field] = result[output_field]
-                        if self.debug:
-                            console.print(
-                                f"[green]Used schema output field:[/] {output_field}"
-                            )
-
-            # If nothing mapped, use the full result
-            if not update_dict:
-                update_dict = result
-                if self.debug:
-                    console.print(
-                        "[yellow]No mapping found - using full result dict[/]"
-                    )
-
-        # Case 3: Other result types - map to default or schema-defined field
-        else:
-            # Use first schema output field if available
-            if engine_outputs:
-                update_dict[engine_outputs[0]] = result
-                if self.debug:
-                    console.print(
-                        f"[green]Mapped result to schema output:[/] {engine_outputs[0]}"
-                    )
-
-            # Otherwise use result field
-            else:
-                update_dict["result"] = result
-                if self.debug:
-                    console.print("[yellow]Using default 'result' field[/]")
-
-        # Create Command or Send with the update dictionary
-        if self.use_send:
-            return Send(node=self.command_goto, arg=update_dict)
-        else:
-            return Command(update=update_dict, goto=self.command_goto)
-
-    def _is_message_result(self, result: Any) -> bool:
-        """Check if result is a message type that should be added to messages."""
-        # Import here to avoid circular imports
-        try:
-            from langchain_core.messages import AIMessage, BaseMessage
-
-            return isinstance(result, (AIMessage, BaseMessage))
-        except ImportError:
-            # If langchain isn't available, use duck typing
-            return hasattr(result, "content") and (
-                hasattr(result, "type") or hasattr(result, "message_type")
-            )
-
-    def extract_input(self, state: StateLike) -> Any:
-        """Extract input for the engine from state."""
-        # Check for engine I/O mappings in schema
-        engine_name = getattr(self.engine, "name", None)
-        engine_inputs = []
-
-        if hasattr(state, "__engine_io_mappings__") and engine_name:
-            mappings = getattr(state, "__engine_io_mappings__", {})
-            if engine_name in mappings:
-                engine_inputs = mappings[engine_name].get("inputs", [])
-                if self.debug:
-                    console.print(
-                        f"[cyan]Found engine inputs in schema:[/] {engine_inputs}"
-                    )
-
-        # Use input_fields mapping if available
-        input_mapping = self.get_input_mapping()
-
-        # Prioritize explicitly configured input mapping
-        if input_mapping:
-            return self._extract_with_mapping(state, input_mapping)
-
-        # If we have engine inputs from schema, use those
-        elif engine_inputs:
-            # Create input dictionary with just those fields
-            input_data = {}
-            for field in engine_inputs:
-                if hasattr(state, field):
-                    input_data[field] = getattr(state, field)
-                elif isinstance(state, dict) and field in state:
-                    input_data[field] = state[field]
-            return input_data
-
-        # Special case for messages - most engines expect this
-        elif hasattr(state, "messages"):
-            return {"messages": state.messages}
-        elif isinstance(state, dict) and "messages" in state:
-            return {"messages": state["messages"]}
-
-        # Last resort - return state as is
-        if hasattr(state, "__dict__"):
-            return state.__dict__
-        return state
-
-    def _extract_with_mapping(
-        self, state: Any, mapping: Dict[str, str]
-    ) -> Dict[str, Any]:
-        """Extract input fields using a mapping."""
-        input_data = {}
-
-        for state_key, input_key in mapping.items():
-            # Try attribute access first
-            if hasattr(state, state_key):
-                input_data[input_key] = getattr(state, state_key)
-            # Then try dictionary access
-            elif isinstance(state, dict) and state_key in state:
-                input_data[input_key] = state[state_key]
-            # Log missing fields in debug mode
-            elif self.debug:
-                logger.debug(f"Missing input field {state_key} in state")
-
-        return input_data
-
-    def get_engine(self) -> Tuple[Optional[Engine], Optional[str]]:
-        """Get the engine for this node, resolving from registry if needed."""
-        # Return direct engine if already set
-        if self.engine is not None:
-            engine_id = getattr(self.engine, "id", None)
-            return self.engine, engine_id
-
-        # Lookup engine by name in registry
-        try:
-            from haive.core.engine.base import EngineRegistry
-
-            registry = EngineRegistry.get_instance()
-            engine = registry.find(self.engine_name)
-            if engine:
-                engine_id = getattr(engine, "id", None)
-                self.engine = engine  # Cache for future use
-                return engine, engine_id
-        except ImportError:
-            logger.warning(
-                f"Could not import EngineRegistry to resolve engine: {self.engine_name}"
-            )
-
-        # Not found - return None
-        return None, None
-
-    def get_input_mapping(self) -> Dict[str, str]:
-        """Get the input mapping for this node."""
-        if self.input_fields:
-            return dict(self.input_fields)
-        return {}
-
-    def get_output_mapping(self) -> Dict[str, str]:
-        """Get the output mapping for this node."""
-        if self.output_fields:
-            return dict(self.output_fields)
-        return {}
-
-    def _merge_configs(
-        self,
-        runtime_config: Optional[Dict[str, Any]] = None,
-        engine_id: Optional[str] = None,
-    ) -> Optional[Dict[str, Any]]:
-        """Merge base config overrides with runtime config."""
-        if not runtime_config and not self.config_overrides:
-            return None
-
-        # Start with a copy of runtime_config or empty dict
-        merged = dict(runtime_config or {})
-
-        # Add configurable section if not present
-        if "configurable" not in merged:
-            merged["configurable"] = {}
-
-        # Apply config_overrides
-        for key, value in self.config_overrides.items():
-            merged["configurable"][key] = value
-
-        # Add engine_id targeting if available
-        if engine_id:
-            if "engine_configs" not in merged["configurable"]:
-                merged["configurable"]["engine_configs"] = {}
-
-            # Ensure this engine's config exists
-            if engine_id not in merged["configurable"]["engine_configs"]:
-                merged["configurable"]["engine_configs"][engine_id] = {}
-
-            # Apply any engine-specific overrides
-            if self.config_overrides:
-                merged["configurable"]["engine_configs"][engine_id].update(
-                    self.config_overrides
-                )  # src/haive/core/graph/node/engine_node.py
-
-
-import logging
-from typing import Any, Dict, List, Optional, Tuple, Type, Union
-
+from langchain_core.messages import AnyMessage
 from langgraph.types import Command, RetryPolicy, Send
 from pydantic import BaseModel, Field
 from rich.console import Console
@@ -415,6 +47,16 @@ class EngineNodeConfig(NodeConfig):
 
             # Execute with merged config
             result = self._execute_with_config(engine, input_data, config)
+
+            # Add name to message if it's from an LLM or Agent engine
+            if hasattr(engine, "engine_type") and engine.engine_type in [
+                EngineType.LLM,
+                EngineType.AGENT,
+            ]:
+                from langchain_core.messages import BaseMessage
+
+                if isinstance(result, BaseMessage):
+                    result.name = engine.name
 
             # Wrap result intelligently
             return self._wrap_smart_result(result, state, engine)
@@ -598,10 +240,10 @@ class EngineNodeConfig(NodeConfig):
 
         # Engine-specific single value mapping
         field_map = {
-            EngineType.RETRIEVER: "documents",
+            EngineType.RETRIEVER: "retrieved_documents",
             EngineType.LLM: "response",
             EngineType.EMBEDDINGS: "embeddings",
-            EngineType.VECTOR_STORE: "documents",
+            EngineType.VECTOR_STORE: "retrieved_documents",
         }
 
         field = field_map.get(engine_type, "result")
@@ -708,7 +350,10 @@ class EngineNodeConfig(NodeConfig):
         console.print(f"  Config: {merged_config}")
 
         # Special handling for retrievers - they need string queries
-        if hasattr(engine, "engine_type") and engine.engine_type.value == "retriever":
+        if (
+            hasattr(engine, "engine_type")
+            and engine.engine_type == EngineType.RETRIEVER
+        ):
             console.print("[yellow]RETRIEVER DETECTED - Special handling[/yellow]")
 
             if isinstance(input_data, dict):
@@ -718,20 +363,59 @@ class EngineNodeConfig(NodeConfig):
                     console.print(
                         f"  Other params: {[k for k in input_data.keys() if k != 'query']}"
                     )
-                    return engine.invoke(query_str, merged_config)
+                    result = engine.invoke(query_str, merged_config)
                 else:
                     console.print(
                         "  No 'query' key in dict, using whole dict as string"
                     )
-                    return engine.invoke(str(input_data), merged_config)
+                    result = engine.invoke(str(input_data), merged_config)
             else:
                 console.print(
                     f"  Input is not dict, converting to string: '{str(input_data)}'"
                 )
-                return engine.invoke(str(input_data), merged_config)
+                result = engine.invoke(str(input_data), merged_config)
+        else:
+            console.print("[green]Standard engine invoke[/green]")
+            result = engine.invoke(input_data, merged_config)
 
-        console.print("[green]Standard engine invoke[/green]")
-        return engine.invoke(input_data, merged_config)
+        # Add name to message if it's from an LLM or Agent engine
+        if hasattr(engine, "engine_type") and engine.engine_type in [
+            EngineType.LLM,
+            EngineType.AGENT,
+        ]:
+            from langchain_core.messages import BaseMessage
+
+            # Handle single message
+            if isinstance(result, BaseMessage):
+                result.name = engine.name
+                console.print(f"[blue]Added name '{engine.name}' to message[/blue]")
+
+            # Handle list of messages
+            elif isinstance(result, list):
+                for msg in result:
+                    if isinstance(msg, BaseMessage):
+                        msg.name = engine.name
+                console.print(
+                    f"[blue]Added name '{engine.name}' to {len([m for m in result if isinstance(m, BaseMessage)])} messages[/blue]"
+                )
+
+            # Handle dict with messages key
+            elif isinstance(result, dict) and "messages" in result:
+                messages = result["messages"]
+                if isinstance(messages, list):
+                    for msg in messages:
+                        if isinstance(msg, BaseMessage):
+                            msg.name = engine.name
+                    console.print(
+                        f"[blue]Added name '{engine.name}' to messages in dict[/blue]"
+                    )
+                elif isinstance(messages, BaseMessage):
+                    messages.name = engine.name
+                    console.print(
+                        f"[blue]Added name '{engine.name}' to message in dict[/blue]"
+                    )
+
+        return result
 
     def _build_merged_config(
         self, runtime_config: Optional[ConfigLike], engine: Engine

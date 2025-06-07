@@ -13,7 +13,7 @@ from pydantic import ConfigDict, Field
 
 from haive.core.engine.base import EngineType, InvokableEngine
 from haive.core.engine.document.transformers.types import DocTransformerType
-from haive.core.engine.embeddings import EmbeddingsConfig
+from haive.core.models.embeddings.base import BaseEmbeddingConfig
 from haive.core.registry.decorators import register_component
 
 

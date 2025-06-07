@@ -87,6 +87,9 @@ class SchemaComposer:
         # Debug tracking
         self.processing_history = []
 
+        # Metadata storage for compatibility analysis
+        self.metadata = {}
+
         logger.debug(f"Created SchemaComposer for '{name}'")
         self._visualize_creation()
 
@@ -104,23 +107,66 @@ class SchemaComposer:
         """
         Detect which base class should be used based on components and current fields.
         Must be called before adding fields to avoid duplicates.
+
+        Priority order:
+        1. Check for AugLLM engines and agents first
+        2. Check for tools
+        3. Check for messages
+        4. Default to StateSchema
         """
         logger.debug("Detecting base class requirements")
 
-        # Check current fields
+        # Check current fields first
         if "messages" in self.fields or self.has_messages:
             self.has_messages = True
 
         if "tools" in self.fields or self.has_tools:
             self.has_tools = True
 
-        # Check components if provided
+        # Enhanced component analysis - prioritize engine type detection
         if components:
             for component in components:
                 if component is None:
                     continue
 
-                # Check for messages in engine I/O
+                # PRIORITY 1: Check for AugLLM engines specifically
+                if hasattr(component, "engine_type"):
+                    engine_type_value = getattr(
+                        component.engine_type, "value", component.engine_type
+                    )
+                    engine_type_str = str(engine_type_value).lower()
+
+                    if engine_type_str == "llm":
+                        logger.debug(
+                            f"Found AugLLM engine: {getattr(component, 'name', 'unnamed')}"
+                        )
+                        self.has_messages = True
+
+                        # Check if this AugLLM has tools
+                        if hasattr(component, "tools") and component.tools:
+                            logger.debug("AugLLM has tools - will use ToolState")
+                            self.has_tools = True
+
+                # PRIORITY 2: Check for agent-like components
+                elif hasattr(component, "agent") or getattr(
+                    component, "__class__", None
+                ).__name__.lower().endswith("agent"):
+                    logger.debug(
+                        f"Found agent component: {getattr(component, 'name', getattr(component, '__class__', {}).get('__name__', 'unnamed'))}"
+                    )
+                    self.has_messages = True
+
+                    # Check if agent has tools
+                    if hasattr(component, "tools") and component.tools:
+                        logger.debug("Agent has tools - will use ToolState")
+                        self.has_tools = True
+
+                # PRIORITY 3: Check for standalone tools
+                elif hasattr(component, "tools") and component.tools:
+                    logger.debug("Found component with tools")
+                    self.has_tools = True
+
+                # PRIORITY 4: Check for messages in engine I/O
                 if hasattr(component, "get_input_fields") and callable(
                     component.get_input_fields
                 ):
@@ -128,7 +174,8 @@ class SchemaComposer:
                         input_fields = component.get_input_fields()
                         if "messages" in input_fields:
                             self.has_messages = True
-                    except:
+                            logger.debug("Found 'messages' in input fields")
+                    except Exception:
                         pass
 
                 if hasattr(component, "get_output_fields") and callable(
@@ -138,44 +185,27 @@ class SchemaComposer:
                         output_fields = component.get_output_fields()
                         if "messages" in output_fields:
                             self.has_messages = True
-                    except:
+                            logger.debug("Found 'messages' in output fields")
+                    except Exception:
                         pass
 
-                # Check for tools
-                if hasattr(component, "tools") and component.tools:
-                    self.has_tools = True
-
-        # Determine base class
-        base_class = None
-
+        # Determine base class with proper priority
+        # Always use StateSchema as base - but import the right one based on needs
         if self.has_tools:
-            try:
-                from haive.core.schema.prebuilt.tool_state import ToolState
+            from haive.core.schema.prebuilt.tool_state import ToolState
 
-                base_class = ToolState
-                logger.debug("Detected need for ToolState base class")
-            except ImportError:
-                logger.warning(
-                    "Could not import ToolState, falling back to MessagesState"
-                )
-                self.has_tools = False
+            base_class = ToolState
+            logger.debug("Using ToolState as base class (found tools)")
+        elif self.has_messages:
+            from haive.core.schema.prebuilt.messages_state import MessagesState
 
-        if not base_class and self.has_messages:
-            try:
-                from haive.core.schema.prebuilt.messages_state import MessagesState
-
-                base_class = MessagesState
-                logger.debug("Detected need for MessagesState base class")
-            except ImportError:
-                logger.warning(
-                    "Could not import MessagesState, falling back to StateSchema"
-                )
-
-        if not base_class:
+            base_class = MessagesState
+            logger.debug("Using MessagesState as base class (found messages)")
+        else:
             from haive.core.schema.state_schema import StateSchema
 
             base_class = StateSchema
-            logger.debug("Using StateSchema as base class")
+            logger.debug("Using StateSchema as base class (default)")
 
         self.detected_base_class = base_class
 
@@ -183,6 +213,8 @@ class SchemaComposer:
         if hasattr(base_class, "model_fields"):
             self.base_class_fields = set(base_class.model_fields.keys())
             logger.debug(f"Base class provides fields: {self.base_class_fields}")
+        else:
+            self.base_class_fields = set()
 
     def add_engine(self, engine: Any) -> "SchemaComposer":
         """
@@ -325,6 +357,27 @@ class SchemaComposer:
         if name == "__runnable_config__" or name == "runnable_config":
             logger.warning(f"Skipping special field {name}")
             return self
+
+        # Ensure field_type is a valid type
+        if field_type is None:
+            field_type = Any
+        elif not isinstance(field_type, type) and not hasattr(field_type, "__origin__"):
+            # Handle non-type values (like from tuple unpacking or invalid inputs)
+            if isinstance(field_type, (dict, list, tuple)) and not hasattr(
+                field_type, "__origin__"
+            ):
+                logger.warning(
+                    f"Invalid field type for '{name}': {field_type}, using Any"
+                )
+                field_type = Any
+            # Allow typing constructs like Union, Optional, etc.
+            elif not hasattr(field_type, "__module__") or "typing" not in str(
+                getattr(field_type, "__module__", "")
+            ):
+                logger.warning(
+                    f"Invalid field type for '{name}': {field_type}, using Any"
+                )
+                field_type = Any
 
         # Check if field is provided by base class
         if self.detected_base_class and name in self.base_class_fields:
@@ -514,6 +567,15 @@ class SchemaComposer:
 
             else:
                 # Assume it's a type with no default
+                # Ensure it's a valid type for add_field
+                if not isinstance(field_info, type) and not hasattr(
+                    field_info, "__origin__"
+                ):
+                    logger.warning(
+                        f"Unexpected field_info type for '{field_name}': {type(field_info)}, using Any"
+                    )
+                    field_info = Any
+
                 self.add_field(
                     name=field_name, field_type=field_info, default=None, source="dict"
                 )
@@ -542,26 +604,24 @@ class SchemaComposer:
         engine_io = {}
 
         # Check if model is a StateSchema
-        is_state_schema = (
-            issubclass(model, StateSchema) if inspect.isclass(model) else False
-        )
+        is_state_schema = inspect.isclass(model) and issubclass(model, StateSchema)
 
         if is_state_schema:
             logger.debug(f"Model {source} is a StateSchema - will extract metadata")
 
             # Extract shared fields
             if hasattr(model, "__shared_fields__"):
-                shared_fields = model.__shared_fields__
+                shared_fields = getattr(model, "__shared_fields__", [])
                 logger.debug(f"Found shared fields: {shared_fields}")
 
             # Extract reducer info
             if hasattr(model, "__serializable_reducers__"):
-                reducers = model.__serializable_reducers__
+                reducers = getattr(model, "__serializable_reducers__", {})
                 logger.debug(f"Found reducers: {reducers}")
 
             # Extract engine IO mappings
             if hasattr(model, "__engine_io_mappings__"):
-                engine_io = model.__engine_io_mappings__
+                engine_io = getattr(model, "__engine_io_mappings__", {})
                 logger.debug(f"Found engine IO mappings: {len(engine_io)} engines")
 
                 # Update our engine mappings
@@ -609,10 +669,22 @@ class SchemaComposer:
                 # Get field type and defaults
                 field_type = field_info.annotation
 
+                # Ensure we have a valid type
+                if field_type is None:
+                    field_type = Any
+
                 # Handle default vs default_factory
                 if field_info.default_factory is not None:
-                    default_factory = field_info.default_factory
-                    default = None
+                    # Ensure default_factory is callable
+                    if callable(field_info.default_factory):
+                        default_factory = field_info.default_factory
+                        default = None
+                    else:
+                        logger.warning(
+                            f"Invalid default_factory for field '{field_name}', ignoring"
+                        )
+                        default_factory = None
+                        default = field_info.default
                 else:
                     default_factory = None
                     default = field_info.default
@@ -673,7 +745,8 @@ class SchemaComposer:
 
         # If a StateSchema, check for structured_models
         if is_state_schema and hasattr(model, "__structured_models__"):
-            for model_name, model_path in model.__structured_models__.items():
+            structured_models_dict = getattr(model, "__structured_models__", {})
+            for model_name, model_path in structured_models_dict.items():
                 logger.debug(f"Found structured model: {model_name} -> {model_path}")
 
                 # Try to import the model
@@ -686,13 +759,14 @@ class SchemaComposer:
                     self.structured_models[model_name] = structured_model
 
                     # Get field names if available
-                    if (
-                        hasattr(model, "__structured_model_fields__")
-                        and model_name in model.__structured_model_fields__
-                    ):
-                        fields = model.__structured_model_fields__[model_name]
-                        for field in fields:
-                            self.structured_model_fields[model_name].add(field)
+                    if hasattr(model, "__structured_model_fields__"):
+                        structured_model_fields_dict = getattr(
+                            model, "__structured_model_fields__", {}
+                        )
+                        if model_name in structured_model_fields_dict:
+                            fields = structured_model_fields_dict[model_name]
+                            for field in fields:
+                                self.structured_model_fields[model_name].add(field)
 
                     logger.debug(
                         f"Imported structured model {model_name}: {structured_model.__name__}"
@@ -732,6 +806,37 @@ class SchemaComposer:
         if engine_name not in self.engine_io_mappings:
             self.engine_io_mappings[engine_name] = {"inputs": [], "outputs": []}
 
+        # Check if it's an AugLLM engine
+        is_aug_llm = (
+            hasattr(engine, "engine_type")
+            and str(getattr(engine.engine_type, "value", engine.engine_type)).lower()
+            == "llm"
+        )
+
+        # Determine output behavior for AugLLM
+        aug_llm_output_field = None
+        has_structured_output = False
+
+        if is_aug_llm:
+            # Check for structured output model
+            has_structured_output = (
+                hasattr(engine, "structured_output_model")
+                and engine.structured_output_model is not None
+            )
+
+            # Check for explicit output field configuration
+            if hasattr(engine, "output_field_name") and engine.output_field_name:
+                aug_llm_output_field = engine.output_field_name
+                logger.debug(
+                    f"AugLLM {engine_name} has explicit output field: {aug_llm_output_field}"
+                )
+            elif not has_structured_output:
+                # Default to messages for conversational agents without structured output
+                aug_llm_output_field = "messages"
+                logger.debug(
+                    f"AugLLM {engine_name} defaulting output to 'messages' field"
+                )
+
         # Process steps:
         # 1. First, check for input/output schemas
         # 2. Then check for structured output model
@@ -743,7 +848,9 @@ class SchemaComposer:
         output_schema = None
 
         # 1.1 Try to get input schema
-        if hasattr(engine, "input_schema") and engine.input_schema:
+        if hasattr(engine, "input_schema") and isinstance(
+            engine.input_schema, BaseModel
+        ):
             input_schema = engine.input_schema
             logger.debug(f"Using input_schema from engine: {input_schema.__name__}")
         elif hasattr(engine, "derive_input_schema") and callable(
@@ -755,21 +862,30 @@ class SchemaComposer:
             except Exception as e:
                 logger.warning(f"Error deriving input schema from {engine_name}: {e}")
 
-        # 1.2 Try to get output schema
-        if hasattr(engine, "output_schema") and engine.output_schema:
-            output_schema = engine.output_schema
-            logger.debug(f"Using output_schema from engine: {output_schema.__name__}")
-        elif hasattr(engine, "derive_output_schema") and callable(
-            engine.derive_output_schema
-        ):
-            try:
-                output_schema = engine.derive_output_schema()
-                logger.debug(f"Using derived output schema: {output_schema.__name__}")
-            except Exception as e:
-                logger.warning(f"Error deriving output schema from {engine_name}: {e}")
+        # 1.2 Try to get output schema (but respect AugLLM behavior)
+        if not is_aug_llm or has_structured_output:
+            if hasattr(engine, "output_schema") and isinstance(
+                engine.output_schema, BaseModel
+            ):
+                output_schema = engine.output_schema
+                logger.debug(
+                    f"Using output_schema from engine: {output_schema.__name__}"
+                )
+            elif hasattr(engine, "derive_output_schema") and callable(
+                engine.derive_output_schema
+            ):
+                try:
+                    output_schema = engine.derive_output_schema()
+                    logger.debug(
+                        f"Using derived output schema: {output_schema.__name__}"
+                    )
+                except Exception as e:
+                    logger.warning(
+                        f"Error deriving output schema from {engine_name}: {e}"
+                    )
 
         # 1.3 Process input schema if found
-        if input_schema:
+        if input_schema and not isinstance(input_schema, dict):
             logger.debug(f"Processing input schema for {engine_name}")
 
             # Extract fields from the schema
@@ -799,8 +915,12 @@ class SchemaComposer:
                             f"Marked field '{field_name}' as input for engine '{engine_name}'"
                         )
 
-        # 1.4 Process output schema if found
-        if output_schema:
+        # 1.4 Process output schema if found (skip for AugLLM without structured output)
+        if (
+            output_schema
+            and not isinstance(output_schema, dict)
+            and (not is_aug_llm or has_structured_output)
+        ):
             logger.debug(f"Processing output schema for {engine_name}")
 
             # Extract fields from the schema
@@ -834,42 +954,10 @@ class SchemaComposer:
                         )
 
         # 2. Process structured output model if available
-        content_field_exists = False
-
-        if (
-            hasattr(engine, "structured_output_model")
-            and engine.structured_output_model
-        ):
+        if has_structured_output and hasattr(engine, "structured_output_model"):
             model = engine.structured_output_model
             model_name = model.__name__.lower()
             logger.debug(f"Found structured_output_model in {source}: {model.__name__}")
-
-            # Check if model contains content/contents field
-            model_has_content = False
-            content_field_name = None
-
-            if hasattr(model, "model_fields"):
-                for content_field in [
-                    "content",
-                    "contents",
-                    "response",
-                    "result",
-                    "output",
-                ]:
-                    if content_field in model.model_fields:
-                        model_has_content = True
-                        content_field_name = content_field
-                        content_field_exists = True
-                        break
-
-                if model_has_content:
-                    logger.debug(
-                        f"Model {model.__name__} has content field: {content_field_name}"
-                    )
-                else:
-                    logger.debug(
-                        f"Model {model.__name__} has no explicit content field"
-                    )
 
             # Store structured model
             self.structured_models[model_name] = model
@@ -891,15 +979,26 @@ class SchemaComposer:
                 from typing import Optional
 
                 field_type = Optional[model]
+                if engine.structured_output_version == "v1":
 
-                self.add_field(
-                    name=model_name,
-                    field_type=field_type,
-                    default=None,
-                    description=f"Output in {model.__name__} format",
-                    source=f"{source}.structured_output_model",
-                    output_from=[engine_name],
-                )
+                    self.add_field(
+                        name=model_name,
+                        field_type=field_type,
+                        default=None,
+                        description=f"Output in {model.__name__} format",
+                        source=f"{source}.structured_output_model",
+                        output_from=[engine_name],
+                    )
+                else:
+                    self.add_field(
+                        name=model_name,
+                        field_type=field_type,
+                        default=None,
+                        description=f"Output in {model.__name__} format",
+                        # source=f"{source}.structured_output_model",
+                        # output_from=[engine_name],
+                    )
+                    self.engine_io_mappings[engine_name]["outputs"].append("messages")
 
                 logger.debug(f"Added field '{model_name}' for structured output model")
 
@@ -914,7 +1013,7 @@ class SchemaComposer:
             try:
                 input_fields = engine.get_input_fields()
                 logger.debug(
-                    f"Got {len(input_fields)} input fields from get_input_fields()"
+                    f"Engine {engine_name} has {len(input_fields)} input fields from get_input_fields()"
                 )
 
                 for field_name, (field_type, field_info) in input_fields.items():
@@ -974,15 +1073,37 @@ class SchemaComposer:
                     f"Error getting input_fields from {engine_name}: {e}", exc_info=True
                 )
 
-        # 3.2 Extract output fields if needed
+        # 3.2 Extract output fields if needed (handle AugLLM special case)
         if (
             not output_schema
             and hasattr(engine, "get_output_fields")
             and callable(engine.get_output_fields)
         ):
             try:
-                # Skip extracting output fields if content field exists in structured model
-                if not content_field_exists:
+                # For AugLLM without structured output, just mark the output field
+                if is_aug_llm and aug_llm_output_field and not has_structured_output:
+                    # Don't extract new fields, just mark the existing field as output
+                    if (
+                        aug_llm_output_field in self.fields
+                        or aug_llm_output_field in self.base_class_fields
+                    ):
+                        self.output_fields[engine_name].add(aug_llm_output_field)
+                        if (
+                            aug_llm_output_field
+                            not in self.engine_io_mappings[engine_name]["outputs"]
+                        ):
+                            self.engine_io_mappings[engine_name]["outputs"].append(
+                                aug_llm_output_field
+                            )
+                        logger.debug(
+                            f"Marked '{aug_llm_output_field}' as output for AugLLM '{engine_name}'"
+                        )
+                    else:
+                        logger.warning(
+                            f"AugLLM output field '{aug_llm_output_field}' not found in schema"
+                        )
+                else:
+                    # Normal output field extraction for non-AugLLM engines
                     output_fields = engine.get_output_fields()
                     logger.debug(
                         f"Got {len(output_fields)} output fields from get_output_fields()"
@@ -1042,15 +1163,42 @@ class SchemaComposer:
                         logger.debug(
                             f"Added output field '{field_name}' from engine '{engine_name}'"
                         )
-                else:
-                    logger.debug(
-                        f"Skipping get_output_fields for {engine_name} - structured model has content field"
-                    )
+
             except Exception as e:
                 logger.warning(
                     f"Error getting output_fields from {engine_name}: {e}",
                     exc_info=True,
                 )
+
+        # For AugLLM, ensure messages is marked as output if that's the default
+        if is_aug_llm and aug_llm_output_field == "messages":
+            # Ensure messages field exists
+            if (
+                "messages" not in self.fields
+                and "messages" not in self.base_class_fields
+            ):
+                from typing import List
+
+                from langchain_core.messages import BaseMessage
+
+                self.add_field(
+                    name="messages",
+                    field_type=List[BaseMessage],
+                    default_factory=list,
+                    description="Conversation messages",
+                    shared=True,
+                    output_from=[engine_name],
+                )
+                self.has_messages = True
+            else:
+                # Just mark as output
+                self.output_fields[engine_name].add("messages")
+                if "messages" not in self.engine_io_mappings[engine_name]["outputs"]:
+                    self.engine_io_mappings[engine_name]["outputs"].append("messages")
+
+            logger.debug(
+                f"Ensured 'messages' is output field for AugLLM '{engine_name}'"
+            )
 
         # 4. Check for tools
         if hasattr(engine, "tools") and engine.tools:
@@ -1089,7 +1237,8 @@ class SchemaComposer:
             )
 
         logger.debug(
-            f"Engine '{engine_name}' IO mappings: {len(self.input_fields[engine_name])} inputs, {len(self.output_fields[engine_name])} outputs"
+            f"Engine '{engine_name}' IO mappings: {len(self.input_fields[engine_name])} inputs, "
+            f"{len(self.output_fields[engine_name])} outputs"
         )
 
         return self
@@ -1211,21 +1360,21 @@ class SchemaComposer:
                                             f"Tool {tool_name} has output schema - marked for parse_output"
                                         )
 
-                                    # Add tool_name attribute to schema
-                                    output_class.tool_name = tool_name
+                                    # Note: Cannot assign tool_name attribute to BaseModel class
+                                    # This will be handled at runtime in ToolState
                                     logger.debug(
                                         f"Found output schema {name} for {tool_name}"
                                     )
                                     break
 
         # Add tool type fields
-        logger.debug("Adding tool_types_dict field")
-        self.add_field(
-            name="tool_types_dict",
-            field_type=Dict[str, str],
-            default_factory=dict,
-            description="Dictionary mapping tool names to their routing destinations",
-        )
+        # logger.debug("Adding tool_types_dict field")
+        # self.add_field(
+        #    name="tool_types_dict",
+        #    field_type=Dict[str, str],
+        #    default_factory=dict,
+        #    description="Dictionary mapping tool names to their routing destinations",
+        # )
 
         # If we have tools marked for parse_output, add them to the schema
         if tools_with_parse_output:
@@ -1594,65 +1743,73 @@ class SchemaComposer:
         # Create the base schema
         schema = create_model(self.name, __base__=base_class, **field_defs)
 
+        # Only add StateSchema-specific attributes if the base class is a StateSchema
+        is_state_schema_base = issubclass(base_class, StateSchema)
+
         # Copy attributes from base class if they exist
-        if hasattr(base_class, "__shared_fields__"):
+        if is_state_schema_base and hasattr(base_class, "__shared_fields__"):
             # Merge with our shared fields
-            base_shared = set(base_class.__shared_fields__)
+            base_shared = set(getattr(base_class, "__shared_fields__", []))
             schema.__shared_fields__ = list(base_shared | self.shared_fields)
-        else:
+        elif is_state_schema_base:
             schema.__shared_fields__ = list(self.shared_fields)
 
-        logger.debug(f"Shared fields: {schema.__shared_fields__}")
+        if is_state_schema_base:
+            logger.debug(f"Shared fields: {getattr(schema, '__shared_fields__', [])}")
 
         # Handle reducers - merge base class reducers with ours
-        schema.__serializable_reducers__ = {}
-        schema.__reducer_fields__ = {}
+        if is_state_schema_base:
+            schema.__serializable_reducers__ = {}
+            schema.__reducer_fields__ = {}
 
-        # Copy base class reducers first
-        if hasattr(base_class, "__serializable_reducers__"):
-            schema.__serializable_reducers__.update(
-                base_class.__serializable_reducers__
-            )
-        if hasattr(base_class, "__reducer_fields__"):
-            schema.__reducer_fields__.update(base_class.__reducer_fields__)
+            # Copy base class reducers first
+            if hasattr(base_class, "__serializable_reducers__"):
+                schema.__serializable_reducers__.update(
+                    getattr(base_class, "__serializable_reducers__", {})
+                )
+            if hasattr(base_class, "__reducer_fields__"):
+                schema.__reducer_fields__.update(
+                    getattr(base_class, "__reducer_fields__", {})
+                )
 
-        # Add our reducers (potentially overriding base class)
-        for name, field_def in self.fields.items():
-            if field_def.reducer:
-                reducer_name = field_def.get_reducer_name()
-                schema.__serializable_reducers__[name] = reducer_name
-                schema.__reducer_fields__[name] = field_def.reducer
+            # Add our reducers (potentially overriding base class)
+            for name, field_def in self.fields.items():
+                if field_def.reducer:
+                    reducer_name = field_def.get_reducer_name()
+                    schema.__serializable_reducers__[name] = reducer_name
+                    schema.__reducer_fields__[name] = field_def.reducer
 
         # Make sure to deep copy the engine I/O mappings to avoid reference issues
-        schema.__engine_io_mappings__ = {}
-        for engine_name, mapping in self.engine_io_mappings.items():
-            schema.__engine_io_mappings__[engine_name] = mapping.copy()
+        if is_state_schema_base:
+            schema.__engine_io_mappings__ = {}
+            for engine_name, mapping in self.engine_io_mappings.items():
+                schema.__engine_io_mappings__[engine_name] = mapping.copy()
 
-        # Same for input/output fields - convert sets to lists and deep copy
-        schema.__input_fields__ = {}
-        for engine_name, fields in self.input_fields.items():
-            schema.__input_fields__[engine_name] = list(fields)
+            # Same for input/output fields - convert sets to lists and deep copy
+            schema.__input_fields__ = {}
+            for engine_name, fields in self.input_fields.items():
+                schema.__input_fields__[engine_name] = list(fields)
 
-        schema.__output_fields__ = {}
-        for engine_name, fields in self.output_fields.items():
-            schema.__output_fields__[engine_name] = list(fields)
+            schema.__output_fields__ = {}
+            for engine_name, fields in self.output_fields.items():
+                schema.__output_fields__[engine_name] = list(fields)
 
-        # Add structured model fields metadata safely - use field names instead of class references
-        if self.structured_model_fields:
-            schema.__structured_model_fields__ = {
-                k: list(v) for k, v in self.structured_model_fields.items()
-            }
+            # Add structured model fields metadata safely - use field names instead of class references
+            if self.structured_model_fields:
+                schema.__structured_model_fields__ = {
+                    k: list(v) for k, v in self.structured_model_fields.items()
+                }
 
-        # Add structured models safely - use string identifiers instead of class references
-        if self.structured_models:
-            schema.__structured_models__ = {
-                k: f"{v.__module__}.{v.__name__}"
-                for k, v in self.structured_models.items()
-            }
+            # Add structured models safely - use string identifiers instead of class references
+            if self.structured_models:
+                schema.__structured_models__ = {
+                    k: f"{v.__module__}.{v.__name__}"
+                    for k, v in self.structured_models.items()
+                }
 
-        # Store engines in the schema
-        schema.__engines__ = self.engines
-        schema.__engines_by_type__ = dict(self.engines_by_type)
+            # Store engines in the schema
+            schema.__engines__ = self.engines
+            schema.__engines_by_type__ = dict(self.engines_by_type)
 
         # Now handle nested fields like tool_schemas.xyz
         # We need to build nested dictionaries for these
@@ -1684,13 +1841,13 @@ class SchemaComposer:
 
             # Initialize tool_schemas
             if hasattr(self, "tool_schemas") and tool_schemas:
-                for name, schema in tool_schemas.items():
-                    self.tool_schemas[name] = schema
+                for name, schema_cls in tool_schemas.items():
+                    self.tool_schemas[name] = schema_cls
 
             # Initialize output_schemas
             if hasattr(self, "output_schemas") and output_schemas:
-                for name, schema in output_schemas.items():
-                    self.output_schemas[name] = schema
+                for name, schema_cls in output_schemas.items():
+                    self.output_schemas[name] = schema_cls
 
             # Return self for chaining
             return self
@@ -1700,14 +1857,18 @@ class SchemaComposer:
 
         # Print summary
         logger.debug(f"Created schema {schema.__name__} with {len(field_defs)} fields")
-        logger.debug(f"Engine mappings: {len(schema.__engine_io_mappings__)} engines")
-        if schema.__serializable_reducers__:
+        if is_state_schema_base:
             logger.debug(
-                f"Reducers: {len(schema.__serializable_reducers__)} fields have reducers"
+                f"Engine mappings: {len(getattr(schema, '__engine_io_mappings__', {})) } engines"
             )
+            if getattr(schema, "__serializable_reducers__", {}):
+                logger.debug(
+                    f"Reducers: {len(getattr(schema, '__serializable_reducers__', {}))} fields have reducers"
+                )
 
-        # Create rich table for field display
-        self._display_schema_summary(schema)
+        # Create rich table for field display (only for StateSchema bases)
+        if is_state_schema_base:
+            self._display_schema_summary(schema)
 
         return schema
 
@@ -1716,6 +1877,9 @@ class SchemaComposer:
         # Only display if debug logging is enabled
         if logger.level > logging.DEBUG:
             return
+
+        # Check if this is a StateSchema
+        is_state_schema = issubclass(schema, StateSchema)
 
         # Create a table for field display
         table = Table(title=f"{schema.__name__} Schema Fields", show_header=True)
@@ -1733,61 +1897,73 @@ class SchemaComposer:
 
             # Build metadata string
             metadata = []
-            if field_name in schema.__shared_fields__:
-                metadata.append("[green]shared[/green]")
-            if field_name in schema.__serializable_reducers__:
-                metadata.append(
-                    f"[yellow]reducer={schema.__serializable_reducers__[field_name]}[/yellow]"
-                )
+            if is_state_schema:
+                shared_fields = getattr(schema, "__shared_fields__", [])
+                if field_name in shared_fields:
+                    metadata.append("[green]shared[/green]")
 
-            # Check if field is input or output for any engine
-            for engine_name, mapping in schema.__engine_io_mappings__.items():
-                if field_name in mapping["inputs"]:
-                    metadata.append(f"[cyan]input({engine_name})[/cyan]")
-                if field_name in mapping["outputs"]:
-                    metadata.append(f"[blue]output({engine_name})[/blue]")
+                serializable_reducers = getattr(schema, "__serializable_reducers__", {})
+                if field_name in serializable_reducers:
+                    metadata.append(
+                        f"[yellow]reducer={serializable_reducers[field_name]}[/yellow]"
+                    )
+
+                # Check if field is input or output for any engine
+                engine_io_mappings = getattr(schema, "__engine_io_mappings__", {})
+                for engine_name, mapping in engine_io_mappings.items():
+                    if field_name in mapping.get("inputs", []):
+                        metadata.append(f"[cyan]input({engine_name})[/cyan]")
+                    if field_name in mapping.get("outputs", []):
+                        metadata.append(f"[blue]output({engine_name})[/blue]")
 
             table.add_row(field_name, field_type, desc, ", ".join(metadata))
 
         console.print(table)
 
-        if schema.__engine_io_mappings__:
-            console.print("\n[bold green]Engine I/O Mappings:[/bold green]")
-            for engine_name, mapping in schema.__engine_io_mappings__.items():
-                inputs = ", ".join(mapping["inputs"]) if mapping["inputs"] else "-"
-                outputs = ", ".join(mapping["outputs"]) if mapping["outputs"] else "-"
-                console.print(f"  [bold]{engine_name}[/bold]:")
-                console.print(f"    [cyan]Inputs[/cyan]: {inputs}")
-                console.print(f"    [blue]Outputs[/blue]: {outputs}")
+        if is_state_schema:
+            engine_io_mappings = getattr(schema, "__engine_io_mappings__", {})
+            if engine_io_mappings:
+                console.print("\n[bold green]Engine I/O Mappings:[/bold green]")
+                for engine_name, mapping in engine_io_mappings.items():
+                    inputs = ", ".join(mapping["inputs"]) if mapping["inputs"] else "-"
+                    outputs = (
+                        ", ".join(mapping["outputs"]) if mapping["outputs"] else "-"
+                    )
+                    console.print(f"  [bold]{engine_name}[/bold]:")
+                    console.print(f"    [cyan]Inputs[/cyan]: {inputs}")
+                    console.print(f"    [blue]Outputs[/blue]: {outputs}")
 
-        # Display engines if any
-        if hasattr(schema, "__engines__") and schema.__engines__:
-            console.print("\n[bold yellow]Registered Engines:[/bold yellow]")
-            engine_table = Table(show_header=True)
-            engine_table.add_column("Name", style="cyan")
-            engine_table.add_column("Type", style="yellow")
-            engine_table.add_column("Config", style="green")
+            # Display engines if any
+            engines = getattr(schema, "__engines__", {})
+            if engines:
+                console.print("\n[bold yellow]Registered Engines:[/bold yellow]")
+                engine_table = Table(show_header=True)
+                engine_table.add_column("Name", style="cyan")
+                engine_table.add_column("Type", style="yellow")
+                engine_table.add_column("Config", style="green")
 
-            for engine_name, engine in schema.__engines__.items():
-                engine_type = getattr(engine, "engine_type", "unknown")
-                if hasattr(engine_type, "value"):
-                    engine_type = engine_type.value
+                for engine_name, engine in engines.items():
+                    engine_type = getattr(engine, "engine_type", "unknown")
+                    if hasattr(engine_type, "value"):
+                        engine_type = str(engine_type.value)
+                    else:
+                        engine_type = str(engine_type)
 
-                # Get key config info
-                config_info = []
-                if engine_type == "llm" and hasattr(engine, "llm_config"):
-                    if hasattr(engine.llm_config, "model"):
-                        config_info.append(f"model={engine.llm_config.model}")
-                elif hasattr(engine, "model"):
-                    config_info.append(f"model={engine.model}")
+                    # Get key config info
+                    config_info = []
+                    if engine_type == "llm" and hasattr(engine, "llm_config"):
+                        if hasattr(engine.llm_config, "model"):
+                            config_info.append(f"model={engine.llm_config.model}")
+                    elif hasattr(engine, "model"):
+                        config_info.append(f"model={engine.model}")
 
-                engine_table.add_row(
-                    engine_name,
-                    str(engine_type),
-                    ", ".join(config_info) if config_info else "-",
-                )
+                    engine_table.add_row(
+                        engine_name,
+                        engine_type,
+                        ", ".join(config_info) if config_info else "-",
+                    )
 
-            console.print(engine_table)
+                console.print(engine_table)
 
     def to_manager(self) -> "StateSchemaManager":
         """
@@ -1987,8 +2163,6 @@ class SchemaComposer:
                     if engine_type == "llm" and hasattr(engine, "llm_config"):
                         if hasattr(engine.llm_config, "model"):
                             info_parts.append(f"model={engine.llm_config.model}")
-                        if hasattr(engine.llm_config, "temperature"):
-                            info_parts.append(f"temp={engine.llm_config.temperature}")
                     elif hasattr(engine, "model"):
                         info_parts.append(f"model={engine.model}")
 
@@ -1998,3 +2172,660 @@ class SchemaComposer:
                     type_node.add(f"[yellow]{engine_name}[/yellow]{info_str}")
 
         console.print(tree)
+
+    # Add these methods to your SchemaComposer class
+
+    @classmethod
+    def compose_input_schema(
+        cls, components: List[Any], name: str = "InputSchema"
+    ) -> Type[BaseModel]:
+        """
+        Create an input schema from components, focusing on input fields.
+
+        Args:
+            components: List of components to extract fields from
+            name: Name for the schema
+
+        Returns:
+            BaseModel subclass optimized for input
+        """
+        composer = cls(name=name)
+
+        # Process each component
+        for component in components:
+            if component is None:
+                continue
+
+            # Only extract input fields from engines
+            if hasattr(component, "engine_type") and hasattr(
+                component, "get_input_fields"
+            ):
+                try:
+                    # Extract input fields
+                    input_fields = component.get_input_fields()
+                    engine_name = getattr(component, "name", str(component))
+
+                    for field_name, (field_type, field_info) in input_fields.items():
+                        # Skip if already has this field
+                        if field_name in composer.fields:
+                            continue
+
+                        # Skip special fields
+                        if (
+                            field_name == "__runnable_config__"
+                            or field_name == "runnable_config"
+                        ):
+                            continue
+
+                        # Get default and default_factory
+                        if (
+                            hasattr(field_info, "default")
+                            and field_info.default is not ...
+                        ):
+                            default = field_info.default
+                        else:
+                            default = None
+
+                        default_factory = getattr(field_info, "default_factory", None)
+                        description = getattr(field_info, "description", None)
+
+                        # Add the field
+                        composer.add_field(
+                            name=field_name,
+                            field_type=field_type,
+                            default=default,
+                            default_factory=default_factory,
+                            description=description,
+                            source=engine_name,
+                        )
+
+                        # Track as input field
+                        composer.input_fields[engine_name].add(field_name)
+
+                    # Update engine IO mapping
+                    composer.engine_io_mappings[engine_name] = {
+                        "inputs": list(composer.input_fields[engine_name]),
+                        "outputs": [],
+                    }
+                except Exception as e:
+                    logger.warning(
+                        f"Error extracting input fields from {component}: {e}"
+                    )
+
+            # Handle BaseModel components differently - only extract specific input-related fields
+            elif isinstance(component, BaseModel) or (
+                isinstance(component, type) and issubclass(component, BaseModel)
+            ):
+                model = (
+                    component if isinstance(component, type) else component.__class__
+                )
+                source = model.__name__
+
+                # Focus on common input field names
+                input_field_names = [
+                    "input",
+                    "query",
+                    "question",
+                    "messages",
+                    "text",
+                    "content",
+                ]
+
+                # Extract differently based on Pydantic version
+                if hasattr(model, "model_fields"):
+                    # Pydantic v2
+                    for field_name, field_info in model.model_fields.items():
+                        # Only include common input fields and skip special fields
+                        if (
+                            field_name not in input_field_names
+                            or field_name.startswith("__")
+                        ):
+                            continue
+
+                        # Skip runnable_config
+                        if (
+                            field_name == "__runnable_config__"
+                            or field_name == "runnable_config"
+                        ):
+                            continue
+
+                        # Get field type and defaults
+                        field_type = field_info.annotation
+
+                        # Handle default vs default_factory
+                        if field_info.default_factory is not None:
+                            default_factory = field_info.default_factory
+                            default = None
+                        else:
+                            default_factory = None
+                            default = field_info.default
+
+                        # Add the field
+                        composer.add_field(
+                            name=field_name,
+                            field_type=field_type,
+                            default=default,
+                            default_factory=default_factory,
+                            description=field_info.description,
+                            source=source,
+                        )
+                elif hasattr(model, "__fields__"):
+                    # Pydantic v1
+                    for field_name, field_info in model.__fields__.items():
+                        # Only include common input fields and skip special fields
+                        if (
+                            field_name not in input_field_names
+                            or field_name.startswith("__")
+                        ):
+                            continue
+
+                        # Skip runnable_config
+                        if (
+                            field_name == "__runnable_config__"
+                            or field_name == "runnable_config"
+                        ):
+                            continue
+
+                        # Get field type and defaults
+                        field_type = field_info.type_
+
+                        # Handle default vs default_factory
+                        if field_info.default_factory is not None:
+                            default_factory = field_info.default_factory
+                            default = None
+                        else:
+                            default_factory = None
+                            default = field_info.default
+
+                        # Add the field
+                        composer.add_field(
+                            name=field_name,
+                            field_type=field_type,
+                            default=default,
+                            default_factory=default_factory,
+                            description=field_info.description,
+                            source=source,
+                        )
+
+        # Add standard input fields if not already present
+        from typing import List, Optional
+
+        from langchain_core.messages import BaseMessage
+
+        # Always ensure we have a messages field
+        if "messages" not in composer.fields:
+            composer.add_field(
+                name="messages",
+                field_type=List[BaseMessage],
+                default_factory=list,
+                description="Messages for agent conversation",
+            )
+
+        # Create model directly instead of using StateSchema as base
+        field_defs = {}
+        for name, field_def in composer.fields.items():
+            field_type, field_info = field_def.to_field_info()
+            field_defs[name] = (field_type, field_info)
+
+        # Create the input schema
+        return create_model(name, **field_defs)
+
+    @classmethod
+    def compose_output_schema(
+        cls, components: List[Any], name: str = "OutputSchema"
+    ) -> Type[BaseModel]:
+        """
+        Create an output schema from components, focusing on output fields.
+
+        Args:
+            components: List of components to extract fields from
+            name: Name for the schema
+
+        Returns:
+            BaseModel subclass optimized for output
+        """
+        composer = cls(name=name)
+
+        # Process each component
+        for component in components:
+            if component is None:
+                continue
+
+            # Only extract output fields from engines
+            if hasattr(component, "engine_type") and hasattr(
+                component, "get_output_fields"
+            ):
+                try:
+                    # Extract output fields
+                    output_fields = component.get_output_fields()
+                    engine_name = getattr(component, "name", str(component))
+
+                    for field_name, (field_type, field_info) in output_fields.items():
+                        # Skip if already has this field
+                        if field_name in composer.fields:
+                            continue
+
+                        # Skip special fields
+                        if (
+                            field_name == "__runnable_config__"
+                            or field_name == "runnable_config"
+                        ):
+                            continue
+
+                        # Get default and default_factory
+                        if (
+                            hasattr(field_info, "default")
+                            and field_info.default is not ...
+                        ):
+                            default = field_info.default
+                        else:
+                            default = None
+
+                        default_factory = getattr(field_info, "default_factory", None)
+                        description = getattr(field_info, "description", None)
+
+                        # Add the field
+                        composer.add_field(
+                            name=field_name,
+                            field_type=field_type,
+                            default=default,
+                            default_factory=default_factory,
+                            description=description,
+                            source=engine_name,
+                        )
+
+                        # Track as output field
+                        composer.output_fields[engine_name].add(field_name)
+
+                    # Add structured output model if available
+                    if (
+                        hasattr(component, "structured_output_model")
+                        and component.structured_output_model
+                    ):
+                        model = component.structured_output_model
+                        model_name = model.__name__.lower()
+
+                        # Store the model
+                        composer.structured_models[model_name] = model
+
+                        # Add field for the model
+                        from typing import Optional
+
+                        composer.add_field(
+                            name=model_name,
+                            field_type=Optional[model],
+                            default=None,
+                            description=f"Output in {model.__name__} format",
+                            source=engine_name,
+                        )
+
+                        # Track as output field
+                        composer.output_fields[engine_name].add(model_name)
+
+                    # Update engine IO mapping
+                    composer.engine_io_mappings[engine_name] = {
+                        "inputs": [],
+                        "outputs": list(composer.output_fields[engine_name]),
+                    }
+                except Exception as e:
+                    logger.warning(
+                        f"Error extracting output fields from {component}: {e}"
+                    )
+
+        # Add standard output fields if not already present
+        from typing import Any, Dict, List, Optional
+
+        from langchain_core.messages import BaseMessage
+
+        # Always ensure we have a messages field
+        if "messages" not in composer.fields:
+            composer.add_field(
+                name="messages",
+                field_type=List[BaseMessage],
+                default_factory=list,
+                description="Messages from agent conversation",
+            )
+
+        # Add a content field if no structured output model is present
+        has_structured_output = any(composer.structured_models)
+        if not has_structured_output:
+            composer.add_field(
+                name="content",
+                field_type=str,
+                default="",
+                description="Agent output content",
+            )
+
+        # Create model directly instead of using StateSchema as base
+        field_defs = {}
+        for name, field_def in composer.fields.items():
+            field_type, field_info = field_def.to_field_info()
+            field_defs[name] = (field_type, field_info)
+
+        # Create the output schema
+        return create_model(name, **field_defs)
+
+    @classmethod
+    def create_message_state(
+        cls,
+        additional_fields: Optional[Dict[str, Any]] = None,
+        name: str = "MessageState",
+    ) -> Type[StateSchema]:
+        """
+        Create a schema with messages field and additional fields.
+
+        Args:
+            additional_fields: Optional dictionary of additional fields to add
+            name: Name for the schema
+
+        Returns:
+            StateSchema subclass with messages field
+        """
+        # Create composer
+        composer = cls(name=name)
+
+        # Add messages field with reducer
+        from typing import List, Sequence
+
+        try:
+            from langchain_core.messages import BaseMessage
+            from langgraph.graph import add_messages
+
+            # Add messages field with reducer
+            composer.add_field(
+                name="messages",
+                field_type=Sequence[BaseMessage],
+                default_factory=list,
+                description="Messages for conversation",
+                reducer=add_messages,
+            )
+        except ImportError:
+            # Fallback if add_messages is not available
+            from typing import Any
+
+            # Create simple concat lists reducer
+            def concat_lists(a, b):
+                return (a or []) + (b or [])
+
+            composer.add_field(
+                name="messages",
+                field_type=List[Any],
+                default_factory=list,
+                description="Messages for conversation",
+                reducer=concat_lists,
+            )
+
+        # Add additional fields
+        if additional_fields:
+            for name, value in additional_fields.items():
+                if isinstance(value, tuple) and len(value) >= 2:
+                    field_type, default = value[0], value[1]
+
+                    # Check if default is a factory
+                    default_factory = None
+                    if callable(default) and not isinstance(default, type):
+                        default_factory = default
+                        default = None
+
+                    composer.add_field(
+                        name=name,
+                        field_type=field_type,
+                        default=default,
+                        default_factory=default_factory,
+                    )
+                else:
+                    # Infer type from value
+                    composer.add_field(name=name, field_type=type(value), default=value)
+
+        # Build schema
+        return composer.build()
+
+    @classmethod
+    def create_state_from_io_schemas(
+        cls,
+        input_schema: Type[BaseModel],
+        output_schema: Type[BaseModel],
+        name: str = "ComposedStateSchema",
+    ) -> Type[StateSchema]:
+        """
+        Create a state schema that combines input and output schemas.
+
+        Args:
+            input_schema: Input schema class
+            output_schema: Output schema class
+            name: Name for the composed schema
+
+        Returns:
+            StateSchema subclass that inherits from both input and output schemas
+        """
+        from typing import List
+
+        from langchain_core.messages import BaseMessage
+
+        # Create composer
+        composer = cls(name=name)
+
+        # Add a messages field with reducer first
+        try:
+            from langgraph.graph import add_messages
+
+            composer.add_field(
+                name="messages",
+                field_type=List[BaseMessage],
+                default_factory=list,
+                description="Messages for conversation",
+                reducer=add_messages,
+                shared=True,
+            )
+        except ImportError:
+            # Fallback if add_messages is not available
+            def concat_lists(a, b):
+                return (a or []) + (b or [])
+
+            composer.add_field(
+                name="messages",
+                field_type=List[BaseMessage],
+                default_factory=list,
+                description="Messages for conversation",
+                reducer=concat_lists,
+                shared=True,
+            )
+
+        # Add fields from input schema
+        composer.add_fields_from_model(input_schema)
+
+        # Add fields from output schema
+        composer.add_fields_from_model(output_schema)
+
+        # Create field definitions for the model including the base classes
+        field_defs = {}
+        for name, field_def in composer.fields.items():
+            # Skip if field is already in a base class
+            if (
+                hasattr(input_schema, "model_fields")
+                and name in input_schema.model_fields
+            ):
+                continue
+            if (
+                hasattr(output_schema, "model_fields")
+                and name in output_schema.model_fields
+            ):
+                continue
+
+            field_type, field_info = field_def.to_field_info()
+            field_defs[name] = (field_type, field_info)
+
+        # Create the schema that inherits from both input and output schemas
+        schema = create_model(
+            name, __base__=(StateSchema, input_schema, output_schema), **field_defs
+        )
+
+        # Configure StateSchema features
+        schema.__shared_fields__ = list(composer.shared_fields)
+
+        # Add reducers
+        schema.__serializable_reducers__ = {}
+        schema.__reducer_fields__ = {}
+
+        for name, field_def in composer.fields.items():
+            if field_def.reducer:
+                reducer_name = field_def.get_reducer_name()
+                schema.__serializable_reducers__[name] = reducer_name
+                schema.__reducer_fields__[name] = field_def.reducer
+
+        # Deep copy the engine I/O mappings
+        schema.__engine_io_mappings__ = {}
+        for engine_name, mapping in composer.engine_io_mappings.items():
+            schema.__engine_io_mappings__[engine_name] = mapping.copy()
+
+        # Convert sets to lists for input/output fields
+        schema.__input_fields__ = {}
+        for engine_name, fields in composer.input_fields.items():
+            schema.__input_fields__[engine_name] = list(fields)
+
+        schema.__output_fields__ = {}
+        for engine_name, fields in composer.output_fields.items():
+            schema.__output_fields__[engine_name] = list(fields)
+
+        # Set structured model info
+        if composer.structured_model_fields:
+            schema.__structured_model_fields__ = {
+                k: list(v) for k, v in composer.structured_model_fields.items()
+            }
+
+        if composer.structured_models:
+            schema.__structured_models__ = {
+                k: f"{v.__module__}.{v.__name__}"
+                for k, v in composer.structured_models.items()
+            }
+
+        return schema
+
+    def compose_state_from_io(
+        self, input_schema: Type[BaseModel], output_schema: Type[BaseModel]
+    ) -> Type[StateSchema]:
+        """
+        Compose a state schema from input and output schemas using this composer.
+
+        Args:
+            input_schema: Input schema class
+            output_schema: Output schema class
+
+        Returns:
+            StateSchema subclass
+        """
+        # Add fields from input schema if not already present
+        for field_name, field_def in self.fields.items():
+            if (
+                field_name not in input_schema.model_fields
+                and field_name not in output_schema.model_fields
+            ):
+                continue
+
+        # Add remaining fields from input schema
+        self.add_fields_from_model(input_schema)
+
+        # Add remaining fields from output schema
+        self.add_fields_from_model(output_schema)
+
+        # Build the final schema
+        return self.build()
+
+    # src/haive/core/schema/schema_composer.py
+
+    # Add this method to the SchemaComposer class
+
+    def extract_tool_schemas(self, tools: List[Any]) -> None:
+        """
+        Extract input and output schemas from tools.
+
+        Args:
+            tools: List of tools to analyze
+        """
+        for tool in tools:
+            # Get tool name
+            tool_name = getattr(tool, "name", None)
+            if not tool_name and hasattr(tool, "__name__"):
+                tool_name = tool.__name__
+
+            if not tool_name:
+                continue
+
+            # Extract input schema
+            input_schema = None
+
+            # Check for args_schema on instance or class
+            if hasattr(tool, "args_schema"):
+                input_schema = tool.args_schema
+
+            # For class types, try to instantiate
+            elif isinstance(tool, type):
+                if issubclass(tool, BaseTool):
+                    try:
+                        instance = tool()
+                        if hasattr(instance, "args_schema"):
+                            input_schema = instance.args_schema
+                    except Exception:
+                        pass
+
+            # For BaseModel types
+            if isinstance(tool, type) and issubclass(tool, BaseModel):
+                input_schema = tool
+
+            # Add input schema field if found
+            if (
+                input_schema
+                and isinstance(input_schema, type)
+                and issubclass(input_schema, BaseModel)
+            ):
+                # Add to tool_schemas dictionary in state
+                self.add_field(
+                    name=f"tool_schemas.{tool_name}",
+                    field_type=Type[BaseModel],
+                    default=input_schema,
+                    description=f"Schema for {tool_name}",
+                )
+
+                # Try to find matching output schema
+                output_class_name = None
+                input_class_name = input_schema.__name__
+
+                # Common naming patterns for output schemas
+                possible_names = [
+                    f"{tool_name.capitalize()}Result",
+                    f"{tool_name.capitalize()}Output",
+                    f"{input_class_name}Result",
+                    f"{input_class_name}Output",
+                    f"{input_class_name.replace('Input', '')}Result",
+                    f"{input_class_name.replace('Query', '')}Result",
+                ]
+
+                # Look in surrounding module
+                if hasattr(input_schema, "__module__"):
+                    module = sys.modules.get(input_schema.__module__)
+                    if module:
+                        for name in possible_names:
+                            if hasattr(module, name):
+                                output_class = getattr(module, name)
+                                if isinstance(output_class, type) and issubclass(
+                                    output_class, BaseModel
+                                ):
+                                    # Add to output_schemas
+                                    self.add_field(
+                                        name=f"output_schemas.{name}",
+                                        field_type=Type[BaseModel],
+                                        default=output_class,
+                                        description=f"Output schema for {tool_name}",
+                                    )
+
+                                    # Add tool_name attribute to schema
+                                    setattr(output_class, "tool_name", tool_name)
+                                    break
+
+        # Add tool field to track tool instances
+        self.add_field(
+            name="tools",
+            field_type=Dict[str, Any],
+            default_factory=dict,
+            description="Tool instances indexed by name",
+        )

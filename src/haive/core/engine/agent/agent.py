@@ -211,6 +211,36 @@ class Agent(Generic[TConfig], ABC):
 
         self._log_agent_ready()
 
+    def set_traceback_mode(self, mode: str = "minimal"):
+        """Control traceback verbosity.
+
+        Args:
+            mode: 'minimal', 'normal', or 'verbose'
+        """
+        if not RICH_AVAILABLE:
+            return
+
+        if mode == "minimal":
+            install_rich_traceback(show_locals=False, max_frames=3)
+        elif mode == "normal":
+            install_rich_traceback(show_locals=False, max_frames=10)
+        elif mode == "verbose":
+            install_rich_traceback(show_locals=True, max_frames=20)
+        else:
+            install_rich_traceback(show_locals=False, max_frames=5)
+
+    def debug_simple(self, message: str, data: Any = None):
+        """Simple debug output without full traceback."""
+        if self.verbose:
+            if self.rich_logging and RICH_AVAILABLE and hasattr(self, "console"):
+                self.console.print(f"[bold yellow]DEBUG:[/bold yellow] {message}")
+                if data is not None:
+                    self.console.print(f"[dim]{data}[/dim]")
+            else:
+                logger.debug(f"DEBUG: {message}")
+                if data is not None:
+                    logger.debug(f"  Data: {data}")
+
     def _setup_rich_ui(self):
         """Configure rich UI for debugging."""
         if not RICH_AVAILABLE:
@@ -219,8 +249,8 @@ class Agent(Generic[TConfig], ABC):
             )
             return
 
-        # Install rich traceback handler
-        install_rich_traceback(show_locals=True)
+        # Install rich traceback handler with minimal output
+        install_rich_traceback(show_locals=False, max_frames=5)
 
         # Set up console
         self.console = Console(record=True, width=120)

@@ -80,13 +80,13 @@ class RetrieverInput(BaseModel):
 class RetrieverOutput(BaseModel):
     """Schema for retriever output."""
 
-    documents: Optional[Sequence[Document]] = Field(
+    retrieved_documents: Optional[Sequence[Document]] = Field(
         default_factory=list, description="Retrieved documents"
     )
 
     model_config = ConfigDict(extra="allow")
 
-    @field_validator("documents", mode="before")
+    @field_validator("retrieved_documents", mode="before")
     @classmethod
     def validate_documents(cls, v):
         """Validate that the documents are a list."""

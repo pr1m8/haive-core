@@ -866,7 +866,36 @@ class StateSchema(BaseModel, Generic[T]):
         for field_name in input_fields:
             if field_name in cls.model_fields:
                 field_info = cls.model_fields[field_name]
-                fields[field_name] = (field_info.annotation, field_info)
+
+                # Create a copy of the field_info to avoid modifying the original
+                from pydantic import Field
+                from pydantic.fields import FieldInfo
+
+                # Extract the original field configuration
+                field_kwargs = {}
+
+                # Check if field is required or optional
+                is_required = field_info.is_required()
+
+                if not is_required:
+                    # Field is optional - preserve the default value
+                    if field_info.default is not ...:
+                        field_kwargs["default"] = field_info.default
+                    elif field_info.default_factory is not None:
+                        field_kwargs["default_factory"] = field_info.default_factory
+                    else:
+                        # Make it explicitly optional with None default
+                        field_kwargs["default"] = None
+
+                # Preserve other field attributes
+                if field_info.description:
+                    field_kwargs["description"] = field_info.description
+
+                # Create new field info
+                new_field_info = Field(**field_kwargs)
+
+                # Add to fields with original type annotation
+                fields[field_name] = (field_info.annotation, new_field_info)
 
         # Create model
         schema_name = name or f"{cls.__name__}Input"
@@ -908,7 +937,36 @@ class StateSchema(BaseModel, Generic[T]):
         for field_name in output_fields:
             if field_name in cls.model_fields:
                 field_info = cls.model_fields[field_name]
-                fields[field_name] = (field_info.annotation, field_info)
+
+                # Create a copy of the field_info to avoid modifying the original
+                from pydantic import Field
+                from pydantic.fields import FieldInfo
+
+                # Extract the original field configuration
+                field_kwargs = {}
+
+                # Check if field is required or optional
+                is_required = field_info.is_required()
+
+                if not is_required:
+                    # Field is optional - preserve the default value
+                    if field_info.default is not ...:
+                        field_kwargs["default"] = field_info.default
+                    elif field_info.default_factory is not None:
+                        field_kwargs["default_factory"] = field_info.default_factory
+                    else:
+                        # Make it explicitly optional with None default
+                        field_kwargs["default"] = None
+
+                # Preserve other field attributes
+                if field_info.description:
+                    field_kwargs["description"] = field_info.description
+
+                # Create new field info
+                new_field_info = Field(**field_kwargs)
+
+                # Add to fields with original type annotation
+                fields[field_name] = (field_info.annotation, new_field_info)
 
         # Create model
         schema_name = name or f"{cls.__name__}Output"
