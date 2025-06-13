@@ -179,6 +179,18 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
         default_factory=list, description="List of nodes available in the graph"
     )
 
+    # Custom route mappings - can override default behavior
+    custom_route_mappings: Dict[str, str] = Field(
+        default_factory=dict,
+        description="Custom mappings from route names to node names",
+    )
+
+    # Direct node routes - routes that should skip standard mapping
+    direct_node_routes: List[str] = Field(
+        default_factory=list,
+        description="Routes that map directly to node names without transformation",
+    )
+
     def validate_node_exists(self, node_name: str) -> str:
         """
         Validate that a node exists in the graph, return fallback if not.
@@ -189,11 +201,15 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
         Returns:
             Valid node name or fallback to agent_node
         """
+        logger.debug(f"Validating node exists: {node_name}")
+
         if not self.available_nodes:
             # If no available nodes specified, trust the provided name
+            logger.debug("No available_nodes configured, trusting provided name")
             return node_name
 
         if node_name in self.available_nodes:
+            logger.debug(f"Node {node_name} found in available_nodes")
             return node_name
 
         # Fallback logic
@@ -216,12 +232,20 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
 
     def _get_node_for_route(self, route: str) -> str:
         """Map tool route to appropriate node with validation."""
-        # First check if this is a direct agent node route (for transfer tools)
-        if route.startswith("agent_") or route in ["research", "math", "writer"]:
-            # This is a direct agent route - validate it exists and return
+        logger.debug(f"Getting node for route: {route}")
+
+        # First check custom route mappings
+        if route in self.custom_route_mappings:
+            target_node = self.custom_route_mappings[route]
+            logger.debug(f"Found custom route mapping: {route} -> {target_node}")
+            return self.validate_node_exists(target_node)
+
+        # Check if this is a direct node route
+        if route in self.direct_node_routes:
+            logger.debug(f"Route {route} is configured as direct node route")
             return self.validate_node_exists(route)
 
-        # Standard route mapping for other tool types
+        # Standard route mapping for tool types
         route_mapping = {
             "pydantic_model": self.parser_node,
             "langchain_tool": self.tool_node,
@@ -231,16 +255,21 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
         }
 
         target_node = route_mapping.get(route, self.tool_node)
+        logger.debug(f"Standard route mapping: {route} -> {target_node}")
+
         # Validate the node exists
         return self.validate_node_exists(target_node)
 
     def _sync_tools_and_schemas(self) -> None:
         """Sync tool routes from both tools and schemas."""
+        logger.debug("Starting tool and schema synchronization")
+
         all_tools = []
 
         # Add schemas first (they take priority for routing)
         if self.schemas:
             all_tools.extend(self.schemas)
+            logger.debug(f"Added {len(self.schemas)} schemas to all_tools")
 
         # Add tools (may override schema routes if same name)
         if self.tools:
@@ -248,76 +277,52 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
             schema_names = {
                 getattr(s, "__name__", getattr(s, "name", str(s))) for s in self.schemas
             }
+            added_tools = 0
             for tool in self.tools:
                 tool_name = getattr(tool, "__name__", getattr(tool, "name", str(tool)))
                 if tool_name not in schema_names:
                     all_tools.append(tool)
+                    added_tools += 1
+            logger.debug(f"Added {added_tools} additional tools (not in schemas)")
 
-        # Sync routes using the mixin but override for transfer tools
+        # Sync routes using the mixin
         if all_tools:
             self.sync_tool_routes_from_tools(all_tools)
+            logger.info(f"Synced routes for {len(all_tools)} total tools/schemas")
 
-            # Override routing for transfer tools - they should route to agent nodes directly
-            transfer_routes = {}
-            for tool_name, route in self.tool_routes.items():
-                if tool_name.startswith("transfer_to_"):
-                    # Extract the agent name from the transfer tool name
-                    agent_name = tool_name.replace("transfer_to_", "")
-                    agent_node_name = f"agent_{agent_name}"
-
-                    # Check if this agent node exists in our available nodes
-                    if self.available_nodes and agent_node_name in self.available_nodes:
-                        transfer_routes[tool_name] = f"agent_{agent_name}"
-                        console.print(
-                            f"[green]Mapped transfer tool {tool_name} -> {agent_node_name}[/green]"
-                        )
-                    else:
-                        # Fallback to the agent name itself
-                        transfer_routes[tool_name] = agent_name
-                        console.print(
-                            f"[yellow]Mapped transfer tool {tool_name} -> {agent_name} (fallback)[/yellow]"
-                        )
-
-            # Update the routes for transfer tools
-            if transfer_routes:
-                self.tool_routes.update(transfer_routes)
-                console.print(
-                    f"[cyan]Updated {len(transfer_routes)} transfer tool routes[/cyan]"
-                )
-
-            console.print(
-                f"[cyan]ValidationNodeConfig synced routes for {len(all_tools)} tools[/cyan]"
-            )
+            # Log final tool routes
+            logger.debug(f"Final tool_routes after sync: {self.tool_routes}")
         else:
-            console.print(
-                "[yellow]ValidationNodeConfig: No tools or schemas to sync[/yellow]"
-            )
+            logger.warning("No tools or schemas to sync")
 
     def __call__(
         self, state: StateLike, config: Optional[ConfigLike] = None
     ) -> Union[Command, List[Send], str]:
         """
         Validate and route tool calls to appropriate nodes.
+
+        FIXED: Now properly adds ToolMessages to state after validation
         """
-        console.print("\n[bold blue]===== VALIDATION NODE START =====[/bold blue]")
+        logger.info("=" * 80)
+        logger.info("VALIDATION NODE START")
+        logger.info("=" * 80)
 
         # Sync tools and schemas to ensure routes are up to date
         self._sync_tools_and_schemas()
 
         # Debug initial state
-        debug_panel = Panel(
-            f"State type: {type(state)}\n"
-            f"Has messages: {hasattr(state, 'messages')}\n"
-            f"Message count: {len(state.messages) if hasattr(state, 'messages') and state.messages else 0}\n"
-            f"Config: {config}\n"
-            f"Tools available: {len(self.tools)}\n"
-            f"Schemas available: {len(self.schemas)}\n"  # Added schemas count
-            f"Available nodes: {self.available_nodes}\n"
-            f"Current tool_routes: {self.tool_routes}",
-            title="Validation Node Debug Info",
-            border_style="blue",
+        logger.debug(f"State type: {type(state)}")
+        logger.debug(f"Has messages: {hasattr(state, 'messages')}")
+        logger.debug(
+            f"Message count: {len(state.messages) if hasattr(state, 'messages') and state.messages else 0}"
         )
-        console.print(debug_panel)
+        logger.debug(f"Config: {config}")
+        logger.debug(f"Tools available: {len(self.tools)}")
+        logger.debug(f"Schemas available: {len(self.schemas)}")
+        logger.debug(f"Available nodes: {self.available_nodes}")
+        logger.debug(f"Current tool_routes: {self.tool_routes}")
+        logger.debug(f"Custom route mappings: {self.custom_route_mappings}")
+        logger.debug(f"Direct node routes: {self.direct_node_routes}")
 
         # Build a mapping of tool names to actual tool classes/schemas
         tool_name_mapping = {}
@@ -337,69 +342,48 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
             elif hasattr(tool, "__name__"):
                 tool_name_mapping[tool.__name__] = tool
 
-        console.print(
-            f"[cyan]Tool name mapping: {list(tool_name_mapping.keys())}[/cyan]"
-        )
+        logger.debug(f"Tool name mapping: {list(tool_name_mapping.keys())}")
 
         # Get messages from state
         if not hasattr(state, "messages") or not state.messages:
-            console.print("[red]❌ No messages found in state[/red]")
             logger.warning("No messages found in state")
             return "no_tool_calls"
 
         messages = state.messages
-        console.print(f"[green]✓ Found {len(messages)} messages[/green]")
+        logger.info(f"Found {len(messages)} messages in state")
 
         # Check for tool calls in the last message
         last_message = messages[-1]
-        console.print(f"[cyan]Last message type: {type(last_message).__name__}[/cyan]")
+        logger.debug(f"Last message type: {type(last_message).__name__}")
 
         if not isinstance(last_message, AIMessage):
-            console.print("[red]❌ Last message is not an AIMessage[/red]")
             logger.warning("Last message is not an AIMessage")
             return "no_tool_calls"
 
         # Get tool calls - handle both attributes and additional_kwargs
         tool_calls = []
-        console.print("[yellow]Checking for tool calls...[/yellow]")
+        logger.debug("Checking for tool calls...")
 
         if hasattr(last_message, "tool_calls") and last_message.tool_calls:
             tool_calls = last_message.tool_calls
-            console.print(
-                f"[green]✓ Found {len(tool_calls)} tool calls in tool_calls attribute[/green]"
-            )
+            logger.info(f"Found {len(tool_calls)} tool calls in tool_calls attribute")
         elif (
             hasattr(last_message, "additional_kwargs")
             and "tool_calls" in last_message.additional_kwargs
         ):
             tool_calls = last_message.additional_kwargs["tool_calls"]
-            console.print(
-                f"[green]✓ Found {len(tool_calls)} tool calls in additional_kwargs[/green]"
-            )
+            logger.info(f"Found {len(tool_calls)} tool calls in additional_kwargs")
 
         if not tool_calls:
-            console.print("[red]❌ No tool calls found in last message[/red]")
             logger.warning("No tool calls found in last message")
             return "no_tool_calls"
 
-        # Display tool calls info
-        from rich.table import Table
-
-        tool_table = Table(title="Tool Calls Found")
-        tool_table.add_column("Index", style="cyan")
-        tool_table.add_column("Name", style="green")
-        tool_table.add_column("Type", style="yellow")
-        tool_table.add_column("Args Preview", style="dim")
-
+        # Log tool calls info
+        logger.info("Tool calls found:")
         for i, tc in enumerate(tool_calls):
             name = get_tool_name(tc)
             args = get_tool_args(tc)
-            args_preview = str(args)[:50] + "..." if len(str(args)) > 50 else str(args)
-            tool_table.add_row(str(i), name, str(type(tc).__name__), args_preview)
-
-        console.print(tool_table)
-
-        logger.info(f"Processing {len(tool_calls)} tool calls")
+            logger.info(f"  [{i}] {name}: {args}")
 
         # Group tool calls by their destination
         tool_groups = {}
@@ -407,21 +391,22 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
         error_messages = []
         validation_results = []
 
-        console.print("\n[bold yellow]===== PROCESSING TOOL CALLS =====[/bold yellow]")
+        # FIXED: Track all validated tool messages to add to state
+        all_validated_tool_messages = []
+
+        logger.info("-" * 60)
+        logger.info("PROCESSING TOOL CALLS")
+        logger.info("-" * 60)
 
         # Process each tool call individually
         for i, tool_call in enumerate(tool_calls):
             tool_name = get_tool_name(tool_call)
-            console.print(
-                f"\n[bold cyan]--- Processing Tool {i+1}/{len(tool_calls)}: {tool_name} ---[/bold cyan]"
-            )
-
-            logger.info(f"Processing tool call: {tool_name}")
+            logger.info(f"Processing tool {i+1}/{len(tool_calls)}: {tool_name}")
 
             # Create standardized tool call
             standardized_tool_call = tool_call
             if isinstance(tool_call, dict):
-                console.print("[yellow]Converting dict to ToolCall object[/yellow]")
+                logger.debug("Converting dict to ToolCall object")
                 # Convert dict to ToolCall
                 standardized_tool_call = ToolCall(
                     name=tool_name,
@@ -429,24 +414,26 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                     id=get_tool_id(tool_call),
                 )
             else:
-                console.print("[green]Tool call already standardized[/green]")
+                logger.debug("Tool call already standardized")
 
-            # Check if this is a transfer tool that should skip validation
+            # Check if tool should skip validation
             route = self.tool_routes.get(tool_name, "unknown")
-            is_transfer_tool = tool_name.startswith("transfer_to_")
+            skip_validation = False
 
-            if is_transfer_tool:
-                console.print(
-                    f"[magenta]🚀 Transfer tool detected - skipping validation[/magenta]"
+            # Check if this route is configured to skip validation
+            if route in self.direct_node_routes:
+                skip_validation = True
+                logger.info(
+                    f"Tool {tool_name} configured to skip validation (direct node route)"
                 )
 
-                # Transfer tools skip validation and go directly to destination
+            if skip_validation:
+                logger.info(f"Skipping validation for {tool_name}")
+
+                # Direct routing without validation
                 destination = self._get_node_for_route(route)
 
-                console.print(f"[green]✓ Transfer tool {tool_name}[/green]")
-                console.print(
-                    f"[cyan]Route: {route} -> Destination: {destination}[/cyan]"
-                )
+                logger.info(f"Direct routing: {tool_name} -> {destination}")
 
                 if destination not in tool_groups:
                     tool_groups[destination] = []
@@ -454,10 +441,15 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                 # Find the actual tool class
                 tool_class = tool_name_mapping.get(tool_name)
 
-                # Create a mock validated message for transfer tools
-                validated_messages = messages[:-1] + [
-                    AIMessage(content="", tool_calls=[standardized_tool_call])
-                ]
+                # Create a placeholder ToolMessage for consistency
+                tool_message = ToolMessage(
+                    content=f"Direct routing to {destination}",
+                    name=tool_name,
+                    tool_call_id=standardized_tool_call.id,
+                )
+
+                # FIXED: Add to tracked tool messages
+                all_validated_tool_messages.append(tool_message)
 
                 tool_groups[destination].append(
                     {
@@ -465,36 +457,34 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                         "tool_name": tool_name,
                         "tool_class": tool_class,
                         "route": route,
-                        "validated_messages": validated_messages,
-                        "is_transfer": True,  # Mark as transfer tool
+                        "tool_message": tool_message,
+                        "skipped_validation": True,
                     }
                 )
 
                 validation_result = {
                     "tool_name": tool_name,
                     "has_error": False,
-                    "message_count": len(validated_messages),
                     "route": route,
                     "destination": destination,
-                    "group_size": len(tool_groups[destination]),
                     "skipped_validation": True,
                 }
 
                 logger.info(
-                    f"Transfer tool [{tool_name}] routed to [{destination}] (no validation)"
+                    f"Tool [{tool_name}] routed to [{destination}] (no validation)"
                 )
                 validation_results.append(validation_result)
                 continue
 
-            # Regular validation for non-transfer tools
-            console.print(f"[yellow]Running validation for {tool_name}[/yellow]")
+            # Regular validation
+            logger.info(f"Running validation for {tool_name}")
 
             # Create temporary message with just this tool call for validation
             temp_message = AIMessage(content="", tool_calls=[standardized_tool_call])
             temp_messages = messages[:-1] + [temp_message]
 
-            console.print(
-                f"[dim]Created temp message with {len(temp_messages)} total messages[/dim]"
+            logger.debug(
+                f"Created temp message list with {len(temp_messages)} messages"
             )
 
             # Create validation node for this specific tool call
@@ -504,9 +494,7 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                 name=f"validate_{tool_name}",
             )
 
-            console.print(
-                f"[cyan]Running validation with {len(self.schemas)} schemas[/cyan]"
-            )
+            logger.debug(f"Running validation with {len(self.schemas)} schemas")
 
             # Run validation on this specific tool call
             validation_input = {"messages": temp_messages}
@@ -514,17 +502,26 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                 result = validation_node.invoke(validation_input)
                 validated_messages = result.get("messages", [])
 
-                console.print(
-                    f"[green]Validation completed - got {len(validated_messages)} messages back[/green]"
+                logger.info(
+                    f"Validation completed - got {len(validated_messages)} messages back"
                 )
 
+                # Extract the ToolMessage from validation
+                validated_tool_msg = None
+                for msg in validated_messages:
+                    if isinstance(msg, ToolMessage) and msg.name == tool_name:
+                        validated_tool_msg = msg
+                        logger.debug(f"Found validated ToolMessage for {tool_name}")
+                        logger.debug(
+                            f"  Tool message content: {validated_tool_msg.content}"
+                        )
+                        logger.debug(
+                            f"  Tool message ID: {validated_tool_msg.tool_call_id}"
+                        )
+                        break
+
                 # Check if this specific tool call has validation errors
-                has_error = any(
-                    isinstance(msg, ToolMessage)
-                    and has_tool_error(msg)
-                    and msg.name == tool_name
-                    for msg in validated_messages
-                )
+                has_error = validated_tool_msg and has_tool_error(validated_tool_msg)
 
                 validation_result = {
                     "tool_name": tool_name,
@@ -534,39 +531,32 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
 
                 if has_error:
                     # This tool call has a validation error
-                    console.print(
-                        f"[red]❌ Validation error detected for {tool_name}[/red]"
-                    )
-                    logger.error(f"Validation error in {tool_name}")
+                    logger.error(f"Validation error detected for {tool_name}")
                     all_valid = False
-                    error_message = next(
-                        (
-                            msg
-                            for msg in validated_messages
-                            if isinstance(msg, ToolMessage) and msg.name == tool_name
-                        ),
-                        None,
-                    )
-                    if error_message:
-                        error_messages.append(error_message)
-                        console.print(
-                            Panel(
-                                f"Error in tool [{tool_name}]: {error_message.content}",
-                                title="Validation Error",
-                                border_style="red",
-                            )
+                    if validated_tool_msg:
+                        error_messages.append(validated_tool_msg)
+                        # FIXED: Still add error messages to tracked list
+                        all_validated_tool_messages.append(validated_tool_msg)
+                        logger.error(
+                            f"Error in tool [{tool_name}]: {validated_tool_msg.content}"
                         )
-                        validation_result["error_content"] = str(error_message.content)[
-                            :100
-                        ]
+                        validation_result["error_content"] = str(
+                            validated_tool_msg.content
+                        )[:100]
                 else:
-                    # This tool call is valid - group by destination
+                    # This tool call is valid
+                    if validated_tool_msg:
+                        # FIXED: Add to tracked tool messages
+                        all_validated_tool_messages.append(validated_tool_msg)
+                        logger.info(
+                            f"Added validated ToolMessage for {tool_name} to tracking list"
+                        )
+
+                    # Group by destination
                     destination = self._get_node_for_route(route)
 
-                    console.print(f"[green]✓ Tool {tool_name} is valid[/green]")
-                    console.print(
-                        f"[cyan]Route: {route} -> Destination: {destination}[/cyan]"
-                    )
+                    logger.info(f"Tool {tool_name} is valid")
+                    logger.info(f"Route: {route} -> Destination: {destination}")
 
                     if destination not in tool_groups:
                         tool_groups[destination] = []
@@ -574,9 +564,7 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                     # Find the actual tool/schema class
                     tool_class = tool_name_mapping.get(tool_name)
                     if not tool_class:
-                        console.print(
-                            f"[yellow]Warning: Could not find tool class for {tool_name}[/yellow]"
-                        )
+                        logger.warning(f"Could not find tool class for {tool_name}")
                         # As a fallback, check if it's in schemas or tools directly
                         for schema in self.schemas:
                             if (
@@ -590,9 +578,9 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                         {
                             "tool_call": standardized_tool_call,
                             "tool_name": tool_name,
-                            "tool_class": tool_class,  # Store the actual tool class
+                            "tool_class": tool_class,
                             "route": route,
-                            "validated_messages": validated_messages,
+                            "tool_message": validated_tool_msg,
                         }
                     )
 
@@ -612,9 +600,6 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
 
             except Exception as e:
                 # Handle unexpected errors during validation
-                console.print(
-                    f"[red]❌ Exception during validation of {tool_name}: {str(e)}[/red]"
-                )
                 logger.exception(f"Error validating {tool_name}: {str(e)}")
                 all_valid = False
                 validation_results.append(
@@ -626,67 +611,69 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                 )
 
         # Display validation summary
-        console.print("\n[bold magenta]===== VALIDATION SUMMARY =====[/bold magenta]")
-
-        summary_table = Table(title="Validation Results")
-        summary_table.add_column("Tool", style="cyan")
-        summary_table.add_column("Status", style="green")
-        summary_table.add_column("Route", style="yellow")
-        summary_table.add_column("Destination", style="blue")
-        summary_table.add_column("Details", style="dim")
+        logger.info("-" * 60)
+        logger.info("VALIDATION SUMMARY")
+        logger.info("-" * 60)
 
         for result in validation_results:
-            status = "❌ ERROR" if result["has_error"] else "✓ VALID"
-
-            # Special status for transfer tools
+            status = "ERROR" if result["has_error"] else "VALID"
             if result.get("skipped_validation"):
-                status = "🚀 TRANSFER"
+                status = "SKIPPED"
 
             route = result.get("route", "N/A")
             dest = result.get("destination", "N/A")
-
-            # Special details for transfer tools
-            if result.get("skipped_validation"):
-                details = "Routed directly (no validation)"
-            else:
-                details = result.get(
-                    "error_content", f"Group size: {result.get('group_size', 'N/A')}"
-                )
-
-            summary_table.add_row(result["tool_name"], status, route, dest, details)
-
-        console.print(summary_table)
-
-        # Display tool groups
-        if tool_groups:
-            console.print(
-                f"\n[bold green]Tool Groups ({len(tool_groups)} destinations):[/bold green]"
+            details = result.get(
+                "error_content", f"Group size: {result.get('group_size', 'N/A')}"
             )
+
+            logger.info(
+                f"{result['tool_name']}: {status} | Route: {route} | Dest: {dest} | {details}"
+            )
+
+        # Log tool groups
+        if tool_groups:
+            logger.info(f"Tool Groups ({len(tool_groups)} destinations):")
             for dest, tools in tool_groups.items():
                 tool_names = [t["tool_name"] for t in tools]
-                console.print(f"  {dest}: {tool_names}")
+                logger.info(f"  {dest}: {tool_names}")
+
+        # FIXED: Update state with ALL validated ToolMessages before routing
+        logger.info("-" * 60)
+        logger.info("UPDATING STATE WITH TOOL MESSAGES")
+        logger.info("-" * 60)
+
+        updated_messages = messages.copy()
+
+        # Add all validated tool messages to state
+        if all_validated_tool_messages:
+            logger.info(
+                f"Adding {len(all_validated_tool_messages)} ToolMessages to state"
+            )
+            for tool_msg in all_validated_tool_messages:
+                logger.debug(
+                    f"  Adding ToolMessage: {tool_msg.name} (ID: {tool_msg.tool_call_id})"
+                )
+            updated_messages.extend(all_validated_tool_messages)
+        else:
+            logger.warning("No validated tool messages to add to state!")
+
+        # Create base update with the messages including ToolMessages
+        base_update = {self.messages_key: updated_messages}
 
         # Handle routing based on validation results
-        console.print("\n[bold yellow]===== ROUTING DECISION =====[/bold yellow]")
+        logger.info("-" * 60)
+        logger.info("ROUTING DECISION")
+        logger.info("-" * 60)
 
         if not all_valid and not tool_groups:
-            # All tools had validation errors - route back to agent with error info
-            console.print(
-                "[red]🚨 All tools failed validation - returning to agent[/red]"
-            )
+            # All tools had validation errors - route back to agent
             logger.warning("All tool calls failed validation, returning to agent")
 
-            # Add error messages to state and route back to agent
-            error_update = {self.messages_key: error_messages}
-
             validated_agent_node = self.validate_node_exists(self.agent_node)
-            return Command(update=error_update, goto=validated_agent_node)
+            return Command(update=base_update, goto=validated_agent_node)
 
         elif not all_valid and tool_groups:
             # Mixed results - execute valid tools but log warnings
-            console.print(
-                f"[orange1]⚠️ Mixed results - executing {len(tool_groups)} valid groups, some tools failed[/orange1]"
-            )
             logger.warning(
                 f"Mixed validation results - executing {len(tool_groups)} valid groups, some tools failed"
             )
@@ -697,161 +684,94 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
             destination = list(tool_groups.keys())[0]
             tools_for_dest = tool_groups[destination]
 
-            console.print(
-                f"[green]✓ Single destination routing to: {destination}[/green]"
+            logger.info(f"Single destination routing to: {destination}")
+            logger.info(
+                f"Tools for {destination}: {[t['tool_name'] for t in tools_for_dest]}"
             )
-            console.print(
-                f"[cyan]Tools for {destination}: {[t['tool_name'] for t in tools_for_dest]}[/cyan]"
-            )
-
-            logger.info(f"All valid tools route to {destination}")
 
             if destination == self.parser_node:
                 # For parser node, we need to send each tool individually
-                console.print(
-                    "[yellow]Creating individual sends for parser node[/yellow]"
-                )
+                logger.info("Creating individual sends for parser node")
                 sends = []
                 for tool_info in tools_for_dest:
-                    # Find the validated tool message
-                    validated_tool_msg = next(
-                        (
-                            msg
-                            for msg in tool_info["validated_messages"]
-                            if isinstance(msg, ToolMessage)
-                            and msg.name == tool_info["tool_name"]
-                        ),
-                        None,
-                    )
-
-                    console.print(
-                        f"[cyan]  Tool class for {tool_info['tool_name']}: {tool_info.get('tool_class')}[/cyan]"
-                    )
-
-                    if validated_tool_msg and tool_info.get("tool_class"):
+                    if tool_info.get("tool_message") and tool_info.get("tool_class"):
                         send_obj = Send(
                             node=destination,
                             arg={
                                 "tool_name": tool_info["tool_name"],
-                                "tool": tool_info[
-                                    "tool_class"
-                                ],  # Use the stored tool class
+                                "tool": tool_info["tool_class"],
                                 "tool_call": tool_info["tool_call"],
-                                "tool_message": validated_tool_msg,
-                                self.messages_key: tool_info["validated_messages"],
+                                "tool_message": tool_info["tool_message"],
+                                self.messages_key: updated_messages,  # Use updated messages
                             },
                         )
                         sends.append(send_obj)
-                        console.print(
-                            f"[green]  ✓ Created send for {tool_info['tool_name']} with tool class[/green]"
+                        logger.debug(
+                            f"Created send for {tool_info['tool_name']} with tool class"
                         )
                     else:
-                        if not validated_tool_msg:
-                            console.print(
-                                f"[red]  ❌ No validated message found for {tool_info['tool_name']}[/red]"
+                        if not tool_info.get("tool_message"):
+                            logger.error(
+                                f"No validated message found for {tool_info['tool_name']}"
                             )
                         if not tool_info.get("tool_class"):
-                            console.print(
-                                f"[red]  ❌ No tool class found for {tool_info['tool_name']}[/red]"
+                            logger.error(
+                                f"No tool class found for {tool_info['tool_name']}"
                             )
 
-                console.print(
-                    f"[bold green]Returning {len(sends)} Send objects for parser node[/bold green]"
-                )
+                logger.info(f"Returning {len(sends)} Send objects for parser node")
                 return sends
 
             else:
-                # For tool_node or retriever_node, send all tools together
-                console.print(
-                    f"[yellow]Creating combined send for {destination}[/yellow]"
-                )
-                all_tool_calls = [t["tool_call"] for t in tools_for_dest]
-                combined_message = AIMessage(content="", tool_calls=all_tool_calls)
-
-                send_obj = Send(
-                    node=destination,
-                    arg={self.messages_key: messages[:-1] + [combined_message]},
-                )
-
-                console.print(
-                    f"[green]✓ Created combined send with {len(all_tool_calls)} tool calls[/green]"
-                )
-                console.print(
-                    f"[bold green]Returning 1 Send object for {destination}[/bold green]"
-                )
-                return [send_obj]
+                # For other nodes, update state and goto
+                logger.info(f"Returning Command with goto={destination}")
+                return Command(update=base_update, goto=destination)
 
         else:
             # Multiple destinations - need to send to each
-            console.print(
-                f"[yellow]Multi-destination routing to {len(tool_groups)} destinations[/yellow]"
-            )
+            logger.info(f"Multi-destination routing to {len(tool_groups)} destinations")
             sends = []
 
             for destination, tools_for_dest in tool_groups.items():
-                console.print(f"[cyan]Processing destination: {destination}[/cyan]")
+                logger.info(f"Processing destination: {destination}")
 
                 if destination == self.parser_node:
                     # Parser node needs individual sends
-                    console.print(
-                        f"[dim]  Creating individual sends for parser ({len(tools_for_dest)} tools)[/dim]"
+                    logger.debug(
+                        f"Creating individual sends for parser ({len(tools_for_dest)} tools)"
                     )
                     for tool_info in tools_for_dest:
-                        validated_tool_msg = next(
-                            (
-                                msg
-                                for msg in tool_info["validated_messages"]
-                                if isinstance(msg, ToolMessage)
-                                and msg.name == tool_info["tool_name"]
-                            ),
-                            None,
-                        )
-
-                        console.print(
-                            f"[cyan]  Tool class for {tool_info['tool_name']}: {tool_info.get('tool_class')}[/cyan]"
-                        )
-
-                        if validated_tool_msg and tool_info.get("tool_class"):
+                        if tool_info.get("tool_message") and tool_info.get(
+                            "tool_class"
+                        ):
                             send_obj = Send(
                                 node=destination,
                                 arg={
                                     "tool_name": tool_info["tool_name"],
-                                    "tool": tool_info[
-                                        "tool_class"
-                                    ],  # Use the stored tool class
+                                    "tool": tool_info["tool_class"],
                                     "tool_call": tool_info["tool_call"],
-                                    "tool_message": validated_tool_msg,
-                                    self.messages_key: tool_info["validated_messages"],
+                                    "tool_message": tool_info["tool_message"],
+                                    self.messages_key: updated_messages,  # Use updated messages
                                 },
                             )
                             sends.append(send_obj)
-                            console.print(
-                                f"[green]    ✓ Added send for {tool_info['tool_name']} with tool class[/green]"
+                            logger.debug(
+                                f"Added send for {tool_info['tool_name']} with tool class"
                             )
                 else:
-                    # Combine tools for this destination
-                    console.print(
-                        f"[dim]  Creating combined send for {destination} ({len(tools_for_dest)} tools)[/dim]"
-                    )
-                    tool_calls_for_dest = [t["tool_call"] for t in tools_for_dest]
-                    combined_message = AIMessage(
-                        content="", tool_calls=tool_calls_for_dest
-                    )
-
+                    # For other nodes, send with updated messages
                     send_obj = Send(
                         node=destination,
-                        arg={self.messages_key: messages[:-1] + [combined_message]},
+                        arg={self.messages_key: updated_messages},
                     )
                     sends.append(send_obj)
-                    console.print(
-                        f"[green]    ✓ Added combined send with {len(tool_calls_for_dest)} tool calls[/green]"
-                    )
+                    logger.debug(f"Added send to {destination}")
 
-            console.print(
-                f"[bold green]Returning {len(sends)} Send objects for multiple destinations[/bold green]"
+            logger.info(
+                f"Returning {len(sends)} Send objects for multiple destinations"
             )
             return sends
 
         # Fallback case - no tool calls to route
-        console.print("[yellow]No valid tool calls to route - returning END[/yellow]")
+        logger.warning("No valid tool calls to route - returning END")
         return END
