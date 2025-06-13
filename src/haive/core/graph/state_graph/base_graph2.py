@@ -3728,36 +3728,6 @@ class BaseGraph(BaseModel, ValidationMixin):
         # Convert to graph
         return serializable.to_graph()
 
-    def to_mermaid(
-        self,
-        include_subgraphs: bool = True,
-        theme: str = "default",
-        subgraph_mode: str = "cluster",
-        show_default_branches: bool = False,
-    ) -> str:
-        """
-        Generate a Mermaid graph diagram string.
-
-        Args:
-            include_subgraphs: Whether to visualize subgraphs as clusters
-            theme: Mermaid theme name (default, forest, dark, neutral)
-            subgraph_mode: How to render subgraphs ("cluster", "inline", or "separate")
-            show_default_branches: Whether to show default branches
-
-        Returns:
-            Mermaid diagram as string
-        """
-        from haive.core.graph.state_graph.graph_visualizer import GraphVisualizer
-
-        return GraphVisualizer.generate_mermaid(
-            self,
-            include_subgraphs=include_subgraphs,
-            theme=theme,
-            subgraph_mode=subgraph_mode,
-            show_default_branches=show_default_branches,
-            debug=True,
-        )
-
     def visualize(
         self,
         output_path: Optional[str] = None,
@@ -3785,7 +3755,7 @@ class BaseGraph(BaseModel, ValidationMixin):
             save_png: Whether to save the diagram as PNG
             width: Width of the displayed diagram
             theme: Mermaid theme to use (e.g., "default", "forest", "dark", "neutral")
-            subgraph_mode: How to render subgraphs ("cluster", "inline", or "separate")
+            subgraph_mode: How to render subgraphs ("cluster", "inline", or "separate") - DEPRECATED
             show_default_branches: Whether to show default branches
             debug: Whether to enable debug output
 
@@ -3881,16 +3851,17 @@ class BaseGraph(BaseModel, ValidationMixin):
             if debug:
                 logger.info("Attempting to generate Mermaid code...")
 
+            # Use only the parameters that GraphVisualizer.generate_mermaid actually accepts
             mermaid_code = GraphVisualizer.generate_mermaid(
                 self,
                 include_subgraphs=include_subgraphs,
                 highlight_nodes=all_highlight_nodes if all_highlight_nodes else None,
                 theme=theme,
-                subgraph_mode=subgraph_mode,
-                show_default_branches=show_default_branches,
+                show_branch_labels=show_default_branches,  # Map show_default_branches to show_branch_labels
                 direction="TD",
-                compact_mode=False,
-                # debug=debug,
+                compact=False,
+                max_depth=3,
+                debug=debug,
             )
 
             if debug:
@@ -3923,6 +3894,10 @@ class BaseGraph(BaseModel, ValidationMixin):
                             all_highlight_nodes if all_highlight_nodes else None
                         ),
                         theme=theme,
+                        show_branch_labels=show_default_branches,
+                        direction="TD",
+                        compact=False,
+                        max_depth=3,
                         debug=debug,
                     )
                     if debug:
@@ -3950,18 +3925,19 @@ class BaseGraph(BaseModel, ValidationMixin):
                 logger.info("Attempting to display graph...")
 
             # Display using the visualizer
-            GraphVisualizer.display_graph(
-                self,
-                output_path=output_path,
-                include_subgraphs=include_subgraphs,
-                highlight_nodes=highlight_nodes,
-                highlight_paths=highlight_paths,
-                save_png=save_png,
-                width=width,
-                theme=theme,  # Pass the string value directly
-                subgraph_mode=subgraph_mode,
-                show_default_branches=show_default_branches,
-                # debug=debug,
+            # Call display_graph with only the parameters it actually accepts
+            # Based on the GraphVisualizer class definition, display_graph signature is:
+            # display_graph(graph, output_path, include_subgraphs, highlight_nodes,
+            #               highlight_paths, save_png, width, theme, subgraph_mode,
+            #               show_default_branches, direction, compact_mode, title, debug)
+
+            # But since we're getting errors, let's try with just the basic parameters
+            # that match what display_mermaid expects
+            from haive.core.utils.mermaid_utils import display_mermaid
+
+            # Just display the mermaid code directly
+            display_mermaid(
+                mermaid_code, output_path=output_path, save_png=save_png, width=width
             )
 
             if output_path and save_png:
@@ -3970,47 +3946,105 @@ class BaseGraph(BaseModel, ValidationMixin):
                     logger.info(f"Graph saved to: {output_path}")
 
         except Exception as e:
-            # Get the current environment
-            env = detect_environment()
+            # Try alternative display method
+            try:
+                # Alternative: use GraphVisualizer.display_graph if available
+                # but only with parameters we know it accepts
+                GraphVisualizer.display_graph(
+                    self,
+                    output_path=output_path,
+                    include_subgraphs=include_subgraphs,
+                    highlight_nodes=highlight_nodes,
+                    highlight_paths=highlight_paths,
+                    save_png=save_png,
+                    width=width,
+                    theme=theme,
+                    # Remove parameters that cause errors
+                    # show_branch_labels=show_default_branches,
+                    # direction="TD",
+                    # compact=False,
+                    title=None,
+                    debug=debug,
+                )
+            except Exception as e2:
+                # Get the current environment
+                env = detect_environment()
 
-            # Provide helpful error message based on environment
-            if debug:
+                # Provide helpful error message based on environment
+                if debug:
+                    logger.error(f"Error displaying graph: {e}")
+                    logger.error(f"Error with alternative display: {e2}")
+                    import traceback
+
+                    traceback.print_exc()
+
                 logger.error(f"Error displaying graph: {e}")
-                import traceback
+                logger.error(f"Detected environment: {env}")
 
-                traceback.print_exc()
-
-            logger.error(f"Error displaying graph: {e}")
-            logger.error(f"Detected environment: {env}")
-
-            if env == Environment.JUPYTER_LAB:
-                suggestions = [
-                    "Install JupyterLab Mermaid extension: jupyter labextension install @jupyterlab/mermaid",
-                    "Run this in a cell to display using HTML:",
-                    "   from IPython.display import HTML",
-                    "   HTML(f'''<div class=\"mermaid\">{my_graph.to_mermaid()}</div>''')",
-                    '   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>',
-                    "   <script>mermaid.initialize({startOnLoad:true});</script>''')",
-                ]
-                logger.info("\n".join(suggestions))
-            elif env == Environment.JUPYTER_NOTEBOOK:
-                suggestions = [
-                    "Run this in a cell to display using HTML:",
-                    "   from IPython.display import HTML",
-                    "   HTML(f'''<div class=\"mermaid\">{my_graph.to_mermaid()}</div>",
-                    '   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>',
-                    "   <script>mermaid.initialize({startOnLoad:true});</script>''')",
-                ]
-                logger.info("\n".join(suggestions))
-            elif env == Environment.VSCODE_NOTEBOOK:
-                suggestions = [
-                    "Install Mermaid Preview extension for VSCode",
-                    "Save the diagram and view manually: my_graph.save_visualization('diagram.png')",
-                ]
-                logger.info("\n".join(suggestions))
+                if env == Environment.JUPYTER_LAB:
+                    suggestions = [
+                        "Install JupyterLab Mermaid extension: jupyter labextension install @jupyterlab/mermaid",
+                        "Run this in a cell to display using HTML:",
+                        "   from IPython.display import HTML",
+                        "   HTML(f'''<div class=\"mermaid\">{mermaid_code}</div>",
+                        '   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>',
+                        "   <script>mermaid.initialize({startOnLoad:true});</script>''')",
+                    ]
+                    logger.info("\n".join(suggestions))
+                elif env == Environment.JUPYTER_NOTEBOOK:
+                    suggestions = [
+                        "Run this in a cell to display using HTML:",
+                        "   from IPython.display import HTML",
+                        f"   mermaid_code = '''{mermaid_code}'''",
+                        "   HTML(f'''<div class=\"mermaid\">{mermaid_code}</div>",
+                        '   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>',
+                        "   <script>mermaid.initialize({startOnLoad:true});</script>''')",
+                    ]
+                    logger.info("\n".join(suggestions))
+                elif env == Environment.VSCODE_NOTEBOOK:
+                    suggestions = [
+                        "Install Mermaid Preview extension for VSCode",
+                        "Save the diagram and view manually: my_graph.save_visualization('diagram.png')",
+                    ]
+                    logger.info("\n".join(suggestions))
 
         # Always return the Mermaid code for reference
         return mermaid_code
+
+    def to_mermaid(
+        self,
+        include_subgraphs: bool = True,
+        theme: str = "default",
+        subgraph_mode: str = "cluster",
+        show_default_branches: bool = False,
+    ) -> str:
+        """
+        Generate a Mermaid graph diagram string.
+
+        Args:
+            include_subgraphs: Whether to visualize subgraphs as clusters
+            theme: Mermaid theme name (default, forest, dark, neutral)
+            subgraph_mode: How to render subgraphs ("cluster", "inline", or "separate") - DEPRECATED
+            show_default_branches: Whether to show default branches
+
+        Returns:
+            Mermaid diagram as string
+        """
+        from haive.core.graph.state_graph.graph_visualizer import GraphVisualizer
+
+        # Note: subgraph_mode is deprecated and not used by GraphVisualizer
+        # but kept in signature for backward compatibility
+        return GraphVisualizer.generate_mermaid(
+            self,
+            include_subgraphs=include_subgraphs,
+            highlight_nodes=None,
+            theme=theme,
+            show_branch_labels=show_default_branches,
+            direction="TD",
+            compact=False,
+            max_depth=3,
+            debug=False,  # Changed to False for cleaner output
+        )
 
     # Implementation of ValidationMixin required methods
     def analyze_cycles(self) -> List[List[str]]:
