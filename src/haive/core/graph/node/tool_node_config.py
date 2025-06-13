@@ -1,5 +1,6 @@
 # src/haive/core/graph/node/tool.py
 
+import logging
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type, Union
 
 from langchain_core.tools import BaseTool, BaseToolkit, StructuredTool, Tool
@@ -9,6 +10,9 @@ from pydantic import BaseModel, Field
 
 from haive.core.graph.node.base_config import NodeConfig
 from haive.core.graph.node.types import NodeType
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.WARNING)
 
 
 class ToolNodeConfig(NodeConfig):

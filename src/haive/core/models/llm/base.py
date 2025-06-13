@@ -17,7 +17,7 @@ from haive.core.models.llm.provider_types import LLMProvider
 from haive.core.models.metadata_mixin import ModelMetadataMixin
 
 logger = logging.getLogger(__name__)
-
+logger.setLevel(logging.WARNING)
 # Try to import rich for enhanced debugging
 try:
     from rich.console import Console

@@ -23,13 +23,12 @@ from langchain_core.prompts import (
 from langchain_core.runnables import Runnable, RunnableLambda
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel
-from rich import print as rprint
-from rich.console import Console
-from rich.panel import Panel
-from rich.table import Table
 
-logger = logging.getLogger(__name__)
-console = Console()
+from haive.core.logging.rich_logger import LogLevel, get_logger
+
+# Get logger for this module
+logger = get_logger(__name__)
+logger.set_level(LogLevel.WARNING)
 
 
 class AugLLMFactory:
@@ -50,7 +49,7 @@ class AugLLMFactory:
         self._apply_config_params()
 
         # Log initialization state
-        self._debug_log(
+        logger.debug_table(
             "AugLLMFactory Initialization",
             {
                 "config_name": self.aug_config.name,
@@ -71,28 +70,13 @@ class AugLLMFactory:
             },
         )
 
-    def _debug_log(self, title: str, content: Dict[str, Any]):
-        """Pretty print debug information."""
-        table = Table(title=title, title_justify="left", show_header=False)
-        table.add_column("Property", style="cyan")
-        table.add_column("Value", style="yellow")
-
-        for key, value in content.items():
-            if value is not None:
-                formatted_value = str(value)
-                if len(formatted_value) > 100:
-                    formatted_value = formatted_value[:97] + "..."
-                table.add_row(key, formatted_value)
-
-        console.print(Panel(table, expand=False))
-
     def _apply_config_params(self):
         """Apply runtime config parameters to the factory instance."""
         # Skip if no config params provided
         if not self.config_params:
             return
 
-        rprint("[blue]Applying runtime config parameters[/blue]")
+        logger.info("Applying runtime config parameters")
 
         # Track what we're overriding
         override_summary = {}
@@ -121,7 +105,7 @@ class AugLLMFactory:
             if param in self.config_params:
                 setattr(self.aug_config, param, self.config_params[param])
                 override_summary[param] = self.config_params[param]
-                rprint(f"[cyan]Overriding {param}: {self.config_params[param]}[/cyan]")
+                logger.debug(f"Overriding {param}: {self.config_params[param]}")
 
         # Handle partial variables separately (update, don't replace)
         if "partial_variables" in self.config_params:
@@ -129,7 +113,7 @@ class AugLLMFactory:
                 self.config_params["partial_variables"]
             )
             override_summary["partial_variables"] = "updated"
-            rprint("[cyan]Updated partial variables[/cyan]")
+            logger.debug("Updated partial variables")
 
         # Ensure messages is in optional variables when required
         if (
@@ -140,8 +124,8 @@ class AugLLMFactory:
             self.aug_config.optional_variables.append(
                 self.aug_config.messages_placeholder_name
             )
-            rprint(
-                f"[yellow]Added {self.aug_config.messages_placeholder_name} to optional_variables during config param application[/yellow]"
+            logger.warning(
+                f"Added {self.aug_config.messages_placeholder_name} to optional_variables during config param application"
             )
 
         # Handle prompt modification if system_message was updated
@@ -191,22 +175,20 @@ class AugLLMFactory:
 
         # Debug summary
         if override_summary:
-            self._debug_log("Applied Runtime Overrides", override_summary)
+            logger.debug_table("Applied Runtime Overrides", override_summary)
 
     def _update_system_message_in_prompt(self):
         """Update system message in prompt template if changed in config params."""
         if not isinstance(self.aug_config.prompt_template, ChatPromptTemplate):
-            rprint(
-                "[yellow]Not a ChatPromptTemplate - skipping system message update[/yellow]"
-            )
+            logger.warning("Not a ChatPromptTemplate - skipping system message update")
             return
 
         new_system_message = self.aug_config.system_message
         if not new_system_message:
-            rprint("[yellow]No system message to update[/yellow]")
+            logger.warning("No system message to update")
             return
 
-        rprint("[blue]Updating system message in prompt template[/blue]")
+        logger.info("Updating system message in prompt template")
 
         # Build new messages list with updated system message
         new_messages = []
@@ -216,14 +198,14 @@ class AugLLMFactory:
             if hasattr(msg, "role") and msg.role == "system":
                 new_messages.append(SystemMessage(content=new_system_message))
                 system_updated = True
-                rprint("[green]Replaced existing system message[/green]")
+                logger.success("Replaced existing system message")
             else:
                 new_messages.append(msg)
 
         # Add system message at the beginning if none was updated
         if not system_updated:
             new_messages.insert(0, SystemMessage(content=new_system_message))
-            rprint("[green]Added new system message at beginning[/green]")
+            logger.success("Added new system message at beginning")
 
         # Create new template with updated messages
         partial_vars = getattr(
@@ -240,7 +222,7 @@ class AugLLMFactory:
         Returns:
             A complete runnable chain
         """
-        rprint("[bold blue]Creating runnable chain[/bold blue]")
+        logger.info("Creating runnable chain")
 
         # Final check to ensure messages are optional if required
         if (
@@ -251,8 +233,8 @@ class AugLLMFactory:
             self.aug_config.optional_variables.append(
                 self.aug_config.messages_placeholder_name
             )
-            rprint(
-                f"[yellow]Added {self.aug_config.messages_placeholder_name} to optional_variables during runnable creation[/yellow]"
+            logger.warning(
+                f"Added {self.aug_config.messages_placeholder_name} to optional_variables during runnable creation"
             )
 
         # Force chat templates to have optional messages placeholder if required
@@ -261,13 +243,13 @@ class AugLLMFactory:
             and self.aug_config.force_messages_optional
         ):
             self.aug_config._handle_chat_template_messages_placeholder()
-            rprint("[green]Enforced optional messages in chat template[/green]")
+            logger.success("Enforced optional messages in chat template")
 
         # Handle FewShotChatMessagePromptTemplate if present
         elif isinstance(
             self.aug_config.prompt_template, FewShotChatMessagePromptTemplate
         ):
-            rprint("[green]Processing FewShotChatMessagePromptTemplate[/green]")
+            logger.info("Processing FewShotChatMessagePromptTemplate")
             # Special handling is done in config
 
         # Initialize LLM with any runtime parameters
@@ -278,7 +260,7 @@ class AugLLMFactory:
             llm_params["max_tokens"] = self.aug_config.max_tokens
 
         # Debug LLM initialization
-        self._debug_log(
+        logger.debug_table(
             "LLM Initialization",
             {
                 "model": self.aug_config.llm_config.model,
@@ -294,10 +276,10 @@ class AugLLMFactory:
         # Make sure we have a valid LLM
         if runnable_llm is None:
             error_msg = "Failed to instantiate LLM from llm_config"
-            rprint(f"[red]{error_msg}[/red]")
+            logger.failure(error_msg)
             raise ValueError(error_msg)
 
-        rprint("[green]Successfully instantiated base LLM[/green]")
+        logger.success("Successfully instantiated base LLM")
 
         # Add tools if specified
         if self.aug_config.tools:
@@ -313,16 +295,16 @@ class AugLLMFactory:
         if runnable_chain is None:
             # If we have no prompt template, just use the LLM as the chain
             runnable_chain = runnable_llm
-            rprint("[yellow]No prompt template - using raw LLM as chain[/yellow]")
+            logger.warning("No prompt template - using raw LLM as chain")
 
         # Apply runtime config if any
         if self.aug_config.runtime_options:
             runnable_chain = runnable_chain.with_config(
                 **self.aug_config.runtime_options
             )
-            rprint("[cyan]Applied runtime options to chain[/cyan]")
+            logger.info("Applied runtime options to chain")
 
-        rprint("[bold green]Successfully created runnable chain[/bold green]")
+        logger.success("Successfully created runnable chain")
         return runnable_chain
 
     def _initialize_llm_with_tools(self, llm: Runnable) -> Runnable:
@@ -338,10 +320,10 @@ class AugLLMFactory:
 
         # Check if list is empty
         if not tools:
-            rprint("[yellow]No tools to bind - returning LLM unchanged[/yellow]")
+            logger.warning("No tools to bind - returning LLM unchanged")
             return llm
 
-        rprint(f"[blue]Binding {len(tools)} tools to LLM[/blue]")
+        logger.progress(f"Binding {len(tools)} tools to LLM")
 
         # Resolve tool instances if needed
         tool_instances = []
@@ -349,99 +331,106 @@ class AugLLMFactory:
         failed_tools = []
 
         for i, tool in enumerate(tools):
-            try:
-                # Case 1: Tool is a BaseModel type for function/schema definition
-                if isinstance(tool, type) and issubclass(tool, BaseModel):
-                    basemodel_tools.append(tool)
-                    tool_instances.append(
-                        tool
-                    )  # v2 structured output needs it as a tool
-                    rprint(f"[green]Adding BaseModel {tool.__name__} as tool[/green]")
+            with logger.track_time(f"Processing tool {i+1}"):
+                try:
+                    # Case 1: Tool is a BaseModel type for function/schema definition
+                    if isinstance(tool, type) and issubclass(tool, BaseModel):
+                        basemodel_tools.append(tool)
+                        tool_instances.append(
+                            tool
+                        )  # v2 structured output needs it as a tool
+                        logger.success(f"Adding BaseModel {tool.__name__} as tool")
 
-                    # If using v2 structured output, ensure proper field names
-                    if (
-                        self.aug_config.structured_output_version == "v2"
-                        and tool == self.aug_config.structured_output_model
-                    ):
-                        if self.aug_config.output_field_name and hasattr(
-                            tool, "__name__"
+                        # If using v2 structured output, ensure proper field names
+                        if (
+                            self.aug_config.structured_output_version == "v2"
+                            and tool == self.aug_config.structured_output_model
                         ):
-                            rprint(
-                                f"[cyan]Using custom output field: {self.aug_config.output_field_name}[/cyan]"
+                            if self.aug_config.output_field_name and hasattr(
+                                tool, "__name__"
+                            ):
+                                logger.info(
+                                    f"Using custom output field: {self.aug_config.output_field_name}"
+                                )
+
+                    # Case 2: Tool is a BaseTool instance or needs instantiation
+                    elif isinstance(tool, BaseTool) or (
+                        isinstance(tool, type) and issubclass(tool, BaseTool)
+                    ):
+                        # If it's a class, instantiate it
+                        if isinstance(tool, type):
+                            # Get tool kwargs from config or use empty dict
+                            kwargs = self.aug_config.tool_kwargs.get(
+                                getattr(tool, "__name__", "Tool"), {}
+                            )
+                            try:
+                                tool_instances.append(tool(**kwargs))
+                                logger.success(
+                                    f"Instantiated tool {i+1}: {getattr(tool, '__name__', 'Unknown')}"
+                                )
+                            except Exception as e:
+                                logger.failure(
+                                    f"Failed to instantiate tool {getattr(tool, '__name__', 'Unknown')}: {e}"
+                                )
+                                failed_tools.append((tool, str(e)))
+                        else:
+                            # Already an instance
+                            tool_instances.append(tool)
+                            tool_class_name = tool.__class__.__name__
+                            logger.success(
+                                f"Using tool instance {i+1}: {tool_class_name}"
                             )
 
-                # Case 2: Tool is a BaseTool instance or needs instantiation
-                elif isinstance(tool, BaseTool) or (
-                    isinstance(tool, type) and issubclass(tool, BaseTool)
-                ):
-                    # If it's a class, instantiate it
-                    if isinstance(tool, type):
-                        # Get tool kwargs from config or use empty dict
-                        kwargs = self.aug_config.tool_kwargs.get(
-                            getattr(tool, "__name__", "Tool"), {}
-                        )
+                    # Case 3: Tool is a string (reference to a tool)
+                    elif isinstance(tool, str):
+                        # Look up tool by name
                         try:
-                            tool_instances.append(tool(**kwargs))
-                            rprint(
-                                f"[green]Instantiated tool {i+1}: {getattr(tool, '__name__', 'Unknown')}[/green]"
+                            # The import would be from haive.core.engine.tool import ToolRegistry in real code
+                            # This is a placeholder - in actual implementation this would be proper registry lookup
+                            tool_instance = {
+                                "name": tool,
+                                "description": f"Mock tool for {tool}",
+                            }
+                            tool_instances.append(tool_instance)
+                            logger.success(f"Resolved tool {i+1}: {tool}")
+                        except (ImportError, AttributeError) as e:
+                            # Fallback - just skip this tool
+                            logger.failure(
+                                f"Failed to resolve tool {i+1}: {tool} - {e}"
                             )
-                        except Exception as e:
-                            rprint(
-                                f"[red]Failed to instantiate tool {getattr(tool, '__name__', 'Unknown')}: {e}[/red]"
+                            failed_tools.append(
+                                (tool, f"Tool resolution failed: {str(e)}")
                             )
-                            failed_tools.append((tool, str(e)))
-                    else:
-                        # Already an instance
+                            continue
+
+                    # Case 4: Callable function
+                    elif callable(tool) and not isinstance(tool, type):
+                        # Add function name as tool name
+                        func_name = getattr(tool, "__name__", "unnamed_function")
                         tool_instances.append(tool)
-                        tool_class_name = tool.__class__.__name__
-                        rprint(
-                            f"[green]Using tool instance {i+1}: {tool_class_name}[/green]"
+                        logger.success(f"Added callable tool {i+1}: {func_name}")
+
+                    # Case 5: Other tool types (log warning)
+                    else:
+                        tool_type = type(tool).__name__
+                        logger.warning(f"Unrecognized tool type: {tool_type}")
+                        failed_tools.append(
+                            (tool, f"Unrecognized tool type: {tool_type}")
                         )
-
-                # Case 3: Tool is a string (reference to a tool)
-                elif isinstance(tool, str):
-                    # Look up tool by name
-                    try:
-                        # The import would be from haive.core.engine.tool import ToolRegistry in real code
-                        # This is a placeholder - in actual implementation this would be proper registry lookup
-                        tool_instance = {
-                            "name": tool,
-                            "description": f"Mock tool for {tool}",
-                        }
-                        tool_instances.append(tool_instance)
-                        rprint(f"[green]Resolved tool {i+1}: {tool}[/green]")
-                    except (ImportError, AttributeError) as e:
-                        # Fallback - just skip this tool
-                        rprint(f"[red]Failed to resolve tool {i+1}: {tool} - {e}[/red]")
-                        failed_tools.append((tool, f"Tool resolution failed: {str(e)}"))
-                        continue
-
-                # Case 4: Callable function
-                elif callable(tool) and not isinstance(tool, type):
-                    # Add function name as tool name
-                    func_name = getattr(tool, "__name__", "unnamed_function")
-                    tool_instances.append(tool)
-                    rprint(f"[green]Added callable tool {i+1}: {func_name}[/green]")
-
-                # Case 5: Other tool types (log warning)
-                else:
-                    tool_type = type(tool).__name__
-                    rprint(f"[yellow]Unrecognized tool type: {tool_type}[/yellow]")
-                    failed_tools.append((tool, f"Unrecognized tool type: {tool_type}"))
-            except Exception as e:
-                rprint(f"[red]Unexpected error processing tool {i+1}: {e}[/red]")
-                failed_tools.append((tool, f"Unexpected error: {str(e)}"))
+                except Exception as e:
+                    logger.error(f"Unexpected error processing tool {i+1}: {e}")
+                    failed_tools.append((tool, f"Unexpected error: {str(e)}"))
 
         # Log any failed tools
         if failed_tools:
-            rprint(f"[yellow]Failed to process {len(failed_tools)} tools[/yellow]")
+            logger.warning(f"Failed to process {len(failed_tools)} tools")
             for failed_tool, error in failed_tools:
                 tool_name = getattr(failed_tool, "__name__", str(failed_tool))
-                rprint(f"[yellow]  - {tool_name}: {error}[/yellow]")
+                logger.debug(f"  - {tool_name}: {error}")
 
         # Check if we found any valid tools
         if not tool_instances:
-            rprint("[yellow]No valid tools found - returning LLM unchanged[/yellow]")
+            logger.warning("No valid tools found - returning LLM unchanged")
             return llm
 
         # Bind tools to the LLM
@@ -456,31 +445,27 @@ class AugLLMFactory:
                 "type": "function",
                 "function": {"name": self.aug_config.force_tool_choice},
             }
-            rprint(
-                f"[cyan]Forcing specific tool: {self.aug_config.force_tool_choice}[/cyan]"
-            )
+            logger.info(f"Forcing specific tool: {self.aug_config.force_tool_choice}")
         elif self.aug_config.tool_choice_mode == "required":
             # Force using any tool
             bind_kwargs["tool_choice"] = "required"
-            rprint("[cyan]Forcing tool use (any tool)[/cyan]")
+            logger.info("Forcing tool use (any tool)")
         elif self.aug_config.tool_choice_mode == "auto":
             # Auto tool choice
             bind_kwargs["tool_choice"] = "auto"
-            rprint("[cyan]Setting tool_choice to 'auto'[/cyan]")
+            logger.info("Setting tool_choice to 'auto'")
         elif self.aug_config.tool_choice_mode == "none":
             # Disable tool usage
             bind_kwargs["tool_choice"] = "none"
-            rprint("[cyan]Setting tool_choice to 'none' (disabled)[/cyan]")
+            logger.info("Setting tool_choice to 'none' (disabled)")
 
         # Use bind_tools method if available
         if hasattr(llm, "bind_tools"):
-            rprint(
-                f"[cyan]Using bind_tools method with {len(tool_instances)} tools[/cyan]"
-            )
+            logger.info(f"Using bind_tools method with {len(tool_instances)} tools")
             try:
                 return llm.bind_tools(tool_instances, **bind_kwargs)
             except Exception as e:
-                rprint(f"[red]Error binding tools: {e}[/red]")
+                logger.error(f"Error binding tools: {e}")
                 # Try with fewer kwargs in case of compatibility issues
                 try:
                     # Simplified binding with just tool_choice
@@ -491,41 +476,41 @@ class AugLLMFactory:
                     else:
                         return llm.bind_tools(tool_instances)
                 except Exception as e2:
-                    rprint(f"[red]Failed simplified tool binding: {e2}[/red]")
+                    logger.failure(f"Failed simplified tool binding: {e2}")
                     return llm
 
         # Fallback - try with_tools for OpenAI compatibility
-        rprint("[yellow]Falling back to with_tools method[/yellow]")
+        logger.warning("Falling back to with_tools method")
         if hasattr(llm, "with_tools"):
             try:
                 return llm.with_tools(tool_instances, **bind_kwargs)
             except Exception as e:
-                rprint(f"[red]Error with fallback tool binding: {e}[/red]")
+                logger.error(f"Error with fallback tool binding: {e}")
                 # Very simplified binding attempt
                 try:
                     return llm.with_tools(tool_instances)
                 except Exception as e3:
-                    rprint(f"[red]Cannot bind tools with minimal args: {e3}[/red]")
+                    logger.failure(f"Cannot bind tools with minimal args: {e3}")
 
         # If no tool binding method available, return original LLM with warning
-        rprint("[red]No tool binding method available on LLM[/red]")
+        logger.error("No tool binding method available on LLM")
         return llm
 
     def _configure_structured_output(self, llm: Runnable) -> Runnable:
         """Configure structured output parsing based on configuration."""
-        rprint("[blue]Configuring structured output[/blue]")
+        logger.info("Configuring structured output")
 
         # If parse_raw_output is True, use StrOutputParser regardless of other settings
         if self.aug_config.parse_raw_output:
-            rprint("[cyan]Using StrOutputParser for raw output[/cyan]")
+            logger.info("Using StrOutputParser for raw output")
             return llm | StrOutputParser()
 
         # ✅ FIX: v2 structured output = NO PARSER, just return LLM with bound tools
         if self.aug_config.structured_output_version == "v2":
-            rprint(
-                "[cyan]V2 structured output: tool binding + format instructions (NO PARSER)[/cyan]"
+            logger.info(
+                "V2 structured output: tool binding + format instructions (NO PARSER)"
             )
-            rprint("[green]Returning raw LLM to get AIMessage with tool_calls[/green]")
+            logger.success("Returning raw LLM to get AIMessage with tool_calls")
             # Tools already bound in _initialize_llm_with_tools()
             # Format instructions already added in config
             # Return raw LLM to get AIMessage with tool_calls
@@ -536,7 +521,7 @@ class AugLLMFactory:
             self.aug_config.structured_output_model
             and self.aug_config.structured_output_version == "v1"
         ):
-            rprint("[cyan]Using v1 structured output with parsing[/cyan]")
+            logger.info("Using v1 structured output with parsing")
 
             # Use with_structured_output for best support
             try:
@@ -545,23 +530,21 @@ class AugLLMFactory:
                         self.aug_config.structured_output_model,
                         method="function_calling",  # Explicitly use function_calling
                     )
-                    rprint(
-                        "[green]Successfully configured v1 structured output[/green]"
-                    )
+                    logger.success("Successfully configured v1 structured output")
                     return configured_llm
                 else:
-                    rprint(
-                        "[yellow]with_structured_output not available - falling back to parser[/yellow]"
+                    logger.warning(
+                        "with_structured_output not available - falling back to parser"
                     )
             except Exception as e:
-                rprint(f"[red]Failed to configure structured output: {e}[/red]")
+                logger.error(f"Failed to configure structured output: {e}")
 
             # Fallback to PydanticOutputParser for v1
             if self.aug_config.output_parser:
-                rprint("[yellow]Using existing output parser for v1[/yellow]")
+                logger.warning("Using existing output parser for v1")
                 return llm | self.aug_config.output_parser
             else:
-                rprint("[yellow]Creating PydanticOutputParser for v1[/yellow]")
+                logger.warning("Creating PydanticOutputParser for v1")
                 parser = PydanticOutputParser(
                     pydantic_object=self.aug_config.structured_output_model
                 )
@@ -573,8 +556,8 @@ class AugLLMFactory:
             and self.aug_config.parser_type == "pydantic_tools"
             and not self.aug_config.structured_output_model
         ):
-            rprint(
-                "[cyan]Using PydanticToolsParser for explicit pydantic tools (not structured output)[/cyan]"
+            logger.info(
+                "Using PydanticToolsParser for explicit pydantic tools (not structured output)"
             )
             if isinstance(self.aug_config.output_parser, PydanticToolsParser):
                 return llm | self.aug_config.output_parser
@@ -584,13 +567,13 @@ class AugLLMFactory:
 
         # ✅ Handle custom output parser
         elif self.aug_config.output_parser:
-            rprint(
-                f"[cyan]Using custom output parser: {type(self.aug_config.output_parser).__name__}[/cyan]"
+            logger.info(
+                f"Using custom output parser: {type(self.aug_config.output_parser).__name__}"
             )
             return llm | self.aug_config.output_parser
 
         # ✅ Default - no parsing, return raw LLM
-        rprint("[yellow]No output parsing configuration - returning raw LLM[/yellow]")
+        logger.warning("No output parsing configuration - returning raw LLM")
         return llm
 
     def _build_chain(self, llm: Runnable) -> Runnable:
@@ -602,16 +585,16 @@ class AugLLMFactory:
         Returns:
             Complete runnable chain
         """
-        rprint("[blue]Building complete chain[/blue]")
+        logger.info("Building complete chain")
 
         # If no prompt template, just return the LLM
         if not self.aug_config.prompt_template:
-            rprint("[yellow]No prompt template - returning LLM as chain[/yellow]")
+            logger.warning("No prompt template - returning LLM as chain")
             return llm
 
         # Ensure we have a proper prompt template
         if not self.aug_config.prompt_template and self.aug_config.system_message:
-            rprint("[cyan]Creating prompt template from system message[/cyan]")
+            logger.info("Creating prompt template from system message")
             messages = [SystemMessage(content=self.aug_config.system_message)]
 
             # Add messages placeholder if needed
@@ -624,41 +607,37 @@ class AugLLMFactory:
                         optional=is_optional,
                     )
                 )
-                rprint(
-                    f"[green]Added messages placeholder (optional={is_optional})[/green]"
-                )
+                logger.success(f"Added messages placeholder (optional={is_optional})")
 
             self.aug_config.prompt_template = ChatPromptTemplate.from_messages(messages)
 
         # If still no prompt template, just return the LLM
         if not self.aug_config.prompt_template:
-            rprint(
-                "[yellow]Still no prompt template - returning LLM unchanged[/yellow]"
-            )
+            logger.warning("Still no prompt template - returning LLM unchanged")
             return llm
 
         # Create full chain with prompt
         chain = self.aug_config.prompt_template | llm
-        rprint("[green]Created base chain with prompt template[/green]")
+        logger.success("Created base chain with prompt template")
 
         # Add preprocessing if specified
         if self.aug_config.preprocess:
             chain = RunnableLambda(self.aug_config.preprocess) | chain
-            rprint("[cyan]Added preprocessing to chain[/cyan]")
+            logger.info("Added preprocessing to chain")
 
         # Add postprocessing if specified
         if self.aug_config.postprocess:
             chain = chain | RunnableLambda(self.aug_config.postprocess)
-            rprint("[cyan]Added postprocessing to chain[/cyan]")
+            logger.info("Added postprocessing to chain")
 
         # Add custom runnables if specified
         if self.aug_config.custom_runnables:
             for i, runnable in enumerate(self.aug_config.custom_runnables):
                 chain = chain | runnable
-                rprint(f"[cyan]Added custom runnable {i+1}[/cyan]")
+                logger.info(f"Added custom runnable {i+1}")
 
         # Debug final chain composition
-        self._debug_log(
+        logger.debug_table(
             "Chain Composition",
             {
                 "prompt_template_type": type(self.aug_config.prompt_template).__name__,
@@ -739,7 +718,7 @@ The output should be valid JSON that conforms to the {model.__name__} schema.
             )
             return tool
         except Exception as e:
-            rprint(f"[yellow]Failed to create structured tool from model: {e}[/yellow]")
+            logger.warning(f"Failed to create structured tool from model: {e}")
 
             # Fallback to simple BaseTool
             class PydanticModelTool(BaseTool):

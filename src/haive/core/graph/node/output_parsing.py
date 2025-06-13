@@ -16,6 +16,7 @@ from haive.core.graph.node.parser_node_config import ParserNodeConfig
 
 logger = logging.getLogger(__name__)
 console = Console()
+logger.setLevel(logging.WARNING)
 
 
 class OutputParserNodeConfig(ParserNodeConfig):

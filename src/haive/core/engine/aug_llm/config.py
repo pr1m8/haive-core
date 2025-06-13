@@ -60,10 +60,10 @@ from haive.core.models.llm.base import AzureLLMConfig, LLMConfig
 
 logger = logging.getLogger(__name__)
 console = Console()
-logger.setLevel(logging.CRITICAL)
+logger.setLevel(logging.WARNING)
 
 # Create a module-level flag to control debug output
-DEBUG_OUTPUT = os.getenv("HAIVE_DEBUG_CONFIG", "").lower() in ("true", "1", "yes")
+DEBUG_OUTPUT = os.getenv("HAIVE_DEBUG_CONFIG", "FALSE").lower() in ("true", "1", "yes")
 
 
 def debug_print(*args, **kwargs):
@@ -73,7 +73,7 @@ def debug_print(*args, **kwargs):
         try:
             from rich import print as rprint
 
-            debug_print(*args, **kwargs)
+            rprint(*args, **kwargs)  # Changed from debug_print to rprint
         except ImportError:
             print(*args, **kwargs)
     else:

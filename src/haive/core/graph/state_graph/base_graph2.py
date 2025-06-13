@@ -40,6 +40,9 @@ from haive.core.graph.state_graph.graph_path import GraphPath
 # Import mixins
 from haive.core.graph.state_graph.validation_mixin import ValidationMixin
 
+# Import RichLogger
+from haive.core.logging.rich_logger import LogLevel, RichLogger, get_logger
+
 # Define a type for branch result types
 BranchResultType = Union[
     str,  # Node name
@@ -50,8 +53,10 @@ BranchResultType = Union[
     Command,  # Command object
     None,  # Default case
 ]
-# Setup logging
-logger = logging.getLogger(__name__)
+
+# Setup rich logging
+logger = get_logger(__name__)
+logger.set_level(LogLevel.WARNING)
 import inspect
 
 
@@ -1790,7 +1795,9 @@ class BaseGraph(BaseModel, ValidationMixin):
             target_found = current == end_node
             if target_found:
                 # Create a new path with the end node and mark as reaching end
-                new_path = path_obj.append(current, is_conditional=False, is_end=True)
+                new_path = new_path = path_obj.append(
+                    current, is_conditional=False, is_end=True
+                )
                 paths.append(new_path)
                 stats["paths_found"] += 1
 
@@ -2295,11 +2302,6 @@ class BaseGraph(BaseModel, ValidationMixin):
         Returns:
             Self for method chaining
         """
-        import logging
-
-        logger = logging.getLogger(__name__)
-        from langgraph.graph import END, START
-
         # Validate source node
         if source_node != START and source_node not in self.nodes:
             raise ValueError(f"Source node '{source_node}' not found in graph")
@@ -2427,16 +2429,16 @@ class BaseGraph(BaseModel, ValidationMixin):
 
         # Log the key information for debugging
         if callable(condition) and hasattr(condition, "__name__"):
-            logging.info(f"Using branch function: {condition.__name__}")
+            logger.info(f"Using branch function: {condition.__name__}")
         elif hasattr(condition, "__class__"):
-            logging.info(f"Using condition of type: {condition.__class__.__name__}")
+            logger.info(f"Using condition of type: {condition.__class__.__name__}")
 
         # Special handling for ValidationNodeConfig
         if (
             hasattr(condition, "__class__")
             and "ValidationNodeConfig" in condition.__class__.__name__
         ):
-            logging.info("Detected ValidationNodeConfig - ensuring correct routing")
+            logger.info("Detected ValidationNodeConfig - ensuring correct routing")
             metadata["is_validation_node"] = True
 
             # Ensure ValidationNodeConfig function knows to return exact routing keys
@@ -2480,7 +2482,7 @@ class BaseGraph(BaseModel, ValidationMixin):
 
         # Get a list of valid string keys for routing
         valid_keys = list(destination_map.keys())
-        logging.info(f"Valid routing keys: {valid_keys}")
+        logger.info(f"Valid routing keys: {valid_keys}")
 
         def validation_wrapper(state, config=None):
             try:
@@ -2488,20 +2490,18 @@ class BaseGraph(BaseModel, ValidationMixin):
                 if callable(validation_config):
                     # Call the ValidationNodeConfig directly
                     result = validation_config(state, config)
-                    logging.info(
-                        f"ValidationNodeConfig result: {type(result).__name__}"
-                    )
+                    logger.info(f"ValidationNodeConfig result: {type(result).__name__}")
 
                     # Handle Send objects directly - this is the primary return type
                     if isinstance(result, list) and all(
                         isinstance(item, Send) for item in result
                     ):
-                        logging.info(
+                        logger.info(
                             f"ValidationNodeConfig returned {len(result)} Send objects"
                         )
                         return result
                     elif isinstance(result, Send):
-                        logging.info(
+                        logger.info(
                             f"ValidationNodeConfig returned single Send object to {result.node}"
                         )
                         return result
@@ -2511,12 +2511,12 @@ class BaseGraph(BaseModel, ValidationMixin):
                         hasattr(result, "__class__")
                         and "Command" in result.__class__.__name__
                     ):
-                        logging.info("ValidationNodeConfig returned Command object")
+                        logger.info("ValidationNodeConfig returned Command object")
                         return result
 
                     # If result is already a string in our routing map, use it directly
                     if isinstance(result, str) and result in destination_map:
-                        logging.info(
+                        logger.info(
                             f"ValidationNodeConfig returned string key: {result}"
                         )
                         return result
@@ -2526,12 +2526,12 @@ class BaseGraph(BaseModel, ValidationMixin):
                         # Look for a key that maps to END or similar
                         for key, dest in destination_map.items():
                             if dest == "END" or str(dest).upper() == "END":
-                                logging.info(
+                                logger.info(
                                     f"Converting 'no_tool_calls' to routing key: {key}"
                                 )
                                 return key
                         # If no END destination found, return the string as-is
-                        logging.info(
+                        logger.info(
                             "ValidationNodeConfig returned no_tool_calls, returning as-is"
                         )
                         return result
@@ -2541,23 +2541,23 @@ class BaseGraph(BaseModel, ValidationMixin):
                         # Look for has_errors, has_tools, parse_output keys
                         for key in ["has_errors", "has_tools", "parse_output"]:
                             if key in result and result[key] and key in destination_map:
-                                logging.info(f"Found validation key: {key}")
+                                logger.info(f"Found validation key: {key}")
                                 return key
 
                         # Look for any True values that match routing keys
                         for key, value in result.items():
                             if value is True and key in destination_map:
-                                logging.info(f"Found True key: {key}")
+                                logger.info(f"Found True key: {key}")
                                 return key
 
                     # For any validation failure, default to 'has_errors' if available
                     if "has_errors" in destination_map:
-                        logging.info("Defaulting to has_errors")
+                        logger.info("Defaulting to has_errors")
                         return "has_errors"
 
                     # Last resort - return first routing key
                     if valid_keys:
-                        logging.warning(
+                        logger.warning(
                             f"No routing match found - using first key: {valid_keys[0]}"
                         )
                         return valid_keys[0]
@@ -2566,12 +2566,12 @@ class BaseGraph(BaseModel, ValidationMixin):
 
                 # If validation_config doesn't have __call__, just return first key
                 if valid_keys:
-                    logging.warning("ValidationNodeConfig doesn't have __call__ method")
+                    logger.warning("ValidationNodeConfig doesn't have __call__ method")
                     return valid_keys[0]
                 return False
 
             except Exception as e:
-                logging.error(f"Error in validation function: {e}")
+                logger.error(f"Error in validation function: {e}")
                 import traceback
 
                 traceback.print_exc()
@@ -2691,7 +2691,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                 # Return result as-is if no conversion needed
                 return result
             except Exception as e:
-                logging.error(f"Error in branch function: {e}")
+                logger.error(f"Error in branch function: {e}")
                 import traceback
 
                 traceback.print_exc()
@@ -3176,15 +3176,11 @@ class BaseGraph(BaseModel, ValidationMixin):
         """
         try:
             from langgraph.graph import StateGraph
-            from rich.console import Console
-            from rich.panel import Panel
 
-            console = Console()
-            console.print(
-                Panel.fit(
-                    "[bold blue]Converting to LangGraph StateGraph[/bold blue]",
-                    border_style="blue",
-                )
+            logger.panel(
+                "[bold blue]Converting to LangGraph StateGraph[/bold blue]",
+                title="LangGraph Conversion",
+                style="blue",
             )
 
             # Schema resolution logic
@@ -3200,9 +3196,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                 resolved_output_schema = (
                     output_schema or state_schema
                 )  # Default to state
-                console.print(
-                    f"[green]Using provided state_schema: {state_schema.__name__}[/green]"
-                )
+                logger.success(f"Using provided state_schema: {state_schema.__name__}")
 
             # Case 2: Both input and output provided, but no state
             elif input_schema is not None and output_schema is not None:
@@ -3214,8 +3208,8 @@ class BaseGraph(BaseModel, ValidationMixin):
                     model_config = ConfigDict(arbitrary_types_allowed=True)
 
                 resolved_state_schema = PassThroughState
-                console.print(
-                    f"[yellow]Created PassThroughState, input: {input_schema.__name__}, output: {output_schema.__name__}[/yellow]"
+                logger.info(
+                    f"Created PassThroughState, input: {input_schema.__name__}, output: {output_schema.__name__}"
                 )
 
             # Case 3: Only input_schema provided
@@ -3225,9 +3219,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                 resolved_output_schema = (
                     output_schema or input_schema
                 )  # Default output to input/state
-                console.print(
-                    f"[cyan]Using input_schema as state: {input_schema.__name__}[/cyan]"
-                )
+                logger.info(f"Using input_schema as state: {input_schema.__name__}")
 
             # Case 4: Only output_schema provided
             elif output_schema is not None:
@@ -3236,9 +3228,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                 resolved_input_schema = (
                     input_schema or output_schema
                 )  # Default input to output/state
-                console.print(
-                    f"[cyan]Using output_schema as state: {output_schema.__name__}[/cyan]"
-                )
+                logger.info(f"Using output_schema as state: {output_schema.__name__}")
 
             # Case 5: Nothing provided, use graph's state_schema or dict
             else:
@@ -3250,25 +3240,35 @@ class BaseGraph(BaseModel, ValidationMixin):
                     if hasattr(resolved_state_schema, "__name__")
                     else str(resolved_state_schema)
                 )
-                console.print(f"[dim]Using default schema: {schema_name}[/dim]")
+                logger.info(f"Using default schema: {schema_name}")
 
             # Log final schema resolution
-            console.print("[bold]Final schemas:[/bold]")
-            console.print(
-                f"  State: {resolved_state_schema.__name__ if hasattr(resolved_state_schema, '__name__') else resolved_state_schema}"
-            )
-            console.print(
-                f"  Input: {resolved_input_schema.__name__ if hasattr(resolved_input_schema, '__name__') else resolved_input_schema}"
-            )
-            console.print(
-                f"  Output: {resolved_output_schema.__name__ if hasattr(resolved_output_schema, '__name__') else resolved_output_schema}"
-            )
+            schema_info = {
+                "State": (
+                    resolved_state_schema.__name__
+                    if hasattr(resolved_state_schema, "__name__")
+                    else str(resolved_state_schema)
+                ),
+                "Input": (
+                    resolved_input_schema.__name__
+                    if hasattr(resolved_input_schema, "__name__")
+                    else str(resolved_input_schema)
+                ),
+                "Output": (
+                    resolved_output_schema.__name__
+                    if hasattr(resolved_output_schema, "__name__")
+                    else str(resolved_output_schema)
+                ),
+            }
+
             if resolved_config_schema:
-                console.print(f"  Config: {resolved_config_schema.__name__}")
+                schema_info["Config"] = resolved_config_schema.__name__
+
+            logger.table("Final Schemas", schema_info)
 
             # Create StateGraph with resolved state schema
             graph_builder = StateGraph(resolved_state_schema)
-            console.print("[green]✓[/green] Created StateGraph")
+            logger.success("Created StateGraph")
 
             # Direct debug function - doesn't wrap, just adds a print
             def log_function_call(func, name):
@@ -3278,7 +3278,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                 sig = inspect.signature(func)
                 param_count = len(sig.parameters)
 
-                console.print(
+                logger.debug(
                     f"Node [yellow]{name}[/yellow]: Function accepts {param_count} parameter(s)"
                 )
 
@@ -3287,46 +3287,43 @@ class BaseGraph(BaseModel, ValidationMixin):
                         # Call with appropriate number of parameters
                         if param_count == 1:
                             # Function only accepts state (one parameter)
-                            console.print(
-                                f"[bold]Calling {name}[/bold] with 1 parameter (state only)"
+                            logger.debug(
+                                f"Calling {name} with 1 parameter (state only)"
                             )
                             result = func(state)
                         else:
                             # Function accepts both state and config
-                            console.print(
-                                f"[bold]Calling {name}[/bold] with 2 parameters (state and config)"
+                            logger.debug(
+                                f"Calling {name} with 2 parameters (state and config)"
                             )
                             result = func(state, config)
 
                         # Log the result
-                        console.print(
-                            f"[bold cyan]Node {name} returned:[/bold cyan] [yellow]{type(result).__name__}[/yellow]"
-                        )
+                        logger.debug(f"Node {name} returned: {type(result).__name__}")
 
                         # Special debug for Command objects
                         from langgraph.types import Command
 
                         if isinstance(result, Command):
-                            console.print(
-                                Panel.fit(
-                                    "[bold yellow]Command Details:[/bold yellow]\n"
-                                    + f"Type: {type(result).__name__}\n"
-                                    + f"Update: {getattr(result, 'update', None)}\n"
-                                    + f"Branch: {getattr(result, 'branch', None)}\n"
-                                    + f"Raw: {result}",
-                                    border_style="yellow",
-                                )
+                            command_info = {
+                                "Type": type(result).__name__,
+                                "Update": str(getattr(result, "update", None)),
+                                "Branch": str(getattr(result, "branch", None)),
+                                "Raw": str(result),
+                            }
+                            logger.debug_table(
+                                f"Command Details - {name}", command_info
                             )
 
                         return result
                     except Exception as e:
-                        console.print(f"[bold red]Error in {name}:[/bold red] {str(e)}")
+                        logger.error(f"Error in {name}: {str(e)}")
                         raise
 
                 return inner
 
             # SIMPLE: Add nodes with direct callable functions - no complex extraction
-            console.print("\n[bold]Adding Nodes:[/bold]")
+            logger.panel("[bold]Adding Nodes[/bold]", style="cyan")
             for node_name, node in self.nodes.items():
                 # Skip special nodes and None nodes
                 if node_name in [START, END] or node is None:
@@ -3338,7 +3335,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                 if callable(node):
                     # 1. Node is directly callable
                     action = node
-                    console.print(
+                    logger.info(
                         f"Node [yellow]{node_name}[/yellow]: Using direct callable"
                     )
                 elif (
@@ -3348,18 +3345,18 @@ class BaseGraph(BaseModel, ValidationMixin):
                 ):
                     # 2. Node has callable in metadata
                     action = node.metadata["callable"]
-                    console.print(
+                    logger.info(
                         f"Node [yellow]{node_name}[/yellow]: Using metadata callable"
                     )
                 elif callable(node) and callable(node.__call__):
                     # 3. Node has __call__ method
                     action = node
-                    console.print(
+                    logger.info(
                         f"Node [yellow]{node_name}[/yellow]: Using __call__ method"
                     )
                 else:
                     # Fallback
-                    console.print(
+                    logger.warning(
                         f"Node [yellow]{node_name}[/yellow]: No callable found, using pass-through"
                     )
 
@@ -3376,13 +3373,13 @@ class BaseGraph(BaseModel, ValidationMixin):
                 graph_builder.add_node(node_name, action)
 
             # SIMPLE: Add direct edges
-            console.print("\n[bold]Adding Edges:[/bold]")
+            logger.panel("[bold]Adding Edges[/bold]", style="cyan")
             for source, target in self.edges:
                 graph_builder.add_edge(source, target)
-                console.print(f"[green]→[/green] {source} → {target}")
+                logger.progress(f"{source} → {target}")
 
             # SIMPLE: Add branches
-            console.print("\n[bold]Adding Branches:[/bold]")
+            logger.panel("[bold]Adding Branches[/bold]", style="cyan")
             for _branch_id, branch in self.branches.items():
                 source = branch.source_node
 
@@ -3391,10 +3388,10 @@ class BaseGraph(BaseModel, ValidationMixin):
                 for key, value in branch.destinations.items():
                     destinations[key] = value
 
-                console.print(
+                logger.info(
                     f"Branch from [yellow]{source}[/yellow] with conditions: {list(destinations.keys())}"
                 )
-                console.print(f"[dim]Destinations dict: {destinations}[/dim]")
+                logger.debug(f"Destinations dict: {destinations}")
 
                 # Check branch function and add parameter-aware wrapper if needed
                 if branch.mode == BranchMode.FUNCTION and branch.function:
@@ -3410,7 +3407,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                             "is_validation_node", False
                         )
                         if is_validation_node:
-                            console.print(
+                            logger.info(
                                 f"[bold magenta]Special handling for ValidationNodeConfig in '{branch.name}'[/bold magenta]"
                             )
 
@@ -3430,13 +3427,13 @@ class BaseGraph(BaseModel, ValidationMixin):
                                     if isinstance(result, list) and all(
                                         isinstance(item, Send) for item in result
                                     ):
-                                        console.print(
-                                            f"[cyan]Branch returning list of {len(result)} Send objects[/cyan]"
+                                        logger.info(
+                                            f"Branch returning list of {len(result)} Send objects"
                                         )
                                         return result
                                     elif isinstance(result, Send):
-                                        console.print(
-                                            f"[cyan]Branch returning Send object to {result.target}[/cyan]"
+                                        logger.info(
+                                            f"Branch returning Send object to {result.target}"
                                         )
                                         return result
 
@@ -3453,32 +3450,28 @@ class BaseGraph(BaseModel, ValidationMixin):
                                                 and result[key]
                                                 and key in dest_dict
                                             ):
-                                                console.print(
-                                                    f"[green]Found validation key: {key}[/green]"
+                                                logger.success(
+                                                    f"Found validation key: {key}"
                                                 )
                                                 return key
 
                                         # Look for any True values that match routing keys
                                         for key, value in result.items():
                                             if value is True and key in dest_dict:
-                                                console.print(
-                                                    f"[green]Found True key: {key}[/green]"
-                                                )
+                                                logger.success(f"Found True key: {key}")
                                                 return key
 
                                         # For validation failure, use has_errors if available
                                         if "has_errors" in dest_dict:
-                                            console.print(
-                                                "[yellow]Using has_errors for validation result[/yellow]"
+                                            logger.info(
+                                                "Using has_errors for validation result"
                                             )
                                             return "has_errors"
 
                                     # Return other results directly
                                     return result
                                 except Exception as e:
-                                    console.print(
-                                        f"[bold red]Error in branch: {str(e)}[/bold red]"
-                                    )
+                                    logger.error(f"Error in branch: {str(e)}")
                                     return False
 
                             return wrapper
@@ -3491,70 +3484,62 @@ class BaseGraph(BaseModel, ValidationMixin):
                         # Add conditional edges with the wrapped function
                         # SIMPLIFIED: Just use the basic LangGraph API without complications
                         try:
-                            console.print(
-                                f"[dim]Adding conditional edges: {source} -> {destinations}[/dim]"
+                            logger.debug(
+                                f"Adding conditional edges: {source} -> {destinations}"
                             )
 
                             # Use the simplest possible call to LangGraph
                             graph_builder.add_conditional_edges(
                                 source, branch_func, destinations
                             )
-                            console.print(
-                                f"[green]✓ Successfully added conditional edges for {source}[/green]"
+                            logger.success(
+                                f"✓ Successfully added conditional edges for {source}"
                             )
 
                         except Exception as e:
-                            console.print(
-                                f"[red]✗ Error adding conditional edges for {source}: {e}[/red]"
+                            logger.failure(
+                                f"Error adding conditional edges for {source}: {e}"
                             )
-                            console.print(f"[red]  Destinations: {destinations}[/red]")
-                            console.print(f"[red]  Function: {branch_func}[/red]")
+                            logger.error(f"  Destinations: {destinations}")
+                            logger.error(f"  Function: {branch_func}")
                             raise
                     except Exception as e:
                         # If anything goes wrong with signature inspection, use original function
-                        console.print(
-                            f"[yellow]Warning: Could not inspect branch function: {str(e)}[/yellow]"
-                        )
-                        console.print(
-                            "[yellow]Falling back to original function[/yellow]"
-                        )
+                        logger.warning(f"Could not inspect branch function: {str(e)}")
+                        logger.warning("Falling back to original function")
 
                         try:
                             graph_builder.add_conditional_edges(
                                 source, branch.function, destinations
                             )
-                            console.print(
-                                f"[green]✓ Successfully added conditional edges for {source} (fallback)[/green]"
+                            logger.success(
+                                f"✓ Successfully added conditional edges for {source} (fallback)"
                             )
                         except Exception as fallback_error:
-                            console.print(
-                                f"[red]✗ Fallback also failed for {source}: {fallback_error}[/red]"
+                            logger.failure(
+                                f"Fallback also failed for {source}: {fallback_error}"
                             )
-                            console.print(f"[red]  Destinations: {destinations}[/red]")
-                            console.print(
-                                f"[red]  Original function: {branch.function}[/red]"
-                            )
+                            logger.error(f"  Destinations: {destinations}")
+                            logger.error(f"  Original function: {branch.function}")
                             raise
                 else:
                     # Use branch object's __call__ method
-                    console.print(f"Using branch object directly for {branch.name}")
+                    logger.info(f"Using branch object directly for {branch.name}")
 
                     try:
                         graph_builder.add_conditional_edges(
                             source, branch, destinations
                         )
-                        console.print(
-                            f"[green]✓ Successfully added conditional edges for {source} (branch object)[/green]"
+                        logger.success(
+                            f"✓ Successfully added conditional edges for {source} (branch object)"
                         )
                     except Exception as e:
-                        console.print(
-                            f"[red]✗ Error using branch object for {source}: {e}[/red]"
-                        )
-                        console.print(f"[red]  Destinations: {destinations}[/red]")
-                        console.print(f"[red]  Branch: {branch}[/red]")
+                        logger.failure(f"Error using branch object for {source}: {e}")
+                        logger.error(f"  Destinations: {destinations}")
+                        logger.error(f"  Branch: {branch}")
                         raise
 
-            console.print("\n[bold green]LangGraph conversion complete![/bold green]")
+            logger.success("LangGraph conversion complete!")
             return graph_builder
 
         except ImportError:
@@ -3810,43 +3795,50 @@ class BaseGraph(BaseModel, ValidationMixin):
         from haive.core.graph.state_graph.graph_visualizer import GraphVisualizer
         from haive.core.utils.mermaid_utils import Environment, detect_environment
 
-        logger = logging.getLogger(__name__)
-
         if debug:
-            print(f"DEBUG: Starting visualization for graph: {self.name}")
-            print(f"DEBUG: Graph type: {type(self).__name__}")
-            print(f"DEBUG: Has nodes attr: {hasattr(self, 'nodes')}")
-            print(f"DEBUG: Has edges attr: {hasattr(self, 'edges')}")
-            print(f"DEBUG: Has subgraphs attr: {hasattr(self, 'subgraphs')}")
+            debug_info = {
+                "Graph": self.name,
+                "Type": type(self).__name__,
+                "Has nodes": hasattr(self, "nodes"),
+                "Has edges": hasattr(self, "edges"),
+                "Has subgraphs": hasattr(self, "subgraphs"),
+            }
 
             if hasattr(self, "nodes"):
                 nodes_count = len(self.nodes) if self.nodes is not None else 0
-                print(f"DEBUG: Nodes count: {nodes_count}")
+                debug_info["Nodes count"] = nodes_count
                 if self.nodes:
-                    print(f"DEBUG: Node names: {list(self.nodes.keys())}")
+                    debug_info["Node names"] = list(self.nodes.keys())
                     # Check each node for graph attributes
                     for name, node in self.nodes.items():
-                        print(
-                            f"DEBUG: Node '{name}': type={type(node).__name__}, has_graph={hasattr(node, 'graph') if node else False}"
+                        logger.debug_table(
+                            f"Node '{name}'",
+                            {
+                                "Type": type(node).__name__ if node else "None",
+                                "Has graph": hasattr(node, "graph") if node else False,
+                                "Graph type": (
+                                    type(node.graph).__name__
+                                    if node and hasattr(node, "graph") and node.graph
+                                    else None
+                                ),
+                            },
                         )
-                        if node and hasattr(node, "graph"):
-                            print(
-                                f"DEBUG:   - Node '{name}' graph: {type(node.graph).__name__ if node.graph else None}"
-                            )
 
             if hasattr(self, "edges"):
                 edges_count = len(self.edges) if self.edges is not None else 0
-                print(f"DEBUG: Edges count: {edges_count}")
+                debug_info["Edges count"] = edges_count
                 if self.edges:
-                    print(f"DEBUG: Edges: {list(self.edges)}")
+                    debug_info["Edges"] = str(list(self.edges))
 
             if hasattr(self, "subgraphs"):
                 subgraphs_count = (
                     len(self.subgraphs) if self.subgraphs is not None else 0
                 )
-                print(f"DEBUG: Subgraphs count: {subgraphs_count}")
+                debug_info["Subgraphs count"] = subgraphs_count
                 if self.subgraphs:
-                    print(f"DEBUG: Subgraph names: {list(self.subgraphs.keys())}")
+                    debug_info["Subgraph names"] = list(self.subgraphs.keys())
+
+            logger.debug_table("Graph Structure", debug_info)
 
         logger.debug(
             f"Visualizing graph: {self.name} (nodes: {len(self.nodes) if self.nodes else 0}, edges: {len(self.edges) if self.edges else 0})"
@@ -3862,7 +3854,7 @@ class BaseGraph(BaseModel, ValidationMixin):
             )
             logger.debug(f"Including {len(self.subgraphs)} subgraphs: {subgraph_info}")
             if debug:
-                print(f"DEBUG: Subgraph info: {subgraph_info}")
+                logger.info(f"Subgraph info: {subgraph_info}")
 
         # Combine nodes from highlight_paths with highlight_nodes
         all_highlight_nodes = highlight_nodes or []
@@ -3873,22 +3865,21 @@ class BaseGraph(BaseModel, ValidationMixin):
 
         # Run debug structure analysis first if debug is enabled
         if debug:
-            print("DEBUG: Running structure analysis...")
+            logger.info("Running structure analysis...")
             try:
                 debug_info = GraphVisualizer.debug_graph_structure(self)
-                print("DEBUG: Structure analysis results:")
-                for key, value in debug_info.items():
-                    print(f"DEBUG:   {key}: {value}")
+                logger.debug_table("Structure Analysis", debug_info)
             except Exception as e:
-                print(f"DEBUG: Error in structure analysis: {e}")
-                import traceback
+                logger.error(f"Error in structure analysis: {e}")
+                if debug:
+                    import traceback
 
-                traceback.print_exc()
+                    traceback.print_exc()
 
         # Generate the Mermaid code
         try:
             if debug:
-                print("DEBUG: Attempting to generate Mermaid code...")
+                logger.info("Attempting to generate Mermaid code...")
 
             mermaid_code = GraphVisualizer.generate_mermaid(
                 self,
@@ -3903,15 +3894,15 @@ class BaseGraph(BaseModel, ValidationMixin):
             )
 
             if debug:
-                print(
-                    f"DEBUG: Successfully generated Mermaid code: {len(mermaid_code)} characters"
+                logger.success(
+                    f"Successfully generated Mermaid code: {len(mermaid_code)} characters"
                 )
 
             logger.debug(f"Generated Mermaid code: {len(mermaid_code)} characters")
 
         except Exception as e:
             if debug:
-                print(f"DEBUG: Error generating Mermaid code: {e}")
+                logger.error(f"Error generating Mermaid code: {e}")
                 import traceback
 
                 traceback.print_exc()
@@ -3922,7 +3913,7 @@ class BaseGraph(BaseModel, ValidationMixin):
             if include_subgraphs and hasattr(self, "subgraphs") and self.subgraphs:
                 logger.warning("Retrying visualization with subgraphs disabled")
                 if debug:
-                    print("DEBUG: Retrying with subgraphs disabled...")
+                    logger.info("Retrying with subgraphs disabled...")
 
                 try:
                     mermaid_code = GraphVisualizer.generate_mermaid(
@@ -3935,12 +3926,12 @@ class BaseGraph(BaseModel, ValidationMixin):
                         debug=debug,
                     )
                     if debug:
-                        print(
-                            "DEBUG: Successfully generated Mermaid code without subgraphs"
+                        logger.success(
+                            "Successfully generated Mermaid code without subgraphs"
                         )
                 except Exception as e2:
                     if debug:
-                        print(f"DEBUG: Failed even without subgraphs: {e2}")
+                        logger.error(f"Failed even without subgraphs: {e2}")
                         import traceback
 
                         traceback.print_exc()
@@ -3951,12 +3942,12 @@ class BaseGraph(BaseModel, ValidationMixin):
                     return f"Error generating graph visualization: {str(e)}"
             else:
                 if debug:
-                    print("DEBUG: No subgraphs to disable, returning error")
+                    logger.error("No subgraphs to disable, returning error")
                 return f"Error generating graph visualization: {str(e)}"
 
         try:
             if debug:
-                print("DEBUG: Attempting to display graph...")
+                logger.info("Attempting to display graph...")
 
             # Display using the visualizer
             GraphVisualizer.display_graph(
@@ -3974,9 +3965,9 @@ class BaseGraph(BaseModel, ValidationMixin):
             )
 
             if output_path and save_png:
-                logger.info(f"Graph visualization saved to: {output_path}")
+                logger.success(f"Graph visualization saved to: {output_path}")
                 if debug:
-                    print(f"DEBUG: Graph saved to: {output_path}")
+                    logger.info(f"Graph saved to: {output_path}")
 
         except Exception as e:
             # Get the current environment
@@ -3984,46 +3975,39 @@ class BaseGraph(BaseModel, ValidationMixin):
 
             # Provide helpful error message based on environment
             if debug:
-                print(f"DEBUG: Error displaying graph: {e}")
+                logger.error(f"Error displaying graph: {e}")
                 import traceback
 
                 traceback.print_exc()
 
             logger.error(f"Error displaying graph: {e}")
-            print(f"Error displaying graph: {e}")
-            print(f"Detected environment: {env}")
+            logger.error(f"Detected environment: {env}")
 
             if env == Environment.JUPYTER_LAB:
-                print("\nTry these options:")
-                print(
-                    "1. Install JupyterLab Mermaid extension: jupyter labextension install @jupyterlab/mermaid"
-                )
-                print("2. Run this in a cell to display using HTML:")
-                print("   from IPython.display import HTML")
-                print(
-                    "   HTML(f'''<div class=\"mermaid\">{my_graph.to_mermaid()}</div>''')"
-                )
-                print(
-                    '   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>'
-                )
-                print("   <script>mermaid.initialize({startOnLoad:true});</script>''')")
+                suggestions = [
+                    "Install JupyterLab Mermaid extension: jupyter labextension install @jupyterlab/mermaid",
+                    "Run this in a cell to display using HTML:",
+                    "   from IPython.display import HTML",
+                    "   HTML(f'''<div class=\"mermaid\">{my_graph.to_mermaid()}</div>''')",
+                    '   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>',
+                    "   <script>mermaid.initialize({startOnLoad:true});</script>''')",
+                ]
+                logger.info("\n".join(suggestions))
             elif env == Environment.JUPYTER_NOTEBOOK:
-                print("\nTry these options:")
-                print("1. Run this in a cell to display using HTML:")
-                print("   from IPython.display import HTML")
-                print(
-                    "   HTML(f'''<div class=\"mermaid\">{my_graph.to_mermaid()}</div>"
-                )
-                print(
-                    '   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>'
-                )
-                print("   <script>mermaid.initialize({startOnLoad:true});</script>''')")
+                suggestions = [
+                    "Run this in a cell to display using HTML:",
+                    "   from IPython.display import HTML",
+                    "   HTML(f'''<div class=\"mermaid\">{my_graph.to_mermaid()}</div>",
+                    '   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>',
+                    "   <script>mermaid.initialize({startOnLoad:true});</script>''')",
+                ]
+                logger.info("\n".join(suggestions))
             elif env == Environment.VSCODE_NOTEBOOK:
-                print("\nTry these options:")
-                print("1. Install Mermaid Preview extension for VSCode")
-                print(
-                    "2. Save the diagram and view manually: my_graph.save_visualization('diagram.png')"
-                )
+                suggestions = [
+                    "Install Mermaid Preview extension for VSCode",
+                    "Save the diagram and view manually: my_graph.save_visualization('diagram.png')",
+                ]
+                logger.info("\n".join(suggestions))
 
         # Always return the Mermaid code for reference
         return mermaid_code
@@ -4181,20 +4165,16 @@ class BaseGraph(BaseModel, ValidationMixin):
         issues = self.validate_graph()
 
         if issues:
-            from rich.console import Console
-
-            console = Console()
-
-            console.print("\n[bold red]Graph Validation Issues:[/bold red]")
-            for issue in issues:
-                console.print(f"[red]- {issue}[/red]")
+            logger.panel(
+                "\n".join([f"- {issue}" for issue in issues]),
+                title="[bold red]Graph Validation Issues[/bold red]",
+                style="red",
+            )
 
             if raise_on_validation_error:
                 raise ValueError(f"Graph validation failed with {len(issues)} issues")
 
-            console.print(
-                "\n[yellow]Proceeding with compilation despite validation issues[/yellow]"
-            )
+            logger.warning("Proceeding with compilation despite validation issues")
 
         # Convert to LangGraph
         graph = self.to_langgraph()
@@ -4277,65 +4257,49 @@ class BaseGraph(BaseModel, ValidationMixin):
         Args:
             source_node: The node to debug routing for
         """
-        from rich.console import Console
-        from rich.panel import Panel
-        from rich.table import Table
-
-        console = Console()
-
         # Find all branches for this node
         node_branches = self.get_branches_for_node(source_node)
 
         if not node_branches:
-            console.print(
-                f"[yellow]No conditional routing found for node '{source_node}'[/yellow]"
-            )
+            logger.warning(f"No conditional routing found for node '{source_node}'")
             return
 
-        console.print(
-            f"\n[bold blue]Conditional Routing Debug for '{source_node}'[/bold blue]"
+        logger.panel(
+            f"[bold blue]Conditional Routing Debug for '{source_node}'[/bold blue]",
+            style="blue",
         )
 
         for i, branch in enumerate(node_branches):
-            console.print(f"\n[cyan]Branch {i+1}: {branch.name}[/cyan]")
+            logger.info(f"\n[cyan]Branch {i+1}: {branch.name}[/cyan]")
 
-            # Create a table showing the routing
-            table = Table(
-                title="Routing Map", show_header=True, header_style="bold magenta"
-            )
-            table.add_column("Condition Result", style="cyan")
-            table.add_column("Destination", style="green")
-            table.add_column("Type", style="yellow")
-
-            # Show all destinations
+            # Create routing map data
+            routing_data = {}
             for condition_result, destination in branch.destinations.items():
                 result_type = (
                     "Boolean" if isinstance(condition_result, bool) else "String"
                 )
-                table.add_row(str(condition_result), destination, result_type)
+                routing_data[f"{condition_result} ({result_type})"] = destination
 
             # Show default if exists
             if branch.default:
-                table.add_row("(default)", branch.default, "Default")
+                routing_data["(default)"] = branch.default
 
-            console.print(table)
+            logger.table(f"Routing Map - {branch.name}", routing_data)
 
             # Show function info if available
             if branch.function:
                 func_name = getattr(branch.function, "__name__", "Unknown")
-                console.print(f"[dim]Condition function: {func_name}[/dim]")
+                logger.info(f"[dim]Condition function: {func_name}[/dim]")
 
         # Show helpful tips
-        tips_panel = Panel.fit(
-            "[bold]Tips for Boolean Routing:[/bold]\n"
-            "• Functions returning True/False will use boolean keys (True, False)\n"
-            "• String-based keys automatically get boolean fallbacks\n"
-            "• Use graph.add_boolean_conditional_edges() for explicit True/False routing\n"
+        tips = [
+            "• Functions returning True/False will use boolean keys (True, False)",
+            "• String-based keys automatically get boolean fallbacks",
+            "• Use graph.add_boolean_conditional_edges() for explicit True/False routing",
             "• Enable debug logging: logger.setLevel(logging.DEBUG)",
-            title="💡 Routing Tips",
-            border_style="blue",
-        )
-        console.print(tips_panel)
+        ]
+
+        logger.panel("\n".join(tips), title="💡 Routing Tips", style="blue")
 
 
 # Utility functions for common graph operations
@@ -4423,77 +4387,96 @@ def create_debug_has_tool_calls(original_func):
     def debug_wrapper(state):
         from langchain_core.messages import AIMessage
 
-        print("\n=== DEBUGGING has_tool_calls ===")
-        print(f"State type: {type(state)}")
+        with logger.track_time("has_tool_calls debug"):
+            logger.panel("[bold]DEBUGGING has_tool_calls[/bold]", style="cyan")
 
-        # Check state structure
-        if hasattr(state, "messages"):
-            messages = state.messages
-            print(f"State.messages: {len(messages)} messages")
-        elif isinstance(state, dict) and "messages" in state:
-            messages = state["messages"]
-            print(f"State['messages']: {len(messages)} messages")
-        else:
-            print("ERROR: No messages found in state!")
-            return False
+            debug_info = {"State type": str(type(state))}
 
-        if not messages:
-            print("ERROR: Messages list is empty!")
-            return False
-
-        # Examine the last message
-        last_msg = messages[-1]
-        print(f"Last message type: {type(last_msg)}")
-        print(f"Last message content preview: {str(last_msg)[:200]}...")
-
-        if isinstance(last_msg, AIMessage):
-            print("✓ Last message is AIMessage")
-
-            # Check tool_calls attribute
-            if hasattr(last_msg, "tool_calls"):
-                tool_calls = getattr(last_msg, "tool_calls", None)
-                print(f"tool_calls attribute: {tool_calls}")
-                print(f"tool_calls type: {type(tool_calls)}")
-                print(f"tool_calls bool: {bool(tool_calls)}")
-
-                if tool_calls:
-                    print(f"✓ Found {len(tool_calls)} tool calls")
-                    for i, call in enumerate(tool_calls):
-                        print(f"  Tool call {i}: {call}")
-                else:
-                    print("✗ tool_calls is empty/None")
+            # Check state structure
+            if hasattr(state, "messages"):
+                messages = state.messages
+                debug_info["Messages location"] = "state.messages"
+                debug_info["Messages count"] = len(messages)
+            elif isinstance(state, dict) and "messages" in state:
+                messages = state["messages"]
+                debug_info["Messages location"] = "state['messages']"
+                debug_info["Messages count"] = len(messages)
             else:
-                print("✗ No tool_calls attribute")
+                logger.error("No messages found in state!")
+                return False
 
-            # Check additional_kwargs
-            if hasattr(last_msg, "additional_kwargs"):
-                additional_kwargs = getattr(last_msg, "additional_kwargs", {})
-                print(f"additional_kwargs: {additional_kwargs}")
+            if not messages:
+                logger.error("Messages list is empty!")
+                return False
 
-                if "tool_calls" in additional_kwargs:
-                    tool_calls_kwargs = additional_kwargs["tool_calls"]
-                    print(f"tool_calls in additional_kwargs: {tool_calls_kwargs}")
-                    print(f"tool_calls_kwargs bool: {bool(tool_calls_kwargs)}")
+            # Examine the last message
+            last_msg = messages[-1]
+            debug_info["Last message type"] = str(type(last_msg))
+            debug_info["Last message preview"] = str(last_msg)[:200] + "..."
+
+            logger.table("State Info", debug_info)
+
+            if isinstance(last_msg, AIMessage):
+                logger.success("✓ Last message is AIMessage")
+
+                message_details = {}
+
+                # Check tool_calls attribute
+                if hasattr(last_msg, "tool_calls"):
+                    tool_calls = getattr(last_msg, "tool_calls", None)
+                    message_details["tool_calls attribute"] = str(tool_calls)
+                    message_details["tool_calls type"] = str(type(tool_calls))
+                    message_details["tool_calls bool"] = str(bool(tool_calls))
+
+                    if tool_calls:
+                        logger.success(f"✓ Found {len(tool_calls)} tool calls")
+                        for i, call in enumerate(tool_calls):
+                            logger.info(f"  Tool call {i}: {call}")
+                    else:
+                        logger.failure("✗ tool_calls is empty/None")
                 else:
-                    print("✗ No tool_calls in additional_kwargs")
+                    logger.failure("✗ No tool_calls attribute")
+
+                # Check additional_kwargs
+                if hasattr(last_msg, "additional_kwargs"):
+                    additional_kwargs = getattr(last_msg, "additional_kwargs", {})
+                    message_details["additional_kwargs"] = str(additional_kwargs)
+
+                    if "tool_calls" in additional_kwargs:
+                        tool_calls_kwargs = additional_kwargs["tool_calls"]
+                        message_details["tool_calls in additional_kwargs"] = str(
+                            tool_calls_kwargs
+                        )
+                        message_details["tool_calls_kwargs bool"] = str(
+                            bool(tool_calls_kwargs)
+                        )
+                    else:
+                        logger.failure("✗ No tool_calls in additional_kwargs")
+                else:
+                    logger.failure("✗ No additional_kwargs")
+
+                logger.table("Message Details", message_details)
             else:
-                print("✗ No additional_kwargs")
-        else:
-            print(f"✗ Last message is not AIMessage: {type(last_msg)}")
+                logger.failure(f"✗ Last message is not AIMessage: {type(last_msg)}")
 
-        # Call original function and compare
-        original_result = original_func(state)
-        fixed_result = has_tool_calls_fixed(state)
+            # Call original function and compare
+            original_result = original_func(state)
+            fixed_result = has_tool_calls_fixed(state)
 
-        print(f"Original function result: {original_result}")
-        print(f"Fixed function result: {fixed_result}")
+            results = {
+                "Original function": original_result,
+                "Fixed function": fixed_result,
+                "Match": original_result == fixed_result,
+            }
 
-        if original_result != fixed_result:
-            print(f"⚠️  MISMATCH! Original: {original_result}, Fixed: {fixed_result}")
-        else:
-            print(f"✓ Results match: {original_result}")
+            logger.table("Results", results)
 
-        print("=== END DEBUGGING ===\n")
+            if original_result != fixed_result:
+                logger.warning(
+                    f"⚠️  MISMATCH! Original: {original_result}, Fixed: {fixed_result}"
+                )
+            else:
+                logger.success(f"✓ Results match: {original_result}")
 
         return original_result
 
