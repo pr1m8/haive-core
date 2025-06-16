@@ -1,18 +1,19 @@
-import logging
+# src/haive/core/graph/node/engine_node.py
+
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
-from langchain_core.messages import AnyMessage
 from langgraph.types import Command, RetryPolicy, Send
 from pydantic import BaseModel, Field
-from rich.console import Console
 
 from haive.core.engine.base import Engine, EngineType
 from haive.core.graph.common.types import ConfigLike, StateLike
 from haive.core.graph.node.base_config import NodeConfig
 from haive.core.graph.node.types import NodeType
+from haive.core.logging.rich_logger import LogLevel, get_logger
 
-logger = logging.getLogger(__name__)
-console = Console()
+# Get module logger
+logger = get_logger(__name__)
+logger.set_level(LogLevel.WARNING)
 
 
 class EngineNodeConfig(NodeConfig):
@@ -36,34 +37,25 @@ class EngineNodeConfig(NodeConfig):
         self, state: StateLike, config: Optional[ConfigLike] = None
     ) -> Union[Command, Send]:
         """Execute engine node with intelligent I/O handling."""
-        try:
-            # Get engine and validate
-            engine = self._get_engine()
-            if not engine:
-                raise ValueError(f"No engine available for node '{self.name}'")
+        with logger.track_time(f"Executing node {self.name}"):
+            try:
+                # Get engine and validate
+                engine = self._get_engine()
+                if not engine:
+                    raise ValueError(f"No engine available for node '{self.name}'")
 
-            # Extract input intelligently
-            input_data = self._extract_smart_input(state, engine)
+                # Extract input intelligently
+                input_data = self._extract_smart_input(state, engine)
 
-            # Execute with merged config
-            result = self._execute_with_config(engine, input_data, config)
+                # Execute with merged config
+                result = self._execute_with_config(engine, input_data, config)
 
-            # Add name to message if it's from an LLM or Agent engine
-            if hasattr(engine, "engine_type") and engine.engine_type in [
-                EngineType.LLM,
-                EngineType.AGENT,
-            ]:
-                from langchain_core.messages import BaseMessage
+                # Wrap result intelligently
+                return self._wrap_smart_result(result, state, engine)
 
-                if isinstance(result, BaseMessage):
-                    result.name = engine.name
-
-            # Wrap result intelligently
-            return self._wrap_smart_result(result, state, engine)
-
-        except Exception as e:
-            self._debug_error(e)
-            raise
+            except Exception as e:
+                self._log_error(e)
+                raise
 
     def _get_engine(self) -> Optional[Engine]:
         """Get engine from direct reference or registry."""
@@ -124,15 +116,14 @@ class EngineNodeConfig(NodeConfig):
 
             if field == "query":
                 # Always include query, even if empty
-
                 input_data[field] = value or ""
-                self._debug(f"Retriever query: '{value or ''}'")
+                logger.debug(f"Retriever query: '{value or ''}'")
             elif value is not None:
                 # Only include other fields if they have values
                 input_data[field] = value
-                self._debug(f"Retriever {field}: {value}")
+                logger.debug(f"Retriever {field}: {value}")
             else:
-                self._debug(f"Skipping None value for {field}")
+                logger.debug(f"Skipping None value for {field}")
 
         return input_data
 
@@ -240,10 +231,10 @@ class EngineNodeConfig(NodeConfig):
 
         # Engine-specific single value mapping
         field_map = {
-            EngineType.RETRIEVER: "retrieved_documents",
+            EngineType.RETRIEVER: "documents",
             EngineType.LLM: "response",
             EngineType.EMBEDDINGS: "embeddings",
-            EngineType.VECTOR_STORE: "retrieved_documents",
+            EngineType.VECTOR_STORE: "documents",
         }
 
         field = field_map.get(engine_type, "result")
@@ -340,82 +331,42 @@ class EngineNodeConfig(NodeConfig):
         """Execute engine with merged configuration."""
         merged_config = self._build_merged_config(config, engine)
 
-        # DEBUG: Show what we're about to invoke
-        console.print("[bold red]DEBUG _execute_with_config:[/bold red]")
-        console.print(
-            f"  Engine: {engine.name} (type: {getattr(engine, 'engine_type', 'unknown')})"
-        )
-        console.print(f"  Input data type: {type(input_data)}")
-        console.print(f"  Input data: {input_data}")
-        console.print(f"  Config: {merged_config}")
+        # Log execution details in debug mode
+        if self.debug or logger.is_debug_mode():
+            logger.debug_table(
+                "_execute_with_config",
+                {
+                    "Engine": engine.name,
+                    "Engine Type": getattr(engine, "engine_type", "unknown"),
+                    "Input Type": type(input_data).__name__,
+                    "Input Data": input_data,
+                    "Config": merged_config,
+                },
+            )
 
         # Special handling for retrievers - they need string queries
-        if (
-            hasattr(engine, "engine_type")
-            and engine.engine_type == EngineType.RETRIEVER
-        ):
-            console.print("[yellow]RETRIEVER DETECTED - Special handling[/yellow]")
+        if hasattr(engine, "engine_type") and engine.engine_type.value == "retriever":
+            logger.debug("RETRIEVER DETECTED - Special handling")
 
             if isinstance(input_data, dict):
                 if "query" in input_data:
                     query_str = str(input_data["query"])
-                    console.print(f"  Extracting query string: '{query_str}'")
-                    console.print(
-                        f"  Other params: {[k for k in input_data.keys() if k != 'query']}"
+                    logger.debug(f"Extracting query string: '{query_str}'")
+                    logger.debug(
+                        f"Other params: {[k for k in input_data.keys() if k != 'query']}"
                     )
-                    result = engine.invoke(query_str, merged_config)
+                    return engine.invoke(query_str, merged_config)
                 else:
-                    console.print(
-                        "  No 'query' key in dict, using whole dict as string"
-                    )
-                    result = engine.invoke(str(input_data), merged_config)
+                    logger.debug("No 'query' key in dict, using whole dict as string")
+                    return engine.invoke(str(input_data), merged_config)
             else:
-                console.print(
-                    f"  Input is not dict, converting to string: '{str(input_data)}'"
+                logger.debug(
+                    f"Input is not dict, converting to string: '{str(input_data)}'"
                 )
-                result = engine.invoke(str(input_data), merged_config)
-        else:
-            console.print("[green]Standard engine invoke[/green]")
-            result = engine.invoke(input_data, merged_config)
+                return engine.invoke(str(input_data), merged_config)
 
-        # Add name to message if it's from an LLM or Agent engine
-        if hasattr(engine, "engine_type") and engine.engine_type in [
-            EngineType.LLM,
-            EngineType.AGENT,
-        ]:
-            from langchain_core.messages import BaseMessage
-
-            # Handle single message
-            if isinstance(result, BaseMessage):
-                result.name = engine.name
-                console.print(f"[blue]Added name '{engine.name}' to message[/blue]")
-
-            # Handle list of messages
-            elif isinstance(result, list):
-                for msg in result:
-                    if isinstance(msg, BaseMessage):
-                        msg.name = engine.name
-                console.print(
-                    f"[blue]Added name '{engine.name}' to {len([m for m in result if isinstance(m, BaseMessage)])} messages[/blue]"
-                )
-
-            # Handle dict with messages key
-            elif isinstance(result, dict) and "messages" in result:
-                messages = result["messages"]
-                if isinstance(messages, list):
-                    for msg in messages:
-                        if isinstance(msg, BaseMessage):
-                            msg.name = engine.name
-                    console.print(
-                        f"[blue]Added name '{engine.name}' to messages in dict[/blue]"
-                    )
-                elif isinstance(messages, BaseMessage):
-                    messages.name = engine.name
-                    console.print(
-                        f"[blue]Added name '{engine.name}' to message in dict[/blue]"
-                    )
-
-        return result
+        logger.debug("Standard engine invoke")
+        return engine.invoke(input_data, merged_config)
 
     def _build_merged_config(
         self, runtime_config: Optional[ConfigLike], engine: Engine
@@ -481,19 +432,11 @@ class EngineNodeConfig(NodeConfig):
         except ImportError:
             return hasattr(obj, "content") and hasattr(obj, "type")
 
-    def _debug(self, msg: str) -> None:
-        """Debug output if enabled."""
-        if self.debug:
-            console.print(f"[dim]{self.name}:[/] {msg}")
-
-    def _debug_error(self, error: Exception) -> None:
-        """Debug error output."""
-        if self.debug:
-            console.print(f"[red]Error in {self.name}:[/] {error}")
-        logger.error(f"Engine node '{self.name}' failed: {error}")
+    def _log_error(self, error: Exception) -> None:
+        """Log error with full context."""
+        logger.log_exception(error, f"Engine node '{self.name}' failed")
 
     def __repr__(self) -> str:
         """Clean string representation."""
         engine_ref = self.engine.name if self.engine else self.engine_name or "None"
         return f"EngineNode(name='{self.name}', engine='{engine_ref}')"
-        return merged

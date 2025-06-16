@@ -28,23 +28,15 @@ from typing import (
 from langchain_core.messages import BaseMessage
 from langchain_core.runnables import RunnableConfig
 from pydantic import BaseModel, create_model, model_validator
-from rich.console import Console
-from rich.logging import RichHandler
 from rich.panel import Panel
 from rich.syntax import Syntax
 from rich.table import Table
 from rich.tree import Tree
 
-# Set up rich logging
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(message)s",
-    datefmt="[%X]",
-    handlers=[RichHandler(rich_tracebacks=True)],
-)
+from haive.core.logging.rich_logger import RichLogger, get_logger
 
-logger = logging.getLogger(__name__)
-console = Console()
+# Get logger instance
+logger = get_logger(__name__)
 
 if TYPE_CHECKING:
     from haive.core.schema.schema_manager import StateSchemaManager
@@ -1335,8 +1327,8 @@ class StateSchema(BaseModel, Generic[T]):
         # Create panel with tree
         panel = Panel(tree, title=display_title, border_style="blue")
 
-        # Print to console
-        console.print(panel)
+        # Use logger to print
+        logger.panel(str(tree), title=display_title, style="blue")
 
     @staticmethod
     def _format_field_value(value: Any) -> str:
@@ -1508,11 +1500,8 @@ class StateSchema(BaseModel, Generic[T]):
                     fields_str = ", ".join(fields)
                     structured_node.add(f"  [dim]Fields: {fields_str}[/dim]")
 
-        # Create panel with tree
-        panel = Panel(tree, title=display_title, border_style="green")
-
-        # Print to console
-        console.print(panel)
+        # Use logger to display
+        logger.panel(str(tree), title=display_title, style="green")
 
     @classmethod
     def to_python_code(cls) -> str:
@@ -1643,13 +1632,8 @@ class StateSchema(BaseModel, Generic[T]):
         # Create syntax highlighted code
         syntax = Syntax(code, "python", theme="monokai", line_numbers=True)
 
-        # Create panel with syntax
-        panel = Panel(
-            syntax, title=title or f"{cls.__name__} Code", border_style="yellow"
-        )
-
-        # Print to console
-        console.print(panel)
+        # Use logger to display
+        logger.panel(str(syntax), title=title or f"{cls.__name__} Code", style="yellow")
 
     @classmethod
     def compare_with(
@@ -1711,8 +1695,25 @@ class StateSchema(BaseModel, Generic[T]):
         other_io = other.__engine_io_mappings__
         table.add_row("Engine I/O", str(cls_io), str(other_io))
 
-        # Print table
-        console.print(table)
+        # Use logger to display table
+        logger.table("Schema Comparison", {"Field": "See detailed comparison below"})
+
+        # Create a detailed comparison as a formatted string
+        comparison_data = {}
+        for field_name in sorted(all_fields):
+            cls_field = cls.model_fields.get(field_name)
+            other_field = other.model_fields.get(field_name)
+
+            cls_str = cls._format_field_info(cls_field) if cls_field else "Not present"
+            other_str = (
+                cls._format_field_info(other_field) if other_field else "Not present"
+            )
+
+            comparison_data[field_name] = (
+                f"{cls.__name__}: {cls_str} | {other.__name__}: {other_str}"
+            )
+
+        logger.table("Field Comparison", comparison_data)
 
     @staticmethod
     def _format_field_info(field_info: Any) -> str:
@@ -1819,5 +1820,51 @@ class StateSchema(BaseModel, Generic[T]):
         """
         Display schema as a table.
         """
-        table = cls.as_table()
-        console.print(table)
+        # Build table data
+        table_data = {}
+
+        for field_name, field_info in cls.model_fields.items():
+            # Skip special fields
+            if field_name.startswith("__"):
+                continue
+
+            # Format field type
+            field_type = field_info.annotation
+            type_str = str(field_type).replace("typing.", "")
+
+            # Format default value
+            if field_info.default_factory is not None:
+                factory_name = getattr(
+                    field_info.default_factory, "__name__", "factory"
+                )
+                default_str = f"default_factory={factory_name}"
+            else:
+                default = field_info.default
+                if default is ...:
+                    default_str = "required"
+                else:
+                    default_str = repr(default)
+
+            # Get description
+            description = field_info.description or ""
+
+            # Build annotations
+            annotations = []
+            if field_name in cls.__shared_fields__:
+                annotations.append("shared")
+            if field_name in cls.__serializable_reducers__:
+                annotations.append(
+                    f"reducer={cls.__serializable_reducers__[field_name]}"
+                )
+
+            # Format entry
+            value = f"Type: {type_str}, Default: {default_str}"
+            if description:
+                value += f", Description: {description}"
+            if annotations:
+                value += f", Annotations: {', '.join(annotations)}"
+
+            table_data[field_name] = value
+
+        # Use logger to display
+        logger.table(f"{cls.__name__} Schema", table_data)

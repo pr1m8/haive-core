@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 from haive.core.graph.node.types import CommandGoto, NodeType
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.WARNING)
 
 
 class NodeConfig(ABC, BaseModel):

@@ -10,7 +10,7 @@ import logging
 import time
 from collections import Counter, deque
 from datetime import datetime
-from typing import Deque, Dict, List
+from typing import Any, Deque, Dict, List
 
 from rich import box
 from rich.console import Console
@@ -50,11 +50,11 @@ class LoggingDashboard:
         self.running = False
 
         # Log data structures
-        self.log_buffer: Deque[Dict[str, any]] = deque(maxlen=1000)
-        self.filtered_logs: List[Dict[str, any]] = []
+        self.log_buffer: Deque[Dict[str, Any]] = deque(maxlen=1000)
+        self.filtered_logs: List[Dict[str, Any]] = []
         self.module_activity: Counter = Counter()
         self.level_counts: Counter = Counter()
-        self.error_buffer: Deque[Dict[str, any]] = deque(maxlen=50)
+        self.error_buffer: Deque[Dict[str, Any]] = deque(maxlen=50)
 
         # UI state
         self.active_panel = "logs"  # logs, config, modules, search
@@ -186,7 +186,7 @@ class LoggingDashboard:
         header.add_column(style="magenta", justify="center")
 
         header.add_row(
-            "🚀 HAIVE LOGGING DASHBOARD"RD",
+            "🚀 HAIVE LOGGING DASHBOARD",
             f"📊 Rate: {self.log_rate:.1f}/s",
             f"📝 Total: {len(self.log_buffer)}",
             f"🔍 Filtered: {len(self.filtered_logs)}",

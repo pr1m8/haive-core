@@ -8,7 +8,9 @@ or nodes that are Agents themselves, expanding them to show their complete inter
 import logging
 import os
 import uuid
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from dataclasses import dataclass
+from enum import Enum
+from typing import Any, Dict, List, NamedTuple, Optional, Set, Tuple, Union
 
 from langgraph.graph import END, START
 
@@ -24,36 +26,171 @@ from haive.core.utils.mermaid_utils import (
 logger = logging.getLogger(__name__)
 
 
+# Supporting data classes
+@dataclass
+class AgentInfo:
+    """Information about a detected agent node."""
+
+    node: Any
+    graph: Any
+    depth: int
+    parent_path: List[str]
+    reason: str
+
+
+@dataclass
+class VisualizationContext:
+    """Context object for tracking visualization state."""
+
+    processed_nodes: Set[str]
+    processed_edges: Set[str]
+    agent_graphs: Dict[str, AgentInfo]
+    node_mappings: Dict[str, str]
+    highlight_nodes: Set[str]
+    debug: bool = False
+
+
+class NodeStyle(Enum):
+    """Standardized node styles for consistent visualization."""
+
+    # Primary node types
+    ENGINE = "engineNode"
+    TOOL = "toolNode"
+    VALIDATION = "validationNode"
+    PARSER = "parserNode"
+    AGENT = "agentNode"
+    CALLABLE = "callableNode"
+
+    # Special nodes
+    START = "startNode"
+    END = "endNode"
+    ENTRY = "entryNode"
+    EXIT = "exitNode"
+
+    # States
+    HIGHLIGHT = "highlightNode"
+    ERROR = "errorNode"
+    SUCCESS = "successNode"
+
+
 class GraphVisualizer:
     """
     Enhanced visualization utilities with automatic Agent detection and expansion.
 
-    Detects:
-    1. EngineNodeConfig where engine.engine_type == 'agent'
-    2. Nodes that are Agent instances themselves
-    3. Any node with a graph attribute
+    Key features:
+    - Detects nodes that are Agents or contain Agent engines
+    - Recursively expands Agent graphs showing internal structure
+    - Consistent styling with professional color scheme
+    - Smart edge routing between parent and subgraphs
+    - Handles nested agents and complex hierarchies
     """
 
-    # Professional color scheme
-    NODE_COLORS = {
-        NodeType.ENGINE: "#2563EB",  # Blue
-        NodeType.TOOL: "#DC2626",  # Red
-        NodeType.VALIDATION: "#059669",  # Green
-        NodeType.SUBGRAPH: "#7C3AED",  # Purple (for agents)
-        NodeType.CALLABLE: "#0891B2",  # Cyan
-        NodeType.CUSTOM: "#BE185D",  # Pink
+    # Professional, accessible color palette
+    STYLE_DEFINITIONS = {
+        # Primary node types - using consistent, professional colors
+        NodeStyle.ENGINE: {
+            "fill": "#3B82F6",  # Blue
+            "stroke": "#1E40AF",
+            "color": "#FFFFFF",
+            "strokeWidth": "2px",
+        },
+        NodeStyle.TOOL: {
+            "fill": "#EF4444",  # Red
+            "stroke": "#991B1B",
+            "color": "#FFFFFF",
+            "strokeWidth": "2px",
+        },
+        NodeStyle.VALIDATION: {
+            "fill": "#10B981",  # Green
+            "stroke": "#047857",
+            "color": "#FFFFFF",
+            "strokeWidth": "2px",
+        },
+        NodeStyle.PARSER: {
+            "fill": "#F59E0B",  # Amber
+            "stroke": "#D97706",
+            "color": "#FFFFFF",
+            "strokeWidth": "2px",
+        },
+        NodeStyle.AGENT: {
+            "fill": "#8B5CF6",  # Purple
+            "stroke": "#6D28D9",
+            "color": "#FFFFFF",
+            "strokeWidth": "3px",
+            "fontWeight": "bold",
+        },
+        NodeStyle.CALLABLE: {
+            "fill": "#6B7280",  # Gray
+            "stroke": "#374151",
+            "color": "#FFFFFF",
+            "strokeWidth": "2px",
+        },
+        # Special nodes - consistent start/end styling
+        NodeStyle.START: {
+            "fill": "#059669",  # Emerald
+            "stroke": "#047857",
+            "color": "#FFFFFF",
+            "strokeWidth": "3px",
+            "fontWeight": "bold",
+        },
+        NodeStyle.END: {
+            "fill": "#DC2626",  # Red
+            "stroke": "#991B1B",
+            "color": "#FFFFFF",
+            "strokeWidth": "3px",
+            "fontWeight": "bold",
+        },
+        NodeStyle.ENTRY: {
+            "fill": "#10B981",  # Light green
+            "stroke": "#059669",
+            "color": "#FFFFFF",
+            "strokeWidth": "2px",
+        },
+        NodeStyle.EXIT: {
+            "fill": "#F87171",  # Light red
+            "stroke": "#DC2626",
+            "color": "#FFFFFF",
+            "strokeWidth": "2px",
+        },
+        # States
+        NodeStyle.HIGHLIGHT: {
+            "fill": "#FBBF24",  # Yellow
+            "stroke": "#F59E0B",
+            "color": "#000000",
+            "strokeWidth": "4px",
+            "fontWeight": "bold",
+        },
+        NodeStyle.ERROR: {
+            "fill": "#FCA5A5",
+            "stroke": "#DC2626",
+            "color": "#000000",
+            "strokeWidth": "3px",
+        },
+        NodeStyle.SUCCESS: {
+            "fill": "#86EFAC",
+            "stroke": "#10B981",
+            "color": "#000000",
+            "strokeWidth": "3px",
+        },
     }
 
-    # Special node colors
-    START_COLOR = "#065F46"  # Dark green
-    END_COLOR = "#991B1B"  # Dark red
-    HIGHLIGHT_COLOR = "#B45309"  # Orange
-
     # Subgraph styling
-    SUBGRAPH_BG = "#F3F4F6"
-    SUBGRAPH_BORDER = "#9CA3AF"
-    AGENT_BG = "#EDE9FE"  # Light purple for agent subgraphs
-    AGENT_BORDER = "#7C3AED"  # Purple border for agents
+    SUBGRAPH_STYLES = {
+        "agent": {
+            "fill": "#F3E8FF",  # Light purple background
+            "stroke": "#8B5CF6",  # Purple border
+            "strokeWidth": "3px",
+            "rx": "10",  # Rounded corners
+            "ry": "10",
+        },
+        "default": {
+            "fill": "#F9FAFB",  # Light gray
+            "stroke": "#6B7280",
+            "strokeWidth": "2px",
+            "rx": "5",
+            "ry": "5",
+        },
+    }
 
     @classmethod
     def generate_mermaid(
@@ -61,12 +198,11 @@ class GraphVisualizer:
         graph: Any,
         include_subgraphs: bool = True,
         highlight_nodes: Optional[List[str]] = None,
-        highlight_color: str = None,
         theme: str = "base",
-        subgraph_mode: str = "cluster",
-        show_default_branches: bool = True,
-        direction: str = "TD",
-        compact_mode: bool = False,
+        show_branch_labels: bool = True,
+        direction: str = "TB",
+        compact: bool = False,
+        max_depth: int = 3,
         debug: bool = False,
     ) -> str:
         """
@@ -76,483 +212,696 @@ class GraphVisualizer:
             graph: The graph to visualize
             include_subgraphs: Whether to expand Agent nodes
             highlight_nodes: Nodes to highlight
-            highlight_color: Color for highlights
             theme: Mermaid theme
-            subgraph_mode: How to display subgraphs
-            show_default_branches: Show default branch labels
-            direction: Graph direction
-            compact_mode: Use compact styling
+            show_branch_labels: Whether to show labels on conditional branches
+            direction: Graph direction (TB, LR, etc.)
+            compact: Use compact layout
+            max_depth: Maximum depth for nested agent expansion
             debug: Enable debug output
 
         Returns:
             Complete Mermaid diagram string
         """
         logger.info(
-            f"Starting Mermaid generation for graph: {getattr(graph, 'name', 'Unnamed')}"
+            f"Generating Mermaid for graph: {getattr(graph, 'name', 'Unnamed')}"
         )
 
-        if debug:
-            print("\n" + "=" * 80)
-            print(f"🎨 GRAPH VISUALIZATION DEBUG")
-            print("=" * 80)
-            print(f"Graph: {getattr(graph, 'name', 'Unnamed Graph')}")
-            print(f"Type: {type(graph).__name__}")
-            print(f"Include subgraphs: {include_subgraphs}")
-            print(f"Debug mode: {debug}")
-            print("=" * 80 + "\n")
-
-        highlight_color = highlight_color or cls.HIGHLIGHT_COLOR
-
         # Initialize diagram
-        lines = [
-            f'%%{{ init: {{ "theme": "{theme}", "flowchart": {{ "curve": "basis", "padding": 15, "nodeSpacing": 50, "rankSpacing": 80 }} }} }}%%',
-            f"flowchart {direction};",
-            "    %% === SAFE PROFESSIONAL STYLING ===",
-        ]
+        lines = cls._initialize_diagram(theme, direction, compact)
 
         # Add style definitions
         cls._add_style_definitions(lines)
 
-        # Track state
-        processed_nodes = set()
-        processed_edges = set()
-        agent_subgraphs = {}  # Map node_name -> (node, agent_graph)
-
-        # CRITICAL: Detect Agent nodes
-        if include_subgraphs:
-            logger.info("Detecting agent nodes...")
-            agent_subgraphs = cls._detect_agent_nodes(graph, debug)
-
-            if debug:
-                print(f"\n🤖 AGENT DETECTION RESULTS:")
-                print(f"   Found {len(agent_subgraphs)} agent nodes")
-                for name, (node, agent_graph) in agent_subgraphs.items():
-                    print(f"   - {name}: {type(node).__name__}")
-                    if agent_graph and hasattr(agent_graph, "nodes"):
-                        print(
-                            f"     └─ Internal nodes: {list(agent_graph.nodes.keys())}"
-                        )
-                print()
-
-        # Add START and END nodes
-        lines.append("    %% === MAIN GRAPH NODES ===")
-        lines.append('    START["START"]:::startNode;')
-        lines.append('    END["END"]:::endNode;')
-        processed_nodes.update(["START", "END"])
-
-        # Process main graph nodes
-        if hasattr(graph, "nodes"):
-            logger.info(f"Processing {len(graph.nodes)} main graph nodes")
-
-            for node_name, node in (graph.nodes or {}).items():
-                if node_name in (START, END, "__start__", "__end__"):
-                    continue
-
-                if debug:
-                    print(f"\n📍 Processing node: {node_name}")
-                    print(f"   Type: {type(node).__name__ if node else 'None'}")
-
-                # Check if this is an Agent node that should be expanded
-                if node_name in agent_subgraphs and include_subgraphs:
-                    node_obj, agent_graph = agent_subgraphs[node_name]
-
-                    if debug:
-                        print(f"   ✓ Expanding as agent subgraph")
-
-                    # Add as expanded subgraph
-                    cls._add_agent_subgraph(
-                        lines,
-                        node_name,
-                        node_obj,
-                        agent_graph,
-                        processed_nodes,
-                        processed_edges,
-                        debug,
-                    )
-                else:
-                    # Regular node
-                    safe_id = cls._get_safe_node_id(node_name)
-                    label = cls._sanitize_node_name(node_name)
-                    style = cls._get_node_style(node, graph, node_name)
-
-                    if debug:
-                        print(f"   → Regular node: {safe_id} [{label}] style={style}")
-
-                    lines.append(f'    {safe_id}["{label}"]:::{style};')
-                    processed_nodes.add(safe_id)
-
-        # Add edges
-        lines.append("")
-        lines.append("    %% === MAIN GRAPH EDGES ===")
-
-        if hasattr(graph, "edges"):
-            logger.info(f"Processing {len(graph.edges)} edges")
-
-            for source, target in graph.edges or []:
-                source_id = cls._get_edge_node_id(source, agent_subgraphs, "exit")
-                target_id = cls._get_edge_node_id(target, agent_subgraphs, "entry")
-
-                if debug:
-                    print(f"Edge: {source} ({source_id}) → {target} ({target_id})")
-
-                edge_key = f"{source_id}->{target_id}"
-                if edge_key not in processed_edges:
-                    lines.append(f"    {source_id} --> {target_id};")
-                    processed_edges.add(edge_key)
-
-        # Add branches
-        if hasattr(graph, "branches") and graph.branches:
-            lines.append("")
-            lines.append("    %% === CONDITIONAL BRANCHES ===")
-            logger.info(f"Processing {len(graph.branches)} branches")
-
-            for branch_id, branch in graph.branches.items():
-                cls._add_branch_edges(
-                    lines, branch, agent_subgraphs, processed_edges, branch_id, debug
-                )
-
-        # Add highlights
-        if highlight_nodes:
-            lines.append("")
-            lines.append("    %% === HIGHLIGHTS ===")
-            highlight_ids = []
-            for node in highlight_nodes:
-                if node in processed_nodes:
-                    highlight_ids.append(cls._get_safe_node_id(node))
-
-            if highlight_ids:
-                lines.append(f"    class {','.join(highlight_ids)} highlightNode;")
-
-        mermaid_code = "\n".join(lines)
-        logger.info(f"Generated Mermaid code: {len(mermaid_code)} characters")
-
-        if debug:
-            print("\n" + "=" * 80)
-            print("✅ VISUALIZATION COMPLETE")
-            print(f"   Total lines: {len(lines)}")
-            print(f"   Processed nodes: {len(processed_nodes)}")
-            print(f"   Processed edges: {len(processed_edges)}")
-            print(f"   Agent subgraphs: {len(agent_subgraphs)}")
-            print("=" * 80 + "\n")
-
-        return mermaid_code
-
-    @classmethod
-    def _detect_agent_nodes(
-        cls, graph: Any, debug: bool = False
-    ) -> Dict[str, Tuple[Any, Any]]:
-        """
-        Detect nodes that are Agents or have Agent engines.
-
-        Returns:
-            Dict mapping node_name -> (node_object, agent_graph)
-        """
-        agent_subgraphs = {}
-
-        if not hasattr(graph, "nodes"):
-            logger.warning("Graph has no nodes attribute")
-            return agent_subgraphs
-
-        logger.info(f"Checking {len(graph.nodes)} nodes for agents...")
-
-        for node_name, node in (graph.nodes or {}).items():
-            if node is None:
-                continue
-
-            if debug:
-                print(f"\n🔍 Checking node: {node_name}")
-                print(f"   Node type: {type(node).__name__}")
-
-            agent_graph = None
-            is_agent = False
-
-            # Method 1: Check if node is EngineNodeConfig with Agent engine
-            if (
-                hasattr(node, "__class__")
-                and "EngineNodeConfig" in node.__class__.__name__
-            ):
-                if debug:
-                    print(f"   → Node is EngineNodeConfig")
-
-                if hasattr(node, "engine") and node.engine:
-                    engine = node.engine
-
-                    if debug:
-                        print(f"   → Has engine: {type(engine).__name__}")
-
-                    # Check engine_type
-                    if hasattr(engine, "engine_type"):
-                        engine_type_value = None
-
-                        # Handle enum or string
-                        if hasattr(engine.engine_type, "value"):
-                            engine_type_value = engine.engine_type.value
-                        else:
-                            engine_type_value = str(engine.engine_type)
-
-                        if debug:
-                            print(f"   → Engine type: {engine_type_value}")
-
-                        if engine_type_value == "agent":
-                            is_agent = True
-                            logger.info(f"   ✓ Found agent engine in {node_name}")
-
-                            # Get the graph from the engine
-                            if hasattr(engine, "graph") and engine.graph:
-                                agent_graph = engine.graph
-                                if debug:
-                                    print(f"   → Got graph from engine.graph")
-                            elif hasattr(engine, "build_graph"):
-                                try:
-                                    if debug:
-                                        print(f"   → Attempting to build graph...")
-                                    agent_graph = engine.build_graph()
-                                    if debug:
-                                        print(f"   → Successfully built graph")
-                                except Exception as e:
-                                    logger.error(
-                                        f"Failed to build graph for {node_name}: {e}"
-                                    )
-                                    if debug:
-                                        print(f"   ⚠️ Failed to build graph: {e}")
-
-            # Method 2: Check if node itself is an Agent
-            if not is_agent:
-                # Check class name
-                class_name = type(node).__name__
-                if "Agent" in class_name:
-                    is_agent = True
-                    logger.info(f"   ✓ Node {node_name} is an Agent ({class_name})")
-
-                    if debug:
-                        print(f"   → Node class contains 'Agent': {class_name}")
-
-                # Check MRO
-                if not is_agent:
-                    for base in type(node).__mro__:
-                        if base.__name__ == "Agent":
-                            is_agent = True
-                            logger.info(f"   ✓ Node {node_name} inherits from Agent")
-
-                            if debug:
-                                print(f"   → Found Agent in MRO")
-                            break
-
-                # If it's an agent, get its graph
-                if is_agent:
-                    if hasattr(node, "graph") and node.graph:
-                        agent_graph = node.graph
-                        if debug:
-                            print(f"   → Got graph from node.graph")
-                    elif hasattr(node, "build_graph"):
-                        try:
-                            if debug:
-                                print(f"   → Attempting to build graph...")
-                            agent_graph = node.build_graph()
-                            if debug:
-                                print(f"   → Successfully built graph")
-                        except Exception as e:
-                            logger.error(f"Failed to build graph for {node_name}: {e}")
-                            if debug:
-                                print(f"   ⚠️ Failed to build graph: {e}")
-
-            # Method 3: Check for graph attribute directly
-            if not is_agent and not agent_graph:
-                if hasattr(node, "graph") and node.graph:
-                    is_agent = True
-                    agent_graph = node.graph
-                    logger.info(f"   ✓ Node {node_name} has graph attribute")
-
-                    if debug:
-                        print(f"   → Node has graph attribute")
-
-            # Store if we found an agent
-            if is_agent and agent_graph:
-                agent_subgraphs[node_name] = (node, agent_graph)
-
-                if debug:
-                    node_count = len(getattr(agent_graph, "nodes", {}))
-                    edge_count = len(getattr(agent_graph, "edges", []))
-                    print(
-                        f"   ✅ AGENT CONFIRMED: {node_count} nodes, {edge_count} edges"
-                    )
-            elif is_agent:
-                logger.warning(f"   ⚠️ Node {node_name} is agent but has no graph")
-                if debug:
-                    print(f"   ⚠️ Agent detected but no graph found")
-
-        logger.info(f"Agent detection complete: found {len(agent_subgraphs)} agents")
-        return agent_subgraphs
-
-    @classmethod
-    def _add_agent_subgraph(
-        cls,
-        lines: List[str],
-        node_name: str,
-        node: Any,
-        agent_graph: Any,
-        processed_nodes: Set[str],
-        processed_edges: Set[str],
-        debug: bool = False,
-    ):
-        """Add a complete Agent subgraph expansion."""
-        logger.info(f"Adding agent subgraph for: {node_name}")
-
-        subgraph_id = f"cluster_{cls._get_safe_node_id(node_name)}"
-        clean_name = cls._sanitize_node_name(node_name)
-
-        lines.append("")
-        lines.append(f"    %% === AGENT SUBGRAPH: {node_name} ===")
-        lines.append(f'    subgraph {subgraph_id}[" 🤖 {clean_name} Agent "]')
-        lines.append("        direction TB")
-
-        # Add entry/exit points
-        entry_id = f"{node_name}_entry"
-        exit_id = f"{node_name}_exit"
-        safe_entry = cls._get_safe_node_id(entry_id)
-        safe_exit = cls._get_safe_node_id(exit_id)
-
-        lines.append(f'        {safe_entry}["◉ Entry"]:::startNode;')
-        lines.append(f'        {safe_exit}["◉ Exit"]:::endNode;')
-        processed_nodes.update([safe_entry, safe_exit])
-
-        if debug:
-            print(f"\n📦 Building subgraph for: {node_name}")
-            print(f"   Entry: {safe_entry}")
-            print(f"   Exit: {safe_exit}")
-
-        # Map internal nodes
-        internal_node_map = {}
-
-        # Add internal nodes
-        if hasattr(agent_graph, "nodes"):
-            internal_nodes = agent_graph.nodes or {}
-            logger.info(f"   Adding {len(internal_nodes)} internal nodes")
-
-            for int_name, int_node in internal_nodes.items():
-                if int_name in (START, END, "__start__", "__end__"):
-                    continue
-
-                int_safe_id = f"{node_name}_{cls._get_safe_node_id(int_name)}"
-                int_label = cls._sanitize_node_name(int_name)
-                int_style = cls._get_node_style(int_node, agent_graph, int_name)
-
-                if debug:
-                    print(f"   + Internal node: {int_name} → {int_safe_id}")
-
-                lines.append(f'        {int_safe_id}["{int_label}"]:::{int_style};')
-                processed_nodes.add(int_safe_id)
-                internal_node_map[int_name] = int_safe_id
-
-        # Add internal edges
-        if hasattr(agent_graph, "edges"):
-            internal_edges = agent_graph.edges or []
-            logger.info(f"   Adding {len(internal_edges)} internal edges")
-
-            for source, target in internal_edges:
-                # Map START/END to entry/exit
-                if source in (START, "__start__"):
-                    source_id = safe_entry
-                elif source in internal_node_map:
-                    source_id = internal_node_map[source]
-                else:
-                    logger.warning(f"   Unknown source node: {source}")
-                    continue
-
-                if target in (END, "__end__"):
-                    target_id = safe_exit
-                elif target in internal_node_map:
-                    target_id = internal_node_map[target]
-                else:
-                    logger.warning(f"   Unknown target node: {target}")
-                    continue
-
-                edge_key = f"{source_id}->{target_id}"
-                if edge_key not in processed_edges:
-                    lines.append(f"        {source_id} --> {target_id};")
-                    processed_edges.add(edge_key)
-
-                    if debug:
-                        print(f"   + Internal edge: {source} → {target}")
-
-        # Add internal branches
-        if hasattr(agent_graph, "branches") and agent_graph.branches:
-            logger.info(f"   Adding {len(agent_graph.branches)} internal branches")
-
-            for branch_id, branch in agent_graph.branches.items():
-                source_node = getattr(branch, "source_node", None)
-                if source_node and source_node in internal_node_map:
-                    source_id = internal_node_map[source_node]
-
-                    destinations = cls._get_branch_destinations(branch)
-                    for condition, target in destinations.items():
-                        if target in (END, "__end__"):
-                            target_id = safe_exit
-                        elif target in internal_node_map:
-                            target_id = internal_node_map[target]
-                        else:
-                            continue
-
-                        condition_label = cls._format_condition_label(condition)
-                        edge_key = f"{source_id}-->{target_id}_{condition}"
-
-                        if edge_key not in processed_edges:
-                            lines.append(
-                                f'        {source_id} -.->|"{condition_label}"| {target_id};'
-                            )
-                            processed_edges.add(edge_key)
-
-                            if debug:
-                                print(
-                                    f"   + Internal branch: {source_node} --{condition}--> {target}"
-                                )
-
-        lines.append("    end")
-
-        # Style the subgraph
-        lines.append(
-            f"    style {subgraph_id} fill:{cls.AGENT_BG},stroke:{cls.AGENT_BORDER},stroke-width:3px;"
+        # Initialize tracking
+        context = VisualizationContext(
+            processed_nodes=set(),
+            processed_edges=set(),
+            agent_graphs={},
+            node_mappings={},
+            highlight_nodes=set(highlight_nodes or []),
+            debug=debug,
         )
 
-        # Mark this node as processed
-        processed_nodes.add(cls._get_safe_node_id(node_name))
+        # Detect all agent nodes if subgraphs enabled
+        if include_subgraphs:
+            context.agent_graphs = cls._detect_all_agents(graph, max_depth, debug)
 
-        logger.info(f"   Agent subgraph complete for: {node_name}")
+        # Build the graph recursively
+        cls._build_graph(lines, graph, context, depth=0, parent_prefix="")
+
+        # Add any global highlights
+        if context.highlight_nodes:
+            cls._add_highlights(lines, context)
+
+        return "\n".join(lines)
+
+    @classmethod
+    def _initialize_diagram(
+        cls, theme: str, direction: str, compact: bool
+    ) -> List[str]:
+        """Initialize the Mermaid diagram with settings."""
+        spacing = "30" if compact else "50"
+        padding = "10" if compact else "15"
+
+        return [
+            f"%%{{ init: {{ "
+            f'"theme": "{theme}", '
+            f'"flowchart": {{ '
+            f'"curve": "basis", '
+            f'"padding": {padding}, '
+            f'"nodeSpacing": {spacing}, '
+            f'"rankSpacing": {int(spacing) * 1.6}, '
+            f'"htmlLabels": true '
+            f"}} }} }}%%",
+            f"flowchart {direction}",
+            "",
+        ]
 
     @classmethod
     def _add_style_definitions(cls, lines: List[str]):
-        """Add all style class definitions."""
-        # Node type styles
-        for node_type, color in cls.NODE_COLORS.items():
-            class_name = f"nodeType{node_type.value.capitalize()}"
+        """Add comprehensive style definitions."""
+        lines.append("    %% ===== STYLE DEFINITIONS =====")
+
+        for style, config in cls.STYLE_DEFINITIONS.items():
+            class_name = style.value
+            style_parts = []
+
+            # Build style string
+            for prop, value in config.items():
+                if prop == "fill":
+                    style_parts.append(f"fill:{value}")
+                elif prop == "stroke":
+                    style_parts.append(f"stroke:{value}")
+                elif prop == "color":
+                    style_parts.append(f"color:{value}")
+                elif prop == "strokeWidth":
+                    style_parts.append(f"stroke-width:{value}")
+                elif prop == "fontWeight":
+                    style_parts.append(f"font-weight:{value}")
+
+            # Add font family for consistency
+            style_parts.append("font-family:system-ui,-apple-system,sans-serif")
+
+            lines.append(f"    classDef {class_name} {','.join(style_parts)}")
+
+        lines.append("")
+
+    @classmethod
+    def _detect_all_agents(
+        cls, graph: Any, max_depth: int, debug: bool, current_depth: int = 0
+    ) -> Dict[str, AgentInfo]:
+        """
+        Recursively detect all agent nodes in the graph and nested subgraphs.
+
+        Returns:
+            Dict mapping node_id -> AgentInfo(node, graph, depth, parent_path)
+        """
+        agents = {}
+
+        if current_depth >= max_depth:
+            logger.warning(f"Max depth {max_depth} reached, stopping agent detection")
+            return agents
+
+        if not hasattr(graph, "nodes"):
+            return agents
+
+        logger.info(
+            f"Detecting agents at depth {current_depth} in {getattr(graph, 'name', 'Unknown')}"
+        )
+
+        for node_name, node in (graph.nodes or {}).items():
+            if node is None or node_name in (START, END):
+                continue
+
+            agent_info = cls._check_if_agent(node, node_name, debug)
+
+            if agent_info:
+                node_id = f"depth{current_depth}_{node_name}"
+                agents[node_id] = AgentInfo(
+                    node=node,
+                    graph=agent_info["graph"],
+                    depth=current_depth,
+                    parent_path=[node_name],
+                    reason=agent_info["reason"],
+                )
+
+                # Recursively check the agent's graph
+                if agent_info["graph"]:
+                    nested_agents = cls._detect_all_agents(
+                        agent_info["graph"], max_depth, debug, current_depth + 1
+                    )
+
+                    # Add nested agents with updated paths
+                    for nested_id, nested_info in nested_agents.items():
+                        full_path = [node_name] + nested_info.parent_path
+                        agents[f"{node_name}_{nested_id}"] = AgentInfo(
+                            node=nested_info.node,
+                            graph=nested_info.graph,
+                            depth=nested_info.depth,
+                            parent_path=full_path,
+                            reason=nested_info.reason,
+                        )
+
+        logger.info(f"Found {len(agents)} agents at depth {current_depth}")
+        return agents
+
+    @classmethod
+    def _check_if_agent(
+        cls, node: Any, node_name: str, debug: bool
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Comprehensive check if a node is an agent with detailed detection logic.
+
+        Returns:
+            Dict with 'graph' and 'reason' if agent, None otherwise
+        """
+        if debug:
+            logger.debug(f"Checking if '{node_name}' is an agent...")
+
+        # Method 1: Direct Agent class check
+        if cls._is_agent_class(node):
+            graph = cls._get_graph_from_object(node, debug)
+            if graph:
+                return {"graph": graph, "reason": "direct_agent_class"}
+
+        # Method 2: EngineNodeConfig with Agent engine
+        if hasattr(node, "__class__") and "EngineNodeConfig" in node.__class__.__name__:
+            if hasattr(node, "engine") and node.engine:
+                engine = node.engine
+
+                # Check engine type
+                engine_type = cls._get_engine_type(engine)
+                if engine_type == "agent":
+                    graph = cls._get_graph_from_object(engine, debug)
+                    if graph:
+                        return {"graph": graph, "reason": "engine_type_agent"}
+
+                # Check if engine is Agent class
+                if cls._is_agent_class(engine):
+                    graph = cls._get_graph_from_object(engine, debug)
+                    if graph:
+                        return {"graph": graph, "reason": "engine_is_agent_class"}
+
+        # Method 3: Any object with a graph attribute
+        if hasattr(node, "graph") and node.graph:
+            return {"graph": node.graph, "reason": "has_graph_attribute"}
+
+        # Method 4: Check for agent-like attributes
+        agent_attributes = ["build_graph", "setup_workflow", "compile", "invoke"]
+        matching_attrs = [attr for attr in agent_attributes if hasattr(node, attr)]
+
+        if len(matching_attrs) >= 2:  # Has multiple agent-like attributes
+            graph = cls._get_graph_from_object(node, debug)
+            if graph:
+                return {
+                    "graph": graph,
+                    "reason": f'agent_attributes:{",".join(matching_attrs)}',
+                }
+
+        return None
+
+    @classmethod
+    def _is_agent_class(cls, obj: Any) -> bool:
+        """Check if object is an Agent class or instance."""
+        if obj is None:
+            return False
+
+        # Check class name
+        class_name = type(obj).__name__
+        if "Agent" in class_name:
+            return True
+
+        # Check MRO
+        for base in type(obj).__mro__:
+            if base.__name__ == "Agent":
+                return True
+
+        return False
+
+    @classmethod
+    def _get_engine_type(cls, engine: Any) -> Optional[str]:
+        """Extract engine type from an engine object."""
+        if hasattr(engine, "engine_type"):
+            engine_type = engine.engine_type
+
+            # Handle enum
+            if hasattr(engine_type, "value"):
+                return engine_type.value
+            else:
+                return str(engine_type)
+
+        return None
+
+    @classmethod
+    def _get_graph_from_object(cls, obj: Any, debug: bool) -> Optional[Any]:
+        """Try to get a graph from an object using various methods."""
+        # Direct graph attribute
+        if hasattr(obj, "graph") and obj.graph:
+            if debug:
+                logger.debug(f"Got graph from {type(obj).__name__}.graph")
+            return obj.graph
+
+        # Try to build graph
+        if hasattr(obj, "build_graph"):
+            try:
+                if debug:
+                    logger.debug(
+                        f"Attempting to build graph from {type(obj).__name__}.build_graph()"
+                    )
+                graph = obj.build_graph()
+                if graph:
+                    return graph
+            except Exception as e:
+                logger.warning(f"Failed to build graph: {e}")
+
+        # Try to get compiled graph
+        if hasattr(obj, "compile"):
+            try:
+                if debug:
+                    logger.debug(
+                        f"Attempting to compile graph from {type(obj).__name__}.compile()"
+                    )
+                compiled = obj.compile()
+                if hasattr(compiled, "graph"):
+                    return compiled.graph
+            except Exception as e:
+                logger.warning(f"Failed to compile graph: {e}")
+
+        return None
+
+    @classmethod
+    def _build_graph(
+        cls,
+        lines: List[str],
+        graph: Any,
+        context: VisualizationContext,
+        depth: int = 0,
+        parent_prefix: str = "",
+        subgraph_id: Optional[str] = None,
+    ):
+        """Recursively build the graph with proper node and edge handling."""
+        indent = "    " * (depth + 1)
+
+        # Add section comment
+        graph_name = getattr(graph, "name", "Unnamed Graph")
+        if depth == 0:
+            lines.append(f"{indent}%% ===== MAIN GRAPH: {graph_name} =====")
+        else:
             lines.append(
-                f"    classDef {class_name} fill:{color},stroke:white,stroke-width:2px,color:white,font-weight:500,font-size:13px,font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;"
+                f"{indent}%% ===== SUBGRAPH: {graph_name} (depth={depth}) ====="
             )
 
-        # Special styles
+        # Process nodes
+        if hasattr(graph, "nodes"):
+            cls._process_nodes(lines, graph, context, depth, parent_prefix, subgraph_id)
+
+        # Process edges
+        if hasattr(graph, "edges"):
+            cls._process_edges(lines, graph, context, depth, parent_prefix)
+
+        # Process branches
+        if hasattr(graph, "branches"):
+            cls._process_branches(lines, graph, context, depth, parent_prefix)
+
+    @classmethod
+    def _process_nodes(
+        cls,
+        lines: List[str],
+        graph: Any,
+        context: VisualizationContext,
+        depth: int,
+        parent_prefix: str,
+        subgraph_id: Optional[str],
+    ):
+        """Process all nodes in a graph."""
+        indent = "    " * (depth + 1)
+
+        # Add START and END nodes for main graph or subgraphs
+        if depth == 0 or subgraph_id:
+            start_id = f"{parent_prefix}START" if parent_prefix else "START"
+            end_id = f"{parent_prefix}END" if parent_prefix else "END"
+
+            # Use consistent shapes for START/END
+            lines.append(f'{indent}{start_id}(["▶ START"]):::{NodeStyle.START.value}')
+            lines.append(f'{indent}{end_id}(["■ END"]):::{NodeStyle.END.value}')
+
+            context.processed_nodes.add(start_id)
+            context.processed_nodes.add(end_id)
+            context.node_mappings[f"{parent_prefix}START"] = start_id
+            context.node_mappings[f"{parent_prefix}END"] = end_id
+
+        for node_name, node in (graph.nodes or {}).items():
+            if node_name in (START, END, "__start__", "__end__"):
+                continue
+
+            node_id = f"{parent_prefix}{cls._get_safe_node_id(node_name)}"
+
+            # Check if this is an agent node to expand
+            agent_key = cls._find_agent_key(
+                node_name, parent_prefix, context.agent_graphs
+            )
+
+            if agent_key and agent_key in context.agent_graphs:
+                # This is an agent - create a subgraph
+                agent_info = context.agent_graphs[agent_key]
+                cls._create_agent_subgraph(
+                    lines, node_name, node_id, agent_info, context, depth, parent_prefix
+                )
+            else:
+                # Regular node
+                cls._add_regular_node(
+                    lines, node_name, node_id, node, graph, context, depth
+                )
+
+    @classmethod
+    def _add_regular_node(
+        cls,
+        lines: List[str],
+        node_name: str,
+        node_id: str,
+        node: Any,
+        graph: Any,
+        context: VisualizationContext,
+        depth: int,
+    ):
+        """Add a regular (non-agent) node."""
+        indent = "    " * (depth + 1)
+
+        # Get node style
+        style = cls._determine_node_style(node, graph, node_name)
+
+        # Get node label
+        label = cls._create_node_label(node_name, node)
+
+        # Determine shape based on style
+        if style == NodeStyle.START or style == NodeStyle.END:
+            shape_start, shape_end = '(["', '"])'
+        elif style == NodeStyle.TOOL:
+            shape_start, shape_end = '[["', '"]]'  # Stadium shape for tools
+        elif style == NodeStyle.VALIDATION:
+            shape_start, shape_end = '{"', '"}'  # Diamond for validation
+        elif style == NodeStyle.AGENT:
+            shape_start, shape_end = '(("', '"))'  # Circle for agents
+        else:
+            shape_start, shape_end = '["', '"]'  # Default rectangle
+
+        # Add highlight if needed
+        if node_name in context.highlight_nodes:
+            style = NodeStyle.HIGHLIGHT
+
         lines.append(
-            f"    classDef startNode fill:{cls.START_COLOR},stroke:white,stroke-width:2px,color:white,font-weight:bold,font-size:14px;"
+            f"{indent}{node_id}{shape_start}{label}{shape_end}:::{style.value}"
         )
+
+        context.processed_nodes.add(node_id)
+        context.node_mappings[f"{node_id}_base"] = node_id
+
+    @classmethod
+    def _create_agent_subgraph(
+        cls,
+        lines: List[str],
+        node_name: str,
+        node_id: str,
+        agent_info: AgentInfo,
+        context: VisualizationContext,
+        depth: int,
+        parent_prefix: str,
+    ):
+        """Create an expanded agent subgraph."""
+        indent = "    " * (depth + 1)
+        subgraph_id = f"subgraph_{node_id}"
+
+        # Create subgraph
+        lines.append("")
         lines.append(
-            f"    classDef endNode fill:{cls.END_COLOR},stroke:white,stroke-width:2px,color:white,font-weight:bold,font-size:14px;"
+            f'{indent}subgraph {subgraph_id}["🤖 {cls._sanitize_label(node_name)} Agent"]'
         )
-        lines.append(
-            f"    classDef highlightNode fill:{cls.HIGHLIGHT_COLOR},stroke:white,stroke-width:3px,color:white,font-weight:bold;"
-        )
-        lines.append(
-            f"    classDef subgraphNode fill:{cls.SUBGRAPH_BG},stroke:{cls.SUBGRAPH_BORDER},stroke-width:2px,color:#374151;"
-        )
+        lines.append(f"{indent}    direction TB")
+
+        # Create entry/exit nodes for the subgraph
+        entry_id = f"{node_id}_entry"
+        exit_id = f"{node_id}_exit"
+
+        lines.append(f'{indent}    {entry_id}(["◉ Entry"]):::{NodeStyle.ENTRY.value}')
+        lines.append(f'{indent}    {exit_id}(["◉ Exit"]):::{NodeStyle.EXIT.value}')
+
+        context.processed_nodes.update([entry_id, exit_id])
+        context.node_mappings[f"{node_id}_entry"] = entry_id
+        context.node_mappings[f"{node_id}_exit"] = exit_id
+
+        # Recursively build the agent's internal graph
+        if agent_info.graph:
+            # Map internal START/END to entry/exit
+            internal_prefix = f"{node_id}_"
+            context.node_mappings[f"{internal_prefix}START"] = entry_id
+            context.node_mappings[f"{internal_prefix}END"] = exit_id
+
+            cls._build_graph(
+                lines,
+                agent_info.graph,
+                context,
+                depth + 1,
+                internal_prefix,
+                subgraph_id,
+            )
+
+        lines.append(f"{indent}end")
+
+        # Style the subgraph
+        style = cls.SUBGRAPH_STYLES["agent"]
+        style_str = f"fill:{style['fill']},stroke:{style['stroke']},stroke-width:{style['strokeWidth']}"
+        lines.append(f"{indent}style {subgraph_id} {style_str}")
+
+        # Mark the original node as processed
+        context.processed_nodes.add(node_id)
+
+    @classmethod
+    def _process_edges(
+        cls,
+        lines: List[str],
+        graph: Any,
+        context: VisualizationContext,
+        depth: int,
+        parent_prefix: str,
+    ):
+        """Process all edges in a graph."""
+        indent = "    " * (depth + 1)
+
+        if not hasattr(graph, "edges"):
+            return
+
+        lines.append(f"{indent}%% --- Edges ---")
+
+        for source, target in graph.edges or []:
+            source_id = cls._resolve_node_id(source, parent_prefix, context)
+            target_id = cls._resolve_node_id(target, parent_prefix, context)
+
+            if source_id and target_id:
+                edge_key = f"{source_id}->{target_id}"
+                if edge_key not in context.processed_edges:
+                    lines.append(f"{indent}{source_id} --> {target_id}")
+                    context.processed_edges.add(edge_key)
+
+    @classmethod
+    def _process_branches(
+        cls,
+        lines: List[str],
+        graph: Any,
+        context: VisualizationContext,
+        depth: int,
+        parent_prefix: str,
+    ):
+        """Process all conditional branches in a graph."""
+        indent = "    " * (depth + 1)
+
+        if not hasattr(graph, "branches") or not graph.branches:
+            return
+
+        lines.append(f"{indent}%% --- Conditional Branches ---")
+
+        for branch_id, branch in (graph.branches or {}).items():
+            source = getattr(branch, "source_node", None)
+            if not source:
+                continue
+
+            source_id = cls._resolve_node_id(source, parent_prefix, context)
+            if not source_id:
+                continue
+
+            # Get destinations
+            destinations = cls._get_branch_destinations(branch)
+
+            for condition, target in destinations.items():
+                target_id = cls._resolve_node_id(target, parent_prefix, context)
+                if not target_id:
+                    continue
+
+                # Format condition label
+                label = cls._format_condition_label(condition)
+
+                # Create dotted edge for conditional
+                edge_key = f"{source_id}-.{condition}.->{target_id}"
+                if edge_key not in context.processed_edges:
+                    lines.append(f'{indent}{source_id} -.->|"{label}"| {target_id}')
+                    context.processed_edges.add(edge_key)
+
+    @classmethod
+    def _resolve_node_id(
+        cls, node_name: str, parent_prefix: str, context: VisualizationContext
+    ) -> Optional[str]:
+        """Resolve a node name to its actual ID in the graph."""
+        # Handle START/END
+        if node_name in (START, "__start__", "START"):
+            key = f"{parent_prefix}START"
+            return context.node_mappings.get(key, "START")
+        elif node_name in (END, "__end__", "END"):
+            key = f"{parent_prefix}END"
+            return context.node_mappings.get(key, "END")
+
+        # Check if node is an agent with entry/exit
+        node_id = f"{parent_prefix}{cls._get_safe_node_id(node_name)}"
+
+        # Check if this is an agent node (would have entry/exit)
+        if f"{node_id}_entry" in context.processed_nodes:
+            # This is an agent - return the exit node for connections
+            return f"{node_id}_exit"
+
+        # Regular node
+        if node_id in context.processed_nodes:
+            return node_id
+
+        # Try without prefix
+        safe_id = cls._get_safe_node_id(node_name)
+        if safe_id in context.processed_nodes:
+            return safe_id
+
+        logger.warning(f"Could not resolve node: {node_name} (prefix={parent_prefix})")
+        return None
+
+    @classmethod
+    def _find_agent_key(
+        cls, node_name: str, parent_prefix: str, agent_graphs: Dict[str, AgentInfo]
+    ) -> Optional[str]:
+        """Find the agent key for a given node."""
+        # Try exact match with prefix
+        for key in agent_graphs:
+            if key.endswith(f"_{node_name}") or key == f"depth0_{node_name}":
+                return key
+
+        return None
+
+    @classmethod
+    def _determine_node_style(cls, node: Any, graph: Any, node_name: str) -> NodeStyle:
+        """Determine the appropriate style for a node."""
+        # Check node_types mapping first
+        if hasattr(graph, "node_types") and node_name in graph.node_types:
+            node_type = graph.node_types[node_name]
+            if hasattr(node_type, "value"):
+                type_str = node_type.value.upper()
+                if hasattr(NodeStyle, type_str):
+                    return NodeStyle[type_str]
+
+        # Check node.node_type
+        if hasattr(node, "node_type"):
+            if hasattr(node.node_type, "value"):
+                type_str = node.node_type.value.upper()
+                if hasattr(NodeStyle, type_str):
+                    return NodeStyle[type_str]
+
+        # Pattern matching on class name
+        if node is not None:
+            class_name = type(node).__name__.lower()
+            if "tool" in class_name:
+                return NodeStyle.TOOL
+            elif "validation" in class_name or "validator" in class_name:
+                return NodeStyle.VALIDATION
+            elif "parser" in class_name or "parse" in class_name:
+                return NodeStyle.PARSER
+            elif "agent" in class_name:
+                return NodeStyle.AGENT
+            elif "engine" in class_name:
+                return NodeStyle.ENGINE
+
+        # Pattern matching on node name
+        node_name_lower = node_name.lower()
+        if "tool" in node_name_lower:
+            return NodeStyle.TOOL
+        elif "validat" in node_name_lower:
+            return NodeStyle.VALIDATION
+        elif "parse" in node_name_lower:
+            return NodeStyle.PARSER
+        elif "agent" in node_name_lower:
+            return NodeStyle.AGENT
+
+        # Default
+        return NodeStyle.CALLABLE
+
+    @classmethod
+    def _create_node_label(cls, node_name: str, node: Any) -> str:
+        """Create a clean, readable label for a node."""
+        # Get base label
+        label = cls._sanitize_label(node_name)
+
+        # Add icon based on node type
+        if node is not None:
+            class_name = type(node).__name__.lower()
+            if "tool" in class_name or "tool" in node_name.lower():
+                label = f"🔧 {label}"
+            elif "validation" in class_name or "validat" in node_name.lower():
+                label = f"✓ {label}"
+            elif "parser" in class_name or "parse" in node_name.lower():
+                label = f"📝 {label}"
+            elif "agent" in class_name or "agent" in node_name.lower():
+                label = f"🤖 {label}"
+            elif "engine" in class_name:
+                label = f"⚙️ {label}"
+
+        return label
+
+    @classmethod
+    def _sanitize_label(cls, text: str) -> str:
+        """Create a clean, readable label from text."""
+        # Handle special cases
+        if text.upper() in ("START", "__START__"):
+            return "START"
+        if text.upper() in ("END", "__END__"):
+            return "END"
+
+        # Clean up underscores and common suffixes
+        label = text.replace("_", " ").strip()
+
+        # Remove common suffixes
+        for suffix in ["node", "Node", "_node"]:
+            if label.endswith(suffix):
+                label = label[: -len(suffix)].strip()
+
+        # Title case
+        label = " ".join(word.capitalize() for word in label.split())
+
+        # Common replacements
+        replacements = {
+            "Agent Node": "Agent",
+            "Tool Node": "Tools",
+            "Parse Output": "Parser",
+            "Validation Node": "Validator",
+        }
+
+        for old, new in replacements.items():
+            label = label.replace(old, new)
+
+        return label
 
     @classmethod
     def _get_safe_node_id(cls, node_name: str) -> str:
         """Convert node name to safe Mermaid ID."""
-        if node_name in ("START", "__start__"):
+        # Special handling
+        if node_name.upper() in ("START", "__START__"):
             return "START"
-        if node_name in ("END", "__end__"):
-            return "node_END"  # Avoid keyword collision
+        if node_name.upper() in ("END", "__END__"):
+            return "END"
 
-        # Replace problematic characters
-        safe_id = str(node_name)
+        # Remove problematic characters
+        safe_id = node_name
         for char in " -./\\:()[]{}@#$%^&*+=|<>?~`\"',;!":
             safe_id = safe_id.replace(char, "_")
 
@@ -561,130 +910,16 @@ class GraphVisualizer:
             safe_id = f"node_{safe_id}"
 
         # Handle reserved words
-        reserved = {
-            "end",
-            "subgraph",
-            "class",
-            "classDef",
-            "click",
-            "style",
-            "graph",
-            "flowchart",
-        }
+        reserved = {"end", "subgraph", "class", "classDef", "click", "style"}
         if safe_id.lower() in reserved:
             safe_id = f"node_{safe_id}"
 
         return safe_id
 
     @classmethod
-    def _get_edge_node_id(
-        cls, node_name: str, agent_subgraphs: Dict[str, Tuple[Any, Any]], suffix: str
-    ) -> str:
-        """Get node ID for edge connections, handling agent subgraphs."""
-        if node_name in (START, "__start__"):
-            return "START"
-        if node_name in (END, "__end__"):
-            return "node_END"
-
-        # If it's an agent node, connect to entry/exit
-        if node_name in agent_subgraphs:
-            return cls._get_safe_node_id(f"{node_name}_{suffix}")
-
-        return cls._get_safe_node_id(node_name)
-
-    @classmethod
-    def _sanitize_node_name(cls, name: str) -> str:
-        """Create clean, readable node label."""
-        if name in ("__start__", "START"):
-            return "START"
-        if name in ("__end__", "END"):
-            return "END"
-
-        # Clean up
-        clean_name = name.replace("_", " ").strip()
-        clean_name = clean_name.title()
-
-        # Common replacements
-        replacements = {
-            "Agent Node": "Agent",
-            "Tool Node": "Tools",
-            "Parse Output": "Parser",
-            "Validation Node": "Validator",
-            "Engine Node": "Engine",
-        }
-
-        for old, new in replacements.items():
-            clean_name = clean_name.replace(old, new)
-
-        return clean_name
-
-    @classmethod
-    def _get_node_style(cls, node: Any, graph: Any, node_name: str) -> str:
-        """Determine the style class for a node."""
-        # Check node_types mapping
-        if hasattr(graph, "node_types") and node_name in graph.node_types:
-            node_type = graph.node_types[node_name]
-            return f"nodeType{node_type.value.capitalize()}"
-
-        # Check node.node_type
-        if hasattr(node, "node_type"):
-            return f"nodeType{node.node_type.value.capitalize()}"
-
-        # Pattern matching
-        if node is not None:
-            class_name = type(node).__name__.lower()
-            if "tool" in class_name:
-                return "nodeTypeTool"
-            elif "validation" in class_name:
-                return "nodeTypeValidation"
-            elif "agent" in class_name:
-                return "nodeTypeSubgraph"
-
-        # Default
-        return "nodeTypeEngine"
-
-    @classmethod
-    def _add_branch_edges(
-        cls,
-        lines: List[str],
-        branch: Any,
-        agent_subgraphs: Dict[str, Tuple[Any, Any]],
-        processed_edges: Set[str],
-        branch_id: str,
-        debug: bool = False,
-    ):
-        """Add conditional branch edges."""
-        source = getattr(branch, "source_node", None)
-        if not source:
-            return
-
-        source_id = cls._get_edge_node_id(source, agent_subgraphs, "exit")
-        destinations = cls._get_branch_destinations(branch)
-
-        # Add comment
-        lines.append(f"    %% Branch: {branch_id}")
-
-        if debug:
-            print(f"\n🔀 Branch: {branch_id}")
-            print(f"   Source: {source} ({source_id})")
-
-        for condition, target in destinations.items():
-            target_id = cls._get_edge_node_id(target, agent_subgraphs, "entry")
-            condition_label = cls._format_condition_label(condition)
-
-            if debug:
-                print(f"   {condition} → {target} ({target_id})")
-
-            edge_key = f"{source_id}-->{target_id}_{condition}"
-            if edge_key not in processed_edges:
-                lines.append(f'    {source_id} -.->|"{condition_label}"| {target_id};')
-                processed_edges.add(edge_key)
-
-    @classmethod
     def _get_branch_destinations(cls, branch: Any) -> Dict[str, str]:
-        """Extract destinations from branch object."""
-        # Try different attributes
-        for attr in ["destinations", "condition_map", "routes"]:
+        """Extract destinations from a branch object."""
+        for attr in ["destinations", "condition_map", "routes", "ends"]:
             if hasattr(branch, attr):
                 dest = getattr(branch, attr)
                 if isinstance(dest, dict):
@@ -692,28 +927,70 @@ class GraphVisualizer:
         return {}
 
     @classmethod
-    def _format_condition_label(cls, condition: str) -> str:
-        """Format condition label for display."""
-        condition_str = str(condition)
+    def _format_condition_label(cls, condition: Any) -> str:
+        """Format a condition into a readable label."""
+        condition_str = str(condition).lower()
 
-        # Boolean values
-        if condition_str.lower() == "true":
-            return "✓ Yes"
-        elif condition_str.lower() == "false":
-            return "✗ No"
-
-        # Common patterns
-        replacements = {
+        # Enhanced condition mapping
+        label_map = {
+            # Boolean
+            "true": "✓ Yes",
+            "false": "✗ No",
+            # Validation
             "has_errors": "❌ Has Errors",
-            "no_errors": "✅ No Errors",
+            "no_errors": "✅ Valid",
+            "validation_passed": "✅ Passed",
+            "validation_failed": "❌ Failed",
+            # Tools
+            "has_tool_calls": "🔧 Has Tools",
+            "no_tool_calls": "📄 No Tools",
             "tool_node": "🔧 Use Tools",
-            "parse_output": "📝 Parse Output",
-            "validation_passed": "✅ Valid",
-            "validation_failed": "❌ Invalid",
+            # Parsing
+            "parse_output": "📝 Parse",
+            "needs_parsing": "📝 Parse Required",
+            # Flow control
+            "continue": "➡️ Continue",
+            "retry": "🔄 Retry",
             "default": "📍 Default",
+            "fallback": "↩️ Fallback",
+            # Success/Error
+            "success": "✅ Success",
+            "error": "❌ Error",
+            "failed": "❌ Failed",
         }
 
-        return replacements.get(condition_str, condition_str.replace("_", " ").title())
+        # Check exact match
+        if condition_str in label_map:
+            return label_map[condition_str]
+
+        # Check partial matches
+        for key, label in label_map.items():
+            if key in condition_str:
+                return label
+
+        # Default formatting
+        return str(condition).replace("_", " ").title()
+
+    @classmethod
+    def _add_highlights(cls, lines: List[str], context: VisualizationContext):
+        """Add highlight styling for specified nodes."""
+        if not context.highlight_nodes:
+            return
+
+        lines.append("")
+        lines.append("    %% ===== HIGHLIGHTS =====")
+
+        highlight_ids = []
+        for node_name in context.highlight_nodes:
+            # Find all variations of this node in processed nodes
+            for processed_id in context.processed_nodes:
+                if node_name in processed_id or processed_id.endswith(f"_{node_name}"):
+                    highlight_ids.append(processed_id)
+
+        if highlight_ids:
+            lines.append(
+                f"    class {','.join(highlight_ids)} {NodeStyle.HIGHLIGHT.value}"
+            )
 
     @classmethod
     def display_graph(
@@ -728,7 +1005,7 @@ class GraphVisualizer:
         theme: str = "base",
         subgraph_mode: str = "cluster",
         show_default_branches: bool = True,
-        direction: str = "TD",
+        direction: str = "TB",
         compact_mode: bool = False,
         title: Optional[str] = None,
         debug: bool = False,
@@ -753,10 +1030,9 @@ class GraphVisualizer:
             include_subgraphs=include_subgraphs,
             highlight_nodes=all_highlight_nodes if all_highlight_nodes else None,
             theme=theme,
-            subgraph_mode=subgraph_mode,
-            show_default_branches=show_default_branches,
+            show_branch_labels=show_default_branches,
             direction=direction,
-            compact_mode=compact_mode,
+            compact=compact_mode,
             debug=debug,
         )
 
@@ -888,11 +1164,11 @@ class GraphVisualizer:
 
         # Edges
         if hasattr(graph, "edges"):
-            info["edges"] = list(graph.edges)
+            info["edges"] = list(graph.edges) if graph.edges else []
 
         # Branches
         if hasattr(graph, "branches"):
-            for branch_id, branch in graph.branches.items():
+            for branch_id, branch in (graph.branches or {}).items():
                 info["branches"][branch_id] = {
                     "source": getattr(branch, "source_node", "unknown"),
                     "destinations": cls._get_branch_destinations(branch),
