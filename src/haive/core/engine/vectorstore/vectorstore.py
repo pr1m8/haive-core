@@ -84,7 +84,37 @@ logger = logging.getLogger(__name__)
 
 
 class VectorStoreProvider(str, Enum):
-    """Enumeration of supported vector store providers."""
+    """
+    Enumeration of supported vector store providers.
+
+    This enum defines the built-in vector store providers supported by the Haive framework.
+    Each provider corresponds to a specific vector database implementation with its own
+    features, capabilities, and requirements.
+
+    The enum can be dynamically extended at runtime using the extend() method
+    or through the VectorStoreProviderRegistry, allowing for custom providers
+    without modifying the core code.
+
+    Attributes:
+        CHROMA (str): Chroma vector database
+        FAISS (str): Facebook AI Similarity Search
+        PINECONE (str): Pinecone managed vector database
+        WEAVIATE (str): Weaviate vector database
+        ZILLIZ (str): Zilliz cloud vector database
+        MILVUS (str): Milvus vector database
+        QDRANT (str): Qdrant vector database
+        IN_MEMORY (str): In-memory vector store (for testing/development)
+
+    Examples:
+        >>> from haive.core.engine.vectorstore import VectorStoreProvider
+        >>> # Using an enum value
+        >>> provider = VectorStoreProvider.FAISS
+        >>> str(provider)
+        'FAISS'
+        >>> # Checking if a value is in the enum
+        >>> "Chroma" in [p.value for p in VectorStoreProvider]
+        True
+    """
 
     CHROMA = "Chroma"
     FAISS = "FAISS"
@@ -113,10 +143,56 @@ class VectorStoreProvider(str, Enum):
 
 
 class VectorStoreConfig(InvokableEngine[Union[str, Dict[str, Any]], List[Document]]):
-    """Configuration model for a vector store engine.
+    """
+    Configuration model for a vector store engine.
 
     VectorStoreConfig provides a consistent interface for creating and using
-    vector stores with embeddings.
+    vector stores with embeddings. It encapsulates all the configuration needed
+    to create and interact with various vector store backends, abstracting away
+    provider-specific implementation details.
+
+    This class enables:
+    1. Creating vector stores with various providers (FAISS, Chroma, Pinecone, etc.)
+    2. Managing documents and embeddings for vector storage
+    3. Performing similarity searches with configurable parameters
+    4. Creating retrievers that can be used in retrieval chains
+
+    Attributes:
+        engine_type (EngineType): The type of engine (always VECTOR_STORE).
+        embedding_model (BaseEmbeddingConfig): Configuration for the embedding model.
+        vector_store_provider (VectorStoreProvider): The vector store provider to use.
+        documents (List[Document]): Documents to store in the vector store.
+        vector_store_path (str): Path for storing vector indices on disk.
+        docstore_path (str): Path for storing document data.
+        k (int): Default number of documents to retrieve in searches.
+        score_threshold (Optional[float]): Minimum similarity score for results.
+        search_type (str): Search algorithm to use (e.g., "similarity", "mmr").
+        vector_store_kwargs (Dict[str, Any]): Additional provider-specific parameters.
+
+    Examples:
+        >>> from haive.core.engine.vectorstore import VectorStoreConfig, VectorStoreProvider
+        >>> from haive.core.models.embeddings.base import HuggingFaceEmbeddingConfig
+        >>> from langchain_core.documents import Document
+        >>>
+        >>> # Create configuration
+        >>> config = VectorStoreConfig(
+        ...     name="product_search",
+        ...     documents=[Document(page_content="iPhone 13: The latest smartphone from Apple")],
+        ...     vector_store_provider=VectorStoreProvider.FAISS,
+        ...     embedding_model=HuggingFaceEmbeddingConfig(
+        ...         model="sentence-transformers/all-MiniLM-L6-v2"
+        ...     ),
+        ...     k=5
+        ... )
+        >>>
+        >>> # Create vector store
+        >>> vectorstore = config.create_vectorstore()
+        >>>
+        >>> # Perform similarity search
+        >>> results = config.similarity_search("smartphone", k=3)
+        >>>
+        >>> # Create a retriever
+        >>> retriever = config.create_retriever(search_type="mmr")
     """
 
     engine_type: EngineType = Field(default=EngineType.VECTOR_STORE)
@@ -329,13 +405,40 @@ class VectorStoreConfig(InvokableEngine[Union[str, Dict[str, Any]], List[Documen
         )
 
     def create_vectorstore(self, async_mode: bool = False) -> VectorStore:
-        """Create a vector store instance from this configuration.
+        """
+        Create a vector store instance from this configuration.
+
+        Instantiates a vector store of the configured provider type, using the
+        documents and embedding model specified in the configuration. This method
+        handles the details of creating the appropriate vector store class,
+        initializing it with the correct parameters, and populating it with documents.
+
+        The method supports both synchronous and asynchronous initialization paths,
+        and includes special handling for empty document collections.
 
         Args:
-            async_mode: Whether to use async methods
+            async_mode (bool): Whether to use async methods for vector store creation.
+                Default is False. If True, the method will use asynchronous variants
+                of the vector store creation methods if available.
 
         Returns:
-            Instantiated vector store
+            VectorStore: An instantiated vector store of the configured provider type,
+                populated with the configured documents and using the specified embedding model.
+
+        Raises:
+            ValueError: If an empty vector store cannot be created with the specified provider.
+
+        Examples:
+            >>> config = VectorStoreConfig(
+            ...     name="product_catalog",
+            ...     vector_store_provider=VectorStoreProvider.FAISS,
+            ...     documents=[Document(page_content="Product description...")]
+            ... )
+            >>> vectorstore = config.create_vectorstore()
+            >>>
+            >>> # With async mode
+            >>> async def create_async():
+            ...     return await config.create_vectorstore(async_mode=True)
         """
         # Dynamically select the backend
         vs_cls = self._get_vectorstore_class()
@@ -548,9 +651,51 @@ class VectorStoreConfig(InvokableEngine[Union[str, Dict[str, Any]], List[Documen
 
 
 class VectorStoreProviderRegistry:
-    """Registry for custom vector store providers.
+    """
+    Registry for custom vector store providers.
 
-    This registry allows adding custom vector store providers without modifying the core VectorStoreProvider enum.
+    This registry allows adding custom vector store providers without modifying
+    the core VectorStoreProvider enum. It provides a flexible extension mechanism
+    that supports both direct class registration and lazy-loading through factory
+    functions, enabling integration with third-party vector store implementations.
+
+    The registry maintains:
+    1. A mapping of provider names to vector store classes
+    2. A mapping of provider names to factory functions that return vector store classes
+    3. Methods to dynamically extend the VectorStoreProvider enum
+
+    This approach allows for runtime extension of the vector store system without
+    modifying core code, supporting both built-in and custom provider implementations.
+
+    Class Attributes:
+        providers (Dict[Union[str, VectorStoreProvider], Type[VectorStore]]):
+            Direct mapping of provider names to vector store classes.
+        provider_factories (Dict[Union[str, VectorStoreProvider], Callable[..., Type[VectorStore]]]):
+            Mapping of provider names to factory functions.
+
+    Examples:
+        >>> from haive.core.engine.vectorstore import VectorStoreProviderRegistry
+        >>> from langchain_community.vectorstores import Chroma
+        >>>
+        >>> # Register a custom vector store class directly
+        >>> class MyCustomVectorStore(VectorStore):
+        ...     # Implementation...
+        ...     pass
+        >>>
+        >>> VectorStoreProviderRegistry.register_provider("MyCustomStore", MyCustomVectorStore)
+        >>>
+        >>> # Register a factory function for lazy loading
+        >>> def get_special_vector_store():
+        ...     # Import and return the class only when needed
+        ...     from my_package.vectorstores import SpecialVectorStore
+        ...     return SpecialVectorStore
+        >>>
+        >>> VectorStoreProviderRegistry.register_provider_factory("SpecialStore", get_special_vector_store)
+        >>>
+        >>> # Use the registered providers
+        >>> providers = VectorStoreProviderRegistry.list_providers()
+        >>> "MyCustomStore" in providers
+        True
     """
 
     # Use class variables without underscore prefixes for Pydantic compatibility
