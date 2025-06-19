@@ -1,8 +1,21 @@
 """
 Factory for creating LLM chain runnables from AugLLMConfig.
 
-Provides a clean separation between configuration and runnable creation,
-with special focus on flexible message handling, tool binding, and output parsing.
+This module provides a specialized factory implementation that transforms
+AugLLMConfig configurations into executable LLM chain runnables. It enforces
+a clean separation between configuration (AugLLMConfig) and runtime creation
+(AugLLMFactory), allowing for runtime overrides and specialized handling.
+
+Key features:
+- Runtime configuration overrides for flexible deployment
+- Structured output handling with multiple approaches (v1/v2)
+- Comprehensive tool binding with graceful fallbacks
+- Chain composition with preprocessing and postprocessing
+- Detailed logging for debugging and monitoring
+
+The factory handles the complex process of assembling different components
+(LLMs, prompts, tools, parsers) into a cohesive, executable chain while
+respecting the configuration specifications from AugLLMConfig.
 """
 
 import json
@@ -32,7 +45,45 @@ logger.set_level(LogLevel.WARNING)
 
 
 class AugLLMFactory:
-    """Factory for creating structured LLM runnables from AugLLMConfig with flexible message handling."""
+    """
+    Factory for creating structured LLM runnables from AugLLMConfig with flexible message handling.
+
+    This factory class takes an AugLLMConfig instance and transforms it into an
+    executable LLM chain runnable, applying any runtime configuration overrides
+    in the process. It handles the complex assembly of various components including
+    LLM initialization, tool binding, structured output configuration, and chain
+    composition.
+
+    The factory follows a builder pattern, handling each aspect of chain creation
+    in discrete steps while maintaining proper validation and logging throughout
+    the process. It provides graceful fallbacks for various scenarios and specialized
+    handling for different tool and output configurations.
+
+    Attributes:
+        aug_config (AugLLMConfig): The configuration object that defines how the
+            runnable should be constructed.
+        config_params (Dict[str, Any]): Runtime configuration overrides that take
+            precedence over the settings in aug_config.
+
+    Examples:
+        >>> from haive.core.engine.aug_llm.config import AugLLMConfig
+        >>> from haive.core.engine.aug_llm.factory import AugLLMFactory
+        >>>
+        >>> # Create a base configuration
+        >>> config = AugLLMConfig(name="text_summarizer", system_message="Summarize text concisely.")
+        >>>
+        >>> # Create a factory with runtime overrides
+        >>> factory = AugLLMFactory(
+        ...     config,
+        ...     config_params={"temperature": 0.3, "max_tokens": 200}
+        ... )
+        >>>
+        >>> # Build the runnable
+        >>> summarizer = factory.create_runnable()
+        >>>
+        >>> # Use the runnable
+        >>> summary = summarizer.invoke("Long text to summarize...")
+    """
 
     def __init__(self, aug_config: Any, config_params: Optional[Dict[str, Any]] = None):
         """
@@ -219,8 +270,27 @@ class AugLLMFactory:
         """
         Create the complete runnable chain with proper message handling.
 
+        Assembles a fully configured runnable chain based on the AugLLMConfig
+        settings and any runtime overrides. This method performs several key steps:
+        1. Ensures messages placeholders are properly configured
+        2. Initializes the LLM with appropriate parameters
+        3. Binds tools to the LLM if specified
+        4. Configures structured output handling
+        5. Builds the complete chain with prompt templates
+        6. Adds pre/post processing functions if specified
+
         Returns:
-            A complete runnable chain
+            Runnable: A complete, executable LLM chain that can be invoked with
+                input data to generate responses.
+
+        Raises:
+            ValueError: If the LLM cannot be instantiated from the configuration.
+
+        Examples:
+            >>> factory = AugLLMFactory(config)
+            >>> runnable = factory.create_runnable()
+            >>> response = runnable.invoke("What is the capital of France?")
+            >>> print(response)
         """
         logger.info("Creating runnable chain")
 
@@ -308,13 +378,26 @@ class AugLLMFactory:
         return runnable_chain
 
     def _initialize_llm_with_tools(self, llm: Runnable) -> Runnable:
-        """Configure LLM with tools based on configuration.
+        """
+        Configure LLM with tools based on configuration.
+
+        This method handles the complex process of binding tools to an LLM, including:
+        1. Processing different tool types (BaseModel, BaseTool, callables)
+        2. Instantiating tool classes as needed
+        3. Configuring tool choice mode (auto, required, optional, none)
+        4. Handling tool forcing for specific scenarios
+        5. Providing fallbacks for different LLM implementations
 
         Args:
-            llm: Base LLM runnable
+            llm (Runnable): Base LLM runnable to which tools will be bound
 
         Returns:
-            LLM with tools configured
+            Runnable: LLM with tools configured according to the specifications
+
+        Notes:
+            This method implements multiple fallback strategies to maximize
+            compatibility with different LLM implementations. It attempts to use
+            bind_tools() first, then falls back to with_tools() if needed.
         """
         tools = self.aug_config.tools
 
@@ -497,7 +580,28 @@ class AugLLMFactory:
         return llm
 
     def _configure_structured_output(self, llm: Runnable) -> Runnable:
-        """Configure structured output parsing based on configuration."""
+        """
+        Configure structured output parsing based on configuration.
+
+        This method sets up the structured output handling based on the configuration
+        in AugLLMConfig. It supports multiple approaches to structured output:
+
+        1. V1 (Traditional): Uses output parsers (typically PydanticOutputParser) to
+           parse the LLM's text output into structured objects
+        2. V2 (Tool-based): Uses function/tool calling to get structured output directly
+           from the LLM's tool calls without a separate parser
+        3. Raw output: Returns the raw text output from the LLM
+        4. Custom parsers: Uses custom output parsers specified in the configuration
+
+        The method implements a decision tree to determine the appropriate
+        structured output approach based on the configuration settings.
+
+        Args:
+            llm (Runnable): The LLM runnable to configure with structured output handling
+
+        Returns:
+            Runnable: LLM with structured output handling configured
+        """
         logger.info("Configuring structured output")
 
         # If parse_raw_output is True, use StrOutputParser regardless of other settings
@@ -577,13 +681,31 @@ class AugLLMFactory:
         return llm
 
     def _build_chain(self, llm: Runnable) -> Runnable:
-        """Build the complete chain with prompt template and pre/post processing.
+        """
+        Build the complete chain with prompt template and pre/post processing.
+
+        This method assembles the final runnable chain by combining the configured LLM
+        with prompt templates and optional pre/post processing functions. It handles
+        various prompt template types and ensures proper configuration of messages
+        placeholders for chat models.
+
+        The chain assembly follows these steps:
+        1. Verify and create prompt template if needed
+        2. Connect prompt template to LLM
+        3. Add preprocessing if specified
+        4. Add postprocessing if specified
+        5. Add any custom runnables
 
         Args:
-            llm: LLM runnable with tools/output handling already configured
+            llm (Runnable): LLM runnable with tools/output handling already configured
 
         Returns:
-            Complete runnable chain
+            Runnable: Complete runnable chain ready for execution
+
+        Notes:
+            If no prompt template is available, the method returns the raw LLM as the chain.
+            For chat models, this method ensures proper handling of system messages and
+            messages placeholders according to the configuration.
         """
         logger.info("Building complete chain")
 

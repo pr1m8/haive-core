@@ -1,8 +1,22 @@
 """
 AugLLM configuration system for enhanced LLM chains.
 
-Provides a structured way to configure and create LLM chains with prompts,
-tools, output parsers, and structured output models with rich debugging.
+This module provides a comprehensive configuration system for creating and
+managing enhanced LLM chains within the Haive framework. The AugLLMConfig class
+serves as a central configuration point that integrates prompts, tools, output
+parsers, and structured output models with extensive validation and debugging
+capabilities.
+
+Key features:
+- Flexible prompt template creation and management with support for few-shot learning
+- Comprehensive tool integration with automatic discovery and configuration
+- Structured output handling via two approaches (v1: parser-based, v2: tool-based)
+- Rich debugging and validation to ensure proper configuration
+- Pre/post processing hooks for customizing input and output
+- Support for both synchronous and asynchronous execution
+
+The configuration system is designed to be highly customizable while providing
+sensible defaults and automatic detection of configuration requirements.
 """
 
 import json
@@ -100,7 +114,60 @@ class AugLLMConfig(
 
     AugLLMConfig provides a structured way to configure and create LLM chains
     with prompts, tools, output parsers, and structured output models with
-    comprehensive validation and automatic updates.
+    comprehensive validation and automatic updates. It serves as the central
+    configuration class for language model interactions in the Haive framework.
+
+    This class integrates several key functionalities:
+    1. Prompt template management with support for few-shot learning
+    2. Tool integration and discovery with automatic routing
+    3. Structured output handling (both parser-based and tool-based approaches)
+    4. Message handling for chat-based LLMs
+    5. Pre/post processing hooks for customization
+
+    The configuration system is designed to be highly flexible while enforcing
+    consistent patterns and proper validation, making it easier to create reliable
+    language model interactions.
+
+    Attributes:
+        engine_type (EngineType): The type of engine (always LLM).
+        llm_config (LLMConfig): Configuration for the LLM provider.
+        prompt_template (Optional[BasePromptTemplate]): Template for structuring prompts.
+        system_message (Optional[str]): System message for chat models.
+        tools (Sequence[Union[Type[BaseTool], Type[BaseModel], Callable, StructuredTool, BaseModel]]):
+            Tools that can be bound to the LLM.
+        structured_output_model (Optional[Type[BaseModel]]): Pydantic model for structured outputs.
+        structured_output_version (Optional[StructuredOutputVersion]):
+            Version of structured output handling (v1: parser-based, v2: tool-based).
+        temperature (Optional[float]): Temperature parameter for the LLM.
+        max_tokens (Optional[int]): Maximum number of tokens to generate.
+        preprocess (Optional[Callable]): Function to preprocess input before sending to LLM.
+        postprocess (Optional[Callable]): Function to postprocess output from LLM.
+
+    Examples:
+        >>> from haive.core.engine.aug_llm.config import AugLLMConfig
+        >>> from haive.core.models.llm.base import AzureLLMConfig
+        >>> from pydantic import BaseModel, Field
+        >>>
+        >>> # Define a structured output model
+        >>> class MovieReview(BaseModel):
+        ...     title: str = Field(description="Title of the movie")
+        ...     rating: int = Field(description="Rating from 1-10")
+        ...     review: str = Field(description="Detailed review of the movie")
+        >>>
+        >>> # Create a basic configuration
+        >>> config = AugLLMConfig(
+        ...     name="movie_reviewer",
+        ...     llm_config=AzureLLMConfig(model="gpt-4"),
+        ...     system_message="You are a professional movie critic.",
+        ...     structured_output_model=MovieReview,
+        ...     temperature=0.7
+        ... )
+        >>>
+        >>> # Create a runnable from the configuration
+        >>> reviewer = config.create_runnable()
+        >>>
+        >>> # Use the runnable
+        >>> result = reviewer.invoke("Review the movie 'Inception'")
     """
 
     engine_type: EngineType = Field(
