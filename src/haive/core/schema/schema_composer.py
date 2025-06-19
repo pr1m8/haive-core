@@ -1,8 +1,66 @@
-"""
-SchemaComposer for the Haive framework.
+"""SchemaComposer for the Haive Schema System.
 
-Provides a comprehensive implementation for schema composition with special focus
-on structured output models, recursive annotations, and rich visualization.
+This module provides the SchemaComposer class, which offers a streamlined API for
+building state schemas dynamically from various components. The SchemaComposer is
+designed for schema composition, enabling the creation of complex state schemas by
+combining fields from multiple sources.
+
+The SchemaComposer is particularly useful for:
+- Building schemas from heterogeneous components (engines, models, dictionaries)
+- Dynamically creating schemas at runtime based on available components
+- Composing schemas with proper field sharing, reducers, and engine I/O mappings
+- Ensuring consistent state handling across complex agent architectures
+
+Key features include:
+- Automatic field extraction from components
+- Field definition management with comprehensive metadata
+- Support for shared fields between parent and child graphs
+- Tracking of engine input/output relationships
+- Integration with structured output models
+- Rich visualization for debugging and analysis
+
+Example:
+    ```python
+    from haive.core.schema import SchemaComposer
+    from typing import List
+    from langchain_core.messages import BaseMessage
+    from pydantic import Field
+    import operator
+
+    # Create a new composer
+    composer = SchemaComposer(name="ConversationState")
+
+    # Add fields manually
+    composer.add_field(
+        name="messages",
+        field_type=List[BaseMessage],
+        default_factory=list,
+        description="Conversation history",
+        shared=True,
+        reducer="add_messages"
+    )
+
+    composer.add_field(
+        name="context",
+        field_type=List[str],
+        default_factory=list,
+        description="Retrieved document contexts",
+        reducer=operator.add
+    )
+
+    # Extract fields from components
+    composer.add_fields_from_components([
+        retriever_engine,
+        llm_engine,
+        memory_component
+    ])
+
+    # Build the schema
+    ConversationState = composer.build()
+
+    # Use the schema
+    state = ConversationState()
+    ```
 """
 
 from __future__ import annotations
@@ -42,16 +100,29 @@ console = Console()
 
 
 class SchemaComposer:
-    """
-    Utility for extracting field information from components and composing schemas.
+    """Utility for building state schemas dynamically from component fields.
 
-    The SchemaComposer provides a high-level API for:
-    - Dynamically extracting fields from various components (engines, models, dictionaries)
-    - Composing schemas from field definitions
-    - Tracking field relationships and metadata
-    - Building optimized schema classes with proper configuration
-    - Support for recursive annotations and nested state schemas
-    - Managing engines and updating their configurations
+    The SchemaComposer provides a high-level, builder-style API for creating state
+    schemas by combining fields from various sources. It handles the complex details
+    of field extraction, metadata management, and schema generation, providing a
+    streamlined interface for schema composition.
+
+    Key capabilities include:
+    - Dynamically extracting fields from components (engines, models, dictionaries)
+    - Adding and configuring fields individually with comprehensive options
+    - Tracking field relationships, shared status, and reducer functions
+    - Managing engine I/O mappings for proper state handling
+    - Building optimized schema classes with the right configuration
+    - Supporting nested state schemas and structured output models
+    - Providing rich visualization for debugging and analysis
+
+    This class is the primary builder interface for dynamic schema creation in the
+    Haive Schema System, offering a more declarative approach than StateSchemaManager.
+    It's particularly useful for creating schemas at runtime based on available
+    components, ensuring consistent state handling across complex agent architectures.
+
+    SchemaComposer is designed to be used either directly or through class methods
+    like from_components() for simplified schema creation from a list of components.
     """
 
     def __init__(self, name: str = "ComposedSchema"):
@@ -336,23 +407,46 @@ class SchemaComposer:
         input_for: Optional[List[str]] = None,
         output_from: Optional[List[str]] = None,
     ) -> "SchemaComposer":
-        """
-        Add a field definition to the schema.
+        """Add a field definition to the schema.
+
+        This method adds a field to the schema being composed, with comprehensive
+        configuration for type, default values, sharing behavior, reducer functions,
+        and engine I/O relationships. It handles special cases like fields provided
+        by the base class and nested StateSchema fields.
+
+        The method performs validation on the field type and ensures proper tracking
+        of metadata for schema generation. It's the core building block for schema
+        composition, allowing fine-grained control over field properties.
 
         Args:
             name: Field name
-            field_type: Type of the field
+            field_type: Type of the field (e.g., str, List[int], Optional[Dict[str, Any]])
             default: Default value for the field
-            default_factory: Optional factory function for default value
-            description: Optional field description
-            shared: Whether field is shared with parent graph
-            reducer: Optional reducer function for this field
-            source: Optional source identifier (component name, etc.)
+            default_factory: Optional factory function for creating default values
+            description: Optional field description for documentation
+            shared: Whether field is shared with parent graph (enables state synchronization)
+            reducer: Optional reducer function for merging field values during state updates
+            source: Optional source identifier (component or module name)
             input_for: Optional list of engines this field is input for
             output_from: Optional list of engines this field is output from
 
         Returns:
-            Self for chaining
+            Self for method chaining to enable fluent API style
+
+        Example:
+            ```python
+            composer = SchemaComposer(name="MyState")
+            composer.add_field(
+                name="messages",
+                field_type=List[BaseMessage],
+                default_factory=list,
+                description="Conversation history",
+                shared=True,
+                reducer=add_messages,
+                input_for=["memory_engine"],
+                output_from=["llm_engine"]
+            )
+            ```
         """
         # Skip special fields
         if name == "__runnable_config__" or name == "runnable_config":
@@ -1422,17 +1516,45 @@ class SchemaComposer:
             )
 
     def add_fields_from_components(self, components: List[Any]) -> "SchemaComposer":
-        """
-        Add fields from multiple components.
+        """Add fields from multiple components to the schema.
 
-        This method processes a list of components, extracting fields from each based on
-        its type (Engine, BaseModel, dict, etc).
+        This method intelligently processes a list of heterogeneous components, automatically
+        detecting their types and extracting fields using the appropriate extraction strategy.
+        It supports engines, Pydantic models, dictionaries, and other component types,
+        providing a unified interface for schema composition from diverse sources.
+
+        The method first detects base class requirements (such as the need for messages or
+        tools fields) and then processes each component individually, delegating to specialized
+        field extraction methods based on component type. After processing all components,
+        it ensures standard fields are present and properly configured.
 
         Args:
-            components: List of components to extract fields from
+            components: List of components to extract fields from, which can include:
+                - Engine instances (with engine_type attribute)
+                - Pydantic BaseModel instances or classes
+                - Dictionaries of field definitions
+                - Other component types with field information
 
         Returns:
-            Self for chaining
+            Self for method chaining to enable fluent API style
+
+        Example:
+            ```python
+            # Create a schema from multiple components
+            composer = SchemaComposer(name="AgentState")
+            composer.add_fields_from_components([
+                llm_engine,          # Engine instance
+                retriever_engine,    # Engine instance
+                MemoryConfig,        # Pydantic model class
+                {"context": (List[str], list, {"description": "Retrieved documents"})}
+            ])
+            ```
+
+        Note:
+            This is one of the most powerful methods in SchemaComposer, as it can
+            automatically build a complete schema from a list of components without
+            requiring manual field definition. It's particularly useful for dynamic
+            composition of schemas at runtime.
         """
         logger.debug(f"Extracting fields from {len(components)} components")
 
@@ -1708,11 +1830,39 @@ class SchemaComposer:
         return self
 
     def build(self) -> Type[StateSchema]:
-        """
-        Build a StateSchema with the right base class and all metadata.
+        """Build and return a StateSchema class with all defined fields and metadata.
+
+        This method finalizes the schema composition process by generating a concrete
+        StateSchema subclass with the appropriate base class (determined by detected
+        requirements) and all the fields, metadata, and behaviors defined during
+        composition. It performs comprehensive setup of the schema class, including:
+
+        1. Field generation with proper types, defaults, and metadata
+        2. Configuration of shared fields for parent-child graph relationships
+        3. Setup of reducer functions for state merging
+        4. Engine I/O tracking for proper state routing
+        5. Structured output model integration
+        6. Schema post-initialization for nested fields, dictionaries, and engine tool synchronization
+        7. Rich visualization for debugging (when debug logging is enabled)
+
+        The generated schema is a fully functional Pydantic model subclass that can
+        be instantiated directly or used as a state schema in a LangGraph workflow.
+
+        Engine Tool Synchronization:
+        --------------------------
+        This method stores engines directly on the schema class and implements an
+        enhanced model_post_init that ensures:
+
+        1. Class-level engines are made available on instances
+        2. For ToolState subclasses, tools from class-level engines are automatically synced
+           to the instance's tools list
+
+        This functionality bridges the gap between class-level engine storage and
+        instance-level tool management, ensuring that tools from engines stored by
+        SchemaComposer are properly synchronized with ToolState instances.
 
         Returns:
-            Subclass of StateSchema with appropriate base class and field attributes
+            A StateSchema subclass with all defined fields, metadata, and behaviors
         """
         # Make sure we've detected base class requirements
         if self.detected_base_class is None:
@@ -1808,9 +1958,10 @@ class SchemaComposer:
                     for k, v in self.structured_models.items()
                 }
 
-            # Store engines in the schema
-            schema.__engines__ = self.engines
-            schema.__engines_by_type__ = dict(self.engines_by_type)
+            # CRITICAL: Store engines directly on the schema class (not private)
+            schema.engines = self.engines
+            schema.engines_by_type = dict(self.engines_by_type)
+            logger.debug(f"Stored {len(schema.engines)} engines on schema class")
 
         # Now handle nested fields like tool_schemas.xyz
         # We need to build nested dictionaries for these
@@ -1832,28 +1983,82 @@ class SchemaComposer:
                     output_schemas[parts[1]] = field_def.default
 
         # Create post_init method to handle nested fields and engine setup
-        def schema_post_init(self, *args, **kwargs):
-            # Call original post_init if it exists
-            original_post_init = getattr(
-                super(self.__class__, self), "model_post_init", None
-            )
-            if original_post_init:
-                original_post_init(*args, **kwargs)
+        def schema_post_init(self, __context):
+            """Enhanced post-init to sync tools from engines."""
+            # IMPORTANT: In Pydantic v2, model_post_init takes a context parameter
 
-            # Initialize tool_schemas
+            # Call parent post_init if it exists
+            if hasattr(super(self.__class__, self), "model_post_init"):
+                super(self.__class__, self).model_post_init(__context)
+
+            # Sync tools from class engines if available
+            if hasattr(self.__class__, "engines"):
+                logger.debug(f"Found {len(self.__class__.engines)} class-level engines")
+
+                # If this is a ToolState subclass or has tools field, sync tools
+                if hasattr(self, "tools"):
+                    logger.debug(f"Syncing tools for {self.__class__.__name__}")
+
+                    # Initialize tools list if it's None
+                    if self.tools is None:
+                        self.tools = []
+
+                    for engine_name, engine in self.__class__.engines.items():
+                        logger.debug(f"Checking engine '{engine_name}' for tools")
+
+                        if hasattr(engine, "tools") and engine.tools:
+                            logger.debug(
+                                f"Engine '{engine_name}' has {len(engine.tools)} tools"
+                            )
+
+                            # For ToolState, use add_tool method if available
+                            if hasattr(self, "add_tool"):
+                                for tool in engine.tools:
+                                    # Get tool name
+                                    tool_name = getattr(
+                                        tool,
+                                        "name",
+                                        getattr(tool, "__name__", str(tool)),
+                                    )
+
+                                    # Check if tool already exists
+                                    existing_tool_names = []
+                                    for t in self.tools:
+                                        t_name = getattr(
+                                            t, "name", getattr(t, "__name__", str(t))
+                                        )
+                                        existing_tool_names.append(t_name)
+
+                                    if tool_name not in existing_tool_names:
+                                        self.add_tool(tool)
+                                        logger.debug(
+                                            f"Added tool '{tool_name}' from engine '{engine_name}'"
+                                        )
+                                    else:
+                                        logger.debug(
+                                            f"Tool '{tool_name}' already exists, skipping"
+                                        )
+                            else:
+                                # For basic tools list, just append
+                                for tool in engine.tools:
+                                    if tool not in self.tools:
+                                        self.tools.append(tool)
+                                        tool_name = getattr(tool, "name", str(tool))
+                                        logger.debug(
+                                            f"Appended tool '{tool_name}' from engine '{engine_name}'"
+                                        )
+
+            # Initialize tool_schemas (existing code)
             if hasattr(self, "tool_schemas") and tool_schemas:
                 for name, schema_cls in tool_schemas.items():
                     self.tool_schemas[name] = schema_cls
 
-            # Initialize output_schemas
+            # Initialize output_schemas (existing code)
             if hasattr(self, "output_schemas") and output_schemas:
                 for name, schema_cls in output_schemas.items():
                     self.output_schemas[name] = schema_cls
 
-            # Return self for chaining
-            return self
-
-        # Add post_init to the schema
+        # Properly set the method on the schema class
         schema.model_post_init = schema_post_init
 
         # Print summary
@@ -1935,7 +2140,7 @@ class SchemaComposer:
                     console.print(f"    [blue]Outputs[/blue]: {outputs}")
 
             # Display engines if any
-            engines = getattr(schema, "__engines__", {})
+            engines = getattr(schema, "engines", {})
             if engines:
                 console.print("\n[bold yellow]Registered Engines:[/bold yellow]")
                 engine_table = Table(show_header=True)
@@ -2097,15 +2302,45 @@ class SchemaComposer:
     def from_components(
         cls, components: List[Any], name: str = "ComposedSchema"
     ) -> Type[StateSchema]:
-        """
-        Create a schema from components.
+        """Create and build a StateSchema directly from a list of components.
+
+        This convenience class method provides a simplified, one-step approach to schema
+        creation from components. It creates a SchemaComposer instance, processes all
+        components to extract fields, ensures standard fields are present, and builds
+        the final StateSchema in a single operation.
+
+        This is the recommended entry point for most schema composition needs, as it
+        handles all the details of schema composition in a single method call. It's
+        particularly useful when you want to quickly create a schema from existing
+        components without detailed customization.
 
         Args:
-            components: List of components to extract fields from
-            name: Name for the schema
+            components: List of components to extract fields from, which can include:
+                - Engine instances (with engine_type attribute)
+                - Pydantic BaseModel instances or classes
+                - Dictionaries of field definitions
+                - Other component types with field information
+            name: Name for the generated schema class
 
         Returns:
-            StateSchema subclass
+            A fully constructed StateSchema subclass ready for instantiation
+
+        Example:
+            ```python
+            # Create a schema from components in one step
+            ConversationState = SchemaComposer.from_components(
+                [llm_engine, retriever_engine, memory_component],
+                name="ConversationState"
+            )
+
+            # Use the schema
+            state = ConversationState()
+            ```
+
+        Note:
+            This method automatically detects which base class to use (StateSchema,
+            MessagesState, or ToolState) based on the components provided, ensuring
+            the schema has the appropriate functionality for the detected requirements.
         """
         logger.debug(f"Creating schema {name} from {len(components)} components")
         composer = cls(name=name)

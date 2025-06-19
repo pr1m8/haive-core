@@ -1,8 +1,61 @@
-"""
-State schema base class for the Haive framework.
+"""State schema base class for the Haive framework.
 
-This module provides the StateSchema base class that adds field sharing,
-reducers, and other enhancements to Pydantic's BaseModel.
+This module provides the StateSchema base class that extends Pydantic's BaseModel
+with features specifically designed for AI agent state management and graph-based
+workflows. The StateSchema class adds powerful capabilities including field sharing
+between parent and child graphs, reducer functions for state updates, engine I/O
+tracking, and extensive serialization support.
+
+StateSchema serves as the foundation of the Haive Schema System, enabling fully
+dynamic and serializable state schemas that can be composed, modified, and extended
+at runtime. This flexibility makes it ideal for complex agent architectures and
+nested workflows.
+
+Key features include:
+- Field sharing: Share state between parent and child graphs with explicit control
+- Reducer functions: Define how field values should be combined during state updates
+- Engine I/O tracking: Map which fields are inputs and outputs for specific engines
+- Message handling: Built-in methods for working with message fields
+- Serialization: Comprehensive support for converting to/from dictionaries and JSON
+- State manipulation: Methods for updating, merging, and comparing states
+- Pretty printing: Rich visualization of state content
+- Engine integration: Prepare inputs and process outputs for specific engines
+
+Example:
+    ```python
+    from typing import List
+    from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
+    from pydantic import Field
+    from haive.core.schema import StateSchema
+    from langgraph.graph import add_messages
+
+    class ConversationState(StateSchema):
+        messages: List[BaseMessage] = Field(default_factory=list)
+        query: str = Field(default="")
+        response: str = Field(default="")
+        context: List[str] = Field(default_factory=list)
+
+        # Define which fields should be shared with parent graphs
+        __shared_fields__ = ["messages"]
+
+        # Define reducer functions for each field
+        __reducer_fields__ = {
+            "messages": add_messages,
+            "context": lambda a, b: (a or []) + (b or [])
+        }
+
+        # Define which fields are inputs/outputs for which engines
+        __engine_io_mappings__ = {
+            "retriever": {
+                "inputs": ["query"],
+                "outputs": ["context"]
+            },
+            "llm": {
+                "inputs": ["query", "context", "messages"],
+                "outputs": ["response"]
+            }
+        }
+    ```
 """
 
 from __future__ import annotations
@@ -45,21 +98,69 @@ T = TypeVar("T", bound=BaseModel)
 
 
 class StateSchema(BaseModel, Generic[T]):
-    """
-    Enhanced base class for state schemas in the Haive framework.
+    """Enhanced base class for state schemas in the Haive framework.
 
-    StateSchema extends Pydantic's BaseModel with features for:
-    - Field sharing between parent and child graphs
-    - Reducer functions for combining field values
-    - Input/output tracking for engines
-    - Message handling utilities
-    - Serialization and deserialization support
-    - State manipulation utilities
-    - Pretty printing and visualization
-    - Engine access and tools management
+    StateSchema extends Pydantic's BaseModel with features for AI agent state management
+    and graph-based workflows. It serves as the core component of the Haive Schema System,
+    providing extensive capabilities for state management in complex agent architectures.
 
-    Field sharing and reducers are critical for proper state handling in nested graphs,
-    enabling parent and child graphs to share and update state properly.
+    Key Features:
+        - Field sharing: Control which fields are shared between parent and child graphs
+        - Reducer functions: Define how field values are combined during state updates
+        - Engine I/O tracking: Map which fields are inputs/outputs for which engines
+        - Message handling: Methods for working with conversation message fields
+        - Serialization: Convert states to/from dictionaries and JSON
+        - State manipulation: Update, merge, compare, and diff state objects
+        - Integration: Support for LangGraph and engine components
+        - Visualization: Rich display options for state inspection
+
+    Special Class Variables:
+        __shared_fields__ (List[str]): Fields to share with parent graphs
+        __serializable_reducers__ (Dict[str, str]): Serializable reducer function names
+        __engine_io_mappings__ (Dict[str, Dict[str, List[str]]]): Engine I/O mappings
+        __input_fields__ (Dict[str, List[str]]): Input fields for each engine
+        __output_fields__ (Dict[str, List[str]]): Output fields for each engine
+        __structured_models__ (Dict[str, str]): Paths to structured output models
+        __structured_model_fields__ (Dict[str, List[str]]): Fields for structured models
+        __reducer_fields__ (Dict[str, Callable]): Runtime reducer functions (not stored)
+
+    Field sharing enables parent and child graphs to maintain synchronized state for
+    specific fields, which is critical for nested graph execution. Reducer functions
+    define how field values are combined during updates, enabling sophisticated state
+    merging operations beyond simple assignment.
+
+    Example:
+        ```python
+        from typing import List
+        from langchain_core.messages import BaseMessage
+        from pydantic import Field
+        from haive.core.schema import StateSchema
+
+        class MyState(StateSchema):
+            messages: List[BaseMessage] = Field(default_factory=list)
+            query: str = Field(default="")
+            result: str = Field(default="")
+
+            # Share only messages with parent graphs
+            __shared_fields__ = ["messages"]
+
+            # Define reducer for messages
+            __reducer_fields__ = {
+                "messages": add_messages  # From langgraph.graph
+            }
+
+        # Create state instance
+        state = MyState()
+
+        # Add a message
+        state.add_message(HumanMessage(content="Hello"))
+
+        # Convert to dictionary
+        state_dict = state.to_dict()
+
+        # Create from dictionary
+        new_state = MyState.from_dict(state_dict)
+        ```
     """
 
     # Class variables to track field sharing and reducers
@@ -112,6 +213,13 @@ class StateSchema(BaseModel, Generic[T]):
         1. Finds all engine fields in the state
         2. If engine has tools and state has tools field, syncs them
         3. Sets up parent-child relationships for nested state schemas
+
+        Note:
+        This validator only handles engines that are instance fields. For engines
+        stored at the class level (e.g., via SchemaComposer), the model_post_init
+        method is enhanced to make class engines available on instances and sync
+        their tools. The two mechanisms work together to ensure comprehensive
+        tool synchronization from all engine sources.
         """
         logger.debug(f"Setting up engines for {self.__class__.__name__}")
 
@@ -129,7 +237,7 @@ class StateSchema(BaseModel, Generic[T]):
                 engine_name = getattr(field_value, "name", field_name)
                 found_engines.append(engine_name)
 
-                # If engine has tools and we have a tools field, sync them
+                # If engine has tools and we have a tools field, sync them both ways
                 if hasattr(field_value, "tools") and hasattr(self, "tools"):
                     engine_tools = getattr(field_value, "tools", [])
                     logger.debug(
@@ -144,6 +252,15 @@ class StateSchema(BaseModel, Generic[T]):
                                 f"Adding tool '{tool_name}' from engine '{engine_name}'"
                             )
                             self.tools.append(tool)
+
+                    # Also sync tools from state to engine if not already there
+                    for tool in self.tools:
+                        if tool not in engine_tools:
+                            tool_name = getattr(tool, "name", str(tool))
+                            logger.debug(
+                                f"Adding tool '{tool_name}' from state to engine '{engine_name}'"
+                            )
+                            engine_tools.append(tool)
 
             # Check if field is another StateSchema for recursive handling
             elif isinstance(field_value, StateSchema):
@@ -373,6 +490,87 @@ class StateSchema(BaseModel, Generic[T]):
             True if engine exists, False otherwise
         """
         return self.get_engine(name) is not None
+
+    @classmethod
+    def get_class_engine(cls, name: str) -> Optional[Any]:
+        """
+        Get a class-level engine by name.
+
+        Args:
+            name: Name of the engine to retrieve
+
+        Returns:
+            Engine instance if found, None otherwise
+        """
+        if hasattr(cls, "engines") and name in cls.engines:
+            return cls.engines[name]
+        return None
+
+    @classmethod
+    def get_all_class_engines(cls) -> Dict[str, Any]:
+        """
+        Get all class-level engines.
+
+        Returns:
+            Dictionary of all engines
+        """
+        if hasattr(cls, "engines"):
+            return cls.engines
+        return {}
+
+    def get_instance_engine(self, name: str) -> Optional[Any]:
+        """
+        Get an engine from instance or class level.
+
+        Args:
+            name: Name of the engine to retrieve
+
+        Returns:
+            Engine instance if found, None otherwise
+        """
+        # First check instance fields
+        if hasattr(self, name):
+            field_value = getattr(self, name)
+            if hasattr(field_value, "engine_type"):
+                return field_value
+
+        # Then check class-level engines
+        if hasattr(self.__class__, "engines") and name in self.__class__.engines:
+            return self.__class__.engines[name]
+
+        # Then try by engine name attribute in instance fields
+        for field_name, field_value in self.__dict__.items():
+            if field_value is None:
+                continue
+            if hasattr(field_value, "engine_type"):
+                engine_name = getattr(field_value, "name", "")
+                if engine_name == name:
+                    return field_value
+
+        return None
+
+    def get_all_instance_engines(self) -> Dict[str, Any]:
+        """
+        Get all engines from both instance and class level.
+
+        Returns:
+            Dictionary mapping engine names to engine instances
+        """
+        engines = {}
+
+        # Get class-level engines first
+        if hasattr(self.__class__, "engines"):
+            engines.update(self.__class__.engines)
+
+        # Then add instance-level engines (may override class engines)
+        for field_name, field_value in self.__dict__.items():
+            if field_value is None:
+                continue
+            if hasattr(field_value, "engine_type"):
+                engine_name = getattr(field_value, "name", field_name)
+                engines[engine_name] = field_value
+
+        return engines
 
     def get_state_values(
         self, keys: Union[List[str], Dict[str, str], None] = None
@@ -831,12 +1029,17 @@ class StateSchema(BaseModel, Generic[T]):
         """
         Derive an input schema for the given engine from this state schema.
 
+        This method intelligently selects the appropriate base class for the derived schema,
+        using prebuilt states (MessagesState, ToolState) when appropriate instead of
+        just creating a generic BaseModel.
+
         Args:
             engine_name: Optional name of the engine to target (default: all inputs)
             name: Optional name for the schema class
 
         Returns:
-            A BaseModel subclass for input validation
+            A BaseModel subclass for input validation, potentially inheriting from
+            MessagesState or ToolState for better compatibility
         """
         fields = {}
 
@@ -854,10 +1057,44 @@ class StateSchema(BaseModel, Generic[T]):
         else:
             input_fields = []
 
+        # Detect if we should use prebuilt base classes
+        has_messages = "messages" in input_fields
+        has_tools = "tools" in input_fields
+
+        # Check what the current schema inherits from
+        from haive.core.schema.prebuilt.messages_state import MessagesState
+        from haive.core.schema.prebuilt.tool_state import ToolState
+
+        current_is_tool_state = issubclass(cls, ToolState)
+        current_is_messages_state = issubclass(cls, MessagesState)
+
+        # Determine appropriate base class using same logic as SchemaComposer
+        base_class = None
+        if has_tools or current_is_tool_state:
+            base_class = ToolState
+            logger.debug("Using ToolState as base for derived input schema")
+        elif has_messages or current_is_messages_state:
+            base_class = MessagesState
+            logger.debug("Using MessagesState as base for derived input schema")
+        else:
+            # Fall back to BaseModel for basic schemas
+            base_class = BaseModel
+            logger.debug("Using BaseModel as base for derived input schema")
+
         # Add input fields to schema
         for field_name in input_fields:
             if field_name in cls.model_fields:
                 field_info = cls.model_fields[field_name]
+
+                # Skip fields that are already defined in the base class
+                if (
+                    hasattr(base_class, "model_fields")
+                    and field_name in base_class.model_fields
+                ):
+                    logger.debug(
+                        f"Skipping field '{field_name}' - already defined in {base_class.__name__}"
+                    )
+                    continue
 
                 # Create a copy of the field_info to avoid modifying the original
                 from pydantic import Field
@@ -889,9 +1126,12 @@ class StateSchema(BaseModel, Generic[T]):
                 # Add to fields with original type annotation
                 fields[field_name] = (field_info.annotation, new_field_info)
 
-        # Create model
+        # Create model with appropriate base class
         schema_name = name or f"{cls.__name__}Input"
-        return create_model(schema_name, **fields)
+        if base_class == BaseModel:
+            return create_model(schema_name, **fields)
+        else:
+            return create_model(schema_name, __base__=base_class, **fields)
 
     @classmethod
     def derive_output_schema(
@@ -900,12 +1140,17 @@ class StateSchema(BaseModel, Generic[T]):
         """
         Derive an output schema for the given engine from this state schema.
 
+        This method intelligently selects the appropriate base class for the derived schema,
+        using prebuilt states (MessagesState, ToolState) when appropriate instead of
+        just creating a generic BaseModel.
+
         Args:
             engine_name: Optional name of the engine to target (default: all outputs)
             name: Optional name for the schema class
 
         Returns:
-            A BaseModel subclass for output validation
+            A BaseModel subclass for output validation, potentially inheriting from
+            MessagesState or ToolState for better compatibility
         """
         fields = {}
 
@@ -925,10 +1170,44 @@ class StateSchema(BaseModel, Generic[T]):
         else:
             output_fields = []
 
+        # Detect if we should use prebuilt base classes
+        has_messages = "messages" in output_fields
+        has_tools = "tools" in output_fields
+
+        # Check what the current schema inherits from
+        from haive.core.schema.prebuilt.messages_state import MessagesState
+        from haive.core.schema.prebuilt.tool_state import ToolState
+
+        current_is_tool_state = issubclass(cls, ToolState)
+        current_is_messages_state = issubclass(cls, MessagesState)
+
+        # Determine appropriate base class using same logic as SchemaComposer
+        base_class = None
+        if has_tools or current_is_tool_state:
+            base_class = ToolState
+            logger.debug("Using ToolState as base for derived output schema")
+        elif has_messages or current_is_messages_state:
+            base_class = MessagesState
+            logger.debug("Using MessagesState as base for derived output schema")
+        else:
+            # Fall back to BaseModel for basic schemas
+            base_class = BaseModel
+            logger.debug("Using BaseModel as base for derived output schema")
+
         # Add output fields to schema
         for field_name in output_fields:
             if field_name in cls.model_fields:
                 field_info = cls.model_fields[field_name]
+
+                # Skip fields that are already defined in the base class
+                if (
+                    hasattr(base_class, "model_fields")
+                    and field_name in base_class.model_fields
+                ):
+                    logger.debug(
+                        f"Skipping field '{field_name}' - already defined in {base_class.__name__}"
+                    )
+                    continue
 
                 # Create a copy of the field_info to avoid modifying the original
                 from pydantic import Field
@@ -960,9 +1239,12 @@ class StateSchema(BaseModel, Generic[T]):
                 # Add to fields with original type annotation
                 fields[field_name] = (field_info.annotation, new_field_info)
 
-        # Create model
+        # Create model with appropriate base class
         schema_name = name or f"{cls.__name__}Output"
-        return create_model(schema_name, **fields)
+        if base_class == BaseModel:
+            return create_model(schema_name, **fields)
+        else:
+            return create_model(schema_name, __base__=base_class, **fields)
 
     @classmethod
     def with_shared_fields(cls, fields: List[str]) -> Type[StateSchema]:

@@ -1,8 +1,40 @@
-"""
-Utility functions for schema manipulation in the Haive framework.
+"""Utility functions for schema manipulation in the Haive framework.
 
-This module provides the SchemaUtils class containing static methods for
-formatting types, extracting fields, and building schemas programmatically.
+This module provides the SchemaUtils class containing static methods for working with
+schemas in the Haive Schema System. It includes utilities for formatting type
+annotations, extracting field information, creating field definitions, and building
+schemas programmatically.
+
+The utilities in this module are primarily used by the SchemaComposer and
+StateSchemaManager classes, but they can also be useful for custom schema
+manipulation tasks or when working with schemas directly.
+
+Key capabilities include:
+- Type annotation formatting for readable representation of complex types
+- Field information extraction from Pydantic field objects
+- Pydantic field creation with proper metadata
+- Support for special types like Optional, Union, and generics
+- Helper functions for schema display and debug visualization
+
+Example:
+    ```python
+    from haive.core.schema.utils import SchemaUtils
+    from typing import List, Optional
+
+    # Format a type annotation
+    type_str = SchemaUtils.format_type_annotation(List[Optional[str]])
+    print(type_str)  # "List[Optional[str]]"
+
+    # Extract field info from a Pydantic model
+    from pydantic import BaseModel, Field
+
+    class MyModel(BaseModel):
+        name: str = Field(default="default", description="User name")
+
+    field_info = MyModel.model_fields["name"]
+    default, default_repr, desc = SchemaUtils.extract_field_info(field_info)
+    # default = "default", desc = "User name"
+    ```
 """
 
 import logging
@@ -22,12 +54,27 @@ logger = logging.getLogger(__name__)
 
 
 class SchemaUtils:
-    """
-    Utility functions for schema manipulation and formatting.
+    """Utility functions for schema manipulation and formatting.
 
     This class provides static methods for working with schema-related tasks
     such as formatting type annotations, extracting field information, and
-    building state schemas from components.
+    building state schemas from components. The methods focus on common
+    operations needed when programmatically working with schemas and Pydantic
+    models in the Haive framework.
+
+    Key methods include:
+
+    - format_type_annotation: Creates readable string representations of type annotations
+    - extract_field_info: Extracts default values and descriptions from Pydantic fields
+    - create_pydantic_field: Creates Pydantic Field objects with proper metadata
+    - extract_model_info: Analyzes a Pydantic model to extract useful information
+    - format_default_value: Creates string representations of default values
+    - analyze_field_type: Determines characteristics of field types (generic, optional, etc.)
+
+    These utilities are designed to work with both Pydantic v1 and v2, handling
+    differences in field structures and model internals. They're used extensively
+    throughout the Haive Schema System to provide consistent handling of types
+    and field definitions.
     """
 
     @staticmethod

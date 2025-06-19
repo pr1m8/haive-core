@@ -23,11 +23,34 @@ from haive.core.schema.state_schema import StateSchema
 
 
 class MessagesState(StateSchema):
-    """
-    State schema for conversation management with LangChain integration.
+    """State schema for conversation management with LangChain integration.
 
-    Provides message handling, filtering, and support for tools and system messages.
-    Designed to work seamlessly with LangGraph for agent workflows.
+    MessagesState is a specialized StateSchema that provides comprehensive message
+    handling capabilities for conversational AI agents. It extends the base StateSchema
+    with specific functionality for working with LangChain message types, message
+    filtering, token counting, and conversation management.
+
+    This schema serves as the foundation for conversation-based agent states in the
+    Haive framework, providing seamless integration with LangGraph for agent workflows.
+    It includes built-in support for all standard message types (Human, AI, System, Tool)
+    and handles message conversion, ordering, and serialization.
+
+    Key features include:
+
+    - Automatic message conversion between different formats (dict/object)
+    - System message handling with proper ordering enforcement
+    - Message filtering by type, content, or custom criteria
+    - Token counting and length estimation for context management
+    - Conversation history manipulation (truncation, filtering, etc.)
+    - LangGraph integration with proper message reducers
+    - Conversion to formats required by different LLM providers
+
+    The messages field is automatically shared with parent/child graphs and configured
+    with the appropriate reducer function for merging message lists during state updates.
+
+    This class is commonly used as a base class for more specialized agent states that
+    need conversation capabilities, and is the default base class used by SchemaComposer
+    when message handling is detected in the components being composed.
     """
 
     # Core messages field with reducer annotation

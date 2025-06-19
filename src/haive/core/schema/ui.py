@@ -1,9 +1,49 @@
-"""
-UI utility for displaying and working with schemas in a user-friendly way.
+"""UI utilities for displaying and visualizing schemas in a user-friendly way.
 
-This module provides the SchemaUI class for displaying schema information
-in a rich text format, generating Python code representations of schemas,
-and comparing schemas side by side.
+This module provides the SchemaUI class, which offers rich-formatted visualization
+of schemas in the Haive Schema System. It allows for displaying schema structures,
+generating equivalent Python code representations, and comparing schemas side by side
+to identify differences.
+
+The SchemaUI is designed to work with the Rich library to provide colorized,
+structured terminal output for both schema classes and instances. This makes
+it invaluable for debugging, development, and educational purposes when working
+with the Haive Schema System.
+
+Key features include:
+- Rich terminal visualization of schema structure
+- Python code generation for schema definitions
+- Side-by-side schema comparison
+- Specialized handling for StateSchema features
+- Support for both class and instance visualization
+- Highlight of important schema features like shared fields and reducers
+
+Example:
+    ```python
+    from haive.core.schema import SchemaUI
+    from haive.core.schema import SchemaComposer
+    from typing import List
+
+    # Create a schema
+    composer = SchemaComposer(name="MyState")
+    composer.add_field(
+        name="messages",
+        field_type=List[str],
+        default_factory=list
+    )
+    MyState = composer.build()
+
+    # Display schema structure
+    SchemaUI.display_schema(MyState)
+
+    # Generate Python code representation
+    code = SchemaUI.schema_to_code(MyState)
+    print(code)
+
+    # Create an instance and display it
+    state = MyState(messages=["Hello"])
+    SchemaUI.display_schema(state, title="State Instance")
+    ```
 """
 
 import logging
@@ -22,12 +62,29 @@ logger = logging.getLogger(__name__)
 
 
 class SchemaUI:
-    """
-    UI utilities for displaying schema information in a rich UI format.
+    """UI utilities for visualizing and working with schemas.
 
-    The SchemaUI class provides static methods for displaying schemas in
-    a human-readable format, converting schemas to code, and comparing
-    different schemas.
+    The SchemaUI class provides a collection of static methods for visualizing
+    schema structures, generating equivalent Python code, and comparing different
+    schemas side by side. It uses the Rich library to create colorized, structured
+    terminal output that makes complex schema relationships more accessible.
+
+    This class is particularly useful for:
+    - Debugging schema composition and creation
+    - Exploring schema structure and relationships
+    - Generating code from dynamically created schemas
+    - Understanding differences between schema versions
+    - Visualizing shared fields and reducer configurations
+    - Displaying the structure of StateSchema instances
+
+    All methods in this class are static and focus on visualization rather than
+    schema modification. For schema creation and manipulation, use SchemaComposer
+    or StateSchemaManager instead.
+
+    Note:
+        The visualization capabilities support both Pydantic v1 and v2 models,
+        with special handling for StateSchema-specific features like shared fields,
+        reducers, and engine I/O mappings.
     """
 
     @staticmethod

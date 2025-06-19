@@ -1,9 +1,47 @@
-"""
-Field extractor utility for extracting field information from various sources.
+"""Field extractor utility for the Haive Schema System.
 
-This module provides a standardized way to extract field definitions from models,
-engines, and other components, ensuring consistent field handling throughout the
-Haive framework.
+This module provides the FieldExtractor class, which offers a standardized way to
+extract field definitions from various sources including Pydantic models, engines,
+and dictionary specifications. It ensures consistent field handling throughout the
+Haive Schema System, serving as a key component for dynamic schema composition.
+
+The FieldExtractor enables automatic discovery of fields and their metadata from
+existing components, making it possible to build schemas that properly integrate
+with those components without manual field specification. This is particularly
+valuable when working with complex systems where fields need to be shared across
+multiple components or where field specifications are distributed across different
+parts of the system.
+
+Key capabilities include:
+- Extracting field definitions from Pydantic models (including annotations)
+- Discovering input and output fields from engine components
+- Identifying shared fields and reducer functions
+- Mapping engine I/O relationships for state management
+- Handling structured output models
+
+Example:
+    ```python
+    from haive.core.schema import FieldExtractor
+
+    # Extract fields from a list of components
+    field_defs, engine_io_mappings, structured_model_fields, structured_models = (
+        FieldExtractor.extract_from_components([
+            retriever_engine,
+            llm_engine,
+            memory_component
+        ])
+    )
+
+    # Fields are returned as FieldDefinition objects
+    for name, field_def in field_defs.items():
+        print(f"Field: {name}, Type: {field_def.field_type}")
+
+    # Engine I/O mappings show which fields are used by which engines
+    for engine, mapping in engine_io_mappings.items():
+        print(f"Engine: {engine}")
+        print(f"  Inputs: {mapping['inputs']}")
+        print(f"  Outputs: {mapping['outputs']}")
+    ```
 """
 
 import logging
@@ -33,12 +71,30 @@ T = TypeVar("T")
 
 
 class FieldExtractor:
-    """
-    Unified utility for extracting fields from various sources.
+    """Unified utility for extracting field definitions from various sources.
 
-    This class provides methods to extract field definitions from models,
-    engines, and dictionaries, ensuring consistent field handling throughout
-    the framework.
+    The FieldExtractor class provides static methods for extracting field definitions,
+    shared fields, reducer functions, and engine I/O mappings from various components
+    in the Haive ecosystem. It's designed to work with:
+
+    1. Pydantic models and model classes
+    2. Engine components with get_input_fields/get_output_fields methods
+    3. Components with structured_output_model attributes
+    4. Dictionary-based field specifications
+
+    This class is a key component of the Haive Schema System's composition capabilities,
+    enabling automatic discovery and integration of fields from different parts of an
+    application. By standardizing field extraction, it ensures consistent handling of
+    field metadata throughout the framework.
+
+    The extraction methods are designed to be comprehensive, gathering not only basic
+    field information like types and defaults, but also Haive-specific metadata such as:
+    - Whether fields are shared between parent and child graphs
+    - Reducer functions for combining field values during updates
+    - Input/output relationships with specific engines
+    - Structured output model associations
+
+    All methods are static and don't require instantiation of the class.
     """
 
     @staticmethod
@@ -480,20 +536,65 @@ class FieldExtractor:
         Dict[str, Set[str]],  # Structured model fields
         Dict[str, Type],  # Structured models
     ]:
-        """
-        Extract field definitions from a list of components.
+        """Extract field definitions from a list of heterogeneous components.
 
-        This is a higher-level method that extracts field definitions from
-        various components (engines, models, dictionaries) and returns them
-        in a consistent format.
+        This is a high-level method that extracts field definitions from various
+        component types (engines, models, dictionaries) and returns them in a
+        consistent format. It's designed to work with mixed collections of components
+        and serves as the primary entry point for schema composition.
+
+        The method processes each component according to its type:
+        - Engine components: Uses get_input_fields/get_output_fields and looks for structured_output_model
+        - Pydantic models: Extracts fields, shared fields, reducers, and engine mappings
+        - Dictionaries: Processes field definitions in dictionary format
+
+        It also handles field conflict resolution by merging field definitions when
+        the same field appears in multiple components.
 
         Args:
-            components: List of components to extract from
-            include_messages_field: Whether to ensure a messages field exists
+            components (List[Any]): List of components to extract fields from. Can include
+                engine instances, Pydantic models, model classes, and dictionaries.
+            include_messages_field (bool, optional): Whether to automatically add a
+                messages field with appropriate reducer if one doesn't exist in the
+                components. This is useful for conversation-based agents. Defaults to True.
 
         Returns:
-            Tuple of (field_definitions, engine_io_mappings, structured_model_fields,
-                     structured_models)
+            Tuple containing:
+                - Dict[str, FieldDefinition]: Dictionary mapping field names to their
+                  complete FieldDefinition objects
+                - Dict[str, Dict[str, List[str]]]: Engine I/O mappings showing which
+                  fields are inputs/outputs for which engines
+                - Dict[str, Set[str]]: Structured model fields, mapping model names
+                  to sets of field names within those models
+                - Dict[str, Type]: Structured model types, mapping model names to
+                  their actual class types
+
+        Example:
+            ```python
+            # Create a list of components
+            components = [
+                retriever_engine,  # Engine with get_input/output_fields
+                ConversationMemory(),  # Pydantic model instance
+                ResponseGeneratorConfig,  # Pydantic model class
+                {  # Dictionary-based field definition
+                    "custom_field": (str, "", {"description": "Custom field"}),
+                    "shared_fields": ["messages"]
+                }
+            ]
+
+            # Extract field definitions
+            field_defs, io_mappings, model_fields, models = (
+                FieldExtractor.extract_from_components(components)
+            )
+
+            # Field definitions can be used with SchemaComposer
+            composer = SchemaComposer(name="AgentState")
+            for name, field_def in field_defs.items():
+                composer.add_field_definition(field_def)
+
+            # Build the schema
+            AgentState = composer.build()
+            ```
         """
         field_definitions = {}
         engine_io_mappings = {}

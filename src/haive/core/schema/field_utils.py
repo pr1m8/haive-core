@@ -1,9 +1,58 @@
-"""
-Field utilities for standardized Pydantic field handling in the Haive framework.
+"""Field utilities for the Haive Schema System.
 
-This module provides consistent utilities for creating, extracting, and manipulating
-Pydantic fields across the entire framework, ensuring proper handling of field
-metadata, types, and defaults.
+This module provides a comprehensive set of utilities for creating, extracting, and
+manipulating Pydantic fields within the Haive Schema System. It ensures consistent
+handling of field metadata, types, and defaults across the entire framework.
+
+The utilities in this module serve as the low-level foundation for the Schema System,
+handling technical details like:
+- Creating fields with standardized metadata
+- Working with Annotated types for metadata embedding
+- Extracting metadata from type annotations
+- Type inference and manipulation
+- Resolver functions for reducers
+
+Core functions include:
+- create_field: Create a standard Pydantic field with metadata
+- create_annotated_field: Create a field using Python's Annotated type for metadata
+- extract_type_metadata: Extract base type and metadata from annotations
+- infer_field_type: Intelligently determine types from values
+- get_common_reducers: Access standard reducer functions
+- resolve_reducer: Convert reducer names to functions
+
+These utilities are primarily used by FieldDefinition, SchemaComposer, and
+StateSchemaManager to implement higher-level functionality.
+
+Example:
+    ```python
+    from haive.core.schema.field_utils import (
+        create_field, create_annotated_field, get_common_reducers
+    )
+    from typing import List
+    import operator
+
+    # Create a standard field
+    field_type, field_info = create_field(
+        field_type=List[str],
+        default_factory=list,
+        description="List of items",
+        shared=True,
+        reducer=operator.add
+    )
+
+    # Create an annotated field with embedded metadata
+    field_type, field_info = create_annotated_field(
+        field_type=List[str],
+        default_factory=list,
+        description="List of items",
+        shared=True,
+        reducer=operator.add
+    )
+
+    # Get common reducer functions
+    reducers = get_common_reducers()
+    add_messages = reducers["add_messages"]  # LangGraph's message list combiner
+    ```
 """
 
 import logging
@@ -35,15 +84,36 @@ ReducerType = TypeVar("ReducerType", bound=Callable[[Any, Any], Any])
 
 
 class FieldMetadata:
-    """
-    Standardized container for field metadata in the Haive framework.
+    """Standardized container for field metadata in the Haive Schema System.
 
-    This class encapsulates all metadata associated with a field:
+    This class encapsulates all metadata associated with a field, serving as a
+    comprehensive representation of field properties beyond what Pydantic directly
+    supports. It provides a structured way to manage:
+
     - Basic field properties (description, title, etc.)
-    - Haive-specific properties (shared, reducer, etc.)
-    - Engine I/O tracking (input/output relationships)
+    - Haive-specific properties (shared status, reducer functions, etc.)
+    - Engine I/O tracking (input/output relationships with engines)
+    - Structured output model associations
 
-    It serves as a single source of truth for field metadata throughout the framework.
+    FieldMetadata provides methods for converting between different metadata
+    representations, including dictionaries for Field instantiation and annotation
+    objects for Annotated types. It also supports merging metadata from different
+    sources and serializing reducer functions.
+
+    This class serves as a single source of truth for field metadata throughout
+    the Schema System, ensuring consistent handling of field properties across
+    schema composition, manipulation, and serialization operations.
+
+    Attributes:
+        description (Optional[str]): Human-readable description of the field
+        shared (bool): Whether the field is shared with parent graphs
+        reducer (Optional[Callable]): Function to combine field values during updates
+        source (Optional[str]): Component that provided this field
+        input_for (List[str]): Engines this field serves as input for
+        output_from (List[str]): Engines this field is output from
+        structured_model (Optional[str]): Name of structured model this field belongs to
+        title (Optional[str]): Field title (for OpenAPI/Schema generation)
+        extra (Dict[str, Any]): Additional metadata properties
     """
 
     def __init__(
@@ -350,25 +420,69 @@ def create_annotated_field(
     make_optional: bool = True,
     **kwargs,
 ) -> Tuple[Type, Field]:
-    """
-    Create a field using Annotated type for metadata.
+    """Create a Pydantic field using Python's Annotated type for embedded metadata.
 
-    This version uses Annotated[Type, ...] to store metadata within the type itself,
-    which is more aligned with Pydantic v2's design.
+    This function creates a field for Pydantic models using the Annotated type to embed
+    metadata directly in the type annotation. This approach aligns with Pydantic v2's
+    design and provides better support for schema composition and manipulation.
+
+    By embedding metadata in the Annotated type, field properties like shared status
+    and reducer functions stay attached to the field type itself, which allows them
+    to be preserved during operations like schema composition and subclassing.
+
+    The function supports both direct metadata parameters (description, shared, reducer)
+    and a comprehensive FieldMetadata object for more complex metadata.
 
     Args:
-        field_type: The type of the field
-        default: Default value (used if default_factory is None)
-        default_factory: Optional factory function for default value
-        metadata: Optional FieldMetadata object for comprehensive metadata
-        description: Optional field description (ignored if metadata is provided)
-        shared: Whether field is shared with parent (ignored if metadata is provided)
-        reducer: Optional reducer function (ignored if metadata is provided)
-        make_optional: Whether to make the field Optional if it's not already
-        **kwargs: Additional field parameters
+        field_type (Type[T]): The Python type of the field (e.g., str, List[int])
+        default (Any, optional): Default value for the field. Used if default_factory
+            is not provided. Defaults to None.
+        default_factory (Optional[Callable[[], T]], optional): Factory function that
+            returns the default value. Takes precedence over default if both are
+            provided. Defaults to None.
+        metadata (Optional[FieldMetadata], optional): Comprehensive field metadata
+            object. If provided, other metadata parameters (description, shared,
+            reducer) are ignored. Defaults to None.
+        description (Optional[str], optional): Human-readable description of the field.
+            Ignored if metadata is provided. Defaults to None.
+        shared (bool, optional): Whether the field is shared with parent graphs.
+            Ignored if metadata is provided. Defaults to False.
+        reducer (Optional[Callable], optional): Function to combine field values during
+            updates. Ignored if metadata is provided. Defaults to None.
+        make_optional (bool, optional): Whether to make the field Optional[T] if it's
+            not already. This ensures the field can be None, which is important for
+            state management. Defaults to True.
+        **kwargs: Additional field parameters passed to FieldMetadata or Field.
 
     Returns:
-        Tuple of (field_type, field_info) ready for Pydantic model creation
+        Tuple[Type, Field]: A tuple containing:
+            - field_type: The annotated type with embedded metadata
+            - field_info: The Pydantic Field object with standard properties
+
+    Example:
+        ```python
+        from typing import List
+        from pydantic import create_model, Field
+        import operator
+
+        # Create an annotated field with shared status and reducer
+        field_type, field_info = create_annotated_field(
+            field_type=List[str],
+            default_factory=list,
+            description="List of items",
+            shared=True,
+            reducer=operator.add
+        )
+
+        # Create a model using the field
+        MyModel = create_model(
+            "MyModel",
+            items=(field_type, field_info)
+        )
+
+        # The model will have "items" as a shared field with an add reducer
+        # The metadata stays attached to the field type
+        ```
     """
     from typing import Optional as OptionalType
 
