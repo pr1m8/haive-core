@@ -1,11 +1,25 @@
-# src/haive/core/persistence/handlers.py
+"""High-level persistence handling utilities for the Haive framework.
 
-"""
-Persistence handling utilities for checkpointing.
+This module provides high-level functions for managing persistence operations,
+including checkpointer creation, configuration interpretation, state recovery,
+and thread management. It serves as a convenient interface layer that abstracts
+away the details of specific persistence implementations.
 
-This module provides high-level functions for managing checkpoint operations,
-including creation, recovery, and thread management.
+The utilities in this module are designed to work with both simple configuration
+dictionaries and full CheckpointerConfig objects, automatically handling fallbacks,
+error recovery, and sensible defaults. They provide a robust interface for both
+synchronous and asynchronous usage patterns.
+
+Key functions:
+- setup_checkpointer: Create appropriate checkpointer based on configuration
+- get_checkpoint: Retrieve state from persistence
+- put_checkpoint: Store state in persistence
+- register_thread: Register a thread for tracking and management
+
+This module enables a more declarative approach to persistence configuration,
+allowing users to specify what they want rather than how to implement it.
 """
+
 import json
 import logging
 from typing import Any, Dict, List, Optional, Union
@@ -20,14 +34,49 @@ logger = logging.getLogger(__name__)
 
 
 def setup_checkpointer(config: Any) -> Any:
-    """
-    Set up the appropriate checkpointer based on persistence configuration.
+    """Set up the appropriate checkpointer based on persistence configuration.
+
+    This function creates and configures a checkpointer instance based on the
+    provided configuration. It handles a variety of configuration formats,
+    including direct CheckpointerConfig objects and configuration dictionaries
+    embedded in larger config objects.
+
+    The function provides intelligent fallbacks and error handling, ensuring that
+    a working checkpointer is always returned - falling back to a memory checkpointer
+    if the requested configuration cannot be satisfied.
 
     Args:
-        config: Configuration containing persistence settings
+        config: Configuration containing persistence settings, which can be:
+            - A direct CheckpointerConfig instance
+            - An object with a 'persistence' attribute containing configuration
+            - An object with a 'persistence' dictionary specifying type and parameters
 
     Returns:
-        A configured checkpointer instance
+        Any: A configured checkpointer instance ready for use
+
+    Examples:
+        ```python
+        # Using a direct config object
+        from haive.core.persistence import MemoryCheckpointerConfig
+        memory_config = MemoryCheckpointerConfig()
+        checkpointer = setup_checkpointer(memory_config)
+
+        # Using a config object with persistence attribute
+        class AgentConfig:
+            def __init__(self):
+                self.persistence = {"type": "postgres", "db_host": "localhost"}
+
+        agent_config = AgentConfig()
+        checkpointer = setup_checkpointer(agent_config)
+
+        # With fallback to memory if configuration fails
+        try:
+            checkpointer = setup_checkpointer({"persistence": {"type": "invalid"}})
+            # Will fall back to memory checkpointer
+        except Exception:
+            # Should not reach here - function handles errors internally
+            pass
+        ```
     """
     # Default to memory checkpointer
     if not hasattr(config, "persistence") or config.persistence is None:

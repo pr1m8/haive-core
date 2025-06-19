@@ -1,12 +1,70 @@
+"""Utility functions for the Haive persistence system.
+
+This module provides helper functions for working with checkpointers and their
+associated resources. It includes utilities for connection pool management,
+serialization/deserialization of metadata, and other common operations needed
+across different persistence implementations.
+
+The utilities are designed to be used by the persistence system internals and
+generally aren't intended to be used directly by application code. They provide
+consistent behavior across different checkpointer implementations and handle
+edge cases and error conditions gracefully.
+"""
+
+import json
 import logging
 from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
 
-def ensure_pool_open(checkpointer: Any) -> Optional[Any]:
+def serialize_metadata(metadata: Dict[str, Any]) -> str:
+    """Serialize metadata dictionary to JSON string.
+
+    Args:
+        metadata: Dictionary containing metadata to serialize
+
+    Returns:
+        str: JSON string representation of the metadata
     """
-    Ensure that any PostgreSQL connection pool is properly opened.
+    return json.dumps(metadata)
+
+
+def deserialize_metadata(metadata_str: str) -> Dict[str, Any]:
+    """Deserialize metadata from JSON string to dictionary.
+
+    Args:
+        metadata_str: JSON string containing serialized metadata
+
+    Returns:
+        Dict[str, Any]: Deserialized metadata dictionary
+    """
+    return json.loads(metadata_str) if metadata_str else {}
+
+
+def ensure_pool_open(checkpointer: Any) -> Optional[Any]:
+    """Ensure that a PostgreSQL connection pool is properly opened.
+
+    This function checks if a checkpointer has an associated connection pool
+    and ensures that it's properly opened. It handles different pool
+    implementations and versions, checking appropriate attributes and calling
+    the open method if needed.
+
+    The function is used to ensure that connection pools are ready for use
+    before attempting database operations, preventing errors from closed
+    or unopened pools.
+
+    Args:
+        checkpointer: The checkpointer instance to check for a connection pool
+
+    Returns:
+        Optional[Any]: The opened connection pool if one was found and opened,
+            None otherwise
+
+    Note:
+        This function gracefully handles the case where psycopg_pool is not
+        available, making it safe to call even if the PostgreSQL dependencies
+        are not installed.
     """
     if not hasattr(checkpointer, "conn"):
         return None
@@ -38,14 +96,39 @@ def ensure_pool_open(checkpointer: Any) -> Optional[Any]:
 
 
 async def ensure_async_pool_open(checkpointer: Any) -> Optional[Any]:
-    """
-    Ensure that any async PostgreSQL connection pool is properly opened.
+    """Ensure that an async PostgreSQL connection pool is properly opened.
+
+    This asynchronous function checks if an async checkpointer has an associated
+    connection pool and ensures that it's properly opened. It handles different
+    async pool implementations and versions, checking appropriate attributes and
+    calling the async open method if needed.
+
+    The function is particularly important for async contexts, where proper
+    connection management is critical for maintaining good performance and
+    resource utilization. It prevents errors from closed or unopened pools
+    in async code.
 
     Args:
-        checkpointer: The async checkpointer to check
+        checkpointer: The async checkpointer instance to check for a connection pool
 
     Returns:
-        The opened pool if one was found and opened, None otherwise
+        Optional[Any]: The opened async connection pool if one was found and
+            opened, None otherwise
+
+    Note:
+        This function gracefully handles the case where the async PostgreSQL
+        dependencies are not available, making it safe to call even if the
+        async database modules are not installed.
+
+    Example:
+        ```python
+        async def prepare_checkpointer(checkpointer):
+            # Ensure the pool is open before using it
+            pool = await ensure_async_pool_open(checkpointer)
+            if pool:
+                print("Pool is ready for use")
+            # Continue with checkpointer operations...
+        ```
     """
     opened_pool = None
     try:

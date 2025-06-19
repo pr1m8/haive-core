@@ -1,10 +1,21 @@
-# src/haive/core/engine/agent/persistence/sqlite_config.py
+"""SQLite-based persistence implementation for the Haive framework.
 
-"""
-SQLite-based checkpointer for agent state persistence.
+This module provides a SQLite-backed checkpoint persistence implementation that
+stores state data in a local SQLite database file. This allows for durable state
+persistence without requiring external database services, making it ideal for
+local development, testing, and single-instance deployments.
 
-This module provides a SQLite-based implementation of the checkpointer
-interface, suitable for local development and testing.
+The SQLite implementation strikes a balance between the simplicity of in-memory
+storage and the durability of full database solutions like PostgreSQL. It offers
+file-based persistence with minimal setup, while still providing basic thread
+tracking and checkpoint management capabilities.
+
+Key advantages of the SQLite implementation include:
+- No external dependencies beyond the Python standard library
+- Simple file-based storage requiring no separate database service
+- Compatibility with both synchronous and asynchronous operations
+- Support for both full history and shallow (latest-only) storage modes
+- Automatic schema creation and management
 """
 
 import json
@@ -24,19 +35,52 @@ logger = logging.getLogger(__name__)
 
 
 class SQLiteSaver:
-    """
-    A checkpointer implementation using SQLite.
+    """A LangGraph-compatible checkpointer implementation using SQLite.
 
-    This class provides a LangGraph-compatible checkpointer that stores
-    state in a SQLite database.
+    This class provides a simple but effective implementation of the LangGraph
+    checkpointer interface using SQLite as the storage backend. It handles state
+    persistence, thread tracking, and checkpoint management through a local
+    SQLite database file.
+
+    The implementation automatically creates and manages the necessary database
+    schema, including tables for threads and checkpoints. It provides methods
+    for storing and retrieving checkpoint data, managing thread information,
+    and tracking checkpoint relationships.
+
+    Key features include:
+
+    - File-based persistence with minimal setup requirements
+    - Support for tracking parent-child relationships between checkpoints
+    - Thread management with metadata and activity tracking
+    - Automatic schema creation and database directory management
+    - Efficient storage and retrieval of checkpoint data
+    - JSON serialization for flexible data storage
+
+    This implementation is ideal for local development, testing, and single-instance
+    deployments where a full database service like PostgreSQL would be overkill.
     """
 
     def __init__(self, db_path: str):
-        """
-        Initialize the SQLite saver.
+        """Initialize the SQLite saver with a database file path.
+
+        This constructor sets up the SQLite checkpointer, ensuring the database
+        directory exists and initializing the required schema. It automatically
+        creates the database file if it doesn't exist.
 
         Args:
-            db_path: Path to the SQLite database file
+            db_path: Path to the SQLite database file where state will be stored.
+                This can be an absolute or relative path. The directory structure
+                will be created if it doesn't exist.
+
+        Example:
+            ```python
+            # Create a SQLite checkpointer in the 'data' directory
+            saver = SQLiteSaver("data/agent_state.db")
+
+            # Use with a graph
+            from langgraph.graph import Graph
+            graph = Graph(checkpointer=saver)
+            ```
         """
         self.db_path = db_path
         self._ensure_db_dir()
@@ -49,10 +93,31 @@ class SQLiteSaver:
             os.makedirs(db_dir, exist_ok=True)
 
     def setup(self):
-        """
-        Set up the SQLite database schema.
+        """Set up the SQLite database schema.
 
-        Creates the necessary tables for storing checkpoints and threads.
+        This method creates the necessary database tables for storing checkpoints
+        and thread information if they don't already exist. It establishes the
+        schema structure with appropriate relationships and constraints.
+
+        The schema includes:
+
+        1. A 'threads' table for tracking conversation threads with:
+           - thread_id: Unique identifier for each thread
+           - created_at: Timestamp when the thread was created
+           - last_access: Timestamp of the most recent activity
+           - metadata: JSON blob for storing additional thread information
+
+        2. A 'checkpoints' table for storing state checkpoints with:
+           - checkpoint_id: Unique identifier for each checkpoint
+           - thread_id: Foreign key linking to the thread
+           - checkpoint_ns: Namespace for organizing checkpoints
+           - parent_checkpoint_id: For tracking checkpoint relationships
+           - created_at: Timestamp when the checkpoint was created
+           - data: The serialized checkpoint data
+           - metadata: JSON blob for storing additional checkpoint information
+
+        The method is automatically called during initialization but can also
+        be called explicitly to recreate or validate the schema.
         """
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
@@ -89,14 +154,45 @@ class SQLiteSaver:
             conn.commit()
 
     def get(self, config: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        """
-        Get a checkpoint from the database.
+        """Retrieve a checkpoint from the SQLite database.
+
+        This method retrieves a specific checkpoint from the database based on the
+        provided configuration. It handles extracting the necessary identifiers
+        from the configuration, constructing and executing the appropriate query,
+        and deserializing the retrieved data.
+
+        The method can retrieve either a specific checkpoint (if checkpoint_id is
+        provided) or the most recent checkpoint for a thread (if only thread_id
+        is specified).
 
         Args:
-            config: Configuration with thread_id and optional checkpoint_id
+            config: Configuration dictionary containing:
+                - thread_id: The thread identifier (required)
+                - checkpoint_id: Optional specific checkpoint to retrieve
+                - configurable: Optional nested dictionary with additional parameters
 
         Returns:
-            Checkpoint data if found, None otherwise
+            Dict[str, Any]: The checkpoint data if found, including:
+                - channel_values: The actual state data
+                - metadata: Additional information about the checkpoint
+                - id: The checkpoint identifier
+                Or None if no matching checkpoint is found
+
+        Example:
+            ```python
+            # Get the latest checkpoint for a thread
+            checkpoint = saver.get({"thread_id": "user_123"})
+
+            # Get a specific checkpoint
+            checkpoint = saver.get({
+                "thread_id": "user_123",
+                "checkpoint_id": "checkpoint_456"
+            })
+
+            if checkpoint:
+                # Use the state data
+                state_data = checkpoint["channel_values"]
+            ```
         """
         thread_id = config["configurable"]["thread_id"]
         checkpoint_id = config["configurable"].get("checkpoint_id")
@@ -302,14 +398,58 @@ class SQLiteSaver:
 
 
 class SQLiteCheckpointerConfig(CheckpointerConfig):
-    """
-    Configuration for SQLite-based checkpointing.
+    """Configuration for SQLite-based checkpoint persistence.
 
-    This class provides a configuration for using SQLite as a persistence
-    backend for LangGraph state.
+    This class provides a comprehensive configuration for using SQLite as a
+    persistence backend for agent state. It offers the simplicity of file-based
+    storage without requiring external database services, making it ideal for
+    local development, testing, and single-instance deployments.
+
+    SQLite persistence strikes a balance between the simplicity of in-memory
+    storage and the durability of full database solutions like PostgreSQL. It
+    provides persistent storage across application restarts while requiring
+    minimal setup and configuration.
+
+    Key features include:
+
+    - File-based persistence with no external database dependencies
+    - Support for both full and shallow storage modes
+    - Thread registration and tracking with metadata
+    - Checkpoint management with parent-child relationships
+    - Simple configuration with minimal required parameters
+    - Automatic database file and directory creation
+
+    The implementation is particularly well-suited for:
+
+    - Local development and testing environments
+    - Single-instance deployments where simplicity is preferred
+    - Applications with modest concurrency requirements
+    - Scenarios where file-based persistence is sufficient
+
+    Example:
+        ```python
+        from haive.core.persistence import SQLiteCheckpointerConfig
+
+        # Create a basic SQLite checkpointer
+        config = SQLiteCheckpointerConfig(
+            db_path="data/agent_state.db"
+        )
+
+        # Create a checkpointer
+        checkpointer = config.create_checkpointer()
+
+        # Use with a graph
+        from langgraph.graph import Graph
+        graph = Graph(checkpointer=checkpointer)
+        ```
+
+    Note:
+        While SQLite supports concurrent readers, it has limitations for
+        concurrent writers. For high-concurrency production environments,
+        consider using PostgresCheckpointerConfig instead.
     """
 
-    type: CheckpointerType = CheckpointerType.sqlite
+    type: CheckpointerType = CheckpointerType.SQLITE
 
     # SQLite configuration
     db_path: str = Field(
@@ -325,11 +465,28 @@ class SQLiteCheckpointerConfig(CheckpointerConfig):
     checkpointer: Optional[Any] = Field(default=None, exclude=True)
 
     def create_checkpointer(self) -> Any:
-        """
-        Create a SQLite checkpointer with the specified configuration.
+        """Create a SQLite checkpointer based on this configuration.
+
+        This method instantiates and returns a SQLiteSaver object configured
+        with the database path specified in this configuration. It caches the
+        created checkpointer instance for reuse, ensuring that multiple calls
+        to this method return the same instance.
+
+        The method handles the creation of the database file and directory
+        structure if they don't already exist, and initializes the database
+        schema with the required tables.
 
         Returns:
-            A SQLiteSaver instance for use with LangGraph
+            Any: A SQLiteSaver instance ready for use with LangGraph
+
+        Example:
+            ```python
+            config = SQLiteCheckpointerConfig(db_path="data/state.db")
+            checkpointer = config.create_checkpointer()
+
+            # Use with a graph
+            graph = Graph(checkpointer=checkpointer)
+            ```
         """
         if self.checkpointer is None:
             self.checkpointer = SQLiteSaver(self.db_path)
@@ -342,13 +499,46 @@ class SQLiteCheckpointerConfig(CheckpointerConfig):
         name: Optional[str] = None,
         metadata: Optional[Dict[str, Any]] = None,
     ) -> None:
-        """
-        Register a thread in the SQLite database.
+        """Register or update a thread in the SQLite database.
+
+        This method registers a new thread in the database or updates an existing
+        thread's metadata and last access time. It ensures that the thread entry
+        exists before any checkpoints are created for that thread, maintaining
+        proper database integrity.
+
+        Thread registration is important for tracking agent conversations and
+        associating metadata with them, such as user information, session data,
+        or other contextual information that might be useful for analytics or
+        debugging.
 
         Args:
-            thread_id: The thread ID to register
-            name: Optional thread name
-            metadata: Optional metadata dict
+            thread_id: Unique identifier for the thread to register or update
+            name: Optional human-readable name for the thread (currently unused)
+            metadata: Optional dictionary of metadata to associate with the thread,
+                which can include any JSON-serializable information relevant to
+                the thread (user info, session data, etc.)
+
+        Example:
+            ```python
+            config = SQLiteCheckpointerConfig(db_path="data/state.db")
+
+            # Register a new thread with metadata
+            config.register_thread(
+                thread_id="user_123",
+                name="John's Conversation",
+                metadata={
+                    "user_id": "user_123",
+                    "session_start": "2023-04-01T12:00:00Z",
+                    "source": "web_app"
+                }
+            )
+
+            # Later, you can use this thread_id with checkpoints
+            config.put_checkpoint(
+                {"configurable": {"thread_id": "user_123"}},
+                {"key": "value"}
+            )
+            ```
         """
         self.create_checkpointer()
 

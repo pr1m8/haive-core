@@ -1,3 +1,16 @@
+"""Base classes and interfaces for the Haive persistence system.
+
+This module defines the core abstractions and interfaces for the persistence
+system used throughout the Haive framework. It provides the foundation for
+various persistence implementations, ensuring a consistent interface regardless
+of the underlying storage technology.
+
+The central component is the CheckpointerConfig abstract base class, which
+defines the configuration interface that all persistence providers must implement.
+This allows different storage backends to be used interchangeably while providing
+a unified API for state persistence.
+"""
+
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Generic, TypeVar
 
@@ -14,12 +27,26 @@ T = TypeVar("T")
 
 
 class CheckpointerConfig(BaseModel, ABC, Generic[T]):
-    """
-    Base configuration for checkpoint persistence.
+    """Base configuration for checkpoint persistence implementations.
 
     This abstract base class defines the interface for all checkpointer
-    configurations in the Haive framework. Implementations must provide
-    concrete methods for creating actual checkpointer instances.
+    configurations in the Haive framework. It provides a standardized way
+    to configure and create checkpointer instances, regardless of the underlying
+    storage technology.
+
+    The CheckpointerConfig class is generic over the connection type T, allowing
+    different implementations to use appropriate connection objects (e.g.,
+    connection pools for databases, client objects for cloud services).
+
+    All concrete implementations must provide methods for creating both synchronous
+    and asynchronous checkpointer instances, ensuring compatibility with both
+    programming models.
+
+    Attributes:
+        type: The type of checkpointer (e.g., memory, postgres, sqlite)
+        mode: Operational mode - synchronous or asynchronous
+        storage_mode: Storage mode - full history or just the latest state
+        setup_needed: Whether tables/structures need to be created on first use
     """
 
     type: CheckpointerType = Field(description="Type of checkpointer to use")
@@ -39,53 +66,129 @@ class CheckpointerConfig(BaseModel, ABC, Generic[T]):
         arbitrary_types_allowed = True
 
     def is_async_mode(self) -> bool:
-        """
-        Check if operating in async mode.
+        """Check if this configuration is set to operate in asynchronous mode.
+
+        This method determines whether the checkpointer should use asynchronous
+        operations based on the configured mode. It's used internally to choose
+        between synchronous and asynchronous implementations.
 
         Returns:
-            True if async mode, False otherwise
+            bool: True if configured for async operations, False for synchronous
+
+        Example:
+            ```python
+            config = PostgresCheckpointerConfig(mode=CheckpointerMode.ASYNC)
+            if config.is_async_mode():
+                # Use async methods
+                checkpointer = await config.create_async_checkpointer()
+            else:
+                # Use sync methods
+                checkpointer = config.create_checkpointer()
+            ```
         """
         return self.mode == CheckpointerMode.ASYNC
 
     @abstractmethod
     def create_checkpointer(self) -> Any:
-        """
-        Create a synchronous checkpointer instance based on this configuration.
+        """Create a synchronous checkpointer instance based on this configuration.
+
+        This method instantiates and configures a synchronous checkpointer that
+        matches the settings in this configuration. The returned object will be
+        a compatible checkpointer implementation (typically a LangGraph Saver)
+        that can be used for storing and retrieving state.
+
+        Implementations should handle connection management, setup of required
+        database structures, and proper error handling with fallbacks.
 
         Returns:
-            A configured checkpointer instance
+            Any: A configured synchronous checkpointer instance
+
+        Raises:
+            RuntimeError: If the checkpointer cannot be created due to missing
+                dependencies or connection issues
+
+        Example:
+            ```python
+            config = MemoryCheckpointerConfig()
+            checkpointer = config.create_checkpointer()
+            # Use checkpointer with a graph
+            graph = Graph(checkpointer=checkpointer)
+            ```
         """
         pass
 
     @abstractmethod
     async def create_async_checkpointer(self) -> Any:
-        """
-        Create an asynchronous checkpointer instance.
+        """Create an asynchronous checkpointer instance.
+
+        This method instantiates and configures an asynchronous checkpointer
+        that matches the settings in this configuration. The returned object
+        will be a compatible async checkpointer implementation that can be used
+        for storing and retrieving state in asynchronous contexts.
+
+        Implementations should handle async connection management, setup of required
+        database structures, and proper error handling with fallbacks.
 
         Returns:
-            A configured async checkpointer instance
+            Any: A configured asynchronous checkpointer instance
+
+        Raises:
+            RuntimeError: If the async checkpointer cannot be created due to
+                missing dependencies or connection issues
+
+        Example:
+            ```python
+            config = PostgresCheckpointerConfig(mode=CheckpointerMode.ASYNC)
+            async_checkpointer = await config.create_async_checkpointer()
+            # Use with async graph
+            graph = AsyncGraph(checkpointer=async_checkpointer)
+            ```
         """
         pass
 
     @abstractmethod
     async def initialize_async_checkpointer(self) -> Any:
-        """
-        Initialize an async checkpointer with proper resource management.
+        """Initialize an async checkpointer with proper resource management.
 
-        This method should return an async context manager that handles
-        the lifecycle of any resources needed by the checkpointer.
+        This method creates and initializes an asynchronous checkpointer with
+        appropriate resource management. Unlike create_async_checkpointer,
+        this method may return an async context manager that properly handles
+        the lifecycle of resources like connection pools.
+
+        This is particularly important for database-backed checkpointers to
+        ensure connections are properly closed when they're no longer needed.
 
         Returns:
-            An async context manager or the checkpointer itself
+            Any: An async context manager or the checkpointer itself, depending
+                on implementation requirements
+
+        Example:
+            ```python
+            config = PostgresCheckpointerConfig(mode=CheckpointerMode.ASYNC)
+            async with await config.initialize_async_checkpointer() as checkpointer:
+                # Use checkpointer with async code
+                # Resources will be properly closed after this block
+            ```
         """
         pass
 
     def to_dict(self) -> Dict[str, Any]:
-        """
-        Convert configuration to a dictionary.
+        """Convert this configuration to a dictionary.
+
+        This method serializes the configuration to a dictionary format,
+        which is useful for persistence, logging, or passing to external
+        systems. It automatically handles both Pydantic v1 and v2 models
+        and excludes sensitive fields like passwords.
 
         Returns:
-            Dictionary representation of the configuration
+            Dict[str, Any]: Dictionary representation of this configuration
+
+        Example:
+            ```python
+            config = PostgresCheckpointerConfig(db_host="localhost")
+            config_dict = config.to_dict()
+            print(config_dict)  # {'type': 'postgres', 'db_host': 'localhost', ...}
+            ```
         """
         # Use Pydantic v2 serialization if available
         if hasattr(self, "model_dump"):
@@ -97,14 +200,38 @@ class CheckpointerConfig(BaseModel, ABC, Generic[T]):
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "CheckpointerConfig":
-        """
-        Create a configuration from a dictionary.
+        """Create a checkpointer configuration from a dictionary.
+
+        This factory method deserializes a configuration from a dictionary,
+        automatically selecting the appropriate implementation class based on
+        the 'type' field. It provides a convenient way to create configurations
+        from serialized data or configuration files.
+
+        The method dynamically imports the appropriate configuration class based
+        on the specified type, ensuring minimal dependencies are loaded when not needed.
 
         Args:
-            data: Dictionary representation
+            data: Dictionary containing configuration parameters, must include a
+                'type' field specifying which checkpointer implementation to use
 
         Returns:
-            Instantiated checkpointer configuration
+            CheckpointerConfig: An instantiated checkpointer configuration of the
+                appropriate subclass
+
+        Raises:
+            ValueError: If the 'type' field is missing or specifies an unsupported
+                checkpointer type
+
+        Example:
+            ```python
+            config_dict = {
+                "type": "postgres",
+                "db_host": "localhost",
+                "db_port": 5432
+            }
+            config = CheckpointerConfig.from_dict(config_dict)
+            # Returns a PostgresCheckpointerConfig instance
+            ```
         """
         # Ensure type is specified
         if "type" not in data:

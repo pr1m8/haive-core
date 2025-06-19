@@ -1,10 +1,22 @@
-# src/haive/core/engine/agent/persistence/supabase_config.py
+"""Supabase-based persistence implementation for the Haive framework.
 
-"""
-Supabase-based checkpointer for agent state persistence.
+This module provides a Supabase-backed checkpoint persistence implementation that
+stores state data in a Supabase Postgres database. This allows for cloud-based,
+scalable state persistence with built-in security features like Row Level Security
+(RLS) policies.
 
-This module provides a Supabase-based implementation of the checkpointer
-interface, using Postgres with proper relational design and RLS policies.
+Supabase offers a fully-managed Postgres database service with authentication,
+realtime features, and other cloud infrastructure benefits. This implementation
+leverages these capabilities to provide a production-ready persistence solution
+with proper relational design and security policies.
+
+Key advantages of the Supabase implementation include:
+- Cloud-hosted and fully-managed database with high availability
+- Built-in authentication and security features
+- Realtime capabilities for live state updates
+- Compatibility with both synchronous and asynchronous operations
+- Support for both full history and shallow storage modes
+- Automatic schema creation and management with migrations
 """
 
 import json
@@ -39,12 +51,33 @@ except ImportError:
 
 
 class SupabaseSaver:
-    """
-    A checkpointer implementation using Supabase.
+    """A LangGraph-compatible checkpointer implementation using Supabase.
 
-    This class provides a LangGraph-compatible checkpointer that stores
-    state in a Supabase Postgres database with proper relational design
-    and security policies.
+    This class provides a robust implementation of the LangGraph checkpointer
+    interface using Supabase as the storage backend. It stores state data in
+    a Supabase Postgres database with proper relational design, security
+    policies, and cloud infrastructure benefits.
+
+    The implementation automatically creates and manages the necessary database
+    schema, including tables for threads and checkpoints with appropriate
+    relationships and indexes for optimal performance. It integrates with
+    Supabase's authentication system and Row Level Security (RLS) policies
+    to ensure data isolation and security.
+
+    Key features include:
+
+    - Cloud-hosted and fully-managed database infrastructure
+    - Proper relational design with foreign key relationships
+    - Row Level Security (RLS) policies for data isolation
+    - Authentication integration for secure multi-tenant deployments
+    - Efficient storage and retrieval of checkpoint data
+    - JSON serialization for flexible data storage
+    - Support for both full history and shallow (latest-only) storage modes
+
+    This implementation is ideal for production deployments where scalability,
+    reliability, and security are paramount considerations. It offers a balance
+    of performance and features suitable for multi-tenant applications and
+    environments where proper data isolation is required.
     """
 
     def __init__(
@@ -952,14 +985,62 @@ class SupabaseSaver:
 
 
 class SupabaseCheckpointerConfig(CheckpointerConfig):
-    """
-    Configuration for Supabase-based checkpointing.
+    """Configuration for Supabase-based checkpoint persistence.
 
-    This class provides a configuration for using Supabase as a persistence
-    backend for LangGraph state, with relational database design and RLS policies.
+    This class provides a comprehensive configuration for using Supabase as a
+    cloud-based persistence backend for agent state. It leverages Supabase's
+    managed PostgreSQL service with additional security features like Row Level
+    Security (RLS) policies and authentication integration.
+
+    Supabase offers a fully-managed database service with cloud infrastructure
+    benefits, making it ideal for production deployments where scalability,
+    reliability, and security are paramount. The implementation includes proper
+    relational database design with appropriate indexes and constraints for
+    optimal performance.
+
+    Key features include:
+
+    - Cloud-hosted and fully-managed PostgreSQL database
+    - Row Level Security (RLS) policies for multi-tenant data isolation
+    - Authentication integration for secure access control
+    - Proper relational design with foreign key relationships
+    - Support for both full and shallow storage modes
+    - Efficient indexing for optimal query performance
+    - Optional integration with shared Supabase clients
+
+    The implementation is particularly well-suited for:
+
+    - Multi-tenant SaaS applications requiring data isolation
+    - Production deployments needing cloud infrastructure benefits
+    - Applications requiring secure data access controls
+    - Environments needing scalable, managed database services
+
+    Example:
+        ```python
+        from haive.core.persistence import SupabaseCheckpointerConfig
+
+        # Create a Supabase checkpointer with direct credentials
+        config = SupabaseCheckpointerConfig(
+            supabase_url="https://your-project.supabase.co",
+            supabase_key="your-api-key",
+            user_id="user-123"  # For RLS policies
+        )
+
+        # Or use shared client from dataflow module (if available)
+        config = SupabaseCheckpointerConfig(
+            user_id="user-123"  # Only need user_id when using shared client
+        )
+
+        # Create a checkpointer
+        checkpointer = config.create_checkpointer()
+        ```
+
+    Note:
+        Requires the supabase-py package to be installed. For shared client
+        functionality, the haive.dataflow.db.supabase module must be available.
     """
 
-    type: CheckpointerType = CheckpointerType.supabase
+    type: CheckpointerType = CheckpointerType.SUPABASE
 
     # Supabase configuration
     supabase_url: Optional[str] = Field(
@@ -991,11 +1072,45 @@ class SupabaseCheckpointerConfig(CheckpointerConfig):
         return self
 
     def create_checkpointer(self) -> Any:
-        """
-        Create a Supabase checkpointer with the specified configuration.
+        """Create a Supabase checkpointer based on this configuration.
+
+        This method instantiates and returns a SupabaseSaver object configured
+        with the Supabase credentials and settings specified in this configuration.
+        It handles the creation of the Supabase client, either directly or by
+        using a shared client from the dataflow module if available.
+
+        The method includes robust error handling with automatic fallback to
+        an in-memory checkpointer if the Supabase connection fails. This ensures
+        that the application can continue to function even if the Supabase
+        service is temporarily unavailable.
 
         Returns:
-            A SupabaseSaver instance for use with LangGraph
+            Any: A SupabaseSaver instance ready for use with LangGraph,
+                or a MemorySaver instance as fallback in case of errors
+
+        Example:
+            ```python
+            config = SupabaseCheckpointerConfig(
+                supabase_url="https://your-project.supabase.co",
+                supabase_key="your-api-key",
+                user_id="user-123"
+            )
+
+            try:
+                # Create the checkpointer
+                checkpointer = config.create_checkpointer()
+
+                # Use with a graph
+                graph = Graph(checkpointer=checkpointer)
+            except Exception as e:
+                print(f"Error creating Supabase checkpointer: {e}")
+                # Handle error...
+            ```
+
+        Note:
+            This method caches the created checkpointer instance, ensuring that
+            multiple calls return the same instance for efficiency. If schema
+            setup is needed, it's performed only on the first call.
         """
         if self.checkpointer is None:
             try:
