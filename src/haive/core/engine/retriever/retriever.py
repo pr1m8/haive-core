@@ -200,13 +200,46 @@ class BaseRetrieverConfig(InvokableEngine[RetrieverInput, RetrieverOutput]):
     def create_runnable(
         self, runnable_config: Optional[RunnableConfig] = None
     ) -> BaseRetriever:
-        """Create a retriever with configuration applied.
+        """
+        Create a retriever with runtime configuration applied.
+
+        This method creates a retriever instance with the current configuration,
+        applying any runtime overrides specified in the runnable_config. It extracts
+        relevant parameters from the runnable_config, updates the current configuration
+        with those parameters, and then creates the retriever instance.
+
+        The method handles common retriever parameters like k (number of results),
+        filter, and search_type, ensuring they're properly propagated to the
+        retriever instance.
 
         Args:
-            runnable_config: Optional runtime configuration
+            runnable_config (Optional[RunnableConfig]): Runtime configuration containing
+                parameter overrides for this execution. This can include parameters like
+                k, filter, and search_type in the "configurable" section.
 
         Returns:
-            Instantiated retriever
+            BaseRetriever: An instantiated retriever with the current configuration
+                and any runtime overrides applied.
+
+        Examples:
+            >>> config = VectorStoreRetrieverConfig(
+            ...     name="my_retriever",
+            ...     vector_store_config=vs_config,
+            ...     k=4
+            ... )
+            >>>
+            >>> # Create with default configuration
+            >>> default_retriever = config.create_runnable()
+            >>>
+            >>> # Create with runtime overrides
+            >>> runtime_config = {
+            ...     "configurable": {
+            ...         "k": 10,
+            ...         "filter": {"metadata.source": "wikipedia"}
+            ...     }
+            ... }
+            >>> custom_retriever = config.create_runnable(runtime_config)
+            >>> # This retriever will use k=10 instead of k=4
         """
         # Extract parameters from runnable_config
         params = self.apply_runnable_config(runnable_config)
@@ -453,10 +486,33 @@ class VectorStoreRetrieverConfig(BaseRetrieverConfig):
         return v
 
     def instantiate(self) -> BaseRetriever:
-        """Create a VectorStoreRetriever instance based on this configuration.
+        """
+        Create a VectorStoreRetriever instance based on this configuration.
+
+        This method creates a retriever that uses the configured vector store as its
+        document source. It sets up the appropriate search parameters based on the
+        configuration, including k (number of results), search type, and any filters.
+
+        The method uses the vector_store_config to create the retriever, handling
+        all the necessary parameter conversions and applying any specific configuration
+        options.
 
         Returns:
-            Instantiated retriever
+            BaseRetriever: An instantiated VectorStoreRetriever ready for document retrieval.
+
+        Raises:
+            ValueError: If the retriever creation fails, with details about the failure.
+
+        Examples:
+            >>> config = VectorStoreRetrieverConfig(
+            ...     name="product_retriever",
+            ...     vector_store_config=vs_config,
+            ...     k=5,
+            ...     search_type="mmr",
+            ...     search_kwargs={"fetch_k": 20, "lambda_mult": 0.7}
+            ... )
+            >>> retriever = config.instantiate()
+            >>> documents = retriever.get_relevant_documents("smartphone with good camera")
         """
         try:
             # Prepare search kwargs
@@ -492,16 +548,54 @@ def create_retriever_config(
     description: Optional[str] = None,
     **kwargs,
 ) -> BaseRetrieverConfig:
-    """Factory function to create appropriate retriever configuration.
+    """
+    Factory function to create the appropriate retriever configuration.
+
+    This function serves as a central factory for creating retriever configurations
+    of any type supported by the system. It automatically determines the correct
+    configuration class based on the provided retriever type and initializes it
+    with the specified parameters.
+
+    The function handles dynamic loading of retriever implementations and converts
+    string-based retriever types to the appropriate enum values.
 
     Args:
-        retriever_type: Type of retriever to create
-        name: Name identifier for this retriever
-        description: Description of the retriever
-        **kwargs: Additional parameters specific to retriever type
+        retriever_type (Union[RetrieverType, str]): Type of retriever to create,
+            either as a RetrieverType enum value or a string matching an enum value.
+        name (str): Name identifier for this retriever instance, used for referencing
+            and debugging.
+        description (Optional[str]): Optional human-readable description of the
+            retriever's purpose.
+        **kwargs: Additional parameters specific to the retriever type, such as
+            vector_store_config for VectorStoreRetriever, k for number of results, etc.
 
     Returns:
-        Appropriate retriever configuration object
+        BaseRetrieverConfig: The appropriate retriever configuration object for
+            the specified type, properly initialized with the provided parameters.
+
+    Examples:
+        >>> from haive.core.engine.retriever import create_retriever_config, RetrieverType
+        >>> from haive.core.engine.vectorstore import VectorStoreConfig
+        >>>
+        >>> # Create a vector store config
+        >>> vs_config = VectorStoreConfig(name="docs")
+        >>>
+        >>> # Create a vector store retriever config
+        >>> vs_retriever = create_retriever_config(
+        ...     retriever_type=RetrieverType.VECTOR_STORE,
+        ...     name="doc_retriever",
+        ...     description="Retrieves relevant documents from the vector store",
+        ...     vector_store_config=vs_config,
+        ...     k=5
+        ... )
+        >>>
+        >>> # Create a multi-query retriever config using string type
+        >>> mq_retriever = create_retriever_config(
+        ...     retriever_type="MultiQueryRetriever",
+        ...     name="multi_query_retriever",
+        ...     base_retriever=vs_retriever,
+        ...     llm_config=llm_config
+        ... )
     """
     # Ensure all retrievers are loaded
     BaseRetrieverConfig._ensure_retrievers_loaded()
@@ -520,14 +614,44 @@ def create_retriever_config(
 def create_retriever_from_vectorstore(
     vector_store_config: VectorStoreConfig, **kwargs
 ) -> BaseRetriever:
-    """Create a retriever from a vector store configuration.
+    """
+    Create a retriever directly from a vector store configuration.
+
+    This convenience function creates a VectorStoreRetrieverConfig and instantiates
+    a retriever from it in a single operation. It's a shortcut for the common case
+    of creating a retriever from an existing vector store configuration.
 
     Args:
-        vector_store_config: Vector store configuration
-        **kwargs: Additional parameters for the retriever
+        vector_store_config (VectorStoreConfig): Configuration for the vector store
+            that will be used as the retrieval source. This contains information about
+            the documents, embedding model, and vector store provider.
+        **kwargs: Additional parameters for the retriever, such as k (number of results),
+            search_type ("similarity", "mmr", etc.), filter, or search_kwargs.
 
     Returns:
-        Instantiated retriever
+        BaseRetriever: An instantiated retriever ready for document retrieval.
+
+    Examples:
+        >>> from haive.core.engine.retriever import create_retriever_from_vectorstore
+        >>> from haive.core.engine.vectorstore import VectorStoreConfig
+        >>>
+        >>> # Create a vector store config
+        >>> vs_config = VectorStoreConfig(
+        ...     name="product_catalog",
+        ...     documents=[Document(page_content="iPhone 13: The latest smartphone")],
+        ...     vector_store_provider="FAISS"
+        ... )
+        >>>
+        >>> # Create a retriever directly
+        >>> retriever = create_retriever_from_vectorstore(
+        ...     vector_store_config=vs_config,
+        ...     k=3,
+        ...     search_type="mmr",
+        ...     search_kwargs={"fetch_k": 10, "lambda_mult": 0.5}
+        ... )
+        >>>
+        >>> # Use the retriever
+        >>> docs = retriever.get_relevant_documents("smartphone")
     """
     # Create retriever config
     retriever_config = VectorStoreRetrieverConfig(

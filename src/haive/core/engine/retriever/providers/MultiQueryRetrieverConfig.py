@@ -1,9 +1,26 @@
 # src/haive/core/engine/retriever/multi_query.py
 
-"""MultiQuery Retriever implementation for the Haive framework.
+"""
+MultiQuery Retriever implementation for the Haive framework.
 
-This module provides a configuration class for the MultiQuery retriever,
-which generates multiple query variations using an LLM and combines the results.
+This module provides a configuration class for the MultiQuery retriever, which
+enhances document retrieval by generating multiple query variations using an LLM
+and combining the results. This approach often improves recall by addressing the
+"vocabulary mismatch" problem in information retrieval.
+
+The MultiQueryRetriever works by:
+1. Taking the user's original query
+2. Using an LLM to generate multiple variations/reformulations of the query
+3. Running each query variation against the base retriever
+4. Combining and deduplicating the results to provide more comprehensive coverage
+
+This retriever is particularly useful when:
+- The user's query might use different vocabulary than the documents
+- You want to improve recall without sacrificing precision too much
+- The information need is complex and might benefit from multiple perspectives
+
+The implementation integrates with LangChain's MultiQueryRetriever while providing
+a consistent Haive configuration interface.
 """
 
 from typing import Any, Dict, List, Optional, Tuple, Type
@@ -33,38 +50,59 @@ DEFAULT_PROMPT = PromptTemplate(
 
 @BaseRetrieverConfig.register(RetrieverType.MULTI_QUERY)
 class MultiQueryRetrieverConfig(BaseRetrieverConfig):
-    """Configuration for MultiQuery retriever.
+    """
+    Configuration for MultiQuery retriever in the Haive framework.
 
     This retriever generates multiple query variations using an LLM and combines the results.
     It's particularly useful for improving recall by rephrasing queries to capture
-    different aspects of the user's information need.
+    different aspects of the user's information need, addressing the vocabulary
+    mismatch problem in information retrieval.
+
+    The MultiQueryRetriever can work with any base retriever or directly with a
+    vector store, providing flexibility in how it's integrated into your retrieval pipeline.
 
     Attributes:
-        retriever_config: Base retriever configuration (optional)
-        vector_store_config: Vector store configuration (alternative to retriever_config)
-        llm_config: LLM configuration for generating query variations
-        prompt: Prompt template for generating query variations
-        include_original: Whether to include the original query in the search
+        retriever_type (RetrieverType): The type of retriever (always MULTI_QUERY).
+        retriever_config (Optional[BaseRetrieverConfig]): Base retriever configuration.
+            Either this or vector_store_config must be provided.
+        vector_store_config (Optional[VectorStoreConfig]): Vector store configuration.
+            Alternative to retriever_config for creating the base retriever.
+        llm_config (AugLLMConfig): LLM configuration for generating query variations.
+            This LLM will be used to create multiple versions of the original query.
+        prompt (PromptTemplate): Prompt template for generating query variations.
+            The prompt should instruct the LLM to generate multiple alternative
+            phrasings of the original query.
+        include_original (bool): Whether to include the original query in the search.
+            If True, both the original query and the generated variations will be used.
 
-    Example:
-        ```python
-        from haive.core.engine.retriever.multi_query import MultiQueryRetrieverConfig
-        from haive.core.engine.aug_llm import AugLLMConfig
-        from haive.core.engine.vectorstore import VectorStoreConfig
-
-        llm_config = AugLLMConfig(...)
-        vs_config = VectorStoreConfig(...)
-
-        config = MultiQueryRetrieverConfig(
-            name="multi_query_retriever",
-            vector_store_config=vs_config,
-            llm_config=llm_config,
-            include_original=True
-        )
-
-        retriever = config.instantiate()
-        docs = retriever.get_relevant_documents("query")
-        ```
+    Examples:
+        >>> from haive.core.engine.retriever import MultiQueryRetrieverConfig
+        >>> from haive.core.engine.aug_llm import AugLLMConfig
+        >>> from haive.core.engine.vectorstore import VectorStoreConfig
+        >>>
+        >>> # Create an LLM config for query generation
+        >>> llm_config = AugLLMConfig(
+        ...     name="query_generator",
+        ...     system_message="You are an expert at rephrasing search queries."
+        ... )
+        >>>
+        >>> # Create a vector store config
+        >>> vs_config = VectorStoreConfig(
+        ...     name="document_store",
+        ...     documents=[Document(page_content="Content...")]
+        ... )
+        >>>
+        >>> # Create the multi-query retriever config
+        >>> config = MultiQueryRetrieverConfig(
+        ...     name="multi_query_retriever",
+        ...     vector_store_config=vs_config,
+        ...     llm_config=llm_config,
+        ...     include_original=True
+        ... )
+        >>>
+        >>> # Instantiate and use the retriever
+        >>> retriever = config.instantiate()
+        >>> docs = retriever.get_relevant_documents("What are the benefits of quantum computing?")
     """
 
     retriever_type: RetrieverType = Field(
@@ -124,14 +162,34 @@ class MultiQueryRetrieverConfig(BaseRetrieverConfig):
         }
 
     def instantiate(self):
-        """Create a MultiQuery retriever from this configuration.
+        """
+        Create a MultiQuery retriever from this configuration.
+
+        This method creates a MultiQueryRetriever instance based on the current
+        configuration. It handles:
+        1. Creating the base retriever (either from retriever_config or vector_store_config)
+        2. Instantiating the LLM for query generation
+        3. Setting up the MultiQueryRetriever with the appropriate parameters
 
         Returns:
-            Instantiated MultiQuery retriever
+            MultiQueryRetriever: Instantiated retriever ready for document retrieval.
 
         Raises:
-            ImportError: If MultiQueryRetriever is not available
-            ValueError: If configuration is invalid
+            ImportError: If MultiQueryRetriever is not available in the current
+                LangChain version.
+            ValueError: If neither retriever_config nor vector_store_config is provided,
+                making it impossible to create a base retriever.
+
+        Examples:
+            >>> config = MultiQueryRetrieverConfig(
+            ...     name="multi_query_retriever",
+            ...     vector_store_config=vs_config,
+            ...     llm_config=llm_config
+            ... )
+            >>> retriever = config.instantiate()
+            >>> # The MultiQueryRetriever will generate multiple variations of each query
+            >>> # and combine the results from the base retriever
+            >>> docs = retriever.get_relevant_documents("How does quantum computing work?")
         """
         try:
             from langchain.retrievers import MultiQueryRetriever
