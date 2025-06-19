@@ -131,8 +131,19 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
         """
         Get combined schema fields for this engine.
 
+        Combines the input and output fields from get_input_fields() and
+        get_output_fields() into a single dictionary. This is useful for
+        generating a comprehensive schema for the engine.
+
         Returns:
-            Dictionary mapping field names to (type, default) tuples
+            Dict[str, Tuple[Type, Any]]: Dictionary mapping field names to
+                (type, default) tuples.
+
+        Examples:
+            >>> engine = MyEngine(name="test_engine", engine_type=EngineType.LLM)
+            >>> fields = engine.get_schema_fields()
+            >>> print(fields.keys())
+            dict_keys(['prompt', 'temperature', 'completion', 'tokens_used'])
         """
         # Combine input and output fields
         fields = {}
@@ -142,10 +153,21 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
 
     def derive_input_schema(self) -> Type[BaseModel]:
         """
-        Derive input schema for this engine.
+        Derive input schema for this engine as a Pydantic model.
+
+        Generates a Pydantic model representing the input schema for this
+        engine, based on the fields returned by get_input_fields() or
+        using the explicitly provided input_schema if available.
 
         Returns:
-            Pydantic model representing the input schema
+            Type[BaseModel]: A Pydantic model class representing the input schema.
+
+        Examples:
+            >>> engine = MyEngine(name="test_engine", engine_type=EngineType.LLM)
+            >>> InputSchema = engine.derive_input_schema()
+            >>> input_data = InputSchema(prompt="Hello, world!", temperature=0.7)
+            >>> print(input_data.model_dump())
+            {'prompt': 'Hello, world!', 'temperature': 0.7}
         """
         # Use provided schema if available
         if self.input_schema:
@@ -159,10 +181,21 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
 
     def derive_output_schema(self) -> Type[BaseModel]:
         """
-        Derive output schema for this engine.
+        Derive output schema for this engine as a Pydantic model.
+
+        Generates a Pydantic model representing the output schema for this
+        engine, based on the fields returned by get_output_fields() or
+        using the explicitly provided output_schema if available.
 
         Returns:
-            Pydantic model representing the output schema
+            Type[BaseModel]: A Pydantic model class representing the output schema.
+
+        Examples:
+            >>> engine = MyEngine(name="test_engine", engine_type=EngineType.LLM)
+            >>> OutputSchema = engine.derive_output_schema()
+            >>> output_data = OutputSchema(completion="Generated text", tokens_used=15)
+            >>> print(output_data.model_dump())
+            {'completion': 'Generated text', 'tokens_used': 15}
         """
         # Use provided schema if available
         if self.output_schema:
@@ -178,11 +211,21 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
         """
         Instantiate the engine (alias for create_runnable).
 
+        This is a convenience method that provides a more intuitive name for
+        the create_runnable method, particularly in contexts where "instantiate"
+        is more semantically appropriate than "create_runnable".
+
         Args:
-            runnable_config: Optional runtime configuration
+            runnable_config (Optional[RunnableConfig]): Optional runtime configuration
+                to apply when creating the runnable.
 
         Returns:
-            Instantiated runtime object
+            Any: The instantiated runtime object.
+
+        Examples:
+            >>> engine = MyEngine(name="test_engine", engine_type=EngineType.LLM)
+            >>> llm = engine.instantiate({"temperature": 0.5})
+            >>> response = llm.generate("Tell me a joke")
         """
         return self.create_runnable(runnable_config)
 
@@ -190,9 +233,27 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
         """
         Register this engine in the global registry.
 
+        Adds this engine instance to the global EngineRegistry, making it
+        available for lookup by name, ID, or type. This method is typically
+        called after creating an engine to make it available throughout
+        the application.
+
         Returns:
-            Self for chaining
+            Engine: Self for method chaining.
+
+        Examples:
+            >>> engine = (
+            ...     MyEngine(name="gpt-4", engine_type=EngineType.LLM)
+            ...     .register()
+            ... )
+            >>> # The engine is now available in the registry
+            >>> from haive.core.engine.base.registry import EngineRegistry
+            >>> registry = EngineRegistry.get_instance()
+            >>> same_engine = registry.get(EngineType.LLM, "gpt-4")
+            >>> engine is same_engine
+            True
         """
+        from haive.core.engine.base.registry import EngineRegistry
 
         return EngineRegistry.get_instance().register(self)
 
@@ -202,11 +263,36 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
         """
         Extract parameters from runnable_config relevant to this engine.
 
+        Processes the provided runtime configuration to extract parameters
+        that apply to this specific engine. The method implements a hierarchical
+        lookup strategy, prioritizing more specific configurations (by ID, then name,
+        then type) over general ones.
+
         Args:
-            runnable_config: Runtime configuration to extract from
+            runnable_config (Optional[RunnableConfig]): Runtime configuration dictionary
+                containing engine-specific parameters.
 
         Returns:
-            Dictionary of relevant parameters
+            Dict[str, Any]: Dictionary of configuration parameters that apply to this engine.
+
+        Examples:
+            >>> engine = MyEngine(name="gpt-4", engine_type=EngineType.LLM)
+            >>> config = {
+            ...     "configurable": {
+            ...         "engine_configs": {
+            ...             "gpt-4": {"temperature": 0.7},
+            ...             "llm_config": {"max_tokens": 1000}
+            ...         },
+            ...         "temperature": 0.5
+            ...     }
+            ... }
+            >>> params = engine.apply_runnable_config(config)
+            >>> # Name-specific config takes priority over engine type config
+            >>> params["temperature"]
+            0.7
+            >>> # Type-specific config is included
+            >>> params["max_tokens"]
+            1000
         """
         # Return empty dict if no config provided
         if not runnable_config or "configurable" not in runnable_config:
@@ -245,8 +331,31 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
         """
         Extract parameters from this engine for serialization.
 
+        Collects all relevant parameters from this engine instance that should
+        be included in serialization or when copying the engine configuration.
+        Excludes internal fields, schema definitions, and identity fields.
+
         Returns:
-            Dictionary of engine parameters
+            Dict[str, Any]: Dictionary of engine parameters suitable for serialization.
+
+        Examples:
+            >>> engine = MyLLMEngine(
+            ...     name="gpt-4",
+            ...     engine_type=EngineType.LLM,
+            ...     temperature=0.7,
+            ...     max_tokens=1000
+            ... )
+            >>> params = engine.extract_params()
+            >>> # Contains configuration parameters
+            >>> params["temperature"]
+            0.7
+            >>> params["max_tokens"]
+            1000
+            >>> # Does not contain identity fields
+            >>> "name" in params
+            False
+            >>> "id" in params
+            False
         """
         params = {}
 
@@ -276,8 +385,23 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
         """
         Convert engine to a dictionary suitable for serialization.
 
+        Creates a complete dictionary representation of this engine that can be
+        used for serialization, persistence, or reconstruction. Includes class
+        information to allow proper reconstruction of the specific engine type.
+
         Returns:
-            Dictionary representation of the engine
+            Dict[str, Any]: Dictionary representation of the engine with all necessary
+                information for reconstruction.
+
+        Examples:
+            >>> engine = MyLLMEngine(name="gpt-4", engine_type=EngineType.LLM)
+            >>> data = engine.to_dict()
+            >>> # Contains the class information for reconstruction
+            >>> data["engine_class"]
+            'haive.core.engine.llm.my_llm_engine.MyLLMEngine'
+            >>> # Serializable to JSON
+            >>> import json
+            >>> json_str = json.dumps(data)
         """
         # Convert to dictionary using Pydantic
         data = self.model_dump(exclude={"input_schema", "output_schema"})
@@ -297,13 +421,33 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> Engine:
         """
-        Create an engine from a dictionary.
+        Create an engine from a dictionary representation.
+
+        Reconstructs an engine instance from its dictionary representation,
+        attempting to use the original engine class if available, or falling back
+        to the base class if the specific class cannot be loaded.
 
         Args:
-            data: Dictionary representation of the engine
+            data (Dict[str, Any]): Dictionary representation of the engine, typically
+                created by the to_dict method.
 
         Returns:
-            Instantiated engine
+            Engine: The reconstructed engine instance.
+
+        Raises:
+            Various exceptions may be raised during dynamic class loading, but these
+            are caught and logged, with a fallback to the base class.
+
+        Examples:
+            >>> # Create an engine
+            >>> original = MyLLMEngine(name="gpt-4", engine_type=EngineType.LLM)
+            >>> # Convert to dictionary
+            >>> data = original.to_dict()
+            >>> # Reconstruct from dictionary
+            >>> reconstructed = Engine.from_dict(data)
+            >>> # Verify it's the same type
+            >>> type(reconstructed) == type(original)
+            True
         """
         # Extract class information for dynamic loading
         engine_class_path = data.pop("engine_class", None)
@@ -332,10 +476,21 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
 
     def to_json(self) -> str:
         """
-        Convert engine to JSON string.
+        Convert engine to a JSON string representation.
+
+        Serializes this engine to a JSON string that can be stored, transmitted,
+        or persisted. The serialization process ensures that all values are
+        JSON-compatible.
 
         Returns:
-            JSON representation of the engine
+            str: JSON string representation of the engine.
+
+        Examples:
+            >>> engine = MyLLMEngine(name="gpt-4", engine_type=EngineType.LLM)
+            >>> json_str = engine.to_json()
+            >>> # Can be saved to file
+            >>> with open("engine_config.json", "w") as f:
+            ...     f.write(json_str)
         """
         from haive.core.utils.pydantic_utils import ensure_json_serializable
 
@@ -346,26 +501,65 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
     @classmethod
     def from_json(cls, json_str: str) -> Engine:
         """
-        Create an engine from a JSON string.
+        Create an engine from a JSON string representation.
+
+        Deserializes an engine from its JSON string representation, reconstructing
+        the original engine instance or a compatible instance if the exact class
+        is not available.
 
         Args:
-            json_str: JSON representation of the engine
+            json_str (str): JSON string representation of the engine, typically
+                created by the to_json method.
 
         Returns:
-            Instantiated engine
+            Engine: The reconstructed engine instance.
+
+        Examples:
+            >>> # Create and serialize an engine
+            >>> original = MyLLMEngine(name="gpt-4", engine_type=EngineType.LLM)
+            >>> json_str = original.to_json()
+            >>> # Reconstruct from JSON
+            >>> reconstructed = Engine.from_json(json_str)
+            >>> reconstructed.name
+            'gpt-4'
+            >>> reconstructed.engine_type
+            <EngineType.LLM: 'llm'>
         """
         data = json.loads(json_str)
         return cls.from_dict(data)
 
     def with_config_overrides(self, overrides: Dict[str, Any]) -> "Engine":
         """
-        Create a new engine with configuration overrides.
+        Create a new engine with configuration overrides applied.
+
+        Creates a new instance of this engine with the specified configuration
+        overrides applied. This is useful for creating variations of an engine
+        without modifying the original instance.
 
         Args:
-            overrides: Configuration overrides to apply
+            overrides (Dict[str, Any]): Dictionary of configuration overrides to apply.
+                Only keys that exist in the engine's configuration will be applied.
 
         Returns:
-            New engine instance with overrides applied
+            Engine: A new engine instance with the overrides applied.
+
+        Examples:
+            >>> original = MyLLMEngine(
+            ...     name="gpt-4",
+            ...     engine_type=EngineType.LLM,
+            ...     temperature=0.7
+            ... )
+            >>> # Create a variation with different temperature
+            >>> variation = original.with_config_overrides({"temperature": 0.3})
+            >>> # Original is unchanged
+            >>> original.temperature
+            0.7
+            >>> # New instance has override applied
+            >>> variation.temperature
+            0.3
+            >>> # Other properties remain the same
+            >>> variation.name
+            'gpt-4'
         """
         # Create a copy of this engine
         config = self.model_dump()
@@ -383,10 +577,28 @@ class InvokableEngine(Engine[TIn, TOut]):
     """
     Base class for engines that create invokable runtime objects.
 
-    The engine itself is not directly invokable, but provides convenience methods
-    that create the runtime object and invoke it.
+    This class extends the base Engine with convenience methods for directly
+    invoking the runnable objects created by the engine. While the engine itself
+    is not directly invokable (it's a factory/configuration), these methods
+    create the runnable and invoke it in a single operation.
 
-    Examples include LLMs, Retrievers, and VectorStores.
+    Examples of invokable engines include LLMs, Retrievers, and VectorStores,
+    which all create components that can process input data and return output data.
+
+    Type Parameters:
+        TIn: The input type for the runnable.
+        TOut: The output type from the runnable.
+
+    Examples:
+        >>> class MyLLMEngine(InvokableEngine[str, str]):
+        ...     engine_type = EngineType.LLM
+        ...     # Engine implementation...
+        ...
+        >>> engine = MyLLMEngine(name="gpt-4")
+        >>> # Direct invocation without creating the runnable separately
+        >>> response = engine.invoke("Tell me a joke")
+        >>> print(response)
+        'Why did the programmer go broke? Because he lost his domain in a crash!'
     """
 
     def invoke(
@@ -395,16 +607,29 @@ class InvokableEngine(Engine[TIn, TOut]):
         """
         Convenience method to create and invoke the runnable with input data.
 
-        This is a shortcut for:
-            runnable = self.create_runnable(runnable_config)
-            return runnable.invoke(input_data)
+        Creates a runnable instance using create_runnable() and immediately invokes
+        it with the provided input data. This is a shortcut that combines creation
+        and invocation into a single method call.
 
         Args:
-            input_data: Input data for the runnable
-            runnable_config: Optional runtime configuration
+            input_data (TIn): Input data for the runnable to process.
+            runnable_config (Optional[RunnableConfig]): Optional runtime configuration
+                to apply when creating and invoking the runnable.
 
         Returns:
-            Output from the runnable
+            TOut: Output from the runnable after processing the input data.
+
+        Raises:
+            NotImplementedError: If the created runnable does not support invocation.
+            Various exceptions may be propagated from the runnable's invoke method.
+
+        Examples:
+            >>> engine = MyLLMEngine(name="gpt-4", engine_type=EngineType.LLM)
+            >>> # Direct invocation with configuration
+            >>> response = engine.invoke(
+            ...     "Generate a poem about AI",
+            ...     {"configurable": {"temperature": 0.8}}
+            ... )
         """
         # Create runnable
         runnable = self.create_runnable(runnable_config)
@@ -436,16 +661,30 @@ class InvokableEngine(Engine[TIn, TOut]):
         """
         Convenience method to create and asynchronously invoke the runnable.
 
-        This is a shortcut for:
-            runnable = self.create_runnable(runnable_config)
-            return await runnable.ainvoke(input_data)
+        Creates a runnable instance using create_runnable() and immediately invokes
+        it asynchronously with the provided input data. If the runnable doesn't
+        support asynchronous invocation natively, this method will run it in a
+        separate thread.
 
         Args:
-            input_data: Input data for the runnable
-            runnable_config: Optional runtime configuration
+            input_data (TIn): Input data for the runnable to process.
+            runnable_config (Optional[RunnableConfig]): Optional runtime configuration
+                to apply when creating and invoking the runnable.
 
         Returns:
-            Output from the runnable
+            TOut: Output from the runnable after processing the input data.
+
+        Raises:
+            NotImplementedError: If the created runnable cannot be invoked asynchronously.
+            Various exceptions may be propagated from the runnable's ainvoke method.
+
+        Examples:
+            >>> engine = MyLLMEngine(name="gpt-4", engine_type=EngineType.LLM)
+            >>> # Usage in an async context
+            >>> async def generate():
+            ...     response = await engine.ainvoke("What is the capital of France?")
+            ...     print(response)
+            >>> # 'The capital of France is Paris.'
         """
         # Create runnable
         runnable = self.create_runnable(runnable_config)
@@ -480,7 +719,30 @@ class NonInvokableEngine(Engine[TIn, TOut]):
     """
     Base class for engines that create non-invokable utility objects.
 
-    Examples include Embeddings engines and DocumentLoader engines.
+    This class is used for engines that create utility objects which don't
+    follow the standard input-to-output invocation pattern. These engines
+    typically provide specialized functionality that doesn't fit the
+    Invokable/AsyncInvokable protocol.
+
+    Examples include:
+    - Embeddings engines that convert text to vectors
+    - DocumentLoader engines that load documents from external sources
+    - DocumentTransformer engines that transform document structure
+    - DocumentSplitter engines that split documents into chunks
+
+    Type Parameters:
+        TIn: The input type for the configuration.
+        TOut: The output type from the configuration.
+
+    Examples:
+        >>> class EmbeddingsEngine(NonInvokableEngine[Dict[str, Any], Any]):
+        ...     engine_type = EngineType.EMBEDDINGS
+        ...     # Engine implementation...
+        ...
+        >>> engine = EmbeddingsEngine(name="text-embedding-ada-002")
+        >>> embeddings = engine.create_runnable()
+        >>> # Use the embeddings object directly with its specific methods
+        >>> vectors = embeddings.embed_documents(["Hello, world!"])
     """
 
     pass
