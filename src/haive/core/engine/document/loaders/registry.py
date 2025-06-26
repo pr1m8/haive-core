@@ -9,7 +9,7 @@ import inspect
 import logging
 from typing import Any, Callable, Dict, List, Optional, Type
 
-from langchain_community.document_loaders import BaseLoader
+from langchain_core.document_loaders.base import BaseLoader
 from pydantic import BaseModel, ConfigDict, Field, create_model
 
 from haive.core.engine.document.loaders.sources.types import SourceType
@@ -312,3 +312,22 @@ def register_loader(
 
 # Instantiate registry singleton
 document_loader_registry = DocumentLoaderRegistry.get_instance()
+
+
+# Convenience functions
+def get_default_registry() -> DocumentLoaderRegistry:
+    """Get the default document loader registry."""
+    return document_loader_registry
+
+
+def get_loader(loader_name: str) -> Optional[Type[BaseLoader]]:
+    """Get a loader by name from the default registry."""
+    return document_loader_registry.find_by_name(loader_name)
+
+
+def create_loader(loader_name: str, **kwargs) -> Optional[BaseLoader]:
+    """Create a loader instance by name."""
+    loader_class = get_loader(loader_name)
+    if loader_class:
+        return loader_class(**kwargs)
+    return None
