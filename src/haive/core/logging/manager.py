@@ -18,8 +18,8 @@ from rich.text import Text
 from rich.theme import Theme
 from rich.traceback import install as install_rich_traceback
 
-from .formatters import FileFormatter, RichFormatter
-from .handlers import RichConsoleHandler, RotatingFileHandler
+from haive.core.logging.formatters import FileFormatter, RichFormatter
+from haive.core.logging.handlers import RichConsoleHandler, RotatingFileHandler
 
 
 class LoggingManager:

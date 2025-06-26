@@ -9,7 +9,7 @@ import logging
 import time
 from typing import Any, Callable, Dict, Optional, TypeVar, Union
 
-from .utils import get_logger
+from haive.core.logging.utils import get_logger
 
 T = TypeVar("T")
 
