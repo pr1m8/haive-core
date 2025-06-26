@@ -1,4 +1,41 @@
-# src/haive/core/structures/auto_tree.py
+"""Automatic tree structure generator for Pydantic BaseModels with Union type support.
+
+This module provides the AutoTree class that automatically wraps any BaseModel
+in a tree structure, handling complex type relationships including Union types.
+It enables hierarchical visualization and analysis of nested BaseModel structures.
+
+The AutoTree automatically detects fields containing BaseModels (including those
+in Union types) and creates child tree nodes, making it perfect for visualizing
+complex data structures like plans with mixed content types.
+
+Usage:
+    ```python
+    from pydantic import BaseModel, Field
+    from typing import List, Union
+    from haive.core.common.structures.tree import AutoTree
+
+    class Step(BaseModel):
+        name: str
+        duration_hours: float = 1.0
+
+    class Plan(BaseModel):
+        name: str
+        # Can contain either Steps OR other Plans
+        items: List[Union[Step, 'Plan']] = Field(default_factory=list)
+
+    # Create nested structure
+    main_plan = Plan(name="Project Alpha")
+    main_plan.items.append(Step(name="Setup", duration_hours=2))
+
+    sub_plan = Plan(name="Development Phase")
+    sub_plan.items.append(Step(name="Code", duration_hours=40))
+    main_plan.items.append(sub_plan)
+
+    # Visualize as tree
+    tree = AutoTree(main_plan)
+    print(tree.visualize())
+    ```
+"""
 
 import json
 from typing import (
@@ -21,18 +58,36 @@ T = TypeVar("T", bound=BaseModel)
 
 
 class AutoTree(BaseModel, Generic[T]):
-    """
-    Automatically wraps ANY BaseModel in a tree structure.
+    """Automatically wraps any BaseModel in a tree structure with Union type support.
 
-    Handles Union types, so fields like List[Union[Task, Project]] work perfectly.
+    This generic class creates a tree representation of any BaseModel by automatically
+    detecting fields that contain other BaseModels (including those in Union types)
+    and creating child tree nodes for them.
 
-    Usage:
-        class Plan(BaseModel):
-            name: str
-            # This field can contain EITHER Steps OR Plans!
-            items: List[Union[Step, 'Plan']] = []
+    The tree structure enables easy navigation, visualization, and analysis of
+    complex nested data structures. It's particularly useful for handling
+    self-referential or polymorphic data structures.
 
-        tree = AutoTree(my_plan)
+    Attributes:
+        content: The wrapped BaseModel instance.
+        _children: List of child AutoTree nodes.
+        _parent: Reference to parent AutoTree node (if any).
+        _field_source: Name of the field this node came from in its parent.
+
+    Args:
+        content: The BaseModel instance to wrap in the tree.
+        parent: Optional parent AutoTree node.
+        field_source: Optional name of the field this content came from.
+
+    Example:
+        >>> class Step(BaseModel):
+        ...     name: str
+        >>> class Plan(BaseModel):
+        ...     name: str
+        ...     items: List[Union[Step, 'Plan']] = []
+        >>> plan = Plan(name="Main", items=[Step(name="Task1")])
+        >>> tree = AutoTree(plan)
+        >>> print(tree.visualize())
     """
 
     content: T
@@ -55,7 +110,18 @@ class AutoTree(BaseModel, Generic[T]):
         self._build_children()
 
     def _is_basemodel_type(self, type_hint: Any) -> bool:
-        """Check if a type hint represents a BaseModel or Union containing BaseModels."""
+        """Check if a type hint represents a BaseModel or Union containing BaseModels.
+
+        This method analyzes type hints to determine if they represent BaseModel
+        types, either directly or within Union types. It's used to identify
+        fields that should be converted to child tree nodes.
+
+        Args:
+            type_hint: The type annotation to analyze.
+
+        Returns:
+            True if the type hint represents BaseModel(s), False otherwise.
+        """
         # Direct BaseModel subclass
         if isinstance(type_hint, type) and issubclass(type_hint, BaseModel):
             return True
@@ -96,8 +162,20 @@ class AutoTree(BaseModel, Generic[T]):
         return types
 
     def _build_children(self):
-        """
-        Auto-detect ALL fields containing BaseModels, including Union types.
+        """Auto-detect all fields containing BaseModels and create child tree nodes.
+
+        This method scans all fields in the wrapped content, identifies those
+        containing BaseModels (including within lists and Union types), and
+        creates corresponding child AutoTree nodes.
+
+        The method handles:
+        - Direct BaseModel fields
+        - Lists of BaseModels
+        - Union types containing BaseModels
+        - Nested combinations of the above
+
+        Child nodes are automatically linked with parent references and
+        field source information for navigation.
         """
         self._children.clear()
 
@@ -196,7 +274,25 @@ class AutoTree(BaseModel, Generic[T]):
         show_type: bool = True,
         max_depth: Optional[int] = None,
     ) -> str:
-        """Enhanced visualization."""
+        """Generate a visual tree representation with customizable display options.
+
+        Creates a text-based tree visualization using Unicode box-drawing characters
+        to show the hierarchical structure. The display can be customized to include
+        or exclude field names, type information, and can be limited to a specific depth.
+
+        Args:
+            show_field: Whether to show the source field name for each node.
+            show_type: Whether to show the BaseModel class name for each node.
+            max_depth: Maximum depth to display (None for unlimited).
+
+        Returns:
+            String representation of the tree structure with appropriate indentation
+            and connectors.
+
+        Example:
+            >>> tree.visualize(show_field=True, show_type=True, max_depth=2)
+            'MainPlan <Plan>\\n├── [items] Setup <Step>\\n└── [items] Development <Plan>'
+        """
         return self._visualize_recursive(
             0, "", True, show_field, show_type, max_depth, 0
         )

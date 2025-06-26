@@ -1,4 +1,6 @@
+# Using TYPE_CHECKING to avoid circular imports
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
@@ -14,8 +16,9 @@ from langchain_core.tools import BaseTool, StructuredTool
 from langchain_core.tools.base import BaseToolkit
 from pydantic import BaseModel
 
-from haive.core.engine.agent.agent import Agent
-from haive.core.engine.base import Engine
+if TYPE_CHECKING:
+    from haive.core.engine.agent.agent import Agent
+    from haive.core.engine.base import Engine
 
 
 @runtime_checkable
