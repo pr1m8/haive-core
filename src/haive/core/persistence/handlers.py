@@ -26,9 +26,9 @@ from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel, SecretStr
 
-from .memory import MemoryCheckpointerConfig
-from .postgres_config import PostgresCheckpointerConfig
-from .types import CheckpointerMode, CheckpointStorageMode
+from haive.core.persistence.memory import MemoryCheckpointerConfig
+from haive.core.persistence.postgres_config import PostgresCheckpointerConfig
+from haive.core.persistence.types import CheckpointerMode, CheckpointStorageMode
 
 logger = logging.getLogger(__name__)
 

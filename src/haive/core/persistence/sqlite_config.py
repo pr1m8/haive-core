@@ -27,9 +27,9 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from pydantic import Field
 
-from .base import CheckpointerConfig
-from .types import CheckpointerType
-from .utils import deserialize_metadata, serialize_metadata
+from haive.core.persistence.base import CheckpointerConfig
+from haive.core.persistence.types import CheckpointerType
+from haive.core.persistence.utils import deserialize_metadata, serialize_metadata
 
 logger = logging.getLogger(__name__)
 
