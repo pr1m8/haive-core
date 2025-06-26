@@ -4,8 +4,8 @@ from typing import Literal
 from langgraph.checkpoint.memory import MemorySaver
 from pydantic import Field
 
-from .base import CheckpointerConfig
-from .types import CheckpointerType
+from haive.core.engine.agent.persistence.base import CheckpointerConfig
+from haive.core.engine.agent.persistence.types import CheckpointerType
 
 
 class MemoryCheckpointerConfig(CheckpointerConfig):

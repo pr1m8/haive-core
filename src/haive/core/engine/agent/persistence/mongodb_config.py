@@ -4,8 +4,8 @@ from typing import Literal
 
 from pydantic import Field
 
-from .base import CheckpointerConfig
-from .types import CheckpointerType
+from haive.core.engine.agent.persistence.base import CheckpointerConfig
+from haive.core.engine.agent.persistence.types import CheckpointerType
 
 logger = logging.getLogger(__name__)
 

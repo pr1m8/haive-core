@@ -7,8 +7,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from pydantic import Field, model_validator
 
-from .base import CheckpointerConfig
-from .types import CheckpointerType
+from haive.core.engine.agent.persistence.base import CheckpointerConfig
+from haive.core.engine.agent.persistence.types import CheckpointerType
 
 # Check if PostgreSQL dependencies are installed
 try:

@@ -2,11 +2,13 @@
 import logging
 from typing import Any, Dict, Optional, Type, Union
 
-from .base import CheckpointerConfig
-from .memory_config import MemoryCheckpointerConfig
-from .mongodb_config import MongoDBCheckpointerConfig
-from .postgres_config import PostgresCheckpointerConfig
-from .types import CheckpointerType
+from haive.core.engine.agent.persistence.base import CheckpointerConfig
+from haive.core.engine.agent.persistence.memory_config import MemoryCheckpointerConfig
+from haive.core.engine.agent.persistence.mongodb_config import MongoDBCheckpointerConfig
+from haive.core.engine.agent.persistence.postgres_config import (
+    PostgresCheckpointerConfig,
+)
+from haive.core.engine.agent.persistence.types import CheckpointerType
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +56,7 @@ def create_persistence_manager(
     Returns:
         Configured PersistenceManager
     """
-    from .manager import PersistenceManager
+from haive.core.engine.agent.persistence.manager import PersistenceManager
 
     if persistence_config is None:
         # Default to memory persistence
