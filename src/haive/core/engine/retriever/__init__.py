@@ -37,13 +37,13 @@ Examples:
     >>> documents = retriever.get_relevant_documents("What is machine learning?")
 """
 
-from .retriever import (
+from haive.core.engine.retriever.retriever import (
     BaseRetrieverConfig,
     VectorStoreRetrieverConfig,
     create_retriever_config,
     create_retriever_from_vectorstore,
 )
-from .types import RetrieverType
+from haive.core.engine.retriever.types import RetrieverType
 
 __all__ = [
     "BaseRetrieverConfig",
