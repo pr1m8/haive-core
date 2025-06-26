@@ -127,30 +127,30 @@ class GraphVisualizer:
         },
         # Special nodes - consistent start/end styling
         NodeStyle.START: {
-            "fill": "#059669",  # Emerald
+            "fill": "#059669",  # Emerald green
             "stroke": "#047857",
             "color": "#FFFFFF",
             "strokeWidth": "3px",
             "fontWeight": "bold",
         },
         NodeStyle.END: {
-            "fill": "#DC2626",  # Red
+            "fill": "#DC2626",  # Bright red
             "stroke": "#991B1B",
             "color": "#FFFFFF",
             "strokeWidth": "3px",
             "fontWeight": "bold",
         },
         NodeStyle.ENTRY: {
-            "fill": "#10B981",  # Light green
-            "stroke": "#059669",
+            "fill": "transparent",  # Invisible by default
+            "stroke": "transparent",
             "color": "#FFFFFF",
-            "strokeWidth": "2px",
+            "strokeWidth": "0px",
         },
         NodeStyle.EXIT: {
-            "fill": "#F87171",  # Light red
-            "stroke": "#DC2626",
+            "fill": "transparent",  # Invisible by default
+            "stroke": "transparent",
             "color": "#FFFFFF",
-            "strokeWidth": "2px",
+            "strokeWidth": "0px",
         },
         # States
         NodeStyle.HIGHLIGHT: {
@@ -177,8 +177,15 @@ class GraphVisualizer:
     # Subgraph styling
     SUBGRAPH_STYLES = {
         "agent": {
-            "fill": "#F3E8FF",  # Light purple background
+            "fill": "#F3E8FF",  # Light purple background for agents
             "stroke": "#8B5CF6",  # Purple border
+            "strokeWidth": "3px",
+            "rx": "10",  # Rounded corners
+            "ry": "10",
+        },
+        "react": {
+            "fill": "#EBF8FF",  # Light blue for React agents
+            "stroke": "#3182CE",  # Blue border
             "strokeWidth": "3px",
             "rx": "10",  # Rounded corners
             "ry": "10",
@@ -523,6 +530,11 @@ class GraphVisualizer:
         if hasattr(graph, "branches"):
             cls._process_branches(lines, graph, context, depth, parent_prefix)
 
+        # If this is a top-level graph with agent subgraphs, add connection edges
+        if depth == 0 and hasattr(graph, "nodes") and context.agent_graphs:
+            # Add connections for agents in the main graph
+            cls._add_agent_connections(lines, graph, context)
+
     @classmethod
     def _process_nodes(
         cls,
@@ -541,14 +553,20 @@ class GraphVisualizer:
             start_id = f"{parent_prefix}START" if parent_prefix else "START"
             end_id = f"{parent_prefix}END" if parent_prefix else "END"
 
-            # Use consistent shapes for START/END
-            lines.append(f'{indent}{start_id}(["▶ START"]):::{NodeStyle.START.value}')
-            lines.append(f'{indent}{end_id}(["■ END"]):::{NodeStyle.END.value}')
+            # Only add START/END nodes if they don't exist yet
+            # This prevents duplicate START/END nodes in subgraphs
+            if start_id not in context.processed_nodes:
+                # Use consistent shapes for START/END
+                lines.append(
+                    f'{indent}{start_id}(["▶ START"]):::{NodeStyle.START.value}'
+                )
+                context.processed_nodes.add(start_id)
+                context.node_mappings[f"{parent_prefix}START"] = start_id
 
-            context.processed_nodes.add(start_id)
-            context.processed_nodes.add(end_id)
-            context.node_mappings[f"{parent_prefix}START"] = start_id
-            context.node_mappings[f"{parent_prefix}END"] = end_id
+            if end_id not in context.processed_nodes:
+                lines.append(f'{indent}{end_id}(["■ END"]):::{NodeStyle.END.value}')
+                context.processed_nodes.add(end_id)
+                context.node_mappings[f"{parent_prefix}END"] = end_id
 
         for node_name, node in (graph.nodes or {}).items():
             if node_name in (START, END, "__start__", "__end__"):
@@ -560,6 +578,20 @@ class GraphVisualizer:
             agent_key = cls._find_agent_key(
                 node_name, parent_prefix, context.agent_graphs
             )
+
+            # Special handling for subgraph nodes to avoid duplication
+            if parent_prefix == "" and depth == 0:
+                # For top-level nodes that will be represented as subgraphs,
+                # track their names so we can properly handle connections
+                subgraph_id = f"subgraph_{node_name}"
+                context.node_mappings[f"main_subgraph_{node_name}"] = subgraph_id
+
+                # Track the next node in the process after this subgraph
+                # by examining the edges in the graph
+                if hasattr(graph, "edges"):
+                    for src, dst in graph.edges:
+                        if src == node_name:
+                            context.node_mappings["next_after_subgraph"] = dst
 
             if agent_key and agent_key in context.agent_graphs:
                 # This is an agent - create a subgraph
@@ -638,23 +670,37 @@ class GraphVisualizer:
         )
         lines.append(f"{indent}    direction TB")
 
-        # Create entry/exit nodes for the subgraph
-        entry_id = f"{node_id}_entry"
-        exit_id = f"{node_id}_exit"
+        # Create START/END nodes directly in the subgraph with improved positioning
+        start_id = f"{node_id}_START"
+        end_id = f"{node_id}_END"
 
-        lines.append(f'{indent}    {entry_id}(["◉ Entry"]):::{NodeStyle.ENTRY.value}')
-        lines.append(f'{indent}    {exit_id}(["◉ Exit"]):::{NodeStyle.EXIT.value}')
+        # Check if these START/END nodes already exist to avoid duplication
+        if start_id not in context.processed_nodes:
+            # Add START at the top of the subgraph
+            lines.append(
+                f'{indent}    {start_id}(["▶ START"]):::{NodeStyle.START.value}'
+            )
+            context.processed_nodes.add(start_id)
 
-        context.processed_nodes.update([entry_id, exit_id])
-        context.node_mappings[f"{node_id}_entry"] = entry_id
-        context.node_mappings[f"{node_id}_exit"] = exit_id
+        if end_id not in context.processed_nodes:
+            # Add END at the bottom (will be rendered later after other nodes)
+            lines.append(f'{indent}    {end_id}(["■ END"]):::{NodeStyle.END.value}')
+            context.processed_nodes.add(end_id)
+
+        # Map START/END nodes for proper edge connections
+        context.node_mappings[f"{node_id}_START"] = start_id
+        context.node_mappings[f"{node_id}_END"] = end_id
+
+        # Use actual node IDs for entry/exit mappings
+        context.node_mappings[f"{node_id}_entry"] = start_id
+        context.node_mappings[f"{node_id}_exit"] = end_id
 
         # Recursively build the agent's internal graph
         if agent_info.graph:
-            # Map internal START/END to entry/exit
+            # Map internal START/END to our explicit subgraph START/END
             internal_prefix = f"{node_id}_"
-            context.node_mappings[f"{internal_prefix}START"] = entry_id
-            context.node_mappings[f"{internal_prefix}END"] = exit_id
+            context.node_mappings[f"{internal_prefix}START"] = start_id
+            context.node_mappings[f"{internal_prefix}END"] = end_id
 
             cls._build_graph(
                 lines,
@@ -693,14 +739,27 @@ class GraphVisualizer:
         lines.append(f"{indent}%% --- Edges ---")
 
         for source, target in graph.edges or []:
+            # Handle edges for better flow
             source_id = cls._resolve_node_id(source, parent_prefix, context)
             target_id = cls._resolve_node_id(target, parent_prefix, context)
 
             if source_id and target_id:
                 edge_key = f"{source_id}->{target_id}"
-                if edge_key not in context.processed_edges:
-                    lines.append(f"{indent}{source_id} --> {target_id}")
-                    context.processed_edges.add(edge_key)
+
+                # Skip self-loops
+                if source_id == target_id:
+                    continue
+
+                # Skip duplicates and self-references
+                if edge_key not in context.processed_edges and source_id != target_id:
+                    # Skip any main graph edges with "react" as these will be handled specially
+                    # with proper connections to subgraphs
+                    if not (source_id == "START" and target_id == "react") and not (
+                        source_id == "react" and target_id == "agent_node"
+                    ):
+                        # Add the edge with the right formatting
+                        lines.append(f"{indent}{source_id} --> {target_id}")
+                        context.processed_edges.add(edge_key)
 
     @classmethod
     def _process_branches(
@@ -750,7 +809,7 @@ class GraphVisualizer:
         cls, node_name: str, parent_prefix: str, context: VisualizationContext
     ) -> Optional[str]:
         """Resolve a node name to its actual ID in the graph."""
-        # Handle START/END
+        # Handle START/END nodes and their variants
         if node_name in (START, "__start__", "START"):
             key = f"{parent_prefix}START"
             return context.node_mappings.get(key, "START")
@@ -758,19 +817,24 @@ class GraphVisualizer:
             key = f"{parent_prefix}END"
             return context.node_mappings.get(key, "END")
 
-        # Check if node is an agent with entry/exit
+        # Special handling for agent/subgraph nodes
+        # In the main diagram, we should try to use the subgraph box when connecting
+        # to a node that's represented as a subgraph
+        if parent_prefix == "":
+            # Check if this node has a subgraph representation
+            subgraph_id = f"subgraph_{node_name}"
+            if subgraph_id in context.processed_nodes:
+                # For incoming connections to a subgraph, use the subgraph ID
+                return subgraph_id
+
+        # Get the node ID with parent prefix
         node_id = f"{parent_prefix}{cls._get_safe_node_id(node_name)}"
 
-        # Check if this is an agent node (would have entry/exit)
-        if f"{node_id}_entry" in context.processed_nodes:
-            # This is an agent - return the exit node for connections
-            return f"{node_id}_exit"
-
-        # Regular node
+        # Regular node in current scope
         if node_id in context.processed_nodes:
             return node_id
 
-        # Try without prefix
+        # Simple node lookup by name
         safe_id = cls._get_safe_node_id(node_name)
         if safe_id in context.processed_nodes:
             return safe_id
@@ -991,6 +1055,147 @@ class GraphVisualizer:
             lines.append(
                 f"    class {','.join(highlight_ids)} {NodeStyle.HIGHLIGHT.value}"
             )
+
+    @classmethod
+    def _add_agent_connections(
+        cls, lines: List[str], graph: Any, context: VisualizationContext
+    ):
+        """Add connections between main graph and agent subgraphs."""
+        # First find all agent nodes and their START/END nodes
+        agent_connections = []
+
+        # Keep track of which connections we've already processed to avoid duplicates
+        processed_connections = set()
+
+        # Find all agent nodes by looking at processed_nodes
+        agent_nodes = {}
+        for node_id in context.processed_nodes:
+            if "_START" in node_id and not node_id.startswith("START"):
+                # This is an agent START node
+                agent_name = node_id.split("_START")[0]
+                if agent_name not in agent_nodes:
+                    agent_nodes[agent_name] = {"start": node_id, "end": None}
+
+            if "_END" in node_id and not node_id.startswith("END"):
+                # This is an agent END node
+                agent_name = node_id.split("_END")[0]
+                if agent_name in agent_nodes:
+                    agent_nodes[agent_name]["end"] = node_id
+                else:
+                    agent_nodes[agent_name] = {"start": None, "end": node_id}
+
+        # Now find connections in the graph that involve agents
+        if hasattr(graph, "edges") and graph.edges:
+            # Check each edge to see if it connects to/from an agent
+            for source, target in graph.edges:
+                # Check if source is an agent name
+                # We don't need to handle special connections here
+                # The connections should be direct from the main graph nodes to subgraph nodes
+                # without special handling that creates duplicates
+
+                # Check if target is an agent name
+                if target in agent_nodes:
+                    # Connection TO agent from regular node
+                    end_node = agent_nodes[target]["end"]
+                    if (
+                        end_node and source != "START"
+                    ):  # Avoid duplicate START connections
+                        # Fix for __start__ reference - replace with START
+                        destination = "START" if source == "__start__" else source
+                        conn_key = f"{end_node}_to_{destination}"
+                        if conn_key not in processed_connections:
+                            agent_connections.append(
+                                f"    {end_node} --> {destination}"
+                            )
+                            processed_connections.add(conn_key)
+
+        # Also process branches for agent connections
+        if hasattr(graph, "branches") and graph.branches:
+            for branch_id, branch in graph.branches.items():
+                if hasattr(branch, "source_node") and branch.source_node:
+                    source = branch.source_node
+                    destinations = cls._get_branch_destinations(branch)
+
+                    # Check if source is an agent
+                    if source in agent_nodes:
+                        # Branch FROM agent
+                        end_node = agent_nodes[source]["end"]
+                        if end_node:
+                            # Connect each destination to agent's END
+                            for target in destinations.values():
+                                if target != "END":
+                                    agent_connections.append(
+                                        f"    {end_node} --> {target}"
+                                    )
+
+                    # Check if any destination is an agent
+                    for condition, target in destinations.items():
+                        if target in agent_nodes:
+                            # Branch TO agent
+                            start_node = agent_nodes[target]["start"]
+                            if start_node:
+                                # Connect source to agent's START
+                                if (
+                                    source != "START"
+                                ):  # Avoid duplicate START connections
+                                    conn_key = f"{source}_to_{start_node}"
+                                    if conn_key not in processed_connections:
+                                        agent_connections.append(
+                                            f"    {source} --> {start_node}"
+                                        )
+                                        processed_connections.add(conn_key)
+
+        # Add agent connections if any were found
+        if agent_connections:
+            lines.append("")
+            lines.append("    %% ===== AGENT CONNECTIONS =====")
+
+            # Add connections between main graph and subgraphs
+            # We need to find proper connections from main graph to subgraphs and vice versa
+            seen_connections = set()
+            explicit_connections = []
+
+            # First, explicitly add START --> react_START connection
+            # This ensures the flow goes from main graph START to the subgraph's START
+            if "react_START" in context.node_mappings:
+                explicit_connections.append("    START --> react_START")
+
+            # Second, explicitly add react_END --> agent_node connection
+            # This ensures the flow continues from subgraph's END to the next node
+            if "react_END" in context.processed_nodes:
+                explicit_connections.append("    react_END --> agent_node")
+
+            # Add all explicit connections first
+            for connection in explicit_connections:
+                if connection not in lines:
+                    lines.append(connection)
+                    seen_connections.add(connection)
+
+            # Then process any other agent connections that might be needed
+            for connection in agent_connections:
+                # Skip connections we've explicitly handled
+                if connection in seen_connections:
+                    continue
+
+                # Skip direct connections from START to internal START nodes
+                if "START --> " in connection and "_START" in connection:
+                    continue
+
+                # Skip any react_END connections since we're handling those explicitly
+                if "react_END -->" in connection:
+                    continue
+
+                # Clean up problematic special node references
+                if "__start__" in connection:
+                    connection = connection.replace("__start__", "START")
+
+                if "__end__" in connection:
+                    connection = connection.replace("__end__", "END")
+
+                # Only add if it's not already in the diagram
+                if connection not in seen_connections and connection not in lines:
+                    lines.append(connection)
+                    seen_connections.add(connection)
 
     @classmethod
     def display_graph(

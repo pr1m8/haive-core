@@ -1,8 +1,8 @@
 from typing import Any, List, Optional, Tuple, Type, Union
 
-from ..models.graph_model import GraphModel
-from ..models.type_ref import TypeReference
-from .pattern_registry import PatternRegistry
+from haive.core.graph.models.graph_model import GraphModel
+from haive.core.graph.models.type_ref import TypeReference
+from haive.core.graph.state_graph.pattern_registry import PatternRegistry
 
 
 class GraphBuilder:
@@ -161,7 +161,7 @@ class GraphBuilder:
         Returns:
             The registered graph model
         """
-        from ..registry.graph_registry import GraphRegistry
+from haive.core.graph.registry.graph_registry import GraphRegistry
 
         graph = self.build()
         registry = GraphRegistry.get_instance()

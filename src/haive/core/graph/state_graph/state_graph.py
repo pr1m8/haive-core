@@ -24,9 +24,9 @@ from pydantic import (
     model_validator,
 )
 
-from .branch_spec import BranchSpec
-from .node_spec import NodeSpec
-from .serializer import FunctionReference, TypeReference
+from haive.core.graph.state_graph.branch_spec import BranchSpec
+from haive.core.graph.state_graph.node_spec import NodeSpec
+from haive.core.graph.state_graph.serializer import FunctionReference, TypeReference
 
 # Generic type for node specification
 TNode = TypeVar("TNode", bound=Any)

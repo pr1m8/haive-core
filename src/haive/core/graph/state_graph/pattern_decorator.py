@@ -1,21 +1,35 @@
+"""Graph pattern decorator for registering state graph patterns.
+
+This module provides decorators for registering functions as graph patterns
+in the Haive state graph system.
+"""
+
 import functools
 from typing import Callable
 
-from ..models.function_ref import FunctionReference
-from .pattern_registry import PatternDefinition, PatternRegistry
+from haive.core.graph.models.function_ref import FunctionReference
+from haive.core.graph.state_graph.pattern_registry import (
+    PatternDefinition,
+    PatternRegistry,
+)
 
 
 def register_pattern(name: str, pattern_type: str, **parameters):
-    """
-    Decorator to register a function as a graph pattern.
+    """Register a function as a graph pattern.
 
     Args:
-        name: Pattern name
-        pattern_type: Pattern type
-        **parameters: Default pattern parameters
+        name: Unique identifier for the pattern.
+        pattern_type: Type classification of the pattern (e.g., 'sequential', 'parallel').
+        **parameters: Default configuration parameters for the pattern.
 
     Returns:
-        Decorator function
+        Decorator function that registers the pattern and preserves original function.
+
+    Example:
+        >>> @register_pattern(name="my_pattern", pattern_type="sequential")
+        ... def my_processing_pattern():
+        ...     '''Process data sequentially.'''
+        ...     pass
     """
 
     def decorator(func: Callable):
