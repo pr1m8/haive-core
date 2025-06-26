@@ -2,8 +2,8 @@ from typing import ClassVar, Dict, Literal, Optional
 
 from pydantic import Field, field_validator, model_validator
 
-from ..base import SerializableModel
-from .function_ref import FunctionReference
+from haive.core.graph.state_graph.base import SerializableModel
+from haive.core.graph.state_graph.models.function_ref import FunctionReference
 
 
 class BranchModel(SerializableModel):

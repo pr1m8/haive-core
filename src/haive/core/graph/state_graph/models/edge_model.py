@@ -3,7 +3,7 @@ from typing import ClassVar, List, Optional
 
 from pydantic import Field, model_validator
 
-from ..base import SerializableModel
+from haive.core.graph.state_graph.base import SerializableModel
 
 
 class EdgeType(str, Enum):

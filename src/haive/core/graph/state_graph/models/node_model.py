@@ -2,9 +2,9 @@ from typing import Any, ClassVar, Dict, Generic, List, Optional, TypeVar
 
 from pydantic import Field, field_validator
 
-from ..base import SerializableModel
-from .function_ref import FunctionReference
-from .type_ref import TypeReference
+from haive.core.graph.state_graph.base import SerializableModel
+from haive.core.graph.state_graph.models.function_ref import FunctionReference
+from haive.core.graph.state_graph.models.type_ref import TypeReference
 
 TSpec = TypeVar("TSpec", bound=Any)
 

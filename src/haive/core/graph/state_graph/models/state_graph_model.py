@@ -3,11 +3,11 @@ from typing import Any, ClassVar, Dict, Generic, List, Optional, Set, Tuple, Typ
 
 from pydantic import Field, computed_field, model_validator
 
-from ..base import SerializableModel
-from .branch_model import BranchModel
-from .edge_model import EdgeModel
-from .node_model import NodeModel
-from .type_ref import TypeReference
+from haive.core.graph.state_graph.base import SerializableModel
+from haive.core.graph.state_graph.models.branch_model import BranchModel
+from haive.core.graph.state_graph.models.edge_model import EdgeModel
+from haive.core.graph.state_graph.models.node_model import NodeModel
+from haive.core.graph.state_graph.models.type_ref import TypeReference
 
 TNode = TypeVar("TNode", bound=Any)
 
