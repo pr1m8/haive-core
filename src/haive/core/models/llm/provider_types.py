@@ -1,10 +1,56 @@
-# src/haive/core/models/provider_types.py
+"""
+LLM Provider Types Module.
+
+This module defines the supported LLM providers as an enumeration,
+ensuring consistent identification and type safety when configuring LLM models.
+
+These provider types are used throughout the Haive LLM framework to identify
+the source of language models and apply appropriate configuration patterns.
+
+Typical usage example:
+    ```python
+    from haive.core.models.llm.provider_types import LLMProvider
+
+    # Check if a provider is supported
+    if provider == LLMProvider.OPENAI:
+        # Use OpenAI-specific configuration
+        pass
+    ```
+"""
 
 from enum import Enum
 
 
 class LLMProvider(str, Enum):
-    """Types of LLM providers supported by the system."""
+    """
+    Enumeration of supported LLM providers.
+
+    This enum inherits from str to allow string comparison and serialization
+    while maintaining type safety and providing autocompletion support.
+
+    Attributes:
+        OPENAI: OpenAI language models (GPT-4, etc.)
+        ANTHROPIC: Anthropic language models (Claude, etc.)
+        HUGGINGFACE: HuggingFace model hub language models
+        AZURE: Microsoft Azure OpenAI language models
+        DEEPSEEK: DeepSeek language models
+        GEMINI: Google Gemini language models
+        COHERE: Cohere language models
+        AI21: AI21 Labs language models (Jurassic, etc.)
+        ALEPH_ALPHA: Aleph Alpha language models (Luminous, etc.)
+        GOOSEAI: GooseAI language models
+        MOSAICML: MosaicML language models
+        NLP_CLOUD: NLP Cloud language models
+        OPENLM: OpenLM language models
+        PETALS: Petals distributed language models
+        REPLICATE: Replicate-hosted language models
+        TOGETHER_AI: Together.ai language models
+        FIREWORKS_AI: Fireworks.ai language models
+        PERPLEXITY: Perplexity language models
+        MISTRALAI: Mistral AI language models
+        GROQ: Groq language models
+        VERTEX_AI: Google Vertex AI language models
+    """
 
     OPENAI = "openai"
     ANTHROPIC = "anthropic"
