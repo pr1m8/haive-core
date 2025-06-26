@@ -22,9 +22,28 @@ The `VectorStoreConfig` class extends `InvokableEngine` to provide a unified int
 
 The system supports multiple vector store backends through the `VectorStoreProvider` enum:
 
-- **Local Options**: FAISS, Chroma, InMemory
-- **Hosted Services**: Pinecone, Weaviate, Qdrant, Zilliz, Milvus
-- **Extensibility**: Structured approach for adding new providers
+| Provider      | Description                        | Notes                                       |
+| ------------- | ---------------------------------- | ------------------------------------------- |
+| CHROMA        | Chroma vector database             | Open source, embedding database             |
+| FAISS         | Facebook AI Similarity Search      | Fast, efficient similarity search           |
+| PINECONE      | Pinecone managed vector database   | Cloud-hosted, serverless                    |
+| WEAVIATE      | Weaviate vector database           | Vector search engine with GraphQL API       |
+| ZILLIZ        | Zilliz cloud vector database       | Managed service                             |
+| MILVUS        | Milvus vector database             | Open-source vector database                 |
+| QDRANT        | Qdrant vector database             | Vector similarity search engine             |
+| IN_MEMORY     | In-memory vector store             | For testing/development                     |
+| PGVECTOR      | PostgreSQL with pgvector extension | Adds vector similarity search to PostgreSQL |
+| ELASTICSEARCH | Elasticsearch vector search        | Full-text search with vector capabilities   |
+| REDIS         | Redis vector database              | In-memory data structure store              |
+| SUPABASE      | Supabase vector store              | PostgreSQL-based, with pgvector             |
+| MONGODB_ATLAS | MongoDB Atlas vector search        | Document database with vector search        |
+| AZURE_SEARCH  | Azure Cognitive Search             | Cloud search service with vector support    |
+| OPENSEARCH    | OpenSearch vector search           | Search and analytics suite                  |
+| CASSANDRA     | Apache Cassandra vector store      | Wide-column store with vector support       |
+| CLICKHOUSE    | ClickHouse vector database         | Column-oriented DBMS                        |
+| TYPESENSE     | Typesense vector search            | Fast, typo-tolerant search engine           |
+| LANCEDB       | LanceDB vector database            | Embedded vector database                    |
+| NEO4J         | Neo4j vector search                | Graph database with vector capabilities     |
 
 ### Search Capabilities
 
@@ -196,6 +215,25 @@ retriever = create_retriever_from_documents(
 )
 ```
 
+## Adding Custom Providers
+
+Custom vector store providers can be added at runtime using the `VectorStoreProviderRegistry`:
+
+```python
+from haive.core.engine.vectorstore import VectorStoreProviderRegistry
+from langchain_community.vectorstores.custom import CustomVectorStore
+
+# Direct registration
+VectorStoreProviderRegistry.register_provider("CustomStore", CustomVectorStore)
+
+# Using a factory function for lazy loading
+def get_special_vectorstore():
+    from special_package import SpecialVectorStore
+    return SpecialVectorStore
+
+VectorStoreProviderRegistry.register_provider_factory("SpecialStore", get_special_vectorstore)
+```
+
 ## Advanced Usage Patterns
 
 ### Custom Embedding Models
@@ -281,30 +319,6 @@ async def search_documents():
     return results
 
 results = asyncio.run(search_documents())
-```
-
-## Customization and Extension
-
-### Custom Vector Store Provider
-
-```python
-# Extend VectorStoreConfig for a custom provider
-from haive.core.engine.vectorstore import VectorStoreConfig, VectorStoreProvider
-
-# Add new provider to enum
-class ExtendedVectorStoreProvider(VectorStoreProvider):
-    CUSTOM_DB = "CustomDB"
-
-# Subclass VectorStoreConfig
-class CustomVectorStoreConfig(VectorStoreConfig):
-    vector_store_provider: ExtendedVectorStoreProvider = ExtendedVectorStoreProvider.CUSTOM_DB
-
-    # Override the class getter
-    def _get_vectorstore_class(self):
-        if self.vector_store_provider == ExtendedVectorStoreProvider.CUSTOM_DB:
-            from custom_package import CustomVectorStore
-            return CustomVectorStore
-        return super()._get_vectorstore_class()
 ```
 
 ## Best Practices
@@ -405,6 +419,14 @@ if is_exploratory_query(query):
     results = vs_config.invoke(query, detailed_config)
 else:
     results = vs_config.invoke(query, precise_config)
+```
+
+## Testing
+
+The vector store system includes comprehensive tests to ensure proper functionality:
+
+```bash
+python -m unittest packages/haive-core/src/haive/core/engine/vectorstore/test_vectorstore_providers.py
 ```
 
 ## Conclusion

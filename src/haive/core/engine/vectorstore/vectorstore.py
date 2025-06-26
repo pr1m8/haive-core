@@ -104,6 +104,18 @@ class VectorStoreProvider(str, Enum):
         MILVUS (str): Milvus vector database
         QDRANT (str): Qdrant vector database
         IN_MEMORY (str): In-memory vector store (for testing/development)
+        PGVECTOR (str): PostgreSQL with pgvector extension
+        ELASTICSEARCH (str): Elasticsearch vector search
+        REDIS (str): Redis vector database
+        SUPABASE (str): Supabase vector store
+        MONGODB_ATLAS (str): MongoDB Atlas vector search
+        AZURE_SEARCH (str): Azure Cognitive Search
+        OPENSEARCH (str): OpenSearch vector search
+        CASSANDRA (str): Apache Cassandra vector store
+        CLICKHOUSE (str): ClickHouse vector database
+        TYPESENSE (str): Typesense vector search
+        LANCEDB (str): LanceDB vector database
+        NEO4J (str): Neo4j vector search
 
     Examples:
         >>> from haive.core.engine.vectorstore import VectorStoreProvider
@@ -124,6 +136,18 @@ class VectorStoreProvider(str, Enum):
     MILVUS = "Milvus"
     QDRANT = "Qdrant"
     IN_MEMORY = "InMemory"
+    PGVECTOR = "PGVector"
+    ELASTICSEARCH = "Elasticsearch"
+    REDIS = "Redis"
+    SUPABASE = "Supabase"
+    MONGODB_ATLAS = "MongoDBAtlas"
+    AZURE_SEARCH = "AzureSearch"
+    OPENSEARCH = "OpenSearch"
+    CASSANDRA = "Cassandra"
+    CLICKHOUSE = "ClickHouse"
+    TYPESENSE = "Typesense"
+    LANCEDB = "LanceDB"
+    NEO4J = "Neo4j"
 
     @classmethod
     def extend(cls, name: str, value: str) -> None:
@@ -493,34 +517,102 @@ class VectorStoreConfig(InvokableEngine[Union[str, Dict[str, Any]], List[Documen
             from langchain_community.vectorstores import Chroma
 
             return Chroma
+
         if self.vector_store_provider == VectorStoreProvider.FAISS:
             from langchain_community.vectorstores import FAISS
 
             return FAISS
+
         if self.vector_store_provider == VectorStoreProvider.PINECONE:
             from langchain_community.vectorstores import Pinecone
 
             return Pinecone
+
         if self.vector_store_provider == VectorStoreProvider.WEAVIATE:
             from langchain_community.vectorstores import Weaviate
 
             return Weaviate
+
         if self.vector_store_provider == VectorStoreProvider.ZILLIZ:
             from langchain_community.vectorstores import Zilliz
 
             return Zilliz
+
         if self.vector_store_provider == VectorStoreProvider.MILVUS:
             from langchain_community.vectorstores import Milvus
 
             return Milvus
+
         if self.vector_store_provider == VectorStoreProvider.QDRANT:
             from langchain_community.vectorstores import Qdrant
 
             return Qdrant
+
         if self.vector_store_provider == VectorStoreProvider.IN_MEMORY:
             from langchain_core.vectorstores import InMemoryVectorStore
 
             return InMemoryVectorStore
+
+        if self.vector_store_provider == VectorStoreProvider.PGVECTOR:
+            from langchain_community.vectorstores import PGVector
+
+            return PGVector
+
+        if self.vector_store_provider == VectorStoreProvider.ELASTICSEARCH:
+            from langchain_community.vectorstores import ElasticsearchStore
+
+            return ElasticsearchStore
+
+        if self.vector_store_provider == VectorStoreProvider.REDIS:
+            from langchain_community.vectorstores.redis import Redis
+
+            return Redis
+
+        if self.vector_store_provider == VectorStoreProvider.SUPABASE:
+            from langchain_community.vectorstores import SupabaseVectorStore
+
+            return SupabaseVectorStore
+
+        if self.vector_store_provider == VectorStoreProvider.MONGODB_ATLAS:
+            from langchain_community.vectorstores import MongoDBAtlasVectorSearch
+
+            return MongoDBAtlasVectorSearch
+
+        if self.vector_store_provider == VectorStoreProvider.AZURE_SEARCH:
+            from langchain_community.vectorstores import AzureSearch
+
+            return AzureSearch
+
+        if self.vector_store_provider == VectorStoreProvider.OPENSEARCH:
+            from langchain_community.vectorstores import OpenSearchVectorSearch
+
+            return OpenSearchVectorSearch
+
+        if self.vector_store_provider == VectorStoreProvider.CASSANDRA:
+            from langchain_community.vectorstores import Cassandra
+
+            return Cassandra
+
+        if self.vector_store_provider == VectorStoreProvider.CLICKHOUSE:
+            from langchain_community.vectorstores import Clickhouse
+
+            return Clickhouse
+
+        if self.vector_store_provider == VectorStoreProvider.TYPESENSE:
+            from langchain_community.vectorstores import Typesense
+
+            return Typesense
+
+        if self.vector_store_provider == VectorStoreProvider.LANCEDB:
+            from langchain_community.vectorstores import LanceDB
+
+            return LanceDB
+
+        if self.vector_store_provider == VectorStoreProvider.NEO4J:
+            from langchain_community.vectorstores import Neo4jVector
+
+            return Neo4jVector
+
         raise ValueError(
             f"Unsupported vector store provider: {self.vector_store_provider}"
         )

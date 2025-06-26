@@ -38,7 +38,7 @@ Examples:
     >>> results = vectorstore.similarity_search("smartphone with fast processor")
 """
 
-from .vectorstore import (
+from haive.core.engine.vectorstore.vectorstore import (
     VectorStoreConfig,
     VectorStoreProvider,
     VectorStoreProviderRegistry,
