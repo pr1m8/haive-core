@@ -1,109 +1,103 @@
+# src/haive/core/graph/node/validation_node_config.py
+
 import json
 import logging
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from langchain_core.messages import AIMessage, ToolCall, ToolMessage
-from langchain_core.tools import BaseTool
 from langgraph.graph import END
 from langgraph.prebuilt import ValidationNode
-from langgraph.types import Command, Send
 from pydantic import BaseModel, Field
-from rich.console import Console
-from rich.panel import Panel
 
 from haive.core.common.mixins.tool_route_mixin import ToolRouteMixin
 from haive.core.graph.common.types import ConfigLike, StateLike
 from haive.core.graph.node.base_config import NodeConfig
 from haive.core.graph.node.types import NodeType
 
+# Configure logger with rich handler
 logger = logging.getLogger(__name__)
-console = Console()
+
+# Add rich handler if not already present
+if not any(isinstance(handler, logging.StreamHandler) for handler in logger.handlers):
+    from rich.logging import RichHandler
+
+    handler = RichHandler(
+        rich_tracebacks=True,
+        show_time=True,
+        show_path=True,
+        enable_link_path=True,
+        markup=True,
+        log_time_format="[%Y-%m-%d %H:%M:%S]",
+    )
+    handler.setLevel(logging.DEBUG)
+    logger.addHandler(handler)
+    logger.setLevel(logging.DEBUG)
 
 
 def has_tool_error(message: ToolMessage) -> bool:
-    """
-    Check if a ToolMessage contains an error.
-
-    Args:
-        message: The ToolMessage to check
-
-    Returns:
-        True if the message indicates a tool error, False otherwise
-    """
+    """Check if a ToolMessage contains an error."""
     if not isinstance(message, ToolMessage):
         return False
 
-    # Check for error content
     content = message.content
-    if isinstance(content, str):
-        # Look for common error indicators
-        error_terms = ["error", "invalid", "failed", "exception", "validation error"]
-        return any(term in content.lower() for term in error_terms)
 
-    # If content is a dict, check for error keys
+    # Check string content for error terms
+    if isinstance(content, str):
+        error_terms = ["error", "invalid", "failed", "exception", "validation error"]
+        contains_error = any(term in content.lower() for term in error_terms)
+        if contains_error:
+            logger.debug(
+                f"[bold yellow]Tool error detected in content:[/bold yellow] {content[:100]}..."
+            )
+        return contains_error
+
+    # Check dict content for error keys
     if isinstance(content, dict):
         error_keys = ["error", "errors", "exception", "validation_error"]
-        return any(key in content for key in error_keys)
+        has_error_key = any(key in content for key in error_keys)
+        if has_error_key:
+            logger.debug(
+                f"[bold yellow]Tool error detected in dict:[/bold yellow] {list(content.keys())}"
+            )
+        return has_error_key
 
-    # Check additional_kwargs for error indicators
+    # Check additional kwargs
     if hasattr(message, "additional_kwargs") and message.additional_kwargs:
         if message.additional_kwargs.get("is_error"):
+            logger.debug(
+                "[bold yellow]Tool error detected in additional_kwargs[/bold yellow]"
+            )
             return True
 
     return False
 
 
 def get_tool_name(tool_call: Any) -> str:
-    """
-    Extract tool name from either ToolCall object or dictionary.
-
-    Args:
-        tool_call: A tool call object or dictionary
-
-    Returns:
-        The name of the tool
-    """
-    # Handle ToolCall object
+    """Extract tool name from either ToolCall object or dictionary."""
     if hasattr(tool_call, "name"):
         return tool_call.name
 
-    # Handle dictionary formats (OpenAI vs LangChain)
     if isinstance(tool_call, dict):
         if "name" in tool_call:
             return tool_call["name"]
         elif "function" in tool_call and "name" in tool_call["function"]:
             return tool_call["function"]["name"]
-        elif (
-            "type" in tool_call
-            and tool_call["type"] == "function"
-            and "function" in tool_call
-        ):
-            return tool_call["function"].get("name", "unknown_tool")
 
-    # Fallback
+    logger.warning(
+        "[bold yellow]Could not extract tool name from tool_call[/bold yellow]"
+    )
     return "unknown_tool"
 
 
 def get_tool_args(tool_call: Any) -> Dict[str, Any]:
-    """
-    Extract tool arguments from either ToolCall object or dictionary.
-
-    Args:
-        tool_call: A tool call object or dictionary
-
-    Returns:
-        Dictionary of tool arguments
-    """
-    # Handle ToolCall object
+    """Extract tool arguments from either ToolCall object or dictionary."""
     if hasattr(tool_call, "args"):
         return tool_call.args
 
-    # Handle dictionary formats
     if isinstance(tool_call, dict):
         if "args" in tool_call:
             return tool_call["args"]
         elif "arguments" in tool_call:
-            # Try to parse arguments from string if needed
             args = tool_call["arguments"]
             if isinstance(args, str):
                 try:
@@ -112,7 +106,6 @@ def get_tool_args(tool_call: Any) -> Dict[str, Any]:
                     return {"raw_args": args}
             return args
         elif "function" in tool_call and "arguments" in tool_call["function"]:
-            # Try to parse arguments from string if needed
             args = tool_call["function"]["arguments"]
             if isinstance(args, str):
                 try:
@@ -121,25 +114,27 @@ def get_tool_args(tool_call: Any) -> Dict[str, Any]:
                     return {"raw_args": args}
             return args
 
-    # Fallback
+    logger.warning(
+        "[bold yellow]Could not extract tool args from tool_call[/bold yellow]"
+    )
     return {}
 
 
-def get_tool_id(tool_call):
+def get_tool_id(tool_call: Any) -> str:
     """Extract tool ID from either ToolCall object or dictionary."""
     if hasattr(tool_call, "id"):
         return tool_call.id
     elif isinstance(tool_call, dict) and "id" in tool_call:
         return tool_call["id"]
 
-    # Fallback
-    return f"id_{id(tool_call)}"
+    # Generate a fallback ID
+    fallback_id = f"tool_call_{id(tool_call)}"
+    logger.debug(f"[bold cyan]Generated fallback tool ID:[/bold cyan] {fallback_id}")
+    return fallback_id
 
 
 class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
-    """
-    Configuration for a validation node that routes tool calls to appropriate nodes.
-    """
+    """Configuration for a validation node that routes tool calls to appropriate nodes."""
 
     node_type: NodeType = Field(
         default=NodeType.VALIDATION, description="The type of node"
@@ -148,16 +143,27 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
     messages_key: str = Field(
         default="messages", description="The key to use for the messages field"
     )
-    schemas: List[Any] = Field(
-        default_factory=list, description="The schemas to use for validation"
+
+    # Engine name to get tools/schemas from
+    engine_name: Optional[str] = Field(
+        default=None, description="Name of the engine to get tools/schemas from"
     )
+
+    # Override tools/schemas if needed
+    schemas: List[Any] = Field(
+        default_factory=list, description="The schemas to use for validation (override)"
+    )
+    tools: List[Any] = Field(
+        default_factory=list, description="List of available tools (override)"
+    )
+
     format_error: Optional[Callable] = Field(
         default=None, description="Custom formatter for validation errors"
     )
 
-    # Node routing configuration - these should match actual nodes in your graph
+    # Node routing configuration
     agent_node: str = Field(
-        default="agent", description="Node to return to for validation errors"
+        default="agent_node", description="Node to return to for validation errors"
     )
     tool_node: str = Field(
         default="tool_node", description="Node for executing standard tools"
@@ -169,609 +175,528 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
         default="retriever", description="Node for retriever tools"
     )
 
-    tools: List[Any] = Field(
-        default_factory=list, description="List of available tools"
-    )
-    # tool_routes now provided by ToolRouteMixin
-
     # Available nodes in the graph (for validation)
     available_nodes: List[str] = Field(
         default_factory=list, description="List of nodes available in the graph"
     )
 
-    # Custom route mappings - can override default behavior
+    # Custom route mappings
     custom_route_mappings: Dict[str, str] = Field(
         default_factory=dict,
         description="Custom mappings from route names to node names",
     )
 
-    # Direct node routes - routes that should skip standard mapping
+    # Direct node routes
     direct_node_routes: List[str] = Field(
         default_factory=list,
         description="Routes that map directly to node names without transformation",
     )
 
     def validate_node_exists(self, node_name: str) -> str:
-        """
-        Validate that a node exists in the graph, return fallback if not.
-
-        Args:
-            node_name: The node name to validate
-
-        Returns:
-            Valid node name or fallback to agent_node
-        """
-        logger.debug(f"Validating node exists: {node_name}")
+        """Validate that a node exists in the graph."""
+        logger.debug(f"[bold blue]Validating node exists:[/bold blue] {node_name}")
 
         if not self.available_nodes:
-            # If no available nodes specified, trust the provided name
-            logger.debug("No available_nodes configured, trusting provided name")
+            logger.debug("  No available_nodes list, assuming node exists")
             return node_name
 
         if node_name in self.available_nodes:
-            logger.debug(f"Node {node_name} found in available_nodes")
+            logger.debug(f"  [bold green]✓ Node exists[/bold green]")
             return node_name
 
-        # Fallback logic
+        # Try fallbacks
         logger.warning(
-            f"Node '{node_name}' not found in graph. Available nodes: {self.available_nodes}"
+            f"[bold yellow]Node '{node_name}' not found in available nodes[/bold yellow]"
         )
+        fallback_options = [self.agent_node, "agent_node", "START"]
 
-        # Try fallbacks in order of preference
-        fallback_options = [self.agent_node, "agent", "START"]
         for fallback in fallback_options:
             if fallback in self.available_nodes:
-                logger.info(f"Using fallback node: {fallback}")
+                logger.info(f"[bold cyan]Using fallback node:[/bold cyan] {fallback}")
                 return fallback
 
-        # If no fallbacks work, return the original name and let LangGraph handle the error
         logger.error(
-            f"No valid fallback found. Returning original node name: {node_name}"
+            f"[bold red]No valid fallback found, returning original:[/bold red] {node_name}"
         )
         return node_name
 
     def _get_node_for_route(self, route: str) -> str:
-        """Map tool route to appropriate node with validation."""
-        logger.debug(f"Getting node for route: {route}")
+        """Map tool route to appropriate node."""
+        logger.debug(f"[bold blue]Getting node for route:[/bold blue] {route}")
 
-        # First check custom route mappings
+        # Check custom mappings first
         if route in self.custom_route_mappings:
-            target_node = self.custom_route_mappings[route]
-            logger.debug(f"Found custom route mapping: {route} -> {target_node}")
-            return self.validate_node_exists(target_node)
+            node = self.custom_route_mappings[route]
+            logger.debug(f"  Found in custom mappings: {node}")
+            return self.validate_node_exists(node)
 
         # Check if this is a direct node route
         if route in self.direct_node_routes:
-            logger.debug(f"Route {route} is configured as direct node route")
+            logger.debug(f"  Direct node route: {route}")
             return self.validate_node_exists(route)
 
-        # Standard route mapping for tool types
+        # Standard route mapping
         route_mapping = {
             "pydantic_model": self.parser_node,
             "langchain_tool": self.tool_node,
             "function": self.tool_node,
             "retriever": self.retriever_node,
-            "unknown": self.tool_node,  # Default fallback
+            "unknown": self.tool_node,
         }
 
         target_node = route_mapping.get(route, self.tool_node)
-        logger.debug(f"Standard route mapping: {route} -> {target_node}")
-
-        # Validate the node exists
+        logger.debug(f"  Standard mapping: {route} -> {target_node}")
         return self.validate_node_exists(target_node)
 
-    def _sync_tools_and_schemas(self) -> None:
-        """Sync tool routes from both tools and schemas."""
-        logger.debug("Starting tool and schema synchronization")
+    def _get_engine_from_state(self, state: StateLike) -> Optional[Any]:
+        """Get engine from state.engines or registry."""
+        logger.debug(f"[bold blue]Getting engine:[/bold blue] {self.engine_name}")
+
+        if not self.engine_name:
+            logger.debug("  No engine name specified")
+            return None
+
+        # FIRST: Try to get from state.engines using engine name
+        if hasattr(state, "engines") and isinstance(state.engines, dict):
+            logger.debug(f"  State has engines dict with {len(state.engines)} engines")
+            logger.debug(f"  Available engine keys: {list(state.engines.keys())}")
+
+            # Try exact name match
+            engine = state.engines.get(self.engine_name)
+            if engine:
+                logger.info(
+                    f"[bold green]✓ Found engine in state.engines:[/bold green] {self.engine_name}"
+                )
+                logger.debug(f"    Engine type: {type(engine).__name__}")
+                logger.debug(f"    Engine has tools: {hasattr(engine, 'tools')}")
+                logger.debug(
+                    f"    Engine has tool_routes: {hasattr(engine, 'tool_routes')}"
+                )
+                return engine
+
+            # Try to find by engine.name attribute
+            for key, eng in state.engines.items():
+                if hasattr(eng, "name") and eng.name == self.engine_name:
+                    logger.info(
+                        f"[bold green]✓ Found engine by name attribute:[/bold green] {self.engine_name} (key: {key})"
+                    )
+                    return eng
+
+        # SECOND: Try to get from state directly (if engines are stored as attributes)
+        if hasattr(state, self.engine_name):
+            engine = getattr(state, self.engine_name)
+            logger.info(
+                f"[bold green]✓ Found engine as state attribute:[/bold green] {self.engine_name}"
+            )
+            return engine
+
+        # LAST: Fallback to registry
+        logger.debug("  Engine not found in state, trying registry...")
+        try:
+            from haive.core.engine.base import EngineRegistry
+
+            registry = EngineRegistry.get_instance()
+            engine = registry.find(self.engine_name)
+            if engine:
+                logger.info(
+                    f"[bold green]✓ Found engine in EngineRegistry:[/bold green] {self.engine_name}"
+                )
+                return engine
+            else:
+                logger.warning(
+                    f"[bold yellow]Engine not found in registry:[/bold yellow] {self.engine_name}"
+                )
+        except Exception as e:
+            logger.error(f"[bold red]Error accessing EngineRegistry:[/bold red] {e}")
+
+        logger.error(
+            f"[bold red]Engine '{self.engine_name}' not found anywhere[/bold red]"
+        )
+        return None
+
+    def _get_tools_and_schemas_from_engine(
+        self, engine: Any
+    ) -> tuple[List[Any], List[Any]]:
+        """Extract tools and schemas from an engine."""
+        logger.debug("[bold blue]Extracting tools and schemas from engine[/bold blue]")
+
+        tools = []
+        schemas = []
+
+        # Log what the engine has
+        logger.debug(
+            f"  Engine attributes: {[attr for attr in dir(engine) if not attr.startswith('_')][:20]}..."
+        )
+
+        # Get tools
+        if hasattr(engine, "tools") and engine.tools:
+            tools.extend(engine.tools)
+            logger.debug(f"  Found {len(engine.tools)} tools")
+            for tool in engine.tools[:3]:  # Log first 3
+                tool_name = getattr(tool, "name", getattr(tool, "__name__", str(tool)))
+                logger.debug(f"    - {tool_name}")
+
+        # Get pydantic tools/schemas
+        if hasattr(engine, "pydantic_tools") and engine.pydantic_tools:
+            schemas.extend(engine.pydantic_tools)
+            logger.debug(f"  Found {len(engine.pydantic_tools)} pydantic_tools")
+
+        if hasattr(engine, "schemas") and engine.schemas:
+            schemas.extend(engine.schemas)
+            logger.debug(f"  Found {len(engine.schemas)} schemas")
+
+        # Check for structured_output_model
+        if (
+            hasattr(engine, "structured_output_model")
+            and engine.structured_output_model
+        ):
+            schemas.append(engine.structured_output_model)
+            model_name = getattr(
+                engine.structured_output_model,
+                "__name__",
+                str(engine.structured_output_model),
+            )
+            logger.debug(f"  Found structured_output_model: {model_name}")
+
+        logger.info(
+            f"[bold cyan]Total extracted:[/bold cyan] {len(tools)} tools, {len(schemas)} schemas"
+        )
+        return tools, schemas
+
+    def _sync_tools_and_schemas(self, state: StateLike) -> tuple[List[Any], List[Any]]:
+        """Sync tools and schemas from engine in state - ONLY from the specified engine."""
+        logger.info("[bold magenta]Syncing tools and schemas from state[/bold magenta]")
 
         all_tools = []
+        all_schemas = []
 
-        # Add schemas first (they take priority for routing)
+        # Get from engine if specified
+        if self.engine_name:
+            engine = self._get_engine_from_state(state)
+            if engine:
+                # IMPORTANT: Only use tools/schemas from THIS specific engine
+                # Do not use tools from other engines in the state to prevent contamination
+                logger.info(
+                    f"[bold yellow]Using ONLY tools/schemas from engine: {self.engine_name}[/bold yellow]"
+                )
+
+                # Get tools and schemas ONLY from this specific engine
+                engine_tools, engine_schemas = self._get_tools_and_schemas_from_engine(
+                    engine
+                )
+
+                # Filter tools to only include those that actually belong to this engine
+                # by checking the engine's original tool definitions
+                original_engine_tools = []
+                original_engine_schemas = []
+
+                # Get the original tools from the engine - filter out contaminated tools
+                if hasattr(engine, "tools") and engine.tools:
+                    for tool in engine.tools:
+                        tool_name = getattr(
+                            tool, "name", getattr(tool, "__name__", str(tool))
+                        )
+
+                        # FILTER: Only include tools that are NOT Pydantic model classes
+                        # Pydantic models (like Plan) should only be in structured_output_model, not tools
+                        if hasattr(tool, "__bases__") and any(
+                            "BaseModel" in str(base) for base in tool.__bases__
+                        ):
+                            logger.debug(
+                                f"  Skipping Pydantic model '{tool_name}' from tools list (belongs in structured_output)"
+                            )
+                            continue
+
+                        # FILTER: Only include actual callable tools
+                        if callable(tool) or hasattr(tool, "invoke"):
+                            original_engine_tools.append(tool)
+                            logger.debug(f"  Including tool: {tool_name}")
+                        else:
+                            logger.debug(f"  Skipping non-callable tool: {tool_name}")
+
+                # For schemas, only include structured_output_model if this engine has it
+                if (
+                    hasattr(engine, "structured_output_model")
+                    and engine.structured_output_model
+                ):
+                    original_engine_schemas.append(engine.structured_output_model)
+                    model_name = getattr(
+                        engine.structured_output_model,
+                        "__name__",
+                        str(engine.structured_output_model),
+                    )
+                    logger.debug(f"  Including structured output model: {model_name}")
+
+                # ADDITIONAL FILTER: Remove any non-tool items that might have been added incorrectly
+                filtered_tools = []
+                for tool in original_engine_tools:
+                    # Skip if this looks like a Pydantic model class
+                    if isinstance(tool, type) and hasattr(tool, "model_fields"):
+                        logger.debug(
+                            f"  Filtering out Pydantic model class from tools: {tool}"
+                        )
+                        continue
+                    filtered_tools.append(tool)
+
+                original_engine_tools = filtered_tools
+
+                # Use filtered tools/schemas instead of all tools
+                all_tools = original_engine_tools
+                all_schemas = original_engine_schemas
+
+                logger.info(
+                    f"[bold green]✓ Filtered to {len(all_tools)} tools and {len(all_schemas)} schemas from engine[/bold green]"
+                )
+
+                # Get tool routes from engine, but filter them too
+                if hasattr(engine, "tool_routes") and engine.tool_routes:
+                    # Only copy routes for tools/schemas we actually have
+                    filtered_routes = {}
+                    tool_names = {
+                        getattr(tool, "name", getattr(tool, "__name__", str(tool)))
+                        for tool in all_tools
+                    }
+                    schema_names = {
+                        getattr(schema, "__name__", str(schema))
+                        for schema in all_schemas
+                    }
+                    all_names = tool_names | schema_names
+
+                    for name, route in engine.tool_routes.items():
+                        if name in all_names:
+                            filtered_routes[name] = route
+
+                    self.tool_routes = filtered_routes
+                    logger.info(
+                        f"[bold green]✓ Filtered tool routes to {len(self.tool_routes)} entries[/bold green]"
+                    )
+                    for name, route in list(self.tool_routes.items())[
+                        :5
+                    ]:  # Log first 5
+                        logger.debug(f"    {name} -> {route}")
+            else:
+                logger.error(
+                    f"[bold red]Could not find engine '{self.engine_name}'[/bold red]"
+                )
+
+        # Add any manual overrides (these take precedence)
         if self.schemas:
-            all_tools.extend(self.schemas)
-            logger.debug(f"Added {len(self.schemas)} schemas to all_tools")
-
-        # Add tools (may override schema routes if same name)
+            all_schemas.extend(self.schemas)
+            logger.debug(f"  Added {len(self.schemas)} override schemas")
         if self.tools:
-            # Only add tools that aren't already in schemas
-            schema_names = {
-                getattr(s, "__name__", getattr(s, "name", str(s))) for s in self.schemas
-            }
-            added_tools = 0
-            for tool in self.tools:
-                tool_name = getattr(tool, "__name__", getattr(tool, "name", str(tool)))
-                if tool_name not in schema_names:
-                    all_tools.append(tool)
-                    added_tools += 1
-            logger.debug(f"Added {added_tools} additional tools (not in schemas)")
+            all_tools.extend(self.tools)
+            logger.debug(f"  Added {len(self.tools)} override tools")
 
-        # Sync routes using the mixin
-        if all_tools:
-            self.sync_tool_routes_from_tools(all_tools)
-            logger.info(f"Synced routes for {len(all_tools)} total tools/schemas")
+        # Sync routes if we don't have them from engine
+        if not self.tool_routes and (all_tools or all_schemas):
+            logger.info("[bold cyan]Syncing tool routes from tools/schemas[/bold cyan]")
+            combined = all_schemas + all_tools  # Schemas first for priority
+            self.sync_tool_routes_from_tools(combined)
+            logger.debug(f"  Generated {len(self.tool_routes)} tool routes")
+            for name, route in list(self.tool_routes.items())[:5]:  # Log first 5
+                logger.debug(f"    {name} -> {route}")
 
-            # Log final tool routes
-            logger.debug(f"Final tool_routes after sync: {self.tool_routes}")
-        else:
-            logger.warning("No tools or schemas to sync")
+        return all_tools, all_schemas
 
     def __call__(
         self, state: StateLike, config: Optional[ConfigLike] = None
-    ) -> Union[Command, List[Send], str]:
+    ) -> Union[str, List[str]]:
         """
         Validate and route tool calls to appropriate nodes.
 
-        FIXED: Now properly adds ToolMessages to state after validation
+        Returns ONLY routing decisions - no state updates!
         """
-        logger.info("=" * 80)
-        logger.info("VALIDATION NODE START")
-        logger.info("=" * 80)
-
-        # Sync tools and schemas to ensure routes are up to date
-        self._sync_tools_and_schemas()
-
-        # Debug initial state
-        logger.debug(f"State type: {type(state)}")
-        logger.debug(f"Has messages: {hasattr(state, 'messages')}")
-        logger.debug(
-            f"Message count: {len(state.messages) if hasattr(state, 'messages') and state.messages else 0}"
+        logger.info(
+            "[bold magenta]=== ValidationNodeConfig Execution ===[/bold magenta]"
         )
-        logger.debug(f"Config: {config}")
-        logger.debug(f"Tools available: {len(self.tools)}")
-        logger.debug(f"Schemas available: {len(self.schemas)}")
+        logger.debug(f"State type: {type(state).__name__}")
         logger.debug(f"Available nodes: {self.available_nodes}")
-        logger.debug(f"Current tool_routes: {self.tool_routes}")
-        logger.debug(f"Custom route mappings: {self.custom_route_mappings}")
-        logger.debug(f"Direct node routes: {self.direct_node_routes}")
 
-        # Build a mapping of tool names to actual tool classes/schemas
-        tool_name_mapping = {}
+        # Log state contents for debugging
+        if hasattr(state, "__dict__"):
+            logger.debug(f"State attributes: {list(state.__dict__.keys())}")
+        if hasattr(state, "engines"):
+            logger.debug(
+                f"State.engines keys: {list(state.engines.keys()) if isinstance(state.engines, dict) else 'Not a dict'}"
+            )
 
-        # First, check schemas (these are likely Pydantic models)
-        for schema in self.schemas:
-            if hasattr(schema, "__name__"):
-                tool_name_mapping[schema.__name__] = schema
-            # Also check for 'name' attribute
-            if hasattr(schema, "name"):
-                tool_name_mapping[schema.name] = schema
-
-        # Then check tools (might override schemas if same name)
-        for tool in self.tools:
-            if hasattr(tool, "name"):
-                tool_name_mapping[tool.name] = tool
-            elif hasattr(tool, "__name__"):
-                tool_name_mapping[tool.__name__] = tool
-
-        logger.debug(f"Tool name mapping: {list(tool_name_mapping.keys())}")
+        # Get tools and schemas from engine/state
+        validation_tools, validation_schemas = self._sync_tools_and_schemas(state)
 
         # Get messages from state
-        if not hasattr(state, "messages") or not state.messages:
-            logger.warning("No messages found in state")
+        if not hasattr(state, self.messages_key):
+            logger.error(
+                f"[bold red]State missing messages key:[/bold red] {self.messages_key}"
+            )
+            return "has_errors"
+
+        messages = getattr(state, self.messages_key, [])
+        if not messages:
+            logger.warning("[bold yellow]No messages found in state[/bold yellow]")
             return "no_tool_calls"
 
-        messages = state.messages
-        logger.info(f"Found {len(messages)} messages in state")
-
-        # Check for tool calls in the last message
+        logger.info(f"[bold cyan]Processing {len(messages)} messages[/bold cyan]")
         last_message = messages[-1]
-        logger.debug(f"Last message type: {type(last_message).__name__}")
 
         if not isinstance(last_message, AIMessage):
-            logger.warning("Last message is not an AIMessage")
+            logger.debug(
+                f"Last message is not AIMessage: {type(last_message).__name__}"
+            )
             return "no_tool_calls"
 
-        # Get tool calls - handle both attributes and additional_kwargs
+        # Get tool calls
         tool_calls = []
-        logger.debug("Checking for tool calls...")
-
         if hasattr(last_message, "tool_calls") and last_message.tool_calls:
             tool_calls = last_message.tool_calls
-            logger.info(f"Found {len(tool_calls)} tool calls in tool_calls attribute")
+            logger.info(
+                f"[bold green]✓ Found {len(tool_calls)} tool calls in message[/bold green]"
+            )
         elif (
             hasattr(last_message, "additional_kwargs")
             and "tool_calls" in last_message.additional_kwargs
         ):
             tool_calls = last_message.additional_kwargs["tool_calls"]
-            logger.info(f"Found {len(tool_calls)} tool calls in additional_kwargs")
+            logger.info(
+                f"[bold green]✓ Found {len(tool_calls)} tool calls in additional_kwargs[/bold green]"
+            )
 
         if not tool_calls:
-            logger.warning("No tool calls found in last message")
+            logger.info("[bold yellow]No tool calls found[/bold yellow]")
             return "no_tool_calls"
 
-        # Log tool calls info
-        logger.info("Tool calls found:")
-        for i, tc in enumerate(tool_calls):
-            name = get_tool_name(tc)
-            args = get_tool_args(tc)
-            logger.info(f"  [{i}] {name}: {args}")
+        # Build tool name mapping for validation
+        logger.debug("[bold blue]Building tool name mapping[/bold blue]")
+        tool_name_mapping = {}
 
-        # Group tool calls by their destination
-        tool_groups = {}
-        all_valid = True
-        error_messages = []
-        validation_results = []
+        for schema in validation_schemas:
+            if hasattr(schema, "__name__"):
+                tool_name_mapping[schema.__name__] = schema
+                logger.debug(f"  Schema: {schema.__name__}")
+            if hasattr(schema, "name"):
+                tool_name_mapping[schema.name] = schema
+                logger.debug(f"  Schema (by name): {schema.name}")
 
-        # FIXED: Track all validated tool messages to add to state
-        all_validated_tool_messages = []
+        for tool in validation_tools:
+            if hasattr(tool, "name"):
+                tool_name_mapping[tool.name] = tool
+                logger.debug(f"  Tool: {tool.name}")
+            elif hasattr(tool, "__name__"):
+                tool_name_mapping[tool.__name__] = tool
+                logger.debug(f"  Tool (by __name__): {tool.__name__}")
 
-        logger.info("-" * 60)
-        logger.info("PROCESSING TOOL CALLS")
-        logger.info("-" * 60)
+        logger.info(
+            f"[bold cyan]Total tools/schemas available:[/bold cyan] {len(tool_name_mapping)}"
+        )
 
-        # Process each tool call individually
+        # Process tool calls and determine routing
+        logger.info("[bold blue]Processing tool calls for routing[/bold blue]")
+        destinations = set()
+        has_errors = False
+
         for i, tool_call in enumerate(tool_calls):
             tool_name = get_tool_name(tool_call)
-            logger.info(f"Processing tool {i+1}/{len(tool_calls)}: {tool_name}")
+            logger.debug(f"\n[bold cyan]Tool call {i+1}:[/bold cyan] {tool_name}")
 
-            # Create standardized tool call
-            standardized_tool_call = tool_call
-            if isinstance(tool_call, dict):
-                logger.debug("Converting dict to ToolCall object")
-                # Convert dict to ToolCall
-                standardized_tool_call = ToolCall(
-                    name=tool_name,
-                    args=get_tool_args(tool_call),
-                    id=get_tool_id(tool_call),
+            # Check if tool exists in our mapping
+            if tool_name not in tool_name_mapping:
+                logger.error(
+                    f"  [bold red]✗ Tool '{tool_name}' not found in available tools![/bold red]"
                 )
-            else:
-                logger.debug("Tool call already standardized")
-
-            # Check if tool should skip validation
-            route = self.tool_routes.get(tool_name, "unknown")
-            skip_validation = False
-
-            # Check if this route is configured to skip validation
-            if route in self.direct_node_routes:
-                skip_validation = True
-                logger.info(
-                    f"Tool {tool_name} configured to skip validation (direct node route)"
-                )
-
-            if skip_validation:
-                logger.info(f"Skipping validation for {tool_name}")
-
-                # Direct routing without validation
-                destination = self._get_node_for_route(route)
-
-                logger.info(f"Direct routing: {tool_name} -> {destination}")
-
-                if destination not in tool_groups:
-                    tool_groups[destination] = []
-
-                # Find the actual tool class
-                tool_class = tool_name_mapping.get(tool_name)
-
-                # Create a placeholder ToolMessage for consistency
-                tool_message = ToolMessage(
-                    content=f"Direct routing to {destination}",
-                    name=tool_name,
-                    tool_call_id=standardized_tool_call.id,
-                )
-
-                # FIXED: Add to tracked tool messages
-                all_validated_tool_messages.append(tool_message)
-
-                tool_groups[destination].append(
-                    {
-                        "tool_call": standardized_tool_call,
-                        "tool_name": tool_name,
-                        "tool_class": tool_class,
-                        "route": route,
-                        "tool_message": tool_message,
-                        "skipped_validation": True,
-                    }
-                )
-
-                validation_result = {
-                    "tool_name": tool_name,
-                    "has_error": False,
-                    "route": route,
-                    "destination": destination,
-                    "skipped_validation": True,
-                }
-
-                logger.info(
-                    f"Tool [{tool_name}] routed to [{destination}] (no validation)"
-                )
-                validation_results.append(validation_result)
+                logger.debug(f"  Available tools: {list(tool_name_mapping.keys())}")
+                has_errors = True
                 continue
 
-            # Regular validation
-            logger.info(f"Running validation for {tool_name}")
+            # Get route for this tool
+            route = self.tool_routes.get(tool_name, "unknown")
+            logger.debug(f"  Route: {route}")
 
-            # Create temporary message with just this tool call for validation
-            temp_message = AIMessage(content="", tool_calls=[standardized_tool_call])
+            # Determine destination node
+            destination = self._get_node_for_route(route)
+            logger.debug(f"  Destination: {destination}")
+
+            # Check if should skip validation for direct routes
+            if route in self.direct_node_routes:
+                logger.debug(
+                    f"  [bold green]✓ Direct route - skipping validation[/bold green]"
+                )
+                destinations.add(destination)
+                continue
+
+            # Validate the tool call
+            logger.debug(f"  [bold blue]Running validation[/bold blue]")
+
+            # Create temporary message for validation
+            temp_message = AIMessage(content="", tool_calls=[tool_call])
             temp_messages = messages[:-1] + [temp_message]
 
-            logger.debug(
-                f"Created temp message list with {len(temp_messages)} messages"
-            )
-
-            # Create validation node for this specific tool call
+            # Create validation node with both tools and schemas
+            # ValidationNode expects a combined list of tools and schemas
+            combined_schemas = list(validation_tools) + list(validation_schemas)
             validation_node = ValidationNode(
-                schemas=self.schemas,
+                schemas=combined_schemas,
                 format_error=self.format_error,
-                name=f"validate_{tool_name}",
             )
 
-            logger.debug(f"Running validation with {len(self.schemas)} schemas")
-
-            # Run validation on this specific tool call
-            validation_input = {"messages": temp_messages}
             try:
-                result = validation_node.invoke(validation_input)
+                # Run validation
+                result = validation_node.invoke({"messages": temp_messages})
                 validated_messages = result.get("messages", [])
 
-                logger.info(
-                    f"Validation completed - got {len(validated_messages)} messages back"
-                )
-
-                # Extract the ToolMessage from validation
-                validated_tool_msg = None
+                # Check for validation errors
+                error_found = False
                 for msg in validated_messages:
                     if isinstance(msg, ToolMessage) and msg.name == tool_name:
-                        validated_tool_msg = msg
-                        logger.debug(f"Found validated ToolMessage for {tool_name}")
-                        logger.debug(
-                            f"  Tool message content: {validated_tool_msg.content}"
-                        )
-                        logger.debug(
-                            f"  Tool message ID: {validated_tool_msg.tool_call_id}"
-                        )
+                        if has_tool_error(msg):
+                            logger.warning(
+                                f"  [bold red]✗ Validation error for {tool_name}[/bold red]"
+                            )
+                            error_found = True
+                            has_errors = True
+                        else:
+                            logger.info(
+                                f"  [bold green]✓ Validation passed[/bold green]"
+                            )
                         break
 
-                # Check if this specific tool call has validation errors
-                has_error = validated_tool_msg and has_tool_error(validated_tool_msg)
-
-                validation_result = {
-                    "tool_name": tool_name,
-                    "has_error": has_error,
-                    "message_count": len(validated_messages),
-                }
-
-                if has_error:
-                    # This tool call has a validation error
-                    logger.error(f"Validation error detected for {tool_name}")
-                    all_valid = False
-                    if validated_tool_msg:
-                        error_messages.append(validated_tool_msg)
-                        # FIXED: Still add error messages to tracked list
-                        all_validated_tool_messages.append(validated_tool_msg)
-                        logger.error(
-                            f"Error in tool [{tool_name}]: {validated_tool_msg.content}"
-                        )
-                        validation_result["error_content"] = str(
-                            validated_tool_msg.content
-                        )[:100]
-                else:
-                    # This tool call is valid
-                    if validated_tool_msg:
-                        # FIXED: Add to tracked tool messages
-                        all_validated_tool_messages.append(validated_tool_msg)
-                        logger.info(
-                            f"Added validated ToolMessage for {tool_name} to tracking list"
-                        )
-
-                    # Group by destination
-                    destination = self._get_node_for_route(route)
-
-                    logger.info(f"Tool {tool_name} is valid")
-                    logger.info(f"Route: {route} -> Destination: {destination}")
-
-                    if destination not in tool_groups:
-                        tool_groups[destination] = []
-
-                    # Find the actual tool/schema class
-                    tool_class = tool_name_mapping.get(tool_name)
-                    if not tool_class:
-                        logger.warning(f"Could not find tool class for {tool_name}")
-                        # As a fallback, check if it's in schemas or tools directly
-                        for schema in self.schemas:
-                            if (
-                                getattr(schema, "__name__", None) == tool_name
-                                or getattr(schema, "name", None) == tool_name
-                            ):
-                                tool_class = schema
-                                break
-
-                    tool_groups[destination].append(
-                        {
-                            "tool_call": standardized_tool_call,
-                            "tool_name": tool_name,
-                            "tool_class": tool_class,
-                            "route": route,
-                            "tool_message": validated_tool_msg,
-                        }
-                    )
-
-                    validation_result.update(
-                        {
-                            "route": route,
-                            "destination": destination,
-                            "group_size": len(tool_groups[destination]),
-                        }
-                    )
-
-                    logger.info(
-                        f"Grouped tool [{tool_name}] with route [{route}] for destination [{destination}]"
-                    )
-
-                validation_results.append(validation_result)
+                if not error_found:
+                    destinations.add(destination)
 
             except Exception as e:
-                # Handle unexpected errors during validation
-                logger.exception(f"Error validating {tool_name}: {str(e)}")
-                all_valid = False
-                validation_results.append(
-                    {
-                        "tool_name": tool_name,
-                        "has_error": True,
-                        "error_content": f"Exception: {str(e)}",
-                    }
+                logger.exception(
+                    f"[bold red]Validation exception for {tool_name}:[/bold red] {e}"
                 )
+                has_errors = True
 
-        # Display validation summary
-        logger.info("-" * 60)
-        logger.info("VALIDATION SUMMARY")
-        logger.info("-" * 60)
+        # Determine routing based on results
+        logger.info(f"\n[bold blue]Routing decision:[/bold blue]")
+        logger.info(f"  Destinations: {destinations}")
+        logger.info(f"  Has errors: {has_errors}")
 
-        for result in validation_results:
-            status = "ERROR" if result["has_error"] else "VALID"
-            if result.get("skipped_validation"):
-                status = "SKIPPED"
-
-            route = result.get("route", "N/A")
-            dest = result.get("destination", "N/A")
-            details = result.get(
-                "error_content", f"Group size: {result.get('group_size', 'N/A')}"
-            )
-
-            logger.info(
-                f"{result['tool_name']}: {status} | Route: {route} | Dest: {dest} | {details}"
-            )
-
-        # Log tool groups
-        if tool_groups:
-            logger.info(f"Tool Groups ({len(tool_groups)} destinations):")
-            for dest, tools in tool_groups.items():
-                tool_names = [t["tool_name"] for t in tools]
-                logger.info(f"  {dest}: {tool_names}")
-
-        # FIXED: Update state with ALL validated ToolMessages before routing
-        logger.info("-" * 60)
-        logger.info("UPDATING STATE WITH TOOL MESSAGES")
-        logger.info("-" * 60)
-
-        updated_messages = messages.copy()
-
-        # Add all validated tool messages to state
-        if all_validated_tool_messages:
-            logger.info(
-                f"Adding {len(all_validated_tool_messages)} ToolMessages to state"
-            )
-            for tool_msg in all_validated_tool_messages:
-                logger.debug(
-                    f"  Adding ToolMessage: {tool_msg.name} (ID: {tool_msg.tool_call_id})"
-                )
-            updated_messages.extend(all_validated_tool_messages)
-        else:
-            logger.warning("No validated tool messages to add to state!")
-
-        # Create base update with the messages including ToolMessages
-        base_update = {self.messages_key: updated_messages}
-
-        # Handle routing based on validation results
-        logger.info("-" * 60)
-        logger.info("ROUTING DECISION")
-        logger.info("-" * 60)
-
-        if not all_valid and not tool_groups:
-            # All tools had validation errors - route back to agent
-            logger.warning("All tool calls failed validation, returning to agent")
-
-            validated_agent_node = self.validate_node_exists(self.agent_node)
-            return Command(update=base_update, goto=validated_agent_node)
-
-        elif not all_valid and tool_groups:
-            # Mixed results - execute valid tools but log warnings
+        # If all validations failed, return to agent
+        if has_errors and not destinations:
             logger.warning(
-                f"Mixed validation results - executing {len(tool_groups)} valid groups, some tools failed"
+                f"[bold yellow]All validations failed - routing to:[/bold yellow] has_errors"
             )
+            return "has_errors"
 
-        # If we have valid tools, determine routing strategy
-        if len(tool_groups) == 1:
-            # All valid tools go to the same destination - simple case
-            destination = list(tool_groups.keys())[0]
-            tools_for_dest = tool_groups[destination]
+        # Route to appropriate destination(s)
+        if not destinations:
+            logger.warning("[bold yellow]No valid destinations found[/bold yellow]")
+            return END
 
-            logger.info(f"Single destination routing to: {destination}")
-            logger.info(
-                f"Tools for {destination}: {[t['tool_name'] for t in tools_for_dest]}"
-            )
+        # Convert destinations to list for consistent return type
+        destinations_list = list(destinations)
 
-            if destination == self.parser_node:
-                # For parser node, we need to send each tool individually
-                logger.info("Creating individual sends for parser node")
-                sends = []
-                for tool_info in tools_for_dest:
-                    if tool_info.get("tool_message") and tool_info.get("tool_class"):
-                        send_obj = Send(
-                            node=destination,
-                            arg={
-                                "tool_name": tool_info["tool_name"],
-                                "tool": tool_info["tool_class"],
-                                "tool_call": tool_info["tool_call"],
-                                "tool_message": tool_info["tool_message"],
-                                self.messages_key: updated_messages,  # Use updated messages
-                            },
-                        )
-                        sends.append(send_obj)
-                        logger.debug(
-                            f"Created send for {tool_info['tool_name']} with tool class"
-                        )
-                    else:
-                        if not tool_info.get("tool_message"):
-                            logger.error(
-                                f"No validated message found for {tool_info['tool_name']}"
-                            )
-                        if not tool_info.get("tool_class"):
-                            logger.error(
-                                f"No tool class found for {tool_info['tool_name']}"
-                            )
-
-                logger.info(f"Returning {len(sends)} Send objects for parser node")
-                return sends
-
-            else:
-                # For other nodes, update state and goto
-                logger.info(f"Returning Command with goto={destination}")
-                return Command(update=base_update, goto=destination)
-
+        if len(destinations_list) == 1:
+            destination = destinations_list[0]
+            logger.info(f"[bold green]✓ Single destination:[/bold green] {destination}")
+            return destination
         else:
-            # Multiple destinations - need to send to each
-            logger.info(f"Multi-destination routing to {len(tool_groups)} destinations")
-            sends = []
-
-            for destination, tools_for_dest in tool_groups.items():
-                logger.info(f"Processing destination: {destination}")
-
-                if destination == self.parser_node:
-                    # Parser node needs individual sends
-                    logger.debug(
-                        f"Creating individual sends for parser ({len(tools_for_dest)} tools)"
-                    )
-                    for tool_info in tools_for_dest:
-                        if tool_info.get("tool_message") and tool_info.get(
-                            "tool_class"
-                        ):
-                            send_obj = Send(
-                                node=destination,
-                                arg={
-                                    "tool_name": tool_info["tool_name"],
-                                    "tool": tool_info["tool_class"],
-                                    "tool_call": tool_info["tool_call"],
-                                    "tool_message": tool_info["tool_message"],
-                                    self.messages_key: updated_messages,  # Use updated messages
-                                },
-                            )
-                            sends.append(send_obj)
-                            logger.debug(
-                                f"Added send for {tool_info['tool_name']} with tool class"
-                            )
-                else:
-                    # For other nodes, send with updated messages
-                    send_obj = Send(
-                        node=destination,
-                        arg={self.messages_key: updated_messages},
-                    )
-                    sends.append(send_obj)
-                    logger.debug(f"Added send to {destination}")
-
             logger.info(
-                f"Returning {len(sends)} Send objects for multiple destinations"
+                f"[bold green]✓ Multiple destinations:[/bold green] {destinations_list}"
             )
-            return sends
+            return destinations_list
 
-        # Fallback case - no tool calls to route
-        logger.warning("No valid tool calls to route - returning END")
-        return END
+        logger.info(
+            "[bold magenta]=== ValidationNodeConfig Complete ===[/bold magenta]"
+        )

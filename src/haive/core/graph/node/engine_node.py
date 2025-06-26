@@ -1,5 +1,6 @@
 # src/haive/core/graph/node/engine_node.py
 
+from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 from langgraph.types import Command, RetryPolicy, Send
@@ -13,7 +14,7 @@ from haive.core.logging.rich_logger import LogLevel, get_logger
 
 # Get module logger
 logger = get_logger(__name__)
-logger.set_level(LogLevel.WARNING)
+logger.set_level(LogLevel.DEBUG)
 
 
 class EngineNodeConfig(NodeConfig):
@@ -31,49 +32,195 @@ class EngineNodeConfig(NodeConfig):
     # Options
     retry_policy: Optional[RetryPolicy] = Field(default=None)
     use_send: bool = Field(default=False)
-    debug: bool = Field(default=False)
+    debug: bool = Field(default=True)
 
     def __call__(
         self, state: StateLike, config: Optional[ConfigLike] = None
     ) -> Union[Command, Send]:
         """Execute engine node with intelligent I/O handling."""
+        logger.info("=" * 80)
+        logger.info(f"ENGINE NODE EXECUTION: {self.name}")
+        logger.info("=" * 80)
+
         with logger.track_time(f"Executing node {self.name}"):
             try:
                 # Get engine and validate
-                engine = self._get_engine()
+                logger.info("Step 1: Getting Engine")
+                engine = self._get_engine(state)
                 if not engine:
+                    logger.error(f"No engine available for node '{self.name}'")
+                    logger.error(f"  engine_name: {self.engine_name}")
+                    logger.error(f"  direct engine: {self.engine}")
                     raise ValueError(f"No engine available for node '{self.name}'")
 
+                logger.info(
+                    f"✅ Got engine: {engine.name} (type: {engine.engine_type.value})"
+                )
+
                 # Extract input intelligently
+                logger.info("Step 2: Extracting Input")
                 input_data = self._extract_smart_input(state, engine)
 
+                logger.debug(f"Input data type: {type(input_data).__name__}")
+                if isinstance(input_data, dict):
+                    logger.debug(f"Input keys: {list(input_data.keys())}")
+                    for key, value in input_data.items():
+                        logger.debug(
+                            f"  {key}: {type(value).__name__} = {str(value)[:100]}..."
+                        )
+                else:
+                    logger.debug(f"Input value: {str(input_data)[:200]}...")
+
                 # Execute with merged config
+                logger.info("Step 3: Executing Engine")
                 result = self._execute_with_config(engine, input_data, config)
 
+                # Log result details
+                logger.debug(f"Result type: {type(result).__name__}")
+                self._log_result_details(result)
+
                 # Wrap result intelligently
-                return self._wrap_smart_result(result, state, engine)
+                logger.info("Step 4: Creating Update")
+                wrapped = self._wrap_smart_result(result, state, engine)
+
+                # Log final update
+                self._log_final_update(wrapped)
+
+                logger.info(f"✅ ENGINE NODE COMPLETED: {self.name}")
+
+                return wrapped
 
             except Exception as e:
                 self._log_error(e)
                 raise
 
-    def _get_engine(self) -> Optional[Engine]:
-        """Get engine from direct reference or registry."""
+    def _get_engine(self, state: Optional[StateLike] = None) -> Optional[Engine]:
+        """Get engine from direct reference or state's engines dict."""
+        logger.debug("Getting engine...")
+
+        # Priority 1: Direct engine reference
         if self.engine:
+            logger.debug(f"Using direct engine reference: {self.engine.name}")
             return self.engine
 
-        if self.engine_name:
-            engine = self._lookup_engine(self.engine_name)
-            if engine:
-                self.engine = engine  # Cache it
-                return engine
+        # Priority 2: Get from state's engines dict using engine_name
+        if self.engine_name and state:
+            logger.debug(f"Looking for engine_name: {self.engine_name}")
 
+            # Try to get from engines dict in state
+            if hasattr(state, "engines"):
+                engines_dict = getattr(state, "engines", {})
+                logger.debug(
+                    f"Found state.engines dict with {len(engines_dict)} engines"
+                )
+
+                if isinstance(engines_dict, dict):
+                    # Log available engines
+                    if engines_dict:
+                        logger.debug("Available engines in state:")
+                        for name, eng in engines_dict.items():
+                            logger.debug(f"  - {name}: {type(eng).__name__}")
+
+                    if self.engine_name in engines_dict:
+                        engine = engines_dict[self.engine_name]
+                        if engine:
+                            logger.info(
+                                f"✅ Found engine '{self.engine_name}' in state.engines!"
+                            )
+                            self.engine = engine  # Cache it
+                            return engine
+                        else:
+                            logger.error(
+                                f"Engine '{self.engine_name}' exists but is None"
+                            )
+                    else:
+                        logger.error(
+                            f"Engine '{self.engine_name}' not found in state.engines"
+                        )
+                        logger.error(f"Available engines: {list(engines_dict.keys())}")
+                else:
+                    logger.error(f"state.engines is not a dict: {type(engines_dict)}")
+            else:
+                logger.debug("State has no 'engines' attribute")
+
+                # Also check if state is a dict with engines key
+                if isinstance(state, dict) and "engines" in state:
+                    logger.debug("State is a dict, checking state['engines']...")
+                    engines_dict = state["engines"]
+                    if (
+                        isinstance(engines_dict, dict)
+                        and self.engine_name in engines_dict
+                    ):
+                        engine = engines_dict[self.engine_name]
+                        if engine:
+                            logger.info(
+                                f"✅ Found engine '{self.engine_name}' in state['engines']!"
+                            )
+                            self.engine = engine  # Cache it
+                            return engine
+
+        logger.error("No engine found!")
         return None
+
+    def _log_result_details(self, result: Any):
+        """Log details about the result."""
+        try:
+            from langchain_core.messages import AIMessage, BaseMessage
+
+            if isinstance(result, BaseMessage):
+                logger.info(f"✅ Result is a {type(result).__name__}")
+                logger.debug(f"  Content: {result.content[:200]}...")
+
+                if isinstance(result, AIMessage) and hasattr(result, "tool_calls"):
+                    if result.tool_calls:
+                        logger.debug(f"  Tool Calls: {len(result.tool_calls)}")
+        except ImportError:
+            pass
+
+        if isinstance(result, dict):
+            logger.debug("Result is a dictionary:")
+            for key, value in result.items():
+                logger.debug(f"  {key}: {type(value).__name__}")
+        elif isinstance(result, str):
+            logger.debug(f"Result is string: {result[:200]}...")
+        else:
+            logger.debug(f"Result: {str(result)[:200]}...")
+
+    def _log_final_update(self, wrapped: Union[Command, Send]):
+        """Log the final wrapped update."""
+        logger.info("Final Update:")
+
+        if isinstance(wrapped, Command):
+            logger.info(f"  Type: Command")
+            logger.info(f"  Goto: {wrapped.goto}")
+
+            if wrapped.update:
+                logger.debug("  Update dict:")
+                for key, value in wrapped.update.items():
+                    if key == "messages":
+                        if isinstance(value, list):
+                            logger.debug(f"    {key}: List with {len(value)} messages")
+                            if value:
+                                last_msg = value[-1]
+                                logger.debug(
+                                    f"      Last message type: {type(last_msg).__name__}"
+                                )
+                        else:
+                            logger.debug(f"    {key}: {type(value).__name__}")
+                    else:
+                        logger.debug(f"    {key}: {str(value)[:100]}...")
+        elif isinstance(wrapped, Send):
+            logger.info(f"  Type: Send")
+            logger.info(f"  Node: {wrapped.node}")
+            logger.debug(f"  Arg type: {type(wrapped.arg).__name__}")
 
     def _extract_smart_input(self, state: StateLike, engine: Engine) -> Any:
         """Extract input using the most appropriate strategy."""
+        logger.debug(f"Extracting input for {engine.engine_type.value} engine...")
+
         # Strategy 1: Explicit mapping
         if self.input_fields:
+            logger.debug("Using explicit input field mapping")
             return self._extract_mapped_input(
                 state, self._normalize_mapping(self.input_fields)
             )
@@ -81,25 +228,31 @@ class EngineNodeConfig(NodeConfig):
         # Strategy 2: Schema-defined inputs
         schema_inputs = self._get_schema_inputs(state, engine.name)
         if schema_inputs:
+            logger.debug(f"Using schema-defined inputs: {schema_inputs}")
             return self._extract_typed_input(state, schema_inputs, engine.engine_type)
 
         # Strategy 3: Engine-defined inputs
         engine_inputs = self._get_engine_inputs(engine)
         if engine_inputs:
+            logger.debug(f"Using engine-defined inputs: {engine_inputs}")
             return self._extract_typed_input(state, engine_inputs, engine.engine_type)
 
         # Strategy 4: Type-based defaults
+        logger.debug("Using type-based default extraction")
         return self._extract_default_input(state, engine.engine_type)
 
     def _extract_typed_input(
         self, state: StateLike, fields: List[str], engine_type: EngineType
     ) -> Dict[str, Any]:
         """Extract fields with type-specific intelligence."""
+        logger.debug(f"Extracting typed input for {engine_type.value}")
+
         extractors = {
             EngineType.RETRIEVER: self._extract_retriever_fields,
             EngineType.LLM: self._extract_llm_fields,
             EngineType.VECTOR_STORE: self._extract_vectorstore_fields,
             EngineType.EMBEDDINGS: self._extract_embeddings_fields,
+            EngineType.AGENT: self._extract_agent_fields,
         }
 
         extractor = extractors.get(engine_type, self._extract_generic_fields)
@@ -109,6 +262,7 @@ class EngineNodeConfig(NodeConfig):
         self, state: StateLike, fields: List[str]
     ) -> Dict[str, Any]:
         """Retriever-specific extraction: always include query, filter None values."""
+        logger.debug("Extracting retriever fields")
         input_data = {}
 
         for field in fields:
@@ -131,12 +285,16 @@ class EngineNodeConfig(NodeConfig):
         self, state: StateLike, fields: List[str]
     ) -> Dict[str, Any]:
         """LLM-specific extraction: include all fields."""
-        return {field: self._get_state_value(state, field) for field in fields}
+        logger.debug("Extracting LLM fields")
+        result = {field: self._get_state_value(state, field) for field in fields}
+        logger.debug(f"LLM input fields: {list(result.keys())}")
+        return result
 
     def _extract_vectorstore_fields(
         self, state: StateLike, fields: List[str]
     ) -> Dict[str, Any]:
         """Vector store extraction: filter None values except query."""
+        logger.debug("Extracting vector store fields")
         input_data = {}
         for field in fields:
             value = self._get_state_value(state, field)
@@ -146,20 +304,48 @@ class EngineNodeConfig(NodeConfig):
 
     def _extract_embeddings_fields(self, state: StateLike, fields: List[str]) -> Any:
         """Embeddings extraction: often just needs text."""
+        logger.debug("Extracting embeddings fields")
         # Try to get text/query field first
         for field in ["query", "text", "content"]:
             if field in fields:
                 value = self._get_state_value(state, field)
                 if value:
+                    logger.debug(
+                        f"Using {field} field for embeddings: {str(value)[:100]}..."
+                    )
                     return value
 
         # Fall back to all fields as dict
         return {field: self._get_state_value(state, field) for field in fields}
 
+    def _extract_agent_fields(
+        self, state: StateLike, fields: List[str]
+    ) -> Dict[str, Any]:
+        """Agent-specific extraction: include all fields, prioritize messages."""
+        logger.debug("Extracting agent fields")
+        result = {}
+
+        # Always include messages if it's in the fields
+        if "messages" in fields:
+            messages = self._get_state_value(state, "messages", [])
+            result["messages"] = messages
+            logger.debug(f"Agent messages: {len(messages) if messages else 0} messages")
+
+        # Include all other fields
+        for field in fields:
+            if field != "messages":  # Already handled
+                value = self._get_state_value(state, field)
+                if value is not None:
+                    result[field] = value
+                    logger.debug(f"Agent {field}: {type(value).__name__}")
+
+        return result
+
     def _extract_generic_fields(
         self, state: StateLike, fields: List[str]
     ) -> Dict[str, Any]:
         """Generic extraction: include non-None values."""
+        logger.debug("Extracting generic fields")
         return {
             field: value
             for field in fields
@@ -168,6 +354,8 @@ class EngineNodeConfig(NodeConfig):
 
     def _extract_default_input(self, state: StateLike, engine_type: EngineType) -> Any:
         """Default extraction when no fields are specified."""
+        logger.debug(f"Using default extraction for {engine_type.value}")
+
         defaults = {
             EngineType.RETRIEVER: lambda: self._extract_retriever_fields(
                 state, ["query", "k", "filter", "search_type", "score_threshold"]
@@ -179,6 +367,9 @@ class EngineNodeConfig(NodeConfig):
                 state, ["query", "k", "filter"]
             ),
             EngineType.EMBEDDINGS: lambda: self._get_state_value(state, "query", ""),
+            EngineType.AGENT: lambda: self._state_as_dict(
+                state
+            ),  # Agents typically need full state
         }
 
         extractor = defaults.get(engine_type, lambda: self._state_as_dict(state))
@@ -188,8 +379,11 @@ class EngineNodeConfig(NodeConfig):
         self, result: Any, state: StateLike, engine: Engine
     ) -> Union[Command, Send]:
         """Intelligently wrap result based on type and configuration."""
+        logger.debug("Wrapping result...")
+
         # Already wrapped? Return as-is
         if isinstance(result, (Command, Send)):
+            logger.debug("Result already wrapped, returning as-is")
             return result
 
         # Generate update dictionary
@@ -197,36 +391,67 @@ class EngineNodeConfig(NodeConfig):
 
         # Return appropriate wrapper
         if self.use_send and self.command_goto:
+            logger.debug(f"Creating Send to {self.command_goto}")
             return Send(node=self.command_goto, arg=update)
         else:
+            logger.debug(f"Creating Command with goto={self.command_goto}")
             return Command(update=update, goto=self.command_goto)
 
     def _create_update_dict(
         self, result: Any, state: StateLike, engine: Engine
     ) -> Dict[str, Any]:
         """Create state update dictionary from result."""
+        logger.debug("Creating update dictionary...")
+
         # Strategy 1: Explicit output mapping
         if self.output_fields:
+            logger.debug("Using explicit output field mapping")
             return self._apply_output_mapping(result)
 
         # Strategy 2: Schema-defined outputs
         schema_outputs = self._get_schema_outputs(state, engine.name)
         if schema_outputs:
+            logger.debug(f"Using schema-defined outputs: {schema_outputs}")
             return self._map_to_outputs(result, schema_outputs)
 
         # Strategy 3: Smart type-based mapping
+        logger.debug("Using smart type-based result mapping")
         return self._smart_result_mapping(result, state, engine.engine_type)
 
     def _smart_result_mapping(
         self, result: Any, state: StateLike, engine_type: EngineType
     ) -> Dict[str, Any]:
         """Smart result mapping based on result type and engine type."""
-        # Message results go to messages
+        logger.debug(f"Smart result mapping for {engine_type.value} engine...")
+
+        # Check if it's a message first
         if self._is_message_like(result):
+            logger.info("✅ Result is message-like, updating messages")
             return self._update_messages(result, state)
+
+        # Check if it's a string that might be a response from LLM
+        if isinstance(result, str) and engine_type == EngineType.LLM:
+            logger.info(
+                "LLM returned string, converting to AIMessage and updating messages"
+            )
+            try:
+                from langchain_core.messages import AIMessage
+
+                ai_msg = AIMessage(content=result)
+                return self._update_messages(ai_msg, state)
+            except ImportError:
+                logger.error("Could not import AIMessage")
+
+        # Agent results are typically full state updates
+        if engine_type == EngineType.AGENT and isinstance(result, dict):
+            logger.info("Agent returned dict state update")
+            return result
 
         # Dictionary results
         if isinstance(result, dict):
+            logger.debug("Result is dict, returning as-is")
+            if "messages" in result:
+                logger.debug("Dict contains 'messages' key")
             return result
 
         # Engine-specific single value mapping
@@ -235,24 +460,54 @@ class EngineNodeConfig(NodeConfig):
             EngineType.LLM: "response",
             EngineType.EMBEDDINGS: "embeddings",
             EngineType.VECTOR_STORE: "documents",
+            EngineType.AGENT: "agent_output",  # Generic field for agent outputs
         }
 
         field = field_map.get(engine_type, "result")
+        logger.debug(f"Mapping result to field: {field}")
         return {field: result}
 
     def _update_messages(self, result: Any, state: StateLike) -> Dict[str, Any]:
         """Update messages list with new message(s)."""
+        logger.info("Updating messages list...")
+
+        # Get existing messages
         existing = self._get_state_value(state, "messages", [])
+        logger.debug(f"Existing messages: {len(existing) if existing else 0}")
+
+        # Create new list
         messages = list(existing) if existing else []
 
+        # Add new messages
         if isinstance(result, list):
             messages.extend(result)
+            logger.debug(f"Added {len(result)} messages")
         else:
             messages.append(result)
+            logger.debug(f"Added 1 message: {type(result).__name__}")
+
+        logger.info(f"✅ Total messages after update: {len(messages)}")
 
         return {"messages": messages}
 
-    # Utility methods
+    def _is_message_like(self, obj: Any) -> bool:
+        """Check if object is message-like."""
+        try:
+            from langchain_core.messages import BaseMessage
+
+            is_msg = isinstance(obj, BaseMessage)
+            if is_msg:
+                logger.debug(f"✅ Object is a BaseMessage: {type(obj).__name__}")
+            return is_msg
+        except ImportError:
+            logger.debug("Could not import BaseMessage, checking attributes")
+            has_attrs = hasattr(obj, "content") and hasattr(obj, "type")
+            if has_attrs:
+                logger.debug("Object has message-like attributes")
+            return has_attrs
+
+    # ... rest of utility methods remain the same ...
+
     def _get_state_value(self, state: StateLike, key: str, default: Any = None) -> Any:
         """Get value from state with fallback."""
         if hasattr(state, key):
@@ -295,6 +550,7 @@ class EngineNodeConfig(NodeConfig):
         self, state: StateLike, mapping: Dict[str, str]
     ) -> Dict[str, Any]:
         """Extract using explicit state->input mapping."""
+        logger.debug(f"Extracting with mapping: {mapping}")
         return {
             input_key: self._get_state_value(state, state_key)
             for state_key, input_key in mapping.items()
@@ -304,6 +560,7 @@ class EngineNodeConfig(NodeConfig):
     def _apply_output_mapping(self, result: Any) -> Dict[str, Any]:
         """Apply explicit output mapping."""
         mapping = self._normalize_mapping(self.output_fields)
+        logger.debug(f"Applying output mapping: {mapping}")
 
         if isinstance(result, dict):
             return {
@@ -313,8 +570,10 @@ class EngineNodeConfig(NodeConfig):
             }
         else:
             # Single value to first mapped field
-            first_state_key = next(iter(mapping.values()))
-            return {first_state_key: result}
+            if mapping:
+                first_state_key = next(iter(mapping.values()))
+                return {first_state_key: result}
+            return {"result": result}
 
     def _map_to_outputs(self, result: Any, output_fields: List[str]) -> Dict[str, Any]:
         """Map result to schema output fields."""
@@ -331,22 +590,14 @@ class EngineNodeConfig(NodeConfig):
         """Execute engine with merged configuration."""
         merged_config = self._build_merged_config(config, engine)
 
-        # Log execution details in debug mode
-        if self.debug or logger.is_debug_mode():
-            logger.debug_table(
-                "_execute_with_config",
-                {
-                    "Engine": engine.name,
-                    "Engine Type": getattr(engine, "engine_type", "unknown"),
-                    "Input Type": type(input_data).__name__,
-                    "Input Data": input_data,
-                    "Config": merged_config,
-                },
-            )
+        # Log execution details
+        logger.debug(f"Executing engine: {engine.name}")
+        logger.debug(f"Engine type: {getattr(engine, 'engine_type', 'unknown')}")
+        logger.debug(f"Input type: {type(input_data).__name__}")
 
         # Special handling for retrievers - they need string queries
         if hasattr(engine, "engine_type") and engine.engine_type.value == "retriever":
-            logger.debug("RETRIEVER DETECTED - Special handling")
+            logger.info("RETRIEVER DETECTED - Special handling")
 
             if isinstance(input_data, dict):
                 if "query" in input_data:
@@ -394,16 +645,6 @@ class EngineNodeConfig(NodeConfig):
 
         return config
 
-    def _lookup_engine(self, name: str) -> Optional[Engine]:
-        """Lookup engine in registry."""
-        try:
-            from haive.core.engine.base import EngineRegistry
-
-            return EngineRegistry.get_instance().find(name)
-        except ImportError:
-            logger.warning(f"Could not import EngineRegistry for {name}")
-            return None
-
     def _normalize_mapping(
         self, fields: Optional[Union[List[str], Dict[str, str]]]
     ) -> Dict[str, str]:
@@ -423,15 +664,6 @@ class EngineNodeConfig(NodeConfig):
         else:
             return {"value": state}
 
-    def _is_message_like(self, obj: Any) -> bool:
-        """Check if object is message-like."""
-        try:
-            from langchain_core.messages import BaseMessage
-
-            return isinstance(obj, BaseMessage)
-        except ImportError:
-            return hasattr(obj, "content") and hasattr(obj, "type")
-
     def _log_error(self, error: Exception) -> None:
         """Log error with full context."""
         logger.log_exception(error, f"Engine node '{self.name}' failed")
@@ -440,3 +672,38 @@ class EngineNodeConfig(NodeConfig):
         """Clean string representation."""
         engine_ref = self.engine.name if self.engine else self.engine_name or "None"
         return f"EngineNode(name='{self.name}', engine='{engine_ref}')"
+
+
+# Factory function for creating appropriate node configs
+def create_engine_node_config(engine: Engine, name: str, **kwargs) -> NodeConfig:
+    """
+    Factory function to create appropriate node config based on engine type.
+
+    Routes agents to AgentNodeConfig if available, otherwise uses EngineNodeConfig.
+
+    Args:
+        engine: The engine to create a node for
+        name: Name for the node
+        **kwargs: Additional configuration parameters
+
+    Returns:
+        Appropriate NodeConfig subclass instance
+    """
+    # Check if it's an agent
+    if hasattr(engine, "engine_type") and engine.engine_type == EngineType.AGENT:
+        try:
+            # Try to import AgentNodeConfig
+            from haive.core.graph.node.agent_node import AgentNodeConfig
+
+            logger.debug(f"Creating AgentNodeConfig for agent: {name}")
+            return AgentNodeConfig(name=name, engine=engine, **kwargs)
+        except ImportError:
+            # Fall back to regular EngineNodeConfig
+            logger.debug(
+                "AgentNodeConfig not available, using EngineNodeConfig for agent"
+            )
+
+    # Default to EngineNodeConfig
+    return EngineNodeConfig(
+        name=name, engine=engine, node_type=NodeType.ENGINE, **kwargs
+    )

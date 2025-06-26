@@ -41,6 +41,7 @@ class NodeType(str, Enum):
     TOOL = "tool"  # Tool nodes for handling tool calls
     VALIDATION = "validation"  # Validation nodes for schema validation
     # BRANCH = "branch"  # Branch nodes for conditional routing
+    AGENT = "agent"  # Agent nodes for agent-specific behavior
 
     # Message handling nodes
     MESSAGE_TRANSFORMER = "message_transformer"
