@@ -1,8 +1,34 @@
-"""
-Secure configuration mixin for API credentials.
+"""Secure configuration mixin for API credentials.
 
 This module provides a mixin for secure handling of API credentials
-with environment variable fallbacks and validation logic.
+with environment variable fallbacks and validation logic. It enables
+automatic resolution of API keys from environment variables based on
+the provider type, with proper secure storage using Pydantic's SecretStr.
+
+Usage:
+    ```python
+    from pydantic import BaseModel, Field
+    from typing import Optional
+    from haive.core.common.mixins import SecureConfigMixin
+
+    class APIConfig(SecureConfigMixin, BaseModel):
+        provider: str = Field(default="openai")
+        api_key: Optional[SecretStr] = Field(default=None)
+
+        def make_api_call(self):
+            # Securely retrieve the API key
+            key = self.get_api_key()
+            if not key:
+                raise ValueError("No API key available")
+            # Use key for API call
+            # ...
+
+    # Will try to use OPENAI_API_KEY from environment
+    config = APIConfig(provider="openai")
+
+    # Will use the explicitly provided key
+    config = APIConfig(provider="anthropic", api_key="sk-ant-...")
+    ```
 """
 
 import logging
@@ -15,25 +41,40 @@ logger = logging.getLogger(__name__)
 
 
 class SecureConfigMixin:
-    """
-    A mixin to provide secure and flexible configuration for API keys.
+    """A mixin to provide secure and flexible configuration for API keys.
 
     This mixin enables:
     1. Dynamic API key resolution from multiple sources
     2. Secure storage using SecretStr
     3. Environment variable fallbacks based on provider type
     4. Validation and error reporting
+
+    The mixin implements a field validator for the 'api_key' field that
+    attempts to resolve the key from environment variables if not explicitly
+    provided, based on the 'provider' field. It also provides a safe
+    method to retrieve the key value with appropriate error handling.
+
+    Attributes:
+        api_key: A SecretStr containing the API key.
+        provider: The API provider name (used to determine environment variable).
     """
 
     @field_validator("api_key", mode="after")
     @classmethod
     def _validate_api_key(cls, v, values):
-        """
-        Dynamically set the API key with robust fallback mechanism.
+        """Dynamically set the API key with robust fallback mechanism.
 
+        This validator implements a priority-based resolution strategy:
         1. Use explicitly provided value
         2. Try environment variable based on provider
         3. Fall back to default/empty
+
+        Args:
+            v: The current value of the api_key field.
+            values: The values dict containing other fields.
+
+        Returns:
+            The resolved SecretStr containing the API key.
         """
         # If a value is already set and not empty, return it
         if v is not None and v != "":
@@ -104,11 +145,15 @@ class SecureConfigMixin:
         return SecretStr("")
 
     def get_api_key(self) -> Optional[str]:
-        """
-        Safely retrieve the API key with improved error handling.
+        """Safely retrieve the API key with improved error handling.
+
+        This method attempts to retrieve the API key value from the SecretStr
+        field, with comprehensive error handling and helpful log messages for
+        troubleshooting. In development environments, it can return fake test
+        keys for testing purposes.
 
         Returns:
-            Optional[str]: The API key value, or None if not set
+            The API key as a string, or None if not available or invalid.
         """
         try:
             # Check if api_key attribute exists and is not None
