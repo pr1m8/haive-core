@@ -28,6 +28,7 @@ class EngineType(str, Enum):
         DOCUMENT_TRANSFORMER (str): Engines for transforming document content.
         DOCUMENT_SPLITTER (str): Engines for splitting documents into chunks.
         OUTPUT_PARSER (str): Engines for parsing and structuring model outputs.
+        PROMPT (str): Engines for prompt template formatting and management.
 
     Examples:
         >>> from haive.core.engine.base.types import EngineType
@@ -48,3 +49,4 @@ class EngineType(str, Enum):
     DOCUMENT_TRANSFORMER = "document_transformer"
     DOCUMENT_SPLITTER = "document_splitter"
     OUTPUT_PARSER = "output_parser"
+    PROMPT = "prompt"
