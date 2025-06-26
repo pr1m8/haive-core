@@ -1,7 +1,37 @@
-import inspect
+"""Tool list mixin for managing LangChain tools.
 
-# Import our NamedDict
-# from haive.core.utils.collections import NamedDict
+This module provides a mixin that adds LangChain tool management capabilities
+to Pydantic models. It defines a ToolList class that manages various tool types
+with automatic expansion of toolkits, type tracking, and convenient querying.
+
+Usage:
+    ```python
+    from pydantic import BaseModel
+    from haive.core.common.mixins.tool_list_mixin import ToolListMixin
+    from langchain_core.tools import BaseTool, Tool
+
+    class MyAgent(ToolListMixin, BaseModel):
+        name: str
+
+        def run(self, query: str):
+            # Access tools by name
+            calculator = self.tools.get_tool("calculator")
+            result = calculator.run(query)
+            return result
+
+    # Create tools
+    search_tool = Tool(name="search", func=lambda x: f"Searched for {x}")
+    calculator = Tool(name="calculator", func=lambda x: f"Calculated {x}")
+
+    # Create agent with tools
+    agent = MyAgent(name="MyAgent", tools=[search_tool, calculator])
+
+    # Get all tools of a specific type
+    base_tools = agent.tools.get_by_tool_type("base_tool_instance")
+    ```
+"""
+
+import inspect
 from typing import Any, Callable, Dict, List, Optional, Sequence, Type, Union
 
 from langchain_core.tools import BaseTool, BaseToolkit, StructuredTool
@@ -11,15 +41,20 @@ from haive.core.common.structures.named_dict import NamedDict
 
 
 class ToolList(NamedDict):
-    """
-    A collection of tools that inherits from NamedDict.
+    """A specialized collection for managing LangChain tools.
 
-    Provides specialized handling for:
+    This class extends NamedDict to provide comprehensive tool management
+    capabilities with specialized handling for different tool types:
     - BaseTool classes and instances
     - BaseToolkit instances (automatically expands tools)
     - StructuredTool instances
     - Pydantic BaseModel classes (kept as classes)
     - Callable functions
+
+    Attributes:
+        name_attrs: Attributes to check for tool names.
+        tool_types: Dictionary mapping tool names to their types.
+        tools: Sequence of tool objects for proper typing.
     """
 
     # Override default name attributes to include function names
@@ -50,6 +85,15 @@ class ToolList(NamedDict):
 
     # Add a custom __new__ method to handle positional arguments
     def __new__(cls, arg=None, **kwargs):
+        """Custom constructor to handle positional tool arguments.
+
+        Args:
+            arg: Optional positional argument (treated as tools if provided).
+            **kwargs: Keyword arguments for initialization.
+
+        Returns:
+            New ToolList instance.
+        """
         if arg is not None and not isinstance(arg, dict) and "tools" not in kwargs:
             kwargs["tools"] = arg
         return super().__new__(cls)
@@ -57,7 +101,18 @@ class ToolList(NamedDict):
     @model_validator(mode="before")
     @classmethod
     def process_tools(cls, data: Any) -> Any:
-        """Process tools input and expand toolkits."""
+        """Process tools input and expand toolkits.
+
+        This validator handles different tool input formats and expands
+        any toolkit instances into their component tools. It works with
+        both sequence inputs and dictionary inputs with a 'tools' key.
+
+        Args:
+            data: Input data for validation.
+
+        Returns:
+            Processed data with expanded tools.
+        """
         # If this is a sequence without proper names, convert to dictionary form
         if isinstance(data, (list, tuple)):
             # Expand toolkits and extract tools
@@ -118,7 +173,11 @@ class ToolList(NamedDict):
         return data
 
     def model_post_init(self, __context) -> None:
-        """Build tool type information after initialization."""
+        """Build tool type information after initialization.
+
+        This method runs after model initialization to set up the tool type
+        tracking system and process any toolkit tools.
+        """
         # Initialize tool_types
         self.tool_types = {}
 
@@ -134,14 +193,16 @@ class ToolList(NamedDict):
 
     @classmethod
     def _determine_tool_type(cls, tool: Any) -> str:
-        """
-        Determine the type of a tool.
+        """Determine the type of a tool.
+
+        This method analyzes a tool object and determines its type category
+        based on class hierarchy and instance type.
 
         Args:
-            tool: The tool to analyze
+            tool: The tool to analyze.
 
         Returns:
-            String representing tool type
+            String representing the tool type.
         """
         # Check tool instance types
         if isinstance(tool, BaseTool):
@@ -174,10 +235,11 @@ class ToolList(NamedDict):
         return "unknown"
 
     def _process_tool_types(self) -> None:
-        """
-        Process tools based on their types.
+        """Process tools based on their types.
 
-        Expands toolkits but keeps model classes as classes.
+        This method handles special tool types like toolkits by expanding
+        them into their component tools. It preserves model classes as classes
+        rather than instantiating them.
         """
         # Process toolkit classes and instances by expanding their tools
         for name, tool_type in list(self.tool_types.items()):
@@ -208,15 +270,17 @@ class ToolList(NamedDict):
         self.tools = list(self.values.values())
 
     def add(self, tool: Any, key: Optional[str] = None) -> str:
-        """
-        Add a tool with automatic or explicit key.
+        """Add a tool with automatic or explicit key.
+
+        This method adds a tool to the collection, automatically expanding
+        toolkits into their component tools.
 
         Args:
-            tool: Tool to add
-            key: Optional explicit key
+            tool: Tool to add.
+            key: Optional explicit key to use.
 
         Returns:
-            Key used for the tool
+            Key used for the tool.
         """
         # Handle toolkit by expanding its tools
         if isinstance(tool, BaseToolkit):
@@ -242,11 +306,13 @@ class ToolList(NamedDict):
         return tool_key
 
     def update(self, items: Any) -> None:
-        """
-        Update with new tools.
+        """Update with new tools.
+
+        This method adds multiple tools at once, handling both dictionary
+        and sequence inputs, and automatically expanding toolkits.
 
         Args:
-            items: Dictionary or sequence of tools
+            items: Dictionary or sequence of tools to add.
         """
         # Expand toolkits if this is a sequence
         if isinstance(items, (list, tuple)):
@@ -279,26 +345,24 @@ class ToolList(NamedDict):
         self._process_tool_types()
 
     def get_tool_type(self, name: str) -> Optional[str]:
-        """
-        Get type of a specific tool.
+        """Get type of a specific tool.
 
         Args:
-            name: Tool name
+            name: Tool name to look up.
 
         Returns:
-            Tool type string or None if not found
+            Tool type string or None if not found.
         """
         return self.tool_types.get(name)
 
     def get_by_tool_type(self, tool_type: str) -> List[Any]:
-        """
-        Get all tools of a specified type.
+        """Get all tools of a specified type.
 
         Args:
-            tool_type: Type to filter by
+            tool_type: Type to filter by.
 
         Returns:
-            List of tools matching the type
+            List of tools matching the type.
         """
         result = []
         for name, type_value in self.tool_types.items():
@@ -307,11 +371,10 @@ class ToolList(NamedDict):
         return result
 
     def get_tool_type_mapping(self) -> Dict[str, List[str]]:
-        """
-        Get mapping of tool types to tool names.
+        """Get mapping of tool types to tool names.
 
         Returns:
-            Dictionary mapping tool types to lists of tool names
+            Dictionary mapping tool types to lists of tool names.
         """
         result = {}
         for name, tool_type in self.tool_types.items():
@@ -321,26 +384,28 @@ class ToolList(NamedDict):
         return result
 
     def get_tool(self, name: str) -> Optional[Any]:
-        """
-        Get a tool by name.
+        """Get a tool by name.
 
         Args:
-            name: Tool name
+            name: Tool name to retrieve.
 
         Returns:
-            Tool if found, None otherwise
+            Tool if found, None otherwise.
         """
         return self.get(name)
 
     def get_tool_info(self, name: str) -> Dict[str, Any]:
-        """
-        Get comprehensive information about a tool.
+        """Get comprehensive information about a tool.
+
+        This method retrieves detailed information about a tool,
+        including its type, description, schema (if available),
+        and field information for model classes.
 
         Args:
-            name: Tool name
+            name: Tool name to look up.
 
         Returns:
-            Dictionary with tool information
+            Dictionary with tool information.
         """
         if name not in self.values:
             return {"found": False}
@@ -379,11 +444,10 @@ class ToolList(NamedDict):
         return info
 
     def get_model_classes(self) -> Dict[str, Type[BaseModel]]:
-        """
-        Get all model classes in the tool list.
+        """Get all model classes in the tool list.
 
         Returns:
-            Dictionary mapping name to model class
+            Dictionary mapping name to model class.
         """
         result = {}
         for name, tool_type in self.tool_types.items():
@@ -392,11 +456,10 @@ class ToolList(NamedDict):
         return result
 
     def get_model_instances(self) -> Dict[str, BaseModel]:
-        """
-        Get all model instances in the tool list.
+        """Get all model instances in the tool list.
 
         Returns:
-            Dictionary mapping name to model instance
+            Dictionary mapping name to model instance.
         """
         result = {}
         for name, tool_type in self.tool_types.items():
@@ -405,11 +468,10 @@ class ToolList(NamedDict):
         return result
 
     def get_tools_by_category(self) -> Dict[str, Dict[str, Any]]:
-        """
-        Get tools organized by category.
+        """Get tools organized by category.
 
         Returns:
-            Dictionary with tools grouped by type
+            Dictionary with tools grouped by type category.
         """
         categories = {
             "tools": {},  # BaseTool instances
@@ -434,16 +496,19 @@ class ToolList(NamedDict):
         return categories
 
     def to_list(self) -> List[Any]:
-        """
-        Convert to a simple list of tools.
+        """Convert to a simple list of tools.
 
         Returns:
-            List of all tools
+            List of all tool objects.
         """
         return list(self.values.values())
 
     def __delitem__(self, key: str) -> None:
-        """Delete tool by name."""
+        """Delete tool by name.
+
+        Args:
+            key: Name of the tool to delete.
+        """
         super().__delitem__(key)
 
         # Also cleanup tool_types
@@ -452,3 +517,18 @@ class ToolList(NamedDict):
 
         # Update tools list to match values
         self.tools = list(self.values.values())
+
+
+class ToolListMixin(BaseModel):
+    """Mixin that adds a ToolList for managing LangChain tools.
+
+    This mixin adds a tools attribute to any Pydantic model, providing
+    comprehensive tool management capabilities.
+
+    Attributes:
+        tools: A ToolList instance for managing tools.
+    """
+
+    tools: ToolList = Field(default_factory=ToolList, description="Collection of tools")
+
+    model_config = {"arbitrary_types_allowed": True}

@@ -1,4 +1,37 @@
-# haive/core/mixins/checkpointer.py
+"""Checkpointer mixin for stateful graphs and execution persistence.
+
+This module provides a mixin that adds checkpointing capabilities to any class
+that uses LangGraph or LangChain for stateful execution. It handles both
+synchronous and asynchronous checkpointing patterns, state restoration, and
+runtime configuration management.
+
+Usage:
+    ```python
+    from pydantic import BaseModel, Field
+    from langgraph.graph import StateGraph
+    from haive.core.common.mixins import CheckpointerMixin
+    from haive.core.persistence.config import CheckpointerConfig
+
+    class MyAgent(CheckpointerMixin, BaseModel):
+        # Define the required fields
+        persistence: Optional[CheckpointerConfig] = Field(default=None)
+        checkpoint_mode: str = Field(default="sync")
+
+        def __init__(self, **data):
+            super().__init__(**data)
+            # Create graph
+            builder = StateGraph(...)
+            self.app = builder.compile()
+
+        # Use run with automatic checkpointing
+        def process(self, input_data, thread_id=None):
+            return self.run(input_data, thread_id=thread_id)
+
+        # Use streaming with automatic checkpointing
+        def process_stream(self, input_data, thread_id=None):
+            return self.stream(input_data, thread_id=thread_id)
+    ```
+"""
 
 import asyncio
 import logging
@@ -8,7 +41,7 @@ from collections.abc import AsyncGenerator
 from typing import Any, Dict, Generator, Optional, Union
 
 from langchain_core.runnables import RunnableConfig
-from langgraph.graph import CompiledGraph
+from langgraph.graph.graph import CompiledGraph
 from pydantic import BaseModel, PrivateAttr
 
 from haive.core.config.runnable import RunnableConfigManager
@@ -24,14 +57,22 @@ logger = logging.getLogger(__name__)
 
 
 class CheckpointerMixin(BaseModel):
-    """
-    Mixin that provides checkpointing capabilities using existing CheckpointerConfig.
+    """Mixin that provides checkpointing capabilities for stateful graph execution.
 
-    This mixin assumes the class has:
-    - persistence: Optional[CheckpointerConfig]
-    - checkpoint_mode: str
-    - runnable_config: RunnableConfig
-    - input_schema, state_schema (optional)
+    This mixin adds methods for running stateful graph executions with
+    checkpointing support, including automatic state restoration, thread
+    management, and proper configuration handling for both synchronous and
+    asynchronous execution patterns.
+
+    The mixin expects the host class to provide:
+    - persistence: Optional[CheckpointerConfig] - Configuration for the checkpointer
+    - checkpoint_mode: str - Mode of checkpointing ("sync", "async", or "none")
+    - runnable_config: RunnableConfig - Base configuration for runnables
+    - input_schema, state_schema (optional) - Schemas for input and state validation
+    - app or compile() method - The LangGraph compiled application
+
+    Attributes:
+        None publicly, but requires the above attributes from the host class.
     """
 
     # Private attributes for runtime checkpointer instances (not serialized)
@@ -41,7 +82,11 @@ class CheckpointerMixin(BaseModel):
     _async_setup_pending: bool = PrivateAttr(default=False)
 
     def _ensure_checkpointer_initialized(self) -> None:
-        """Initialize checkpointers if not already done."""
+        """Initialize checkpointers if not already done.
+
+        This method creates the appropriate checkpointer instances
+        based on the persistence configuration and checkpoint mode.
+        """
         if self._checkpointer_initialized:
             return
 
@@ -63,7 +108,11 @@ class CheckpointerMixin(BaseModel):
         self._checkpointer_initialized = True
 
     async def _ensure_async_checkpointer_initialized(self) -> None:
-        """Initialize async checkpointer if needed."""
+        """Initialize async checkpointer if needed.
+
+        This method creates the asynchronous checkpointer instance
+        if async mode is enabled and setup is pending.
+        """
         if not self._async_setup_pending:
             return
 
@@ -81,7 +130,14 @@ class CheckpointerMixin(BaseModel):
         self._async_setup_pending = False
 
     def get_checkpointer(self, async_mode: bool = False) -> Any:
-        """Get the appropriate checkpointer."""
+        """Get the appropriate checkpointer.
+
+        Args:
+            async_mode: Whether to return the async checkpointer.
+
+        Returns:
+            The appropriate checkpointer instance or None if not available.
+        """
         self._ensure_checkpointer_initialized()
 
         if async_mode:
@@ -94,7 +150,19 @@ class CheckpointerMixin(BaseModel):
         config: Optional[RunnableConfig] = None,
         **kwargs,
     ) -> RunnableConfig:
-        """Prepare runnable config with thread management."""
+        """Prepare runnable config with thread management.
+
+        This method creates or merges runnable configurations with
+        appropriate thread management and checkpointing settings.
+
+        Args:
+            thread_id: Optional thread ID for the execution.
+            config: Optional base configuration to extend.
+            **kwargs: Additional configuration parameters.
+
+        Returns:
+            The prepared runnable configuration.
+        """
         # Get base config from the class
         base_config = getattr(self, "runnable_config", None)
 
@@ -148,7 +216,20 @@ class CheckpointerMixin(BaseModel):
         config: Optional[RunnableConfig] = None,
         **kwargs,
     ) -> Any:
-        """Run with checkpointer support."""
+        """Run with checkpointer support.
+
+        This method runs a graph execution with checkpointing support,
+        automatically handling state restoration and persistence.
+
+        Args:
+            input_data: The input data for the execution.
+            thread_id: Optional thread ID for state tracking.
+            config: Optional configuration override.
+            **kwargs: Additional configuration parameters.
+
+        Returns:
+            The result of the graph execution.
+        """
         self._ensure_checkpointer_initialized()
 
         # Get the compiled app - this should be implemented by the class using the mixin
@@ -200,7 +281,20 @@ class CheckpointerMixin(BaseModel):
         config: Optional[RunnableConfig] = None,
         **kwargs,
     ) -> Any:
-        """Async run with checkpointer support."""
+        """Async run with checkpointer support.
+
+        This method runs a graph execution asynchronously with checkpointing
+        support, automatically handling state restoration and persistence.
+
+        Args:
+            input_data: The input data for the execution.
+            thread_id: Optional thread ID for state tracking.
+            config: Optional configuration override.
+            **kwargs: Additional configuration parameters.
+
+        Returns:
+            The result of the graph execution.
+        """
         self._ensure_checkpointer_initialized()
         await self._ensure_async_checkpointer_initialized()
 
@@ -312,7 +406,21 @@ class CheckpointerMixin(BaseModel):
         config: Optional[RunnableConfig] = None,
         **kwargs,
     ) -> Generator[Dict[str, Any], None, None]:
-        """Stream with checkpointer support."""
+        """Stream with checkpointer support.
+
+        This method streams graph execution results with checkpointing support,
+        automatically handling state restoration and persistence.
+
+        Args:
+            input_data: The input data for the execution.
+            thread_id: Optional thread ID for state tracking.
+            stream_mode: The streaming mode to use (values, actions, etc.).
+            config: Optional configuration override.
+            **kwargs: Additional configuration parameters.
+
+        Returns:
+            A generator yielding execution chunks.
+        """
         self._ensure_checkpointer_initialized()
 
         # Get the compiled app
@@ -365,7 +473,22 @@ class CheckpointerMixin(BaseModel):
         config: Optional[RunnableConfig] = None,
         **kwargs,
     ) -> AsyncGenerator[Dict[str, Any], None]:
-        """Async stream with checkpointer support."""
+        """Async stream with checkpointer support.
+
+        This method streams graph execution results asynchronously with
+        checkpointing support, automatically handling state restoration
+        and persistence.
+
+        Args:
+            input_data: The input data for the execution.
+            thread_id: Optional thread ID for state tracking.
+            stream_mode: The streaming mode to use (values, actions, etc.).
+            config: Optional configuration override.
+            **kwargs: Additional configuration parameters.
+
+        Yields:
+            Execution chunks as they become available.
+        """
         self._ensure_checkpointer_initialized()
         await self._ensure_async_checkpointer_initialized()
 

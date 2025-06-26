@@ -1,4 +1,36 @@
-# src/haive/core/schema/engine_mixin.py
+"""Engine management mixin for tracking and accessing Haive engines.
+
+This module provides a sophisticated mixin for managing different types of
+engines within the Haive framework. It enables tracking engines by name and type,
+collecting usage statistics, and provides rich visualization capabilities.
+
+Usage:
+    ```python
+    from pydantic import BaseModel
+    from haive.core.common.mixins import EngineStateMixin
+    from haive.core.engine.llm import LLMEngine
+
+    class MyState(EngineStateMixin, BaseModel):
+        # Other fields
+        pass
+
+    # Create state and add engines
+    state = MyState()
+
+    # Add an LLM engine
+    llm = LLMEngine(name="my_llm", model="gpt-4", provider="openai")
+    state.add_engine(llm)
+
+    # Later, retrieve the engine
+    retrieved_llm = state.get_engine("my_llm")
+
+    # Get all LLM engines
+    all_llms = state.get_llms()
+
+    # Display engine information
+    state.display_engines()
+    ```
+"""
 
 import json
 import logging
@@ -21,7 +53,19 @@ class EngineStateMixin(BaseModel):
     """Mixin providing comprehensive engine management capabilities with validation.
 
     This mixin allows StateSchema to manage engines by name and type, providing
-    rich access patterns and debugging capabilities.
+    rich access patterns, performance tracking, and debugging capabilities.
+
+    The mixin maintains multiple indexes for efficient access:
+    - By name: Fast lookup of specific engines
+    - By type: Group engines by their type (LLM, Retriever, etc.)
+
+    It also tracks metadata about engines including access patterns and
+    performance metrics, and provides rich visualization for debugging.
+
+    Attributes:
+        engines: Dictionary of engines indexed by name.
+        engines_by_type: Dictionary of engines organized by type.
+        engine_metadata: Dictionary containing additional metadata for each engine.
     """
 
     # Main storage - using proper field names (no leading underscore)
@@ -48,7 +92,14 @@ class EngineStateMixin(BaseModel):
 
     @model_validator(mode="after")
     def validate_and_organize_engines(self) -> "EngineStateMixin":
-        """Ensure engines are properly organized by type and validated."""
+        """Ensure engines are properly organized by type and validated.
+
+        This validator rebuilds the engines_by_type index to ensure consistency
+        and initializes metadata for any engines that don't have it yet.
+
+        Returns:
+            Self with validated engine organization.
+        """
         # Rebuild engines_by_type to ensure consistency
         self.engines_by_type = {engine_type: [] for engine_type in EngineType}
 
@@ -81,9 +132,12 @@ class EngineStateMixin(BaseModel):
     def add_engine(self, engine: Engine, name: Optional[str] = None) -> None:
         """Add an engine to the state with automatic organization by type.
 
+        This method adds an engine to both the main engines dictionary and the
+        type-based index. It also initializes metadata tracking for the engine.
+
         Args:
-            engine: The engine to add
-            name: Optional name override (defaults to engine.name)
+            engine: The engine to add.
+            name: Optional name override (defaults to engine.name).
         """
         engine_name = name or engine.name
         self.engines[engine_name] = engine
@@ -107,11 +161,14 @@ class EngineStateMixin(BaseModel):
     def get_engine(self, name: str) -> Optional[Engine]:
         """Get an engine by name with access logging.
 
+        This method retrieves an engine by name and updates access metrics
+        including access count, timestamp, and performance data.
+
         Args:
-            name: Engine name
+            name: Engine name.
 
         Returns:
-            Engine if found, None otherwise
+            Engine if found, None otherwise.
         """
         import time
 
@@ -148,10 +205,10 @@ class EngineStateMixin(BaseModel):
         """Get all engines of a specific type.
 
         Args:
-            engine_type: The engine type to filter by
+            engine_type: The engine type to filter by.
 
         Returns:
-            List of engines of the specified type
+            List of engines of the specified type.
         """
         return self.engines_by_type.get(engine_type, [])
 
@@ -159,34 +216,58 @@ class EngineStateMixin(BaseModel):
         """Get all engines as a dictionary.
 
         Returns:
-            Dictionary of all engines by name
+            Dictionary of all engines by name.
         """
         return self.engines.copy()
 
     # ===== Specialized Getters =====
 
     def get_llms(self) -> List[Engine]:
-        """Get all LLM/AugLLM engines."""
+        """Get all LLM/AugLLM engines.
+
+        Returns:
+            List of LLM engines.
+        """
         return self.get_engines_by_type(EngineType.LLM)
 
     def get_retrievers(self) -> List[Engine]:
-        """Get all retriever engines."""
+        """Get all retriever engines.
+
+        Returns:
+            List of retriever engines.
+        """
         return self.get_engines_by_type(EngineType.RETRIEVER)
 
     def get_agents(self) -> List[Engine]:
-        """Get all agent engines."""
+        """Get all agent engines.
+
+        Returns:
+            List of agent engines.
+        """
         return self.get_engines_by_type(EngineType.AGENT)
 
     def get_vector_stores(self) -> List[Engine]:
-        """Get all vector store engines."""
+        """Get all vector store engines.
+
+        Returns:
+            List of vector store engines.
+        """
         return self.get_engines_by_type(EngineType.VECTOR_STORE)
 
     def get_tools(self) -> List[Engine]:
-        """Get all tool engines."""
+        """Get all tool engines.
+
+        Returns:
+            List of tool engines.
+        """
         return self.get_engines_by_type(EngineType.TOOL)
 
     def get_embeddings(self) -> List[Engine]:
-        """Get all embeddings engines."""
+        """Get all embeddings engines.
+
+        Returns:
+            List of embeddings engines.
+        """
         return self.get_engines_by_type(EngineType.EMBEDDINGS)
 
     # ===== Engine Manipulation =====
@@ -194,9 +275,15 @@ class EngineStateMixin(BaseModel):
     def update_engine(self, name: str, **kwargs) -> None:
         """Update engine attributes dynamically.
 
+        This method allows updating specific attributes of an engine
+        by providing them as keyword arguments.
+
         Args:
-            name: Engine name
-            **kwargs: Attributes to update
+            name: Engine name.
+            **kwargs: Attributes to update.
+
+        Raises:
+            ValueError: If the engine is not found.
         """
         engine = self.get_engine(name)
         if not engine:
@@ -212,9 +299,15 @@ class EngineStateMixin(BaseModel):
     def change_provider(self, name: str, provider: str) -> None:
         """Change the provider of an LLM engine.
 
+        This is a convenience method specifically for changing the
+        provider of an engine (e.g., switching from 'openai' to 'anthropic').
+
         Args:
-            name: Engine name
-            provider: New provider name
+            name: Engine name.
+            provider: New provider name.
+
+        Raises:
+            ValueError: If the engine is not found.
         """
         engine = self.get_engine(name)
         if not engine:
@@ -232,11 +325,14 @@ class EngineStateMixin(BaseModel):
     def get_engine_tools(self, name: str) -> List[Any]:
         """Get tools from an engine (for agents/LLMs with tools).
 
+        This method tries to extract tools from an engine by checking
+        various attribute names where tools might be stored.
+
         Args:
-            name: Engine name
+            name: Engine name.
 
         Returns:
-            List of tools if available, empty list otherwise
+            List of tools if available, empty list otherwise.
         """
         engine = self.get_engine(name)
         if not engine:
@@ -256,11 +352,14 @@ class EngineStateMixin(BaseModel):
     def get_engine_routes(self, name: str) -> Dict[str, str]:
         """Get tool routes from an engine.
 
+        This method tries to extract routing information from an engine
+        by checking various attribute names where routes might be stored.
+
         Args:
-            name: Engine name
+            name: Engine name.
 
         Returns:
-            Dictionary of routes if available, empty dict otherwise
+            Dictionary of routes if available, empty dict otherwise.
         """
         engine = self.get_engine(name)
         if not engine:
@@ -278,11 +377,14 @@ class EngineStateMixin(BaseModel):
     def remove_engine(self, name: str) -> bool:
         """Remove an engine from the state.
 
+        This method removes an engine from both the main engines dictionary
+        and the type-based index, as well as removing its metadata.
+
         Args:
-            name: Engine name to remove
+            name: Engine name to remove.
 
         Returns:
-            True if removed, False if not found
+            True if removed, False if not found.
         """
         if name not in self.engines:
             return False
@@ -310,9 +412,12 @@ class EngineStateMixin(BaseModel):
     ) -> None:
         """Display all engines in a rich tree view organized by type.
 
+        This method creates a rich visual representation of engines
+        organized by type, with optional metadata and performance information.
+
         Args:
-            show_metadata: Whether to show additional metadata
-            show_performance: Whether to show performance metrics
+            show_metadata: Whether to show additional metadata.
+            show_performance: Whether to show performance metrics.
         """
         console = Console()
 
@@ -420,8 +525,12 @@ class EngineStateMixin(BaseModel):
     def display_engine_details(self, name: str) -> None:
         """Display detailed information about a specific engine.
 
+        This method creates a rich visual representation of all the details
+        for a specific engine, including its configuration, metadata,
+        and performance metrics.
+
         Args:
-            name: Engine name
+            name: Engine name.
         """
         console = Console()
 
@@ -513,8 +622,11 @@ class EngineStateMixin(BaseModel):
     def debug_engine_access(self, limit: int = 10) -> None:
         """Show debug information about engine access patterns.
 
+        This method displays access statistics and a recent access log
+        to help with debugging engine usage patterns and performance.
+
         Args:
-            limit: Maximum number of access log entries to show
+            limit: Maximum number of access log entries to show.
         """
         console = Console()
 
@@ -577,8 +689,11 @@ class EngineStateMixin(BaseModel):
     def get_engine_summary(self) -> Dict[str, Any]:
         """Get a summary of all engines.
 
+        This method generates a summary of engine statistics including
+        counts by type, access patterns, and performance information.
+
         Returns:
-            Dictionary with engine statistics
+            Dictionary with engine statistics.
         """
         summary = {
             "total_engines": len(self.engines),
