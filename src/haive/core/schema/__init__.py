@@ -14,12 +14,17 @@ Key Components:
       and I/O tracking
     - SchemaComposer: Utility for building schemas from components dynamically
     - StateSchemaManager: Tool for manipulating schemas at runtime
+    - MultiAgentStateSchema: Enhanced schema for multi-agent architectures
+    - AgentSchemaComposer: Schema composer specialized for agent architectures
     - FieldDefinition: Representation of field type, default, and metadata
     - FieldExtractor: Utility for extracting fields from various sources
     - Field Utilities: Common functions for field manipulation
 
 For detailed usage examples, see the haive_schema_system_readme.md file.
 """
+
+# Import agent schema composer
+from haive.core.schema.agent_schema_composer import AgentSchemaComposer, BuildMode
 
 # Import core components for easy access
 from haive.core.schema.field_definition import FieldDefinition
@@ -32,6 +37,13 @@ from haive.core.schema.field_utils import (
     infer_field_type,
     resolve_reducer,
 )
+from haive.core.schema.multi_agent_state_schema import (
+    MultiAgentSchemaComposer,
+    MultiAgentStateSchema,
+)
+
+# Import preserve messages reducer
+from haive.core.schema.preserve_messages_reducer import preserve_messages_reducer
 from haive.core.schema.schema_composer import SchemaComposer
 from haive.core.schema.schema_manager import StateSchemaManager
 from haive.core.schema.state_schema import StateSchema
@@ -49,5 +61,10 @@ __all__ = [
     "SchemaComposer",
     "StateSchemaManager",
     "StateSchema",
+    "MultiAgentStateSchema",
+    "MultiAgentSchemaComposer",
+    "AgentSchemaComposer",
+    "BuildMode",
+    "preserve_messages_reducer",
     "SchemaUI",
 ]

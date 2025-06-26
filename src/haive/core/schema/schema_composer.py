@@ -126,7 +126,18 @@ class SchemaComposer:
     """
 
     def __init__(self, name: str = "ComposedSchema"):
-        """Initialize a new SchemaComposer."""
+        """Initialize a new SchemaComposer.
+
+        Args:
+            name: The name for the composed schema class. Defaults to "ComposedSchema".
+
+        Example:
+            Creating a schema composer for a conversational agent::
+
+                composer = SchemaComposer(name="ConversationState")
+                composer.add_field("messages", List[BaseMessage], default_factory=list)
+                schema_class = composer.build()
+        """
         self.name = name
         self.fields = {}
         self.shared_fields = set()
@@ -1647,6 +1658,28 @@ class SchemaComposer:
             )
             logger.debug("Added standard field 'runnable_config'")
 
+        # Ensure engines field if we have engines
+        if (
+            self.engines
+            and "engines" not in self.fields
+            and "engines" not in self.base_class_fields
+        ):
+            from typing import Any, Dict
+
+            # Create a default factory that returns the class engines
+            def get_class_engines():
+                # This will be bound to the schema class later
+                return {}
+
+            self.add_field(
+                name="engines",
+                field_type=Dict[str, Any],
+                default_factory=get_class_engines,
+                description="Engine instances indexed by name",
+                source="auto_added",
+            )
+            logger.debug("Added standard field 'engines' with engine factory")
+
         # Ensure we have messages field for chat agents
         engines_with_messages = [
             entry
@@ -1963,6 +1996,18 @@ class SchemaComposer:
             schema.engines_by_type = dict(self.engines_by_type)
             logger.debug(f"Stored {len(schema.engines)} engines on schema class")
 
+            # Update the engines field default factory to return class engines
+            if "engines" in schema.model_fields:
+                # Create a factory that returns the class engines
+                def engines_factory(cls=schema):
+                    return cls.engines.copy() if hasattr(cls, "engines") else {}
+
+                # Update the field's default_factory
+                schema.model_fields["engines"].default_factory = engines_factory
+                logger.debug(
+                    "Updated engines field default_factory to return class engines"
+                )
+
         # Now handle nested fields like tool_schemas.xyz
         # We need to build nested dictionaries for these
 
@@ -1986,14 +2031,30 @@ class SchemaComposer:
         def schema_post_init(self, __context):
             """Enhanced post-init to sync tools from engines."""
             # IMPORTANT: In Pydantic v2, model_post_init takes a context parameter
+            logger.debug(f"schema_post_init called for {self.__class__.__name__}")
 
             # Call parent post_init if it exists
             if hasattr(super(self.__class__, self), "model_post_init"):
                 super(self.__class__, self).model_post_init(__context)
 
+            # Initialize instance-level engines from class-level engines
+            if hasattr(self.__class__, "engines"):
+                # If engines field exists, populate it from class engines
+                if hasattr(self, "engines"):
+                    if not self.engines:  # Only populate if empty
+                        self.engines = {}
+                    # Copy class engines to instance field
+                    for engine_name, engine in self.__class__.engines.items():
+                        self.engines[engine_name] = engine
+                    logger.debug(
+                        f"Populated instance engines field with {len(self.engines)} engines from class"
+                    )
+
             # Sync tools from class engines if available
             if hasattr(self.__class__, "engines"):
-                logger.debug(f"Found {len(self.__class__.engines)} class-level engines")
+                logger.debug(
+                    f"Found {len(self.__class__.engines)} class-level engines (legacy)"
+                )
 
                 # If this is a ToolState subclass or has tools field, sync tools
                 if hasattr(self, "tools"):
@@ -2724,13 +2785,6 @@ class SchemaComposer:
 
         # Add a content field if no structured output model is present
         has_structured_output = any(composer.structured_models)
-        if not has_structured_output:
-            composer.add_field(
-                name="content",
-                field_type=str,
-                default="",
-                description="Agent output content",
-            )
 
         # Create model directly instead of using StateSchema as base
         field_defs = {}
