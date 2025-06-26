@@ -9,7 +9,7 @@ from typing import Any, Dict, Generic, Iterable, List, Optional, TypeVar, Union
 
 from pydantic import BaseModel, Field, model_validator
 
-from .getter_mixin import GetterMixin
+from haive.core.utils.getter_mixin import GetterMixin
 
 T = TypeVar('T')
 
