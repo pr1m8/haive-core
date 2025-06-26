@@ -5,6 +5,40 @@ This module provides utilities for downloading, caching, and accessing
 model metadata from LiteLLM's model_prices_and_context_window.json.
 """
 
+from dataclasses import dataclass
+from typing import Any, Dict, Optional
+
+
+@dataclass
+class ModelMetadata:
+    """A class to store and provide model metadata.
+
+    This class encapsulates metadata about a language model, including
+    its pricing, context window limits, and provider information.
+    """
+
+    name: str
+    provider: Optional[str] = None
+    metadata: Dict[str, Any] = None
+
+    def __post_init__(self):
+        if self.metadata is None:
+            self.metadata = get_model_metadata(self.name, self.provider)
+
+    @property
+    def context_window(self) -> int:
+        """Get the context window size for this model."""
+        return self.metadata.get("context_window", 2048)
+
+    @property
+    def pricing(self) -> Dict[str, float]:
+        """Get the pricing information for this model."""
+        return {
+            "input": self.metadata.get("input_cost_per_token", 0.0),
+            "output": self.metadata.get("output_cost_per_token", 0.0),
+        }
+
+
 import json
 import logging
 from datetime import datetime, timedelta
