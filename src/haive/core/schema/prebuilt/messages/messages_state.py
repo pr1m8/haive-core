@@ -21,7 +21,7 @@ from typing import (
 import tiktoken
 from langchain_core.messages import (
     AIMessage,
-    BaseMessage,
+    AnyMessage,
     HumanMessage,
     SystemMessage,
     ToolMessage,
@@ -82,7 +82,7 @@ class MessageRound(BaseModel):
     )
 
 
-class MessageList(RootModel[List[BaseMessage]]):
+class MessageList(RootModel[List[AnyMessage]]):
     """
     Enhanced root model for managing conversation messages with advanced filtering,
     analysis, and transformation capabilities.
@@ -98,7 +98,7 @@ class MessageList(RootModel[List[BaseMessage]]):
     - Comprehensive testing support
     """
 
-    root: Annotated[List[BaseMessage], add_messages] = Field(
+    root: Annotated[List[AnyMessage], add_messages] = Field(
         default_factory=list,
         description="List of conversation messages with add_messages reducer",
     )
@@ -113,7 +113,7 @@ class MessageList(RootModel[List[BaseMessage]]):
 
     @field_validator("root", mode="before")
     @classmethod
-    def convert_strings_to_messages(cls, v: Any) -> List[BaseMessage]:
+    def convert_strings_to_messages(cls, v: Any) -> List[AnyMessage]:
         """Automatically convert strings and dicts to proper Message objects."""
         if isinstance(v, str):
             # Single string -> HumanMessage
@@ -131,14 +131,14 @@ class MessageList(RootModel[List[BaseMessage]]):
                 return [messages_from_dict([v])[0]]
         elif isinstance(v, list):
             return cls._convert_message_data(v)
-        elif isinstance(v, BaseMessage):
+        elif isinstance(v, AnyMessage):
             return [v]
 
         return v or []
 
     @classmethod
-    def _convert_message_data(cls, data: Any) -> List[BaseMessage]:
-        """Convert various message data formats to BaseMessage list."""
+    def _convert_message_data(cls, data: Any) -> List[AnyMessage]:
+        """Convert various message data formats to AnyMessage list."""
         if isinstance(data, list):
             converted = []
             for item in data:
@@ -146,14 +146,14 @@ class MessageList(RootModel[List[BaseMessage]]):
                     converted.append(HumanMessage(content=item))
                 elif isinstance(item, dict):
                     converted.append(messages_from_dict([item])[0])
-                elif isinstance(item, BaseMessage):
+                elif isinstance(item, AnyMessage):
                     converted.append(item)
                 else:
                     raise ValueError(f"Unsupported message type: {type(item)}")
             return converted
         elif isinstance(data, str):
             return [HumanMessage(content=data)]
-        elif isinstance(data, BaseMessage):
+        elif isinstance(data, AnyMessage):
             return [data]
         else:
             return convert_to_messages(data)
@@ -188,7 +188,7 @@ class MessageList(RootModel[List[BaseMessage]]):
 
     @computed_field
     # @cached_property
-    def last_message(self) -> Optional[BaseMessage]:
+    def last_message(self) -> Optional[AnyMessage]:
         """Get the last message in the conversation."""
         return self.root[-1] if self.root else None
 
@@ -315,7 +315,7 @@ class MessageList(RootModel[List[BaseMessage]]):
     # LIST-LIKE INTERFACE WITH CACHE INVALIDATION
     # ============================================================================
 
-    def __iter__(self) -> Iterator[BaseMessage]:
+    def __iter__(self) -> Iterator[AnyMessage]:
         """Make the root model iterable."""
         return iter(self.root)
 
@@ -325,25 +325,25 @@ class MessageList(RootModel[List[BaseMessage]]):
 
     def __getitem__(
         self, index: Union[int, slice]
-    ) -> Union[BaseMessage, List[BaseMessage]]:
+    ) -> Union[AnyMessage, List[AnyMessage]]:
         """Support indexing and slicing."""
         return self.root[index]
 
-    def __setitem__(self, index: int, value: Union[BaseMessage, str]) -> None:
+    def __setitem__(self, index: int, value: Union[AnyMessage, str]) -> None:
         """Support item assignment with auto-conversion."""
         if isinstance(value, str):
             value = HumanMessage(content=value)
         self.root[index] = value
         self._invalidate_cache()
 
-    def append(self, message: Union[BaseMessage, str]) -> None:
+    def append(self, message: Union[AnyMessage, str]) -> None:
         """Append a message to the list with auto-conversion."""
         if isinstance(message, str):
             message = HumanMessage(content=message)
         self.root.append(message)
         self._invalidate_cache()
 
-    def extend(self, messages: List[Union[BaseMessage, str]]) -> None:
+    def extend(self, messages: List[Union[AnyMessage, str]]) -> None:
         """Extend the list with multiple messages with auto-conversion."""
         converted = [
             HumanMessage(content=msg) if isinstance(msg, str) else msg
@@ -352,14 +352,14 @@ class MessageList(RootModel[List[BaseMessage]]):
         self.root.extend(converted)
         self._invalidate_cache()
 
-    def insert(self, index: int, message: Union[BaseMessage, str]) -> None:
+    def insert(self, index: int, message: Union[AnyMessage, str]) -> None:
         """Insert a message at a specific index with auto-conversion."""
         if isinstance(message, str):
             message = HumanMessage(content=message)
         self.root.insert(index, message)
         self._invalidate_cache()
 
-    def remove(self, message: BaseMessage) -> None:
+    def remove(self, message: AnyMessage) -> None:
         """Remove a message from the list."""
         self.root.remove(message)
         self._invalidate_cache()
@@ -369,7 +369,7 @@ class MessageList(RootModel[List[BaseMessage]]):
         self.root.clear()
         self._invalidate_cache()
 
-    def copy(self) -> List[BaseMessage]:
+    def copy(self) -> List[AnyMessage]:
         """Create a copy of the messages list."""
         return self.root.copy()
 
@@ -399,9 +399,7 @@ class MessageList(RootModel[List[BaseMessage]]):
     # ADVANCED FILTERING
     # ============================================================================
 
-    def filter_by_type(
-        self, message_type: Union[type, List[type]]
-    ) -> List[BaseMessage]:
+    def filter_by_type(self, message_type: Union[type, List[type]]) -> List[AnyMessage]:
         """Filter messages by type(s)."""
         if not isinstance(message_type, list):
             message_type = [message_type]
@@ -410,7 +408,7 @@ class MessageList(RootModel[List[BaseMessage]]):
 
     def filter_by_content_pattern(
         self, pattern: str, case_sensitive: bool = False
-    ) -> List[BaseMessage]:
+    ) -> List[AnyMessage]:
         """Filter messages by content pattern."""
         import re
 
@@ -422,7 +420,7 @@ class MessageList(RootModel[List[BaseMessage]]):
             if hasattr(msg, "content") and re.search(pattern, msg.content, flags)
         ]
 
-    def filter_by_metadata(self, key: str, value: Any = None) -> List[BaseMessage]:
+    def filter_by_metadata(self, key: str, value: Any = None) -> List[AnyMessage]:
         """Filter messages by metadata key/value."""
         filtered = []
         for msg in self.root:
@@ -439,7 +437,7 @@ class MessageList(RootModel[List[BaseMessage]]):
 
     def filter_by_engine(
         self, engine_id: Optional[str] = None, engine_name: Optional[str] = None
-    ) -> List[BaseMessage]:
+    ) -> List[AnyMessage]:
         """Filter messages by engine ID or name."""
         filtered = []
         for msg in self.root:
@@ -455,7 +453,7 @@ class MessageList(RootModel[List[BaseMessage]]):
 
     def filter_by_time_range(
         self, start_index: int = 0, end_index: Optional[int] = None
-    ) -> List[BaseMessage]:
+    ) -> List[AnyMessage]:
         """Filter messages by index range (time-based ordering)."""
         if end_index is None:
             end_index = len(self.root)
@@ -464,7 +462,7 @@ class MessageList(RootModel[List[BaseMessage]]):
 
     def get_messages_since_last_human(
         self, include_human: bool = True
-    ) -> List[BaseMessage]:
+    ) -> List[AnyMessage]:
         """Get all messages since the last real human message."""
         if not self.last_human_message:
             return []
@@ -482,7 +480,7 @@ class MessageList(RootModel[List[BaseMessage]]):
         start_idx = last_human_idx if include_human else last_human_idx + 1
         return self.root[start_idx:]
 
-    def get_messages_in_current_round(self) -> List[BaseMessage]:
+    def get_messages_in_current_round(self) -> List[AnyMessage]:
         """Get all messages in the current (potentially incomplete) round."""
         if not self.conversation_rounds:
             return []
@@ -643,7 +641,7 @@ class MessageList(RootModel[List[BaseMessage]]):
 
         return not (has_name or has_engine_metadata or has_agent_metadata)
 
-    def _has_engine_metadata(self, msg: BaseMessage) -> bool:
+    def _has_engine_metadata(self, msg: AnyMessage) -> bool:
         """Check if message has engine-related metadata."""
         if not hasattr(msg, "additional_kwargs") or not msg.additional_kwargs:
             return False
@@ -652,7 +650,7 @@ class MessageList(RootModel[List[BaseMessage]]):
             or "engine_name" in msg.additional_kwargs
         )
 
-    def _has_agent_metadata(self, msg: BaseMessage) -> bool:
+    def _has_agent_metadata(self, msg: AnyMessage) -> bool:
         """Check if message has agent-related metadata."""
         if not hasattr(msg, "additional_kwargs") or not msg.additional_kwargs:
             return False
@@ -900,7 +898,7 @@ class MessageList(RootModel[List[BaseMessage]]):
     # UTILITY METHODS
     # ============================================================================
 
-    def add_message(self, message: Union[BaseMessage, str, Dict]) -> None:
+    def add_message(self, message: Union[AnyMessage, str, Dict]) -> None:
         """Add a message to the conversation with auto-conversion."""
         if isinstance(message, str):
             message = HumanMessage(content=message)
@@ -953,7 +951,7 @@ class MessageList(RootModel[List[BaseMessage]]):
         """Convert message history to LangChain compatible prompt string."""
         return get_buffer_string(self.root, human_prefix="User", ai_prefix="Assistant")
 
-    def get_filtered_messages(self, **filter_kwargs) -> List[BaseMessage]:
+    def get_filtered_messages(self, **filter_kwargs) -> List[AnyMessage]:
         """Filter messages using LangChain's built-in filter_messages utility."""
         limit = filter_kwargs.pop("limit", None)
         filtered_messages = filter_messages(self.root, **filter_kwargs)
@@ -968,7 +966,7 @@ class MessageList(RootModel[List[BaseMessage]]):
     # ============================================================================
 
     @classmethod
-    def from_messages(cls, messages: List[Union[BaseMessage, str]]) -> "MessageList":
+    def from_messages(cls, messages: List[Union[AnyMessage, str]]) -> "MessageList":
         """Create instance from a list of messages."""
         return cls(root=messages)
 
@@ -1045,7 +1043,7 @@ class MessagesState(StateSchema):
     # ============================================================================
 
     @property
-    def last_message(self) -> Optional[BaseMessage]:
+    def last_message(self) -> Optional[AnyMessage]:
         """Delegate to messages state."""
         return self.messages.last_message
 
@@ -1118,7 +1116,7 @@ class MessagesState(StateSchema):
     # DELEGATED LIST-LIKE METHODS
     # ============================================================================
 
-    def __iter__(self) -> Iterator[BaseMessage]:
+    def __iter__(self) -> Iterator[AnyMessage]:
         """Make MessagesState iterable."""
         return iter(self.messages)
 
@@ -1128,27 +1126,27 @@ class MessagesState(StateSchema):
 
     def __getitem__(
         self, index: Union[int, slice]
-    ) -> Union[BaseMessage, List[BaseMessage]]:
+    ) -> Union[AnyMessage, List[AnyMessage]]:
         """Support indexing and slicing."""
         return self.messages[index]
 
-    def __setitem__(self, index: int, value: Union[BaseMessage, str]) -> None:
+    def __setitem__(self, index: int, value: Union[AnyMessage, str]) -> None:
         """Support item assignment."""
         self.messages[index] = value
 
-    def append(self, message: Union[BaseMessage, str]) -> None:
+    def append(self, message: Union[AnyMessage, str]) -> None:
         """Append a message."""
         self.messages.append(message)
 
-    def extend(self, messages: List[Union[BaseMessage, str]]) -> None:
+    def extend(self, messages: List[Union[AnyMessage, str]]) -> None:
         """Extend with multiple messages."""
         self.messages.extend(messages)
 
-    def insert(self, index: int, message: Union[BaseMessage, str]) -> None:
+    def insert(self, index: int, message: Union[AnyMessage, str]) -> None:
         """Insert a message at index."""
         self.messages.insert(index, message)
 
-    def remove(self, message: BaseMessage) -> None:
+    def remove(self, message: AnyMessage) -> None:
         """Remove a message."""
         self.messages.remove(message)
 
@@ -1160,7 +1158,7 @@ class MessagesState(StateSchema):
     # DELEGATED METHODS
     # ============================================================================
 
-    def add_message(self, message: Union[BaseMessage, str, Dict]) -> None:
+    def add_message(self, message: Union[AnyMessage, str, Dict]) -> None:
         """Delegate to messages state."""
         self.messages.add_message(message)
 
@@ -1172,31 +1170,29 @@ class MessagesState(StateSchema):
         """Delegate to messages state."""
         return self.messages.get_pending_tool_calls()
 
-    def filter_by_type(
-        self, message_type: Union[type, List[type]]
-    ) -> List[BaseMessage]:
+    def filter_by_type(self, message_type: Union[type, List[type]]) -> List[AnyMessage]:
         """Delegate to messages state."""
         return self.messages.filter_by_type(message_type)
 
     def filter_by_content_pattern(
         self, pattern: str, case_sensitive: bool = False
-    ) -> List[BaseMessage]:
+    ) -> List[AnyMessage]:
         """Delegate to messages state."""
         return self.messages.filter_by_content_pattern(pattern, case_sensitive)
 
-    def filter_by_metadata(self, key: str, value: Any = None) -> List[BaseMessage]:
+    def filter_by_metadata(self, key: str, value: Any = None) -> List[AnyMessage]:
         """Delegate to messages state."""
         return self.messages.filter_by_metadata(key, value)
 
     def filter_by_engine(
         self, engine_id: Optional[str] = None, engine_name: Optional[str] = None
-    ) -> List[BaseMessage]:
+    ) -> List[AnyMessage]:
         """Delegate to messages state."""
         return self.messages.filter_by_engine(engine_id, engine_name)
 
     def get_messages_since_last_human(
         self, include_human: bool = True
-    ) -> List[BaseMessage]:
+    ) -> List[AnyMessage]:
         """Delegate to messages state."""
         return self.messages.get_messages_since_last_human(include_human)
 
@@ -1241,7 +1237,7 @@ class MessagesState(StateSchema):
     # ============================================================================
 
     @classmethod
-    def from_messages(cls, messages: List[Union[BaseMessage, str]]) -> "MessagesState":
+    def from_messages(cls, messages: List[Union[AnyMessage, str]]) -> "MessagesState":
         """Create instance from a list of messages."""
         return cls(messages=messages)
 

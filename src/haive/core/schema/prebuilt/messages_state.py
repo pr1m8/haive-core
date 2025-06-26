@@ -3,7 +3,7 @@ from typing import Annotated, Any, ClassVar, Dict, List, Optional, Union
 import tiktoken
 from langchain_core.messages import (
     AIMessage,
-    BaseMessage,
+    AnyMessage,
     HumanMessage,
     SystemMessage,
     ToolMessage,
@@ -20,6 +20,20 @@ from langgraph.types import Send
 from pydantic import Field, model_validator
 
 from haive.core.schema.state_schema import StateSchema
+
+# Import new utilities
+try:
+    from haive.core.schema.prebuilt.messages.compatibility import MessagesStateAdapter
+    from haive.core.schema.prebuilt.messages.utils import (
+        MessageRound,
+        ToolCallInfo,
+        is_real_human_message,
+        is_tool_error,
+    )
+
+    ENHANCED_FEATURES_AVAILABLE = True
+except ImportError:
+    ENHANCED_FEATURES_AVAILABLE = False
 
 
 class MessagesState(StateSchema):
@@ -44,6 +58,9 @@ class MessagesState(StateSchema):
     - Conversation history manipulation (truncation, filtering, etc.)
     - LangGraph integration with proper message reducers
     - Conversion to formats required by different LLM providers
+    - Conversation round tracking and analysis (NEW)
+    - Tool call deduplication and error handling (NEW)
+    - Message transformation utilities (NEW)
 
     The messages field is automatically shared with parent/child graphs and configured
     with the appropriate reducer function for merging message lists during state updates.
@@ -54,7 +71,7 @@ class MessagesState(StateSchema):
     """
 
     # Core messages field with reducer annotation
-    messages: Annotated[List[BaseMessage], add_messages] = Field(
+    messages: Annotated[List[AnyMessage], add_messages] = Field(
         default_factory=list, description="Conversation messages"
     )
 
@@ -102,13 +119,13 @@ class MessagesState(StateSchema):
 
         return instance
 
-    def add_message(self, message: Union[BaseMessage, Dict]) -> None:
+    def add_message(self, message: Union[AnyMessage, Dict]) -> None:
         """Add a message to the conversation."""
         if isinstance(message, dict):
             message = messages_from_dict([message])[0]
         self.messages.append(message)
 
-    def get_last_message(self) -> Optional[BaseMessage]:
+    def get_last_message(self) -> Optional[AnyMessage]:
         """Get the last message in the conversation."""
         if not self.messages:
             return None
@@ -149,7 +166,7 @@ class MessagesState(StateSchema):
 
     # Message filtering
 
-    def get_filtered_messages(self, **filter_kwargs) -> List[BaseMessage]:
+    def get_filtered_messages(self, **filter_kwargs) -> List[AnyMessage]:
         """
         Filter messages using LangChain's built-in filter_messages utility.
 
@@ -374,3 +391,127 @@ class MessagesState(StateSchema):
         state = cls()
         state.add_system_message(system_content)
         return state
+
+    # NEW METHODS FROM ENHANCED IMPLEMENTATION
+
+    def get_conversation_rounds(self) -> List[Any]:
+        """
+        Get detailed information about each conversation round.
+
+        A conversation round typically consists of a human message,
+        followed by one or more AI responses and possibly tool calls/responses.
+
+        Returns:
+            List of MessageRound objects with round details
+        """
+        if not ENHANCED_FEATURES_AVAILABLE:
+            raise NotImplementedError(
+                "Enhanced features not available. Install the enhanced MessagesState package."
+            )
+
+        adapter = MessagesStateAdapter(self)
+        return adapter.get_conversation_rounds()
+
+    def deduplicate_tool_calls(self) -> int:
+        """
+        Remove duplicate tool calls based on tool call ID.
+
+        This is useful when the same API call might be made multiple times
+        due to agent or LLM quirks.
+
+        Returns:
+            Number of duplicates removed
+        """
+        if not ENHANCED_FEATURES_AVAILABLE:
+            raise NotImplementedError(
+                "Enhanced features not available. Install the enhanced MessagesState package."
+            )
+
+        adapter = MessagesStateAdapter(self)
+        return adapter.deduplicate_tool_calls()
+
+    def get_completed_tool_calls(self) -> List[Any]:
+        """
+        Get all completed tool calls with their responses.
+
+        This method matches tool calls in AI messages with their
+        corresponding tool responses.
+
+        Returns:
+            List of ToolCallInfo objects with tool call details
+        """
+        if not ENHANCED_FEATURES_AVAILABLE:
+            raise NotImplementedError(
+                "Enhanced features not available. Install the enhanced MessagesState package."
+            )
+
+        adapter = MessagesStateAdapter(self)
+        return adapter.get_completed_tool_calls()
+
+    def is_real_human_message(self, msg: HumanMessage) -> bool:
+        """
+        Check if a human message is from a real user (not transformed).
+
+        Args:
+            msg: The message to check
+
+        Returns:
+            True if the message is from a real human, False if transformed
+        """
+        if not ENHANCED_FEATURES_AVAILABLE:
+            # Simple fallback implementation
+            has_name = hasattr(msg, "name") and msg.name is not None
+            has_engine_metadata = (
+                hasattr(msg, "additional_kwargs")
+                and msg.additional_kwargs
+                and (
+                    "engine_id" in msg.additional_kwargs
+                    or "engine_name" in msg.additional_kwargs
+                )
+            )
+            return not (has_name or has_engine_metadata)
+
+        return is_real_human_message(msg)
+
+    def is_tool_error(self, msg: ToolMessage) -> bool:
+        """
+        Check if a tool message represents an error.
+
+        Args:
+            msg: The tool message to check
+
+        Returns:
+            True if the message indicates an error, False otherwise
+        """
+        if not ENHANCED_FEATURES_AVAILABLE:
+            # Simple fallback implementation
+            if hasattr(msg, "additional_kwargs") and msg.additional_kwargs:
+                return msg.additional_kwargs.get("is_error", False)
+            return False
+
+        return is_tool_error(msg)
+
+    def transform_ai_to_human(
+        self,
+        preserve_metadata: bool = True,
+        engine_id: Optional[str] = None,
+        engine_name: Optional[str] = None,
+    ) -> None:
+        """
+        Transform AI messages to Human messages in place.
+
+        This is useful for agent-to-agent communication or for
+        creating synthetic conversations.
+
+        Args:
+            preserve_metadata: Whether to preserve message metadata
+            engine_id: Optional engine ID to add to transformed messages
+            engine_name: Optional engine name to add to transformed messages
+        """
+        if not ENHANCED_FEATURES_AVAILABLE:
+            raise NotImplementedError(
+                "Enhanced features not available. Install the enhanced MessagesState package."
+            )
+
+        adapter = MessagesStateAdapter(self)
+        adapter.transform_ai_to_human(preserve_metadata, engine_id, engine_name)
