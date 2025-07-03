@@ -109,8 +109,8 @@ class PostgresCheckpointerConfig(CheckpointerConfig[Dict[str, Any]]):
 
     # Additional connection options
     auto_commit: bool = Field(default=True, description="Auto-commit transactions")
-    prepare_threshold: int = Field(
-        default=0, description="Prepared statement threshold"
+    prepare_threshold: int | None = Field(
+        default=None, description="Prepared statement threshold (None to disable)"
     )
     connection_kwargs: Dict[str, Any] = Field(
         default_factory=dict, description="Additional connection keyword arguments"

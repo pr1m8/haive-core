@@ -37,7 +37,7 @@ class RetrieverType(str, Enum):
             Simple retrievers that directly use vector stores for similarity search.
 
         Advanced Retrieval Strategies:
-            Sophisticated retrieval methods that enhance basic vector similarity search:
+                    Sophisticated retrieval methods that enhance basic vector similarity search:
             - TIME_WEIGHTED: Considers document recency in retrieval
             - MULTI_QUERY: Generates multiple queries for better coverage
             - MULTI_VECTOR: Uses multiple vector representations per document
