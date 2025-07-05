@@ -42,13 +42,22 @@ from haive.core.graph.state_graph.components.base_component import (
     ComponentRegistry,
 )
 
-# Legacy components
-from haive.core.graph.state_graph.components.branch import Branch
+# Modular components
 from haive.core.graph.state_graph.components.branch_manager import BranchManager
 from haive.core.graph.state_graph.components.edge_manager import EdgeManager
 from haive.core.graph.state_graph.components.modular_base_graph import ModularBaseGraph
-from haive.core.graph.state_graph.components.node import Node
 from haive.core.graph.state_graph.components.node_manager import NodeManager
+
+# Legacy components (if they exist)
+try:
+    from haive.core.graph.state_graph.components.branch import Branch
+except ImportError:
+    from haive.core.graph.branches.branch import Branch
+
+try:
+    from haive.core.graph.state_graph.components.node import Node
+except ImportError:
+    from haive.core.graph.state_graph.base_graph2 import Node
 
 __all__ = [
     # Legacy components

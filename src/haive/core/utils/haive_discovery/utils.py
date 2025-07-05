@@ -6,7 +6,7 @@ import json
 import logging
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 from haive.core.utils.haive_discovery.base_analyzer import ComponentAnalyzer
 from haive.core.utils.haive_discovery.component_info import ComponentInfo
@@ -202,14 +202,14 @@ def create_tool_from_component(
         return component.tool_instance
 
     # Import the appropriate analyzer
-from haive.core.utils.haive_discovery.retriever_analyzers import (
-    RetrieverAnalyzer,
-    VectorStoreAnalyzer,
-)
-from haive.core.utils.haive_discovery.tool_analyzers import (
-    DocumentLoaderAnalyzer,
-    ToolAnalyzer,
-)
+    from haive.core.utils.haive_discovery.retriever_analyzers import (
+        RetrieverAnalyzer,
+        VectorStoreAnalyzer,
+    )
+    from haive.core.utils.haive_discovery.tool_analyzers import (
+        DocumentLoaderAnalyzer,
+        ToolAnalyzer,
+    )
 
     analyzer_map = {
         "tool": ToolAnalyzer(),
@@ -280,25 +280,28 @@ def save_discovery_report(
         Dictionary of created file paths
     """
     if output_dir is None:
-        output_dir = Path.cwd() / "discovery_reports"
+        output_dir_path = Path.cwd() / "discovery_reports"
+    else:
+        output_dir_path = Path(output_dir)
 
-    output_dir = Path(output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
+    output_dir_path.mkdir(parents=True, exist_ok=True)
 
     created_files = {}
 
     if format in ["json", "all"]:
-        json_path = generate_json_catalog(components, output_dir)
+        json_path = generate_json_catalog(components, output_dir_path)
         created_files["json"] = json_path
 
     if format in ["markdown", "all"]:
-        md_path = generate_markdown_report(components, output_dir)
+        md_path = generate_markdown_report(components, output_dir_path)
         created_files["markdown"] = md_path
 
     # Also save using the documentation writer
     writer = DocumentationWriter()
     doc_files = writer.save_to_project_docs(
-        components, project_root=str(output_dir.parent), subfolder=output_dir.name
+        components,
+        project_root=str(output_dir_path.parent),
+        subfolder=output_dir_path.name,
     )
     created_files.update(doc_files)
 
@@ -522,10 +525,10 @@ def create_discovery(
 
 def create_custom_analyzer(
     name: str,
-    can_analyze_func: callable,
-    analyze_func: callable,
-    create_tool_func: Optional[callable] = None,
-    create_engine_func: Optional[callable] = None,
+    can_analyze_func: Callable[[Any], bool],
+    analyze_func: Callable[[Any, str], Any],
+    create_tool_func: Optional[Callable[[Any], Any]] = None,
+    create_engine_func: Optional[Callable[[Any], Any]] = None,
 ) -> Type[ComponentAnalyzer]:
     """
     Create a custom analyzer class dynamically.

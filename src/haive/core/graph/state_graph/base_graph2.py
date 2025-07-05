@@ -179,6 +179,21 @@ class BaseGraph(BaseModel, ValidationMixin):
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
 
+    # Recompilation tracking (excluded from serialization)
+    needs_recompile_flag: bool = Field(default=False, exclude=True)
+    last_compiled_at: Optional[datetime] = Field(default=None, exclude=True)
+    compilation_state_hash: Optional[str] = Field(default=None, exclude=True)
+
+    # Schema tracking for recompilation (excluded from serialization)
+    last_input_schema: Optional[Any] = Field(default=None, exclude=True)
+    last_output_schema: Optional[Any] = Field(default=None, exclude=True)
+    last_config_schema: Optional[Any] = Field(default=None, exclude=True)
+
+    # Compilation parameters tracking (excluded from serialization)
+    last_interrupt_before: Optional[list] = Field(default=None, exclude=True)
+    last_interrupt_after: Optional[list] = Field(default=None, exclude=True)
+    last_compile_kwargs: Optional[Dict[str, Any]] = Field(default=None, exclude=True)
+
     model_config = {"arbitrary_types_allowed": True}
 
     # Validation configuration - required by ValidationMixin
@@ -253,6 +268,271 @@ class BaseGraph(BaseModel, ValidationMixin):
 
         return self
 
+    # ============================================================================
+    # RECOMPILATION TRACKING
+    # ============================================================================
+
+    def _mark_needs_recompile(self, reason: str = "") -> None:
+        """Mark the graph as needing recompilation.
+
+        Args:
+            reason: Optional reason for needing recompilation
+        """
+        self.needs_recompile_flag = True
+        if reason:
+            logger.debug(f"Graph '{self.name}' marked for recompilation: {reason}")
+
+    def needs_recompile(self) -> bool:
+        """Check if the graph needs recompilation.
+
+        Returns:
+            True if the graph has been modified since last compilation
+        """
+        return self.needs_recompile_flag
+
+    def mark_compiled(
+        self,
+        input_schema: Optional[Any] = None,
+        output_schema: Optional[Any] = None,
+        config_schema: Optional[Any] = None,
+        interrupt_before: Optional[list] = None,
+        interrupt_after: Optional[list] = None,
+        **compile_kwargs,
+    ) -> None:
+        """Mark the graph as compiled and reset the recompilation flag.
+
+        Args:
+            input_schema: Input schema used for compilation
+            output_schema: Output schema used for compilation
+            config_schema: Config schema used for compilation
+            interrupt_before: Interrupt before nodes used for compilation
+            interrupt_after: Interrupt after nodes used for compilation
+            **compile_kwargs: Additional compilation parameters
+        """
+        self.needs_recompile_flag = False
+        self.last_compiled_at = datetime.now()
+        self.compilation_state_hash = self._compute_state_hash()
+
+        # Store schema information
+        self.last_input_schema = input_schema
+        self.last_output_schema = output_schema
+        self.last_config_schema = config_schema
+
+        # Store interrupt configuration
+        self.last_interrupt_before = (
+            interrupt_before.copy() if interrupt_before else None
+        )
+        self.last_interrupt_after = interrupt_after.copy() if interrupt_after else None
+
+        # Store other compilation parameters
+        self.last_compile_kwargs = compile_kwargs.copy() if compile_kwargs else {}
+
+        logger.debug(
+            f"Graph '{self.name}' marked as compiled at {self.last_compiled_at}"
+        )
+
+    def get_compilation_info(self) -> Dict[str, Any]:
+        """Get information about the compilation state.
+
+        Returns:
+            Dictionary with compilation state information
+        """
+        return {
+            "needs_recompile": self.needs_recompile_flag,
+            "last_compiled_at": (
+                self.last_compiled_at.isoformat() if self.last_compiled_at else None
+            ),
+            "compilation_state_hash": self.compilation_state_hash,
+            "current_state_hash": self._compute_state_hash(),
+            "state_matches": (
+                self.compilation_state_hash == self._compute_state_hash()
+                if self.compilation_state_hash
+                else None
+            ),
+            "schemas": {
+                "input_schema": (
+                    str(self.last_input_schema) if self.last_input_schema else None
+                ),
+                "output_schema": (
+                    str(self.last_output_schema) if self.last_output_schema else None
+                ),
+                "config_schema": (
+                    str(self.last_config_schema) if self.last_config_schema else None
+                ),
+                "state_schema": str(self.state_schema) if self.state_schema else None,
+            },
+            "interrupts": {
+                "interrupt_before": self.last_interrupt_before,
+                "interrupt_after": self.last_interrupt_after,
+            },
+            "compile_kwargs": self.last_compile_kwargs or {},
+        }
+
+    def _compute_state_hash(self) -> str:
+        """Compute a hash of the current graph state for comparison.
+
+        Returns:
+            Hash string representing the current graph structure
+        """
+        import hashlib
+        import json
+
+        # Create a deterministic representation of the graph state
+        state_repr = {
+            "nodes": sorted(self.nodes.keys()),
+            "edges": sorted([f"{s}->{t}" for s, t in self.edges]),
+            "branches": sorted(self.branches.keys()),
+            "entry_points": sorted(self.entry_points),
+            "finish_points": sorted(self.finish_points),
+            "state_schema": str(self.state_schema) if self.state_schema else None,
+        }
+
+        # Convert to JSON for consistent hashing
+        state_json = json.dumps(state_repr, sort_keys=True)
+        return hashlib.sha256(state_json.encode()).hexdigest()[:16]
+
+    def needs_recompile_for_schemas(
+        self,
+        input_schema: Optional[Any] = None,
+        output_schema: Optional[Any] = None,
+        config_schema: Optional[Any] = None,
+    ) -> bool:
+        """Check if recompilation is needed due to schema changes.
+
+        Args:
+            input_schema: New input schema to compare
+            output_schema: New output schema to compare
+            config_schema: New config schema to compare
+
+        Returns:
+            True if any schema has changed since last compilation
+        """
+        if self.needs_recompile_flag:
+            return True
+
+        # Check if schemas have changed
+        if input_schema != self.last_input_schema:
+            return True
+        if output_schema != self.last_output_schema:
+            return True
+        if config_schema != self.last_config_schema:
+            return True
+
+        return False
+
+    def needs_recompile_for_interrupts(
+        self,
+        interrupt_before: Optional[list] = None,
+        interrupt_after: Optional[list] = None,
+    ) -> bool:
+        """Check if recompilation is needed due to interrupt changes.
+
+        Args:
+            interrupt_before: New interrupt_before list to compare
+            interrupt_after: New interrupt_after list to compare
+
+        Returns:
+            True if interrupt configuration has changed since last compilation
+        """
+        if self.needs_recompile_flag:
+            return True
+
+        # Check if interrupt configuration has changed
+        if interrupt_before != self.last_interrupt_before:
+            return True
+        if interrupt_after != self.last_interrupt_after:
+            return True
+
+        return False
+
+    def check_full_recompilation_needed(
+        self,
+        input_schema: Optional[Any] = None,
+        output_schema: Optional[Any] = None,
+        config_schema: Optional[Any] = None,
+        interrupt_before: Optional[list] = None,
+        interrupt_after: Optional[list] = None,
+        **compile_kwargs,
+    ) -> Dict[str, Any]:
+        """Check if recompilation is needed for any reason and provide details.
+
+        Args:
+            input_schema: Input schema to check
+            output_schema: Output schema to check
+            config_schema: Config schema to check
+            interrupt_before: Interrupt before configuration to check
+            interrupt_after: Interrupt after configuration to check
+            **compile_kwargs: Additional compilation parameters to check
+
+        Returns:
+            Dictionary with recompilation status and reasons
+        """
+        reasons = []
+
+        # Check structural changes
+        if self.needs_recompile_flag:
+            reasons.append("Graph structure has changed")
+
+        # Check schema changes
+        if input_schema != self.last_input_schema:
+            reasons.append(
+                f"Input schema changed: {self.last_input_schema} -> {input_schema}"
+            )
+        if output_schema != self.last_output_schema:
+            reasons.append(
+                f"Output schema changed: {self.last_output_schema} -> {output_schema}"
+            )
+        if config_schema != self.last_config_schema:
+            reasons.append(
+                f"Config schema changed: {self.last_config_schema} -> {config_schema}"
+            )
+
+        # Check interrupt changes
+        if interrupt_before != self.last_interrupt_before:
+            reasons.append(
+                f"Interrupt before changed: {self.last_interrupt_before} -> {interrupt_before}"
+            )
+        if interrupt_after != self.last_interrupt_after:
+            reasons.append(
+                f"Interrupt after changed: {self.last_interrupt_after} -> {interrupt_after}"
+            )
+
+        # Check kwargs changes
+        last_kwargs = self.last_compile_kwargs or {}
+        if compile_kwargs != last_kwargs:
+            reasons.append(f"Compile kwargs changed: {last_kwargs} -> {compile_kwargs}")
+
+        return {
+            "needs_recompile": len(reasons) > 0,
+            "reasons": reasons,
+            "structural_changes": self.needs_recompile_flag,
+            "schema_changes": input_schema != self.last_input_schema
+            or output_schema != self.last_output_schema
+            or config_schema != self.last_config_schema,
+            "interrupt_changes": interrupt_before != self.last_interrupt_before
+            or interrupt_after != self.last_interrupt_after,
+            "kwargs_changes": compile_kwargs != last_kwargs,
+        }
+
+    def set_state_schema(self, schema: Optional[Type[BaseModel]]) -> "BaseGraph":
+        """Set the state schema and mark the graph as needing recompilation.
+
+        Args:
+            schema: New state schema to use
+
+        Returns:
+            Self for method chaining
+        """
+        old_schema = self.state_schema
+        self.state_schema = schema
+
+        if old_schema != schema:
+            self._mark_needs_recompile(
+                f"Changed state schema from {old_schema} to {schema}"
+            )
+
+        return self
+
     def _infer_node_type(self, node: Any) -> NodeType:
         """
         Infer the node type from a node object.
@@ -321,6 +601,7 @@ class BaseGraph(BaseModel, ValidationMixin):
             # If node_like is None, store it directly (useful for pattern placeholders)
             if node_like is None and not kwargs:
                 self.nodes[name] = None
+                self._mark_needs_recompile(f"Added placeholder node '{name}'")
                 return self
 
             # Prepare node data
@@ -345,6 +626,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                 )
 
                 self.updated_at = datetime.now()
+                self._mark_needs_recompile(f"Added NodeConfig node '{name}'")
                 return self
             elif isinstance(node_like, Node):
                 # Use existing node with new name
@@ -428,6 +710,7 @@ class BaseGraph(BaseModel, ValidationMixin):
 
             logger.debug(f"Added NodeConfig '{name}' to graph '{self.name}'")
             self.updated_at = datetime.now()
+            self._mark_needs_recompile(f"Added NodeConfig '{name}'")
             return self
         else:
             raise TypeError(f"Unsupported node type: {type(node_or_name)}")
@@ -445,6 +728,7 @@ class BaseGraph(BaseModel, ValidationMixin):
         logger.debug(f"Added node '{node_obj.name}' to graph '{self.name}'")
 
         self.updated_at = datetime.now()
+        self._mark_needs_recompile(f"Added node '{node_obj.name}'")
         return self
 
     def _track_node_type(
@@ -871,6 +1155,7 @@ class BaseGraph(BaseModel, ValidationMixin):
 
         logger.debug(f"Removed node '{node_name}' from graph '{self.name}'")
         self.updated_at = datetime.now()
+        self._mark_needs_recompile(f"Removed node '{node_name}'")
         return self
 
     def get_node(self, node_name: str) -> Optional[Any]:
@@ -1650,6 +1935,7 @@ class BaseGraph(BaseModel, ValidationMixin):
         logger.debug(f"Added edge {source} -> {target} to graph '{self.name}'")
 
         self.updated_at = datetime.now()
+        self._mark_needs_recompile(f"Added edge {source} -> {target}")
         return self
 
     def remove_edge(self, source: str, target: Optional[str] = None) -> "BaseGraph":
@@ -1677,6 +1963,7 @@ class BaseGraph(BaseModel, ValidationMixin):
             logger.debug(f"Removed all edges from {source} in graph '{self.name}'")
 
         self.updated_at = datetime.now()
+        self._mark_needs_recompile(f"Removed edges from {source}")
         return self
 
     def get_edges(
@@ -2468,6 +2755,7 @@ class BaseGraph(BaseModel, ValidationMixin):
 
         logger.debug(f"Branch '{branch_name}' added successfully!")
         self.updated_at = datetime.now()
+        self._mark_needs_recompile(f"Added conditional edges from '{source_node}'")
         return self
 
     def _create_validation_wrapper(self, validation_config, destination_map):
@@ -3171,7 +3459,13 @@ class BaseGraph(BaseModel, ValidationMixin):
         3. If only input_schema provided: use it for both input and state, output defaults to state
         4. If only output_schema provided: use it for both output and state, input defaults to state
         5. If none provided: use self.state_schema or dict
+
+        Note: This method marks the graph as compiled after successful conversion.
         """
+        # Check if recompilation is needed
+        if self.needs_recompile():
+            logger.info(f"Graph '{self.name}' needs recompilation")
+
         try:
             from langgraph.graph import StateGraph
 
@@ -3538,6 +3832,10 @@ class BaseGraph(BaseModel, ValidationMixin):
                         raise
 
             logger.success("LangGraph conversion complete!")
+
+            # Mark the graph as compiled since conversion was successful
+            self.mark_compiled()
+
             return graph_builder
 
         except ImportError:

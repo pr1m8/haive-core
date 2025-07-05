@@ -33,20 +33,47 @@ class SchemaGraph(BaseGraph, GraphSchemaMixin[StateLike, Optional[ConfigLike]]):
         Returns:
             LangGraph StateGraph instance
         """
-        return convert_to_langgraph(self, self.state_schema)
+        langgraph = convert_to_langgraph(self, self.state_schema)
 
-    def compile(self) -> StateGraph:
+        # Mark as compiled in BaseGraph tracking
+        self.mark_compiled(
+            input_schema=getattr(self, "input_schema", None),
+            output_schema=getattr(self, "output_schema", None),
+            config_schema=getattr(self, "config_schema", None),
+        )
+
+        return langgraph
+
+    def compile(self, **kwargs) -> StateGraph:
         """
         Validate and compile the graph to a runnable StateGraph.
+
+        Args:
+            **kwargs: Additional compilation arguments (checkpointer, interrupt_before, etc.)
 
         Returns:
             Compiled LangGraph StateGraph
         """
-        # Mark as compiled in BaseGraph
-        super().compile()
+        # Extract interrupt parameters for tracking
+        interrupt_before = kwargs.get("interrupt_before")
+        interrupt_after = kwargs.get("interrupt_after")
+
+        # Mark as compiled in BaseGraph with compilation parameters
+        self.mark_compiled(
+            input_schema=getattr(self, "input_schema", None),
+            output_schema=getattr(self, "output_schema", None),
+            config_schema=getattr(self, "config_schema", None),
+            interrupt_before=interrupt_before,
+            interrupt_after=interrupt_after,
+            **{
+                k: v
+                for k, v in kwargs.items()
+                if k not in ["interrupt_before", "interrupt_after"]
+            },
+        )
 
         # Convert to LangGraph and compile
-        return self.to_langgraph().compile()
+        return self.to_langgraph().compile(**kwargs)
 
     def display(self):
         """

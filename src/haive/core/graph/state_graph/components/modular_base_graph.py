@@ -92,17 +92,18 @@ class ModularBaseGraph(BaseModel, ValidationMixin):
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
 
-    # Exclude components from serialization
-    _component_registry: ComponentRegistry = Field(exclude=True, default=None)
-    _node_manager: NodeManager = Field(exclude=True, default=None)
-    _edge_manager: EdgeManager = Field(exclude=True, default=None)
-    _branch_manager: BranchManager = Field(exclude=True, default=None)
+    # Pydantic v2 configuration
+    model_config = {
+        "extra": "forbid",
+        "validate_assignment": True,
+        "arbitrary_types_allowed": True,
+    }
 
-    class Config:
-        """Pydantic configuration."""
-
-        validate_assignment = True
-        arbitrary_types_allowed = True
+    # Private attributes (not Pydantic fields)
+    _component_registry: Optional[ComponentRegistry] = None
+    _node_manager: Optional[NodeManager] = None
+    _edge_manager: Optional[EdgeManager] = None
+    _branch_manager: Optional[BranchManager] = None
 
     def __init__(self, **data):
         """Initialize modular graph with components."""

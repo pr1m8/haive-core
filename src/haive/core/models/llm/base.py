@@ -11,8 +11,10 @@ with support for model metadata, context windows, and capabilities.
 
 import logging
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Sequence, Union
 
+from langchain.chat_models.base import BaseChatModel
+from langchain_core.messages import AnyMessage, BaseMessage
 from pydantic import BaseModel, Field, SecretStr, field_validator, model_validator
 
 # Import the mixins
@@ -324,7 +326,7 @@ class LLMConfig(SecureConfigMixin, ModelMetadataMixin, RateLimitingMixin, BaseMo
             "deprecation_date": deprecation_date,
         }
 
-    def instantiate(self, **kwargs) -> Any:
+    def instantiate(self, **kwargs) -> BaseChatModel:
         """Abstract method to instantiate the configured LLM.
 
         This method must be implemented by all provider-specific subclasses
@@ -347,6 +349,294 @@ class LLMConfig(SecureConfigMixin, ModelMetadataMixin, RateLimitingMixin, BaseMo
 
         llm = self.instantiate()
         return LLMGraphTransformer(llm=llm)
+
+    def get_num_tokens_from_messages(
+        self,
+        messages: Sequence[AnyMessage],
+        tools: Optional[Sequence[Dict[str, Any]]] = None,
+    ) -> int:
+        """
+        Count tokens in a sequence of messages.
+
+        This method instantiates the model temporarily to count tokens,
+        preserving the serializability of the configuration object.
+
+        Args:
+            messages: Sequence of chat messages (HumanMessage, AIMessage, etc.)
+            tools: Optional sequence of function schemas for tool calls
+
+        Returns:
+            Integer count of tokens across all messages
+
+        Example:
+            ```python
+            from langchain_core.messages import HumanMessage, AIMessage
+
+            config = OpenAILLMConfig(model="gpt-3.5-turbo")
+            messages = [
+                HumanMessage(content="Translate 'Hello' to French."),
+                AIMessage(content="Bonjour"),
+            ]
+
+            token_count = config.get_num_tokens_from_messages(messages)
+            print(f"Total tokens: {token_count}")
+            ```
+        """
+        try:
+            llm = self.instantiate()
+            if hasattr(llm, "get_num_tokens_from_messages"):
+                return llm.get_num_tokens_from_messages(messages, tools=tools)
+            else:
+                # Fallback: estimate based on string length if method not available
+                total_content = ""
+                for msg in messages:
+                    if hasattr(msg, "content"):
+                        total_content += str(msg.content) + " "
+
+                # Rough estimation: ~4 characters per token
+                return len(total_content) // 4
+        except Exception as e:
+            logger.warning(f"Error counting tokens from messages: {e}")
+            # Fallback estimation
+            total_content = ""
+            for msg in messages:
+                if hasattr(msg, "content"):
+                    total_content += str(msg.content) + " "
+            return len(total_content) // 4
+
+    def get_num_tokens(self, text: str) -> int:
+        """
+        Count tokens in a single text string.
+
+        This method instantiates the model temporarily to count tokens,
+        preserving the serializability of the configuration object.
+
+        Args:
+            text: Raw text string to count tokens for
+
+        Returns:
+            Integer count of tokens in the text
+
+        Example:
+            ```python
+            config = OpenAILLMConfig(model="gpt-3.5-turbo")
+            text = "Hello, world!"
+            token_count = config.get_num_tokens(text)
+            print(f"Tokens in text: {token_count}")
+            ```
+        """
+        try:
+            llm = self.instantiate()
+            if hasattr(llm, "get_num_tokens"):
+                return llm.get_num_tokens(text)
+            else:
+                # Fallback: rough estimation based on string length
+                return len(text) // 4
+        except Exception as e:
+            logger.warning(f"Error counting tokens from text: {e}")
+            # Fallback estimation: ~4 characters per token
+            return len(text) // 4
+
+    def estimate_cost_from_messages(
+        self,
+        messages: Sequence[AnyMessage],
+        tools: Optional[Sequence[Dict[str, Any]]] = None,
+        include_output_estimate: bool = True,
+        estimated_output_tokens: Optional[int] = None,
+    ) -> Dict[str, float]:
+        """
+        Estimate the cost of processing messages with this model.
+
+        This method combines token counting with pricing metadata to estimate costs
+        before making API calls, helping with budget management and cost optimization.
+
+        Args:
+            messages: Sequence of chat messages
+            tools: Optional sequence of function schemas for tool calls
+            include_output_estimate: Whether to include estimated output costs
+            estimated_output_tokens: Manual override for output token estimation
+
+        Returns:
+            Dictionary with cost breakdown:
+            {
+                "input_tokens": int,
+                "input_cost": float,
+                "estimated_output_tokens": int,
+                "estimated_output_cost": float,
+                "total_estimated_cost": float
+            }
+
+        Example:
+            ```python
+            from langchain_core.messages import HumanMessage
+
+            config = OpenAILLMConfig(model="gpt-4")
+            messages = [HumanMessage(content="Write a short story about AI.")]
+
+            cost_estimate = config.estimate_cost_from_messages(messages)
+            print(f"Estimated total cost: ${cost_estimate['total_estimated_cost']:.6f}")
+            ```
+        """
+        try:
+            # Count input tokens
+            input_tokens = self.get_num_tokens_from_messages(messages, tools=tools)
+
+            # Get pricing information
+            input_cost_per_token, output_cost_per_token = self.get_token_pricing()
+
+            # Calculate input cost
+            input_cost = input_tokens * input_cost_per_token
+
+            # Estimate output tokens and cost
+            estimated_output_tokens = estimated_output_tokens or (
+                max(100, input_tokens // 4) if include_output_estimate else 0
+            )
+            estimated_output_cost = estimated_output_tokens * output_cost_per_token
+
+            total_estimated_cost = input_cost + estimated_output_cost
+
+            return {
+                "input_tokens": input_tokens,
+                "input_cost": input_cost,
+                "estimated_output_tokens": estimated_output_tokens,
+                "estimated_output_cost": estimated_output_cost,
+                "total_estimated_cost": total_estimated_cost,
+            }
+
+        except Exception as e:
+            logger.warning(f"Error estimating cost from messages: {e}")
+            return {
+                "input_tokens": 0,
+                "input_cost": 0.0,
+                "estimated_output_tokens": 0,
+                "estimated_output_cost": 0.0,
+                "total_estimated_cost": 0.0,
+            }
+
+    def estimate_cost_from_text(
+        self,
+        text: str,
+        include_output_estimate: bool = True,
+        estimated_output_tokens: Optional[int] = None,
+    ) -> Dict[str, float]:
+        """
+        Estimate the cost of processing a single text string.
+
+        Args:
+            text: Raw text string to estimate cost for
+            include_output_estimate: Whether to include estimated output costs
+            estimated_output_tokens: Manual override for output token estimation
+
+        Returns:
+            Dictionary with cost breakdown (same format as estimate_cost_from_messages)
+
+        Example:
+            ```python
+            config = AnthropicLLMConfig(model="claude-3-opus-20240229")
+            text = "Explain quantum computing in simple terms."
+
+            cost_estimate = config.estimate_cost_from_text(text)
+            print(f"Input cost: ${cost_estimate['input_cost']:.6f}")
+            ```
+        """
+        try:
+            # Count input tokens
+            input_tokens = self.get_num_tokens(text)
+
+            # Get pricing information
+            input_cost_per_token, output_cost_per_token = self.get_token_pricing()
+
+            # Calculate input cost
+            input_cost = input_tokens * input_cost_per_token
+
+            # Estimate output tokens and cost
+            estimated_output_tokens = estimated_output_tokens or (
+                max(100, input_tokens // 4) if include_output_estimate else 0
+            )
+            estimated_output_cost = estimated_output_tokens * output_cost_per_token
+
+            total_estimated_cost = input_cost + estimated_output_cost
+
+            return {
+                "input_tokens": input_tokens,
+                "input_cost": input_cost,
+                "estimated_output_tokens": estimated_output_tokens,
+                "estimated_output_cost": estimated_output_cost,
+                "total_estimated_cost": total_estimated_cost,
+            }
+
+        except Exception as e:
+            logger.warning(f"Error estimating cost from text: {e}")
+            return {
+                "input_tokens": 0,
+                "input_cost": 0.0,
+                "estimated_output_tokens": 0,
+                "estimated_output_cost": 0.0,
+                "total_estimated_cost": 0.0,
+            }
+
+    def check_context_window_fit(
+        self,
+        messages: Sequence[AnyMessage],
+        tools: Optional[Sequence[Dict[str, Any]]] = None,
+        reserve_output_tokens: int = 1000,
+    ) -> Dict[str, Union[bool, int]]:
+        """
+        Check if messages fit within the model's context window.
+
+        This method helps prevent "context length exceeded" errors by validating
+        message length before making API calls.
+
+        Args:
+            messages: Sequence of chat messages to check
+            tools: Optional sequence of function schemas for tool calls
+            reserve_output_tokens: Number of tokens to reserve for output
+
+        Returns:
+            Dictionary with fit analysis:
+            {
+                "fits": bool,
+                "input_tokens": int,
+                "context_window": int,
+                "available_tokens": int,
+                "tokens_over_limit": int  # 0 if fits, positive if over
+            }
+
+        Example:
+            ```python
+            config = OpenAILLMConfig(model="gpt-3.5-turbo")
+
+            # Check if messages fit
+            fit_check = config.check_context_window_fit(messages)
+            if not fit_check["fits"]:
+                print(f"Messages exceed context window by {fit_check['tokens_over_limit']} tokens")
+            ```
+        """
+        try:
+            input_tokens = self.get_num_tokens_from_messages(messages, tools=tools)
+            context_window = self.get_context_window()
+            available_tokens = context_window - reserve_output_tokens
+
+            fits = input_tokens <= available_tokens
+            tokens_over_limit = max(0, input_tokens - available_tokens)
+
+            return {
+                "fits": fits,
+                "input_tokens": input_tokens,
+                "context_window": context_window,
+                "available_tokens": available_tokens,
+                "tokens_over_limit": tokens_over_limit,
+            }
+
+        except Exception as e:
+            logger.warning(f"Error checking context window fit: {e}")
+            return {
+                "fits": False,
+                "input_tokens": 0,
+                "context_window": 0,
+                "available_tokens": 0,
+                "tokens_over_limit": 0,
+            }
 
 
 class AzureLLMConfig(LLMConfig):

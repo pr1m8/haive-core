@@ -856,3 +856,23 @@ class ToolRouteMixin(BaseModel):
 
         logger.debug(f"Updated route for '{tool_name}': {old_route} -> {new_route}")
         return self
+
+    def _get_tool_name(self, tool: Any, index: int) -> str:
+        """Get a standardized tool name for a tool.
+
+        Args:
+            tool: Tool instance to name
+            index: Index/position of tool for fallback naming
+
+        Returns:
+            Standardized tool name
+        """
+        # Try to get name from tool
+        if hasattr(tool, "name") and tool.name:
+            return tool.name
+        elif isinstance(tool, type) and hasattr(tool, "__name__"):
+            return tool.__name__
+        elif hasattr(tool, "__name__"):
+            return tool.__name__
+        else:
+            return f"tool_{index}"

@@ -12,10 +12,7 @@ Universal interface for AI components:
 Graph System
 ------------
 Dynamic workflow builder:
-- **DynamicGraph**: Compose workflows programmatically
-- **StateGraph**: LangGraph integration
-- **NodeFactory**: Create nodes from engines
-- **ToolManager**: Dynamic tool management
+- **BaseGraph**: Foundation for graph-based workflows
 
 Schema System
 -------------
@@ -34,14 +31,14 @@ Conversation and state persistence:
 Quick Start
 -----------
 >>> from haive.core.engine import AugLLMConfig
->>> from haive.core.graph import DynamicGraph
+>>> from haive.core.graph import BaseGraph
 >>>
 >>> # Create an enhanced LLM
 >>> llm = AugLLMConfig(model="gpt-4", temperature=0.7)
 >>>
 >>> # Build a workflow
->>> graph = DynamicGraph()
->>> graph.add_node("agent", llm)
+>>> graph = BaseGraph()
+>>> # Add nodes to graph as needed
 
 See Also
 --------
@@ -63,9 +60,7 @@ from haive.core.engine import (
     NonInvokableEngine,
 )
 from haive.core.graph import (
-    DynamicGraph,
-    StateGraph,
-    ToolManager,
+    BaseGraph,
 )
 from haive.core.schema import (
     BasicAgentState,
@@ -83,9 +78,7 @@ __all__ = [
     "AugLLMConfig",
     "AugLLMFactory",
     # Graph system
-    "DynamicGraph",
-    "StateGraph",
-    "ToolManager",
+    "BaseGraph",
     # Schema system
     "SchemaComposer",
     "BasicAgentState",

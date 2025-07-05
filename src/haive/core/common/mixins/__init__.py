@@ -39,6 +39,7 @@ from haive.core.common.mixins.identifier import IdentifierMixin
 from haive.core.common.mixins.rich_logger_mixin import RichLoggerMixin
 from haive.core.common.mixins.secure_config import SecureConfigMixin
 from haive.core.common.mixins.state_interface_mixin import StateInterfaceMixin
+from haive.core.common.mixins.structured_output_mixin import StructuredOutputMixin
 from haive.core.common.mixins.tool_list_mixin import ToolListMixin
 from haive.core.common.mixins.tool_route_mixin import ToolRouteMixin
 
@@ -50,6 +51,7 @@ __all__ = [
     "IdentifierMixin",
     "SecureConfigMixin",
     "StateInterfaceMixin",
+    "StructuredOutputMixin",
     "ToolListMixin",
     "ToolRouteMixin",
     "RichLoggerMixin",

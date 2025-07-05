@@ -8,7 +8,7 @@ import re
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Type
 
-from pydantic import BaseModel, create_model
+from pydantic import BaseModel, ConfigDict, create_model
 
 from haive.core.utils.haive_discovery.component_info import ComponentInfo
 
@@ -139,17 +139,43 @@ class ComponentAnalyzer(ABC):
                     param.annotation if param.annotation != inspect._empty else Any
                 )
                 default = param.default if param.default != inspect._empty else ...
+
+                # Handle complex types that might cause issues
+                try:
+                    if hasattr(param_type, "__origin__"):
+                        # For generic types like Dict[str, Tuple[Type, Any]], simplify to basic types
+                        type_str = str(param_type)
+                        if "Dict" in type_str:
+                            param_type = dict
+                        elif "List" in type_str:
+                            param_type = list
+                        elif "Optional" in type_str:
+                            param_type = Any
+                except Exception:
+                    # If type inspection fails, use Any as fallback
+                    param_type = Any
+
                 fields[name] = (param_type, default)
 
-            config_dict = (
-                {"arbitrary_types_allowed": True} if force_serializable else {}
+            config = (
+                ConfigDict(arbitrary_types_allowed=True) if force_serializable else None
             )
 
             return create_model(
                 f"{cls.__name__}Args",
-                __config__=type("Config", (), config_dict) if config_dict else None,
+                __config__=config,
                 **fields,
             )
         except Exception as e:
             logger.warning(f"Error creating Pydantic model for {cls.__name__}: {e}")
-            return create_model(f"{cls.__name__}Args")
+            # Return a minimal model with just basic fields as fallback
+            try:
+                return create_model(
+                    f"{cls.__name__}Args",
+                    __config__=ConfigDict(arbitrary_types_allowed=True),
+                    args=(Any, None),
+                    kwds=(Any, None),
+                )
+            except Exception as fallback_error:
+                logger.warning(f"Fallback model creation also failed: {fallback_error}")
+                return create_model(f"{cls.__name__}Args")

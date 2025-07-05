@@ -4,8 +4,7 @@ Component information data model with serialization support.
 
 import json
 import logging
-from dataclasses import asdict, dataclass
-from datetime import datetime
+from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
@@ -181,7 +180,7 @@ class ComponentInfo:
             content.append("## Engine Configuration")
             content.append("This component can be used as a Haive engine:")
             content.append("```python")
-            content.append(f"# Example engine usage")
+            content.append("# Example engine usage")
             content.append(f"engine = {self.class_name}Engine(name='{self.name}')")
             content.append("```")
             content.append("")
