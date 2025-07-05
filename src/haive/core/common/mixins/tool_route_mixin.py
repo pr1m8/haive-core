@@ -35,8 +35,20 @@ Usage:
     ```
 """
 
+import inspect
 import logging
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    Union,
+    get_type_hints,
+)
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 from rich.console import Console
@@ -96,6 +108,18 @@ class ToolRouteMixin(BaseModel):
         default=None,
         description="Optional callable to validate tools before routing",
         exclude=True,  # Exclude from serialization
+    )
+
+    # NEW: Actual tool storage
+    tools: List[Any] = Field(
+        default_factory=list,
+        description="List of tools (BaseTool, StructuredTool, Pydantic models, callables)",
+    )
+
+    # NEW: Tool instance mapping for quick lookup
+    tool_instances: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Mapping of tool names to actual tool instances",
     )
 
     def set_tool_route(
@@ -303,6 +327,12 @@ class ToolRouteMixin(BaseModel):
                 "module": getattr(tool, "__module__", "unknown"),
                 "tool_type": "pydantic_model",
             }
+            # Check if it has __call__ method (executable tool)
+            if hasattr(tool, "__call__") and callable(getattr(tool, "__call__")):
+                metadata["is_executable"] = True
+                route = "pydantic_tool"
+            else:
+                metadata["is_executable"] = False
         elif hasattr(tool, "__class__") and "BaseTool" in str(tool.__class__.__mro__):
             route = "langchain_tool"
             metadata = {
@@ -315,11 +345,60 @@ class ToolRouteMixin(BaseModel):
                 "callable_type": type(tool).__name__,
                 "has_annotations": hasattr(tool, "__annotations__"),
             }
+            # Enhanced callable analysis
+            metadata.update(self._get_callable_metadata(tool))
         else:
             route = "unknown"
             metadata = {"original_type": type(tool).__name__}
 
         return route, metadata
+
+    def _get_callable_metadata(self, callable_obj: Callable) -> Dict[str, Any]:
+        """Extract enhanced metadata from callable objects.
+
+        Args:
+            callable_obj: Callable to analyze
+
+        Returns:
+            Dictionary of metadata
+        """
+        metadata = {}
+
+        try:
+            # Check if async
+            metadata["is_async"] = inspect.iscoroutinefunction(callable_obj)
+
+            # Get signature
+            sig = inspect.signature(callable_obj)
+            metadata["parameters"] = list(sig.parameters.keys())
+            metadata["parameter_count"] = len(sig.parameters)
+
+            # Check for type hints
+            try:
+                hints = get_type_hints(callable_obj)
+                metadata["has_type_hints"] = bool(hints)
+                metadata["has_return_type"] = "return" in hints
+            except Exception:
+                metadata["has_type_hints"] = False
+                metadata["has_return_type"] = False
+
+            # Determine callable kind
+            if inspect.ismethod(callable_obj):
+                metadata["callable_kind"] = "method"
+            elif inspect.isfunction(callable_obj):
+                metadata["callable_kind"] = "function"
+            elif (
+                hasattr(callable_obj, "__name__")
+                and callable_obj.__name__ == "<lambda>"
+            ):
+                metadata["callable_kind"] = "lambda"
+            else:
+                metadata["callable_kind"] = "callable_object"
+
+        except Exception as e:
+            logger.debug(f"Error analyzing callable: {e}")
+
+        return metadata
 
     def add_tools_to_category(
         self, category: str, tools: List[Any]
@@ -664,4 +743,116 @@ class ToolRouteMixin(BaseModel):
             console.print(metadata_table)
 
         console.print("=" * 80 + "\n")
+        return self
+
+    def add_tool(
+        self,
+        tool: Any,
+        route: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> "ToolRouteMixin":
+        """Add a tool with automatic routing and metadata.
+
+        Args:
+            tool: Tool instance to add
+            route: Optional explicit route (auto-detected if not provided)
+            metadata: Optional metadata for the tool
+
+        Returns:
+            Self for method chaining
+        """
+        # Get tool name
+        tool_name = self._get_tool_name(tool, len(self.tools))
+
+        # Add to tools list if not already there
+        if tool not in self.tools:
+            self.tools.append(tool)
+
+        # Store tool instance
+        self.tool_instances[tool_name] = tool
+
+        # Determine route if not provided
+        if route is None:
+            route, auto_metadata = self._analyze_tool(tool)
+            if metadata:
+                metadata.update(auto_metadata or {})
+            else:
+                metadata = auto_metadata
+
+        # Set route and metadata
+        self.set_tool_route(tool_name, route, metadata)
+
+        logger.debug(f"Added tool '{tool_name}' with route '{route}'")
+        return self
+
+    def get_tool(self, tool_name: str) -> Optional[Any]:
+        """Get a tool instance by name.
+
+        Args:
+            tool_name: Name of the tool
+
+        Returns:
+            Tool instance or None if not found
+        """
+        return self.tool_instances.get(tool_name)
+
+    def get_tools_by_route(self, route: str) -> List[Any]:
+        """Get all tools with a specific route.
+
+        Args:
+            route: Route to filter by
+
+        Returns:
+            List of tools with that route
+        """
+        tools = []
+        for name, tool_route in self.tool_routes.items():
+            if tool_route == route:
+                tool = self.get_tool(name)
+                if tool:
+                    tools.append(tool)
+        return tools
+
+    def clear_tools(self) -> "ToolRouteMixin":
+        """Clear all tools and routes.
+
+        Returns:
+            Self for method chaining
+        """
+        self.tools.clear()
+        self.tool_instances.clear()
+        self.tool_routes.clear()
+        self.tool_metadata.clear()
+        logger.debug("Cleared all tools and routes")
+        return self
+
+    def update_tool_route(self, tool_name: str, new_route: str) -> "ToolRouteMixin":
+        """Update an existing tool's route dynamically.
+
+        Args:
+            tool_name: Name of the tool to update
+            new_route: New route to assign
+
+        Returns:
+            Self for method chaining
+        """
+        if tool_name not in self.tool_routes:
+            logger.warning(f"Tool '{tool_name}' not found in routes")
+            return self
+
+        old_route = self.tool_routes[tool_name]
+        self.tool_routes[tool_name] = new_route
+
+        # Update metadata to track changes
+        if tool_name not in self.tool_metadata:
+            self.tool_metadata[tool_name] = {}
+
+        self.tool_metadata[tool_name].update(
+            {
+                "route_updated": True,
+                "previous_route": old_route,
+            }
+        )
+
+        logger.debug(f"Updated route for '{tool_name}': {old_route} -> {new_route}")
         return self
