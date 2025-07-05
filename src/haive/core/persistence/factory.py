@@ -6,11 +6,21 @@ import random
 import time
 from typing import Any, Dict, Optional
 
-from langgraph.checkpoint.postgres import PostgresSaver, ShallowPostgresSaver
-from langgraph.checkpoint.postgres.aio import (
-    AsyncPostgresSaver,
-    AsyncShallowPostgresSaver,
-)
+# Check if PostgreSQL is available
+try:
+    from langgraph.checkpoint.postgres import ShallowPostgresSaver
+    from langgraph.checkpoint.postgres.aio import AsyncShallowPostgresSaver
+
+    from haive.core.persistence.postgres_saver_override import (
+        AsyncPostgresSaverNoPreparedStatements as AsyncPostgresSaver,
+    )
+    from haive.core.persistence.postgres_saver_override import (
+        PostgresSaverNoPreparedStatements as PostgresSaver,
+    )
+
+    POSTGRES_AVAILABLE = True
+except ImportError:
+    POSTGRES_AVAILABLE = False
 
 from haive.core.persistence.postgres_config import PostgresCheckpointerConfig
 

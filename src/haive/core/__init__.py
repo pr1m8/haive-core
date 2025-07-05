@@ -1,51 +1,92 @@
-"""
-Haive Core Package
+"""Haive Core - Foundation for the Haive AI Agent Framework
 
-Provides core functionality for the haive framework including:
-- Logging management with automatic source tracking
-- Engine components
-- Graph builders
-- Model abstractions
+This package provides the core building blocks for creating AI agents:
+
+Engine System
+-------------
+Universal interface for AI components:
+- **InvokableEngine**: For LLMs, retrievers, and tools
+- **AugLLM**: Enhanced LLM with tools and structured output
+- **EngineConfig**: Runtime configuration management
+
+Graph System
+------------
+Dynamic workflow builder:
+- **DynamicGraph**: Compose workflows programmatically
+- **StateGraph**: LangGraph integration
+- **NodeFactory**: Create nodes from engines
+- **ToolManager**: Dynamic tool management
+
+Schema System
+-------------
+Intelligent state management:
+- **SchemaBuilder**: Auto-generate schemas
+- **StateComposer**: Merge and manage states
+- **Reducers**: Define state update logic
+
+Persistence
+-----------
+Conversation and state persistence:
+- **PostgreSQL/Supabase**: Auto-persistence support
+- **Checkpointers**: Save/restore agent state
+- **Thread management**: Conversation continuity
+
+Quick Start
+-----------
+>>> from haive.core.engine import AugLLMConfig
+>>> from haive.core.graph import DynamicGraph
+>>>
+>>> # Create an enhanced LLM
+>>> llm = AugLLMConfig(model="gpt-4", temperature=0.7)
+>>>
+>>> # Build a workflow
+>>> graph = DynamicGraph()
+>>> graph.add_node("agent", llm)
+
+See Also
+--------
+- haive.agents: Pre-built agent implementations
+- haive.tools: Tool library
+- haive.core.engine: Engine system documentation
+- haive.core.graph: Graph building guide
 """
 
 # Set version
 __version__ = "0.1.0"
-"""
-# Monkey-patch rich print if requested before ANY imports
-import os
-if os.getenv("HAIVE_NO_RICH"):
-    try:
-        import rich
-        rich.print = lambda *args, **kwargs: None
-        # Also create a no-op rprint
-        import sys
-        sys.modules['rprint'] = type(sys)('rprint')
-        sys.modules['rprint'].rprint = lambda *args, **kwargs: None
-    except ImportError:
-        pass
 
-# Auto-configure logging to reduce clutter AND show sources
-try:
-    from haive.core.logging.auto_config import auto_configure_logging
-    
-    # Apply default configuration WITH source tracking
-    # This happens silently - no messages printed
-    auto_configure_logging(preset="default", use_source_formatter=True)
-    
-    # Only enable print tracking if explicitly requested
-    if os.getenv("HAIVE_TRACK_PRINTS"):
-        from haive.core.logging.quick_setup import intercept_prints_silent
-        intercept_prints_silent()
-    
-    # Redirect rich print to logging if quiet mode requested
-    if os.getenv("HAIVE_QUIET_RICH"):
-        from haive.core.logging.quick_setup import redirect_rich_print_to_logging
-        redirect_rich_print_to_logging()
-    
-except ImportError:
-    # Logging not available yet - that's okay
-    pass
+# Core imports for convenience
+from haive.core.engine import (
+    AugLLMConfig,
+    AugLLMFactory,
+    Engine,
+    InvokableEngine,
+    NonInvokableEngine,
+)
+from haive.core.graph import (
+    DynamicGraph,
+    StateGraph,
+    ToolManager,
+)
+from haive.core.schema import (
+    BasicAgentState,
+    SchemaComposer,
+)
 
-# Export version
-__all__ = ["__version__"]
-"""
+# Public API
+__all__ = [
+    # Version
+    "__version__",
+    # Engine system
+    "Engine",
+    "InvokableEngine",
+    "NonInvokableEngine",
+    "AugLLMConfig",
+    "AugLLMFactory",
+    # Graph system
+    "DynamicGraph",
+    "StateGraph",
+    "ToolManager",
+    # Schema system
+    "SchemaComposer",
+    "BasicAgentState",
+]

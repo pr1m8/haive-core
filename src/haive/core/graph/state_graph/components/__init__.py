@@ -1,41 +1,64 @@
 """Components module for the Haive state graph system.
 
-This module provides the core components used in the state graph system for building
+This module provides both legacy components and new modular components for building
 computational graphs with rich state management and control flow capabilities.
 
-The components module includes:
+Legacy Components:
     - Node: Base processing unit in a graph that handles state transformation
     - Branch: Conditional routing component for decision points in the graph
 
-These components are designed to be used both within the graph system and independently,
-allowing for flexible composition and reuse across different graph configurations.
+New Modular Components (Composition-based architecture):
+    - BaseGraphComponent: Abstract base for all graph components
+    - ComponentRegistry: Manages component lifecycle
+    - NodeManager: Handles all node operations
+    - EdgeManager: Handles direct edge operations
+    - BranchManager: Handles conditional routing and branches
+    - ModularBaseGraph: Main graph class using composition
 
 Example:
-    Creating and using components directly:
+    Using the new modular architecture:
     ```python
-    from haive.core.graph.state_graph.components import Node, Branch
-    from haive.core.graph.common.types import NodeType
-    from haive.core.graph.branches.types import BranchMode
+    from haive.core.graph.state_graph.components import ModularBaseGraph
 
-    # Create a processing node
-    node = Node(
-        name="process_data",
-        node_type=NodeType.CALLABLE,
-        metadata={"callable": lambda state: {"processed": state["input"].upper()}}
-    )
+    # Create a modular graph
+    graph = ModularBaseGraph(name="my_workflow")
 
-    # Create a decision branch
-    branch = Branch(
-        name="route_data",
-        source_node="check_data",
-        mode=BranchMode.FUNCTION,
-        function=lambda state: "valid" if len(state.get("data", "")) > 0 else "invalid",
-        destinations={"valid": "process_valid", "invalid": "handle_error"}
-    )
+    # Add nodes
+    graph.add_node("start", start_function)
+    graph.add_node("process", process_function)
+
+    # Add edges and routing
+    graph.add_edge("start", "process")
+    graph.add_conditional_edges("process", router_function, {
+        "success": "finish",
+        "error": "retry"
+    })
     ```
 """
 
-from haive.core.graph.state_graph.components.branch import Branch
-from haive.core.graph.state_graph.components.node import Node
+# New modular components
+from haive.core.graph.state_graph.components.base_component import (
+    BaseGraphComponent,
+    ComponentRegistry,
+)
 
-__all__ = ["Node", "Branch"]
+# Legacy components
+from haive.core.graph.state_graph.components.branch import Branch
+from haive.core.graph.state_graph.components.branch_manager import BranchManager
+from haive.core.graph.state_graph.components.edge_manager import EdgeManager
+from haive.core.graph.state_graph.components.modular_base_graph import ModularBaseGraph
+from haive.core.graph.state_graph.components.node import Node
+from haive.core.graph.state_graph.components.node_manager import NodeManager
+
+__all__ = [
+    # Legacy components
+    "Node",
+    "Branch",
+    # New modular components
+    "BaseGraphComponent",
+    "ComponentRegistry",
+    "NodeManager",
+    "EdgeManager",
+    "BranchManager",
+    "ModularBaseGraph",
+]

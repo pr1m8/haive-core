@@ -42,6 +42,9 @@ from haive.core.schema.multi_agent_state_schema import (
     MultiAgentStateSchema,
 )
 
+# Import prebuilt states
+from haive.core.schema.prebuilt.basic_agent_state import BasicAgentState
+
 # Import preserve messages reducer
 from haive.core.schema.preserve_messages_reducer import preserve_messages_reducer
 from haive.core.schema.schema_composer import SchemaComposer

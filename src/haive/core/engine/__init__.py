@@ -1,3 +1,4 @@
+from haive.core.engine.aug_llm import AugLLMConfig, AugLLMFactory
 from haive.core.engine.base import (
     Engine,
     EngineRegistry,
@@ -21,6 +22,8 @@ __all__ = [
     "EngineType",
     "InvokableEngine",
     "NonInvokableEngine",
+    "AugLLMConfig",
+    "AugLLMFactory",
     "BaseRetrieverConfig",
     "RetrieverType",
     "VectorStoreConfig",

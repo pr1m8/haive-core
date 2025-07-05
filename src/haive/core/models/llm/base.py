@@ -1,8 +1,12 @@
-"""
-Base LLM configuration with model metadata support.
+"""Base LLM configuration with model metadata support.
 
 This module provides base classes and implementations for LLM providers
 with support for model metadata, context windows, and capabilities.
+
+.. deprecated:: 0.2.0
+   This module is deprecated. Use :mod:`haive.core.models.llm.providers` instead.
+   The individual provider configurations have been moved to separate modules
+   for better organization and maintainability.
 """
 
 import logging
@@ -14,6 +18,7 @@ from pydantic import BaseModel, Field, SecretStr, field_validator, model_validat
 # Import the mixins
 from haive.core.common.mixins.secure_config import SecureConfigMixin
 from haive.core.models.llm.provider_types import LLMProvider
+from haive.core.models.llm.rate_limiting_mixin import RateLimitingMixin
 from haive.core.models.metadata_mixin import ModelMetadataMixin
 
 logger = logging.getLogger(__name__)
@@ -59,15 +64,46 @@ except ImportError:
     logger.debug("LangChain cache modules not available, skipping cache setup")
 
 
-class LLMConfig(BaseModel, SecureConfigMixin, ModelMetadataMixin):
-    """
-    Base configuration for Language Model providers with security and metadata support.
+class LLMConfig(SecureConfigMixin, ModelMetadataMixin, RateLimitingMixin, BaseModel):
+    """Base configuration for Language Model providers with security and metadata support.
 
     This class provides:
     1. Secure API key handling with environment variable fallbacks
     2. Model metadata access (context windows, capabilities, pricing)
     3. Common configuration parameters
     4. Graph transformation utilities
+    5. Rate limiting capabilities via RateLimitingMixin
+
+    All LLM configurations inherit from this base class, providing a consistent
+    interface for configuration, instantiation, and management of language models
+    from various providers.
+
+    Attributes:
+        provider: The LLM provider enum value
+        model: The specific model identifier
+        name: Optional friendly name for the model
+        api_key: Secure storage of API key with env fallback
+        cache_enabled: Whether to enable response caching
+        cache_ttl: Time-to-live for cached responses
+        extra_params: Additional provider-specific parameters
+        debug: Enable detailed debug output
+
+    Examples:
+        Direct instantiation (not recommended)::
+
+            config = LLMConfig(
+                provider=LLMProvider.OPENAI,
+                model="gpt-4",
+                api_key=SecretStr("your-key")
+            )
+
+        Using provider-specific config (recommended)::
+
+            config = OpenAILLMConfig(
+                model="gpt-4",
+                temperature=0.7
+            )
+            llm = config.instantiate()
     """
 
     provider: LLMProvider = Field(description="The provider of the LLM.")
@@ -88,6 +124,41 @@ class LLMConfig(BaseModel, SecureConfigMixin, ModelMetadataMixin):
         default_factory=dict, description="Optional extra parameters."
     )
     debug: bool = Field(default=False, description="Enable detailed debug output.")
+
+    # Rate limiting fields (from RateLimitingMixin)
+    requests_per_second: Optional[float] = Field(
+        default=None,
+        description="Maximum number of requests per second. None means no limit.",
+        ge=0,
+    )
+    tokens_per_second: Optional[int] = Field(
+        default=None,
+        description="Maximum number of tokens per second. None means no limit.",
+        ge=0,
+    )
+    tokens_per_minute: Optional[int] = Field(
+        default=None,
+        description="Maximum number of tokens per minute. None means no limit.",
+        ge=0,
+    )
+    max_retries: int = Field(
+        default=3,
+        description="Maximum number of retries for rate-limited requests.",
+        ge=0,
+    )
+    retry_delay: float = Field(
+        default=1.0, description="Base delay between retries in seconds.", ge=0
+    )
+    check_every_n_seconds: Optional[float] = Field(
+        default=None,
+        description="How often to check rate limits. None uses default.",
+        ge=0,
+    )
+    burst_size: Optional[int] = Field(
+        default=None,
+        description="Maximum burst size for rate limiting. None uses default.",
+        ge=1,
+    )
 
     model_config = {"arbitrary_types_allowed": True}
     model_alias: Optional[str] = Field(default=None, description="Alias for the model.")
@@ -254,8 +325,16 @@ class LLMConfig(BaseModel, SecureConfigMixin, ModelMetadataMixin):
         }
 
     def instantiate(self, **kwargs) -> Any:
-        """
-        Abstract method to be implemented by subclasses.
+        """Abstract method to instantiate the configured LLM.
+
+        This method must be implemented by all provider-specific subclasses
+        to handle the actual creation of the LLM instance.
+
+        Args:
+            **kwargs: Additional parameters to pass to the LLM constructor
+
+        Returns:
+            Instantiated LLM object ready for use
 
         Raises:
             NotImplementedError: If not overridden by a subclass
@@ -1352,6 +1431,371 @@ class VertexAILLMConfig(LLMConfig):
             raise RuntimeError(
                 f"Failed to instantiate Vertex AI model: {str(e)}"
             ) from e
+
+
+class BedrockLLMConfig(LLMConfig):
+    """Configuration for AWS Bedrock models.
+
+    AWS Bedrock provides access to foundation models from various providers
+    including Anthropic, AI21, Cohere, and Amazon's own models.
+
+    Attributes:
+        model_id: The Bedrock model ID (e.g., 'anthropic.claude-v2')
+        region_name: AWS region for Bedrock service
+        aws_access_key_id: AWS access key (optional, uses AWS credentials chain)
+        aws_secret_access_key: AWS secret key (optional, uses AWS credentials chain)
+    """
+
+    provider: LLMProvider = LLMProvider.BEDROCK
+    model: str = Field(
+        default="anthropic.claude-v2", description="Bedrock model ID.", alias="model_id"
+    )
+    region_name: str = Field(
+        default_factory=lambda: os.getenv("AWS_DEFAULT_REGION", "us-east-1"),
+        description="AWS region name.",
+    )
+    aws_access_key_id: Optional[SecretStr] = Field(
+        default_factory=lambda: SecretStr(os.getenv("AWS_ACCESS_KEY_ID", "")),
+        description="AWS access key ID.",
+    )
+    aws_secret_access_key: Optional[SecretStr] = Field(
+        default_factory=lambda: SecretStr(os.getenv("AWS_SECRET_ACCESS_KEY", "")),
+        description="AWS secret access key.",
+    )
+
+    def instantiate(self, **kwargs) -> Any:
+        """Instantiate AWS Bedrock Chat model."""
+        try:
+            from langchain_aws import ChatBedrock
+        except ImportError:
+            raise RuntimeError(
+                "langchain-aws is not installed. "
+                "Please install it with 'pip install langchain-aws'"
+            )
+
+        try:
+            params = {
+                "model_id": self.model,
+                "region_name": self.region_name,
+                **(self.extra_params or {}),
+                **kwargs,
+            }
+
+            # Only add credentials if explicitly provided
+            if self.aws_access_key_id and self.aws_access_key_id.get_secret_value():
+                params["aws_access_key_id"] = self.aws_access_key_id.get_secret_value()
+            if (
+                self.aws_secret_access_key
+                and self.aws_secret_access_key.get_secret_value()
+            ):
+                params["aws_secret_access_key"] = (
+                    self.aws_secret_access_key.get_secret_value()
+                )
+
+            return ChatBedrock(**params)
+        except Exception as e:
+            raise RuntimeError(f"Failed to instantiate Bedrock model: {str(e)}") from e
+
+
+class NVIDIALLMConfig(LLMConfig):
+    """Configuration for NVIDIA AI Endpoints models."""
+
+    provider: LLMProvider = LLMProvider.NVIDIA
+    model: str = Field(
+        default="meta/llama3-70b-instruct", description="NVIDIA model name."
+    )
+    api_key: SecretStr = Field(
+        default_factory=lambda: SecretStr(os.getenv("NVIDIA_API_KEY", "")),
+        description="API key for NVIDIA AI Endpoints.",
+    )
+    base_url: Optional[str] = Field(
+        default="https://api.nvcf.nvidia.com/v2/nvcf/pexec/functions",
+        description="NVIDIA API base URL.",
+    )
+
+    def instantiate(self, **kwargs) -> Any:
+        """Instantiate NVIDIA Chat model."""
+        try:
+            from langchain_nvidia_ai_endpoints import ChatNVIDIA
+        except ImportError:
+            raise RuntimeError(
+                "langchain-nvidia-ai-endpoints is not installed. "
+                "Please install it with 'pip install langchain-nvidia-ai-endpoints'"
+            )
+
+        if not self.get_api_key():
+            raise ValueError(
+                "NVIDIA API key is required. "
+                "Please set NVIDIA_API_KEY environment variable or provide an API key."
+            )
+
+        try:
+            return ChatNVIDIA(
+                model=self.model,
+                api_key=self.get_api_key(),
+                base_url=self.base_url,
+                **(self.extra_params or {}),
+                **kwargs,
+            )
+        except Exception as e:
+            raise RuntimeError(f"Failed to instantiate NVIDIA model: {str(e)}") from e
+
+
+class OllamaLLMConfig(LLMConfig):
+    """Configuration for Ollama local models."""
+
+    provider: LLMProvider = LLMProvider.OLLAMA
+    model: str = Field(default="llama3", description="Ollama model name.")
+    base_url: str = Field(
+        default_factory=lambda: os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
+        description="Ollama server URL.",
+    )
+    # No API key needed for local Ollama
+
+    def instantiate(self, **kwargs) -> Any:
+        """Instantiate Ollama Chat model."""
+        try:
+            from langchain_ollama import ChatOllama
+        except ImportError:
+            raise RuntimeError(
+                "langchain-ollama is not installed. "
+                "Please install it with 'pip install langchain-ollama'"
+            )
+
+        try:
+            return ChatOllama(
+                model=self.model,
+                base_url=self.base_url,
+                **(self.extra_params or {}),
+                **kwargs,
+            )
+        except Exception as e:
+            raise RuntimeError(f"Failed to instantiate Ollama model: {str(e)}") from e
+
+
+class LlamaCppLLMConfig(LLMConfig):
+    """Configuration for Llama.cpp local models."""
+
+    provider: LLMProvider = LLMProvider.LLAMACPP
+    model: str = Field(description="Path to the GGUF model file.", alias="model_path")
+    n_ctx: int = Field(default=2048, description="Context window size.")
+    n_threads: Optional[int] = Field(
+        default=None, description="Number of threads to use."
+    )
+    n_gpu_layers: int = Field(
+        default=0, description="Number of layers to offload to GPU."
+    )
+
+    def instantiate(self, **kwargs) -> Any:
+        """Instantiate Llama.cpp Chat model."""
+        try:
+            from langchain_community.chat_models import ChatLlamaCpp
+        except ImportError:
+            raise RuntimeError(
+                "langchain-community is not installed. "
+                "Please install it with 'pip install langchain-community'"
+            )
+
+        try:
+            params = {
+                "model_path": self.model,
+                "n_ctx": self.n_ctx,
+                "n_gpu_layers": self.n_gpu_layers,
+                **(self.extra_params or {}),
+                **kwargs,
+            }
+
+            if self.n_threads is not None:
+                params["n_threads"] = self.n_threads
+
+            return ChatLlamaCpp(**params)
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed to instantiate Llama.cpp model: {str(e)}"
+            ) from e
+
+
+class UpstageLLMConfig(LLMConfig):
+    """Configuration for Upstage models."""
+
+    provider: LLMProvider = LLMProvider.UPSTAGE
+    model: str = Field(default="solar-1-mini-chat", description="Upstage model name.")
+    api_key: SecretStr = Field(
+        default_factory=lambda: SecretStr(os.getenv("UPSTAGE_API_KEY", "")),
+        description="API key for Upstage.",
+    )
+
+    def instantiate(self, **kwargs) -> Any:
+        """Instantiate Upstage Chat model."""
+        try:
+            from langchain_upstage import ChatUpstage
+        except ImportError:
+            raise RuntimeError(
+                "langchain-upstage is not installed. "
+                "Please install it with 'pip install langchain-upstage'"
+            )
+
+        if not self.get_api_key():
+            raise ValueError(
+                "Upstage API key is required. "
+                "Please set UPSTAGE_API_KEY environment variable or provide an API key."
+            )
+
+        try:
+            return ChatUpstage(
+                model=self.model,
+                api_key=self.get_api_key(),
+                **(self.extra_params or {}),
+                **kwargs,
+            )
+        except Exception as e:
+            raise RuntimeError(f"Failed to instantiate Upstage model: {str(e)}") from e
+
+
+class DatabricksLLMConfig(LLMConfig):
+    """Configuration for Databricks models."""
+
+    provider: LLMProvider = LLMProvider.DATABRICKS
+    model: str = Field(
+        default="databricks-dbrx-instruct",
+        description="Databricks model name or endpoint.",
+    )
+    api_key: SecretStr = Field(
+        default_factory=lambda: SecretStr(os.getenv("DATABRICKS_API_KEY", "")),
+        description="Databricks API key.",
+        alias="databricks_api_key",
+    )
+    host: str = Field(
+        default_factory=lambda: os.getenv("DATABRICKS_HOST", ""),
+        description="Databricks workspace URL.",
+    )
+
+    def instantiate(self, **kwargs) -> Any:
+        """Instantiate Databricks Chat model."""
+        try:
+            from langchain_databricks import ChatDatabricks
+        except ImportError:
+            raise RuntimeError(
+                "langchain-databricks is not installed. "
+                "Please install it with 'pip install langchain-databricks'"
+            )
+
+        if not self.get_api_key():
+            raise ValueError(
+                "Databricks API key is required. "
+                "Please set DATABRICKS_API_KEY environment variable or provide an API key."
+            )
+
+        try:
+            return ChatDatabricks(
+                endpoint=self.model,
+                databricks_api_key=self.get_api_key(),
+                host=self.host if self.host else None,
+                **(self.extra_params or {}),
+                **kwargs,
+            )
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed to instantiate Databricks model: {str(e)}"
+            ) from e
+
+
+class WatsonxLLMConfig(LLMConfig):
+    """Configuration for IBM Watson.x models."""
+
+    provider: LLMProvider = LLMProvider.WATSONX
+    model: str = Field(
+        default="ibm/granite-13b-chat-v2", description="Watson.x model ID."
+    )
+    api_key: SecretStr = Field(
+        default_factory=lambda: SecretStr(os.getenv("WATSONX_API_KEY", "")),
+        description="IBM Cloud API key.",
+    )
+    project_id: str = Field(
+        default_factory=lambda: os.getenv("WATSONX_PROJECT_ID", ""),
+        description="Watson.x project ID.",
+    )
+    url: str = Field(
+        default_factory=lambda: os.getenv(
+            "WATSONX_URL", "https://us-south.ml.cloud.ibm.com"
+        ),
+        description="Watson.x API URL.",
+    )
+
+    def instantiate(self, **kwargs) -> Any:
+        """Instantiate Watson.x Chat model."""
+        try:
+            from langchain_ibm import ChatWatsonx
+        except ImportError:
+            raise RuntimeError(
+                "langchain-ibm is not installed. "
+                "Please install it with 'pip install langchain-ibm'"
+            )
+
+        if not self.get_api_key():
+            raise ValueError(
+                "Watson.x API key is required. "
+                "Please set WATSONX_API_KEY environment variable or provide an API key."
+            )
+
+        if not self.project_id:
+            raise ValueError(
+                "Watson.x project ID is required. "
+                "Please set WATSONX_PROJECT_ID environment variable or provide a project ID."
+            )
+
+        try:
+            return ChatWatsonx(
+                model_id=self.model,
+                api_key=self.get_api_key(),
+                project_id=self.project_id,
+                url=self.url,
+                **(self.extra_params or {}),
+                **kwargs,
+            )
+        except Exception as e:
+            raise RuntimeError(f"Failed to instantiate Watson.x model: {str(e)}") from e
+
+
+class XAILLMConfig(LLMConfig):
+    """Configuration for xAI models."""
+
+    provider: LLMProvider = LLMProvider.XAI
+    model: str = Field(default="grok-beta", description="xAI model name.")
+    api_key: SecretStr = Field(
+        default_factory=lambda: SecretStr(os.getenv("XAI_API_KEY", "")),
+        description="API key for xAI.",
+    )
+    base_url: str = Field(
+        default="https://api.x.ai/v1", description="xAI API base URL."
+    )
+
+    def instantiate(self, **kwargs) -> Any:
+        """Instantiate xAI Chat model."""
+        try:
+            from langchain_xai import ChatXAI
+        except ImportError:
+            raise RuntimeError(
+                "langchain-xai is not installed. "
+                "Please install it with 'pip install langchain-xai'"
+            )
+
+        if not self.get_api_key():
+            raise ValueError(
+                "xAI API key is required. "
+                "Please set XAI_API_KEY environment variable or provide an API key."
+            )
+
+        try:
+            return ChatXAI(
+                model=self.model,
+                api_key=self.get_api_key(),
+                base_url=self.base_url,
+                **(self.extra_params or {}),
+                **kwargs,
+            )
+        except Exception as e:
+            raise RuntimeError(f"Failed to instantiate xAI model: {str(e)}") from e
 
 
 # TODO: CONVERT OT LIST AND ADD SUPP FOR GEMINI

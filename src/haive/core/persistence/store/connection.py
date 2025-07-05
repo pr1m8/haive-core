@@ -63,7 +63,7 @@ class ConnectionManager:
                 max_size=pool_config.get("max_size", 10),
                 kwargs={
                     "autocommit": True,
-                    "prepare_threshold": 0,
+                    "prepare_threshold": None,  # Disable prepared statements
                 },
                 open=True,
             )
@@ -107,7 +107,7 @@ class ConnectionManager:
                 max_size=pool_config.get("max_size", 10),
                 kwargs={
                     "autocommit": True,
-                    "prepare_threshold": 0,
+                    "prepare_threshold": None,  # Disable prepared statements
                 },
             )
 

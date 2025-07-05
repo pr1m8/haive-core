@@ -50,6 +50,14 @@ class LLMProvider(str, Enum):
         MISTRALAI: Mistral AI language models
         GROQ: Groq language models
         VERTEX_AI: Google Vertex AI language models
+        BEDROCK: AWS Bedrock language models
+        NVIDIA: NVIDIA AI Endpoints language models
+        OLLAMA: Ollama local language models
+        LLAMACPP: Llama.cpp local language models
+        UPSTAGE: Upstage language models
+        DATABRICKS: Databricks language models
+        WATSONX: IBM Watson.x language models
+        XAI: xAI language models
     """
 
     OPENAI = "openai"
@@ -73,3 +81,11 @@ class LLMProvider(str, Enum):
     MISTRALAI = "mistralai"
     GROQ = "groq"
     VERTEX_AI = "vertex_ai"
+    BEDROCK = "bedrock"
+    NVIDIA = "nvidia"
+    OLLAMA = "ollama"
+    LLAMACPP = "llamacpp"
+    UPSTAGE = "upstage"
+    DATABRICKS = "databricks"
+    WATSONX = "watsonx"
+    XAI = "xai"
