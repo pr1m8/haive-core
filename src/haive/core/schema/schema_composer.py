@@ -319,13 +319,21 @@ class SchemaComposer:
         # Store engine
         self.engines[engine_name] = engine
 
-        # Track by type if available
+        # Track by type if available - avoid duplicates
         if engine_type:
             engine_type_str = (
                 engine_type.value if hasattr(engine_type, "value") else str(engine_type)
             )
-            self.engines_by_type[engine_type_str].append(engine_name)
-            logger.debug(f"Added engine '{engine_name}' of type '{engine_type_str}'")
+            # Only add if not already in the list (avoid duplicates)
+            if engine_name not in self.engines_by_type[engine_type_str]:
+                self.engines_by_type[engine_type_str].append(engine_name)
+                logger.debug(
+                    f"Added engine '{engine_name}' of type '{engine_type_str}'"
+                )
+            else:
+                logger.debug(
+                    f"Engine '{engine_name}' already exists in engines_by_type for type '{engine_type_str}'"
+                )
 
         # Add tracking entry
         self.processing_history.append(
@@ -1696,6 +1704,55 @@ class SchemaComposer:
             self.configure_messages_field(with_reducer=True, force_add=True)
             logger.debug("Added standard field 'messages' with reducer")
 
+    def add_engine_management(self) -> "SchemaComposer":
+        """Add standardized engine management fields to the schema.
+
+        This method adds the new engine management pattern to support:
+        - Optional 'engine' field for primary/main engine
+        - Explicit 'engines' dict field (was implicit before)
+        - Automatic synchronization between the two
+
+        This is part of the schema simplification effort to provide clearer
+        patterns for engine management while maintaining backward compatibility.
+
+        Returns:
+            Self for chaining
+        """
+        logger.debug("Adding standardized engine management fields")
+
+        # Import engine type if available
+        engine_type = Any
+        try:
+            from haive.core.engine.base import Engine
+
+            engine_type = Optional[Engine]
+        except ImportError:
+            logger.debug("Could not import Engine type, using Any")
+
+        # Add optional engine field if not present
+        if "engine" not in self.fields and "engine" not in self.base_class_fields:
+            self.add_field(
+                name="engine",
+                field_type=engine_type,
+                default=None,
+                description="Optional main/primary engine for convenience",
+                source="engine_management",
+            )
+            logger.debug("Added 'engine' field for primary engine")
+
+        # Add explicit engines dict if not present
+        if "engines" not in self.fields and "engines" not in self.base_class_fields:
+            self.add_field(
+                name="engines",
+                field_type=Dict[str, Any],
+                default_factory=dict,
+                description="Engine registry for this state (backward compatible)",
+                source="engine_management",
+            )
+            logger.debug("Added 'engines' dict field for engine registry")
+
+        return self
+
     def configure_messages_field(
         self, with_reducer: bool = True, force_add: bool = False
     ) -> "SchemaComposer":
@@ -1902,6 +1959,13 @@ class SchemaComposer:
             self._detect_base_class_requirements()
 
         base_class = self.detected_base_class
+
+        # Auto-add engine management if we have engines and using StateSchema base
+        if self.engines and issubclass(base_class, StateSchema):
+            self.add_engine_management()
+            logger.debug(
+                "Auto-added engine management fields based on detected engines"
+            )
 
         # Show what we're building
         logger.debug(

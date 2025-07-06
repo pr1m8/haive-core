@@ -80,7 +80,7 @@ from typing import (
 
 from langchain_core.messages import BaseMessage
 from langchain_core.runnables import RunnableConfig
-from pydantic import BaseModel, create_model, model_validator
+from pydantic import BaseModel, Field, create_model, model_validator
 from rich.panel import Panel
 from rich.syntax import Syntax
 from rich.table import Table
@@ -93,6 +93,11 @@ logger = get_logger(__name__)
 
 if TYPE_CHECKING:
     from haive.core.schema.schema_manager import StateSchemaManager
+
+# Import Engine at runtime for type resolution in postponed annotations
+# This is needed because with __future__ annotations, type hints become strings
+# and LangGraph's get_type_hints() needs Engine in the global namespace
+from haive.core.engine.base import Engine
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -174,6 +179,40 @@ class StateSchema(BaseModel, Generic[T]):
 
     # Note: __reducer_fields__ is created dynamically and not part of instance properties
 
+    # Optional convenience fields for better engine management
+    engine: Optional[Engine] = Field(
+        default=None, description="Optional main/primary engine for convenience"
+    )
+
+    engines: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Engine registry for this state (backward compatible)",
+    )
+
+    # Convenience properties for accessing engines
+    @property
+    def llm(self) -> Optional[Engine]:
+        """Convenience property to access the LLM engine."""
+        # First check the main engine field
+        if self.engine and hasattr(self.engine, "engine_type"):
+            engine_type_str = str(self.engine.engine_type).lower()
+            if "llm" in engine_type_str:
+                return self.engine
+
+        # Then check engines dict for LLM
+        for name, eng in self.engines.items():
+            if hasattr(eng, "engine_type"):
+                engine_type_str = str(eng.engine_type).lower()
+                if "llm" in engine_type_str:
+                    return eng
+
+        return None
+
+    @property
+    def main_engine(self) -> Optional[Engine]:
+        """Convenience property to access the main engine."""
+        return self.engine or self.engines.get("main")
+
     def model_dump(self, **kwargs) -> Dict[str, Any]:
         """
         Override model_dump to exclude internal fields and handle special types.
@@ -207,19 +246,14 @@ class StateSchema(BaseModel, Generic[T]):
     @model_validator(mode="after")
     def setup_engines_and_tools(self) -> "StateSchema":
         """
-        Setup engines and sync their tools if present.
+        Setup engines and sync their tools, structured output models, and add engine to state.
 
         This validator runs after the model is created and:
         1. Finds all engine fields in the state
-        2. If engine has tools and state has tools field, syncs them
-        3. Sets up parent-child relationships for nested state schemas
-
-        Note:
-        This validator only handles engines that are instance fields. For engines
-        stored at the class level (e.g., via SchemaComposer), the model_post_init
-        method is enhanced to make class engines available on instances and sync
-        their tools. The two mechanisms work together to ensure comprehensive
-        tool synchronization from all engine sources.
+        2. Syncs engine to main engine field and engines dict
+        3. Syncs tools from engine to state tools field
+        4. Syncs structured output models
+        5. Sets up parent-child relationships for nested state schemas
         """
         logger.debug(f"Setting up engines for {self.__class__.__name__}")
 
@@ -237,12 +271,26 @@ class StateSchema(BaseModel, Generic[T]):
                 engine_name = getattr(field_value, "name", field_name)
                 found_engines.append(engine_name)
 
-                # If engine has tools and we have a tools field, sync them both ways
+                # 1. Add engine to engines dict
+                if engine_name not in self.engines:
+                    self.engines[engine_name] = field_value
+                    logger.debug(f"Added engine '{engine_name}' to engines dict")
+
+                # 2. Set as main engine if we don't have one
+                if self.engine is None:
+                    self.engine = field_value
+                    logger.debug(f"Set engine '{engine_name}' as main engine")
+
+                # 3. Sync tools if engine has tools and we have a tools field
                 if hasattr(field_value, "tools") and hasattr(self, "tools"):
                     engine_tools = getattr(field_value, "tools", [])
                     logger.debug(
                         f"Found engine '{engine_name}' with {len(engine_tools)} tools"
                     )
+
+                    # Initialize tools list if None
+                    if self.tools is None:
+                        self.tools = []
 
                     # Add engine tools to our tools list if not already there
                     for tool in engine_tools:
@@ -253,14 +301,19 @@ class StateSchema(BaseModel, Generic[T]):
                             )
                             self.tools.append(tool)
 
-                    # Also sync tools from state to engine if not already there
-                    for tool in self.tools:
-                        if tool not in engine_tools:
-                            tool_name = getattr(tool, "name", str(tool))
-                            logger.debug(
-                                f"Adding tool '{tool_name}' from state to engine '{engine_name}'"
+                # 4. Sync structured output model if present
+                if (
+                    hasattr(field_value, "structured_output_model")
+                    and field_value.structured_output_model
+                ):
+                    if hasattr(self, "structured_output_model"):
+                        if self.structured_output_model is None:
+                            self.structured_output_model = (
+                                field_value.structured_output_model
                             )
-                            engine_tools.append(tool)
+                            logger.debug(
+                                f"Synced structured output model from engine '{engine_name}'"
+                            )
 
             # Check if field is another StateSchema for recursive handling
             elif isinstance(field_value, StateSchema):
@@ -325,6 +378,45 @@ class StateSchema(BaseModel, Generic[T]):
                         logger.debug(
                             f"Synced shared field '{shared_field}' from parent to '{field_name}'"
                         )
+
+    @model_validator(mode="after")
+    def sync_engine_fields(self) -> "StateSchema":
+        """Sync between engine and engines dict for backward compatibility.
+
+        This validator ensures that:
+        1. If 'engine' is set, it's available in engines dict
+        2. If engines dict has items but no engine, set main engine
+        3. Both access patterns work seamlessly
+        """
+        # If engine is provided, ensure it's in engines dict
+        if self.engine:
+            # Add as 'main' if not already there
+            if "main" not in self.engines:
+                self.engines["main"] = self.engine
+
+            # Add by engine name if available
+            if hasattr(self.engine, "name") and self.engine.name:
+                if self.engine.name not in self.engines:
+                    self.engines[self.engine.name] = self.engine
+
+            # Add by engine type if available
+            if hasattr(self.engine, "engine_type"):
+                engine_type = str(self.engine.engine_type)
+                # Remove "EngineType." prefix if present
+                if "." in engine_type:
+                    engine_type = engine_type.split(".")[-1].lower()
+                if engine_type not in self.engines:
+                    self.engines[engine_type] = self.engine
+
+        # If no engine but engines dict has 'main', sync back
+        elif not self.engine and self.engines.get("main"):
+            self.engine = self.engines["main"]
+
+        # If no engine but engines dict has one item, use it as main
+        elif not self.engine and len(self.engines) == 1:
+            self.engine = next(iter(self.engines.values()))
+
+        return self
 
     def dict(self, **kwargs) -> Dict[str, Any]:
         """
@@ -439,7 +531,12 @@ class StateSchema(BaseModel, Generic[T]):
         """
         logger.debug(f"Looking for engine: {name}")
 
-        # First try by field name
+        # First check engines dict
+        if name in self.engines:
+            logger.debug(f"Found engine '{name}' in engines dict")
+            return self.engines[name]
+
+        # Then try by field name
         if hasattr(self, name):
             field_value = getattr(self, name)
             if hasattr(field_value, "engine_type"):
@@ -451,7 +548,10 @@ class StateSchema(BaseModel, Generic[T]):
             if field_value is None:
                 continue
 
-            if hasattr(field_value, "engine_type"):
+            if hasattr(field_value, "engine_type") and field_name not in [
+                "engine",
+                "engines",
+            ]:
                 engine_name = getattr(field_value, "name", "")
                 if engine_name == name:
                     logger.debug(f"Found engine '{name}' in field '{field_name}'")
@@ -469,11 +569,18 @@ class StateSchema(BaseModel, Generic[T]):
         """
         engines = {}
 
+        # First add engines from the engines dict
+        engines.update(self.engines)
+
+        # Then find engine fields (for backward compatibility)
         for field_name, field_value in self.__dict__.items():
             if field_value is None:
                 continue
 
-            if hasattr(field_value, "engine_type"):
+            if hasattr(field_value, "engine_type") and field_name not in [
+                "engine",
+                "engines",
+            ]:
                 engine_name = getattr(field_value, "name", field_name)
                 engines[engine_name] = field_value
 
