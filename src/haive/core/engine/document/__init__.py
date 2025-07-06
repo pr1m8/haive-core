@@ -106,13 +106,20 @@ def load_documents(
     return engine.invoke(source)
 
 
-# Agents
-from haive.core.engine.document.agents import (
-    DirectoryDocumentAgent,
-    DocumentAgent,
-    FileDocumentAgent,
-    WebDocumentAgent,
-)
+# Agents (conditional import - only if agents package available)
+try:
+    from haive.core.engine.document.agents import (
+        DirectoryDocumentAgent,
+        DocumentAgent,
+        FileDocumentAgent,
+        WebDocumentAgent,
+    )
+except ImportError:
+    # Agents not available - they depend on haive-agents package
+    DirectoryDocumentAgent = None
+    DocumentAgent = None
+    FileDocumentAgent = None
+    WebDocumentAgent = None
 
 # Factory and enhanced loaders
 from haive.core.engine.document.factory import (

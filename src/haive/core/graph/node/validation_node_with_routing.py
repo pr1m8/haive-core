@@ -66,51 +66,205 @@ class ValidationNodeWithRouting(ValidationNodeConfig):
         """Create validation function with message updates and routing."""
 
         def validation_node_with_routing(state: Dict[str, Any]) -> Dict[str, Any]:
-            start_time = time.time()
+            import traceback
+            from datetime import datetime
 
-            logger.info("[bold blue]Starting validation with routing[/bold blue]")
+            start_time = time.time()
+            start_datetime = datetime.now()
+
+            logger.info(
+                f"[bold magenta]=== ValidationNodeWithRouting START at {start_datetime.strftime('%H:%M:%S.%f')} ===[/bold magenta]"
+            )
+            logger.debug(
+                f"[bold blue]Input state keys: {list(state.keys())}[/bold blue]"
+            )
+            logger.debug(f"[bold blue]State type: {type(state)}[/bold blue]")
 
             # Create validation routing state
             routing_state = ValidationStateManager.create_routing_state()
+            logger.debug(
+                f"[bold cyan]Created routing state: {type(routing_state)}[/bold cyan]"
+            )
 
             try:
                 # Extract tool calls from the last AI message
+                logger.info(
+                    f"[bold magenta]STEP 1: Extracting tool calls[/bold magenta]"
+                )
                 tool_calls = self._extract_tool_calls_from_state(state)
 
                 if not tool_calls:
-                    logger.info("No tool calls found for validation")
+                    logger.info(
+                        "[bold yellow]No tool calls found for validation[/bold yellow]"
+                    )
+                    logger.debug(
+                        f"Messages in state: {len(state.get(self.messages_key, []))}"
+                    )
+                    if self.messages_key in state:
+                        messages = state[self.messages_key]
+                        if messages:
+                            last_msg = messages[-1]
+                            logger.debug(
+                                f"Last message type: {type(last_msg).__name__}"
+                            )
+                            logger.debug(
+                                f"Last message content: {str(last_msg)[:200]}..."
+                            )
                     return self._handle_no_tool_calls(state, routing_state)
 
-                logger.info(f"Validating {len(tool_calls)} tool calls")
+                logger.info(
+                    f"[bold green]✓ Found {len(tool_calls)} tool calls for validation[/bold green]"
+                )
+
+                # Log tool call details
+                logger.debug(f"[bold cyan]TOOL CALLS DETAILS[/bold cyan]")
+                for i, tc in enumerate(tool_calls):
+                    tc_name = (
+                        tc.get("name", "unknown")
+                        if isinstance(tc, dict)
+                        else getattr(tc, "name", "unknown")
+                    )
+                    tc_args = (
+                        tc.get("args", {})
+                        if isinstance(tc, dict)
+                        else getattr(tc, "args", {})
+                    )
+                    logger.debug(f"  [{i}] {tc_name}: {tc_args}")
 
                 # Get tools and schemas for validation
+                logger.info(
+                    f"[bold magenta]STEP 2: Getting validation resources[/bold magenta]"
+                )
                 available_tools, validation_schemas = self._get_validation_resources(
                     state
                 )
 
+                logger.info(
+                    f"[bold green]✓ Resources gathered:[/bold green] {len(available_tools)} tools, {len(validation_schemas)} schemas"
+                )
+                logger.debug(
+                    f"[bold cyan]Available tools: {list(available_tools.keys())}[/bold cyan]"
+                )
+                logger.debug(
+                    f"[bold cyan]Available schemas: {list(validation_schemas.keys())}[/bold cyan]"
+                )
+
                 # Validate each tool call
-                for tool_call in tool_calls:
-                    result = self._validate_single_tool_call(
-                        tool_call, available_tools, validation_schemas, state
+                logger.info(
+                    f"[bold magenta]STEP 3: Validating individual tool calls[/bold magenta]"
+                )
+                for i, tool_call in enumerate(tool_calls):
+                    tc_name = (
+                        tool_call.get("name", "unknown")
+                        if isinstance(tool_call, dict)
+                        else getattr(tool_call, "name", "unknown")
                     )
-                    routing_state.add_validation_result(result)
+                    logger.info(
+                        f"[bold cyan]Validating tool call {i+1}/{len(tool_calls)}: {tc_name}[/bold cyan]"
+                    )
+
+                    try:
+                        result = self._validate_single_tool_call(
+                            tool_call, available_tools, validation_schemas, state
+                        )
+                        routing_state.add_validation_result(result)
+
+                        logger.debug(f"  Validation result: {result.status.value}")
+                        logger.debug(
+                            f"  Route recommendation: {result.route_recommendation.value}"
+                        )
+                        logger.debug(f"  Target node: {result.target_node}")
+                        if result.errors:
+                            logger.debug(f"  Errors: {result.errors}")
+                        if result.warnings:
+                            logger.debug(f"  Warnings: {result.warnings}")
+
+                    except Exception as e:
+                        logger.error(
+                            f"[bold red]Error validating tool call {tc_name}: {e}[/bold red]"
+                        )
+                        logger.error(
+                            f"[bold red]Traceback: {traceback.format_exc()}[/bold red]"
+                        )
+                        # Create error result
+                        error_result = ValidationStateManager.create_validation_result(
+                            tool_call_id=tool_call.get("id", f"error_{i}"),
+                            tool_name=tc_name,
+                            status=ValidationStatus.ERROR,
+                            route_recommendation=RouteRecommendation.AGENT,
+                            errors=[f"Validation exception: {str(e)}"],
+                            target_node=self.agent_node,
+                        )
+                        routing_state.add_validation_result(error_result)
 
                 # Update validation duration
                 routing_state.validation_duration = time.time() - start_time
+                logger.debug(
+                    f"[bold blue]Total validation duration: {routing_state.validation_duration:.3f}s[/bold blue]"
+                )
 
                 # Update state with validation results
+                logger.info(
+                    f"[bold magenta]STEP 4: Updating state with validation results[/bold magenta]"
+                )
                 updated_state = self._update_state_with_validation_results(
                     state, routing_state
                 )
 
+                # Log final summary
+                routing_summary = routing_state.get_routing_summary()
                 logger.info(
-                    f"Validation complete: {routing_state.get_routing_summary()}"
+                    f"[bold green]✓ Validation complete: {routing_summary}[/bold green]"
+                )
+
+                logger.debug(f"[bold cyan]VALIDATION SUMMARY[/bold cyan]")
+                logger.debug(
+                    f"  Total results: {len(routing_state.validation_results)}"
+                )
+                logger.debug(
+                    f"  Should continue: {routing_state.should_continue_execution()}"
+                )
+                logger.debug(
+                    f"  Should return to agent: {routing_state.should_return_to_agent()}"
+                )
+                logger.debug(f"  Should end: {routing_state.should_end_processing()}")
+                logger.debug(f"  Target nodes: {list(routing_state.target_nodes)}")
+                logger.debug(f"  Next action: {routing_state.next_action.value}")
+
+                # Log state changes
+                logger.debug(f"[bold cyan]STATE CHANGES[/bold cyan]")
+                logger.debug(f"  Input keys: {list(state.keys())}")
+                logger.debug(f"  Output keys: {list(updated_state.keys())}")
+                new_keys = set(updated_state.keys()) - set(state.keys())
+                if new_keys:
+                    logger.debug(f"  New keys added: {list(new_keys)}")
+
+                end_datetime = datetime.now()
+                total_duration = end_datetime - start_datetime
+                logger.info(
+                    f"[bold magenta]=== ValidationNodeWithRouting COMPLETE at {end_datetime.strftime('%H:%M:%S.%f')} ===[/bold magenta]"
+                )
+                logger.info(
+                    f"[bold green]Total processing time: {total_duration.total_seconds():.3f}s[/bold green]"
                 )
 
                 return updated_state
 
             except Exception as e:
-                logger.error(f"Validation failed with error: {e}")
+                logger.error(f"[bold red]Validation failed with error: {e}[/bold red]")
+                logger.error(
+                    f"[bold red]Full traceback: {traceback.format_exc()}[/bold red]"
+                )
+
+                end_datetime = datetime.now()
+                error_duration = end_datetime - start_datetime
+                logger.error(
+                    f"[bold red]=== ValidationNodeWithRouting FAILED at {end_datetime.strftime('%H:%M:%S.%f')} ===[/bold red]"
+                )
+                logger.error(
+                    f"[bold red]Error occurred after: {error_duration.total_seconds():.3f}s[/bold red]"
+                )
+
                 return self._handle_validation_error(state, routing_state, str(e))
 
         return validation_node_with_routing

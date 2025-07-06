@@ -278,25 +278,58 @@ class PostgresCheckpointerConfig(CheckpointerConfig[Dict[str, Any]]):
 
             from psycopg_pool import ConnectionPool
 
-            # Import appropriate checkpointer class
-            if self.storage_mode == CheckpointStorageMode.SHALLOW:
-                try:
-                    from langgraph.checkpoint.postgres import (
-                        ShallowPostgresSaver as PostgresSaver,
-                    )
-                except ImportError:
-                    from langgraph.checkpoint.postgres import PostgresSaver
-            else:
-                from langgraph.checkpoint.postgres import PostgresSaver
+            # Try to use our custom PostgresSaver that disables prepared statements
+            try:
+                from haive.core.persistence.postgres_saver_override import (
+                    PostgresSaverNoPreparedStatements as PostgresSaver,
+                )
 
-            # Create connection pool
+                logger.info(
+                    "Using PostgresSaverNoPreparedStatements to avoid prepared statement conflicts"
+                )
+            except ImportError:
+                logger.warning(
+                    "Could not import PostgresSaverNoPreparedStatements, using standard PostgresSaver"
+                )
+                # Import appropriate checkpointer class
+                if self.storage_mode == CheckpointStorageMode.SHALLOW:
+                    try:
+                        from langgraph.checkpoint.postgres import (
+                            ShallowPostgresSaver as PostgresSaver,
+                        )
+                    except ImportError:
+                        from langgraph.checkpoint.postgres import PostgresSaver
+                else:
+                    from langgraph.checkpoint.postgres import PostgresSaver
+
+            # Create connection pool with forced parameters to avoid SSL issues
+            connection_kwargs = self.get_connection_kwargs()
+
+            # Force disable prepared statements and ensure proper SSL handling
+            connection_kwargs.update(
+                {
+                    "prepare_threshold": None,  # Force disable prepared statements
+                    "autocommit": True,  # Ensure autocommit
+                }
+            )
+
             pool = ConnectionPool(
                 conninfo=self.get_connection_uri(),
                 min_size=self.min_pool_size,
                 max_size=self.max_pool_size,
-                kwargs=self.get_connection_kwargs(),
-                open=True,  # Explicitly open the pool
+                kwargs=connection_kwargs,
+                check=ConnectionPool.check_connection,  # Add connection health checking
+                max_lifetime=1800,  # 30 minutes max connection lifetime
+                open=False,  # Don't open in constructor to avoid early failures
             )
+
+            # Explicitly open the pool with error handling
+            try:
+                pool.open()
+                logger.info("PostgreSQL connection pool opened successfully")
+            except Exception as e:
+                logger.error(f"Failed to open PostgreSQL connection pool: {e}")
+                raise
 
             # Create checkpointer
             checkpointer = PostgresSaver(pool)
@@ -366,70 +399,105 @@ class PostgresCheckpointerConfig(CheckpointerConfig[Dict[str, Any]]):
 
             from psycopg_pool import AsyncConnectionPool
 
-            # Import appropriate checkpointer class
+            # Try to use our custom AsyncPostgresSaver that disables prepared statements
             try:
-                if self.storage_mode == CheckpointStorageMode.SHALLOW:
-                    from langgraph.checkpoint.postgres.aio import (
-                        AsyncShallowPostgresSaver as AsyncPostgresSaver,
-                    )
-                else:
-                    from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
+                from haive.core.persistence.postgres_saver_override import (
+                    AsyncPostgresSaverNoPreparedStatements as AsyncPostgresSaver,
+                )
 
                 logger.info(
-                    "Successfully imported AsyncPostgresSaver from langgraph.checkpoint.postgres.aio"
+                    "Using AsyncPostgresSaverNoPreparedStatements to avoid prepared statement conflicts"
                 )
-            except ImportError as e:
-                logger.error(
-                    f"Failed to import AsyncPostgresSaver from aio module: {e}"
+            except ImportError:
+                logger.warning(
+                    "Could not import AsyncPostgresSaverNoPreparedStatements, using standard AsyncPostgresSaver"
                 )
 
-                # Try alternative import paths
+                # Import appropriate checkpointer class
                 try:
-                    # Some versions might have it in the main postgres module
-                    from langgraph.checkpoint.postgres import AsyncPostgresSaver
+                    if self.storage_mode == CheckpointStorageMode.SHALLOW:
+                        from langgraph.checkpoint.postgres.aio import (
+                            AsyncShallowPostgresSaver as AsyncPostgresSaver,
+                        )
+                    else:
+                        from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 
                     logger.info(
-                        "Successfully imported AsyncPostgresSaver from langgraph.checkpoint.postgres"
+                        "Successfully imported AsyncPostgresSaver from langgraph.checkpoint.postgres.aio"
                     )
-                except ImportError:
+                except ImportError as e:
+                    logger.error(
+                        f"Failed to import AsyncPostgresSaver from aio module: {e}"
+                    )
+
+                    # Try alternative import paths
                     try:
-                        # Try langgraph_checkpoint_postgres package
-                        from langgraph_checkpoint_postgres.aio import AsyncPostgresSaver
+                        # Some versions might have it in the main postgres module
+                        from langgraph.checkpoint.postgres import AsyncPostgresSaver
 
                         logger.info(
-                            "Successfully imported AsyncPostgresSaver from langgraph_checkpoint_postgres.aio"
+                            "Successfully imported AsyncPostgresSaver from langgraph.checkpoint.postgres"
                         )
                     except ImportError:
                         try:
-                            from langgraph_checkpoint_postgres import AsyncPostgresSaver
+                            # Try langgraph_checkpoint_postgres package
+                            from langgraph_checkpoint_postgres.aio import (
+                                AsyncPostgresSaver,
+                            )
 
                             logger.info(
-                                "Successfully imported AsyncPostgresSaver from langgraph_checkpoint_postgres"
+                                "Successfully imported AsyncPostgresSaver from langgraph_checkpoint_postgres.aio"
                             )
                         except ImportError:
-                            logger.error(
-                                "AsyncPostgresSaver not available in any known location. "
-                                "Please ensure langgraph-checkpoint-postgres is installed with async support."
-                            )
-                            # Fall back to sync checkpointer with warning
-                            logger.warning(
-                                "Falling back to sync PostgresSaver for async operations (not recommended)"
-                            )
-                            from langgraph.checkpoint.postgres import (
-                                PostgresSaver as AsyncPostgresSaver,
-                            )
+                            try:
+                                from langgraph_checkpoint_postgres import (
+                                    AsyncPostgresSaver,
+                                )
 
-            # Create connection pool
+                                logger.info(
+                                    "Successfully imported AsyncPostgresSaver from langgraph_checkpoint_postgres"
+                                )
+                            except ImportError:
+                                logger.error(
+                                    "AsyncPostgresSaver not available in any known location. "
+                                    "Please ensure langgraph-checkpoint-postgres is installed with async support."
+                                )
+                                # Fall back to sync checkpointer with warning
+                                logger.warning(
+                                    "Falling back to sync PostgresSaver for async operations (not recommended)"
+                                )
+                                from langgraph.checkpoint.postgres import (
+                                    PostgresSaver as AsyncPostgresSaver,
+                                )
+
+            # Create connection pool with forced parameters to avoid SSL issues
+            connection_kwargs = self.get_connection_kwargs()
+
+            # Force disable prepared statements and ensure proper SSL handling
+            connection_kwargs.update(
+                {
+                    "prepare_threshold": None,  # Force disable prepared statements
+                    "autocommit": True,  # Ensure autocommit
+                }
+            )
+
             pool = AsyncConnectionPool(
                 conninfo=self.get_connection_uri(),
                 min_size=self.min_pool_size,
                 max_size=self.max_pool_size,
-                kwargs=self.get_connection_kwargs(),
+                kwargs=connection_kwargs,
+                check=AsyncConnectionPool.check_connection,  # Add connection health checking
+                max_lifetime=1800,  # 30 minutes max connection lifetime
                 open=False,  # Don't open in constructor to avoid deprecation warning
             )
 
-            # Explicitly open the pool
-            await pool.open()
+            # Explicitly open the pool with error handling
+            try:
+                await pool.open()
+                logger.info("Async PostgreSQL connection pool opened successfully")
+            except Exception as e:
+                logger.error(f"Failed to open async PostgreSQL connection pool: {e}")
+                raise
 
             # Create checkpointer
             checkpointer = AsyncPostgresSaver(pool)

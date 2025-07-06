@@ -14,11 +14,26 @@ synchronous and asynchronous operation modes.
 """
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-from haive.agents.base.agent import Agent
 from langgraph.graph import END, START
 from pydantic import Field
+
+# Conditional import for agents - only needed if agents package is available
+if TYPE_CHECKING:
+    from haive.agents.base.agent import Agent
+else:
+    try:
+        from haive.agents.base.agent import Agent
+    except ImportError:
+        # Create a placeholder base class if agents package not available
+        from pydantic import BaseModel
+
+        class Agent(BaseModel):
+            """Placeholder Agent class when haive-agents package not available."""
+
+            pass
+
 
 from haive.core.engine.document.config import DocumentOutput
 from haive.core.engine.document.engine import (

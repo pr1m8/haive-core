@@ -39,15 +39,35 @@ from haive.core.schema.field_utils import (
 )
 from haive.core.schema.multi_agent_state_schema import (
     MultiAgentSchemaComposer,
-    MultiAgentStateSchema,
+)
+from haive.core.schema.multi_agent_state_schema import MultiAgentStateSchema
+from haive.core.schema.multi_agent_state_schema import (
+    MultiAgentStateSchema as PrebuiltMultiAgentStateSchema,
 )
 
 # Import prebuilt states
 from haive.core.schema.prebuilt.basic_agent_state import BasicAgentState
+from haive.core.schema.prebuilt.messages import (
+    MessagesStateWithTokenUsage,
+    TokenUsage,
+    TokenUsageMixin,
+    aggregate_token_usage,
+    calculate_token_cost,
+    extract_token_usage_from_message,
+)
+from haive.core.schema.prebuilt.messages_state import MessagesState
+from haive.core.schema.prebuilt.tool_state import ToolState
 
 # Import preserve messages reducer
 from haive.core.schema.preserve_messages_reducer import preserve_messages_reducer
-from haive.core.schema.schema_composer import SchemaComposer
+
+# Import from new location while maintaining backward compatibility
+try:
+    from haive.core.schema.composer.schema_composer import SchemaComposer
+except ImportError:
+    # Fallback to original location if needed
+    from haive.core.schema.schema_composer import SchemaComposer
+
 from haive.core.schema.schema_manager import StateSchemaManager
 from haive.core.schema.state_schema import StateSchema
 from haive.core.schema.ui import SchemaUI
@@ -70,4 +90,14 @@ __all__ = [
     "BuildMode",
     "preserve_messages_reducer",
     "SchemaUI",
+    "BasicAgentState",
+    "MessagesState",
+    "ToolState",
+    "PrebuiltMultiAgentStateSchema",
+    "TokenUsage",
+    "TokenUsageMixin",
+    "MessagesStateWithTokenUsage",
+    "extract_token_usage_from_message",
+    "aggregate_token_usage",
+    "calculate_token_cost",
 ]

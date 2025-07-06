@@ -36,6 +36,7 @@ from haive.core.common.mixins.general import (
 )
 from haive.core.common.mixins.getter_mixin import GetterMixin
 from haive.core.common.mixins.identifier import IdentifierMixin
+from haive.core.common.mixins.mcp_mixin import MCPMixin
 from haive.core.common.mixins.rich_logger_mixin import RichLoggerMixin
 from haive.core.common.mixins.secure_config import SecureConfigMixin
 from haive.core.common.mixins.state_interface_mixin import StateInterfaceMixin
@@ -49,6 +50,7 @@ __all__ = [
     "EngineMixin",
     "GetterMixin",
     "IdentifierMixin",
+    "MCPMixin",
     "SecureConfigMixin",
     "StateInterfaceMixin",
     "StructuredOutputMixin",

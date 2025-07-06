@@ -1,76 +1,54 @@
-"""
-Enhanced message handling for Haive agents.
+"""Messages state module with token usage tracking and utilities.
 
-This package provides improved message handling capabilities including:
-- Conversation round tracking
-- Tool call deduplication and analysis
+This module provides enhanced message state functionality including:
+- Token usage tracking and cost calculation
+- Message round analysis and conversation tracking
+- Tool call management and deduplication
 - Message transformation utilities
-- Advanced filtering and analysis
-
-Migration guide from classic MessagesState:
-
-1. Direct replacement (basic features):
-   ```python
-   # Old code
-   from haive.core.schema.prebuilt.messages_state import MessagesState
-
-   # New code (compatible with old API)
-   from haive.core.schema.prebuilt.messages import MessagesState
-   ```
-
-2. Using enhanced features:
-   ```python
-   # Import enhanced state
-   from haive.core.schema.prebuilt.messages import MessagesState
-
-   state = MessagesState()
-
-   # New features
-   rounds = state.get_conversation_rounds()
-   state.deduplicate_tool_calls()
-   tool_calls = state.get_completed_tool_calls()
-   ```
-
-3. Full migration to new architecture:
-   ```python
-   # Import enhanced implementation
-   from haive.core.schema.prebuilt.messages import EnhancedMessagesState
-
-   # Create with same API but more capabilities
-   state = EnhancedMessagesState()
-
-   # Access new features
-   print(state.round_count)
-   print(state.has_tool_errors)
-   state.transform_ai_to_human()
-   ```
 """
 
-# Export the compatibility adapter for advanced usage
-from haive.core.schema.prebuilt.messages.compatibility import MessagesStateAdapter
-
-# Export utility classes for advanced usage
-from haive.core.schema.prebuilt.messages.utils import (
-    MessageRound,
-    ToolCallInfo,
-    extract_tool_calls,
-    inject_state_into_tool_calls,
-    is_real_human_message,
-    is_tool_error,
+from haive.core.schema.prebuilt.messages.messages_with_token_usage import (
+    MessagesStateWithTokenUsage,
 )
+from haive.core.schema.prebuilt.messages.token_usage import (
+    TokenUsage,
+    aggregate_token_usage,
+    calculate_token_cost,
+    extract_token_usage_from_message,
+)
+from haive.core.schema.prebuilt.messages.token_usage_mixin import TokenUsageMixin
 
-# Re-export the original implementation with enhancements
-from haive.core.schema.prebuilt.messages_state import MessagesState
-
-# Re-export the enhanced implementation under a different name
+# Import compatibility and utils if they exist
 try:
-    from haive.core.schema.prebuilt.messages.messages_state import (
-        MessageList,
+    from haive.core.schema.prebuilt.messages.compatibility import MessagesStateAdapter
+    from haive.core.schema.prebuilt.messages.utils import (
+        MessageRound,
+        ToolCallInfo,
+        is_real_human_message,
+        is_tool_error,
     )
-    from haive.core.schema.prebuilt.messages.messages_state import (
-        MessagesState as EnhancedMessagesState,
-    )
+
+    ENHANCED_FEATURES_AVAILABLE = True
 except ImportError:
-    # Fallback if the enhanced implementation is not available yet
-    EnhancedMessagesState = None
-    MessageList = None
+    ENHANCED_FEATURES_AVAILABLE = False
+
+__all__ = [
+    "TokenUsage",
+    "extract_token_usage_from_message",
+    "aggregate_token_usage",
+    "calculate_token_cost",
+    "TokenUsageMixin",
+    "MessagesStateWithTokenUsage",
+]
+
+# Add enhanced features to exports if available
+if ENHANCED_FEATURES_AVAILABLE:
+    __all__.extend(
+        [
+            "MessagesStateAdapter",
+            "MessageRound",
+            "ToolCallInfo",
+            "is_real_human_message",
+            "is_tool_error",
+        ]
+    )

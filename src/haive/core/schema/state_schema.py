@@ -418,6 +418,38 @@ class StateSchema(BaseModel, Generic[T]):
 
         return self
 
+    def model_post_init(self, __context: Any) -> None:
+        """Sync engines from class level to instance level after initialization.
+
+        This ensures that engines stored at the class level (via SchemaComposer)
+        are available on state instances.
+        """
+        # Check if class has engines and sync them to instance
+        if hasattr(self.__class__, "engines") and self.__class__.engines:
+            logger.debug(
+                f"Syncing {len(self.__class__.engines)} engines from class to instance"
+            )
+
+            # Update instance engines dict with class engines
+            for engine_name, engine in self.__class__.engines.items():
+                if engine_name not in self.engines:
+                    self.engines[engine_name] = engine
+                    logger.debug(f"Synced engine '{engine_name}' from class")
+
+            # Set main engine if not already set
+            if self.engine is None and self.engines:
+                # Try 'main' first, then any engine
+                if "main" in self.engines:
+                    self.engine = self.engines["main"]
+                    logger.debug("Set main engine from class engines")
+                else:
+                    # Use first available engine
+                    first_engine = next(iter(self.engines.values()))
+                    self.engine = first_engine
+                    logger.debug(
+                        f"Set first available engine as main: {getattr(first_engine, 'name', 'unnamed')}"
+                    )
+
     def dict(self, **kwargs) -> Dict[str, Any]:
         """
         Backwards compatibility alias for model_dump.

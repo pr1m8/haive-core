@@ -327,8 +327,12 @@ class ToolRouteMixin(BaseModel):
                 "module": getattr(tool, "__module__", "unknown"),
                 "tool_type": "pydantic_model",
             }
-            # Check if it has __call__ method (executable tool)
-            if hasattr(tool, "__call__") and callable(getattr(tool, "__call__")):
+            # Check if it has explicitly defined __call__ method (executable tool)
+            # Only consider it executable if __call__ is defined in the class itself
+            has_explicit_call = (
+                "__call__" in tool.__dict__ if hasattr(tool, "__dict__") else False
+            )
+            if has_explicit_call and callable(getattr(tool, "__call__")):
                 metadata["is_executable"] = True
                 route = "pydantic_tool"
             else:

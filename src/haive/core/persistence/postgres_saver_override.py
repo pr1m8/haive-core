@@ -80,3 +80,19 @@ class AsyncPostgresSaverNoPreparedStatements(BaseAsyncPostgresSaver):
             row_factory=dict_row,
         )
         return cls(conn)
+
+    def __init__(
+        self,
+        conn: Union[psycopg.AsyncConnection, AsyncConnectionPool],
+    ) -> None:
+        """Initialize with async connection that has prepared statements disabled."""
+        # If it's a raw connection, ensure prepare_threshold is None
+        if hasattr(conn, "prepare_threshold") and conn.prepare_threshold is not None:
+            import logging
+
+            logging.getLogger(__name__).warning(
+                "Connection has prepare_threshold enabled. This may cause conflicts."
+            )
+
+        # Call parent init
+        super().__init__(conn)

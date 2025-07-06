@@ -7,6 +7,7 @@ description = "Happy Eyeballs for asyncio"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
+markers = "extra == \"bm25\" or extra == \"tfidf\" or extra == \"knn\" or extra == \"svm\" or extra == \"elasticsearch\" or extra == \"faiss\" or extra == \"cohere-rag\" or extra == \"azure-search\" or extra == \"tavily\" or extra == \"arxiv\" or extra == \"wikipedia\" or extra == \"pubmed\" or extra == \"web-research\" or extra == \"you-search\" or extra == \"metal\" or extra == \"vespa\" or extra == \"zep\" or extra == \"zep-cloud\" or extra == \"asknews\" or extra == \"google-document-ai-warehouse\" or extra == \"docarray\" or extra == \"neuraldb\" or extra == \"llamaindex\" or extra == \"chatgpt-plugin\" or extra == \"all-retrievers\" or extra == \"popular-retrievers\" or extra == \"sparse-retrievers\" or extra == \"api-retrievers\""
 files = [
     {file = "aiohappyeyeballs-2.6.1-py3-none-any.whl", hash = "sha256:f349ba8f4b75cb25c99c5c2d84e997e485204d2902a9597802b0371f09331fb8"},
     {file = "aiohappyeyeballs-2.6.1.tar.gz", hash = "sha256:c3f9d0113123803ccadfdf3f0faa505bc78e6a72d1cc4806cbd719826e943558"},
@@ -19,6 +20,7 @@ description = "Async http client/server framework (asyncio)"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
+markers = "extra == \"bm25\" or extra == \"tfidf\" or extra == \"knn\" or extra == \"svm\" or extra == \"elasticsearch\" or extra == \"faiss\" or extra == \"cohere-rag\" or extra == \"azure-search\" or extra == \"tavily\" or extra == \"arxiv\" or extra == \"wikipedia\" or extra == \"pubmed\" or extra == \"web-research\" or extra == \"you-search\" or extra == \"metal\" or extra == \"vespa\" or extra == \"zep\" or extra == \"zep-cloud\" or extra == \"asknews\" or extra == \"google-document-ai-warehouse\" or extra == \"docarray\" or extra == \"neuraldb\" or extra == \"llamaindex\" or extra == \"chatgpt-plugin\" or extra == \"all-retrievers\" or extra == \"popular-retrievers\" or extra == \"sparse-retrievers\" or extra == \"api-retrievers\""
 files = [
     {file = "aiohttp-3.12.13-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:5421af8f22a98f640261ee48aae3a37f0c41371e99412d55eaf2f8a46d5dad29"},
     {file = "aiohttp-3.12.13-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:0fcda86f6cb318ba36ed8f1396a6a4a3fd8f856f84d426584392083d10da4de0"},
@@ -127,6 +129,7 @@ description = "aiosignal: a list of registered asynchronous callbacks"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
+markers = "extra == \"bm25\" or extra == \"tfidf\" or extra == \"knn\" or extra == \"svm\" or extra == \"elasticsearch\" or extra == \"faiss\" or extra == \"cohere-rag\" or extra == \"azure-search\" or extra == \"tavily\" or extra == \"arxiv\" or extra == \"wikipedia\" or extra == \"pubmed\" or extra == \"web-research\" or extra == \"you-search\" or extra == \"metal\" or extra == \"vespa\" or extra == \"zep\" or extra == \"zep-cloud\" or extra == \"asknews\" or extra == \"google-document-ai-warehouse\" or extra == \"docarray\" or extra == \"neuraldb\" or extra == \"llamaindex\" or extra == \"chatgpt-plugin\" or extra == \"all-retrievers\" or extra == \"popular-retrievers\" or extra == \"sparse-retrievers\" or extra == \"api-retrievers\""
 files = [
     {file = "aiosignal-1.4.0-py3-none-any.whl", hash = "sha256:053243f8b92b990551949e63930a839ff0cf0b0ebbe0597b0f3fb19e1a0fe82e"},
     {file = "aiosignal-1.4.0.tar.gz", hash = "sha256:f47eecd9468083c2029cc99945502cb7708b082c232f9aca65da147157b251c7"},
@@ -213,6 +216,7 @@ files = [
     {file = "attrs-25.3.0-py3-none-any.whl", hash = "sha256:427318ce031701fea540783410126f03899a97ffc6f61596ad581ac2e40e3bc3"},
     {file = "attrs-25.3.0.tar.gz", hash = "sha256:75d7cefc7fb576747b2c81b4442d4d4a1ce0900973527c011d1030fd3bf4af1b"},
 ]
+markers = {main = "extra == \"bm25\" or extra == \"tfidf\" or extra == \"knn\" or extra == \"svm\" or extra == \"elasticsearch\" or extra == \"faiss\" or extra == \"cohere-rag\" or extra == \"azure-search\" or extra == \"tavily\" or extra == \"arxiv\" or extra == \"wikipedia\" or extra == \"pubmed\" or extra == \"web-research\" or extra == \"you-search\" or extra == \"metal\" or extra == \"vespa\" or extra == \"zep\" or extra == \"zep-cloud\" or extra == \"asknews\" or extra == \"google-document-ai-warehouse\" or extra == \"docarray\" or extra == \"neuraldb\" or extra == \"llamaindex\" or extra == \"chatgpt-plugin\" or extra == \"all-retrievers\" or extra == \"popular-retrievers\" or extra == \"sparse-retrievers\" or extra == \"api-retrievers\""}
 
 [package.extras]
 benchmark = ["cloudpickle ; platform_python_implementation == \"CPython\"", "hypothesis", "mypy (>=1.11.1) ; platform_python_implementation == \"CPython\" and python_version >= \"3.10\"", "pympler", "pytest (>=4.3.0)", "pytest-codspeed", "pytest-mypy-plugins ; platform_python_implementation == \"CPython\" and python_version >= \"3.10\"", "pytest-xdist[psutil]"]
@@ -554,12 +558,12 @@ version = "0.4.6"
 description = "Cross-platform colored terminal text."
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7"
-groups = ["dev"]
-markers = "sys_platform == \"win32\" or platform_system == \"Windows\""
+groups = ["main", "dev"]
 files = [
     {file = "colorama-0.4.6-py2.py3-none-any.whl", hash = "sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6"},
     {file = "colorama-0.4.6.tar.gz", hash = "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44"},
 ]
+markers = {main = "platform_system == \"Windows\"", dev = "sys_platform == \"win32\" or platform_system == \"Windows\""}
 
 [[package]]
 name = "dataclasses-json"
@@ -568,6 +572,7 @@ description = "Easily serialize dataclasses to and from JSON."
 optional = false
 python-versions = "<4.0,>=3.7"
 groups = ["main"]
+markers = "extra == \"bm25\" or extra == \"tfidf\" or extra == \"knn\" or extra == \"svm\" or extra == \"elasticsearch\" or extra == \"faiss\" or extra == \"cohere-rag\" or extra == \"azure-search\" or extra == \"tavily\" or extra == \"arxiv\" or extra == \"wikipedia\" or extra == \"pubmed\" or extra == \"web-research\" or extra == \"you-search\" or extra == \"metal\" or extra == \"vespa\" or extra == \"zep\" or extra == \"zep-cloud\" or extra == \"asknews\" or extra == \"google-document-ai-warehouse\" or extra == \"docarray\" or extra == \"neuraldb\" or extra == \"llamaindex\" or extra == \"chatgpt-plugin\" or extra == \"all-retrievers\" or extra == \"popular-retrievers\" or extra == \"sparse-retrievers\" or extra == \"api-retrievers\""
 files = [
     {file = "dataclasses_json-0.6.7-py3-none-any.whl", hash = "sha256:0dbf33f26c8d5305befd61b39d2b3414e8a407bedc2834dea9b8d642666fb40a"},
     {file = "dataclasses_json-0.6.7.tar.gz", hash = "sha256:b6b3e528266ea45b9535223bc53ca645f5208833c29229e847b3f26a1cc55fc0"},
@@ -590,12 +595,30 @@ files = [
 ]
 
 [[package]]
+name = "filelock"
+version = "3.18.0"
+description = "A platform independent file lock."
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "filelock-3.18.0-py3-none-any.whl", hash = "sha256:c401f4f8377c4464e6db25fff06205fd89bdd83b65eb0488ed1b160f780e21de"},
+    {file = "filelock-3.18.0.tar.gz", hash = "sha256:adbc88eabb99d2fec8c9c1b229b171f18afa655400173ddc653d5d01501fb9f2"},
+]
+
+[package.extras]
+docs = ["furo (>=2024.8.6)", "sphinx (>=8.1.3)", "sphinx-autodoc-typehints (>=3)"]
+testing = ["covdefaults (>=2.3)", "coverage (>=7.6.10)", "diff-cover (>=9.2.1)", "pytest (>=8.3.4)", "pytest-asyncio (>=0.25.2)", "pytest-cov (>=6)", "pytest-mock (>=3.14)", "pytest-timeout (>=2.3.1)", "virtualenv (>=20.28.1)"]
+typing = ["typing-extensions (>=4.12.2) ; python_version < \"3.11\""]
+
+[[package]]
 name = "frozenlist"
 version = "1.7.0"
 description = "A list-like structure which implements collections.abc.MutableSequence"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
+markers = "extra == \"bm25\" or extra == \"tfidf\" or extra == \"knn\" or extra == \"svm\" or extra == \"elasticsearch\" or extra == \"faiss\" or extra == \"cohere-rag\" or extra == \"azure-search\" or extra == \"tavily\" or extra == \"arxiv\" or extra == \"wikipedia\" or extra == \"pubmed\" or extra == \"web-research\" or extra == \"you-search\" or extra == \"metal\" or extra == \"vespa\" or extra == \"zep\" or extra == \"zep-cloud\" or extra == \"asknews\" or extra == \"google-document-ai-warehouse\" or extra == \"docarray\" or extra == \"neuraldb\" or extra == \"llamaindex\" or extra == \"chatgpt-plugin\" or extra == \"all-retrievers\" or extra == \"popular-retrievers\" or extra == \"sparse-retrievers\" or extra == \"api-retrievers\""
 files = [
     {file = "frozenlist-1.7.0-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:cc4df77d638aa2ed703b878dd093725b72a824c3c546c076e8fdf276f78ee84a"},
     {file = "frozenlist-1.7.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:716a9973a2cc963160394f701964fe25012600f3d311f60c790400b00e568b61"},
@@ -702,6 +725,46 @@ files = [
     {file = "frozenlist-1.7.0-py3-none-any.whl", hash = "sha256:9a5af342e34f7e97caf8c995864c7a396418ae2859cc6fdf1b1073020d516a7e"},
     {file = "frozenlist-1.7.0.tar.gz", hash = "sha256:2e310d81923c2437ea8670467121cc3e9b0f76d3043cc1d2331d56c7fb7a3a8f"},
 ]
+
+[[package]]
+name = "fsspec"
+version = "2025.5.1"
+description = "File-system specification"
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "fsspec-2025.5.1-py3-none-any.whl", hash = "sha256:24d3a2e663d5fc735ab256263c4075f374a174c3410c0b25e5bd1970bceaa462"},
+    {file = "fsspec-2025.5.1.tar.gz", hash = "sha256:2e55e47a540b91843b755e83ded97c6e897fa0942b11490113f09e9c443c2475"},
+]
+
+[package.extras]
+abfs = ["adlfs"]
+adl = ["adlfs"]
+arrow = ["pyarrow (>=1)"]
+dask = ["dask", "distributed"]
+dev = ["pre-commit", "ruff"]
+doc = ["numpydoc", "sphinx", "sphinx-design", "sphinx-rtd-theme", "yarl"]
+dropbox = ["dropbox", "dropboxdrivefs", "requests"]
+full = ["adlfs", "aiohttp (!=4.0.0a0,!=4.0.0a1)", "dask", "distributed", "dropbox", "dropboxdrivefs", "fusepy", "gcsfs", "libarchive-c", "ocifs", "panel", "paramiko", "pyarrow (>=1)", "pygit2", "requests", "s3fs", "smbprotocol", "tqdm"]
+fuse = ["fusepy"]
+gcs = ["gcsfs"]
+git = ["pygit2"]
+github = ["requests"]
+gs = ["gcsfs"]
+gui = ["panel"]
+hdfs = ["pyarrow (>=1)"]
+http = ["aiohttp (!=4.0.0a0,!=4.0.0a1)"]
+libarchive = ["libarchive-c"]
+oci = ["ocifs"]
+s3 = ["s3fs"]
+sftp = ["paramiko"]
+smb = ["smbprotocol"]
+ssh = ["paramiko"]
+test = ["aiohttp (!=4.0.0a0,!=4.0.0a1)", "numpy", "pytest", "pytest-asyncio (!=0.22.0)", "pytest-benchmark", "pytest-cov", "pytest-mock", "pytest-recording", "pytest-rerunfailures", "requests"]
+test-downstream = ["aiobotocore (>=2.5.4,<3.0.0)", "dask[dataframe,test]", "moto[server] (>4,<5)", "pytest-timeout", "xarray"]
+test-full = ["adlfs", "aiohttp (!=4.0.0a0,!=4.0.0a1)", "cloudpickle", "dask", "distributed", "dropbox", "dropboxdrivefs", "fastparquet", "fusepy", "gcsfs", "jinja2", "kerchunk", "libarchive-c", "lz4", "notebook", "numpy", "ocifs", "pandas", "panel", "paramiko", "pyarrow", "pyarrow (>=1)", "pyftpdlib", "pygit2", "pytest", "pytest-asyncio (!=0.22.0)", "pytest-benchmark", "pytest-cov", "pytest-mock", "pytest-recording", "pytest-rerunfailures", "python-snappy", "requests", "smbprotocol", "tqdm", "urllib3", "zarr", "zstandard"]
+tqdm = ["tqdm"]
 
 [[package]]
 name = "google-api-core"
@@ -1021,7 +1084,7 @@ description = "Lightweight in-process concurrent programming"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "platform_machine == \"aarch64\" or platform_machine == \"ppc64le\" or platform_machine == \"x86_64\" or platform_machine == \"amd64\" or platform_machine == \"AMD64\" or platform_machine == \"win32\" or platform_machine == \"WIN32\""
+markers = "(platform_machine == \"aarch64\" or platform_machine == \"ppc64le\" or platform_machine == \"x86_64\" or platform_machine == \"amd64\" or platform_machine == \"AMD64\" or platform_machine == \"win32\" or platform_machine == \"WIN32\") and (extra == \"multi-query\" or extra == \"ensemble\" or extra == \"contextual-compression\" or extra == \"parent-document\" or extra == \"self-query\" or extra == \"time-weighted\" or extra == \"all-retrievers\" or extra == \"popular-retrievers\" or extra == \"bm25\" or extra == \"tfidf\" or extra == \"knn\" or extra == \"svm\" or extra == \"elasticsearch\" or extra == \"faiss\" or extra == \"cohere-rag\" or extra == \"azure-search\" or extra == \"tavily\" or extra == \"arxiv\" or extra == \"wikipedia\" or extra == \"pubmed\" or extra == \"web-research\" or extra == \"you-search\" or extra == \"metal\" or extra == \"vespa\" or extra == \"zep\" or extra == \"zep-cloud\" or extra == \"asknews\" or extra == \"google-document-ai-warehouse\" or extra == \"docarray\" or extra == \"neuraldb\" or extra == \"llamaindex\" or extra == \"chatgpt-plugin\" or extra == \"sparse-retrievers\" or extra == \"api-retrievers\")"
 files = [
     {file = "greenlet-3.2.0-cp310-cp310-macosx_11_0_universal2.whl", hash = "sha256:b7a7b7f2bad3ca72eb2fa14643f1c4ca11d115614047299d89bc24a3b11ddd09"},
     {file = "greenlet-3.2.0-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:60e77242e38e99ecaede853755bbd8165e0b20a2f1f3abcaa6f0dceb826a7411"},
@@ -1195,6 +1258,28 @@ files = [
 ]
 
 [[package]]
+name = "hf-xet"
+version = "1.1.5"
+description = "Fast transfer of large files with the Hugging Face Hub."
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+markers = "platform_machine == \"x86_64\" or platform_machine == \"amd64\" or platform_machine == \"arm64\" or platform_machine == \"aarch64\""
+files = [
+    {file = "hf_xet-1.1.5-cp37-abi3-macosx_10_12_x86_64.whl", hash = "sha256:f52c2fa3635b8c37c7764d8796dfa72706cc4eded19d638331161e82b0792e23"},
+    {file = "hf_xet-1.1.5-cp37-abi3-macosx_11_0_arm64.whl", hash = "sha256:9fa6e3ee5d61912c4a113e0708eaaef987047616465ac7aa30f7121a48fc1af8"},
+    {file = "hf_xet-1.1.5-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:fc874b5c843e642f45fd85cda1ce599e123308ad2901ead23d3510a47ff506d1"},
+    {file = "hf_xet-1.1.5-cp37-abi3-manylinux_2_28_aarch64.whl", hash = "sha256:dbba1660e5d810bd0ea77c511a99e9242d920790d0e63c0e4673ed36c4022d18"},
+    {file = "hf_xet-1.1.5-cp37-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:ab34c4c3104133c495785d5d8bba3b1efc99de52c02e759cf711a91fd39d3a14"},
+    {file = "hf_xet-1.1.5-cp37-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:83088ecea236d5113de478acb2339f92c95b4fb0462acaa30621fac02f5a534a"},
+    {file = "hf_xet-1.1.5-cp37-abi3-win_amd64.whl", hash = "sha256:73e167d9807d166596b4b2f0b585c6d5bd84a26dea32843665a8b58f6edba245"},
+    {file = "hf_xet-1.1.5.tar.gz", hash = "sha256:69ebbcfd9ec44fdc2af73441619eeb06b94ee34511bbcf57cd423820090f5694"},
+]
+
+[package.extras]
+tests = ["pytest"]
+
+[[package]]
 name = "httpcore"
 version = "1.0.8"
 description = "A minimal low-level HTTP client."
@@ -1252,6 +1337,46 @@ files = [
     {file = "httpx-sse-0.4.0.tar.gz", hash = "sha256:1e81a3a3070ce322add1d3529ed42eb5f70817f45ed6ec915ab753f961139721"},
     {file = "httpx_sse-0.4.0-py3-none-any.whl", hash = "sha256:f329af6eae57eaa2bdfd962b42524764af68075ea87370a2de920af5341e318f"},
 ]
+markers = {main = "extra == \"bm25\" or extra == \"tfidf\" or extra == \"knn\" or extra == \"svm\" or extra == \"elasticsearch\" or extra == \"faiss\" or extra == \"cohere-rag\" or extra == \"azure-search\" or extra == \"tavily\" or extra == \"arxiv\" or extra == \"wikipedia\" or extra == \"pubmed\" or extra == \"web-research\" or extra == \"you-search\" or extra == \"metal\" or extra == \"vespa\" or extra == \"zep\" or extra == \"zep-cloud\" or extra == \"asknews\" or extra == \"google-document-ai-warehouse\" or extra == \"docarray\" or extra == \"neuraldb\" or extra == \"llamaindex\" or extra == \"chatgpt-plugin\" or extra == \"all-retrievers\" or extra == \"popular-retrievers\" or extra == \"sparse-retrievers\" or extra == \"api-retrievers\""}
+
+[[package]]
+name = "huggingface-hub"
+version = "0.33.2"
+description = "Client library to download and publish models, datasets and other repos on the huggingface.co hub"
+optional = false
+python-versions = ">=3.8.0"
+groups = ["main"]
+files = [
+    {file = "huggingface_hub-0.33.2-py3-none-any.whl", hash = "sha256:3749498bfa91e8cde2ddc2c1db92c79981f40e66434c20133b39e5928ac9bcc5"},
+    {file = "huggingface_hub-0.33.2.tar.gz", hash = "sha256:84221defaec8fa09c090390cd68c78b88e3c4c2b7befba68d3dc5aacbc3c2c5f"},
+]
+
+[package.dependencies]
+filelock = "*"
+fsspec = ">=2023.5.0"
+hf-xet = {version = ">=1.1.2,<2.0.0", markers = "platform_machine == \"x86_64\" or platform_machine == \"amd64\" or platform_machine == \"arm64\" or platform_machine == \"aarch64\""}
+packaging = ">=20.9"
+pyyaml = ">=5.1"
+requests = "*"
+tqdm = ">=4.42.1"
+typing-extensions = ">=3.7.4.3"
+
+[package.extras]
+all = ["InquirerPy (==0.3.4)", "Jinja2", "Pillow", "aiohttp", "authlib (>=1.3.2)", "fastapi", "gradio (>=4.0.0)", "httpx", "itsdangerous", "jedi", "libcst (==1.4.0)", "mypy (==1.15.0) ; python_version >= \"3.9\"", "mypy (>=1.14.1,<1.15.0) ; python_version == \"3.8\"", "numpy", "pytest (>=8.1.1,<8.2.2)", "pytest-asyncio", "pytest-cov", "pytest-env", "pytest-mock", "pytest-rerunfailures", "pytest-vcr", "pytest-xdist", "ruff (>=0.9.0)", "soundfile", "types-PyYAML", "types-requests", "types-simplejson", "types-toml", "types-tqdm", "types-urllib3", "typing-extensions (>=4.8.0)", "urllib3 (<2.0)"]
+cli = ["InquirerPy (==0.3.4)"]
+dev = ["InquirerPy (==0.3.4)", "Jinja2", "Pillow", "aiohttp", "authlib (>=1.3.2)", "fastapi", "gradio (>=4.0.0)", "httpx", "itsdangerous", "jedi", "libcst (==1.4.0)", "mypy (==1.15.0) ; python_version >= \"3.9\"", "mypy (>=1.14.1,<1.15.0) ; python_version == \"3.8\"", "numpy", "pytest (>=8.1.1,<8.2.2)", "pytest-asyncio", "pytest-cov", "pytest-env", "pytest-mock", "pytest-rerunfailures", "pytest-vcr", "pytest-xdist", "ruff (>=0.9.0)", "soundfile", "types-PyYAML", "types-requests", "types-simplejson", "types-toml", "types-tqdm", "types-urllib3", "typing-extensions (>=4.8.0)", "urllib3 (<2.0)"]
+fastai = ["fastai (>=2.4)", "fastcore (>=1.3.27)", "toml"]
+hf-transfer = ["hf-transfer (>=0.1.4)"]
+hf-xet = ["hf-xet (>=1.1.2,<2.0.0)"]
+inference = ["aiohttp"]
+mcp = ["aiohttp", "mcp (>=1.8.0)", "typer"]
+oauth = ["authlib (>=1.3.2)", "fastapi", "httpx", "itsdangerous"]
+quality = ["libcst (==1.4.0)", "mypy (==1.15.0) ; python_version >= \"3.9\"", "mypy (>=1.14.1,<1.15.0) ; python_version == \"3.8\"", "ruff (>=0.9.0)"]
+tensorflow = ["graphviz", "pydot", "tensorflow"]
+tensorflow-testing = ["keras (<3.0)", "tensorflow"]
+testing = ["InquirerPy (==0.3.4)", "Jinja2", "Pillow", "aiohttp", "authlib (>=1.3.2)", "fastapi", "gradio (>=4.0.0)", "httpx", "itsdangerous", "jedi", "numpy", "pytest (>=8.1.1,<8.2.2)", "pytest-asyncio", "pytest-cov", "pytest-env", "pytest-mock", "pytest-rerunfailures", "pytest-vcr", "pytest-xdist", "soundfile", "urllib3 (<2.0)"]
+torch = ["safetensors[torch]", "torch"]
+typing = ["types-PyYAML", "types-requests", "types-simplejson", "types-toml", "types-tqdm", "types-urllib3", "typing-extensions (>=4.8.0)"]
 
 [[package]]
 name = "idna"
@@ -1348,6 +1473,7 @@ description = "Building applications with LLMs through composability"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
+markers = "extra == \"multi-query\" or extra == \"ensemble\" or extra == \"contextual-compression\" or extra == \"parent-document\" or extra == \"self-query\" or extra == \"time-weighted\" or extra == \"all-retrievers\" or extra == \"popular-retrievers\" or extra == \"bm25\" or extra == \"tfidf\" or extra == \"knn\" or extra == \"svm\" or extra == \"elasticsearch\" or extra == \"faiss\" or extra == \"cohere-rag\" or extra == \"azure-search\" or extra == \"tavily\" or extra == \"arxiv\" or extra == \"wikipedia\" or extra == \"pubmed\" or extra == \"web-research\" or extra == \"you-search\" or extra == \"metal\" or extra == \"vespa\" or extra == \"zep\" or extra == \"zep-cloud\" or extra == \"asknews\" or extra == \"google-document-ai-warehouse\" or extra == \"docarray\" or extra == \"neuraldb\" or extra == \"llamaindex\" or extra == \"chatgpt-plugin\" or extra == \"sparse-retrievers\" or extra == \"api-retrievers\""
 files = [
     {file = "langchain-0.3.26-py3-none-any.whl", hash = "sha256:361bb2e61371024a8c473da9f9c55f4ee50f269c5ab43afdb2b1309cb7ac36cf"},
     {file = "langchain-0.3.26.tar.gz", hash = "sha256:8ff034ee0556d3e45eff1f1e96d0d745ced57858414dba7171c8ebdbeb5580c9"},
@@ -1388,6 +1514,7 @@ description = "Community contributed LangChain integrations."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
+markers = "extra == \"bm25\" or extra == \"tfidf\" or extra == \"knn\" or extra == \"svm\" or extra == \"elasticsearch\" or extra == \"faiss\" or extra == \"cohere-rag\" or extra == \"azure-search\" or extra == \"tavily\" or extra == \"arxiv\" or extra == \"wikipedia\" or extra == \"pubmed\" or extra == \"web-research\" or extra == \"you-search\" or extra == \"metal\" or extra == \"vespa\" or extra == \"zep\" or extra == \"zep-cloud\" or extra == \"asknews\" or extra == \"google-document-ai-warehouse\" or extra == \"docarray\" or extra == \"neuraldb\" or extra == \"llamaindex\" or extra == \"chatgpt-plugin\" or extra == \"all-retrievers\" or extra == \"popular-retrievers\" or extra == \"sparse-retrievers\" or extra == \"api-retrievers\""
 files = [
     {file = "langchain_community-0.3.27-py3-none-any.whl", hash = "sha256:581f97b795f9633da738ea95da9cb78f8879b538090c9b7a68c0aed49c828f0d"},
     {file = "langchain_community-0.3.27.tar.gz", hash = "sha256:e1037c3b9da0c6d10bf06e838b034eb741e016515c79ef8f3f16e53ead33d882"},
@@ -1457,12 +1584,33 @@ anthropic = ["anthropic[vertexai] (>=0.35.0,<1)"]
 mistral = ["langchain-mistralai (>=0.2.0,<1)"]
 
 [[package]]
+name = "langchain-huggingface"
+version = "0.3.0"
+description = "An integration package connecting Hugging Face and LangChain."
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "langchain_huggingface-0.3.0-py3-none-any.whl", hash = "sha256:aab85d57e649c805d2f2a9f8d72d87b5d12c45dd4831309ac9c37753ddb237ed"},
+    {file = "langchain_huggingface-0.3.0.tar.gz", hash = "sha256:d1cf93fb4d4eafc8b44edcd5fba904b27cbd3fda6cdef0e2321fbcf4efcda822"},
+]
+
+[package.dependencies]
+huggingface-hub = ">=0.30.2"
+langchain-core = ">=0.3.65,<1.0.0"
+tokenizers = ">=0.19.1"
+
+[package.extras]
+full = ["sentence-transformers (>=2.6.0)", "transformers (>=4.39.0)"]
+
+[[package]]
 name = "langchain-text-splitters"
 version = "0.3.8"
 description = "LangChain text splitting utilities"
 optional = false
 python-versions = "<4.0,>=3.9"
 groups = ["main"]
+markers = "extra == \"multi-query\" or extra == \"ensemble\" or extra == \"contextual-compression\" or extra == \"parent-document\" or extra == \"self-query\" or extra == \"time-weighted\" or extra == \"all-retrievers\" or extra == \"popular-retrievers\" or extra == \"bm25\" or extra == \"tfidf\" or extra == \"knn\" or extra == \"svm\" or extra == \"elasticsearch\" or extra == \"faiss\" or extra == \"cohere-rag\" or extra == \"azure-search\" or extra == \"tavily\" or extra == \"arxiv\" or extra == \"wikipedia\" or extra == \"pubmed\" or extra == \"web-research\" or extra == \"you-search\" or extra == \"metal\" or extra == \"vespa\" or extra == \"zep\" or extra == \"zep-cloud\" or extra == \"asknews\" or extra == \"google-document-ai-warehouse\" or extra == \"docarray\" or extra == \"neuraldb\" or extra == \"llamaindex\" or extra == \"chatgpt-plugin\" or extra == \"sparse-retrievers\" or extra == \"api-retrievers\""
 files = [
     {file = "langchain_text_splitters-0.3.8-py3-none-any.whl", hash = "sha256:e75cc0f4ae58dcf07d9f18776400cf8ade27fadd4ff6d264df6278bb302f6f02"},
     {file = "langchain_text_splitters-0.3.8.tar.gz", hash = "sha256:116d4b9f2a22dda357d0b79e30acf005c5518177971c66a9f1ab0edfdb0f912e"},
@@ -1668,6 +1816,7 @@ description = "A lightweight library for converting complex datatypes to and fro
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
+markers = "extra == \"bm25\" or extra == \"tfidf\" or extra == \"knn\" or extra == \"svm\" or extra == \"elasticsearch\" or extra == \"faiss\" or extra == \"cohere-rag\" or extra == \"azure-search\" or extra == \"tavily\" or extra == \"arxiv\" or extra == \"wikipedia\" or extra == \"pubmed\" or extra == \"web-research\" or extra == \"you-search\" or extra == \"metal\" or extra == \"vespa\" or extra == \"zep\" or extra == \"zep-cloud\" or extra == \"asknews\" or extra == \"google-document-ai-warehouse\" or extra == \"docarray\" or extra == \"neuraldb\" or extra == \"llamaindex\" or extra == \"chatgpt-plugin\" or extra == \"all-retrievers\" or extra == \"popular-retrievers\" or extra == \"sparse-retrievers\" or extra == \"api-retrievers\""
 files = [
     {file = "marshmallow-3.26.1-py3-none-any.whl", hash = "sha256:3350409f20a70a7e4e11a27661187b77cdcaeb20abca41c1454fe33636bea09c"},
     {file = "marshmallow-3.26.1.tar.gz", hash = "sha256:e6d8affb6cb61d39d26402096dc0aee12d5a26d490a121f118d2e81dc0719dc6"},
@@ -1700,6 +1849,7 @@ description = "multidict implementation"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
+markers = "extra == \"bm25\" or extra == \"tfidf\" or extra == \"knn\" or extra == \"svm\" or extra == \"elasticsearch\" or extra == \"faiss\" or extra == \"cohere-rag\" or extra == \"azure-search\" or extra == \"tavily\" or extra == \"arxiv\" or extra == \"wikipedia\" or extra == \"pubmed\" or extra == \"web-research\" or extra == \"you-search\" or extra == \"metal\" or extra == \"vespa\" or extra == \"zep\" or extra == \"zep-cloud\" or extra == \"asknews\" or extra == \"google-document-ai-warehouse\" or extra == \"docarray\" or extra == \"neuraldb\" or extra == \"llamaindex\" or extra == \"chatgpt-plugin\" or extra == \"all-retrievers\" or extra == \"popular-retrievers\" or extra == \"sparse-retrievers\" or extra == \"api-retrievers\""
 files = [
     {file = "multidict-6.6.3-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:a2be5b7b35271f7fff1397204ba6708365e3d773579fe2a30625e16c4b4ce817"},
     {file = "multidict-6.6.3-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:12f4581d2930840295c461764b9a65732ec01250b46c6b2c510d7ee68872b140"},
@@ -1877,6 +2027,7 @@ files = [
     {file = "mypy_extensions-1.0.0-py3-none-any.whl", hash = "sha256:4392f6c0eb8a5668a69e23d168ffa70f0be9ccfd32b5cc2d26a34ae5b844552d"},
     {file = "mypy_extensions-1.0.0.tar.gz", hash = "sha256:75dbf8955dc00442a438fc4d0666508a9a97b6bd41aa2f0ffe9d2f2725af0782"},
 ]
+markers = {main = "extra == \"bm25\" or extra == \"tfidf\" or extra == \"knn\" or extra == \"svm\" or extra == \"elasticsearch\" or extra == \"faiss\" or extra == \"cohere-rag\" or extra == \"azure-search\" or extra == \"tavily\" or extra == \"arxiv\" or extra == \"wikipedia\" or extra == \"pubmed\" or extra == \"web-research\" or extra == \"you-search\" or extra == \"metal\" or extra == \"vespa\" or extra == \"zep\" or extra == \"zep-cloud\" or extra == \"asknews\" or extra == \"google-document-ai-warehouse\" or extra == \"docarray\" or extra == \"neuraldb\" or extra == \"llamaindex\" or extra == \"chatgpt-plugin\" or extra == \"all-retrievers\" or extra == \"popular-retrievers\" or extra == \"sparse-retrievers\" or extra == \"api-retrievers\""}
 
 [[package]]
 name = "numexpr"
@@ -1972,6 +2123,7 @@ files = [
     {file = "numpy-1.26.4-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:7e50d0a0cc3189f9cb0aeb3a6a6af18c16f59f004b866cd2be1c14b36134a4a0"},
     {file = "numpy-1.26.4.tar.gz", hash = "sha256:2a02aba9ed12e4ac4eb3ea9421c420301a0c6460d9830d74a9df87efa4912010"},
 ]
+markers = {main = "extra == \"bm25\" or extra == \"tfidf\" or extra == \"knn\" or extra == \"svm\" or extra == \"elasticsearch\" or extra == \"faiss\" or extra == \"cohere-rag\" or extra == \"azure-search\" or extra == \"tavily\" or extra == \"arxiv\" or extra == \"wikipedia\" or extra == \"pubmed\" or extra == \"web-research\" or extra == \"you-search\" or extra == \"metal\" or extra == \"vespa\" or extra == \"zep\" or extra == \"zep-cloud\" or extra == \"asknews\" or extra == \"google-document-ai-warehouse\" or extra == \"docarray\" or extra == \"neuraldb\" or extra == \"llamaindex\" or extra == \"chatgpt-plugin\" or extra == \"all-retrievers\" or extra == \"popular-retrievers\" or extra == \"sparse-retrievers\" or extra == \"api-retrievers\""}
 
 [[package]]
 name = "orjson"
@@ -2179,6 +2331,7 @@ description = "Accelerated property cache"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
+markers = "extra == \"bm25\" or extra == \"tfidf\" or extra == \"knn\" or extra == \"svm\" or extra == \"elasticsearch\" or extra == \"faiss\" or extra == \"cohere-rag\" or extra == \"azure-search\" or extra == \"tavily\" or extra == \"arxiv\" or extra == \"wikipedia\" or extra == \"pubmed\" or extra == \"web-research\" or extra == \"you-search\" or extra == \"metal\" or extra == \"vespa\" or extra == \"zep\" or extra == \"zep-cloud\" or extra == \"asknews\" or extra == \"google-document-ai-warehouse\" or extra == \"docarray\" or extra == \"neuraldb\" or extra == \"llamaindex\" or extra == \"chatgpt-plugin\" or extra == \"all-retrievers\" or extra == \"popular-retrievers\" or extra == \"sparse-retrievers\" or extra == \"api-retrievers\""
 files = [
     {file = "propcache-0.3.2-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:22d9962a358aedbb7a2e36187ff273adeaab9743373a272976d2e348d08c7770"},
     {file = "propcache-0.3.2-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:0d0fda578d1dc3f77b6b5a5dce3b9ad69a8250a891760a548df850a5e8da87f3"},
@@ -2555,6 +2708,7 @@ description = "Settings management using Pydantic"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
+markers = "extra == \"bm25\" or extra == \"tfidf\" or extra == \"knn\" or extra == \"svm\" or extra == \"elasticsearch\" or extra == \"faiss\" or extra == \"cohere-rag\" or extra == \"azure-search\" or extra == \"tavily\" or extra == \"arxiv\" or extra == \"wikipedia\" or extra == \"pubmed\" or extra == \"web-research\" or extra == \"you-search\" or extra == \"metal\" or extra == \"vespa\" or extra == \"zep\" or extra == \"zep-cloud\" or extra == \"asknews\" or extra == \"google-document-ai-warehouse\" or extra == \"docarray\" or extra == \"neuraldb\" or extra == \"llamaindex\" or extra == \"chatgpt-plugin\" or extra == \"all-retrievers\" or extra == \"popular-retrievers\" or extra == \"sparse-retrievers\" or extra == \"api-retrievers\""
 files = [
     {file = "pydantic_settings-2.10.1-py3-none-any.whl", hash = "sha256:a60952460b99cf661dc25c29c0ef171721f98bfcb52ef8d9ea4c943d7c8cc796"},
     {file = "pydantic_settings-2.10.1.tar.gz", hash = "sha256:06f0062169818d0f5524420a360d632d5857b83cffd4d42fe29597807a1614ee"},
@@ -2724,6 +2878,7 @@ description = "Read key-value pairs from a .env file and set them as environment
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
+markers = "extra == \"bm25\" or extra == \"tfidf\" or extra == \"knn\" or extra == \"svm\" or extra == \"elasticsearch\" or extra == \"faiss\" or extra == \"cohere-rag\" or extra == \"azure-search\" or extra == \"tavily\" or extra == \"arxiv\" or extra == \"wikipedia\" or extra == \"pubmed\" or extra == \"web-research\" or extra == \"you-search\" or extra == \"metal\" or extra == \"vespa\" or extra == \"zep\" or extra == \"zep-cloud\" or extra == \"asknews\" or extra == \"google-document-ai-warehouse\" or extra == \"docarray\" or extra == \"neuraldb\" or extra == \"llamaindex\" or extra == \"chatgpt-plugin\" or extra == \"all-retrievers\" or extra == \"popular-retrievers\" or extra == \"sparse-retrievers\" or extra == \"api-retrievers\""
 files = [
     {file = "python_dotenv-1.1.1-py3-none-any.whl", hash = "sha256:31f23644fe2602f88ff55e1f5c79ba497e01224ee7737937930c448e4d0e24dc"},
     {file = "python_dotenv-1.1.1.tar.gz", hash = "sha256:a8a6399716257f45be6a007360200409fce5cda2661e3dec71d23dc15f6189ab"},
@@ -2955,6 +3110,7 @@ description = "Database Abstraction Library"
 optional = false
 python-versions = ">=3.7"
 groups = ["main"]
+markers = "extra == \"multi-query\" or extra == \"ensemble\" or extra == \"contextual-compression\" or extra == \"parent-document\" or extra == \"self-query\" or extra == \"time-weighted\" or extra == \"all-retrievers\" or extra == \"popular-retrievers\" or extra == \"bm25\" or extra == \"tfidf\" or extra == \"knn\" or extra == \"svm\" or extra == \"elasticsearch\" or extra == \"faiss\" or extra == \"cohere-rag\" or extra == \"azure-search\" or extra == \"tavily\" or extra == \"arxiv\" or extra == \"wikipedia\" or extra == \"pubmed\" or extra == \"web-research\" or extra == \"you-search\" or extra == \"metal\" or extra == \"vespa\" or extra == \"zep\" or extra == \"zep-cloud\" or extra == \"asknews\" or extra == \"google-document-ai-warehouse\" or extra == \"docarray\" or extra == \"neuraldb\" or extra == \"llamaindex\" or extra == \"chatgpt-plugin\" or extra == \"sparse-retrievers\" or extra == \"api-retrievers\""
 files = [
     {file = "SQLAlchemy-2.0.40-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:ae9597cab738e7cc823f04a704fb754a9249f0b6695a6aeb63b74055cd417a96"},
     {file = "SQLAlchemy-2.0.40-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:37a5c21ab099a83d669ebb251fddf8f5cee4d75ea40a5a1653d9c43d60e20867"},
@@ -3076,6 +3232,61 @@ files = [
 tests = ["pytest", "pytest-cov"]
 
 [[package]]
+name = "tokenizers"
+version = "0.21.2"
+description = ""
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "tokenizers-0.21.2-cp39-abi3-macosx_10_12_x86_64.whl", hash = "sha256:342b5dfb75009f2255ab8dec0041287260fed5ce00c323eb6bab639066fef8ec"},
+    {file = "tokenizers-0.21.2-cp39-abi3-macosx_11_0_arm64.whl", hash = "sha256:126df3205d6f3a93fea80c7a8a266a78c1bd8dd2fe043386bafdd7736a23e45f"},
+    {file = "tokenizers-0.21.2-cp39-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:4a32cd81be21168bd0d6a0f0962d60177c447a1aa1b1e48fa6ec9fc728ee0b12"},
+    {file = "tokenizers-0.21.2-cp39-abi3-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:8bd8999538c405133c2ab999b83b17c08b7fc1b48c1ada2469964605a709ef91"},
+    {file = "tokenizers-0.21.2-cp39-abi3-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:5e9944e61239b083a41cf8fc42802f855e1dca0f499196df37a8ce219abac6eb"},
+    {file = "tokenizers-0.21.2-cp39-abi3-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:514cd43045c5d546f01142ff9c79a96ea69e4b5cda09e3027708cb2e6d5762ab"},
+    {file = "tokenizers-0.21.2-cp39-abi3-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:b1b9405822527ec1e0f7d8d2fdb287a5730c3a6518189c968254a8441b21faae"},
+    {file = "tokenizers-0.21.2-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:fed9a4d51c395103ad24f8e7eb976811c57fbec2af9f133df471afcd922e5020"},
+    {file = "tokenizers-0.21.2-cp39-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:2c41862df3d873665ec78b6be36fcc30a26e3d4902e9dd8608ed61d49a48bc19"},
+    {file = "tokenizers-0.21.2-cp39-abi3-musllinux_1_2_armv7l.whl", hash = "sha256:ed21dc7e624e4220e21758b2e62893be7101453525e3d23264081c9ef9a6d00d"},
+    {file = "tokenizers-0.21.2-cp39-abi3-musllinux_1_2_i686.whl", hash = "sha256:0e73770507e65a0e0e2a1affd6b03c36e3bc4377bd10c9ccf51a82c77c0fe365"},
+    {file = "tokenizers-0.21.2-cp39-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:106746e8aa9014a12109e58d540ad5465b4c183768ea96c03cbc24c44d329958"},
+    {file = "tokenizers-0.21.2-cp39-abi3-win32.whl", hash = "sha256:cabda5a6d15d620b6dfe711e1af52205266d05b379ea85a8a301b3593c60e962"},
+    {file = "tokenizers-0.21.2-cp39-abi3-win_amd64.whl", hash = "sha256:58747bb898acdb1007f37a7bbe614346e98dc28708ffb66a3fd50ce169ac6c98"},
+    {file = "tokenizers-0.21.2.tar.gz", hash = "sha256:fdc7cffde3e2113ba0e6cc7318c40e3438a4d74bbc62bf04bcc63bdfb082ac77"},
+]
+
+[package.dependencies]
+huggingface-hub = ">=0.16.4,<1.0"
+
+[package.extras]
+dev = ["tokenizers[testing]"]
+docs = ["setuptools-rust", "sphinx", "sphinx-rtd-theme"]
+testing = ["black (==22.3)", "datasets", "numpy", "pytest", "requests", "ruff"]
+
+[[package]]
+name = "tqdm"
+version = "4.67.1"
+description = "Fast, Extensible Progress Meter"
+optional = false
+python-versions = ">=3.7"
+groups = ["main"]
+files = [
+    {file = "tqdm-4.67.1-py3-none-any.whl", hash = "sha256:26445eca388f82e72884e0d580d5464cd801a3ea01e63e5601bdff9ba6a48de2"},
+    {file = "tqdm-4.67.1.tar.gz", hash = "sha256:f8aef9c52c08c13a65f30ea34f4e5aac3fd1a34959879d7e59e63027286627f2"},
+]
+
+[package.dependencies]
+colorama = {version = "*", markers = "platform_system == \"Windows\""}
+
+[package.extras]
+dev = ["nbval", "pytest (>=6)", "pytest-asyncio (>=0.24)", "pytest-cov", "pytest-timeout"]
+discord = ["requests"]
+notebook = ["ipywidgets (>=6)"]
+slack = ["slack-sdk"]
+telegram = ["requests"]
+
+[[package]]
 name = "typing-extensions"
 version = "4.13.2"
 description = "Backported and Experimental Type Hints for Python 3.8+"
@@ -3094,6 +3305,7 @@ description = "Runtime inspection utilities for typing module."
 optional = false
 python-versions = "*"
 groups = ["main"]
+markers = "extra == \"bm25\" or extra == \"tfidf\" or extra == \"knn\" or extra == \"svm\" or extra == \"elasticsearch\" or extra == \"faiss\" or extra == \"cohere-rag\" or extra == \"azure-search\" or extra == \"tavily\" or extra == \"arxiv\" or extra == \"wikipedia\" or extra == \"pubmed\" or extra == \"web-research\" or extra == \"you-search\" or extra == \"metal\" or extra == \"vespa\" or extra == \"zep\" or extra == \"zep-cloud\" or extra == \"asknews\" or extra == \"google-document-ai-warehouse\" or extra == \"docarray\" or extra == \"neuraldb\" or extra == \"llamaindex\" or extra == \"chatgpt-plugin\" or extra == \"all-retrievers\" or extra == \"popular-retrievers\" or extra == \"sparse-retrievers\" or extra == \"api-retrievers\""
 files = [
     {file = "typing_inspect-0.9.0-py3-none-any.whl", hash = "sha256:9ee6fc59062311ef8547596ab6b955e1b8aa46242d854bfc78f4f6b0eff35f9f"},
     {file = "typing_inspect-0.9.0.tar.gz", hash = "sha256:b23fc42ff6f6ef6954e4852c1fb512cdd18dbea03134f91f856a95ccc9461f78"},
@@ -3370,6 +3582,7 @@ description = "Yet another URL library"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
+markers = "extra == \"bm25\" or extra == \"tfidf\" or extra == \"knn\" or extra == \"svm\" or extra == \"elasticsearch\" or extra == \"faiss\" or extra == \"cohere-rag\" or extra == \"azure-search\" or extra == \"tavily\" or extra == \"arxiv\" or extra == \"wikipedia\" or extra == \"pubmed\" or extra == \"web-research\" or extra == \"you-search\" or extra == \"metal\" or extra == \"vespa\" or extra == \"zep\" or extra == \"zep-cloud\" or extra == \"asknews\" or extra == \"google-document-ai-warehouse\" or extra == \"docarray\" or extra == \"neuraldb\" or extra == \"llamaindex\" or extra == \"chatgpt-plugin\" or extra == \"all-retrievers\" or extra == \"popular-retrievers\" or extra == \"sparse-retrievers\" or extra == \"api-retrievers\""
 files = [
     {file = "yarl-1.20.1-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:6032e6da6abd41e4acda34d75a816012717000fa6839f37124a47fcefc49bec4"},
     {file = "yarl-1.20.1-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:2c7b34d804b8cf9b214f05015c4fee2ebe7ed05cf581e7192c06555c71f4446a"},
@@ -3598,44 +3811,44 @@ cffi = ["cffi (>=1.11)"]
 [extras]
 ai21 = []
 all-providers = []
-all-retrievers = ["langchain", "langchain-core"]
+all-retrievers = ["langchain", "langchain-community", "langchain-core"]
 amazon-knowledge-bases = []
 anthropic = []
-api-retrievers = []
-arxiv = []
-asknews = []
+api-retrievers = ["langchain-community"]
+arxiv = ["langchain-community"]
+asknews = ["langchain-community"]
 aws = []
 azure = []
-azure-search = []
+azure-search = ["langchain-community"]
 bedrock = []
-bm25 = []
-chatgpt-plugin = []
+bm25 = ["langchain-community"]
+chatgpt-plugin = ["langchain-community"]
 chroma = []
 cloud-retrievers = []
 cohere = []
-cohere-rag = []
+cohere-rag = ["langchain-community"]
 contextual-compression = ["langchain"]
 databricks = []
-docarray = []
-elasticsearch = []
+docarray = ["langchain-community"]
+elasticsearch = ["langchain-community"]
 ensemble = ["langchain"]
-faiss = []
+faiss = ["langchain-community"]
 fireworks = []
 google = []
-google-document-ai-warehouse = []
+google-document-ai-warehouse = ["langchain-community"]
 google-vertex-ai-search = []
 google-vertex-search = []
 groq = []
 huggingface = []
 ibm = []
 kendra = []
-knn = []
-llamaindex = []
-metal = []
+knn = ["langchain-community"]
+llamaindex = ["langchain-community"]
+metal = ["langchain-community"]
 milvus = []
 mistral = []
 multi-query = ["langchain"]
-neuraldb = []
+neuraldb = ["langchain-community"]
 nvidia = []
 ollama = []
 openai = []
@@ -3644,34 +3857,34 @@ pgvector = []
 pinecone = []
 pinecone-hybrid = []
 popular-providers = []
-popular-retrievers = ["langchain", "langchain-core"]
-pubmed = []
+popular-retrievers = ["langchain", "langchain-community", "langchain-core"]
+pubmed = ["langchain-community"]
 qdrant = []
 qdrant-sparse = []
 redis = []
 self-query = ["langchain"]
-sparse-retrievers = []
-svm = []
-tavily = []
-tfidf = []
+sparse-retrievers = ["langchain-community"]
+svm = ["langchain-community"]
+tavily = ["langchain-community"]
+tfidf = ["langchain-community"]
 time-weighted = ["langchain"]
 together = []
 upstage = []
 vector-retrievers = ["langchain-core"]
 vector-store = ["langchain-core"]
 vertex-search = []
-vespa = []
+vespa = ["langchain-community"]
 weaviate = []
 weaviate-hybrid = []
-web-research = []
-wikipedia = []
+web-research = ["langchain-community"]
+wikipedia = ["langchain-community"]
 xai = []
-you-search = []
-zep = []
-zep-cloud = []
+you-search = ["langchain-community"]
+zep = ["langchain-community"]
+zep-cloud = ["langchain-community"]
 zilliz = []
 
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "e9420c0629a2e8a646558082fa83093deddc5c42e3f93bc67771673b4f8d76e6"
+content-hash = "77d1ab91309a4f052da9968db4deca15c3db0d1762fd83c015123e3de8dabb43"

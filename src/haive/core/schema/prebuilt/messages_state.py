@@ -119,6 +119,35 @@ class MessagesState(StateSchema):
 
         return instance
 
+    @model_validator(mode="after")
+    def sync_message_engine_settings(self) -> "MessagesState":
+        """Sync message-related settings with engine if present.
+
+        This enhances MessagesState to work better with the new engine management.
+        """
+        # The parent sync_engine_fields validator will run automatically
+        # since validators are inherited and run in order
+
+        # Get main engine (from engine field or engines dict)
+        main_engine = None
+        if hasattr(self, "engine") and self.engine:
+            main_engine = self.engine
+        elif hasattr(self, "engines") and self.engines.get("main"):
+            main_engine = self.engines["main"]
+
+        if main_engine:
+            # Sync system message if engine supports it
+            if hasattr(main_engine, "system_message"):
+                system_msg = self.get_system_message()
+                if system_msg and system_msg.content:
+                    main_engine.system_message = system_msg.content
+
+            # If engine tracks messages, sync them
+            if hasattr(main_engine, "messages"):
+                main_engine.messages = self.messages
+
+        return self
+
     def add_message(self, message: Union[AnyMessage, Dict]) -> None:
         """Add a message to the conversation."""
         if isinstance(message, dict):
