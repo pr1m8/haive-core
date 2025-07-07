@@ -131,7 +131,9 @@ class MessageList(RootModel[List[AnyMessage]]):
                 return [messages_from_dict([v])[0]]
         elif isinstance(v, list):
             return cls._convert_message_data(v)
-        elif isinstance(v, AnyMessage):
+        elif hasattr(v, "__class__") and issubclass(
+            v.__class__, (AIMessage, HumanMessage, SystemMessage, ToolMessage)
+        ):
             return [v]
 
         return v or []
@@ -145,26 +147,83 @@ class MessageList(RootModel[List[AnyMessage]]):
                 if isinstance(item, str):
                     converted.append(HumanMessage(content=item))
                 elif isinstance(item, dict):
-                    converted.append(messages_from_dict([item])[0])
-                elif isinstance(item, AnyMessage):
+                    # Convert dict to proper message type based on 'type' field
+                    msg_type = item.get("type", "human")
+                    if msg_type == "human":
+                        converted.append(
+                            HumanMessage(
+                                **{k: v for k, v in item.items() if k != "type"}
+                            )
+                        )
+                    elif msg_type == "ai":
+                        converted.append(
+                            AIMessage(**{k: v for k, v in item.items() if k != "type"})
+                        )
+                    elif msg_type == "system":
+                        converted.append(
+                            SystemMessage(
+                                **{k: v for k, v in item.items() if k != "type"}
+                            )
+                        )
+                    elif msg_type == "tool":
+                        converted.append(
+                            ToolMessage(
+                                **{k: v for k, v in item.items() if k != "type"}
+                            )
+                        )
+                    else:
+                        # Fallback to convert_to_messages for other types
+                        converted.append(convert_to_messages([item])[0])
+                elif hasattr(item, "__class__") and issubclass(
+                    item.__class__,
+                    (AIMessage, HumanMessage, SystemMessage, ToolMessage),
+                ):
+                    # It's already a Message object
                     converted.append(item)
                 else:
                     raise ValueError(f"Unsupported message type: {type(item)}")
             return converted
         elif isinstance(data, str):
             return [HumanMessage(content=data)]
-        elif isinstance(data, AnyMessage):
+        elif hasattr(data, "__class__") and issubclass(
+            data.__class__, (AIMessage, HumanMessage, SystemMessage, ToolMessage)
+        ):
             return [data]
         else:
             return convert_to_messages(data)
 
     @model_validator(mode="after")
-    def ensure_system_before_human(self) -> "MessageList":
-        """Ensure system messages come before human messages."""
+    def ensure_proper_messages_and_ordering(self) -> "MessageList":
+        """Ensure all messages are proper Message objects and system messages come before human."""
+        # First ensure all items are proper Message objects
+        # This handles cases where persistence returns dicts instead of Message objects
+        for i, item in enumerate(self.root):
+            if isinstance(item, dict):
+                # Convert dict to proper message type
+                msg_type = item.get("type", "human")
+                if msg_type == "human":
+                    self.root[i] = HumanMessage(
+                        **{k: v for k, v in item.items() if k != "type"}
+                    )
+                elif msg_type == "ai":
+                    self.root[i] = AIMessage(
+                        **{k: v for k, v in item.items() if k != "type"}
+                    )
+                elif msg_type == "system":
+                    self.root[i] = SystemMessage(
+                        **{k: v for k, v in item.items() if k != "type"}
+                    )
+                elif msg_type == "tool":
+                    self.root[i] = ToolMessage(
+                        **{k: v for k, v in item.items() if k != "type"}
+                    )
+                else:
+                    self.root[i] = convert_to_messages([item])[0]
+
+        # Then handle ordering - ensure system messages come before human messages
         if len(self.root) < 2:
             return self
 
-        # Look for adjacent human->system pairs and flip them
         messages = self.root
         i = 0
         while i < len(messages) - 1:
