@@ -18,14 +18,17 @@ logger.set_level(LogLevel.DEBUG)
 
 
 class EngineNodeConfig(NodeConfig):
-    """Elegant engine-based node with intelligent I/O handling."""
+    """Engine-based node with intelligent I/O handling and schema support.
+
+    This node config extends the base NodeConfig with engine-specific functionality
+    while maintaining the new input/output schema pattern for better state utilization.
+    """
 
     # Core identity
     node_type: NodeType = Field(default=NodeType.ENGINE)
     engine: Optional[Engine] = Field(default=None)
-    engine_name: Optional[str] = Field(default=None)
 
-    # Field mappings (auto-normalized)
+    # Legacy field mappings (backwards compatibility)
     input_fields: Optional[Union[List[str], Dict[str, str]]] = Field(default=None)
     output_fields: Optional[Union[List[str], Dict[str, str]]] = Field(default=None)
 
@@ -34,10 +37,64 @@ class EngineNodeConfig(NodeConfig):
     use_send: bool = Field(default=False)
     debug: bool = Field(default=True)
 
+    def model_post_init(self, __context):
+        """Post-initialization to setup engine-specific configurations."""
+        # Set engine_name from engine if not provided
+        if self.engine and not self.engine_name:
+            self.engine_name = self.engine.name
+
+        # Setup default field definitions based on engine type if not provided
+        if self.engine and not self.input_field_defs and not self.output_field_defs:
+            self._setup_default_field_defs_from_engine()
+
+        # Call parent post_init to handle schema setup
+        super().model_post_init(__context)
+
+    def _setup_default_field_defs_from_engine(self):
+        """Setup default field definitions based on engine type."""
+        if not self.engine:
+            return
+
+        from haive.core.schema.field_registry import StandardFields
+
+        # Set defaults based on engine type
+        if self.engine.engine_type == EngineType.LLM:
+            if not self.input_field_defs:
+                self.input_field_defs = [StandardFields.messages(use_enhanced=True)]
+            if not self.output_field_defs:
+                self.output_field_defs = [
+                    StandardFields.ai_message(),
+                    StandardFields.engine_name(),
+                ]
+
+        elif self.engine.engine_type == EngineType.RAG:
+            if not self.input_field_defs:
+                self.input_field_defs = [
+                    StandardFields.query(),
+                    StandardFields.messages(use_enhanced=True),
+                ]
+            if not self.output_field_defs:
+                self.output_field_defs = [
+                    StandardFields.context(),
+                    StandardFields.documents(),
+                    StandardFields.engine_name(),
+                ]
+
+        # Add structured output field if engine has structured_output_model
+        if (
+            hasattr(self.engine, "structured_output_model")
+            and self.engine.structured_output_model
+        ):
+            structured_field = StandardFields.structured_output(
+                self.engine.structured_output_model
+            )
+            if structured_field not in self.output_field_defs:
+                self.output_field_defs.append(structured_field)
+
     def __call__(
         self, state: StateLike, config: Optional[ConfigLike] = None
     ) -> Union[Command, Send]:
-        """Execute engine node with intelligent I/O handling."""
+        """Execute engine node with schema-aware I/O handling."""
         logger.info("=" * 80)
         logger.info(f"ENGINE NODE EXECUTION: {self.name}")
         logger.info("=" * 80)
@@ -57,9 +114,16 @@ class EngineNodeConfig(NodeConfig):
                     f"✅ Got engine: {engine.name} (type: {engine.engine_type.value})"
                 )
 
-                # Extract input intelligently
+                # Extract input using schema-aware method
                 logger.info("Step 2: Extracting Input")
-                input_data = self._extract_smart_input(state, engine)
+                if self.input_schema or self.input_field_defs:
+                    input_data = self.extract_input_from_state(state)
+                    logger.info(
+                        f"Using schema-based input extraction: {list(input_data.keys()) if isinstance(input_data, dict) else type(input_data)}"
+                    )
+                else:
+                    input_data = self._extract_smart_input(state, engine)
+                    logger.info("Using legacy smart input extraction")
 
                 logger.debug(f"Input data type: {type(input_data).__name__}")
                 if isinstance(input_data, dict):
@@ -79,9 +143,16 @@ class EngineNodeConfig(NodeConfig):
                 logger.debug(f"Result type: {type(result).__name__}")
                 self._log_result_details(result)
 
-                # Wrap result intelligently
+                # Wrap result using schema-aware method
                 logger.info("Step 4: Creating Update")
-                wrapped = self._wrap_smart_result(result, state, engine)
+                if self.output_schema or self.output_field_defs:
+                    wrapped = self.create_output_for_state(result)
+                    logger.info(
+                        f"Using schema-based output creation: {list(wrapped.keys()) if isinstance(wrapped, dict) else type(wrapped)}"
+                    )
+                else:
+                    wrapped = self._wrap_smart_result(result, state, engine)
+                    logger.info("Using legacy smart result wrapping")
 
                 # Log final update
                 self._log_final_update(wrapped)
