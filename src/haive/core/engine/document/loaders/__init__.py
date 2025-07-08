@@ -117,6 +117,9 @@ Author: Claude (Haive AI Agent Framework)
 Version: 2.0.0 - Complete Rewrite with 230+ Loaders
 """
 
+# Import LoaderPreference from config
+from haive.core.engine.document.config import LoaderPreference
+
 # Ultimate Auto-Loader System - Main Interface
 from .auto_loader import (
     AutoLoader,
@@ -150,7 +153,6 @@ from .path_analyzer import (
 
 # Enhanced Registry
 from .sources.enhanced_registry import (
-    LoaderPreference,
     enhanced_registry,
     register_bulk_source,
     register_file_source,

@@ -6,12 +6,11 @@ Notion, Obsidian, Slack, and other productivity tools.
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 from langchain_core.document_loaders.base import BaseLoader
 
 from haive.core.engine.document.loaders.sources.implementation import (
-    CredentialManager,
     CredentialType,
     EnhancedSource,
     SourceType,
@@ -345,7 +344,7 @@ class ReadTheDocsSource(EnhancedSource):
 
             match = re.search(r"https?://([^.]+)\.readthedocs", self.project_url)
             if match:
-                project_name = match.group(1)
+                match.group(1)
 
                 # ReadTheDocsLoader expects a local path to downloaded docs
                 # This is a limitation - would need to download first

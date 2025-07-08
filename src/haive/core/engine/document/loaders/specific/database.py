@@ -11,7 +11,6 @@ from urllib.parse import urlparse
 from langchain_core.document_loaders.base import BaseLoader
 
 from haive.core.engine.document.loaders.sources.implementation import (
-    CredentialManager,
     CredentialType,
     DatabaseSource,
 )

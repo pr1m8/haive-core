@@ -17,6 +17,7 @@ from unittest.mock import MagicMock, Mock
 import pytest
 from langchain_core.documents import Document
 
+from haive.core.engine.document.config import LoaderPreference
 from haive.core.engine.document.loaders.auto_loader import (
     AutoLoader,
     AutoLoaderConfig,
@@ -33,8 +34,7 @@ from haive.core.engine.document.loaders.path_analyzer import (
     SourceInfo,
 )
 from haive.core.engine.document.loaders.sources.enhanced_registry import (
-    EnhancedRegistry,
-    LoaderPreference,
+    EnhancedSourceRegistry,
 )
 from haive.core.engine.document.loaders.sources.source_types import (
     BaseSource,
@@ -230,7 +230,7 @@ def mock_document_loader():
 @pytest.fixture
 def mock_enhanced_registry():
     """Create a mock enhanced registry."""
-    registry = Mock(spec=EnhancedRegistry)
+    registry = Mock(spec=EnhancedSourceRegistry)
 
     # Mock registry data
     registry._sources = {

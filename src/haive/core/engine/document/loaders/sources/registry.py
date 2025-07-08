@@ -232,7 +232,7 @@ class SourceRegistry:
         # Create source instance
         try:
             # Analyze path for additional metadata
-            analysis = analyze_path(path)
+            analyze_path(path)
 
             # Build source kwargs based on source type
             source_kwargs = {

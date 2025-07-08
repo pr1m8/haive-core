@@ -5,7 +5,6 @@ the type of document source from a path string. Critical for auto-loading.
 """
 
 import mimetypes
-import os
 import re
 from enum import Enum
 from pathlib import Path

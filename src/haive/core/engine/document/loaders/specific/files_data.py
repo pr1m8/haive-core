@@ -5,7 +5,7 @@ and other structured data files.
 """
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from langchain_core.document_loaders.base import BaseLoader
 

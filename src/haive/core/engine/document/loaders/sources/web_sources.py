@@ -4,9 +4,8 @@ This module implements comprehensive web scraping sources from langchain_communi
 with intelligent sitemap detection, recursive crawling, and browser automation.
 """
 
-import re
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Union
+from typing import Any, Dict, List, Optional
 from urllib.parse import urljoin, urlparse
 
 import requests
@@ -18,7 +17,6 @@ from .enhanced_registry import (
 )
 from .source_types import (
     CredentialType,
-    DirectorySource,
     LoaderCapability,
     RemoteSource,
     SourceCategory,
@@ -159,7 +157,6 @@ def extract_metadata_from_html(
     },
     default_loader="simple",
     description="Base web page loader with multiple processing options",
-    requires_credentials=False,
     capabilities=[LoaderCapability.METADATA_EXTRACTION],
     priority=8,
 )
@@ -208,7 +205,6 @@ class WebBaseSource(RemoteSource):
     },
     default_loader="async",
     description="Asynchronous HTML loader for high-performance web scraping",
-    requires_credentials=False,
     capabilities=[LoaderCapability.ASYNC_PROCESSING, LoaderCapability.BULK_LOADING],
     priority=7,
 )
@@ -255,7 +251,6 @@ class AsyncHTMLSource(RemoteSource):
     },
     default_loader="playwright",
     description="Playwright browser automation for JavaScript-heavy sites",
-    requires_credentials=False,
     capabilities=[
         LoaderCapability.ASYNC_PROCESSING,
         LoaderCapability.METADATA_EXTRACTION,
@@ -310,7 +305,6 @@ class PlaywrightWebSource(RemoteSource):
     },
     default_loader="selenium",
     description="Selenium browser automation for complex web interactions",
-    requires_credentials=False,
     capabilities=[LoaderCapability.METADATA_EXTRACTION],
     priority=8,
 )
@@ -352,7 +346,6 @@ class SeleniumWebSource(RemoteSource):
     },
     default_loader="chromium",
     description="Async Chromium loader for high-performance browser automation",
-    requires_credentials=False,
     capabilities=[LoaderCapability.ASYNC_PROCESSING, LoaderCapability.BULK_LOADING],
     priority=8,
 )
@@ -619,7 +612,6 @@ class DocusaurusSource(RemoteSource):
     },
     default_loader="firecrawl",
     description="FireCrawl web scraping service with advanced features",
-    requires_credentials=True,
     credential_type=CredentialType.API_KEY,
     capabilities=[
         LoaderCapability.BULK_LOADING,

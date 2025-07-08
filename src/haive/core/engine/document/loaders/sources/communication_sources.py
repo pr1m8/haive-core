@@ -10,16 +10,14 @@ and productivity platform loaders including:
 - Regional platforms and specialized services
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
-from pydantic import Field, validator
+from pydantic import Field
 
 from .enhanced_registry import enhanced_registry, register_bulk_source, register_source
 from .source_types import (
-    BaseSource,
     CredentialType,
     LoaderCapability,
     RemoteSource,
@@ -115,7 +113,7 @@ class ExportFormat(str, Enum):
 
 @register_bulk_source(
     name="matrix",
-    platform=CommunicationPlatform.MATRIX,
+    category=SourceCategory.COMMUNICATION,
     loaders={
         "matrix": {
             "class": "MatrixLoader",
@@ -1111,7 +1109,7 @@ def validate_communication_sources() -> bool:
         print(f"Missing communication sources: {missing}")
         return False
 
-    print(f"✅ All essential communication sources registered!")
+    print("✅ All essential communication sources registered!")
     return True
 
 

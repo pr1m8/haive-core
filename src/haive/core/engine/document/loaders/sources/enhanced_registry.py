@@ -8,7 +8,6 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional, Set, Type, Union
 
-from ...config import LoaderPreference
 from .registry import LoaderMapping
 from .source_types import (
     BaseSource,
@@ -171,7 +170,6 @@ class EnhancedSourceRegistry:
                         speed=loader_def.get("speed", "medium"),
                         quality=loader_def.get("quality", "medium"),
                         requires_packages=loader_def.get("requires_packages", []),
-                        config=loader_def.get("config", {}),
                     )
 
         # Create registration

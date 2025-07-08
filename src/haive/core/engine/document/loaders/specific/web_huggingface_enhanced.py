@@ -5,8 +5,7 @@ organizations, and extended dataset/model features.
 """
 
 import logging
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import List, Optional
 
 from langchain_core.document_loaders.base import BaseLoader
 from langchain_core.documents import Document
@@ -360,7 +359,7 @@ class HuggingFaceCollectionsLoader(BaseLoader):
         try:
             from huggingface_hub import HfApi
 
-            api = HfApi()
+            HfApi()
             documents = []
 
             # Note: HuggingFace Collections API is evolving

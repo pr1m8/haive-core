@@ -9,14 +9,12 @@ This module implements comprehensive cloud storage and data platform loaders inc
 
 from datetime import datetime
 from enum import Enum
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
-from pydantic import Field, validator
+from pydantic import Field
 
 from .enhanced_registry import enhanced_registry, register_bulk_source, register_source
 from .source_types import (
-    BaseSource,
     CredentialType,
     LoaderCapability,
     RemoteSource,
@@ -81,7 +79,7 @@ class SyncDirection(str, Enum):
 
 @register_bulk_source(
     name="s3_file",
-    platform=CloudPlatform.AWS_S3,
+    category=SourceCategory.CLOUD_STORAGE,
     loaders={
         "s3_file": {
             "class": "S3FileLoader",
@@ -137,7 +135,7 @@ class S3FileSource(RemoteSource):
 
 @register_bulk_source(
     name="s3_directory",
-    platform=CloudPlatform.AWS_S3,
+    category=SourceCategory.CLOUD_STORAGE,
     loaders={
         "s3_dir": {
             "class": "S3DirectoryLoader",
@@ -217,7 +215,7 @@ class S3DirectorySource(RemoteSource):
 
 @register_bulk_source(
     name="gcs_file",
-    platform=CloudPlatform.GCP_STORAGE,
+    category=SourceCategory.CLOUD_STORAGE,
     loaders={
         "gcs_file": {
             "class": "GCSFileLoader",
@@ -266,7 +264,7 @@ class GCSFileSource(RemoteSource):
 
 @register_bulk_source(
     name="gcs_directory",
-    platform=CloudPlatform.GCP_STORAGE,
+    category=SourceCategory.CLOUD_STORAGE,
     loaders={
         "gcs_dir": {
             "class": "GCSDirectoryLoader",
@@ -336,7 +334,7 @@ class GCSDirectorySource(RemoteSource):
 
 @register_bulk_source(
     name="azure_blob_file",
-    platform=CloudPlatform.AZURE_BLOB,
+    category=SourceCategory.CLOUD_STORAGE,
     loaders={
         "azure_blob": {
             "class": "AzureBlobStorageFileLoader",
@@ -388,7 +386,7 @@ class AzureBlobFileSource(RemoteSource):
 
 @register_bulk_source(
     name="azure_blob_directory",
-    platform=CloudPlatform.AZURE_BLOB,
+    category=SourceCategory.CLOUD_STORAGE,
     loaders={
         "azure_dir": {
             "class": "AzureBlobStorageContainerLoader",
@@ -509,7 +507,7 @@ class DropboxSource(RemoteSource):
 
 @register_bulk_source(
     name="google_drive",
-    platform=CloudPlatform.GOOGLE_DRIVE,
+    category=SourceCategory.CLOUD_STORAGE,
     loaders={
         "gdrive": {
             "class": "GoogleDriveLoader",
@@ -784,7 +782,7 @@ class IcebergSource(RemoteSource):
 
 @register_bulk_source(
     name="sharepoint",
-    platform=CloudPlatform.SHAREPOINT,
+    category=SourceCategory.CLOUD_STORAGE,SHAREPOINT,
     loaders={
         "sharepoint": {
             "class": "SharePointLoader",
@@ -867,7 +865,7 @@ class SharePointSource(RemoteSource):
 
 @register_bulk_source(
     name="minio",
-    platform=CloudPlatform.MINIO,
+    category=SourceCategory.CLOUD_STORAGE,MINIO,
     loaders={
         "minio": {
             "class": "MinioLoader",
@@ -1015,7 +1013,7 @@ def validate_cloud_sources() -> bool:
         print(f"Missing cloud sources: {missing}")
         return False
 
-    print(f"✅ All essential cloud storage sources registered!")
+    print("✅ All essential cloud storage sources registered!")
     return True
 
 

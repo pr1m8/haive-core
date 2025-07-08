@@ -4,7 +4,6 @@ This module implements all file-based document loaders from langchain_community
 with focus on unstructured processing, generic loaders, and code language support.
 """
 
-from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from .enhanced_registry import (

@@ -6,10 +6,9 @@ detection, and loader creation.
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Optional, Union
 
 from langchain_core.document_loaders import BaseLoader
-from langchain_core.documents import Document
 
 from haive.core.engine.document.config import (
     DocumentInput,

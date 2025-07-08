@@ -4,7 +4,6 @@ This module registers the most commonly used document loaders to support
 the core functionality needed for the document engine migration.
 """
 
-from pathlib import Path
 from typing import Any, Dict, Optional
 
 from .enhanced_registry import (
@@ -18,7 +17,6 @@ from .source_types import (
     CredentialType,
     DatabaseSource,
     DirectorySource,
-    LoaderCapability,
     LocalFileSource,
     RemoteSource,
     SourceCategory,
@@ -326,7 +324,6 @@ class HTMLSource(LocalFileSource):
     },
     default_loader="simple",
     description="Web page loader with browser automation support",
-    requires_credentials=False,
     priority=8,
 )
 class WebPageSource(RemoteSource):
@@ -361,7 +358,6 @@ class WebPageSource(RemoteSource):
     },
     default_loader="file",
     description="GitHub repository and file loader",
-    requires_credentials=True,
     credential_type=CredentialType.API_KEY,
     priority=7,
 )

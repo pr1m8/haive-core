@@ -6,11 +6,10 @@ project_notes with proper integration into the Haive document engine framework.
 
 import logging
 import os
-import re
 from abc import ABC, abstractmethod
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse
 
 from pydantic import BaseModel, Field

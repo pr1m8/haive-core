@@ -4,11 +4,9 @@ This module contains loaders for social media platforms, forums, and community s
 """
 
 import logging
-from datetime import datetime
-from typing import Any, Dict, List, Optional, Sequence
+from typing import List, Optional, Sequence
 
 from langchain_core.document_loaders.base import BaseLoader
-from langchain_core.documents import Document
 
 from haive.core.engine.document.loaders.sources.implementation import WebSource
 

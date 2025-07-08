@@ -5,8 +5,7 @@ BibTeX, ReStructuredText, TSV, Org Mode, MHTML, Visio, and subtitle files.
 """
 
 import logging
-from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from langchain_core.document_loaders.base import BaseLoader
 

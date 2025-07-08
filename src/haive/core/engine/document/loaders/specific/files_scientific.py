@@ -5,7 +5,7 @@ and other academic file types.
 """
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Optional
 
 from langchain_core.document_loaders.base import BaseLoader
 

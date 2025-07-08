@@ -10,12 +10,11 @@ This module completes the comprehensive document loader system with:
 - Completing the path to 231+ langchain_community loaders
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
-from pydantic import Field, validator
+from pydantic import Field
 
 from .enhanced_registry import (
     enhanced_registry,
@@ -24,7 +23,6 @@ from .enhanced_registry import (
     register_source,
 )
 from .source_types import (
-    BaseSource,
     CredentialType,
     LoaderCapability,
     LocalFileSource,
@@ -105,7 +103,7 @@ class DataStandard(str, Enum):
 
 @register_bulk_source(
     name="gov_docs",
-    platform=FinalPlatform.GOV_DOCS,
+    category=SourceCategory.GOVERNMENT,
     loaders={
         "gov_docs": {
             "class": "GovDocsLoader",
@@ -1033,7 +1031,7 @@ def validate_final_sources() -> bool:
         print(f"Missing final sources: {missing}")
         return False
 
-    print(f"✅ All essential final sources registered!")
+    print("✅ All essential final sources registered!")
     return True
 
 

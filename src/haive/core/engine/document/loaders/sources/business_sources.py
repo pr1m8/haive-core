@@ -5,19 +5,17 @@ including CRM systems (HubSpot, Salesforce), e-commerce (Shopify), productivity 
 (Notion, Airtable), enterprise platforms (Jira, Confluence), and data integration tools.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
-from pydantic import Field, validator
+from pydantic import Field
 
 from .enhanced_registry import (
     enhanced_registry,
-    register_bulk_source,
-    register_business_source,
+    register_source,
 )
 from .source_types import (
-    BaseSource,
     CredentialType,
     LoaderCapability,
     RemoteSource,
@@ -184,9 +182,9 @@ class BusinessSource(RemoteSource):
 # =============================================================================
 
 
-@register_business_source(
+@register_source(
     name="hubspot",
-    platform=BusinessPlatform.HUBSPOT,
+    category=SourceCategory.BUSINESS,
     loaders={
         "hubspot": {
             "class": "HubSpotLoader",
@@ -256,9 +254,9 @@ class HubSpotSource(BusinessSource):
         return kwargs
 
 
-@register_business_source(
+@register_source(
     name="salesforce",
-    platform=BusinessPlatform.SALESFORCE,
+    category=SourceCategory.BUSINESS,
     loaders={
         "salesforce": {
             "class": "SalesforceLoader",
@@ -317,9 +315,9 @@ class SalesforceSource(BusinessSource):
         return kwargs
 
 
-@register_business_source(
+@register_source(
     name="pipedrive",
-    platform=BusinessPlatform.PIPEDRIVE,
+    category=SourceCategory.BUSINESS,
     loaders={
         "pipedrive": {
             "class": "PipedriveLoader",
@@ -381,9 +379,9 @@ class PipedriveSource(BusinessSource):
 # =============================================================================
 
 
-@register_business_source(
+@register_source(
     name="shopify",
-    platform=BusinessPlatform.SHOPIFY,
+    category=SourceCategory.BUSINESS,
     loaders={
         "shopify": {
             "class": "ShopifyLoader",
@@ -449,9 +447,9 @@ class ShopifySource(BusinessSource):
 # =============================================================================
 
 
-@register_business_source(
+@register_source(
     name="notion",
-    platform=BusinessPlatform.NOTION,
+    category=SourceCategory.BUSINESS,
     loaders={
         "notion": {
             "class": "NotionDBLoader",
@@ -510,9 +508,9 @@ class NotionSource(BusinessSource):
         return kwargs
 
 
-@register_business_source(
+@register_source(
     name="airtable",
-    platform=BusinessPlatform.AIRTABLE,
+    category=SourceCategory.BUSINESS,
     loaders={
         "airtable": {
             "class": "AirtableLoader",
@@ -566,9 +564,9 @@ class AirtableSource(BusinessSource):
         return kwargs
 
 
-@register_business_source(
+@register_source(
     name="trello",
-    platform=BusinessPlatform.TRELLO,
+    category=SourceCategory.BUSINESS,
     loaders={
         "trello": {
             "class": "TrelloLoader",
@@ -626,9 +624,9 @@ class TrelloSource(BusinessSource):
 # =============================================================================
 
 
-@register_business_source(
+@register_source(
     name="jira",
-    platform=BusinessPlatform.JIRA,
+    category=SourceCategory.BUSINESS,
     loaders={
         "jira": {
             "class": "JiraLoader",
@@ -699,9 +697,9 @@ class JiraSource(BusinessSource):
         return kwargs
 
 
-@register_business_source(
+@register_source(
     name="confluence",
-    platform=BusinessPlatform.CONFLUENCE,
+    category=SourceCategory.BUSINESS,
     loaders={
         "confluence": {
             "class": "ConfluenceLoader",
@@ -775,9 +773,9 @@ class ConfluenceSource(BusinessSource):
 # =============================================================================
 
 
-@register_business_source(
+@register_source(
     name="airbyte",
-    platform=BusinessPlatform.AIRBYTE,
+    category=SourceCategory.BUSINESS,
     loaders={
         "airbyte": {
             "class": "AirbyteLoader",
@@ -840,9 +838,9 @@ class AirbyteSource(BusinessSource):
 # =============================================================================
 
 
-@register_business_source(
+@register_source(
     name="google_analytics",
-    platform=BusinessPlatform.GOOGLE_ANALYTICS,
+    category=SourceCategory.BUSINESS,
     loaders={
         "ga": {
             "class": "GoogleAnalyticsLoader",

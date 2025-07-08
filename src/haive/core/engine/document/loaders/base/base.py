@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 from langchain_core.documents import Document
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 # Removed unused imports
 

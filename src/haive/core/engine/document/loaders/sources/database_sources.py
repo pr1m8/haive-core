@@ -6,17 +6,16 @@ connection string detection and query optimization.
 """
 
 from enum import Enum
-from typing import Any, Dict, Iterator, List, Optional, Union
+from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse
 
 from pydantic import Field, validator
 
 from .enhanced_registry import (
     enhanced_registry,
-    register_bulk_source,
     register_database_source,
 )
-from .source_types import BaseSource, CredentialType, LoaderCapability, SourceCategory
+from .source_types import BaseSource, LoaderCapability
 
 
 class DatabaseType(str, Enum):
@@ -340,7 +339,6 @@ class DatabaseSource(BaseSource):
             "supports_fetch_all": True,
         },
     },
-    schemes=["postgresql", "postgres"],
     default_loader="sql",
     description="PostgreSQL database loader with fetch-all-tables support",
     capabilities=[LoaderCapability.BULK_LOADING, LoaderCapability.FILTERING],
@@ -376,7 +374,6 @@ class PostgreSQLSource(DatabaseSource):
             "requires_packages": ["PyMySQL"],
         }
     },
-    schemes=["mysql"],
     default_loader="sql",
     description="MySQL database loader with optimization features",
     capabilities=[LoaderCapability.BULK_LOADING, LoaderCapability.FILTERING],
@@ -406,7 +403,6 @@ class MySQLSource(DatabaseSource):
             "module": "langchain_community.document_loaders",
         }
     },
-    schemes=["sqlite"],
     default_loader="sql",
     description="SQLite database loader for local databases",
     capabilities=[LoaderCapability.BULK_LOADING, LoaderCapability.FILTERING],
@@ -455,7 +451,6 @@ class SQLiteSource(DatabaseSource):
             "supports_fetch_all": True,
         },
     },
-    schemes=["mongodb"],
     default_loader="mongo",
     description="MongoDB document database loader with fetch-all-collections support",
     capabilities=[LoaderCapability.BULK_LOADING, LoaderCapability.FILTERING],
@@ -501,7 +496,6 @@ class MongoDBSource(DatabaseSource):
             "requires_packages": ["cassandra-driver"],
         }
     },
-    schemes=["cassandra"],
     default_loader="cassandra",
     description="Apache Cassandra database loader",
     capabilities=[LoaderCapability.BULK_LOADING, LoaderCapability.FILTERING],
@@ -534,7 +528,6 @@ class CassandraSource(DatabaseSource):
             "requires_packages": ["elasticsearch"],
         }
     },
-    schemes=["elasticsearch"],
     default_loader="elasticsearch",
     description="Elasticsearch search engine loader",
     capabilities=[
@@ -589,7 +582,6 @@ class ElasticsearchSource(DatabaseSource):
             "requires_packages": ["neo4j"],
         }
     },
-    schemes=["neo4j", "bolt"],
     default_loader="neo4j",
     description="Neo4j graph database loader with Cypher support",
     capabilities=[LoaderCapability.BULK_LOADING, LoaderCapability.FILTERING],
@@ -627,7 +619,6 @@ class Neo4jSource(DatabaseSource):
             "requires_packages": ["python-arango"],
         }
     },
-    schemes=["arangodb"],
     default_loader="arango",
     description="ArangoDB multi-model database loader",
     capabilities=[LoaderCapability.BULK_LOADING, LoaderCapability.FILTERING],
@@ -674,7 +665,6 @@ class ArangoDBSource(DatabaseSource):
             "requires_packages": ["google-cloud-bigquery"],
         }
     },
-    schemes=["bigquery"],
     default_loader="bigquery",
     description="Google BigQuery data warehouse loader",
     capabilities=[
@@ -718,7 +708,6 @@ class BigQuerySource(DatabaseSource):
             "requires_packages": ["snowflake-connector-python"],
         }
     },
-    schemes=["snowflake"],
     default_loader="snowflake",
     description="Snowflake cloud data warehouse loader",
     capabilities=[LoaderCapability.BULK_LOADING, LoaderCapability.FILTERING],
@@ -765,7 +754,7 @@ def get_database_sources_statistics() -> Dict[str, Any]:
     graph_sources = 0
     warehouse_sources = 0
 
-    for name, registration in registry._sources.items():
+    for _name, registration in registry._sources.items():
         if hasattr(registration, "database_type"):
             db_type = registration.database_type
             if db_type in [

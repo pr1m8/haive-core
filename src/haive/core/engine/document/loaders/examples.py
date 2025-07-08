@@ -9,17 +9,10 @@ Version: 1.0.0
 """
 
 import asyncio
-import os
-from pathlib import Path
-from typing import Any, Dict, List
-
-from langchain_core.documents import Document
 
 from .auto_loader import (
     AutoLoader,
     AutoLoaderConfig,
-    BulkLoadingResult,
-    LoadingResult,
     aload_document,
     load_document,
     load_documents_bulk,
@@ -31,7 +24,7 @@ from .auto_registry import (
     list_available_sources,
 )
 from .sources.enhanced_registry import LoaderPreference
-from .sources.source_types import LoaderCapability, SourceCategory
+from .sources.source_types import SourceCategory
 
 # =============================================================================
 # Basic Usage Examples
@@ -144,7 +137,7 @@ def example_configuration_options():
         enable_caching=True,
         cache_ttl=3600,
     )
-    speed_loader = AutoLoader(speed_config)
+    AutoLoader(speed_config)
     print(f"   Preference: {speed_config.preference.value}")
     print(f"   Max concurrency: {speed_config.max_concurrency}")
     print(f"   Caching enabled: {speed_config.enable_caching}")
@@ -159,7 +152,7 @@ def example_configuration_options():
         enable_metadata=True,
         default_chunk_size=2000,
     )
-    quality_loader = AutoLoader(quality_config)
+    AutoLoader(quality_config)
     print(f"   Preference: {quality_config.preference.value}")
     print(f"   Retry attempts: {quality_config.retry_attempts}")
     print(f"   Chunk size: {quality_config.default_chunk_size}")
@@ -172,9 +165,9 @@ def example_configuration_options():
         enable_caching=True,
         enable_metadata=True,
     )
-    balanced_loader = AutoLoader(balanced_config)
+    AutoLoader(balanced_config)
     print(f"   Preference: {balanced_config.preference.value}")
-    print(f"   Balanced settings for speed and quality")
+    print("   Balanced settings for speed and quality")
 
 
 def example_detailed_loading():
@@ -238,7 +231,7 @@ def example_bulk_loading():
         print(f"   Average time per source: {result.summary['avg_loading_time']:.2f}s")
 
         if result.failed_sources:
-            print(f"   Failed sources:")
+            print("   Failed sources:")
             for source, error in result.failed_sources:
                 print(f"     - {source}: {error}")
 
@@ -294,7 +287,7 @@ def example_scrape_all():
     try:
         documents = loader.load_all("/path/to/documents/")
         print(f"   Loaded {len(documents)} documents from directory")
-        print(f"   Recursive processing included subdirectories")
+        print("   Recursive processing included subdirectories")
     except Exception as e:
         print(f"❌ Error: {e}")
 
@@ -308,7 +301,7 @@ def example_scrape_all():
             include_external_links=False,
         )
         print(f"   Scraped {len(documents)} pages from documentation")
-        print(f"   Limited to depth 3, respecting robots.txt")
+        print("   Limited to depth 3, respecting robots.txt")
     except Exception as e:
         print(f"❌ Error: {e}")
 
@@ -398,9 +391,9 @@ def example_performance_optimization():
         enable_caching=True,
         cache_ttl=7200,  # 2 hours
     )
-    perf_loader = AutoLoader(perf_config)
+    AutoLoader(perf_config)
     print(f"   Max concurrency: {perf_config.max_concurrency}")
-    print(f"   Fast preference with caching enabled")
+    print("   Fast preference with caching enabled")
 
     # Caching demonstration
     print("\n💾 Caching performance:")
@@ -411,12 +404,12 @@ def example_performance_optimization():
     try:
         # First load (slow)
         start = time.time()
-        docs1 = cached_loader.load("/test.pdf")
+        cached_loader.load("/test.pdf")
         first_time = time.time() - start
 
         # Second load (fast from cache)
         start = time.time()
-        docs2 = cached_loader.load("/test.pdf")
+        cached_loader.load("/test.pdf")
         second_time = time.time() - start
 
         print(f"   First load: {first_time:.3f}s")
@@ -491,7 +484,7 @@ def example_enterprise_document_processing():
                 source_types[source_type] = 0
             source_types[source_type] += len(loading_result.documents)
 
-        print(f"   Documents by source type:")
+        print("   Documents by source type:")
         for source_type, count in source_types.items():
             print(f"     - {source_type}: {count} documents")
 
@@ -677,11 +670,11 @@ def example_registry_management():
         print(f"   Categories: {status['categories_count']}")
         print(f"   Total errors: {status['total_errors']}")
 
-        print(f"   Category breakdown:")
+        print("   Category breakdown:")
         for category, count in status["category_breakdown"].items():
             print(f"     - {category}: {count} sources")
 
-        print(f"   Recent registrations:")
+        print("   Recent registrations:")
         for reg in status["recent_registrations"][:3]:
             print(
                 f"     - {reg['name']} ({reg['category']}) - {reg['loaders']} loaders"
@@ -815,7 +808,7 @@ def example_error_handling():
         print(f"   Failed: {result.summary['failed_loads']}")
 
         if result.failed_sources:
-            print(f"   Failed sources:")
+            print("   Failed sources:")
             for source, error in result.failed_sources:
                 print(f"     - {source}: {error}")
 
@@ -828,7 +821,7 @@ def example_error_handling():
         retry_attempts=5,
         timeout=30,
     )
-    retry_loader = AutoLoader(retry_config)
+    AutoLoader(retry_config)
     print(f"   Configured for {retry_config.retry_attempts} retry attempts")
     print(f"   Timeout: {retry_config.timeout} seconds")
 

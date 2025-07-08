@@ -7,16 +7,14 @@ This module implements specialized loaders from langchain_community including:
 - Domain-specific systems (Wikipedia, weather data, financial data)
 """
 
-from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 from pydantic import Field, validator
 
 from .enhanced_registry import enhanced_registry, register_file_source, register_source
 from .source_types import (
-    BaseSource,
     CredentialType,
     LoaderCapability,
     LocalFileSource,
@@ -912,7 +910,7 @@ def validate_specialized_sources() -> bool:
         print(f"Missing specialized sources: {missing}")
         return False
 
-    print(f"✅ All essential specialized sources registered!")
+    print("✅ All essential specialized sources registered!")
     return True
 
 

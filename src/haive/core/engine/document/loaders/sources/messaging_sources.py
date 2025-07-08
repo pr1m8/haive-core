@@ -7,17 +7,16 @@ Telegram, email systems, and other communication platforms.
 
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 from pydantic import Field, validator
 
 from .enhanced_registry import (
     enhanced_registry,
     register_bulk_source,
-    register_messaging_source,
+    register_source,
 )
 from .source_types import (
-    BaseSource,
     CredentialType,
     LoaderCapability,
     RemoteSource,
@@ -186,9 +185,9 @@ class MessagingSource(RemoteSource):
 # =============================================================================
 
 
-@register_messaging_source(
+@register_source(
     name="discord",
-    platform=MessagingPlatform.DISCORD,
+    category=SourceCategory.MESSAGING,
     loaders={
         "discord": {
             "class": "DiscordChatLoader",
@@ -239,9 +238,9 @@ class DiscordSource(MessagingSource):
         return kwargs
 
 
-@register_messaging_source(
+@register_source(
     name="slack",
-    platform=MessagingPlatform.SLACK,
+    category=SourceCategory.MESSAGING,
     loaders={
         "slack": {
             "class": "SlackDirectoryLoader",
@@ -302,9 +301,9 @@ class SlackSource(MessagingSource):
         return kwargs
 
 
-@register_messaging_source(
+@register_source(
     name="microsoft_teams",
-    platform=MessagingPlatform.MICROSOFT_TEAMS,
+    category=SourceCategory.MESSAGING,MICROSOFT_TEAMS,
     loaders={
         "teams": {
             "class": "MicrosoftTeamsLoader",
@@ -347,9 +346,9 @@ class MicrosoftTeamsSource(MessagingSource):
 # =============================================================================
 
 
-@register_messaging_source(
+@register_source(
     name="twitter",
-    platform=MessagingPlatform.TWITTER,
+    category=SourceCategory.MESSAGING,TWITTER,
     loaders={
         "twitter": {
             "class": "TwitterTweetLoader",
@@ -408,9 +407,9 @@ class TwitterSource(MessagingSource):
         return kwargs
 
 
-@register_messaging_source(
+@register_source(
     name="reddit",
-    platform=MessagingPlatform.REDDIT,
+    category=SourceCategory.MESSAGING,REDDIT,
     loaders={
         "reddit": {
             "class": "RedditPostsLoader",
@@ -469,9 +468,9 @@ class RedditSource(MessagingSource):
         return kwargs
 
 
-@register_messaging_source(
+@register_source(
     name="mastodon",
-    platform=MessagingPlatform.MASTODON,
+    category=SourceCategory.MESSAGING,MASTODON,
     loaders={
         "mastodon": {
             "class": "MastodonTootsLoader",
@@ -525,9 +524,9 @@ class MastodonSource(MessagingSource):
 # =============================================================================
 
 
-@register_messaging_source(
+@register_source(
     name="email_imap",
-    platform=MessagingPlatform.IMAP,
+    category=SourceCategory.MESSAGING,IMAP,
     loaders={
         "imap": {
             "class": "IMAPEmailLoader",
@@ -589,9 +588,9 @@ class IMAPEmailSource(MessagingSource):
         return kwargs
 
 
-@register_messaging_source(
+@register_source(
     name="gmail_api",
-    platform=MessagingPlatform.GMAIL,
+    category=SourceCategory.MESSAGING,GMAIL,
     loaders={
         "gmail": {
             "class": "GmailLoader",
@@ -654,9 +653,9 @@ class GmailSource(MessagingSource):
 # =============================================================================
 
 
-@register_messaging_source(
+@register_source(
     name="whatsapp_export",
-    platform=MessagingPlatform.WHATSAPP,
+    category=SourceCategory.MESSAGING,WHATSAPP,
     loaders={
         "whatsapp": {
             "class": "WhatsAppChatLoader",
@@ -687,9 +686,9 @@ class WhatsAppSource(MessagingSource):
         return kwargs
 
 
-@register_messaging_source(
+@register_source(
     name="telegram_export",
-    platform=MessagingPlatform.TELEGRAM,
+    category=SourceCategory.MESSAGING,TELEGRAM,
     loaders={
         "telegram": {
             "class": "TelegramChatLoader",

@@ -80,7 +80,7 @@ from typing import (
 
 from langchain_core.messages import BaseMessage
 from langchain_core.runnables import RunnableConfig
-from pydantic import BaseModel, Field, create_model, model_validator
+from pydantic import BaseModel, Field, create_model, field_validator, model_validator
 from rich.panel import Panel
 from rich.syntax import Syntax
 from rich.table import Table
@@ -180,6 +180,8 @@ class StateSchema(BaseModel, Generic[T]):
     # Note: __reducer_fields__ is created dynamically and not part of instance properties
 
     # Optional convenience fields for better engine management
+    # TODO: Consider using generics (Generic[TEngine]) for better type safety
+    # This would require updating all StateSchema subclasses for backwards compatibility
     engine: Optional[Engine] = Field(
         default=None, description="Optional main/primary engine for convenience"
     )
@@ -188,6 +190,49 @@ class StateSchema(BaseModel, Generic[T]):
         default_factory=dict,
         description="Engine registry for this state (backward compatible)",
     )
+
+    @field_validator("engine", mode="before")
+    @classmethod
+    def validate_engine(cls, v):
+        """Handle both serialized dict and actual Engine instances.
+
+        This validator allows the engine field to accept both:
+        - Actual Engine instances (for runtime use)
+        - Serialized dicts (for state passing between agents)
+
+        This prevents the "Can't instantiate abstract class Engine" error
+        when deserializing state in multi-agent systems.
+        """
+        if v is None:
+            return None
+        if isinstance(v, dict):
+            # It's a serialized engine - keep as dict to avoid instantiation
+            return v
+        # Otherwise assume it's an actual Engine instance
+        return v
+
+    @field_validator("engines", mode="before")
+    @classmethod
+    def validate_engines(cls, v):
+        """Handle both serialized dicts and actual Engine instances in engines dict.
+
+        Similar to validate_engine but for the engines dictionary.
+        Each value can be either a serialized dict or an actual Engine instance.
+        """
+        if not isinstance(v, dict):
+            return v
+
+        # Process each engine in the dict
+        result = {}
+        for key, engine in v.items():
+            if isinstance(engine, dict) or engine is None:
+                # Keep serialized engines as dicts
+                result[key] = engine
+            else:
+                # Keep actual Engine instances as-is
+                result[key] = engine
+
+        return result
 
     # Convenience properties for accessing engines
     @property

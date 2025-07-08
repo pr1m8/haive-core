@@ -17,29 +17,71 @@ from haive.core.common.mixins.secure_config import SecureConfigMixin
 class SourceCategory(str, Enum):
     """High-level source categories for organization."""
 
+    # File-based sources
     FILE_DOCUMENT = "file_document"  # PDF, Word, etc.
     FILE_DATA = "file_data"  # CSV, JSON, etc.
     FILE_CODE = "file_code"  # Python, notebooks, etc.
     FILE_MEDIA = "file_media"  # Images, audio, etc.
+    LOCAL_FILE = "local_file"  # General local files
+    ARCHIVE = "archive"  # ZIP, TAR, etc.
+
+    # Web-based sources
+    WEB = "web"  # General web content
     WEB_SCRAPING = "web_scraping"  # URLs, web pages
     WEB_DOCUMENTATION = "web_documentation"  # Docs sites, wikis
+    API = "api"  # REST APIs, GraphQL
+
+    # Directory sources
     DIRECTORY_LOCAL = "directory_local"  # Local directories
     DIRECTORY_CLOUD = "directory_cloud"  # Cloud storage
+
+    # Database sources
+    DATABASE = "database"  # General database
     DATABASE_SQL = "database_sql"  # SQL databases
     DATABASE_NOSQL = "database_nosql"  # NoSQL databases
+
+    # Cloud storage
+    CLOUD_STORAGE = "cloud_storage"  # S3, GCS, Azure
+
+    # Messaging sources
+    MESSAGING = "messaging"  # General messaging
     MESSAGING_CHAT = "messaging_chat"  # Discord, Slack, etc.
     MESSAGING_EMAIL = "messaging_email"  # Email systems
+
+    # Business sources
+    BUSINESS = "business"  # General business tools
     BUSINESS_CRM = "business_crm"  # CRM systems
     BUSINESS_PRODUCTIVITY = "business_productivity"  # Office tools
+
+    # Academic sources
     ACADEMIC_RESEARCH = "academic_research"  # arXiv, PubMed
     ACADEMIC_EDUCATION = "academic_education"  # Educational platforms
+
+    # Knowledge management
     KNOWLEDGE_PERSONAL = "knowledge_personal"  # Obsidian, notes
     KNOWLEDGE_TEAM = "knowledge_team"  # Confluence, wikis
+
+    # Media sources
     MEDIA_VIDEO = "media_video"  # YouTube, video platforms
     MEDIA_AUDIO = "media_audio"  # Audio processing
+
+    # Social media
     SOCIAL_MEDIA = "social_media"  # Twitter, Reddit
+
+    # Development
     DEVELOPMENT_VCS = "development_vcs"  # Git, GitHub
+
+    # Analytics and specialized
+    ANALYTICS = "analytics"  # Analytics platforms
+    SPECIALIZED = "specialized"  # Specialized domains
     SPECIALIZED_DOMAIN = "specialized_domain"  # Domain-specific
+
+    # Others
+    COMMUNICATION = "communication"  # General communication
+    GOVERNMENT = "government"  # Government sources
+    HEALTHCARE = "healthcare"  # Healthcare systems
+    EDUCATION = "education"  # Education platforms
+    UNKNOWN = "unknown"  # Unknown category
 
 
 class CredentialType(str, Enum):
@@ -47,11 +89,17 @@ class CredentialType(str, Enum):
 
     NONE = "none"
     API_KEY = "api_key"
+    ACCESS_KEY = "access_key"  # AWS/cloud access keys
+    OAUTH = "oauth"  # OAuth 1.0/2.0
     OAUTH_TOKEN = "oauth_token"
+    SERVICE_ACCOUNT = "service_account"  # Service account JSON
     CONNECTION_STRING = "connection_string"
     USERNAME_PASSWORD = "username_password"
+    PASSWORD = "password"  # Simple password authentication
     SSH_KEY = "ssh_key"
     CLOUD_CREDENTIALS = "cloud_credentials"
+    BEARER_TOKEN = "bearer_token"  # Bearer tokens
+    COOKIES = "cookies"  # Cookie-based authentication
     CUSTOM = "custom"
 
 
@@ -68,6 +116,23 @@ class LoaderCapability(str, Enum):
     ASYNC_PROCESSING = "async_processing"  # Asynchronous processing
     RATE_LIMITED = "rate_limited"  # Has rate limiting
     PAGINATION = "pagination"  # Supports paginated loading
+    TEXT_EXTRACTION = "text_extraction"  # Extract text from files
+    WEB_SCRAPING = "web_scraping"  # Web scraping capability
+    AUTHENTICATION = "authentication"  # Requires authentication
+    REAL_TIME = "real_time"  # Real-time data loading
+    BATCH_PROCESSING = "batch_processing"  # Batch processing
+    MULTILINGUAL = "multilingual"  # Multi-language support
+    STRUCTURED_DATA = "structured_data"  # Structured data parsing
+    UNSTRUCTURED_DATA = "unstructured_data"  # Unstructured data parsing
+    SEARCH = "search"  # Search capability
+    QUERY = "query"  # Query support
+    QUERY_BASED = "query_based"  # Query-based loading
+    CLOUD_NATIVE = "cloud_native"  # Cloud-native integration
+    ENCRYPTION_SUPPORT = "encryption_support"  # Encryption support
+    TIME_TRAVEL = "time_travel"  # Time travel/versioning support
+    FEDERATION = "federation"  # Federation support
+    DELTA_SUPPORT = "delta_support"  # Delta table support
+    PARTITIONED_DATA = "partitioned_data"  # Partitioned data support
 
 
 class SourceCapabilities(BaseModel):

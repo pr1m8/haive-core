@@ -1,3 +1,3 @@
+"""ChatGPT loader placeholder module."""
 
-
-class ChatGptLoad
+# This module is a placeholder for future ChatGPT integration

@@ -8,16 +8,13 @@ Kept under 300 lines as per code style guidelines.
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Literal, Optional, Type, Union
+from typing import Callable, Dict, List, Optional, Type
 
 from langchain_core.document_loaders import BaseLoader
-from langchain_core.documents import Document
 from pydantic import BaseModel, Field
 
 from haive.core.common.mixins.secure_config import SecureConfigMixin
 from haive.core.engine.document.config import (
-    DocumentFormat,
-    DocumentSourceType,
     LoaderPreference,
 )
 

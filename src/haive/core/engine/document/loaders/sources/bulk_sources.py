@@ -6,8 +6,7 @@ and filtering capabilities.
 """
 
 from enum import Enum
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Union
+from typing import Any, Dict, List, Optional, Set
 
 from .enhanced_registry import enhanced_registry, register_bulk_source
 from .source_types import (
@@ -64,14 +63,6 @@ class FilterStrategy(str, Enum):
     default_loader="concurrent",
     description="High-performance recursive directory loader with concurrent processing",
     max_concurrent=8,
-    supports_filtering=True,
-    supports_recursive=True,
-    capabilities=[
-        LoaderCapability.BULK_LOADING,
-        LoaderCapability.RECURSIVE,
-        LoaderCapability.FILTERING,
-        LoaderCapability.ASYNC_PROCESSING,
-    ],
     priority=10,
 )
 class RecursiveDirectorySource(DirectorySource):
@@ -131,12 +122,6 @@ class RecursiveDirectorySource(DirectorySource):
     default_loader="smart",
     description="Directory loader with advanced filtering and content analysis",
     max_concurrent=6,
-    supports_filtering=True,
-    capabilities=[
-        LoaderCapability.BULK_LOADING,
-        LoaderCapability.RECURSIVE,
-        LoaderCapability.FILTERING,
-    ],
     priority=8,
 )
 class FilteredDirectorySource(DirectorySource):
@@ -191,15 +176,8 @@ class FilteredDirectorySource(DirectorySource):
     default_loader="directory",
     description="AWS S3 bucket bulk loader with prefix filtering",
     max_concurrent=10,
-    supports_filtering=True,
     requires_credentials=True,
     credential_type=CredentialType.CLOUD_CREDENTIALS,
-    capabilities=[
-        LoaderCapability.BULK_LOADING,
-        LoaderCapability.RECURSIVE,
-        LoaderCapability.FILTERING,
-        LoaderCapability.STREAMING,
-    ],
     priority=9,
 )
 class S3BucketSource(CloudStorageSource):
@@ -244,14 +222,8 @@ class S3BucketSource(CloudStorageSource):
     default_loader="directory",
     description="Google Cloud Storage bucket bulk loader",
     max_concurrent=8,
-    supports_filtering=True,
     requires_credentials=True,
     credential_type=CredentialType.CLOUD_CREDENTIALS,
-    capabilities=[
-        LoaderCapability.BULK_LOADING,
-        LoaderCapability.RECURSIVE,
-        LoaderCapability.FILTERING,
-    ],
     priority=9,
 )
 class GCSBucketSource(CloudStorageSource):
@@ -287,14 +259,8 @@ class GCSBucketSource(CloudStorageSource):
     default_loader="container",
     description="Azure Blob Storage container bulk loader",
     max_concurrent=8,
-    supports_filtering=True,
     requires_credentials=True,
     credential_type=CredentialType.CLOUD_CREDENTIALS,
-    capabilities=[
-        LoaderCapability.BULK_LOADING,
-        LoaderCapability.RECURSIVE,
-        LoaderCapability.FILTERING,
-    ],
     priority=9,
 )
 class AzureContainerSource(CloudStorageSource):
@@ -335,8 +301,6 @@ class AzureContainerSource(CloudStorageSource):
     default_loader="merger",
     description="Multi-source data merger with deduplication",
     max_concurrent=4,
-    supports_filtering=True,
-    capabilities=[LoaderCapability.BULK_LOADING, LoaderCapability.FILTERING],
     priority=7,
 )
 class MergedDataSource(DirectorySource):
@@ -383,13 +347,6 @@ class MergedDataSource(DirectorySource):
     default_loader="blob",
     description="File system blob loader with binary file support",
     max_concurrent=6,
-    supports_filtering=True,
-    capabilities=[
-        LoaderCapability.BULK_LOADING,
-        LoaderCapability.RECURSIVE,
-        LoaderCapability.FILTERING,
-        LoaderCapability.STREAMING,
-    ],
     priority=8,
 )
 class FileSystemBlobSource(DirectorySource):
@@ -434,14 +391,8 @@ class FileSystemBlobSource(DirectorySource):
     default_loader="blob",
     description="Multi-cloud blob loader supporting s3://, gs://, az:// schemes",
     max_concurrent=8,
-    supports_filtering=True,
     requires_credentials=True,
     credential_type=CredentialType.CLOUD_CREDENTIALS,
-    capabilities=[
-        LoaderCapability.BULK_LOADING,
-        LoaderCapability.STREAMING,
-        LoaderCapability.FILTERING,
-    ],
     priority=8,
 )
 class CloudBlobSource(CloudStorageSource):
@@ -481,13 +432,6 @@ class CloudBlobSource(CloudStorageSource):
     default_loader="stream",
     description="Streaming directory loader for real-time file processing",
     max_concurrent=4,
-    supports_filtering=True,
-    capabilities=[
-        LoaderCapability.BULK_LOADING,
-        LoaderCapability.STREAMING,
-        LoaderCapability.INCREMENTAL,
-        LoaderCapability.FILTERING,
-    ],
     priority=7,
 )
 class StreamingDirectorySource(DirectorySource):
