@@ -30,12 +30,19 @@ logger = logging.getLogger(__name__)
 
 
 class ParserNodeConfigV2(NodeConfig):
-    """V2 Parser node with ToolMessage safety net capability.
+    """V2 Parser node with ToolMessage safety net and schema-aware I/O.
 
     This parser extends the original functionality with:
     1. Optional ToolMessage creation for missing tool responses
     2. Configurable safety net behavior
     3. Better error handling and state management
+    4. Schema-aware input/output field handling
+
+    Schema Features:
+    - Uses enhanced MessageList for message handling
+    - Supports structured output field detection and parsing
+    - Engine attribution in generated ToolMessages
+    - Selective state field extraction
 
     Safety net modes:
     - "create": Automatically create missing ToolMessages (default)
@@ -48,6 +55,30 @@ class ParserNodeConfigV2(NodeConfig):
     agent_node: str = Field(
         default="agent", description="Node to return to after parsing"
     )
+
+    def model_post_init(self, __context):
+        """Setup default field definitions for parser node."""
+        if not self.input_field_defs:
+            from haive.core.schema.field_registry import StandardFields
+
+            # Parser nodes need messages, tool_routes, and engine info
+            self.input_field_defs = [
+                StandardFields.messages(use_enhanced=True),
+                StandardFields.tool_routes(),
+                StandardFields.engine_name(),
+            ]
+
+        if not self.output_field_defs:
+            from haive.core.schema.field_registry import StandardFields
+
+            # Parser nodes output updated messages and parsed structured output
+            self.output_field_defs = [
+                StandardFields.messages(use_enhanced=True),
+                # Structured output fields will be added dynamically based on tools
+            ]
+
+        # Call parent post_init to handle schema setup
+        super().model_post_init(__context)
 
     # Engine reference for getting tools
     engine_name: Optional[str] = Field(
@@ -245,6 +276,18 @@ class ParserNodeConfigV2(NodeConfig):
         if isinstance(content, str):
             try:
                 json_data = json.loads(content)
+
+                # V2 CHECK: If this looks like a V2 validation wrapper, extract the data
+                if (
+                    isinstance(json_data, dict)
+                    and "data" in json_data
+                    and "validated" in json_data
+                ):
+                    logger.debug(
+                        "Detected V2 validation wrapper, extracting data field"
+                    )
+                    json_data = json_data["data"]
+
                 model_instance = tool_class.model_validate(json_data)
                 logger.info(f"Successfully created {tool_class.__name__} from JSON")
                 return model_instance
@@ -254,6 +297,13 @@ class ParserNodeConfigV2(NodeConfig):
         # Try direct model validation if content is dict
         if isinstance(content, dict):
             try:
+                # V2 CHECK: If this looks like a V2 validation wrapper, extract the data
+                if "data" in content and "validated" in content:
+                    logger.debug(
+                        "Detected V2 validation wrapper, extracting data field"
+                    )
+                    content = content["data"]
+
                 model_instance = tool_class.model_validate(content)
                 logger.info(f"Successfully created {tool_class.__name__} from dict")
                 return model_instance
@@ -470,12 +520,22 @@ class ParserNodeConfigV2(NodeConfig):
                 logger.warning(f"Tool is not a Pydantic model: {type(tool_class)}")
                 parsed_result = content
 
-            # Determine field name for the result
-            field_name = (
-                tool_name.lower().replace("response", "").replace("result", "").strip()
-            )
-            if not field_name:
-                field_name = "parsed_result"
+            # Determine field name for the result using proper naming utilities
+            if isinstance(tool_class, type) and issubclass(tool_class, BaseModel):
+                from haive.core.schema.field_utils import get_field_info_from_model
+
+                field_info = get_field_info_from_model(tool_class)
+                field_name = field_info["field_name"]
+            else:
+                # Fallback for non-Pydantic models
+                field_name = (
+                    tool_name.lower()
+                    .replace("response", "")
+                    .replace("result", "")
+                    .strip()
+                )
+                if not field_name:
+                    field_name = "parsed_result"
 
             logger.info("Successfully parsed tool response")
 

@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 class ValidationNodeV2(NodeConfig, ToolRouteMixin):
-    """V2 Validation node that updates state with ToolMessages.
+    """V2 Validation node that updates state with ToolMessages using schema-aware I/O.
 
     This node processes AIMessages with tool calls and:
     1. Validates Pydantic models and creates ToolMessages
@@ -35,17 +35,38 @@ class ValidationNodeV2(NodeConfig, ToolRouteMixin):
     3. Updates state.messages with new ToolMessages
     4. Returns Command to route to validation router
 
-    Used in conjunction with validation_router_v2 function for routing.
+    Schema Features:
+    - Uses enhanced MessageList for input/output
+    - Supports engine attribution in tool messages
+    - Selective field extraction from state
     """
 
     node_type: NodeType = Field(default=NodeType.VALIDATION, description="Node type")
     name: str = Field(default="validation_v2", description="Node name")
     messages_key: str = Field(default="messages", description="Messages field in state")
 
-    # Engine configuration
-    engine_name: Optional[str] = Field(
-        default=None, description="Engine name to get tool routes from"
-    )
+    def model_post_init(self, __context):
+        """Setup default field definitions for validation node."""
+        if not self.input_field_defs:
+            from haive.core.schema.field_registry import StandardFields
+
+            # Validation nodes need messages, tool_routes, and engine_name
+            self.input_field_defs = [
+                StandardFields.messages(use_enhanced=True),
+                StandardFields.tool_routes(),
+                StandardFields.engine_name(),
+            ]
+
+        if not self.output_field_defs:
+            from haive.core.schema.field_registry import StandardFields
+
+            # Validation nodes output updated messages
+            self.output_field_defs = [
+                StandardFields.messages(use_enhanced=True),
+            ]
+
+        # Call parent post_init to handle schema setup
+        super().model_post_init(__context)
 
     # Router node to go to after updating state
     router_node: str = Field(
