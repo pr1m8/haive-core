@@ -346,6 +346,88 @@ class SchemaComposer:
 
         return self
 
+    def resolve_engine_types(self) -> Dict[str, type]:
+        """Resolve engine types from added engines for generic typing.
+
+        Returns:
+            Dictionary mapping engine names to their concrete types
+        """
+        resolved_types = {}
+
+        for engine_name, engine in self.engines.items():
+            if engine is not None:
+                resolved_types[engine_name] = type(engine)
+                logger.debug(
+                    f"Resolved engine '{engine_name}' to type {type(engine).__name__}"
+                )
+
+        return resolved_types
+
+    def get_engine_union_type(self):
+        """Get a Union type of all concrete engine types."""
+        from typing import Union
+
+        from haive.core.engine.base import Engine
+
+        resolved_types = self.resolve_engine_types()
+        unique_types = list(set(resolved_types.values()))
+
+        if not unique_types:
+            return Engine  # Fallback to base Engine type
+        elif len(unique_types) == 1:
+            return unique_types[0]
+        else:
+            return Union[tuple(unique_types)]
+
+    def build_with_engine_generics(self, name: str = None) -> Type[StateSchema]:
+        """Build a StateSchema with resolved engine generics.
+
+        Args:
+            name: Optional name for the schema class
+
+        Returns:
+            StateSchema class with concrete engine types
+        """
+        from typing import Dict
+
+        from haive.core.schema.state_schema import StateSchema
+
+        # Resolve engine types
+        engine_union_type = self.get_engine_union_type()
+        engines_dict_type = Dict[str, engine_union_type]
+
+        # Build the schema with generic resolution
+        schema_class = self.build()
+
+        # Create a concrete version with resolved generics
+        class_name = name or f"{schema_class.__name__}WithResolvedEngines"
+
+        # Create type annotations for the resolved schema
+        resolved_annotations = {
+            "engine": Optional[engine_union_type],
+            "engines": engines_dict_type,
+        }
+
+        # Add existing field annotations
+        if hasattr(schema_class, "__annotations__"):
+            resolved_annotations.update(schema_class.__annotations__)
+
+        # Create the resolved schema class
+        resolved_schema = type(
+            class_name,
+            (schema_class,),
+            {
+                "__annotations__": resolved_annotations,
+                "__module__": schema_class.__module__,
+            },
+        )
+
+        logger.debug(f"Built schema with resolved engine generics: {class_name}")
+        logger.debug(f"Engine type: {engine_union_type}")
+        logger.debug(f"Engines type: {engines_dict_type}")
+
+        return resolved_schema
+
     def update_engine_provider(
         self, engine_type: str, updates: Dict[str, Any]
     ) -> "SchemaComposer":
@@ -1070,8 +1152,16 @@ class SchemaComposer:
         # 2. Process structured output model if available
         if has_structured_output and hasattr(engine, "structured_output_model"):
             model = engine.structured_output_model
-            model_name = model.__name__.lower()
-            logger.debug(f"Found structured_output_model in {source}: {model.__name__}")
+
+            # Use proper field naming utilities
+            from haive.core.schema.field_utils import get_field_info_from_model
+
+            field_info_dict = get_field_info_from_model(model)
+            model_name = field_info_dict["field_name"]
+
+            logger.debug(
+                f"Found structured_output_model in {source}: {model.__name__} -> {model_name}"
+            )
 
             # Store structured model
             self.structured_models[model_name] = model

@@ -100,9 +100,12 @@ if TYPE_CHECKING:
 from haive.core.engine.base import Engine
 
 T = TypeVar("T", bound=BaseModel)
+TEngine = TypeVar("TEngine", bound=Engine)
+# TEngines should be a dict-like container of engines
+TEngines = TypeVar("TEngines")
 
 
-class StateSchema(BaseModel, Generic[T]):
+class StateSchema(BaseModel, Generic[TEngine, TEngines]):
     """Enhanced base class for state schemas in the Haive framework.
 
     StateSchema extends Pydantic's BaseModel with features for AI agent state management
@@ -180,15 +183,14 @@ class StateSchema(BaseModel, Generic[T]):
     # Note: __reducer_fields__ is created dynamically and not part of instance properties
 
     # Optional convenience fields for better engine management
-    # TODO: Consider using generics (Generic[TEngine]) for better type safety
-    # This would require updating all StateSchema subclasses for backwards compatibility
-    engine: Optional[Engine] = Field(
+    # Generic typing allows concrete engine types to be resolved
+    engine: Optional[TEngine] = Field(
         default=None, description="Optional main/primary engine for convenience"
     )
 
-    engines: Dict[str, Any] = Field(
+    engines: TEngines = Field(
         default_factory=dict,
-        description="Engine registry for this state (backward compatible)",
+        description="Engine registry for this state",
     )
 
     @field_validator("engine", mode="before")
