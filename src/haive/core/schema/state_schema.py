@@ -67,15 +67,19 @@ import uuid
 from typing import (
     TYPE_CHECKING,
     Any,
+    Awaitable,
     Callable,
     Dict,
     Generic,
     List,
     Optional,
+    Set,
     Tuple,
     Type,
     TypeVar,
     Union,
+    cast,
+    overload,
 )
 
 from langchain_core.messages import BaseMessage
@@ -85,6 +89,15 @@ from rich.panel import Panel
 from rich.syntax import Syntax
 from rich.table import Table
 from rich.tree import Tree
+from typing_extensions import (
+    Literal,
+    NotRequired,
+    Required,
+    Self,
+    TypeAlias,
+    TypedDict,
+    TypeGuard,
+)
 
 from haive.core.logging.rich_logger import RichLogger, get_logger
 
@@ -99,10 +112,38 @@ if TYPE_CHECKING:
 # and LangGraph's get_type_hints() needs Engine in the global namespace
 from haive.core.engine.base import Engine
 
+# Type variables for generic state schema
 T = TypeVar("T", bound=BaseModel)
 TEngine = TypeVar("TEngine", bound=Engine)
-# TEngines should be a dict-like container of engines
-TEngines = TypeVar("TEngines")
+TEngines = TypeVar("TEngines", bound=Dict[str, Engine])
+TStateSchema = TypeVar("TStateSchema", bound="StateSchema")
+
+# Type aliases for better API clarity
+FieldName: TypeAlias = str
+FieldValue: TypeAlias = Any
+FieldMapping: TypeAlias = Dict[FieldName, FieldValue]
+ReducerFunction: TypeAlias = Callable[[Any, Any], Any]
+ValidatorFunction: TypeAlias = Callable[[Any], Any]
+EngineMapping: TypeAlias = Dict[str, Engine]
+FieldList: TypeAlias = List[FieldName]
+IOMapping: TypeAlias = Dict[str, Dict[str, FieldList]]
+
+
+# Structured configuration types
+class EngineIOConfig(TypedDict, total=False):
+    """Configuration for engine input/output mappings."""
+
+    inputs: NotRequired[FieldList]
+    outputs: NotRequired[FieldList]
+
+
+class StateConfig(TypedDict, total=False):
+    """Configuration for state schema metadata."""
+
+    shared_fields: NotRequired[FieldList]
+    reducers: NotRequired[Dict[FieldName, str]]
+    engine_io: NotRequired[Dict[str, EngineIOConfig]]
+    structured_models: NotRequired[Dict[str, str]]
 
 
 class StateSchema(BaseModel, Generic[TEngine, TEngines]):
@@ -172,13 +213,13 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
     """
 
     # Class variables to track field sharing and reducers
-    __shared_fields__: List[str] = []
-    __serializable_reducers__: Dict[str, str] = {}
-    __engine_io_mappings__: Dict[str, Dict[str, List[str]]] = {}
-    __input_fields__: Dict[str, List[str]] = {}
-    __output_fields__: Dict[str, List[str]] = {}
+    __shared_fields__: FieldList = []
+    __serializable_reducers__: Dict[FieldName, str] = {}
+    __engine_io_mappings__: IOMapping = {}
+    __input_fields__: Dict[str, FieldList] = {}
+    __output_fields__: Dict[str, FieldList] = {}
     __structured_models__: Dict[str, str] = {}
-    __structured_model_fields__: Dict[str, List[str]] = {}
+    __structured_model_fields__: Dict[str, FieldList] = {}
 
     # Note: __reducer_fields__ is created dynamically and not part of instance properties
 
@@ -189,8 +230,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
     )
 
     engines: TEngines = Field(
-        default_factory=dict,
-        description="Engine registry for this state",
+        default_factory=dict,  # type: ignore[arg-type]
+        description="Engine registry for this state - supports easy addition",
     )
 
     @field_validator("engine", mode="before")
@@ -260,7 +301,66 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         """Convenience property to access the main engine."""
         return self.engine or self.engines.get("main")
 
-    def model_dump(self, **kwargs) -> Dict[str, Any]:
+    def add_engine(self, name: str, engine: Engine) -> None:
+        """Add an engine to the engines registry.
+
+        Args:
+            name: Name/key for the engine
+            engine: Engine instance to add
+        """
+        if not hasattr(self, "engines") or self.engines is None:
+            self.engines = {}
+        self.engines[name] = engine
+
+    def get_engine(self, name: str) -> Optional[Engine]:
+        """Get an engine by name.
+
+        Args:
+            name: Name of the engine to retrieve
+
+        Returns:
+            Engine instance if found, None otherwise
+        """
+        if hasattr(self, "engines") and self.engines:
+            return self.engines.get(name)
+        return None
+
+    def has_engine(self, name: str) -> bool:
+        """Check if an engine exists.
+
+        Args:
+            name: Name of the engine to check
+
+        Returns:
+            True if engine exists, False otherwise
+        """
+        return self.get_engine(name) is not None
+
+    def remove_engine(self, name: str) -> bool:
+        """Remove an engine from the registry.
+
+        Args:
+            name: Name of the engine to remove
+
+        Returns:
+            True if engine was removed, False if not found
+        """
+        if hasattr(self, "engines") and self.engines and name in self.engines:
+            del self.engines[name]
+            return True
+        return False
+
+    def list_engines(self) -> List[str]:
+        """Get list of all engine names.
+
+        Returns:
+            List of engine names
+        """
+        if hasattr(self, "engines") and self.engines:
+            return list(self.engines.keys())
+        return []
+
+    def model_dump(self, **kwargs: Any) -> FieldMapping:
         """
         Override model_dump to exclude internal fields and handle special types.
 
@@ -291,7 +391,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         return data
 
     @model_validator(mode="after")
-    def setup_engines_and_tools(self) -> "StateSchema":
+    def setup_engines_and_tools(self) -> Self:
         """
         Setup engines and sync their tools, structured output models, and add engine to state.
 
@@ -509,7 +609,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         """
         return self.model_dump(**kwargs)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> FieldMapping:
         """
         Convert the state to a clean dictionary.
 
@@ -542,7 +642,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         return cls.from_dict(data)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "StateSchema":
+    def from_dict(cls, data: FieldMapping) -> Self:
         """
         Create a state from a dictionary.
 
