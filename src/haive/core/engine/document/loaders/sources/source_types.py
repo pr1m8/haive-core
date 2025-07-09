@@ -100,6 +100,7 @@ class CredentialType(str, Enum):
     CLOUD_CREDENTIALS = "cloud_credentials"
     BEARER_TOKEN = "bearer_token"  # Bearer tokens
     COOKIES = "cookies"  # Cookie-based authentication
+    JWT = "jwt"  # JSON Web Token
     CUSTOM = "custom"
 
 
@@ -133,6 +134,59 @@ class LoaderCapability(str, Enum):
     FEDERATION = "federation"  # Federation support
     DELTA_SUPPORT = "delta_support"  # Delta table support
     PARTITIONED_DATA = "partitioned_data"  # Partitioned data support
+    THREADING = "threading"  # Threading/conversation support
+    FILE_ATTACHMENTS = "file_attachments"  # File attachment support
+    LEGAL_CITATIONS = "legal_citations"  # Legal citation parsing
+    CASE_LAW = "case_law"  # Case law processing
+    FULL_TEXT_SEARCH = "full_text_search"  # Full text search capability
+    HEALTHCARE_STANDARDS = "healthcare_standards"  # Healthcare data standards
+    PATIENT_DATA = "patient_data"  # Patient data handling
+    MEDICAL_IMAGING = "medical_imaging"  # Medical imaging support
+    ALERTING = "alerting"  # Alerting capabilities
+    ANALYTICS = "analytics"  # Analytics data
+    APPS_INTEGRATION = "apps_integration"  # Apps integration
+    ASSIGNMENTS = "assignments"  # Assignment data
+    ATTACHMENTS = "attachments"  # File attachments
+    AUTOMATION_LOGS = "automation_logs"  # Automation logs
+    BLOCKCHAIN_DATA = "blockchain_data"  # Blockchain data
+    CHANNEL_MESSAGES = "channel_messages"  # Channel messages
+    CHAT_LOGS = "chat_logs"  # Chat logs
+    CHINESE_CONTENT = "chinese_content"  # Chinese content support
+    COLLABORATION_DATA = "collaboration_data"  # Collaboration data
+    COLLABORATIVE_EDITING = "collaborative_editing"  # Collaborative editing
+    COMMENTS = "comments"  # Comments support
+    S3_COMPATIBLE = "s3_compatible"  # S3 compatible storage
+    VISUALIZATION = "visualization"  # Data visualization
+    TIMESERIES_DATA = "timeseries_data"  # Time series data
+    RUSSIAN_CONTENT = "russian_content"  # Russian content support
+    REGIONAL_SPECIFIC = "regional_specific"  # Region-specific features
+    SEARCH_RESULTS = "search_results"  # Search results processing
+    COURSE_CONTENT = "course_content"  # Course content
+    DISCUSSIONS = "discussions"  # Discussion forums
+    GRADEBOOK = "gradebook"  # Gradebook data
+    FORUMS = "forums"  # Forum discussions
+    RESOURCES = "resources"  # Learning resources
+    SENSOR_DATA = "sensor_data"  # IoT sensor data
+    TELEMETRY = "telemetry"  # Telemetry data
+    RSS_FEEDS = "rss_feeds"  # RSS feed parsing
+    XML_PARSING = "xml_parsing"  # XML parsing
+    GEOSPATIAL_DATA = "geospatial_data"  # Geospatial data
+    VECTOR_DATA = "vector_data"  # Vector data
+    COORDINATE_SYSTEMS = "coordinate_systems"  # Coordinate systems
+    SMART_CONTRACTS = "smart_contracts"  # Smart contracts
+    TRANSACTION_HISTORY = "transaction_history"  # Transaction history
+    WORKFLOW = "workflow"  # Workflow data
+    MONITORING = "monitoring"  # System monitoring
+    QR_CODE_AUTH = "qr_code_auth"  # QR code authentication
+    MEDIA_CONTENT = "media_content"  # Media content handling
+    SCHEMA_EVOLUTION = "schema_evolution"  # Schema evolution support
+    CONTACT_SYNC = "contact_sync"  # Contact synchronization
+    WEBHOOK_INTEGRATION = "webhook_integration"  # Webhook integration
+    RICH_MESSAGING = "rich_messaging"  # Rich messaging support
+    STICKERS = "stickers"  # Sticker support
+    MEETING_RECORDING = "meeting_recording"  # Meeting recording support
+    MEETING_RECORDINGS = "meeting_recordings"  # Meeting recordings support
+    TRANSCRIPTS = "transcripts"  # Transcript support
 
 
 class SourceCapabilities(BaseModel):

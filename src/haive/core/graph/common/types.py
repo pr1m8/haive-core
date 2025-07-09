@@ -44,6 +44,7 @@ class NodeType(str, Enum):
     """Types of nodes in a graph."""
 
     ENGINE = "engine"
+    AGENT = "agent"
     CALLABLE = "callable"
     TOOL = "tool"
     VALIDATION = "validation"

@@ -229,8 +229,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         default=None, description="Optional main/primary engine for convenience"
     )
 
-    engines: TEngines = Field(
-        default_factory=dict,  # type: ignore[arg-type]
+    engines: Dict[str, Engine] = Field(
+        default_factory=dict,
         description="Engine registry for this state - supports easy addition",
     )
 

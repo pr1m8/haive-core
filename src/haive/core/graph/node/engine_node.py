@@ -67,7 +67,7 @@ class EngineNodeConfig(NodeConfig):
                     StandardFields.engine_name(),
                 ]
 
-        elif self.engine.engine_type == EngineType.RAG:
+        elif self.engine.engine_type == EngineType.RETRIEVER:
             if not self.input_field_defs:
                 self.input_field_defs = [
                     StandardFields.query(),

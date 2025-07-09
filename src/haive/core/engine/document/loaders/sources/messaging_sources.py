@@ -303,7 +303,7 @@ class SlackSource(MessagingSource):
 
 @register_source(
     name="microsoft_teams",
-    category=SourceCategory.MESSAGING,MICROSOFT_TEAMS,
+    category=SourceCategory.MESSAGING,
     loaders={
         "teams": {
             "class": "MicrosoftTeamsLoader",
@@ -348,7 +348,7 @@ class MicrosoftTeamsSource(MessagingSource):
 
 @register_source(
     name="twitter",
-    category=SourceCategory.MESSAGING,TWITTER,
+    category=SourceCategory.MESSAGING,
     loaders={
         "twitter": {
             "class": "TwitterTweetLoader",
@@ -409,7 +409,7 @@ class TwitterSource(MessagingSource):
 
 @register_source(
     name="reddit",
-    category=SourceCategory.MESSAGING,REDDIT,
+    category=SourceCategory.MESSAGING,
     loaders={
         "reddit": {
             "class": "RedditPostsLoader",
@@ -470,7 +470,7 @@ class RedditSource(MessagingSource):
 
 @register_source(
     name="mastodon",
-    category=SourceCategory.MESSAGING,MASTODON,
+    category=SourceCategory.MESSAGING,
     loaders={
         "mastodon": {
             "class": "MastodonTootsLoader",
@@ -526,7 +526,7 @@ class MastodonSource(MessagingSource):
 
 @register_source(
     name="email_imap",
-    category=SourceCategory.MESSAGING,IMAP,
+    category=SourceCategory.MESSAGING,
     loaders={
         "imap": {
             "class": "IMAPEmailLoader",
@@ -590,7 +590,7 @@ class IMAPEmailSource(MessagingSource):
 
 @register_source(
     name="gmail_api",
-    category=SourceCategory.MESSAGING,GMAIL,
+    category=SourceCategory.MESSAGING,
     loaders={
         "gmail": {
             "class": "GmailLoader",
@@ -655,7 +655,7 @@ class GmailSource(MessagingSource):
 
 @register_source(
     name="whatsapp_export",
-    category=SourceCategory.MESSAGING,WHATSAPP,
+    category=SourceCategory.MESSAGING,
     loaders={
         "whatsapp": {
             "class": "WhatsAppChatLoader",
@@ -688,7 +688,7 @@ class WhatsAppSource(MessagingSource):
 
 @register_source(
     name="telegram_export",
-    category=SourceCategory.MESSAGING,TELEGRAM,
+    category=SourceCategory.MESSAGING,
     loaders={
         "telegram": {
             "class": "TelegramChatLoader",
@@ -738,7 +738,6 @@ class TelegramSource(MessagingSource):
     default_loader="multi_chat",
     description="Bulk chat export processor for multiple platforms",
     max_concurrent=4,
-    supports_filtering=True,
     capabilities=[
         LoaderCapability.BULK_LOADING,
         LoaderCapability.FILTERING,

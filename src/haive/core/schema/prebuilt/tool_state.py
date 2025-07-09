@@ -4,23 +4,27 @@ from typing import Any, Dict, List, Optional
 from langchain_core.tools import BaseTool
 from pydantic import Field, computed_field, model_validator
 
-from haive.core.schema.prebuilt.messages_state import MessagesState
+from haive.core.common.mixins.tool_route_mixin import ToolRouteMixin
+from haive.core.schema.prebuilt.messages.messages_with_token_usage import (
+    MessagesStateWithTokenUsage,
+)
 
 logger = logging.getLogger(__name__)
 
 
-class ToolState(MessagesState):
-    """State schema for tool-based agents with comprehensive tool management.
+class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
+    """State schema for tool-based agents with tool management and token tracking.
 
-    ToolState extends MessagesState to provide specialized functionality for agents that
-    use tools. It provides a robust infrastructure for tool registration, categorization,
-    routing, and execution, while maintaining all the message handling capabilities of
-    its parent class.
+    ToolState combines ToolRouteMixin and MessagesStateWithTokenUsage to provide specialized
+    functionality for agents that use tools. It provides robust tool management infrastructure
+    for tool registration, categorization, routing, and execution while maintaining token
+    tracking for all messages.
 
-    This schema serves as the foundation for tool-using agent states in the Haive
-    framework, providing seamless integration with various tool types including LangChain
-    tools, Pydantic models, and callable functions. It automatically categorizes tools
-    by type, maintains tool metadata, and tracks tool relationships.
+    This schema serves as the foundation for tool-using agent states in the Haive framework,
+    providing seamless integration with various tool types including LangChain tools, Pydantic
+    models, and callable functions. It automatically categorizes tools by type, maintains tool
+    metadata, and tracks tool relationships while providing LLM-specific features like context
+    length awareness and token usage thresholds.
 
     Key features include:
 
@@ -56,15 +60,9 @@ class ToolState(MessagesState):
     stored at the class level by SchemaComposer or added directly to instances.
     """
 
-    # Tool-related fields - matching AugLLMConfig pattern
-    tools: List[Any] = Field(default_factory=list, description="Available tools")
-    tool_routes: Dict[str, str] = Field(
-        default_factory=dict, description="Mapping of tool names to their routes/types"
-    )
-    name_attrs: List[str] = Field(
-        default_factory=lambda: ["name", "__name__", "func_name"],
-        description="Attributes to check for tool names",
-    )
+    # Tool-related fields - inherited from ToolRouteMixin
+    # tools: List[Any] - provided by ToolRouteMixin
+    # tool_routes: Dict[str, str] - provided by ToolRouteMixin
     content: Optional[str] = Field(default=None, description="Content field")
     output_schemas: Dict[str, Any] = Field(
         default_factory=dict, description="Output schemas for tools"
@@ -86,10 +84,11 @@ class ToolState(MessagesState):
         """
         Sync tools from engines and update tool routes after model creation.
 
-        This runs after the parent validator, so engines are already set up.
+        This runs after the parent validators, so engines and tool routes are already set up.
         """
-        # Call parent validator first
-        super().setup_engines_and_tools()
+        # Call parent validators first
+        super().auto_track_all_tokens()  # From MessagesStateWithTokenUsage
+        super()._validate_and_process_tools()  # From ToolRouteMixin
 
         # Sync tools from class-level engines if they haven't been synced yet
         if hasattr(self.__class__, "engines") and not self.tools:
@@ -294,6 +293,11 @@ class ToolState(MessagesState):
 
     def _get_tool_name(self, tool: Any, index: int) -> str:
         """Extract tool name from various possible attributes."""
+        # Use the mixin's method if available
+        if hasattr(super(), "_get_tool_name"):
+            return super()._get_tool_name(tool, index)
+
+        # Fallback to local implementation
         if hasattr(tool, "name"):
             return tool.name
         elif isinstance(tool, type) and hasattr(tool, "__name__"):
@@ -343,6 +347,10 @@ class ToolState(MessagesState):
             "function": "tool_node",
             "unknown": "tool_node",
         }
+
+        # Handle case where tool_routes might not exist in composed schemas
+        if not hasattr(self, "tool_routes"):
+            return {}
 
         return {
             tool_name: legacy_mapping.get(route, "tool_node")

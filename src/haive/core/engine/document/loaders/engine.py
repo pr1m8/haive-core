@@ -1,485 +1,447 @@
-"""
-Document loader engine for loading documents from sources.
+"""Document Loader Engine for pure document loading without splitting.
 
-This module provides an InvokableEngine implementation for document loaders that can
-handle various source types by mapping source objects to appropriate loaders from
-langchain_community.
+This module provides the DocumentLoaderEngine that handles only document loading
+from various sources and returns raw documents in DocumentState format.
 """
 
-import asyncio
-import inspect
-import logging
-import os
+import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar, Union
+from typing import Any, Dict, List, Optional, Union
 
-from langchain_core.documents import Document
-from langchain_core.runnables import RunnableConfig
-from pydantic import Field, root_validator
+from langchain.schema import Document
+from pydantic import BaseModel, Field
 
-from haive.core.engine.base import InvokableEngine
+from haive.core.common.config.runnable import RunnableConfig
+from haive.core.engine.base.base import InvokableEngine
 from haive.core.engine.base.types import EngineType
-from haive.core.engine.document.loaders.registry import (
-    DocumentLoaderRegistry,
+from haive.core.engine.document.config import (
+    DocumentSourceType,
+    LoaderPreference,
+    ProcessedDocument,
 )
-from haive.core.engine.document.loaders.sources.base.base import BaseSource
-from haive.core.engine.document.loaders.sources.types import SourceType
+from haive.core.schema.prebuilt.document_state import DocumentState
 
-logger = logging.getLogger(__name__)
+from .auto_loader import AutoLoader, AutoLoaderConfig
 
-# Type variable for document-like objects
-D = TypeVar("D", bound=Document)
+
+class DocumentLoaderConfig(BaseModel):
+    """Configuration for document loader engine."""
+
+    name: str = Field(default="document_loader", description="Engine name")
+    loader_preference: LoaderPreference = Field(
+        default=LoaderPreference.BALANCED,
+        description="Preference for loader selection (speed vs quality)",
+    )
+
+    # Loading options
+    recursive: bool = Field(
+        default=True, description="Whether to recursively process directories"
+    )
+    max_documents: Optional[int] = Field(
+        default=None, ge=1, description="Maximum number of documents to load"
+    )
+    use_async: bool = Field(
+        default=False, description="Whether to use async loading when available"
+    )
+    parallel_processing: bool = Field(
+        default=True, description="Whether to enable parallel processing"
+    )
+    max_workers: int = Field(
+        default=4, ge=1, le=32, description="Maximum number of worker threads"
+    )
+
+    # Filtering options
+    include_patterns: List[str] = Field(
+        default_factory=list, description="Glob patterns for files to include"
+    )
+    exclude_patterns: List[str] = Field(
+        default_factory=list, description="Glob patterns for files to exclude"
+    )
+
+    # Additional options
+    loader_options: Dict[str, Any] = Field(
+        default_factory=dict, description="Additional loader-specific options"
+    )
+
+    # Caching
+    enable_caching: bool = Field(default=False, description="Enable document caching")
+    cache_ttl: int = Field(
+        default=3600, ge=60, description="Cache time-to-live in seconds"
+    )
+
+    # Document identity options
+    generate_document_ids: bool = Field(
+        default=True, description="Whether to generate unique document IDs"
+    )
+    preserve_source_metadata: bool = Field(
+        default=True, description="Whether to preserve original source metadata"
+    )
+
+    class Config:
+        use_enum_values = True
 
 
 class DocumentLoaderEngine(
-    InvokableEngine[Union[BaseSource, str, Path, Dict[str, Any]], List[Document]]
+    InvokableEngine[Union[str, Path, Dict[str, Any]], DocumentState]
 ):
+    """Document loader engine for loading documents from various sources.
+
+    This engine handles pure document loading without any splitting or transformation.
+    It returns raw documents in DocumentState format with proper metadata and IDs.
+
+    Examples:
+        Basic usage::
+
+            engine = DocumentLoaderEngine(config=DocumentLoaderConfig())
+            result = engine.invoke("/path/to/document.pdf")
+
+        With custom configuration::
+
+            config = DocumentLoaderConfig(
+                loader_preference=LoaderPreference.QUALITY,
+                recursive=True,
+                max_workers=8
+            )
+            engine = DocumentLoaderEngine(config=config)
+            runnable = engine.create_runnable({"enable_caching": True})
+            result = runnable.invoke("https://example.com/docs")
     """
-    Engine for loading documents from various sources.
 
-    This engine provides a unified interface for working with document loaders from
-    langchain_community, with support for different source types and configurations.
-    """
-
-    # Engine type
-    engine_type: EngineType = Field(default=EngineType.DOCUMENT_LOADER)
-
-    # Loader configuration
-    loader_name: Optional[str] = Field(
-        default=None,
-        description="Name of the document loader to use (auto-detected if not provided)",
-    )
-
-    # Source type filters
-    supported_source_types: List[SourceType] = Field(
-        default_factory=list,
-        description="Source types this loader supports (all if empty)",
-    )
-
-    # Document loading options
-    recursive: bool = Field(
-        default=True, description="Whether to recursively load from directory sources"
-    )
-    max_documents: Optional[int] = Field(
-        default=None,
-        description="Maximum number of documents to load (None for unlimited)",
-    )
-    use_async: bool = Field(
-        default=False, description="Whether to use async loading if available"
-    )
-
-    # Additional configuration for the loader
-    loader_options: Dict[str, Any] = Field(
-        default_factory=dict, description="Configuration parameters for the loader"
-    )
-
-    model_config = {"arbitrary_types_allowed": True}
-
-    @root_validator(pre=True)
-    def ensure_valid_configuration(cls, values):
-        """Ensure the engine has a valid configuration."""
-        # If loader_name is provided, verify it exists
-        if loader_name := values.get("loader_name"):
-            registry = DocumentLoaderRegistry.get_instance()
-            if not registry.find_by_name(loader_name):
-                raise ValueError(
-                    f"Document loader '{loader_name}' not found in registry"
-                )
-
-        return values
-
-    def get_input_fields(self) -> Dict[str, Tuple[Type, Any]]:
-        """
-        Get input field definitions for this engine.
-
-        Returns:
-            Dictionary mapping field names to (type, default) tuples
-        """
-        return {
-            "source": (
-                Union[BaseSource, str, Path, Dict[str, Any]],
-                Field(description="Source to load documents from"),
-            ),
-            "recursive": (
-                bool,
-                Field(
-                    default=self.recursive,
-                    description="Whether to recursively load from directory sources",
-                ),
-            ),
-            "max_documents": (
-                Optional[int],
-                Field(
-                    default=self.max_documents,
-                    description="Maximum number of documents to load (None for unlimited)",
-                ),
-            ),
-            "loader_options": (
-                Dict[str, Any],
-                Field(
-                    default_factory=dict,
-                    description="Additional options to pass to the loader",
-                ),
-            ),
-        }
-
-    def get_output_fields(self) -> Dict[str, Tuple[Type, Any]]:
-        """
-        Get output field definitions for this engine.
-
-        Returns:
-            Dictionary mapping field names to (type, default) tuples
-        """
-        return {
-            "documents": (
-                List[Document],
-                Field(description="List of loaded documents"),
-            ),
-            "metadata": (
-                Dict[str, Any],
-                Field(
-                    default_factory=dict,
-                    description="Metadata about the loading process",
-                ),
-            ),
-        }
-
-    def _resolve_source(
-        self, source: Union[BaseSource, str, Path, Dict[str, Any]]
-    ) -> BaseSource:
-        """
-        Resolve various source formats to a BaseSource object.
+    def __init__(self, config: Optional[DocumentLoaderConfig] = None):
+        """Initialize the document loader engine.
 
         Args:
-            source: Source in various formats
-
-        Returns:
-            BaseSource object
-
-        Raises:
-            ValueError: If source cannot be resolved
+            config: Configuration for the loader engine
         """
-        # Already a BaseSource
-        if isinstance(source, BaseSource):
-            return source
+        super().__init__()
+        self.config = config or DocumentLoaderConfig()
+        self.engine_type = EngineType.DOCUMENT_LOADER
 
-        # Import source factories here to avoid circular imports
-        from haive.core.engine.document.loaders.sources.factory import (
-            create_source_from_dict,
-            create_source_from_path,
-            create_source_from_string,
+        # Create auto loader with configuration
+        auto_loader_config = AutoLoaderConfig(
+            preference=self.config.loader_preference,
+            max_concurrency=self.config.max_workers,
+            enable_caching=self.config.enable_caching,
+            cache_ttl=self.config.cache_ttl,
         )
+        self.auto_loader = AutoLoader(config=auto_loader_config)
 
-        # String source
-        if isinstance(source, str):
-            return create_source_from_string(source)
-
-        # Path source
-        if isinstance(source, Path):
-            return create_source_from_path(source)
-
-        # Dict source
-        if isinstance(source, dict):
-            return create_source_from_dict(source)
-
-        raise ValueError(f"Cannot resolve source of type: {type(source)}")
-
-    def _select_loader_name(self, source: BaseSource) -> str:
-        """
-        Select an appropriate loader based on the source.
+    def create_runnable(
+        self, runnable_config: Optional[Dict[str, Any]] = None
+    ) -> "DocumentLoaderEngine":
+        """Create a runnable instance with optional configuration overrides.
 
         Args:
-            source: Source to load from
+            runnable_config: Configuration overrides for this runnable
 
         Returns:
-            Name of the selected loader
-
-        Raises:
-            ValueError: If no suitable loader is found
+            New DocumentLoaderEngine instance with updated configuration
         """
-        # Use explicitly specified loader if provided
-        if self.loader_name:
-            return self.loader_name
+        if runnable_config:
+            # Merge configurations
+            config_dict = self.config.model_dump()
+            config_dict.update(runnable_config)
 
-        registry = DocumentLoaderRegistry.get_instance()
-        source_type = source.source_type
+            # Create new config and engine
+            new_config = DocumentLoaderConfig.model_validate(config_dict)
+            return DocumentLoaderEngine(config=new_config)
 
-        # Find loaders that support this source type
-        loaders_for_type = registry.get_all(source_type)
-        if loaders_for_type:
-            # Return the first loader
-            return next(iter(loaders_for_type.keys()))
-
-        # Try to find a generic loader based on source class
-        from haive.core.engine.document.loaders.sources.base.base import SourceClass
-
-        source_class = getattr(source, "source_class", None)
-        if source_class:
-            if source_class == SourceClass.LOCAL:
-                # Try file loader
-                if registry.find_by_name("TextLoader"):
-                    return "TextLoader"
-                elif registry.find_by_name("UnstructuredFileLoader"):
-                    return "UnstructuredFileLoader"
-            elif source_class == SourceClass.WEB:
-                # Try web loader
-                if registry.find_by_name("WebBaseLoader"):
-                    return "WebBaseLoader"
-
-        # Fall back to a default loader if available
-        if registry.find_by_name("UnstructuredLoader"):
-            return "UnstructuredLoader"
-
-        raise ValueError(f"No suitable loader found for source type {source_type}")
-
-    def create_runnable(self, runnable_config: Optional[RunnableConfig] = None) -> Any:
-        """
-        Create a runnable function from this engine configuration.
-
-        Args:
-            runnable_config: Optional runtime configuration
-
-        Returns:
-            A callable that loads documents
-        """
-        # Extract relevant parameters from config
-        params = self.apply_runnable_config(runnable_config) or {}
-
-        # Update options with runtime overrides
-        loader_options = self.loader_options.copy()
-        if "loader_options" in params:
-            loader_options.update(params["loader_options"])
-
-        # Create a copy of this engine with updated config
-        updated_engine = self.model_copy(update={"loader_options": loader_options})
-
-        # Create a function that will be returned as the runnable
-        async def load_documents_callable(
-            source: Union[BaseSource, str, Path, Dict[str, Any]],
-        ) -> List[Document]:
-            # Resolve the source
-            resolved_source = updated_engine._resolve_source(source)
-
-            # Select loader
-            loader_name = updated_engine._select_loader_name(resolved_source)
-
-            # Get loader class
-            registry = DocumentLoaderRegistry.get_instance()
-            loader_class = registry.find_by_name(loader_name)
-            if not loader_class:
-                raise ValueError(
-                    f"Document loader '{loader_name}' not found in registry"
-                )
-
-            # Prepare loader options
-            options = loader_options.copy()
-
-            # Add source-specific options
-            source_str = str(resolved_source.source)
-            if hasattr(loader_class, "__init__"):
-                sig = inspect.signature(loader_class.__init__)
-                for param_name in sig.parameters:
-                    if param_name == "file_path" and os.path.exists(source_str):
-                        options.setdefault("file_path", source_str)
-                    elif param_name == "path" and os.path.exists(source_str):
-                        options.setdefault("path", source_str)
-                    elif param_name == "url" and (
-                        source_str.startswith("http://")
-                        or source_str.startswith("https://")
-                    ):
-                        options.setdefault("url", source_str)
-                    elif param_name == "source":
-                        options.setdefault("source", source_str)
-
-            # Create loader instance
-            try:
-                loader_instance = loader_class(**options)
-            except Exception as e:
-                raise ValueError(
-                    f"Failed to instantiate loader '{loader_name}': {str(e)}"
-                )
-
-            # Load documents
-            try:
-                if updated_engine.use_async and hasattr(loader_instance, "aload"):
-                    documents = await loader_instance.aload()
-                elif hasattr(loader_instance, "load"):
-                    if updated_engine.use_async:
-                        documents = await asyncio.to_thread(loader_instance.load)
-                    else:
-                        documents = loader_instance.load()
-                else:
-                    raise ValueError(
-                        f"Loader {loader_name} does not have a load method"
-                    )
-
-                # Apply document limit if specified
-                if updated_engine.max_documents is not None:
-                    documents = documents[: updated_engine.max_documents]
-
-                return documents
-            except Exception as e:
-                raise ValueError(f"Failed to load documents: {str(e)}")
-
-        # Add reference to the engine for inspection
-        load_documents_callable.engine = updated_engine
-
-        return load_documents_callable
+        return self
 
     def invoke(
         self,
-        source: Union[BaseSource, str, Path, Dict[str, Any]],
-        runnable_config: Optional[RunnableConfig] = None,
-    ) -> List[Document]:
-        """
-        Load documents from the specified source.
+        input_data: Union[str, Path, Dict[str, Any], DocumentState],
+        config: Optional[RunnableConfig] = None,
+    ) -> DocumentState:
+        """Load documents from the specified source.
 
         Args:
-            source: Source to load documents from
-            runnable_config: Optional runtime configuration
+            input_data: Source path, URL, or configuration
+            config: Optional runnable configuration
 
         Returns:
-            List of loaded documents
-
-        Raises:
-            ValueError: If loading fails
+            DocumentState with loaded documents and metadata
         """
-        # Create runnable
-        runnable = self.create_runnable(runnable_config)
+        start_time = time.time()
 
-        # Invoke synchronously
         try:
-            if asyncio.iscoroutinefunction(runnable):
-                # Get or create event loop
-                try:
-                    loop = asyncio.get_event_loop()
-                except RuntimeError:
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-
-                return loop.run_until_complete(runnable(source))
+            # Extract source from input
+            if isinstance(input_data, (str, Path)):
+                source = str(input_data)
+                loader_options = {}
+            elif isinstance(input_data, dict):
+                source = input_data.get("source")
+                if not source:
+                    raise ValueError("Dictionary input must contain 'source' key")
+                loader_options = input_data.get("loader_options", {})
+            elif isinstance(input_data, DocumentState):
+                source = input_data.source
+                if not source:
+                    raise ValueError("DocumentState must contain source")
+                loader_options = {}
             else:
-                return runnable(source)
+                raise ValueError(f"Invalid input type: {type(input_data)}")
+
+            # Load documents using AutoLoader
+            result = self.auto_loader.load(
+                source, **{**self.config.loader_options, **loader_options}
+            )
+
+            # Convert to our format and add metadata
+            raw_documents = []
+            processed_documents = []
+
+            for doc_index, doc in enumerate(result.documents):
+                # Generate unique document ID
+                doc_id = f"doc_{doc_index}_{int(start_time)}"
+
+                # Add loader metadata
+                enhanced_metadata = {
+                    **doc.metadata,
+                    # Document identity
+                    "document_id": doc_id,
+                    "is_loaded": True,
+                    "is_original": True,
+                    "document_hierarchy_level": 0,
+                    # Loader information
+                    "loader_engine": "DocumentLoaderEngine",
+                    "loader_name": result.loader_name or "auto_detected",
+                    "loader_preference": self.config.loader_preference.value,
+                    "loading_timestamp": start_time,
+                    # Source information
+                    "source": source,
+                    "source_type": result.source_type or "auto_detected",
+                    "original_source": source,
+                    # Document characteristics
+                    "document_length": len(doc.page_content),
+                    "document_type": self._detect_document_type(doc),
+                    # Processing flags
+                    "is_split": False,
+                    "is_transformed": False,
+                    "is_child_document": False,
+                }
+
+                # Create enhanced raw document
+                enhanced_doc = Document(
+                    page_content=doc.page_content, metadata=enhanced_metadata
+                )
+                raw_documents.append(enhanced_doc)
+
+                # Create processed document
+                processed_doc = ProcessedDocument(
+                    content=doc.page_content,
+                    metadata=enhanced_metadata,
+                    source_type=result.source_type,
+                    loader_name=result.loader_name or "auto_detected",
+                    character_count=len(doc.page_content),
+                    word_count=len(doc.page_content.split()),
+                    chunk_count=1,  # Original document is one chunk
+                    chunks=[enhanced_doc],
+                    format=self._detect_format(doc),
+                    processing_time=0.0,  # Individual loading time
+                )
+                processed_documents.append(processed_doc)
+
+            operation_time = time.time() - start_time
+
+            # Create document state
+            document_state = DocumentState(
+                # Input configuration
+                source=source,
+                source_type=self._map_source_type(result.source_type),
+                loader_preference=self.config.loader_preference,
+                # Output data
+                raw_documents=raw_documents,
+                documents=processed_documents,
+                total_documents=len(raw_documents),
+                successful_documents=len(raw_documents),
+                processing_stage="load_completed",
+                # Workflow metadata
+                workflow_metadata={
+                    "loader_config": {
+                        "loader_preference": self.config.loader_preference.value,
+                        "recursive": self.config.recursive,
+                        "max_workers": self.config.max_workers,
+                        "enable_caching": self.config.enable_caching,
+                    },
+                    "loading_operation_time": operation_time,
+                    "total_loaded_documents": len(raw_documents),
+                    "auto_loader_result": {
+                        "loader_name": result.loader_name,
+                        "source_type": result.source_type,
+                        "operation_time": result.operation_time,
+                    },
+                },
+            )
+
+            return document_state
+
         except Exception as e:
-            logger.error(f"Error in document loader: {str(e)}")
-            raise
+            operation_time = time.time() - start_time
+
+            # Create error document state
+            document_state = DocumentState(
+                source=str(input_data) if hasattr(input_data, "__str__") else "unknown",
+                processing_stage="load_failed",
+                errors=[
+                    {
+                        "error": str(e),
+                        "error_type": type(e).__name__,
+                        "stage": "loading",
+                        "timestamp": start_time,
+                    }
+                ],
+                workflow_metadata={
+                    "loader_error": {
+                        "error": str(e),
+                        "error_type": type(e).__name__,
+                        "operation_time": operation_time,
+                    }
+                },
+            )
+
+            return document_state
 
     async def ainvoke(
         self,
-        source: Union[BaseSource, str, Path, Dict[str, Any]],
-        runnable_config: Optional[RunnableConfig] = None,
-    ) -> List[Document]:
-        """
-        Load documents asynchronously from the specified source.
+        input_data: Union[str, Path, Dict[str, Any], DocumentState],
+        config: Optional[RunnableConfig] = None,
+    ) -> DocumentState:
+        """Asynchronously load documents.
 
         Args:
-            source: Source to load documents from
-            runnable_config: Optional runtime configuration
+            input_data: Source path, URL, or configuration
+            config: Optional runnable configuration
 
         Returns:
-            List of loaded documents
-
-        Raises:
-            ValueError: If loading fails
+            DocumentState with loaded documents and metadata
         """
-        # Create runnable
-        runnable = self.create_runnable(runnable_config)
+        # For now, run synchronously in thread pool
+        # TODO: Implement true async processing if needed
+        import asyncio
 
-        # Invoke asynchronously
-        try:
-            if asyncio.iscoroutinefunction(runnable):
-                return await runnable(source)
-            else:
-                return await asyncio.to_thread(runnable, source)
-        except Exception as e:
-            logger.error(f"Error in document loader: {str(e)}")
-            raise
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, self.invoke, input_data, config)
+
+    def _detect_document_type(self, document: Document) -> str:
+        """Detect document type from metadata or content."""
+        # Check metadata first
+        if "document_type" in document.metadata:
+            return document.metadata["document_type"]
+
+        # Check file extension
+        source = document.metadata.get("source", "")
+        if isinstance(source, str):
+            if source.endswith((".pdf", ".PDF")):
+                return "pdf"
+            elif source.endswith((".docx", ".DOCX", ".doc", ".DOC")):
+                return "word"
+            elif source.endswith((".html", ".HTML", ".htm", ".HTM")):
+                return "html"
+            elif source.endswith((".md", ".MD", ".markdown")):
+                return "markdown"
+            elif source.endswith((".txt", ".TXT")):
+                return "text"
+
+        # Default
+        return "unknown"
+
+    def _detect_format(self, document: Document) -> Optional[str]:
+        """Detect document format."""
+        doc_type = self._detect_document_type(document)
+        return doc_type if doc_type != "unknown" else None
+
+    def _map_source_type(
+        self, auto_loader_source_type: Optional[str]
+    ) -> Optional[DocumentSourceType]:
+        """Map auto loader source type to DocumentSourceType enum."""
+        if not auto_loader_source_type:
+            return None
+
+        # Map common types
+        mapping = {
+            "file": DocumentSourceType.FILE,
+            "url": DocumentSourceType.URL,
+            "directory": DocumentSourceType.DIRECTORY,
+            "api": DocumentSourceType.API,
+        }
+
+        return mapping.get(auto_loader_source_type.lower(), DocumentSourceType.UNKNOWN)
 
 
-# Factory methods for common sources
-def create_file_loader_engine(
-    file_path: Union[str, Path], loader_name: Optional[str] = None, **loader_options
+# Factory functions for common loading scenarios
+def create_file_loader(
+    loader_preference: LoaderPreference = LoaderPreference.BALANCED,
+    enable_caching: bool = False,
 ) -> DocumentLoaderEngine:
-    """
-    Create a document loader engine for a file.
+    """Create a document loader engine optimized for file loading.
 
     Args:
-        file_path: Path to the file to load
-        loader_name: Optional specific loader to use
-        **loader_options: Additional configuration for the loader
+        loader_preference: Preference for loader selection
+        enable_caching: Whether to enable document caching
 
     Returns:
-        DocumentLoaderEngine configured for the file
+        DocumentLoaderEngine configured for file loading
     """
-    file_path_str = str(file_path)
-    file_name = os.path.basename(file_path_str)
+    config = DocumentLoaderConfig(
+        loader_preference=loader_preference,
+        recursive=False,
+        parallel_processing=True,
+        max_workers=4,
+        enable_caching=enable_caching,
+    )
+    return DocumentLoaderEngine(config=config)
 
-    engine_name = f"{loader_name or 'file'}_loader_{file_name}"
-    return DocumentLoaderEngine(
-        name=engine_name,
-        loader_name=loader_name,
-        loader_options=loader_options,
-    ).register()
 
-
-def create_url_loader_engine(
-    url: str, loader_name: Optional[str] = None, **loader_options
+def create_directory_loader(
+    loader_preference: LoaderPreference = LoaderPreference.BALANCED,
+    max_workers: int = 8,
+    include_patterns: Optional[List[str]] = None,
+    exclude_patterns: Optional[List[str]] = None,
 ) -> DocumentLoaderEngine:
-    """
-    Create a document loader engine for a URL.
+    """Create a document loader engine optimized for directory processing.
 
     Args:
-        url: URL to load
-        loader_name: Optional specific loader to use
-        **loader_options: Additional configuration for the loader
+        loader_preference: Preference for loader selection
+        max_workers: Maximum number of worker threads
+        include_patterns: Glob patterns for files to include
+        exclude_patterns: Glob patterns for files to exclude
 
     Returns:
-        DocumentLoaderEngine configured for the URL
+        DocumentLoaderEngine configured for directory processing
     """
-    from urllib.parse import urlparse
-
-    parsed_url = urlparse(url)
-    domain = parsed_url.netloc
-
-    engine_name = f"{loader_name or 'url'}_loader_{domain}"
-    return DocumentLoaderEngine(
-        name=engine_name,
-        loader_name=loader_name,
-        loader_options=loader_options,
-    ).register()
+    config = DocumentLoaderConfig(
+        loader_preference=loader_preference,
+        recursive=True,
+        parallel_processing=True,
+        max_workers=max_workers,
+        include_patterns=include_patterns or [],
+        exclude_patterns=exclude_patterns or [],
+    )
+    return DocumentLoaderEngine(config=config)
 
 
-def create_directory_loader_engine(
-    directory_path: Union[str, Path],
-    loader_name: Optional[str] = None,
-    glob_pattern: Optional[str] = None,
-    recursive: bool = True,
-    **loader_options,
+def create_web_loader(
+    loader_preference: LoaderPreference = LoaderPreference.QUALITY,
+    enable_caching: bool = True,
+    cache_ttl: int = 3600,
 ) -> DocumentLoaderEngine:
-    """
-    Create a document loader engine for a directory.
+    """Create a document loader engine optimized for web content.
 
     Args:
-        directory_path: Path to the directory to load
-        loader_name: Optional specific loader to use
-        glob_pattern: Optional glob pattern for filtering files
-        recursive: Whether to load files recursively
-        **loader_options: Additional configuration for the loader
+        loader_preference: Preference for loader selection
+        enable_caching: Whether to enable document caching
+        cache_ttl: Cache time-to-live in seconds
 
     Returns:
-        DocumentLoaderEngine configured for the directory
+        DocumentLoaderEngine configured for web loading
     """
-    directory_str = str(directory_path)
-    dir_name = os.path.basename(directory_str)
-
-    options = loader_options.copy()
-    if glob_pattern:
-        options["glob"] = glob_pattern
-
-    engine_name = f"{loader_name or 'directory'}_loader_{dir_name}"
-    return DocumentLoaderEngine(
-        name=engine_name,
-        loader_name=loader_name,
-        recursive=recursive,
-        loader_options=options,
-    ).register()
+    config = DocumentLoaderConfig(
+        loader_preference=loader_preference,
+        recursive=False,
+        parallel_processing=True,
+        max_workers=2,  # Be gentle with web servers
+        enable_caching=enable_caching,
+        cache_ttl=cache_ttl,
+    )
+    return DocumentLoaderEngine(config=config)

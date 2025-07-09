@@ -280,7 +280,7 @@ def create_engine_node(
 
 @overload
 def create_engine_node(
-    engine: Engine, name: str, *, engine_type: EngineType.RAG
+    engine: Engine, name: str, *, engine_type: EngineType.RETRIEVER
 ) -> RAGNodeConfig: ...
 
 
@@ -317,7 +317,7 @@ def create_engine_node(
 
     if engine_type == EngineType.LLM:
         return LLMNodeConfig(**config_kwargs)
-    elif engine_type == EngineType.RAG:
+    elif engine_type == EngineType.RETRIEVER:
         return RAGNodeConfig(**config_kwargs)
     elif engine_type == EngineType.AGENT:
         return PlannerNodeConfig(**config_kwargs)

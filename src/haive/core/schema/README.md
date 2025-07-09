@@ -579,62 +579,464 @@ engine_input = state.prepare_for_engine("llm")
 state.merge_engine_output("llm", engine_output)
 ```
 
+## Common Patterns
+
+### Pattern 1: Message-Based State
+
+The most common pattern for conversational agents:
+
+```python
+from haive.core.schema import create_message_state
+
+# Quick creation with message field
+ConversationState = create_message_state({
+    "topic": (str, Field(default="general chat")),
+    "speaker_count": (int, Field(default=0))
+})
+
+# Use in your agent
+state = ConversationState()
+state.add_message(HumanMessage(content="Hello!"))
+state.add_messages([AIMessage(content="Hi there!")])
+```
+
+### Pattern 2: Multi-Engine State
+
+For complex workflows with multiple engines:
+
+```python
+from haive.core.schema import SchemaComposer
+
+# Compose from engines
+engines = [retriever_engine, reranker_engine, llm_engine]
+RAGState = SchemaComposer.from_components(
+    engines,
+    name="RAGState",
+    additional_fields={
+        "metadata": (Dict[str, Any], Field(default_factory=dict))
+    }
+)
+```
+
+### Pattern 3: Hierarchical State
+
+For parent-child graph relationships:
+
+```python
+# Parent state
+class ParentState(StateSchema):
+    messages: List[BaseMessage] = Field(default_factory=list)
+    global_context: str = Field(default="")
+    results: List[str] = Field(default_factory=list)
+
+    __shared_fields__ = ["messages", "global_context"]
+
+# Child state
+class ChildState(StateSchema):
+    messages: List[BaseMessage] = Field(default_factory=list)  # From parent
+    global_context: str = Field(default="")  # From parent
+    local_data: str = Field(default="")  # Local only
+
+    __shared_fields__ = ["messages", "global_context"]
+    __reducer_fields__ = {
+        "messages": add_messages,
+        "results": operator.add
+    }
+```
+
+### Pattern 4: Streaming State
+
+For real-time streaming applications:
+
+```python
+class StreamingState(StateSchema):
+    chunks: List[str] = Field(default_factory=list)
+    buffer: str = Field(default="")
+    is_complete: bool = Field(default=False)
+
+    __reducer_fields__ = {
+        "chunks": operator.add,
+        "buffer": lambda old, new: new,  # Replace buffer
+        "is_complete": lambda old, new: old or new  # Once true, stays true
+    }
+
+    def flush_buffer(self) -> str:
+        """Flush buffer and return content."""
+        content = self.buffer
+        self.buffer = ""
+        return content
+```
+
+### Pattern 5: Validation State
+
+For states requiring complex validation:
+
+```python
+from pydantic import validator
+
+class ValidatedState(StateSchema):
+    email: str = Field(default="")
+    age: int = Field(default=0)
+    tags: List[str] = Field(default_factory=list)
+
+    @validator("email")
+    def validate_email(cls, v):
+        if v and "@" not in v:
+            raise ValueError("Invalid email format")
+        return v
+
+    @validator("age")
+    def validate_age(cls, v):
+        if v < 0 or v > 150:
+            raise ValueError("Age must be between 0 and 150")
+        return v
+
+    @validator("tags")
+    def validate_tags(cls, v):
+        return list(set(v))  # Remove duplicates
+```
+
 ## Best Practices
 
-1. **Define Schemas Declaratively** when possible for clarity:
+### 1. Schema Definition
 
-   ```python
-   class MyState(StateSchema):
-       messages: List[BaseMessage] = Field(default_factory=list)
-       query: str = Field(default="")
-   ```
+**Define Schemas Declaratively** when possible for clarity:
 
-2. **Use SchemaComposer for Dynamic Composition** when building schemas at runtime:
+```python
+class MyState(StateSchema):
+    messages: List[BaseMessage] = Field(default_factory=list)
+    query: str = Field(default="")
+```
 
-   ```python
-   schema = SchemaComposer.from_components(components)
-   ```
+**Use Type Aliases** for complex types:
 
-3. **Always Configure Message Fields with Reducers** to ensure proper concatenation:
+```python
+from typing import TypeAlias
 
-   ```python
-   composer.configure_messages_field(with_reducer=True)
-   ```
+DocumentType: TypeAlias = Dict[str, Union[str, List[str], Dict[str, Any]]]
 
-4. **Use Appropriate Reducers** for different field types:
+class DocumentState(StateSchema):
+    documents: List[DocumentType] = Field(default_factory=list)
+```
 
-   - `add_messages` for message lists
-   - `operator.add` for regular lists and numbers
-   - Custom reducers for complex types
+### 2. Dynamic Composition
 
-5. **Mark Shared Fields Explicitly** to control state flow between graphs:
+**Use SchemaComposer** for runtime schema building:
 
-   ```python
-   schema.__shared_fields__ = ["messages", "context"]
-   ```
+```python
+# From components
+schema = SchemaComposer.from_components(components)
 
-6. **Use Engine I/O Mappings** to track field relationships:
+# With builder pattern
+composer = SchemaComposer(name="CustomState")
+composer.add_field("field1", str, default="")
+composer.add_field("field2", int, default=0)
+schema = composer.build()
+```
 
-   ```python
-   schema.__engine_io_mappings__ = {
-       "retriever": {"inputs": ["query"], "outputs": ["context"]}
-   }
-   ```
+### 3. Field Management
 
-7. **Validate Fields** before creating instances:
+**Always Configure Message Fields** with appropriate reducers:
 
-   ```python
-   try:
-       state = MyState.model_validate(data)
-   except ValidationError as e:
-       print(f"Validation error: {e}")
-   ```
+```python
+composer.configure_messages_field(with_reducer=True)
+```
 
-8. **Serialize to JSON** for persistence:
-   ```python
-   json_data = state.to_json()
-   restored_state = MyState.from_json(json_data)
-   ```
+**Use Appropriate Reducers** for different field types:
+
+- `add_messages` for message lists
+- `operator.add` for regular lists and numbers
+- Custom lambdas for replace behavior
+- Custom functions for complex merging
+
+### 4. State Sharing
+
+**Mark Shared Fields Explicitly** to control parent-child communication:
+
+```python
+__shared_fields__ = ["messages", "context"]
+```
+
+**Consider Reducer Behavior** when sharing fields:
+
+```python
+# Shared fields should have compatible reducers
+__reducer_fields__ = {
+    "messages": add_messages,  # Standard for messages
+    "context": operator.add    # Accumulate context
+}
+```
+
+### 5. Engine Integration
+
+**Track Engine I/O Relationships**:
+
+```python
+__engine_io_mappings__ = {
+    "retriever": {
+        "inputs": ["query"],
+        "outputs": ["context", "sources"]
+    },
+    "llm": {
+        "inputs": ["query", "context"],
+        "outputs": ["response"]
+    }
+}
+```
+
+**Prepare State for Engines**:
+
+```python
+# Extract only relevant fields
+engine_input = state.prepare_for_engine("retriever")
+
+# Merge results back
+state.merge_engine_output("retriever", {"context": [...]})
+```
+
+### 6. Validation and Safety
+
+**Validate Before Creation**:
+
+```python
+try:
+    state = MyState.model_validate(data)
+except ValidationError as e:
+    logger.error(f"Invalid state data: {e}")
+    # Handle error appropriately
+```
+
+**Use Type Guards**:
+
+```python
+from typing import TypeGuard
+
+def is_valid_state(obj: Any) -> TypeGuard[MyState]:
+    return (
+        hasattr(obj, "messages") and
+        hasattr(obj, "query") and
+        isinstance(obj.messages, list)
+    )
+```
+
+### 7. Serialization
+
+**Use Built-in Methods**:
+
+```python
+# To JSON
+json_data = state.to_json()
+
+# From JSON
+restored = MyState.from_json(json_data)
+
+# To dict
+state_dict = state.to_dict()
+
+# From dict
+restored = MyState.from_dict(state_dict)
+```
+
+**Handle Complex Types**:
+
+```python
+# Custom serialization for non-standard types
+class CustomState(StateSchema):
+    data: CustomType = Field(default_factory=CustomType)
+
+    class Config:
+        json_encoders = {
+            CustomType: lambda v: v.to_dict()
+        }
+```
+
+### 8. Performance Optimization
+
+**Minimize Field Count**:
+
+```python
+# Bad: Too many fields
+class OverloadedState(StateSchema):
+    field1: str = Field(default="")
+    field2: str = Field(default="")
+    # ... 50 more fields
+
+# Good: Group related fields
+class OrganizedState(StateSchema):
+    config: Dict[str, Any] = Field(default_factory=dict)
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+    messages: List[BaseMessage] = Field(default_factory=list)
+```
+
+**Use Lazy Loading**:
+
+```python
+class LazyState(StateSchema):
+    _large_data: Optional[LargeData] = None
+
+    @property
+    def large_data(self) -> LargeData:
+        if self._large_data is None:
+            self._large_data = self._load_large_data()
+        return self._large_data
+```
+
+### 9. Testing Schemas
+
+**Create Test Factories**:
+
+```python
+def create_test_state(**overrides) -> MyState:
+    """Create state with test defaults."""
+    defaults = {
+        "messages": [HumanMessage(content="Test")],
+        "query": "test query"
+    }
+    defaults.update(overrides)
+    return MyState(**defaults)
+```
+
+**Test Reducer Behavior**:
+
+```python
+def test_message_reducer():
+    state = MyState()
+    state.apply_reducers({
+        "messages": [HumanMessage(content="Hello")]
+    })
+    assert len(state.messages) == 1
+
+    state.apply_reducers({
+        "messages": [AIMessage(content="Hi")]
+    })
+    assert len(state.messages) == 2
+```
+
+## Troubleshooting
+
+### Common Issues
+
+#### 1. Field Name Conflicts
+
+**Problem**: Multiple engines define the same field with different types.
+
+**Solution**:
+
+```python
+# Use prefixing
+composer = SchemaComposer()
+composer.add_fields_from_engine(engine1, prefix="eng1_")
+composer.add_fields_from_engine(engine2, prefix="eng2_")
+```
+
+#### 2. Reducer Not Applied
+
+**Problem**: Field updates overwrite instead of reducing.
+
+**Solution**:
+
+```python
+# Ensure reducer is defined
+__reducer_fields__ = {
+    "my_field": operator.add  # Don't forget this!
+}
+
+# Or use apply_reducers method
+state.apply_reducers(update_dict)
+```
+
+#### 3. Shared Fields Not Syncing
+
+**Problem**: Updates in child graph don't appear in parent.
+
+**Solution**:
+
+```python
+# Both parent and child must list the field
+__shared_fields__ = ["messages"]  # In BOTH schemas
+```
+
+#### 4. Serialization Errors
+
+**Problem**: Custom types fail to serialize.
+
+**Solution**:
+
+```python
+class MyState(StateSchema):
+    custom: CustomType = Field(...)
+
+    class Config:
+        json_encoders = {
+            CustomType: lambda v: v.to_dict(),
+            datetime: lambda v: v.isoformat()
+        }
+```
+
+#### 5. Performance Issues
+
+**Problem**: Large states causing slowdowns.
+
+**Solution**:
+
+```python
+# Use selective field updates
+state.model_validate_assignment = False  # Disable validation
+state.messages.append(msg)  # Direct append
+state.model_validate_assignment = True  # Re-enable
+
+# Or use update with specific fields
+state.model_update({"messages": new_messages})
+```
+
+## Examples
+
+For complete working examples, see the [example.py](example.py) file which demonstrates:
+
+- Basic schema creation and usage
+- Dynamic schema composition from engines
+- Parent-child state sharing
+- Custom reducers and validators
+- Schema merging and extension
+- Real-world agent state patterns
+
+## API Quick Reference
+
+### StateSchema
+
+| Method                     | Description                |
+| -------------------------- | -------------------------- |
+| `to_dict()`                | Convert to dictionary      |
+| `to_json()`                | Convert to JSON string     |
+| `from_dict(data)`          | Create from dictionary     |
+| `from_json(json_str)`      | Create from JSON           |
+| `apply_reducers(update)`   | Apply update with reducers |
+| `add_message(msg)`         | Add single message         |
+| `add_messages(msgs)`       | Add multiple messages      |
+| `prepare_for_engine(name)` | Get engine inputs          |
+| `to_command(goto)`         | Convert to Command         |
+
+### SchemaComposer
+
+| Method                           | Description                |
+| -------------------------------- | -------------------------- |
+| `add_field(...)`                 | Add single field           |
+| `add_fields_from_model(model)`   | Import from Pydantic model |
+| `add_fields_from_engine(engine)` | Import from engine         |
+| `from_components(components)`    | Create from component list |
+| `build()`                        | Generate StateSchema class |
+| `merge(composer1, composer2)`    | Merge two composers        |
+
+### StateSchemaManager
+
+| Method                 | Description              |
+| ---------------------- | ------------------------ |
+| `add_field(...)`       | Add field to schema      |
+| `remove_field(name)`   | Remove field             |
+| `modify_field(...)`    | Update field properties  |
+| `get_model()`          | Get Pydantic model class |
+| `add_method(func)`     | Add custom method        |
+| `from_components(...)` | Build from components    |
 
 ## Conclusion
 
@@ -648,5 +1050,13 @@ Key strengths include:
 - **Engine Integration**: Track field-to-engine relationships
 - **Serialization**: Full support for serializing and deserializing schemas and states
 - **Visualization**: Rich utilities for displaying and working with schemas
+- **Type Safety**: Full type hints and runtime validation
+- **Extensibility**: Add custom methods, validators, and reducers
 
-By leveraging these capabilities, you can build sophisticated agent systems with clean state management and dynamic behavior.
+By leveraging these capabilities, you can build sophisticated agent systems with clean state management and dynamic behavior. The schema system serves as the backbone for state management across the entire Haive framework.
+
+## See Also
+
+- [Engine System](../engine/README.md) - How engines integrate with schemas
+- [Graph System](../graph/README.md) - Using schemas in graphs
+- [Agent Base](../../../haive-agents/src/haive/agents/base/README.md) - Schema usage in agents

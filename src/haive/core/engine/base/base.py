@@ -27,7 +27,7 @@ from typing import (
 )
 
 from langchain_core.runnables import RunnableConfig
-from pydantic import BaseModel, ConfigDict, Field, create_model
+from pydantic import BaseModel, ConfigDict, Field, create_model, field_serializer
 
 # Import registry base
 from haive.core.engine.base.protocols import AsyncInvokable, Invokable
@@ -84,6 +84,11 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
 
     # Configuration for model serialization
     model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    @field_serializer("engine_type")
+    def serialize_engine_type(self, engine_type: EngineType) -> str:
+        """Ensure engine_type is serialized as its value, not string representation."""
+        return engine_type.value
 
     @abstractmethod
     def get_input_fields(self) -> Dict[str, Tuple[Type, Any]]:

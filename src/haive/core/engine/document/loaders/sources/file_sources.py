@@ -531,7 +531,6 @@ class SubtitleSource(LocalFileSource):
     default_loader="bulk",
     description="Bulk PDF directory loader with recursive processing",
     max_concurrent=6,
-    supports_filtering=True,
     capabilities=[
         LoaderCapability.BULK_LOADING,
         LoaderCapability.RECURSIVE,
@@ -567,7 +566,6 @@ class PDFDirectorySource(DirectorySource):
     default_loader="auto",
     description="Directory loader with unstructured file processing",
     max_concurrent=4,
-    supports_filtering=True,
     capabilities=[
         LoaderCapability.BULK_LOADING,
         LoaderCapability.RECURSIVE,

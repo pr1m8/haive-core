@@ -388,8 +388,6 @@ class ChromiumAsyncSource(RemoteSource):
     default_loader="recursive",
     description="Recursive web crawler with depth control and filtering",
     max_concurrent=6,
-    supports_filtering=True,
-    supports_recursive=True,
     capabilities=[
         LoaderCapability.BULK_LOADING,
         LoaderCapability.RECURSIVE,
@@ -459,7 +457,6 @@ class RecursiveWebSource(RemoteSource):
     default_loader="sitemap",
     description="Sitemap-based website crawler with auto-detection",
     max_concurrent=8,
-    supports_filtering=True,
     capabilities=[
         LoaderCapability.BULK_LOADING,
         LoaderCapability.FILTERING,
@@ -525,7 +522,6 @@ class SitemapCrawlerSource(RemoteSource):
     default_loader="rtd",
     description="Read the Docs documentation site loader",
     max_concurrent=4,
-    supports_filtering=True,
     capabilities=[
         LoaderCapability.BULK_LOADING,
         LoaderCapability.FILTERING,
@@ -570,7 +566,6 @@ class ReadTheDocsSource(RemoteSource):
     default_loader="docusaurus",
     description="Docusaurus documentation site loader",
     max_concurrent=6,
-    supports_filtering=True,
     capabilities=[
         LoaderCapability.BULK_LOADING,
         LoaderCapability.FILTERING,
@@ -612,7 +607,6 @@ class DocusaurusSource(RemoteSource):
     },
     default_loader="firecrawl",
     description="FireCrawl web scraping service with advanced features",
-    credential_type=CredentialType.API_KEY,
     capabilities=[
         LoaderCapability.BULK_LOADING,
         LoaderCapability.METADATA_EXTRACTION,

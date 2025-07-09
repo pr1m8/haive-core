@@ -4,9 +4,9 @@ import logging
 from abc import abstractmethod
 from typing import Any, Dict, Optional, Type, Union
 
-from pydantic import Field
+from pydantic import Field, SecretStr
 
-from haive.core.config.secure import SecureConfigMixin
+from haive.core.common.mixins.secure_config import SecureConfigMixin
 from haive.core.engine.base import InvokableEngine
 from haive.core.engine.base.types import EngineType
 from haive.core.engine.embedding.types import EmbeddingType
@@ -68,6 +68,11 @@ class BaseEmbeddingConfig(SecureConfigMixin, InvokableEngine):
     )
     dimensions: Optional[int] = Field(
         default=None, description="Output dimensions for the embeddings (if supported)"
+    )
+
+    # API key field for SecureConfigMixin
+    api_key: Optional[SecretStr] = Field(
+        default=None, description="API key for the embedding provider"
     )
 
     @classmethod

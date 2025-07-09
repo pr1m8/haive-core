@@ -100,7 +100,7 @@ class S3FileSource(RemoteSource):
     """AWS S3 single file source."""
 
     source_type: str = "s3_file"
-    category: SourceCategory = SourceCategory.CLOUD
+    category: SourceCategory = SourceCategory.CLOUD_STORAGE
     platform: CloudPlatform = CloudPlatform.AWS_S3
 
     # S3 configuration
@@ -162,7 +162,7 @@ class S3DirectorySource(RemoteSource):
     """AWS S3 directory bulk source."""
 
     source_type: str = "s3_directory"
-    category: SourceCategory = SourceCategory.CLOUD
+    category: SourceCategory = SourceCategory.CLOUD_STORAGE
     platform: CloudPlatform = CloudPlatform.AWS_S3
 
     # S3 configuration
@@ -236,7 +236,7 @@ class GCSFileSource(RemoteSource):
     """Google Cloud Storage file source."""
 
     source_type: str = "gcs_file"
-    category: SourceCategory = SourceCategory.CLOUD
+    category: SourceCategory = SourceCategory.CLOUD_STORAGE
     platform: CloudPlatform = CloudPlatform.GCP_STORAGE
 
     # GCS configuration
@@ -291,7 +291,7 @@ class GCSDirectorySource(RemoteSource):
     """Google Cloud Storage directory source."""
 
     source_type: str = "gcs_directory"
-    category: SourceCategory = SourceCategory.CLOUD
+    category: SourceCategory = SourceCategory.CLOUD_STORAGE
     platform: CloudPlatform = CloudPlatform.GCP_STORAGE
 
     # GCS configuration
@@ -355,7 +355,7 @@ class AzureBlobFileSource(RemoteSource):
     """Azure Blob Storage file source."""
 
     source_type: str = "azure_blob_file"
-    category: SourceCategory = SourceCategory.CLOUD
+    category: SourceCategory = SourceCategory.CLOUD_STORAGE
     platform: CloudPlatform = CloudPlatform.AZURE_BLOB
 
     # Azure configuration
@@ -413,7 +413,7 @@ class AzureBlobDirectorySource(RemoteSource):
     """Azure Blob Storage container source."""
 
     source_type: str = "azure_blob_directory"
-    category: SourceCategory = SourceCategory.CLOUD
+    category: SourceCategory = SourceCategory.CLOUD_STORAGE
     platform: CloudPlatform = CloudPlatform.AZURE_BLOB
 
     # Azure configuration
@@ -447,7 +447,7 @@ class AzureBlobDirectorySource(RemoteSource):
 
 @register_source(
     name="dropbox",
-    category=SourceCategory.CLOUD,
+    category=SourceCategory.CLOUD_STORAGE,
     loaders={
         "dropbox": {
             "class": "DropboxLoader",
@@ -472,7 +472,7 @@ class DropboxSource(RemoteSource):
     """Dropbox file sharing source."""
 
     source_type: str = "dropbox"
-    category: SourceCategory = SourceCategory.CLOUD
+    category: SourceCategory = SourceCategory.CLOUD_STORAGE
     platform: CloudPlatform = CloudPlatform.DROPBOX
 
     # Dropbox configuration
@@ -534,7 +534,7 @@ class GoogleDriveSource(RemoteSource):
     """Google Drive source."""
 
     source_type: str = "google_drive"
-    category: SourceCategory = SourceCategory.CLOUD
+    category: SourceCategory = SourceCategory.CLOUD_STORAGE
     platform: CloudPlatform = CloudPlatform.GOOGLE_DRIVE
 
     # Drive configuration
@@ -589,7 +589,7 @@ class GoogleDriveSource(RemoteSource):
 
 @register_source(
     name="onedrive",
-    category=SourceCategory.CLOUD,
+    category=SourceCategory.CLOUD_STORAGE,
     loaders={
         "onedrive": {
             "class": "OneDriveLoader",
@@ -614,7 +614,7 @@ class OneDriveSource(RemoteSource):
     """Microsoft OneDrive source."""
 
     source_type: str = "onedrive"
-    category: SourceCategory = SourceCategory.CLOUD
+    category: SourceCategory = SourceCategory.CLOUD_STORAGE
     platform: CloudPlatform = CloudPlatform.ONEDRIVE
 
     # OneDrive configuration
@@ -649,7 +649,7 @@ class OneDriveSource(RemoteSource):
 
 @register_source(
     name="delta_lake",
-    category=SourceCategory.CLOUD,
+    category=SourceCategory.CLOUD_STORAGE,
     loaders={
         "delta": {
             "class": "DeltaLakeLoader",
@@ -673,7 +673,7 @@ class DeltaLakeSource(RemoteSource):
     """Delta Lake data source."""
 
     source_type: str = "delta_lake"
-    category: SourceCategory = SourceCategory.CLOUD
+    category: SourceCategory = SourceCategory.CLOUD_STORAGE
     platform: CloudPlatform = CloudPlatform.DELTA_LAKE
 
     # Delta Lake configuration
@@ -715,7 +715,7 @@ class DeltaLakeSource(RemoteSource):
 
 @register_source(
     name="apache_iceberg",
-    category=SourceCategory.CLOUD,
+    category=SourceCategory.CLOUD_STORAGE,
     loaders={
         "iceberg": {
             "class": "IcebergLoader",
@@ -740,7 +740,7 @@ class IcebergSource(RemoteSource):
     """Apache Iceberg data source."""
 
     source_type: str = "apache_iceberg"
-    category: SourceCategory = SourceCategory.CLOUD
+    category: SourceCategory = SourceCategory.CLOUD_STORAGE
     platform: CloudPlatform = CloudPlatform.APACHE_ICEBERG
 
     # Iceberg configuration
@@ -782,7 +782,7 @@ class IcebergSource(RemoteSource):
 
 @register_bulk_source(
     name="sharepoint",
-    category=SourceCategory.CLOUD_STORAGE,SHAREPOINT,
+    category=SourceCategory.CLOUD_STORAGE,
     loaders={
         "sharepoint": {
             "class": "SharePointLoader",
@@ -809,7 +809,7 @@ class SharePointSource(RemoteSource):
     """Microsoft SharePoint source."""
 
     source_type: str = "sharepoint"
-    category: SourceCategory = SourceCategory.CLOUD
+    category: SourceCategory = SourceCategory.CLOUD_STORAGE
     platform: CloudPlatform = CloudPlatform.SHAREPOINT
 
     # SharePoint configuration
@@ -865,7 +865,7 @@ class SharePointSource(RemoteSource):
 
 @register_bulk_source(
     name="minio",
-    category=SourceCategory.CLOUD_STORAGE,MINIO,
+    category=SourceCategory.CLOUD_STORAGE,
     loaders={
         "minio": {
             "class": "MinioLoader",
@@ -893,7 +893,7 @@ class MinioSource(RemoteSource):
     """MinIO object storage source."""
 
     source_type: str = "minio"
-    category: SourceCategory = SourceCategory.CLOUD
+    category: SourceCategory = SourceCategory.CLOUD_STORAGE
     platform: CloudPlatform = CloudPlatform.MINIO
 
     # MinIO configuration
@@ -957,7 +957,7 @@ def get_cloud_storage_statistics() -> Dict[str, Any]:
             platform_counts[platform.value] = count
 
     # Category statistics
-    cloud_sources = registry.find_sources_by_category(SourceCategory.CLOUD)
+    cloud_sources = registry.find_sources_by_category(SourceCategory.CLOUD_STORAGE)
 
     # S3-compatible sources
     s3_compatible = len(

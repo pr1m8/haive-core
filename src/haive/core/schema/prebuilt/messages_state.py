@@ -17,7 +17,7 @@ from langchain_core.messages.utils import (
 )
 from langgraph.graph import add_messages
 from langgraph.types import Send
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 
 from haive.core.schema.state_schema import StateSchema
 
@@ -42,7 +42,7 @@ class MessagesState(StateSchema):
     MessagesState is a specialized StateSchema that provides comprehensive message
     handling capabilities for conversational AI agents. It extends the base StateSchema
     with specific functionality for working with LangChain message types, message
-    filtering, token counting, and conversation management.
+    filtering, and conversation management.
 
     This schema serves as the foundation for conversation-based agent states in the
     Haive framework, providing seamless integration with LangGraph for agent workflows.
@@ -58,9 +58,11 @@ class MessagesState(StateSchema):
     - Conversation history manipulation (truncation, filtering, etc.)
     - LangGraph integration with proper message reducers
     - Conversion to formats required by different LLM providers
-    - Conversation round tracking and analysis (NEW)
-    - Tool call deduplication and error handling (NEW)
-    - Message transformation utilities (NEW)
+    - Conversation round tracking and analysis
+    - Tool call deduplication and error handling
+    - Message transformation utilities
+
+    Note: For token usage tracking, use MessagesStateWithTokenUsage instead.
 
     The messages field is automatically shared with parent/child graphs and configured
     with the appropriate reducer function for merging message lists during state updates.
@@ -120,6 +122,22 @@ class MessagesState(StateSchema):
         return instance
 
     @model_validator(mode="after")
+    def track_all_message_tokens(self) -> "MessagesState":
+        """
+        Automatically track token usage for all messages.
+        This runs after model creation to ensure all messages are tracked.
+        """
+        # Only track if we haven't already initialized token tracking
+        if not self.token_usage and not self.token_usage_history:
+            # Track tokens for all AI messages
+            for message in self.messages:
+                if isinstance(message, AIMessage):
+                    # Extract and track token usage from the message
+                    self.track_message_tokens(message)
+
+        return self
+
+    @model_validator(mode="after")
     def sync_message_engine_settings(self) -> "MessagesState":
         """Sync message-related settings with engine if present.
 
@@ -149,10 +167,14 @@ class MessagesState(StateSchema):
         return self
 
     def add_message(self, message: Union[AnyMessage, Dict]) -> None:
-        """Add a message to the conversation."""
+        """Add a message to the conversation and track token usage."""
         if isinstance(message, dict):
             message = messages_from_dict([message])[0]
         self.messages.append(message)
+
+        # Automatically track token usage for AI messages
+        if isinstance(message, AIMessage):
+            self.track_message_tokens(message)
 
     def get_last_message(self) -> Optional[AnyMessage]:
         """Get the last message in the conversation."""

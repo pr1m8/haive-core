@@ -1,12 +1,13 @@
 """MessagesState with integrated token usage tracking.
 
-This module provides a prebuilt schema that combines MessagesState with
-TokenUsageMixin for comprehensive conversation and token tracking.
+This module provides THE standard messages state schema with automatic token tracking.
+This should be used as the base for all conversational agents that need token awareness.
 """
 
-from typing import Dict, Union
+from typing import Dict, List, Union
 
-from langchain_core.messages import AnyMessage, messages_from_dict
+from langchain_core.messages import AIMessage, AnyMessage, messages_from_dict
+from pydantic import model_validator
 
 from haive.core.schema.prebuilt.messages.token_usage_mixin import TokenUsageMixin
 from haive.core.schema.prebuilt.messages_state import MessagesState
@@ -50,6 +51,19 @@ class MessagesStateWithTokenUsage(MessagesState, TokenUsageMixin):
         ```
     """
 
+    @model_validator(mode="after")
+    def auto_track_all_tokens(self) -> "MessagesStateWithTokenUsage":
+        """
+        Automatically track token usage for ALL messages in the state.
+        This ensures token tracking happens no matter how messages are added.
+        """
+        # Track tokens for ALL messages
+        for message in self.messages:
+            # Track tokens for any message type that might have usage data
+            self.track_message_tokens(message)
+
+        return self
+
     def add_message(self, message: Union[AnyMessage, Dict]) -> None:
         """Add a message to the conversation and track token usage.
 
@@ -66,7 +80,7 @@ class MessagesStateWithTokenUsage(MessagesState, TokenUsageMixin):
         # Add to messages list
         self.messages.append(message)
 
-        # Track token usage
+        # Track token usage immediately for any message
         self.track_message_tokens(message)
 
     @classmethod

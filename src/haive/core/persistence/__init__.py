@@ -60,6 +60,12 @@ code, providing appropriate interfaces for each context.
 # Base persistence classes
 from haive.core.persistence.base import CheckpointerConfig
 
+# Factory functions
+from haive.core.persistence.factory import (
+    acreate_postgres_checkpointer,
+    create_postgres_checkpointer,
+)
+
 # Handler utilities
 from haive.core.persistence.handlers import setup_checkpointer
 
@@ -86,6 +92,9 @@ __all__ = [
     "SupabaseCheckpointerConfig",
     # Handlers
     "setup_checkpointer",
+    # Factory functions
+    "create_postgres_checkpointer",
+    "acreate_postgres_checkpointer",
     # Types
     "CheckpointerMode",
     "CheckpointerType",

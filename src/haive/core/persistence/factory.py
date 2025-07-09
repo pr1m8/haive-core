@@ -307,9 +307,9 @@ def register_postgres_thread(
                         if "metadata" in columns:
                             cursor.execute(
                                 """
-                                INSERT INTO threads (thread_id, metadata, last_access) 
+                                INSERT INTO threads (thread_name, metadata, last_access) 
                                 VALUES (%s, %s, CURRENT_TIMESTAMP) 
-                                ON CONFLICT (thread_id) 
+                                ON CONFLICT (thread_name) 
                                 DO UPDATE SET 
                                     last_access = CURRENT_TIMESTAMP,
                                     metadata = COALESCE(threads.metadata, '{}'::jsonb) || %s::jsonb

@@ -435,12 +435,22 @@ class ParserNodeConfig(NodeConfig):
                 )
                 parsed_result = content
 
-            # Determine field name for the result
-            field_name = (
-                tool_name.lower().replace("response", "").replace("result", "").strip()
-            )
-            if not field_name:
-                field_name = "parsed_result"
+            # Determine field name for the result using proper naming utilities
+            if isinstance(tool_class, type) and issubclass(tool_class, BaseModel):
+                from haive.core.schema.field_utils import get_field_info_from_model
+
+                field_info = get_field_info_from_model(tool_class)
+                field_name = field_info["field_name"]
+            else:
+                # Fallback for non-Pydantic models
+                field_name = (
+                    tool_name.lower()
+                    .replace("response", "")
+                    .replace("result", "")
+                    .strip()
+                )
+                if not field_name:
+                    field_name = "parsed_result"
 
             logger.info(f"[bold green]✓ Successfully parsed tool response[/bold green]")
             logger.debug(f"  Field name: {field_name}")

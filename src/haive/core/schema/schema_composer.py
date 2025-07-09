@@ -125,11 +125,20 @@ class SchemaComposer:
     like from_components() for simplified schema creation from a list of components.
     """
 
-    def __init__(self, name: str = "ComposedSchema"):
+    def __init__(
+        self,
+        name: str = "ComposedSchema",
+        base_state_schema: Optional[Type[StateSchema]] = None,
+        include_engine_fields: bool = True,
+    ):
         """Initialize a new SchemaComposer.
 
         Args:
             name: The name for the composed schema class. Defaults to "ComposedSchema".
+            base_state_schema: Optional custom base state schema to use. If not provided,
+                             the composer will auto-detect the appropriate base class.
+            include_engine_fields: Whether to include engine and engines fields in the schema.
+                                 Set to False for projected schemas used in multi-agent execution.
 
         Example:
             Creating a schema composer for a conversational agent::
@@ -137,8 +146,25 @@ class SchemaComposer:
                 composer = SchemaComposer(name="ConversationState")
                 composer.add_field("messages", List[BaseMessage], default_factory=list)
                 schema_class = composer.build()
+
+            Using a custom base schema::
+
+                from haive.core.schema.prebuilt import MessagesStateWithTokenUsage
+                composer = SchemaComposer(
+                    name="TokenAwareState",
+                    base_state_schema=MessagesStateWithTokenUsage
+                )
+
+            Creating a schema without engine fields for projection::
+
+                composer = SchemaComposer(
+                    name="ProjectedState",
+                    base_state_schema=existing_schema,
+                    include_engine_fields=False
+                )
         """
         self.name = name
+        self.include_engine_fields = include_engine_fields
         self.fields = {}
         self.shared_fields = set()
         self.field_sources = defaultdict(set)
@@ -164,8 +190,18 @@ class SchemaComposer:
         self.engines_by_type = defaultdict(list)  # type -> [engine names]
 
         # Base class detection (determined early)
-        self.detected_base_class = None
+        self.detected_base_class = base_state_schema
+        self.custom_base_schema = base_state_schema is not None
         self.base_class_fields = set()
+
+        # If custom base schema provided, extract its fields
+        if base_state_schema and hasattr(base_state_schema, "model_fields"):
+            self.base_class_fields = set(base_state_schema.model_fields.keys())
+            # Check if the base schema has messages or tools
+            if "messages" in self.base_class_fields:
+                self.has_messages = True
+            if "tools" in self.base_class_fields:
+                self.has_tools = True
 
         # Debug tracking
         self.processing_history = []
@@ -184,6 +220,31 @@ class SchemaComposer:
         tree.add("[yellow]Ready to compose schema[/yellow]")
         console.print(tree)
 
+    def _has_single_llm_engine(self) -> bool:
+        """Check if we have exactly one LLM engine, suggesting LLMState usage.
+
+        Returns:
+            True if there's exactly one primary LLM engine
+        """
+        llm_engines = []
+
+        # Check engines by type
+        if "llm" in self.engines_by_type:
+            llm_engines.extend(self.engines_by_type["llm"])
+
+        # Check for AugLLM specifically in engines
+        for engine_name, engine in self.engines.items():
+            if hasattr(engine, "engine_type"):
+                engine_type_value = getattr(
+                    engine.engine_type, "value", engine.engine_type
+                )
+                if str(engine_type_value).lower() == "llm":
+                    if engine_name not in llm_engines:
+                        llm_engines.append(engine_name)
+
+        # LLMState is appropriate for single primary LLM engine scenarios
+        return len(llm_engines) == 1
+
     def _detect_base_class_requirements(
         self, components: Optional[List[Any]] = None
     ) -> None:
@@ -191,13 +252,23 @@ class SchemaComposer:
         Detect which base class should be used based on components and current fields.
         Must be called before adding fields to avoid duplicates.
 
-        Priority order:
-        1. Check for AugLLM engines and agents first
-        2. Check for tools
-        3. Check for messages
-        4. Default to StateSchema
+        Priority order (following inheritance hierarchy):
+        1. Use custom base schema if provided
+        2. Check for tools + single LLM engine → LLMState
+        3. Check for tools → ToolState
+        4. Check for messages → MessagesStateWithTokenUsage
+        5. Default to StateSchema
+
+        Inheritance hierarchy: MessagesState → MessagesStateWithTokenUsage → ToolState → LLMState
         """
         logger.debug("Detecting base class requirements")
+
+        # If custom base schema was provided, skip detection
+        if self.custom_base_schema:
+            logger.debug(
+                f"Using custom base schema: {self.detected_base_class.__name__}"
+            )
+            return
 
         # Check current fields first
         if "messages" in self.fields or self.has_messages:
@@ -272,18 +343,30 @@ class SchemaComposer:
                     except Exception:
                         pass
 
-        # Determine base class with proper priority
-        # Always use StateSchema as base - but import the right one based on needs
-        if self.has_tools:
+        # Determine base class with proper priority - following new inheritance hierarchy
+        # MessagesState → MessagesStateWithTokenUsage → ToolState → LLMState
+        if self.has_tools and self._has_single_llm_engine():
+            from haive.core.schema.prebuilt.llm_state import LLMState
+
+            base_class = LLMState
+            logger.debug(
+                "Using LLMState as base class (found tools + single LLM engine)"
+            )
+        elif self.has_tools:
             from haive.core.schema.prebuilt.tool_state import ToolState
 
             base_class = ToolState
             logger.debug("Using ToolState as base class (found tools)")
         elif self.has_messages:
-            from haive.core.schema.prebuilt.messages_state import MessagesState
+            # Use token-aware messages state for better tracking
+            from haive.core.schema.prebuilt.messages.messages_with_token_usage import (
+                MessagesStateWithTokenUsage,
+            )
 
-            base_class = MessagesState
-            logger.debug("Using MessagesState as base class (found messages)")
+            base_class = MessagesStateWithTokenUsage
+            logger.debug(
+                "Using MessagesStateWithTokenUsage as base class (found messages, with token tracking)"
+            )
         else:
             from haive.core.schema.state_schema import StateSchema
 
@@ -691,6 +774,49 @@ class SchemaComposer:
         )
 
         logger.debug(f"Added field '{name}' of type {field_type}")
+
+        return self
+
+    def add_standard_field(self, field_name: str, **kwargs) -> "SchemaComposer":
+        """Add a standard field from the field registry.
+
+        Args:
+            field_name: Name of the standard field (e.g., 'messages', 'context')
+            **kwargs: Additional arguments to pass to the field factory
+
+        Returns:
+            Self for chaining
+        """
+        from haive.core.schema.field_registry import StandardFields
+
+        # Get the field factory method
+        field_method = getattr(StandardFields, field_name, None)
+        if not field_method:
+            raise ValueError(f"Unknown standard field: {field_name}")
+
+        # Get the field definition
+        field_def = field_method(**kwargs)
+
+        # Get metadata but filter out unsupported keys
+        metadata = getattr(field_def, "metadata", {})
+        supported_metadata = {}
+
+        # Only pass metadata that add_field supports
+        for key, value in metadata.items():
+            if key in ["input_for", "output_from", "source"]:
+                supported_metadata[key] = value
+
+        # Add using the field definition
+        self.add_field(
+            name=field_def.name,
+            field_type=field_def.field_type,
+            default=field_def.default,
+            default_factory=field_def.default_factory,
+            description=field_def.description,
+            shared=getattr(field_def, "shared", False),
+            reducer=getattr(field_def, "reducer", None),
+            **supported_metadata,
+        )
 
         return self
 
@@ -1381,16 +1507,17 @@ class SchemaComposer:
                 "messages" not in self.fields
                 and "messages" not in self.base_class_fields
             ):
-                from typing import List
+                from haive.core.schema.field_registry import StandardFields
 
-                from langchain_core.messages import BaseMessage
+                # Use the enhanced MessageList from StandardFields
+                messages_field = StandardFields.messages(use_enhanced=True)
 
                 self.add_field(
-                    name="messages",
-                    field_type=List[BaseMessage],
-                    default_factory=list,
-                    description="Conversation messages",
-                    shared=True,
+                    name=messages_field.name,
+                    field_type=messages_field.field_type,
+                    default_factory=messages_field.default_factory,
+                    description=messages_field.description,
+                    shared=True,  # Override to ensure it's shared
                     output_from=[engine_name],
                 )
                 self.has_messages = True
@@ -1809,6 +1936,13 @@ class SchemaComposer:
             Self for chaining
         """
         logger.debug("Adding standardized engine management fields")
+
+        # Skip engine fields if include_engine_fields is False
+        if not self.include_engine_fields:
+            logger.debug(
+                "Skipping engine management fields due to include_engine_fields=False"
+            )
+            return self
 
         # Import engine type if available
         engine_type = Any
@@ -2515,7 +2649,10 @@ class SchemaComposer:
 
     @classmethod
     def from_components(
-        cls, components: List[Any], name: str = "ComposedSchema"
+        cls,
+        components: List[Any],
+        name: str = "ComposedSchema",
+        base_state_schema: Optional[Type[StateSchema]] = None,
     ) -> Type[StateSchema]:
         """Create and build a StateSchema directly from a list of components.
 
@@ -2536,6 +2673,8 @@ class SchemaComposer:
                 - Dictionaries of field definitions
                 - Other component types with field information
             name: Name for the generated schema class
+            base_state_schema: Optional custom base state schema to use. If not provided,
+                             the composer will auto-detect the appropriate base class.
 
         Returns:
             A fully constructed StateSchema subclass ready for instantiation
@@ -2550,15 +2689,25 @@ class SchemaComposer:
 
             # Use the schema
             state = ConversationState()
+
+            # With custom base schema for token tracking
+            from haive.core.schema.prebuilt import MessagesStateWithTokenUsage
+            TokenAwareState = SchemaComposer.from_components(
+                [llm_engine],
+                name="TokenAwareState",
+                base_state_schema=MessagesStateWithTokenUsage
+            )
             ```
 
         Note:
             This method automatically detects which base class to use (StateSchema,
-            MessagesState, or ToolState) based on the components provided, ensuring
-            the schema has the appropriate functionality for the detected requirements.
+            MessagesStateWithTokenUsage, or ToolState) based on the components provided,
+            ensuring the schema has the appropriate functionality for the detected requirements.
+            When messages are detected, it now uses MessagesStateWithTokenUsage by default
+            for better token tracking.
         """
         logger.debug(f"Creating schema {name} from {len(components)} components")
-        composer = cls(name=name)
+        composer = cls(name=name, base_state_schema=base_state_schema)
 
         # Detect base class requirements early
         composer._detect_base_class_requirements(components)

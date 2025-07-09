@@ -22,6 +22,7 @@ from langgraph.types import Command, Send
 from pydantic import BaseModel, Field, ValidationError
 
 from haive.core.graph.node.base_node_config import BaseNodeConfig
+from haive.core.graph.node.types import CommandGoto, NodeType
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +53,7 @@ class ValidationNodeConfigV2(BaseNodeConfig):
     pydantic_models: Dict[str, type[BaseModel]] = Field(
         default_factory=dict, description="Pydantic models for validation"
     )
+    node_type: NodeType = Field(default=NodeType.VALIDATION, description="Node type")
 
     def __call__(self, state: Dict[str, Any]) -> Command:
         """Process tool calls and update state with ToolMessages."""

@@ -263,7 +263,7 @@ class DatabricksSource(RemoteSource):
 
 @register_bulk_source(
     name="bigquery",
-    platform=AnalyticsPlatform.BIGQUERY,
+    category=SourceCategory.ANALYTICS,
     loaders={
         "bigquery": {
             "class": "BigQueryLoader",
@@ -664,7 +664,7 @@ class PrometheusSource(RemoteSource):
 
 @register_bulk_source(
     name="elasticsearch",
-    platform=AnalyticsPlatform.ELASTICSEARCH,
+    category=SourceCategory.ANALYTICS,
     loaders={
         "elastic": {
             "class": "ElasticsearchLoader",

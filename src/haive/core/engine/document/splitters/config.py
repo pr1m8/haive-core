@@ -1,6 +1,8 @@
 from enum import Enum
 
- "TokenTextSplitter",
+__all__ = [
+    "DocSplitterType",
+    "TokenTextSplitter",
     "TextSplitter",
     "Tokenizer",
     "Language",
@@ -22,18 +24,20 @@ from enum import Enum
     "CharacterTextSplitter",
 ]
 
-class DocSplitterType(Enum,str):
-    NLTK='nltk'
-    CHARACTER='character'
-    HTML='html'
-    MARKDOWN='markdown'
-    JSON='json'
-    LATEX='latex'
-    PYTHON='python'
-    KONLPY='konlpy'
-    SPACY='spacy'
-    SENTENCE_TRANSFORMERS='sentence_transformers'
-    TOKEN='token'
-    TEXT='text'
 
-class DocSplitterEngine(InvokableEngine[DocSplitterInputSchema,DocSplitterOutputSchema]):
+class DocSplitterType(str, Enum):
+    """Document splitter types available in the system."""
+
+    NLTK = "nltk"
+    CHARACTER = "character"
+    RECURSIVE_CHARACTER = "recursive_character"
+    HTML = "html"
+    MARKDOWN = "markdown"
+    JSON = "json"
+    LATEX = "latex"
+    PYTHON = "python"
+    KONLPY = "konlpy"
+    SPACY = "spacy"
+    SENTENCE_TRANSFORMERS = "sentence_transformers"
+    TOKEN = "token"
+    TEXT = "text"

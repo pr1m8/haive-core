@@ -438,7 +438,7 @@ class WeChatSource(RemoteSource):
     credential_type=CredentialType.API_KEY,
     capabilities=[
         LoaderCapability.WEBHOOK_INTEGRATION,
-        LoaderCapability.RICH_MESSAGES,
+        LoaderCapability.RICH_MESSAGING,
         LoaderCapability.STICKERS,
     ],
     priority=7,
@@ -674,10 +674,10 @@ class TeamsSource(RemoteSource):
     requires_credentials=True,
     credential_type=CredentialType.API_KEY,
     capabilities=[
-        LoaderCapability.DESIGN_FILES,
+        LoaderCapability.COLLABORATIVE_EDITING,
         LoaderCapability.COMMENTS,
-        LoaderCapability.VERSION_HISTORY,
-        LoaderCapability.TEAM_COLLABORATION,
+        LoaderCapability.TIME_TRAVEL,
+        LoaderCapability.COLLABORATION_DATA,
     ],
     priority=8,
 )
@@ -754,9 +754,9 @@ class FigmaSource(RemoteSource):
     requires_credentials=True,
     credential_type=CredentialType.OAUTH,
     capabilities=[
-        LoaderCapability.WHITEBOARD_CONTENT,
+        LoaderCapability.VISUALIZATION,
         LoaderCapability.COLLABORATION_DATA,
-        LoaderCapability.REAL_TIME_SYNC,
+        LoaderCapability.REAL_TIME,
     ],
     priority=7,
 )
@@ -827,9 +827,9 @@ class MiroSource(RemoteSource):
     requires_credentials=True,
     credential_type=CredentialType.API_KEY,
     capabilities=[
-        LoaderCapability.DOCUMENT_TREE,
+        LoaderCapability.STRUCTURED_DATA,
         LoaderCapability.COLLABORATIVE_EDITING,
-        LoaderCapability.VERSION_CONTROL,
+        LoaderCapability.TIME_TRAVEL,
     ],
     priority=8,
 )
@@ -899,7 +899,7 @@ class OutlineSource(RemoteSource):
     requires_credentials=True,
     credential_type=CredentialType.API_KEY,
     capabilities=[
-        LoaderCapability.HIERARCHICAL_CONTENT,
+        LoaderCapability.STRUCTURED_DATA,
         LoaderCapability.FULL_TEXT_SEARCH,
         LoaderCapability.ATTACHMENTS,
     ],
@@ -980,8 +980,8 @@ class BookStackSource(RemoteSource):
     requires_credentials=True,
     credential_type=CredentialType.API_KEY,
     capabilities=[
-        LoaderCapability.CONVERSATION_HISTORY,
-        LoaderCapability.CUSTOMER_DATA,
+        LoaderCapability.CHAT_LOGS,
+        LoaderCapability.CONTACT_SYNC,
         LoaderCapability.AUTOMATION_LOGS,
     ],
     priority=8,

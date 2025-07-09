@@ -59,7 +59,7 @@ class SecureConfigMixin:
         provider: The API provider name (used to determine environment variable).
     """
 
-    @field_validator("api_key", mode="after")
+    @field_validator("api_key", mode="after", check_fields=False)
     @classmethod
     def _validate_api_key(cls, v, values):
         """Dynamically set the API key with robust fallback mechanism.

@@ -379,6 +379,7 @@ def register_source(
     is_bulk_loader: bool = False,
     supports_recursive: bool = False,
     supports_filtering: bool = False,
+    supports_scrape_all: bool = False,
     capabilities: List[LoaderCapability] = None,
     # Performance characteristics
     max_concurrent: int = 1,
@@ -519,6 +520,21 @@ def register_bulk_source(
 ) -> Callable[[Type[BaseSource]], Type[BaseSource]]:
     """Convenience decorator for bulk loading sources."""
 
+    # Merge capabilities instead of overriding
+    default_capabilities = [
+        LoaderCapability.BULK_LOADING,
+        LoaderCapability.RECURSIVE,
+        LoaderCapability.FILTERING,
+    ]
+
+    if "capabilities" in kwargs:
+        # Merge with existing capabilities
+        existing_capabilities = kwargs.pop("capabilities")
+        merged_capabilities = list(set(default_capabilities + existing_capabilities))
+        kwargs["capabilities"] = merged_capabilities
+    else:
+        kwargs["capabilities"] = default_capabilities
+
     return register_source(
         name=name,
         category=category,
@@ -527,11 +543,6 @@ def register_bulk_source(
         supports_recursive=True,
         supports_filtering=True,
         max_concurrent=max_concurrent,
-        capabilities=[
-            LoaderCapability.BULK_LOADING,
-            LoaderCapability.RECURSIVE,
-            LoaderCapability.FILTERING,
-        ],
         **kwargs,
     )
 

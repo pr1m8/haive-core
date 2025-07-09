@@ -22,6 +22,7 @@ import tiktoken
 from langchain_core.messages import (
     AIMessage,
     AnyMessage,
+    BaseMessage,
     HumanMessage,
     SystemMessage,
     ToolMessage,
@@ -29,6 +30,7 @@ from langchain_core.messages import (
     filter_messages,
     get_buffer_string,
 )
+from langchain_core.messages.base import message_to_dict
 from langchain_core.messages.utils import (
     convert_to_openai_messages,
     messages_from_dict,
@@ -41,6 +43,7 @@ from pydantic import (
     RootModel,
     computed_field,
     field_validator,
+    model_serializer,
     model_validator,
 )
 
@@ -1055,9 +1058,39 @@ class MessageList(RootModel[List[AnyMessage]]):
     # COMPATIBILITY WITH LANGGRAPH REDUCERS
     # ============================================================================
 
-    def model_dump(self, **kwargs) -> Any:
-        """Override model_dump to return the root list directly for LangGraph compatibility."""
-        return self.root
+    @model_serializer
+    def serialize_model(self):
+        """Custom serializer to properly handle MessageList for LangGraph compatibility."""
+        # Get the root list - handle both MessageList objects and plain lists
+        messages = self.root if hasattr(self, "root") else self
+
+        # Use LangChain's built-in serialization with proper BaseMessage checking
+        serialized_messages = []
+        for msg in messages:
+            if isinstance(msg, BaseMessage):
+                # Use serialize_as_any to ensure all fields are preserved
+                msg_dict = msg.model_dump(serialize_as_any=True)
+
+                # For ToolMessage, ensure tool_call_id is preserved explicitly
+                if isinstance(msg, ToolMessage) and hasattr(msg, "tool_call_id"):
+                    msg_dict["tool_call_id"] = msg.tool_call_id
+
+                # Preserve engine metadata from additional_kwargs at top level
+                if hasattr(msg, "additional_kwargs") and msg.additional_kwargs:
+                    # Check for engine_name, engine_id and other metadata
+                    engine_fields = ["engine_name", "engine_id"]
+                    for field in engine_fields:
+                        if field in msg.additional_kwargs:
+                            msg_dict[field] = msg.additional_kwargs[field]
+
+                serialized_messages.append(msg_dict)
+            elif isinstance(msg, dict):
+                # Already serialized
+                serialized_messages.append(msg)
+            else:
+                # For non-BaseMessage objects, serialize as-is
+                serialized_messages.append(msg)
+        return serialized_messages
 
     def __add__(self, other):
         """Support addition for LangGraph reducers."""

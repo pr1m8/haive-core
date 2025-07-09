@@ -281,5 +281,8 @@ def register_custom_node_type(name: str, config_class: Type[NodeConfig]) -> None
     NodeRegistry.get_instance().register_custom_node_type(name, config_class)
 
 
+# Import V3 agent node
+from haive.core.graph.node.agent_node_v3 import AgentNodeV3Config, create_agent_node_v3
+
 # Node factory singleton for convenience
 factory = NodeFactory()
