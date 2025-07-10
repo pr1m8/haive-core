@@ -350,6 +350,10 @@ def ensure_pool_open(checkpointer: Any) -> Optional[Any]:
             # just make sure tables are set up
             logger.debug("No pool found but checkpointer has setup method")
             try:
+                # Check if it's an async setup method
+                setup_method = getattr(checkpointer, "setup")
+                if hasattr(setup_method, "__aenter__") or "async" in str(setup_method):
+                    logger.warning("Sync context calling async setup method - this may cause issues")
                 checkpointer.setup()
             except Exception as e:
                 logger.error(f"Error setting up checkpointer: {e}")
