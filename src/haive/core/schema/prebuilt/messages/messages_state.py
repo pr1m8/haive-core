@@ -1,6 +1,5 @@
 # src/haive/core/graph/state/messages_state.py
 
-from collections import defaultdict
 from datetime import datetime
 from functools import cached_property
 from typing import (
@@ -11,10 +10,7 @@ from typing import (
     Dict,
     Iterator,
     List,
-    Literal,
     Optional,
-    Set,
-    Tuple,
     Union,
 )
 
@@ -30,7 +26,6 @@ from langchain_core.messages import (
     filter_messages,
     get_buffer_string,
 )
-from langchain_core.messages.base import message_to_dict
 from langchain_core.messages.utils import convert_to_openai_messages, messages_from_dict
 from langgraph.graph import END, add_messages
 from langgraph.types import Send

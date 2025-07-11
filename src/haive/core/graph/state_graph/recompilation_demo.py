@@ -6,7 +6,6 @@ recompilation is needed vs when it's not.
 """
 
 import logging
-from typing import Any, Dict
 
 from pydantic import BaseModel
 
@@ -37,7 +36,7 @@ def demo_recompilation_tracking():
     # Create a new graph
     graph = BaseGraph(name="recompilation_demo")
 
-    info = graph.get_compilation_info()
+    graph.get_compilation_info()
 
     # Add some nodes - should mark as needing recompilation
 

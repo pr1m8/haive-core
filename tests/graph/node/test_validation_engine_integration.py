@@ -2,7 +2,7 @@
 in complex graph scenarios using the StateGraph system.
 """
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 import pytest
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage

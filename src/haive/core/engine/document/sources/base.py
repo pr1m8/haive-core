@@ -1,7 +1,7 @@
 import hashlib
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Any, Dict, Optional, Protocol
+from typing import Any, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field
 

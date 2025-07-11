@@ -25,7 +25,7 @@ Note: Annoy indices are immutable after building - no new documents
 can be added once the index is created.
 """
 
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any
 
 from langchain_core.documents import Document
 from pydantic import Field, validator

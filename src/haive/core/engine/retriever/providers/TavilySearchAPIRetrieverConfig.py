@@ -18,7 +18,7 @@ The implementation integrates with LangChain's TavilySearchAPIRetriever while pr
 a consistent Haive configuration interface with secure API key management.
 """
 
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any
 
 from langchain_core.documents import Document
 from pydantic import Field, SecretStr

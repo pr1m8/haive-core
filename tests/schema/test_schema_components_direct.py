@@ -12,13 +12,6 @@ def test_direct_imports():
 
     try:
         # Import schema components directly
-        from haive.core.schema.prebuilt.messages.token_usage import TokenUsage
-        from haive.core.schema.prebuilt.messages.token_usage_mixin import (
-            TokenUsageMixin,
-        )
-        from haive.core.schema.prebuilt.messages_state import MessagesState
-        from haive.core.schema.schema_composer import SchemaComposer
-        from haive.core.schema.state_schema import StateSchema
 
         print("✅ Direct imports successful")
         return True

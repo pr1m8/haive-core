@@ -11,7 +11,7 @@ The processors handle:
 """
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from langchain_core.documents import Document as LCDocument
 

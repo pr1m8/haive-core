@@ -1,13 +1,12 @@
 # src/haive/core/graph/node/tool_node_config.py
 
 import logging
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 from langchain_core.messages import AIMessage, ToolMessage
-from langchain_core.tools import BaseTool, BaseToolkit, StructuredTool, Tool
 from langgraph.prebuilt import ToolNode
 from langgraph.types import Command
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 from haive.core.graph.node.base_config import NodeConfig
 from haive.core.graph.node.types import NodeType

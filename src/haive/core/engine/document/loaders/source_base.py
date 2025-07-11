@@ -5,7 +5,7 @@ Sources represent the location/type of documents, while loaders handle the actua
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field, SecretStr
 

@@ -7,7 +7,7 @@ langchain_community document loaders with proper categorization and typing.
 from abc import ABC, abstractmethod
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, Optional, Set, Union
+from typing import Any
 
 from pydantic import BaseModel, Field, SecretStr
 

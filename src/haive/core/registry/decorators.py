@@ -8,10 +8,7 @@ from typing import (
     Callable,
     Dict,
     List,
-    Optional,
-    Type,
     TypeVar,
-    Union,
 )
 
 logger = logging.getLogger(__name__)

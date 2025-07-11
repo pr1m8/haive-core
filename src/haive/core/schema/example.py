@@ -7,21 +7,16 @@ including state creation, dynamic composition, reducers, and real-world patterns
 """
 
 import operator
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from pydantic import Field, validator
 
 from haive.core.schema import (
-    FieldDefinition,
-    FieldExtractor,
     SchemaComposer,
-    SchemaType,
     StateSchema,
-    StateSchemaManager,
     create_agent_state,
     create_message_state,
-    create_simple_state,
     get_schema_info,
     validate_schema,
 )
@@ -124,7 +119,7 @@ def example_dynamic_composition():
     DynamicRAGState = composer.build()
 
     # Use the dynamic schema
-    rag_state = DynamicRAGState(query="What is quantum computing?")
+    DynamicRAGState(query="What is quantum computing?")
     print(f"Schema name: {DynamicRAGState.__name__}")
     print(f"Fields: {list(DynamicRAGState.model_fields.keys())}")
     print(f"Shared fields: {DynamicRAGState.__shared_fields__}")

@@ -20,9 +20,9 @@ The implementation integrates with LangChain's RePhraseQueryRetriever while
 providing a consistent Haive configuration interface with LLM integration.
 """
 
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any
 
-from pydantic import Field, validator
+from pydantic import Field
 
 from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.engine.retriever.retriever import BaseRetrieverConfig

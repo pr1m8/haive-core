@@ -382,7 +382,7 @@ class StateUpdatingValidationNode(BaseModel):
             return
 
         # Update tool calls with validation metadata
-        for i, tool_call in enumerate(last_msg.tool_calls):
+        for _i, tool_call in enumerate(last_msg.tool_calls):
             tool_id = tool_call.get("id")
             if tool_id in routing_state.tool_validations:
                 result = routing_state.tool_validations[tool_id]

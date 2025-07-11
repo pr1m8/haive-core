@@ -5,7 +5,7 @@ This module provides functions to convert Haive graphs to and from LangGraph obj
 
 import inspect
 import logging
-from typing import Any, Optional, Type
+from typing import Any
 
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import Command

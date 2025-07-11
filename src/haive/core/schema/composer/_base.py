@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-import inspect
 import logging
 from collections import defaultdict
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Type
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Type
 
 from pydantic import create_model
 
@@ -14,7 +13,7 @@ from haive.core.schema.field_definition import FieldDefinition
 from haive.core.schema.state_schema import StateSchema
 
 if TYPE_CHECKING:
-    from haive.core.engine.base import Engine
+    pass
 
 # Configure rich logging
 logger = logging.getLogger(__name__)

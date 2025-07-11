@@ -8,7 +8,7 @@ import mimetypes
 import re
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 from urllib.parse import parse_qs, urlparse
 
 from pydantic import BaseModel, Field

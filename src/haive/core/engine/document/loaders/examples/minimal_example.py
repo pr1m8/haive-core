@@ -18,9 +18,7 @@ from haive.core.engine.document.loaders import (
     AutoLoaderConfig,
     get_registration_status,
     list_available_sources,
-    load_document,
 )
-from haive.core.engine.document.loaders.sources.source_types import SourceCategory
 
 
 def create_test_files():
@@ -97,7 +95,7 @@ def demonstrate_basic_functionality():
     print("-" * 40)
 
     loader = AutoLoader()
-    print(f"✅ AutoLoader initialized successfully")
+    print("✅ AutoLoader initialized successfully"y")
     print(f"   Default preference: {loader.config.preference}")
     print(f"   Max concurrency: {loader.config.max_concurrency}")
     print(f"   Caching enabled: {loader.config.enable_caching}")
@@ -113,7 +111,7 @@ def demonstrate_basic_functionality():
         timeout=120,
     )
     custom_loader = AutoLoader(custom_config)
-    print(f"✅ Custom loader initialized")
+    print("✅ Custom loader initialized"d")
     print(f"   Preference: {custom_loader.config.preference}")
     print(f"   Max concurrency: {custom_loader.config.max_concurrency}")
     print(f"   Caching: {custom_loader.config.enable_caching}")
@@ -161,7 +159,7 @@ def demonstrate_basic_functionality():
 
     try:
         status = get_registration_status()
-        print(f"✅ Registry status retrieved:")
+        print("✅ Registry status retrieved:":")
         print(f"   Total sources: {status.get('total_sources', 0)}")
         print(f"   Categories: {status.get('categories_count', 0)}")
         print(f"   Errors: {status.get('total_errors', 0)}")
@@ -199,7 +197,7 @@ def demonstrate_basic_functionality():
 
     for pref in preferences:
         try:
-            pref_loader = AutoLoader(AutoLoaderConfig(preference=pref))
+            AutoLoader(AutoLoaderConfig(preference=pref))
             print(f"✅ {pref.value} preference loader created")
         except Exception as e:
             print(f"❌ {pref.value} preference failed: {e}")
@@ -209,7 +207,7 @@ def demonstrate_basic_functionality():
     print("=" * 60)
 
     print(
-        f"""
+        """
 📝 Summary:
    - AutoLoader initialization: ✅ Working
    - Custom configuration: ✅ Working  

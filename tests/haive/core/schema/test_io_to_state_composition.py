@@ -4,7 +4,7 @@ These tests verify that the SchemaComposer can correctly create a state schema
 by combining existing input and output schemas, rather than deriving them from a state schema.
 """
 
-from typing import Any, Dict, List
+from typing import Any
 
 from langchain_core.messages import BaseMessage, HumanMessage
 from pydantic import BaseModel, Field

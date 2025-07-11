@@ -1,11 +1,6 @@
 from collections.abc import Callable, Sequence
 from typing import (
     Any,
-    Dict,
-    List,
-    Optional,
-    Tuple,
-    Type,
     TypeVar,
     Union,
 )

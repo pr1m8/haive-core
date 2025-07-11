@@ -13,7 +13,7 @@ edge cases and error conditions gracefully.
 
 import json
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 

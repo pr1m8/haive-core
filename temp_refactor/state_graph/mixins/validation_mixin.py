@@ -4,8 +4,6 @@ This module provides the ValidationMixin class for validating graph
 structure and integrity.
 """
 
-from typing import List, Tuple
-
 from rich.console import Console
 from rich.table import Table
 

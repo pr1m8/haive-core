@@ -62,24 +62,19 @@ from __future__ import annotations
 
 import copy
 import json
-import logging
 import uuid
 from typing import (
     TYPE_CHECKING,
     Any,
-    Awaitable,
     Callable,
     Dict,
     Generic,
     List,
     Optional,
-    Set,
     Tuple,
     Type,
     TypeVar,
     Union,
-    cast,
-    overload,
 )
 
 from langchain_core.messages import BaseMessage
@@ -90,16 +85,13 @@ from rich.syntax import Syntax
 from rich.table import Table
 from rich.tree import Tree
 from typing_extensions import (
-    Literal,
     NotRequired,
-    Required,
     Self,
     TypeAlias,
     TypedDict,
-    TypeGuard,
 )
 
-from haive.core.logging.rich_logger import RichLogger, get_logger
+from haive.core.logging.rich_logger import get_logger
 
 # Get logger instance
 logger = get_logger(__name__)
@@ -111,7 +103,6 @@ if TYPE_CHECKING:
 # Also import BaseOutputParser for type resolution
 # This is needed because AugLLMConfig has output_parser: Optional[BaseOutputParser]
 # and LangGraph evaluates all nested type hints when processing state schemas
-from langchain_core.output_parsers.base import BaseOutputParser
 
 # This is needed because with __future__ annotations, type hints become strings
 # and LangGraph's get_type_hints() needs Engine in the global namespace
@@ -293,7 +284,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                 return self.engine
 
         # Then check engines dict for LLM
-        for name, eng in self.engines.items():
+        for _name, eng in self.engines.items():
             if hasattr(eng, "engine_type"):
                 engine_type_str = str(eng.engine_type).lower()
                 if "llm" in engine_type_str:
@@ -844,7 +835,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
             return self.__class__.engines[name]
 
         # Then try by engine name attribute in instance fields
-        for field_name, field_value in self.__dict__.items():
+        for _field_name, field_value in self.__dict__.items():
             if field_value is None:
                 continue
             if hasattr(field_value, "engine_type"):
@@ -1364,14 +1355,13 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
         # Detect if we should use prebuilt base classes
         has_messages = "messages" in input_fields
-        has_tools = "tools" in input_fields
 
         # Check what the current schema inherits from
         from haive.core.schema.prebuilt.messages_state import MessagesState
         from haive.core.schema.prebuilt.tool_state import ToolState
 
-        current_is_tool_state = issubclass(cls, ToolState)
-        current_is_messages_state = issubclass(cls, MessagesState)
+        issubclass(cls, ToolState)
+        issubclass(cls, MessagesState)
 
         # Determine appropriate base class for INPUT schema
         # IMPORTANT: We cannot use MessagesState or ToolState directly as base classes
@@ -1418,7 +1408,6 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
                 # Create a copy of the field_info to avoid modifying the original
                 from pydantic import Field
-                from pydantic.fields import FieldInfo
 
                 # Extract the original field configuration
                 field_kwargs = {}
@@ -1531,7 +1520,6 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
                 # Create a copy of the field_info to avoid modifying the original
                 from pydantic import Field
-                from pydantic.fields import FieldInfo
 
                 # Extract the original field configuration
                 field_kwargs = {}
@@ -1927,7 +1915,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
             )
 
         # Create panel with tree
-        panel = Panel(tree, title=display_title, border_style="blue")
+        Panel(tree, title=display_title, border_style="blue")
 
         # Use logger to print
         logger.panel(str(tree), title=display_title, style="blue")

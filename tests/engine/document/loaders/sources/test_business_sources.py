@@ -5,8 +5,8 @@ e-commerce platforms, productivity tools, and enterprise integrations.
 """
 
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
-from unittest.mock import MagicMock, Mock, patch
+from typing import Any, Dict
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -26,7 +26,6 @@ from haive.core.engine.document.loaders.sources.business_sources import (
 )
 from haive.core.engine.document.loaders.sources.source_types import (
     CredentialType,
-    LoaderCapability,
     SourceCategory,
 )
 

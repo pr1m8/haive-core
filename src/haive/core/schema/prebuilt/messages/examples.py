@@ -5,11 +5,8 @@ This file contains complete examples of common usage patterns, demonstrating
 both the classic API and the enhanced features.
 """
 
-from typing import Dict, List, Optional, Union
-
 from langchain_core.messages import (
     AIMessage,
-    BaseMessage,
     HumanMessage,
     SystemMessage,
     ToolMessage,
@@ -100,7 +97,6 @@ def tool_usage_example():
 
 def enhanced_features_example():
     """Demonstrates enhanced features of MessagesState."""
-    from haive.core.schema.prebuilt.messages import MessagesState
 
     # Create state with conversation including tools
     state = tool_usage_example()

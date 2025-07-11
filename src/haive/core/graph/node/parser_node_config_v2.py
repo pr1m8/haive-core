@@ -16,7 +16,7 @@ Config options:
 
 import json
 import logging
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, List, Optional, Type
 
 from langchain_core.messages import AIMessage, BaseMessage, ToolMessage
 from langchain_core.output_parsers import PydanticOutputParser
@@ -116,7 +116,7 @@ class ParserNodeConfigV2(NodeConfig):
                 return engine
 
             # Try by engine.name attribute
-            for key, eng in state.engines.items():
+            for _key, eng in state.engines.items():
                 if hasattr(eng, "name") and eng.name == self.engine_name:
                     logger.info(f"Found engine by name attribute: {self.engine_name}")
                     return eng
@@ -193,7 +193,7 @@ class ParserNodeConfigV2(NodeConfig):
 
         # Find the last AIMessage with tool calls
         last_ai_message = None
-        for i, msg in enumerate(reversed(messages)):
+        for _i, msg in enumerate(reversed(messages)):
             if isinstance(msg, AIMessage):
                 if hasattr(msg, "tool_calls") and msg.tool_calls:
                     last_ai_message = msg
@@ -478,7 +478,6 @@ class ParserNodeConfigV2(NodeConfig):
 
         content = None
         parsed_result = None
-        parsing_success = True
         parse_error = None
 
         # Try to get content from ToolMessage first
@@ -562,7 +561,6 @@ class ParserNodeConfigV2(NodeConfig):
 
         except Exception as e:
             logger.exception(f"Failed to parse tool response: {e}")
-            parsing_success = False
             parse_error = str(e)
 
             # Apply safety net for parsing error

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, ClassVar, Iterable, Type, TypeVar
+from typing import Any, ClassVar, Iterable, TypeVar
 
 from pydantic.json_schema import JsonSchemaValue
 from pydantic_core import core_schema

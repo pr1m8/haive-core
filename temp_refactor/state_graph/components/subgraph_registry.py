@@ -4,8 +4,6 @@ This module provides the SubgraphRegistry class for managing subgraphs
 in a graph.
 """
 
-from typing import Dict, List, Optional
-
 from pydantic import BaseModel, Field
 
 from haive.core.graph.state_graph.base.graph_base import GraphBase

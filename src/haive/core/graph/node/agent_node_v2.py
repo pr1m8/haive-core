@@ -3,11 +3,10 @@
 # ============================================================================
 
 import logging
-from typing import Any, Dict, List, Literal, Optional, Type, TypeVar, Union
+from typing import Any, Literal, Optional, TypeVar
 
 from haive.agents.base.agent import Agent
-from langchain_core.messages import BaseMessage, ToolMessage
-from langchain_core.runnables import RunnableConfig
+from langchain_core.messages import BaseMessage
 from langgraph.types import Command
 from pydantic import BaseModel, Field, model_validator
 from rich.console import Console

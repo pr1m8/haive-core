@@ -33,7 +33,6 @@ Usage:
 
 import logging
 import os
-from typing import Optional
 
 from pydantic import SecretStr, field_validator
 

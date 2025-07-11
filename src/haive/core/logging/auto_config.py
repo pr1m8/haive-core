@@ -6,7 +6,7 @@ while preserving important information.
 
 import logging
 import os
-from typing import List, Optional
+from typing import List
 
 from haive.core.logging.control import logging_control
 

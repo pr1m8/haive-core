@@ -10,16 +10,12 @@ import os
 import uuid
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, NamedTuple, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set
 
 from langgraph.graph import END, START
 
-from haive.core.graph.common.types import NodeType
 from haive.core.utils.mermaid_utils import (
-    Environment,
-    detect_environment,
     display_mermaid,
-    mermaid_to_png,
 )
 
 # Set up module logger
@@ -778,7 +774,7 @@ class GraphVisualizer:
 
         lines.append(f"{indent}%% --- Conditional Branches ---")
 
-        for branch_id, branch in (graph.branches or {}).items():
+        for _branch_id, branch in (graph.branches or {}).items():
             source = getattr(branch, "source_node", None)
             if not source:
                 continue
@@ -1111,7 +1107,7 @@ class GraphVisualizer:
 
         # Also process branches for agent connections
         if hasattr(graph, "branches") and graph.branches:
-            for branch_id, branch in graph.branches.items():
+            for _branch_id, branch in graph.branches.items():
                 if hasattr(branch, "source_node") and branch.source_node:
                     source = branch.source_node
                     destinations = cls._get_branch_destinations(branch)
@@ -1129,7 +1125,7 @@ class GraphVisualizer:
                                     )
 
                     # Check if any destination is an agent
-                    for condition, target in destinations.items():
+                    for _condition, target in destinations.items():
                         if target in agent_nodes:
                             # Branch TO agent
                             start_node = agent_nodes[target]["start"]

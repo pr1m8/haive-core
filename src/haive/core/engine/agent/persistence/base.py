@@ -1,6 +1,6 @@
 # src/haive/core/engine/agent/persistence/base.py
 import logging
-from typing import Any, Dict
+from typing import Any
 
 from pydantic import BaseModel, Field
 

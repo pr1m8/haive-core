@@ -1,6 +1,6 @@
 """Ollama embedding configuration."""
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 from pydantic import Field, validator
 

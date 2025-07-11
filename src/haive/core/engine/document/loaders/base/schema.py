@@ -1,4 +1,4 @@
-from typing import List, TypeVar, Union
+from typing import TypeVar
 
 from langchain_community.graphs import GraphDocument
 from langchain_core.documents import Document

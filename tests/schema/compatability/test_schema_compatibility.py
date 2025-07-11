@@ -10,14 +10,12 @@ import pytest
 from pydantic import BaseModel, Field
 
 from haive.core.schema.compatibility import (
-    CompatibilityChecker,
     CompatibilityLevel,
     ConverterRegistry,
     FieldMapper,
     SchemaMerger,
     TypeAnalyzer,
     check_compatibility,
-    create_mapping,
     generate_report,
 )
 from haive.core.schema.compatibility.types import ConversionQuality

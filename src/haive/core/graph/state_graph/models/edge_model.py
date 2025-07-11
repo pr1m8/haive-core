@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import ClassVar, List, Optional
+from typing import ClassVar
 
 from pydantic import Field, model_validator
 

@@ -2,10 +2,10 @@
 
 """Retriever mixins for the Haive framework."""
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 from langchain_core.documents import Document
-from pydantic import Field, field_validator
+from pydantic import field_validator
 
 from haive.core.engine.retriever.retriever import (
     BaseRetrieverConfig,

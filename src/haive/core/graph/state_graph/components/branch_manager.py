@@ -16,7 +16,7 @@ from haive.core.graph.state_graph.components.base_component import BaseGraphComp
 from haive.core.logging.rich_logger import get_logger
 
 if TYPE_CHECKING:
-    from haive.core.graph.state_graph.base_graph2 import BaseGraph, BranchResultType
+    from haive.core.graph.state_graph.base_graph2 import BaseGraph
 
 logger = get_logger(__name__)
 
@@ -483,7 +483,7 @@ class BranchManager(BaseGraphComponent):
 
         # Check value mapping destinations
         if hasattr(branch, "value_mapping") and branch.value_mapping:
-            for value, destination in branch.value_mapping.items():
+            for _value, destination in branch.value_mapping.items():
                 if destination not in self.graph.nodes and destination not in {
                     "END",
                     "__end__",

@@ -4,7 +4,7 @@ This module provides the SchemaMixin class for managing state,
 input, and output schemas in graph objects.
 """
 
-from typing import Any, Dict, Generic, List, Optional, TypeVar
+from typing import Any, Generic, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 

@@ -20,9 +20,9 @@ The implementation integrates with LangChain's MergerRetriever while
 providing a consistent Haive configuration interface with flexible merging options.
 """
 
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any
 
-from pydantic import Field, validator
+from pydantic import Field
 
 from haive.core.engine.retriever.retriever import BaseRetrieverConfig
 from haive.core.engine.retriever.types import RetrieverType

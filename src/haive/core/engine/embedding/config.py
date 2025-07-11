@@ -1,7 +1,7 @@
 """Embedding configuration factory and utilities."""
 
 import logging
-from typing import Any, Dict, Union
+from typing import Any
 
 from .base import BaseEmbeddingConfig
 from .types import EmbeddingType

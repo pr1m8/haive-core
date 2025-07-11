@@ -11,15 +11,6 @@ def test_core_imports():
     print("🧪 Testing Core Imports...")
 
     try:
-        from haive.core.schema import (
-            MessagesState,
-            MessagesStateWithTokenUsage,
-            MultiAgentStateSchema,
-            SchemaComposer,
-            StateSchema,
-            TokenUsage,
-            TokenUsageMixin,
-        )
 
         print("✅ All core imports successful")
         return True

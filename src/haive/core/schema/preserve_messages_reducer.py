@@ -27,7 +27,6 @@ Note:
 """
 
 import logging
-from typing import List, Union
 
 from langchain_core.messages import BaseMessage, convert_to_messages
 

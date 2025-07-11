@@ -4,7 +4,6 @@ This test directly tests pattern functionality with DynamicGraph.
 """
 
 import logging
-from typing import Optional
 
 from langgraph.graph import END, START
 from pydantic import BaseModel

@@ -6,7 +6,6 @@ This module tests the rate limiting mixin including:
 - Error handling
 """
 
-from typing import Optional
 from unittest.mock import Mock, patch
 
 import pytest

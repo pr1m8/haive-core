@@ -6,7 +6,7 @@ import functools
 import logging
 import time
 from collections.abc import Callable
-from typing import Any, Dict, Optional, TypeVar, Union
+from typing import Any, TypeVar
 
 from haive.core.logging.utils import get_logger
 

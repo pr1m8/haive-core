@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict
+from typing import Any
 
 from langchain_core.retrievers import BaseRetriever
 from pydantic import Field

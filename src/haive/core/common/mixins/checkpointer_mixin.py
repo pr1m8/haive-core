@@ -36,18 +36,14 @@ Usage:
 import asyncio
 import logging
 import uuid
-from abc import ABC
 from collections.abc import AsyncGenerator
-from typing import Any, Dict, Generator, Optional, Union
+from typing import Any, Generator
 
 from langchain_core.runnables import RunnableConfig
-from langgraph.graph.graph import CompiledGraph
 from pydantic import BaseModel, PrivateAttr
 
 from haive.core.config.runnable import RunnableConfigManager
 from haive.core.persistence.handlers import (
-    ensure_async_pool_open,
-    ensure_pool_open,
     prepare_merged_input,
     register_async_thread_if_needed,
     register_thread_if_needed,

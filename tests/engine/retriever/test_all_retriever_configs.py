@@ -6,11 +6,9 @@ they instantiate properly and have correct configuration validation.
 """
 
 import logging
-from unittest.mock import Mock, patch
 
 import pytest
 from langchain_core.documents import Document
-from langchain_core.retrievers import BaseRetriever
 
 logger = logging.getLogger(__name__)
 
@@ -399,18 +397,6 @@ def test_retriever_registration():
 
     # Import all our retrievers to trigger registration
     try:
-        from haive.core.engine.retriever.providers.BM25RetrieverConfig import (
-            BM25RetrieverConfig,
-        )
-        from haive.core.engine.retriever.providers.KendraRetrieverConfig import (
-            KendraRetrieverConfig,
-        )
-        from haive.core.engine.retriever.providers.WeaviateHybridSearchRetrieverConfig import (
-            WeaviateHybridSearchRetrieverConfig,
-        )
-        from haive.core.engine.retriever.providers.YouRetrieverConfig import (
-            YouRetrieverConfig,
-        )
 
         # Check that they're registered
         registry = BaseRetrieverConfig._registry

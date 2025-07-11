@@ -9,11 +9,9 @@ and actual LLM interactions (no mocks). Tests cover:
 - Integration with SimpleAgent for real-world scenarios
 """
 
-from typing import Any, Dict
-
 import pytest
 from haive.agents.simple.agent import SimpleAgent
-from langchain_core.messages import AIMessage, HumanMessage
+from langchain_core.messages import AIMessage
 
 from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.schema.prebuilt.messages.messages_with_token_usage import (

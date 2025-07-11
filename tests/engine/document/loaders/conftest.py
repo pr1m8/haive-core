@@ -11,8 +11,8 @@ import shutil
 import tempfile
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
-from unittest.mock import MagicMock, Mock
+from typing import Any, Dict, List
+from unittest.mock import Mock
 
 import pytest
 from langchain_core.documents import Document
@@ -34,8 +34,6 @@ from haive.core.engine.document.loaders.sources.enhanced_registry import (
     EnhancedSourceRegistry,
 )
 from haive.core.engine.document.loaders.sources.source_types import (
-    BaseSource,
-    CredentialType,
     LoaderCapability,
     LocalFileSource,
     RemoteSource,

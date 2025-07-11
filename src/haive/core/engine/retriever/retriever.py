@@ -42,7 +42,7 @@ import importlib
 import logging
 import pkgutil
 import sys
-from typing import Any, ClassVar, Dict, Optional, Sequence, Tuple, Type, Union
+from typing import Any, ClassVar, Dict, Sequence
 
 from langchain_core.documents import Document
 from langchain_core.retrievers import BaseRetriever

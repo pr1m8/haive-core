@@ -1,8 +1,5 @@
 """Test RecompileMixin functionality."""
 
-from datetime import datetime
-
-import pytest
 from pydantic import BaseModel, Field
 
 from haive.core.mixins.recompile_mixin import RecompileMixin

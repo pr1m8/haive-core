@@ -4,8 +4,8 @@ This module provides the abstract base class that all BaseGraph components
 must inherit from, ensuring consistent interfaces and proper lifecycle management.
 """
 
-from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from abc import ABC
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from haive.core.graph.state_graph.base_graph2 import BaseGraph

@@ -31,10 +31,7 @@ from typing import (
     Dict,
     List,
     Literal,
-    Optional,
     Sequence,
-    Set,
-    Tuple,
     Type,
     Union,
     cast,
@@ -1308,7 +1305,6 @@ class AugLLMConfig(
     def _compute_input_fields(self) -> dict[str, tuple[type, Any]]:
         """Compute input fields based on prompt template and configuration."""
         from typing import Any as AnyType
-        from typing import List as ListType
         from typing import Optional as OptionalType
 
         fields = {}
@@ -1370,11 +1366,6 @@ class AugLLMConfig(
     def _compute_output_fields(self) -> dict[str, tuple[type, Any]]:
         """Compute output fields based on configuration."""
         from typing import Any as AnyType
-        from typing import (
-            Dict,
-        )
-        from typing import List as ListType
-        from typing import Optional as OptionalType
 
         fields = {}
 

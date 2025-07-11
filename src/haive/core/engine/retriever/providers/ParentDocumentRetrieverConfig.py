@@ -21,7 +21,7 @@ The implementation integrates with LangChain's ParentDocumentRetriever while
 providing a consistent Haive configuration interface with flexible chunking options.
 """
 
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any
 
 from pydantic import Field, validator
 

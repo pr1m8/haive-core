@@ -8,11 +8,11 @@ The configuration automatically discovers MCP tools, manages resources, and enha
 prompts while maintaining compatibility with all existing AugLLMConfig features.
 """
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from pydantic import Field, model_validator
 
-from haive.core.common.mixins import MCPMixin, ToolRouteMixin
+from haive.core.common.mixins import MCPMixin
 from haive.core.engine.aug_llm.config import AugLLMConfig
 
 if TYPE_CHECKING:

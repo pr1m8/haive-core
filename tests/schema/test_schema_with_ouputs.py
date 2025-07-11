@@ -1,5 +1,5 @@
 import operator
-from typing import Annotated, List, Optional
+from typing import Annotated
 
 import pytest
 from langchain.output_parsers import PydanticOutputParser

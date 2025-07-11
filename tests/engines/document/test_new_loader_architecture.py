@@ -4,7 +4,6 @@ This test verifies that the source-loader-registry architecture works correctly
 for automatic document loading from various path types.
 """
 
-from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
@@ -21,7 +20,6 @@ from haive.core.engine.document.loaders.sources.registry import (
     source_registry,
 )
 from haive.core.engine.document.loaders.sources.source_base import (
-    BaseSource,
     LocalSource,
     RemoteSource,
 )
@@ -253,9 +251,7 @@ class TestDocumentLoaderFactory:
         source = factory.create_source("/path/to/document.pdf")
 
         # Test speed preference (should use fast loader)
-        loader = factory.create_loader_from_source(
-            source, preference=LoaderPreference.SPEED
-        )
+        factory.create_loader_from_source(source, preference=LoaderPreference.SPEED)
         mock_fast_loader.assert_called()
 
         # Reset mocks
@@ -263,9 +259,7 @@ class TestDocumentLoaderFactory:
         mock_quality_loader.reset_mock()
 
         # Test quality preference (should use quality loader)
-        loader = factory.create_loader_from_source(
-            source, preference=LoaderPreference.QUALITY
-        )
+        factory.create_loader_from_source(source, preference=LoaderPreference.QUALITY)
         mock_quality_loader.assert_called()
 
     def test_analyze_path_with_sources(self):
@@ -371,7 +365,7 @@ class TestEndToEndIntegration:
         # This would normally create a real loader, but since we're not mocking
         # the import, it will fail. That's expected in this test.
         with pytest.raises((ImportError, AttributeError)):
-            loader = create_loader("/path/to/document.pdf")
+            create_loader("/path/to/document.pdf")
 
 
 if __name__ == "__main__":

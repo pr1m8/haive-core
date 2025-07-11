@@ -119,10 +119,7 @@ def test_component_isolation():
     """Test that components work in isolation."""
     try:
         from haive.core.graph.state_graph.components import (
-            BranchManager,
-            EdgeManager,
             ModularBaseGraph,
-            NodeManager,
         )
 
         logger.info("Testing component isolation...")
@@ -177,20 +174,20 @@ def test_error_handling():
         # Test node errors
         try:
             graph.remove_node("nonexistent")
-            assert False, "Should have raised ValueError"
+            raise AssertionError("Should have raised ValueError")
         except ValueError:
             pass  # Expected
 
         try:
             graph.set_entry_point("nonexistent")
-            assert False, "Should have raised ValueError"
+            raise AssertionError("Should have raised ValueError")
         except ValueError:
             pass  # Expected
 
         # Test edge errors
         try:
             graph.add_edge("nonexistent1", "nonexistent2")
-            assert False, "Should have raised ValueError"
+            raise AssertionError("Should have raised ValueError")
         except ValueError:
             pass  # Expected
 
@@ -199,7 +196,7 @@ def test_error_handling():
             graph.add_conditional_edges(
                 "nonexistent", lambda x: "test", {"test": "target"}
             )
-            assert False, "Should have raised ValueError"
+            raise AssertionError("Should have raised ValueError")
         except ValueError:
             pass  # Expected
 

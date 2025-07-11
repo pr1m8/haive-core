@@ -8,14 +8,12 @@ This module tests individual provider implementations including:
 - Provider-specific parameters
 """
 
-import os
 from unittest.mock import Mock, patch
 
 import pytest
 from pydantic import SecretStr
 
 from haive.core.models.llm.provider_types import LLMProvider
-from haive.core.models.llm.providers.base import ProviderImportError
 
 
 class TestOpenAIProvider:

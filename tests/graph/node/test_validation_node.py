@@ -1,5 +1,5 @@
 # tests/graph/node/test_validation_node.py
-from typing import Any, List
+from typing import Any
 
 import pytest
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage

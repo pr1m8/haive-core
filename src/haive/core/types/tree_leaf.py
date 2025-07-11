@@ -1,7 +1,7 @@
 # tree_model.py
 from __future__ import annotations
 
-from typing import Generic, List, Literal, TypeVar
+from typing import Generic, Literal, TypeVar
 
 from pydantic import BaseModel, Field, computed_field
 

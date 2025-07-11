@@ -21,7 +21,7 @@ This vector store is particularly useful when:
 The implementation extends the base OpenSearch configuration with AWS-specific features.
 """
 
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any
 
 from langchain_core.documents import Document
 from pydantic import Field, validator

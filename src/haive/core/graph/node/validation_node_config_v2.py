@@ -15,14 +15,14 @@ Key improvements:
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Sequence, Union
+from typing import Any, Dict, List, Optional
 
-from langchain_core.messages import AIMessage, BaseMessage, ToolMessage
-from langgraph.types import Command, Send
+from langchain_core.messages import AIMessage, ToolMessage
+from langgraph.types import Command
 from pydantic import BaseModel, Field, ValidationError
 
 from haive.core.graph.node.base_node_config import BaseNodeConfig
-from haive.core.graph.node.types import CommandGoto, NodeType
+from haive.core.graph.node.types import NodeType
 
 logger = logging.getLogger(__name__)
 
@@ -172,7 +172,6 @@ class ValidationNodeConfigV2(BaseNodeConfig):
     def _find_model_class(self, tool_name: str) -> Optional[type[BaseModel]]:
         """Try to find Pydantic model class by name."""
         # Common model names to try
-        import sys
 
         # Look in current module globals
         if tool_name in globals():

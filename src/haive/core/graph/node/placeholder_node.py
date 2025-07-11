@@ -1,5 +1,3 @@
-from typing import Union
-
 from langgraph.types import Command
 from pydantic import BaseModel
 

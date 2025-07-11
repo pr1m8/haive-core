@@ -15,7 +15,7 @@ from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
 from haive.core.engine.base.types import EngineType
 
 if TYPE_CHECKING:
-    from haive.core.engine.base.base import Engine
+    pass
 
 T = TypeVar("T")  # Resolved component type
 

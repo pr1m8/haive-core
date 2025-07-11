@@ -5,9 +5,6 @@ This avoids the cascading import errors from the main document module.
 
 import sys
 from pathlib import Path
-from unittest.mock import Mock
-
-import pytest
 
 # Add the source directory to path for direct imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "src"))
@@ -94,7 +91,6 @@ def test_registry_direct():
     """Test registry functionality directly."""
     from haive.core.engine.document.loaders.sources.registry import (
         SourceRegistry,
-        register_source,
     )
     from haive.core.engine.document.loaders.sources.source_base import LocalSource
 
@@ -159,7 +155,6 @@ def test_registry_direct():
 
 def test_auto_factory_direct():
     """Test auto factory directly."""
-    from haive.core.engine.document.config import LoaderPreference
     from haive.core.engine.document.loaders.auto_factory import DocumentLoaderFactory
     from haive.core.engine.document.loaders.sources.registry import (
         register_source,

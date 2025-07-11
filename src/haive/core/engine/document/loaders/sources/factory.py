@@ -16,7 +16,6 @@ from haive.core.engine.document.loaders.sources.local.base import (
     FileSource,
 )
 from haive.core.engine.document.loaders.sources.remote.base import URLSource
-from haive.core.engine.document.loaders.sources.source_types import SourceCategory
 
 
 def create_source_from_string(source_string: str) -> BaseSource:

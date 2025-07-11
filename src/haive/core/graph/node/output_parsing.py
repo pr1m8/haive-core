@@ -3,12 +3,12 @@
 # ============================================================================
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
-from langchain_core.messages import AIMessage, BaseMessage
+from langchain_core.messages import BaseMessage
 from langchain_core.output_parsers.base import BaseOutputParser
 from langgraph.types import Command
-from pydantic import BaseModel, Field
+from pydantic import Field
 from rich.console import Console
 
 from haive.core.graph.common.types import ConfigLike, NodeType, StateLike

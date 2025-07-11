@@ -5,7 +5,6 @@ This module tests the core document loading capabilities with real examples.
 
 import tempfile
 from pathlib import Path
-from typing import List
 
 import pytest
 from langchain_core.documents import Document
@@ -341,7 +340,7 @@ class TestPathAnalyzer:
             ("gs://bucket/object", "gcs"),
         ]
 
-        for url, expected_category in test_urls:
+        for url, _expected_category in test_urls:
             result = analyzer.analyze_path(url)
             assert result is not None
             assert result.category in [

@@ -5,7 +5,6 @@ Provides a comprehensive system for building, manipulating, and executing
 graphs with consistent interfaces, serialization support, and dynamic composition.
 """
 
-import logging
 import uuid
 from datetime import datetime
 from enum import Enum
@@ -39,7 +38,7 @@ from haive.core.graph.state_graph.graph_path import GraphPath
 from haive.core.graph.state_graph.validation_mixin import ValidationMixin
 
 # Import RichLogger
-from haive.core.logging.rich_logger import LogLevel, RichLogger, get_logger
+from haive.core.logging.rich_logger import LogLevel, get_logger
 
 # Define a type for branch result types
 BranchResultType = Union[

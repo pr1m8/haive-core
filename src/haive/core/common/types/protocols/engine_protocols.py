@@ -1,5 +1,5 @@
 from collections.abc import Callable, Sequence
-from typing import Optional, Protocol, Type, Union
+from typing import Protocol
 
 from haive.agents.base.agent import Agent
 from langchain_core.tools import BaseTool, StructuredTool

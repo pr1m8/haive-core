@@ -6,7 +6,7 @@ coordination information, and workflow state in multi-agent systems.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
 

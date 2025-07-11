@@ -1,6 +1,6 @@
 """Tests for ToolStateWithValidation functionality."""
 
-from typing import Any, Dict, List
+from typing import List
 
 import pytest
 from langchain_core.messages import AIMessage, ToolMessage
@@ -13,7 +13,6 @@ from haive.core.schema.prebuilt.tool_state_with_validation import (
 )
 from haive.core.schema.prebuilt.tools.validation_state import (
     RouteRecommendation,
-    ToolValidationResult,
     ValidationStateManager,
     ValidationStatus,
 )
@@ -211,7 +210,7 @@ class TestToolStateWithValidation:
         state.set_branch_condition("total_tools", 5)
 
         # Get conditions
-        assert state.get_branch_condition("has_valid_tools") == True
+        assert state.get_branch_condition("has_valid_tools")
         assert state.get_branch_condition("error_count") == 0
         assert state.get_branch_condition("missing_condition", "default") == "default"
 
@@ -231,7 +230,7 @@ class TestToolStateWithValidation:
         assert routing_data["next_action"] == "execute"
         assert routing_data["valid_count"] == 0
         assert routing_data["total_tools_in_state"] == 1
-        assert routing_data["has_dependencies"] == False
+        assert not routing_data["has_dependencies"]
 
         # Add validation results
         routing_state = ValidationStateManager.create_routing_state()
@@ -265,7 +264,7 @@ class TestToolStateWithValidation:
         assert summary["total_tools"] == 2
         assert "langchain_tool" in summary["tools_by_route"]
         assert summary["tools_with_dependencies"] == 1
-        assert summary["branch_conditions"]["test"] == True
+        assert summary["branch_conditions"]["test"]
         assert "validation_summary" in summary
 
 
@@ -277,11 +276,11 @@ class TestValidationNodeWithRouting:
         node = ValidationNodeWithRouting()
 
         # Check configuration
-        assert node.update_tool_messages == True
-        assert node.provide_routing_state == True
-        assert node.auto_correct_args == True
+        assert node.update_tool_messages
+        assert node.provide_routing_state
+        assert node.auto_correct_args
         assert node.validation_timeout == 30.0
-        assert node.continue_on_partial_validation == True
+        assert node.continue_on_partial_validation
 
     def test_create_node_function(self):
         """Test creating the validation node function."""
@@ -338,7 +337,7 @@ class TestValidationNodeWithRouting:
         assert "routing_data" in result
 
         routing_data = result["routing_data"]
-        assert routing_data["should_continue"] == True  # Valid tool exists
+        assert routing_data["should_continue"]  # Valid tool exists
         assert routing_data["next_action"] == "execute"
         assert len(routing_data["target_nodes"]) > 0
 

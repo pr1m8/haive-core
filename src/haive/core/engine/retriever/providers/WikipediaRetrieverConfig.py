@@ -18,7 +18,7 @@ The implementation integrates with LangChain's WikipediaRetriever while providin
 a consistent Haive configuration interface.
 """
 
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any
 
 from langchain_core.documents import Document
 from pydantic import Field

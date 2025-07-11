@@ -18,8 +18,7 @@ respecting the configuration specifications from AugLLMConfig.
 """
 
 import json
-import logging
-from typing import Any, Dict, Optional, Type
+from typing import Any, Dict
 
 from langchain_core.messages import SystemMessage
 from langchain_core.output_parsers import PydanticOutputParser, StrOutputParser

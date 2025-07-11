@@ -47,7 +47,7 @@ Example:
 """
 
 import logging
-from typing import Any, Type, Union
+from typing import Any
 
 from pydantic import BaseModel
 from rich.console import Console

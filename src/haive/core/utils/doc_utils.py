@@ -1,7 +1,5 @@
-import json
 from collections.abc import Iterable
 from pathlib import Path
-from typing import Optional
 
 from langchain_core.documents import Document
 

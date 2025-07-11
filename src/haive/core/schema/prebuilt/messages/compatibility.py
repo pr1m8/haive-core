@@ -6,13 +6,11 @@ compatibility while adding new features from the enhanced MessagesState
 implementation. It serves as a bridge between the old and new architectures.
 """
 
-from typing import Any, Dict, List, Optional, Union
+from typing import List, Optional, Union
 
 from langchain_core.messages import (
     AIMessage,
-    BaseMessage,
     HumanMessage,
-    SystemMessage,
     ToolMessage,
 )
 from langgraph.graph import END

@@ -2,7 +2,7 @@
 
 import json
 import logging
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, List, Optional, Type
 
 from langchain_core.messages import AIMessage, BaseMessage, ToolMessage
 from langchain_core.output_parsers import PydanticOutputParser
@@ -204,7 +204,7 @@ class ParserNodeConfig(NodeConfig):
                     and "tool_calls" in msg.additional_kwargs
                 ):
                     last_ai_message = msg
-                    logger.debug(f"    Has tool calls in additional_kwargs")
+                    logger.debug("    Has tool calls in additional_kwargs")
                     break
 
         if not last_ai_message:
@@ -267,7 +267,7 @@ class ParserNodeConfig(NodeConfig):
                 if msg_name == tool_name:
                     tool_message = msg
                     logger.info(
-                        f"[bold green]✓ Found matching ToolMessage[/bold green]"
+                        "[bold green]✓ Found matching ToolMessage[/bold green]"]"
                     )
                     logger.debug(f"  Content type: {type(msg.content)}")
                     logger.debug(f"  Content preview: {str(msg.content)[:100]}...")
@@ -330,7 +330,7 @@ class ParserNodeConfig(NodeConfig):
             parser = PydanticOutputParser(pydantic_object=tool_class)
             model_instance = parser.parse(str(content))
             logger.info(
-                f"[bold green]✓ Successfully parsed with PydanticOutputParser[/bold green]"
+                "[bold green]✓ Successfully parsed with PydanticOutputParser[/bold green]"]"
             )
             return model_instance
         except Exception as e:
@@ -452,7 +452,7 @@ class ParserNodeConfig(NodeConfig):
                 if not field_name:
                     field_name = "parsed_result"
 
-            logger.info(f"[bold green]✓ Successfully parsed tool response[/bold green]")
+            logger.info("[bold green]✓ Successfully parsed tool response[/bold green]"]")
             logger.debug(f"  Field name: {field_name}")
             logger.debug(f"  Result type: {type(parsed_result).__name__}")
 
@@ -466,7 +466,7 @@ class ParserNodeConfig(NodeConfig):
                 )
 
             logger.info(
-                f"[bold green]=== Parser completed successfully ===[/bold green]"
+                "[bold green]=== Parser completed successfully ===[/bold green]"
             )
             return Command(update=update_dict, goto=goto_node)
 

@@ -2,7 +2,7 @@
 
 import logging
 from collections import defaultdict
-from typing import Any, Callable, Dict, List, Optional, Type
+from typing import Any, Callable
 
 from haive.core.schema.field_definition import FieldDefinition
 

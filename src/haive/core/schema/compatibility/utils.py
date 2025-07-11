@@ -9,11 +9,11 @@ import hashlib
 import inspect
 import json
 from functools import wraps
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Type, TypeVar, Union
+from typing import Any, Callable, Dict, List, Set, Tuple, Type, TypeVar, Union
 
 from pydantic import BaseModel
 
-from haive.core.schema.compatibility.types import FieldInfo, SchemaInfo
+from haive.core.schema.compatibility.types import SchemaInfo
 
 T = TypeVar("T")
 

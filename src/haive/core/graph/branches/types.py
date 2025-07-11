@@ -1,7 +1,7 @@
 """Type definitions for the Branch system."""
 
 from enum import Enum
-from typing import Any, Dict, Generic, List, Optional, Protocol
+from typing import Any, Generic, Protocol
 
 from pydantic import BaseModel, Field
 

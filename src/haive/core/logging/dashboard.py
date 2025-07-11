@@ -9,7 +9,7 @@ import logging
 import time
 from collections import Counter, deque
 from datetime import datetime
-from typing import Any, Deque, Dict, List
+from typing import Any, Deque
 
 from rich import box
 from rich.console import Console

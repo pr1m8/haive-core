@@ -4,7 +4,7 @@ import json
 import logging
 import random
 import time
-from typing import Any, Dict
+from typing import Any
 
 # Check if PostgreSQL is available
 try:

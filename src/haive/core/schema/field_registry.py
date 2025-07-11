@@ -12,10 +12,9 @@ Key benefits:
 - Backwards compatibility
 """
 
-from typing import Any, Dict, List, Optional, Type, TypeVar, Union
+from typing import Dict, List, Optional, Type, TypeVar
 
-from langchain_core.messages import BaseMessage
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from haive.core.schema.field_definition import FieldDefinition
 
@@ -67,7 +66,7 @@ class StandardFields:
 
         # Note: shared is already in metadata, so don't pass it twice
         # Extract reducer_name from metadata if needed
-        reducer_name = metadata.pop("reducer", None)
+        metadata.pop("reducer", None)
 
         return FieldDefinition(
             name="messages",

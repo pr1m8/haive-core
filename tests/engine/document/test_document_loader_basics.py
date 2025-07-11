@@ -3,8 +3,6 @@
 Tests the source-loader-engine relationship and auto-detection.
 """
 
-from pathlib import Path
-
 import pytest
 
 from haive.core.engine.document.loaders.auto_factory import (
@@ -246,7 +244,7 @@ class TestIntegration:
 
         # Try to create loader (will fail without the actual loader class)
         with pytest.raises((ImportError, AttributeError)):
-            loader = create_loader("/test/file.test")
+            create_loader("/test/file.test")
 
     def test_factory_error_handling(self):
         """Test factory error handling."""

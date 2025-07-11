@@ -5,7 +5,7 @@ import logging
 import os
 import time
 from contextlib import contextmanager
-from typing import Any, Dict
+from typing import Any
 
 from pydantic import BaseModel
 from rich.console import Console

@@ -6,14 +6,13 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Type, Union
+from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 from pydantic import BaseModel, Field, create_model
 
 from haive.core.schema.compatibility.analyzer import TypeAnalyzer
 from haive.core.schema.compatibility.compatibility import CompatibilityChecker
 from haive.core.schema.compatibility.types import (
-    CompatibilityLevel,
     FieldInfo,
     MergeStrategy,
     SchemaInfo,
@@ -153,7 +152,7 @@ class UnionMergeStrategy(MergeStrategy):
         # Merge other properties
         # Use the most restrictive settings
         is_required = any(info.is_required for _, info in field_infos)
-        has_default = all(info.has_default for _, info in field_infos)
+        all(info.has_default for _, info in field_infos)
 
         # Take the last definition as base
         merged = field_infos[-1][1]
@@ -195,7 +194,7 @@ class IntersectionMergeStrategy(MergeStrategy):
         analyzer = TypeAnalyzer()
         base_type = field_infos[0][1].type_info.type_hint
 
-        for schema_name, field_info in field_infos[1:]:
+        for _schema_name, field_info in field_infos[1:]:
             if not analyzer.is_subtype(field_info.type_info.type_hint, base_type):
                 context.add_warning(
                     f"Type incompatibility in intersection for '{field_info.name}'"
@@ -259,7 +258,7 @@ class SchemaMerger:
 
         # Convert all to SchemaInfo
         schema_infos = []
-        for i, schema in enumerate(schemas):
+        for _i, schema in enumerate(schemas):
             if isinstance(schema, type) and issubclass(schema, BaseModel):
                 info = self.analyzer.analyze_schema(schema)
                 info.name = schema.__name__

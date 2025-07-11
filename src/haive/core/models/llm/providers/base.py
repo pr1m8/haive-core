@@ -37,7 +37,7 @@ Examples:
 import logging
 import os
 from abc import ABC, abstractmethod
-from typing import Any, Dict
+from typing import Any
 
 from pydantic import BaseModel, Field, SecretStr, field_validator, model_validator
 

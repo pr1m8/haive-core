@@ -21,7 +21,7 @@ The implementation integrates with LangChain Community's LlamaIndexGraphRetrieve
 providing a consistent Haive configuration interface with graph database support.
 """
 
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any
 
 from pydantic import Field, validator
 

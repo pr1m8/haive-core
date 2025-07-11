@@ -20,7 +20,7 @@ The implementation integrates with LangChain's TimeWeightedVectorStoreRetriever 
 providing a consistent Haive configuration interface with flexible time weighting options.
 """
 
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any
 
 from pydantic import Field, validator
 

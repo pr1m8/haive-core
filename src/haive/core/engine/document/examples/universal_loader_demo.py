@@ -6,7 +6,6 @@ detect and load documents from any source with intelligent source detection.
 
 import sys
 from pathlib import Path
-from typing import Any, Dict
 
 # Add the package root to the path for import
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent.parent))
@@ -77,7 +76,7 @@ def demo_universal_loader():
         if analysis["recommended"]:
             print(f"   ⭐ Recommended: {analysis['recommended']}")
         if analysis["supports_auth"]:
-            print(f"   🔐 Requires authentication")
+            print("   🔐 Requires authentication"on")
 
         # Show top 3 candidates
         for i, candidate in enumerate(analysis["candidates"][:3]):
@@ -102,7 +101,7 @@ def demo_universal_loader():
             if doc_loader:
                 print(f"   ✅ Successfully created: {type(doc_loader).__name__}")
             else:
-                print(f"   ❌ Failed to create loader")
+                print("   ❌ Failed to create loader"r")
         except Exception as e:
             print(f"   ⚠️ Error: {e}")
 
@@ -123,7 +122,7 @@ def demo_universal_loader():
             if doc_loader:
                 print(f"   ✅ Created: {type(doc_loader).__name__}")
             else:
-                print(f"   ❌ Failed to create loader")
+                print("   ❌ Failed to create loader"r")
 
             # Analyze with convenience function
             analysis = analyze_document_source(path)

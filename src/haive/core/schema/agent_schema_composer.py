@@ -44,9 +44,9 @@ Note:
 
 import logging
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Set, Tuple, Type
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type
 
-from langchain_core.messages import AnyMessage, BaseMessage
+from langchain_core.messages import AnyMessage
 
 from haive.core.schema.schema_composer import SchemaComposer
 from haive.core.schema.state_schema import StateSchema
@@ -614,7 +614,7 @@ class AgentSchemaComposer(SchemaComposer):
         # Create agent ID to name mapping
         agent_id_to_name = {agent.id: agent.name for agent in agents}
 
-        for field_name, field_sources in all_fields.items():
+        for _field_name, field_sources in all_fields.items():
             for agent_id, fname, ftype, finfo in field_sources:
                 agent_name = agent_id_to_name.get(agent_id, agent_id)
                 namespaced_name = f"{agent_name.lower().replace(' ', '_')}_{fname}"
@@ -652,7 +652,7 @@ class AgentSchemaComposer(SchemaComposer):
         """
         # Create agent ID to index mapping
         agent_id_to_idx = {agent.id: idx for idx, agent in enumerate(agents)}
-        agent_id_to_name = {agent.id: agent.name for agent in agents}
+        {agent.id: agent.name for agent in agents}
 
         # Process fields based on their position in the sequence
         for field_name, field_sources in all_fields.items():
@@ -674,7 +674,7 @@ class AgentSchemaComposer(SchemaComposer):
 
             # Determine which agents use this field
             agent_indices = []
-            for agent_id, fname, ftype, finfo in field_sources:
+            for agent_id, _fname, ftype, finfo in field_sources:
                 if agent_id in agent_id_to_idx:
                     agent_indices.append(agent_id_to_idx[agent_id])
 
@@ -682,7 +682,7 @@ class AgentSchemaComposer(SchemaComposer):
                 continue
 
             min_idx = min(agent_indices)
-            max_idx = max(agent_indices)
+            max(agent_indices)
 
             # Use first occurrence for type info
             _, _, ftype, finfo = field_sources[0]

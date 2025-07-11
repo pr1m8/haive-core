@@ -142,7 +142,7 @@ class TestValidationState:
         assert decision["valid_count"] == 3
         assert decision["invalid_count"] == 0
         assert decision["error_count"] == 0
-        assert decision["has_corrections"] == False
+        assert not decision["has_corrections"]
 
         assert state.should_continue_execution()
         assert not state.should_return_to_agent()

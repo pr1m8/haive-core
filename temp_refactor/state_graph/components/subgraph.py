@@ -4,7 +4,7 @@ This module provides the Subgraph class for encapsulating a subgraph
 within a parent graph.
 """
 
-from typing import Any, Dict, List, Optional, TypeVar
+from typing import Any, TypeVar
 
 from pydantic import BaseModel, Field
 

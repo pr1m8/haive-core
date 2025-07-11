@@ -1,7 +1,7 @@
 # src/haive/core/runtime/base.py
 
 from abc import abstractmethod
-from typing import Any, Generic, Optional, TypeVar
+from typing import Any, Generic, TypeVar
 
 from langchain_core.runnables import Runnable, RunnableConfig
 

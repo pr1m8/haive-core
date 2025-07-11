@@ -2,10 +2,10 @@
 
 import logging
 import time
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional
 
 from langchain_core.messages import AIMessage, ToolMessage
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 from haive.core.graph.node.validation_node_config import ValidationNodeConfig
 from haive.core.schema.prebuilt.tools.validation_state import (
@@ -89,7 +89,7 @@ class ValidationNodeWithRouting(ValidationNodeConfig):
             try:
                 # Extract tool calls from the last AI message
                 logger.info(
-                    f"[bold magenta]STEP 1: Extracting tool calls[/bold magenta]"
+                    "[bold magenta]STEP 1: Extracting tool calls[/bold magenta]"
                 )
                 tool_calls = self._extract_tool_calls_from_state(state)
 
@@ -117,7 +117,7 @@ class ValidationNodeWithRouting(ValidationNodeConfig):
                 )
 
                 # Log tool call details
-                logger.debug(f"[bold cyan]TOOL CALLS DETAILS[/bold cyan]")
+                logger.debug("[bold cyan]TOOL CALLS DETAILS[/bold cyan]")
                 for i, tc in enumerate(tool_calls):
                     tc_name = (
                         tc.get("name", "unknown")
@@ -133,7 +133,7 @@ class ValidationNodeWithRouting(ValidationNodeConfig):
 
                 # Get tools and schemas for validation
                 logger.info(
-                    f"[bold magenta]STEP 2: Getting validation resources[/bold magenta]"
+                    "[bold magenta]STEP 2: Getting validation resources[/bold magenta]"
                 )
                 available_tools, validation_schemas = self._get_validation_resources(
                     state
@@ -151,7 +151,7 @@ class ValidationNodeWithRouting(ValidationNodeConfig):
 
                 # Validate each tool call
                 logger.info(
-                    f"[bold magenta]STEP 3: Validating individual tool calls[/bold magenta]"
+                    "[bold magenta]STEP 3: Validating individual tool calls[/bold magenta]"
                 )
                 for i, tool_call in enumerate(tool_calls):
                     tc_name = (
@@ -205,7 +205,7 @@ class ValidationNodeWithRouting(ValidationNodeConfig):
 
                 # Update state with validation results
                 logger.info(
-                    f"[bold magenta]STEP 4: Updating state with validation results[/bold magenta]"
+                    "[bold magenta]STEP 4: Updating state with validation results[/bold magenta]"
                 )
                 updated_state = self._update_state_with_validation_results(
                     state, routing_state
@@ -217,7 +217,7 @@ class ValidationNodeWithRouting(ValidationNodeConfig):
                     f"[bold green]✓ Validation complete: {routing_summary}[/bold green]"
                 )
 
-                logger.debug(f"[bold cyan]VALIDATION SUMMARY[/bold cyan]")
+                logger.debug("[bold cyan]VALIDATION SUMMARY[/bold cyan]")
                 logger.debug(
                     f"  Total results: {len(routing_state.validation_results)}"
                 )
@@ -232,7 +232,7 @@ class ValidationNodeWithRouting(ValidationNodeConfig):
                 logger.debug(f"  Next action: {routing_state.next_action.value}")
 
                 # Log state changes
-                logger.debug(f"[bold cyan]STATE CHANGES[/bold cyan]")
+                logger.debug("[bold cyan]STATE CHANGES[/bold cyan]")
                 logger.debug(f"  Input keys: {list(state.keys())}")
                 logger.debug(f"  Output keys: {list(updated_state.keys())}")
                 new_keys = set(updated_state.keys()) - set(state.keys())
@@ -469,7 +469,7 @@ class ValidationNodeWithRouting(ValidationNodeConfig):
                             corrected[field_name] = field_info.default_factory()
 
                 # Type corrections
-                for field_name, value in corrected.items():
+                for field_name, _value in corrected.items():
                     if field_name in fields:
                         field_info = fields[field_name]
                         # Add type conversion logic here if needed

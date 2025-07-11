@@ -249,6 +249,6 @@ class MongoDBAtlasVectorStoreConfig(BaseVectorStoreConfig):
                 # Index creation might fail due to permissions or other issues
                 import warnings
 
-                warnings.warn(f"Could not create search index: {e}")
+                warnings.warn(f"Could not create search index: {e}", stacklevel=2)
 
         return vectorstore

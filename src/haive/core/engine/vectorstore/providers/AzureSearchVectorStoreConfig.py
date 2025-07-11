@@ -279,7 +279,6 @@ class AzureSearchVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
                     from azure.search.documents.indexes.models import (
                         HnswAlgorithmConfiguration,
                         SearchField,
-                        SearchFieldDataType,
                         SearchIndex,
                         VectorSearch,
                     )
@@ -333,6 +332,6 @@ class AzureSearchVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
                 # Index creation might fail, but we can continue
                 import warnings
 
-                warnings.warn(f"Could not create search index: {e}")
+                warnings.warn(f"Could not create search index: {e}", stacklevel=2)
 
         return vectorstore

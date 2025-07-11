@@ -32,7 +32,7 @@ Typical usage example:
 from __future__ import annotations
 
 from collections.abc import Iterator
-from typing import Optional, TypeVar
+from typing import TypeVar
 
 from pydantic import Field
 

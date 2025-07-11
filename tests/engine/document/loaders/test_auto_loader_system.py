@@ -8,11 +8,8 @@ Author: Claude (Haive Document Loader System)
 Version: 1.0.0
 """
 
-import asyncio
 import time
-from pathlib import Path
-from typing import Any, Dict, List
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 from langchain_core.documents import Document
@@ -36,7 +33,6 @@ from haive.core.engine.document.loaders.sources.enhanced_registry import (
 )
 from haive.core.engine.document.loaders.sources.source_types import (
     LoaderCapability,
-    SourceCategory,
 )
 
 
@@ -215,10 +211,10 @@ class TestAutoLoaderLoading:
         auto_loader.config.enable_caching = True
 
         # First load
-        with patch.object(auto_loader, "detect_source") as mock_detect:
+        with patch.object(auto_loader, "detect_source"):
             with patch.object(
                 auto_loader, "_load_documents_internal", return_value=sample_documents
-            ) as mock_load:
+            ):
                 result1 = auto_loader.load("/test.pdf")
 
         # Second load (should use cache)
@@ -391,7 +387,7 @@ class TestAutoLoaderBulkLoading:
             )
 
         with patch.object(auto_loader, "load_detailed", side_effect=mock_load_detailed):
-            result = auto_loader.load_bulk(sources, progress_callback=progress_callback)
+            auto_loader.load_bulk(sources, progress_callback=progress_callback)
 
         assert len(progress_calls) == 2
         assert progress_calls[0] == (1, 2)

@@ -1,7 +1,5 @@
 """Integration tests for the schema system with proper pytest format."""
 
-import pytest
-
 
 class TestSchemaIntegration:
     """Test schema system integration."""

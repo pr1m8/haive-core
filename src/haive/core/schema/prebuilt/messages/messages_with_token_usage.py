@@ -4,9 +4,9 @@ This module provides THE standard messages state schema with automatic token tra
 This should be used as the base for all conversational agents that need token awareness.
 """
 
-from typing import Dict, List, Union
+from typing import Dict, Union
 
-from langchain_core.messages import AIMessage, AnyMessage, messages_from_dict
+from langchain_core.messages import AnyMessage, messages_from_dict
 from pydantic import model_validator
 
 from haive.core.schema.prebuilt.messages.token_usage_mixin import TokenUsageMixin

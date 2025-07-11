@@ -5,7 +5,7 @@ graph needs to be recompiled due to changes.
 """
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 from pydantic import Field
 

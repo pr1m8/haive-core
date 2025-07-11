@@ -5,7 +5,7 @@ This file shows various use cases and patterns for using the
 schema compatibility system in the Haive framework.
 """
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 from langchain_core.documents import Document
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
@@ -13,15 +13,11 @@ from pydantic import BaseModel, Field
 
 # Import compatibility module components
 from haive.core.schema.compatibility import (
-    CompatibilityChecker,
-    CompatibilityLevel,
     ConverterRegistry,
     FieldMapper,
     MessageConverter,
-    SchemaMerger,
     TypeAnalyzer,
     check_compatibility,
-    create_mapping,
     generate_report,
     merge_schemas,
     register_converter,
@@ -83,7 +79,7 @@ def example_langchain_conversion():
     print()
 
     # Convert Document to HumanMessage
-    doc = Document(
+    Document(
         page_content="This is important information.",
         metadata={"source": "manual.pdf", "page": 5},
     )
@@ -317,10 +313,8 @@ def example_field_validation():
     print("=== Example 8: Field Validation ===\n")
 
     from haive.core.schema.compatibility.validators import (
-        FieldValidator,
         ModelValidator,
         ValidatorBuilder,
-        create_validator,
     )
 
     # Define schema with validation needs
@@ -450,12 +444,12 @@ def example_performance_optimization():
 
     # First analysis (not cached)
     start = time.time()
-    info1 = analyzer.analyze_schema(ComplexSchema)
+    analyzer.analyze_schema(ComplexSchema)
     time1 = time.time() - start
 
     # Second analysis (cached)
     start = time.time()
-    info2 = analyzer.analyze_schema(ComplexSchema)
+    analyzer.analyze_schema(ComplexSchema)
     time2 = time.time() - start
 
     print(f"First analysis: {time1*1000:.2f}ms")

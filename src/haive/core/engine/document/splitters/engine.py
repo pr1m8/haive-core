@@ -21,7 +21,6 @@ from .base import (
     CharacterTextSplitter,
     HTMLHeaderTextSplitter,
     LatexTextSplitter,
-    MarkdownHeaderTextSplitter,
     MarkdownTextSplitter,
     NLTKTextSplitter,
     PythonCodeTextSplitter,

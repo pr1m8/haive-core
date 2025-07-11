@@ -33,14 +33,9 @@ Usage:
     ```
 """
 
-from typing import Any, Dict
+from typing import Any
 
-from pydantic import BaseModel, Field
-
-from haive.core.common.mixins.general.id import IdMixin
-from haive.core.common.mixins.general.metadata import MetadataMixin
-from haive.core.common.mixins.general.timestamp import TimestampMixin
-from haive.core.common.mixins.general.version import VersionMixin
+from pydantic import BaseModel
 
 
 class SerializationMixin(BaseModel):

@@ -4,7 +4,7 @@
 
 import logging
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
+from typing import Any, Callable, Dict, List, Optional, TypeVar
 
 from langchain_core.messages import (
     AIMessage,

@@ -1,7 +1,7 @@
 # src/haive/core/runtime/extensions/base.py
 
 import uuid
-from typing import Any, Dict, Generic, Optional, TypeVar
+from typing import Any, Generic, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field
 

@@ -14,10 +14,9 @@ sys.path.insert(0, "/home/will/Projects/haive/backend/haive")
 
 from typing import Any, Dict, List, Optional
 
-from haive.agents.base.agent import Agent
 from haive.agents.simple.agent import SimpleAgent
 from langchain_core.messages import BaseMessage, HumanMessage
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 from haive.core.engine.llm.factories.litellm_factory import LiteLLMFactory
 from haive.core.schema.agent_schema_composer import AgentSchemaComposer, BuildMode
@@ -145,7 +144,7 @@ def test_state_projection_issues():
     except Exception as e:
         print(f"❌ Planner execution failed: {e}")
         print(
-            f"   This is the core issue - agent expects specific schema but gets different one"
+            "   This is the core issue - agent expects specific schema but gets different one"
         )
 
 

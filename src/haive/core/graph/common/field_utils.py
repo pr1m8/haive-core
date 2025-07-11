@@ -3,7 +3,7 @@
 import inspect
 import logging
 import re
-from typing import Any, Optional, Set
+from typing import Any
 
 logger = logging.getLogger(__name__)
 

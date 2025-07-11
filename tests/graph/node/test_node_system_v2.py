@@ -1,5 +1,4 @@
 import logging
-from typing import List
 
 from langchain_core.messages import HumanMessage
 from pydantic import BaseModel, Field

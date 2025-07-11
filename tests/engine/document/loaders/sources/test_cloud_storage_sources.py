@@ -5,8 +5,7 @@ Azure Blob Storage, file sharing services, data lakes, and enterprise storage.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -20,13 +19,11 @@ from haive.core.engine.document.loaders.sources.cloud_storage_sources import (
     S3FileSource,
     SharePointSource,
     StorageAuthType,
-    SyncDirection,
     detect_cloud_platform,
     get_cloud_storage_statistics,
     validate_cloud_sources,
 )
 from haive.core.engine.document.loaders.sources.source_types import (
-    CredentialType,
     LoaderCapability,
     SourceCategory,
 )

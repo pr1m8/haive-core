@@ -20,7 +20,7 @@ The implementation integrates with LangChain's MultiVectorRetriever while
 providing a consistent Haive configuration interface with flexible vector storage.
 """
 
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any
 
 from pydantic import Field, validator
 

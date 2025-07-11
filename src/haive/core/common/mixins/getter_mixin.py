@@ -35,7 +35,7 @@ Usage:
 """
 
 from collections.abc import Callable
-from typing import Any, Generic, List, Optional, Type, TypeVar
+from typing import Any, Generic, TypeVar
 
 T = TypeVar("T")
 

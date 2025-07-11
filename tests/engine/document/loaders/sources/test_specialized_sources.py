@@ -4,16 +4,12 @@ This module tests the specialized loaders including academic platforms,
 media processing, development tools, and domain-specific systems.
 """
 
-from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
 from haive.core.engine.document.loaders.sources.source_types import (
-    CredentialType,
-    LoaderCapability,
     SourceCategory,
 )
 from haive.core.engine.document.loaders.sources.specialized_sources import (

@@ -6,9 +6,8 @@ handle preferences for optimal loader selection.
 """
 
 import logging
-import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 
 from langchain_core.document_loaders.base import BaseLoader
@@ -91,15 +90,8 @@ from haive.core.engine.document.loaders.specific.web import (
     WikipediaSource,
 )
 from haive.core.engine.document.loaders.specific.web_api import (
-    ApifyDatasetSource,
-    AssemblyAITranscriptSource,
-    BraveSearchSource,
-    DiffbotSource,
     EtherscanSource,
-    GoogleSearchSource,
     NewsAPISource,
-    ScrapflySource,
-    ScrapingBeeSource,
 )
 from haive.core.engine.document.loaders.specific.web_github_enhanced import (
     GitHubActionsSource,
@@ -118,7 +110,6 @@ from haive.core.engine.document.loaders.specific.web_huggingface_enhanced import
 from haive.core.engine.document.loaders.specific.web_social import (
     BiliBiliSource,
     DiscordSource,
-    FacebookChatSource,
     HackerNewsSource,
     IFixitSource,
     IMSDbSource,

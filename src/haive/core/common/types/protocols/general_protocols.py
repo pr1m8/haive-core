@@ -1,13 +1,8 @@
 # Using TYPE_CHECKING to avoid circular imports
-from collections.abc import Callable, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
-    Dict,
-    Optional,
     Protocol,
-    Type,
-    Union,
     runtime_checkable,
 )
 

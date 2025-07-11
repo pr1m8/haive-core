@@ -1,5 +1,3 @@
-from typing import Optional, Union
-
 from pydantic import Field, HttpUrl, field_validator
 
 from haive.core.engine.loaders.sources.base import BaseSource

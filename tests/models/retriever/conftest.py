@@ -1,7 +1,6 @@
 """Test configuration for retriever tests."""
 
-from typing import Any, Dict, List
-from unittest.mock import MagicMock, Mock
+from unittest.mock import Mock
 
 import pytest
 from langchain_core.documents import Document

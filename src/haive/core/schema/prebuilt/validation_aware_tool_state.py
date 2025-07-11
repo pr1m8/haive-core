@@ -8,7 +8,7 @@ patterns and history.
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List
 
 from pydantic import Field, computed_field, model_validator
 

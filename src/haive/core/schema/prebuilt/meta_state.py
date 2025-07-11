@@ -34,9 +34,8 @@ Example:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any
 
-from langchain_core.messages import BaseMessage
 from pydantic import Field, model_validator
 
 from haive.core.schema.prebuilt.messages_state import MessagesState

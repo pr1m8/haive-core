@@ -5,18 +5,10 @@ strings, dicts, BaseModels, or any custom class with a name attribute.
 """
 
 import logging
-from enum import Enum
 from typing import (
     Any,
-    Dict,
     Generic,
-    List,
-    Optional,
-    Protocol,
-    Type,
     TypeVar,
-    Union,
-    runtime_checkable,
 )
 
 from pydantic import (
@@ -25,7 +17,6 @@ from pydantic import (
     PrivateAttr,
     create_model,
     field_validator,
-    model_validator,
 )
 from rich.console import Console
 from rich.panel import Panel

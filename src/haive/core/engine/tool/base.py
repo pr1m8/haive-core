@@ -1,7 +1,7 @@
 # src/haive/core/engine/tool/base.py
 
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import StructuredTool, Tool

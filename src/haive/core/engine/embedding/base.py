@@ -2,7 +2,7 @@
 
 import logging
 from abc import abstractmethod
-from typing import Any, Dict, Optional, Type, Union
+from typing import Any
 
 from pydantic import Field, SecretStr
 

@@ -4,7 +4,6 @@ Protocol definitions for extending the schema compatibility system.
 
 from __future__ import annotations
 
-from abc import abstractmethod
 from typing import (
     Any,
     Dict,
@@ -22,7 +21,6 @@ from pydantic import BaseModel
 from haive.core.schema.compatibility.types import (
     CompatibilityLevel,
     ConversionContext,
-    ConversionQuality,
     FieldInfo,
     SchemaInfo,
 )

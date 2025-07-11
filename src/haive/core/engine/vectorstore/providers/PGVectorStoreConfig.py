@@ -241,7 +241,8 @@ class PGVectorStoreConfig(BaseVectorStoreConfig):
 
                 warnings.warn(
                     "Could not create pgvector extension. "
-                    "Please ensure it's installed: CREATE EXTENSION vector;"
+                    "Please ensure it's installed: CREATE EXTENSION vector;",
+                    stacklevel=2,
                 )
 
         return vectorstore

@@ -4,7 +4,7 @@ import importlib
 import inspect
 import logging
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any
 
 from haive.core.utils.haive_discovery.base_analyzer import ComponentAnalyzer
 from haive.core.utils.haive_discovery.component_info import ComponentInfo

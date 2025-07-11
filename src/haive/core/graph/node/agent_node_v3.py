@@ -6,14 +6,13 @@ maintaining type safety and hierarchical access patterns.
 """
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, TypeVar
 
 from langchain_core.messages import BaseMessage
 from langgraph.types import Command
 from pydantic import BaseModel, Field, model_validator
 from rich.console import Console
 from rich.panel import Panel
-from rich.table import Table
 from rich.tree import Tree
 
 from haive.core.graph.common.types import ConfigLike, NodeType, StateLike

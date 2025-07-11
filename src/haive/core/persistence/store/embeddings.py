@@ -6,7 +6,7 @@ to the format expected by LangGraph stores.
 """
 
 import logging
-from typing import Any, Dict
+from typing import Any
 
 logger = logging.getLogger(__name__)
 

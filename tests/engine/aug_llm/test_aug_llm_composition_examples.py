@@ -2,7 +2,6 @@
 
 import logging
 import os
-import pprint
 from typing import Any
 
 import pytest

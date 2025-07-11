@@ -179,7 +179,7 @@ def langchain_tools_node(tool_call: Dict[str, Any]) -> Dict[str, Any]:
     """Execute LangChain tools."""
     # This node receives individual tool calls via Send
     tool_name = tool_call.get("name")
-    tool_args = tool_call.get("args", {})
+    tool_call.get("args", {})
     validation_info = tool_call.get("validation", {})
 
     print(f"Executing LangChain tool: {tool_name}")

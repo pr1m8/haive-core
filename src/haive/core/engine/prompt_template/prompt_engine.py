@@ -1,4 +1,4 @@
-"""PromptTemplateEngine: InvokableEngine wrapper for LangChain prompt templates.
+r"""PromptTemplateEngine: InvokableEngine wrapper for LangChain prompt templates.
 
 This module provides the PromptTemplateEngine class, which wraps LangChain prompt
 templates as first-class InvokableEngines with automatic input schema derivation
@@ -92,17 +92,15 @@ from typing import Any, Dict, List, Optional, Type, Union
 from uuid import uuid4
 
 from langchain_core.messages import AnyMessage
-from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import (
     BasePromptTemplate,
     ChatPromptTemplate,
     FewShotChatMessagePromptTemplate,
-    FewShotPromptTemplate,
     MessagesPlaceholder,
     PromptTemplate,
 )
 from langchain_core.prompts.base import FormatOutputType
-from pydantic import BaseModel, Field, computed_field
+from pydantic import BaseModel, Field
 
 from haive.core.engine.base import EngineType, InvokableEngine
 from haive.core.schema.schema_composer import SchemaComposer
@@ -379,7 +377,7 @@ class PromptTemplateEngine(InvokableEngine[Dict[str, Any], FormatOutputType]):
                 # Return as string for text templates
                 result = prompt_value.to_string()
 
-        except Exception as e:
+        except Exception:
             # Fallback to direct formatting if PromptValue fails
             if isinstance(
                 self.prompt_template,

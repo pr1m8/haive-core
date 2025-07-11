@@ -1,6 +1,5 @@
 # haive/core/graph/paths.py
 
-from typing import List
 
 from pydantic import BaseModel, Field
 from rich.console import Console

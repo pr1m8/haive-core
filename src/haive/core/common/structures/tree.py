@@ -37,14 +37,10 @@ Usage:
     ```
 """
 
-import json
 from typing import (
     Any,
-    Dict,
     Generic,
-    List,
     Optional,
-    Type,
     TypeVar,
     Union,
     get_args,
@@ -52,7 +48,7 @@ from typing import (
     get_type_hints,
 )
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict
 
 T = TypeVar("T", bound=BaseModel)
 

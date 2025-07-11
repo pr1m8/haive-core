@@ -20,7 +20,7 @@ The implementation integrates with LangChain Community's ArceeRetriever while
 providing a consistent Haive configuration interface with secure API management.
 """
 
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any
 
 from pydantic import Field, SecretStr
 

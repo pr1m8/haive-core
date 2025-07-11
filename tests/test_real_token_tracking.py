@@ -85,7 +85,7 @@ def test_llm_state_with_real_engine():
         },
     )
 
-    print(f"   Adding message with token usage...")
+    print("   Adding message with token usage...")
     llm_state.add_message(ai_message)
 
     print(f"   Messages count: {len(llm_state.messages)}")

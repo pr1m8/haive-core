@@ -323,7 +323,7 @@ class SchemaComposer:
                         break
 
         # Also check current engines
-        for engine_name in self.engines_by_type.get("llm", []):
+        for _engine_name in self.engines_by_type.get("llm", []):
             has_llm_engine = True
             break
 
@@ -455,8 +455,6 @@ class SchemaComposer:
             StateSchema class with concrete engine types
         """
         from typing import Dict
-
-        from haive.core.schema.state_schema import StateSchema
 
         # Resolve engine types
         engine_union_type = self.get_engine_union_type()
@@ -2949,7 +2947,7 @@ class SchemaComposer:
                         )
 
         # Add standard input fields if not already present
-        from typing import List, Optional
+        from typing import List
 
         from langchain_core.messages import BaseMessage
 
@@ -3074,7 +3072,7 @@ class SchemaComposer:
                     )
 
         # Add standard output fields if not already present
-        from typing import Any, Dict, List, Optional
+        from typing import List, Optional
 
         from langchain_core.messages import BaseMessage
 
@@ -3088,7 +3086,7 @@ class SchemaComposer:
             )
 
         # Add a content field if no structured output model is present
-        has_structured_output = any(composer.structured_models)
+        any(composer.structured_models)
 
         # Create model directly instead of using StateSchema as base
         field_defs = {}
@@ -3309,7 +3307,7 @@ class SchemaComposer:
             StateSchema subclass
         """
         # Add fields from input schema if not already present
-        for field_name, field_def in self.fields.items():
+        for field_name, _field_def in self.fields.items():
             if (
                 field_name not in input_schema.model_fields
                 and field_name not in output_schema.model_fields
@@ -3381,7 +3379,6 @@ class SchemaComposer:
                 )
 
                 # Try to find matching output schema
-                output_class_name = None
                 input_class_name = input_schema.__name__
 
                 # Common naming patterns for output schemas
@@ -3413,7 +3410,7 @@ class SchemaComposer:
                                     )
 
                                     # Add tool_name attribute to schema
-                                    setattr(output_class, "tool_name", tool_name)
+                                    output_class.tool_name = tool_name
                                     break
 
         # Add tool field to track tool instances

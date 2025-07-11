@@ -1,6 +1,6 @@
 # src/haive/core/engine/agent/persistence/handlers.py
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from langchain_core.messages import HumanMessage
 from pydantic import BaseModel

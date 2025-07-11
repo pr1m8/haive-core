@@ -1,6 +1,6 @@
 # tests/test_reference.py
 
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 

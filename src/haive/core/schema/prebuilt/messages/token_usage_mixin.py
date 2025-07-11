@@ -4,7 +4,7 @@ This module provides a mixin class that adds token usage tracking capabilities
 to MessagesState or any other schema that manages messages.
 """
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 from langchain_core.messages import AnyMessage
 from pydantic import BaseModel, Field

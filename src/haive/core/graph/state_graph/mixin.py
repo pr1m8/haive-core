@@ -1,6 +1,6 @@
 # src/haive/core/graph/graph_mixin.py
 
-from typing import Any, Dict, Generic, Optional
+from typing import Any, Generic
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 

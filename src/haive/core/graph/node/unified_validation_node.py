@@ -6,12 +6,11 @@ with a single node that validates and routes in one unified operation.
 Fixed to follow proper Pydantic patterns without custom __init__ methods.
 """
 
-from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
-from langchain_core.messages import AIMessage, BaseMessage, ToolMessage
+from langchain_core.messages import AIMessage, ToolMessage
 from langgraph.types import Command, Send
-from pydantic import BaseModel, Field, model_validator
+from pydantic import Field, model_validator
 
 from haive.core.graph.node.base_node_config import BaseNodeConfig
 from haive.core.graph.node.types import NodeType

@@ -5,9 +5,7 @@ This tests that LLM engines always get LLMState as their base class.
 """
 
 import sys
-from typing import Any, Dict, Optional
-
-from pydantic import BaseModel, Field
+from typing import Any, Dict
 
 # Add the src directory to the path
 sys.path.insert(0, "src")

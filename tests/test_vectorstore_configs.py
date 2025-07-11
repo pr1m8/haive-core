@@ -135,7 +135,6 @@ def test_milvus_config(sample_embedding_config):
 def test_vector_store_registration():
     """Test that vector stores are properly registered."""
     # Import to trigger registration
-    import haive.core.engine.vectorstore.providers
 
     # Check that vector stores are registered
     registered = BaseVectorStoreConfig.list_registered_types()

@@ -7,18 +7,16 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set, Tuple, Type, Union
+from typing import Any, Dict, List, Optional, Type, Union
 
 from pydantic import BaseModel
 
 from haive.core.schema.compatibility.compatibility import (
-    FieldCompatibility,
     SchemaCompatibility,
 )
 from haive.core.schema.compatibility.types import (
     CompatibilityLevel,
     ConversionPath,
-    FieldInfo,
     SchemaInfo,
 )
 
@@ -79,33 +77,33 @@ class CompatibilityReport:
     def to_markdown(self) -> str:
         """Generate markdown report."""
         lines = [
-            f"# Schema Compatibility Report",
-            f"",
+            "# Schema Compatibility Report",
+            "",
             f"**Generated**: {self.timestamp.strftime('%Y-%m-%d %H:%M:%S')}",
-            f"",
-            f"## Summary",
-            f"",
+            "",
+            "## Summary",
+            "",
             f"- **Source Schema**: `{self.source_schema.name}`",
             f"- **Target Schema**: `{self.target_schema.name}`",
             f"- **Compatible**: {'✅ Yes' if self.overall_compatible else '❌ No'}",
             f"- **Compatibility Score**: {self.compatibility_score:.1f}/100",
             f"- **Compatibility Level**: {self.compatibility_result.level.value}",
-            f"",
+            "",
         ]
 
         # Field summary
         lines.extend(
             [
-                f"## Field Analysis",
-                f"",
-                f"| Metric | Count |",
-                f"|--------|-------|",
+                "## Field Analysis",
+                "",
+                "| Metric | Count |",
+                "|--------|-------|",
                 f"| Source Fields | {len(self.source_schema.fields)} |",
                 f"| Target Fields | {len(self.target_schema.fields)} |",
                 f"| Compatible Fields | {len([f for f in self.field_analyses.values() if f.is_compatible])} |",
                 f"| Missing Required | {len(self.compatibility_result.missing_required_fields)} |",
                 f"| Extra Fields | {len(self.compatibility_result.extra_fields)} |",
-                f"",
+                "",
             ]
         )
 
@@ -113,8 +111,8 @@ class CompatibilityReport:
         if self.critical_issues:
             lines.extend(
                 [
-                    f"## 🚨 Critical Issues",
-                    f"",
+                    "## 🚨 Critical Issues"es",
+                    "",
                 ]
             )
             for issue in self.critical_issues:
@@ -125,8 +123,8 @@ class CompatibilityReport:
         if self.warnings:
             lines.extend(
                 [
-                    f"## ⚠️ Warnings",
-                    f"",
+                    "## ⚠️ Warnings"ngs",
+                    "",
                 ]
             )
             for warning in self.warnings:
@@ -137,10 +135,10 @@ class CompatibilityReport:
         if self.field_analyses:
             lines.extend(
                 [
-                    f"## Field Compatibility Details",
-                    f"",
-                    f"| Field | Source Type | Target Type | Compatible | Notes |",
-                    f"|-------|-------------|-------------|------------|-------|",
+                    "## Field Compatibility Details",
+                    "",
+                    "| Field | Source Type | Target Type | Compatible | Notes |",
+                    "|-------|-------------|-------------|------------|-------|",
                 ]
             )
 
@@ -159,8 +157,8 @@ class CompatibilityReport:
         if self.recommendations:
             lines.extend(
                 [
-                    f"## 💡 Recommendations",
-                    f"",
+                    "## 💡 Recommendations"ns",
+                    "",
                 ]
             )
             for i, rec in enumerate(self.recommendations, 1):
@@ -170,8 +168,8 @@ class CompatibilityReport:
         # Performance
         lines.extend(
             [
-                f"## Performance",
-                f"",
+                "## Performance",
+                "",
                 f"Analysis completed in {self.analysis_time_ms:.2f}ms",
             ]
         )
@@ -429,7 +427,7 @@ class VisualDiffer:
                 lines.append(f"- {field_name}: (only in target)")
                 lines.append(f"    Type: {target_field.type_info.type_hint}")
                 if target_field.is_required:
-                    lines.append(f"    ⚠️  REQUIRED")
+                    lines.append("    ⚠️  REQUIRED"RED")
 
         return "\n".join(lines)
 

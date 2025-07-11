@@ -5,12 +5,11 @@ existing agents and the broader Haive framework, ensuring that the meta
 agent pattern works correctly with real agent implementations.
 """
 
-from typing import Any, Dict, List
-from unittest.mock import MagicMock, Mock
+from typing import Any
+from unittest.mock import Mock
 
 import pytest
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
-from pydantic import ValidationError
+from langchain_core.messages import AIMessage, HumanMessage
 
 from haive.core.graph.node.meta_agent_node import MetaAgentNodeConfig
 from haive.core.schema.prebuilt.meta_state import MetaStateSchema

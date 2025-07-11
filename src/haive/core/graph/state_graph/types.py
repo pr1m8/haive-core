@@ -1,7 +1,7 @@
 # src/haive/core/graph/common/types.py
 
 from collections.abc import Callable
-from typing import Any, Dict, ForwardRef, Optional, Type, TypeVar, Union
+from typing import Any, ForwardRef, Optional, TypeVar, Union
 
 from pydantic import BaseModel
 

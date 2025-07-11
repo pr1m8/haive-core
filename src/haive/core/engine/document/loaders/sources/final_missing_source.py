@@ -4,11 +4,9 @@ This module adds the missing Playwright Web loader that completes our
 comprehensive document loader system.
 """
 
-from typing import Any, Dict, List, Optional
-
 from pydantic import Field
 
-from .enhanced_registry import enhanced_registry, register_source
+from .enhanced_registry import register_source
 from .source_types import LoaderCapability, RemoteSource, SourceCategory
 
 # =============================================================================

@@ -4,7 +4,6 @@ import json
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
 
 from haive.core.utils.haive_discovery.component_info import ComponentInfo
 

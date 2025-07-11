@@ -1,7 +1,6 @@
 """Standalone test of the document loader architecture."""
 
 import sys
-from pathlib import Path
 
 # Direct imports to avoid cascading import issues
 sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
@@ -98,7 +97,6 @@ def test_registry():
     """Test source registry and registration."""
     from haive.core.engine.document.config import LoaderPreference
     from haive.core.engine.document.loaders.sources.registry import (
-        SourceRegistry,
         register_source,
         source_registry,
     )
@@ -135,7 +133,7 @@ def test_registry():
 
         pass
 
-    print(f"  ✓ Registered PDF source")
+    print("  ✓ Registered PDF source"e")
 
     # Test finding source by path
     registration = source_registry.find_source_for_path("/path/to/document.pdf")
@@ -210,7 +208,7 @@ def test_complete_workflow():
     # Test the convenience function
     result = analyze_document_source("/path/to/document.pdf")
 
-    print(f"  ✓ Complete analysis:")
+    print("  ✓ Complete analysis:":")
     print(f"    - Path: {result['path']}")
     print(f"    - Path type: {result['analysis']['path_type']}")
     print(f"    - File extension: {result['analysis']['file_extension']}")

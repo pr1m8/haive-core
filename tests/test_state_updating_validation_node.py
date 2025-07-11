@@ -1,9 +1,8 @@
 """Tests for StateUpdatingValidationNode with dual state update and routing functionality."""
 
-from typing import Any, Dict, List, Optional
-from unittest.mock import MagicMock, Mock
+from typing import Any, Dict, List
+from unittest.mock import Mock
 
-import pytest
 from langchain_core.messages import AIMessage, ToolMessage
 from langgraph.types import END, Send
 
@@ -109,7 +108,7 @@ class TestStateUpdatingValidationNode:
         state.messages.append(ai_msg)
 
         # Execute node
-        result = node_func(state)
+        node_func(state)
 
         # Verify state was updated
         assert state.validation_state is not None
@@ -134,7 +133,7 @@ class TestStateUpdatingValidationNode:
         state.messages.append(ai_msg)
 
         # Execute node
-        result = node_func(state)
+        node_func(state)
 
         # Verify validation state
         assert state.validation_state is not None
@@ -303,7 +302,7 @@ class TestStateUpdatingValidationNode:
         state.messages.append(ai_msg)
 
         # Execute node
-        result = node_func(state)
+        node_func(state)
 
         # Verify tool was found and validated
         assert state.validation_state is not None
@@ -332,7 +331,7 @@ class TestStateUpdatingValidationNode:
         state.messages.append(ai_msg)
 
         # Execute node
-        result = node_func(state)
+        node_func(state)
 
         # Verify validation failed
         assert state.validation_state is not None
@@ -355,7 +354,7 @@ class TestStateUpdatingValidationNode:
         state.messages.append(ai_msg)
 
         # Execute node
-        result = node_func(state)
+        node_func(state)
 
         # Verify metadata was added
         updated_tool_call = state.messages[-1].tool_calls[0]

@@ -5,7 +5,6 @@ from haive.core.engine.document.loaders.base.schema import (
     DocumentEngineOutputSchema,
 )
 from haive.core.engine.document.loaders.sources.remote.base import URLSource
-from haive.core.engine.document.loaders.sources.source_types import SourceCategory
 
 
 class ArxivSource(URLSource):

@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional
 
 from langchain_core.documents import Document
 from langchain_core.messages import (
@@ -239,7 +239,7 @@ class DocumentConverter(TypeConverter):
 
     def convert(self, value: Any, context: ConversionContext) -> Any:
         """Perform conversion."""
-        source_type_name = context.source_type.split(".")[-1]
+        context.source_type.split(".")[-1]
         target_type_name = context.target_type.split(".")[-1]
 
         # Document to Message

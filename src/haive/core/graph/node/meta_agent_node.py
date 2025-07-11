@@ -34,10 +34,10 @@ from __future__ import annotations
 
 import traceback
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from langgraph.types import Command, Send
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 from haive.core.graph.common.types import ConfigLike, StateLike
 from haive.core.graph.node.base_config import NodeConfig

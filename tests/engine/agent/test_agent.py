@@ -1,9 +1,8 @@
 import os
-from typing import ClassVar, List
+from typing import ClassVar
 from unittest.mock import ANY, MagicMock, patch
 
 import pytest
-from pydantic import Field
 
 from haive.core.engine.agent.agent import Agent, register_agent
 from haive.core.engine.agent.config import AgentConfig

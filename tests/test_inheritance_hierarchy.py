@@ -6,8 +6,6 @@ MessagesState → MessagesStateWithTokenUsage → ToolState → LLMState
 And that SchemaComposer detects the appropriate base class.
 """
 
-import asyncio
-
 from langchain_core.tools import tool
 
 from haive.core.engine.aug_llm import AugLLMConfig

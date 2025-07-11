@@ -1,7 +1,7 @@
 """Engine detection and base class determination for schema composition."""
 
 import logging
-from typing import Any, List, Type
+from typing import Any
 
 logger = logging.getLogger(__name__)
 

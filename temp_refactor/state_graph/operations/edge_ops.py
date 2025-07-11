@@ -6,7 +6,6 @@ edges in a graph.
 
 import logging
 from datetime import datetime
-from typing import List, Optional, Tuple
 
 from haive.core.graph.state_graph.base.graph_base import GraphBase
 

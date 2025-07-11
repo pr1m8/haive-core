@@ -5,7 +5,7 @@ in the BaseGraph architecture, following the modular design principles.
 """
 
 import uuid
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from haive.core.graph.common.types import NodeType
 from haive.core.graph.node.config import NodeConfig

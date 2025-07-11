@@ -1,7 +1,6 @@
 # test_node_factory.py
 
 import uuid
-from typing import List
 
 from langchain_core.messages import HumanMessage
 from langgraph.graph import END
