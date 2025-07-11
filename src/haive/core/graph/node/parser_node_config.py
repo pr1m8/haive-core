@@ -266,9 +266,7 @@ class ParserNodeConfig(NodeConfig):
                 msg_name = getattr(msg, "name", None)
                 if msg_name == tool_name:
                     tool_message = msg
-                    logger.info(
-                        "[bold green]✓ Found matching ToolMessage[/bold green]"]"
-                    )
+                    logger.info("[bold green]✓ Found matching ToolMessage[/bold green]")
                     logger.debug(f"  Content type: {type(msg.content)}")
                     logger.debug(f"  Content preview: {str(msg.content)[:100]}...")
                     break
@@ -330,7 +328,7 @@ class ParserNodeConfig(NodeConfig):
             parser = PydanticOutputParser(pydantic_object=tool_class)
             model_instance = parser.parse(str(content))
             logger.info(
-                "[bold green]✓ Successfully parsed with PydanticOutputParser[/bold green]"]"
+                "[bold green]✓ Successfully parsed with PydanticOutputParser[/bold green]"
             )
             return model_instance
         except Exception as e:
@@ -452,7 +450,7 @@ class ParserNodeConfig(NodeConfig):
                 if not field_name:
                     field_name = "parsed_result"
 
-            logger.info("[bold green]✓ Successfully parsed tool response[/bold green]"]")
+            logger.info("[bold green]✓ Successfully parsed tool response[/bold green]")
             logger.debug(f"  Field name: {field_name}")
             logger.debug(f"  Result type: {type(parsed_result).__name__}")
 

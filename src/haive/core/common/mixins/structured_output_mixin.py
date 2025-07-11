@@ -4,13 +4,10 @@ This mixin provides functionality to configure and manage structured output mode
 with support for both v1 (parser-based) and v2 (tool-based) approaches.
 """
 
-from typing import TYPE_CHECKING, Any, Literal, Optional, cast
+from typing import Any, Literal, Optional, cast
 
-from langchain_core.output_parsers import PydanticOutputParser
+from langchain_core.output_parsers import BaseOutputParser, PydanticOutputParser
 from pydantic import BaseModel
-
-if TYPE_CHECKING:
-    from langchain_core.output_parsers import BaseOutputParser
 
 StructuredOutputVersion = Literal["v1", "v2"]
 
@@ -29,7 +26,7 @@ class StructuredOutputMixin:
     structured_output_model: type[BaseModel] | None
     structured_output_version: StructuredOutputVersion | None
     include_format_instructions: bool
-    output_parser: Optional["BaseOutputParser"]
+    output_parser: Optional[BaseOutputParser]
     parser_type: str | None
     partial_variables: dict[str, Any]
     tools: list[Any]
