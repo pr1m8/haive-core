@@ -98,6 +98,14 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
 console = Console()
 
+# Check if rich is available for UI
+try:
+    from rich import console as _
+
+    RICH_AVAILABLE = True
+except ImportError:
+    RICH_AVAILABLE = False
+
 
 class SchemaComposer:
     """Utility for building state schemas dynamically from component fields.
@@ -224,6 +232,19 @@ class SchemaComposer:
         """
         logger.debug("Detecting base class requirements")
 
+        # Rich UI logging
+        if RICH_AVAILABLE:
+            from rich.panel import Panel
+            from rich.table import Table
+
+            console.print(
+                Panel.fit(
+                    f"[bold cyan]Detecting Base Class Requirements[/bold cyan]\n"
+                    f"Components: {len(components) if components else 0}",
+                    title="Schema Detection",
+                )
+            )
+
         # If custom base schema was provided, skip detection
         if self.custom_base_schema:
             logger.debug(
@@ -257,9 +278,13 @@ class SchemaComposer:
                         )
                         self.has_messages = True
 
+                        # IMPORTANT: Add the engine to tracking immediately so it's available
+                        # for the base class selection logic below
+                        self.add_engine(component)
+
                         # Check if this AugLLM has tools
                         if hasattr(component, "tools") and component.tools:
-                            logger.debug("AugLLM has tools - will use ToolState")
+                            logger.debug("AugLLM has tools")
                             self.has_tools = True
 
                 # PRIORITY 2: Check for agent-like components
@@ -328,6 +353,9 @@ class SchemaComposer:
             break
 
         # Priority: LLMState for LLM engines (includes messages + tools + token tracking)
+        logger.debug(
+            f"DEBUG: has_llm_engine={has_llm_engine}, has_tools={self.has_tools}, has_messages={self.has_messages}"
+        )
         if has_llm_engine:
             from haive.core.schema.prebuilt.llm_state import LLMState
 
