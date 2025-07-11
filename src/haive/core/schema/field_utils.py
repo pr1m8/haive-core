@@ -574,6 +574,8 @@ def create_field(
     if default_factory is not None:
         field_info = Field(default_factory=default_factory, **field_params)
     else:
+        # Use Pydantic's natural default handling - don't force explicit None
+        # This matches the behavior from commit 99cfc8b4
         field_info = Field(default=default, **field_params)
 
     # Return the field definition

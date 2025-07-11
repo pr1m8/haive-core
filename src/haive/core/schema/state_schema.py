@@ -567,90 +567,17 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         This ensures that engines stored at the class level (via SchemaComposer)
         are available on state instances.
         """
-        # Initialize undefined fields as appropriate defaults
+        # Initialize engines field if it's PydanticUndefined
         from pydantic_core import PydanticUndefined
 
-        # Comprehensive PydanticUndefined field cleanup
-        # This prevents msgpack serialization errors during LangGraph checkpointing
-        undefined_fields_fixed = 0
+        if not hasattr(self, "engines") or self.engines is PydanticUndefined:
+            self.engines = {}
+            logger.debug("Initialized engines field to empty dict")
 
-        for field_name, field_info in self.__fields__.items():
-            if hasattr(self, field_name):
-                field_value = getattr(self, field_name)
-                if field_value is PydanticUndefined:
-                    # Determine appropriate default based on field type
-                    if field_info.default_factory is not None:
-                        # Use the default_factory to create the default value
-                        default_value = field_info.default_factory()
-                        setattr(self, field_name, default_value)
-                        logger.debug(
-                            f"Fixed PydanticUndefined field '{field_name}' with factory default"
-                        )
-                        undefined_fields_fixed += 1
-                    elif (
-                        field_info.default is not None
-                        and field_info.default is not PydanticUndefined
-                    ):
-                        # Use the explicit default value
-                        setattr(self, field_name, field_info.default)
-                        logger.debug(
-                            f"Fixed PydanticUndefined field '{field_name}' with explicit default"
-                        )
-                        undefined_fields_fixed += 1
-                    else:
-                        # Infer appropriate default based on type annotation
-                        field_type = field_info.annotation
-                        if hasattr(field_type, "__origin__"):
-                            # Handle generic types like List, Dict, etc.
-                            origin = field_type.__origin__
-                            if origin is list:
-                                setattr(self, field_name, [])
-                                logger.debug(
-                                    f"Fixed PydanticUndefined field '{field_name}' with empty list"
-                                )
-                                undefined_fields_fixed += 1
-                            elif origin is dict:
-                                setattr(self, field_name, {})
-                                logger.debug(
-                                    f"Fixed PydanticUndefined field '{field_name}' with empty dict"
-                                )
-                                undefined_fields_fixed += 1
-                            elif origin is set:
-                                setattr(self, field_name, set())
-                                logger.debug(
-                                    f"Fixed PydanticUndefined field '{field_name}' with empty set"
-                                )
-                                undefined_fields_fixed += 1
-                        elif field_type is str:
-                            setattr(self, field_name, "")
-                            logger.debug(
-                                f"Fixed PydanticUndefined field '{field_name}' with empty string"
-                            )
-                            undefined_fields_fixed += 1
-                        elif field_type is int:
-                            setattr(self, field_name, 0)
-                            logger.debug(
-                                f"Fixed PydanticUndefined field '{field_name}' with zero"
-                            )
-                            undefined_fields_fixed += 1
-                        elif field_type is bool:
-                            setattr(self, field_name, False)
-                            logger.debug(
-                                f"Fixed PydanticUndefined field '{field_name}' with False"
-                            )
-                            undefined_fields_fixed += 1
-                        else:
-                            # Default to None for other types
-                            setattr(self, field_name, None)
-                            logger.debug(
-                                f"Fixed PydanticUndefined field '{field_name}' with None"
-                            )
-                            undefined_fields_fixed += 1
-
-        if undefined_fields_fixed > 0:
-            logger.info(
-                f"Fixed {undefined_fields_fixed} PydanticUndefined fields to prevent msgpack serialization errors"
-            )
+        # Initialize engine field if it's PydanticUndefined
+        if not hasattr(self, "engine") or self.engine is PydanticUndefined:
+            self.engine = None
+            logger.debug("Initialized engine field to None")
 
         # Check if class has engines and sync them to instance
         if hasattr(self.__class__, "engines") and self.__class__.engines:

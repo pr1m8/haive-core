@@ -2348,6 +2348,55 @@ class SchemaComposer:
             # IMPORTANT: In Pydantic v2, model_post_init takes a context parameter
             logger.debug(f"schema_post_init called for {self.__class__.__name__}")
 
+            # First, fix any PydanticUndefined fields before parent post_init
+            from pydantic_core import PydanticUndefined
+
+            # Fix ALL PydanticUndefined fields to prevent msgpack serialization errors
+            for field_name, field_info in self.__fields__.items():
+                if hasattr(self, field_name):
+                    field_value = getattr(self, field_name)
+                    if field_value is PydanticUndefined:
+                        # Get default from field_info
+                        if (
+                            hasattr(field_info, "default_factory")
+                            and field_info.default_factory is not None
+                        ):
+                            default_value = field_info.default_factory()
+                            setattr(self, field_name, default_value)
+                            logger.debug(
+                                f"Fixed PydanticUndefined '{field_name}' with factory default"
+                            )
+                        elif (
+                            hasattr(field_info, "default")
+                            and field_info.default is not PydanticUndefined
+                        ):
+                            setattr(self, field_name, field_info.default)
+                            logger.debug(
+                                f"Fixed PydanticUndefined '{field_name}' with explicit default"
+                            )
+                        else:
+                            # Use type-specific defaults
+                            if field_name == "engines":
+                                setattr(self, field_name, {})
+                                logger.debug(
+                                    f"Fixed PydanticUndefined '{field_name}' -> {{}}"
+                                )
+                            elif field_name == "tools":
+                                setattr(self, field_name, [])
+                                logger.debug(
+                                    f"Fixed PydanticUndefined '{field_name}' -> []"
+                                )
+                            elif field_name == "messages":
+                                setattr(self, field_name, [])
+                                logger.debug(
+                                    f"Fixed PydanticUndefined '{field_name}' -> []"
+                                )
+                            else:
+                                setattr(self, field_name, None)
+                                logger.debug(
+                                    f"Fixed PydanticUndefined '{field_name}' -> None"
+                                )
+
             # Call parent post_init if it exists
             if hasattr(super(self.__class__, self), "model_post_init"):
                 super(self.__class__, self).model_post_init(__context)
