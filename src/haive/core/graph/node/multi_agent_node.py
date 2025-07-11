@@ -24,8 +24,7 @@ TOutput = TypeVar("TOutput", bound=BaseModel)
 
 
 class MultiAgentNode(BaseNodeConfig[MultiAgentState, MultiAgentState]):
-    """
-    Node for executing agents within a multi-agent state container.
+    """Node for executing agents within a multi-agent state container.
 
     This node handles:
     - State projection from MultiAgentState to agent-specific schema
@@ -47,7 +46,7 @@ class MultiAgentNode(BaseNodeConfig[MultiAgentState, MultiAgentState]):
     )
 
     # Optional agent reference (will be extracted from state if not provided)
-    agent: Optional[Agent] = Field(
+    agent: Agent | None = Field(
         default=None,
         description="Agent instance (extracted from state if not provided)",
     )
@@ -75,7 +74,7 @@ class MultiAgentNode(BaseNodeConfig[MultiAgentState, MultiAgentState]):
         return self
 
     def __call__(
-        self, state: MultiAgentState, config: Optional[ConfigLike] = None
+        self, state: MultiAgentState, config: ConfigLike | None = None
     ) -> Command:
         """Execute agent with state projection."""
         logger.info(f"{'='*60}")
@@ -111,12 +110,12 @@ class MultiAgentNode(BaseNodeConfig[MultiAgentState, MultiAgentState]):
             if self._needs_recompilation(agent):
                 state.mark_agent_for_recompile(self.agent_name, "Agent graph changed")
 
-            logger.info(f"✅ Agent completed successfully")
+            logger.info("✅ Agent completed successfully"y")
 
             return Command(update=state_update, goto=self._get_goto_node())
 
         except Exception as e:
-            logger.error(f"❌ Agent execution failed: {e}")
+            logger.exception(f"❌ Agent execution failed: {e}")
 
             # Record error in state
             state_update = {
@@ -128,7 +127,7 @@ class MultiAgentNode(BaseNodeConfig[MultiAgentState, MultiAgentState]):
 
             return Command(update=state_update, goto=self._get_goto_node())
 
-    def _get_agent(self, state: MultiAgentState) -> Optional[Agent]:
+    def _get_agent(self, state: MultiAgentState) -> Agent | None:
         """Get agent from state or use provided agent."""
         if self.agent:
             return self.agent
@@ -137,7 +136,7 @@ class MultiAgentNode(BaseNodeConfig[MultiAgentState, MultiAgentState]):
 
     def _project_state_for_agent(
         self, state: MultiAgentState, agent: Agent
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Project container state to agent's expected schema.
 
         This is the key method that gives each agent its exact
@@ -190,7 +189,7 @@ class MultiAgentNode(BaseNodeConfig[MultiAgentState, MultiAgentState]):
 
     def _update_container_state(
         self, state: MultiAgentState, agent_result: Any
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Update container state with agent results."""
         state_update = {}
 
@@ -242,14 +241,13 @@ class MultiAgentNode(BaseNodeConfig[MultiAgentState, MultiAgentState]):
             return agent.graph.needs_recompile()
         return False
 
-    def _get_goto_node(self) -> Optional[str]:
+    def _get_goto_node(self) -> str | None:
         """Get next node to execute."""
         return self.command_goto
 
 
 class StateProjectionNode(BaseNodeConfig[TInput, TOutput]):
-    """
-    Generic state projection node for any schema transformation.
+    """Generic state projection node for any schema transformation.
 
     This node can project from any input schema to any output schema,
     useful for bridging between different state representations.
@@ -260,22 +258,22 @@ class StateProjectionNode(BaseNodeConfig[TInput, TOutput]):
     )
 
     # Schema specifications
-    input_schema: Type[BaseModel] = Field(description="Expected input schema")
+    input_schema: type[BaseModel] = Field(description="Expected input schema")
 
-    output_schema: Type[BaseModel] = Field(description="Output schema to produce")
+    output_schema: type[BaseModel] = Field(description="Output schema to produce")
 
     # Field mappings
-    field_mappings: Dict[str, str] = Field(
+    field_mappings: dict[str, str] = Field(
         default_factory=dict, description="Map input fields to output fields"
     )
 
     # Default values for missing fields
-    defaults: Dict[str, Any] = Field(
+    defaults: dict[str, Any] = Field(
         default_factory=dict, description="Default values for output fields"
     )
 
     def __call__(
-        self, state: StateLike, config: Optional[ConfigLike] = None
+        self, state: StateLike, config: ConfigLike | None = None
     ) -> Command:
         """Project state from input to output schema."""
         logger.info(
@@ -313,7 +311,7 @@ class StateProjectionNode(BaseNodeConfig[TInput, TOutput]):
             validated = self.output_schema(**output_data)
             result = validated.model_dump()
         except Exception as e:
-            logger.error(f"Schema validation failed: {e}")
+            logger.exception(f"Schema validation failed: {e}")
             result = output_data
 
         return Command(update=result, goto=self._get_goto_node())
@@ -325,7 +323,7 @@ class StateProjectionNode(BaseNodeConfig[TInput, TOutput]):
 
 
 def create_multi_agent_node(
-    agent_name: str, name: Optional[str] = None, **kwargs
+    agent_name: str, name: str | None = None, **kwargs
 ) -> MultiAgentNode:
     """Create a multi-agent node for executing an agent from MultiAgentState."""
     if not name:
@@ -335,9 +333,9 @@ def create_multi_agent_node(
 
 
 def create_projection_node(
-    input_schema: Type[BaseModel],
-    output_schema: Type[BaseModel],
-    name: Optional[str] = None,
+    input_schema: type[BaseModel],
+    output_schema: type[BaseModel],
+    name: str | None = None,
     **kwargs,
 ) -> StateProjectionNode:
     """Create a state projection node."""

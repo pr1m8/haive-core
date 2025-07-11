@@ -129,7 +129,6 @@ class SchemaComposer:
         self,
         name: str = "ComposedSchema",
         base_state_schema: Optional[Type[StateSchema]] = None,
-        include_engine_fields: bool = True,
     ):
         """Initialize a new SchemaComposer.
 
@@ -137,8 +136,6 @@ class SchemaComposer:
             name: The name for the composed schema class. Defaults to "ComposedSchema".
             base_state_schema: Optional custom base state schema to use. If not provided,
                              the composer will auto-detect the appropriate base class.
-            include_engine_fields: Whether to include engine and engines fields in the schema.
-                                 Set to False for projected schemas used in multi-agent execution.
 
         Example:
             Creating a schema composer for a conversational agent::
@@ -154,17 +151,8 @@ class SchemaComposer:
                     name="TokenAwareState",
                     base_state_schema=MessagesStateWithTokenUsage
                 )
-
-            Creating a schema without engine fields for projection::
-
-                composer = SchemaComposer(
-                    name="ProjectedState",
-                    base_state_schema=existing_schema,
-                    include_engine_fields=False
-                )
         """
         self.name = name
-        self.include_engine_fields = include_engine_fields
         self.fields = {}
         self.shared_fields = set()
         self.field_sources = defaultdict(set)
@@ -220,31 +208,6 @@ class SchemaComposer:
         tree.add("[yellow]Ready to compose schema[/yellow]")
         console.print(tree)
 
-    def _has_single_llm_engine(self) -> bool:
-        """Check if we have exactly one LLM engine, suggesting LLMState usage.
-
-        Returns:
-            True if there's exactly one primary LLM engine
-        """
-        llm_engines = []
-
-        # Check engines by type
-        if "llm" in self.engines_by_type:
-            llm_engines.extend(self.engines_by_type["llm"])
-
-        # Check for AugLLM specifically in engines
-        for engine_name, engine in self.engines.items():
-            if hasattr(engine, "engine_type"):
-                engine_type_value = getattr(
-                    engine.engine_type, "value", engine.engine_type
-                )
-                if str(engine_type_value).lower() == "llm":
-                    if engine_name not in llm_engines:
-                        llm_engines.append(engine_name)
-
-        # LLMState is appropriate for single primary LLM engine scenarios
-        return len(llm_engines) == 1
-
     def _detect_base_class_requirements(
         self, components: Optional[List[Any]] = None
     ) -> None:
@@ -252,14 +215,12 @@ class SchemaComposer:
         Detect which base class should be used based on components and current fields.
         Must be called before adding fields to avoid duplicates.
 
-        Priority order (following inheritance hierarchy):
+        Priority order:
         1. Use custom base schema if provided
-        2. Check for tools + single LLM engine → LLMState
-        3. Check for tools → ToolState
-        4. Check for messages → MessagesStateWithTokenUsage
+        2. Check for AugLLM engines and agents first
+        3. Check for tools
+        4. Check for messages (use token-aware version)
         5. Default to StateSchema
-
-        Inheritance hierarchy: MessagesState → MessagesStateWithTokenUsage → ToolState → LLMState
         """
         logger.debug("Detecting base class requirements")
 
@@ -343,20 +304,42 @@ class SchemaComposer:
                     except Exception:
                         pass
 
-        # Determine base class with proper priority - following new inheritance hierarchy
-        # MessagesState → MessagesStateWithTokenUsage → ToolState → LLMState
-        if self.has_tools and self._has_single_llm_engine():
+        # Determine base class with proper priority
+        # NEW LOGIC: Always use LLMState as foundation for LLM engines
+        has_llm_engine = False
+
+        # Check for LLM engines in components or current engines
+        if components:
+            for component in components:
+                if component is None:
+                    continue
+                if hasattr(component, "engine_type"):
+                    engine_type_value = getattr(
+                        component.engine_type, "value", component.engine_type
+                    )
+                    engine_type_str = str(engine_type_value).lower()
+                    if engine_type_str == "llm":
+                        has_llm_engine = True
+                        break
+
+        # Also check current engines
+        for engine_name in self.engines_by_type.get("llm", []):
+            has_llm_engine = True
+            break
+
+        # Priority: LLMState for LLM engines (includes messages + tools + token tracking)
+        if has_llm_engine:
             from haive.core.schema.prebuilt.llm_state import LLMState
 
             base_class = LLMState
             logger.debug(
-                "Using LLMState as base class (found tools + single LLM engine)"
+                "Using LLMState as base class (found LLM engine - includes messages, tools, and token tracking)"
             )
         elif self.has_tools:
             from haive.core.schema.prebuilt.tool_state import ToolState
 
             base_class = ToolState
-            logger.debug("Using ToolState as base class (found tools)")
+            logger.debug("Using ToolState as base class (found tools without LLM)")
         elif self.has_messages:
             # Use token-aware messages state for better tracking
             from haive.core.schema.prebuilt.messages.messages_with_token_usage import (
@@ -365,7 +348,7 @@ class SchemaComposer:
 
             base_class = MessagesStateWithTokenUsage
             logger.debug(
-                "Using MessagesStateWithTokenUsage as base class (found messages, with token tracking)"
+                "Using MessagesStateWithTokenUsage as base class (found messages without LLM/tools)"
             )
         else:
             from haive.core.schema.state_schema import StateSchema
@@ -1556,6 +1539,31 @@ class SchemaComposer:
 
                 logger.debug(f"Added 'tools' field for engine '{engine_name}'")
 
+        # 5. Check for tool routes (from ToolRouteMixin)
+        if hasattr(engine, "tool_routes") and engine.tool_routes:
+            tool_routes = engine.tool_routes
+            logger.debug(f"Engine {engine_name} has {len(tool_routes)} tool routes")
+
+            # Add tool_routes field if not present and not in base class
+            if (
+                "tool_routes" not in self.fields
+                and "tool_routes" not in self.base_class_fields
+            ):
+                from haive.core.schema.field_registry import StandardFields
+
+                # Use StandardFields to get the tool_routes field definition
+                tool_routes_field = StandardFields.tool_routes()
+
+                self.add_field(
+                    name=tool_routes_field.name,
+                    field_type=tool_routes_field.field_type,
+                    default_factory=tool_routes_field.default_factory,
+                    description=tool_routes_field.description,
+                    source=source,
+                )
+
+                logger.debug(f"Added 'tool_routes' field for engine '{engine_name}'")
+
         # Update engine IO mapping
         if self.input_fields[engine_name]:
             self.engine_io_mappings[engine_name]["inputs"] = list(
@@ -1936,13 +1944,6 @@ class SchemaComposer:
             Self for chaining
         """
         logger.debug("Adding standardized engine management fields")
-
-        # Skip engine fields if include_engine_fields is False
-        if not self.include_engine_fields:
-            logger.debug(
-                "Skipping engine management fields due to include_engine_fields=False"
-            )
-            return self
 
         # Import engine type if available
         engine_type = Any

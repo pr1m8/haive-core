@@ -16,8 +16,8 @@ class Extension(BaseModel, Generic[T], ExtensionProtocol[T]):
 
     id: str = Field(default_factory=lambda: f"ext_{uuid.uuid4().hex[:8]}")
     name: str
-    description: Optional[str] = Field(default=None)
-    config: Dict[str, Any] = Field(default_factory=dict)
+    description: str | None = Field(default=None)
+    config: dict[str, Any] = Field(default_factory=dict)
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -29,4 +29,3 @@ class Extension(BaseModel, Generic[T], ExtensionProtocol[T]):
 
     def apply(self, target: T) -> None:
         """Apply extension to target. Override in subclasses."""
-        pass

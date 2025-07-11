@@ -1,5 +1,4 @@
-"""
-Haive Logging Module Entry Point
+"""Haive Logging Module Entry Point.
 
 This allows running the logging module directly:
     python -m haive.core.logging [command] [options]

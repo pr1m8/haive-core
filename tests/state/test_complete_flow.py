@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Complete test of the schema fix to verify the full flow works.
-"""
+"""Complete test of the schema fix to verify the full flow works."""
 
 import asyncio
 import sys
@@ -59,7 +57,6 @@ RAG_QUERY_REFINEMENT = ChatPromptTemplate.from_messages(
 
 async def test_complete_flow():
     """Test the complete flow works end-to-end."""
-    print("=== Testing Complete Flow ===")
 
     # Create agent with structured output
     agent = SimpleAgentV2(
@@ -71,49 +68,22 @@ async def test_complete_flow():
         ),
     )
 
-    print(f"Agent: {agent.name}")
-    print(f"Engine: {agent.engine.name}")
-    print(f"Structured output: {agent.structured_output_model}")
 
     # Test run
     try:
         result = await agent.arun({"query": "what is the tallest building in france"})
-        print(f"\n✅ SUCCESS: Agent execution completed")
-        print(f"Result type: {type(result)}")
-        print(
-            f"Result keys: {list(result.keys()) if hasattr(result, 'keys') else 'No keys'}"
-        )
 
         # Check for the expected field
         expected_field = "query_refinement_response"
         if hasattr(result, "keys") and expected_field in result:
-            print(f"✅ SUCCESS: Found expected field '{expected_field}' in result")
             field_value = result[expected_field]
-            print(f"Field value type: {type(field_value)}")
             if isinstance(field_value, QueryRefinementResponse):
-                print(
-                    f"✅ SUCCESS: Field value is correct type QueryRefinementResponse"
-                )
-                print(f"Original query: {field_value.original_query}")
-                print(f"Best refined query: {field_value.best_refined_query}")
-                print(
-                    f"Number of suggestions: {len(field_value.refinement_suggestions)}"
-                )
             else:
-                print(
-                    f"❌ ISSUE: Field value is not QueryRefinementResponse: {type(field_value)}"
-                )
-                print(f"Value: {field_value}")
         else:
-            print(f"❌ FAILURE: Expected field '{expected_field}' not found in result")
-            print(
-                f"Available fields: {list(result.keys()) if hasattr(result, 'keys') else 'No keys'}"
-            )
 
         return True
 
     except Exception as e:
-        print(f"❌ ERROR: Agent execution failed: {e}")
         import traceback
 
         traceback.print_exc()

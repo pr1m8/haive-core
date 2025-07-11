@@ -1,5 +1,4 @@
-"""
-Branch operations for the state graph system.
+"""Branch operations for the state graph system.
 
 This module provides operations for adding, removing, and managing
 branches (conditional routing) in a graph.
@@ -20,8 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 class BranchOperations:
-    """
-    Operations for managing branches in a graph.
+    """Operations for managing branches in a graph.
 
     This class provides methods for adding, removing, updating,
     and querying branches in a graph.
@@ -30,15 +28,14 @@ class BranchOperations:
     @staticmethod
     def add_branch(
         graph: GraphBase,
-        branch_or_name: Union[Branch, str],
-        source_node: Optional[str] = None,
-        condition: Optional[Any] = None,
-        routes: Optional[Dict[Union[bool, str], str]] = None,
-        branch_type: Optional[str] = None,
+        branch_or_name: Branch | str,
+        source_node: str | None = None,
+        condition: Any | None = None,
+        routes: dict[bool | str, str] | None = None,
+        branch_type: str | None = None,
         **kwargs,
     ) -> GraphBase:
-        """
-        Add a branch to the graph with flexible input options.
+        """Add a branch to the graph with flexible input options.
 
         Args:
             graph: Graph to add the branch to
@@ -143,11 +140,10 @@ class BranchOperations:
         graph: GraphBase,
         source_node: str,
         condition: Callable,
-        destinations: Dict[Any, str],
+        destinations: dict[Any, str],
         default: str = "END",
     ) -> GraphBase:
-        """
-        Add conditional edges from a source node based on a condition.
+        """Add conditional edges from a source node based on a condition.
 
         Args:
             graph: Graph to add conditional edges to
@@ -200,12 +196,11 @@ class BranchOperations:
         graph: GraphBase,
         source_node: str,
         condition: Callable,
-        routes: Dict[Union[bool, str], str],
+        routes: dict[bool | str, str],
         default_route: str = "END",
-        name: Optional[str] = None,
+        name: str | None = None,
     ) -> GraphBase:
-        """
-        Add a function-based branch.
+        """Add a function-based branch.
 
         Args:
             graph: Graph to add the branch to
@@ -259,13 +254,12 @@ class BranchOperations:
         source_node: str,
         key: str,
         value: Any,
-        comparison: Union[ComparisonType, str] = ComparisonType.EQUALS,
+        comparison: ComparisonType | str = ComparisonType.EQUALS,
         true_dest: str = "continue",
         false_dest: str = "END",
-        name: Optional[str] = None,
+        name: str | None = None,
     ) -> GraphBase:
-        """
-        Add a key-value comparison branch.
+        """Add a key-value comparison branch.
 
         Args:
             graph: Graph to add the branch to
@@ -285,11 +279,7 @@ class BranchOperations:
             raise ValueError(f"Source node '{source_node}' not found in graph")
 
         # Validate target nodes
-        if (
-            true_dest != "END"
-            and true_dest != "continue"
-            and true_dest not in graph.nodes
-        ):
+        if true_dest not in {"END", "continue"} and true_dest not in graph.nodes:
             raise ValueError(f"True destination node '{true_dest}' not found in graph")
 
         if false_dest != "END" and false_dest not in graph.nodes:
@@ -322,8 +312,7 @@ class BranchOperations:
 
     @staticmethod
     def remove_branch(graph: GraphBase, branch_id: str) -> GraphBase:
-        """
-        Remove a branch from the graph.
+        """Remove a branch from the graph.
 
         Args:
             graph: Graph to remove the branch from
@@ -347,8 +336,7 @@ class BranchOperations:
 
     @staticmethod
     def update_branch(graph: GraphBase, branch_id: str, **updates) -> GraphBase:
-        """
-        Update a branch's properties.
+        """Update a branch's properties.
 
         Args:
             graph: Graph containing the branch
@@ -396,8 +384,7 @@ class BranchOperations:
     def replace_branch(
         graph: GraphBase, branch_id: str, new_branch: Branch
     ) -> GraphBase:
-        """
-        Replace a branch with a new one.
+        """Replace a branch with a new one.
 
         Args:
             graph: Graph containing the branch
@@ -442,9 +429,8 @@ class BranchOperations:
         return graph
 
     @staticmethod
-    def get_branches_for_node(graph: GraphBase, node_name: str) -> List[Branch]:
-        """
-        Get all branches with a given source node.
+    def get_branches_for_node(graph: GraphBase, node_name: str) -> list[Branch]:
+        """Get all branches with a given source node.
 
         Args:
             graph: Graph to query
@@ -460,9 +446,8 @@ class BranchOperations:
         ]
 
     @staticmethod
-    def get_branch(graph: GraphBase, branch_id: str) -> Optional[Branch]:
-        """
-        Get a branch by ID.
+    def get_branch(graph: GraphBase, branch_id: str) -> Branch | None:
+        """Get a branch by ID.
 
         Args:
             graph: Graph to query
@@ -474,9 +459,8 @@ class BranchOperations:
         return graph.branches.get(branch_id)
 
     @staticmethod
-    def get_branch_by_name(graph: GraphBase, name: str) -> Optional[Branch]:
-        """
-        Get a branch by name.
+    def get_branch_by_name(graph: GraphBase, name: str) -> Branch | None:
+        """Get a branch by name.
 
         Args:
             graph: Graph to query

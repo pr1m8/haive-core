@@ -1,5 +1,4 @@
-"""
-Qdrant Vector Store implementation for the Haive framework.
+"""Qdrant Vector Store implementation for the Haive framework.
 
 This module provides a configuration class for the Qdrant vector store,
 which is a vector similarity search engine with extended filtering support.
@@ -35,8 +34,7 @@ from haive.core.engine.vectorstore.types import VectorStoreType
 
 @BaseVectorStoreConfig.register(VectorStoreType.QDRANT)
 class QdrantVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
-    """
-    Configuration for Qdrant vector store in the Haive framework.
+    """Configuration for Qdrant vector store in the Haive framework.
 
     This vector store uses Qdrant for high-performance vector similarity search
     with advanced filtering capabilities and production-ready features.
@@ -82,11 +80,11 @@ class QdrantVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
     """
 
     # Connection configuration
-    url: Optional[str] = Field(
+    url: str | None = Field(
         default=None, description="URL of the Qdrant instance (for Qdrant Cloud)"
     )
 
-    api_key: Optional[SecretStr] = Field(
+    api_key: SecretStr | None = Field(
         default=None,
         description="API key for Qdrant Cloud (auto-resolved from QDRANT_API_KEY)",
     )
@@ -97,15 +95,11 @@ class QdrantVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
     )
 
     # Local deployment configuration
-    host: Optional[str] = Field(
-        default=None, description="Host for local Qdrant instance"
-    )
+    host: str | None = Field(default=None, description="Host for local Qdrant instance")
 
-    port: Optional[int] = Field(
-        default=6333, description="Port for local Qdrant instance"
-    )
+    port: int | None = Field(default=6333, description="Port for local Qdrant instance")
 
-    grpc_port: Optional[int] = Field(
+    grpc_port: int | None = Field(
         default=6334, description="gRPC port for better performance"
     )
 
@@ -123,7 +117,7 @@ class QdrantVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
         description="Distance metric: 'cosine', 'euclidean', 'dot', or 'manhattan'",
     )
 
-    vector_size: Optional[int] = Field(
+    vector_size: int | None = Field(
         default=None,
         description="Size of the embedding vectors (auto-detected if not specified)",
     )
@@ -146,12 +140,12 @@ class QdrantVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
         default=1, ge=1, description="Write consistency factor"
     )
 
-    timeout: Optional[int] = Field(
+    timeout: int | None = Field(
         default=None, description="Timeout for operations in seconds"
     )
 
     @validator("distance_metric")
-    def validate_distance_metric(cls, v):
+    def validate_distance_metric(self, v):
         """Validate distance metric is supported."""
         valid_metrics = ["cosine", "euclidean", "dot", "manhattan"]
         if v not in valid_metrics:
@@ -159,30 +153,29 @@ class QdrantVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
         return v
 
     @validator("url", "host")
-    def validate_connection(cls, v, values):
+    def validate_connection(self, v, values):
         """Validate that either url or host is provided."""
         if not v and not values.get("url") and not values.get("host"):
             raise ValueError("Either 'url' or 'host' must be provided")
         return v
 
-    def get_input_fields(self) -> Dict[str, Tuple[Type, Any]]:
+    def get_input_fields(self) -> dict[str, tuple[type, Any]]:
         """Return input field definitions for Qdrant vector store."""
         return {
             "documents": (
-                List[Document],
+                list[Document],
                 Field(description="Documents to add to the vector store"),
             ),
         }
 
-    def get_output_fields(self) -> Dict[str, Tuple[Type, Any]]:
+    def get_output_fields(self) -> dict[str, tuple[type, Any]]:
         """Return output field definitions for Qdrant vector store."""
         return {
-            "ids": (List[str], Field(description="IDs of the added documents")),
+            "ids": (list[str], Field(description="IDs of the added documents")),
         }
 
     def instantiate(self):
-        """
-        Create a Qdrant vector store from this configuration.
+        """Create a Qdrant vector store from this configuration.
 
         Returns:
             Qdrant: Instantiated Qdrant vector store.

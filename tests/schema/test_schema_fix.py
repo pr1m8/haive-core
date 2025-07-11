@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Test script to verify the schema formation fix.
-"""
+"""Test script to verify the schema formation fix."""
 
 import sys
 
@@ -58,7 +56,6 @@ RAG_QUERY_REFINEMENT = ChatPromptTemplate.from_messages(
 
 def test_schema_formation():
     """Test that the schema formation fix works."""
-    print("=== Testing Schema Formation Fix ===")
 
     # Create agent with structured output
     agent = SimpleAgentV2(
@@ -71,36 +68,21 @@ def test_schema_formation():
     )
 
     # Check the agent's output schema
-    print(f"Agent name: {agent.name}")
-    print(f"Engine name: {agent.engine.name}")
-    print(f"Structured output model: {agent.structured_output_model}")
 
     # Check if engine has modified output schema
     if hasattr(agent.engine, "output_schema") and agent.engine.output_schema:
-        print(f"Engine output schema: {agent.engine.output_schema}")
-        print(
-            f"Engine output schema fields: {list(agent.engine.output_schema.model_fields.keys())}"
-        )
     else:
-        print("Engine has no output schema")
+        pass
 
     # Check the agent's output schema
     if hasattr(agent, "output_schema") and agent.output_schema:
-        print(f"Agent output schema: {agent.output_schema}")
-        print(
-            f"Agent output schema fields: {list(agent.output_schema.model_fields.keys())}"
-        )
     else:
-        print("Agent has no output schema")
+        pass
 
     # Check the state schema
     if hasattr(agent, "state_schema") and agent.state_schema:
-        print(f"Agent state schema: {agent.state_schema}")
-        print(
-            f"Agent state schema fields: {list(agent.state_schema.model_fields.keys())}"
-        )
     else:
-        print("Agent has no state schema")
+        pass
 
     return agent
 
@@ -109,27 +91,18 @@ if __name__ == "__main__":
     agent = test_schema_formation()
 
     # Test a simple run
-    print("\n=== Testing Agent Run ===")
     try:
         result = agent.run(
             {"query": "what is the tallest building in france"}, debug=True
-        )
-        print(f"Result type: {type(result)}")
-        print(
-            f"Result keys: {list(result.keys()) if hasattr(result, 'keys') else 'No keys'}"
         )
 
         # Check for the expected field
         expected_field = "queryrefinementresponse"
         if hasattr(result, "keys") and expected_field in result:
-            print(f"✅ SUCCESS: Found expected field '{expected_field}' in result")
-            print(f"Field value type: {type(result[expected_field])}")
-            print(f"Field value: {result[expected_field]}")
         else:
-            print(f"❌ FAILURE: Expected field '{expected_field}' not found in result")
+            pass")
 
     except Exception as e:
-        print(f"❌ ERROR: Agent run failed: {e}")
         import traceback
 
         traceback.print_exc()

@@ -11,10 +11,7 @@ from langchain_core.messages import (
     filter_messages,
     get_buffer_string,
 )
-from langchain_core.messages.utils import (
-    convert_to_openai_messages,
-    messages_from_dict,
-)
+from langchain_core.messages.utils import convert_to_openai_messages, messages_from_dict
 from langgraph.graph import add_messages
 from langgraph.types import Send
 from pydantic import Field, field_validator, model_validator

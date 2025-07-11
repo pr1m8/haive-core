@@ -18,7 +18,5 @@ TOutput = TypeVar("TOutput", bound=BaseModel)
 class BaseNodeConfig(NodeConfig, Generic[TInput, TOutput]):
     """Base node config with generic input/output typing support for v2 nodes."""
 
-    pass
-
 
 __all__ = ["BaseNodeConfig", "TInput", "TOutput"]

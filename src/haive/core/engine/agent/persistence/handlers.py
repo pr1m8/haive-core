@@ -9,10 +9,9 @@ logger = logging.getLogger(__name__)
 
 
 def process_input(
-    input_data: Union[str, List[str], Dict[str, Any], BaseModel], input_schema=None
-) -> Dict[str, Any]:
-    """
-    Process input for the agent based on the input schema.
+    input_data: str | list[str] | dict[str, Any] | BaseModel, input_schema=None
+) -> dict[str, Any]:
+    """Process input for the agent based on the input schema.
 
     Args:
         input_data: Input in various formats
@@ -35,7 +34,7 @@ def process_input(
 
         # Add to other input fields based on schema
         for field_name, field_info in schema_fields.items():
-            if field_name != "messages" and field_name != "__runnable_config__":
+            if field_name not in {"messages", "__runnable_config__"}:
                 # Only add to text fields
                 field_type = getattr(field_info, "annotation", None) or getattr(
                     field_info, "type_", None
@@ -50,7 +49,7 @@ def process_input(
                 validated = input_schema(**prepared_input)
                 if hasattr(validated, "model_dump"):
                     return validated.model_dump()
-                elif hasattr(validated, "dict"):
+                if hasattr(validated, "dict"):
                     return validated.dict()
                 return validated
             except Exception as e:
@@ -69,7 +68,7 @@ def process_input(
         # Join strings for other text fields
         joined_text = "\n".join(input_data)
         for field_name, field_info in schema_fields.items():
-            if field_name != "messages" and field_name != "__runnable_config__":
+            if field_name not in {"messages", "__runnable_config__"}:
                 # Only add to text fields
                 field_type = getattr(field_info, "annotation", None) or getattr(
                     field_info, "type_", None
@@ -84,7 +83,7 @@ def process_input(
                 validated = input_schema(**prepared_input)
                 if hasattr(validated, "model_dump"):
                     return validated.model_dump()
-                elif hasattr(validated, "dict"):
+                if hasattr(validated, "dict"):
                     return validated.dict()
                 return validated
             except Exception as e:
@@ -109,10 +108,9 @@ def process_input(
         if input_schema:
             try:
                 validated = input_schema(**input_dict)
-                # src/haive/core/engine/agent/persistence/handlers.py (continued)
                 if hasattr(validated, "model_dump"):
                     return validated.model_dump()
-                elif hasattr(validated, "dict"):
+                if hasattr(validated, "dict"):
                     return validated.dict()
                 return validated
             except Exception as e:
@@ -150,7 +148,7 @@ def process_input(
                 validated = input_schema(**model_dict)
                 if hasattr(validated, "model_dump"):
                     return validated.model_dump()
-                elif hasattr(validated, "dict"):
+                if hasattr(validated, "dict"):
                     return validated.dict()
                 return validated
             except Exception as e:
@@ -167,7 +165,7 @@ def process_input(
             validated = input_schema(**fallback_input)
             if hasattr(validated, "model_dump"):
                 return validated.model_dump()
-            elif hasattr(validated, "dict"):
+            if hasattr(validated, "dict"):
                 return validated.dict()
             return validated
         except Exception as e:
@@ -177,14 +175,13 @@ def process_input(
 
 
 def prepare_merged_input(
-    input_data: Union[str, List[str], Dict[str, Any], BaseModel],
-    previous_state: Optional[Any] = None,
-    runtime_config: Optional[Dict[str, Any]] = None,
+    input_data: str | list[str] | dict[str, Any] | BaseModel,
+    previous_state: Any | None = None,
+    runtime_config: dict[str, Any] | None = None,
     input_schema=None,
     state_schema=None,
 ) -> Any:
-    """
-    Process input data and merge with previous state if available.
+    """Process input data and merge with previous state if available.
 
     Args:
         input_data: Input data in various formats
@@ -266,7 +263,7 @@ def prepare_merged_input(
             validated = state_schema(**merged_input)
             if hasattr(validated, "model_dump"):
                 return validated.model_dump()
-            elif hasattr(validated, "dict"):
+            if hasattr(validated, "dict"):
                 return validated.dict()
             return validated
         except Exception as e:
@@ -275,9 +272,8 @@ def prepare_merged_input(
     return merged_input
 
 
-def extract_output(output_data: Any, output_schema=None) -> Dict[str, Any]:
-    """
-    Extract and validate output from agent result.
+def extract_output(output_data: Any, output_schema=None) -> dict[str, Any]:
+    """Extract and validate output from agent result.
 
     Args:
         output_data: Agent output data
@@ -305,7 +301,7 @@ def extract_output(output_data: Any, output_schema=None) -> Dict[str, Any]:
             validated = output_schema(**processed_output)
             if hasattr(validated, "model_dump"):
                 return validated.model_dump()
-            elif hasattr(validated, "dict"):
+            if hasattr(validated, "dict"):
                 return validated.dict()
             return validated
         except Exception as e:
@@ -314,9 +310,8 @@ def extract_output(output_data: Any, output_schema=None) -> Dict[str, Any]:
     return processed_output
 
 
-def extract_state_snapshot(snapshot: Any) -> Dict[str, Any]:
-    """
-    Extract state values from a state snapshot.
+def extract_state_snapshot(snapshot: Any) -> dict[str, Any]:
+    """Extract state values from a state snapshot.
 
     Args:
         snapshot: State snapshot from checkpointer
@@ -331,10 +326,10 @@ def extract_state_snapshot(snapshot: Any) -> Dict[str, Any]:
     if hasattr(snapshot, "values"):
         # Standard StateSnapshot
         return snapshot.values
-    elif hasattr(snapshot, "channel_values") and snapshot.channel_values:
+    if hasattr(snapshot, "channel_values") and snapshot.channel_values:
         # Alternative attribute name in some versions
         return snapshot.channel_values
-    elif isinstance(snapshot, dict):
+    if isinstance(snapshot, dict):
         # Dictionary state
         return snapshot
 
@@ -343,7 +338,7 @@ def extract_state_snapshot(snapshot: Any) -> Dict[str, Any]:
         if hasattr(snapshot, "model_dump"):
             # Pydantic v2
             return snapshot.model_dump()
-        elif hasattr(snapshot, "dict"):
+        if hasattr(snapshot, "dict"):
             # Pydantic v1
             return snapshot.dict()
     except Exception:

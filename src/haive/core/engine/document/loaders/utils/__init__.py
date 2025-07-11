@@ -68,7 +68,6 @@ class SourceType(str, Enum):
     CHM = "chm"
     PPTX = "pptx"
     PPT = "ppt"
-    TOML = "toml"
     PNG = "png"
     JPG = "jpg"
     JPEG = "jpeg"

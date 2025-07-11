@@ -8,10 +8,7 @@ import operator
 from typing import Annotated, Any, Dict, List, Optional
 
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
-from langchain_core.output_parsers import (
-    PydanticOutputParser,
-    StrOutputParser,
-)
+from langchain_core.output_parsers import PydanticOutputParser, StrOutputParser
 
 # Mocked imports to avoid external dependencies
 from langchain_core.prompts import (

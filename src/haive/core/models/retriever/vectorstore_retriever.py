@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from langchain_core.retrievers import BaseRetriever
 from pydantic import Field
@@ -31,7 +31,7 @@ class VectorStoreRetrieverConfig(RetrieverConfig):
     )
 
     # Embedding configuration with default
-    embedding_config: Optional[BaseEmbeddingConfig] = Field(
+    embedding_config: BaseEmbeddingConfig | None = Field(
         default_factory=lambda: HuggingFaceEmbeddingConfig(
             model="sentence-transformers/all-mpnet-base-v2"
         ),
@@ -50,11 +50,11 @@ class VectorStoreRetrieverConfig(RetrieverConfig):
         default="similarity", description="Search type: 'similarity', 'mmr', etc."
     )
 
-    search_kwargs: Dict[str, Any] = Field(
+    search_kwargs: dict[str, Any] = Field(
         default_factory=dict, description="Additional search parameters"
     )
 
-    filter: Optional[Dict[str, Any]] = Field(
+    filter: dict[str, Any] | None = Field(
         default=None, description="Filter to apply to vector store search"
     )
 
@@ -76,8 +76,8 @@ class VectorStoreRetrieverConfig(RetrieverConfig):
             return retriever
 
         except Exception as e:
-            logger.error(f"Error instantiating VectorStoreRetriever: {str(e)}")
-            raise ValueError(f"Failed to create VectorStoreRetriever: {str(e)}")
+            logger.exception(f"Error instantiating VectorStoreRetriever: {e!s}")
+            raise ValueError(f"Failed to create VectorStoreRetriever: {e!s}")
 
     def _get_embeddings(self):
         """Prepare embeddings, with fallback to default."""
@@ -91,8 +91,8 @@ class VectorStoreRetrieverConfig(RetrieverConfig):
                 model="sentence-transformers/all-mpnet-base-v2"
             ).instantiate()
         except Exception as e:
-            logger.error(f"Error creating embeddings: {str(e)}")
-            raise ValueError(f"Failed to create embeddings: {str(e)}")
+            logger.exception(f"Error creating embeddings: {e!s}")
+            raise ValueError(f"Failed to create embeddings: {e!s}")
 
     def _create_vector_store(self, embeddings):
         """Create vector store with given embeddings."""
@@ -104,8 +104,8 @@ class VectorStoreRetrieverConfig(RetrieverConfig):
             # Create vector store
             return self.vector_store_config.get_vectorstore(embedding=embeddings)
         except Exception as e:
-            logger.error(f"Error creating vector store: {str(e)}")
-            raise ValueError(f"Failed to create vector store: {str(e)}")
+            logger.exception(f"Error creating vector store: {e!s}")
+            raise ValueError(f"Failed to create vector store: {e!s}")
 
     def _create_retriever(self, vector_store):
         """Create retriever from vector store."""
@@ -127,8 +127,8 @@ class VectorStoreRetrieverConfig(RetrieverConfig):
                 **extra_kwargs,
             )
         except Exception as e:
-            logger.error(f"Error creating retriever: {str(e)}")
-            raise ValueError(f"Failed to create retriever: {str(e)}")
+            logger.exception(f"Error creating retriever: {e!s}")
+            raise ValueError(f"Failed to create retriever: {e!s}")
 
     def get_retriever(self) -> BaseRetriever:
         """Helper method to create and return the retriever."""

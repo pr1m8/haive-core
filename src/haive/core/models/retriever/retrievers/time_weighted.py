@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 from langchain_core.retrievers import BaseRetriever
 from pydantic import Field
@@ -15,7 +14,7 @@ logger.setLevel(logging.DEBUG)
 class TimeWeightedRetrieverConfig(RetrieverConfig):
     """Configuration for time-weighted retrievers."""
 
-    vector_store_config: Optional[VectorStoreConfig] = Field(
+    vector_store_config: VectorStoreConfig | None = Field(
         default=None, description="Configuration for the vector store"
     )
     decay_rate: float = Field(

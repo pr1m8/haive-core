@@ -9,11 +9,7 @@ from typing import Any, Dict, List, Optional
 from pydantic import Field
 
 from .enhanced_registry import enhanced_registry, register_source
-from .source_types import (
-    LoaderCapability,
-    RemoteSource,
-    SourceCategory,
-)
+from .source_types import LoaderCapability, RemoteSource, SourceCategory
 
 # =============================================================================
 # Missing Web Loader
@@ -49,7 +45,7 @@ class PlaywrightWebSource(RemoteSource):
     browser_type: str = Field(
         "chromium", description="Browser type (chromium, firefox, webkit)"
     )
-    wait_selector: Optional[str] = Field(None, description="CSS selector to wait for")
+    wait_selector: str | None = Field(None, description="CSS selector to wait for")
     timeout: int = Field(30000, description="Page load timeout in milliseconds")
 
 

@@ -1,4 +1,4 @@
-"""Haive Core - Foundation for the Haive AI Agent Framework
+"""Haive Core - Foundation for the Haive AI Agent Framework.
 
 This package provides the core building blocks for creating AI agents:
 
@@ -40,7 +40,7 @@ Quick Start
 >>> graph = BaseGraph()
 >>> # Add nodes to graph as needed
 
-See Also
+See Also:
 --------
 - haive.agents: Pre-built agent implementations
 - haive.tools: Tool library
@@ -62,24 +62,23 @@ from haive.core.engine import (
 from haive.core.graph import (
     BaseGraph,
 )
-from haive.core.schema import (
-    BasicAgentState,
+from haive.core.schema import (  # BasicAgentState,  # Module doesn't exist
     SchemaComposer,
 )
 
 # Public API
 __all__ = [
-    # Version
-    "__version__",
-    # Engine system
-    "Engine",
-    "InvokableEngine",
-    "NonInvokableEngine",
     "AugLLMConfig",
     "AugLLMFactory",
     # Graph system
     "BaseGraph",
+    # "BasicAgentState",  # Module doesn't exist
+    # Engine system
+    "Engine",
+    "InvokableEngine",
+    "NonInvokableEngine",
     # Schema system
     "SchemaComposer",
-    "BasicAgentState",
+    # Version
+    "__version__",
 ]

@@ -131,5 +131,5 @@ def register_agents_from_module(module_path: str) -> int:
 
         return count
     except ImportError as e:
-        logger.error(f"Error importing module {module_path}: {e}")
+        logger.exception(f"Error importing module {module_path}: {e}")
         return 0

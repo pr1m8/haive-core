@@ -19,11 +19,7 @@ from haive.core.graph.branches.send_mapping import (
     SendMapping,
     SendMappingList,
 )
-from haive.core.graph.branches.types import (
-    BranchMode,
-    BranchResult,
-    ComparisonType,
-)
+from haive.core.graph.branches.types import BranchMode, BranchResult, ComparisonType
 from haive.core.graph.common.field_utils import (
     extract_base_field,
     extract_field,

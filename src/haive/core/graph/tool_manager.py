@@ -1,6 +1,6 @@
 """Tool manager wrapper for dynamic tool management."""
 
-from typing import Any, Dict, List
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -15,7 +15,7 @@ class ToolManager(BaseModel):
     """
 
     name: str = Field(default="tool_manager", description="Name of the tool manager")
-    tools: Dict[str, Any] = Field(default_factory=dict, description="Managed tools")
+    tools: dict[str, Any] = Field(default_factory=dict, description="Managed tools")
 
     def __init__(self, name: str = "tool_manager", **kwargs):
         """Initialize a new tool manager."""
@@ -31,6 +31,6 @@ class ToolManager(BaseModel):
         """Get a tool by name."""
         return self.tools.get(tool_name)
 
-    def list_tools(self) -> List[str]:
+    def list_tools(self) -> list[str]:
         """List all available tools."""
         return list(self.tools.keys())

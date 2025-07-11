@@ -1,4 +1,5 @@
-from typing import Callable, Optional, Protocol, Sequence, Type, Union
+from collections.abc import Callable, Sequence
+from typing import Optional, Protocol, Type, Union
 
 from haive.agents.base.agent import Agent
 from langchain_core.tools import BaseTool, StructuredTool
@@ -13,27 +14,25 @@ from haive.core.engine.base import Engine
 
 
 class EngineAware(Protocol):
-    """Protocol for objects that have an engine attribute"""
+    """Protocol for objects that have an engine attribute."""
 
-    engine: Optional[Engine]
+    engine: Engine | None
 
 
 class ToolAware(Protocol):
-    """Protocol for objects that have a tool attribute"""
+    """Protocol for objects that have a tool attribute."""
 
     tools: Sequence[
-        Union[
-            Type[BaseTool],
-            Type[BaseModel],
-            Callable,
-            StructuredTool,
-            BaseModel,
-            BaseToolkit,
-        ]
+        type[BaseTool]
+        | type[BaseModel]
+        | Callable
+        | StructuredTool
+        | BaseModel
+        | BaseToolkit
     ]
 
 
 class AgentAware(Protocol):
-    """Protocol for objects that have an agent attribute"""
+    """Protocol for objects that have an agent attribute."""
 
-    agent: Optional[Agent]
+    agent: Agent | None

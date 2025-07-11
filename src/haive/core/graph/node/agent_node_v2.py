@@ -26,8 +26,7 @@ TOutput = TypeVar("TOutput", bound=BaseModel)
 
 
 class AgentNodeConfig(BaseNodeConfig[TInput, TOutput]):
-    """
-    Schema-aware node configuration for agents in multi-agent systems.
+    """Schema-aware node configuration for agents in multi-agent systems.
 
     This node properly handles:
     - Agent execution with type-safe state management
@@ -53,24 +52,24 @@ class AgentNodeConfig(BaseNodeConfig[TInput, TOutput]):
     agent: Agent = Field(description="The agent to execute")
 
     # Schema handling
-    agent_state_schema: Optional[Type[BaseModel]] = Field(
+    agent_state_schema: type[BaseModel] | None = Field(
         default=None,
         description="Agent's expected state schema (if different from global)",
         exclude=True,
     )
 
     # Field mapping
-    shared_fields: List[str] = Field(
+    shared_fields: list[str] = Field(
         default_factory=lambda: ["messages"],
         description="Fields to share between global and agent state",
     )
 
-    agent_fields: Optional[Dict[str, str]] = Field(
+    agent_fields: dict[str, str] | None = Field(
         default=None, description="Mapping of global_field -> agent_field names"
     )
 
     # Output handling
-    output_field: Optional[str] = Field(
+    output_field: str | None = Field(
         default=None, description="Field to store agent's primary output"
     )
 
@@ -94,7 +93,7 @@ class AgentNodeConfig(BaseNodeConfig[TInput, TOutput]):
             self.agent_state_schema = self.agent.state_schema
         return self
 
-    def get_default_input_fields(self) -> List[FieldDefinition]:
+    def get_default_input_fields(self) -> list[FieldDefinition]:
         """Get input fields based on agent's requirements."""
         fields = []
 
@@ -118,7 +117,7 @@ class AgentNodeConfig(BaseNodeConfig[TInput, TOutput]):
 
         return fields
 
-    def get_default_output_fields(self) -> List[FieldDefinition]:
+    def get_default_output_fields(self) -> list[FieldDefinition]:
         """Get output fields based on agent's outputs."""
         fields = []
 
@@ -140,7 +139,7 @@ class AgentNodeConfig(BaseNodeConfig[TInput, TOutput]):
         fields.append(
             FieldDefinition(
                 name=self.metadata_field,
-                field_type=Optional[Dict[str, Any]],
+                field_type=Optional[dict[str, Any]],
                 default=None,
                 description="Agent execution metadata",
             )
@@ -148,9 +147,7 @@ class AgentNodeConfig(BaseNodeConfig[TInput, TOutput]):
 
         return fields
 
-    def __call__(
-        self, state: StateLike, config: Optional[ConfigLike] = None
-    ) -> Command:
+    def __call__(self, state: StateLike, config: ConfigLike | None = None) -> Command:
         """Execute the agent with proper state management."""
         logger.info(f"{'='*60}")
         logger.info(f"AGENT NODE V2: {self.name}")
@@ -188,7 +185,7 @@ class AgentNodeConfig(BaseNodeConfig[TInput, TOutput]):
             return Command(update=state_update, goto=self._get_goto_node())
 
         except Exception as e:
-            logger.error(f"❌ Agent execution failed: {e}")
+            logger.exception(f"❌ Agent execution failed: {e}")
 
             # Track error
             if self.track_execution:
@@ -199,7 +196,7 @@ class AgentNodeConfig(BaseNodeConfig[TInput, TOutput]):
 
             raise
 
-    def _prepare_agent_input(self, state: StateLike) -> Dict[str, Any]:
+    def _prepare_agent_input(self, state: StateLike) -> dict[str, Any]:
         """Prepare input for agent based on schema requirements."""
         agent_input = {}
 
@@ -210,7 +207,7 @@ class AgentNodeConfig(BaseNodeConfig[TInput, TOutput]):
             )
 
             # Extract fields that exist in both state and agent schema
-            for field_name, field_info in self.agent_state_schema.model_fields.items():
+            for field_name, _field_info in self.agent_state_schema.model_fields.items():
                 # Check field mapping
                 source_field = field_name
                 if self.agent_fields and field_name in self.agent_fields:
@@ -260,23 +257,22 @@ class AgentNodeConfig(BaseNodeConfig[TInput, TOutput]):
 
         return agent_input
 
-    def _extract_message_objects(self, messages: Any) -> List[BaseMessage]:
+    def _extract_message_objects(self, messages: Any) -> list[BaseMessage]:
         """Extract actual BaseMessage objects from various containers."""
         if hasattr(messages, "root"):
             # MessageList with root attribute
             return messages.root
-        elif isinstance(messages, (list, tuple)):
+        if isinstance(messages, list | tuple):
             # Already a list
             return list(messages)
-        else:
-            # Try to iterate
-            try:
-                return list(messages)
-            except:
-                logger.warning(f"Cannot extract messages from {type(messages)}")
-                return []
+        # Try to iterate
+        try:
+            return list(messages)
+        except:
+            logger.warning(f"Cannot extract messages from {type(messages)}")
+            return []
 
-    def _process_agent_output(self, result: Any, state: StateLike) -> Dict[str, Any]:
+    def _process_agent_output(self, result: Any, state: StateLike) -> dict[str, Any]:
         """Process agent output and prepare state update."""
         state_update = {}
 
@@ -306,7 +302,7 @@ class AgentNodeConfig(BaseNodeConfig[TInput, TOutput]):
 
         return state_update
 
-    def _track_start(self, state: StateLike) -> Dict[str, Any]:
+    def _track_start(self, state: StateLike) -> dict[str, Any]:
         """Track agent execution start."""
         return {
             "agent_name": self.agent.name,
@@ -314,7 +310,7 @@ class AgentNodeConfig(BaseNodeConfig[TInput, TOutput]):
             "input_message_count": len(self._get_messages_from_state(state)),
         }
 
-    def _track_end(self, metadata: Dict[str, Any], result: Any) -> Dict[str, Any]:
+    def _track_end(self, metadata: dict[str, Any], result: Any) -> dict[str, Any]:
         """Track agent execution end."""
         metadata["end_time"] = logger.time()
         metadata["duration_ms"] = metadata["end_time"] - metadata["start_time"]
@@ -326,7 +322,7 @@ class AgentNodeConfig(BaseNodeConfig[TInput, TOutput]):
         metadata["status"] = "completed"
         return metadata
 
-    def _track_error(self, error: Exception) -> Dict[str, Any]:
+    def _track_error(self, error: Exception) -> dict[str, Any]:
         """Track agent execution error."""
         return {
             "agent_name": self.agent.name,
@@ -335,11 +331,11 @@ class AgentNodeConfig(BaseNodeConfig[TInput, TOutput]):
             "error_message": str(error),
         }
 
-    def _get_messages_from_state(self, state: StateLike) -> List[BaseMessage]:
+    def _get_messages_from_state(self, state: StateLike) -> list[BaseMessage]:
         """Extract messages from state."""
         if hasattr(state, "messages"):
             return self._extract_message_objects(state.messages)
-        elif hasattr(state, "get"):
+        if hasattr(state, "get"):
             messages = state.get("messages", [])
             return self._extract_message_objects(messages)
         return []
@@ -355,8 +351,7 @@ class AgentNodeConfig(BaseNodeConfig[TInput, TOutput]):
 
 
 class CoordinatorNodeConfig(BaseNodeConfig[TInput, TOutput]):
-    """
-    Coordinator node for managing multi-agent execution patterns.
+    """Coordinator node for managing multi-agent execution patterns.
 
     Handles:
     - Fan-out for parallel execution
@@ -369,7 +364,7 @@ class CoordinatorNodeConfig(BaseNodeConfig[TInput, TOutput]):
         default=NodeType.COORDINATOR, description="Coordinator node type"
     )
 
-    agents: List[Agent] = Field(description="Agents to coordinate")
+    agents: list[Agent] = Field(description="Agents to coordinate")
 
     mode: Literal["fanout", "aggregate", "sequence"] = Field(
         description="Coordination mode"
@@ -384,7 +379,7 @@ class CoordinatorNodeConfig(BaseNodeConfig[TInput, TOutput]):
         default=True, description="Whether to preserve individual agent outputs"
     )
 
-    def get_default_input_fields(self) -> List[FieldDefinition]:
+    def get_default_input_fields(self) -> list[FieldDefinition]:
         """Coordinator needs messages and potentially agent results."""
         fields = [StandardFields.messages(use_enhanced=True)]
 
@@ -392,7 +387,7 @@ class CoordinatorNodeConfig(BaseNodeConfig[TInput, TOutput]):
             fields.append(
                 FieldDefinition(
                     name=self.aggregation_field,
-                    field_type=Optional[Dict[str, Any]],
+                    field_type=Optional[dict[str, Any]],
                     default_factory=dict,
                     description="Individual agent results to aggregate",
                 )
@@ -400,7 +395,7 @@ class CoordinatorNodeConfig(BaseNodeConfig[TInput, TOutput]):
 
         return fields
 
-    def get_default_output_fields(self) -> List[FieldDefinition]:
+    def get_default_output_fields(self) -> list[FieldDefinition]:
         """Coordinator outputs depend on mode."""
         fields = [StandardFields.messages(use_enhanced=True)]
 
@@ -416,21 +411,17 @@ class CoordinatorNodeConfig(BaseNodeConfig[TInput, TOutput]):
 
         return fields
 
-    def __call__(
-        self, state: StateLike, config: Optional[ConfigLike] = None
-    ) -> Command:
+    def __call__(self, state: StateLike, config: ConfigLike | None = None) -> Command:
         """Execute coordination logic."""
-
         if self.mode == "fanout":
             return self._handle_fanout(state, config)
-        elif self.mode == "aggregate":
+        if self.mode == "aggregate":
             return self._handle_aggregate(state, config)
-        elif self.mode == "sequence":
+        if self.mode == "sequence":
             return self._handle_sequence(state, config)
-        else:
-            raise ValueError(f"Unknown coordination mode: {self.mode}")
+        raise ValueError(f"Unknown coordination mode: {self.mode}")
 
-    def _handle_fanout(self, state: StateLike, config: Optional[ConfigLike]) -> Command:
+    def _handle_fanout(self, state: StateLike, config: ConfigLike | None) -> Command:
         """Prepare for parallel agent execution."""
         logger.info(f"Fanning out to {len(self.agents)} agents")
 
@@ -440,9 +431,7 @@ class CoordinatorNodeConfig(BaseNodeConfig[TInput, TOutput]):
             update={"coordination_stage": "fanout"}, goto=self._get_goto_node()
         )
 
-    def _handle_aggregate(
-        self, state: StateLike, config: Optional[ConfigLike]
-    ) -> Command:
+    def _handle_aggregate(self, state: StateLike, config: ConfigLike | None) -> Command:
         """Aggregate results from parallel agents."""
         logger.info("Aggregating agent results")
 
@@ -465,9 +454,7 @@ class CoordinatorNodeConfig(BaseNodeConfig[TInput, TOutput]):
             goto=self._get_goto_node(),
         )
 
-    def _handle_sequence(
-        self, state: StateLike, config: Optional[ConfigLike]
-    ) -> Command:
+    def _handle_sequence(self, state: StateLike, config: ConfigLike | None) -> Command:
         """Handle sequential agent execution tracking."""
         # This is more of a tracking node - actual sequencing is in graph structure
         current_index = state.get("agent_index", 0) if hasattr(state, "get") else 0
@@ -477,7 +464,7 @@ class CoordinatorNodeConfig(BaseNodeConfig[TInput, TOutput]):
             goto=self._get_goto_node(),
         )
 
-    def _aggregate_results(self, results: Dict[str, Any]) -> Any:
+    def _aggregate_results(self, results: dict[str, Any]) -> Any:
         """Aggregate results from multiple agents."""
         if not results:
             return None
@@ -507,11 +494,10 @@ class CoordinatorNodeConfig(BaseNodeConfig[TInput, TOutput]):
         if self.mode == "fanout":
             # Go to first agent or parallel split
             return self.command_goto or "parallel_split"
-        elif self.mode == "aggregate":
+        if self.mode == "aggregate":
             # Continue to next stage
             return self.command_goto or "next"
-        else:
-            return self.command_goto or "next"
+        return self.command_goto or "next"
 
 
 # ============================================================================
@@ -521,8 +507,8 @@ class CoordinatorNodeConfig(BaseNodeConfig[TInput, TOutput]):
 
 def create_agent_node(
     agent: Agent,
-    name: Optional[str] = None,
-    shared_fields: Optional[List[str]] = None,
+    name: str | None = None,
+    shared_fields: list[str] | None = None,
     **kwargs,
 ) -> AgentNodeConfig:
     """Create an agent node configuration."""
@@ -535,9 +521,9 @@ def create_agent_node(
 
 
 def create_coordinator_node(
-    agents: List[Agent],
+    agents: list[Agent],
     mode: Literal["fanout", "aggregate", "sequence"],
-    name: Optional[str] = None,
+    name: str | None = None,
     **kwargs,
 ) -> CoordinatorNodeConfig:
     """Create a coordinator node configuration."""

@@ -108,6 +108,11 @@ if TYPE_CHECKING:
     from haive.core.schema.schema_manager import StateSchemaManager
 
 # Import Engine at runtime for type resolution in postponed annotations
+# Also import BaseOutputParser for type resolution
+# This is needed because AugLLMConfig has output_parser: Optional[BaseOutputParser]
+# and LangGraph evaluates all nested type hints when processing state schemas
+from langchain_core.output_parsers.base import BaseOutputParser
+
 # This is needed because with __future__ annotations, type hints become strings
 # and LangGraph's get_type_hints() needs Engine in the global namespace
 from haive.core.engine.base import Engine
@@ -571,6 +576,20 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         This ensures that engines stored at the class level (via SchemaComposer)
         are available on state instances.
         """
+        # Initialize undefined fields as appropriate defaults
+        from pydantic_core import PydanticUndefined
+
+        if self.engines is PydanticUndefined:
+            self.engines = {}
+            logger.debug("Initialized engines dict from PydanticUndefined")
+
+        if (
+            hasattr(self, "token_usage_history")
+            and self.token_usage_history is PydanticUndefined
+        ):
+            self.token_usage_history = []
+            logger.debug("Initialized token_usage_history list from PydanticUndefined")
+
         # Check if class has engines and sync them to instance
         if hasattr(self.__class__, "engines") and self.__class__.engines:
             logger.debug(
@@ -1354,16 +1373,31 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         current_is_tool_state = issubclass(cls, ToolState)
         current_is_messages_state = issubclass(cls, MessagesState)
 
-        # Determine appropriate base class using same logic as SchemaComposer
+        # Determine appropriate base class for INPUT schema
+        # IMPORTANT: We cannot use MessagesState or ToolState directly as base classes
+        # for input schemas because they inherit from StateSchema which has engine/engines fields.
+        # Instead, we create minimal schemas with just the fields we need.
         base_class = None
-        if has_tools or current_is_tool_state:
-            base_class = ToolState
-            logger.debug("Using ToolState as base for derived input schema")
-        elif has_messages or current_is_messages_state:
-            base_class = MessagesState
-            logger.debug("Using MessagesState as base for derived input schema")
+        if has_messages:
+            # Create a minimal messages schema for input (no StateSchema inheritance)
+            from typing import List
+
+            from langchain_core.messages import BaseMessage
+            from pydantic import Field
+
+            MinimalMessagesSchema = create_model(
+                "_MinimalMessagesInputSchema",
+                messages=(
+                    List[BaseMessage],
+                    Field(default_factory=list, description="Conversation messages"),
+                ),
+            )
+            base_class = MinimalMessagesSchema
+            logger.debug(
+                "Using minimal messages schema as base for derived input schema"
+            )
         else:
-            # Fall back to BaseModel for basic schemas
+            # For pure input schemas, use BaseModel
             base_class = BaseModel
             logger.debug("Using BaseModel as base for derived input schema")
 

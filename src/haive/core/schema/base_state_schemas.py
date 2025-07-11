@@ -8,16 +8,7 @@ separating concerns between different types of agents and workflows.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    List,
-    Optional,
-    Type,
-    TypeVar,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, TypeVar, Union
 
 from langchain_core.messages import BaseMessage
 from pydantic import BaseModel, Field, PrivateAttr

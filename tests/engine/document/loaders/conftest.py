@@ -29,10 +29,7 @@ from haive.core.engine.document.loaders.auto_registry import (
     RegistrationInfo,
     RegistrationStats,
 )
-from haive.core.engine.document.loaders.path_analyzer import (
-    PathAnalyzer,
-    SourceInfo,
-)
+from haive.core.engine.document.loaders.path_analyzer import PathAnalyzer, SourceInfo
 from haive.core.engine.document.loaders.sources.enhanced_registry import (
     EnhancedSourceRegistry,
 )

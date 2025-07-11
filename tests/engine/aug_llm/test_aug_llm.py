@@ -18,7 +18,7 @@ logging.basicConfig(
 
 
 def log_test_result(test_name, result):
-    """Format and log test results for better visibility"""
+    """Format and log test results for better visibility."""
     separator = "=" * 70
     log_msg = f"\n{separator}\n✅ TEST: {test_name}\n{separator}\n"
 
@@ -38,7 +38,6 @@ def log_test_result(test_name, result):
 
     log_msg += f"{separator}\n"
     logger.info(log_msg)
-    print(log_msg)
     return result
 
 

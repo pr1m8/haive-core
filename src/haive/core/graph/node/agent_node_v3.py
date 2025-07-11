@@ -33,8 +33,7 @@ TOutput = TypeVar("TOutput", bound=BaseModel)
 
 
 class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
-    """
-    Agent node configuration with hierarchical state projection support.
+    """Agent node configuration with hierarchical state projection support.
 
     This node configuration handles:
     - Execution of agents within container states (like MultiAgentState)
@@ -82,7 +81,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
         default=True, description="Whether to project state to agent's expected schema"
     )
 
-    shared_fields: List[str] = Field(
+    shared_fields: list[str] = Field(
         default_factory=lambda: ["messages"],
         description="Fields to share from container to agent",
     )
@@ -109,7 +108,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
             raise ValueError("Either agent_name or agent must be provided")
         return self
 
-    def get_default_input_fields(self) -> List[FieldDefinition]:
+    def get_default_input_fields(self) -> list[FieldDefinition]:
         """Get input fields based on container expectations."""
         fields = []
 
@@ -120,7 +119,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
         fields.append(
             FieldDefinition(
                 name=self.agent_state_field,
-                field_type=Dict[str, Dict[str, Any]],
+                field_type=dict[str, dict[str, Any]],
                 default_factory=dict,
                 description="Agent states container",
             )
@@ -131,7 +130,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
             fields.append(
                 FieldDefinition(
                     name=self.agents_field,
-                    field_type=Dict[str, "Agent"],
+                    field_type=dict[str, "Agent"],
                     default_factory=dict,
                     description="Agent instances",
                 )
@@ -139,7 +138,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
 
         return fields
 
-    def get_default_output_fields(self) -> List[FieldDefinition]:
+    def get_default_output_fields(self) -> list[FieldDefinition]:
         """Get output fields."""
         fields = []
 
@@ -151,7 +150,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
             fields.append(
                 FieldDefinition(
                     name=self.agent_state_field,
-                    field_type=Dict[str, Dict[str, Any]],
+                    field_type=dict[str, dict[str, Any]],
                     default_factory=dict,
                     description="Updated agent states",
                 )
@@ -161,7 +160,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
         fields.append(
             FieldDefinition(
                 name="agent_outputs",
-                field_type=Dict[str, Any],
+                field_type=dict[str, Any],
                 default_factory=dict,
                 description="Agent execution outputs",
             )
@@ -169,10 +168,18 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
 
         return fields
 
-    def __call__(
-        self, state: StateLike, config: Optional[ConfigLike] = None
-    ) -> Command:
+    def __call__(self, state: StateLike, config: ConfigLike | None = None) -> Command:
         """Execute agent with hierarchical state projection."""
+        # Check if debug mode is enabled
+        debug_mode = (
+            (config and config.get("debug", False))
+            or (hasattr(state, "debug") and getattr(state, "debug", False))
+            or False
+        )
+
+        if debug_mode:
+            self._display_debug_info(state, "BEFORE_EXECUTION")
+
         logger.info(f"{'='*60}")
         logger.info(f"AGENT NODE V3: {self.name}")
         logger.info(f"Agent: {self.agent_name}")
@@ -190,6 +197,9 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
             # Project state for agent
             agent_input = self._project_state_for_agent(state, agent)
 
+            if debug_mode:
+                self._display_agent_input(agent_input, agent)
+
             logger.info(f"Executing agent with {len(agent_input)} fields")
             logger.debug(f"Fields: {list(agent_input.keys())}")
 
@@ -204,16 +214,22 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
             # Process output
             state_update = self._process_agent_output(result, state, agent)
 
+            if debug_mode:
+                self._display_agent_output(result, state_update)
+
             # Track recompilation if needed
             if self.track_recompilation:
                 self._check_recompilation(state, agent)
 
             logger.info(f"✅ Agent completed with {len(state_update)} field updates")
 
+            if debug_mode:
+                self._display_debug_info(state, "AFTER_EXECUTION", state_update)
+
             return Command(update=state_update, goto=self._get_goto_node())
 
         except Exception as e:
-            logger.error(f"❌ Agent execution failed: {e}")
+            logger.exception(f"❌ Agent execution failed: {e}")
 
             # Record error
             error_update = {
@@ -254,7 +270,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
 
     def _project_state_for_agent(
         self, state: StateLike, agent: "Agent"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Project container state to agent's expected schema.
 
         This is the key method that enables hierarchical state management.
@@ -281,11 +297,11 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
         # AgentNodeV3 just provides the projected data
         return projected
 
-    def _extract_message_objects(self, messages: Any) -> List[BaseMessage]:
+    def _extract_message_objects(self, messages: Any) -> list[BaseMessage]:
         """Extract BaseMessage objects from various containers."""
         if hasattr(messages, "root"):
             return messages.root
-        elif isinstance(messages, (list, tuple)):
+        if isinstance(messages, list | tuple):
             return list(messages)
         else:
             try:
@@ -296,7 +312,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
 
     def _process_agent_output(
         self, result: Any, state: StateLike, agent: "Agent"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Process agent output and prepare state update."""
         state_update = {}
 
@@ -361,9 +377,277 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
                 elif hasattr(state, "agents_needing_recompile"):
                     state.agents_needing_recompile.add(self.agent_name)
 
-    def _get_goto_node(self) -> Optional[str]:
+    def _get_goto_node(self) -> str | None:
         """Get next node to execute."""
         return self.command_goto
+
+    def _display_debug_info(
+        self,
+        state: StateLike,
+        phase: str,
+        state_update: Dict[str, Any] | None = None,
+    ) -> None:
+        """Display comprehensive debug information with rich visualization."""
+        # Create main panel title
+        panel_title = f"🔍 AgentNodeV3 Debug - {phase} - {self.agent_name}"
+
+        # Create the main tree structure
+        debug_tree = Tree(panel_title, style="bold blue")
+
+        # 1. Global MultiAgentState
+        global_branch = debug_tree.add("🌍 Global MultiAgentState", style="bold green")
+        self._add_global_state_info(global_branch, state)
+
+        # 2. Individual Agent State
+        agent_branch = debug_tree.add(
+            f"🤖 Agent '{self.agent_name}' State", style="bold yellow"
+        )
+        self._add_agent_state_info(agent_branch, state)
+
+        # 3. Private/Engine State
+        private_branch = debug_tree.add("🔒 Private/Engine State", style="bold red")
+        self._add_private_state_info(private_branch, state)
+
+        # 4. State Update (if provided)
+        if state_update:
+            update_branch = debug_tree.add("📝 State Updates", style="bold magenta")
+            self._add_state_update_info(update_branch, state_update)
+
+        # Display the tree in a panel
+        console.print(Panel(debug_tree, border_style="blue", expand=False))
+        console.print()  # Add spacing
+
+    def _add_global_state_info(self, branch: Tree, state: StateLike) -> None:
+        """Add global state information to the debug tree."""
+        # Messages
+        if hasattr(state, "messages"):
+            messages = getattr(state, "messages", [])
+            msg_branch = branch.add(f"💬 Messages ({len(messages)})")
+            for i, msg in enumerate(messages[-3:]):  # Show last 3 messages
+                content = (
+                    getattr(msg, "content", str(msg))[:50] + "..."
+                    if len(str(getattr(msg, "content", str(msg)))) > 50
+                    else getattr(msg, "content", str(msg))
+                )
+                msg_type = getattr(msg, "type", type(msg).__name__)
+                msg_branch.add(f"[{i}] {msg_type}: {content}")
+
+        # Agent count and names
+        if hasattr(state, "agents"):
+            agents = getattr(state, "agents", {})
+            agent_branch = branch.add(f"👥 Agents ({len(agents)})")
+            for name, agent in agents.items():
+                agent_type = type(agent).__name__
+                agent_status = "✅ Active" if name == self.agent_name else "⏸️ Idle"
+                agent_branch.add(f"{name} ({agent_type}) - {agent_status}")
+
+        # Execution order
+        if hasattr(state, "agent_execution_order"):
+            order = getattr(state, "agent_execution_order", [])
+            order_branch = branch.add(f"📋 Execution Order ({len(order)})")
+            for i, agent_name in enumerate(order):
+                order_branch.add(f"{i+1}. {agent_name}")
+
+        # Active agent
+        if hasattr(state, "active_agent"):
+            active = getattr(state, "active_agent", None)
+            branch.add(f"⭐ Active Agent: {active or 'None'}")
+
+    def _add_agent_state_info(self, branch: Tree, state: StateLike) -> None:
+        """Add specific agent state information to the debug tree."""
+        # Agent states container
+        if hasattr(state, "agent_states"):
+            agent_states = getattr(state, "agent_states", {})
+            agent_state = agent_states.get(self.agent_name, {})
+
+            state_branch = branch.add(f"📊 State Fields ({len(agent_state)})")
+            for key, value in agent_state.items():
+                if key == "messages":
+                    state_branch.add(f"💬 {key}: {len(value)} messages")
+                elif isinstance(value, list | tuple):
+                    state_branch.add(f"📋 {key}: [{len(value)} items]")
+                elif isinstance(value, dict):
+                    state_branch.add(f"📁 {key}: {{{len(value)} keys}}")
+                else:
+                    value_str = (
+                        str(value)[:30] + "..." if len(str(value)) > 30 else str(value)
+                    )
+                    state_branch.add(f"📝 {key}: {value_str}")
+
+        # Agent outputs
+        if hasattr(state, "agent_outputs"):
+            outputs = getattr(state, "agent_outputs", {})
+            agent_output = outputs.get(self.agent_name, {})
+
+            output_branch = branch.add(f"📤 Outputs ({len(agent_output)})")
+            for key, value in agent_output.items():
+                if key == "error":
+                    output_branch.add(f"❌ {key}: {value}")
+                elif isinstance(value, list | tuple):
+                    output_branch.add(f"📋 {key}: [{len(value)} items]")
+                else:
+                    value_str = (
+                        str(value)[:30] + "..." if len(str(value)) > 30 else str(value)
+                    )
+                    output_branch.add(f"📝 {key}: {value_str}")
+
+    def _add_private_state_info(self, branch: Tree, state: StateLike) -> None:
+        """Add private/engine state information to the debug tree."""
+        # Tool-related state
+        tool_fields = ["tools", "tool_calls", "tool_results", "available_tools"]
+        tool_branch = None
+        for field in tool_fields:
+            if hasattr(state, field):
+                if tool_branch is None:
+                    tool_branch = branch.add("🛠️ Tool State")
+                value = getattr(state, field, None)
+                if isinstance(value, list | tuple):
+                    tool_branch.add(f"{field}: [{len(value)} items]")
+                elif isinstance(value, dict):
+                    tool_branch.add(f"{field}: {{{len(value)} keys}}")
+                else:
+                    tool_branch.add(f"{field}: {str(value)[:30]}...")
+
+        # Engine-related state
+        engine_fields = [
+            "engine_name",
+            "model",
+            "temperature",
+            "max_tokens",
+            "token_usage",
+        ]
+        engine_branch = None
+        for field in engine_fields:
+            if hasattr(state, field):
+                if engine_branch is None:
+                    engine_branch = branch.add("⚙️ Engine State")
+                value = getattr(state, field, None)
+                engine_branch.add(f"{field}: {value}")
+
+        # Meta state
+        meta_fields = ["recompile_needed", "agents_needing_recompile", "meta"]
+        meta_branch = None
+        for field in meta_fields:
+            if hasattr(state, field):
+                if meta_branch is None:
+                    meta_branch = branch.add("🎛️ Meta State")
+                value = getattr(state, field, None)
+                if isinstance(value, set):
+                    meta_branch.add(f"{field}: {{{', '.join(value)}}}")
+                else:
+                    meta_branch.add(f"{field}: {value}")
+
+    def _add_state_update_info(
+        self, branch: Tree, state_update: dict[str, Any]
+    ) -> None:
+        """Add state update information to the debug tree."""
+        for key, value in state_update.items():
+            if key == "messages":
+                branch.add(f"💬 {key}: Updated with new messages")
+            elif key == "agent_states":
+                agent_updates = (
+                    value.get(self.agent_name, {}) if isinstance(value, dict) else {}
+                )
+                update_branch = branch.add(
+                    f"📊 {key}: Agent '{self.agent_name}' ({len(agent_updates)} fields)"
+                )
+                for field, field_value in agent_updates.items():
+                    if isinstance(field_value, list | tuple):
+                        update_branch.add(f"  📋 {field}: [{len(field_value)} items]")
+                    else:
+                        value_str = (
+                            str(field_value)[:30] + "..."
+                            if len(str(field_value)) > 30
+                            else str(field_value)
+                        )
+                        update_branch.add(f"  📝 {field}: {value_str}")
+            elif key == "agent_outputs":
+                agent_output = (
+                    value.get(self.agent_name, {}) if isinstance(value, dict) else {}
+                )
+                output_branch = branch.add(
+                    f"📤 {key}: Agent '{self.agent_name}' ({len(agent_output)} fields)"
+                )
+                for field, field_value in agent_output.items():
+                    value_str = (
+                        str(field_value)[:30] + "..."
+                        if len(str(field_value)) > 30
+                        else str(field_value)
+                    )
+                    output_branch.add(f"  📝 {field}: {value_str}")
+            else:
+                value_str = (
+                    str(value)[:30] + "..." if len(str(value)) > 30 else str(value)
+                )
+                branch.add(f"📝 {key}: {value_str}")
+
+    def _display_agent_input(self, agent_input: dict[str, Any], agent: "Agent") -> None:
+        """Display agent input projection with rich visualization."""
+        input_tree = Tree(
+            f"📥 Projected Input for '{self.agent_name}'", style="bold cyan"
+        )
+
+        # Add agent schema info
+        schema_info = input_tree.add("📋 Schema Information")
+        if hasattr(agent, "state_schema"):
+            schema_name = getattr(
+                agent.state_schema, "__name__", str(agent.state_schema)
+            )
+            schema_info.add(f"State Schema: {schema_name}")
+        if hasattr(agent, "input_schema"):
+            schema_name = getattr(
+                agent.input_schema, "__name__", str(agent.input_schema)
+            )
+            schema_info.add(f"Input Schema: {schema_name}")
+
+        # Add projected fields
+        fields_branch = input_tree.add(f"📊 Projected Fields ({len(agent_input)})")
+        for key, value in agent_input.items():
+            if key == "messages":
+                fields_branch.add(f"💬 {key}: {len(value)} messages")
+            elif isinstance(value, list | tuple):
+                fields_branch.add(f"📋 {key}: [{len(value)} items]")
+            elif isinstance(value, dict):
+                fields_branch.add(f"📁 {key}: {{{len(value)} keys}}")
+            else:
+                value_str = (
+                    str(value)[:30] + "..." if len(str(value)) > 30 else str(value)
+                )
+                fields_branch.add(f"📝 {key}: {value_str}")
+
+        console.print(Panel(input_tree, border_style="cyan", expand=False))
+        console.print()
+
+    def _display_agent_output(self, result: Any, state_update: dict[str, Any]) -> None:
+        """Display agent output and state updates with rich visualization."""
+        output_tree = Tree(f"📤 Agent '{self.agent_name}' Output", style="bold green")
+
+        # Add raw result info
+        result_branch = output_tree.add("🎯 Raw Result")
+        if isinstance(result, dict):
+            result_branch.add(f"Type: Dictionary ({len(result)} fields)")
+            for key, value in result.items():
+                if isinstance(value, list | tuple):
+                    result_branch.add(f"📋 {key}: [{len(value)} items]")
+                else:
+                    value_str = (
+                        str(value)[:30] + "..." if len(str(value)) > 30 else str(value)
+                    )
+                    result_branch.add(f"📝 {key}: {value_str}")
+        else:
+            result_type = type(result).__name__
+            result_branch.add(f"Type: {result_type}")
+            if hasattr(result, "model_dump"):
+                fields = result.model_dump()
+                result_branch.add(f"Fields: {len(fields)}")
+
+        # Add state update info
+        if state_update:
+            update_branch = output_tree.add(f"📝 State Updates ({len(state_update)})")
+            self._add_state_update_info(update_branch, state_update)
+
+        console.print(Panel(output_tree, border_style="green", expand=False))
+        console.print()
 
 
 # ============================================================================
@@ -374,7 +658,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
 def create_agent_node_v3(
     agent_name: str,
     agent: Optional["Agent"] = None,
-    name: Optional[str] = None,
+    name: str | None = None,
     **kwargs,
 ) -> AgentNodeV3Config:
     """Create an agent node V3 configuration.

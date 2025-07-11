@@ -2,13 +2,9 @@
 
 import logging
 from collections.abc import Callable
-from typing import (
-    Any,
-)
+from typing import Any
 
-from langchain_core.messages import (
-    AIMessage,
-)
+from langchain_core.messages import AIMessage
 from pydantic import BaseModel, Field
 
 # Set up logging
@@ -201,7 +197,7 @@ class FunctionCondition(RouteCondition):
         try:
             return self.function(state)
         except Exception as e:
-            logger.error(f"Error evaluating function condition: {e}")
+            logger.exception(f"Error evaluating function condition: {e}")
             return False
 
 

@@ -36,7 +36,6 @@ def debug_state_inspection():
 
     # Run the agent
     result = agent.run({"messages": [input_message]}, config=config)
-    print(result)
     # Debug output
     logger.info("FIRST RUN RESULT:")
     print_state_deeply(result)

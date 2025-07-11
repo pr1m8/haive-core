@@ -30,15 +30,7 @@ Typical usage:
 
 import logging
 import uuid
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Generic,
-    Optional,
-    TypeVar,
-    Union,
-)
+from typing import Any, Callable, Dict, Generic, Optional, TypeVar, Union
 
 from langgraph.graph import END
 from langgraph.types import Command, Send

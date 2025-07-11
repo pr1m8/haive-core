@@ -2,14 +2,9 @@
 
 import logging
 from collections.abc import Callable
-from typing import (
-    Any,
-)
+from typing import Any
 
-from langchain_core.messages import (
-    AIMessage,
-    ToolMessage,
-)
+from langchain_core.messages import AIMessage, ToolMessage
 from langchain_core.tools import BaseTool, create_schema_from_function
 from langchain_core.utils.pydantic import is_basemodel_subclass
 from langgraph.graph import END

@@ -2,7 +2,6 @@
 """In-memory store wrapper implementation."""
 
 import logging
-from typing import Any, Dict, Optional
 
 from langgraph.store.base import BaseStore
 from langgraph.store.memory import InMemoryStore
@@ -44,9 +43,8 @@ class MemoryStoreWrapper(SerializableStoreWrapper):
         if index_config:
             logger.info("Creating InMemoryStore with semantic search")
             return InMemoryStore(index=index_config)
-        else:
-            logger.info("Creating InMemoryStore without semantic search")
-            return InMemoryStore()
+        logger.info("Creating InMemoryStore without semantic search")
+        return InMemoryStore()
 
     async def _create_async_store(self) -> BaseStore:
         """Create async InMemoryStore (same as sync for memory)."""

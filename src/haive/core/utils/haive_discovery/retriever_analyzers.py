@@ -1,6 +1,4 @@
-"""
-Analyzers for retriever and vector store components.
-"""
+"""Analyzers for retriever and vector store components."""
 
 import importlib
 import inspect
@@ -38,10 +36,9 @@ class RetrieverAnalyzer(ComponentAnalyzer):
                 return True
 
             # Check for retriever-like methods
-            if hasattr(obj, "get_relevant_documents") or hasattr(obj, "retrieve"):
-                return True
-
-            return False
+            return bool(
+                hasattr(obj, "get_relevant_documents") or hasattr(obj, "retrieve")
+            )
         except Exception as e:
             logger.debug(f"Error checking if can analyze: {e}")
             return False
@@ -66,7 +63,7 @@ class RetrieverAnalyzer(ComponentAnalyzer):
         info.engine_config = self.create_engine_config(info)
         return info
 
-    def create_tool(self, component_info: ComponentInfo) -> Optional[Any]:
+    def create_tool(self, component_info: ComponentInfo) -> Any | None:
         """Convert retriever to a StructuredTool."""
         if not LANGCHAIN_AVAILABLE:
             return None
@@ -84,7 +81,7 @@ class RetrieverAnalyzer(ComponentAnalyzer):
             # Add query fields
             class RetrieverArgs(args_model):
                 query: str = Field(description="Query to search for")
-                k: Optional[int] = Field(
+                k: int | None = Field(
                     default=4, description="Number of documents to retrieve"
                 )
 
@@ -145,7 +142,7 @@ class RetrieverAnalyzer(ComponentAnalyzer):
 
     def create_engine_config(
         self, component_info: ComponentInfo
-    ) -> Optional[Dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """Create a Haive RetrieverEngine config."""
         try:
             return {
@@ -174,10 +171,9 @@ class VectorStoreAnalyzer(ComponentAnalyzer):
                 return True
 
             # Check methods
-            if hasattr(obj, "similarity_search") or hasattr(obj, "add_documents"):
-                return True
-
-            return False
+            return bool(
+                hasattr(obj, "similarity_search") or hasattr(obj, "add_documents")
+            )
         except Exception as e:
             logger.debug(f"Error checking if can analyze: {e}")
             return False
@@ -202,7 +198,7 @@ class VectorStoreAnalyzer(ComponentAnalyzer):
         info.engine_config = self.create_engine_config(info)
         return info
 
-    def create_tool(self, component_info: ComponentInfo) -> Optional[Any]:
+    def create_tool(self, component_info: ComponentInfo) -> Any | None:
         """Convert vector store to a StructuredTool."""
         if not LANGCHAIN_AVAILABLE:
             return None
@@ -211,10 +207,10 @@ class VectorStoreAnalyzer(ComponentAnalyzer):
 
             class VectorStoreArgs(BaseModel):
                 query: str = Field(description="Query to search for")
-                k: Optional[int] = Field(
+                k: int | None = Field(
                     default=4, description="Number of documents to retrieve"
                 )
-                filter: Optional[Dict[str, Any]] = Field(
+                filter: dict[str, Any] | None = Field(
                     default=None, description="Metadata filter"
                 )
 
@@ -246,7 +242,7 @@ class VectorStoreAnalyzer(ComponentAnalyzer):
 
     def create_engine_config(
         self, component_info: ComponentInfo
-    ) -> Optional[Dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """Create a Haive VectorStoreEngine config."""
         try:
             return {

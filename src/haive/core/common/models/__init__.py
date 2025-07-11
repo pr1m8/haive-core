@@ -1,5 +1,4 @@
-"""
-Common models for the Haive framework.
+"""Common models for the Haive framework.
 
 This module contains reusable model classes and data structures that can be used
 across different parts of the Haive framework.

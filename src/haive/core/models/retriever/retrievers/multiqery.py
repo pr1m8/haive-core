@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from langchain_core.retrievers import BaseRetriever
 from pydantic import Field
@@ -15,10 +15,10 @@ logger.setLevel(logging.DEBUG)
 class MultiQueryRetrieverConfig(RetrieverConfig):
     """Configuration for multi-query retrievers."""
 
-    vector_store_config: Optional[VectorStoreConfig] = Field(
+    vector_store_config: VectorStoreConfig | None = Field(
         default=None, description="Configuration for the vector store"
     )
-    llm_config: Optional[Any] = Field(
+    llm_config: Any | None = Field(
         default=None, description="Configuration for the LLM"
     )
     query_count: int = Field(

@@ -6,10 +6,7 @@ import os
 import pytest
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.prompts import (
-    ChatPromptTemplate,
-    HumanMessagePromptTemplate,
-)
+from langchain_core.prompts import ChatPromptTemplate, HumanMessagePromptTemplate
 from pydantic import BaseModel, Field
 
 from haive.core.engine.aug_llm import AugLLMConfig

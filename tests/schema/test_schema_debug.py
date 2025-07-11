@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Debug schema generation specifically.
-"""
+"""Debug schema generation specifically."""
 
 import sys
 
@@ -30,11 +28,9 @@ TEST_PROMPT = ChatPromptTemplate.from_messages(
 
 def test_schema_debug():
     """Debug schema generation."""
-    print("=== Schema Generation Debug ===")
 
     # Test field naming utility
     field_info = get_field_info_from_model(TestResponse)
-    print(f"Field info from model: {field_info}")
 
     # Create agent
     agent = SimpleAgentV2(
@@ -46,37 +42,21 @@ def test_schema_debug():
         ),
     )
 
-    print(
-        f"\nAgent engine has structured_output_model: {agent.engine.structured_output_model}"
-    )
-    print(f"Agent structured_output_model: {agent.structured_output_model}")
 
     # Check engine's output schema
     if hasattr(agent.engine, "output_schema") and agent.engine.output_schema:
-        print(f"\nEngine output schema: {agent.engine.output_schema}")
-        print(
-            f"Engine output schema fields: {list(agent.engine.output_schema.model_fields.keys())}"
-        )
     else:
-        print(f"\nEngine has no output_schema")
+        pass
 
     # Check agent's state schema
     if hasattr(agent, "state_schema") and agent.state_schema:
-        print(f"\nAgent state schema: {agent.state_schema}")
-        print(
-            f"Agent state schema fields: {list(agent.state_schema.model_fields.keys())}"
-        )
     else:
-        print(f"\nAgent has no state_schema")
+        pass
 
     # Check agent's output schema
     if hasattr(agent, "output_schema") and agent.output_schema:
-        print(f"\nAgent output schema: {agent.output_schema}")
-        print(
-            f"Agent output schema fields: {list(agent.output_schema.model_fields.keys())}"
-        )
     else:
-        print(f"\nAgent has no output_schema")
+        pass
 
     return agent
 

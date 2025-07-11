@@ -1,6 +1,4 @@
-"""
-Simple test to verify SchemaComposer fixes work.
-"""
+"""Simple test to verify SchemaComposer fixes work."""
 
 from rich.console import Console
 

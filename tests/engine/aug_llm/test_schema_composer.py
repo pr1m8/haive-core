@@ -1,6 +1,4 @@
-"""
-Improved tests for SchemaComposer with detailed logging and visibility into field extraction.
-"""
+"""Improved tests for SchemaComposer with detailed logging and visibility into field extraction."""
 
 import logging
 import operator
@@ -38,17 +36,17 @@ class SearchResult(BaseModel):
     """Search result model for testing."""
 
     answer: str = Field(description="Answer to the query")
-    sources: List[str] = Field(default_factory=list, description="Source documents")
+    sources: list[str] = Field(default_factory=list, description="Source documents")
     confidence: float = Field(default=0.0, description="Confidence score")
 
 
 class ChatState(StateSchema):
     """Chat state with messages and reducers."""
 
-    messages: Annotated[List[BaseMessage], operator.add] = Field(
+    messages: Annotated[list[BaseMessage], operator.add] = Field(
         default_factory=list, description="Conversation messages"
     )
-    context: List[str] = Field(default_factory=list, description="Context documents")
+    context: list[str] = Field(default_factory=list, description="Context documents")
     query: str = Field(default="", description="User query")
 
 
@@ -365,9 +363,7 @@ def test_schema_composer_input_output_schema():
 
     # Check what's in output schema
     has_content = "content" in output_schema.model_fields
-    has_searchresult = any(
-        "searchresult" in k for k in output_schema.model_fields.keys()
-    )
+    has_searchresult = any("searchresult" in k for k in output_schema.model_fields)
 
     console.print("\nOutput schema contains:")
     console.print(f"  - 'content' field: {has_content}")
@@ -447,9 +443,9 @@ def test_schema_composer_state_from_io():
     class QueryInputSchema(BaseModel):
         """Input schema for a query-based system."""
 
-        messages: List[BaseMessage] = Field(default_factory=list)
+        messages: list[BaseMessage] = Field(default_factory=list)
         query: str = Field(default="", description="User query")
-        context: List[str] = Field(
+        context: list[str] = Field(
             default_factory=list, description="Context documents"
         )
 
@@ -457,9 +453,9 @@ def test_schema_composer_state_from_io():
     class ResponseOutputSchema(BaseModel):
         """Output schema for a response-based system."""
 
-        messages: List[BaseMessage] = Field(default_factory=list)
+        messages: list[BaseMessage] = Field(default_factory=list)
         response: str = Field(default="", description="Generated response")
-        sources: List[Dict[str, Any]] = Field(
+        sources: list[dict[str, Any]] = Field(
             default_factory=list, description="Source documents"
         )
         confidence: float = Field(default=0.0, description="Confidence score")

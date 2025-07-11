@@ -1,5 +1,4 @@
-"""
-Unified Validation Node V2 - Proper Pydantic implementation.
+"""Unified Validation Node V2 - Proper Pydantic implementation.
 
 This replaces the artificial separation between ValidationNodeV2 and validation_router_v2
 with a single node that validates and routes in one unified operation.
@@ -22,8 +21,7 @@ logger = get_logger(__name__)
 
 
 class UnifiedValidationNodeConfig(BaseNodeConfig):
-    """
-    Unified validation node that combines tool validation and routing.
+    """Unified validation node that combines tool validation and routing.
 
     This node:
     1. Analyzes tool calls from the last AIMessage
@@ -74,10 +72,9 @@ class UnifiedValidationNodeConfig(BaseNodeConfig):
         return self
 
     def __call__(
-        self, state: Dict[str, Any], config: Optional[Dict[str, Any]] = None
+        self, state: dict[str, Any], config: dict[str, Any] | None = None
     ) -> Command:
-        """
-        Unified validation and routing function.
+        """Unified validation and routing function.
 
         This is the main entry point that processes tool calls and routes them.
         """
@@ -136,7 +133,7 @@ class UnifiedValidationNodeConfig(BaseNodeConfig):
             destinations = [
                 d["destination"] for d in routing_decisions if d.get("destination")
             ]
-            unique_destinations = set(destinations)
+            set(destinations)
 
             # Use Send objects if we have multiple decisions, even if same destination
             sends = self._create_send_objects(routing_decisions)
@@ -148,10 +145,9 @@ class UnifiedValidationNodeConfig(BaseNodeConfig):
         return Command(update=update_dict, goto=destination)
 
     def _process_tool_call(
-        self, tool_call: Dict[str, Any], engine: Any, state: Dict[str, Any]
-    ) -> Dict[str, Any]:
-        """
-        Process a single tool call and determine routing.
+        self, tool_call: dict[str, Any], engine: Any, state: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Process a single tool call and determine routing.
 
         Returns a decision dict with routing information.
         """
@@ -227,7 +223,7 @@ class UnifiedValidationNodeConfig(BaseNodeConfig):
 
         return "unknown"
 
-    def _find_pydantic_model(self, tool_name: str, engine: Any) -> Optional[type]:
+    def _find_pydantic_model(self, tool_name: str, engine: Any) -> type | None:
         """Find a Pydantic model class for the tool."""
         if not engine:
             return None
@@ -254,15 +250,11 @@ class UnifiedValidationNodeConfig(BaseNodeConfig):
             return False
 
         tools = getattr(engine, "tools", [])
-        for tool in tools:
-            if hasattr(tool, "name") and tool.name == tool_name:
-                return True
-
-        return False
+        return any(hasattr(tool, "name") and tool.name == tool_name for tool in tools)
 
     def _validate_pydantic_model(
-        self, tool_name: str, tool_args: Dict[str, Any], tool_id: str, engine: Any
-    ) -> Dict[str, Any]:
+        self, tool_name: str, tool_args: dict[str, Any], tool_id: str, engine: Any
+    ) -> dict[str, Any]:
         """Validate a Pydantic model and create ToolMessage."""
         result = {
             "success": False,
@@ -300,7 +292,7 @@ class UnifiedValidationNodeConfig(BaseNodeConfig):
             result["error"] = str(e)
             if self.create_tool_messages:
                 result["tool_message"] = ToolMessage(
-                    content=f"Validation error for {tool_name}: {str(e)}",
+                    content=f"Validation error for {tool_name}: {e!s}",
                     tool_call_id=tool_id,
                     name=tool_name,
                 )
@@ -308,8 +300,8 @@ class UnifiedValidationNodeConfig(BaseNodeConfig):
         return result
 
     def _create_send_objects(
-        self, routing_decisions: List[Dict[str, Any]]
-    ) -> List[Send]:
+        self, routing_decisions: list[dict[str, Any]]
+    ) -> list[Send]:
         """Create Send objects for parallel execution."""
         sends = []
 
@@ -331,7 +323,7 @@ class UnifiedValidationNodeConfig(BaseNodeConfig):
         return sends
 
     def _determine_single_destination(
-        self, routing_decisions: List[Dict[str, Any]]
+        self, routing_decisions: list[dict[str, Any]]
     ) -> str:
         """Determine single destination from routing decisions."""
         if not routing_decisions:
@@ -357,5 +349,4 @@ def create_unified_validation_node(
     name: str = "unified_validation", engine_name: str = "main_engine", **kwargs
 ) -> UnifiedValidationNodeConfig:
     """Create a unified validation node with sensible defaults."""
-
     return UnifiedValidationNodeConfig(name=name, engine_name=engine_name, **kwargs)

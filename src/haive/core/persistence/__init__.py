@@ -83,20 +83,20 @@ from haive.core.persistence.types import (
 )
 
 __all__ = [
+    "CheckpointStorageMode",
     # Base classes
     "CheckpointerConfig",
+    # Types
+    "CheckpointerMode",
+    "CheckpointerType",
     # Implementations
     "MemoryCheckpointerConfig",
     "PostgresCheckpointerConfig",
     "SQLiteCheckpointerConfig",
     "SupabaseCheckpointerConfig",
-    # Handlers
-    "setup_checkpointer",
+    "acreate_postgres_checkpointer",
     # Factory functions
     "create_postgres_checkpointer",
-    "acreate_postgres_checkpointer",
-    # Types
-    "CheckpointerMode",
-    "CheckpointerType",
-    "CheckpointStorageMode",
+    # Handlers
+    "setup_checkpointer",
 ]

@@ -43,7 +43,7 @@ class CheckpointerConfig(BaseModel):
         # Default implementation returns same as synchronous version
         return self.create_checkpointer()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert configuration to a dictionary for serialization.
 
         Returns:

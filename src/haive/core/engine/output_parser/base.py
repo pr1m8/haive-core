@@ -18,11 +18,7 @@ import logging
 import uuid
 from datetime import datetime
 from enum import Enum
-from typing import (
-    Dict,
-    List,
-    Type,
-)
+from typing import Dict, List, Type
 
 from langchain_core.messages import BaseMessage
 from langchain_core.runnables import RunnableConfig

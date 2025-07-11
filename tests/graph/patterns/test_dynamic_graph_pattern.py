@@ -21,7 +21,7 @@ class _TestState(BaseModel):
     """Test state for DynamicGraph."""
 
     test: str = ""
-    value: Optional[str] = None
+    value: str | None = None
 
 
 def test_dynamic_graph_pattern():
@@ -101,8 +101,8 @@ def test_dynamic_graph_pattern():
         assert result["test"] == "value", "Graph execution produced unexpected result"
 
     except Exception as e:
-        logger.error(f"Test failed with exception: {e}")
+        logger.exception(f"Test failed with exception: {e}")
         import traceback
 
-        logger.error(traceback.format_exc())
+        logger.exception(traceback.format_exc())
         raise

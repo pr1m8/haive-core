@@ -35,7 +35,6 @@ class AgentForTests(Agent):
         """Implement required abstract method with a simple workflow."""
         # Use mock implementation to avoid actual graph manipulation
         # This prevents the 'START' node error during testing
-        pass
 
 
 # Test fixtures
@@ -116,7 +115,7 @@ def mock_derive_schema():
         # Return a simple BaseModel class as the schema
         from pydantic import create_model
 
-        mock.return_value = create_model("TestSchema", messages=(List, []))
+        mock.return_value = create_model("TestSchema", messages=(list, []))
         yield mock
 
 

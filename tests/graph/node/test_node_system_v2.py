@@ -17,7 +17,7 @@ logger = logging.getLogger("test_node_factory")
 
 # Define a proper BaseModel for structured output
 class Plan(BaseModel):
-    steps: List[str] = Field(description="A list of steps to complete the task")
+    steps: list[str] = Field(description="A list of steps to complete the task")
 
 
 def test_node_creation_with_schema_composer():

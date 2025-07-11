@@ -1,16 +1,6 @@
 # haive/core/graph/common/types.py
 from enum import Enum
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-)
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
 from langchain_core.runnables import RunnableConfig
 from langgraph.types import Command, Send

@@ -10,16 +10,14 @@ from haive.core.graph.state_graph.base import SerializableModel
 class FunctionReference(SerializableModel):
     """Reference to a callable object that can be serialized."""
 
-    module_path: Optional[str] = Field(
+    module_path: str | None = Field(
         default=None, description="Module containing the callable"
     )
-    function_name: Optional[str] = Field(
-        default=None, description="Name of the callable"
-    )
+    function_name: str | None = Field(default=None, description="Name of the callable")
     callable_type: Literal["function", "method", "class", "lambda", "unknown"] = Field(
         default="function", description="Type of callable"
     )
-    source_code: Optional[str] = Field(
+    source_code: str | None = Field(
         default=None, description="Source code if available"
     )
 
@@ -47,7 +45,7 @@ class FunctionReference(SerializableModel):
 
     @classmethod
     def from_callable(
-        cls, callable_obj: Any, name: Optional[str] = None
+        cls, callable_obj: Any, name: str | None = None
     ) -> Optional["FunctionReference"]:
         """Create a FunctionReference from a callable object."""
         if callable_obj is None:
@@ -84,15 +82,15 @@ class FunctionReference(SerializableModel):
 
         return ref
 
-    def resolve(self) -> Optional[Any]:
+    def resolve(self) -> Any | None:
         """Resolve the reference back to a callable."""
         # Resolve from module path and name
         if self.module_path and self.function_name:
             try:
                 module = importlib.import_module(self.module_path)
                 return getattr(module, self.function_name)
-            except (ImportError, AttributeError) as e:
-                print(f"Error resolving callable: {e}")
+            except (ImportError, AttributeError):
+                pass
 
         # Try to resolve from source code if available
         if self.source_code:
@@ -106,7 +104,7 @@ class FunctionReference(SerializableModel):
                 for obj in namespace.values():
                     if callable(obj):
                         return obj
-            except Exception as e:
-                print(f"Error resolving from source code: {e}")
+            except Exception:
+                pass
 
         return None

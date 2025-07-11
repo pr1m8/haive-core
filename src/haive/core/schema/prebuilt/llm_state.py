@@ -4,11 +4,17 @@ This module provides a state schema optimized for LLM-based agents that need
 to track token usage against thresholds and metadata.
 """
 
-from typing import Any, Dict, Optional, Union
+from __future__ import annotations
 
-from pydantic import Field, computed_field, model_validator
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
-from haive.core.engine import Engine
+# Import BaseOutputParser for type resolution in LangGraph
+# This ensures it's available when LangGraph evaluates type hints
+from langchain_core.output_parsers.base import BaseOutputParser
+from pydantic import Field, computed_field, field_validator, model_validator
+
+# Direct import - simpler approach
+from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.schema.prebuilt.tool_state import ToolState
 
 # Model-specific context lengths (approximate)
@@ -89,7 +95,8 @@ class LLMState(ToolState):
     """
 
     # Override to make engine required for LLM agents
-    engine: Engine = Field(
+    # Use forward reference to avoid runtime type evaluation issues
+    engine: AugLLMConfig = Field(
         ..., description="The LLM engine for this agent"  # Required field
     )
 
@@ -111,12 +118,12 @@ class LLMState(ToolState):
     )
 
     # Context length override (if not auto-detected)
-    context_length_override: Optional[int] = Field(
+    context_length_override: int | None = Field(
         default=None, description="Override auto-detected context length"
     )
 
     @model_validator(mode="after")
-    def setup_primary_engine_references(self) -> "LLMState":
+    def setup_primary_engine_references(self) -> LLMState:
         """Ensure the primary LLM engine is available in engines dict with standard keys.
 
         This works with ToolState's engine management to provide consistent access.
@@ -218,18 +225,19 @@ class LLMState(ToolState):
         max_tokens = 4000  # default
         if hasattr(self.engine, "max_tokens") and self.engine.max_tokens:
             max_tokens = self.engine.max_tokens
-        elif hasattr(self.engine, "llm_config") and hasattr(
-            self.engine.llm_config, "max_tokens"
+        elif (
+            hasattr(self.engine, "llm_config")
+            and hasattr(self.engine.llm_config, "max_tokens")
+            and self.engine.llm_config.max_tokens
         ):
-            if self.engine.llm_config.max_tokens:
-                max_tokens = self.engine.llm_config.max_tokens
+            max_tokens = self.engine.llm_config.max_tokens
 
         if not self.token_usage:
             return max_tokens
 
         return max(0, max_tokens - self.token_usage.total_tokens)
 
-    def get_engine_metadata(self) -> Dict[str, Any]:
+    def get_engine_metadata(self) -> dict[str, Any]:
         """Get metadata from the engine for threshold comparisons."""
         if not self.engine:
             return {}
@@ -259,8 +267,7 @@ class LLMState(ToolState):
         return metadata
 
     def should_summarize_context(self, threshold: float = 0.75) -> bool:
-        """
-        Determine if context should be summarized based on token usage.
+        """Determine if context should be summarized based on token usage.
 
         Args:
             threshold: Percentage threshold (0.0-1.0) for triggering summarization
@@ -271,12 +278,11 @@ class LLMState(ToolState):
         return (self.token_usage_percentage / 100) > threshold
 
     @classmethod
-    def from_engine(cls, engine: Engine, **kwargs) -> "LLMState":
-        """
-        Create LLMState from an engine.
+    def from_engine(cls, engine: AugLLMConfig, **kwargs) -> LLMState:
+        """Create LLMState from an AugLLMConfig engine.
 
         Args:
-            engine: The LLM engine
+            engine: The AugLLMConfig engine
             **kwargs: Additional fields for the state
 
         Returns:

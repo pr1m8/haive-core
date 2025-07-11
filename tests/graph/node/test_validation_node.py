@@ -16,7 +16,7 @@ from haive.core.schema.state_schema import StateSchema
 class _ValidationState(StateSchema):
     """State schema with messages and validation fields."""
 
-    messages: List[Any] = Field(default_factory=list)
+    messages: list[Any] = Field(default_factory=list)
     validated: bool = Field(default=False)
 
 

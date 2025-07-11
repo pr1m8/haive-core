@@ -1,5 +1,4 @@
-"""
-Dynamic Tool Route Mixin with Recompilation Signaling.
+"""Dynamic Tool Route Mixin with Recompilation Signaling.
 
 This mixin extends ToolRouteMixin to provide callbacks when tool routes change,
 enabling graphs to know when they need recompilation.
@@ -16,8 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class DynamicToolRouteMixin(ToolRouteMixin):
-    """
-    Extended tool route mixin that signals when routes change.
+    """Extended tool route mixin that signals when routes change.
 
     This allows graphs and agents to register callbacks that get triggered
     when tool routes are added, updated, or removed, enabling dynamic
@@ -25,19 +23,18 @@ class DynamicToolRouteMixin(ToolRouteMixin):
     """
 
     # Private attributes for change tracking
-    _route_change_callbacks: List[Callable[[str, str, Optional[str]], None]] = (
-        PrivateAttr(default_factory=list)
+    _route_change_callbacks: list[Callable[[str, str, str | None], None]] = PrivateAttr(
+        default_factory=list
     )
-    _route_observers: Dict[str, List[Callable]] = PrivateAttr(default_factory=dict)
-    _pending_changes: Set[str] = PrivateAttr(default_factory=set)
+    _route_observers: dict[str, list[Callable]] = PrivateAttr(default_factory=dict)
+    _pending_changes: set[str] = PrivateAttr(default_factory=set)
 
     def register_route_change_callback(
         self,
-        callback: Callable[[str, str, Optional[str]], None],
-        callback_id: Optional[str] = None,
+        callback: Callable[[str, str, str | None], None],
+        callback_id: str | None = None,
     ) -> str:
-        """
-        Register a callback for tool route changes.
+        """Register a callback for tool route changes.
 
         Args:
             callback: Function called with (tool_name, action, old_route)
@@ -68,10 +65,9 @@ class DynamicToolRouteMixin(ToolRouteMixin):
         return False
 
     def _notify_route_change(
-        self, tool_name: str, action: str, old_route: Optional[str] = None
+        self, tool_name: str, action: str, old_route: str | None = None
     ) -> None:
-        """
-        Notify all registered callbacks of a route change.
+        """Notify all registered callbacks of a route change.
 
         Args:
             tool_name: Name of the tool that changed
@@ -84,17 +80,16 @@ class DynamicToolRouteMixin(ToolRouteMixin):
             try:
                 callback(tool_name, action, old_route)
             except Exception as e:
-                logger.error(f"Error in route change callback: {e}")
+                logger.exception(f"Error in route change callback: {e}")
 
     def add_tool(
         self,
         tool: Any,
-        route: Optional[str] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        route: str | None = None,
+        metadata: dict[str, Any] | None = None,
         notify: bool = True,
     ) -> "DynamicToolRouteMixin":
-        """
-        Add a tool and optionally notify observers.
+        """Add a tool and optionally notify observers.
 
         Args:
             tool: Tool to add
@@ -115,8 +110,7 @@ class DynamicToolRouteMixin(ToolRouteMixin):
     def update_tool_route(
         self, tool_name: str, new_route: str, notify: bool = True
     ) -> "DynamicToolRouteMixin":
-        """
-        Update a tool's route and optionally notify observers.
+        """Update a tool's route and optionally notify observers.
 
         Args:
             tool_name: Name of tool to update
@@ -137,8 +131,7 @@ class DynamicToolRouteMixin(ToolRouteMixin):
     def remove_tool(
         self, tool_name: str, notify: bool = True
     ) -> "DynamicToolRouteMixin":
-        """
-        Remove a tool and optionally notify observers.
+        """Remove a tool and optionally notify observers.
 
         Args:
             tool_name: Name of tool to remove
@@ -161,10 +154,9 @@ class DynamicToolRouteMixin(ToolRouteMixin):
         return self
 
     def batch_update_tools(
-        self, updates: List[Dict[str, Any]], notify_once: bool = True
+        self, updates: list[dict[str, Any]], notify_once: bool = True
     ) -> "DynamicToolRouteMixin":
-        """
-        Perform multiple tool updates and notify once at the end.
+        """Perform multiple tool updates and notify once at the end.
 
         Args:
             updates: List of update operations
@@ -197,7 +189,7 @@ class DynamicToolRouteMixin(ToolRouteMixin):
 
         return self
 
-    def get_pending_changes(self) -> Set[str]:
+    def get_pending_changes(self) -> set[str]:
         """Get set of tools with pending changes."""
         return self._pending_changes.copy()
 

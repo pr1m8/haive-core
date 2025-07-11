@@ -1,5 +1,4 @@
-"""
-Recompilation mixin for agents and engines that need dynamic recompilation.
+"""Recompilation mixin for agents and engines that need dynamic recompilation.
 
 This mixin provides standardized recompilation tracking and management
 for components that can be dynamically updated (agents, engines, graphs).
@@ -15,8 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class RecompileMixin:
-    """
-    Mixin that adds recompilation tracking to agents and engines.
+    """Mixin that adds recompilation tracking to agents and engines.
 
     This mixin provides:
     - Recompilation need tracking
@@ -50,7 +48,7 @@ class RecompileMixin:
         default=False, description="Whether this component needs recompilation"
     )
 
-    recompile_reasons: List[str] = Field(
+    recompile_reasons: list[str] = Field(
         default_factory=list, description="List of reasons why recompilation is needed"
     )
 
@@ -58,7 +56,7 @@ class RecompileMixin:
         default=0, description="Total number of recompilations performed"
     )
 
-    recompile_history: List[Dict[str, Any]] = Field(
+    recompile_history: list[dict[str, Any]] = Field(
         default_factory=list, description="History of recompilation events"
     )
 
@@ -73,8 +71,7 @@ class RecompileMixin:
     )
 
     def mark_for_recompile(self, reason: str) -> None:
-        """
-        Mark this component as needing recompilation.
+        """Mark this component as needing recompilation.
 
         Args:
             reason: Description of why recompilation is needed
@@ -110,8 +107,7 @@ class RecompileMixin:
             self._trigger_auto_recompile()
 
     def resolve_recompile(self, success: bool = True) -> None:
-        """
-        Mark recompilation as resolved.
+        """Mark recompilation as resolved.
 
         Args:
             success: Whether the recompilation was successful
@@ -154,9 +150,8 @@ class RecompileMixin:
                 entry["resolved"] = True
                 entry["resolved_at"] = datetime.now().isoformat()
 
-    def get_recompile_status(self) -> Dict[str, Any]:
-        """
-        Get current recompilation status.
+    def get_recompile_status(self) -> dict[str, Any]:
+        """Get current recompilation status.
 
         Returns:
             Dictionary with recompilation status information
@@ -171,8 +166,7 @@ class RecompileMixin:
         }
 
     def clear_recompile_history(self, keep_recent: int = 10) -> None:
-        """
-        Clear recompilation history, optionally keeping recent entries.
+        """Clear recompilation history, optionally keeping recent entries.
 
         Args:
             keep_recent: Number of recent entries to keep (0 = clear all)
@@ -187,8 +181,7 @@ class RecompileMixin:
         )
 
     def force_recompile(self, reason: str = "Manual force recompile") -> None:
-        """
-        Force immediate recompilation regardless of current state.
+        """Force immediate recompilation regardless of current state.
 
         Args:
             reason: Reason for forcing recompilation
@@ -197,8 +190,7 @@ class RecompileMixin:
         self._trigger_auto_recompile()
 
     def _trigger_auto_recompile(self) -> None:
-        """
-        Trigger automatic recompilation if supported.
+        """Trigger automatic recompilation if supported.
 
         This method should be overridden by subclasses to implement
         actual recompilation logic.
@@ -211,7 +203,7 @@ class RecompileMixin:
         # Subclasses should override this with actual recompilation logic
         self.resolve_recompile(success=True)
 
-    def _get_last_recompile_timestamp(self) -> Optional[str]:
+    def _get_last_recompile_timestamp(self) -> str | None:
         """Get timestamp of last successful recompilation."""
         for entry in reversed(self.recompile_history):
             if entry.get("action") == "resolved_recompile" and entry.get("success"):
@@ -219,8 +211,7 @@ class RecompileMixin:
         return None
 
     def add_recompile_trigger(self, condition_func: callable, reason: str) -> None:
-        """
-        Add a condition that triggers recompilation.
+        """Add a condition that triggers recompilation.
 
         Args:
             condition_func: Function that returns True if recompilation needed
@@ -230,8 +221,7 @@ class RecompileMixin:
             self.mark_for_recompile(reason)
 
     def check_recompile_conditions(self) -> bool:
-        """
-        Check if any recompilation conditions are met.
+        """Check if any recompilation conditions are met.
 
         This method should be overridden by subclasses to implement
         specific recompilation condition checking.

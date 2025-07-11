@@ -15,16 +15,7 @@ import json
 import logging
 import uuid
 from abc import ABC, abstractmethod
-from typing import (
-    Any,
-    Dict,
-    Generic,
-    List,
-    Optional,
-    Tuple,
-    Type,
-    TypeVar,
-)
+from typing import Any, Dict, Generic, List, Optional, Tuple, Type, TypeVar
 
 from langchain_core.runnables import RunnableConfig
 from pydantic import BaseModel, ConfigDict, Field, create_model, field_serializer
