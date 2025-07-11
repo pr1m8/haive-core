@@ -331,8 +331,16 @@ class PostgresCheckpointerConfig(CheckpointerConfig[dict[str, Any]]):
                 logger.exception(f"Failed to open PostgreSQL connection pool: {e}")
                 raise
 
-            # Create checkpointer
-            checkpointer = PostgresSaver(pool)
+            # Import our production serializer factory
+            from haive.core.persistence.serializers import (
+                create_encrypted_serializer_for_postgres,
+            )
+
+            # Create production-grade encrypted serializer for PostgreSQL
+            production_serializer = create_encrypted_serializer_for_postgres(
+                connection_string=self.get_connection_uri()
+            )
+            checkpointer = PostgresSaver(pool, serde=production_serializer)
 
             # Setup tables if needed
             if self.setup_needed:
@@ -501,8 +509,16 @@ class PostgresCheckpointerConfig(CheckpointerConfig[dict[str, Any]]):
                 )
                 raise
 
-            # Create checkpointer
-            checkpointer = AsyncPostgresSaver(pool)
+            # Import our production serializer factory
+            from haive.core.persistence.serializers import (
+                create_encrypted_serializer_for_postgres,
+            )
+
+            # Create production-grade encrypted serializer for PostgreSQL
+            production_serializer = create_encrypted_serializer_for_postgres(
+                connection_string=self.get_connection_uri()
+            )
+            checkpointer = AsyncPostgresSaver(pool, serde=production_serializer)
 
             # Setup tables if needed
             if self.setup_needed:

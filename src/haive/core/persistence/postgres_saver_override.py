@@ -30,6 +30,8 @@ class PostgresSaverNoPreparedStatements(BasePostgresSaver):
     def __init__(
         self,
         conn: psycopg.Connection | ConnectionPool,
+        pipe: psycopg.Pipeline | None = None,
+        serde=None,
     ) -> None:
         """Initialize with connection that has prepared statements disabled."""
         # If it's a raw connection, ensure prepare_threshold is None
@@ -45,8 +47,17 @@ class PostgresSaverNoPreparedStatements(BasePostgresSaver):
                     "Connection has prepare_threshold enabled. This may cause conflicts."
                 )
 
-        # Call parent init
-        super().__init__(conn)
+        # Call parent init with all parameters
+        super().__init__(conn, pipe=pipe, serde=serde)
+
+        # CRITICAL: Override jsonplus_serde to use our secure serializer for metadata
+        if serde is not None:
+            self.jsonplus_serde = serde
+            import logging
+
+            logging.getLogger(__name__).info(
+                f"Set jsonplus_serde to secure serializer: {type(serde).__name__}"
+            )
 
 
 import psycopg
@@ -80,6 +91,8 @@ class AsyncPostgresSaverNoPreparedStatements(BaseAsyncPostgresSaver):
     def __init__(
         self,
         conn: psycopg.AsyncConnection | AsyncConnectionPool,
+        pipe: psycopg.AsyncPipeline | None = None,
+        serde=None,
     ) -> None:
         """Initialize with async connection that has prepared statements disabled."""
         # If it's a raw connection, ensure prepare_threshold is None
@@ -90,5 +103,14 @@ class AsyncPostgresSaverNoPreparedStatements(BaseAsyncPostgresSaver):
                 "Connection has prepare_threshold enabled. This may cause conflicts."
             )
 
-        # Call parent init
-        super().__init__(conn)
+        # Call parent init with all parameters
+        super().__init__(conn, pipe=pipe, serde=serde)
+
+        # CRITICAL: Override jsonplus_serde to use our secure serializer for metadata
+        if serde is not None:
+            self.jsonplus_serde = serde
+            import logging
+
+            logging.getLogger(__name__).info(
+                f"Set jsonplus_serde to secure serializer: {type(serde).__name__}"
+            )
