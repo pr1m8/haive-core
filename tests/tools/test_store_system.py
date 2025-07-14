@@ -1,9 +1,7 @@
 """Tests for the store management system and tools."""
 
 import json
-import uuid
 from datetime import datetime
-from typing import Any, Dict
 
 import pytest
 
@@ -349,7 +347,7 @@ class TestStoreSystemIntegration:
         """Test a complete memory workflow using tools."""
         # Create tools
         store_tool = create_store_memory_tool(store_manager)
-        search_tool = create_search_memory_tool(store_manager)
+        create_search_memory_tool(store_manager)
         retrieve_tool = create_retrieve_memory_tool(store_manager)
         update_tool = create_update_memory_tool(store_manager)
         delete_tool = create_delete_memory_tool(store_manager)

@@ -51,7 +51,7 @@ class TestStoreFactory:
         from pydantic_core import ValidationError
 
         with pytest.raises(ValidationError):
-            config = StoreConfig(type="unknown_type")
+            StoreConfig(type="unknown_type")
 
     def test_create_store_with_connection_params(self):
         """Test creating store with individual connection parameters."""

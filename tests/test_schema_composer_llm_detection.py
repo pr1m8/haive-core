@@ -1,10 +1,7 @@
 """Test that SchemaComposer properly detects LLM engines and uses LLMState."""
 
-import pytest
-
 from haive.core.engine.aug_llm.config import AugLLMConfig
 from haive.core.schema.prebuilt.llm_state import LLMState
-from haive.core.schema.prebuilt.messages_state import MessagesState
 from haive.core.schema.schema_composer import SchemaComposer
 
 

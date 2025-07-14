@@ -1,7 +1,5 @@
 """Tests for FieldMapping dataclass - using real components only."""
 
-import pytest
-
 from haive.core.graph.node.composer import FieldMapping
 
 

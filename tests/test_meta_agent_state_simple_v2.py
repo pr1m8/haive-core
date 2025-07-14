@@ -13,11 +13,10 @@ from typing import Any, Dict
 
 import pytest
 from haive.agents.simple.agent_v2 import SimpleAgentV2
-from langchain_core.messages import AIMessage, HumanMessage
+from langchain_core.messages import HumanMessage
 from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 
-from haive.core.common.mixins.dynamic_tool_route_mixin import DynamicToolRouteMixin
 from haive.core.common.mixins.recompile_mixin import RecompileMixin
 from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.models.llm.base import AzureLLMConfig
@@ -178,7 +177,7 @@ class TestMetaAgentStateWithSimpleV2:
         agent = meta_state_with_agent.agent
 
         # Debug agent attributes
-        print(f"\n=== AGENT DEBUG INFO ===")
+        print("\n=== AGENT DEBUG INFO ===")
         print(f"Agent type: {type(agent)}")
         print(f"Agent name: {getattr(agent, 'name', 'NO NAME')}")
         print(f"Agent MRO: {[cls.__name__ for cls in type(agent).__mro__]}")
@@ -202,7 +201,7 @@ class TestMetaAgentStateWithSimpleV2:
             engine_tools = getattr(agent.engine, "tools", "NO_TOOLS")
             print(f"  engine.tools: {engine_tools}")
 
-        print(f"=== END DEBUG INFO ===\n")
+        print("=== END DEBUG INFO ===\n")
 
         # Skip test if agent doesn't have recompilation capability
         if not hasattr(agent, "needs_recompile"):
@@ -266,7 +265,7 @@ class TestMetaAgentStateWithSimpleV2:
     def test_state_persistence_through_recompilation(self, meta_state_with_agent):
         """Test that state persists through agent recompilation."""
         # Execute once to establish state
-        result1 = meta_state_with_agent.execute_agent()
+        meta_state_with_agent.execute_agent()
         initial_history_count = len(meta_state_with_agent.execution_history)
 
         # Get the agent and add tool (triggers recompilation)
@@ -285,7 +284,7 @@ class TestMetaAgentStateWithSimpleV2:
                 )
             ]
         }
-        result2 = meta_state_with_agent.execute_agent(input_data=new_input)
+        meta_state_with_agent.execute_agent(input_data=new_input)
 
         # Verify state persistence
         assert len(meta_state_with_agent.execution_history) == initial_history_count + 1
@@ -312,7 +311,7 @@ class TestMetaAgentStateWithSimpleV2:
 
         # Check that we got structured output
         assert result["status"] == "success"
-        output = result["output"]
+        result["output"]
 
         # The output should contain our structured result
         # (The exact structure depends on SimpleAgentV2 implementation)
@@ -323,7 +322,7 @@ class TestMetaAgentStateWithSimpleV2:
         # Cause an error by passing invalid input
         invalid_input = {"messages": None}  # This should cause an error
 
-        with pytest.raises(RuntimeError) as exc_info:
+        with pytest.raises(RuntimeError):
             meta_state_with_agent.execute_agent(input_data=invalid_input)
 
         # Check error state

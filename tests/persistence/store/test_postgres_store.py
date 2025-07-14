@@ -8,8 +8,6 @@ This test suite validates the PostgreSQL store wrapper's ability to handle:
 4. Both synchronous and asynchronous store operations
 """
 
-import asyncio
-import logging
 import os
 import uuid
 from typing import Optional
