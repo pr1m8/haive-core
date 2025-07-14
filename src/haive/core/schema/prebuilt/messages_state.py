@@ -117,21 +117,8 @@ class MessagesState(StateSchema):
 
         return instance
 
-    @model_validator(mode="after")
-    def track_all_message_tokens(self) -> "MessagesState":
-        """
-        Automatically track token usage for all messages.
-        This runs after model creation to ensure all messages are tracked.
-        """
-        # Only track if we haven't already initialized token tracking
-        if not self.token_usage and not self.token_usage_history:
-            # Track tokens for all AI messages
-            for message in self.messages:
-                if isinstance(message, AIMessage):
-                    # Extract and track token usage from the message
-                    self.track_message_tokens(message)
-
-        return self
+    # NOTE: Token tracking validators moved to MessagesStateWithTokenUsage
+    # The base MessagesState doesn't have token_usage fields
 
     @model_validator(mode="after")
     def sync_message_engine_settings(self) -> "MessagesState":
@@ -168,9 +155,8 @@ class MessagesState(StateSchema):
             message = messages_from_dict([message])[0]
         self.messages.append(message)
 
-        # Automatically track token usage for AI messages
-        if isinstance(message, AIMessage):
-            self.track_message_tokens(message)
+        # NOTE: Token tracking moved to MessagesStateWithTokenUsage
+        # The base MessagesState doesn't have token tracking methods
 
     def get_last_message(self) -> Optional[AnyMessage]:
         """Get the last message in the conversation."""

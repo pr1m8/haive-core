@@ -94,10 +94,10 @@ class LLMState(ToolState):
         ```
     """
 
-    # Override to make engine required for LLM agents
-    # Use forward reference to avoid runtime type evaluation issues
-    engine: AugLLMConfig = Field(
-        ..., description="The LLM engine for this agent"  # Required field
+    # Override to make engine optional for LLM agents to prevent PydanticUndefined serialization errors
+    # When creating state instances, engine can be None initially and set later
+    engine: Optional[AugLLMConfig] = Field(
+        default=None, description="The LLM engine for this agent"
     )
 
     # engines field inherited from ToolState (via StateSchema)
