@@ -111,7 +111,12 @@ class SerializableStoreWrapper(BaseModel, ABC):
         """Retrieve a value."""
         store = self.get_store()
         namespace = self._apply_namespace_prefix(namespace)
-        return store.get(namespace, key)
+        result = store.get(namespace, key)
+
+        # Handle Item objects returned by some stores
+        if result and hasattr(result, "value"):
+            return result.value
+        return result
 
     def delete(self, namespace: tuple[str, ...], key: str) -> None:
         """Delete a value."""
@@ -155,9 +160,15 @@ class SerializableStoreWrapper(BaseModel, ABC):
         namespace = self._apply_namespace_prefix(namespace)
 
         if hasattr(store, "aget"):
-            return await store.aget(namespace, key)
-        # Fallback to sync
-        return store.get(namespace, key)
+            result = await store.aget(namespace, key)
+        else:
+            # Fallback to sync
+            result = store.get(namespace, key)
+
+        # Handle Item objects returned by some stores
+        if result and hasattr(result, "value"):
+            return result.value
+        return result
 
     async def adelete(self, namespace: tuple[str, ...], key: str) -> None:
         """Async delete a value."""

@@ -8,7 +8,14 @@ from typing import Any
 from .base import SerializableStoreWrapper
 from .types import StoreConfig, StoreType
 from .wrappers.memory import MemoryStoreWrapper
-from .wrappers.postgres import AsyncPostgresStoreWrapper, PostgresStoreWrapper
+
+# Import PostgreSQL wrappers if available
+try:
+    from .postgres import AsyncPostgresStoreWrapper, PostgresStoreWrapper
+except ImportError:
+    # PostgreSQL wrappers not available yet
+    AsyncPostgresStoreWrapper = None
+    PostgresStoreWrapper = None
 
 logger = logging.getLogger(__name__)
 
@@ -33,10 +40,39 @@ class StoreFactory:
         # Create appropriate wrapper
         if config.type == StoreType.MEMORY:
             return MemoryStoreWrapper(config=config)
+
         if config.type == StoreType.POSTGRES_SYNC:
-            return PostgresStoreWrapper(config=config)
+            if PostgresStoreWrapper is None:
+                logger.warning(
+                    "PostgresStore not available, falling back to memory store. "
+                    "Install with: pip install langgraph-checkpoint-postgres"
+                )
+                return MemoryStoreWrapper(config=config)
+
+            # Try to create PostgreSQL wrapper, fallback to memory on connection failure
+            try:
+                wrapper = PostgresStoreWrapper(config=config)
+                # Test the connection by attempting to get the store
+                wrapper.get_store()
+                return wrapper
+            except Exception as e:
+                logger.warning(
+                    f"PostgreSQL connection failed ({e}), falling back to memory store"
+                )
+                return MemoryStoreWrapper(config=config)
+
         if config.type == StoreType.POSTGRES_ASYNC:
+            if AsyncPostgresStoreWrapper is None:
+                logger.warning(
+                    "AsyncPostgresStore not available, falling back to memory store. "
+                    "Install with: pip install langgraph-checkpoint-postgres"
+                )
+                return MemoryStoreWrapper(config=config)
+
+            # For async, we can't test connection here since this is sync method
+            # Connection testing will happen when store is first used
             return AsyncPostgresStoreWrapper(config=config)
+
         raise ValueError(f"Unknown store type: {config.type}")
 
     @staticmethod
@@ -96,7 +132,13 @@ def create_store(
     config_dict = {"type": store_type}
 
     # Connection parameters
-    if "host" in kwargs:
+    if "connection_string" in kwargs:
+        # Direct connection string takes precedence
+        config_dict["connection_params"] = {
+            "connection_string": kwargs.pop("connection_string")
+        }
+    elif "host" in kwargs:
+        # Individual connection parameters
         config_dict["connection_params"] = {
             "host": kwargs.pop("host"),
             "port": kwargs.pop("port", 5432),

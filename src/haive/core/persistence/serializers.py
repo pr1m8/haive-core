@@ -5,14 +5,12 @@ while maintaining security and avoiding the pickle_fallback security issue.
 Supports both basic secure serialization and production-grade encryption.
 """
 
-import inspect
 import logging
 import os
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional
 
-from langchain_core.load.serializable import Serializable
 from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
-from pydantic import BaseModel, SecretBytes, SecretStr
+from pydantic import SecretBytes, SecretStr
 from pydantic_core import PydanticUndefined
 
 logger = logging.getLogger(__name__)
