@@ -8,7 +8,7 @@ tools similar to LangMem, using our PostgreSQL store infrastructure.
 import asyncio
 import logging
 import os
-from typing import List, Optional
+from typing import Optional
 
 from haive.agents.simple import SimpleAgent
 
@@ -172,7 +172,7 @@ async def demo_memory_agent():
         "I'm planning a team outing. What would be good activities based on what you know about me?",
     ]
 
-    for i, message in enumerate(scenarios, 1):
+    for _i, message in enumerate(scenarios, 1):
         print(f"User: {message}")
 
         try:
