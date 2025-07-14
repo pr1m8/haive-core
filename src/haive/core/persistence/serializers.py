@@ -85,10 +85,10 @@ class SecureSecretStrSerializer(JsonPlusSerializer):
         else:
             return value
 
-    def loads_typed(self, data: bytes, type_: str) -> Any:
+    def loads_typed(self, data: tuple[str, bytes]) -> Any:
         """Override to handle loading of masked secrets."""
         try:
-            result = super().loads_typed(data, type_)
+            result = super().loads_typed(data)
 
             # If we encounter masked secrets during loading, warn about it
             if self._contains_masked_secrets(result):
