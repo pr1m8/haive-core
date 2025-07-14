@@ -101,7 +101,7 @@ def get_available_classes(module_names: list[str]) -> dict[str, dict[str, Any]]:
                 }
 
         except ImportError as e:
-            passe}")
+            pass  # Skip classes that can't be imported
 
     return available_classes
 
