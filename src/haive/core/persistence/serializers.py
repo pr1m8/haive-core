@@ -5,13 +5,14 @@ while maintaining security and avoiding the pickle_fallback security issue.
 Supports both basic secure serialization and production-grade encryption.
 """
 
+import inspect
 import logging
 import os
 from typing import Any, Dict, Optional, Union
 
 from langchain_core.load.serializable import Serializable
 from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
-from pydantic import SecretBytes, SecretStr
+from pydantic import BaseModel, SecretBytes, SecretStr
 from pydantic_core import PydanticUndefined
 
 logger = logging.getLogger(__name__)
@@ -69,6 +70,14 @@ class SecureSecretStrSerializer(JsonPlusSerializer):
         elif isinstance(value, SecretBytes):
             # Convert to masked bytes
             return b"**SECRET_MASKED**"
+        elif (
+            isinstance(value, type)
+            and hasattr(value, "__module__")
+            and hasattr(value, "__name__")
+        ):
+            # Handle Pydantic model classes and other type references
+            # Store as a string reference that can be reimported later
+            return f"__type__:{value.__module__}.{value.__name__}"
         elif isinstance(value, dict):
             # Recursively handle dictionaries
             return {k: self._handle_secret_types(v) for k, v in value.items()}

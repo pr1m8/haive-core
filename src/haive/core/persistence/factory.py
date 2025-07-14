@@ -91,11 +91,17 @@ def create_postgres_checkpointer(config: PostgresCheckpointerConfig) -> Any:
                     else:
                         raise
 
-        # Create appropriate PostgresSaver
+        # Create appropriate PostgresSaver with secure serializer
+        from haive.core.persistence.serializers import create_production_serializer
+
+        # Create secure serializer that handles SecretStr
+        serializer = create_production_serializer()
+
         checkpointer = None
-        checkpointer = (
-            ShallowPostgresSaver(pool) if config.shallow_mode else PostgresSaver(pool)
-        )
+        if config.shallow_mode:
+            checkpointer = ShallowPostgresSaver(pool)
+        else:
+            checkpointer = PostgresSaver(pool, serde=serializer)
 
         # Initialize tables if needed
         if config.setup_needed:
@@ -189,12 +195,17 @@ async def acreate_postgres_checkpointer(config: PostgresCheckpointerConfig) -> A
                     else:
                         raise
 
-        # Create appropriate async checkpoint saver
+        # Create appropriate async checkpoint saver with secure serializer
+        from haive.core.persistence.serializers import create_production_serializer
+
+        # Create secure serializer that handles SecretStr
+        serializer = create_production_serializer()
+
         async_checkpointer = None
         if config.shallow_mode:
             async_checkpointer = AsyncShallowPostgresSaver(async_pool)
         else:
-            async_checkpointer = AsyncPostgresSaver(async_pool)
+            async_checkpointer = AsyncPostgresSaver(async_pool, serde=serializer)
 
         # Initialize tables if needed
         if config.setup_needed:
