@@ -110,7 +110,7 @@ class MultiAgentNode(BaseNodeConfig[MultiAgentState, MultiAgentState]):
             if self._needs_recompilation(agent):
                 state.mark_agent_for_recompile(self.agent_name, "Agent graph changed")
 
-            logger.info("✅ Agent completed successfully"y")
+            logger.info("✅ Agent completed successfully")
 
             return Command(update=state_update, goto=self._get_goto_node())
 
@@ -272,9 +272,7 @@ class StateProjectionNode(BaseNodeConfig[TInput, TOutput]):
         default_factory=dict, description="Default values for output fields"
     )
 
-    def __call__(
-        self, state: StateLike, config: ConfigLike | None = None
-    ) -> Command:
+    def __call__(self, state: StateLike, config: ConfigLike | None = None) -> Command:
         """Project state from input to output schema."""
         logger.info(
             f"Projecting state: {self.input_schema.__name__} → {self.output_schema.__name__}"

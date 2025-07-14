@@ -27,7 +27,6 @@ def analyze_codebase():
     original_file = components_dir.parent / "base_graph2.py"
     original_lines = count_lines_in_file(original_file)
 
-
     # Analyze new components
     component_files = {
         "Base Component": "base_component.py",
@@ -66,7 +65,7 @@ def show_architecture_benefits():
     ]
 
     for i, benefit in enumerate(benefits, 1):
-        pass")
+        pass
 
 
 def show_component_responsibilities():
@@ -113,7 +112,7 @@ def show_component_responsibilities():
 
     for component, responsibilities in components.items():
         for responsibility in responsibilities:
-            pass")
+            pass
 
 
 def show_design_patterns():
@@ -129,7 +128,7 @@ def show_design_patterns():
     }
 
     for pattern, description in patterns.items():
-        pass")
+        pass
 
 
 def show_coding_style_compliance():
@@ -149,7 +148,7 @@ def show_coding_style_compliance():
     ]
 
     for compliance in compliances:
-        pass")
+        pass
 
 
 def main():
@@ -162,10 +161,6 @@ def main():
     show_component_responsibilities()
     show_design_patterns()
     show_coding_style_compliance()
-
-
-
-
 
 
 if __name__ == "__main__":

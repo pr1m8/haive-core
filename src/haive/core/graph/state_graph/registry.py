@@ -3,6 +3,7 @@
 This module provides a singleton registry for managing state graph models
 in the Haive framework.
 """
+
 from typing import Any, ClassVar, Dict, List, Optional
 
 from haive.core.graph.models.graph_model import GraphModel
@@ -100,6 +101,6 @@ class GraphRegistry(AbstractRegistry[GraphModel]):
         return self.graphs
 
     def clear(self) -> None:
-        """Clear all registered graph models from the registry.""\
+        """Clear all registered graph models from the registry."""
         self.graphs.clear()
         self.graph_ids.clear()

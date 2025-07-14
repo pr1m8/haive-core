@@ -161,7 +161,7 @@ class GraphBuilder:
         Returns:
             The registered graph model
         """
-from haive.core.graph.registry.graph_registry import GraphRegistry
+        from haive.core.graph.registry.graph_registry import GraphRegistry
 
         graph = self.build()
         registry = GraphRegistry.get_instance()

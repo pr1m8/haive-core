@@ -281,7 +281,7 @@ class MermaidVisualizer:
             icon = MermaidStyle.NODE_ICONS.get(node_type, MermaidStyle.NODE_ICONS["default"])
             
             # Add node with appropriate shape and icon
-            mermaid_lines.append(f"  {node_id}[\"{icon} {name}\")
+            mermaid_lines.append(f"  {node_id}[\"{icon} {name}\"]")
             
             # Apply style based on node type and status
             if node_status == NodeStatus.UNREACHABLE:
