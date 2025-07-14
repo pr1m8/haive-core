@@ -10,6 +10,28 @@ Create a flexible, pluggable system for node I/O that enables:
 - Type-safe transformations
 - Backward compatibility with existing nodes
 
+## Enhanced Design Based on Node Analysis
+
+### Key Insights from 6-Node Analysis
+
+1. **Extraction Complexity Levels**:
+   - **Simple**: Direct field access (ValidationNodeV2)
+   - **Medium**: Configurable fields with type handling (ToolNodeConfig, OutputParserNode)
+   - **Advanced**: Multi-strategy with fallbacks (EngineNode, ParserNodeV2)
+   - **Projection**: Hierarchical state transformation (AgentNodeV3)
+
+2. **Update Patterns**:
+   - **Message-centric**: Append to messages list (ToolNodeConfig, ValidationNodeV2)
+   - **Dynamic field**: Result-based field naming (OutputParserNode, ParserNodeV2)
+   - **Type-aware**: Different handling per result type (EngineNode)
+   - **Hierarchical**: Nested state updates (AgentNodeV3)
+
+3. **Special Features to Preserve**:
+   - Safety net creation (ParserNodeV2)
+   - Multi-source extraction with fallbacks (ParserNodeV2)
+   - Projection-based extraction (AgentNodeV3)
+   - Type-specific strategies (EngineNode)
+
 ## Core Architecture
 
 ### 1. Extract/Update Function System
@@ -117,40 +139,117 @@ class NodeSchemaComposer:
         """Compose a node with flexible I/O configuration."""
 ```
 
-### 4. Common Extract Functions
+### 4. Enhanced Extract Functions Library
 
 ```python
 class CommonExtractFunctions:
-    """Library of reusable extract functions."""
+    """Library of reusable extract functions based on node patterns."""
 
+    # Basic Extraction (ValidationNodeV2 pattern)
+    @staticmethod
+    def extract_simple(state: Any, config: Dict[str, Any]) -> Dict[str, Any]:
+        """Simple field extraction with defaults."""
+        fields = config.get("fields", ["messages"])
+        return {field: getattr(state, field, None) for field in fields}
+
+    # Message Extraction (Multiple nodes)
     @staticmethod
     def extract_messages(state: Any, config: Dict[str, Any]) -> List[BaseMessage]:
-        """Extract messages from state."""
+        """Extract messages with enhanced MessageList support."""
         field_name = config.get("field_name", "messages")
-        return getattr(state, field_name, [])
+        messages = getattr(state, field_name, [])
 
+        # Handle enhanced MessageList (ParserNodeV2 pattern)
+        if hasattr(messages, "root"):
+            return messages.root
+        return list(messages) if messages else []
+
+    # Multi-Strategy Extraction (EngineNode pattern)
     @staticmethod
-    def extract_mapped_fields(state: Any, config: Dict[str, Any]) -> Dict[str, Any]:
-        """Extract fields using mapping configuration."""
-        mappings = config.get("mappings", [])
-        engine = FieldMappingEngine()
-        result = {}
+    def extract_with_fallback(state: Any, config: Dict[str, Any]) -> Any:
+        """Multi-strategy extraction with fallbacks."""
+        strategies = config.get("strategies", [])
 
-        for mapping in mappings:
-            value = engine.extract_value(state, mapping.source_path)
-            if mapping.transform:
-                value = engine.apply_transforms(value, mapping.transform)
-            result[mapping.target_path] = value
+        for strategy in strategies:
+            try:
+                if strategy["type"] == "field":
+                    value = getattr(state, strategy["name"], None)
+                elif strategy["type"] == "dict_key":
+                    value = state.get(strategy["name"]) if hasattr(state, "get") else None
+                elif strategy["type"] == "nested":
+                    value = FieldMappingEngine().extract_value(state, strategy["path"])
+                elif strategy["type"] == "computed":
+                    value = strategy["compute_fn"](state)
 
-        return result
+                if value is not None:
+                    return value
+            except:
+                continue
 
+        return config.get("default")
+
+    # Projection Extraction (AgentNodeV3 pattern)
     @staticmethod
-    def extract_last_message_content(state: Any, config: Dict[str, Any]) -> str:
-        """Extract content from last message."""
+    def extract_with_projection(state: Any, config: Dict[str, Any]) -> Dict[str, Any]:
+        """Project hierarchical state to flat structure."""
+        # Get base state
+        base_field = config.get("base_field", "agent_states")
+        projection_key = config.get("projection_key", "active_agent")
+        shared_fields = config.get("shared_fields", ["messages"])
+
+        # Get projected state
+        base_states = getattr(state, base_field, {})
+        active_key = getattr(state, projection_key, None)
+        projected = base_states.get(active_key, {}).copy() if active_key else {}
+
+        # Add shared fields
+        for field in shared_fields:
+            if hasattr(state, field) and field not in projected:
+                projected[field] = getattr(state, field)
+
+        return projected
+
+    # Tool Extraction (ParserNodeV2 pattern)
+    @staticmethod
+    def extract_tool_info(state: Any, config: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract tool information from messages."""
         messages = CommonExtractFunctions.extract_messages(state, config)
-        if messages:
-            return messages[-1].content
-        return config.get("default", "")
+
+        # Find last AI message with tool calls
+        for msg in reversed(messages):
+            if hasattr(msg, "tool_calls") and msg.tool_calls:
+                tool_call = msg.tool_calls[-1]
+                return {
+                    "tool_name": getattr(tool_call, "name", tool_call.get("name")),
+                    "tool_id": getattr(tool_call, "id", tool_call.get("id")),
+                    "tool_args": getattr(tool_call, "args", tool_call.get("args", {}))
+                }
+
+        return {}
+
+    # Content Extraction (OutputParserNode pattern)
+    @staticmethod
+    def extract_message_content(state: Any, config: Dict[str, Any]) -> str:
+        """Extract content from various message types."""
+        messages = CommonExtractFunctions.extract_messages(state, config)
+        parse_all = config.get("parse_all", False)
+
+        messages_to_parse = messages if parse_all else [messages[-1]] if messages else []
+        contents = []
+
+        for msg in messages_to_parse:
+            content = None
+            if hasattr(msg, "content"):
+                content = msg.content
+            elif isinstance(msg, dict):
+                content = msg.get("content", msg.get("text", msg.get("message")))
+            elif isinstance(msg, str):
+                content = msg
+
+            if content:
+                contents.append(content)
+
+        return contents if parse_all else (contents[0] if contents else "")
 ```
 
 ### 5. Common Update Functions

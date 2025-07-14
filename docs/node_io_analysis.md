@@ -368,6 +368,54 @@ def __call__(self, state):
    }
    ```
 
+## Comprehensive Node I/O Summary
+
+### Node I/O Comparison Matrix
+
+| Node Type        | Input Fields                   | Output Fields               | Extract Pattern         | Update Pattern      | Flexibility |
+| ---------------- | ------------------------------ | --------------------------- | ----------------------- | ------------------- | ----------- |
+| EngineNode       | messages, query, context       | messages, result, metadata  | Multi-strategy          | Type-aware mapping  | High        |
+| AgentNodeV3      | agent_states, messages, agents | agent_states, agent_outputs | Projection-based        | Multi-mode          | High        |
+| ToolNodeConfig   | messages, tool_routes, engines | messages, tool_error        | Field-based             | Message append      | Medium      |
+| OutputParserNode | messages                       | parsed_output, error, raw   | Content extraction      | Dynamic field       | Medium      |
+| ValidationNodeV2 | messages, tool_routes          | messages, routing           | Hardcoded               | Fixed messages      | Low         |
+| ParserNodeV2     | messages, engines              | parsed_result, messages     | Multi-source extraction | Dynamic with safety | High        |
+
+### Extract Function Patterns Summary
+
+1. **High Flexibility** (EngineNode, AgentNodeV3, ParserNodeV2):
+   - Multiple extraction strategies
+   - Type-aware extraction
+   - Fallback mechanisms
+   - Complex data navigation
+
+2. **Medium Flexibility** (ToolNodeConfig, OutputParserNode):
+   - Configurable field names
+   - Some type handling
+   - Limited strategy options
+
+3. **Low Flexibility** (ValidationNodeV2):
+   - Hardcoded field access
+   - Minimal configuration
+   - Fixed extraction logic
+
+### Update Function Patterns Summary
+
+1. **Dynamic Updates** (EngineNode, AgentNodeV3, ParserNodeV2):
+   - Field mapping based on result type
+   - Multi-mode updates (merge/replace/isolate)
+   - Safety mechanisms
+
+2. **Message-Focused** (ToolNodeConfig, ValidationNodeV2):
+   - Primarily updates messages field
+   - Limited field mapping
+   - Fixed update patterns
+
+3. **Field-Configurable** (OutputParserNode):
+   - Dynamic field naming
+   - Error state handling
+   - Some configurability
+
 ## Recommendations
 
 ### 1. Priority Improvements
@@ -461,6 +509,20 @@ Each node needs tests with:
 
 ## Conclusion
 
-The current node system has sophisticated I/O handling in some areas but lacks the flexibility for arbitrary field mappings and pluggable functions. The NodeSchemaComposer can build on existing patterns while adding the missing flexibility for "result → potato" style mappings and dynamic schema adaptation.
+After analyzing all six node types, clear patterns emerge:
 
-The key is to preserve the good patterns (type awareness, multi-strategy extraction) while adding configurability where it's currently hardcoded.
+1. **Flexibility Spectrum**: Nodes range from highly flexible (EngineNode, AgentNodeV3, ParserNodeV2) to rigid (ValidationNodeV2), with most in the middle.
+
+2. **Common Needs**: All nodes need to:
+   - Extract data from state (with varying complexity)
+   - Transform/process the data
+   - Update state with results
+   - Handle errors gracefully
+
+3. **Missing Capabilities**:
+   - Arbitrary field mappings ("result → potato")
+   - Pluggable extract/update functions
+   - Consistent schema awareness across all nodes
+   - Reusable transformation pipelines
+
+The NodeSchemaComposer can unify these patterns while preserving the sophisticated logic in advanced nodes and upgrading the capabilities of simpler nodes. The key is to create a flexible system that doesn't force unnecessary complexity on simple use cases while enabling advanced patterns when needed.
