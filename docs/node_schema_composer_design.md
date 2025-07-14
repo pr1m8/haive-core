@@ -252,17 +252,26 @@ class CommonExtractFunctions:
         return contents if parse_all else (contents[0] if contents else "")
 ```
 
-### 5. Common Update Functions
+### 5. Enhanced Update Functions Library
 
 ```python
 class CommonUpdateFunctions:
-    """Library of reusable update functions."""
+    """Library of reusable update functions based on node patterns."""
 
+    # Message Updates (ToolNodeConfig, ValidationNodeV2 pattern)
     @staticmethod
     def update_messages(result: Any, state: Any, config: Dict[str, Any]) -> Dict[str, Any]:
-        """Update messages list with result."""
+        """Update messages list with proper handling."""
         field_name = config.get("field_name", "messages")
         messages = list(getattr(state, field_name, []))
+
+        # Convert result to message if needed
+        if config.get("convert_to_message", False):
+            from langchain_core.messages import AIMessage, ToolMessage
+            if isinstance(result, str):
+                result = AIMessage(content=result)
+            elif isinstance(result, dict) and "tool_call_id" in result:
+                result = ToolMessage(**result)
 
         if isinstance(result, list):
             messages.extend(result)
@@ -271,6 +280,132 @@ class CommonUpdateFunctions:
 
         return {field_name: messages}
 
+    # Type-Aware Updates (EngineNode pattern)
+    @staticmethod
+    def update_type_aware(result: Any, state: Any, config: Dict[str, Any]) -> Dict[str, Any]:
+        """Update based on result type with smart mapping."""
+        type_map = config.get("type_map", {
+            "BaseMessage": "messages",
+            "dict": "pass_through",
+            "str": "response",
+            "list": "results",
+            "default": "output"
+        })
+
+        # Determine result type
+        result_type = type(result).__name__
+        if hasattr(result, "_type"):  # LangChain messages
+            result_type = "BaseMessage"
+
+        # Get update strategy
+        strategy = type_map.get(result_type, type_map.get("default", "output"))
+
+        if strategy == "messages":
+            return CommonUpdateFunctions.update_messages(result, state, config)
+        elif strategy == "pass_through" and isinstance(result, dict):
+            return result
+        else:
+            return {strategy: result}
+
+    # Hierarchical Updates (AgentNodeV3 pattern)
+    @staticmethod
+    def update_hierarchical(result: Any, state: Any, config: Dict[str, Any]) -> Dict[str, Any]:
+        """Update hierarchical state structures."""
+        base_field = config.get("base_field", "agent_states")
+        key_field = config.get("key_field", "active_agent")
+        output_field = config.get("output_field", "agent_outputs")
+        mode = config.get("mode", "merge")  # merge, replace, isolate
+
+        # Get current states
+        base_states = getattr(state, base_field, {})
+        active_key = getattr(state, key_field, None)
+
+        if not active_key:
+            return {}
+
+        # Process result
+        result_dict = result if isinstance(result, dict) else {"result": result}
+        current_state = base_states.get(active_key, {})
+
+        # Apply update mode
+        if mode == "merge":
+            updated_state = {**current_state, **result_dict}
+        elif mode == "replace":
+            updated_state = result_dict
+        else:  # isolate
+            updated_state = current_state
+
+        # Create updates
+        update = {
+            base_field: {**base_states, active_key: updated_state},
+            output_field: {**getattr(state, output_field, {}), active_key: result_dict}
+        }
+
+        # Update shared fields if configured
+        if config.get("update_shared", True) and "messages" in result_dict:
+            update["messages"] = result_dict["messages"]
+
+        return update
+
+    # Dynamic Field Updates (OutputParserNode, ParserNodeV2 pattern)
+    @staticmethod
+    def update_dynamic_field(result: Any, state: Any, config: Dict[str, Any]) -> Dict[str, Any]:
+        """Update with dynamic field naming."""
+        # Determine field name
+        field_name = config.get("field_name")
+
+        if not field_name and hasattr(result, "__class__"):
+            # Use class name as field name
+            from haive.core.schema.field_utils import create_field_name_from_model
+            field_name = create_field_name_from_model(result.__class__)
+
+        if not field_name:
+            field_name = config.get("default_field", "parsed_output")
+
+        # Add error fields if configured
+        update = {field_name: result}
+
+        if config.get("include_error_fields", True):
+            update[config.get("error_field", "parse_error")] = None
+            update[config.get("raw_field", "raw_content")] = None
+
+        return update
+
+    # Safety Net Updates (ParserNodeV2 pattern)
+    @staticmethod
+    def update_with_safety_net(result: Any, state: Any, config: Dict[str, Any]) -> Dict[str, Any]:
+        """Update with safety net for missing data."""
+        base_update = CommonUpdateFunctions.update_dynamic_field(result, state, config)
+
+        if config.get("safety_net_enabled", False):
+            messages = getattr(state, "messages", [])
+            tool_info = CommonExtractFunctions.extract_tool_info(state, {})
+
+            # Check if ToolMessage exists
+            has_tool_message = any(
+                hasattr(msg, "tool_call_id") and msg.tool_call_id == tool_info.get("tool_id")
+                for msg in messages
+            )
+
+            if not has_tool_message and tool_info.get("tool_id"):
+                # Create safety net message
+                from langchain_core.messages import ToolMessage
+                import json
+
+                content = json.dumps(result.model_dump()) if hasattr(result, "model_dump") else str(result)
+                safety_message = ToolMessage(
+                    content=content,
+                    tool_call_id=tool_info["tool_id"],
+                    name=tool_info.get("tool_name", "unknown"),
+                    additional_kwargs={"created_by": "safety_net"}
+                )
+
+                # Add to messages
+                base_update["messages"] = list(messages) + [safety_message]
+
+        return base_update
+
+    # Mapped Field Updates (Enhanced)
     @staticmethod
     def update_mapped_fields(result: Any, state: Any, config: Dict[str, Any]) -> Dict[str, Any]:
         """Update fields using mapping configuration."""
@@ -279,34 +414,26 @@ class CommonUpdateFunctions:
         update = {}
 
         for mapping in mappings:
+            # Extract value from result
             value = engine.extract_value(result, mapping.source_path)
+
+            # Apply transforms
             if mapping.transform:
                 value = engine.apply_transforms(value, mapping.transform)
 
             # Handle nested updates
             if "." in mapping.target_path:
-                # Create nested structure
                 nested_update = engine.create_nested_update(mapping.target_path, value)
                 update = engine.merge_updates(update, nested_update)
             else:
                 update[mapping.target_path] = value
 
-        return update
-
-    @staticmethod
-    def update_with_merge(result: Any, state: Any, config: Dict[str, Any]) -> Dict[str, Any]:
-        """Merge result with existing state fields."""
-        merge_fields = config.get("merge_fields", [])
-        update = {}
-
-        if isinstance(result, dict):
-            for field in merge_fields:
-                if field in result:
-                    current = getattr(state, field, {})
-                    if isinstance(current, dict):
-                        update[field] = {**current, **result[field]}
-                    else:
-                        update[field] = result[field]
+        # Apply merge strategy if configured
+        if config.get("merge_with_state", False):
+            for field, value in update.items():
+                if hasattr(state, field) and isinstance(getattr(state, field), dict):
+                    current = getattr(state, field)
+                    update[field] = {**current, **value} if isinstance(value, dict) else value
 
         return update
 ```
