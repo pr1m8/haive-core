@@ -10,7 +10,6 @@ from typing import Any, Optional
 
 # Import BaseOutputParser for type resolution in LangGraph
 # This ensures it's available when LangGraph evaluates type hints
-from langchain_core.output_parsers import BaseOutputParser
 from pydantic import Field, computed_field, model_validator
 
 # Direct import - simpler approach

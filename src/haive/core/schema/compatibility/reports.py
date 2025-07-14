@@ -111,7 +111,7 @@ class CompatibilityReport:
         if self.critical_issues:
             lines.extend(
                 [
-                    "## 🚨 Critical Issues"es",
+                    "## 🚨 Critical Issues",
                     "",
                 ]
             )
@@ -123,7 +123,7 @@ class CompatibilityReport:
         if self.warnings:
             lines.extend(
                 [
-                    "## ⚠️ Warnings"ngs",
+                    "## ⚠️ Warnings",
                     "",
                 ]
             )
@@ -157,7 +157,7 @@ class CompatibilityReport:
         if self.recommendations:
             lines.extend(
                 [
-                    "## 💡 Recommendations"ns",
+                    "## 💡 Recommendations",
                     "",
                 ]
             )
@@ -427,7 +427,7 @@ class VisualDiffer:
                 lines.append(f"- {field_name}: (only in target)")
                 lines.append(f"    Type: {target_field.type_info.type_hint}")
                 if target_field.is_required:
-                    lines.append("    ⚠️  REQUIRED"RED")
+                    lines.append("    ⚠️  REQUIRED")
 
         return "\n".join(lines)
 

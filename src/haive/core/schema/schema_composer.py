@@ -235,7 +235,6 @@ class SchemaComposer:
         # Rich UI logging
         if RICH_AVAILABLE:
             from rich.panel import Panel
-            from rich.table import Table
 
             console.print(
                 Panel.fit(
