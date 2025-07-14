@@ -116,10 +116,16 @@ class MemoryCheckpointerConfig(CheckpointerConfig[dict[str, Any]]):
         try:
             from langgraph.checkpoint.memory import MemorySaver
 
-            # Create checkpointer - no additional configuration needed
-            checkpointer = MemorySaver()
+            # Import our secure serializer
+            from haive.core.persistence.serializers import SecureSecretStrSerializer
 
-            logger.info("Memory checkpointer created successfully")
+            # Create checkpointer with secure serializer
+            secure_serializer = SecureSecretStrSerializer()
+            checkpointer = MemorySaver(serde=secure_serializer)
+
+            logger.info(
+                "Memory checkpointer created successfully with secure serializer"
+            )
             return checkpointer
 
         except Exception as e:
