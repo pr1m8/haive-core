@@ -11,8 +11,9 @@ from langgraph.types import Command
 from pydantic import Field
 from rich.console import Console
 
-from haive.core.graph.common.types import ConfigLike, NodeType, StateLike
+from haive.core.graph.common.types import ConfigLike, StateLike
 from haive.core.graph.node.parser_node_config import ParserNodeConfig
+from haive.core.graph.node.types import NodeType
 
 logger = logging.getLogger(__name__)
 console = Console()

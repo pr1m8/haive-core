@@ -549,17 +549,62 @@ class EngineNodeConfig(NodeConfig):
         # Create new list
         messages = list(existing) if existing else []
 
-        # Add new messages
+        # Add new messages with engine attribution
         if isinstance(result, list):
-            messages.extend(result)
-            logger.debug(f"Added {len(result)} messages")
+            # Process each message to add engine attribution
+            processed_messages = []
+            for msg in result:
+                processed_msg = self._add_engine_attribution_to_message(msg)
+                processed_messages.append(processed_msg)
+            messages.extend(processed_messages)
+            logger.debug(f"Added {len(result)} messages with engine attribution")
         else:
-            messages.append(result)
-            logger.debug(f"Added 1 message: {type(result).__name__}")
+            # Process single message to add engine attribution
+            processed_msg = self._add_engine_attribution_to_message(result)
+            messages.append(processed_msg)
+            logger.debug(
+                f"Added 1 message: {type(result).__name__} with engine attribution"
+            )
 
         logger.info(f"✅ Total messages after update: {len(messages)}")
 
         return {"messages": messages}
+
+    def _add_engine_attribution_to_message(self, message: Any) -> Any:
+        """Add engine attribution to a message if it's an AI message."""
+        try:
+            from langchain_core.messages import AIMessage
+
+            # Only add attribution to AI messages
+            if isinstance(message, AIMessage) and self.engine:
+                logger.debug(
+                    f"Adding engine attribution '{self.engine.name}' to AIMessage"
+                )
+
+                # Get existing additional_kwargs or create new dict
+                additional_kwargs = getattr(message, "additional_kwargs", {}).copy()
+
+                # Add engine attribution
+                additional_kwargs["engine_name"] = self.engine.name
+
+                # Create new AIMessage with attribution
+                attributed_message = AIMessage(
+                    content=message.content,
+                    additional_kwargs=additional_kwargs,
+                    tool_calls=getattr(message, "tool_calls", None),
+                    id=getattr(message, "id", None),
+                )
+
+                logger.debug(f"✅ Added engine attribution: {self.engine.name}")
+                return attributed_message
+
+        except ImportError:
+            logger.debug("Could not import AIMessage for attribution")
+        except Exception as e:
+            logger.debug(f"Failed to add engine attribution: {e}")
+
+        # Return original message if attribution failed or not applicable
+        return message
 
     def _is_message_like(self, obj: Any) -> bool:
         """Check if object is message-like."""

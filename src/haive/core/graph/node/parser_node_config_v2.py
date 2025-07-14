@@ -23,8 +23,9 @@ from langchain_core.output_parsers import PydanticOutputParser
 from langgraph.types import Command
 from pydantic import BaseModel, Field
 
-from haive.core.graph.common.types import ConfigLike, NodeType, StateLike
+from haive.core.graph.common.types import ConfigLike, StateLike
 from haive.core.graph.node.base_config import NodeConfig
+from haive.core.graph.node.types import NodeType
 
 logger = logging.getLogger(__name__)
 
@@ -188,7 +189,7 @@ class ParserNodeConfigV2(NodeConfig):
     def _extract_tool_from_messages(
         self, messages: List[BaseMessage]
     ) -> tuple[Optional[str], Optional[Any], Optional[ToolMessage]]:
-        """Extract tool information from messages - same as V1."""
+        """Extract tool information from messages - V2 with engine attribution."""
         logger.debug("Extracting tool information from messages")
 
         # Find the last AIMessage with tool calls
@@ -208,6 +209,26 @@ class ParserNodeConfigV2(NodeConfig):
         if not last_ai_message:
             logger.warning("No AIMessage with tool calls found")
             return None, None, None
+
+        # V2 ENHANCEMENT: Extract engine name from AI message attribution
+        if (
+            hasattr(last_ai_message, "additional_kwargs")
+            and last_ai_message.additional_kwargs
+        ):
+            engine_name_from_message = last_ai_message.additional_kwargs.get(
+                "engine_name"
+            )
+            if engine_name_from_message:
+                logger.info(
+                    f"Found engine attribution in AI message: {engine_name_from_message}"
+                )
+                # Override the parser's engine_name with the one from the message
+                self.engine_name = engine_name_from_message
+                logger.debug(f"Updated parser engine_name to: {self.engine_name}")
+            else:
+                logger.debug(
+                    "No engine attribution found in AI message additional_kwargs"
+                )
 
         # Get tool calls
         tool_calls = []

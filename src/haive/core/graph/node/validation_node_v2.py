@@ -247,6 +247,26 @@ class ValidationNodeV2(NodeConfig, ToolRouteMixin):
             logger.warning("Last message is not AIMessage")
             return Command(goto=self.router_node)
 
+        # EXTRACT ENGINE NAME FROM AI MESSAGE ATTRIBUTION
+        if (
+            hasattr(last_message, "additional_kwargs")
+            and last_message.additional_kwargs
+        ):
+            engine_name_from_message = last_message.additional_kwargs.get("engine_name")
+            if engine_name_from_message:
+                logger.info(
+                    f"Found engine attribution in AI message: {engine_name_from_message}"
+                )
+                # Override the validation node's engine_name with the one from the message
+                self.engine_name = engine_name_from_message
+                logger.debug(
+                    f"Updated validation node engine_name to: {self.engine_name}"
+                )
+            else:
+                logger.debug(
+                    "No engine attribution found in AI message additional_kwargs"
+                )
+
         # Get tool calls
         tool_calls = getattr(last_message, "tool_calls", [])
         if not tool_calls:

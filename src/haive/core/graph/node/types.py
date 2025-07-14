@@ -48,6 +48,7 @@ class NodeType(str, Enum):
     # SEND = "send"  # Send nodes for dynamic routing
     CUSTOM = "custom"  # Custom node types
     PARSER = "parser"  # Parser nodes for parsing tool results
+    OUTPUT_PARSER = "output_parser"  # Output parser nodes for parsing LLM outputs
 
 
 # Command destination types for better type checking
