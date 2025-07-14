@@ -66,29 +66,49 @@ class EngineNodeConfig(NodeConfig):
                         f"Engine derived input fields: {list(engine_input_fields.keys())}"
                     )
 
-                    # Convert engine fields to field definitions
+                    # Convert engine fields to field definitions using StandardFields when possible
                     self.input_field_defs = []
                     for field_name, (
                         type_hint,
                         field_info,
                     ) in engine_input_fields.items():
-                        if field_name == "messages":
-                            self.input_field_defs.append(
-                                StandardFields.messages(use_enhanced=True)
+                        # Try to use StandardFields for known field types
+                        try:
+                            if field_name == "messages":
+                                field_def = StandardFields.messages(use_enhanced=True)
+                            elif field_name == "query":
+                                field_def = StandardFields.query()
+                            elif field_name == "context":
+                                field_def = StandardFields.context()
+                            else:
+                                # For other fields, try StandardFields first, then fallback
+                                field_method = getattr(StandardFields, field_name, None)
+                                if field_method and callable(field_method):
+                                    field_def = field_method()
+                                else:
+                                    # Create generic field definition
+                                    from haive.core.schema.field_definition import (
+                                        FieldDefinition,
+                                    )
+
+                                    field_def = FieldDefinition(
+                                        name=field_name, type_hint=type_hint
+                                    )
+
+                            self.input_field_defs.append(field_def)
+                        except Exception as e:
+                            logger.debug(
+                                f"Failed to create field definition for {field_name}: {e}"
                             )
-                        elif field_name == "query":
-                            self.input_field_defs.append(StandardFields.query())
-                        elif field_name == "context":
-                            self.input_field_defs.append(StandardFields.context())
-                        else:
-                            # For other fields, create a generic field definition
+                            # Fallback to generic field definition
                             from haive.core.schema.field_definition import (
                                 FieldDefinition,
                             )
 
-                            self.input_field_defs.append(
-                                FieldDefinition(name=field_name, type_hint=type_hint)
+                            field_def = FieldDefinition(
+                                name=field_name, type_hint=type_hint
                             )
+                            self.input_field_defs.append(field_def)
                 else:
                     # Fallback to messages only
                     self.input_field_defs = [StandardFields.messages(use_enhanced=True)]

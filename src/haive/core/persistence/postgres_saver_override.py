@@ -1,116 +1,96 @@
-"""Override for LangGraph's PostgresSaver to properly disable prepared statements."""
+"""PostgreSQL persistence utilities with Pydantic support.
 
+This module provides utilities for handling Pydantic models in PostgreSQL
+persistence. The main functionality is the JSON encoder configuration that
+ensures Pydantic models are properly serialized to JSONB columns.
+
+The override classes are kept for backward compatibility and as a fallback
+when using connection strings directly. However, the preferred approach is
+to configure the connection pool with the configure parameter.
+"""
+
+import json
+
+from pydantic import BaseModel
+
+
+def pydantic_aware_json_dumps(obj):
+    """JSON encoder that handles Pydantic models.
+
+    This encoder ensures that Pydantic models are properly serialized
+    when stored in PostgreSQL JSONB columns.
+    """
+
+    class PydanticEncoder(json.JSONEncoder):
+        def default(self, o):
+            if isinstance(o, BaseModel):
+                return o.model_dump()
+            return super().default(o)
+
+    return json.dumps(obj, cls=PydanticEncoder)
+
+
+def configure_postgres_json(connection):
+    """Configure a PostgreSQL connection to handle Pydantic JSON serialization.
+
+    Args:
+        connection: A psycopg connection object
+    """
+    from psycopg.types.json import set_json_dumps
+
+    set_json_dumps(pydantic_aware_json_dumps, context=connection)
+
+
+# Override classes for backward compatibility and direct connection string usage
 import psycopg
 from langgraph.checkpoint.postgres import PostgresSaver as BasePostgresSaver
 from psycopg.rows import dict_row
-from psycopg_pool import ConnectionPool
 
 
 class PostgresSaverNoPreparedStatements(BasePostgresSaver):
-    """PostgresSaver that properly disables prepared statements."""
+    """PostgresSaver that disables prepared statements and handles Pydantic models.
+
+    This class is kept for backward compatibility and for cases where you need
+    to use from_conn_string directly. The preferred approach is to configure
+    the connection pool with the configure parameter in postgres_config.py.
+    """
 
     @classmethod
-    def from_conn_string(
-        cls,
-        conn_string: str,
-    ) -> "PostgresSaverNoPreparedStatements":
-        """Create a PostgresSaver from a connection string.
-
-        Overrides the base implementation to properly disable prepared statements.
-        """
-        # Create connection with prepare_threshold=None to disable prepared statements
+    def from_conn_string(cls, conn_string: str) -> "PostgresSaverNoPreparedStatements":
+        """Create a PostgresSaver with proper configuration."""
         conn = psycopg.connect(
             conn_string,
             autocommit=True,
-            prepare_threshold=None,  # Disable prepared statements
+            prepare_threshold=None,
             row_factory=dict_row,
         )
+        configure_postgres_json(conn)
         return cls(conn)
 
-    def __init__(
-        self,
-        conn: psycopg.Connection | ConnectionPool,
-        pipe: psycopg.Pipeline | None = None,
-        serde=None,
-    ) -> None:
-        """Initialize with connection that has prepared statements disabled."""
-        # If it's a raw connection, ensure prepare_threshold is None
-        if isinstance(conn, psycopg.Connection):
-            # Can't modify existing connection, but we can warn
-            if (
-                hasattr(conn, "prepare_threshold")
-                and conn.prepare_threshold is not None
-            ):
-                import logging
 
-                logging.getLogger(__name__).warning(
-                    "Connection has prepare_threshold enabled. This may cause conflicts."
-                )
-
-        # Call parent init with all parameters
-        super().__init__(conn, pipe=pipe, serde=serde)
-
-        # CRITICAL: Override jsonplus_serde to use our secure serializer for metadata
-        if serde is not None:
-            self.jsonplus_serde = serde
-            import logging
-
-            logging.getLogger(__name__).info(
-                f"Set jsonplus_serde to secure serializer: {type(serde).__name__}"
-            )
-
-
-import psycopg
 from langgraph.checkpoint.postgres.aio import (
     AsyncPostgresSaver as BaseAsyncPostgresSaver,
 )
-from psycopg_pool import AsyncConnectionPool
 
 
 class AsyncPostgresSaverNoPreparedStatements(BaseAsyncPostgresSaver):
-    """Async PostgresSaver that properly disables prepared statements."""
+    """Async PostgresSaver with proper configuration.
+
+    This class is kept for backward compatibility and for cases where you need
+    to use from_conn_string directly. The preferred approach is to configure
+    the connection pool with the configure parameter in postgres_config.py.
+    """
 
     @classmethod
     async def from_conn_string(
-        cls,
-        conn_string: str,
+        cls, conn_string: str
     ) -> "AsyncPostgresSaverNoPreparedStatements":
-        """Create an AsyncPostgresSaver from a connection string.
-
-        Overrides the base implementation to properly disable prepared statements.
-        """
-        # Create async connection with prepare_threshold=None to disable prepared statements
+        """Create an AsyncPostgresSaver with proper configuration."""
         conn = await psycopg.AsyncConnection.connect(
             conn_string,
             autocommit=True,
-            prepare_threshold=None,  # Disable prepared statements
+            prepare_threshold=None,
             row_factory=dict_row,
         )
+        configure_postgres_json(conn)
         return cls(conn)
-
-    def __init__(
-        self,
-        conn: psycopg.AsyncConnection | AsyncConnectionPool,
-        pipe: psycopg.AsyncPipeline | None = None,
-        serde=None,
-    ) -> None:
-        """Initialize with async connection that has prepared statements disabled."""
-        # If it's a raw connection, ensure prepare_threshold is None
-        if hasattr(conn, "prepare_threshold") and conn.prepare_threshold is not None:
-            import logging
-
-            logging.getLogger(__name__).warning(
-                "Connection has prepare_threshold enabled. This may cause conflicts."
-            )
-
-        # Call parent init with all parameters
-        super().__init__(conn, pipe=pipe, serde=serde)
-
-        # CRITICAL: Override jsonplus_serde to use our secure serializer for metadata
-        if serde is not None:
-            self.jsonplus_serde = serde
-            import logging
-
-            logging.getLogger(__name__).info(
-                f"Set jsonplus_serde to secure serializer: {type(serde).__name__}"
-            )

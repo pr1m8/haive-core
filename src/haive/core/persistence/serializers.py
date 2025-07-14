@@ -132,7 +132,7 @@ class SecureSecretStrSerializer(JsonPlusSerializer):
 
             return result
         except Exception as e:
-            logger.error(f"Failed to deserialize data of type {type_}: {e}")
+            logger.error(f"Failed to deserialize data: {e}")
             raise
 
     def _contains_masked_secrets(self, obj: Any) -> bool:

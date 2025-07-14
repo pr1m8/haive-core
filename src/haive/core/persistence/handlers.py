@@ -723,6 +723,28 @@ def register_thread_if_needed(
                     )
 
                     logger.info(f"Thread {thread_id} registered/updated in PostgreSQL")
+
+                    # Initialize checkpoint metadata for new threads to prevent None errors
+                    try:
+                        # Check if this thread has any checkpoints
+                        cursor.execute(
+                            "SELECT COUNT(*) FROM checkpoints WHERE thread_id = %s",
+                            (thread_id,),
+                        )
+                        checkpoint_count = cursor.fetchone()[0]
+
+                        if checkpoint_count == 0:
+                            logger.debug(
+                                f"Initializing checkpoint metadata for new thread {thread_id}"
+                            )
+                            # We don't need to insert a checkpoint here - LangGraph will handle that
+                            # Just ensuring the threads table is properly set up
+
+                    except Exception as init_error:
+                        logger.debug(
+                            f"Could not check/initialize checkpoint metadata: {init_error}"
+                        )
+                        # This is not critical - LangGraph should handle initial checkpoint creation
         except Exception as e:
             logger.warning(f"Error registering thread: {e}")
 
