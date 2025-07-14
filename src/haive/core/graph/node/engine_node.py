@@ -61,9 +61,11 @@ class EngineNodeConfig(NodeConfig):
             if not self.input_field_defs:
                 self.input_field_defs = [StandardFields.messages(use_enhanced=True)]
             if not self.output_field_defs:
+                # LLM engines should ONLY output to messages field
+                # V2 structured output: Tool calls in AIMessage are extracted by downstream validation nodes
+                # V1 regular output: AI response appended to messages
                 self.output_field_defs = [
-                    StandardFields.ai_message(),
-                    StandardFields.engine_name(),
+                    StandardFields.messages(use_enhanced=True),  # ONLY messages field
                 ]
 
         elif self.engine.engine_type == EngineType.RETRIEVER:
@@ -79,10 +81,13 @@ class EngineNodeConfig(NodeConfig):
                     []
                 )  # Let it use the engine's actual output schema
 
-        # Add structured output field if engine has structured_output_model
+        # Note: For LLM engines with structured output, we do NOT add structured fields to node output
+        # V2 structured output uses tool calls embedded in AIMessage, extracted by downstream validation nodes
+        # Only add structured output fields for non-LLM engines that need separate structured fields
         if (
             hasattr(self.engine, "structured_output_model")
             and self.engine.structured_output_model
+            and self.engine.engine_type != EngineType.LLM  # Skip for LLM engines
         ):
             structured_field = StandardFields.structured_output(
                 self.engine.structured_output_model

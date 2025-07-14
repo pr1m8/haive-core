@@ -362,14 +362,10 @@ class AugLLMConfig(
         arbitrary_types_allowed=True, validate_assignment=True, extra="forbid"
     )
 
-    def __init__(self, **kwargs):
-        """Initialize with comprehensive debug logging."""
-        # Set default name if not provided
-        if "name" not in kwargs:
-            kwargs["name"] = f"aug_llm_{uuid.uuid4().hex[:8]}"
-
-        # Initialize the engine
-        super().__init__(**kwargs)
+    def model_post_init(self, __context):
+        """Proper Pydantic post-initialization."""
+        # Call parent post_init first
+        super().model_post_init(__context)
 
         # Initialize ToolListMixin functionality manually to avoid recursion
         self._initialize_tool_mixin()
@@ -1444,16 +1440,9 @@ class AugLLMConfig(
 
         # Chat templates message variables
         if isinstance(self.prompt_template, ChatPromptTemplate):
-            # Get partial variables to exclude them from required inputs
-            partial_vars = getattr(self.prompt_template, "partial_variables", {})
-
             for msg in self.prompt_template.messages:
                 if hasattr(msg, "prompt") and hasattr(msg.prompt, "input_variables"):
-                    # Only add variables that are NOT in partial_variables
-                    msg_vars = set(msg.prompt.input_variables) - set(
-                        partial_vars.keys()
-                    )
-                    all_vars.update(msg_vars)
+                    all_vars.update(msg.prompt.input_variables)
 
                 if hasattr(msg, "variable_name"):
                     var_name = msg.variable_name
@@ -1466,25 +1455,13 @@ class AugLLMConfig(
         # Remove partial and optional variables
         partial_vars = set(self.partial_variables.keys())
         if hasattr(self.prompt_template, "partial_variables"):
-            template_partials = getattr(self.prompt_template, "partial_variables", {})
-            partial_vars.update(template_partials.keys())
+            partial_vars.update(
+                getattr(self.prompt_template, "partial_variables", {}).keys()
+            )
 
-        optional_vars = set(self.optional_variables)
-        if hasattr(self.prompt_template, "optional_variables"):
-            template_optionals = getattr(self.prompt_template, "optional_variables", [])
-            optional_vars.update(template_optionals)
+        all_vars = all_vars - partial_vars - set(self.optional_variables)
 
-        result = all_vars - partial_vars - optional_vars
-
-        # Default to messages if empty and uses_messages_field
-        if (
-            not result
-            and self.uses_messages_field
-            and self.messages_placeholder_name not in optional_vars
-        ):
-            return {self.messages_placeholder_name}
-
-        return result
+        return all_vars
 
     def _format_model_schema(
         self, model_name: str, schema: dict[str, Any], as_section: bool = False

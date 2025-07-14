@@ -211,14 +211,25 @@ class LLMNodeConfig(GenericEngineNodeConfig[BaseModel, BaseModel]):
     """Specialized node configuration for LLM engines."""
 
     def __init__(self, **kwargs):
-        # Set default field definitions for LLM nodes
-        if "input_field_defs" not in kwargs:
-            kwargs["input_field_defs"] = [StandardFields.messages(with_tokens=True)]
-        if "output_field_defs" not in kwargs:
-            kwargs["output_field_defs"] = [
-                StandardFields.ai_message(),
-                StandardFields.engine_name(),
-            ]
+        # For LLM engines, prefer using the engine's own input/output schemas if available
+        # Only set defaults if no field defs are provided and engine doesn't have schemas
+        engine = kwargs.get("engine")
+
+        if "input_field_defs" not in kwargs and engine:
+            # Check if engine has its own input schema
+            if not (hasattr(engine, "input_schema") and engine.input_schema):
+                kwargs["input_field_defs"] = [
+                    StandardFields.messages(use_enhanced=True)
+                ]
+
+        if "output_field_defs" not in kwargs and engine:
+            # Check if engine has its own output schema
+            if not (hasattr(engine, "output_schema") and engine.output_schema):
+                # LLM engines should ONLY output to messages field
+                # V2 structured output: Tool calls in AIMessage are extracted by downstream validation nodes
+                kwargs["output_field_defs"] = [
+                    StandardFields.messages(use_enhanced=True),  # ONLY messages field
+                ]
 
         super().__init__(**kwargs)
 
