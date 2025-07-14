@@ -48,14 +48,24 @@ class PathResolver:
             # Phase 1: Simple field access only
             # Handle both dict and object attribute access
 
-            if hasattr(obj, path):
-                # Object attribute access (Pydantic models, dataclasses)
-                return getattr(obj, path, default)
-            elif hasattr(obj, "__getitem__"):
+            # Try object attribute access first
+            try:
+                if hasattr(obj, path):
+                    # Object attribute access (Pydantic models, dataclasses)
+                    return getattr(obj, path, default)
+            except (AttributeError, RuntimeError):
+                # hasattr or getattr failed, continue to dict access
+                pass
+
+            # Try dict-like access
+            if hasattr(obj, "__getitem__"):
                 # Dict-like access
-                return obj.get(path, default) if hasattr(obj, "get") else obj[path]
+                try:
+                    return obj.get(path, default) if hasattr(obj, "get") else obj[path]
+                except (KeyError, RuntimeError):
+                    return default
             else:
                 return default
 
-        except (KeyError, AttributeError, TypeError):
+        except (KeyError, AttributeError, TypeError, RuntimeError):
             return default

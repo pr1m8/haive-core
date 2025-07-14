@@ -85,7 +85,7 @@ class TestPathResolver:
 
         # Extract nested model field
         config = resolver.extract_value(pydantic_state, "config")
-        assert isinstance(config, TestConfig)
+        assert isinstance(config, SampleConfig)
         assert config.temperature == 0.5
         assert config.model == "claude"
 
@@ -192,7 +192,7 @@ class TestPathResolver:
             messages: List[str] = Field(default_factory=list)
             agent_states: Dict[str, AgentState] = Field(default_factory=dict)
             active_agent: Optional[str] = None
-            global_config: TestConfig = Field(default_factory=TestConfig)
+            global_config: SampleConfig = Field(default_factory=SampleConfig)
 
         state = MultiAgentState(
             messages=["Start", "Processing"],
@@ -205,7 +205,7 @@ class TestPathResolver:
                 ),
             },
             active_agent="agent1",
-            global_config=TestConfig(temperature=0.3),
+            global_config=SampleConfig(temperature=0.3),
         )
 
         # Extract various fields
@@ -221,5 +221,5 @@ class TestPathResolver:
         assert active == "agent1"
 
         config = resolver.extract_value(state, "global_config")
-        assert isinstance(config, TestConfig)
+        assert isinstance(config, SampleConfig)
         assert config.temperature == 0.3
