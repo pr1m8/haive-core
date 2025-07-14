@@ -5,6 +5,7 @@ from typing import Any, Dict, Optional, Tuple, Union
 from langchain_core.runnables import RunnableConfig
 
 from haive.core.engine.agent.persistence.base import CheckpointerConfig
+from haive.core.engine.agent.persistence.factory import load_checkpointer_config
 from haive.core.engine.agent.persistence.manager import PersistenceManager
 
 logger = logging.getLogger(__name__)
@@ -100,22 +101,16 @@ def extract_persistence_config(agent_config: Any) -> Optional[CheckpointerConfig
 
         # Handle dictionary
         if isinstance(persistence, dict):
-from haive.core.engine.agent.persistence.factory import load_checkpointer_config
-
             return load_checkpointer_config(persistence)
 
         # Try to convert from model
         if hasattr(persistence, "model_dump"):
             # Pydantic v2
             persistence_dict = persistence.model_dump()
-from haive.core.engine.agent.persistence.factory import load_checkpointer_config
-
             return load_checkpointer_config(persistence_dict)
         elif hasattr(persistence, "dict"):
             # Pydantic v1
             persistence_dict = persistence.dict()
-from haive.core.engine.agent.persistence.factory import load_checkpointer_config
-
             return load_checkpointer_config(persistence_dict)
 
     return None

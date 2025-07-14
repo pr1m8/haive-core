@@ -23,7 +23,6 @@ from __future__ import annotations
 import json
 import logging
 import os
-import uuid
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -502,7 +501,7 @@ class AugLLMConfig(
                 # Check if this looks like a LangChain serialized object
                 if "lc" in v and "type" in v and v.get("type") == "constructor":
                     logger.debug(
-                        f"Attempting to reconstruct prompt template using LangChain load"
+                        "Attempting to reconstruct prompt template using LangChain load"
                     )
                     reconstructed = load(v)
                     if isinstance(reconstructed, BasePromptTemplate):
@@ -517,7 +516,7 @@ class AugLLMConfig(
                 )
 
             # Fallback: Create a default ChatPromptTemplate that works for most cases
-            logger.debug(f"Creating default ChatPromptTemplate from dict")
+            logger.debug("Creating default ChatPromptTemplate from dict")
 
             # Check if the dict has messages structure (for ChatPromptTemplate)
             if "messages" in v:
