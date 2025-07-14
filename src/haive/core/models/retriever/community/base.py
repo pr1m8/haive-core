@@ -39,32 +39,3 @@ class CommunityRetrieverConfig(BaseRetrieverConfig):
 
         retriever_cls = __getattr__(self.retriever_type.value)
         return retriever_cls(**self.retriever_kwargs)
-
-
-sample_queries = {
-    "WikipediaRetriever": "Large language models",
-    "TavilySearchAPIRetriever": "latest advancements in generative AI",
-    "PubMedRetriever": "CRISPR gene editing technology",
-    "AskNewsRetriever": "current state of global inflation",
-    "WebResearchRetriever": "open source vector databases",
-    "ZepRetriever": "user behavior analysis",
-    "ZillizRetriever": "embedding optimization techniques",
-    "ArxivRetriever": "transformer models in NLP",
-}
-
-for retriever_name, query in sample_queries.items():
-
-    try:
-        config = CommunityRetrieverConfig(
-            retriever_type=CommunityRetrieverType(retriever_name),
-            retriever_kwargs={"search_type": "similarity"},  # Optional per retriever
-        )
-        retriever = config.create()
-        docs = retriever.invoke(query)
-
-        if docs:
-            pass
-        else:
-            passd.")
-    except Exception as e:
-        pass")
