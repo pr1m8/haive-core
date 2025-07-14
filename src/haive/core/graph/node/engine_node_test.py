@@ -70,7 +70,7 @@ class EngineNodeConfig(NodeConfig):
                     self.input_field_defs = []
                     for field_name, (
                         type_hint,
-                        field_info,
+                        _field_info,
                     ) in engine_input_fields.items():
                         if field_name == "messages":
                             self.input_field_defs.append(

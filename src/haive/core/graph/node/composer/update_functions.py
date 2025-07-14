@@ -7,7 +7,7 @@ Based on analysis of 6 node types, these functions handle the most common
 state update patterns found in actual Haive nodes.
 """
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 from haive.core.graph.node.composer.path_resolver import PathResolver
 from haive.core.graph.node.composer.protocols import UpdateFunction
@@ -108,7 +108,7 @@ class UpdateFunctions:
             current_dict = updates
 
             # Build nested dictionary structure
-            for i, part in enumerate(path_parts[:-1]):
+            for _i, part in enumerate(path_parts[:-1]):
                 if "[" in part:
                     # Array access - for now, treat as simple key
                     key = part.split("[")[0]

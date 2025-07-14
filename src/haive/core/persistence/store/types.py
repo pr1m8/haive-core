@@ -76,6 +76,11 @@ class StoreConfig(BaseModel):
         default=None, description="Connection pool configuration"
     )
 
+    # Index configuration (for vector stores)
+    index_config: dict[str, Any] | None = Field(
+        default=None, description="Index configuration for vector search"
+    )
+
     # Setup behavior
     setup_on_init: bool = Field(
         default=True, description="Run setup/migrations on initialization"
