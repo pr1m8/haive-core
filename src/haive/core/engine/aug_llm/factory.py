@@ -18,6 +18,7 @@ respecting the configuration specifications from AugLLMConfig.
 """
 
 import json
+import logging
 from typing import Any, Dict
 
 from langchain_core.messages import SystemMessage
@@ -32,11 +33,8 @@ from langchain_core.runnables import Runnable, RunnableLambda
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel
 
-from haive.core.logging.rich_logger import LogLevel, get_logger
-
 # Get logger for this module
-logger = get_logger(__name__)
-logger.set_level(LogLevel.WARNING)
+logger = logging.getLogger(__name__)
 
 
 class AugLLMFactory:
