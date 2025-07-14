@@ -2352,7 +2352,7 @@ class SchemaComposer:
             from pydantic_core import PydanticUndefined
 
             # Fix ALL PydanticUndefined fields to prevent msgpack serialization errors
-            for field_name, field_info in self.__fields__.items():
+            for field_name, field_info in self.model_fields.items():
                 if hasattr(self, field_name):
                     field_value = getattr(self, field_name)
                     if field_value is PydanticUndefined:
