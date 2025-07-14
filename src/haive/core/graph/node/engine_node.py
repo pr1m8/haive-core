@@ -738,6 +738,33 @@ class EngineNodeConfig(NodeConfig):
             }
         return {output_fields[0]: result} if output_fields else {"result": result}
 
+    def extract_input_from_state(self, state: Any) -> dict[str, Any]:
+        """Override to properly extract input fields from state using engine-aware logic."""
+        logger.debug("Engine node extracting input from state...")
+
+        # Use input schema if available
+        if self.input_schema:
+            input_dict = {}
+            for field_name in self.input_schema.model_fields:
+                value = self._get_state_value(state, field_name)
+                if value is not None:
+                    input_dict[field_name] = value
+            logger.debug(f"Schema-based extraction: {list(input_dict.keys())}")
+            return input_dict
+
+        # Use field definitions if available
+        if self.input_field_defs:
+            input_dict = {}
+            for field_def in self.input_field_defs:
+                value = self._get_state_value(state, field_def.name)
+                if value is not None:
+                    input_dict[field_def.name] = value
+            logger.debug(f"Field definition extraction: {list(input_dict.keys())}")
+            return input_dict
+
+        logger.debug("No input schema or field defs, returning empty dict")
+        return {}
+
     def _execute_with_config(
         self, engine: Engine, input_data: Any, config: ConfigLike | None
     ) -> Any:
