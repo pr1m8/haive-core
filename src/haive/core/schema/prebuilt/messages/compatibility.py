@@ -287,13 +287,10 @@ class MessagesStateAdapter:
                     if hasattr(msg, "additional_kwargs") and msg.additional_kwargs:
                         kwargs["additional_kwargs"] = msg.additional_kwargs.copy()
 
-                    if engine_id or engine_name:
+                    if engine_id:
                         if "additional_kwargs" not in kwargs:
                             kwargs["additional_kwargs"] = {}
-                        if engine_id:
-                            kwargs["additional_kwargs"]["engine_id"] = engine_id
-                        if engine_name:
-                            kwargs["additional_kwargs"]["engine_name"] = engine_name
+                        kwargs["additional_kwargs"]["engine_id"] = engine_id
 
                     if hasattr(msg, "name") and msg.name:
                         kwargs["name"] = msg.name

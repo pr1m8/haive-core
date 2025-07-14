@@ -180,7 +180,10 @@ class AugLLMConfig(
 
     # Prompt components
     prompt_template: BasePromptTemplate | None = Field(
-        default=None, description="Prompt template for the LLM"
+        default_factory=lambda: ChatPromptTemplate.from_messages(
+            [("system", "You are a helpful assistant."), ("placeholder", "{messages}")]
+        ),
+        description="Prompt template for the LLM",
     )
     system_message: str | None = Field(
         default=None, description="System message for chat models"
@@ -478,6 +481,93 @@ class AugLLMConfig(
             raise ValueError("structured_output_model must be a BaseModel subclass")
 
         return v
+
+    @field_validator("prompt_template", mode="before")
+    @classmethod
+    def validate_prompt_template(cls, v):
+        """Validate and reconstruct prompt template from dict data."""
+        if not v:
+            return v
+
+        # If it's already a BasePromptTemplate, return it
+        if isinstance(v, BasePromptTemplate):
+            return v
+
+        # If it's a dict (from serialization), try to reconstruct using LangChain's load
+        if isinstance(v, dict):
+            try:
+                # Try to use LangChain's load mechanism if the dict has the right structure
+                from langchain_core.load.load import load
+
+                # Check if this looks like a LangChain serialized object
+                if "lc" in v and "type" in v and v.get("type") == "constructor":
+                    logger.debug(
+                        f"Attempting to reconstruct prompt template using LangChain load"
+                    )
+                    reconstructed = load(v)
+                    if isinstance(reconstructed, BasePromptTemplate):
+                        logger.debug(
+                            f"Successfully reconstructed: {type(reconstructed)}"
+                        )
+                        return reconstructed
+
+            except Exception as e:
+                logger.debug(
+                    f"LangChain load failed: {e}, falling back to default template"
+                )
+
+            # Fallback: Create a default ChatPromptTemplate that works for most cases
+            logger.debug(f"Creating default ChatPromptTemplate from dict")
+
+            # Check if the dict has messages structure (for ChatPromptTemplate)
+            if "messages" in v:
+                try:
+                    # Try to reconstruct messages
+                    messages = []
+                    for msg_data in v.get("messages", []):
+                        if isinstance(msg_data, dict):
+                            msg_type = msg_data.get("type", "human")
+                            if msg_type == "system":
+                                messages.append(
+                                    (
+                                        "system",
+                                        msg_data.get("prompt", {}).get(
+                                            "template", "You are a helpful assistant."
+                                        ),
+                                    )
+                                )
+                            elif msg_type == "human":
+                                messages.append(
+                                    (
+                                        "human",
+                                        msg_data.get("prompt", {}).get(
+                                            "template", "{input}"
+                                        ),
+                                    )
+                                )
+                            elif msg_type == "placeholder":
+                                var_name = msg_data.get("variable_name", "messages")
+                                messages.append(("placeholder", f"{{{var_name}}}"))
+
+                    if messages:
+                        return ChatPromptTemplate.from_messages(messages)
+
+                except Exception as e:
+                    logger.debug(f"Failed to reconstruct from messages: {e}")
+
+            # Ultimate fallback: Create a working default template
+            return ChatPromptTemplate.from_messages(
+                [
+                    ("system", "You are a helpful assistant."),
+                    ("placeholder", "{messages}"),
+                ]
+            )
+
+        # For any other type, create a default
+        logger.debug(f"Unexpected type {type(v)}, creating default ChatPromptTemplate")
+        return ChatPromptTemplate.from_messages(
+            [("system", "You are a helpful assistant."), ("placeholder", "{messages}")]
+        )
 
     @model_validator(mode="before")
     @classmethod

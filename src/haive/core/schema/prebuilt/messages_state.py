@@ -497,10 +497,7 @@ class MessagesState(StateSchema):
             has_engine_metadata = (
                 hasattr(msg, "additional_kwargs")
                 and msg.additional_kwargs
-                and (
-                    "engine_id" in msg.additional_kwargs
-                    or "engine_name" in msg.additional_kwargs
-                )
+                and "engine_id" in msg.additional_kwargs
             )
             return not (has_name or has_engine_metadata)
 
@@ -528,7 +525,6 @@ class MessagesState(StateSchema):
         self,
         preserve_metadata: bool = True,
         engine_id: Optional[str] = None,
-        engine_name: Optional[str] = None,
     ) -> None:
         """
         Transform AI messages to Human messages in place.
@@ -539,7 +535,6 @@ class MessagesState(StateSchema):
         Args:
             preserve_metadata: Whether to preserve message metadata
             engine_id: Optional engine ID to add to transformed messages
-            engine_name: Optional engine name to add to transformed messages
         """
         if not ENHANCED_FEATURES_AVAILABLE:
             raise NotImplementedError(
@@ -547,4 +542,4 @@ class MessagesState(StateSchema):
             )
 
         adapter = MessagesStateAdapter(self)
-        adapter.transform_ai_to_human(preserve_metadata, engine_id, engine_name)
+        adapter.transform_ai_to_human(preserve_metadata, engine_id)

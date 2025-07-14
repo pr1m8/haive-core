@@ -87,6 +87,12 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
         description="Engine ID to add to messages (for ADD_ENGINE_ID transformation)",
     )
 
+    # Engine name configuration
+    engine_name: Optional[str] = Field(
+        default=None,
+        description="Engine name to add to messages (for engine attribution)",
+    )
+
     # Filtering configuration
     preserve_first_message: bool = Field(
         default=True,
@@ -137,8 +143,11 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
         if (
             self.transformation_type == TransformationType.ADD_ENGINE_ID
             and not self.engine_id
+            and not self.engine_name
         ):
-            raise ValueError("engine_id is required for ADD_ENGINE_ID transformation")
+            raise ValueError(
+                "engine_id or engine_name is required for ADD_ENGINE_ID transformation"
+            )
 
         if (
             self.transformation_type == TransformationType.CUSTOM
@@ -292,6 +301,11 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
                         if "additional_kwargs" not in kwargs:
                             kwargs["additional_kwargs"] = {}
                         kwargs["additional_kwargs"]["engine_id"] = self.engine_id
+                    # Add engine_name if specified
+                    if self.engine_name:
+                        if "additional_kwargs" not in kwargs:
+                            kwargs["additional_kwargs"] = {}
+                        kwargs["additional_kwargs"]["engine_name"] = self.engine_name
 
                     # Preserve name if it exists
                     if hasattr(msg, "name") and msg.name:
@@ -330,6 +344,11 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
                         if "additional_kwargs" not in kwargs:
                             kwargs["additional_kwargs"] = {}
                         kwargs["additional_kwargs"]["engine_id"] = self.engine_id
+                    # Add engine_name if specified
+                    if self.engine_name:
+                        if "additional_kwargs" not in kwargs:
+                            kwargs["additional_kwargs"] = {}
+                        kwargs["additional_kwargs"]["engine_name"] = self.engine_name
 
                     # Preserve name if it exists
                     if hasattr(msg, "name") and msg.name:
@@ -459,8 +478,8 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
         return transformed
 
     def _add_engine_id(self, messages: List[BaseMessage]) -> List[BaseMessage]:
-        """Add engine_id to all AI messages."""
-        if not self.engine_id:
+        """Add engine_id and engine_name to all AI messages."""
+        if not self.engine_id and not self.engine_name:
             return messages
 
         transformed = []
@@ -478,6 +497,9 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
 
                 # Add engine_id
                 kwargs["additional_kwargs"]["engine_id"] = self.engine_id
+                # Add engine_name if specified
+                if self.engine_name:
+                    kwargs["additional_kwargs"]["engine_name"] = self.engine_name
 
                 # Preserve other attributes
                 if hasattr(msg, "name") and msg.name:
@@ -512,7 +534,7 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
                     and msg.additional_kwargs
                     and any(
                         key in msg.additional_kwargs
-                        for key in ["engine_id", "source_agent"]
+                        for key in ["engine_id", "engine_name", "source_agent"]
                     )
                 )
 
@@ -657,6 +679,7 @@ def create_ai_to_human_transformer(
     messages_field: str = "messages",
     output_field: Optional[str] = None,
     engine_id: Optional[str] = None,
+    engine_name: Optional[str] = None,
     preserve_metadata: bool = True,
     **kwargs,
 ) -> MessageTransformationNodeConfig:
@@ -667,6 +690,7 @@ def create_ai_to_human_transformer(
         messages_field=messages_field,
         output_field=output_field,
         engine_id=engine_id,
+        engine_name=engine_name,
         preserve_metadata=preserve_metadata,
         **kwargs,
     )

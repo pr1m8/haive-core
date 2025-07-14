@@ -78,6 +78,29 @@ class SecureSecretStrSerializer(JsonPlusSerializer):
             # Handle Pydantic model classes and other type references
             # Store as a string reference that can be reimported later
             return f"__type__:{value.__module__}.{value.__name__}"
+        elif hasattr(value, "__class__") and hasattr(value.__class__, "__mro__"):
+            # Check if this is a LangChain Serializable object
+            # Let LangChain handle its own serialization
+            for cls in value.__class__.__mro__:
+                if cls.__name__ == "Serializable" and "langchain" in getattr(
+                    cls, "__module__", ""
+                ):
+                    logger.debug(
+                        f"Allowing LangChain Serializable object to handle its own serialization: {type(value)}"
+                    )
+                    return value
+
+            # Also check for specific LangChain prompt types that should not be model_dump'd
+            if any(
+                cls.__name__
+                in ["BasePromptTemplate", "ChatPromptTemplate", "PromptTemplate"]
+                and "langchain" in getattr(cls, "__module__", "")
+                for cls in value.__class__.__mro__
+            ):
+                logger.debug(
+                    f"Preserving LangChain prompt template object: {type(value)}"
+                )
+                return value
         elif isinstance(value, dict):
             # Recursively handle dictionaries
             return {k: self._handle_secret_types(v) for k, v in value.items()}

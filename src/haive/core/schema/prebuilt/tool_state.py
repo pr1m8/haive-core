@@ -86,9 +86,34 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
 
         This runs after the parent validators, so engines and tool routes are already set up.
         """
+        # Fix any PydanticUndefined values in tool-related fields
+        from pydantic_core import PydanticUndefined
+
+        if not hasattr(self, "tools") or self.tools is PydanticUndefined:
+            self.tools = []
+        if not hasattr(self, "tool_routes") or self.tool_routes is PydanticUndefined:
+            self.tool_routes = {}
+        if (
+            not hasattr(self, "tool_metadata")
+            or self.tool_metadata is PydanticUndefined
+        ):
+            self.tool_metadata = {}
+        if (
+            not hasattr(self, "tool_instances")
+            or self.tool_instances is PydanticUndefined
+        ):
+            self.tool_instances = {}
+        if not hasattr(self, "tools_dict") or self.tools_dict is PydanticUndefined:
+            self.tools_dict = {}
+        if not hasattr(self, "routed_tools") or self.routed_tools is PydanticUndefined:
+            self.routed_tools = []
+
         # Call parent validators first
         super().auto_track_all_tokens()  # From MessagesStateWithTokenUsage
         super()._validate_and_process_tools()  # From ToolRouteMixin
+
+        # Sync tools from instance-level engine field (like self.engine)
+        self._sync_tools_from_instance_engines()
 
         # Sync tools from class-level engines if they haven't been synced yet
         if hasattr(self.__class__, "engines") and not self.tools:
@@ -104,6 +129,38 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
         self._sync_tools_to_engines_by_route()
 
         return self
+
+    def _sync_tools_from_instance_engines(self) -> None:
+        """Sync tools from instance-level engine fields to state."""
+        # Look for engine fields in the instance
+        for field_name, field_value in self.__dict__.items():
+            if hasattr(field_value, "tools") and hasattr(field_value, "engine_type"):
+                logger.debug(
+                    f"Found instance engine field '{field_name}' with {len(field_value.tools)} tools"
+                )
+
+                # Sync tools from this engine
+                for tool in field_value.tools:
+                    if tool not in self.tools:
+                        self.tools.append(tool)
+                        tool_name = getattr(tool, "name", str(tool))
+                        logger.debug(
+                            f"Added tool '{tool_name}' from instance engine '{field_name}'"
+                        )
+
+                # Sync tool routes from this engine
+                if hasattr(field_value, "tool_routes") and field_value.tool_routes:
+                    logger.debug(
+                        f"Syncing tool routes from instance engine '{field_name}': {field_value.tool_routes}"
+                    )
+                    self.tool_routes.update(field_value.tool_routes)
+
+                # Sync tool metadata from this engine
+                if hasattr(field_value, "tool_metadata") and field_value.tool_metadata:
+                    logger.debug(
+                        f"Syncing tool metadata from instance engine '{field_name}': {field_value.tool_metadata}"
+                    )
+                    self.tool_metadata.update(field_value.tool_metadata)
 
     def _sync_tools_from_class_engines(self) -> None:
         """Sync tools from class-level engines to state."""

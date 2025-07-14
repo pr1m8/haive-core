@@ -64,6 +64,12 @@ class MessageTransformationNodeConfig(NodeConfig):
         description="Engine ID to add to messages (for ADD_ENGINE_ID transformation)",
     )
 
+    # Engine name configuration
+    engine_name: Optional[str] = Field(
+        default=None,
+        description="Engine name to add to messages (for engine attribution)",
+    )
+
     # Filtering configuration
     preserve_first_message: bool = Field(
         default=True,
@@ -105,8 +111,11 @@ class MessageTransformationNodeConfig(NodeConfig):
         if (
             self.transformation_type == TransformationType.ADD_ENGINE_ID
             and not self.engine_id
+            and not self.engine_name
         ):
-            raise ValueError("engine_id is required for ADD_ENGINE_ID transformation")
+            raise ValueError(
+                "engine_id or engine_name is required for ADD_ENGINE_ID transformation"
+            )
 
         if (
             self.transformation_type == TransformationType.CUSTOM
@@ -207,6 +216,11 @@ class MessageTransformationNodeConfig(NodeConfig):
                         if "additional_kwargs" not in kwargs:
                             kwargs["additional_kwargs"] = {}
                         kwargs["additional_kwargs"]["engine_id"] = self.engine_id
+                    # Add engine_name if specified
+                    if self.engine_name:
+                        if "additional_kwargs" not in kwargs:
+                            kwargs["additional_kwargs"] = {}
+                        kwargs["additional_kwargs"]["engine_name"] = self.engine_name
 
                     # Preserve name if it exists
                     if hasattr(msg, "name") and msg.name:
@@ -245,6 +259,11 @@ class MessageTransformationNodeConfig(NodeConfig):
                         if "additional_kwargs" not in kwargs:
                             kwargs["additional_kwargs"] = {}
                         kwargs["additional_kwargs"]["engine_id"] = self.engine_id
+                    # Add engine_name if specified
+                    if self.engine_name:
+                        if "additional_kwargs" not in kwargs:
+                            kwargs["additional_kwargs"] = {}
+                        kwargs["additional_kwargs"]["engine_name"] = self.engine_name
 
                     # Preserve name if it exists
                     if hasattr(msg, "name") and msg.name:
@@ -374,8 +393,8 @@ class MessageTransformationNodeConfig(NodeConfig):
         return transformed
 
     def _add_engine_id(self, messages: List[BaseMessage]) -> List[BaseMessage]:
-        """Add engine_id to all AI messages."""
-        if not self.engine_id:
+        """Add engine_id and engine_name to all AI messages."""
+        if not self.engine_id and not self.engine_name:
             return messages
 
         transformed = []
@@ -393,6 +412,9 @@ class MessageTransformationNodeConfig(NodeConfig):
 
                 # Add engine_id
                 kwargs["additional_kwargs"]["engine_id"] = self.engine_id
+                # Add engine_name if specified
+                if self.engine_name:
+                    kwargs["additional_kwargs"]["engine_name"] = self.engine_name
 
                 # Preserve other attributes
                 if hasattr(msg, "name") and msg.name:
@@ -427,7 +449,7 @@ class MessageTransformationNodeConfig(NodeConfig):
                     and msg.additional_kwargs
                     and any(
                         key in msg.additional_kwargs
-                        for key in ["engine_id", "source_agent"]
+                        for key in ["engine_id", "engine_name", "source_agent"]
                     )
                 )
 
