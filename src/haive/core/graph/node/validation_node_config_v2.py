@@ -68,6 +68,26 @@ class ValidationNodeConfigV2(BaseNodeConfig):
         if not isinstance(last_message, AIMessage):
             return Command(goto="END")
 
+        # EXTRACT ENGINE NAME FROM AI MESSAGE ATTRIBUTION
+        if (
+            hasattr(last_message, "additional_kwargs")
+            and last_message.additional_kwargs
+        ):
+            engine_name_from_message = last_message.additional_kwargs.get("engine_name")
+            if engine_name_from_message:
+                logger.info(
+                    f"Found engine attribution in AI message: {engine_name_from_message}"
+                )
+                # Override the validation node's engine_name with the one from the message
+                self.engine_name = engine_name_from_message
+                logger.debug(
+                    f"Updated validation node engine_name to: {self.engine_name}"
+                )
+            else:
+                logger.debug(
+                    "No engine attribution found in AI message additional_kwargs"
+                )
+
         tool_calls = getattr(last_message, "tool_calls", [])
         if not tool_calls:
             return Command(goto="END")
@@ -92,7 +112,9 @@ class ValidationNodeConfigV2(BaseNodeConfig):
 
             if route == "pydantic_model":
                 # Handle Pydantic model validation
-                tool_msg = self._validate_pydantic_model(tool_name, tool_id, args)
+                tool_msg = self._validate_pydantic_model(
+                    tool_name, tool_id, args, state
+                )
                 new_messages.append(tool_msg)
 
                 # Route to parser if validation succeeded
@@ -130,7 +152,7 @@ class ValidationNodeConfigV2(BaseNodeConfig):
         return Command(update=update_dict, goto=goto)
 
     def _validate_pydantic_model(
-        self, tool_name: str, tool_id: str, args: Dict[str, Any]
+        self, tool_name: str, tool_id: str, args: Dict[str, Any], state: Dict[str, Any]
     ) -> ToolMessage:
         """Validate Pydantic model and create ToolMessage."""
         try:
@@ -139,7 +161,7 @@ class ValidationNodeConfigV2(BaseNodeConfig):
 
             if not model_class:
                 # Try to dynamically find model class
-                model_class = self._find_model_class(tool_name)
+                model_class = self._find_model_class(tool_name, state)
 
             if not model_class:
                 return ToolMessage(
@@ -169,17 +191,89 @@ class ValidationNodeConfigV2(BaseNodeConfig):
             error_msg = f"Error processing {tool_name}: {str(e)}"
             return ToolMessage(content=error_msg, tool_call_id=tool_id, name=tool_name)
 
-    def _find_model_class(self, tool_name: str) -> Optional[type[BaseModel]]:
-        """Try to find Pydantic model class by name."""
-        # Common model names to try
+    def _get_engine_from_state(self, state: Dict[str, Any]) -> Optional[Any]:
+        """Get engine from state using engine_name."""
+        if not self.engine_name:
+            return None
 
-        # Look in current module globals
+        # Try state.engines first
+        if "engines" in state and isinstance(state["engines"], dict):
+            engine = state["engines"].get(self.engine_name)
+            if engine:
+                logger.info(f"Found engine in state.engines: {self.engine_name}")
+                return engine
+
+            # Try by engine.name attribute
+            for _key, eng in state["engines"].items():
+                if hasattr(eng, "name") and eng.name == self.engine_name:
+                    logger.info(f"Found engine by name attribute: {self.engine_name}")
+                    return eng
+
+        # Try registry
+        try:
+            from haive.core.engine.base import EngineRegistry
+
+            registry = EngineRegistry.get_instance()
+            engine = registry.find(self.engine_name)
+            if engine:
+                logger.info(f"Found engine in registry: {self.engine_name}")
+                return engine
+        except Exception as e:
+            logger.warning(f"Registry lookup failed: {e}")
+
+        logger.warning(f"Engine not found: {self.engine_name}")
+        return None
+
+    def _find_model_class_from_engine(
+        self, tool_name: str, state: Dict[str, Any]
+    ) -> Optional[type[BaseModel]]:
+        """Find Pydantic model class from engine."""
+        engine = self._get_engine_from_state(state)
+        if not engine:
+            return None
+
+        # Check structured_output_model
+        if (
+            hasattr(engine, "structured_output_model")
+            and engine.structured_output_model
+            and getattr(engine.structured_output_model, "__name__", None) == tool_name
+        ):
+            logger.info(f"Found model in engine.structured_output_model: {tool_name}")
+            return engine.structured_output_model
+
+        # Check schemas
+        if hasattr(engine, "schemas") and engine.schemas:
+            for schema in engine.schemas:
+                if getattr(schema, "__name__", None) == tool_name:
+                    logger.info(f"Found model in engine.schemas: {tool_name}")
+                    return schema
+
+        # Check pydantic_tools
+        if hasattr(engine, "pydantic_tools") and engine.pydantic_tools:
+            for tool in engine.pydantic_tools:
+                if getattr(tool, "__name__", None) == tool_name:
+                    logger.info(f"Found model in engine.pydantic_tools: {tool_name}")
+                    return tool
+
+        return None
+
+    def _find_model_class(
+        self, tool_name: str, state: Dict[str, Any] = None
+    ) -> Optional[type[BaseModel]]:
+        """Try to find Pydantic model class by name."""
+        # FIRST: Try to find from engine (using attribution)
+        if state:
+            model_class = self._find_model_class_from_engine(tool_name, state)
+            if model_class:
+                return model_class
+
+        # FALLBACK: Look in current module globals
         if tool_name in globals():
             candidate = globals()[tool_name]
             if isinstance(candidate, type) and issubclass(candidate, BaseModel):
                 return candidate
 
-        # Try to import from common locations
+        # FALLBACK: Try to import from common locations
         try:
             # Try importing from test modules
             from haive.agents.planning.p_and_e.models import (
