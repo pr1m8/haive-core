@@ -897,7 +897,7 @@ class DynamicGraph:
 
         except Exception as e:
             tb = traceback.format_exc()
-            logger.exception(f"Error adding edge {from_node} → {to_node}: {e!s}\n{tb}"}")
+            logger.exception(f"Error adding edge {from_node} → {to_node}: {e!s}\n{tb}")
             self._log_error(f"Error adding edge {from_node} → {to_node}", e)
             raise
 
@@ -1426,7 +1426,7 @@ class DynamicGraph:
                 # Suggest a fix if possible
                 if self.nodes:
                     first_node = next(iter(self.nodes.keys()))
-                    logger.error(f"Try adding: graph.add_edge(START, "{first_node}\")")
+                    logger.error(f"Try adding: graph.add_edge(START, \"{first_node}\")") # noqa: E501
             elif "No transitions defined" in error_str:
                 logger.error("Graph has no transitions (edges) defined")
                 logger.error("Add edges between nodes")
@@ -1462,7 +1462,7 @@ class DynamicGraph:
 
                 if self.nodes:
                     first_node = next(iter(self.nodes.keys()))
-                    logger.error(f"    graph.add_edge(START, "{first_node}\")")
+                    logger.error(f"    graph.add_edge(START, \"{first_node}\")") # noqa: E501
 
                     # Suggest entry point
                     logger.error(f"SUGGESTION: Consider using '{first_node}' as entry point")
@@ -1486,10 +1486,10 @@ class DynamicGraph:
 
                     if connected_nodes:
                         closest_node = next(iter(connected_nodes))
-                        logger.error(f"    graph.add_edge("{closest_node}\", \"{unreachable_node}\")")
+                        logger.error(f"    graph.add_edge(\"{closest_node}\", \"{unreachable_node}\")") # noqa: E501
                         logger.error(f"SUGGESTION: Consider connecting '{unreachable_node}' to '{closest_node}'")
                     else:
-                        logger.error(f"    graph.add_edge(START, "{unreachable_node}\")")
+                        logger.error(f"    graph.add_edge(START, \"{unreachable_node}\")") # noqa: E501
                 else:
                     logger.error("CRITICAL: Some node is unreachable")
 
@@ -1529,7 +1529,9 @@ class DynamicGraph:
             # Check if we have a compiled graph
             if hasattr(self, "compiled_graph") and self.compiled_graph is not None:
                 # Import the visualization utility
-                from haive.core.utils.visualize_graph_utils import render_and_display_graph
+                from haive.core.utils.visualize_graph_utils import (
+                    render_and_display_graph,
+                )
 
                 # Use the visualization utility
                 result_file = render_and_display_graph(
@@ -1550,8 +1552,9 @@ class DynamicGraph:
             try:
                 # Try to use the uncompiled builder's visualization (experimental)
                 if hasattr(self.graph_builder, "get_graph"):
-                    from haive.core.utils.visualize_graph_utils import \
-                            render_uncompiled_graph
+                    from haive.core.utils.visualize_graph_utils import (
+                        render_uncompiled_graph,
+                    )
                     
                     result_file = render_uncompiled_graph(
                         graph_builder=self.graph_builder,
@@ -1830,7 +1833,7 @@ class DynamicGraph:
         if self.errors:
             logger.debug(f"\n--- Errors ({len(self.errors)}) ---")
             for i, error in enumerate(self.errors):
-                logger.debug(f"  {i+1}. {error.split('\n')[0]}")
+                logger.debug(f"  {i+1}. {error.split('\n')[0]}") # noqa: E501    # noqa: E501
 
         # Compilation status
         compiled = hasattr(self, "_compiled_graph") and self._compiled_graph is not None

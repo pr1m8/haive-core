@@ -253,12 +253,12 @@ class MermaidVisualizer:
         special_nodes = set()
         
         # Add START node
-        mermaid_lines.append("  START([\"🚀 Start\"])"])")
+        mermaid_lines.append("  START([\"🚀 Start\"])")
         mermaid_lines.append(f"  style START {MermaidStyle.NODE_STYLES['start']}")
         special_nodes.add("START")
         
         # Add END node
-        mermaid_lines.append("  END([\"🏁 End\"])"])")
+        mermaid_lines.append("  END([\"🏁 End\"])")
         mermaid_lines.append(f"  style END {MermaidStyle.NODE_STYLES['end']}")
         special_nodes.add("END")
         
@@ -281,7 +281,7 @@ class MermaidVisualizer:
             icon = MermaidStyle.NODE_ICONS.get(node_type, MermaidStyle.NODE_ICONS["default"])
             
             # Add node with appropriate shape and icon
-            mermaid_lines.append(f"  {node_id}[\"{icon} {name}\"]")
+            mermaid_lines.append(f"  {node_id}[\"{icon} {name}\")
             
             # Apply style based on node type and status
             if node_status == NodeStatus.UNREACHABLE:
