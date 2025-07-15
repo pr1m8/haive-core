@@ -135,8 +135,8 @@ class EngineNodeConfig(NodeConfig):
         logger.info(f"ENGINE NODE EXECUTION: {self.name}")
         logger.info("=" * 80)
 
-        with logger.track_time(f"Executing node {self.name}"):
-            try:
+        logger.debug(f"Starting execution of node {self.name}")
+        try:
                 # Get engine and validate
                 logger.info("Step 1: Getting Engine")
                 engine = self._get_engine(state)
@@ -876,7 +876,7 @@ class EngineNodeConfig(NodeConfig):
 
     def _log_error(self, error: Exception) -> None:
         """Log error with full context."""
-        logger.log_exception(error, f"Engine node '{self.name}' failed")
+        logger.exception(error, f"Engine node '{self.name}' failed")
 
     def __repr__(self) -> str:
         """Clean string representation."""

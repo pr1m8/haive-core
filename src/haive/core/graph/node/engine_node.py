@@ -155,79 +155,79 @@ class EngineNodeConfig(NodeConfig):
         logger.info(f"ENGINE NODE EXECUTION: {self.name}")
         logger.info("=" * 80)
 
-        with logger.track_time(f"Executing node {self.name}"):
-            try:
-                # Get engine and validate
-                logger.info("Step 1: Getting Engine")
-                engine = self._get_engine(state)
-                if not engine:
-                    logger.error(f"No engine available for node '{self.name}'")
-                    logger.error(f"  engine_name: {self.engine_name}")
-                    logger.error(f"  direct engine: {self.engine}")
-                    raise ValueError(f"No engine available for node '{self.name}'")
+        logger.debug(f"Starting execution of node {self.name}")
+        try:
+            # Get engine and validate
+            logger.info("Step 1: Getting Engine")
+            engine = self._get_engine(state)
+            if not engine:
+                logger.error(f"No engine available for node '{self.name}'")
+                logger.error(f"  engine_name: {self.engine_name}")
+                logger.error(f"  direct engine: {self.engine}")
+                raise ValueError(f"No engine available for node '{self.name}'")
 
+            logger.info(
+                f"✅ Got engine: {engine.name} (type: {engine.engine_type.value})"
+            )
+
+            # Extract input using schema-aware method
+            logger.info("Step 2: Extracting Input")
+            logger.debug(f"Node input_schema: {self.input_schema}")
+            logger.debug(f"Node input_field_defs: {self.input_field_defs}")
+            logger.debug(
+                f"State fields available: {[field for field in dir(state) if not field.startswith('_')]}"
+            )
+
+            if self.input_schema or self.input_field_defs:
+                input_data = self.extract_input_from_state(state)
                 logger.info(
-                    f"✅ Got engine: {engine.name} (type: {engine.engine_type.value})"
+                    f"Using schema-based input extraction: {list(input_data.keys()) if isinstance(input_data, dict) else type(input_data)}"
                 )
+                logger.debug(f"Extracted input_data: {input_data}")
+            else:
+                input_data = self._extract_smart_input(state, engine)
+                logger.info("Using legacy smart input extraction")
+                logger.debug(f"Smart extracted input_data: {input_data}")
 
-                # Extract input using schema-aware method
-                logger.info("Step 2: Extracting Input")
-                logger.debug(f"Node input_schema: {self.input_schema}")
-                logger.debug(f"Node input_field_defs: {self.input_field_defs}")
-                logger.debug(
-                    f"State fields available: {[field for field in dir(state) if not field.startswith('_')]}"
+            logger.debug(f"Input data type: {type(input_data).__name__}")
+            if isinstance(input_data, dict):
+                logger.debug(f"Input keys: {list(input_data.keys())}")
+                for key, value in input_data.items():
+                    logger.debug(
+                        f"  {key}: {type(value).__name__} = {str(value)[:100]}..."
+                    )
+            else:
+                logger.debug(f"Input value: {str(input_data)[:200]}...")
+
+            # Execute with merged config
+            logger.info("Step 3: Executing Engine")
+            result = self._execute_with_config(engine, input_data, config)
+
+            # Log result details
+            logger.debug(f"Result type: {type(result).__name__}")
+            self._log_result_details(result)
+
+            # Wrap result using schema-aware method
+            logger.info("Step 4: Creating Update")
+            if self.output_schema or self.output_field_defs:
+                wrapped = self.create_output_for_state(result)
+                logger.info(
+                    f"Using schema-based output creation: {list(wrapped.keys()) if isinstance(wrapped, dict) else type(wrapped)}"
                 )
+            else:
+                wrapped = self._wrap_smart_result(result, state, engine)
+                logger.info("Using legacy smart result wrapping")
 
-                if self.input_schema or self.input_field_defs:
-                    input_data = self.extract_input_from_state(state)
-                    logger.info(
-                        f"Using schema-based input extraction: {list(input_data.keys()) if isinstance(input_data, dict) else type(input_data)}"
-                    )
-                    logger.debug(f"Extracted input_data: {input_data}")
-                else:
-                    input_data = self._extract_smart_input(state, engine)
-                    logger.info("Using legacy smart input extraction")
-                    logger.debug(f"Smart extracted input_data: {input_data}")
+            # Log final update
+            self._log_final_update(wrapped)
 
-                logger.debug(f"Input data type: {type(input_data).__name__}")
-                if isinstance(input_data, dict):
-                    logger.debug(f"Input keys: {list(input_data.keys())}")
-                    for key, value in input_data.items():
-                        logger.debug(
-                            f"  {key}: {type(value).__name__} = {str(value)[:100]}..."
-                        )
-                else:
-                    logger.debug(f"Input value: {str(input_data)[:200]}...")
+            logger.info(f"✅ ENGINE NODE COMPLETED: {self.name}")
 
-                # Execute with merged config
-                logger.info("Step 3: Executing Engine")
-                result = self._execute_with_config(engine, input_data, config)
+            return wrapped
 
-                # Log result details
-                logger.debug(f"Result type: {type(result).__name__}")
-                self._log_result_details(result)
-
-                # Wrap result using schema-aware method
-                logger.info("Step 4: Creating Update")
-                if self.output_schema or self.output_field_defs:
-                    wrapped = self.create_output_for_state(result)
-                    logger.info(
-                        f"Using schema-based output creation: {list(wrapped.keys()) if isinstance(wrapped, dict) else type(wrapped)}"
-                    )
-                else:
-                    wrapped = self._wrap_smart_result(result, state, engine)
-                    logger.info("Using legacy smart result wrapping")
-
-                # Log final update
-                self._log_final_update(wrapped)
-
-                logger.info(f"✅ ENGINE NODE COMPLETED: {self.name}")
-
-                return wrapped
-
-            except Exception as e:
-                self._log_error(e)
-                raise
+        except Exception as e:
+            self._log_error(e)
+            raise
 
     def _get_engine(self, state: StateLike | None = None) -> Engine | None:
         """Get engine from direct reference or state's engines dict."""
@@ -923,7 +923,7 @@ class EngineNodeConfig(NodeConfig):
 
     def _log_error(self, error: Exception) -> None:
         """Log error with full context."""
-        logger.log_exception(error, f"Engine node '{self.name}' failed")
+        logger.exception(f"Engine node '{self.name}' failed: {error}")
 
     def __repr__(self) -> str:
         """Clean string representation."""

@@ -120,8 +120,8 @@ class GenericEngineNodeConfig(NodeConfig, Generic[TInput, TOutput]):
         logger.info(f"GENERIC ENGINE NODE EXECUTION: {self.name}")
         logger.info("=" * 80)
 
-        with logger.track_time(f"Executing node {self.name}"):
-            try:
+        logger.debug(f"Starting execution of node {self.name}")
+        try:
                 # Get engine
                 engine = self._get_engine(state)
                 if not engine:

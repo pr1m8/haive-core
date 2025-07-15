@@ -158,8 +158,8 @@ class MetaAgentNodeConfig(NodeConfig):
         logger.info(f"META AGENT NODE EXECUTION: {self.name}")
         logger.info("=" * 80)
 
-        with logger.track_time(f"Executing meta agent node {self.name}"):
-            try:
+        logger.debug(f"Starting execution of meta agent node {self.name}")
+        try:
                 # Validate state is meta state
                 if not self._is_meta_state(state):
                     raise ValueError(
