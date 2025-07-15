@@ -275,22 +275,69 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
         This is the key method that enables hierarchical state management.
         Each agent gets exactly what it expects, not a flattened global state.
         """
+        # DEBUG: Print state projection debug info
+        print(f"\n🔍 DEBUG: Projecting state for agent '{self.agent_name}'")
+        print(f"  State type: {type(state)}")
+        print(f"  State.__dict__: {state.__dict__}")
+        print(f"  State fields: {[f for f in dir(state) if not f.startswith('_')]}")
+
         # Start with agent's isolated state
         agent_states = getattr(state, self.agent_state_field, {})
         agent_state = agent_states.get(self.agent_name, {})
         projected = agent_state.copy()
 
+        print(f"  Agent states field '{self.agent_state_field}': {agent_states}")
+        print(f"  Agent state for '{self.agent_name}': {agent_state}")
+
+        # DEBUG: Show agent outputs
+        if hasattr(state, "agent_outputs"):
+            agent_outputs = getattr(state, "agent_outputs", {})
+            print(f"  Agent outputs available: {list(agent_outputs.keys())}")
+            for agent_name, output in agent_outputs.items():
+                print(f"    {agent_name}: {type(output)} - {str(output)[:100]}...")
+
         if not self.project_state:
+            print(f"  ❌ project_state=False, returning isolated state only")
             return projected
 
         # Add shared fields from container
+        print(f"  Shared fields to check: {self.shared_fields}")
         for field in self.shared_fields:
             if hasattr(state, field) and field not in projected:
                 value = getattr(state, field)
+                print(f"    Adding shared field '{field}': {str(value)[:100]}...")
                 # Special handling for messages
                 if field == "messages":
                     value = self._extract_message_objects(value)
                 projected[field] = value
+            elif hasattr(state, field):
+                print(f"    Skipping '{field}' - already in projected")
+            else:
+                print(f"    Missing field '{field}' in state")
+
+        # DEBUG: Show projected state
+        print(f"  Projected state keys: {list(projected.keys())}")
+        print(f"  Projected state values: {projected}")
+
+        # DEBUG: Check if required inputs are available
+        agent_name = self.agent_name
+        if agent_name == "select_modules":
+            required = ["reasoning_modules", "task_description"]
+        elif agent_name == "adapt_modules":
+            required = ["selected_modules", "task_description"]
+        elif agent_name == "create_structure":
+            required = ["adapted_modules", "task_description"]
+        elif agent_name == "final_reasoning":
+            required = ["reasoning_structure", "task_description"]
+        else:
+            required = []
+
+        print(f"  Required inputs: {required}")
+        missing = [key for key in required if key not in projected]
+        if missing:
+            print(f"  ❌ MISSING INPUTS: {missing}")
+        else:
+            print(f"  ✅ All required inputs available")
 
         # Let the agent handle its own state schema validation
         # AgentNodeV3 just provides the projected data

@@ -69,6 +69,10 @@ from haive.core.engine import (
 from haive.core.graph import (
     BaseGraph,
 )
+from haive.core.registry import (
+    DynamicRegistry,
+    RegistryItem,
+)
 from haive.core.schema import (  # BasicAgentState,  # Module doesn't exist
     SchemaComposer,
 )
@@ -80,6 +84,9 @@ __all__ = [
     # Graph system
     "BaseGraph",
     # "BasicAgentState",  # Module doesn't exist
+    # Registry system
+    "DynamicRegistry",
+    "RegistryItem",
     # Engine system
     "Engine",
     "InvokableEngine",

@@ -160,44 +160,42 @@ class MetaAgentNodeConfig(NodeConfig):
 
         logger.debug(f"Starting execution of meta agent node {self.name}")
         try:
-                # Validate state is meta state
-                if not self._is_meta_state(state):
-                    raise ValueError(
-                        f"State must be a MetaStateSchema instance, got {type(state)}"
-                    )
-
-                # Extract the embedded agent
-                agent = self._extract_agent(state)
-                if agent is None:
-                    raise ValueError(
-                        f"No agent found in state field '{self.agent_field}'"
-                    )
-
-                logger.info(f"✅ Found embedded agent: {type(agent).__name__}")
-
-                # Prepare input for the embedded agent
-                agent_input = self._prepare_agent_input(state, config)
-                logger.debug(f"Prepared agent input with {len(agent_input)} fields")
-
-                # Prepare execution configuration
-                execution_config = self._prepare_execution_config(state, config)
-
-                # Execute the embedded agent
-                execution_result = self._execute_embedded_agent(
-                    state, agent, agent_input, execution_config
+            # Validate state is meta state
+            if not self._is_meta_state(state):
+                raise ValueError(
+                    f"State must be a MetaStateSchema instance, got {type(state)}"
                 )
 
-                # Handle the execution output
-                updated_state = self._handle_agent_output(state, execution_result)
+            # Extract the embedded agent
+            agent = self._extract_agent(state)
+            if agent is None:
+                raise ValueError(f"No agent found in state field '{self.agent_field}'")
 
-                # Create response
-                response = self._create_response(updated_state)
+            logger.info(f"✅ Found embedded agent: {type(agent).__name__}")
 
-                logger.info(f"✅ META AGENT NODE COMPLETED: {self.name}")
-                return response
+            # Prepare input for the embedded agent
+            agent_input = self._prepare_agent_input(state, config)
+            logger.debug(f"Prepared agent input with {len(agent_input)} fields")
 
-            except Exception as e:
-                return self._handle_execution_error(state, e, config)
+            # Prepare execution configuration
+            execution_config = self._prepare_execution_config(state, config)
+
+            # Execute the embedded agent
+            execution_result = self._execute_embedded_agent(
+                state, agent, agent_input, execution_config
+            )
+
+            # Handle the execution output
+            updated_state = self._handle_agent_output(state, execution_result)
+
+            # Create response
+            response = self._create_response(updated_state)
+
+            logger.info(f"✅ META AGENT NODE COMPLETED: {self.name}")
+            return response
+
+        except Exception as e:
+            return self._handle_execution_error(state, e, config)
 
     def _is_meta_state(self, state: StateLike) -> bool:
         """Check if state is a MetaStateSchema instance."""

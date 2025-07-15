@@ -3597,9 +3597,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                                 "Branch": str(getattr(result, "branch", None)),
                                 "Raw": str(result),
                             }
-                            logger.debug_table(
-                                f"Command Details - {name}", command_info
-                            )
+                            logger.debug(f"Command Details - {name}", command_info)
 
                         return result
                     except Exception as e:
@@ -3662,7 +3660,7 @@ class BaseGraph(BaseModel, ValidationMixin):
             logger.info("Adding Edges")
             for source, target in self.edges:
                 graph_builder.add_edge(source, target)
-                logger.progress(f"{source} → {target}")
+                logger.debug(f"{source} → {target}")
 
             # SIMPLE: Add branches
             logger.info("Adding Branches")
@@ -3736,7 +3734,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                                                 and result[key]
                                                 and key in dest_dict
                                             ):
-                                                logger.success(
+                                                logger.info(
                                                     f"Found validation key: {key}"
                                                 )
                                                 return key
@@ -3744,7 +3742,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                                         # Look for any True values that match routing keys
                                         for key, value in result.items():
                                             if value is True and key in dest_dict:
-                                                logger.success(f"Found True key: {key}")
+                                                logger.info(f"Found True key: {key}")
                                                 return key
 
                                         # For validation failure, use has_errors if available
@@ -3778,12 +3776,12 @@ class BaseGraph(BaseModel, ValidationMixin):
                             graph_builder.add_conditional_edges(
                                 source, branch_func, destinations
                             )
-                            logger.success(
+                            logger.info(
                                 f"✓ Successfully added conditional edges for {source}"
                             )
 
                         except Exception as e:
-                            logger.failure(
+                            logger.error(
                                 f"Error adding conditional edges for {source}: {e}"
                             )
                             logger.error(f"  Destinations: {destinations}")
@@ -3798,11 +3796,11 @@ class BaseGraph(BaseModel, ValidationMixin):
                             graph_builder.add_conditional_edges(
                                 source, branch.function, destinations
                             )
-                            logger.success(
+                            logger.info(
                                 f"✓ Successfully added conditional edges for {source} (fallback)"
                             )
                         except Exception as fallback_error:
-                            logger.failure(
+                            logger.error(
                                 f"Fallback also failed for {source}: {fallback_error}"
                             )
                             logger.error(f"  Destinations: {destinations}")
@@ -3816,11 +3814,11 @@ class BaseGraph(BaseModel, ValidationMixin):
                         graph_builder.add_conditional_edges(
                             source, branch, destinations
                         )
-                        logger.success(
+                        logger.info(
                             f"✓ Successfully added conditional edges for {source} (branch object)"
                         )
                     except Exception as e:
-                        logger.failure(f"Error using branch object for {source}: {e}")
+                        logger.error(f"Error using branch object for {source}: {e}")
                         logger.error(f"  Destinations: {destinations}")
                         logger.error(f"  Branch: {branch}")
                         raise
@@ -4071,17 +4069,10 @@ class BaseGraph(BaseModel, ValidationMixin):
                     debug_info["Node names"] = list(self.nodes.keys())
                     # Check each node for graph attributes
                     for name, node in self.nodes.items():
-                        logger.debug_table(
-                            f"Node '{name}'",
-                            {
-                                "Type": type(node).__name__ if node else "None",
-                                "Has graph": hasattr(node, "graph") if node else False,
-                                "Graph type": (
-                                    type(node.graph).__name__
-                                    if node and hasattr(node, "graph") and node.graph
-                                    else None
-                                ),
-                            },
+                        logger.debug(
+                            f"Node '{name}' - Type: {type(node).__name__ if node else 'None'}, "
+                            f"Has graph: {hasattr(node, 'graph') if node else False}, "
+                            f"Graph type: {type(node.graph).__name__ if node and hasattr(node, 'graph') and node.graph else None}"
                         )
 
             if hasattr(self, "edges"):
@@ -4098,7 +4089,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                 if self.subgraphs:
                     debug_info["Subgraph names"] = list(self.subgraphs.keys())
 
-            logger.debug_table("Graph Structure", debug_info)
+            logger.debug(f"Graph Structure: {debug_info}")
 
         logger.debug(
             f"Visualizing graph: {self.name} (nodes: {len(self.nodes) if self.nodes else 0}, edges: {len(self.edges) if self.edges else 0})"
@@ -4128,7 +4119,7 @@ class BaseGraph(BaseModel, ValidationMixin):
             logger.info("Running structure analysis...")
             try:
                 debug_info = GraphVisualizer.debug_graph_structure(self)
-                logger.debug_table("Structure Analysis", debug_info)
+                logger.debug(f"Structure Analysis: {debug_info}")
             except Exception as e:
                 logger.error(f"Error in structure analysis: {e}")
                 if debug:
@@ -4155,7 +4146,7 @@ class BaseGraph(BaseModel, ValidationMixin):
             )
 
             if debug:
-                logger.success(
+                logger.info(
                     f"Successfully generated Mermaid code: {len(mermaid_code)} characters"
                 )
 
@@ -4191,7 +4182,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                         debug=debug,
                     )
                     if debug:
-                        logger.success(
+                        logger.info(
                             "Successfully generated Mermaid code without subgraphs"
                         )
                 except Exception as e2:
@@ -4231,7 +4222,7 @@ class BaseGraph(BaseModel, ValidationMixin):
             )
 
             if output_path and save_png:
-                logger.success(f"Graph visualization saved to: {output_path}")
+                logger.info(f"Graph visualization saved to: {output_path}")
                 if debug:
                     logger.info(f"Graph saved to: {output_path}")
 
@@ -4619,7 +4610,7 @@ class BaseGraph(BaseModel, ValidationMixin):
             "• Enable debug logging: logger.setLevel(logging.DEBUG)",
         ]
 
-        logger.panel("\n".join(tips), title="💡 Routing Tips", style="blue")
+        logger.info("\n".join(tips), title="💡 Routing Tips", style="blue")
 
 
 # Utility functions for common graph operations
@@ -4707,96 +4698,96 @@ def create_debug_has_tool_calls(original_func):
     def debug_wrapper(state):
         from langchain_core.messages import AIMessage
 
-        with logger.track_time("has_tool_calls debug"):
-            logger.panel("[bold]DEBUGGING has_tool_calls[/bold]", style="cyan")
+        logger.debug("Starting has_tool_calls debug")
+        logger.info("[bold]DEBUGGING has_tool_calls[/bold]", style="cyan")
 
-            debug_info = {"State type": str(type(state))}
+        debug_info = {"State type": str(type(state))}
 
-            # Check state structure
-            if hasattr(state, "messages"):
-                messages = state.messages
-                debug_info["Messages location"] = "state.messages"
-                debug_info["Messages count"] = len(messages)
-            elif isinstance(state, dict) and "messages" in state:
-                messages = state["messages"]
-                debug_info["Messages location"] = "state['messages']"
-                debug_info["Messages count"] = len(messages)
-            else:
-                logger.error("No messages found in state!")
-                return False
+        # Check state structure
+        if hasattr(state, "messages"):
+            messages = state.messages
+            debug_info["Messages location"] = "state.messages"
+            debug_info["Messages count"] = len(messages)
+        elif isinstance(state, dict) and "messages" in state:
+            messages = state["messages"]
+            debug_info["Messages location"] = "state['messages']"
+            debug_info["Messages count"] = len(messages)
+        else:
+            logger.error("No messages found in state!")
+            return False
 
-            if not messages:
-                logger.error("Messages list is empty!")
-                return False
+        if not messages:
+            logger.error("Messages list is empty!")
+            return False
 
-            # Examine the last message
-            last_msg = messages[-1]
-            debug_info["Last message type"] = str(type(last_msg))
-            debug_info["Last message preview"] = str(last_msg)[:200] + "..."
+        # Examine the last message
+        last_msg = messages[-1]
+        debug_info["Last message type"] = str(type(last_msg))
+        debug_info["Last message preview"] = str(last_msg)[:200] + "..."
 
-            logger.table("State Info", debug_info)
+        logger.table("State Info", debug_info)
 
-            if isinstance(last_msg, AIMessage):
-                logger.success("✓ Last message is AIMessage")
+        if isinstance(last_msg, AIMessage):
+            logger.info("✓ Last message is AIMessage")
 
-                message_details = {}
+            message_details = {}
 
-                # Check tool_calls attribute
-                if hasattr(last_msg, "tool_calls"):
-                    tool_calls = getattr(last_msg, "tool_calls", None)
-                    message_details["tool_calls attribute"] = str(tool_calls)
-                    message_details["tool_calls type"] = str(type(tool_calls))
-                    message_details["tool_calls bool"] = str(bool(tool_calls))
+            # Check tool_calls attribute
+            if hasattr(last_msg, "tool_calls"):
+                tool_calls = getattr(last_msg, "tool_calls", None)
+                message_details["tool_calls attribute"] = str(tool_calls)
+                message_details["tool_calls type"] = str(type(tool_calls))
+                message_details["tool_calls bool"] = str(bool(tool_calls))
 
-                    if tool_calls:
-                        logger.success(f"✓ Found {len(tool_calls)} tool calls")
-                        for i, call in enumerate(tool_calls):
-                            logger.info(f"  Tool call {i}: {call}")
-                    else:
-                        logger.failure("✗ tool_calls is empty/None")
+                if tool_calls:
+                    logger.info(f"✓ Found {len(tool_calls)} tool calls")
+                    for i, call in enumerate(tool_calls):
+                        logger.info(f"  Tool call {i}: {call}")
                 else:
-                    logger.failure("✗ No tool_calls attribute")
+                    logger.error("✗ tool_calls is empty/None")
+            else:
+                logger.error("✗ No tool_calls attribute")
 
-                # Check additional_kwargs
-                if hasattr(last_msg, "additional_kwargs"):
-                    additional_kwargs = getattr(last_msg, "additional_kwargs", {})
-                    message_details["additional_kwargs"] = str(additional_kwargs)
+            # Check additional_kwargs
+            if hasattr(last_msg, "additional_kwargs"):
+                additional_kwargs = getattr(last_msg, "additional_kwargs", {})
+                message_details["additional_kwargs"] = str(additional_kwargs)
 
-                    if "tool_calls" in additional_kwargs:
-                        tool_calls_kwargs = additional_kwargs["tool_calls"]
-                        message_details["tool_calls in additional_kwargs"] = str(
-                            tool_calls_kwargs
-                        )
-                        message_details["tool_calls_kwargs bool"] = str(
-                            bool(tool_calls_kwargs)
-                        )
-                    else:
-                        logger.failure("✗ No tool_calls in additional_kwargs")
+                if "tool_calls" in additional_kwargs:
+                    tool_calls_kwargs = additional_kwargs["tool_calls"]
+                    message_details["tool_calls in additional_kwargs"] = str(
+                        tool_calls_kwargs
+                    )
+                    message_details["tool_calls_kwargs bool"] = str(
+                        bool(tool_calls_kwargs)
+                    )
                 else:
-                    logger.failure("✗ No additional_kwargs")
-
-                logger.table("Message Details", message_details)
+                    logger.error("✗ No tool_calls in additional_kwargs")
             else:
-                logger.failure(f"✗ Last message is not AIMessage: {type(last_msg)}")
+                logger.error("✗ No additional_kwargs")
 
-            # Call original function and compare
-            original_result = original_func(state)
-            fixed_result = has_tool_calls_fixed(state)
+            logger.table("Message Details", message_details)
+        else:
+            logger.error(f"✗ Last message is not AIMessage: {type(last_msg)}")
 
-            results = {
-                "Original function": original_result,
-                "Fixed function": fixed_result,
-                "Match": original_result == fixed_result,
-            }
+        # Call original function and compare
+        original_result = original_func(state)
+        fixed_result = has_tool_calls_fixed(state)
 
-            logger.table("Results", results)
+        results = {
+            "Original function": original_result,
+            "Fixed function": fixed_result,
+            "Match": original_result == fixed_result,
+        }
 
-            if original_result != fixed_result:
-                logger.warning(
-                    f"⚠️  MISMATCH! Original: {original_result}, Fixed: {fixed_result}"
-                )
-            else:
-                logger.success(f"✓ Results match: {original_result}")
+        logger.table("Results", results)
+
+        if original_result != fixed_result:
+            logger.warning(
+                f"⚠️  MISMATCH! Original: {original_result}, Fixed: {fixed_result}"
+            )
+        else:
+            logger.info(f"✓ Results match: {original_result}")
 
         return original_result
 

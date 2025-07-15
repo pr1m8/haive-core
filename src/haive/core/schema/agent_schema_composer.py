@@ -132,6 +132,89 @@ class AgentSchemaComposer(SchemaComposer):
     """
 
     @classmethod
+    def from_agents_with_multiagent_base(
+        cls,
+        agents: List["Agent"],
+        name: Optional[str] = None,
+        separation: str = "smart",  # "smart", "shared", "namespaced"
+        build_mode: Optional[BuildMode] = None,
+    ) -> Type[StateSchema]:
+        """Compose a state schema that inherits from MultiAgentState with agent fields.
+
+        This method creates a schema that MARRIES AgentSchemaComposer with MultiAgentState:
+        - Inherits ALL MultiAgentState functionality (hierarchical agents, agent_states, agent_outputs)
+        - Adds ALL agent-specific fields from the composed agents on top
+        - Preserves the hierarchical big daddy grand state architecture
+
+        This is the solution for multi-agent systems that need both:
+        1. Hierarchical state management (MultiAgentState)
+        2. Access to all agent-specific fields (composed from agents)
+
+        Args:
+            agents: List of agent instances to compose fields from
+            name: Optional name for the composed schema class
+            separation: Field separation strategy for agent fields
+            build_mode: Execution pattern for the multi-agent system
+
+        Returns:
+            A StateSchema class that inherits from MultiAgentState and includes
+            all composed agent fields
+
+        Example:
+            >>> # Self-discovery agents example
+            >>> schema = AgentSchemaComposer.from_agents_with_multiagent_base(
+            ...     agents=[self_discovery_agent],
+            ...     name="SelfDiscoveryMultiState"
+            ... )
+            >>> # This schema has BOTH:
+            >>> # - MultiAgentState fields: agents, agent_states, agent_outputs
+            >>> # - SelfDiscoveryState fields: reasoning_modules, task_description, etc.
+        """
+        from haive.core.schema.prebuilt.multi_agent_state import MultiAgentState
+
+        # Auto-detect build mode if not specified
+        if build_mode is None:
+            build_mode = BuildMode.PARALLEL if len(agents) <= 1 else BuildMode.SEQUENCE
+
+        # Create composer with MultiAgentState as base
+        composer = cls(
+            name=name or f"{cls._generate_name(agents)}WithMultiBase",
+            base_state_schema=MultiAgentState,
+        )
+
+        # Collect all fields from all agents (excluding MultiAgentState fields to avoid conflicts)
+        all_fields, engine_io_mappings = cls._collect_all_fields(agents)
+
+        # Filter out fields that already exist in MultiAgentState to avoid conflicts
+        multiagent_fields = set(MultiAgentState.model_fields.keys())
+        filtered_fields = {}
+        for agent_name, agent_fields in all_fields.items():
+            filtered_fields[agent_name] = [
+                field
+                for field in agent_fields
+                if field[0] not in multiagent_fields  # field[0] is field name
+            ]
+
+        # Apply separation strategy for agent-specific fields only
+        if separation == "smart":
+            cls._apply_smart_separation(composer, filtered_fields, agents)
+        elif separation == "shared":
+            cls._apply_shared_separation(composer, filtered_fields)
+        elif separation == "namespaced":
+            cls._apply_namespaced_separation(composer, filtered_fields, agents)
+
+        # Copy engine IO mappings
+        for engine_name, mapping in engine_io_mappings.items():
+            composer.engine_io_mappings[engine_name] = mapping.copy()
+            for field_name in mapping["inputs"]:
+                composer.input_fields[engine_name].add(field_name)
+            for field_name in mapping["outputs"]:
+                composer.output_fields[engine_name].add(field_name)
+
+        # Build the composed schema (inheriting from MultiAgentState + agent fields)
+        return composer.build()
+
+    @classmethod
     def from_agents(
         cls,
         agents: List["Agent"],

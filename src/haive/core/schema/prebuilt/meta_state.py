@@ -33,7 +33,9 @@ Example:
 
 from __future__ import annotations
 
+import asyncio
 import logging
+from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
 from pydantic import Field, model_validator
@@ -143,7 +145,7 @@ class MetaStateSchema(StateSchema, RecompileMixin):
             # Set up graph context
             if not self.graph_context:
                 self.graph_context = {
-                    "created_at": str(__import__("datetime").datetime.now()),
+                    "created_at": str(datetime.now()),
                     "agent_class": self.agent_type,
                     "composition_type": "nested",
                 }
@@ -191,7 +193,7 @@ class MetaStateSchema(StateSchema, RecompileMixin):
                 {
                     "agent_name": self.agent_name,
                     "agent_type": self.agent_type,
-                    "last_updated": str(__import__("datetime").datetime.now()),
+                    "last_updated": str(datetime.now()),
                 }
             )
 
@@ -210,7 +212,7 @@ class MetaStateSchema(StateSchema, RecompileMixin):
 
         return False
 
-    def execute_agent(
+    async def execute_agent(
         self,
         input_data: dict[str, Any] | None = None,
         config: dict[str, Any] | None = None,
@@ -252,18 +254,31 @@ class MetaStateSchema(StateSchema, RecompileMixin):
                 self.mark_for_recompile(f"Agent {self.agent_name} needs recompilation")
 
             # Execute the agent using appropriate method
-            if hasattr(self.agent, "run"):
-                result = self.agent.run(input_data, config=config or {})
+            if hasattr(self.agent, "arun"):
+                # Async execution - pass input_data directly
+                result = await self.agent.arun(input_data, **config or {})
+            elif hasattr(self.agent, "run"):
+                # Sync execution - run in thread to avoid blocking
+                result = await asyncio.to_thread(
+                    self.agent.run, input_data, **config or {}
+                )
+            elif hasattr(self.agent, "ainvoke"):
+                # Async invoke
+                result = await self.agent.ainvoke(input_data, config or {})
             elif hasattr(self.agent, "invoke"):
-                result = self.agent.invoke(input_data, config or {})
+                # Sync invoke - run in thread
+                result = await asyncio.to_thread(
+                    self.agent.invoke, input_data, config or {}
+                )
             elif callable(self.agent):
-                result = self.agent(input_data)
+                # Callable - run in thread
+                result = await asyncio.to_thread(self.agent, input_data)
             else:
                 raise RuntimeError(f"Agent {self.agent_type} is not executable")
 
             # Create execution record
             execution_record = {
-                "timestamp": str(__import__("datetime").datetime.now()),
+                "timestamp": str(datetime.now()),
                 "input": input_data,
                 "output": result,
                 "config": config or {},
@@ -304,7 +319,7 @@ class MetaStateSchema(StateSchema, RecompileMixin):
 
             # Create error record
             error_record = {
-                "timestamp": str(__import__("datetime").datetime.now()),
+                "timestamp": str(datetime.now()),
                 "input": input_data,
                 "error": str(e),
                 "error_type": type(e).__name__,
@@ -435,7 +450,7 @@ class MetaStateSchema(StateSchema, RecompileMixin):
             cloned_data["execution_status"] = "ready"
             cloned_data["agent_state"] = {}
             cloned_data["graph_context"] = {
-                "created_at": str(__import__("datetime").datetime.now()),
+                "created_at": str(datetime.now()),
                 "composition_type": "cloned",
             }
 

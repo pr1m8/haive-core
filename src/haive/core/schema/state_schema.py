@@ -1915,7 +1915,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         Panel(tree, title=display_title, border_style="blue")
 
         # Use logger to print
-        logger.panel(str(tree), title=display_title, style="blue")
+        logger.info(str(tree), title=display_title, style="blue")
 
     @staticmethod
     def _format_field_value(value: Any) -> str:
@@ -2088,7 +2088,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                     structured_node.add(f"  [dim]Fields: {fields_str}[/dim]")
 
         # Use logger to display
-        logger.panel(str(tree), title=display_title, style="green")
+        logger.info(str(tree), title=display_title, style="green")
 
     @classmethod
     def to_python_code(cls) -> str:
@@ -2220,7 +2220,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         syntax = Syntax(code, "python", theme="monokai", line_numbers=True)
 
         # Use logger to display
-        logger.panel(str(syntax), title=title or f"{cls.__name__} Code", style="yellow")
+        logger.info(str(syntax), title=title or f"{cls.__name__} Code", style="yellow")
 
     @classmethod
     def compare_with(

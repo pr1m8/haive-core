@@ -17,6 +17,7 @@ The messages submodule provides additional functionality:
 from haive.core.schema.multi_agent_state_schema import MultiAgentStateSchema
 
 # from haive.core.schema.prebuilt.basic_agent_state import BasicAgentState
+from haive.core.schema.prebuilt.dynamic_activation_state import DynamicActivationState
 from haive.core.schema.prebuilt.llm_state import LLMState
 
 # Import messages module components
@@ -40,6 +41,7 @@ AgentState = LLMState  # Generic agent state with single engine
 __all__ = [
     # Core prebuilt schemas
     # "BasicAgentState",
+    "DynamicActivationState",
     "MessagesState",
     "ToolState",
     "MultiAgentStateSchema",

@@ -436,6 +436,18 @@ files = [
 pycparser = "*"
 
 [[package]]
+name = "cfgv"
+version = "3.4.0"
+description = "Validate configuration and produce human readable error messages."
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "cfgv-3.4.0-py2.py3-none-any.whl", hash = "sha256:b7265b1f29fd3316bfcd2b330d63d024f2bfd8bcb8b0272f8e19a504856c48f9"},
+    {file = "cfgv-3.4.0.tar.gz", hash = "sha256:e52591d4c5f5dead8e0f673fb16db7949d2cfb3f7da4582893288f0ded8fe560"},
+]
+
+[[package]]
 name = "charset-normalizer"
 version = "3.4.1"
 description = "The Real First Universal Charset Detector. Open, modern and actively maintained alternative to Chardet."
@@ -563,7 +575,7 @@ files = [
     {file = "colorama-0.4.6-py2.py3-none-any.whl", hash = "sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6"},
     {file = "colorama-0.4.6.tar.gz", hash = "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44"},
 ]
-markers = {main = "platform_system == \"Windows\"", dev = "sys_platform == \"win32\" or platform_system == \"Windows\""}
+markers = {main = "(extra == \"huggingface\" or extra == \"all-providers\") and platform_system == \"Windows\"", dev = "sys_platform == \"win32\" or platform_system == \"Windows\""}
 
 [[package]]
 name = "dataclasses-json"
@@ -581,6 +593,18 @@ files = [
 [package.dependencies]
 marshmallow = ">=3.18.0,<4.0.0"
 typing-inspect = ">=0.4.0,<1"
+
+[[package]]
+name = "distlib"
+version = "0.3.9"
+description = "Distribution utilities"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "distlib-0.3.9-py2.py3-none-any.whl", hash = "sha256:47f8c22fd27c27e25a65601af709b38e4f0a45ea4fc2e710f65755fa8caaaf87"},
+    {file = "distlib-0.3.9.tar.gz", hash = "sha256:a60f20dea646b8a33f3e7772f74dc0b2d0772d2837ee1342a00645c81edf9403"},
+]
 
 [[package]]
 name = "docstring-parser"
@@ -733,6 +757,7 @@ description = "File-system specification"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
+markers = "extra == \"huggingface\" or extra == \"all-providers\""
 files = [
     {file = "fsspec-2025.5.1-py3-none-any.whl", hash = "sha256:24d3a2e663d5fc735ab256263c4075f374a174c3410c0b25e5bd1970bceaa462"},
     {file = "fsspec-2025.5.1.tar.gz", hash = "sha256:2e55e47a540b91843b755e83ded97c6e897fa0942b11490113f09e9c443c2475"},
@@ -1264,7 +1289,7 @@ description = "Fast transfer of large files with the Hugging Face Hub."
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "platform_machine == \"x86_64\" or platform_machine == \"amd64\" or platform_machine == \"arm64\" or platform_machine == \"aarch64\""
+markers = "(extra == \"huggingface\" or extra == \"all-providers\") and (platform_machine == \"x86_64\" or platform_machine == \"amd64\" or platform_machine == \"arm64\" or platform_machine == \"aarch64\")"
 files = [
     {file = "hf_xet-1.1.5-cp37-abi3-macosx_10_12_x86_64.whl", hash = "sha256:f52c2fa3635b8c37c7764d8796dfa72706cc4eded19d638331161e82b0792e23"},
     {file = "hf_xet-1.1.5-cp37-abi3-macosx_11_0_arm64.whl", hash = "sha256:9fa6e3ee5d61912c4a113e0708eaaef987047616465ac7aa30f7121a48fc1af8"},
@@ -1346,6 +1371,7 @@ description = "Client library to download and publish models, datasets and other
 optional = false
 python-versions = ">=3.8.0"
 groups = ["main"]
+markers = "extra == \"huggingface\" or extra == \"all-providers\""
 files = [
     {file = "huggingface_hub-0.33.2-py3-none-any.whl", hash = "sha256:3749498bfa91e8cde2ddc2c1db92c79981f40e66434c20133b39e5928ac9bcc5"},
     {file = "huggingface_hub-0.33.2.tar.gz", hash = "sha256:84221defaec8fa09c090390cd68c78b88e3c4c2b7befba68d3dc5aacbc3c2c5f"},
@@ -1377,6 +1403,21 @@ tensorflow-testing = ["keras (<3.0)", "tensorflow"]
 testing = ["InquirerPy (==0.3.4)", "Jinja2", "Pillow", "aiohttp", "authlib (>=1.3.2)", "fastapi", "gradio (>=4.0.0)", "httpx", "itsdangerous", "jedi", "numpy", "pytest (>=8.1.1,<8.2.2)", "pytest-asyncio", "pytest-cov", "pytest-env", "pytest-mock", "pytest-rerunfailures", "pytest-vcr", "pytest-xdist", "soundfile", "urllib3 (<2.0)"]
 torch = ["safetensors[torch]", "torch"]
 typing = ["types-PyYAML", "types-requests", "types-simplejson", "types-toml", "types-tqdm", "types-urllib3", "typing-extensions (>=4.8.0)"]
+
+[[package]]
+name = "identify"
+version = "2.6.12"
+description = "File identification library for Python"
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "identify-2.6.12-py2.py3-none-any.whl", hash = "sha256:ad9672d5a72e0d2ff7c5c8809b62dfa60458626352fb0eb7b55e69bdc45334a2"},
+    {file = "identify-2.6.12.tar.gz", hash = "sha256:d8de45749f1efb108badef65ee8386f0f7bb19a7f26185f74de6367bffbaf0e6"},
+]
+
+[package.extras]
+license = ["ukkonen"]
 
 [[package]]
 name = "idna"
@@ -1590,6 +1631,7 @@ description = "An integration package connecting Hugging Face and LangChain."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
+markers = "extra == \"huggingface\" or extra == \"all-providers\""
 files = [
     {file = "langchain_huggingface-0.3.0-py3-none-any.whl", hash = "sha256:aab85d57e649c805d2f2a9f8d72d87b5d12c45dd4831309ac9c37753ddb237ed"},
     {file = "langchain_huggingface-0.3.0.tar.gz", hash = "sha256:d1cf93fb4d4eafc8b44edcd5fba904b27cbd3fda6cdef0e2321fbcf4efcda822"},
@@ -2030,6 +2072,18 @@ files = [
 markers = {main = "extra == \"bm25\" or extra == \"tfidf\" or extra == \"knn\" or extra == \"svm\" or extra == \"elasticsearch\" or extra == \"faiss\" or extra == \"cohere-rag\" or extra == \"azure-search\" or extra == \"tavily\" or extra == \"arxiv\" or extra == \"wikipedia\" or extra == \"pubmed\" or extra == \"web-research\" or extra == \"you-search\" or extra == \"metal\" or extra == \"vespa\" or extra == \"zep\" or extra == \"zep-cloud\" or extra == \"asknews\" or extra == \"google-document-ai-warehouse\" or extra == \"docarray\" or extra == \"neuraldb\" or extra == \"llamaindex\" or extra == \"chatgpt-plugin\" or extra == \"all-retrievers\" or extra == \"popular-retrievers\" or extra == \"sparse-retrievers\" or extra == \"api-retrievers\""}
 
 [[package]]
+name = "nodeenv"
+version = "1.9.1"
+description = "Node.js virtual environment builder"
+optional = false
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7"
+groups = ["main"]
+files = [
+    {file = "nodeenv-1.9.1-py2.py3-none-any.whl", hash = "sha256:ba11c9782d29c27c70ffbdda2d7415098754709be8a7056d79a737cd901155c9"},
+    {file = "nodeenv-1.9.1.tar.gz", hash = "sha256:6ec12890a2dab7946721edbfbcd91f3319c6ccc9aec47be7c7e6b7011ee6645f"},
+]
+
+[[package]]
 name = "numexpr"
 version = "2.10.2"
 description = "Fast numerical expression evaluator for NumPy"
@@ -2285,7 +2339,7 @@ version = "4.3.7"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a `user data dir`."
 optional = false
 python-versions = ">=3.9"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "platformdirs-4.3.7-py3-none-any.whl", hash = "sha256:a03875334331946f13c549dbd8f4bac7a13a50a895a0eb1e8c6a8ace80d40a94"},
     {file = "platformdirs-4.3.7.tar.gz", hash = "sha256:eb437d586b6a0986388f0d6f74aa0cde27b48d0e3d66843640bfb6bdcdb6e351"},
@@ -2323,6 +2377,25 @@ files = [
     {file = "pprintpp-0.4.0-py2.py3-none-any.whl", hash = "sha256:b6b4dcdd0c0c0d75e4d7b2f21a9e933e5b2ce62b26e1a54537f9651ae5a5c01d"},
     {file = "pprintpp-0.4.0.tar.gz", hash = "sha256:ea826108e2c7f49dc6d66c752973c3fc9749142a798d6b254e1e301cfdbc6403"},
 ]
+
+[[package]]
+name = "pre-commit"
+version = "4.2.0"
+description = "A framework for managing and maintaining multi-language pre-commit hooks."
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "pre_commit-4.2.0-py2.py3-none-any.whl", hash = "sha256:a009ca7205f1eb497d10b845e52c838a98b6cdd2102a6c8e4540e94ee75c58bd"},
+    {file = "pre_commit-4.2.0.tar.gz", hash = "sha256:601283b9757afd87d40c4c4a9b2b5de9637a8ea02eaff7adc2d0fb4e04841146"},
+]
+
+[package.dependencies]
+cfgv = ">=2.0.0"
+identify = ">=1.0.0"
+nodeenv = ">=0.11.1"
+pyyaml = ">=5.1"
+virtualenv = ">=20.10.0"
 
 [[package]]
 name = "propcache"
@@ -3238,6 +3311,7 @@ description = ""
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
+markers = "extra == \"huggingface\" or extra == \"all-providers\""
 files = [
     {file = "tokenizers-0.21.2-cp39-abi3-macosx_10_12_x86_64.whl", hash = "sha256:342b5dfb75009f2255ab8dec0041287260fed5ce00c323eb6bab639066fef8ec"},
     {file = "tokenizers-0.21.2-cp39-abi3-macosx_11_0_arm64.whl", hash = "sha256:126df3205d6f3a93fea80c7a8a266a78c1bd8dd2fe043386bafdd7736a23e45f"},
@@ -3271,6 +3345,7 @@ description = "Fast, Extensible Progress Meter"
 optional = false
 python-versions = ">=3.7"
 groups = ["main"]
+markers = "extra == \"huggingface\" or extra == \"all-providers\""
 files = [
     {file = "tqdm-4.67.1-py3-none-any.whl", hash = "sha256:26445eca388f82e72884e0d580d5464cd801a3ea01e63e5601bdff9ba6a48de2"},
     {file = "tqdm-4.67.1.tar.gz", hash = "sha256:f8aef9c52c08c13a65f30ea34f4e5aac3fd1a34959879d7e59e63027286627f2"},
@@ -3362,6 +3437,27 @@ files = [
 
 [package.extras]
 crypto-eth-addresses = ["eth-hash[pycryptodome] (>=0.7.0)"]
+
+[[package]]
+name = "virtualenv"
+version = "20.31.2"
+description = "Virtual Python Environment builder"
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "virtualenv-20.31.2-py3-none-any.whl", hash = "sha256:36efd0d9650ee985f0cad72065001e66d49a6f24eb44d98980f630686243cf11"},
+    {file = "virtualenv-20.31.2.tar.gz", hash = "sha256:e10c0a9d02835e592521be48b332b6caee6887f332c111aa79a09b9e79efc2af"},
+]
+
+[package.dependencies]
+distlib = ">=0.3.7,<1"
+filelock = ">=3.12.2,<4"
+platformdirs = ">=3.9.1,<5"
+
+[package.extras]
+docs = ["furo (>=2023.7.26)", "proselint (>=0.13)", "sphinx (>=7.1.2,!=7.3)", "sphinx-argparse (>=0.4)", "sphinxcontrib-towncrier (>=0.2.1a0)", "towncrier (>=23.6)"]
+test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess (>=1)", "flaky (>=3.7)", "packaging (>=23.1)", "pytest (>=7.4)", "pytest-env (>=0.8.2)", "pytest-freezer (>=0.4.8) ; platform_python_implementation == \"PyPy\" or platform_python_implementation == \"GraalVM\" or platform_python_implementation == \"CPython\" and sys_platform == \"win32\" and python_version >= \"3.13\"", "pytest-mock (>=3.11.1)", "pytest-randomly (>=3.12)", "pytest-timeout (>=2.1)", "setuptools (>=68)", "time-machine (>=2.10) ; platform_python_implementation == \"CPython\""]
 
 [[package]]
 name = "websockets"
@@ -3810,7 +3906,7 @@ cffi = ["cffi (>=1.11)"]
 
 [extras]
 ai21 = []
-all-providers = []
+all-providers = ["langchain-huggingface"]
 all-retrievers = ["langchain", "langchain-community", "langchain-core"]
 amazon-knowledge-bases = []
 anthropic = []
@@ -3839,7 +3935,7 @@ google-document-ai-warehouse = ["langchain-community"]
 google-vertex-ai-search = []
 google-vertex-search = []
 groq = []
-huggingface = []
+huggingface = ["langchain-huggingface"]
 ibm = []
 kendra = []
 knn = ["langchain-community"]
@@ -3887,4 +3983,4 @@ zilliz = []
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "77d1ab91309a4f052da9968db4deca15c3db0d1762fd83c015123e3de8dabb43"
+content-hash = "16f1cba65d0c7989efef23502ef1c27e2975bd7bb8e80adafbcea6a27c75d043"

@@ -122,25 +122,25 @@ class GenericEngineNodeConfig(NodeConfig, Generic[TInput, TOutput]):
 
         logger.debug(f"Starting execution of node {self.name}")
         try:
-                # Get engine
-                engine = self._get_engine(state)
-                if not engine:
-                    raise ValueError(f"No engine available for node '{self.name}'")
+            # Get engine
+            engine = self._get_engine(state)
+            if not engine:
+                raise ValueError(f"No engine available for node '{self.name}'")
 
-                # Extract input using schema-aware method
-                input_data = self._extract_typed_input(state, engine)
+            # Extract input using schema-aware method
+            input_data = self._extract_typed_input(state, engine)
 
-                # Execute engine
-                result = self._execute_with_config(engine, input_data, config)
+            # Execute engine
+            result = self._execute_with_config(engine, input_data, config)
 
-                # Wrap result with type-safe output
-                wrapped = self._wrap_typed_result(result, state, engine)
+            # Wrap result with type-safe output
+            wrapped = self._wrap_typed_result(result, state, engine)
 
-                return wrapped
+            return wrapped
 
-            except Exception as e:
-                logger.exception(f"Error in {self.name}: {e}")
-                raise
+        except Exception as e:
+            logger.exception(f"Error in {self.name}: {e}")
+            raise
 
     def _extract_typed_input(self, state: StateLike, engine: Engine) -> Any:
         """Extract input using input schema if available."""
