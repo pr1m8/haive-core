@@ -4,18 +4,18 @@ This module provides the NodeManager class that handles all node-related operati
 in the BaseGraph architecture, following the modular design principles.
 """
 
+import logging
 import uuid
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from haive.core.graph.common.types import NodeType
 from haive.core.graph.node.config import NodeConfig
 from haive.core.graph.state_graph.components.base_component import BaseGraphComponent
-from haive.core.logging.rich_logger import get_logger
 
 if TYPE_CHECKING:
     from haive.core.graph.state_graph.base_graph2 import BaseGraph, Node
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class NodeManager(BaseGraphComponent):

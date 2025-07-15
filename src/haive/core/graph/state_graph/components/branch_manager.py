@@ -4,6 +4,7 @@ This module provides the BranchManager class that handles all conditional routin
 and branch operations in the BaseGraph architecture.
 """
 
+import logging
 import uuid
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal, Optional, Union
 
@@ -13,12 +14,11 @@ from haive.core.graph.branches.branch import Branch
 from haive.core.graph.branches.types import BranchMode, ComparisonType
 from haive.core.graph.common.references import CallableReference
 from haive.core.graph.state_graph.components.base_component import BaseGraphComponent
-from haive.core.logging.rich_logger import get_logger
 
 if TYPE_CHECKING:
     from haive.core.graph.state_graph.base_graph2 import BaseGraph
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class BranchManager(BaseGraphComponent):

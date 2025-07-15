@@ -4,15 +4,15 @@ This module provides the EdgeManager class that handles all edge-related operati
 in the BaseGraph architecture, maintaining clean separation of concerns.
 """
 
+import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 from haive.core.graph.state_graph.components.base_component import BaseGraphComponent
-from haive.core.logging.rich_logger import get_logger
 
 if TYPE_CHECKING:
     from haive.core.graph.state_graph.base_graph2 import BaseGraph
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 # Type alias for edges
 Edge = Tuple[str, str]

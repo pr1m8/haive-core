@@ -4,6 +4,7 @@ This module provides a refactored BaseGraph that uses composition to organize
 functionality into focused, testable components following the coding style guide.
 """
 
+import logging
 import uuid
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Literal, Optional, Union
@@ -16,9 +17,8 @@ from haive.core.graph.state_graph.components.branch_manager import BranchManager
 from haive.core.graph.state_graph.components.edge_manager import EdgeManager
 from haive.core.graph.state_graph.components.node_manager import NodeManager
 from haive.core.graph.state_graph.validation_mixin import ValidationMixin
-from haive.core.logging.rich_logger import get_logger
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class ModularBaseGraph(BaseModel, ValidationMixin):

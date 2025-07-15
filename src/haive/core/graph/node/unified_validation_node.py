@@ -16,7 +16,7 @@ from haive.core.graph.node.base_node_config import BaseNodeConfig
 from haive.core.graph.node.types import NodeType
 from haive.core.logging import get_logger
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class UnifiedValidationNodeConfig(BaseNodeConfig):

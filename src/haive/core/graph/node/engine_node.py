@@ -1,5 +1,6 @@
 # src/haive/core/graph/node/engine_node.py
 
+import logging
 from typing import Any
 
 from langgraph.types import Command, RetryPolicy, Send
@@ -9,11 +10,10 @@ from haive.core.engine.base import Engine, EngineType
 from haive.core.graph.common.types import ConfigLike, StateLike
 from haive.core.graph.node.base_config import NodeConfig
 from haive.core.graph.node.types import NodeType
-from haive.core.logging.rich_logger import LogLevel, get_logger
 
 # Get module logger
-logger = get_logger(__name__)
-logger.set_level(LogLevel.DEBUG)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 class EngineNodeConfig(NodeConfig):

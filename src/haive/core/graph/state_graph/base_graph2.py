@@ -5,6 +5,8 @@ Provides a comprehensive system for building, manipulating, and executing
 graphs with consistent interfaces, serialization support, and dynamic composition.
 """
 
+# Import RichLogger
+import logging
 import uuid
 from datetime import datetime
 from enum import Enum
@@ -37,9 +39,6 @@ from haive.core.graph.state_graph.graph_path import GraphPath
 # Import mixins
 from haive.core.graph.state_graph.validation_mixin import ValidationMixin
 
-# Import RichLogger
-from haive.core.logging.rich_logger import LogLevel, get_logger
-
 # Define a type for branch result types
 BranchResultType = Union[
     str,  # Node name
@@ -52,8 +51,8 @@ BranchResultType = Union[
 ]
 
 # Setup rich logging
-logger = get_logger(__name__)
-logger.set_level(LogLevel.WARNING)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.WARNING)
 import inspect
 
 
@@ -3468,11 +3467,7 @@ class BaseGraph(BaseModel, ValidationMixin):
         try:
             from langgraph.graph import StateGraph
 
-            logger.panel(
-                "[bold blue]Converting to LangGraph StateGraph[/bold blue]",
-                title="LangGraph Conversion",
-                style="blue",
-            )
+            logger.info("Converting to LangGraph StateGraph")
 
             # Schema resolution logic
             resolved_state_schema = None
@@ -3487,7 +3482,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                 resolved_output_schema = (
                     output_schema or state_schema
                 )  # Default to state
-                logger.success(f"Using provided state_schema: {state_schema.__name__}")
+                logger.info(f"Using provided state_schema: {state_schema.__name__}")
 
             # Case 2: Both input and output provided, but no state
             elif input_schema is not None and output_schema is not None:
@@ -3555,11 +3550,11 @@ class BaseGraph(BaseModel, ValidationMixin):
             if resolved_config_schema:
                 schema_info["Config"] = resolved_config_schema.__name__
 
-            logger.table("Final Schemas", schema_info)
+            logger.info(f"Final Schemas: {schema_info}")
 
             # Create StateGraph with resolved state schema
             graph_builder = StateGraph(resolved_state_schema)
-            logger.success("Created StateGraph")
+            logger.info("Created StateGraph")
 
             # Direct debug function - doesn't wrap, just adds a print
             def log_function_call(func, name):
@@ -3614,7 +3609,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                 return inner
 
             # SIMPLE: Add nodes with direct callable functions - no complex extraction
-            logger.panel("[bold]Adding Nodes[/bold]", style="cyan")
+            logger.info("Adding Nodes")
             for node_name, node in self.nodes.items():
                 # Skip special nodes and None nodes
                 if node_name in [START, END] or node is None:
@@ -3664,13 +3659,13 @@ class BaseGraph(BaseModel, ValidationMixin):
                 graph_builder.add_node(node_name, action)
 
             # SIMPLE: Add direct edges
-            logger.panel("[bold]Adding Edges[/bold]", style="cyan")
+            logger.info("Adding Edges")
             for source, target in self.edges:
                 graph_builder.add_edge(source, target)
                 logger.progress(f"{source} → {target}")
 
             # SIMPLE: Add branches
-            logger.panel("[bold]Adding Branches[/bold]", style="cyan")
+            logger.info("Adding Branches")
             for _branch_id, branch in self.branches.items():
                 source = branch.source_node
 
@@ -3830,7 +3825,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                         logger.error(f"  Branch: {branch}")
                         raise
 
-            logger.success("LangGraph conversion complete!")
+            logger.info("LangGraph conversion complete!")
 
             # Mark the graph as compiled since conversion was successful
             self.mark_compiled()
@@ -4494,10 +4489,9 @@ class BaseGraph(BaseModel, ValidationMixin):
         issues = self.validate_graph()
 
         if issues:
-            logger.panel(
-                "\n".join([f"- {issue}" for issue in issues]),
-                title="[bold red]Graph Validation Issues[/bold red]",
-                style="red",
+            logger.error(
+                f"Graph Validation Issues:\n"
+                + "\n".join([f"- {issue}" for issue in issues])
             )
 
             if raise_on_validation_error:
@@ -4593,10 +4587,7 @@ class BaseGraph(BaseModel, ValidationMixin):
             logger.warning(f"No conditional routing found for node '{source_node}'")
             return
 
-        logger.panel(
-            f"[bold blue]Conditional Routing Debug for '{source_node}'[/bold blue]",
-            style="blue",
-        )
+        logger.info(f"Conditional Routing Debug for '{source_node}'")
 
         for i, branch in enumerate(node_branches):
             logger.info(f"\n[cyan]Branch {i+1}: {branch.name}[/cyan]")
