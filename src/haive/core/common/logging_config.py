@@ -24,7 +24,7 @@ Typical usage example:
     logger.player_move("Player 1", from_pos=0, to_pos=7)
 
     # Change log level dynamically
-    logger.set_level(LogLevel.DEBUG)
+    logger.setLevel(logging.DEBUG)
     ```
 """
 
