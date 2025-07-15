@@ -8,15 +8,15 @@ in complex agent workflows.
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 from pydantic import Field, create_model, model_validator
 
-from haive.core.logging.rich_logger import get_logger
 from haive.core.schema.state_schema import StateSchema
 
 # Get logger instance
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class MultiAgentStateSchema(StateSchema):

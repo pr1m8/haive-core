@@ -62,6 +62,7 @@ from __future__ import annotations
 
 import copy
 import json
+import logging
 import uuid
 from typing import (
     TYPE_CHECKING,
@@ -91,10 +92,8 @@ from typing_extensions import (
     TypedDict,
 )
 
-from haive.core.logging.rich_logger import get_logger
-
 # Get logger instance
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from haive.core.schema.schema_manager import StateSchemaManager

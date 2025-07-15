@@ -87,7 +87,9 @@ class FieldDefinition:
     def __init__(
         self,
         name: str,
-        field_type: type[Any],
+        field_type: type[Any] | None = None,
+        *,
+        type_hint: type[Any] | None = None,  # Alias for field_type used in some modules
         field_info: Any = None,
         default: Any = None,
         default_factory: Callable[[], Any] | None = None,
@@ -102,59 +104,20 @@ class FieldDefinition:
     ):
         """Initialize a field definition with comprehensive metadata.
 
-        Creates a new FieldDefinition object that encapsulates all information about a field,
-        including its type, default value, description, and relationships to other components
-        in the system.
-
-        Args:
-            name (str): Field name that will be used in the schema
-            field_type (Type[Any]): Python type annotation for the field (e.g., str, List[int])
-            field_info (Any, optional): Existing Pydantic FieldInfo object. If provided,
-                some other parameters may be ignored in favor of this object's properties.
-            default (Any, optional): Default value for the field. Ignored if default_factory
-                is also provided.
-            default_factory (Optional[Callable[[], Any]], optional): Factory function that
-                creates the default value. Takes precedence over default if both are provided.
-            description (Optional[str], optional): Human-readable description of the field's
-                purpose and usage.
-            shared (bool, optional): Whether this field is shared with parent graphs. Fields
-                marked as shared will be synchronized between parent and child graphs. Defaults to False.
-            reducer (Optional[Callable], optional): Function that defines how field values
-                are combined during state updates. Should accept two arguments (old_value, new_value)
-                and return the combined result.
-            source (Optional[str], optional): Name of the component that provided this field,
-                useful for tracking field origins.
-            input_for (Optional[List[str]], optional): List of engine names that use this field
-                as input.
-            output_from (Optional[List[str]], optional): List of engine names that produce
-                this field as output.
-            structured_model (Optional[str], optional): Name of structured output model this
-                field belongs to, for schema composition.
-            **kwargs: Additional metadata to store with the field definition.
-
-        Note:
-            The field_type parameter accepts any valid Python type annotation, including:
-            - Basic types: str, int, float, bool
-            - Container types: List[T], Dict[K, V], Tuple[T, ...]
-            - Union types: Union[T1, T2]
-            - Optional types: Optional[T] (equivalent to Union[T, None])
-            - Custom classes, especially Pydantic models
-
-        Example:
-            ```python
-            # Create a field for a list of messages with add_messages reducer
-            messages_field = FieldDefinition(
-                name="messages",
-                field_type=List[BaseMessage],
-                default_factory=list,
-                description="Conversation message history",
-                shared=True,
-                reducer=add_messages,
-                input_for=["llm_engine"],
-                output_from=["memory_engine"]
-            )
-            ```
+        Accepts either *field_type* (preferred) or the legacy keyword *type_hint* used by
+        some parts of the code-base. If *field_type* is omitted but *type_hint* is
+        provided we use that value to maintain backwards compatibility.
         """
+        # ------------------------------------------------------------------
+        # Backwards-compatibility shim – fall back to `type_hint` if supplied.
+        # ------------------------------------------------------------------
+        if field_type is None:
+            field_type = type_hint
+        if field_type is None:
+            raise ValueError(
+                "Either 'field_type' or 'type_hint' must be provided when constructing FieldDefinition"
+            )
+
         self.name = name
         self.field_type = field_type
         self.field_info = field_info
