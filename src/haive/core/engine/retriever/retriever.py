@@ -404,6 +404,83 @@ class BaseRetrieverConfig(InvokableEngine[RetrieverInput, RetrieverOutput]):
             logger.warning(f"Failed to load retriever modules: {e}")
             # Continue without loading modules
 
+    def create_retriever_tool(
+        self, name: str | None = None, description: str | None = None
+    ):
+        """Create a LangChain tool from this retriever configuration.
+
+        This method creates a tool that can be used with LangChain agents
+        to perform document retrieval operations.
+
+        Args:
+            name: Optional tool name, defaults to retriever name + '_tool'
+            description: Optional tool description
+
+        Returns:
+            A LangChain tool that performs retrieval using this configuration
+
+        Example:
+            >>> from haive.core.engine.retriever import VectorStoreRetrieverConfig
+            >>> retriever_config = VectorStoreRetrieverConfig(
+            ...     name="my_retriever",
+            ...     vector_store_config=vs_config,
+            ...     k=3
+            ... )
+            >>> tool = retriever_config.create_retriever_tool(
+            ...     name="search_documents",
+            ...     description="Search knowledge base for relevant information"
+            ... )
+        """
+        from langchain_core.tools import tool
+
+        tool_name = name or f"{self.name}_retriever_tool"
+        tool_description = (
+            description or f"Search knowledge base using {self.name} retriever"
+        )
+
+        # Create the retriever instance
+        retriever = self.instantiate()
+
+        @tool(tool_name)
+        def retriever_tool(query: str) -> str:
+            f"""{tool_description}"""
+
+            try:
+                # Search for relevant documents
+                docs = retriever.invoke(query)
+
+                if not docs:
+                    return "No relevant documents found."
+
+                # Format results
+                results = []
+                for i, doc in enumerate(docs[: self.k]):  # Limit to configured k
+                    content_preview = (
+                        doc.page_content[:300] + "..."
+                        if len(doc.page_content) > 300
+                        else doc.page_content
+                    )
+
+                    # Include metadata if available
+                    metadata_str = ""
+                    if hasattr(doc, "metadata") and doc.metadata:
+                        metadata_items = []
+                        for key, value in doc.metadata.items():
+                            if key in ["source", "title", "author", "date"]:
+                                metadata_items.append(f"{key}: {value}")
+                        if metadata_items:
+                            metadata_str = f" ({', '.join(metadata_items)})"
+
+                    results.append(f"Result {i+1}{metadata_str}:\n{content_preview}")
+
+                return "\n\n".join(results)
+
+            except Exception as e:
+                logger.exception(f"Error in retriever tool: {e}")
+                return f"Error retrieving documents: {e}"
+
+        return retriever_tool
+
 
 @BaseRetrieverConfig.register(RetrieverType.VECTOR_STORE)
 class VectorStoreRetrieverConfig(BaseRetrieverConfig):

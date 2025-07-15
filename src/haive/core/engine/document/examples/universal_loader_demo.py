@@ -76,7 +76,7 @@ def demo_universal_loader():
         if analysis["recommended"]:
             print(f"   ⭐ Recommended: {analysis['recommended']}")
         if analysis["supports_auth"]:
-            print("   🔐 Requires authentication"on")
+            print("   🔐 Requires authentication")
 
         # Show top 3 candidates
         for i, candidate in enumerate(analysis["candidates"][:3]):
@@ -101,7 +101,7 @@ def demo_universal_loader():
             if doc_loader:
                 print(f"   ✅ Successfully created: {type(doc_loader).__name__}")
             else:
-                print("   ❌ Failed to create loader"r")
+                print("   ❌ Failed to create loader")
         except Exception as e:
             print(f"   ⚠️ Error: {e}")
 
@@ -122,7 +122,7 @@ def demo_universal_loader():
             if doc_loader:
                 print(f"   ✅ Created: {type(doc_loader).__name__}")
             else:
-                print("   ❌ Failed to create loader"r")
+                print("   ❌ Failed to create loader")
 
             # Analyze with convenience function
             analysis = analyze_document_source(path)
