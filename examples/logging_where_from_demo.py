@@ -6,6 +6,7 @@ This shows the easiest ways to configure logging to see sources.
 
 # Method 2: Just see your code (recommended for most cases)
 # Method 1: Quick one-liner to see EVERYTHING
+from haive.core.logging import get_logger
 from haive.core.logging.quick_setup import (
     setup_development_logging,
 )
@@ -18,8 +19,6 @@ setup_development_logging()
 
 
 # Now let's test it!
-
-from haive.core.logging import get_logger
 
 
 class MyService:

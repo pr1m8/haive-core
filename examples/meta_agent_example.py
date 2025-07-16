@@ -67,14 +67,13 @@ def create_basic_meta_agent_example():
     # 2. Create meta state with the embedded agent
     meta_state = MetaStateSchema(
         agent=helpful_agent,
-        agent_input={"messages": [HumanMessage(content="Hello, I need some help!")]},
+        agent_input={"messages": [HumanMessage(
+            content="Hello, I need some help!")]},
         meta_context={"purpose": "customer_support", "priority": "high"},
     )
 
-
     # 3. Execute the embedded agent
     meta_state.execute_agent()
-
 
     return meta_state
 
@@ -154,7 +153,6 @@ def create_meta_agent_graph_example():
     # Compile graph
     compiled_graph = graph.compile()
 
-
     # Test with different inputs
     test_inputs = [
         "Help me with a general question",
@@ -194,7 +192,6 @@ def create_advanced_meta_agent_example():
             "available_agents": list(agents.keys()),
         },
     )
-
 
     # Simulate workflow stages
     workflow_stages = [

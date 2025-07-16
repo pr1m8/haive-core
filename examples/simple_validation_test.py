@@ -2,15 +2,14 @@
 
 import os
 import sys
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from typing import Any
 
 from src.haive.core.graph.node.state_updating_validation_node import (
     StateUpdatingValidationNode,
     ValidationMode,
 )
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 class MockAIMessage:
