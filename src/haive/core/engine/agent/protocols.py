@@ -7,7 +7,7 @@ different agent implementations.
 """
 
 from collections.abc import AsyncGenerator, Generator
-from typing import Any, Protocol, TypeVar, runtime_checkable
+from typing import TYPE_CHECKING, Any, Protocol, TypeVar, runtime_checkable
 
 from langchain_core.runnables import RunnableConfig
 
@@ -234,7 +234,6 @@ class FullAgentProtocol(
 
 
 # Type assertions to verify that Agent class implements protocols
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from haive.core.engine.agent.agent import Agent

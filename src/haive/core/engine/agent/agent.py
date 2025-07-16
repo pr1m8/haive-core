@@ -91,7 +91,8 @@ def register_agent(config_class: type[AgentConfig]):
 TConfig = TypeVar("TConfig", bound="AgentConfig")  # Required
 TIn = TypeVar("TIn")  # Defaults to Any in practice
 TOut = TypeVar("TOut")  # Defaults to Any in practice
-TState = TypeVar("TState", bound=BaseModel | None)  # Defaults to None in practice
+# Defaults to None in practice
+TState = TypeVar("TState", bound=BaseModel | None)
 
 
 class Agent(Generic[TConfig], ABC):
