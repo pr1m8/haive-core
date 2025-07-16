@@ -2390,6 +2390,18 @@ class SchemaComposer:
                                 logger.debug(
                                     f"Fixed PydanticUndefined '{field_name}' -> []"
                                 )
+                            elif field_name == "before_tool_validator":
+                                setattr(self, field_name, None)
+                                logger.debug(
+                                    f"Fixed PydanticUndefined '{field_name}' -> None (callable field)"
+                                )
+                            elif "tool" in field_name and field_name.endswith(("_dict", "_metadata", "_instances", "_routes")):
+                                if "dict" in field_name or "metadata" in field_name or "instances" in field_name:
+                                    setattr(self, field_name, {})
+                                    logger.debug(f"Fixed PydanticUndefined '{field_name}' -> {{}}")
+                                else:
+                                    setattr(self, field_name, [])
+                                    logger.debug(f"Fixed PydanticUndefined '{field_name}' -> []")
                             else:
                                 setattr(self, field_name, None)
                                 logger.debug(
@@ -2399,6 +2411,32 @@ class SchemaComposer:
             # Call parent post_init if it exists
             if hasattr(super(self.__class__, self), "model_post_init"):
                 super(self.__class__, self).model_post_init(__context)
+
+        @classmethod
+        def model_json_schema(cls, by_alias=True, ref_template='#/$defs/{model}'):
+            """Override JSON schema generation to exclude callable fields."""
+            # Get the original schema
+            schema = super(cls, cls).model_json_schema(by_alias=by_alias, ref_template=ref_template)
+            
+            # Remove callable fields from the schema
+            if 'properties' in schema:
+                callable_fields = []
+                for field_name, field_info in cls.model_fields.items():
+                    annotation_str = str(field_info.annotation)
+                    if 'Callable' in annotation_str:
+                        callable_fields.append(field_name)
+                
+                for field_name in callable_fields:
+                    if field_name in schema['properties']:
+                        del schema['properties'][field_name]
+                        logger.debug(f"Removed callable field '{field_name}' from JSON schema")
+                    
+                    # Also remove from required if present
+                    if 'required' in schema and field_name in schema['required']:
+                        schema['required'].remove(field_name)
+                        logger.debug(f"Removed callable field '{field_name}' from required fields")
+            
+            return schema
 
             # Initialize instance-level engines from class-level engines
             if hasattr(self.__class__, "engines"):

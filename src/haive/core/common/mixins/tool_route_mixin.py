@@ -99,7 +99,7 @@ class ToolRouteMixin(BaseModel):
     before_tool_validator: Callable[[Any], Any] | None = Field(
         default=None,
         description="Optional callable to validate tools before routing",
-        exclude=True,  # Exclude from serialization
+        exclude=False,  # Include in serialization for debugging
     )
 
     # NEW: Actual tool storage
