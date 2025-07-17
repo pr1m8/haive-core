@@ -1,0 +1,55 @@
+[
+  {
+    "__shared_fields__": [],
+    "__reducer_fields__": {},
+    "messages": [
+      {
+        "content": "Hi there! I'm Taylor and I enjoy playing chess.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "46c5e41e-58c2-42ca-87ce-6dc85a9eef16",
+        "example": false
+      },
+      {
+        "content": "What's your favorite chess opening?",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "95e44225-5956-4831-8bdb-0130666ef61d",
+        "example": false
+      }
+    ],
+    "context": {},
+    "runnable_config": {}
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "postgres_thread_cfc692e1",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f01b73d-eca3-6ea5-8004-e74c15c82054"
+    }
+  },
+  {
+    "step": 4,
+    "source": "loop",
+    "writes": {
+      "process_c59172": null
+    },
+    "parents": {},
+    "thread_id": "postgres_thread_cfc692e1",
+    "recursion_limit": 200
+  },
+  "2025-04-17T10:08:12.147040+00:00",
+  {
+    "configurable": {
+      "thread_id": "postgres_thread_cfc692e1",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f01b73d-ec9d-6efe-8003-5e7ad7b7e4fe"
+    }
+  },
+  []
+]

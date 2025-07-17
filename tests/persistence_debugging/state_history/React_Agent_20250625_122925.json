@@ -1,0 +1,353 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Calculate 5 + 3, then create a plan",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "22e1834e-cfc5-4920-a58f-4785f672fd17",
+        "example": false
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "tool_calls": [
+            {
+              "id": "call_fmDr9JMXRfgkes4CpeY7QJnf",
+              "function": {
+                "arguments": "{\"a\":5,\"b\":3}",
+                "name": "add"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 18,
+            "prompt_tokens": 58,
+            "total_tokens": 76,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "content_filter_results": {}
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--1b5383e9-a3d1-4cbb-a0ed-4cb551056601-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "add",
+            "args": {
+              "a": 5,
+              "b": 3
+            },
+            "id": "call_fmDr9JMXRfgkes4CpeY7QJnf",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 58,
+          "output_tokens": 18,
+          "total_tokens": 76,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "8",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "add",
+        "id": "7e3ea3a9-b5f0-4a82-90a3-1761f7f73b5e",
+        "tool_call_id": "call_fmDr9JMXRfgkes4CpeY7QJnf",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "The sum of 5 + 3 is 8.\n\n### Plan\n1. **Identify Objective**: Determine the overall goal of the plan.\n2. **Analyze Requirements**: Gather necessary information or resources needed to accomplish the objective.\n3. **Set Objectives**: Break down the main goal into smaller, achievable objectives.\n4. **Develop Strategies**: Identify methods or actions necessary to achieve each objective.\n5. **Create a Timeline**: Establish a sequence and timeframe for the implementation of each strategy.\n6. **Implement Actions**: Begin executing the strategies in accordance with the timeline.\n7. **Monitor Progress**: Track the progress of the implementation and make adjustments as needed.\n8. **Evaluate Results**: Assess the effectiveness of the plan after completion and identify areas for improvement.\n\nDo you need a plan for a specific scenario or goal?",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 174,
+            "prompt_tokens": 83,
+            "total_tokens": 257,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--a78d2719-ce21-41ae-b1d2-771f5cc0fa66-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 83,
+          "output_tokens": 174,
+          "total_tokens": 257,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ],
+    "tools": [
+      {
+        "name": "{'name': 'add', 'description': 'returns the sum of two numbers', 'args_schema': <class 'langchain_core.utils.pydantic.add'>, 'return_direct': False, 'verbose': False, 'tags': None, 'metadata': None, 'handle_tool_error': False, 'handle_validation_error': False, 'response_format': 'content', 'func': <function add at 0x7d297c1da340>, 'coroutine': None}",
+        "description": "",
+        "type": "tool"
+      }
+    ],
+    "tool_routes": {
+      "tool_0": "unknown"
+    },
+    "name_attrs": ["name", "__name__", "func_name"],
+    "content": null,
+    "output_schemas": {},
+    "engine_route_config": {
+      "llm": ["langchain_tool", "function", "pydantic_model"],
+      "aug_llm": ["langchain_tool", "function", "pydantic_model"],
+      "retriever": ["retriever"],
+      "parser": ["pydantic_model"]
+    }
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "f9683474-9b7c-4c81-a5e6-c62c15687249",
+      "checkpoint_ns": "React Agent:0a5a5d86-f585-bd4f-9c01-fa4138fba630",
+      "checkpoint_id": "1f051e18-f007-68d4-8004-013ddb467d13",
+      "checkpoint_map": {
+        "": "1f051e18-ccd4-60ed-8000-d686c8969fda",
+        "React Agent:0a5a5d86-f585-bd4f-9c01-fa4138fba630": "1f051e18-f007-68d4-8004-013ddb467d13"
+      }
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "The sum of 5 + 3 is 8.\n\n### Plan\n1. **Identify Objective**: Determine the overall goal of the plan.\n2. **Analyze Requirements**: Gather necessary information or resources needed to accomplish the objective.\n3. **Set Objectives**: Break down the main goal into smaller, achievable objectives.\n4. **Develop Strategies**: Identify methods or actions necessary to achieve each objective.\n5. **Create a Timeline**: Establish a sequence and timeframe for the implementation of each strategy.\n6. **Implement Actions**: Begin executing the strategies in accordance with the timeline.\n7. **Monitor Progress**: Track the progress of the implementation and make adjustments as needed.\n8. **Evaluate Results**: Assess the effectiveness of the plan after completion and identify areas for improvement.\n\nDo you need a plan for a specific scenario or goal?",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 174,
+              "prompt_tokens": 83,
+              "total_tokens": 257,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--a78d2719-ce21-41ae-b1d2-771f5cc0fa66-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 83,
+            "output_tokens": 174,
+            "total_tokens": 257,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 4,
+    "parents": {
+      "": "1f051e18-ccd4-60ed-8000-d686c8969fda"
+    },
+    "thread_id": "f9683474-9b7c-4c81-a5e6-c62c15687249",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 1,
+    "langgraph_node": "React Agent",
+    "langgraph_triggers": ["branch:to:React Agent"],
+    "langgraph_path": ["__pregel_pull", "React Agent"],
+    "langgraph_checkpoint_ns": "React Agent:0a5a5d86-f585-bd4f-9c01-fa4138fba630"
+  },
+  "2025-06-25T16:29:25.714946+00:00",
+  {
+    "configurable": {
+      "thread_id": "f9683474-9b7c-4c81-a5e6-c62c15687249",
+      "checkpoint_ns": "React Agent:0a5a5d86-f585-bd4f-9c01-fa4138fba630",
+      "checkpoint_id": "1f051e18-d302-6a0f-8003-e6da9c33551d",
+      "checkpoint_map": {
+        "": "1f051e18-ccd4-60ed-8000-d686c8969fda",
+        "React Agent:0a5a5d86-f585-bd4f-9c01-fa4138fba630": "1f051e18-d302-6a0f-8003-e6da9c33551d"
+      }
+    }
+  },
+  []
+]

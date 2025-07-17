@@ -1,0 +1,232 @@
+[
+  {
+    "messages": [
+      {
+        "content": "[@DevNewbie]\nStats: 0 likes | 0 followers\nTrending: Nothing trending\nKeep it under 500 characters!",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "system",
+        "name": null,
+        "id": "3de27e51-fe5e-484c-b76e-987e169e2dc8"
+      },
+      {
+        "content": "\ud83d\udc26 New thread: \ud83d\ude80 Just shipped our new AI framework! It's 10x faster than before. AMA!\nPlatform: twitter (max 280 chars)\nShare your thoughts! Go viral at 8 likes \ud83d\udd25",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "6b194996-956b-4aef-b100-825f310ed419",
+        "example": false
+      },
+      {
+        "content": "\ud83d\ude80 Wow, 10x faster AI framework?! That's a game-changer! \ud83e\udd16 Can't wait to dive in and explore the possibilities! \ud83d\ude4c #AI #Innovation #TechTalk @mentions, any thoughts on the impact? \ud83e\udde0\ud83d\udd25",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 53,
+            "prompt_tokens": 272,
+            "total_tokens": 325,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--b0948d7a-2442-496e-89f0-99fa93844379-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 272,
+          "output_tokens": 53,
+          "total_tokens": 325,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "74a59e9e-6d6c-4586-b17a-2e4c5001d10e",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04ee03-ba21-6b22-8001-d4a07bf6c903"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "\ud83d\ude80 Wow, 10x faster AI framework?! That's a game-changer! \ud83e\udd16 Can't wait to dive in and explore the possibilities! \ud83d\ude4c #AI #Innovation #TechTalk @mentions, any thoughts on the impact? \ud83e\udde0\ud83d\udd25",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 53,
+              "prompt_tokens": 272,
+              "total_tokens": 325,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--b0948d7a-2442-496e-89f0-99fa93844379-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 272,
+            "output_tokens": 53,
+            "total_tokens": 325,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 1,
+    "parents": {},
+    "thread_id": "c935fc70-c126-432a-9db1-0b22852a89e5",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 99,
+    "langgraph_node": "execute_agent",
+    "langgraph_triggers": ["branch:to:execute_agent"],
+    "langgraph_path": ["__pregel_pull", "execute_agent"],
+    "langgraph_checkpoint_ns": "execute_agent:8efb606e-31d0-2bf8-6cc3-e1323a397442",
+    "recursion_limit": 50
+  },
+  "2025-06-21T20:42:22.860558+00:00",
+  {
+    "configurable": {
+      "thread_id": "74a59e9e-6d6c-4586-b17a-2e4c5001d10e",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04ee03-b38d-6af6-8000-d7ce356fb22c"
+    }
+  },
+  []
+]

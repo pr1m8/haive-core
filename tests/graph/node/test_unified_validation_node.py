@@ -159,7 +159,8 @@ class TestUnifiedValidationNode:
                     tool_calls=[
                         {
                             "name": "UserQuery",
-                            "args": {"question": "What is AI?"},  # Missing priority
+                            # Missing priority
+                            "args": {"question": "What is AI?"},
                             "id": "call_1",
                         }
                     ],

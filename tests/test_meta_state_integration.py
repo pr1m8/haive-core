@@ -386,7 +386,8 @@ class TestMetaStateIntegration:
 
         # Check that reducers were applied correctly
         assert len(meta_state.messages) == 2  # Messages should be added
-        assert len(meta_state.execution_history) == 2  # History should be appended
+        # History should be appended
+        assert len(meta_state.execution_history) == 2
 
     def test_shared_fields(self):
         """Test that shared fields work correctly in meta state."""

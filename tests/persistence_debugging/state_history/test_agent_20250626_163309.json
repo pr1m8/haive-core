@@ -1,0 +1,73 @@
+[
+  {
+    "messages": [
+      {
+        "content": "First message",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "2acfbfb2-b9be-4c72-ab09-e3e777e13162",
+        "example": false
+      },
+      {
+        "content": "Processed 1 previous messages",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "c92a21e7-2f98-4f9d-a8ff-83a7e320d24c",
+        "example": false
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "persistence-test-123",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f052ccc-5f81-6586-8001-71b94c5b302b"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "process": {
+        "messages": [
+          {
+            "content": "First message",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "2acfbfb2-b9be-4c72-ab09-e3e777e13162",
+            "example": false
+          },
+          {
+            "content": "Processed 1 previous messages",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "c92a21e7-2f98-4f9d-a8ff-83a7e320d24c",
+            "example": false
+          }
+        ]
+      }
+    },
+    "step": 1,
+    "parents": {},
+    "thread_id": "persistence-test-123",
+    "debug": false,
+    "checkpoint_mode": "sync"
+  },
+  "2025-06-26T20:33:09.666118+00:00",
+  {
+    "configurable": {
+      "thread_id": "persistence-test-123",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f052ccc-5f77-6ba6-8000-370d54045a22"
+    }
+  },
+  []
+]

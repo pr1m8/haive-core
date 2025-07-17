@@ -8,16 +8,13 @@ This test demonstrates:
 5. Demonstrating the complete flow
 """
 
-import asyncio
 import logging
 from contextlib import contextmanager
-from typing import Any, Dict, List
-from unittest.mock import patch
+from typing import List
 
-import pytest
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 from langgraph.types import Command
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.graph.node.engine_node import EngineNodeConfig
@@ -84,7 +81,8 @@ class TestEngineAttribution:
 
         # Create test state with a user message
         state = TestState(
-            messages=[HumanMessage(content="Hello, please respond with a greeting.")]
+            messages=[HumanMessage(
+                content="Hello, please respond with a greeting.")]
         )
 
         print(f"\n1. Created engine with name: '{engine_name}'")
@@ -95,7 +93,8 @@ class TestEngineAttribution:
         result = engine_node(state)
 
         # Verify the result is a Command
-        assert isinstance(result, Command), f"Expected Command, got {type(result)}"
+        assert isinstance(
+            result, Command), f"Expected Command, got {type(result)}"
         assert "messages" in result.update, "Expected 'messages' in update"
 
         # Get the updated messages
@@ -171,7 +170,8 @@ class TestEngineAttribution:
         result = transformer(state)
 
         # Verify the result
-        assert isinstance(result, Command), f"Expected Command, got {type(result)}"
+        assert isinstance(
+            result, Command), f"Expected Command, got {type(result)}"
         assert (
             "transformed_messages" in result.update
         ), "Expected 'transformed_messages' in update"
@@ -184,7 +184,8 @@ class TestEngineAttribution:
 
         # Check the transformed message (should be the second one)
         transformed_msg = transformed_messages[1]
-        print(f"\n4. Transformed message type: {type(transformed_msg).__name__}")
+        print(
+            f"\n4. Transformed message type: {type(transformed_msg).__name__}")
 
         # Verify it's now a HumanMessage but retains attribution
         assert isinstance(
@@ -203,7 +204,7 @@ class TestEngineAttribution:
             transformed_msg.additional_kwargs["custom_field"] == "test_value"
         ), "Other metadata should also be preserved"
 
-        print(f"\n✅ SUCCESS: Transformation preserved engine attribution")
+        print("\n✅ SUCCESS: Transformation preserved engine attribution"n")
         print(f"   Transformed to: {type(transformed_msg).__name__}")
         print(
             f"   Engine name preserved: '{transformed_msg.additional_kwargs['engine_name']}'"
@@ -274,7 +275,7 @@ class TestEngineAttribution:
         assert final_ai_msg.additional_kwargs.get("engine_name") == engine_name
         assert final_ai_msg.additional_kwargs.get("engine_id") == engine_id
 
-        print(f"5. Transformation added engine_id while preserving engine_name")
+        print("5. Transformation added engine_id while preserving engine_name")
         print(f"   Final additional_kwargs: {final_ai_msg.additional_kwargs}")
 
         # Step 3: Reflection transformation (swap roles but preserve metadata)
@@ -287,7 +288,7 @@ class TestEngineAttribution:
             output_key="reflected_messages",
         )
 
-        print(f"\n6. Applying reflection transformation...")
+        print("\n6. Applying reflection transformation...")
 
         reflection_result = reflection_transformer(state)
         reflected_messages = reflection_result.update["reflected_messages"]
@@ -301,15 +302,15 @@ class TestEngineAttribution:
         assert reflected_msg.additional_kwargs.get("engine_name") == engine_name
         assert reflected_msg.additional_kwargs.get("engine_id") == engine_id
 
-        print(f"7. Reflection changed AI → Human but preserved attribution")
+        print("7. Reflection changed AI → Human but preserved attribution"n")
         print(f"   Message type: {type(reflected_msg).__name__}")
         print(f"   Attribution preserved: {reflected_msg.additional_kwargs}")
 
-        print(f"\n✅ COMPLETE FLOW SUCCESS:")
-        print(f"   - Engine node added engine_name attribution")
-        print(f"   - Transformation node added engine_id")
-        print(f"   - Reflection preserved all metadata")
-        print(f"   - Final message has complete attribution chain")
+        print("\n✅ COMPLETE FLOW SUCCESS:":")
+        print("   - Engine node added engine_name attribution")
+        print("   - Transformation node added engine_id")
+        print("   - Reflection preserved all metadata")
+        print("   - Final message has complete attribution chain")
 
     def test_multiple_engines_with_attribution(self):
         """Test multiple engines each adding their own attribution."""
@@ -342,7 +343,7 @@ class TestEngineAttribution:
             ]
         )
 
-        print(f"\n1. Starting with user query")
+        print("\n1. Starting with user query")
 
         # Process through first engine
         print(f"2. Processing through '{engine1.name}'...")
@@ -390,9 +391,9 @@ class TestEngineAttribution:
                 engine = msg.additional_kwargs["engine_name"]
                 engine_counts[engine] = engine_counts.get(engine, 0) + 1
 
-        print(f"\n✅ SUCCESS: Multiple engines with proper attribution")
+        print("\n✅ SUCCESS: Multiple engines with proper attribution"n")
         print(f"   Engine message counts: {engine_counts}")
-        print(f"   Each AI message is properly attributed to its source engine")
+        print("   Each AI message is properly attributed to its source engine")
 
 
 if __name__ == "__main__":

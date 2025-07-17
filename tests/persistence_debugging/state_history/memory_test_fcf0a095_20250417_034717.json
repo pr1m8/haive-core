@@ -1,0 +1,212 @@
+[
+  {
+    "__shared_fields__": [],
+    "__reducer_fields__": {},
+    "__name__": "Memory_Test_Fcf0A095StateNoConfig",
+    "messages": [
+      {
+        "content": "You mentioned your name is TestUser. If there\u2019s anything else you\u2019d like to share or ask about, feel free!",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 26,
+            "prompt_tokens": 65,
+            "total_tokens": 91,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run-1076c309-dc7b-4089-a072-b0e327162e5c-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 65,
+          "output_tokens": 26,
+          "total_tokens": 91,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "memory_thread_532cb80a",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f01b603-139e-6c01-8004-5b2fc753a876"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "process": {
+        "messages": [
+          {
+            "content": "You mentioned your name is TestUser. If there\u2019s anything else you\u2019d like to share or ask about, feel free!",
+            "additional_kwargs": {
+              "refusal": null
+            },
+            "response_metadata": {
+              "token_usage": {
+                "completion_tokens": 26,
+                "prompt_tokens": 65,
+                "total_tokens": 91,
+                "completion_tokens_details": {
+                  "accepted_prediction_tokens": 0,
+                  "audio_tokens": 0,
+                  "reasoning_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                },
+                "prompt_tokens_details": {
+                  "audio_tokens": 0,
+                  "cached_tokens": 0
+                }
+              },
+              "model_name": "gpt-4o-2024-08-06",
+              "system_fingerprint": "fp_ee1d74bde0",
+              "prompt_filter_results": [
+                {
+                  "prompt_index": 0,
+                  "content_filter_results": {
+                    "hate": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "self_harm": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "sexual": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "violence": {
+                      "filtered": false,
+                      "severity": "safe"
+                    }
+                  }
+                }
+              ],
+              "finish_reason": "stop",
+              "logprobs": null,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            },
+            "type": "ai",
+            "name": null,
+            "id": "run-1076c309-dc7b-4089-a072-b0e327162e5c-0",
+            "example": false,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": {
+              "input_tokens": 65,
+              "output_tokens": 26,
+              "total_tokens": 91,
+              "input_token_details": {
+                "audio": 0,
+                "cache_read": 0
+              },
+              "output_token_details": {
+                "audio": 0,
+                "reasoning": 0
+              }
+            }
+          }
+        ]
+      }
+    },
+    "thread_id": "memory_thread_532cb80a",
+    "step": 4,
+    "parents": {}
+  },
+  "2025-04-17T07:47:20.517504+00:00",
+  {
+    "configurable": {
+      "thread_id": "memory_thread_532cb80a",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f01b603-0b0c-6763-8003-2f858a05c27f"
+    }
+  },
+  []
+]

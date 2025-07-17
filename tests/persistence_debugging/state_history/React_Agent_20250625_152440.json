@@ -1,0 +1,499 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Create a plan for a day trip, then calculate how many hours we'll need if we spend 2 hours at each location",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "5584a2dd-83c6-46d0-95e3-8bc9b610c2d4",
+        "example": false
+      },
+      {
+        "content": "Creating a plan for a day trip involves choosing a destination, selecting points of interest, and estimating the time spent at each location. Below is a step-by-step plan:\n\n### Day Trip Plan\n\n#### Destination:\n- **City:** San Francisco, CA\n\n#### Points of Interest:\n1. **Golden Gate Bridge**\n2. **Alcatraz Island**\n3. **Fisherman's Wharf**\n4. **Exploratorium**\n\n### Time Management\n- **Time at each location:** 2 hours\n- **Total number of locations:** 4\n\nNow, I'll calculate the total number of hours needed, assuming 2 hours are spent at each location. \n\nThe calculation for total hours needed is straightforward: 2 hours per location * 4 locations.\n\nLet's proceed with the calculation.",
+        "additional_kwargs": {
+          "tool_calls": [
+            {
+              "id": "call_Grz9FXmfeA3vFMkMxlTx5s1s",
+              "function": {
+                "arguments": "{\"a\":2,\"b\":2}",
+                "name": "add"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 178,
+            "prompt_tokens": 71,
+            "total_tokens": 249,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--88bc76dc-4b8e-48d2-a9be-e54e5e432b81-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "add",
+            "args": {
+              "a": 2,
+              "b": 2
+            },
+            "id": "call_Grz9FXmfeA3vFMkMxlTx5s1s",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 71,
+          "output_tokens": 178,
+          "total_tokens": 249,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "4",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "add",
+        "id": "fb06263f-671f-45a2-8411-4fe3792a9e43",
+        "tool_call_id": "call_Grz9FXmfeA3vFMkMxlTx5s1s",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "tool_calls": [
+            {
+              "id": "call_1T7O2uwCIFCqL2iYxI1qo6gq",
+              "function": {
+                "arguments": "{\"a\": 2, \"b\": 2}",
+                "name": "add"
+              },
+              "type": "function"
+            },
+            {
+              "id": "call_VcIS45eTmPl9e7MIx3zNzlk9",
+              "function": {
+                "arguments": "{\"a\": 2, \"b\": 2}",
+                "name": "add"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 51,
+            "prompt_tokens": 258,
+            "total_tokens": 309,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "content_filter_results": {}
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--d42509cb-bf89-492a-af10-06de230992e3-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "add",
+            "args": {
+              "a": 2,
+              "b": 2
+            },
+            "id": "call_1T7O2uwCIFCqL2iYxI1qo6gq",
+            "type": "tool_call"
+          },
+          {
+            "name": "add",
+            "args": {
+              "a": 2,
+              "b": 2
+            },
+            "id": "call_VcIS45eTmPl9e7MIx3zNzlk9",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 258,
+          "output_tokens": 51,
+          "total_tokens": 309,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "4",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "add",
+        "id": "c62c69cc-e10e-4ac8-b23a-255a35ed68f0",
+        "tool_call_id": "call_1T7O2uwCIFCqL2iYxI1qo6gq",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "4",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "add",
+        "id": "36a10253-9c1e-4198-8bae-d8515fe19b6c",
+        "tool_call_id": "call_VcIS45eTmPl9e7MIx3zNzlk9",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "The total number of hours required for this day trip is \\(4 + 4 = 8\\) hours. \n\n### Day Trip Summary\n- **Total Locations:** 4 (Golden Gate Bridge, Alcatraz Island, Fisherman's Wharf, Exploratorium)\n- **Time at each location:** 2 hours\n- **Total Trip Duration:** 8 hours\n\nEnjoy your trip to San Francisco!",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 83,
+            "prompt_tokens": 324,
+            "total_tokens": 407,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--f7ba6c3a-9120-4d22-8f64-1cb758cc3058-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 324,
+          "output_tokens": 83,
+          "total_tokens": 407,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ],
+    "tools": [
+      {
+        "name": "{'name': 'add', 'description': 'Returns the sum of two numbers.', 'args_schema': <class 'langchain_core.utils.pydantic.add'>, 'return_direct': False, 'verbose': False, 'tags': None, 'metadata': None, 'handle_tool_error': False, 'handle_validation_error': False, 'response_format': 'content', 'func': <function add at 0x7d48e215e8e0>, 'coroutine': None}",
+        "description": "",
+        "type": "tool"
+      }
+    ],
+    "tool_routes": {
+      "tool_0": "unknown"
+    },
+    "name_attrs": ["name", "__name__", "func_name"],
+    "content": null,
+    "output_schemas": {},
+    "engine_route_config": {
+      "llm": ["langchain_tool", "function", "pydantic_model"],
+      "aug_llm": ["langchain_tool", "function", "pydantic_model"],
+      "retriever": ["retriever"],
+      "parser": ["pydantic_model"]
+    }
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "e01b5fc4-8340-445b-865b-0c02464a6e7d",
+      "checkpoint_ns": "React Agent:e6083798-8605-fd1a-4482-20eea337860a",
+      "checkpoint_id": "1f051fa0-a951-67f9-8007-232e9cb018b9",
+      "checkpoint_map": {
+        "": "1f051fa0-6e26-6cb7-8001-5f5ec29f7251",
+        "React Agent:e6083798-8605-fd1a-4482-20eea337860a": "1f051fa0-a951-67f9-8007-232e9cb018b9"
+      }
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "The total number of hours required for this day trip is \\(4 + 4 = 8\\) hours. \n\n### Day Trip Summary\n- **Total Locations:** 4 (Golden Gate Bridge, Alcatraz Island, Fisherman's Wharf, Exploratorium)\n- **Time at each location:** 2 hours\n- **Total Trip Duration:** 8 hours\n\nEnjoy your trip to San Francisco!",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 83,
+              "prompt_tokens": 324,
+              "total_tokens": 407,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--f7ba6c3a-9120-4d22-8f64-1cb758cc3058-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 324,
+            "output_tokens": 83,
+            "total_tokens": 407,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 7,
+    "parents": {
+      "": "1f051fa0-6e26-6cb7-8001-5f5ec29f7251"
+    },
+    "thread_id": "e01b5fc4-8340-445b-865b-0c02464a6e7d",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 2,
+    "langgraph_node": "React Agent",
+    "langgraph_triggers": ["branch:to:React Agent"],
+    "langgraph_path": ["__pregel_pull", "React Agent"],
+    "langgraph_checkpoint_ns": "React Agent:e6083798-8605-fd1a-4482-20eea337860a"
+  },
+  "2025-06-25T19:24:40.970218+00:00",
+  {
+    "configurable": {
+      "thread_id": "e01b5fc4-8340-445b-865b-0c02464a6e7d",
+      "checkpoint_ns": "React Agent:e6083798-8605-fd1a-4482-20eea337860a",
+      "checkpoint_id": "1f051fa0-9c55-6b98-8006-eff14deaad18",
+      "checkpoint_map": {
+        "": "1f051fa0-6e26-6cb7-8001-5f5ec29f7251",
+        "React Agent:e6083798-8605-fd1a-4482-20eea337860a": "1f051fa0-9c55-6b98-8006-eff14deaad18"
+      }
+    }
+  },
+  []
+]

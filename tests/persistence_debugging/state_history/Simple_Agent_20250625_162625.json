@@ -1,0 +1,382 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Calculate 5 + 3, then create a plan",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "932c80c4-17c5-4fca-a06a-286def885aea",
+        "example": false
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 58,
+            "output_tokens": 18,
+            "total_tokens": 76,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          },
+          "tool_calls": [
+            {
+              "id": "call_hwvLAgKAdSv0q6DJDz2r7wDo",
+              "function": {
+                "arguments": "{\"a\":5,\"b\":3}",
+                "name": "add"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 18,
+            "prompt_tokens": 58,
+            "total_tokens": 76,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "content_filter_results": {}
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--81111253-20f3-4840-82ed-9987e762f856-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "add",
+            "args": {
+              "a": 5,
+              "b": 3
+            },
+            "id": "call_hwvLAgKAdSv0q6DJDz2r7wDo",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "8",
+        "additional_kwargs": {
+          "status": "success"
+        },
+        "response_metadata": {},
+        "type": "tool",
+        "name": "add",
+        "id": "3cf57afc-494a-44de-a893-c2000b45ad33",
+        "tool_call_id": "call_hwvLAgKAdSv0q6DJDz2r7wDo",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "The sum of 5 and 3 is 8.\n\nNow let's create a plan:\n\n1. **Analysis Phase:**\n   - Determine the objectives and goals. For example, if this calculation is part of a larger project, identify how it fits within that context.\n   - Identify resources needed for implementation, such as tools, personnel, and time.\n\n2. **Planning Phase:**\n   - Outline the steps required to achieve the objectives. These steps should be clear and measurable, with specific timeframes assigned.\n   - Develop contingency plans for potential obstacles or challenges.\n\n3. **Execution Phase:**\n   - Implement the steps defined in the planning phase.\n   - Monitor progress closely to ensure alignment with objectives.\n   - Adjust the plan as necessary based on feedback or unforeseen circumstances.\n\n4. **Evaluation Phase:**\n   - Evaluate the outcomes against the initial objectives and goals.\n   - Gather feedback from stakeholders to refine the process for future endeavors.\n   - Document lessons learned and best practices for continuous improvement.\n\nBy following this structured approach, you can effectively plan and execute projects, ensuring successful outcomes aligned with your goals and objectives.",
+        "additional_kwargs": {
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 83,
+            "output_tokens": 228,
+            "total_tokens": 311,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          },
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 228,
+            "prompt_tokens": 83,
+            "total_tokens": 311,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--71471c03-08be-41ab-87c5-94a40ba1db0d-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "tool_calls": [
+            {
+              "id": "call_KDYrkeLNVKyWnwWZ3J6c86Ef",
+              "function": {
+                "arguments": "{\"steps\":[\"Determine the objectives and goals, and identify resources needed for implementation.\",\"Outline the steps required to achieve the objectives and develop contingency plans for potential obstacles.\",\"Implement the steps, monitor progress, and adjust the plan as necessary based on feedback.\",\"Evaluate the outcomes against the initial objectives, gather feedback, and document lessons learned for future improvement.\"]}",
+                "name": "Plan"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 71,
+            "prompt_tokens": 315,
+            "total_tokens": 386,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {}
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--a86f7ab3-19e6-451c-a356-69b73ab6aa73-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "Plan",
+            "args": {
+              "steps": [
+                "Determine the objectives and goals, and identify resources needed for implementation.",
+                "Outline the steps required to achieve the objectives and develop contingency plans for potential obstacles.",
+                "Implement the steps, monitor progress, and adjust the plan as necessary based on feedback.",
+                "Evaluate the outcomes against the initial objectives, gather feedback, and document lessons learned for future improvement."
+              ]
+            },
+            "id": "call_KDYrkeLNVKyWnwWZ3J6c86Ef",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 315,
+          "output_tokens": 71,
+          "total_tokens": 386,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ],
+    "tools": [
+      {
+        "name": "<class 'haive.agents.multi.debug_with_logging.Plan'>",
+        "description": "",
+        "type": "tool"
+      }
+    ],
+    "tool_routes": {
+      "tool_0": "unknown"
+    },
+    "name_attrs": ["name", "__name__", "func_name"],
+    "content": null,
+    "output_schemas": {},
+    "engine_route_config": {
+      "llm": ["langchain_tool", "function", "pydantic_model"],
+      "aug_llm": ["langchain_tool", "function", "pydantic_model"],
+      "retriever": ["retriever"],
+      "parser": ["pydantic_model"]
+    },
+    "plan": {
+      "steps": [
+        "Determine the objectives and goals, and identify resources needed for implementation.",
+        "Outline the steps required to achieve the objectives and develop contingency plans for potential obstacles.",
+        "Implement the steps, monitor progress, and adjust the plan as necessary based on feedback.",
+        "Evaluate the outcomes against the initial objectives, gather feedback, and document lessons learned for future improvement."
+      ]
+    }
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "af2426dd-0032-459a-8967-1d9cf76e9c05",
+      "checkpoint_ns": "Simple Agent:78a8bb61-d6f2-32bf-050d-cf2b62edaa1e",
+      "checkpoint_id": "1f05202a-aa93-679a-8003-f7ef85050cad",
+      "checkpoint_map": {
+        "": "1f05202a-9d8b-6f5b-8001-e2cb77151607",
+        "Simple Agent:78a8bb61-d6f2-32bf-050d-cf2b62edaa1e": "1f05202a-aa93-679a-8003-f7ef85050cad"
+      }
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "parse_output": {
+        "plan": {
+          "steps": [
+            "Determine the objectives and goals, and identify resources needed for implementation.",
+            "Outline the steps required to achieve the objectives and develop contingency plans for potential obstacles.",
+            "Implement the steps, monitor progress, and adjust the plan as necessary based on feedback.",
+            "Evaluate the outcomes against the initial objectives, gather feedback, and document lessons learned for future improvement."
+          ]
+        }
+      }
+    },
+    "step": 3,
+    "parents": {
+      "": "1f05202a-9d8b-6f5b-8001-e2cb77151607"
+    },
+    "thread_id": "af2426dd-0032-459a-8967-1d9cf76e9c05",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 2,
+    "langgraph_node": "Simple Agent",
+    "langgraph_triggers": ["branch:to:Simple Agent"],
+    "langgraph_path": ["__pregel_pull", "Simple Agent"],
+    "langgraph_checkpoint_ns": "Simple Agent:78a8bb61-d6f2-32bf-050d-cf2b62edaa1e"
+  },
+  "2025-06-25T20:26:25.511393+00:00",
+  {
+    "configurable": {
+      "thread_id": "af2426dd-0032-459a-8967-1d9cf76e9c05",
+      "checkpoint_ns": "Simple Agent:78a8bb61-d6f2-32bf-050d-cf2b62edaa1e",
+      "checkpoint_id": "1f05202a-aa19-68e2-8002-13c5d99deff2",
+      "checkpoint_map": {
+        "": "1f05202a-9d8b-6f5b-8001-e2cb77151607",
+        "Simple Agent:78a8bb61-d6f2-32bf-050d-cf2b62edaa1e": "1f05202a-aa19-68e2-8002-13c5d99deff2"
+      }
+    }
+  },
+  []
+]

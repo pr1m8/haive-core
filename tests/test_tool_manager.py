@@ -6,6 +6,13 @@ import os
 import sys
 from typing import Any
 
+from haive.core.graph.ToolManager import (
+    ToolConfig,
+    ToolManager,
+    state_tool,
+    tool_manager,
+)
+
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -15,13 +22,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Import the tool manager components
 # Import LangGraph components for testing
-
-from haive.core.graph.ToolManager import (
-    ToolConfig,
-    ToolManager,
-    state_tool,
-    tool_manager,
-)
 
 
 # Test basic tool registration and execution
@@ -91,7 +91,7 @@ def test_tool_with_config():
     )
 
     # Register with config
-    tool_obj = manager.create_and_register_tool(unreliable_function, config=config)
+    manager.create_and_register_tool(unreliable_function, config=config)
 
     # Execute with very low success rate
     result = manager.execute_tool("unreliable_tool", kwargs={"success_rate": 0.1})
@@ -195,7 +195,7 @@ async def test_async_tools():
         return await async_fetch(url, delay)
 
     # Create and register
-    tool_obj = manager.create_and_register_tool(wrapped_async_fetch, config=config)
+    manager.create_and_register_tool(wrapped_async_fetch, config=config)
 
     # Execute async tool
     result = await manager.execute_tool_async(
@@ -317,10 +317,10 @@ def run_tests():
     print("=== Running ToolManager Tests ===")
 
     # Run synchronous tests
-    basic_manager = test_basic_tool_registration()
-    config_manager = test_tool_with_config()
-    state_manager = test_state_injection()
-    filter_manager = test_tool_filtering()
+    test_basic_tool_registration()
+    test_tool_with_config()
+    test_state_injection()
+    test_tool_filtering()
 
     # Run async test
     asyncio.run(test_async_tools())

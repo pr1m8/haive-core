@@ -1,0 +1,306 @@
+[
+  {
+    "messages": [
+      {
+        "content": "[@Comedian]\nStats: 0 likes | 0 followers\nTrending: Nothing trending\nKeep it under 500 characters!",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "system",
+        "name": null,
+        "id": "79e6930f-f6c0-4aea-9785-1ba6bdf717b9"
+      },
+      {
+        "content": "\ud83d\udc26 New thread: \ud83d\ude05 Tried to make a souffl\u00e9... it's now a pancake. Chef life! \ud83d\udc68\u200d\ud83c\udf73 #CookingFail\nPlatform: twitter (max 280 chars)\nShare your thoughts! Go viral at 5 likes \ud83d\udd25",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "5156fecd-0733-4c1c-a43c-50a374afd85a",
+        "example": false
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "tool_calls": [
+            {
+              "id": "call_SJyWK0k7ySAiIOt06Mbjte2y",
+              "function": {
+                "arguments": "{\"reply_to\": \"New thread\", \"content\": \"Sounds like your souffl\u00e9 did a flop and decided to take a flat tire vacation as a pancake! \ud83d\ude06 Next time add more air in your recipe tires! \ud83c\udf73\ud83d\ude97 #PancakeOops\"}",
+                "name": "reply_to_post"
+              },
+              "type": "function"
+            },
+            {
+              "id": "call_BoLYxjNOFA5OisKRwdrFUKcD",
+              "function": {
+                "arguments": "{\"post_author\": \"New thread\", \"reason\": \"Cooking fails deserve a sprinkle of humor!\"}",
+                "name": "like_post"
+              },
+              "type": "function"
+            },
+            {
+              "id": "call_pSRjY9VYhrY0vNjYcEOvbJNl",
+              "function": {
+                "arguments": "{\"original_author\": \"New thread\", \"comment\": \"Turning a souffl\u00e9 into a pancake is a skill itself! Maybe you're onto a new culinary trend! \ud83e\udd5e\ud83d\ude04\"}",
+                "name": "share_post"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 149,
+            "prompt_tokens": 263,
+            "total_tokens": 412,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "content_filter_results": {}
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--4ce06732-e058-4c40-b548-2959b71c948a-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "reply_to_post",
+            "args": {
+              "reply_to": "New thread",
+              "content": "Sounds like your souffl\u00e9 did a flop and decided to take a flat tire vacation as a pancake! \ud83d\ude06 Next time add more air in your recipe tires! \ud83c\udf73\ud83d\ude97 #PancakeOops"
+            },
+            "id": "call_SJyWK0k7ySAiIOt06Mbjte2y",
+            "type": "tool_call"
+          },
+          {
+            "name": "like_post",
+            "args": {
+              "post_author": "New thread",
+              "reason": "Cooking fails deserve a sprinkle of humor!"
+            },
+            "id": "call_BoLYxjNOFA5OisKRwdrFUKcD",
+            "type": "tool_call"
+          },
+          {
+            "name": "share_post",
+            "args": {
+              "original_author": "New thread",
+              "comment": "Turning a souffl\u00e9 into a pancake is a skill itself! Maybe you're onto a new culinary trend! \ud83e\udd5e\ud83d\ude04"
+            },
+            "id": "call_pSRjY9VYhrY0vNjYcEOvbJNl",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 263,
+          "output_tokens": 149,
+          "total_tokens": 412,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "1f0a17e0-a117-4e41-8ad1-7b525bc4609d",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04ee08-ef86-66af-8001-28272d02d109"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "",
+          "additional_kwargs": {
+            "tool_calls": [
+              {
+                "id": "call_SJyWK0k7ySAiIOt06Mbjte2y",
+                "function": {
+                  "arguments": "{\"reply_to\": \"New thread\", \"content\": \"Sounds like your souffl\u00e9 did a flop and decided to take a flat tire vacation as a pancake! \ud83d\ude06 Next time add more air in your recipe tires! \ud83c\udf73\ud83d\ude97 #PancakeOops\"}",
+                  "name": "reply_to_post"
+                },
+                "type": "function"
+              },
+              {
+                "id": "call_BoLYxjNOFA5OisKRwdrFUKcD",
+                "function": {
+                  "arguments": "{\"post_author\": \"New thread\", \"reason\": \"Cooking fails deserve a sprinkle of humor!\"}",
+                  "name": "like_post"
+                },
+                "type": "function"
+              },
+              {
+                "id": "call_pSRjY9VYhrY0vNjYcEOvbJNl",
+                "function": {
+                  "arguments": "{\"original_author\": \"New thread\", \"comment\": \"Turning a souffl\u00e9 into a pancake is a skill itself! Maybe you're onto a new culinary trend! \ud83e\udd5e\ud83d\ude04\"}",
+                  "name": "share_post"
+                },
+                "type": "function"
+              }
+            ],
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 149,
+              "prompt_tokens": 263,
+              "total_tokens": 412,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "tool_calls",
+            "logprobs": null,
+            "content_filter_results": {}
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--4ce06732-e058-4c40-b548-2959b71c948a-0",
+          "example": false,
+          "tool_calls": [
+            {
+              "name": "reply_to_post",
+              "args": {
+                "reply_to": "New thread",
+                "content": "Sounds like your souffl\u00e9 did a flop and decided to take a flat tire vacation as a pancake! \ud83d\ude06 Next time add more air in your recipe tires! \ud83c\udf73\ud83d\ude97 #PancakeOops"
+              },
+              "id": "call_SJyWK0k7ySAiIOt06Mbjte2y",
+              "type": "tool_call"
+            },
+            {
+              "name": "like_post",
+              "args": {
+                "post_author": "New thread",
+                "reason": "Cooking fails deserve a sprinkle of humor!"
+              },
+              "id": "call_BoLYxjNOFA5OisKRwdrFUKcD",
+              "type": "tool_call"
+            },
+            {
+              "name": "share_post",
+              "args": {
+                "original_author": "New thread",
+                "comment": "Turning a souffl\u00e9 into a pancake is a skill itself! Maybe you're onto a new culinary trend! \ud83e\udd5e\ud83d\ude04"
+              },
+              "id": "call_pSRjY9VYhrY0vNjYcEOvbJNl",
+              "type": "tool_call"
+            }
+          ],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 263,
+            "output_tokens": 149,
+            "total_tokens": 412,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 1,
+    "parents": {},
+    "thread_id": "f84ac1e0-8dd2-450b-b231-69ea5b4b3db9",
+    "debug": true,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 87,
+    "langgraph_node": "execute_agent",
+    "langgraph_triggers": ["branch:to:execute_agent"],
+    "langgraph_path": ["__pregel_pull", "execute_agent"],
+    "langgraph_checkpoint_ns": "execute_agent:80a7683b-392f-3ffe-382c-d249bf23dcdc",
+    "recursion_limit": 50
+  },
+  "2025-06-21T20:44:42.676994+00:00",
+  {
+    "configurable": {
+      "thread_id": "1f0a17e0-a117-4e41-8ad1-7b525bc4609d",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04ee08-e2fb-6cd8-8000-afbbf6ef5d29"
+    }
+  },
+  []
+]

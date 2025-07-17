@@ -1,0 +1,223 @@
+[
+  {
+    "messages": [
+      {
+        "content": "First plan a day trip, then calculate how many hours we need",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "20833056-f80a-4cac-b16d-88f440d84cb1",
+        "example": false
+      },
+      {
+        "content": "To plan a comprehensive day trip, we'll need to consider several elements: destination, activities, meals, transportation, and time allocation. Here's a general outline for a day trip, including how to estimate the number of hours needed:\n\n### Destination:\nLet's say your destination is a city or town within a 2-hour drive from your starting point. For this example, we'll select a scenic town with cultural attractions.\n\n### Activities:\n1. **Morning:** \n   - **Departure:** Leave home at 8:00 AM.\n   - **Arrival and Morning Activity:** Arrive by 10:00 AM. Start with a visit to a local museum or art gallery (Duration: 2 hours).\n   \n2. **Lunch:**\n   - Find a local restaurant or caf\u00e9 for lunch (Duration: 1.5 hours).\n\n3. **Afternoon Activities:**\n   - **Nature or Historical Site:** Spend some time at a nearby park, historical site, or go hiking (Duration: 2 hours).\n   - **Shopping or Exploring Town:** Stroll through the town center or visit a local market (Duration: 1.5 hours).\n\n4. **Evening:**\n   - **Dinner:** Choose a restaurant for a relaxing dinner (Duration: 2 hours).\n   - **Wrap-up:** Optionally catch a local event or performance or enjoy a coffee at a local caf\u00e9 (Duration: 1.5 hours).\n\n5. **Travel Back:**\n   - Depart for home around 8:30 PM, arrive by 10:30 PM.\n\n### Total Time Allocation:\n- **Travel Time:** 4 hours (2 hours each way).\n- **Activities & Meals:** 10.5 hours.\n  \n### Total Time Needed:\n- **Total Time for Day Trip:** 14.5 hours.\n\nAdjust the plan according to your interests and the actual distance to your chosen destination. This outline gives a balanced day of cultural, nature, and dining experiences.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 397,
+            "prompt_tokens": 20,
+            "total_tokens": 417,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--6e3013a1-aa6e-4d4d-9997-a8c765a1256e-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 20,
+          "output_tokens": 397,
+          "total_tokens": 417,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "e0008a4d-e3a6-4b64-9c13-b1b32e8e4320",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04f04f-c704-6ae5-8001-dcb04353fbb9"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "To plan a comprehensive day trip, we'll need to consider several elements: destination, activities, meals, transportation, and time allocation. Here's a general outline for a day trip, including how to estimate the number of hours needed:\n\n### Destination:\nLet's say your destination is a city or town within a 2-hour drive from your starting point. For this example, we'll select a scenic town with cultural attractions.\n\n### Activities:\n1. **Morning:** \n   - **Departure:** Leave home at 8:00 AM.\n   - **Arrival and Morning Activity:** Arrive by 10:00 AM. Start with a visit to a local museum or art gallery (Duration: 2 hours).\n   \n2. **Lunch:**\n   - Find a local restaurant or caf\u00e9 for lunch (Duration: 1.5 hours).\n\n3. **Afternoon Activities:**\n   - **Nature or Historical Site:** Spend some time at a nearby park, historical site, or go hiking (Duration: 2 hours).\n   - **Shopping or Exploring Town:** Stroll through the town center or visit a local market (Duration: 1.5 hours).\n\n4. **Evening:**\n   - **Dinner:** Choose a restaurant for a relaxing dinner (Duration: 2 hours).\n   - **Wrap-up:** Optionally catch a local event or performance or enjoy a coffee at a local caf\u00e9 (Duration: 1.5 hours).\n\n5. **Travel Back:**\n   - Depart for home around 8:30 PM, arrive by 10:30 PM.\n\n### Total Time Allocation:\n- **Travel Time:** 4 hours (2 hours each way).\n- **Activities & Meals:** 10.5 hours.\n  \n### Total Time Needed:\n- **Total Time for Day Trip:** 14.5 hours.\n\nAdjust the plan according to your interests and the actual distance to your chosen destination. This outline gives a balanced day of cultural, nature, and dining experiences.",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 397,
+              "prompt_tokens": 20,
+              "total_tokens": 417,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--6e3013a1-aa6e-4d4d-9997-a8c765a1256e-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 20,
+            "output_tokens": 397,
+            "total_tokens": 417,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 1,
+    "parents": {},
+    "thread_id": "76bde735-3bde-4720-8146-e67e2bf74a8d",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 2,
+    "langgraph_node": "delegate_to_agent",
+    "langgraph_triggers": ["branch:to:delegate_to_agent"],
+    "langgraph_path": ["__pregel_pull", "delegate_to_agent"],
+    "langgraph_checkpoint_ns": "delegate_to_agent:6cb171f3-54ad-fe1e-f459-850816720e06"
+  },
+  "2025-06-22T01:05:28.216633+00:00",
+  {
+    "configurable": {
+      "thread_id": "e0008a4d-e3a6-4b64-9c13-b1b32e8e4320",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04f04f-aba2-666f-8000-28f009e58c6b"
+    }
+  },
+  []
+]

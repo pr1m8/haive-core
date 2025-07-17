@@ -1,0 +1,86 @@
+[
+    {
+        "messages": [
+            {
+                "content": "\ud83d\udcdd Collaborative Session: Collaborative Document\n\nTopic: Testing prepared statements\n\nWe'll work together on these sections:\n- Test\n\nFormat: markdown\nMin contributions per section: 1\n\nLet's start with: Test",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "human",
+                "name": null,
+                "id": "5021bf47-f115-4e16-9119-86742567590a",
+                "example": false
+            },
+            {
+                "content": "\ud83c\udfc1 Conversation ended: Reached maximum rounds (1)\n\ud83d\udcca Total rounds: 1\n\ud83d\udd04 Total turns: 1",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "system",
+                "name": null,
+                "id": "268f5220-097b-4ba1-ab6b-7acc435666d9"
+            }
+        ],
+        "current_speaker": null,
+        "speakers": [
+            "TestA_234725",
+            "TestB_234725"
+        ],
+        "turn_count": 1,
+        "max_rounds": 1,
+        "topic": "Testing prepared statements",
+        "conversation_ended": true,
+        "mode": "collaborative",
+        "speaker_history": [
+            "TestA_234725"
+        ],
+        "shared_document": "# Collaborative Document\n\n",
+        "document_sections": {
+            "Test": ""
+        },
+        "current_section": "Test",
+        "sections_order": [
+            "Test"
+        ],
+        "output_format": "markdown"
+    },
+    [],
+    {
+        "configurable": {
+            "thread_id": "ps_test_234725",
+            "checkpoint_ns": "",
+            "checkpoint_id": "1f057c07-50de-631e-8006-e0c0cdaa2d1f"
+        }
+    },
+    {
+        "step": 6,
+        "debug": false,
+        "source": "loop",
+        "writes": {
+            "conclude": {
+                "messages": [
+                    {
+                        "content": "\ud83c\udfc1 Conversation ended: Reached maximum rounds (1)\n\ud83d\udcca Total rounds: 1\n\ud83d\udd04 Total turns: 1",
+                        "additional_kwargs": {},
+                        "response_metadata": {},
+                        "type": "system",
+                        "name": null,
+                        "id": "268f5220-097b-4ba1-ab6b-7acc435666d9"
+                    }
+                ],
+                "current_speaker": null,
+                "conversation_ended": true
+            }
+        },
+        "parents": {},
+        "thread_id": "ps_test_234725",
+        "checkpoint_mode": "sync"
+    },
+    "2025-07-03T03:47:35.766693+00:00",
+    {
+        "configurable": {
+            "thread_id": "ps_test_234725",
+            "checkpoint_ns": "",
+            "checkpoint_id": "1f057c07-50d9-6fce-8005-565f70660880"
+        }
+    },
+    []
+]

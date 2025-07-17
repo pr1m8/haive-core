@@ -1,0 +1,353 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Calculate 5 + 3, then create a plan",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "776ec33a-9bda-4820-95e5-9f95987e2afb",
+        "example": false
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "tool_calls": [
+            {
+              "id": "call_kL53E4hEh4bdObm18dup8r2l",
+              "function": {
+                "arguments": "{\"a\":5,\"b\":3}",
+                "name": "add"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 18,
+            "prompt_tokens": 58,
+            "total_tokens": 76,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "content_filter_results": {}
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--54d3b1e6-3410-4cc9-a229-f8fd20e52741-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "add",
+            "args": {
+              "a": 5,
+              "b": 3
+            },
+            "id": "call_kL53E4hEh4bdObm18dup8r2l",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 58,
+          "output_tokens": 18,
+          "total_tokens": 76,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "8",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "add",
+        "id": "66e83702-1eb3-42e9-9852-4dd6f8b1af9e",
+        "tool_call_id": "call_kL53E4hEh4bdObm18dup8r2l",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "The result of \\(5 + 3\\) is \\(8\\).\n\nNow, let's create a simple plan:\n\n1. **Goal Setting**: Define what you want to achieve. Example: Enhance problem-solving skills in mathematics.\n  \n2. **Research**: Gather resources and materials that can help you. Example: Visit bookshops or online platforms to find math workbooks.\n\n3. **Schedule Study Time**: Allocate specific times in your week for focused study sessions.\n\n4. **Practice Regularly**: Solve different types of math problems to enhance skills. \n\n5. **Evaluate Progress**: Periodically review your progress and adjust your plan accordingly. \n\n6. **Seek Feedback**: Discuss challenging problems with peers or mentors to gain new perspectives.\n\n7. **Celebrate Achievements**: Recognize milestones to stay motivated.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 169,
+            "prompt_tokens": 83,
+            "total_tokens": 252,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--3aff2690-f520-43f5-9fe8-7345bdbf94ce-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 83,
+          "output_tokens": 169,
+          "total_tokens": 252,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ],
+    "tools": [
+      {
+        "name": "{'name': 'add', 'description': 'returns the sum of two numbers', 'args_schema': <class 'langchain_core.utils.pydantic.add'>, 'return_direct': False, 'verbose': False, 'tags': None, 'metadata': None, 'handle_tool_error': False, 'handle_validation_error': False, 'response_format': 'content', 'func': <function add at 0x7b8d257da340>, 'coroutine': None}",
+        "description": "",
+        "type": "tool"
+      }
+    ],
+    "tool_routes": {
+      "tool_0": "unknown"
+    },
+    "name_attrs": ["name", "__name__", "func_name"],
+    "content": null,
+    "output_schemas": {},
+    "engine_route_config": {
+      "llm": ["langchain_tool", "function", "pydantic_model"],
+      "aug_llm": ["langchain_tool", "function", "pydantic_model"],
+      "retriever": ["retriever"],
+      "parser": ["pydantic_model"]
+    }
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "37ea1411-5d2d-4a78-b681-8ec16ede4493",
+      "checkpoint_ns": "React Agent:b6ea9c79-ba52-6b34-78cd-a95d3ef9fc6e",
+      "checkpoint_id": "1f051e2e-ddb8-67dd-8004-32e13ffdb947",
+      "checkpoint_map": {
+        "": "1f051e2e-c7ec-657d-8000-a3ee62e8697c",
+        "React Agent:b6ea9c79-ba52-6b34-78cd-a95d3ef9fc6e": "1f051e2e-ddb8-67dd-8004-32e13ffdb947"
+      }
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "The result of \\(5 + 3\\) is \\(8\\).\n\nNow, let's create a simple plan:\n\n1. **Goal Setting**: Define what you want to achieve. Example: Enhance problem-solving skills in mathematics.\n  \n2. **Research**: Gather resources and materials that can help you. Example: Visit bookshops or online platforms to find math workbooks.\n\n3. **Schedule Study Time**: Allocate specific times in your week for focused study sessions.\n\n4. **Practice Regularly**: Solve different types of math problems to enhance skills. \n\n5. **Evaluate Progress**: Periodically review your progress and adjust your plan accordingly. \n\n6. **Seek Feedback**: Discuss challenging problems with peers or mentors to gain new perspectives.\n\n7. **Celebrate Achievements**: Recognize milestones to stay motivated.",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 169,
+              "prompt_tokens": 83,
+              "total_tokens": 252,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--3aff2690-f520-43f5-9fe8-7345bdbf94ce-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 83,
+            "output_tokens": 169,
+            "total_tokens": 252,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 4,
+    "parents": {
+      "": "1f051e2e-c7ec-657d-8000-a3ee62e8697c"
+    },
+    "thread_id": "37ea1411-5d2d-4a78-b681-8ec16ede4493",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 1,
+    "langgraph_node": "React Agent",
+    "langgraph_triggers": ["branch:to:React Agent"],
+    "langgraph_path": ["__pregel_pull", "React Agent"],
+    "langgraph_checkpoint_ns": "React Agent:b6ea9c79-ba52-6b34-78cd-a95d3ef9fc6e"
+  },
+  "2025-06-25T16:39:14.353129+00:00",
+  {
+    "configurable": {
+      "thread_id": "37ea1411-5d2d-4a78-b681-8ec16ede4493",
+      "checkpoint_ns": "React Agent:b6ea9c79-ba52-6b34-78cd-a95d3ef9fc6e",
+      "checkpoint_id": "1f051e2e-cefa-617c-8003-ba5b0fc6ea1e",
+      "checkpoint_map": {
+        "": "1f051e2e-c7ec-657d-8000-a3ee62e8697c",
+        "React Agent:b6ea9c79-ba52-6b34-78cd-a95d3ef9fc6e": "1f051e2e-cefa-617c-8003-ba5b0fc6ea1e"
+      }
+    }
+  },
+  []
+]

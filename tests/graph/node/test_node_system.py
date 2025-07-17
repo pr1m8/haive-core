@@ -911,7 +911,8 @@ def test_complex_node_chain(azure_llm_config, retriever, node_registry):
     # Verify final result - look for aimessage instead of content
     assert isinstance(final_result, Command)
     assert final_result.goto == END
-    assert "aimessage" in final_result.update  # Changed from 'content' to 'aimessage'
+    # Changed from 'content' to 'aimessage'
+    assert "aimessage" in final_result.update
     assert isinstance(final_result.update["aimessage"], AIMessage)
 
     logger.info(

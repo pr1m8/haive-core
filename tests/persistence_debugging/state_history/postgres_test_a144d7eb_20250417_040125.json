@@ -1,0 +1,209 @@
+[
+  {
+    "messages": [
+      {
+        "content": "You haven't told me your name yet. What should I call you?",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 15,
+            "prompt_tokens": 83,
+            "total_tokens": 98,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run-168b5908-4c57-466a-95e7-93f238b10cf6-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 83,
+          "output_tokens": 15,
+          "total_tokens": 98,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "postgres_thread_c7b7bc68",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f01b622-a116-6073-8004-11e76185c397"
+    }
+  },
+  {
+    "step": 4,
+    "source": "loop",
+    "writes": {
+      "process": {
+        "messages": [
+          {
+            "content": "You haven't told me your name yet. What should I call you?",
+            "additional_kwargs": {
+              "refusal": null
+            },
+            "response_metadata": {
+              "logprobs": null,
+              "model_name": "gpt-4o-2024-08-06",
+              "token_usage": {
+                "total_tokens": 98,
+                "prompt_tokens": 83,
+                "completion_tokens": 15,
+                "prompt_tokens_details": {
+                  "audio_tokens": 0,
+                  "cached_tokens": 0
+                },
+                "completion_tokens_details": {
+                  "audio_tokens": 0,
+                  "reasoning_tokens": 0,
+                  "accepted_prediction_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                }
+              },
+              "finish_reason": "stop",
+              "system_fingerprint": "fp_ee1d74bde0",
+              "prompt_filter_results": [
+                {
+                  "prompt_index": 0,
+                  "content_filter_results": {
+                    "hate": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "sexual": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "violence": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "self_harm": {
+                      "filtered": false,
+                      "severity": "safe"
+                    }
+                  }
+                }
+              ],
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            },
+            "type": "ai",
+            "name": null,
+            "id": "run-168b5908-4c57-466a-95e7-93f238b10cf6-0",
+            "example": false,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": {
+              "input_tokens": 83,
+              "output_tokens": 15,
+              "total_tokens": 98,
+              "input_token_details": {
+                "audio": 0,
+                "cache_read": 0
+              },
+              "output_token_details": {
+                "audio": 0,
+                "reasoning": 0
+              }
+            }
+          }
+        ]
+      }
+    },
+    "parents": {},
+    "thread_id": "postgres_thread_c7b7bc68"
+  },
+  "2025-04-17T08:01:27.501200+00:00",
+  {
+    "configurable": {
+      "thread_id": "postgres_thread_c7b7bc68",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f01b622-a09d-63b6-8003-d0fbc54367ef"
+    }
+  },
+  []
+]

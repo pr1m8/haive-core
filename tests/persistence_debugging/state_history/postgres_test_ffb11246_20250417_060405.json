@@ -1,0 +1,55 @@
+[
+  {
+    "__shared_fields__": [],
+    "__reducer_fields__": {},
+    "messages": [
+      {
+        "content": "Hello, my name is PostgresUser.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "c3c0dd4e-0613-4a5a-9077-f8dac22f3d5a",
+        "example": false
+      },
+      {
+        "content": "What's my name?",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "88033c0a-6986-4280-9eea-754b98ea8bae",
+        "example": false
+      }
+    ],
+    "context": {},
+    "runnable_config": {}
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "postgres_thread_6b531cb6",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f01b734-c859-6b82-8004-141c7be2ea7c"
+    }
+  },
+  {
+    "step": 4,
+    "source": "loop",
+    "writes": {
+      "process_6f0960": null
+    },
+    "parents": {},
+    "thread_id": "postgres_thread_6b531cb6",
+    "recursion_limit": 200
+  },
+  "2025-04-17T10:04:06.749856+00:00",
+  {
+    "configurable": {
+      "thread_id": "postgres_thread_6b531cb6",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f01b734-c84e-6bd9-8003-c590ece39efd"
+    }
+  },
+  []
+]

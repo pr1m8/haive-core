@@ -1,0 +1,80 @@
+[
+  {
+    "messages": [
+      {
+        "content": "\ud83d\udcdd Collaborative Session: Brainstorming: Quick test idea\n\nTopic: Quick test idea\n\nWe'll work together on these sections:\n- Overview\n\nFormat: outline\nMin contributions per section: 1\n\nLet's start with: Overview",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "7c12c0d4-aa76-42bf-b696-d94d9e707eac",
+        "example": false
+      },
+      {
+        "content": "\ud83c\udfc1 Conversation ended: Reached maximum rounds (1)\n\ud83d\udcca Total rounds: 1\n\ud83d\udd04 Total turns: 1",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "system",
+        "name": null,
+        "id": "0164004c-b5ea-4ecb-9fc3-6998507c877a"
+      }
+    ],
+    "current_speaker": null,
+    "speakers": ["Alice", "Bob"],
+    "turn_count": 1,
+    "max_rounds": 1,
+    "topic": "Quick test idea",
+    "conversation_ended": true,
+    "mode": "collaborative",
+    "speaker_history": ["Alice"],
+    "shared_document": "Brainstorming: Quick test idea\n==============================\n\n",
+    "document_sections": {
+      "Overview": ""
+    },
+    "current_section": "Overview",
+    "sections_order": ["Overview"],
+    "output_format": "outline"
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "simple_test_001",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057a7b-1bb7-6aee-8006-5fbbdcd339f0"
+    }
+  },
+  {
+    "step": 6,
+    "debug": false,
+    "source": "loop",
+    "writes": {
+      "conclude": {
+        "messages": [
+          {
+            "content": "\ud83c\udfc1 Conversation ended: Reached maximum rounds (1)\n\ud83d\udcca Total rounds: 1\n\ud83d\udd04 Total turns: 1",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "system",
+            "name": null,
+            "id": "0164004c-b5ea-4ecb-9fc3-6998507c877a"
+          }
+        ],
+        "current_speaker": null,
+        "conversation_ended": true
+      }
+    },
+    "parents": {},
+    "thread_id": "simple_test_001",
+    "checkpoint_mode": "sync",
+    "recursion_limit": 20
+  },
+  "2025-07-03T00:50:20.149405+00:00",
+  {
+    "configurable": {
+      "thread_id": "simple_test_001",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057a7b-1bb2-689c-8005-3d69818298d6"
+    }
+  },
+  []
+]

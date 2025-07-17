@@ -1,0 +1,31 @@
+[
+  {
+    "messages": []
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "a13c5c26-fb7e-42b7-9a5e-d6434ef1908a",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f01b48a-cc02-6c13-8001-9f5082e9805c"
+    }
+  },
+  {
+    "step": 1,
+    "source": "loop",
+    "writes": {
+      "process": null
+    },
+    "parents": {},
+    "thread_id": "a13c5c26-fb7e-42b7-9a5e-d6434ef1908a"
+  },
+  "2025-04-17T04:58:59.835580+00:00",
+  {
+    "configurable": {
+      "thread_id": "a13c5c26-fb7e-42b7-9a5e-d6434ef1908a",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f01b48a-cb7d-61ff-8000-7cd9b161c849"
+    }
+  },
+  []
+]

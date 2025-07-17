@@ -1,0 +1,88 @@
+[
+    {
+        "messages": [
+            {
+                "content": "\ud83d\udcdd Collaborative Session: Collaborative Document\n\nTopic: Testing persistence for collaborative agents\n\nWe'll work together on these sections:\n- Problem\n- Solution\n\nFormat: markdown\nMin contributions per section: 1\n\nLet's start with: Problem",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "human",
+                "name": null,
+                "id": "74b61d81-74fe-40df-866c-20d64e84cd73",
+                "example": false
+            },
+            {
+                "content": "\ud83c\udfc1 Conversation ended: Reached maximum rounds (1)\n\ud83d\udcca Total rounds: 1\n\ud83d\udd04 Total turns: 1",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "system",
+                "name": null,
+                "id": "188e8b8c-5cbf-48c4-92b1-3f4f08a047eb"
+            }
+        ],
+        "current_speaker": null,
+        "speakers": [
+            "TestPM_001056",
+            "TestDev_001056"
+        ],
+        "turn_count": 1,
+        "max_rounds": 1,
+        "topic": "Testing persistence for collaborative agents",
+        "conversation_ended": true,
+        "mode": "collaborative",
+        "speaker_history": [
+            "TestPM_001056"
+        ],
+        "shared_document": "# Collaborative Document\n\n",
+        "document_sections": {
+            "Problem": "",
+            "Solution": ""
+        },
+        "current_section": "Problem",
+        "sections_order": [
+            "Problem",
+            "Solution"
+        ],
+        "output_format": "markdown"
+    },
+    [],
+    {
+        "configurable": {
+            "thread_id": "collab_test_001056",
+            "checkpoint_ns": "",
+            "checkpoint_id": "1f057c3b-8d8b-6982-8006-bf3f01c4be09"
+        }
+    },
+    {
+        "step": 6,
+        "debug": false,
+        "source": "loop",
+        "writes": {
+            "conclude": {
+                "messages": [
+                    {
+                        "content": "\ud83c\udfc1 Conversation ended: Reached maximum rounds (1)\n\ud83d\udcca Total rounds: 1\n\ud83d\udd04 Total turns: 1",
+                        "additional_kwargs": {},
+                        "response_metadata": {},
+                        "type": "system",
+                        "name": null,
+                        "id": "188e8b8c-5cbf-48c4-92b1-3f4f08a047eb"
+                    }
+                ],
+                "current_speaker": null,
+                "conversation_ended": true
+            }
+        },
+        "parents": {},
+        "thread_id": "collab_test_001056",
+        "checkpoint_mode": "sync"
+    },
+    "2025-07-03T04:10:57.993549+00:00",
+    {
+        "configurable": {
+            "thread_id": "collab_test_001056",
+            "checkpoint_ns": "",
+            "checkpoint_id": "1f057c3b-8d87-6c48-8005-b36e37fae8d3"
+        }
+    },
+    []
+]

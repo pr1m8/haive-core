@@ -1,0 +1,229 @@
+[
+    {
+        "messages": [
+            {
+                "content": "Topic: Round robin discussion test\nLet's begin our round_robin discussion.",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "human",
+                "name": null,
+                "id": "7431f195-8b38-4703-862f-dc8961664c92",
+                "example": false
+            },
+            {
+                "content": "Sure, let's get started! What's the first point on the agenda for discussion?",
+                "additional_kwargs": {
+                    "refusal": null
+                },
+                "response_metadata": {
+                    "token_usage": {
+                        "completion_tokens": 17,
+                        "prompt_tokens": 35,
+                        "total_tokens": 52,
+                        "completion_tokens_details": {
+                            "accepted_prediction_tokens": 0,
+                            "audio_tokens": 0,
+                            "reasoning_tokens": 0,
+                            "rejected_prediction_tokens": 0
+                        },
+                        "prompt_tokens_details": {
+                            "audio_tokens": 0,
+                            "cached_tokens": 0
+                        }
+                    },
+                    "model_name": "gpt-4o-2024-08-06",
+                    "system_fingerprint": "fp_ee1d74bde0",
+                    "prompt_filter_results": [
+                        {
+                            "prompt_index": 0,
+                            "content_filter_results": {
+                                "hate": {
+                                    "filtered": false,
+                                    "severity": "safe"
+                                },
+                                "self_harm": {
+                                    "filtered": false,
+                                    "severity": "safe"
+                                },
+                                "sexual": {
+                                    "filtered": false,
+                                    "severity": "safe"
+                                },
+                                "violence": {
+                                    "filtered": false,
+                                    "severity": "safe"
+                                }
+                            }
+                        }
+                    ],
+                    "finish_reason": "stop",
+                    "logprobs": null,
+                    "content_filter_results": {
+                        "hate": {
+                            "filtered": false,
+                            "severity": "safe"
+                        },
+                        "self_harm": {
+                            "filtered": false,
+                            "severity": "safe"
+                        },
+                        "sexual": {
+                            "filtered": false,
+                            "severity": "safe"
+                        },
+                        "violence": {
+                            "filtered": false,
+                            "severity": "safe"
+                        }
+                    }
+                },
+                "type": "ai",
+                "name": null,
+                "id": "run--f65a205c-2c5b-453d-9f0a-f793b562f1dd-0",
+                "example": false,
+                "tool_calls": [],
+                "invalid_tool_calls": [],
+                "usage_metadata": {
+                    "input_tokens": 35,
+                    "output_tokens": 17,
+                    "total_tokens": 52,
+                    "input_token_details": {
+                        "audio": 0,
+                        "cache_read": 0
+                    },
+                    "output_token_details": {
+                        "audio": 0,
+                        "reasoning": 0
+                    }
+                }
+            }
+        ]
+    },
+    [],
+    {
+        "configurable": {
+            "thread_id": "A_001136_agent_a3e1bdd8",
+            "checkpoint_ns": "",
+            "checkpoint_id": "1f057c3d-0e9a-6185-8001-6b04165221bf"
+        }
+    },
+    {
+        "step": 1,
+        "debug": false,
+        "source": "loop",
+        "writes": {
+            "agent_node": {
+                "messages": {
+                    "content": "Sure, let's get started! What's the first point on the agenda for discussion?",
+                    "additional_kwargs": {
+                        "refusal": null
+                    },
+                    "response_metadata": {
+                        "logprobs": null,
+                        "model_name": "gpt-4o-2024-08-06",
+                        "token_usage": {
+                            "total_tokens": 52,
+                            "prompt_tokens": 35,
+                            "completion_tokens": 17,
+                            "prompt_tokens_details": {
+                                "audio_tokens": 0,
+                                "cached_tokens": 0
+                            },
+                            "completion_tokens_details": {
+                                "audio_tokens": 0,
+                                "reasoning_tokens": 0,
+                                "accepted_prediction_tokens": 0,
+                                "rejected_prediction_tokens": 0
+                            }
+                        },
+                        "finish_reason": "stop",
+                        "system_fingerprint": "fp_ee1d74bde0",
+                        "prompt_filter_results": [
+                            {
+                                "prompt_index": 0,
+                                "content_filter_results": {
+                                    "hate": {
+                                        "filtered": false,
+                                        "severity": "safe"
+                                    },
+                                    "sexual": {
+                                        "filtered": false,
+                                        "severity": "safe"
+                                    },
+                                    "violence": {
+                                        "filtered": false,
+                                        "severity": "safe"
+                                    },
+                                    "self_harm": {
+                                        "filtered": false,
+                                        "severity": "safe"
+                                    }
+                                }
+                            }
+                        ],
+                        "content_filter_results": {
+                            "hate": {
+                                "filtered": false,
+                                "severity": "safe"
+                            },
+                            "sexual": {
+                                "filtered": false,
+                                "severity": "safe"
+                            },
+                            "violence": {
+                                "filtered": false,
+                                "severity": "safe"
+                            },
+                            "self_harm": {
+                                "filtered": false,
+                                "severity": "safe"
+                            }
+                        }
+                    },
+                    "type": "ai",
+                    "name": null,
+                    "id": "run--f65a205c-2c5b-453d-9f0a-f793b562f1dd-0",
+                    "example": false,
+                    "tool_calls": [],
+                    "invalid_tool_calls": [],
+                    "usage_metadata": {
+                        "input_tokens": 35,
+                        "output_tokens": 17,
+                        "total_tokens": 52,
+                        "input_token_details": {
+                            "audio": 0,
+                            "cache_read": 0
+                        },
+                        "output_token_details": {
+                            "audio": 0,
+                            "reasoning": 0
+                        }
+                    }
+                }
+            }
+        },
+        "parents": {},
+        "thread_id": "roundrobin_test_001136",
+        "langgraph_node": "execute_agent",
+        "langgraph_path": [
+            "__pregel_pull",
+            "execute_agent"
+        ],
+        "langgraph_step": 3,
+        "checkpoint_mode": "sync",
+        "recursion_limit": 50,
+        "langgraph_triggers": [
+            "branch:to:execute_agent"
+        ],
+        "langgraph_checkpoint_ns": "execute_agent:15436d94-8c02-5595-85a3-a1597a5d4d07"
+    },
+    "2025-07-03T04:11:38.369661+00:00",
+    {
+        "configurable": {
+            "thread_id": "A_001136_agent_a3e1bdd8",
+            "checkpoint_ns": "",
+            "checkpoint_id": "1f057c3d-0aaa-66f7-8000-29d16451f4fd"
+        }
+    },
+    []
+]

@@ -1,0 +1,333 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Calculate 5 + 3",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "c784b5c7-24a1-4780-bce8-1f01316c5f13",
+        "example": false
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "tool_calls": [
+            {
+              "id": "call_1hgof4MKBPvJhg9MopHlS5WJ",
+              "function": {
+                "arguments": "{\"a\":5,\"b\":3}",
+                "name": "add"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 18,
+            "prompt_tokens": 53,
+            "total_tokens": 71,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BnML0dq7NQboWGM0hRxjdjMXpWtPA",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "content_filter_results": {}
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run-1515c642-b0b4-47ea-ba01-fb3717e27750-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "add",
+            "args": {
+              "a": 5,
+              "b": 3
+            },
+            "id": "call_1hgof4MKBPvJhg9MopHlS5WJ",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 53,
+          "output_tokens": 18,
+          "total_tokens": 71,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "8",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "add",
+        "id": "972f7427-0a3c-464f-b3da-95bfb5ec57b6",
+        "tool_call_id": "call_1hgof4MKBPvJhg9MopHlS5WJ",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "The result of \\(5 + 3\\) is 8.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 16,
+            "prompt_tokens": 78,
+            "total_tokens": 94,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BnML0wkicf2Mf4R9qd2HF0PYSkdie",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run-1014856a-e141-480c-ae33-650e3680b228-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 78,
+          "output_tokens": 16,
+          "total_tokens": 94,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ],
+    "tools": [],
+    "tool_routes": {},
+    "name_attrs": ["name", "__name__", "func_name"],
+    "content": null,
+    "output_schemas": {},
+    "engine_route_config": {
+      "llm": ["langchain_tool", "function", "pydantic_model"],
+      "aug_llm": ["langchain_tool", "function", "pydantic_model"],
+      "retriever": ["retriever"],
+      "parser": ["pydantic_model"]
+    }
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "37d6520d-2f83-44f0-a879-2253a0536e3a",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f05403f-2fce-6270-8004-3fd3b2a4d460"
+    }
+  },
+  {
+    "step": 4,
+    "debug": false,
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "The result of \\(5 + 3\\) is 8.",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "id": "chatcmpl-BnML0wkicf2Mf4R9qd2HF0PYSkdie",
+            "logprobs": null,
+            "model_name": "gpt-4o-2024-08-06",
+            "token_usage": {
+              "total_tokens": 94,
+              "prompt_tokens": 78,
+              "completion_tokens": 16,
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              },
+              "completion_tokens_details": {
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "accepted_prediction_tokens": 0,
+                "rejected_prediction_tokens": 0
+              }
+            },
+            "finish_reason": "stop",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run-1014856a-e141-480c-ae33-650e3680b228-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 78,
+            "output_tokens": 16,
+            "total_tokens": 94,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "parents": {},
+    "thread_id": "37d6520d-2f83-44f0-a879-2253a0536e3a",
+    "checkpoint_mode": "sync"
+  },
+  "2025-06-28T09:40:38.677957+00:00",
+  {
+    "configurable": {
+      "thread_id": "37d6520d-2f83-44f0-a879-2253a0536e3a",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f05403f-2b98-6c8c-8003-f71a0c82cd9d"
+    }
+  },
+  []
+]

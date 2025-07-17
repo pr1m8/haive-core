@@ -11,6 +11,17 @@ import pytest
 from rich.logging import RichHandler
 from rich.traceback import install as install_rich_traceback
 
+from haive.core.persistence.handlers import (
+    ensure_pool_open,
+    register_thread_if_needed,
+    setup_checkpointer,
+)
+from haive.core.persistence.types import (
+    CheckpointMode,
+    PostgresCheckpointerConfig,
+    SyncMode,
+)
+
 # Install rich traceback handler
 install_rich_traceback(show_locals=True, width=120, word_wrap=True)
 
@@ -24,18 +35,8 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-from haive.core.persistence.handlers import (
-    ensure_pool_open,
-    register_thread_if_needed,
-    setup_checkpointer,
-)
 
 # Import the modules
-from haive.core.persistence.types import (
-    CheckpointMode,
-    PostgresCheckpointerConfig,
-    SyncMode,
-)
 
 
 # Test fixtures
@@ -188,7 +189,8 @@ class Test_PostgresCheckpointer:
     def test_register_thread(self, postgres_config, test_thread_id):
         """Test registering a thread."""
         # Register a thread
-        postgres_config.register_thread(test_thread_id, metadata={"test": True})
+        postgres_config.register_thread(
+            test_thread_id, metadata={"test": True})
 
         # Create checkpointer to verify
         checkpointer = postgres_config.create_checkpointer()
@@ -200,7 +202,8 @@ class Test_PostgresCheckpointer:
         with pool.connection() as conn:
             with conn.cursor() as cursor:
                 cursor.execute(
-                    "SELECT 1 FROM threads WHERE thread_id = %s", (test_thread_id,)
+                    "SELECT 1 FROM threads WHERE thread_id = %s", (
+                        test_thread_id,)
                 )
                 result = cursor.fetchone()
 
@@ -237,7 +240,8 @@ class Test_PostgresCheckpointer:
         assert "_counter" in checkpoint["state"]
         assert checkpoint["state"]["_counter"] == 1
 
-        logger.info(f"✅ Retrieved checkpoint data: {json.dumps(checkpoint, indent=2)}")
+        logger.info(
+            f"✅ Retrieved checkpoint data: {json.dumps(checkpoint, indent=2)}")
 
     def test_get_checkpoint_tuple(self, postgres_config, test_thread_id, test_data):
         """Test retrieving a complete checkpoint tuple."""
@@ -294,12 +298,14 @@ class Test_PostgresCheckpointer:
 
         # Verify order (newest first)
         for i, checkpoint in enumerate(checkpoints):
-            state = checkpoint.checkpoint.get("channel_values", {}).get("state", {})
+            state = checkpoint.checkpoint.get(
+                "channel_values", {}).get("state", {})
             counter = state.get("_counter", None)
             expected = 3 - i  # 3, 2, 1
             assert counter == expected, f"Expected counter {expected}, got {counter}"
 
-        logger.info(f"✅ Listed {len(checkpoints)} checkpoints in correct order")
+        logger.info(
+            f"✅ Listed {len(checkpoints)} checkpoints in correct order")
 
     def test_delete_thread(self, postgres_config, test_thread_id, test_data):
         """Test deleting a thread and all its checkpoints."""
@@ -329,7 +335,8 @@ class Test_PostgresCheckpointer:
         with pool.connection() as conn:
             with conn.cursor() as cursor:
                 cursor.execute(
-                    "SELECT 1 FROM threads WHERE thread_id = %s", (test_thread_id,)
+                    "SELECT 1 FROM threads WHERE thread_id = %s", (
+                        test_thread_id,)
                 )
                 result = cursor.fetchone()
 
@@ -339,7 +346,8 @@ class Test_PostgresCheckpointer:
 
                 # Verify checkpoints were deleted
                 cursor.execute(
-                    "SELECT 1 FROM checkpoints WHERE thread_id = %s", (test_thread_id,)
+                    "SELECT 1 FROM checkpoints WHERE thread_id = %s", (
+                        test_thread_id,)
                 )
                 result = cursor.fetchone()
 
@@ -364,7 +372,8 @@ class Test_PostgresShallowCheckpointer:
         assert checkpointer is not None
         assert "ShallowPostgresSaver" in str(type(checkpointer))
 
-        logger.info(f"✅ Created shallow PostgreSQL checkpointer: {type(checkpointer)}")
+        logger.info(
+            f"✅ Created shallow PostgreSQL checkpointer: {type(checkpointer)}")
 
     def test_shallow_list_checkpoints(
         self, postgres_shallow_config, test_thread_id, test_data
@@ -399,7 +408,8 @@ class Test_PostgresShallowCheckpointer:
         assert len(checkpoints) == 1, "Expected only 1 checkpoint in shallow mode"
 
         # Verify it's the latest one
-        state = checkpoints[0].checkpoint.get("channel_values", {}).get("state", {})
+        state = checkpoints[0].checkpoint.get(
+            "channel_values", {}).get("state", {})
         counter = state.get("_counter", None)
         assert counter == 3, f"Expected counter 3, got {counter}"
 

@@ -1,0 +1,33 @@
+[
+  {
+    "contents": "# Introduction to Python\n    \n    Python is a popular programming language.\n    \n    ## Basic Syntax\n    \n    Python has a simple syntax that is easy to learn.\n    \n    ## Data Types\n    \n    Python supports various data types including strings, numbers, and lists.\n    ",
+    "runnable_config": {},
+    "messages": []
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "1cc7d320-c7dc-492f-919d-a24f2485b2c1",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f01b471-e754-693d-8001-d3a59c9758f5"
+    }
+  },
+  {
+    "step": 1,
+    "source": "loop",
+    "writes": {
+      "process": null
+    },
+    "parents": {},
+    "thread_id": "1cc7d320-c7dc-492f-919d-a24f2485b2c1"
+  },
+  "2025-04-17T04:47:51.611605+00:00",
+  {
+    "configurable": {
+      "thread_id": "1cc7d320-c7dc-492f-919d-a24f2485b2c1",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f01b471-e6d5-6d66-8000-1259997cb184"
+    }
+  },
+  []
+]

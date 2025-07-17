@@ -225,7 +225,8 @@ def test_node_config_serialization(real_llm_engine, monkeypatch):
     # Check fields match
     assert new_config.name == node_config.name
     assert new_config.engine_id == real_llm_engine.id
-    assert new_config.engine == real_llm_engine  # Check if engine object was resolved
+    # Check if engine object was resolved
+    assert new_config.engine == real_llm_engine
     assert new_config.command_goto is END
     assert new_config.input_mapping == node_config.input_mapping
     assert new_config.output_mapping == node_config.output_mapping

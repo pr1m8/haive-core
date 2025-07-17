@@ -40,7 +40,6 @@ try:
         result = cursor.fetchone()
         print(f"Query result: {result}")
 
-
     # Test registering a thread
     thread_id = "test-thread-connection"
     postgres_config.register_thread(thread_id)

@@ -428,7 +428,8 @@ def test_validation_branching_with_invalid_input(validation_branching_graph):
                             "type": "function",
                             "function": {
                                 "name": "get_weather",
-                                "arguments": '{"unit": "fahrenheit"}',  # Missing required location
+                                # Missing required location
+                                "arguments": '{"unit": "fahrenheit"}',
                             },
                         }
                     ]

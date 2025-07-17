@@ -1,0 +1,72 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Topic: Round robin discussion test\nLet's begin our round_robin discussion.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "01490ba4-66f2-4db5-8db9-0e82ce701aef",
+        "example": false
+      },
+      {
+        "content": "\ud83c\udfc1 Conversation ended: Reached maximum rounds (1)\n\ud83d\udcca Total rounds: 1\n\ud83d\udd04 Total turns: 1",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "system",
+        "name": null,
+        "id": "88e2ea85-bb0e-42c5-b014-1933deebcac0"
+      }
+    ],
+    "current_speaker": null,
+    "speakers": ["A_230303", "B_230303"],
+    "turn_count": 1,
+    "max_rounds": 1,
+    "topic": "Round robin discussion test",
+    "conversation_ended": true,
+    "mode": "round_robin",
+    "speaker_history": ["A_230303"]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "roundrobin_test_230303",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057ba3-d42e-68f0-8006-cab43ba59110"
+    }
+  },
+  {
+    "step": 6,
+    "debug": false,
+    "source": "loop",
+    "writes": {
+      "conclude": {
+        "messages": [
+          {
+            "content": "\ud83c\udfc1 Conversation ended: Reached maximum rounds (1)\n\ud83d\udcca Total rounds: 1\n\ud83d\udd04 Total turns: 1",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "system",
+            "name": null,
+            "id": "88e2ea85-bb0e-42c5-b014-1933deebcac0"
+          }
+        ],
+        "current_speaker": null,
+        "conversation_ended": true
+      }
+    },
+    "parents": {},
+    "thread_id": "roundrobin_test_230303",
+    "checkpoint_mode": "sync"
+  },
+  "2025-07-03T03:03:05.181403+00:00",
+  {
+    "configurable": {
+      "thread_id": "roundrobin_test_230303",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057ba3-d42d-6752-8005-dfa989163f93"
+    }
+  },
+  []
+]

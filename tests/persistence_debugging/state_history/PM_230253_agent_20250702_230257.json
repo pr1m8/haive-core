@@ -1,0 +1,240 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Current Section: Issue\nYour total contributions: 0\nFormat: markdown",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "system",
+        "name": null,
+        "id": "01f48aa3-72ef-4f1e-87b6-76c47f6ffb52"
+      },
+      {
+        "content": "Start the 'Issue' section. Provide a solid foundation for others to build on.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "system",
+        "name": null,
+        "id": "29437669-8964-4dc3-8eb6-9ef4c683d84b"
+      },
+      {
+        "content": "\ud83d\udcdd Collaborative Session: Collaborative Document\n\nTopic: Testing collaborative persistence\n\nWe'll work together on these sections:\n- Issue\n- Solution\n\nFormat: markdown\nMin contributions per section: 1\n\nLet's start with: Issue",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "459a32a6-ecd9-4999-bd8e-5ef1a625e4cd",
+        "example": false
+      },
+      {
+        "content": "## Issue\n\nIn the current collaborative document systems, users often face challenges that hinder effective collaboration and productivity. These challenges include:\n\n1. **Data Consistency**: Ensuring that all participants see the same version of the document in real-time can be problematic, especially in systems with high latency or connectivity issues.\n\n2. **Conflict Resolution**: When multiple users edit the same portion of the document simultaneously, resolving conflicts without losing data or changes made by participants is crucial but difficult.\n\n3. **Version History and Tracking**: Users need seamless access to version history to track changes and restore previous versions. Many systems lack intuitive interfaces for version control.\n\n4. **Access and Permission Management**: Properly managing who can view and edit sections of the document is fundamental but often lacks flexibility and can be cumbersome.\n\n5. **Scalability**: Growing the system to handle more users and larger documents without compromising performance is a persistent challenge in collaborative tools.\n\n6. **Security and Privacy**: Maintaining security protocols to protect sensitive information while ensuring privacy is a critical concern that needs continual attention.\n\nAddressing these issues is essential for improving the user experience and enhancing the effectiveness of collaborative document tools.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 238,
+            "prompt_tokens": 105,
+            "total_tokens": 343,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--b29d71cb-e2ff-454f-b5d6-2a036e70b745-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 105,
+          "output_tokens": 238,
+          "total_tokens": 343,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "PM_230253_agent_65489c77",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057ba3-880b-69c1-8001-cc19e6384aba"
+    }
+  },
+  {
+    "step": 1,
+    "debug": false,
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "## Issue\n\nIn the current collaborative document systems, users often face challenges that hinder effective collaboration and productivity. These challenges include:\n\n1. **Data Consistency**: Ensuring that all participants see the same version of the document in real-time can be problematic, especially in systems with high latency or connectivity issues.\n\n2. **Conflict Resolution**: When multiple users edit the same portion of the document simultaneously, resolving conflicts without losing data or changes made by participants is crucial but difficult.\n\n3. **Version History and Tracking**: Users need seamless access to version history to track changes and restore previous versions. Many systems lack intuitive interfaces for version control.\n\n4. **Access and Permission Management**: Properly managing who can view and edit sections of the document is fundamental but often lacks flexibility and can be cumbersome.\n\n5. **Scalability**: Growing the system to handle more users and larger documents without compromising performance is a persistent challenge in collaborative tools.\n\n6. **Security and Privacy**: Maintaining security protocols to protect sensitive information while ensuring privacy is a critical concern that needs continual attention.\n\nAddressing these issues is essential for improving the user experience and enhancing the effectiveness of collaborative document tools.",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "logprobs": null,
+            "model_name": "gpt-4o-2024-08-06",
+            "token_usage": {
+              "total_tokens": 343,
+              "prompt_tokens": 105,
+              "completion_tokens": 238,
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              },
+              "completion_tokens_details": {
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "accepted_prediction_tokens": 0,
+                "rejected_prediction_tokens": 0
+              }
+            },
+            "finish_reason": "stop",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--b29d71cb-e2ff-454f-b5d6-2a036e70b745-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 105,
+            "output_tokens": 238,
+            "total_tokens": 343,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "parents": {},
+    "thread_id": "collab_test_230253",
+    "langgraph_node": "execute_agent",
+    "langgraph_path": ["__pregel_pull", "execute_agent"],
+    "langgraph_step": 3,
+    "checkpoint_mode": "sync",
+    "recursion_limit": 50,
+    "langgraph_triggers": ["branch:to:execute_agent"],
+    "langgraph_checkpoint_ns": "execute_agent:4d177403-7cf2-225c-2cb6-63a61af35a92"
+  },
+  "2025-07-03T03:02:57.197906+00:00",
+  {
+    "configurable": {
+      "thread_id": "PM_230253_agent_65489c77",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057ba3-7462-6ef7-8000-c4c8ccd4052b"
+    }
+  },
+  []
+]

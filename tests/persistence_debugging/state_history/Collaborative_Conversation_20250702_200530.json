@@ -1,0 +1,80 @@
+[
+  {
+    "messages": [
+      {
+        "content": "\ud83d\udcdd Collaborative Session: Brainstorming: Database Persistence Test\n\nTopic: Database Persistence Test\n\nWe'll work together on these sections:\n- Overview\n- Testing\n\nFormat: outline\nMin contributions per section: 1\n\nLet's start with: Overview",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "6b6496a6-74af-405c-9261-a1db9c34ec98",
+        "example": false
+      },
+      {
+        "content": "\ud83c\udfc1 Conversation ended: Reached maximum rounds (1)\n\ud83d\udcca Total rounds: 1\n\ud83d\udd04 Total turns: 1",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "system",
+        "name": null,
+        "id": "94c38a2b-2a8e-486b-8076-b6168aaad882"
+      }
+    ],
+    "current_speaker": null,
+    "speakers": ["Alice", "Bob"],
+    "turn_count": 1,
+    "max_rounds": 1,
+    "topic": "Database Persistence Test",
+    "conversation_ended": true,
+    "mode": "collaborative",
+    "speaker_history": ["Alice"],
+    "shared_document": "Brainstorming: Database Persistence Test\n========================================\n\n",
+    "document_sections": {
+      "Overview": "",
+      "Testing": ""
+    },
+    "current_section": "Overview",
+    "sections_order": ["Overview", "Testing"],
+    "output_format": "outline"
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "test-ecc324ed-1166-48e4-b456-e8c49793919f",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057a16-ed0a-6fbd-8006-0c2eeed6aa6f"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "conclude": {
+        "messages": [
+          {
+            "content": "\ud83c\udfc1 Conversation ended: Reached maximum rounds (1)\n\ud83d\udcca Total rounds: 1\n\ud83d\udd04 Total turns: 1",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "system",
+            "name": null,
+            "id": "94c38a2b-2a8e-486b-8076-b6168aaad882"
+          }
+        ],
+        "conversation_ended": true,
+        "current_speaker": null
+      }
+    },
+    "step": 6,
+    "parents": {},
+    "thread_id": "test-ecc324ed-1166-48e4-b456-e8c49793919f",
+    "debug": false,
+    "checkpoint_mode": "sync"
+  },
+  "2025-07-03T00:05:30.900656+00:00",
+  {
+    "configurable": {
+      "thread_id": "test-ecc324ed-1166-48e4-b456-e8c49793919f",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057a16-ed05-61fc-8005-fe92b5106421"
+    }
+  },
+  []
+]

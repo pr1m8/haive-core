@@ -1,0 +1,191 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Create a plan for a day trip, then calculate how many hours we'll need if we spend 2 hours at each location",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "93c621f1-5576-4e3c-b47d-0d479793dfcd",
+        "example": false
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "tool_calls": [
+            {
+              "id": "call_sQmDR2XybSjWULigcU5g5TAX",
+              "function": {
+                "arguments": "{\"steps\":[\"Decide on a destination for the day trip.\",\"Research and list 3-4 popular tourist attractions or locations to visit in the chosen destination.\",\"Plan the sequence of visiting each location to maximize time.\",\"Allocate 2 hours of visit time for each location.\",\"Calculate travel time between locations and returning home.\"]}",
+                "name": "Plan"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 66,
+            "prompt_tokens": 73,
+            "total_tokens": 139,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {}
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--e5b94fb6-59f3-470f-a99d-e7182f111d54-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "Plan",
+            "args": {
+              "steps": [
+                "Decide on a destination for the day trip.",
+                "Research and list 3-4 popular tourist attractions or locations to visit in the chosen destination.",
+                "Plan the sequence of visiting each location to maximize time.",
+                "Allocate 2 hours of visit time for each location.",
+                "Calculate travel time between locations and returning home."
+              ]
+            },
+            "id": "call_sQmDR2XybSjWULigcU5g5TAX",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 73,
+          "output_tokens": 66,
+          "total_tokens": 139,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ],
+    "tools": [
+      {
+        "name": "<class '__main__.Plan'>",
+        "description": "",
+        "type": "tool"
+      }
+    ],
+    "tool_routes": {
+      "tool_0": "unknown"
+    },
+    "name_attrs": ["name", "__name__", "func_name"],
+    "content": null,
+    "output_schemas": {},
+    "engine_route_config": {
+      "llm": ["langchain_tool", "function", "pydantic_model"],
+      "aug_llm": ["langchain_tool", "function", "pydantic_model"],
+      "retriever": ["retriever"],
+      "parser": ["pydantic_model"]
+    },
+    "plan": {
+      "steps": [
+        "Decide on a destination for the day trip.",
+        "Research and list 3-4 popular tourist attractions or locations to visit in the chosen destination.",
+        "Plan the sequence of visiting each location to maximize time.",
+        "Allocate 2 hours of visit time for each location.",
+        "Calculate travel time between locations and returning home."
+      ]
+    }
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "34d2d6c5-446f-4897-93a3-8cdc63734128",
+      "checkpoint_ns": "Simple Agent:8fb7c64a-0230-5f2e-f4de-05f2304f9489",
+      "checkpoint_id": "1f051fa6-f254-6abc-8003-c61196d0ba83",
+      "checkpoint_map": {
+        "": "1f051fa6-e5eb-6676-8000-fd89702f3ab5",
+        "Simple Agent:8fb7c64a-0230-5f2e-f4de-05f2304f9489": "1f051fa6-f254-6abc-8003-c61196d0ba83"
+      }
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "parse_output": {
+        "plan": {
+          "steps": [
+            "Decide on a destination for the day trip.",
+            "Research and list 3-4 popular tourist attractions or locations to visit in the chosen destination.",
+            "Plan the sequence of visiting each location to maximize time.",
+            "Allocate 2 hours of visit time for each location.",
+            "Calculate travel time between locations and returning home."
+          ]
+        }
+      }
+    },
+    "step": 3,
+    "parents": {
+      "": "1f051fa6-e5eb-6676-8000-fd89702f3ab5"
+    },
+    "thread_id": "34d2d6c5-446f-4897-93a3-8cdc63734128",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 1,
+    "langgraph_node": "Simple Agent",
+    "langgraph_triggers": ["branch:to:Simple Agent"],
+    "langgraph_path": ["__pregel_pull", "Simple Agent"],
+    "langgraph_checkpoint_ns": "Simple Agent:8fb7c64a-0230-5f2e-f4de-05f2304f9489"
+  },
+  "2025-06-25T19:27:29.687387+00:00",
+  {
+    "configurable": {
+      "thread_id": "34d2d6c5-446f-4897-93a3-8cdc63734128",
+      "checkpoint_ns": "Simple Agent:8fb7c64a-0230-5f2e-f4de-05f2304f9489",
+      "checkpoint_id": "1f051fa6-f191-607a-8002-ff035743ddd3",
+      "checkpoint_map": {
+        "": "1f051fa6-e5eb-6676-8000-fd89702f3ab5",
+        "Simple Agent:8fb7c64a-0230-5f2e-f4de-05f2304f9489": "1f051fa6-f191-607a-8002-ff035743ddd3"
+      }
+    }
+  },
+  []
+]

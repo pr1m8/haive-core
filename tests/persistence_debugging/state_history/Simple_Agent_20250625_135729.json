@@ -1,0 +1,226 @@
+[
+  {
+    "messages": [
+      {
+        "content": "The retrieved documents do not contain any information to answer the query.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 14,
+            "prompt_tokens": 50,
+            "total_tokens": 64,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--c53e8ded-ae8d-4c9b-9793-efcc7d11eb84-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 50,
+          "output_tokens": 14,
+          "total_tokens": 64,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ],
+    "query": "what is the conversation about",
+    "retrieved_documents": []
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "2402e982-9027-4cdf-a074-7ae0ad50722c",
+      "checkpoint_ns": "Simple Agent:f7f7e9f2-c709-22da-24d4-5035eb10eda0",
+      "checkpoint_id": "1f051edd-c1ad-6ab6-8001-25995ddb8f7f",
+      "checkpoint_map": {
+        "": "1f051edd-c075-6d51-8001-9856e991ddf4",
+        "Simple Agent:f7f7e9f2-c709-22da-24d4-5035eb10eda0": "1f051edd-c1ad-6ab6-8001-25995ddb8f7f"
+      }
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "The retrieved documents do not contain any information to answer the query.",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 14,
+              "prompt_tokens": 50,
+              "total_tokens": 64,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--c53e8ded-ae8d-4c9b-9793-efcc7d11eb84-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 50,
+            "output_tokens": 14,
+            "total_tokens": 64,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 1,
+    "parents": {
+      "": "1f051edd-c075-6d51-8001-9856e991ddf4"
+    },
+    "thread_id": "2402e982-9027-4cdf-a074-7ae0ad50722c",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 2,
+    "langgraph_node": "Simple Agent",
+    "langgraph_triggers": ["branch:to:Simple Agent"],
+    "langgraph_path": ["__pregel_pull", "Simple Agent"],
+    "langgraph_checkpoint_ns": "Simple Agent:f7f7e9f2-c709-22da-24d4-5035eb10eda0"
+  },
+  "2025-06-25T17:57:29.033160+00:00",
+  {
+    "configurable": {
+      "thread_id": "2402e982-9027-4cdf-a074-7ae0ad50722c",
+      "checkpoint_ns": "Simple Agent:f7f7e9f2-c709-22da-24d4-5035eb10eda0",
+      "checkpoint_id": "1f051edd-c099-69cc-8000-6c8b5dc508f7",
+      "checkpoint_map": {
+        "": "1f051edd-c075-6d51-8001-9856e991ddf4",
+        "Simple Agent:f7f7e9f2-c709-22da-24d4-5035eb10eda0": "1f051edd-c099-69cc-8000-6c8b5dc508f7"
+      }
+    }
+  },
+  []
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "messages": [],
+    "query": "what is the conversation about",
+    "k": null,
+    "filter": null,
+    "search_type": null,
+    "score_threshold": null
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "ee23a6d0-5f50-47e7-a6d5-76859c03b011",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f051f04-1107-60ea-8002-fd8491d2b58d"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "Simple Agent": null
+    },
+    "step": 2,
+    "parents": {},
+    "thread_id": "ee23a6d0-5f50-47e7-a6d5-76859c03b011",
+    "debug": false,
+    "checkpoint_mode": "sync"
+  },
+  "2025-06-25T18:14:37.408265+00:00",
+  {
+    "configurable": {
+      "thread_id": "ee23a6d0-5f50-47e7-a6d5-76859c03b011",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f051f04-0fb0-6268-8001-378e05b98a54"
+    }
+  },
+  []
+]

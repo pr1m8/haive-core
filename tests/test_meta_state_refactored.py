@@ -7,12 +7,10 @@ This test validates that the refactored MetaStateSchema:
 4. Tracks recompilation needs
 """
 
-from datetime import datetime
 from unittest.mock import Mock
 
-import pytest
 from haive.agents.simple.agent import SimpleAgent
-from langchain_core.messages import AIMessage, HumanMessage
+from langchain_core.messages import HumanMessage
 
 from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.schema.prebuilt.meta_state import MetaStateSchema

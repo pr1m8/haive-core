@@ -7,13 +7,11 @@ This shows:
 """
 
 import logging
-from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from langgraph.graph import StateGraph
-from langgraph.types import Command
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 from haive.core.graph.node.callable_node import (
     CallableNodeConfig,
@@ -200,7 +198,8 @@ def demonstrate_callable_nodes():
         goto_on_true="expensive_path",
         goto_on_false="normal_path",
         parameter_mapping={"value": "total_cost", "threshold": "cost_limit"},
-        extraction_paths={"field_name": "metadata.cost_field_name"},  # Advanced path
+        # Advanced path
+        extraction_paths={"field_name": "metadata.cost_field_name"},
     )
 
     class CostState(StateSchema):
@@ -284,7 +283,7 @@ def demonstrate_schema_composition():
                 field_sources[field.name] = []
             field_sources[field.name].append(node.name)
 
-    print(f"\nRequired fields across all nodes:")
+    print("\nRequired fields across all nodes:")
     for field_name in sorted(all_fields):
         sources = field_sources[field_name]
         print(f"  - {field_name}: needed by {', '.join(sources)}")
@@ -308,7 +307,7 @@ def demonstrate_schema_composition():
         "CompositeState", __base__=StateSchema, **field_definitions
     )
 
-    print(f"\nComposite schema fields:")
+    print("\nComposite schema fields:")
     for name, field in CompositeState.model_fields.items():
         print(f"  - {name}: {field.annotation}")
 

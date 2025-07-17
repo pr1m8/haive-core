@@ -1,0 +1,315 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Hello, I'm testing React agent persistence.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "9bc94212-93be-404b-809a-18d11dd5a058",
+        "example": false
+      },
+      {
+        "content": "Hi there! It sounds like you're working with React and testing some persistence capabilities in your application. If you have any specific questions or need assistance with React's state management or handling data persistence, feel free to ask!",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 44,
+            "prompt_tokens": 15,
+            "total_tokens": 59,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--62c45e90-4aba-4491-9580-e4448f5416fc-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 15,
+          "output_tokens": 44,
+          "total_tokens": 59,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "What was I testing?",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "9b7396a1-6afe-4ef1-bbf8-479983130454",
+        "example": false
+      },
+      {
+        "content": "Based on your initial message, you mentioned testing \u201cReact agent persistence.\u201d While not a specific term or widely known feature, it suggests you are focusing on persistence mechanisms within a React application, potentially involving components that maintain state across sessions or interact with external services or tools often referred to as \"agents.\"\n\nHere are some possibilities of what you might be testing:\n\n1. **State Persistence**: Ensuring that the state in your React application persists across page reloads or sessions. This could involve techniques like using localStorage, sessionStorage, or IndexedDB.\n\n2. **Agent Pattern**: If you are using agent patterns, you might be testing the interaction between components and these agents to ensure data and interactions persist correctly.\n\n3. **Persistence in Third-party Libraries**: If you're using a library that uses the term \"agent\" for persistence, you might be testing how well these tools or libraries maintain their data integrity or session persistence.\n\n4. **Data Fetching and Caching**: Testing how data fetched by agents (or other services or APIs in your application) is cached or persisted.\n\nIf none of these align with what you were testing, feel free to provide more context or details, and I can help further!",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 245,
+            "prompt_tokens": 71,
+            "total_tokens": 316,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--fd846373-e500-49e8-95a9-fb988adc607f-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 71,
+          "output_tokens": 245,
+          "total_tokens": 316,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "react_test_225354",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057b8f-72f9-625d-8004-aeb82b553838"
+    }
+  },
+  {
+    "step": 4,
+    "debug": false,
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "Based on your initial message, you mentioned testing \u201cReact agent persistence.\u201d While not a specific term or widely known feature, it suggests you are focusing on persistence mechanisms within a React application, potentially involving components that maintain state across sessions or interact with external services or tools often referred to as \"agents.\"\n\nHere are some possibilities of what you might be testing:\n\n1. **State Persistence**: Ensuring that the state in your React application persists across page reloads or sessions. This could involve techniques like using localStorage, sessionStorage, or IndexedDB.\n\n2. **Agent Pattern**: If you are using agent patterns, you might be testing the interaction between components and these agents to ensure data and interactions persist correctly.\n\n3. **Persistence in Third-party Libraries**: If you're using a library that uses the term \"agent\" for persistence, you might be testing how well these tools or libraries maintain their data integrity or session persistence.\n\n4. **Data Fetching and Caching**: Testing how data fetched by agents (or other services or APIs in your application) is cached or persisted.\n\nIf none of these align with what you were testing, feel free to provide more context or details, and I can help further!",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "logprobs": null,
+            "model_name": "gpt-4o-2024-08-06",
+            "token_usage": {
+              "total_tokens": 316,
+              "prompt_tokens": 71,
+              "completion_tokens": 245,
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              },
+              "completion_tokens_details": {
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "accepted_prediction_tokens": 0,
+                "rejected_prediction_tokens": 0
+              }
+            },
+            "finish_reason": "stop",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--fd846373-e500-49e8-95a9-fb988adc607f-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 71,
+            "output_tokens": 245,
+            "total_tokens": 316,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "parents": {},
+    "thread_id": "react_test_225354",
+    "checkpoint_mode": "sync",
+    "recursion_limit": 100
+  },
+  "2025-07-03T02:53:58.117421+00:00",
+  {
+    "configurable": {
+      "thread_id": "react_test_225354",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057b8f-5c88-6210-8003-570571a1cefe"
+    }
+  },
+  []
+]

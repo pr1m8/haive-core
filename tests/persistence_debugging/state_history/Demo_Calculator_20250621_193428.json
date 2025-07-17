@@ -1,0 +1,1798 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Create a plan for a day trip with at least 4 stops, then calculate total hours",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "007f98de-4012-4cb4-8285-650ba1be565a",
+        "example": false
+      },
+      {
+        "content": "Here\u2019s a sample plan for a day trip with four engaging stops:\n\n### Day Trip: Exploring Coastal Treasures\n\n**Stop 1: Morning Beach Sunrise**\n- **Location:** Main Beach\n- **Activity:** Enjoy a peaceful sunrise, beach walk, and beach yoga session.\n- **Duration:** 1.5 hours\n- **Time:** 6:30 AM - 8:00 AM\n\n**Stop 2: Historical Lighthouse Tour**\n- **Location:** Coastal Lighthouse\n- **Activity:** Guided tour of the lighthouse and museum\n- **Duration:** 1.5 hours\n- **Time:** 9:00 AM - 10:30 AM\n\n**Stop 3: Charming Coastal Cafe Brunch**\n- **Location:** Seaside Cafe\n- **Activity:** Enjoy a brunch with scenic views over the ocean, followed by a leisurely stroll in the nearby artisan shops area.\n- **Duration:** 2 hours\n- **Time:** 11:00 AM - 1:00 PM\n\n**Stop 4: Nature Reserve Exploration**\n- **Location:** Coastal Nature Reserve\n- **Activity:** Guided hike through nature trails, birdwatching, and photography opportunities.\n- **Duration:** 2.5 hours\n- **Time:** 1:30 PM - 4:00 PM\n\n### Total Hours Calculation:\n- **Morning Beach:** 1.5 hours\n- **Lighthouse Tour:** 1.5 hours \n- **Brunch and Stroll:** 2 hours\n- **Nature Reserve:** 2.5 hours\n\n**Total Duration:** 7.5 hours\n\n### Notes:\n- **Travel Time:** Assume short travel times between each stop, approximately 30 minutes or less, integrated into the schedule. Adjust accordingly based on real-time distance or traffic conditions.\n- **Rest Period:** Consider light, informal breaks between stops for lunch, snacks, water, and rest as needed.\n- **Safety Precautions:** Ensure to bring along essentials like sunscreen, comfortable clothing, water, and any personal requirements.\n\nThis trip offers a mix of relaxation, history, dining, and exploration, making for a fulfilling day by the coast! Adjust the timing to your liking or specific location constraints.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 450,
+            "prompt_tokens": 25,
+            "total_tokens": 475,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--04a8abff-8221-4009-9854-8012af6beb07-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "Here\u2019s a sample plan for a day trip with four engaging stops:\n\n### Day Trip: Exploring Coastal Treasures\n\n**Stop 1: Morning Beach Sunrise**\n- **Location:** Main Beach\n- **Activity:** Enjoy a peaceful sunrise, beach walk, and beach yoga session.\n- **Duration:** 1.5 hours\n- **Time:** 6:30 AM - 8:00 AM\n\n**Stop 2: Historical Lighthouse Tour**\n- **Location:** Coastal Lighthouse\n- **Activity:** Guided tour of the lighthouse and museum\n- **Duration:** 1.5 hours\n- **Time:** 9:00 AM - 10:30 AM\n\n**Stop 3: Charming Coastal Cafe Brunch**\n- **Location:** Seaside Cafe\n- **Activity:** Enjoy a brunch with scenic views over the ocean, followed by a leisurely stroll in the nearby artisan shops area.\n- **Duration:** 2 hours\n- **Time:** 11:00 AM - 1:00 PM\n\n**Stop 4: Nature Reserve Exploration**\n- **Location:** Coastal Nature Reserve\n- **Activity:** Guided hike through nature trails, birdwatching, and photography opportunities.\n- **Duration:** 2.5 hours\n- **Time:** 1:30 PM - 4:00 PM\n\n### Total Hours Calculation:\n- **Morning Beach:** 1.5 hours\n- **Lighthouse Tour:** 1.5 hours\n- **Brunch and Stroll:** 2 hours\n- **Nature Reserve:** 2.5 hours\n\n**Total Duration:** 7.5 hours\n\n### Notes:\n- **Travel Time:** Assume short travel times between each stop, approximately 30 minutes or less, integrated into the schedule. Adjust accordingly based on real-time distance or traffic conditions.\n- **Rest Period:** Consider light, informal breaks between stops for lunch, snacks, water, and rest as needed.\n- **Safety Precautions:** Ensure to bring along essentials like sunscreen, comfortable clothing, water, and any personal requirements.\n\nThis trip offers a mix of relaxation, history, dining, and exploration, making for a fulfilling day by the coast! Adjust the timing to your liking or specific location constraints.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 450,
+            "prompt_tokens": 478,
+            "total_tokens": 928,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--536d9db2-e799-4ed8-9f31-07df5ca80368-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "Here\u2019s a sample plan for a day trip with four engaging stops:\n\n### Day Trip: Exploring Coastal Treasures\n\n**Stop 1: Morning Beach Sunrise**\n- **Location:** Main Beach\n- **Activity:** Enjoy a peaceful sunrise, beach walk, and beach yoga session.\n- **Duration:** 1.5 hours\n- **Time:** 6:30 AM - 8:00 AM\n\n**Stop 2: Historical Lighthouse Tour**\n- **Location:** Coastal Lighthouse\n- **Activity:** Guided tour of the lighthouse and museum\n- **Duration:** 1.5 hours\n- **Time:** 9:00 AM - 10:30 AM\n\n**Stop 3: Charming Coastal Cafe Brunch**\n- **Location:** Seaside Cafe\n- **Activity:** Enjoy a brunch with scenic views over the ocean, followed by a leisurely stroll in the nearby artisan shops area.\n- **Duration:** 2 hours\n- **Time:** 11:00 AM - 1:00 PM\n\n**Stop 4: Nature Reserve Exploration**\n- **Location:** Coastal Nature Reserve\n- **Activity:** Guided hike through nature trails, birdwatching, and photography opportunities.\n- **Duration:** 2.5 hours\n- **Time:** 1:30 PM - 4:00 PM\n\n### Total Hours Calculation:\n- **Morning Beach:** 1.5 hours\n- **Lighthouse Tour:** 1.5 hours \n- **Brunch and Stroll:** 2 hours\n- **Nature Reserve:** 2.5 hours\n\n**Total Duration:** 7.5 hours\n\n### Notes:\n- **Travel Time:** Assume short travel times between each stop, approximately 30 minutes or less, integrated into the schedule. Adjust accordingly based on real-time distance or traffic conditions.\n- **Rest Period:** Consider light, informal breaks between stops for lunch, snacks, water, and rest as needed.\n- **Safety Precautions:** Ensure to bring along essentials like sunscreen, comfortable clothing, water, and any personal requirements.\n\nThis trip offers a mix of relaxation, history, dining, and exploration, making for a fulfilling day by the coast! Adjust the timing to your liking or specific location constraints.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 450,
+            "prompt_tokens": 931,
+            "total_tokens": 1381,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--c84e43e9-ba9c-4a9a-896b-54490b3bd0ae-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "Here\u2019s a sample plan for a day trip with four engaging stops:\n\n### Day Trip: Exploring Coastal Treasures\n\n**Stop 1: Morning Beach Sunrise**\n- **Location:** Main Beach\n- **Activity:** Enjoy a peaceful sunrise, beach walk, and beach yoga session.\n- **Duration:** 1.5 hours\n- **Time:** 6:30 AM - 8:00 AM\n\n**Stop 2: Historical Lighthouse Tour**\n- **Location:** Coastal Lighthouse\n- **Activity:** Guided tour of the lighthouse and museum\n- **Duration:** 1.5 hours\n- **Time:** 9:00 AM - 10:30 AM\n\n**Stop 3: Charming Coastal Cafe Brunch**\n- **Location:** Seaside Cafe\n- **Activity:** Enjoy a brunch with scenic views over the ocean, followed by a leisurely stroll in the nearby artisan shops area.\n- **Duration:** 2 hours\n- **Time:** 11:00 AM - 1:00 PM\n\n**Stop 4: Nature Reserve Exploration**\n- **Location:** Coastal Nature Reserve\n- **Activity:** Guided hike through nature trails, birdwatching, and photography opportunities.\n- **Duration:** 2.5 hours\n- **Time:** 1:30 PM - 4:00 PM\n\n### Total Hours Calculation:\n- **Morning Beach:** 1.5 hours\n- **Lighthouse Tour:** 1.5 hours \n- **Brunch and Stroll:** 2 hours\n- **Nature Reserve:** 2.5 hours\n\n**Total Duration:** 7.5 hours\n\n### Notes:\n- **Travel Time:** Assume short travel times between each stop, approximately 30 minutes or less, integrated into the schedule. Adjust accordingly based on real-time distance or traffic conditions.\n- **Rest Period:** Consider light, informal breaks between stops for lunch, snacks, water, and rest as needed.\n- **Safety Precautions:** Ensure to bring along essentials like sunscreen, comfortable clothing, water, and any personal requirements.\n\nThis trip offers a mix of relaxation, history, dining, and exploration, making for a fulfilling day by the coast! Adjust the timing to your liking or specific location constraints.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 450,
+            "prompt_tokens": 1384,
+            "total_tokens": 1834,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 1152
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--2e4b4a67-90fb-4eb3-a29e-7c3132ffa6cf-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "Here\u2019s a sample plan for a day trip with four engaging stops:\n\n### Day Trip: Exploring Coastal Treasures\n\n**Stop 1: Morning Beach Sunrise**\n- **Location:** Main Beach\n- **Activity:** Enjoy a peaceful sunrise, beach walk, and beach yoga session.\n- **Duration:** 1.5 hours\n- **Time:** 6:30 AM - 8:00 AM\n\n**Stop 2: Historical Lighthouse Tour**\n- **Location:** Coastal Lighthouse\n- **Activity:** Guided tour of the lighthouse and museum\n- **Duration:** 1.5 hours\n- **Time:** 9:00 AM - 10:30 AM\n\n**Stop 3: Charming Coastal Cafe Brunch**\n- **Location:** Seaside Cafe\n- **Activity:** Enjoy a brunch with scenic views over the ocean, followed by a leisurely stroll in the nearby artisan shops area.\n- **Duration:** 2 hours\n- **Time:** 11:00 AM - 1:00 PM\n\n**Stop 4: Nature Reserve Exploration**\n- **Location:** Coastal Nature Reserve\n- **Activity:** Guided hike through nature trails, birdwatching, and photography opportunities.\n- **Duration:** 2.5 hours\n- **Time:** 1:30 PM - 4:00 PM\n\n### Total Hours Calculation:\n- **Morning Beach:** 1.5 hours\n- **Lighthouse Tour:** 1.5 hours \n- **Brunch and Stroll:** 2 hours\n- **Nature Reserve:** 2.5 hours\n\n**Total Duration:** 7.5 hours\n\n### Notes:\n- **Travel Time:** Assume short travel times between each stop, approximately 30 minutes or less, integrated into the schedule. Adjust accordingly based on real-time distance or traffic conditions.\n- **Rest Period:** Consider light, informal breaks between stops for lunch, snacks, water, and rest as needed.\n- **Safety Precautions:** Ensure to bring along essentials like sunscreen, comfortable clothing, water, and any personal requirements.\n\nThis trip offers a mix of relaxation, history, dining, and exploration, making for a fulfilling day by the coast! Adjust the timing to your liking or specific location constraints.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 450,
+            "prompt_tokens": 1837,
+            "total_tokens": 2287,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 1664
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--a28f2255-0640-46db-adff-dbc750081234-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "Here\u2019s a sample plan for a day trip with four engaging stops:\n\n### Day Trip: Exploring Coastal Treasures\n\n**Stop 1: Morning Beach Sunrise**\n- **Location:** Main Beach\n- **Activity:** Enjoy a peaceful sunrise, beach walk, and beach yoga session.\n- **Duration:** 1.5 hours\n- **Time:** 6:30 AM - 8:00 AM\n\n**Stop 2: Historical Lighthouse Tour**\n- **Location:** Coastal Lighthouse\n- **Activity:** Guided tour of the lighthouse and museum\n- **Duration:** 1.5 hours\n- **Time:** 9:00 AM - 10:30 AM\n\n**Stop 3: Charming Coastal Cafe Brunch**\n- **Location:** Seaside Cafe\n- **Activity:** Enjoy a brunch with scenic views over the ocean, followed by a leisurely stroll in the nearby artisan shops area.\n- **Duration:** 2 hours\n- **Time:** 11:00 AM - 1:00 PM\n\n**Stop 4: Nature Reserve Exploration**\n- **Location:** Coastal Nature Reserve\n- **Activity:** Guided hike through nature trails, birdwatching, and photography opportunities.\n- **Duration:** 2.5 hours\n- **Time:** 1:30 PM - 4:00 PM\n\n### Total Hours Calculation:\n- **Morning Beach:** 1.5 hours\n- **Lighthouse Tour:** 1.5 hours\n- **Brunch and Stroll:** 2 hours\n- **Nature Reserve:** 2.5 hours\n\n**Total Duration:** 7.5 hours\n\n### Notes:\n- **Travel Time:** Assume short travel times between each stop, approximately 30 minutes or less, integrated into the schedule. Adjust accordingly based on real-time distance or traffic conditions.\n- **Rest Period:** Consider light, informal breaks between stops for lunch, snacks, water, and rest as needed.\n- **Safety Precautions:** Ensure to bring along essentials like sunscreen, comfortable clothing, water, and any personal requirements.\n\nThis trip offers a mix of relaxation, history, dining, and exploration, making for a fulfilling day by the coast! Adjust the timing to your liking or specific location constraints.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 450,
+            "prompt_tokens": 2290,
+            "total_tokens": 2740,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 2048
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--8d6ad60f-b841-4fff-ad04-f3549403b84d-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "Here\u2019s a sample plan for a day trip with four engaging stops:\n\n### Day Trip: Exploring Coastal Treasures\n\n**Stop 1: Morning Beach Sunrise**\n- **Location:** Main Beach\n- **Activity:** Enjoy a peaceful sunrise, beach walk, and beach yoga session.\n- **Duration:** 1.5 hours\n- **Time:** 6:30 AM - 8:00 AM\n\n**Stop 2: Historical Lighthouse Tour**\n- **Location:** Coastal Lighthouse\n- **Activity:** Guided tour of the lighthouse and museum\n- **Duration:** 1.5 hours\n- **Time:** 9:00 AM - 10:30 AM\n\n**Stop 3: Charming Coastal Cafe Brunch**\n- **Location:** Seaside Cafe\n- **Activity:** Enjoy a brunch with scenic views over the ocean, followed by a leisurely stroll in the nearby artisan shops area.\n- **Duration:** 2 hours\n- **Time:** 11:00 AM - 1:00 PM\n\n**Stop 4: Nature Reserve Exploration**\n- **Location:** Coastal Nature Reserve\n- **Activity:** Guided hike through nature trails, birdwatching, and photography opportunities.\n- **Duration:** 2.5 hours\n- **Time:** 1:30 PM - 4:00 PM\n\n### Total Hours Calculation:\n- **Morning Beach:** 1.5 hours\n- **Lighthouse Tour:** 1.5 hours\n- **Brunch and Stroll:** 2 hours\n- **Nature Reserve:** 2.5 hours\n\n**Total Duration:** 7.5 hours\n\n### Notes:\n- **Travel Time:** Assume short travel times between each stop, approximately 30 minutes or less, integrated into the schedule. Adjust accordingly based on real-time distance or traffic conditions.\n- **Rest Period:** Consider light, informal breaks between stops for lunch, snacks, water, and rest as needed.\n- **Safety Precautions:** Ensure to bring along essentials like sunscreen, comfortable clothing, water, and any personal requirements.\n\nThis trip offers a mix of relaxation, history, dining, and exploration, making for a fulfilling day by the coast! Adjust the timing to your liking or specific location constraints.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 450,
+            "prompt_tokens": 2743,
+            "total_tokens": 3193,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 2560
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--682b97de-b6bc-4b8b-af8d-711e932bd6dc-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "Here\u2019s a sample plan for a day trip with four engaging stops:\n\n### Day Trip: Exploring Coastal Treasures\n\n**Stop 1: Morning Beach Sunrise**\n- **Location:** Main Beach\n- **Activity:** Enjoy a peaceful sunrise, beach walk, and beach yoga session.\n- **Duration:** 1.5 hours\n- **Time:** 6:30 AM - 8:00 AM\n\n**Stop 2: Historical Lighthouse Tour**\n- **Location:** Coastal Lighthouse\n- **Activity:** Guided tour of the lighthouse and museum\n- **Duration:** 1.5 hours\n- **Time:** 9:00 AM - 10:30 AM\n\n**Stop 3: Charming Coastal Cafe Brunch**\n- **Location:** Seaside Cafe\n- **Activity:** Enjoy a brunch with scenic views over the ocean, followed by a leisurely stroll in the nearby artisan shops area.\n- **Duration:** 2 hours\n- **Time:** 11:00 AM - 1:00 PM\n\n**Stop 4: Nature Reserve Exploration**\n- **Location:** Coastal Nature Reserve\n- **Activity:** Guided hike through nature trails, birdwatching, and photography opportunities.\n- **Duration:** 2.5 hours\n- **Time:** 1:30 PM - 4:00 PM\n\n### Total Hours Calculation:\n- **Morning Beach:** 1.5 hours\n- **Lighthouse Tour:** 1.5 hours \n- **Brunch and Stroll:** 2 hours\n- **Nature Reserve:** 2.5 hours\n\n**Total Duration:** 7.5 hours\n\n### Notes:\n- **Travel Time:** Assume short travel times between each stop, approximately 30 minutes or less, integrated into the schedule. Adjust accordingly based on real-time distance or traffic conditions.\n- **Rest Period:** Consider light, informal breaks between stops for lunch, snacks, water, and rest as needed.\n- **Safety Precautions:** Ensure to bring along essentials like sunscreen, comfortable clothing, water, and any personal requirements.\n\nThis trip offers a mix of relaxation, history, dining, and exploration, making for a fulfilling day by the coast! Adjust the timing to your liking or specific location constraints.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 450,
+            "prompt_tokens": 3196,
+            "total_tokens": 3646,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 3072
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--d025b475-bfc4-4758-a4bc-eb0b3d27590f-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "Here\u2019s a sample plan for a day trip with four engaging stops:\n\n### Day Trip: Exploring Coastal Treasures\n\n**Stop 1: Morning Beach Sunrise**\n- **Location:** Main Beach\n- **Activity:** Enjoy a peaceful sunrise, beach walk, and beach yoga session.\n- **Duration:** 1.5 hours\n- **Time:** 6:30 AM - 8:00 AM\n\n**Stop 2: Historical Lighthouse Tour**\n- **Location:** Coastal Lighthouse\n- **Activity:** Guided tour of the lighthouse and museum\n- **Duration:** 1.5 hours\n- **Time:** 9:00 AM - 10:30 AM\n\n**Stop 3: Charming Coastal Cafe Brunch**\n- **Location:** Seaside Cafe\n- **Activity:** Enjoy a brunch with scenic views over the ocean, followed by a leisurely stroll in the nearby artisan shops area.\n- **Duration:** 2 hours\n- **Time:** 11:00 AM - 1:00 PM\n\n**Stop 4: Nature Reserve Exploration**\n- **Location:** Coastal Nature Reserve\n- **Activity:** Guided hike through nature trails, birdwatching, and photography opportunities.\n- **Duration:** 2.5 hours\n- **Time:** 1:30 PM - 4:00 PM\n\n### Total Hours Calculation:\n- **Morning Beach:** 1.5 hours\n- **Lighthouse Tour:** 1.5 hours \n- **Brunch and Stroll:** 2 hours\n- **Nature Reserve:** 2.5 hours\n\n**Total Duration:** 7.5 hours\n\n### Notes:\n- **Travel Time:** Assume short travel times between each stop, approximately 30 minutes or less, integrated into the schedule. Adjust accordingly based on real-time distance or traffic conditions.\n- **Rest Period:** Consider light, informal breaks between stops for lunch, snacks, water, and rest as needed.\n- **Safety Precautions:** Ensure to bring along essentials like sunscreen, comfortable clothing, water, and any personal requirements.\n\nThis trip offers a mix of relaxation, history, dining, and exploration, making for a fulfilling day by the coast! Adjust the timing to your liking or specific location constraints.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 450,
+            "prompt_tokens": 3649,
+            "total_tokens": 4099,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 3456
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--0e8a2550-bf6d-4ee4-86f1-319876cb2a53-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "Here\u2019s a sample plan for a day trip with four engaging stops:\n\n### Day Trip: Exploring Coastal Treasures\n\n**Stop 1: Morning Beach Sunrise**\n- **Location:** Main Beach\n- **Activity:** Enjoy a peaceful sunrise, beach walk, and beach yoga session.\n- **Duration:** 1.5 hours\n- **Time:** 6:30 AM - 8:00 AM\n\n**Stop 2: Historical Lighthouse Tour**\n- **Location:** Coastal Lighthouse\n- **Activity:** Guided tour of the lighthouse and museum\n- **Duration:** 1.5 hours\n- **Time:** 9:00 AM - 10:30 AM\n\n**Stop 3: Charming Coastal Cafe Brunch**\n- **Location:** Seaside Cafe\n- **Activity:** Enjoy a brunch with scenic views over the ocean, followed by a leisurely stroll in the nearby artisan shops area.\n- **Duration:** 2 hours\n- **Time:** 11:00 AM - 1:00 PM\n\n**Stop 4: Nature Reserve Exploration**\n- **Location:** Coastal Nature Reserve\n- **Activity:** Guided hike through nature trails, birdwatching, and photography opportunities.\n- **Duration:** 2.5 hours\n- **Time:** 1:30 PM - 4:00 PM\n\n### Total Hours Calculation:\n- **Morning Beach:** 1.5 hours\n- **Lighthouse Tour:** 1.5 hours \n- **Brunch and Stroll:** 2 hours\n- **Nature Reserve:** 2.5 hours\n\n**Total Duration:** 7.5 hours\n\n### Notes:\n- **Travel Time:** Assume short travel times between each stop, approximately 30 minutes or less, integrated into the schedule. Adjust accordingly based on real-time distance or traffic conditions.\n- **Rest Period:** Consider light, informal breaks between stops for lunch, snacks, water, and rest as needed.\n- **Safety Precautions:** Ensure to bring along essentials like sunscreen, comfortable clothing, water, and any personal requirements.\n\nThis trip offers a mix of relaxation, history, dining, and exploration, making for a fulfilling day by the coast! Adjust the timing to your liking or specific location constraints.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 450,
+            "prompt_tokens": 4102,
+            "total_tokens": 4552,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 3968
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--b143753f-ed68-4a51-aa8b-0ee90821ec47-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "Here\u2019s a sample plan for a day trip with four engaging stops:\n\n### Day Trip: Exploring Coastal Treasures\n\n**Stop 1: Morning Beach Sunrise**\n- **Location:** Main Beach\n- **Activity:** Enjoy a peaceful sunrise, beach walk, and beach yoga session.\n- **Duration:** 1.5 hours\n- **Time:** 6:30 AM - 8:00 AM\n\n**Stop 2: Historical Lighthouse Tour**\n- **Location:** Coastal Lighthouse\n- **Activity:** Guided tour of the lighthouse and museum\n- **Duration:** 1.5 hours\n- **Time:** 9:00 AM - 10:30 AM\n\n**Stop 3: Charming Coastal Cafe Brunch**\n- **Location:** Seaside Cafe\n- **Activity:** Enjoy a brunch with scenic views over the ocean, followed by a leisurely stroll in the nearby artisan shops area.\n- **Duration:** 2 hours\n- **Time:** 11:00 AM - 1:00 PM\n\n**Stop 4: Nature Reserve Exploration**\n- **Location:** Coastal Nature Reserve\n- **Activity:** Guided hike through nature trails, birdwatching, and photography opportunities.\n- **Duration:** 2.5 hours\n- **Time:** 1:30 PM - 4:00 PM\n\n### Total Hours Calculation:\n- **Morning Beach:** 1.5 hours\n- **Lighthouse Tour:** 1.5 hours \n- **Brunch and Stroll:** 2 hours\n- **Nature Reserve:** 2.5 hours\n\n**Total Duration:** 7.5 hours\n\n### Notes:\n- **Travel Time:** Assume short travel times between each stop, approximately 30 minutes or less, integrated into the schedule. Adjust accordingly based on real-time distance or traffic conditions.\n- **Rest Period:** Consider light, informal breaks between stops for lunch, snacks, water, and rest as needed.\n- **Safety Precautions:** Ensure to bring along essentials like sunscreen, comfortable clothing, water, and any personal requirements.\n\nThis trip offers a mix of relaxation, history, dining, and exploration, making for a fulfilling day by the coast! Adjust the timing to your liking or specific location constraints.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 450,
+            "prompt_tokens": 4555,
+            "total_tokens": 5005,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 4352
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--82fe1631-de9b-4bb4-b7eb-2bd866799ca6-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "Here\u2019s a sample plan for a day trip with four engaging stops:\n\n### Day Trip: Exploring Coastal Treasures\n\n**Stop 1: Morning Beach Sunrise**\n- **Location:** Main Beach\n- **Activity:** Enjoy a peaceful sunrise, beach walk, and beach yoga session.\n- **Duration:** 1.5 hours\n- **Time:** 6:30 AM - 8:00 AM\n\n**Stop 2: Historical Lighthouse Tour**\n- **Location:** Coastal Lighthouse\n- **Activity:** Guided tour of the lighthouse and museum\n- **Duration:** 1.5 hours\n- **Time:** 9:00 AM - 10:30 AM\n\n**Stop 3: Charming Coastal Cafe Brunch**\n- **Location:** Seaside Cafe\n- **Activity:** Enjoy a brunch with scenic views over the ocean, followed by a leisurely stroll in the nearby artisan shops area.\n- **Duration:** 2 hours\n- **Time:** 11:00 AM - 1:00 PM\n\n**Stop 4: Nature Reserve Exploration**\n- **Location:** Coastal Nature Reserve\n- **Activity:** Guided hike through nature trails, birdwatching, and photography opportunities.\n- **Duration:** 2.5 hours\n- **Time:** 1:30 PM - 4:00 PM\n\n### Total Hours Calculation:\n- **Morning Beach:** 1.5 hours\n- **Lighthouse Tour:** 1.5 hours\n- **Brunch and Stroll:** 2 hours\n- **Nature Reserve:** 2.5 hours\n\n**Total Duration:** 7.5 hours\n\n### Notes:\n- **Travel Time:** Assume short travel times between each stop, approximately 30 minutes or less, integrated into the schedule. Adjust accordingly based on real-time distance or traffic conditions.\n- **Rest Period:** Consider light, informal breaks between stops for lunch, snacks, water, and rest as needed.\n- **Safety Precautions:** Ensure to bring along essentials like sunscreen, comfortable clothing, water, and any personal requirements.\n\nThis trip offers a mix of relaxation, history, dining, and exploration, making for a fulfilling day by the coast! Adjust the timing to your liking or specific location constraints.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 450,
+            "prompt_tokens": 5008,
+            "total_tokens": 5458,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 4864
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--411072cf-9e29-469c-b754-4589575bf0e2-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "Here\u2019s a sample plan for a day trip with four engaging stops:\n\n### Day Trip: Exploring Coastal Treasures\n\n**Stop 1: Morning Beach Sunrise**\n- **Location:** Main Beach\n- **Activity:** Enjoy a peaceful sunrise, beach walk, and beach yoga session.\n- **Duration:** 1.5 hours\n- **Time:** 6:30 AM - 8:00 AM\n\n**Stop 2: Historical Lighthouse Tour**\n- **Location:** Coastal Lighthouse\n- **Activity:** Guided tour of the lighthouse and museum\n- **Duration:** 1.5 hours\n- **Time:** 9:00 AM - 10:30 AM\n\n**Stop 3: Charming Coastal Cafe Brunch**\n- **Location:** Seaside Cafe\n- **Activity:** Enjoy a brunch with scenic views over the ocean, followed by a leisurely stroll in the nearby artisan shops area.\n- **Duration:** 2 hours\n- **Time:** 11:00 AM - 1:00 PM\n\n**Stop 4: Nature Reserve Exploration**\n- **Location:** Coastal Nature Reserve\n- **Activity:** Guided hike through nature trails, birdwatching, and photography opportunities.\n- **Duration:** 2.5 hours\n- **Time:** 1:30 PM - 4:00 PM\n\n### Total Hours Calculation:\n- **Morning Beach:** 1.5 hours\n- **Lighthouse Tour:** 1.5 hours\n- **Brunch and Stroll:** 2 hours\n- **Nature Reserve:** 2.5 hours\n\n**Total Duration:** 7.5 hours\n\n### Notes:\n- **Travel Time:** Assume short travel times between each stop, approximately 30 minutes or less, integrated into the schedule. Adjust accordingly based on real-time distance or traffic conditions.\n- **Rest Period:** Consider light, informal breaks between stops for lunch, snacks, water, and rest as needed.\n- **Safety Precautions:** Ensure to bring along essentials like sunscreen, comfortable clothing, water, and any personal requirements.\n\nThis trip offers a mix of relaxation, history, dining, and exploration, making for a fulfilling day by the coast! Adjust the timing to your liking or specific location constraints.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 450,
+            "prompt_tokens": 5461,
+            "total_tokens": 5911,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 5248
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--1c7b2003-a4e5-4c94-84fb-c4e6638db0d7-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "Here\u2019s a sample plan for a day trip with four engaging stops:\n\n### Day Trip: Exploring Coastal Treasures\n\n**Stop 1: Morning Beach Sunrise**\n- **Location:** Main Beach\n- **Activity:** Enjoy a peaceful sunrise, beach walk, and beach yoga session.\n- **Duration:** 1.5 hours\n- **Time:** 6:30 AM - 8:00 AM\n\n**Stop 2: Historical Lighthouse Tour**\n- **Location:** Coastal Lighthouse\n- **Activity:** Guided tour of the lighthouse and museum\n- **Duration:** 1.5 hours\n- **Time:** 9:00 AM - 10:30 AM\n\n**Stop 3: Charming Coastal Cafe Brunch**\n- **Location:** Seaside Cafe\n- **Activity:** Enjoy a brunch with scenic views over the ocean, followed by a leisurely stroll in the nearby artisan shops area.\n- **Duration:** 2 hours\n- **Time:** 11:00 AM - 1:00 PM\n\n**Stop 4: Nature Reserve Exploration**\n- **Location:** Coastal Nature Reserve\n- **Activity:** Guided hike through nature trails, birdwatching, and photography opportunities.\n- **Duration:** 2.5 hours\n- **Time:** 1:30 PM - 4:00 PM\n\n### Total Hours Calculation:\n- **Morning Beach:** 1.5 hours\n- **Lighthouse Tour:** 1.5 hours \n- **Brunch and Stroll:** 2 hours\n- **Nature Reserve:** 2.5 hours\n\n**Total Duration:** 7.5 hours\n\n### Notes:\n- **Travel Time:** Assume short travel times between each stop, approximately 30 minutes or less, integrated into the schedule. Adjust accordingly based on real-time distance or traffic conditions.\n- **Rest Period:** Consider light, informal breaks between stops for lunch, snacks, water, and rest as needed.\n- **Safety Precautions:** Ensure to bring along essentials like sunscreen, comfortable clothing, water, and any personal requirements.\n\nThis trip offers a mix of relaxation, history, dining, and exploration, making for a fulfilling day by the coast! Adjust the timing to your liking or specific location constraints.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 450,
+            "prompt_tokens": 5914,
+            "total_tokens": 6364,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 5760
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--f1d386b9-ab03-4487-9860-4c71d0236217-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "Here\u2019s a sample plan for a day trip with four engaging stops:\n\n### Day Trip: Exploring Coastal Treasures\n\n**Stop 1: Morning Beach Sunrise**\n- **Location:** Main Beach\n- **Activity:** Enjoy a peaceful sunrise, beach walk, and beach yoga session.\n- **Duration:** 1.5 hours\n- **Time:** 6:30 AM - 8:00 AM\n\n**Stop 2: Historical Lighthouse Tour**\n- **Location:** Coastal Lighthouse\n- **Activity:** Guided tour of the lighthouse and museum\n- **Duration:** 1.5 hours\n- **Time:** 9:00 AM - 10:30 AM\n\n**Stop 3: Charming Coastal Cafe Brunch**\n- **Location:** Seaside Cafe\n- **Activity:** Enjoy a brunch with scenic views over the ocean, followed by a leisurely stroll in the nearby artisan shops area.\n- **Duration:** 2 hours\n- **Time:** 11:00 AM - 1:00 PM\n\n**Stop 4: Nature Reserve Exploration**\n- **Location:** Coastal Nature Reserve\n- **Activity:** Guided hike through nature trails, birdwatching, and photography opportunities.\n- **Duration:** 2.5 hours\n- **Time:** 1:30 PM - 4:00 PM\n\n### Total Hours Calculation:\n- **Morning Beach:** 1.5 hours\n- **Lighthouse Tour:** 1.5 hours \n- **Brunch and Stroll:** 2 hours\n- **Nature Reserve:** 2.5 hours\n\n**Total Duration:** 7.5 hours\n\n### Notes:\n- **Travel Time:** Assume short travel times between each stop, approximately 30 minutes or less, integrated into the schedule. Adjust accordingly based on real-time distance or traffic conditions.\n- **Rest Period:** Consider light, informal breaks between stops for lunch, snacks, water, and rest as needed.\n- **Safety Precautions:** Ensure to bring along essentials like sunscreen, comfortable clothing, water, and any personal requirements.\n\nThis trip offers a mix of relaxation, history, dining, and exploration, making for a fulfilling day by the coast! Adjust the timing to your liking or specific location constraints.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 450,
+            "prompt_tokens": 6367,
+            "total_tokens": 6817,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 6144
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--b9733dae-7813-48f4-862f-9da28f45d1b5-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "Here\u2019s a sample plan for a day trip with four engaging stops:\n\n### Day Trip: Exploring Coastal Treasures\n\n**Stop 1: Morning Beach Sunrise**\n- **Location:** Main Beach\n- **Activity:** Enjoy a peaceful sunrise, beach walk, and beach yoga session.\n- **Duration:** 1.5 hours\n- **Time:** 6:30 AM - 8:00 AM\n\n**Stop 2: Historical Lighthouse Tour**\n- **Location:** Coastal Lighthouse\n- **Activity:** Guided tour of the lighthouse and museum\n- **Duration:** 1.5 hours\n- **Time:** 9:00 AM - 10:30 AM\n\n**Stop 3: Charming Coastal Cafe Brunch**\n- **Location:** Seaside Cafe\n- **Activity:** Enjoy a brunch with scenic views over the ocean, followed by a leisurely stroll in the nearby artisan shops area.\n- **Duration:** 2 hours\n- **Time:** 11:00 AM - 1:00 PM\n\n**Stop 4: Nature Reserve Exploration**\n- **Location:** Coastal Nature Reserve\n- **Activity:** Guided hike through nature trails, birdwatching, and photography opportunities.\n- **Duration:** 2.5 hours\n- **Time:** 1:30 PM - 4:00 PM\n\n### Total Hours Calculation:\n- **Morning Beach:** 1.5 hours\n- **Lighthouse Tour:** 1.5 hours\n- **Brunch and Stroll:** 2 hours\n- **Nature Reserve:** 2.5 hours\n\n**Total Duration:** 7.5 hours\n\n### Notes:\n- **Travel Time:** Assume short travel times between each stop, approximately 30 minutes or less, integrated into the schedule. Adjust accordingly based on real-time distance or traffic conditions.\n- **Rest Period:** Consider light, informal breaks between stops for lunch, snacks, water, and rest as needed.\n- **Safety Precautions:** Ensure to bring along essentials like sunscreen, comfortable clothing, water, and any personal requirements.\n\nThis trip offers a mix of relaxation, history, dining, and exploration, making for a fulfilling day by the coast! Adjust the timing to your liking or specific location constraints.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 450,
+            "prompt_tokens": 6820,
+            "total_tokens": 7270,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 6656
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--d852c761-b669-4085-93df-31d40ca4fd82-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "Here\u2019s a sample plan for a day trip with four engaging stops:\n\n### Day Trip: Exploring Coastal Treasures\n\n**Stop 1: Morning Beach Sunrise**\n- **Location:** Main Beach\n- **Activity:** Enjoy a peaceful sunrise, beach walk, and beach yoga session.\n- **Duration:** 1.5 hours\n- **Time:** 6:30 AM - 8:00 AM\n\n**Stop 2: Historical Lighthouse Tour**\n- **Location:** Coastal Lighthouse\n- **Activity:** Guided tour of the lighthouse and museum\n- **Duration:** 1.5 hours\n- **Time:** 9:00 AM - 10:30 AM\n\n**Stop 3: Charming Coastal Cafe Brunch**\n- **Location:** Seaside Cafe\n- **Activity:** Enjoy a brunch with scenic views over the ocean, followed by a leisurely stroll in the nearby artisan shops area.\n- **Duration:** 2 hours\n- **Time:** 11:00 AM - 1:00 PM\n\n**Stop 4: Nature Reserve Exploration**\n- **Location:** Coastal Nature Reserve\n- **Activity:** Guided hike through nature trails, birdwatching, and photography opportunities.\n- **Duration:** 2.5 hours\n- **Time:** 1:30 PM - 4:00 PM\n\n### Total Hours Calculation:\n- **Morning Beach:** 1.5 hours\n- **Lighthouse Tour:** 1.5 hours \n- **Brunch and Stroll:** 2 hours\n- **Nature Reserve:** 2.5 hours\n\n**Total Duration:** 7.5 hours\n\n### Notes:\n- **Travel Time:** Assume short travel times between each stop, approximately 30 minutes or less, integrated into the schedule. Adjust accordingly based on real-time distance or traffic conditions.\n- **Rest Period:** Consider light, informal breaks between stops for lunch, snacks, water, and rest as needed.\n- **Safety Precautions:** Ensure to bring along essentials like sunscreen, comfortable clothing, water, and any personal requirements.\n\nThis trip offers a mix of relaxation, history, dining, and exploration, making for a fulfilling day by the coast! Adjust the timing to your liking or specific location constraints.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 450,
+            "prompt_tokens": 7273,
+            "total_tokens": 7723,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--ca64fa3e-5141-450f-bdcd-c27ab303694c-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "Here\u2019s a sample plan for a day trip with four engaging stops:\n\n### Day Trip: Exploring Coastal Treasures\n\n**Stop 1: Morning Beach Sunrise**\n- **Location:** Main Beach\n- **Activity:** Enjoy a peaceful sunrise, beach walk, and beach yoga session.\n- **Duration:** 1.5 hours\n- **Time:** 6:30 AM - 8:00 AM\n\n**Stop 2: Historical Lighthouse Tour**\n- **Location:** Coastal Lighthouse\n- **Activity:** Guided tour of the lighthouse and museum\n- **Duration:** 1.5 hours\n- **Time:** 9:00 AM - 10:30 AM\n\n**Stop 3: Charming Coastal Cafe Brunch**\n- **Location:** Seaside Cafe\n- **Activity:** Enjoy a brunch with scenic views over the ocean, followed by a leisurely stroll in the nearby artisan shops area.\n- **Duration:** 2 hours\n- **Time:** 11:00 AM - 1:00 PM\n\n**Stop 4: Nature Reserve Exploration**\n- **Location:** Coastal Nature Reserve\n- **Activity:** Guided hike through nature trails, birdwatching, and photography opportunities.\n- **Duration:** 2.5 hours\n- **Time:** 1:30 PM - 4:00 PM\n\n### Total Hours Calculation:\n- **Morning Beach:** 1.5 hours\n- **Lighthouse Tour:** 1.5 hours\n- **Brunch and Stroll:** 2 hours\n- **Nature Reserve:** 2.5 hours\n\n**Total Duration:** 7.5 hours\n\n### Notes:\n- **Travel Time:** Assume short travel times between each stop, approximately 30 minutes or less, integrated into the schedule. Adjust accordingly based on real-time distance or traffic conditions.\n- **Rest Period:** Consider light, informal breaks between stops for lunch, snacks, water, and rest as needed.\n- **Safety Precautions:** Ensure to bring along essentials like sunscreen, comfortable clothing, water, and any personal requirements.\n\nThis trip offers a mix of relaxation, history, dining, and exploration, making for a fulfilling day by the coast! Adjust the timing to your liking or specific location constraints.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 450,
+            "prompt_tokens": 7726,
+            "total_tokens": 8176,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 7040
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--5216e67c-6433-4fc0-b3e7-89aa9a44efe4-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "Here\u2019s a sample plan for a day trip with four engaging stops:\n\n### Day Trip: Exploring Coastal Treasures\n\n**Stop 1: Morning Beach Sunrise**\n- **Location:** Main Beach\n- **Activity:** Enjoy a peaceful sunrise, beach walk, and beach yoga session.\n- **Duration:** 1.5 hours\n- **Time:** 6:30 AM - 8:00 AM\n\n**Stop 2: Historical Lighthouse Tour**\n- **Location:** Coastal Lighthouse\n- **Activity:** Guided tour of the lighthouse and museum\n- **Duration:** 1.5 hours\n- **Time:** 9:00 AM - 10:30 AM\n\n**Stop 3: Charming Coastal Cafe Brunch**\n- **Location:** Seaside Cafe\n- **Activity:** Enjoy a brunch with scenic views over the ocean, followed by a leisurely stroll in the nearby artisan shops area.\n- **Duration:** 2 hours\n- **Time:** 11:00 AM - 1:00 PM\n\n**Stop 4: Nature Reserve Exploration**\n- **Location:** Coastal Nature Reserve\n- **Activity:** Guided hike through nature trails, birdwatching, and photography opportunities.\n- **Duration:** 2.5 hours\n- **Time:** 1:30 PM - 4:00 PM\n\n### Total Hours Calculation:\n- **Morning Beach:** 1.5 hours\n- **Lighthouse Tour:** 1.5 hours\n- **Brunch and Stroll:** 2 hours\n- **Nature Reserve:** 2.5 hours\n\n**Total Duration:** 7.5 hours\n\n### Notes:\n- **Travel Time:** Assume short travel times between each stop, approximately 30 minutes or less, integrated into the schedule. Adjust accordingly based on real-time distance or traffic conditions.\n- **Rest Period:** Consider light, informal breaks between stops for lunch, snacks, water, and rest as needed.\n- **Safety Precautions:** Ensure to bring along essentials like sunscreen, comfortable clothing, water, and any personal requirements.\n\nThis trip offers a mix of relaxation, history, dining, and exploration, making for a fulfilling day by the coast! Adjust the timing to your liking or specific location constraints.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 450,
+            "prompt_tokens": 8179,
+            "total_tokens": 8629,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 8064
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--3b80a08d-772d-4697-b4c3-0ade95f3bc7e-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "Here\u2019s a sample plan for a day trip with four engaging stops:\n\n### Day Trip: Exploring Coastal Treasures\n\n**Stop 1: Morning Beach Sunrise**\n- **Location:** Main Beach\n- **Activity:** Enjoy a peaceful sunrise, beach walk, and beach yoga session.\n- **Duration:** 1.5 hours\n- **Time:** 6:30 AM - 8:00 AM\n\n**Stop 2: Historical Lighthouse Tour**\n- **Location:** Coastal Lighthouse\n- **Activity:** Guided tour of the lighthouse and museum\n- **Duration:** 1.5 hours\n- **Time:** 9:00 AM - 10:30 AM\n\n**Stop 3: Charming Coastal Cafe Brunch**\n- **Location:** Seaside Cafe\n- **Activity:** Enjoy a brunch with scenic views over the ocean, followed by a leisurely stroll in the nearby artisan shops area.\n- **Duration:** 2 hours\n- **Time:** 11:00 AM - 1:00 PM\n\n**Stop 4: Nature Reserve Exploration**\n- **Location:** Coastal Nature Reserve\n- **Activity:** Guided hike through nature trails, birdwatching, and photography opportunities.\n- **Duration:** 2.5 hours\n- **Time:** 1:30 PM - 4:00 PM\n\n### Total Hours Calculation:\n- **Morning Beach:** 1.5 hours\n- **Lighthouse Tour:** 1.5 hours\n- **Brunch and Stroll:** 2 hours\n- **Nature Reserve:** 2.5 hours\n\n**Total Duration:** 7.5 hours\n\n### Notes:\n- **Travel Time:** Assume short travel times between each stop, approximately 30 minutes or less, integrated into the schedule. Adjust accordingly based on real-time distance or traffic conditions.\n- **Rest Period:** Consider light, informal breaks between stops for lunch, snacks, water, and rest as needed.\n- **Safety Precautions:** Ensure to bring along essentials like sunscreen, comfortable clothing, water, and any personal requirements.\n\nThis trip offers a mix of relaxation, history, dining, and exploration, making for a fulfilling day by the coast! Adjust the timing to your liking or specific location constraints.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 450,
+            "prompt_tokens": 8632,
+            "total_tokens": 9082,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 8448
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--882a9f5a-b193-463d-b05f-42170cd27deb-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "Here\u2019s a sample plan for a day trip with four engaging stops:\n\n### Day Trip: Exploring Coastal Treasures\n\n**Stop 1: Morning Beach Sunrise**\n- **Location:** Main Beach\n- **Activity:** Enjoy a peaceful sunrise, beach walk, and beach yoga session.\n- **Duration:** 1.5 hours\n- **Time:** 6:30 AM - 8:00 AM\n\n**Stop 2: Historical Lighthouse Tour**\n- **Location:** Coastal Lighthouse\n- **Activity:** Guided tour of the lighthouse and museum\n- **Duration:** 1.5 hours\n- **Time:** 9:00 AM - 10:30 AM\n\n**Stop 3: Charming Coastal Cafe Brunch**\n- **Location:** Seaside Cafe\n- **Activity:** Enjoy a brunch with scenic views over the ocean, followed by a leisurely stroll in the nearby artisan shops area.\n- **Duration:** 2 hours\n- **Time:** 11:00 AM - 1:00 PM\n\n**Stop 4: Nature Reserve Exploration**\n- **Location:** Coastal Nature Reserve\n- **Activity:** Guided hike through nature trails, birdwatching, and photography opportunities.\n- **Duration:** 2.5 hours\n- **Time:** 1:30 PM - 4:00 PM\n\n### Total Hours Calculation:\n- **Morning Beach:** 1.5 hours\n- **Lighthouse Tour:** 1.5 hours\n- **Brunch and Stroll:** 2 hours\n- **Nature Reserve:** 2.5 hours\n\n**Total Duration:** 7.5 hours\n\n### Notes:\n- **Travel Time:** Assume short travel times between each stop, approximately 30 minutes or less, integrated into the schedule. Adjust accordingly based on real-time distance or traffic conditions.\n- **Rest Period:** Consider light, informal breaks between stops for lunch, snacks, water, and rest as needed.\n- **Safety Precautions:** Ensure to bring along essentials like sunscreen, comfortable clothing, water, and any personal requirements.\n\nThis trip offers a mix of relaxation, history, dining, and exploration, making for a fulfilling day by the coast! Adjust the timing to your liking or specific location constraints.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 450,
+            "prompt_tokens": 9085,
+            "total_tokens": 9535,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 8960
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--eb6414ef-d801-4fb7-9250-a1586e920453-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "Here\u2019s a sample plan for a day trip with four engaging stops:\n\n### Day Trip: Exploring Coastal Treasures\n\n**Stop 1: Morning Beach Sunrise**\n- **Location:** Main Beach\n- **Activity:** Enjoy a peaceful sunrise, beach walk, and beach yoga session.\n- **Duration:** 1.5 hours\n- **Time:** 6:30 AM - 8:00 AM\n\n**Stop 2: Historical Lighthouse Tour**\n- **Location:** Coastal Lighthouse\n- **Activity:** Guided tour of the lighthouse and museum\n- **Duration:** 1.5 hours\n- **Time:** 9:00 AM - 10:30 AM\n\n**Stop 3: Charming Coastal Cafe Brunch**\n- **Location:** Seaside Cafe\n- **Activity:** Enjoy a brunch with scenic views over the ocean, followed by a leisurely stroll in the nearby artisan shops area.\n- **Duration:** 2 hours\n- **Time:** 11:00 AM - 1:00 PM\n\n**Stop 4: Nature Reserve Exploration**\n- **Location:** Coastal Nature Reserve\n- **Activity:** Guided hike through nature trails, birdwatching, and photography opportunities.\n- **Duration:** 2.5 hours\n- **Time:** 1:30 PM - 4:00 PM\n\n### Total Hours Calculation:\n- **Morning Beach:** 1.5 hours\n- **Lighthouse Tour:** 1.5 hours \n- **Brunch and Stroll:** 2 hours\n- **Nature Reserve:** 2.5 hours\n\n**Total Duration:** 7.5 hours\n\n### Notes:\n- **Travel Time:** Assume short travel times between each stop, approximately 30 minutes or less, integrated into the schedule. Adjust accordingly based on real-time distance or traffic conditions.\n- **Rest Period:** Consider light, informal breaks between stops for lunch, snacks, water, and rest as needed.\n- **Safety Precautions:** Ensure to bring along essentials like sunscreen, comfortable clothing, water, and any personal requirements.\n\nThis trip offers a mix of relaxation, history, dining, and exploration, making for a fulfilling day by the coast! Adjust the timing to your liking or specific location constraints.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 450,
+            "prompt_tokens": 9538,
+            "total_tokens": 9988,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 9344
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--a01b164c-48dc-4689-8f14-885270c97885-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 9538,
+          "output_tokens": 450,
+          "total_tokens": 9988,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 9344
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "9b1f71d5-e4fd-432f-ace3-6018397f924a",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04ef87-fe08-6409-8001-45a7fd7ec2b4"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "Here\u2019s a sample plan for a day trip with four engaging stops:\n\n### Day Trip: Exploring Coastal Treasures\n\n**Stop 1: Morning Beach Sunrise**\n- **Location:** Main Beach\n- **Activity:** Enjoy a peaceful sunrise, beach walk, and beach yoga session.\n- **Duration:** 1.5 hours\n- **Time:** 6:30 AM - 8:00 AM\n\n**Stop 2: Historical Lighthouse Tour**\n- **Location:** Coastal Lighthouse\n- **Activity:** Guided tour of the lighthouse and museum\n- **Duration:** 1.5 hours\n- **Time:** 9:00 AM - 10:30 AM\n\n**Stop 3: Charming Coastal Cafe Brunch**\n- **Location:** Seaside Cafe\n- **Activity:** Enjoy a brunch with scenic views over the ocean, followed by a leisurely stroll in the nearby artisan shops area.\n- **Duration:** 2 hours\n- **Time:** 11:00 AM - 1:00 PM\n\n**Stop 4: Nature Reserve Exploration**\n- **Location:** Coastal Nature Reserve\n- **Activity:** Guided hike through nature trails, birdwatching, and photography opportunities.\n- **Duration:** 2.5 hours\n- **Time:** 1:30 PM - 4:00 PM\n\n### Total Hours Calculation:\n- **Morning Beach:** 1.5 hours\n- **Lighthouse Tour:** 1.5 hours \n- **Brunch and Stroll:** 2 hours\n- **Nature Reserve:** 2.5 hours\n\n**Total Duration:** 7.5 hours\n\n### Notes:\n- **Travel Time:** Assume short travel times between each stop, approximately 30 minutes or less, integrated into the schedule. Adjust accordingly based on real-time distance or traffic conditions.\n- **Rest Period:** Consider light, informal breaks between stops for lunch, snacks, water, and rest as needed.\n- **Safety Precautions:** Ensure to bring along essentials like sunscreen, comfortable clothing, water, and any personal requirements.\n\nThis trip offers a mix of relaxation, history, dining, and exploration, making for a fulfilling day by the coast! Adjust the timing to your liking or specific location constraints.",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 450,
+              "prompt_tokens": 9538,
+              "total_tokens": 9988,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 9344
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--a01b164c-48dc-4689-8f14-885270c97885-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 9538,
+            "output_tokens": 450,
+            "total_tokens": 9988,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 9344
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 1,
+    "parents": {},
+    "thread_id": "3c53d392-c5b8-4129-ab14-6d94f7e8900d",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 86,
+    "langgraph_node": "delegate_to_agent",
+    "langgraph_triggers": ["branch:to:delegate_to_agent"],
+    "langgraph_path": ["__pregel_pull", "delegate_to_agent"],
+    "langgraph_checkpoint_ns": "delegate_to_agent:295589e6-49bf-c339-3918-dd3189279324"
+  },
+  "2025-06-21T23:36:05.276144+00:00",
+  {
+    "configurable": {
+      "thread_id": "9b1f71d5-e4fd-432f-ace3-6018397f924a",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04ef87-d222-6167-8000-e5c60e2899e5"
+    }
+  },
+  []
+]

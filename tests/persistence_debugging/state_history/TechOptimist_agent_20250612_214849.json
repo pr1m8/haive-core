@@ -1,0 +1,234 @@
+[
+  {
+    "messages": [
+      {
+        "content": "\ud83c\udfad Debate Phase: Arguments\n\ud83d\udccc Your Position: Social media is a net positive\n\ud83d\udcca Your Progress: 0 arguments, 0 rebuttals\n\ud83d\udcc8 Completion: 0%\n\n\ud83d\udcdd Instructions: Present argument 1 of 1. Make a specific, well-supported point for your position. You have 1 more arguments after this.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "system",
+        "name": null,
+        "id": "33934843-3c65-41f9-89bd-7f9a6f643b92"
+      },
+      {
+        "content": "\ud83c\udfad Welcome to the Formal Debate!\n\n\ud83d\udccb **Topic**: The Impact of Social Media on Society\n\n\ud83d\udc65 **Participants and Positions**:\n  \u2022 TechOptimist: Social media is a net positive\n  \u2022 DigitalWellbeing: Social media needs mental health reforms\n  \u2022 PrivacyAdvocate: Social media violates privacy rights\n\n\ud83d\udcdc **Debate Format** (traditional):\n1. Main Arguments - Each participant makes 1 arguments\n2. Rebuttals - Participants respond to opposing arguments\n\n\u2696\ufe0f **Rules**:\n  \u2022 Participants must argue for their assigned position\n\nLet us begin! TechOptimist, please present your opening statement.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "0434b52e-3a1c-4cf0-9ed7-296e890972bf",
+        "example": false
+      },
+      {
+        "content": "Social media has revolutionized the way we connect, breaking geographical barriers and fostering global communication. It empowers individuals to share their stories, access diverse perspectives, and mobilize for causes, amplifying voices that were previously marginalized. This democratization of information has led to increased awareness and social change, evident in movements like #MeToo and climate activism. Moreover, social media serves as a platform for education and innovation, enabling collaboration across fields and cultures. By facilitating real-time interaction and knowledge exchange, social media has undeniably enriched society, driving progress and inclusivity in an interconnected world.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 116,
+            "prompt_tokens": 259,
+            "total_tokens": 375,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BhnpAbtHf50N6BIn9ZPkEDsFRvihL",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run-3d1313fa-a07b-4686-9c42-245a142617fd-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 259,
+          "output_tokens": 116,
+          "total_tokens": 375,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "fda27971-2f8c-487a-8c5f-d0cdad0bc2a8",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f047f88-d0e7-6453-8001-9647157a4be7"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "Social media has revolutionized the way we connect, breaking geographical barriers and fostering global communication. It empowers individuals to share their stories, access diverse perspectives, and mobilize for causes, amplifying voices that were previously marginalized. This democratization of information has led to increased awareness and social change, evident in movements like #MeToo and climate activism. Moreover, social media serves as a platform for education and innovation, enabling collaboration across fields and cultures. By facilitating real-time interaction and knowledge exchange, social media has undeniably enriched society, driving progress and inclusivity in an interconnected world.",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 116,
+              "prompt_tokens": 259,
+              "total_tokens": 375,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "id": "chatcmpl-BhnpAbtHf50N6BIn9ZPkEDsFRvihL",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run-3d1313fa-a07b-4686-9c42-245a142617fd-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 259,
+            "output_tokens": 116,
+            "total_tokens": 375,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 1,
+    "parents": {},
+    "recursion_limit": 30,
+    "thread_id": "e65a82a4-2ba8-4592-b384-8a717c001ea0",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 3,
+    "langgraph_node": "execute_agent",
+    "langgraph_triggers": ["branch:to:execute_agent"],
+    "langgraph_path": ["__pregel_pull", "execute_agent"],
+    "langgraph_checkpoint_ns": "execute_agent:17fc777f-b581-c844-c607-e5bd420f5d41"
+  },
+  "2025-06-13T01:48:49.248146+00:00",
+  {
+    "configurable": {
+      "thread_id": "fda27971-2f8c-487a-8c5f-d0cdad0bc2a8",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f047f88-c3cf-6a34-8000-79585654356d"
+    }
+  },
+  []
+]

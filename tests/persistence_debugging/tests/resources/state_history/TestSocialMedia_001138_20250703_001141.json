@@ -1,0 +1,77 @@
+[
+    {
+        "messages": [
+            {
+                "content": "\ud83d\udcac New thread: Social media conversation test\nPlatform: generic (max 500 chars)\nShare your thoughts! Go viral at 10 likes \ud83d\udd25",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "human",
+                "name": null,
+                "id": "ce248ad7-5572-4f86-b8e4-591be2d93e7b",
+                "example": false
+            },
+            {
+                "content": "\ud83c\udfc1 Conversation ended: Reached maximum rounds (1)\n\ud83d\udcca Total rounds: 1\n\ud83d\udd04 Total turns: 1",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "system",
+                "name": null,
+                "id": "44a8c516-f226-4f47-aa0e-976f8e213c39"
+            }
+        ],
+        "current_speaker": null,
+        "speakers": [
+            "User_001138",
+            "Influencer_001138"
+        ],
+        "turn_count": 1,
+        "max_rounds": 1,
+        "topic": "Social media conversation test",
+        "conversation_ended": true,
+        "mode": "social_media",
+        "speaker_history": [
+            "Influencer_001138"
+        ]
+    },
+    [],
+    {
+        "configurable": {
+            "thread_id": "socialmedia_test_001138",
+            "checkpoint_ns": "",
+            "checkpoint_id": "1f057c3d-256a-6788-8006-714f0b927130"
+        }
+    },
+    {
+        "step": 6,
+        "debug": false,
+        "source": "loop",
+        "writes": {
+            "conclude": {
+                "messages": [
+                    {
+                        "content": "\ud83c\udfc1 Conversation ended: Reached maximum rounds (1)\n\ud83d\udcca Total rounds: 1\n\ud83d\udd04 Total turns: 1",
+                        "additional_kwargs": {},
+                        "response_metadata": {},
+                        "type": "system",
+                        "name": null,
+                        "id": "44a8c516-f226-4f47-aa0e-976f8e213c39"
+                    }
+                ],
+                "current_speaker": null,
+                "conversation_ended": true
+            }
+        },
+        "parents": {},
+        "thread_id": "socialmedia_test_001138",
+        "checkpoint_mode": "sync"
+    },
+    "2025-07-03T04:11:40.761879+00:00",
+    {
+        "configurable": {
+            "thread_id": "socialmedia_test_001138",
+            "checkpoint_ns": "",
+            "checkpoint_id": "1f057c3d-2566-6b3b-8005-3be27614cd93"
+        }
+    },
+    []
+]

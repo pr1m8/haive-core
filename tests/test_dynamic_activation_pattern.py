@@ -9,8 +9,6 @@ Based on:
 - Real Azure OpenAI integration for testing
 """
 
-from typing import Any, Dict, List, Optional
-
 import pytest
 from langchain_core.tools import tool
 
@@ -547,7 +545,7 @@ class TestDynamicActivationPerformance:
             components.append(component)
 
         # Perform multiple activation/deactivation cycles
-        for cycle in range(100):
+        for _cycle in range(100):
             # Activate random components
             for i in range(0, 10, 2):  # Even numbered components
                 state.activate_component(f"comp_{i:03d}")

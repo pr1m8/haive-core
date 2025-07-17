@@ -1,0 +1,395 @@
+[
+    {
+        "messages": [
+            {
+                "content": "Current Section: Introduction\nYour total contributions: 0\nFormat: markdown\n\nCurrent content:\n[Alice_235106]: [Error from Alice_235106]: consuming input failed: SSL connection has been closed unexpectedly",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "system",
+                "name": null,
+                "id": "9eff9e02-2d37-4485-904e-8f19ca67414d"
+            },
+            {
+                "content": "Build upon or enhance the existing content. Be constructive and collaborative.",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "system",
+                "name": null,
+                "id": "90c4caae-4880-4da8-b3f2-494f708ad851"
+            },
+            {
+                "content": "Hello agents, please introduce yourselves",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "human",
+                "name": null,
+                "id": "76745839-3d81-4283-bf4e-9a92c1f394f6",
+                "example": false
+            },
+            {
+                "content": "\ud83d\udcdd Collaborative Session: Collaborative Document\n\nTopic: Testing message persistence\n\nWe'll work together on these sections:\n- Introduction\n- Discussion\n\nFormat: markdown\nMin contributions per section: 1\n\nLet's start with: Introduction",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "human",
+                "name": null,
+                "id": "29ba2ddd-384d-4e7d-9c77-13eed2760361",
+                "example": false
+            },
+            {
+                "content": "[Error from Alice_235106]: consuming input failed: SSL connection has been closed unexpectedly",
+                "additional_kwargs": {
+                    "invalid_tool_calls": [],
+                    "usage_metadata": null
+                },
+                "response_metadata": {},
+                "type": "ai",
+                "name": "Alice_235106",
+                "id": "b94d1c38-d292-4915-be10-1f60e1559ab9",
+                "example": false,
+                "tool_calls": [],
+                "invalid_tool_calls": [],
+                "usage_metadata": null
+            },
+            {
+                "content": "Bob here: \n\nHello everyone, I'm Bob, your collaborative assistant for this session. My role is to help facilitate the discussion and ensure we are all on the same page, literally and figuratively. I'm excited to work with you on testing message persistence and eager to see what insights we'll gather from this process. Let's kick things off with a thorough introduction! If you have any questions or items you want to include, feel free to jump in!",
+                "additional_kwargs": {
+                    "refusal": null
+                },
+                "response_metadata": {
+                    "token_usage": {
+                        "completion_tokens": 90,
+                        "prompt_tokens": 169,
+                        "total_tokens": 259,
+                        "completion_tokens_details": {
+                            "accepted_prediction_tokens": 0,
+                            "audio_tokens": 0,
+                            "reasoning_tokens": 0,
+                            "rejected_prediction_tokens": 0
+                        },
+                        "prompt_tokens_details": {
+                            "audio_tokens": 0,
+                            "cached_tokens": 0
+                        }
+                    },
+                    "model_name": "gpt-4o-2024-08-06",
+                    "system_fingerprint": "fp_ee1d74bde0",
+                    "prompt_filter_results": [
+                        {
+                            "prompt_index": 0,
+                            "content_filter_results": {
+                                "hate": {
+                                    "filtered": false,
+                                    "severity": "safe"
+                                },
+                                "self_harm": {
+                                    "filtered": false,
+                                    "severity": "safe"
+                                },
+                                "sexual": {
+                                    "filtered": false,
+                                    "severity": "safe"
+                                },
+                                "violence": {
+                                    "filtered": false,
+                                    "severity": "safe"
+                                }
+                            }
+                        }
+                    ],
+                    "finish_reason": "stop",
+                    "logprobs": null,
+                    "content_filter_results": {
+                        "hate": {
+                            "filtered": false,
+                            "severity": "safe"
+                        },
+                        "self_harm": {
+                            "filtered": false,
+                            "severity": "safe"
+                        },
+                        "sexual": {
+                            "filtered": false,
+                            "severity": "safe"
+                        },
+                        "violence": {
+                            "filtered": false,
+                            "severity": "safe"
+                        }
+                    }
+                },
+                "type": "ai",
+                "name": null,
+                "id": "run--5952835b-7835-4917-8976-6141e59090ba-0",
+                "example": false,
+                "tool_calls": [],
+                "invalid_tool_calls": [],
+                "usage_metadata": {
+                    "input_tokens": 169,
+                    "output_tokens": 90,
+                    "total_tokens": 259,
+                    "input_token_details": {
+                        "audio": 0,
+                        "cache_read": 0
+                    },
+                    "output_token_details": {
+                        "audio": 0,
+                        "reasoning": 0
+                    }
+                }
+            },
+            {
+                "content": "Current Section: Discussion\nYour total contributions: 0\nFormat: markdown\n\nCurrent content:\n[Alice_235106]: [Error from Alice_235106]: consuming input failed: SSL connection has been closed unexpectedly",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "system",
+                "name": null,
+                "id": "a51f81e6-9e17-4587-8501-9ef6d4e14465"
+            },
+            {
+                "content": "Build upon or enhance the existing content. Be constructive and collaborative.",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "system",
+                "name": null,
+                "id": "85efd86c-8d85-424d-9fa5-9de1e419e4ac"
+            },
+            {
+                "content": "\u2705 Section 'Introduction' complete. Moving to 'Discussion'.",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "system",
+                "name": null,
+                "id": "4468bd52-f479-46b9-91be-c1485546caf2"
+            },
+            {
+                "content": "[Error from Alice_235106]: consuming input failed: SSL connection has been closed unexpectedly",
+                "additional_kwargs": {
+                    "invalid_tool_calls": [],
+                    "usage_metadata": null
+                },
+                "response_metadata": {},
+                "type": "ai",
+                "name": "Alice_235106",
+                "id": "376cc34a-92d6-4dc3-af4b-a8f33c837740",
+                "example": false,
+                "tool_calls": [],
+                "invalid_tool_calls": [],
+                "usage_metadata": null
+            },
+            {
+                "content": "Bob here: \n\nMoving into the Discussion phase, let's focus on the concept of message persistence, which is crucial for maintaining seamless communication. Message persistence ensures that data is retained and can be retrieved after being sent and received, even if connection interruptions occur, as we've seen with Alice's situation. \n\nHere are a few points we might want to discuss:\n1. **Challenges:** What are the common issues faced with message persistence, such as SSL connection errors or unexpected closures?\n2. **Solutions:** What technologies or approaches can help improve message persistence? Are there specific protocols or security measures that work well?\n3. **Examples:** Have you experienced message persistence issues in your projects? How were they resolved?\n\nI invite everyone to contribute their thoughts and experiences, as well as any questions or topics you'd like to explore further in this session.",
+                "additional_kwargs": {
+                    "refusal": null
+                },
+                "response_metadata": {
+                    "token_usage": {
+                        "completion_tokens": 167,
+                        "prompt_tokens": 369,
+                        "total_tokens": 536,
+                        "completion_tokens_details": {
+                            "accepted_prediction_tokens": 0,
+                            "audio_tokens": 0,
+                            "reasoning_tokens": 0,
+                            "rejected_prediction_tokens": 0
+                        },
+                        "prompt_tokens_details": {
+                            "audio_tokens": 0,
+                            "cached_tokens": 0
+                        }
+                    },
+                    "model_name": "gpt-4o-2024-08-06",
+                    "system_fingerprint": "fp_ee1d74bde0",
+                    "prompt_filter_results": [
+                        {
+                            "prompt_index": 0,
+                            "content_filter_results": {
+                                "hate": {
+                                    "filtered": false,
+                                    "severity": "safe"
+                                },
+                                "self_harm": {
+                                    "filtered": false,
+                                    "severity": "safe"
+                                },
+                                "sexual": {
+                                    "filtered": false,
+                                    "severity": "safe"
+                                },
+                                "violence": {
+                                    "filtered": false,
+                                    "severity": "safe"
+                                }
+                            }
+                        }
+                    ],
+                    "finish_reason": "stop",
+                    "logprobs": null,
+                    "content_filter_results": {
+                        "hate": {
+                            "filtered": false,
+                            "severity": "safe"
+                        },
+                        "self_harm": {
+                            "filtered": false,
+                            "severity": "safe"
+                        },
+                        "sexual": {
+                            "filtered": false,
+                            "severity": "safe"
+                        },
+                        "violence": {
+                            "filtered": false,
+                            "severity": "safe"
+                        }
+                    }
+                },
+                "type": "ai",
+                "name": null,
+                "id": "run--871c6d93-fed7-4514-b070-178ddce2968e-0",
+                "example": false,
+                "tool_calls": [],
+                "invalid_tool_calls": [],
+                "usage_metadata": {
+                    "input_tokens": 369,
+                    "output_tokens": 167,
+                    "total_tokens": 536,
+                    "input_token_details": {
+                        "audio": 0,
+                        "cache_read": 0
+                    },
+                    "output_token_details": {
+                        "audio": 0,
+                        "reasoning": 0
+                    }
+                }
+            }
+        ]
+    },
+    [],
+    {
+        "configurable": {
+            "thread_id": "Bob_235106_agent_de0578fa",
+            "checkpoint_ns": "",
+            "checkpoint_id": "1f057c12-c960-65e6-8004-47037ed01db1"
+        }
+    },
+    {
+        "step": 4,
+        "debug": false,
+        "source": "loop",
+        "writes": {
+            "agent_node": {
+                "messages": {
+                    "content": "Bob here: \n\nMoving into the Discussion phase, let's focus on the concept of message persistence, which is crucial for maintaining seamless communication. Message persistence ensures that data is retained and can be retrieved after being sent and received, even if connection interruptions occur, as we've seen with Alice's situation. \n\nHere are a few points we might want to discuss:\n1. **Challenges:** What are the common issues faced with message persistence, such as SSL connection errors or unexpected closures?\n2. **Solutions:** What technologies or approaches can help improve message persistence? Are there specific protocols or security measures that work well?\n3. **Examples:** Have you experienced message persistence issues in your projects? How were they resolved?\n\nI invite everyone to contribute their thoughts and experiences, as well as any questions or topics you'd like to explore further in this session.",
+                    "additional_kwargs": {
+                        "refusal": null
+                    },
+                    "response_metadata": {
+                        "logprobs": null,
+                        "model_name": "gpt-4o-2024-08-06",
+                        "token_usage": {
+                            "total_tokens": 536,
+                            "prompt_tokens": 369,
+                            "completion_tokens": 167,
+                            "prompt_tokens_details": {
+                                "audio_tokens": 0,
+                                "cached_tokens": 0
+                            },
+                            "completion_tokens_details": {
+                                "audio_tokens": 0,
+                                "reasoning_tokens": 0,
+                                "accepted_prediction_tokens": 0,
+                                "rejected_prediction_tokens": 0
+                            }
+                        },
+                        "finish_reason": "stop",
+                        "system_fingerprint": "fp_ee1d74bde0",
+                        "prompt_filter_results": [
+                            {
+                                "prompt_index": 0,
+                                "content_filter_results": {
+                                    "hate": {
+                                        "filtered": false,
+                                        "severity": "safe"
+                                    },
+                                    "sexual": {
+                                        "filtered": false,
+                                        "severity": "safe"
+                                    },
+                                    "violence": {
+                                        "filtered": false,
+                                        "severity": "safe"
+                                    },
+                                    "self_harm": {
+                                        "filtered": false,
+                                        "severity": "safe"
+                                    }
+                                }
+                            }
+                        ],
+                        "content_filter_results": {
+                            "hate": {
+                                "filtered": false,
+                                "severity": "safe"
+                            },
+                            "sexual": {
+                                "filtered": false,
+                                "severity": "safe"
+                            },
+                            "violence": {
+                                "filtered": false,
+                                "severity": "safe"
+                            },
+                            "self_harm": {
+                                "filtered": false,
+                                "severity": "safe"
+                            }
+                        }
+                    },
+                    "type": "ai",
+                    "name": null,
+                    "id": "run--871c6d93-fed7-4514-b070-178ddce2968e-0",
+                    "example": false,
+                    "tool_calls": [],
+                    "invalid_tool_calls": [],
+                    "usage_metadata": {
+                        "input_tokens": 369,
+                        "output_tokens": 167,
+                        "total_tokens": 536,
+                        "input_token_details": {
+                            "audio": 0,
+                            "cache_read": 0
+                        },
+                        "output_token_details": {
+                            "audio": 0,
+                            "reasoning": 0
+                        }
+                    }
+                }
+            }
+        },
+        "parents": {},
+        "thread_id": "content_test_235106",
+        "langgraph_node": "execute_agent",
+        "langgraph_path": [
+            "__pregel_pull",
+            "execute_agent"
+        ],
+        "langgraph_step": 91,
+        "checkpoint_mode": "sync",
+        "recursion_limit": 50,
+        "langgraph_triggers": [
+            "branch:to:execute_agent"
+        ],
+        "langgraph_checkpoint_ns": "execute_agent:d9686015-8a7a-e76d-ec23-cb9e7a6049c2"
+    },
+    "2025-07-03T03:52:43.681922+00:00",
+    {
+        "configurable": {
+            "thread_id": "Bob_235106_agent_de0578fa",
+            "checkpoint_ns": "",
+            "checkpoint_id": "1f057c12-b974-69c2-8003-8073a7a9192f"
+        }
+    },
+    []
+]

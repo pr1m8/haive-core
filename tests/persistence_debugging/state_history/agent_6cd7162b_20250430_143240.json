@@ -1,0 +1,43 @@
+[
+  {
+    "summary": "This document offers a comprehensive overview of machine learning, highlighting deep learning architectures and their application in natural language processing (NLP) through transformers. Additionally, it provides an overview of AI applications, showcasing the practical implementation and impact of artificial intelligence across various fields.",
+    "contents": [
+      "This is a test document about machine learning.",
+      "This document expands on deep learning architectures.",
+      "It also discusses how transformers are used in NLP.",
+      "Finally, it provides an overview of applications of AI."
+    ],
+    "index": 4
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "b4a1d17e-f9f9-471e-92aa-6b22dcb117da",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f025f18-10c7-6249-8004-b294c2617f5d"
+    }
+  },
+  {
+    "step": 4,
+    "debug": true,
+    "source": "loop",
+    "writes": {
+      "refine_summary": {
+        "summary": "This document offers a comprehensive overview of machine learning, highlighting deep learning architectures and their application in natural language processing (NLP) through transformers. Additionally, it provides an overview of AI applications, showcasing the practical implementation and impact of artificial intelligence across various fields."
+      }
+    },
+    "parents": {},
+    "thread_id": "b4a1d17e-f9f9-471e-92aa-6b22dcb117da",
+    "checkpoint_mode": "async",
+    "recursion_limit": 200
+  },
+  "2025-04-30T18:32:43.090776+00:00",
+  {
+    "configurable": {
+      "thread_id": "b4a1d17e-f9f9-471e-92aa-6b22dcb117da",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f025f18-086e-61b0-8003-4eef29e5d53c"
+    }
+  },
+  []
+]

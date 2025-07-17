@@ -1,0 +1,223 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Create a plan for a day trip, then calculate how many hours we'll need if we spend 2 hours at each location",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "f4902c34-4d32-464a-a519-3b7fbd277090",
+        "example": false
+      },
+      {
+        "content": "Sure! Here\u2019s a sample day trip itinerary with several locations you might enjoy:\n\n### Day Trip Itinerary\n\n1. **Early Morning: Visit a Local Cafe**\n   - **Activity:** Enjoy breakfast and coffee.\n   - **Duration:** 2 hours\n\n2. **Mid-Morning: Explore a Local Museum**\n   - **Activity:** Tour exhibits and learn about history/art.\n   - **Duration:** 2 hours\n\n3. **Late Morning: Visit a Botanical Garden**\n   - **Activity:** Walk through gardens and enjoy nature.\n   - **Duration:** 2 hours\n\n4. **Lunch: Dine at a Popular Restaurant**\n   - **Activity:** Enjoy a local meal.\n   - **Duration:** 2 hours\n\n5. **Afternoon: Explore a Historic Site**\n   - **Activity:** Guided tour and explore historic landmarks.\n   - **Duration:** 2 hours\n\n6. **Late Afternoon: Visit a Local Park**\n   - **Activity:** Relax and engage in recreational activities.\n   - **Duration:** 2 hours\n\n### Time Calculation\n\nLet's add up the time for each location:\n\n- Local Cafe: 2 hours\n- Museum: 2 hours\n- Botanical Garden: 2 hours\n- Restaurant: 2 hours\n- Historic Site: 2 hours\n- Park: 2 hours\n\nTotal time at each location: \\(6 \\times 2 = 12\\) hours\n\n### Note\n\n- **Travel Time:** Depending on the distance between each location, you may need to account for travel time, potentially extending the total duration of your day trip.\n\n- **Adjustments:** You might want to add breaks or adjust the time at each location based on your interests and pace.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 351,
+            "prompt_tokens": 31,
+            "total_tokens": 382,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--b5720183-fd7b-4be3-93f8-b3fa4c9d4d48-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 31,
+          "output_tokens": 351,
+          "total_tokens": 382,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "6cc43f75-0dd9-4686-ad18-527de0920c29",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04f04c-2e66-694b-8001-c055928a69f7"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "Sure! Here\u2019s a sample day trip itinerary with several locations you might enjoy:\n\n### Day Trip Itinerary\n\n1. **Early Morning: Visit a Local Cafe**\n   - **Activity:** Enjoy breakfast and coffee.\n   - **Duration:** 2 hours\n\n2. **Mid-Morning: Explore a Local Museum**\n   - **Activity:** Tour exhibits and learn about history/art.\n   - **Duration:** 2 hours\n\n3. **Late Morning: Visit a Botanical Garden**\n   - **Activity:** Walk through gardens and enjoy nature.\n   - **Duration:** 2 hours\n\n4. **Lunch: Dine at a Popular Restaurant**\n   - **Activity:** Enjoy a local meal.\n   - **Duration:** 2 hours\n\n5. **Afternoon: Explore a Historic Site**\n   - **Activity:** Guided tour and explore historic landmarks.\n   - **Duration:** 2 hours\n\n6. **Late Afternoon: Visit a Local Park**\n   - **Activity:** Relax and engage in recreational activities.\n   - **Duration:** 2 hours\n\n### Time Calculation\n\nLet's add up the time for each location:\n\n- Local Cafe: 2 hours\n- Museum: 2 hours\n- Botanical Garden: 2 hours\n- Restaurant: 2 hours\n- Historic Site: 2 hours\n- Park: 2 hours\n\nTotal time at each location: \\(6 \\times 2 = 12\\) hours\n\n### Note\n\n- **Travel Time:** Depending on the distance between each location, you may need to account for travel time, potentially extending the total duration of your day trip.\n\n- **Adjustments:** You might want to add breaks or adjust the time at each location based on your interests and pace.",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 351,
+              "prompt_tokens": 31,
+              "total_tokens": 382,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--b5720183-fd7b-4be3-93f8-b3fa4c9d4d48-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 31,
+            "output_tokens": 351,
+            "total_tokens": 382,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 1,
+    "parents": {},
+    "thread_id": "75469e6b-42f6-4950-99e3-6883831a56d2",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 2,
+    "langgraph_node": "delegate_to_agent",
+    "langgraph_triggers": ["branch:to:delegate_to_agent"],
+    "langgraph_path": ["__pregel_pull", "delegate_to_agent"],
+    "langgraph_checkpoint_ns": "delegate_to_agent:8f748f41-a476-aa0d-816e-28edd3096627"
+  },
+  "2025-06-22T01:03:51.682885+00:00",
+  {
+    "configurable": {
+      "thread_id": "6cc43f75-0dd9-4686-ad18-527de0920c29",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04f04c-15e7-6eeb-8000-faf43b679c1c"
+    }
+  },
+  []
+]

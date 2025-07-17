@@ -573,7 +573,8 @@ class TestAutoLoaderUtilities:
             assert doc.metadata["loader_used"] == "pypdf"
             assert doc.metadata["confidence"] == mock_source_info.confidence
             assert "loaded_at" in doc.metadata
-            assert doc.metadata["original"] == "metadata"  # Original metadata preserved
+            # Original metadata preserved
+            assert doc.metadata["original"] == "metadata"
 
 
 class TestConvenienceFunctions:

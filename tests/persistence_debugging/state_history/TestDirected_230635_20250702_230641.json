@@ -1,0 +1,86 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Topic: Planning a project sprint\nLet's begin our directed discussion.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "380300dd-9619-4e48-aba6-23b328859bdc",
+        "example": false
+      },
+      {
+        "content": "[Error from Lead_230635]: consuming input failed: SSL connection has been closed unexpectedly",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "ai",
+        "name": "Lead_230635",
+        "id": "0cf1778c-ae7d-4ae3-b6e3-b79de0983910",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "\ud83c\udfc1 Conversation ended: Reached maximum rounds (1)\n\ud83d\udcca Total rounds: 1\n\ud83d\udd04 Total turns: 1",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "system",
+        "name": null,
+        "id": "95be21a1-9d66-443d-87a4-6db7b1af6988"
+      }
+    ],
+    "current_speaker": null,
+    "speakers": ["Lead_230635", "Member_230635"],
+    "turn_count": 1,
+    "max_rounds": 1,
+    "topic": "Planning a project sprint",
+    "conversation_ended": true,
+    "mode": "directed",
+    "speaker_history": ["Lead_230635"],
+    "mentioned_speakers": [],
+    "pending_speakers": []
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "directed_test_230635",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057bab-e305-67f5-8006-23e809c74331"
+    }
+  },
+  {
+    "step": 6,
+    "debug": false,
+    "source": "loop",
+    "writes": {
+      "conclude": {
+        "messages": [
+          {
+            "content": "\ud83c\udfc1 Conversation ended: Reached maximum rounds (1)\n\ud83d\udcca Total rounds: 1\n\ud83d\udd04 Total turns: 1",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "system",
+            "name": null,
+            "id": "95be21a1-9d66-443d-87a4-6db7b1af6988"
+          }
+        ],
+        "current_speaker": null,
+        "conversation_ended": true
+      }
+    },
+    "parents": {},
+    "thread_id": "directed_test_230635",
+    "checkpoint_mode": "sync"
+  },
+  "2025-07-03T03:06:41.485812+00:00",
+  {
+    "configurable": {
+      "thread_id": "directed_test_230635",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057bab-e304-62b2-8005-db9dbc329840"
+    }
+  },
+  []
+]

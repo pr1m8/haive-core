@@ -626,7 +626,8 @@ def test_graph_validation_and_cycles():
     no_cycles_graph.add_edge("query_analysis", "retrieval")
     no_cycles_graph.add_edge("retrieval", "generation")
     no_cycles_graph.add_edge("generation", "feedback")
-    no_cycles_graph.add_edge("feedback", "query_analysis")  # Cycle for refinement
+    # Cycle for refinement
+    no_cycles_graph.add_edge("feedback", "query_analysis")
 
     # Validate the graph - should have issues due to cycle
     validation_issues = no_cycles_graph.validate_graph()

@@ -1,0 +1,218 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Hello, I'd like to learn about artificial intelligence.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "4ceab35b-b5b5-4068-a355-f70b211b75f8",
+        "example": false
+      },
+      {
+        "content": "That's great! Artificial intelligence (AI) is a fascinating and rapidly evolving field. Here are some key points to get you started:\n\n1. **Definition:** AI refers to the simulation of human intelligence processes by machines, especially computer systems. It involves creating algorithms that allow machines to perform tasks typically requiring human intelligence, such as visual perception, speech recognition, decision-making, and language translation.\n\n2. **Types of AI:**\n   - **Reactive Machines:** These are the most basic form of AI, capable of perceiving the world directly but not storing memories or past experiences. They respond to specific situations based on pre-set rules.\n   - **Limited Memory:** These AI systems can use past experiences to inform future actions, usually through supervisory training where they categorize data.\n   - **Theory of Mind:** This is a concept that AI will one day have the ability to understand and represent human emotions, beliefs, and thoughts. It's a future possibility.\n   - **Self-aware AI:** This is the theoretical development of AI that is both aware of its existence and capable of independently expressing human-like consciousness. It's still speculative.\n\n3. **Applications:**\n   - **Natural Language Processing (NLP):** Enables machines to understand and interact using human language.\n   - **Computer Vision:** Allows AI systems to interpret and make decisions based on visual data, such as facial recognition and object detection.\n   - **Robotics:** Robots powered by AI can perform tasks ranging from simple manufacturing chores to complex medical surgeries.\n   - **Expert Systems:** These emulate human decision-making and problem-solving for specific tasks, such as medical diagnosis.\n\n4. **Machine Learning and Deep Learning:**\n   - **Machine Learning (ML):** A subset of AI, focused on the idea that systems can learn from data, identify patterns, and make decisions without being explicitly programmed.\n   - **Deep Learning:** A subfield of ML involving neural networks with many layers (deep networks) that can learn complex patterns in large amounts of data.\n\n5. **Ethical and Societal Impact:** AI raises several ethical questions about privacy, bias, and employment displacement. It's important to ensure AI development considers these implications to create equitable and safe technologies.\n\n6. **Current Trends:** AI is being integrated into various fields, such as healthcare, finance, autonomous vehicles, and virtual assistants like Siri or Alexa.\n\nTo delve deeper into AI, consider exploring these resources:\n- **Books:** \"Artificial Intelligence: A Guide to Intelligent Systems\" by Michael Negnevitsky, \"Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow\" by Aur\u00e9lien G\u00e9ron.\n- **Online Courses:** Platforms like Coursera, edX, and Udacity offer courses ranging from introductory to advanced levels.\n- **Research Papers and Journals:** Follow publications from journals like \"Artificial Intelligence\" and conferences like NeurIPS or ICCV.\n\nFeel free to ask more specific questions or topics you're interested in!",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 596,
+            "prompt_tokens": 17,
+            "total_tokens": 613,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--0a48d090-27ff-4a08-a2bf-a50a950aa7a4-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 17,
+          "output_tokens": 596,
+          "total_tokens": 613,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "76bfa125-722b-4f63-845a-c4ed09f50686",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04ef12-fcf7-64e9-8001-e8c727cc481f"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "That's great! Artificial intelligence (AI) is a fascinating and rapidly evolving field. Here are some key points to get you started:\n\n1. **Definition:** AI refers to the simulation of human intelligence processes by machines, especially computer systems. It involves creating algorithms that allow machines to perform tasks typically requiring human intelligence, such as visual perception, speech recognition, decision-making, and language translation.\n\n2. **Types of AI:**\n   - **Reactive Machines:** These are the most basic form of AI, capable of perceiving the world directly but not storing memories or past experiences. They respond to specific situations based on pre-set rules.\n   - **Limited Memory:** These AI systems can use past experiences to inform future actions, usually through supervisory training where they categorize data.\n   - **Theory of Mind:** This is a concept that AI will one day have the ability to understand and represent human emotions, beliefs, and thoughts. It's a future possibility.\n   - **Self-aware AI:** This is the theoretical development of AI that is both aware of its existence and capable of independently expressing human-like consciousness. It's still speculative.\n\n3. **Applications:**\n   - **Natural Language Processing (NLP):** Enables machines to understand and interact using human language.\n   - **Computer Vision:** Allows AI systems to interpret and make decisions based on visual data, such as facial recognition and object detection.\n   - **Robotics:** Robots powered by AI can perform tasks ranging from simple manufacturing chores to complex medical surgeries.\n   - **Expert Systems:** These emulate human decision-making and problem-solving for specific tasks, such as medical diagnosis.\n\n4. **Machine Learning and Deep Learning:**\n   - **Machine Learning (ML):** A subset of AI, focused on the idea that systems can learn from data, identify patterns, and make decisions without being explicitly programmed.\n   - **Deep Learning:** A subfield of ML involving neural networks with many layers (deep networks) that can learn complex patterns in large amounts of data.\n\n5. **Ethical and Societal Impact:** AI raises several ethical questions about privacy, bias, and employment displacement. It's important to ensure AI development considers these implications to create equitable and safe technologies.\n\n6. **Current Trends:** AI is being integrated into various fields, such as healthcare, finance, autonomous vehicles, and virtual assistants like Siri or Alexa.\n\nTo delve deeper into AI, consider exploring these resources:\n- **Books:** \"Artificial Intelligence: A Guide to Intelligent Systems\" by Michael Negnevitsky, \"Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow\" by Aur\u00e9lien G\u00e9ron.\n- **Online Courses:** Platforms like Coursera, edX, and Udacity offer courses ranging from introductory to advanced levels.\n- **Research Papers and Journals:** Follow publications from journals like \"Artificial Intelligence\" and conferences like NeurIPS or ICCV.\n\nFeel free to ask more specific questions or topics you're interested in!",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 596,
+              "prompt_tokens": 17,
+              "total_tokens": 613,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--0a48d090-27ff-4a08-a2bf-a50a950aa7a4-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 17,
+            "output_tokens": 596,
+            "total_tokens": 613,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 1,
+    "parents": {},
+    "thread_id": "76bfa125-722b-4f63-845a-c4ed09f50686",
+    "debug": false,
+    "checkpoint_mode": "sync"
+  },
+  "2025-06-21T22:43:44.469510+00:00",
+  {
+    "configurable": {
+      "thread_id": "76bfa125-722b-4f63-845a-c4ed09f50686",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04ef12-d42f-6bed-8000-b892a653b512"
+    }
+  },
+  []
+]

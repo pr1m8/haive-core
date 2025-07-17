@@ -1,0 +1,50 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Hello, my name is PostgresUser.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "7f42030a-b0ea-4457-8838-9cbc2bafcc46",
+        "example": false
+      },
+      {
+        "content": "What's my name?",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "8cae101a-1ac5-4d60-9012-5ee7631796ae",
+        "example": false
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "postgres_thread_d6c02a11",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f01b500-9cc4-6691-8004-2a8d72da9dfa"
+    }
+  },
+  {
+    "step": 4,
+    "source": "loop",
+    "writes": {
+      "process": null
+    },
+    "parents": {},
+    "thread_id": "postgres_thread_d6c02a11"
+  },
+  "2025-04-17T05:51:42.420114+00:00",
+  {
+    "configurable": {
+      "thread_id": "postgres_thread_d6c02a11",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f01b500-9c3f-6b16-8003-6828fd029122"
+    }
+  },
+  []
+]

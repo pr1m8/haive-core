@@ -3,13 +3,14 @@
 
 import logging
 
+from haive.core.engine.aug_llm.config import AugLLMConfig
+from haive.core.schema.composer import SchemaComposer
+
 # Set up logging to see debug messages
 logging.basicConfig(
     level=logging.DEBUG, format="%(name)s - %(levelname)s - %(message)s"
 )
 
-from haive.core.engine.aug_llm.config import AugLLMConfig
-from haive.core.schema.composer import SchemaComposer
 
 # Create AugLLMConfig
 config = AugLLMConfig(temperature=0.7)

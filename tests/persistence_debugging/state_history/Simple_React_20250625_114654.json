@@ -1,0 +1,233 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Test",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "4afdeae4-0ab9-4a05-ad8d-0c23717bce85",
+        "example": false
+      },
+      {
+        "content": "Certainly! If you have any questions or need assistance, feel free to ask.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 17,
+            "prompt_tokens": 8,
+            "total_tokens": 25,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--8b1815be-9dc7-4341-807d-cecad7cee522-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 8,
+          "output_tokens": 17,
+          "total_tokens": 25,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "4113eb0e-8808-4b8a-8665-102821e0ec52",
+      "checkpoint_ns": "Simple React:c90b60d4-242e-c77e-de5f-cccdeb827bdb",
+      "checkpoint_id": "1f051db9-e13a-6b27-8001-bef798c6948d",
+      "checkpoint_map": {
+        "": "1f051db9-dcee-6322-8000-e28a66e4e970",
+        "Simple React:c90b60d4-242e-c77e-de5f-cccdeb827bdb": "1f051db9-e13a-6b27-8001-bef798c6948d"
+      }
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "Certainly! If you have any questions or need assistance, feel free to ask.",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 17,
+              "prompt_tokens": 8,
+              "total_tokens": 25,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--8b1815be-9dc7-4341-807d-cecad7cee522-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 8,
+            "output_tokens": 17,
+            "total_tokens": 25,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 1,
+    "parents": {
+      "": "1f051db9-dcee-6322-8000-e28a66e4e970"
+    },
+    "thread_id": "4113eb0e-8808-4b8a-8665-102821e0ec52",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 1,
+    "langgraph_node": "Simple React",
+    "langgraph_triggers": ["branch:to:Simple React"],
+    "langgraph_path": ["__pregel_pull", "Simple React"],
+    "langgraph_checkpoint_ns": "Simple React:c90b60d4-242e-c77e-de5f-cccdeb827bdb"
+  },
+  "2025-06-25T15:46:54.026204+00:00",
+  {
+    "configurable": {
+      "thread_id": "4113eb0e-8808-4b8a-8665-102821e0ec52",
+      "checkpoint_ns": "Simple React:c90b60d4-242e-c77e-de5f-cccdeb827bdb",
+      "checkpoint_id": "1f051db9-dd1b-6900-8000-5f3ef92b977d",
+      "checkpoint_map": {
+        "": "1f051db9-dcee-6322-8000-e28a66e4e970",
+        "Simple React:c90b60d4-242e-c77e-de5f-cccdeb827bdb": "1f051db9-dd1b-6900-8000-5f3ef92b977d"
+      }
+    }
+  },
+  []
+]

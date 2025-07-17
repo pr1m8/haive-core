@@ -86,7 +86,6 @@ def test_web_loaders_system():
     web_stats = web_sources_module.get_web_sources_statistics()
     web_validation = web_sources_module.validate_web_sources()
 
-
     assert web_validation, "Web source validation failed"
     assert (
         web_stats["total_web_sources"] >= 8

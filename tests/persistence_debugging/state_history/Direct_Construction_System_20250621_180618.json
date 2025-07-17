@@ -1,0 +1,177 @@
+[
+  {
+    "__shared_fields__": [
+      "active_agent_id",
+      "shared_state",
+      "structured_outputs"
+    ],
+    "__serializable_reducers__": {
+      "messages": "add_messages"
+    },
+    "__engine_io_mappings__": {
+      "multi_agent": {
+        "inputs": ["messages", "active_agent_id", "shared_state", "agents"],
+        "outputs": [
+          "messages",
+          "outputs",
+          "structured_outputs",
+          "active_agent_id",
+          "shared_state",
+          "agents",
+          "tool_routes",
+          "agent_tool_routes",
+          "available_nodes"
+        ]
+      },
+      "*": {
+        "inputs": ["messages", "active_agent_id", "shared_state", "agents"],
+        "outputs": [
+          "messages",
+          "outputs",
+          "structured_outputs",
+          "active_agent_id",
+          "shared_state",
+          "agents",
+          "tool_routes",
+          "agent_tool_routes",
+          "available_nodes"
+        ]
+      }
+    },
+    "__input_fields__": {},
+    "__output_fields__": {
+      "*": [
+        "messages",
+        "outputs",
+        "structured_outputs",
+        "active_agent_id",
+        "shared_state",
+        "agents",
+        "tool_routes",
+        "agent_tool_routes",
+        "available_nodes"
+      ]
+    },
+    "__structured_models__": {},
+    "__structured_model_fields__": {},
+    "messages": [
+      {
+        "content": "First plan a day trip with at least 3 stops, then calculate the total hours",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "f1aea354-d4cd-4d07-a0ff-3bed851d75cf",
+        "example": false
+      }
+    ],
+    "agents": {},
+    "outputs": {},
+    "tool_routes": {},
+    "agent_tool_routes": {},
+    "available_nodes": [],
+    "shared_state": {},
+    "structured_outputs": {}
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "7f06c64f-53e5-4e33-957b-6d44271f1afb",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04eebf-4fc0-6cb8-8004-db5b53e71023"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "process_results_decision": {
+        "__shared_fields__": [
+          "active_agent_id",
+          "shared_state",
+          "structured_outputs"
+        ],
+        "__serializable_reducers__": {
+          "messages": "add_messages"
+        },
+        "__engine_io_mappings__": {
+          "multi_agent": {
+            "inputs": ["messages", "active_agent_id", "shared_state", "agents"],
+            "outputs": [
+              "messages",
+              "outputs",
+              "structured_outputs",
+              "active_agent_id",
+              "shared_state",
+              "agents",
+              "tool_routes",
+              "agent_tool_routes",
+              "available_nodes"
+            ]
+          },
+          "*": {
+            "inputs": ["messages", "active_agent_id", "shared_state", "agents"],
+            "outputs": [
+              "messages",
+              "outputs",
+              "structured_outputs",
+              "active_agent_id",
+              "shared_state",
+              "agents",
+              "tool_routes",
+              "agent_tool_routes",
+              "available_nodes"
+            ]
+          }
+        },
+        "__input_fields__": {},
+        "__output_fields__": {
+          "*": [
+            "messages",
+            "outputs",
+            "structured_outputs",
+            "active_agent_id",
+            "shared_state",
+            "agents",
+            "tool_routes",
+            "agent_tool_routes",
+            "available_nodes"
+          ]
+        },
+        "__structured_models__": {},
+        "__structured_model_fields__": {},
+        "messages": [
+          {
+            "content": "First plan a day trip with at least 3 stops, then calculate the total hours",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "f1aea354-d4cd-4d07-a0ff-3bed851d75cf",
+            "example": false
+          }
+        ],
+        "agents": {},
+        "outputs": {},
+        "tool_routes": {},
+        "agent_tool_routes": {},
+        "available_nodes": [],
+        "shared_state": {},
+        "structured_outputs": {}
+      }
+    },
+    "step": 4,
+    "parents": {},
+    "thread_id": "7f06c64f-53e5-4e33-957b-6d44271f1afb",
+    "debug": false,
+    "checkpoint_mode": "sync"
+  },
+  "2025-06-21T22:06:18.292539+00:00",
+  {
+    "configurable": {
+      "thread_id": "7f06c64f-53e5-4e33-957b-6d44271f1afb",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04eebf-4fbc-6d8d-8003-d42964a373f9"
+    }
+  },
+  []
+]

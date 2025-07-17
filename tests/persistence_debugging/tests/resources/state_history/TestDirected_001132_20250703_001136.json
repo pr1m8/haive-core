@@ -1,0 +1,79 @@
+[
+    {
+        "messages": [
+            {
+                "content": "Topic: Planning a project sprint\nLet's begin our directed discussion.",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "human",
+                "name": null,
+                "id": "f334476d-0c3d-4803-b271-d3f842ba779f",
+                "example": false
+            },
+            {
+                "content": "\ud83c\udfc1 Conversation ended: Reached maximum rounds (1)\n\ud83d\udcca Total rounds: 1\n\ud83d\udd04 Total turns: 1",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "system",
+                "name": null,
+                "id": "02359801-43d6-461f-b41a-6d0bc457ff30"
+            }
+        ],
+        "current_speaker": null,
+        "speakers": [
+            "Lead_001132",
+            "Member_001132"
+        ],
+        "turn_count": 1,
+        "max_rounds": 1,
+        "topic": "Planning a project sprint",
+        "conversation_ended": true,
+        "mode": "directed",
+        "speaker_history": [
+            "Lead_001132"
+        ],
+        "mentioned_speakers": [],
+        "pending_speakers": []
+    },
+    [],
+    {
+        "configurable": {
+            "thread_id": "directed_test_001132",
+            "checkpoint_ns": "",
+            "checkpoint_id": "1f057c3c-fd06-6128-8006-14d0b16d8499"
+        }
+    },
+    {
+        "step": 6,
+        "debug": false,
+        "source": "loop",
+        "writes": {
+            "conclude": {
+                "messages": [
+                    {
+                        "content": "\ud83c\udfc1 Conversation ended: Reached maximum rounds (1)\n\ud83d\udcca Total rounds: 1\n\ud83d\udd04 Total turns: 1",
+                        "additional_kwargs": {},
+                        "response_metadata": {},
+                        "type": "system",
+                        "name": null,
+                        "id": "02359801-43d6-461f-b41a-6d0bc457ff30"
+                    }
+                ],
+                "current_speaker": null,
+                "conversation_ended": true
+            }
+        },
+        "parents": {},
+        "thread_id": "directed_test_001132",
+        "checkpoint_mode": "sync"
+    },
+    "2025-07-03T04:11:36.526458+00:00",
+    {
+        "configurable": {
+            "thread_id": "directed_test_001132",
+            "checkpoint_ns": "",
+            "checkpoint_id": "1f057c3c-fd04-6c89-8005-35c6a1381f60"
+        }
+    },
+    []
+]

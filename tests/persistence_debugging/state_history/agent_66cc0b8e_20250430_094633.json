@@ -1,0 +1,163 @@
+[
+  {
+    "__shared_fields__": [],
+    "__serializable_reducers__": {},
+    "__engine_io_mappings__": {
+      "engine_fb6788e2": {
+        "inputs": ["messages"],
+        "outputs": ["Steps", "plan"]
+      }
+    },
+    "__input_fields__": {
+      "engine_fb6788e2": ["messages"]
+    },
+    "__output_fields__": {
+      "engine_fb6788e2": ["Steps", "plan"]
+    },
+    "__structured_model_schemas__": {
+      "plan": {
+        "schema": {
+          "properties": {
+            "Steps": {
+              "description": "A list of steps to complete the task",
+              "items": {
+                "type": "string"
+              },
+              "title": "Steps",
+              "type": "array"
+            }
+          },
+          "required": ["Steps"],
+          "title": "Plan",
+          "type": "object"
+        },
+        "model_name": "Plan",
+        "model_module": "__main__"
+      }
+    },
+    "__structured_model_fields__": {
+      "plan": ["Steps"]
+    },
+    "messages": [
+      {
+        "content": "Write a plan for building a website",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": null,
+        "example": false
+      }
+    ],
+    "plan": {
+      "Steps": [
+        "Define the purpose and goals of the website.",
+        "Conduct research to understand the target audience and competitors.",
+        "Choose a domain name and register it.",
+        "Select a web hosting service.",
+        "Plan the website structure and create a sitemap.",
+        "Design the website layout and user interface.",
+        "Develop the website using appropriate technologies (e.g., HTML, CSS, JavaScript).",
+        "Create and integrate content, including text, images, and videos.",
+        "Optimize the website for search engines (SEO).",
+        "Test the website for functionality, usability, and compatibility across different devices and browsers.",
+        "Launch the website and promote it through various channels.",
+        "Monitor website performance and make necessary updates and improvements."
+      ]
+    }
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "991fa9b4-4964-4ee7-990e-d6ef1ca9f787",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f025c98-78cf-6bb7-8001-5d09a89a6b54"
+    }
+  },
+  {
+    "step": 1,
+    "debug": false,
+    "source": "loop",
+    "writes": {
+      "simple_agent_node": {
+        "plan": {
+          "Steps": [
+            "Define the purpose and goals of the website.",
+            "Conduct research to understand the target audience and competitors.",
+            "Choose a domain name and register it.",
+            "Select a web hosting service.",
+            "Plan the website structure and create a sitemap.",
+            "Design the website layout and user interface.",
+            "Develop the website using appropriate technologies (e.g., HTML, CSS, JavaScript).",
+            "Create and integrate content, including text, images, and videos.",
+            "Optimize the website for search engines (SEO).",
+            "Test the website for functionality, usability, and compatibility across different devices and browsers.",
+            "Launch the website and promote it through various channels.",
+            "Monitor website performance and make necessary updates and improvements."
+          ]
+        },
+        "messages": [
+          {
+            "content": "Write a plan for building a website",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null,
+            "example": false
+          }
+        ],
+        "__input_fields__": {
+          "engine_fb6788e2": ["messages"]
+        },
+        "__output_fields__": {
+          "engine_fb6788e2": ["Steps", "plan"]
+        },
+        "__shared_fields__": [],
+        "__engine_io_mappings__": {
+          "engine_fb6788e2": {
+            "inputs": ["messages"],
+            "outputs": ["Steps", "plan"]
+          }
+        },
+        "__serializable_reducers__": {},
+        "__structured_model_fields__": {
+          "plan": ["Steps"]
+        },
+        "__structured_model_schemas__": {
+          "plan": {
+            "schema": {
+              "type": "object",
+              "title": "Plan",
+              "required": ["Steps"],
+              "properties": {
+                "Steps": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Steps",
+                  "description": "A list of steps to complete the task"
+                }
+              }
+            },
+            "model_name": "Plan",
+            "model_module": "__main__"
+          }
+        }
+      }
+    },
+    "parents": {},
+    "thread_id": "991fa9b4-4964-4ee7-990e-d6ef1ca9f787",
+    "recursion_limit": 200
+  },
+  "2025-04-30T13:46:34.130297+00:00",
+  {
+    "configurable": {
+      "thread_id": "991fa9b4-4964-4ee7-990e-d6ef1ca9f787",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f025c98-7806-637d-8000-0ed95a64ae84"
+    }
+  },
+  []
+]

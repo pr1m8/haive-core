@@ -1,0 +1,306 @@
+[
+  {
+    "messages": [
+      {
+        "content": "[@HomeCook]\nStats: 0 likes | 0 followers\nTrending: Nothing trending\nKeep it under 500 characters!",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "system",
+        "name": null,
+        "id": "fa7e9bbb-5ffc-49a0-bee2-0b10a188277b"
+      },
+      {
+        "content": "\ud83d\udc26 New thread: \ud83d\ude05 Tried to make a souffl\u00e9... it's now a pancake. Chef life! \ud83d\udc68\u200d\ud83c\udf73 #CookingFail\nPlatform: twitter (max 280 chars)\nShare your thoughts! Go viral at 5 likes \ud83d\udd25",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "5156fecd-0733-4c1c-a43c-50a374afd85a",
+        "example": false
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "tool_calls": [
+            {
+              "id": "call_xl5uAIFQ9rGjktun4pSx4Cjf",
+              "function": {
+                "arguments": "{\"reply_to\": \"ChefLifeFan\", \"content\": \"\ud83d\ude02 Oh, the classic souffl\u00e9 flop! Don't worry, I call that a 'flat-tastic' pancake transformation! \ud83e\udd5e Maybe it's just the universe saying you needed breakfast instead. \ud83d\ude09 #Souffl\u00e9Savior\"}",
+                "name": "reply_to_post"
+              },
+              "type": "function"
+            },
+            {
+              "id": "call_gVRjmd1HjGCJHgsps0C3AZm7",
+              "function": {
+                "arguments": "{\"post_author\": \"ChefLifeFan\", \"reason\": \"Because who doesn't love a pancake surprise from a souffl\u00e9 attempt? \ud83e\udd23\"}",
+                "name": "like_post"
+              },
+              "type": "function"
+            },
+            {
+              "id": "call_rewvv8k5ZQBPpVMBJQMNF4Eb",
+              "function": {
+                "arguments": "{\"original_author\": \"ChefLifeFan\", \"comment\": \"Chef life indeed! From souffl\u00e9 dreams to pancake reality. Who else has faced the fluffy flop? \ud83e\udd5e\ud83d\ude02 #CookingFail\"}",
+                "name": "share_post"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 165,
+            "prompt_tokens": 260,
+            "total_tokens": 425,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "content_filter_results": {}
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--9a815ac2-1cc8-43b3-a0a3-4cc581702005-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "reply_to_post",
+            "args": {
+              "reply_to": "ChefLifeFan",
+              "content": "\ud83d\ude02 Oh, the classic souffl\u00e9 flop! Don't worry, I call that a 'flat-tastic' pancake transformation! \ud83e\udd5e Maybe it's just the universe saying you needed breakfast instead. \ud83d\ude09 #Souffl\u00e9Savior"
+            },
+            "id": "call_xl5uAIFQ9rGjktun4pSx4Cjf",
+            "type": "tool_call"
+          },
+          {
+            "name": "like_post",
+            "args": {
+              "post_author": "ChefLifeFan",
+              "reason": "Because who doesn't love a pancake surprise from a souffl\u00e9 attempt? \ud83e\udd23"
+            },
+            "id": "call_gVRjmd1HjGCJHgsps0C3AZm7",
+            "type": "tool_call"
+          },
+          {
+            "name": "share_post",
+            "args": {
+              "original_author": "ChefLifeFan",
+              "comment": "Chef life indeed! From souffl\u00e9 dreams to pancake reality. Who else has faced the fluffy flop? \ud83e\udd5e\ud83d\ude02 #CookingFail"
+            },
+            "id": "call_rewvv8k5ZQBPpVMBJQMNF4Eb",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 260,
+          "output_tokens": 165,
+          "total_tokens": 425,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "85cec78d-31bf-4d4d-ba3f-1bdbd6e777c2",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04ee08-d639-6931-8001-762dc3917d92"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "",
+          "additional_kwargs": {
+            "tool_calls": [
+              {
+                "id": "call_xl5uAIFQ9rGjktun4pSx4Cjf",
+                "function": {
+                  "arguments": "{\"reply_to\": \"ChefLifeFan\", \"content\": \"\ud83d\ude02 Oh, the classic souffl\u00e9 flop! Don't worry, I call that a 'flat-tastic' pancake transformation! \ud83e\udd5e Maybe it's just the universe saying you needed breakfast instead. \ud83d\ude09 #Souffl\u00e9Savior\"}",
+                  "name": "reply_to_post"
+                },
+                "type": "function"
+              },
+              {
+                "id": "call_gVRjmd1HjGCJHgsps0C3AZm7",
+                "function": {
+                  "arguments": "{\"post_author\": \"ChefLifeFan\", \"reason\": \"Because who doesn't love a pancake surprise from a souffl\u00e9 attempt? \ud83e\udd23\"}",
+                  "name": "like_post"
+                },
+                "type": "function"
+              },
+              {
+                "id": "call_rewvv8k5ZQBPpVMBJQMNF4Eb",
+                "function": {
+                  "arguments": "{\"original_author\": \"ChefLifeFan\", \"comment\": \"Chef life indeed! From souffl\u00e9 dreams to pancake reality. Who else has faced the fluffy flop? \ud83e\udd5e\ud83d\ude02 #CookingFail\"}",
+                  "name": "share_post"
+                },
+                "type": "function"
+              }
+            ],
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 165,
+              "prompt_tokens": 260,
+              "total_tokens": 425,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "tool_calls",
+            "logprobs": null,
+            "content_filter_results": {}
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--9a815ac2-1cc8-43b3-a0a3-4cc581702005-0",
+          "example": false,
+          "tool_calls": [
+            {
+              "name": "reply_to_post",
+              "args": {
+                "reply_to": "ChefLifeFan",
+                "content": "\ud83d\ude02 Oh, the classic souffl\u00e9 flop! Don't worry, I call that a 'flat-tastic' pancake transformation! \ud83e\udd5e Maybe it's just the universe saying you needed breakfast instead. \ud83d\ude09 #Souffl\u00e9Savior"
+              },
+              "id": "call_xl5uAIFQ9rGjktun4pSx4Cjf",
+              "type": "tool_call"
+            },
+            {
+              "name": "like_post",
+              "args": {
+                "post_author": "ChefLifeFan",
+                "reason": "Because who doesn't love a pancake surprise from a souffl\u00e9 attempt? \ud83e\udd23"
+              },
+              "id": "call_gVRjmd1HjGCJHgsps0C3AZm7",
+              "type": "tool_call"
+            },
+            {
+              "name": "share_post",
+              "args": {
+                "original_author": "ChefLifeFan",
+                "comment": "Chef life indeed! From souffl\u00e9 dreams to pancake reality. Who else has faced the fluffy flop? \ud83e\udd5e\ud83d\ude02 #CookingFail"
+              },
+              "id": "call_rewvv8k5ZQBPpVMBJQMNF4Eb",
+              "type": "tool_call"
+            }
+          ],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 260,
+            "output_tokens": 165,
+            "total_tokens": 425,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 1,
+    "parents": {},
+    "thread_id": "f84ac1e0-8dd2-450b-b231-69ea5b4b3db9",
+    "debug": true,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 79,
+    "langgraph_node": "execute_agent",
+    "langgraph_triggers": ["branch:to:execute_agent"],
+    "langgraph_path": ["__pregel_pull", "execute_agent"],
+    "langgraph_checkpoint_ns": "execute_agent:41a389ef-1ec3-fdb2-b811-8f3287a6206f",
+    "recursion_limit": 50
+  },
+  "2025-06-21T20:44:40.024078+00:00",
+  {
+    "configurable": {
+      "thread_id": "85cec78d-31bf-4d4d-ba3f-1bdbd6e777c2",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04ee08-c839-6eeb-8000-ff42885bbab0"
+    }
+  },
+  []
+]

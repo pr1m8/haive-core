@@ -1,0 +1,74 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Topic: Planning a project sprint\nLet's begin our directed discussion.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "97f074ef-8926-471d-b09b-d7e127364b62",
+        "example": false
+      },
+      {
+        "content": "\ud83c\udfc1 Conversation ended: Reached maximum rounds (1)\n\ud83d\udcca Total rounds: 1\n\ud83d\udd04 Total turns: 1",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "system",
+        "name": null,
+        "id": "07c5123b-baf8-4d1f-a51a-de484c7e4c71"
+      }
+    ],
+    "current_speaker": null,
+    "speakers": ["Lead_230258", "Member_230258"],
+    "turn_count": 1,
+    "max_rounds": 1,
+    "topic": "Planning a project sprint",
+    "conversation_ended": true,
+    "mode": "directed",
+    "speaker_history": ["Lead_230258"],
+    "mentioned_speakers": [],
+    "pending_speakers": []
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "directed_test_230258",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057ba3-c130-66e8-8006-f1cfdf089810"
+    }
+  },
+  {
+    "step": 6,
+    "debug": false,
+    "source": "loop",
+    "writes": {
+      "conclude": {
+        "messages": [
+          {
+            "content": "\ud83c\udfc1 Conversation ended: Reached maximum rounds (1)\n\ud83d\udcca Total rounds: 1\n\ud83d\udd04 Total turns: 1",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "system",
+            "name": null,
+            "id": "07c5123b-baf8-4d1f-a51a-de484c7e4c71"
+          }
+        ],
+        "current_speaker": null,
+        "conversation_ended": true
+      }
+    },
+    "parents": {},
+    "thread_id": "directed_test_230258",
+    "checkpoint_mode": "sync"
+  },
+  "2025-07-03T03:03:03.189876+00:00",
+  {
+    "configurable": {
+      "thread_id": "directed_test_230258",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057ba3-c12f-64e5-8005-55e4724ef9d6"
+    }
+  },
+  []
+]

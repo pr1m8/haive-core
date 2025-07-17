@@ -1,0 +1,265 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Hello",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "4c59af8b-8a9b-462d-a6a5-a4f797fca974",
+        "example": false
+      },
+      {
+        "content": "Hi there! How can I assist you today?",
+        "additional_kwargs": {
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 48,
+            "output_tokens": 12,
+            "total_tokens": 60,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          },
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 12,
+            "prompt_tokens": 48,
+            "total_tokens": 60,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--b74bc6e6-2e55-4836-9f76-a9f410574d49-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "tool_calls": [
+            {
+              "id": "call_1KntIsQFH6zgj9rfqMNfO1TV",
+              "function": {
+                "arguments": "{\"steps\":[\"Say Hello back to the user\",\"Ask how can assist the user\"]}",
+                "name": "Plan"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 19,
+            "prompt_tokens": 64,
+            "total_tokens": 83,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {}
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--f2f0b98a-5494-4138-be9e-a55f8004ff63-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "Plan",
+            "args": {
+              "steps": [
+                "Say Hello back to the user",
+                "Ask how can assist the user"
+              ]
+            },
+            "id": "call_1KntIsQFH6zgj9rfqMNfO1TV",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 64,
+          "output_tokens": 19,
+          "total_tokens": 83,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ],
+    "tools": [
+      {
+        "name": "<class 'haive.agents.multi.simple_debug.Plan'>",
+        "description": "",
+        "type": "tool"
+      }
+    ],
+    "tool_routes": {
+      "tool_0": "unknown"
+    },
+    "name_attrs": ["name", "__name__", "func_name"],
+    "content": null,
+    "output_schemas": {},
+    "engine_route_config": {
+      "llm": ["langchain_tool", "function", "pydantic_model"],
+      "aug_llm": ["langchain_tool", "function", "pydantic_model"],
+      "retriever": ["retriever"],
+      "parser": ["pydantic_model"]
+    },
+    "plan": {
+      "steps": ["Say Hello back to the user", "Ask how can assist the user"]
+    }
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "4e7118a9-b90e-4e12-b770-44804a26953d",
+      "checkpoint_ns": "Simple Agent:56fe4a3c-82c8-7255-4439-8d44d2587f1f",
+      "checkpoint_id": "1f05202a-b694-66a5-8003-101f01356681",
+      "checkpoint_map": {
+        "": "1f05202a-b04f-6644-8001-44f4ca228231",
+        "Simple Agent:56fe4a3c-82c8-7255-4439-8d44d2587f1f": "1f05202a-b694-66a5-8003-101f01356681"
+      }
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "parse_output": {
+        "plan": {
+          "steps": ["Say Hello back to the user", "Ask how can assist the user"]
+        }
+      }
+    },
+    "step": 3,
+    "parents": {
+      "": "1f05202a-b04f-6644-8001-44f4ca228231"
+    },
+    "thread_id": "4e7118a9-b90e-4e12-b770-44804a26953d",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 2,
+    "langgraph_node": "Simple Agent",
+    "langgraph_triggers": ["branch:to:Simple Agent"],
+    "langgraph_path": ["__pregel_pull", "Simple Agent"],
+    "langgraph_checkpoint_ns": "Simple Agent:56fe4a3c-82c8-7255-4439-8d44d2587f1f"
+  },
+  "2025-06-25T20:26:26.770065+00:00",
+  {
+    "configurable": {
+      "thread_id": "4e7118a9-b90e-4e12-b770-44804a26953d",
+      "checkpoint_ns": "Simple Agent:56fe4a3c-82c8-7255-4439-8d44d2587f1f",
+      "checkpoint_id": "1f05202a-b617-6746-8002-e195ce26202e",
+      "checkpoint_map": {
+        "": "1f05202a-b04f-6644-8001-44f4ca228231",
+        "Simple Agent:56fe4a3c-82c8-7255-4439-8d44d2587f1f": "1f05202a-b617-6746-8002-e195ce26202e"
+      }
+    }
+  },
+  []
+]

@@ -1,0 +1,274 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Hello",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "c5605c52-ff09-48fd-a0f6-696a105a4a33",
+        "example": false
+      },
+      {
+        "content": "Hello! How can I assist you today?",
+        "additional_kwargs": {
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 48,
+            "output_tokens": 11,
+            "total_tokens": 59,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          },
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 11,
+            "prompt_tokens": 48,
+            "total_tokens": 59,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--ab263bab-d27b-4282-b03e-ec32c184ce5c-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "tool_calls": [
+            {
+              "id": "call_7SzMdEu3M4Emtp1q5psw6sDB",
+              "function": {
+                "arguments": "{\"steps\":[\"Implement multi_tool_use.parallel functionality\",\"Integrate functions.Plan within multi_tool_use.parallel\",\"Execute multi_tool_use.parallel with concurrent tool calls\"]}",
+                "name": "Plan"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 32,
+            "prompt_tokens": 63,
+            "total_tokens": 95,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {}
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--046e597c-c313-4c67-9b15-475010a88e94-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "Plan",
+            "args": {
+              "steps": [
+                "Implement multi_tool_use.parallel functionality",
+                "Integrate functions.Plan within multi_tool_use.parallel",
+                "Execute multi_tool_use.parallel with concurrent tool calls"
+              ]
+            },
+            "id": "call_7SzMdEu3M4Emtp1q5psw6sDB",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 63,
+          "output_tokens": 32,
+          "total_tokens": 95,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ],
+    "tools": [
+      {
+        "name": "<class 'haive.agents.multi.simple_debug.Plan'>",
+        "description": "",
+        "type": "tool"
+      }
+    ],
+    "tool_routes": {
+      "tool_0": "unknown"
+    },
+    "name_attrs": ["name", "__name__", "func_name"],
+    "content": null,
+    "output_schemas": {},
+    "engine_route_config": {
+      "llm": ["langchain_tool", "function", "pydantic_model"],
+      "aug_llm": ["langchain_tool", "function", "pydantic_model"],
+      "retriever": ["retriever"],
+      "parser": ["pydantic_model"]
+    },
+    "plan": {
+      "steps": [
+        "Implement multi_tool_use.parallel functionality",
+        "Integrate functions.Plan within multi_tool_use.parallel",
+        "Execute multi_tool_use.parallel with concurrent tool calls"
+      ]
+    }
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "f0befa2c-e22d-4c64-b07e-2d629a1f2b17",
+      "checkpoint_ns": "Simple Agent:51239c82-dd8f-a8f6-2712-e3e9e02984fd",
+      "checkpoint_id": "1f05202f-db76-6ff1-8003-ea1565cb9253",
+      "checkpoint_map": {
+        "": "1f05202f-d38a-6f2d-8001-84878a409383",
+        "Simple Agent:51239c82-dd8f-a8f6-2712-e3e9e02984fd": "1f05202f-db76-6ff1-8003-ea1565cb9253"
+      }
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "parse_output": {
+        "plan": {
+          "steps": [
+            "Implement multi_tool_use.parallel functionality",
+            "Integrate functions.Plan within multi_tool_use.parallel",
+            "Execute multi_tool_use.parallel with concurrent tool calls"
+          ]
+        }
+      }
+    },
+    "step": 3,
+    "parents": {
+      "": "1f05202f-d38a-6f2d-8001-84878a409383"
+    },
+    "thread_id": "f0befa2c-e22d-4c64-b07e-2d629a1f2b17",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 2,
+    "langgraph_node": "Simple Agent",
+    "langgraph_triggers": ["branch:to:Simple Agent"],
+    "langgraph_path": ["__pregel_pull", "Simple Agent"],
+    "langgraph_checkpoint_ns": "Simple Agent:51239c82-dd8f-a8f6-2712-e3e9e02984fd"
+  },
+  "2025-06-25T20:28:44.855480+00:00",
+  {
+    "configurable": {
+      "thread_id": "f0befa2c-e22d-4c64-b07e-2d629a1f2b17",
+      "checkpoint_ns": "Simple Agent:51239c82-dd8f-a8f6-2712-e3e9e02984fd",
+      "checkpoint_id": "1f05202f-daf9-6a47-8002-89e15d2b81fa",
+      "checkpoint_map": {
+        "": "1f05202f-d38a-6f2d-8001-84878a409383",
+        "Simple Agent:51239c82-dd8f-a8f6-2712-e3e9e02984fd": "1f05202f-daf9-6a47-8002-89e15d2b81fa"
+      }
+    }
+  },
+  []
+]

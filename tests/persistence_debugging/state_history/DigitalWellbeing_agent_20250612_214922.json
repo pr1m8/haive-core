@@ -1,0 +1,762 @@
+[
+  {
+    "messages": [
+      {
+        "content": "\ud83c\udfad Debate Phase: Arguments\n\ud83d\udccc Your Position: Social media needs mental health reforms\n\ud83d\udcca Your Progress: 5 arguments, 0 rebuttals\n\ud83d\udcc8 Completion: 100%\n\n\ud83d\udcdd Instructions: Present argument 6 of 1. Make a specific, well-supported point for your position. You have -4 more arguments after this.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "system",
+        "name": null,
+        "id": "88ddbc84-edc7-45ff-bf14-f13fd9587933"
+      },
+      {
+        "content": "\ud83c\udfad Welcome to the Formal Debate!\n\n\ud83d\udccb **Topic**: The Impact of Social Media on Society\n\n\ud83d\udc65 **Participants and Positions**:\n  \u2022 TechOptimist: Social media is a net positive\n  \u2022 DigitalWellbeing: Social media needs mental health reforms\n  \u2022 PrivacyAdvocate: Social media violates privacy rights\n\n\ud83d\udcdc **Debate Format** (traditional):\n1. Main Arguments - Each participant makes 1 arguments\n2. Rebuttals - Participants respond to opposing arguments\n\n\u2696\ufe0f **Rules**:\n  \u2022 Participants must argue for their assigned position\n\nLet us begin! TechOptimist, please present your opening statement.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "809e894c-26fb-4909-b5ec-44aab8df4715",
+        "example": false
+      },
+      {
+        "content": "Social media has revolutionized access to information, democratizing knowledge like never before. It empowers individuals by providing platforms for education, awareness, and advocacy on critical issues. Movements like #MeToo and Black Lives Matter have gained global traction, driving societal change and holding entities accountable. Additionally, social media fosters connections, enabling people to maintain relationships across distances, share experiences, and form communities based on common interests. This unprecedented access to diverse perspectives enriches cultural understanding and promotes empathy. Overall, social media's ability to amplify voices and facilitate learning makes it a powerful tool for positive societal transformation.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 119,
+            "prompt_tokens": 259,
+            "total_tokens": 378,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BhnpgavyD6kJqaqFaOoG7zg4AbAnA",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": "TechOptimist",
+        "id": "run-5461a925-398c-4e72-9f5b-b75dc6365928-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 259,
+          "output_tokens": 119,
+          "total_tokens": 378,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "Social media platforms, designed for maximum engagement, often exploit psychological vulnerabilities, leading to addictive behaviors and impairing mental health. The endless scroll, likes, and notifications trigger dopamine responses similar to gambling, fostering dependency and anxiety. Moreover, curated feeds can create unrealistic standards and foster negative self-comparison, contributing to depression and low self-esteem. Cyberbullying and online harassment exacerbate these issues, creating environments that are often hostile rather than supportive. Implementing reforms such as transparent algorithms, moderation of harmful content, and tools to manage screen time can mitigate these impacts, fostering healthier digital environments for users.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 120,
+            "prompt_tokens": 379,
+            "total_tokens": 499,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-Bhnph7ApOTOssOYfTcOC1Dgo8VFNl",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": "DigitalWellbeing",
+        "id": "run-8ad6e345-bfbb-4663-9533-1ec727304750-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 379,
+          "output_tokens": 120,
+          "total_tokens": 499,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "PrivacyAdvocate",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 4,
+            "prompt_tokens": 506,
+            "total_tokens": 510,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BhnpjYTGOTIhEHI9r1ILQqX1evPDj",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": "DigitalWellbeing",
+        "id": "run-24f2bbea-1d7a-42b0-903d-ab3c734d15cd-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 506,
+          "output_tokens": 4,
+          "total_tokens": 510,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "Social media platforms often prioritize user data collection over privacy, employing algorithms that manipulate user behavior for profit. This exploitation of personal data without transparent consent leads to targeted advertising, misinformation, and breaches of trust. The pervasive surveillance not only infringes on individual privacy rights but also contributes to mental health issues by creating an environment of constant scrutiny and pressure to conform. Reforms focused on data protection, such as stronger privacy regulations and user control over data, are essential to safeguard both privacy and mental health, ensuring social media serves public interests rather than corporate agendas.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 110,
+            "prompt_tokens": 517,
+            "total_tokens": 627,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BhnpjuWC9h3x9ZJCMi11lI3bePqi3",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": "DigitalWellbeing",
+        "id": "run-9c5ea0c4-555e-4de0-a9eb-a18125326658-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 517,
+          "output_tokens": 110,
+          "total_tokens": 627,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "Thank you, participants, for your arguments. Now we will move on to the rebuttals phase. Each participant will respond to the arguments presented by their opponents.\n\nTechOptimist, please begin with your rebuttal to DigitalWellbeing and PrivacyAdvocate's arguments.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 55,
+            "prompt_tokens": 634,
+            "total_tokens": 689,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-Bhnplv6eR10E68xrZ2UpxZu3rwMpv",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": "DigitalWellbeing",
+        "id": "run-e3fa7482-f69e-45b7-a681-0d800ef90230-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 634,
+          "output_tokens": 55,
+          "total_tokens": 689,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "TechOptimist",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 4,
+            "prompt_tokens": 696,
+            "total_tokens": 700,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BhnplXQ55PzaTyBTJQNRLXLktxINb",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": "DigitalWellbeing",
+        "id": "run-b78d0a73-e265-48b2-83a5-49cd15b5ff48-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 696,
+          "output_tokens": 4,
+          "total_tokens": 700,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "While social media indeed offers platforms for advocacy and connection, these benefits are countered by significant mental health challenges. The constant comparison fostered by curated feeds can lead to depression and anxiety, overshadowing positive interactions. The addictive nature of social media, driven by algorithms designed for maximum engagement, often results in excessive screen time that detracts from real-world relationships and activities. Furthermore, the prevalence of cyberbullying undermines the supportive community aspect, creating environments that can be detrimental to mental well-being. Reform is necessary to balance these impacts with the benefits you highlight.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 113,
+            "prompt_tokens": 707,
+            "total_tokens": 820,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-Bhnpm6ry2aGy1vqA3xA5WRE98xCFq",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run-1a6794cb-a518-4f95-8059-115137e11a11-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 707,
+          "output_tokens": 113,
+          "total_tokens": 820,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "89e2976d-f19d-4ab9-8930-9c9cc1850bc0",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f047f8a-3bca-6614-8001-d3b753d97b1f"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "While social media indeed offers platforms for advocacy and connection, these benefits are countered by significant mental health challenges. The constant comparison fostered by curated feeds can lead to depression and anxiety, overshadowing positive interactions. The addictive nature of social media, driven by algorithms designed for maximum engagement, often results in excessive screen time that detracts from real-world relationships and activities. Furthermore, the prevalence of cyberbullying undermines the supportive community aspect, creating environments that can be detrimental to mental well-being. Reform is necessary to balance these impacts with the benefits you highlight.",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 113,
+              "prompt_tokens": 707,
+              "total_tokens": 820,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "id": "chatcmpl-Bhnpm6ry2aGy1vqA3xA5WRE98xCFq",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run-1a6794cb-a518-4f95-8059-115137e11a11-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 707,
+            "output_tokens": 113,
+            "total_tokens": 820,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 1,
+    "parents": {},
+    "recursion_limit": 30,
+    "thread_id": "3b8f10c6-0220-4f23-be8f-6671dd805d35",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 27,
+    "langgraph_node": "execute_agent",
+    "langgraph_triggers": ["branch:to:execute_agent"],
+    "langgraph_path": ["__pregel_pull", "execute_agent"],
+    "langgraph_checkpoint_ns": "execute_agent:0c834fbe-888e-2ac3-422e-4a2e4c169d99"
+  },
+  "2025-06-13T01:49:27.299620+00:00",
+  {
+    "configurable": {
+      "thread_id": "89e2976d-f19d-4ab9-8930-9c9cc1850bc0",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f047f8a-2fb1-64d4-8000-a07a5020cf0f"
+    }
+  },
+  []
+]

@@ -1,0 +1,52 @@
+[
+  {
+    "__shared_fields__": [],
+    "__reducer_fields__": {
+      "messages": {
+        "__function__": true,
+        "name": "_add_messages",
+        "module": "langgraph.graph.message"
+      }
+    },
+    "__name__": "Tuple_Test_Cbec4CfbState",
+    "messages": [
+      {
+        "content": "Hello, I'm a normal message",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "03d6d467-c614-47ce-b17f-60aad0889711",
+        "example": false
+      }
+    ],
+    "runnable_config": {}
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "tuple_thread_caa2ee75",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f01c428-73c0-6b3e-8001-60f9124268e0"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "simple_agent_node": null
+    },
+    "step": 1,
+    "parents": {},
+    "thread_id": "tuple_thread_caa2ee75",
+    "recursion_limit": 200
+  },
+  "2025-04-18T10:47:31.076373+00:00",
+  {
+    "configurable": {
+      "thread_id": "tuple_thread_caa2ee75",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f01c428-73ba-675e-8000-b00a195074f8"
+    }
+  },
+  []
+]

@@ -187,7 +187,8 @@ class TestEnsembleProvider:
 
         assert len(provider.retrievers) == 3
         assert len(provider.weights) == 3
-        assert abs(sum(provider.weights) - 1.0) < 1e-6  # Should still sum to 1.0
+        # Should still sum to 1.0
+        assert abs(sum(provider.weights) - 1.0) < 1e-6
         assert provider.retrievers[2] == retriever3
 
     def test_remove_retriever(self, mock_retriever):
@@ -203,7 +204,8 @@ class TestEnsembleProvider:
 
         assert len(provider.retrievers) == 2
         assert len(provider.weights) == 2
-        assert abs(sum(provider.weights) - 1.0) < 1e-6  # Should still sum to 1.0
+        # Should still sum to 1.0
+        assert abs(sum(provider.weights) - 1.0) < 1e-6
         assert provider.retrievers == [mock_retriever, retriever3]
 
     def test_remove_retriever_errors(self, mock_retriever):

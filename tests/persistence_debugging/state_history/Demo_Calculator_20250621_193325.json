@@ -1,0 +1,298 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Create a plan for a day trip, then calculate how many hours we'll need in total",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "7ce9c845-f8c3-49e2-b761-6f3a20199836",
+        "example": false
+      },
+      {
+        "content": "Creating a well-planned day trip involves deciding on your destination, activities, and travel times. Here's a sample itinerary for a day trip, along with the estimated total time needed:\n\n### Destination: Nearby Scenic Town\n\n#### Morning\n1. **7:00 AM - Depart from Home**\n   - Travel time: 1.5 hours to destination\n   - Estimated arrival: 8:30 AM\n   \n2. **8:30 AM - Breakfast at Local Caf\u00e9**\n   - Duration: 1 hour\n   - Enjoy a hearty breakfast and coffee to start the day.\n\n#### Late Morning\n3. **9:30 AM - Explore Main Street**\n   - Duration: 1.5 hours\n   - Visit local shops and boutiques. Grab some souvenirs and enjoy the local vibe.\n\n#### Midday\n4. **11:00 AM - Visit Nearby Museum or Gallery**\n   - Duration: 2 hours\n   - Discover regional art or historical exhibits.\n\n5. **1:00 PM - Lunch at a Popular Restaurant**\n   - Duration: 1 hour\n   - Taste local cuisine and relax before afternoon activities.\n\n#### Afternoon\n6. **2:00 PM - Outdoor Activity (e.g., hiking, biking, or park visit)**\n   - Duration: 2 hours\n   - Experience the natural beauty of the area.\n\n7. **4:00 PM - Coffee/Tea Break**\n   - Duration: 30 minutes\n   - Recharge with a quick drink at a cozy spot.\n\n#### Evening\n8. **4:30 PM - Leisure Walk or Visit Scenic Spot**\n   - Duration: 1 hour\n   - Enjoy a leisurely walk or visit a nearby scenic overlook.\n\n9. **5:30 PM - Depart for Home**\n   - Travel time: 1.5 hours\n   - Estimated arrival: 7:00 PM\n\n### Total Time Calculation\n- **Travel Time:** 3 hours (1.5 hours each way)\n- **Activities Time:** 8 hours (includes meal times and breaks)\n\n**Total Time Needed:** 11 hours\n\nThis plan can be adjusted based on specific interests, travel distances, and activity durations, but generally, a day trip like this would take around 11 hours from start to finish. Make sure to check opening times for venues and consider traffic conditions for more accurate planning.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 476,
+            "prompt_tokens": 24,
+            "total_tokens": 500,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--8e31bba5-9d78-4658-b881-0dea643bdcaf-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "If you have more specific preferences or activities you\u2019d like included in your day trip, feel free to share them, and I can tailor the itinerary to better suit your interests!",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 36,
+            "prompt_tokens": 503,
+            "total_tokens": 539,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--3b6ae9f2-77b6-45f6-ab9f-6ea39dc1c88f-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 503,
+          "output_tokens": 36,
+          "total_tokens": 539,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "61efeab9-95fd-428f-b1eb-2b11fa1bb486",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04ef82-0a78-600e-8001-11a3de98080a"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "If you have more specific preferences or activities you\u2019d like included in your day trip, feel free to share them, and I can tailor the itinerary to better suit your interests!",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 36,
+              "prompt_tokens": 503,
+              "total_tokens": 539,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--3b6ae9f2-77b6-45f6-ab9f-6ea39dc1c88f-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 503,
+            "output_tokens": 36,
+            "total_tokens": 539,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 1,
+    "parents": {},
+    "thread_id": "db1105da-3b46-46fd-9158-391a1299665a",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 6,
+    "langgraph_node": "delegate_to_agent",
+    "langgraph_triggers": ["branch:to:delegate_to_agent"],
+    "langgraph_path": ["__pregel_pull", "delegate_to_agent"],
+    "langgraph_checkpoint_ns": "delegate_to_agent:f5c01923-2291-08be-5dd4-e3a591666740"
+  },
+  "2025-06-21T23:33:25.518936+00:00",
+  {
+    "configurable": {
+      "thread_id": "61efeab9-95fd-428f-b1eb-2b11fa1bb486",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04ef82-0385-6c87-8000-c2556103a3db"
+    }
+  },
+  []
+]

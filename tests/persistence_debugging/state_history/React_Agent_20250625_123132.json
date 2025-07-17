@@ -1,0 +1,370 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Calculate 5 + 3, then create a plan",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "c71834e6-2d4f-4152-843f-8a081108ca42",
+        "example": false
+      },
+      {
+        "content": "To calculate 5 + 3, I'll use the addition function.\n\nLet's proceed with calculating 5 + 3.",
+        "additional_kwargs": {
+          "tool_calls": [
+            {
+              "id": "call_MoBBDc6mB0PVCZ6BdEBcoieh",
+              "function": {
+                "arguments": "{\"a\":5,\"b\":3}",
+                "name": "add"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 44,
+            "prompt_tokens": 58,
+            "total_tokens": 102,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--855d0232-3ac9-45c9-8992-6609980d978e-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "add",
+            "args": {
+              "a": 5,
+              "b": 3
+            },
+            "id": "call_MoBBDc6mB0PVCZ6BdEBcoieh",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 58,
+          "output_tokens": 44,
+          "total_tokens": 102,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "8",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "add",
+        "id": "39b7d3b4-62b0-4e7b-863f-7cd19f05e6fb",
+        "tool_call_id": "call_MoBBDc6mB0PVCZ6BdEBcoieh",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "The sum of 5 + 3 is 8.\n\nNow, let's create a plan:\n\n**Plan to Achieve a Goal:**\n\n1. **Define the Goal:**\n   - Clearly articulate what you want to achieve. Ensure it's specific, measurable, achievable, relevant, and time-bound (SMART).\n\n2. **Research and Gather Information:**\n   - Collect necessary data, insights, or resources that will help in understanding how to achieve your goal.\n\n3. **Break Down into Tasks:**\n   - Divide the goal into smaller, manageable tasks or milestones. Each should have a clear purpose and deliverable.\n\n4. **Set Priorities:**\n   - Rank tasks based on their importance and urgency. Focus on high-priority tasks first.\n\n5. **Create a Timeline:**\n   - Develop a realistic timeline for completing each task. Consider setting deadlines to stay on track.\n\n6. **Identify Resources:**\n   - Determine what materials, tools, or support are needed. Ensure availability and accessibility.\n\n7. **Monitor Progress:**\n   - Regularly review your progress. Use metrics or checklists to assess how well tasks are being completed.\n\n8. **Adjust Plan When Needed:**\n   - Be flexible to adjust your plans based on unforeseen circumstances or better strategies.\n\n9. **Celebrate Achievements:**\n   - Recognize and celebrate milestones and successes to maintain motivation.\n\n10. **Reflect and Improve:**\n    - After achieving the goal, reflect on what worked well and areas for improvement for future plans.\n\nThis plan can be adjusted according to the specifics of the goal you intend to achieve.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 325,
+            "prompt_tokens": 111,
+            "total_tokens": 436,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--5f3e6b5e-5107-445b-8cc0-b579038fcc48-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 111,
+          "output_tokens": 325,
+          "total_tokens": 436,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ],
+    "tools": [
+      {
+        "name": "{'name': 'add', 'description': 'returns the sum of two numbers', 'args_schema': <class 'langchain_core.utils.pydantic.add'>, 'return_direct': False, 'verbose': False, 'tags': None, 'metadata': None, 'handle_tool_error': False, 'handle_validation_error': False, 'response_format': 'content', 'func': <function add at 0x70d87c56a340>, 'coroutine': None}",
+        "description": "",
+        "type": "tool"
+      }
+    ],
+    "tool_routes": {
+      "tool_0": "unknown"
+    },
+    "name_attrs": ["name", "__name__", "func_name"],
+    "content": null,
+    "output_schemas": {},
+    "engine_route_config": {
+      "llm": ["langchain_tool", "function", "pydantic_model"],
+      "aug_llm": ["langchain_tool", "function", "pydantic_model"],
+      "retriever": ["retriever"],
+      "parser": ["pydantic_model"]
+    }
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "d19a5aca-62f0-4080-b4fb-35c8875315c9",
+      "checkpoint_ns": "React Agent:2aefa8e4-9a6f-6b18-b647-0f34b930be82",
+      "checkpoint_id": "1f051e1d-a824-6c5b-8004-7545b73f6252",
+      "checkpoint_map": {
+        "": "1f051e1d-7f91-6cab-8000-237e748d90b2",
+        "React Agent:2aefa8e4-9a6f-6b18-b647-0f34b930be82": "1f051e1d-a824-6c5b-8004-7545b73f6252"
+      }
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "The sum of 5 + 3 is 8.\n\nNow, let's create a plan:\n\n**Plan to Achieve a Goal:**\n\n1. **Define the Goal:**\n   - Clearly articulate what you want to achieve. Ensure it's specific, measurable, achievable, relevant, and time-bound (SMART).\n\n2. **Research and Gather Information:**\n   - Collect necessary data, insights, or resources that will help in understanding how to achieve your goal.\n\n3. **Break Down into Tasks:**\n   - Divide the goal into smaller, manageable tasks or milestones. Each should have a clear purpose and deliverable.\n\n4. **Set Priorities:**\n   - Rank tasks based on their importance and urgency. Focus on high-priority tasks first.\n\n5. **Create a Timeline:**\n   - Develop a realistic timeline for completing each task. Consider setting deadlines to stay on track.\n\n6. **Identify Resources:**\n   - Determine what materials, tools, or support are needed. Ensure availability and accessibility.\n\n7. **Monitor Progress:**\n   - Regularly review your progress. Use metrics or checklists to assess how well tasks are being completed.\n\n8. **Adjust Plan When Needed:**\n   - Be flexible to adjust your plans based on unforeseen circumstances or better strategies.\n\n9. **Celebrate Achievements:**\n   - Recognize and celebrate milestones and successes to maintain motivation.\n\n10. **Reflect and Improve:**\n    - After achieving the goal, reflect on what worked well and areas for improvement for future plans.\n\nThis plan can be adjusted according to the specifics of the goal you intend to achieve.",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 325,
+              "prompt_tokens": 111,
+              "total_tokens": 436,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--5f3e6b5e-5107-445b-8cc0-b579038fcc48-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 111,
+            "output_tokens": 325,
+            "total_tokens": 436,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 4,
+    "parents": {
+      "": "1f051e1d-7f91-6cab-8000-237e748d90b2"
+    },
+    "thread_id": "d19a5aca-62f0-4080-b4fb-35c8875315c9",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 1,
+    "langgraph_node": "React Agent",
+    "langgraph_triggers": ["branch:to:React Agent"],
+    "langgraph_path": ["__pregel_pull", "React Agent"],
+    "langgraph_checkpoint_ns": "React Agent:2aefa8e4-9a6f-6b18-b647-0f34b930be82"
+  },
+  "2025-06-25T16:31:32.394899+00:00",
+  {
+    "configurable": {
+      "thread_id": "d19a5aca-62f0-4080-b4fb-35c8875315c9",
+      "checkpoint_ns": "React Agent:2aefa8e4-9a6f-6b18-b647-0f34b930be82",
+      "checkpoint_id": "1f051e1d-88fa-65ac-8003-07c57613e9bc",
+      "checkpoint_map": {
+        "": "1f051e1d-7f91-6cab-8000-237e748d90b2",
+        "React Agent:2aefa8e4-9a6f-6b18-b647-0f34b930be82": "1f051e1d-88fa-65ac-8003-07c57613e9bc"
+      }
+    }
+  },
+  []
+]

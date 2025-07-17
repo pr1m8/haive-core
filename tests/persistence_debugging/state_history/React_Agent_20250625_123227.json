@@ -1,0 +1,353 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Calculate 5 + 3, then create a plan",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "c91deb4e-03cf-45e8-a969-e53f3a1734e1",
+        "example": false
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "tool_calls": [
+            {
+              "id": "call_iYfJTFj4omvl6vKDMflpcIzb",
+              "function": {
+                "arguments": "{\"a\":5,\"b\":3}",
+                "name": "add"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 18,
+            "prompt_tokens": 58,
+            "total_tokens": 76,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "content_filter_results": {}
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--4ad7dad5-2fd1-47ce-a674-b091ddef28eb-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "add",
+            "args": {
+              "a": 5,
+              "b": 3
+            },
+            "id": "call_iYfJTFj4omvl6vKDMflpcIzb",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 58,
+          "output_tokens": 18,
+          "total_tokens": 76,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "8",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "add",
+        "id": "2e4c0555-25b2-4580-8599-4cbed1d04ab1",
+        "tool_call_id": "call_iYfJTFj4omvl6vKDMflpcIzb",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "The result of 5 + 3 is 8.\n\nNow, let's create a plan.\n\n### Plan for the Day\n\n1. **Morning Routine**\n   - Wake up and stretch for 10 minutes.\n   - Have a healthy breakfast.\n   - Review tasks for the day.\n\n2. **Work Tasks**\n   - Prioritize emails and respond to urgent ones.\n   - Complete the report draft by noon.\n   - Attend the team meeting at 2 PM.\n\n3. **Afternoon Activities**\n   - Have lunch and take a short walk.\n   - Review and edit the report draft.\n   - Research for the upcoming project.\n\n4. **Evening Wind Down**\n   - Exercise for 30 minutes.\n   - Prepare dinner.\n   - Read a book or watch a favorite show.\n\n5. **Before Bed**\n   - Reflect on achievements of the day.\n   - Plan tasks for tomorrow.\n   - Relax and ensure a good night's sleep.\n\nLet me know if there's anything specific you'd like to adjust or focus on in this plan!",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 212,
+            "prompt_tokens": 83,
+            "total_tokens": 295,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--e2355bba-885e-4d26-8270-e612ad7bd533-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 83,
+          "output_tokens": 212,
+          "total_tokens": 295,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ],
+    "tools": [
+      {
+        "name": "{'name': 'add', 'description': 'returns the sum of two numbers', 'args_schema': <class 'langchain_core.utils.pydantic.add'>, 'return_direct': False, 'verbose': False, 'tags': None, 'metadata': None, 'handle_tool_error': False, 'handle_validation_error': False, 'response_format': 'content', 'func': <function add at 0x729015b1e340>, 'coroutine': None}",
+        "description": "",
+        "type": "tool"
+      }
+    ],
+    "tool_routes": {
+      "tool_0": "unknown"
+    },
+    "name_attrs": ["name", "__name__", "func_name"],
+    "content": null,
+    "output_schemas": {},
+    "engine_route_config": {
+      "llm": ["langchain_tool", "function", "pydantic_model"],
+      "aug_llm": ["langchain_tool", "function", "pydantic_model"],
+      "retriever": ["retriever"],
+      "parser": ["pydantic_model"]
+    }
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "b438e344-d0bd-4823-a93b-442cb7367cad",
+      "checkpoint_ns": "React Agent:493cd15d-5368-b68f-af3c-b0e2488c8dcc",
+      "checkpoint_id": "1f051e1f-b6e6-63fa-8004-8ae16f57787e",
+      "checkpoint_map": {
+        "": "1f051e1f-9cc0-6678-8000-20b47d85d2ed",
+        "React Agent:493cd15d-5368-b68f-af3c-b0e2488c8dcc": "1f051e1f-b6e6-63fa-8004-8ae16f57787e"
+      }
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "The result of 5 + 3 is 8.\n\nNow, let's create a plan.\n\n### Plan for the Day\n\n1. **Morning Routine**\n   - Wake up and stretch for 10 minutes.\n   - Have a healthy breakfast.\n   - Review tasks for the day.\n\n2. **Work Tasks**\n   - Prioritize emails and respond to urgent ones.\n   - Complete the report draft by noon.\n   - Attend the team meeting at 2 PM.\n\n3. **Afternoon Activities**\n   - Have lunch and take a short walk.\n   - Review and edit the report draft.\n   - Research for the upcoming project.\n\n4. **Evening Wind Down**\n   - Exercise for 30 minutes.\n   - Prepare dinner.\n   - Read a book or watch a favorite show.\n\n5. **Before Bed**\n   - Reflect on achievements of the day.\n   - Plan tasks for tomorrow.\n   - Relax and ensure a good night's sleep.\n\nLet me know if there's anything specific you'd like to adjust or focus on in this plan!",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 212,
+              "prompt_tokens": 83,
+              "total_tokens": 295,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--e2355bba-885e-4d26-8270-e612ad7bd533-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 83,
+            "output_tokens": 212,
+            "total_tokens": 295,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 4,
+    "parents": {
+      "": "1f051e1f-9cc0-6678-8000-20b47d85d2ed"
+    },
+    "thread_id": "b438e344-d0bd-4823-a93b-442cb7367cad",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 1,
+    "langgraph_node": "React Agent",
+    "langgraph_triggers": ["branch:to:React Agent"],
+    "langgraph_path": ["__pregel_pull", "React Agent"],
+    "langgraph_checkpoint_ns": "React Agent:493cd15d-5368-b68f-af3c-b0e2488c8dcc"
+  },
+  "2025-06-25T16:32:27.629241+00:00",
+  {
+    "configurable": {
+      "thread_id": "b438e344-d0bd-4823-a93b-442cb7367cad",
+      "checkpoint_ns": "React Agent:493cd15d-5368-b68f-af3c-b0e2488c8dcc",
+      "checkpoint_id": "1f051e1f-a35a-6f32-8003-58b97df609aa",
+      "checkpoint_map": {
+        "": "1f051e1f-9cc0-6678-8000-20b47d85d2ed",
+        "React Agent:493cd15d-5368-b68f-af3c-b0e2488c8dcc": "1f051e1f-a35a-6f32-8003-58b97df609aa"
+      }
+    }
+  },
+  []
+]

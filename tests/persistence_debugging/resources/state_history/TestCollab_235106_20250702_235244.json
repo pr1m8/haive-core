@@ -1,0 +1,165 @@
+[
+    {
+        "messages": [
+            {
+                "content": "Hello agents, please introduce yourselves",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "human",
+                "name": null,
+                "id": "76745839-3d81-4283-bf4e-9a92c1f394f6",
+                "example": false
+            },
+            {
+                "content": "\ud83d\udcdd Collaborative Session: Collaborative Document\n\nTopic: Testing message persistence\n\nWe'll work together on these sections:\n- Introduction\n- Discussion\n\nFormat: markdown\nMin contributions per section: 1\n\nLet's start with: Introduction",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "human",
+                "name": null,
+                "id": "29ba2ddd-384d-4e7d-9c77-13eed2760361",
+                "example": false
+            },
+            {
+                "content": "[Error from Alice_235106]: consuming input failed: SSL connection has been closed unexpectedly",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "ai",
+                "name": "Alice_235106",
+                "id": "b94d1c38-d292-4915-be10-1f60e1559ab9",
+                "example": false,
+                "tool_calls": [],
+                "invalid_tool_calls": [],
+                "usage_metadata": null
+            },
+            {
+                "content": "\u2705 Section 'Introduction' complete. Moving to 'Discussion'.",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "system",
+                "name": null,
+                "id": "4468bd52-f479-46b9-91be-c1485546caf2"
+            },
+            {
+                "content": "[Error from Alice_235106]: consuming input failed: SSL connection has been closed unexpectedly",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "ai",
+                "name": "Alice_235106",
+                "id": "376cc34a-92d6-4dc3-af4b-a8f33c837740",
+                "example": false,
+                "tool_calls": [],
+                "invalid_tool_calls": [],
+                "usage_metadata": null
+            },
+            {
+                "content": "\ud83d\udcc4 Document Complete!\n\nTitle: Collaborative Document\nTotal Contributions: 4\n\nContributors:\n- Alice_235106: 4 contributions\n\nThe final document has been compiled.",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "system",
+                "name": null,
+                "id": "1222d1de-38a4-45a0-9a7a-23f7c0f30d95"
+            },
+            {
+                "content": "\ud83c\udfc1 Conversation ended: Conversation completed\n\ud83d\udcca Total rounds: 1\n\ud83d\udd04 Total turns: 1",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "system",
+                "name": null,
+                "id": "285f0f21-9b7a-4e83-aa13-148f318d4584"
+            }
+        ],
+        "current_speaker": null,
+        "speakers": [
+            "Alice_235106",
+            "Bob_235106"
+        ],
+        "turn_count": 1,
+        "max_rounds": 2,
+        "topic": "Testing message persistence",
+        "conversation_ended": true,
+        "mode": "collaborative",
+        "speaker_history": [
+            "Bob_235106"
+        ],
+        "shared_document": "# Collaborative Document\n\n## Introduction\n[Alice_235106]: [Error from Alice_235106]: consuming input failed: SSL connection has been closed unexpectedly\n[Alice_235106]: [Error from Alice_235106]: consuming input failed: SSL connection has been closed unexpectedly\n\n## Discussion\n[Alice_235106]: [Error from Alice_235106]: consuming input failed: SSL connection has been closed unexpectedly\n[Alice_235106]: [Error from Alice_235106]: consuming input failed: SSL connection has been closed unexpectedly",
+        "document_sections": {
+            "Introduction": "[Alice_235106]: [Error from Alice_235106]: consuming input failed: SSL connection has been closed unexpectedly\n[Alice_235106]: [Error from Alice_235106]: consuming input failed: SSL connection has been closed unexpectedly",
+            "Discussion": "[Alice_235106]: [Error from Alice_235106]: consuming input failed: SSL connection has been closed unexpectedly\n[Alice_235106]: [Error from Alice_235106]: consuming input failed: SSL connection has been closed unexpectedly"
+        },
+        "contributions": [
+            [
+                "Alice_235106",
+                "Introduction",
+                "[Error from Alice_235106]: consuming input failed: SSL connection has been closed unexpectedly"
+            ],
+            [
+                "Alice_235106",
+                "Introduction",
+                "[Error from Alice_235106]: consuming input failed: SSL connection has been closed unexpectedly"
+            ],
+            [
+                "Alice_235106",
+                "Discussion",
+                "[Error from Alice_235106]: consuming input failed: SSL connection has been closed unexpectedly"
+            ],
+            [
+                "Alice_235106",
+                "Discussion",
+                "[Error from Alice_235106]: consuming input failed: SSL connection has been closed unexpectedly"
+            ]
+        ],
+        "contribution_count": {
+            "Alice_235106": 4
+        },
+        "current_section": "Discussion",
+        "sections_order": [
+            "Introduction",
+            "Discussion"
+        ],
+        "completed_sections": [
+            "Introduction"
+        ],
+        "output_format": "markdown"
+    },
+    [],
+    {
+        "configurable": {
+            "thread_id": "content_test_235106",
+            "checkpoint_ns": "",
+            "checkpoint_id": "1f057c12-ca75-6f71-805f-36e7a9e2b48b"
+        }
+    },
+    {
+        "step": 95,
+        "debug": false,
+        "source": "loop",
+        "writes": {
+            "conclude": {
+                "messages": [
+                    {
+                        "content": "\ud83c\udfc1 Conversation ended: Conversation completed\n\ud83d\udcca Total rounds: 1\n\ud83d\udd04 Total turns: 1",
+                        "additional_kwargs": {},
+                        "response_metadata": {},
+                        "type": "system",
+                        "name": null,
+                        "id": "285f0f21-9b7a-4e83-aa13-148f318d4584"
+                    }
+                ],
+                "current_speaker": null,
+                "conversation_ended": true
+            }
+        },
+        "parents": {},
+        "thread_id": "content_test_235106",
+        "checkpoint_mode": "sync"
+    },
+    "2025-07-03T03:52:43.795624+00:00",
+    {
+        "configurable": {
+            "thread_id": "content_test_235106",
+            "checkpoint_ns": "",
+            "checkpoint_id": "1f057c12-ca70-63e7-805e-bbb019b8d7ba"
+        }
+    },
+    []
+]

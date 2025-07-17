@@ -5,16 +5,16 @@ This script traces EVERY step where ChatPromptTemplate gets converted to dict
 and where BasePromptTemplate instantiation is attempted.
 """
 
-import json
 import logging
 import pdb
 import sys
 import traceback
-from typing import Any, Dict
 
 # Add packages to path
-sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
-sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-agents/src")
+sys.path.insert(
+    0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
+sys.path.insert(
+    0, "/home/will/Projects/haive/backend/haive/packages/haive-agents/src")
 
 # Set up EXTREMELY verbose logging
 logging.basicConfig(
@@ -42,14 +42,14 @@ def add_prompt_template_breakpoint():
     original_init = None
 
     def debug_init(self, *args, **kwargs):
-        logger.error(f"🚨 BREAKPOINT: BasePromptTemplate.__init__ called!")
+        logger.error("🚨 BREAKPOINT: BasePromptTemplate.__init__ called!"d!")
         logger.error(f"   Args: {args}")
         logger.error(f"   Kwargs: {kwargs}")
         logger.error(f"   Class: {self.__class__}")
 
         # Print full stack trace
         stack = traceback.extract_stack()
-        logger.error(f"   FULL CALL STACK:")
+        logger.error("   FULL CALL STACK:")
         for i, frame in enumerate(stack):
             logger.error(f"     [{i}] {frame.filename}:{frame.lineno} in {frame.name}")
             logger.error(f"         {frame.line}")
@@ -75,7 +75,7 @@ def trace_model_dump_calls():
 
     def debug_model_dump(self, *args, **kwargs):
         if hasattr(self, "prompt_template") or "prompt_template" in str(type(self)):
-            logger.error(f"🔍 MODEL_DUMP CALL on object with prompt_template!")
+            logger.error("🔍 MODEL_DUMP CALL on object with prompt_template!"e!")
             logger.error(f"   Object type: {type(self)}")
             logger.error(f"   Args: {args}")
             logger.error(f"   Kwargs: {kwargs}")
@@ -86,7 +86,7 @@ def trace_model_dump_calls():
 
             # Print stack trace
             stack = traceback.extract_stack()
-            logger.error(f"   CALL STACK:")
+            logger.error("   CALL STACK:")
             for frame in stack[-8:]:  # Last 8 frames
                 logger.error(f"     {frame.filename}:{frame.lineno} in {frame.name}")
                 logger.error(f"       {frame.line}")
@@ -102,7 +102,7 @@ def trace_model_dump_calls():
 
                 # Breakpoint for dict conversion
                 if isinstance(result["prompt_template"], dict):
-                    logger.error(f"🚨 PROMPT TEMPLATE CONVERTED TO DICT!")
+                    logger.error("🚨 PROMPT TEMPLATE CONVERTED TO DICT!"T!")
                     pdb.set_trace()
 
             return result
@@ -124,7 +124,7 @@ def trace_pydantic_validation():
 
     def debug_validate_python(self, obj, *args, **kwargs):
         if "BasePromptTemplate" in str(self) or "prompt_template" in str(obj):
-            logger.error(f"🔍 PYDANTIC VALIDATION of prompt_template!")
+            logger.error("🔍 PYDANTIC VALIDATION of prompt_template!"e!")
             logger.error(f"   Validator: {self}")
             logger.error(f"   Object type: {type(obj)}")
             logger.error(f"   Object: {obj}")
@@ -133,13 +133,13 @@ def trace_pydantic_validation():
             if isinstance(obj, dict) and all(
                 k in obj for k in ["name", "input_variables", "optional_variables"]
             ):
-                logger.error(f"🚨 FOUND THE PROBLEMATIC DICT!")
+                logger.error("🚨 FOUND THE PROBLEMATIC DICT!"T!")
                 logger.error(f"   Dict keys: {list(obj.keys())}")
                 logger.error(f"   Dict values: {obj}")
 
                 # Print stack trace
                 stack = traceback.extract_stack()
-                logger.error(f"   FULL VALIDATION STACK:")
+                logger.error("   FULL VALIDATION STACK:")
                 for i, frame in enumerate(stack):
                     logger.error(
                         f"     [{i}] {frame.filename}:{frame.lineno} in {frame.name}"
@@ -168,7 +168,7 @@ def trace_serialization():
         if hasattr(obj, "prompt_template") or (
             isinstance(obj, dict) and "prompt_template" in obj
         ):
-            logger.error(f"🔍 SERIALIZATION of object with prompt_template!")
+            logger.error("🔍 SERIALIZATION of object with prompt_template!"e!")
             logger.error(f"   Object type: {type(obj)}")
 
             if hasattr(obj, "prompt_template"):
@@ -180,7 +180,7 @@ def trace_serialization():
 
             # Stack trace
             stack = traceback.extract_stack()
-            logger.error(f"   SERIALIZATION STACK:")
+            logger.error("   SERIALIZATION STACK:")
             for frame in stack[-6:]:
                 logger.error(f"     {frame.filename}:{frame.lineno} in {frame.name}")
                 logger.error(f"       {frame.line}")
@@ -209,7 +209,6 @@ def main():
     logger.error("🔧 All debug hooks installed")
 
     # Import after patching
-    from typing import List
 
     from haive.agents.simple.agent_v2 import SimpleAgentV2
     from langchain_core.prompts import ChatPromptTemplate
@@ -288,7 +287,7 @@ def main():
                     "validate_python",
                 ]
             ):
-                logger.error(f"📍 CRITICAL FRAME:")
+                logger.error("📍 CRITICAL FRAME:"E:")
                 logger.error(f"   File: {frame_info.filename}")
                 logger.error(f"   Line: {frame_info.lineno}")
                 logger.error(f"   Function: {frame_info.name}")

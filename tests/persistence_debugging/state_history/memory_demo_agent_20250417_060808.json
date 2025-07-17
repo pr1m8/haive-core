@@ -1,0 +1,55 @@
+[
+  {
+    "__shared_fields__": [],
+    "__reducer_fields__": {},
+    "messages": [
+      {
+        "content": "Hello! My name is Alex and I'm a software engineer.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "549b2b5e-1a1e-40fe-99c8-d32df8940a13",
+        "example": false
+      },
+      {
+        "content": "What programming language do you think I might use most often?",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "585186df-8a60-49ee-880e-1d12a83aff07",
+        "example": false
+      }
+    ],
+    "context": {},
+    "runnable_config": {}
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "memory_thread_10ede944",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f01b73d-dd4d-64e7-8004-9d6884c500a8"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "process_7062fd": null
+    },
+    "thread_id": "memory_thread_10ede944",
+    "recursion_limit": 200,
+    "step": 4,
+    "parents": {}
+  },
+  "2025-04-17T10:08:10.538709+00:00",
+  {
+    "configurable": {
+      "thread_id": "memory_thread_10ede944",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f01b73d-dd49-69e5-8003-7123db83172b"
+    }
+  },
+  []
+]

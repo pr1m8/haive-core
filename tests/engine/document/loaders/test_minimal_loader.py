@@ -41,7 +41,8 @@ base_path = Path(
 
 # Import modules
 config_module = import_module_from_file(
-    "haive.core.engine.document.config", base_path / "engine" / "document" / "config.py"
+    "haive.core.engine.document.config", base_path /
+    "engine" / "document" / "config.py"
 )
 
 source_base_module = import_module_from_file(
@@ -60,7 +61,6 @@ def test_loader_selection_fix():
     register_source = registry_module.register_source
     source_registry = registry_module.source_registry
     LocalSource = source_base_module.LocalSource
-
 
     # Clear the global registry
     source_registry._sources.clear()
@@ -87,8 +87,6 @@ def test_loader_selection_fix():
     class PDFSource(LocalSource):
         """PDF source for testing."""
 
-
-
     # Create a source
     source = source_registry.create_source("/path/to/document.pdf")
 
@@ -99,8 +97,8 @@ def test_loader_selection_fix():
     quality_loader = source_registry.get_loader_for_source(
         source, preference=LoaderPreference.QUALITY
     )
-    default_loader = source_registry.get_loader_for_source(source)  # No preference
-
+    default_loader = source_registry.get_loader_for_source(
+        source)  # No preference
 
     # Verify the fix worked
     assert (
@@ -118,7 +116,6 @@ def test_loader_selection_fix():
     assert (
         default_loader.name == "PyPDFLoader"
     ), f"Expected default PyPDFLoader, got {default_loader.name}"
-
 
     return True
 

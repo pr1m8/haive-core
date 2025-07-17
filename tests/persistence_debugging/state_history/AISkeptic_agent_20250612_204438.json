@@ -1,0 +1,274 @@
+[
+  {
+    "messages": [
+      {
+        "content": "[@AISkeptic]\nStats: 0 likes | 0 followers\nTrending: Nothing trending\nKeep it under 500 characters!",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "system",
+        "name": null,
+        "id": "9728f864-4c1f-4271-b405-b9af80b9e725"
+      },
+      {
+        "content": "\ud83d\udc26 New thread: \ud83d\ude80 Just shipped our new AI framework! It's 10x faster than before. AMA!\nPlatform: twitter (max 280 chars)\nShare your thoughts! Go viral at 8 likes \ud83d\udd25",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "e6aaeac8-5b04-4b43-ab60-3f6001ff195f",
+        "example": false
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "tool_calls": [
+            {
+              "id": "call_gFkPcPk4EPFYmuMuADerLcFu",
+              "function": {
+                "arguments": "{\"reply_to\": \"unknown\", \"content\": \"Before we celebrate, let's see some benchmarks! \ud83e\uddd0 Transparency in performance claims is key! #AISafety #PerformanceMetrics\"}",
+                "name": "reply_to_post"
+              },
+              "type": "function"
+            },
+            {
+              "id": "call_loZce4j5EK8a07FZuqmQkrkV",
+              "function": {
+                "arguments": "{\"post_author\": \"unknown\", \"reason\": \"Excited to see new AI developments!\"}",
+                "name": "like_post"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 86,
+            "prompt_tokens": 273,
+            "total_tokens": 359,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-Bhmp4Mie9pSkF0LKwfYJ8UTa9nRYO",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "content_filter_results": {}
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run-d822056d-669e-43c0-b1d4-695b1bbc40b8-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "reply_to_post",
+            "args": {
+              "reply_to": "unknown",
+              "content": "Before we celebrate, let's see some benchmarks! \ud83e\uddd0 Transparency in performance claims is key! #AISafety #PerformanceMetrics"
+            },
+            "id": "call_gFkPcPk4EPFYmuMuADerLcFu",
+            "type": "tool_call"
+          },
+          {
+            "name": "like_post",
+            "args": {
+              "post_author": "unknown",
+              "reason": "Excited to see new AI developments!"
+            },
+            "id": "call_loZce4j5EK8a07FZuqmQkrkV",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 273,
+          "output_tokens": 86,
+          "total_tokens": 359,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "232c4b05-848c-4d23-9092-adfcab78f4a0",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f047ef9-60cd-6939-8001-5a69919d11dd"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "",
+          "additional_kwargs": {
+            "tool_calls": [
+              {
+                "id": "call_gFkPcPk4EPFYmuMuADerLcFu",
+                "function": {
+                  "arguments": "{\"reply_to\": \"unknown\", \"content\": \"Before we celebrate, let's see some benchmarks! \ud83e\uddd0 Transparency in performance claims is key! #AISafety #PerformanceMetrics\"}",
+                  "name": "reply_to_post"
+                },
+                "type": "function"
+              },
+              {
+                "id": "call_loZce4j5EK8a07FZuqmQkrkV",
+                "function": {
+                  "arguments": "{\"post_author\": \"unknown\", \"reason\": \"Excited to see new AI developments!\"}",
+                  "name": "like_post"
+                },
+                "type": "function"
+              }
+            ],
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 86,
+              "prompt_tokens": 273,
+              "total_tokens": 359,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "id": "chatcmpl-Bhmp4Mie9pSkF0LKwfYJ8UTa9nRYO",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "tool_calls",
+            "logprobs": null,
+            "content_filter_results": {}
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run-d822056d-669e-43c0-b1d4-695b1bbc40b8-0",
+          "example": false,
+          "tool_calls": [
+            {
+              "name": "reply_to_post",
+              "args": {
+                "reply_to": "unknown",
+                "content": "Before we celebrate, let's see some benchmarks! \ud83e\uddd0 Transparency in performance claims is key! #AISafety #PerformanceMetrics"
+              },
+              "id": "call_gFkPcPk4EPFYmuMuADerLcFu",
+              "type": "tool_call"
+            },
+            {
+              "name": "like_post",
+              "args": {
+                "post_author": "unknown",
+                "reason": "Excited to see new AI developments!"
+              },
+              "id": "call_loZce4j5EK8a07FZuqmQkrkV",
+              "type": "tool_call"
+            }
+          ],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 273,
+            "output_tokens": 86,
+            "total_tokens": 359,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 1,
+    "parents": {},
+    "thread_id": "e2c2c26d-8d9a-411d-9c44-6ba683e48ce4",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 3,
+    "langgraph_node": "execute_agent",
+    "langgraph_triggers": ["branch:to:execute_agent"],
+    "langgraph_path": ["__pregel_pull", "execute_agent"],
+    "langgraph_checkpoint_ns": "execute_agent:a5267799-9120-2b6f-cecf-cded6f14e05c",
+    "recursion_limit": 50
+  },
+  "2025-06-13T00:44:38.866548+00:00",
+  {
+    "configurable": {
+      "thread_id": "232c4b05-848c-4d23-9092-adfcab78f4a0",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f047ef9-5601-6599-8000-9a526f1e5362"
+    }
+  },
+  []
+]

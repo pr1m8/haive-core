@@ -1,0 +1,315 @@
+[
+    {
+        "messages": [
+            {
+                "content": "Hello, I'm testing React agent persistence.",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "human",
+                "name": null,
+                "id": "942063ad-a5e5-4aa1-8d3a-06a9205803d6",
+                "example": false
+            },
+            {
+                "content": "It sounds like you're working on a project that involves maintaining state or data persistently within a React application. Persistence is a common challenge in front-end development, especially when dealing with data that needs to be saved beyond the lifecycle of your application or browser session. Here are some tips to ensure effective persistence in a React application:\n\n1. **State Management Libraries**: Consider using state management libraries like Redux or Zustand. These can help manage and persist state across your application.\n\n2. **Local Storage**: Utilize `localStorage` or `sessionStorage` to save data on the client-side. This data persists even when the user refreshes the page or closes the browser but will be lost once the browser cache is cleared.\n\n3. **Backend Persistence**: If you're seeking long-term persistence, consider using a backend solution such as RESTful APIs or GraphQL to store data in a database. This requires frequent communication with your server to fetch and update data.\n\n4. **React Context**: Use React's Context API for global state management. When combined with local storage or backend solutions, you can ensure persistent data across components.\n\n5. **Persistence Libraries**: There are libraries specifically designed to help with persistence in React applications, such as `redux-persist`.\n\n6. **React Query or Apollo**: If you're using React Query or Apollo Client for data fetching, they offer built-in caching mechanisms that can help with data persistence.\n\n7. **UseEffects and State Hooks**: Ensure you are effectively using `useEffect` and state hooks to manage your component's lifecycle in response to persisted changes.\n\nBy combining these techniques, you can effectively manage and persist data within a React application. If you have more specific questions or issues, feel free to ask!",
+                "additional_kwargs": {
+                    "refusal": null
+                },
+                "response_metadata": {
+                    "token_usage": {
+                        "completion_tokens": 352,
+                        "prompt_tokens": 15,
+                        "total_tokens": 367,
+                        "completion_tokens_details": {
+                            "accepted_prediction_tokens": 0,
+                            "audio_tokens": 0,
+                            "reasoning_tokens": 0,
+                            "rejected_prediction_tokens": 0
+                        },
+                        "prompt_tokens_details": {
+                            "audio_tokens": 0,
+                            "cached_tokens": 0
+                        }
+                    },
+                    "model_name": "gpt-4o-2024-08-06",
+                    "system_fingerprint": "fp_ee1d74bde0",
+                    "prompt_filter_results": [
+                        {
+                            "prompt_index": 0,
+                            "content_filter_results": {
+                                "hate": {
+                                    "filtered": false,
+                                    "severity": "safe"
+                                },
+                                "self_harm": {
+                                    "filtered": false,
+                                    "severity": "safe"
+                                },
+                                "sexual": {
+                                    "filtered": false,
+                                    "severity": "safe"
+                                },
+                                "violence": {
+                                    "filtered": false,
+                                    "severity": "safe"
+                                }
+                            }
+                        }
+                    ],
+                    "finish_reason": "stop",
+                    "logprobs": null,
+                    "content_filter_results": {
+                        "hate": {
+                            "filtered": false,
+                            "severity": "safe"
+                        },
+                        "self_harm": {
+                            "filtered": false,
+                            "severity": "safe"
+                        },
+                        "sexual": {
+                            "filtered": false,
+                            "severity": "safe"
+                        },
+                        "violence": {
+                            "filtered": false,
+                            "severity": "safe"
+                        }
+                    }
+                },
+                "type": "ai",
+                "name": null,
+                "id": "run--e7dc3405-ac3b-4d97-ae7a-f9ec23dfb295-0",
+                "example": false,
+                "tool_calls": [],
+                "invalid_tool_calls": [],
+                "usage_metadata": {
+                    "input_tokens": 15,
+                    "output_tokens": 352,
+                    "total_tokens": 367,
+                    "input_token_details": {
+                        "audio": 0,
+                        "cache_read": 0
+                    },
+                    "output_token_details": {
+                        "audio": 0,
+                        "reasoning": 0
+                    }
+                }
+            },
+            {
+                "content": "What was I testing?",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "human",
+                "name": null,
+                "id": "fbbf6649-c1f7-4e4d-8a46-6cbbf5e1970e",
+                "example": false
+            },
+            {
+                "content": "Based on your initial statement, \"I'm testing React agent persistence,\" it seems you were testing the persistence of state or data management within a React application. \"Agent persistence\" could refer to a specific concept or tool related to maintaining state or data over time and across different sessions or components in your application. If \"React agent\" relates to a particular library or tool you're using, it could involve how data is retained or synchronized across your app's lifecycle or in relation to external services.\n\nIf you have further context or specific aspects of what you're testing\u2014such as the name of a tool, library, or specific functionality you're focusing on\u2014I can provide more targeted information or suggestions.",
+                "additional_kwargs": {
+                    "refusal": null
+                },
+                "response_metadata": {
+                    "token_usage": {
+                        "completion_tokens": 135,
+                        "prompt_tokens": 379,
+                        "total_tokens": 514,
+                        "completion_tokens_details": {
+                            "accepted_prediction_tokens": 0,
+                            "audio_tokens": 0,
+                            "reasoning_tokens": 0,
+                            "rejected_prediction_tokens": 0
+                        },
+                        "prompt_tokens_details": {
+                            "audio_tokens": 0,
+                            "cached_tokens": 0
+                        }
+                    },
+                    "model_name": "gpt-4o-2024-08-06",
+                    "system_fingerprint": "fp_ee1d74bde0",
+                    "prompt_filter_results": [
+                        {
+                            "prompt_index": 0,
+                            "content_filter_results": {
+                                "hate": {
+                                    "filtered": false,
+                                    "severity": "safe"
+                                },
+                                "self_harm": {
+                                    "filtered": false,
+                                    "severity": "safe"
+                                },
+                                "sexual": {
+                                    "filtered": false,
+                                    "severity": "safe"
+                                },
+                                "violence": {
+                                    "filtered": false,
+                                    "severity": "safe"
+                                }
+                            }
+                        }
+                    ],
+                    "finish_reason": "stop",
+                    "logprobs": null,
+                    "content_filter_results": {
+                        "hate": {
+                            "filtered": false,
+                            "severity": "safe"
+                        },
+                        "self_harm": {
+                            "filtered": false,
+                            "severity": "safe"
+                        },
+                        "sexual": {
+                            "filtered": false,
+                            "severity": "safe"
+                        },
+                        "violence": {
+                            "filtered": false,
+                            "severity": "safe"
+                        }
+                    }
+                },
+                "type": "ai",
+                "name": null,
+                "id": "run--9cbb171c-0267-452f-ac9c-ea316f569c7e-0",
+                "example": false,
+                "tool_calls": [],
+                "invalid_tool_calls": [],
+                "usage_metadata": {
+                    "input_tokens": 379,
+                    "output_tokens": 135,
+                    "total_tokens": 514,
+                    "input_token_details": {
+                        "audio": 0,
+                        "cache_read": 0
+                    },
+                    "output_token_details": {
+                        "audio": 0,
+                        "reasoning": 0
+                    }
+                }
+            }
+        ]
+    },
+    [],
+    {
+        "configurable": {
+            "thread_id": "react_test_001050",
+            "checkpoint_ns": "",
+            "checkpoint_id": "1f057c3b-7a17-6b1d-8004-8b3b3f80dc78"
+        }
+    },
+    {
+        "step": 4,
+        "debug": false,
+        "source": "loop",
+        "writes": {
+            "agent_node": {
+                "messages": {
+                    "content": "Based on your initial statement, \"I'm testing React agent persistence,\" it seems you were testing the persistence of state or data management within a React application. \"Agent persistence\" could refer to a specific concept or tool related to maintaining state or data over time and across different sessions or components in your application. If \"React agent\" relates to a particular library or tool you're using, it could involve how data is retained or synchronized across your app's lifecycle or in relation to external services.\n\nIf you have further context or specific aspects of what you're testing\u2014such as the name of a tool, library, or specific functionality you're focusing on\u2014I can provide more targeted information or suggestions.",
+                    "additional_kwargs": {
+                        "refusal": null
+                    },
+                    "response_metadata": {
+                        "logprobs": null,
+                        "model_name": "gpt-4o-2024-08-06",
+                        "token_usage": {
+                            "total_tokens": 514,
+                            "prompt_tokens": 379,
+                            "completion_tokens": 135,
+                            "prompt_tokens_details": {
+                                "audio_tokens": 0,
+                                "cached_tokens": 0
+                            },
+                            "completion_tokens_details": {
+                                "audio_tokens": 0,
+                                "reasoning_tokens": 0,
+                                "accepted_prediction_tokens": 0,
+                                "rejected_prediction_tokens": 0
+                            }
+                        },
+                        "finish_reason": "stop",
+                        "system_fingerprint": "fp_ee1d74bde0",
+                        "prompt_filter_results": [
+                            {
+                                "prompt_index": 0,
+                                "content_filter_results": {
+                                    "hate": {
+                                        "filtered": false,
+                                        "severity": "safe"
+                                    },
+                                    "sexual": {
+                                        "filtered": false,
+                                        "severity": "safe"
+                                    },
+                                    "violence": {
+                                        "filtered": false,
+                                        "severity": "safe"
+                                    },
+                                    "self_harm": {
+                                        "filtered": false,
+                                        "severity": "safe"
+                                    }
+                                }
+                            }
+                        ],
+                        "content_filter_results": {
+                            "hate": {
+                                "filtered": false,
+                                "severity": "safe"
+                            },
+                            "sexual": {
+                                "filtered": false,
+                                "severity": "safe"
+                            },
+                            "violence": {
+                                "filtered": false,
+                                "severity": "safe"
+                            },
+                            "self_harm": {
+                                "filtered": false,
+                                "severity": "safe"
+                            }
+                        }
+                    },
+                    "type": "ai",
+                    "name": null,
+                    "id": "run--9cbb171c-0267-452f-ac9c-ea316f569c7e-0",
+                    "example": false,
+                    "tool_calls": [],
+                    "invalid_tool_calls": [],
+                    "usage_metadata": {
+                        "input_tokens": 379,
+                        "output_tokens": 135,
+                        "total_tokens": 514,
+                        "input_token_details": {
+                            "audio": 0,
+                            "cache_read": 0
+                        },
+                        "output_token_details": {
+                            "audio": 0,
+                            "reasoning": 0
+                        }
+                    }
+                }
+            }
+        },
+        "parents": {},
+        "thread_id": "react_test_001050",
+        "checkpoint_mode": "sync",
+        "recursion_limit": 100
+    },
+    "2025-07-03T04:10:55.953770+00:00",
+    {
+        "configurable": {
+            "thread_id": "react_test_001050",
+            "checkpoint_ns": "",
+            "checkpoint_id": "1f057c3b-6b08-6f76-8003-33ddd5910e30"
+        }
+    },
+    []
+]

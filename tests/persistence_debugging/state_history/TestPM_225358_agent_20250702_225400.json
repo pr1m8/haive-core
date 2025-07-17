@@ -1,0 +1,240 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Current Section: Problem\nYour total contributions: 0\nFormat: markdown",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "system",
+        "name": null,
+        "id": "92aee1cd-969f-4a20-a24b-046cf64bd63e"
+      },
+      {
+        "content": "Start the 'Problem' section. Provide a solid foundation for others to build on.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "system",
+        "name": null,
+        "id": "adff8b08-cebe-46e8-824b-e4f67843f0f7"
+      },
+      {
+        "content": "\ud83d\udcdd Collaborative Session: Collaborative Document\n\nTopic: Testing persistence for collaborative agents\n\nWe'll work together on these sections:\n- Problem\n- Solution\n\nFormat: markdown\nMin contributions per section: 1\n\nLet's start with: Problem",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "d821180d-e388-41d4-a018-f6bbbe3d2adf",
+        "example": false
+      },
+      {
+        "content": "### Problem\n\nCollaborative agents often struggle with maintaining persistent and consistent states across multiple sessions, leading to issues such as data loss, synchronization errors, and reduced efficiency in collaborative environments.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 37,
+            "prompt_tokens": 112,
+            "total_tokens": 149,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--545efdc7-98d9-4eb9-be23-058b78ec149d-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 112,
+          "output_tokens": 37,
+          "total_tokens": 149,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "TestPM_225358_agent_09978051",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057b8f-8815-65bd-8001-976a1edd1c60"
+    }
+  },
+  {
+    "step": 1,
+    "debug": false,
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "### Problem\n\nCollaborative agents often struggle with maintaining persistent and consistent states across multiple sessions, leading to issues such as data loss, synchronization errors, and reduced efficiency in collaborative environments.",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "logprobs": null,
+            "model_name": "gpt-4o-2024-08-06",
+            "token_usage": {
+              "total_tokens": 149,
+              "prompt_tokens": 112,
+              "completion_tokens": 37,
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              },
+              "completion_tokens_details": {
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "accepted_prediction_tokens": 0,
+                "rejected_prediction_tokens": 0
+              }
+            },
+            "finish_reason": "stop",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--545efdc7-98d9-4eb9-be23-058b78ec149d-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 112,
+            "output_tokens": 37,
+            "total_tokens": 149,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "parents": {},
+    "thread_id": "collab_test_225358",
+    "langgraph_node": "execute_agent",
+    "langgraph_path": ["__pregel_pull", "execute_agent"],
+    "langgraph_step": 3,
+    "checkpoint_mode": "sync",
+    "recursion_limit": 50,
+    "langgraph_triggers": ["branch:to:execute_agent"],
+    "langgraph_checkpoint_ns": "execute_agent:f8033ac6-d712-a491-18f7-039bf0710e8b"
+  },
+  "2025-07-03T02:54:00.330984+00:00",
+  {
+    "configurable": {
+      "thread_id": "TestPM_225358_agent_09978051",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057b8f-81cc-6493-8000-edca7d548059"
+    }
+  },
+  []
+]

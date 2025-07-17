@@ -1,0 +1,145 @@
+[
+  {
+    "query": "what is the conversation about",
+    "k": null,
+    "filter": null,
+    "search_type": null,
+    "score_threshold": null,
+    "retrieved_documents": [
+      {
+        "id": "c444b693-57ed-4388-9a57-b5c0450e53cb",
+        "metadata": {
+          "category": "conversation",
+          "message_type": "ai",
+          "turn": 7,
+          "has_tool_call": true
+        },
+        "page_content": "AI: I'll attempt to make a reservation at Carmine's for you.",
+        "type": "Document"
+      },
+      {
+        "id": "fc7c1717-7272-4e50-9c7e-dd5b3e8ae11e",
+        "metadata": {
+          "category": "conversation",
+          "message_type": "ai",
+          "turn": 2,
+          "has_tool_call": true
+        },
+        "page_content": "AI: I'll help you find restaurants near Times Square. Let me search for current options in that area.",
+        "type": "Document"
+      },
+      {
+        "id": "b3736896-c789-48bd-9dd1-5a31acc63797",
+        "metadata": {
+          "category": "conversation",
+          "message_type": "human",
+          "turn": 6,
+          "intent": "reservation_request"
+        },
+        "page_content": "Human: Great! Can you book a table at Carmine's for tonight at 7 PM for 4 people?",
+        "type": "Document"
+      },
+      {
+        "id": "dc725102-8a92-4902-92a6-a1e9066cbacb",
+        "metadata": {
+          "category": "conversation",
+          "message_type": "tool_call",
+          "turn": 8,
+          "tool_name": "make_reservation"
+        },
+        "page_content": "Tool Call: make_reservation(restaurant='Carmines Italian', time='19:00', date='today', party_size=4)",
+        "type": "Document"
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "6a9f3ed4-064b-4740-9709-d26c1c216b21",
+      "checkpoint_ns": "SimpleRAGAgent:8db8c876-667a-c450-7745-d5172fdcb6ad",
+      "checkpoint_id": "1f05277c-374e-65fb-8001-ee5c392c18ce",
+      "checkpoint_map": {
+        "": "1f05277c-0159-6fc5-8000-6cfebf750e59",
+        "SimpleRAGAgent:8db8c876-667a-c450-7745-d5172fdcb6ad": "1f05277c-374e-65fb-8001-ee5c392c18ce"
+      }
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "retrieval_node": {
+        "retrieved_documents": [
+          {
+            "id": "c444b693-57ed-4388-9a57-b5c0450e53cb",
+            "metadata": {
+              "category": "conversation",
+              "message_type": "ai",
+              "turn": 7,
+              "has_tool_call": true
+            },
+            "page_content": "AI: I'll attempt to make a reservation at Carmine's for you.",
+            "type": "Document"
+          },
+          {
+            "id": "fc7c1717-7272-4e50-9c7e-dd5b3e8ae11e",
+            "metadata": {
+              "category": "conversation",
+              "message_type": "ai",
+              "turn": 2,
+              "has_tool_call": true
+            },
+            "page_content": "AI: I'll help you find restaurants near Times Square. Let me search for current options in that area.",
+            "type": "Document"
+          },
+          {
+            "id": "b3736896-c789-48bd-9dd1-5a31acc63797",
+            "metadata": {
+              "category": "conversation",
+              "message_type": "human",
+              "turn": 6,
+              "intent": "reservation_request"
+            },
+            "page_content": "Human: Great! Can you book a table at Carmine's for tonight at 7 PM for 4 people?",
+            "type": "Document"
+          },
+          {
+            "id": "dc725102-8a92-4902-92a6-a1e9066cbacb",
+            "metadata": {
+              "category": "conversation",
+              "message_type": "tool_call",
+              "turn": 8,
+              "tool_name": "make_reservation"
+            },
+            "page_content": "Tool Call: make_reservation(restaurant='Carmines Italian', time='19:00', date='today', party_size=4)",
+            "type": "Document"
+          }
+        ]
+      }
+    },
+    "step": 1,
+    "parents": {
+      "": "1f05277c-0159-6fc5-8000-6cfebf750e59"
+    },
+    "thread_id": "6a9f3ed4-064b-4740-9709-d26c1c216b21",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 1,
+    "langgraph_node": "SimpleRAGAgent",
+    "langgraph_triggers": ["branch:to:SimpleRAGAgent"],
+    "langgraph_path": ["__pregel_pull", "SimpleRAGAgent"],
+    "langgraph_checkpoint_ns": "SimpleRAGAgent:8db8c876-667a-c450-7745-d5172fdcb6ad"
+  },
+  "2025-06-26T10:24:38.228923+00:00",
+  {
+    "configurable": {
+      "thread_id": "6a9f3ed4-064b-4740-9709-d26c1c216b21",
+      "checkpoint_ns": "SimpleRAGAgent:8db8c876-667a-c450-7745-d5172fdcb6ad",
+      "checkpoint_id": "1f05277c-018c-612f-8000-462f3a8dd95c",
+      "checkpoint_map": {
+        "": "1f05277c-0159-6fc5-8000-6cfebf750e59",
+        "SimpleRAGAgent:8db8c876-667a-c450-7745-d5172fdcb6ad": "1f05277c-018c-612f-8000-462f3a8dd95c"
+      }
+    }
+  },
+  []
+]

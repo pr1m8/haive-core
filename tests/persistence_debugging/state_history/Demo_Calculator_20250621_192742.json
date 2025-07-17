@@ -1,0 +1,298 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Create a plan for a day trip, then calculate how many hours we'll need in total",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "4b8f70c5-4ede-4fb8-803b-8c4eb3d87a58",
+        "example": false
+      },
+      {
+        "content": "Creating a day trip plan can be a fun and efficient way to explore a new area or enjoy some leisure time. Let\u2019s design a versatile itinerary for a day trip and calculate the total time you will need. I\u2019ll assume you\u2019re traveling by car and starting in a city or town with various attractions. Here\u2019s a sample plan:\n\n### Day Trip Itinerary\n\n#### 8:00 AM - 9:00 AM: Breakfast at Local Cafe\n- **Activity**: Begin your day at a charming local cafe that serves breakfast.\n- **Time Needed**: 1 hour\n\n#### 9:30 AM - 11:30 AM: Visit to a Nearby Museum or Art Gallery\n- **Activity**: Explore the exhibits and enjoy the cultural insights.\n- **Time Needed**: 2 hours\n\n#### Travel Time to Next Destination\n- **Distance**: Assume a 30-minute drive.\n- **Time Needed**: 0.5 hours\n\n#### 12:00 PM - 1:30 PM: Outdoor Activity (e.g., hiking or park visit)\n- **Activity**: Engage in a moderate hike or enjoy a stroll in a scenic park.\n- **Time Needed**: 1.5 hours\n\n#### 2:00 PM - 3:00 PM: Lunch at a Local Restaurant\n- **Activity**: Taste the local cuisine at a recommended restaurant.\n- **Time Needed**: 1 hour\n\n#### Travel Time to Next Destination\n- **Distance**: Assume a 30-minute drive.\n- **Time Needed**: 0.5 hours\n\n#### 3:30 PM - 5:00 PM: Visit to a Historical Site or Local Landmark\n- **Activity**: Discover historical narratives and unique architecture.\n- **Time Needed**: 1.5 hours\n\n#### Travel Time to Next Destination\n- **Distance**: Assume a 30-minute drive back to the city or town.\n- **Time Needed**: 0.5 hours\n\n#### 5:30 PM - 6:30 PM: Relax with Coffee or Ice Cream\n- **Activity**: End the day with a refreshing coffee or ice cream break.\n- **Time Needed**: 1 hour\n\n### Total Time Calculation\n\nLet's sum up the time required for each activity and travel:\n\n- Breakfast: 1 hour\n- Museum/Art Gallery Visit: 2 hours\n- Travel Time: 0.5 hours\n- Outdoor Activity: 1.5 hours\n- Lunch: 1 hour\n- Travel Time: 0.5 hours\n- Historical Site Visit: 1.5 hours\n- Travel Time: 0.5 hours\n- Coffee/Ice Cream Break: 1 hour\n\n### Total Time: 10 hours\n\nThis itinerary should allow you to enjoy a full day without feeling rushed, while providing a balanced mix of food, culture, and outdoor experiences. Adjust the plan according to specific interests or travel distances, and remember to check opening hours and any necessary reservations in advance!",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 619,
+            "prompt_tokens": 24,
+            "total_tokens": 643,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--62e2bec2-c910-4af4-8697-560d7c6ede3b-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "Creating a day trip plan can be a fun and efficient way to explore a new area or enjoy some leisure time. Let\u2019s design a versatile itinerary for a day trip and calculate the total time you will need. I\u2019ll assume you\u2019re traveling by car and starting in a city or town with various attractions. Here\u2019s a sample plan:\n\n### Day Trip Itinerary\n\n#### 8:00 AM - 9:00 AM: Breakfast at Local Cafe\n- **Activity**: Begin your day at a charming local cafe that serves breakfast.\n- **Time Needed**: 1 hour\n\n#### 9:30 AM - 11:30 AM: Visit to a Nearby Museum or Art Gallery\n- **Activity**: Explore the exhibits and enjoy the cultural insights.\n- **Time Needed**: 2 hours\n\n#### Travel Time to Next Destination\n- **Distance**: Assume a 30-minute drive.\n- **Time Needed**: 0.5 hours\n\n#### 12:00 PM - 1:30 PM: Outdoor Activity (e.g., hiking or park visit)\n- **Activity**: Engage in a moderate hike or enjoy a stroll in a scenic park.\n- **Time Needed**: 1.5 hours\n\n#### 2:00 PM - 3:00 PM: Lunch at a Local Restaurant\n- **Activity**: Taste the local cuisine at a recommended restaurant.\n- **Time Needed**: 1 hour\n\n#### Travel Time to Next Destination\n- **Distance**: Assume a 30-minute drive.\n- **Time Needed**: 0.5 hours\n\n#### 3:30 PM - 5:00 PM: Visit to a Historical Site or Local Landmark\n- **Activity**: Discover historical narratives and unique architecture.\n- **Time Needed**: 1.5 hours\n\n#### Travel Time to Next Destination\n- **Distance**: Assume a 30-minute drive back to the city or town.\n- **Time Needed**: 0.5 hours\n\n#### 5:30 PM - 6:30 PM: Relax with Coffee or Ice Cream\n- **Activity**: End the day with a refreshing coffee or ice cream break.\n- **Time Needed**: 1 hour\n\n### Total Time Calculation\n\nLet's sum up the time required for each activity and travel:\n\n- Breakfast: 1 hour\n- Museum/Art Gallery Visit: 2 hours\n- Travel Time: 0.5 hours\n- Outdoor Activity: 1.5 hours\n- Lunch: 1 hour\n- Travel Time: 0.5 hours\n- Historical Site Visit: 1.5 hours\n- Travel Time: 0.5 hours\n- Coffee/Ice Cream Break: 1 hour\n\n### Total Time: 10 hours\n\nThis itinerary should allow you to enjoy a full day without feeling rushed, while providing a balanced mix of food, culture, and outdoor experiences. Adjust the plan according to specific interests or travel distances, and remember to check opening hours and any necessary reservations in advance!",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 619,
+            "prompt_tokens": 646,
+            "total_tokens": 1265,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--e661f6b4-6ca6-4bb9-bf3e-163c042f2c42-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 646,
+          "output_tokens": 619,
+          "total_tokens": 1265,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "c5d636bc-66fc-4f87-844d-33c77af31f86",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04ef75-476d-6e57-8001-a83997de4dc8"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "Creating a day trip plan can be a fun and efficient way to explore a new area or enjoy some leisure time. Let\u2019s design a versatile itinerary for a day trip and calculate the total time you will need. I\u2019ll assume you\u2019re traveling by car and starting in a city or town with various attractions. Here\u2019s a sample plan:\n\n### Day Trip Itinerary\n\n#### 8:00 AM - 9:00 AM: Breakfast at Local Cafe\n- **Activity**: Begin your day at a charming local cafe that serves breakfast.\n- **Time Needed**: 1 hour\n\n#### 9:30 AM - 11:30 AM: Visit to a Nearby Museum or Art Gallery\n- **Activity**: Explore the exhibits and enjoy the cultural insights.\n- **Time Needed**: 2 hours\n\n#### Travel Time to Next Destination\n- **Distance**: Assume a 30-minute drive.\n- **Time Needed**: 0.5 hours\n\n#### 12:00 PM - 1:30 PM: Outdoor Activity (e.g., hiking or park visit)\n- **Activity**: Engage in a moderate hike or enjoy a stroll in a scenic park.\n- **Time Needed**: 1.5 hours\n\n#### 2:00 PM - 3:00 PM: Lunch at a Local Restaurant\n- **Activity**: Taste the local cuisine at a recommended restaurant.\n- **Time Needed**: 1 hour\n\n#### Travel Time to Next Destination\n- **Distance**: Assume a 30-minute drive.\n- **Time Needed**: 0.5 hours\n\n#### 3:30 PM - 5:00 PM: Visit to a Historical Site or Local Landmark\n- **Activity**: Discover historical narratives and unique architecture.\n- **Time Needed**: 1.5 hours\n\n#### Travel Time to Next Destination\n- **Distance**: Assume a 30-minute drive back to the city or town.\n- **Time Needed**: 0.5 hours\n\n#### 5:30 PM - 6:30 PM: Relax with Coffee or Ice Cream\n- **Activity**: End the day with a refreshing coffee or ice cream break.\n- **Time Needed**: 1 hour\n\n### Total Time Calculation\n\nLet's sum up the time required for each activity and travel:\n\n- Breakfast: 1 hour\n- Museum/Art Gallery Visit: 2 hours\n- Travel Time: 0.5 hours\n- Outdoor Activity: 1.5 hours\n- Lunch: 1 hour\n- Travel Time: 0.5 hours\n- Historical Site Visit: 1.5 hours\n- Travel Time: 0.5 hours\n- Coffee/Ice Cream Break: 1 hour\n\n### Total Time: 10 hours\n\nThis itinerary should allow you to enjoy a full day without feeling rushed, while providing a balanced mix of food, culture, and outdoor experiences. Adjust the plan according to specific interests or travel distances, and remember to check opening hours and any necessary reservations in advance!",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 619,
+              "prompt_tokens": 646,
+              "total_tokens": 1265,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--e661f6b4-6ca6-4bb9-bf3e-163c042f2c42-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 646,
+            "output_tokens": 619,
+            "total_tokens": 1265,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 1,
+    "parents": {},
+    "thread_id": "003ac62a-0e09-4307-bdfa-4beae780ef7c",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 6,
+    "langgraph_node": "delegate_to_agent",
+    "langgraph_triggers": ["branch:to:delegate_to_agent"],
+    "langgraph_path": ["__pregel_pull", "delegate_to_agent"],
+    "langgraph_checkpoint_ns": "delegate_to_agent:bc05c03a-a031-6df8-242e-ccadbe5e9a10"
+  },
+  "2025-06-21T23:27:42.945013+00:00",
+  {
+    "configurable": {
+      "thread_id": "c5d636bc-66fc-4f87-844d-33c77af31f86",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04ef75-12da-697d-8000-0644361d4dcb"
+    }
+  },
+  []
+]

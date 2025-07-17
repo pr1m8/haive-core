@@ -1,0 +1,345 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Whats 300+300. use tools. after write a plan for building a website",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "fc581e7a-e07e-47a1-ab55-6eeba66dd23a",
+        "example": false
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "tool_calls": [
+            {
+              "id": "call_cMRDo5K2i5Lz8klrTVKYFfNv",
+              "function": {
+                "arguments": "{\"a\":300,\"b\":300}",
+                "name": "add"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 18,
+            "prompt_tokens": 64,
+            "total_tokens": 82,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "content_filter_results": {}
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--1282bab5-a3d4-415a-be71-324a0a557170-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "add",
+            "args": {
+              "a": 300,
+              "b": 300
+            },
+            "id": "call_cMRDo5K2i5Lz8klrTVKYFfNv",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 64,
+          "output_tokens": 18,
+          "total_tokens": 82,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "600",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "add",
+        "id": "f0942e0d-be6a-4e89-8df5-bec18e363b2b",
+        "tool_call_id": "call_cMRDo5K2i5Lz8klrTVKYFfNv",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "The sum of 300 + 300 is 600.\n\n### Plan for Building a Website\n\n1. **Define Purpose and Goals:**\n   - Determine the primary purpose of the website (e.g., informational, e-commerce, portfolio).\n   - Set specific goals to achieve with the website (e.g., increase brand awareness, drive sales).\n\n2. **Research and Planning:**\n   - Conduct research on target audience and competitors.\n   - Plan the website structure and layout.\n   - Decide on features and functionalities needed.\n\n3. **Choose a Domain and Hosting:**\n   - Select a domain name reflecting the brand and easy to remember.\n   - Choose a reliable hosting provider based on your needs (e.g., shared, VPS, dedicated).\n\n4. **Design and User Experience:**\n   - Create wireframes and mockups.\n   - Design an intuitive user interface focusing on ease of navigation.\n   - Ensure responsive design for mobile and desktop devices.\n\n5. **Development:**\n   - Choose a platform or CMS (e.g., WordPress, Shopify, custom).\n   - Develop the website using HTML, CSS, JavaScript, and server-side technologies.\n   - Integrate necessary tools and plugins for functionality.\n\n6. **Content Creation:**\n   - Develop and optimize content for SEO, readability, and engagement.\n   - Create multimedia elements (images, videos) to enhance content.\n\n7. **Testing:**\n   - Perform cross-browser and device testing.\n   - Test all functionalities (forms, links, shopping carts).\n\n8. **Launch:**\n   - Conduct a soft launch to identify any initial issues.\n   - Officially launch the website and promote through marketing channels.\n\n9. **Maintenance and Updates:**\n   - Regularly update content and software.\n   - Monitor user feedback and make improvements.\n   - Implement analytics to track performance and growth.\n\nThis plan provides a structured approach to build and maintain a successful website.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 391,
+            "prompt_tokens": 89,
+            "total_tokens": 480,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--eb63ed19-abb0-4738-99de-4da49f2f258d-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 89,
+          "output_tokens": 391,
+          "total_tokens": 480,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ],
+    "tools": [],
+    "tool_routes": {},
+    "name_attrs": ["name", "__name__", "func_name"],
+    "content": null,
+    "output_schemas": {},
+    "engine_route_config": {
+      "llm": ["langchain_tool", "function", "pydantic_model"],
+      "aug_llm": ["langchain_tool", "function", "pydantic_model"],
+      "retriever": ["retriever"],
+      "parser": ["pydantic_model"]
+    }
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "5a6223c2-d9ba-4cb7-a9fa-8c374555f400",
+      "checkpoint_ns": "react:9d56d1a2-96e5-f421-0356-2ea4685c00f9",
+      "checkpoint_id": "1f051666-e127-63df-8004-c3a9573a61dd",
+      "checkpoint_map": {
+        "": "1f051666-9725-6f48-8000-0b4bb8a73df7",
+        "react:9d56d1a2-96e5-f421-0356-2ea4685c00f9": "1f051666-e127-63df-8004-c3a9573a61dd"
+      }
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "The sum of 300 + 300 is 600.\n\n### Plan for Building a Website\n\n1. **Define Purpose and Goals:**\n   - Determine the primary purpose of the website (e.g., informational, e-commerce, portfolio).\n   - Set specific goals to achieve with the website (e.g., increase brand awareness, drive sales).\n\n2. **Research and Planning:**\n   - Conduct research on target audience and competitors.\n   - Plan the website structure and layout.\n   - Decide on features and functionalities needed.\n\n3. **Choose a Domain and Hosting:**\n   - Select a domain name reflecting the brand and easy to remember.\n   - Choose a reliable hosting provider based on your needs (e.g., shared, VPS, dedicated).\n\n4. **Design and User Experience:**\n   - Create wireframes and mockups.\n   - Design an intuitive user interface focusing on ease of navigation.\n   - Ensure responsive design for mobile and desktop devices.\n\n5. **Development:**\n   - Choose a platform or CMS (e.g., WordPress, Shopify, custom).\n   - Develop the website using HTML, CSS, JavaScript, and server-side technologies.\n   - Integrate necessary tools and plugins for functionality.\n\n6. **Content Creation:**\n   - Develop and optimize content for SEO, readability, and engagement.\n   - Create multimedia elements (images, videos) to enhance content.\n\n7. **Testing:**\n   - Perform cross-browser and device testing.\n   - Test all functionalities (forms, links, shopping carts).\n\n8. **Launch:**\n   - Conduct a soft launch to identify any initial issues.\n   - Officially launch the website and promote through marketing channels.\n\n9. **Maintenance and Updates:**\n   - Regularly update content and software.\n   - Monitor user feedback and make improvements.\n   - Implement analytics to track performance and growth.\n\nThis plan provides a structured approach to build and maintain a successful website.",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 391,
+              "prompt_tokens": 89,
+              "total_tokens": 480,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--eb63ed19-abb0-4738-99de-4da49f2f258d-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 89,
+            "output_tokens": 391,
+            "total_tokens": 480,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 4,
+    "parents": {
+      "": "1f051666-9725-6f48-8000-0b4bb8a73df7"
+    },
+    "thread_id": "5a6223c2-d9ba-4cb7-a9fa-8c374555f400",
+    "debug": true,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 1,
+    "langgraph_node": "react",
+    "langgraph_triggers": ["branch:to:react"],
+    "langgraph_path": ["__pregel_pull", "react"],
+    "langgraph_checkpoint_ns": "react:9d56d1a2-96e5-f421-0356-2ea4685c00f9"
+  },
+  "2025-06-25T01:48:02.370233+00:00",
+  {
+    "configurable": {
+      "thread_id": "5a6223c2-d9ba-4cb7-a9fa-8c374555f400",
+      "checkpoint_ns": "react:9d56d1a2-96e5-f421-0356-2ea4685c00f9",
+      "checkpoint_id": "1f051666-9d25-631a-8003-9d154f3f50ea",
+      "checkpoint_map": {
+        "": "1f051666-9725-6f48-8000-0b4bb8a73df7",
+        "react:9d56d1a2-96e5-f421-0356-2ea4685c00f9": "1f051666-9d25-631a-8003-9d154f3f50ea"
+      }
+    }
+  },
+  []
+]

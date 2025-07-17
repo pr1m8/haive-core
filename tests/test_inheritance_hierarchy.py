@@ -41,7 +41,8 @@ def test_field_inheritance():
 
     # Check that it has fields from all parent classes
     assert hasattr(llm_state, "messages")  # From MessagesState
-    assert hasattr(llm_state, "token_usage")  # From MessagesStateWithTokenUsage
+    # From MessagesStateWithTokenUsage
+    assert hasattr(llm_state, "token_usage")
     assert hasattr(llm_state, "tools")  # From ToolState
     assert hasattr(llm_state, "tool_routes")  # From ToolState
     assert hasattr(llm_state, "engine")  # From LLMState

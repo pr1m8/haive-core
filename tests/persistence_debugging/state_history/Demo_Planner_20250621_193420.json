@@ -1,0 +1,223 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Create a plan for a day trip, then calculate how many hours we'll need if we spend 2 hours at each location",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "fd26b35c-2bbb-4498-b13e-e5c2a1c2c312",
+        "example": false
+      },
+      {
+        "content": "Sure! When planning a day trip, it's important to consider the locations you want to visit, the time you'll spend at each, and any travel time between them. Here\u2019s a sample plan for a day trip with four attractions:\n\n### Day Trip Plan\n\n1. **Morning:**\n   - **Location 1: Local Museum**\n     - Arrival: 9:00 AM\n     - Duration: 2 hours (9:00 AM - 11:00 AM)\n\n2. **Late Morning:**\n   - **Location 2: Botanical Gardens**\n     - Arrival: 11:30 AM (including travel time of 30 minutes)\n     - Duration: 2 hours (11:30 AM - 1:30 PM)\n\n3. **Afternoon:**\n   - **Lunch Break: Nearby Cafe**\n     - Arrival: 1:45 PM (including travel time of 15 minutes)\n     - Duration: 1 hour (1:45 PM - 2:45 PM)\n\n4. **Early Afternoon:**\n   - **Location 3: Historic Site**\n     - Arrival: 3:00 PM (including travel time of 15 minutes)\n     - Duration: 2 hours (3:00 PM - 5:00 PM)\n\n5. **Evening:**\n   - **Location 4: Art Gallery**\n     - Arrival: 5:30 PM (including travel time of 30 minutes)\n     - Duration: 2 hours (5:30 PM - 7:30 PM)\n\n### Total Time Needed\n\n- **Time Spent at Locations:** 4 locations * 2 hours each = 8 hours\n- **Travel Time Between Locations:** 30 minutes + 15 minutes + 15 minutes + 30 minutes = 1.5 hours\n- **Lunch Break:** 1 hour\n\n### Overall Total: 8 hours (locations) + 1.5 hours (travel) + 1 hour (lunch) = 10.5 hours\n\n### Suggested Schedule\n- **Start Time:** 9:00 AM\n- **End Time:** 7:30 PM\n\nThis plan allows you to have a rounded day trip experience, incorporating a mix of cultural, natural, and historical attractions with breaks for meals and travel in between. Adjust the schedule and locations according to your preferences and local offerings. Enjoy your day trip!",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 486,
+            "prompt_tokens": 31,
+            "total_tokens": 517,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--689f5659-4ce7-42e7-9d39-092ec47954d5-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 31,
+          "output_tokens": 486,
+          "total_tokens": 517,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "346b2fde-b245-475e-a3eb-e766abf1024d",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04ef84-1737-6c49-8001-c112b1e93d30"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "Sure! When planning a day trip, it's important to consider the locations you want to visit, the time you'll spend at each, and any travel time between them. Here\u2019s a sample plan for a day trip with four attractions:\n\n### Day Trip Plan\n\n1. **Morning:**\n   - **Location 1: Local Museum**\n     - Arrival: 9:00 AM\n     - Duration: 2 hours (9:00 AM - 11:00 AM)\n\n2. **Late Morning:**\n   - **Location 2: Botanical Gardens**\n     - Arrival: 11:30 AM (including travel time of 30 minutes)\n     - Duration: 2 hours (11:30 AM - 1:30 PM)\n\n3. **Afternoon:**\n   - **Lunch Break: Nearby Cafe**\n     - Arrival: 1:45 PM (including travel time of 15 minutes)\n     - Duration: 1 hour (1:45 PM - 2:45 PM)\n\n4. **Early Afternoon:**\n   - **Location 3: Historic Site**\n     - Arrival: 3:00 PM (including travel time of 15 minutes)\n     - Duration: 2 hours (3:00 PM - 5:00 PM)\n\n5. **Evening:**\n   - **Location 4: Art Gallery**\n     - Arrival: 5:30 PM (including travel time of 30 minutes)\n     - Duration: 2 hours (5:30 PM - 7:30 PM)\n\n### Total Time Needed\n\n- **Time Spent at Locations:** 4 locations * 2 hours each = 8 hours\n- **Travel Time Between Locations:** 30 minutes + 15 minutes + 15 minutes + 30 minutes = 1.5 hours\n- **Lunch Break:** 1 hour\n\n### Overall Total: 8 hours (locations) + 1.5 hours (travel) + 1 hour (lunch) = 10.5 hours\n\n### Suggested Schedule\n- **Start Time:** 9:00 AM\n- **End Time:** 7:30 PM\n\nThis plan allows you to have a rounded day trip experience, incorporating a mix of cultural, natural, and historical attractions with breaks for meals and travel in between. Adjust the schedule and locations according to your preferences and local offerings. Enjoy your day trip!",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 486,
+              "prompt_tokens": 31,
+              "total_tokens": 517,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--689f5659-4ce7-42e7-9d39-092ec47954d5-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 31,
+            "output_tokens": 486,
+            "total_tokens": 517,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 1,
+    "parents": {},
+    "thread_id": "cb1da07e-a3b0-408a-9fa9-9f4cc7a21de5",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 2,
+    "langgraph_node": "delegate_to_agent",
+    "langgraph_triggers": ["branch:to:delegate_to_agent"],
+    "langgraph_path": ["__pregel_pull", "delegate_to_agent"],
+    "langgraph_checkpoint_ns": "delegate_to_agent:69249434-b1aa-b890-8046-4928f38a38e4"
+  },
+  "2025-06-21T23:34:20.542861+00:00",
+  {
+    "configurable": {
+      "thread_id": "346b2fde-b245-475e-a3eb-e766abf1024d",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04ef83-ed6e-69c5-8000-05c21c05ffbb"
+    }
+  },
+  []
+]

@@ -102,7 +102,6 @@ def test_database_loaders_system():
     db_stats = database_sources_module.get_database_sources_statistics()
     db_validation = database_sources_module.validate_database_sources()
 
-
     assert db_validation, "Database source validation failed"
     assert (
         db_stats["total_database_sources"] >= 9
@@ -135,7 +134,7 @@ def test_database_loaders_system():
         if detected == expected_type:
             detection_success += 1
         else:
-            pass})")
+            pass })")
 
     assert (
         detection_success >= 7

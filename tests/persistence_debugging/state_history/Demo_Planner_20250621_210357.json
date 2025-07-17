@@ -1,0 +1,2023 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Create a plan for a day trip with at least 4 stops, then calculate total hours",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "a1a69fbd-7209-4bf0-ad11-8ea59f25ad9b",
+        "example": false
+      },
+      {
+        "content": "### Day Trip Plan\n\n**Destination:** Downtown San Francisco, California\n\n#### Stop 1: Breakfast at Mama\u2019s on Washington Square\n- **Time:** 8:00 AM - 9:00 AM\n- **Activity:** Enjoy a hearty breakfast at this iconic spot known for its omelets and French toast.\n\n#### Stop 2: Exploring Coit Tower\n- **Time:** 9:30 AM - 11:00 AM\n- **Activity:** Visit Coit Tower for panoramic views of the city. Learn about the history and admire the murals inside.\n\n#### Stop 3: Fisherman\u2019s Wharf and Pier 39\n- **Time:** 11:30 AM - 1:30 PM\n- **Activity:** Walk around Fisherman\u2019s Wharf, enjoy some clam chowder, and check out the sea lions at Pier 39.\n\n#### Stop 4: Lunch and Strolling in Chinatown\n- **Time:** 2:00 PM - 3:30 PM\n- **Activity:** Have lunch at a dim sum restaurant and explore the shops and markets in Chinatown.\n\n#### Stop 5: Golden Gate Park\n- **Time:** 4:00 PM - 6:00 PM\n- **Activity:** Visit the Japanese Tea Garden or take a peaceful stroll through the park\u2019s gardens.\n\n#### Stop 6: Dinner at North Beach\n- **Time:** 6:30 PM - 8:00 PM\n- **Activity:** Wind down the day with dinner at one of North Beach\u2019s Italian restaurants. Try some authentic pasta and pizza.\n\n### Total Duration\n\n1. **Breakfast at Mama\u2019s on Washington Square:** 1 hour\n2. **Exploring Coit Tower:** 1.5 hours\n3. **Fisherman\u2019s Wharf and Pier 39:** 2 hours\n4. **Lunch and Strolling in Chinatown:** 1.5 hours\n5. **Golden Gate Park:** 2 hours\n6. **Dinner at North Beach:** 1.5 hours\n\n**Total Activity Time:** 9.5 hours\n\n**Note:** This plan does not account for transit times between locations or additional time spent at each site beyond the scheduled activities, so consider perhaps an extra 30 minutes to an hour for transitions and relaxing.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 463,
+            "prompt_tokens": 25,
+            "total_tokens": 488,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--50f729b8-a125-4693-a042-70ae4419f820-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "### Day Trip Plan\n\n**Destination:** Downtown San Francisco, California\n\n#### Stop 1: Breakfast at Mama\u2019s on Washington Square\n- **Time:** 8:00 AM - 9:00 AM\n- **Activity:** Enjoy a hearty breakfast at this iconic spot known for its omelets and French toast.\n\n#### Stop 2: Exploring Coit Tower\n- **Time:** 9:30 AM - 11:00 AM\n- **Activity:** Visit Coit Tower for panoramic views of the city. Learn about the history and admire the murals inside.\n\n#### Stop 3: Fisherman\u2019s Wharf and Pier 39\n- **Time:** 11:30 AM - 1:30 PM\n- **Activity:** Walk around Fisherman\u2019s Wharf, enjoy some clam chowder, and check out the sea lions at Pier 39.\n\n#### Stop 4: Lunch and Strolling in Chinatown\n- **Time:** 2:00 PM - 3:30 PM\n- **Activity:** Have lunch at a dim sum restaurant and explore the shops and markets in Chinatown.\n\n#### Stop 5: Golden Gate Park\n- **Time:** 4:00 PM - 6:00 PM\n- **Activity:** Visit the Japanese Tea Garden or take a peaceful stroll through the park\u2019s gardens.\n\n#### Stop 6: Dinner at North Beach\n- **Time:** 6:30 PM - 8:00 PM\n- **Activity:** Wind down the day with dinner at one of North Beach\u2019s Italian restaurants. Try some authentic pasta and pizza.\n\n### Total Duration\n\n1. **Breakfast at Mama\u2019s on Washington Square:** 1 hour\n2. **Exploring Coit Tower:** 1.5 hours\n3. **Fisherman\u2019s Wharf and Pier 39:** 2 hours\n4. **Lunch and Strolling in Chinatown:** 1.5 hours\n5. **Golden Gate Park:** 2 hours\n6. **Dinner at North Beach:** 1.5 hours\n\n**Total Activity Time:** 9.5 hours\n\n**Note:** This plan does not account for transit times between locations or additional time spent at each site beyond the scheduled activities, so consider perhaps an extra 30 minutes to an hour for transitions and relaxing.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 463,
+            "prompt_tokens": 491,
+            "total_tokens": 954,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--83e4a698-3a19-4fff-af99-763faa2f1b6f-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "### Day Trip Plan\n\n**Destination:** San Francisco, California\n\n#### Stop 1: Breakfast at Mama\u2019s on Washington Square\n- **Time:** 8:00 AM - 9:00 AM\n- **Activity:** Enjoy a hearty breakfast at this iconic spot known for its omelets and French toast.\n\n#### Stop 2: Coit Tower\n- **Time:** 9:30 AM - 11:00 AM\n- **Activity:** Visit Coit Tower for panoramic views of the city. Explore its history and admire the murals inside.\n\n#### Stop 3: Fisherman\u2019s Wharf and Pier 39\n- **Time:** 11:30 AM - 1:30 PM\n- **Activity:** Stroll around Fisherman\u2019s Wharf, savor some clam chowder, and watch the sea lions at Pier 39.\n\n#### Stop 4: Lunch and Shopping in Chinatown\n- **Time:** 2:00 PM - 3:30 PM\n- **Activity:** Have lunch at a dim sum restaurant and explore the shops and markets in Chinatown.\n\n#### Stop 5: Golden Gate Park\n- **Time:** 4:00 PM - 6:00 PM\n- **Activity:** Visit the Japanese Tea Garden or take a peaceful stroll through the park\u2019s scenic gardens.\n\n#### Stop 6: Dinner in North Beach\n- **Time:** 6:30 PM - 8:00 PM\n- **Activity:** End the day with dinner at an Italian restaurant in North Beach.\n\n### Total Duration\n\n1. **Breakfast at Mama\u2019s on Washington Square:** 1 hour\n2. **Coit Tower:** 1.5 hours\n3. **Fisherman\u2019s Wharf and Pier 39:** 2 hours\n4. **Lunch and Shopping in Chinatown:** 1.5 hours\n5. **Golden Gate Park:** 2 hours\n6. **Dinner in North Beach:** 1.5 hours\n\n**Total Activity Time:** 9.5 hours\n\n**Note:** Additional time for transit between locations should be considered, likely adding 30 minutes to an hour to the total trip time.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 434,
+            "prompt_tokens": 957,
+            "total_tokens": 1391,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--0420b67d-2c65-4e79-8a65-66fb50d7b6a1-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "### Day Trip Plan\n\n**Destination:** San Francisco, California\n\n#### Stop 1: Breakfast at Mama\u2019s on Washington Square\n- **Time:** 8:00 AM - 9:00 AM\n- **Activity:** Enjoy a hearty breakfast at this iconic spot known for its omelets and French toast.\n\n#### Stop 2: Coit Tower\n- **Time:** 9:30 AM - 11:00 AM\n- **Activity:** Visit Coit Tower for panoramic views of the city. Explore its history and admire the murals inside.\n\n#### Stop 3: Fisherman\u2019s Wharf and Pier 39\n- **Time:** 11:30 AM - 1:30 PM\n- **Activity:** Stroll around Fisherman\u2019s Wharf, savor some clam chowder, and watch the sea lions at Pier 39.\n\n#### Stop 4: Lunch and Shopping in Chinatown\n- **Time:** 2:00 PM - 3:30 PM\n- **Activity:** Have lunch at a dim sum restaurant and explore the shops and markets in Chinatown.\n\n#### Stop 5: Golden Gate Park\n- **Time:** 4:00 PM - 6:00 PM\n- **Activity:** Visit the Japanese Tea Garden or take a peaceful stroll through the park\u2019s scenic gardens.\n\n#### Stop 6: Dinner in North Beach\n- **Time:** 6:30 PM - 8:00 PM\n- **Activity:** End the day with dinner at an Italian restaurant in North Beach.\n\n### Total Duration\n\n1. **Breakfast at Mama\u2019s on Washington Square:** 1 hour\n2. **Coit Tower:** 1.5 hours\n3. **Fisherman\u2019s Wharf and Pier 39:** 2 hours\n4. **Lunch at Chinatown:** 1.5 hours\n5. **Golden Gate Park:** 2 hours\n6. **Dinner in North Beach:** 1.5 hours\n\n**Total Activity Time:** 9.5 hours\n\n**Note:** Transit time between locations and additional flexibility should be factored in, possibly adding 30 minutes to 1 hour for traveling and relaxation.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 435,
+            "prompt_tokens": 1394,
+            "total_tokens": 1829,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 1152
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--7309f3cb-5ec5-40b6-8672-245b911ebe76-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "### Day Trip Plan\n\n**Destination:** San Francisco, California\n\n#### Stop 1: Breakfast at Mama\u2019s on Washington Square\n- **Time:** 8:00 AM - 9:00 AM\n- **Activity:** Enjoy a hearty breakfast at this iconic spot known for its omelets and French toast.\n\n#### Stop 2: Coit Tower\n- **Time:** 9:30 AM - 11:00 AM\n- **Activity:** Visit Coit Tower for panoramic views of the city. Explore its history and admire the murals inside.\n\n#### Stop 3: Fisherman\u2019s Wharf and Pier 39\n- **Time:** 11:30 AM - 1:30 PM\n- **Activity:** Stroll around Fisherman\u2019s Wharf, savor some clam chowder, and watch the sea lions at Pier 39.\n\n#### Stop 4: Lunch and Shopping in Chinatown\n- **Time:** 2:00 PM - 3:30 PM\n- **Activity:** Have lunch at a dim sum restaurant and explore the shops and markets in Chinatown.\n\n#### Stop 5: Golden Gate Park\n- **Time:** 4:00 PM - 6:00 PM\n- **Activity:** Visit the Japanese Tea Garden or take a peaceful stroll through the park\u2019s scenic gardens.\n\n#### Stop 6: Dinner in North Beach\n- **Time:** 6:30 PM - 8:00 PM\n- **Activity:** End the day with dinner at an Italian restaurant in North Beach.\n\n### Total Duration\n\n1. **Breakfast at Mama\u2019s on Washington Square:** 1 hour\n2. **Coit Tower:** 1.5 hours\n3. **Fisherman\u2019s Wharf and Pier 39:** 2 hours\n4. **Lunch at Chinatown:** 1.5 hours\n5. **Golden Gate Park:** 2 hours\n6. **Dinner in North Beach:** 1.5 hours\n\n**Total Activity Time:** 9.5 hours\n\n**Note:** Transit time between locations and extra time for relaxing should be factored in, potentially adding 30 minutes to 1 hour for traveling and unwinding.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 438,
+            "prompt_tokens": 1832,
+            "total_tokens": 2270,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 1664
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--408aabcc-df5a-4e8f-bd2e-256c44301cec-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "### Day Trip Plan\n\n**Destination:** San Francisco, California\n\n#### Stop 1: Breakfast at Mama\u2019s on Washington Square\n- **Time:** 8:00 AM - 9:00 AM\n- **Activity:** Enjoy a hearty breakfast at this iconic spot known for its omelets and French toast.\n\n#### Stop 2: Coit Tower\n- **Time:** 9:30 AM - 11:00 AM\n- **Activity:** Visit Coit Tower for panoramic views of the city. Explore its history and admire the murals inside.\n\n#### Stop 3: Fisherman\u2019s Wharf and Pier 39\n- **Time:** 11:30 AM - 1:30 PM\n- **Activity:** Stroll around Fisherman\u2019s Wharf, savor some clam chowder, and watch the sea lions at Pier 39.\n\n#### Stop 4: Lunch and Shopping in Chinatown\n- **Time:** 2:00 PM - 3:30 PM\n- **Activity:** Have lunch at a dim sum restaurant and explore the shops and markets in Chinatown.\n\n#### Stop 5: Golden Gate Park\n- **Time:** 4:00 PM - 6:00 PM\n- **Activity:** Visit the Japanese Tea Garden or take a peaceful stroll through the park\u2019s scenic gardens.\n\n#### Stop 6: Dinner in North Beach\n- **Time:** 6:30 PM - 8:00 PM\n- **Activity:** End the day with dinner at an Italian restaurant in North Beach.\n\n### Total Duration\n\n1. **Breakfast at Mama\u2019s on Washington Square:** 1 hour\n2. **Coit Tower:** 1.5 hours\n3. **Fisherman\u2019s Wharf and Pier 39:** 2 hours\n4. **Lunch at Chinatown:** 1.5 hours\n5. **Golden Gate Park:** 2 hours\n6. **Dinner in North Beach:** 1.5 hours\n\n**Total Activity Time:** 9.5 hours\n\n**Note:** Transit time between locations and extra time for relaxing should be factored in, potentially adding 30 minutes to 1 hour for traveling and unwinding.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 438,
+            "prompt_tokens": 2273,
+            "total_tokens": 2711,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--b8458875-0aa0-4544-b7f9-61c7552b9a27-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "### Day Trip Plan\n\n**Destination:** San Francisco, California\n\n#### Stop 1: Breakfast at Mama\u2019s on Washington Square\n- **Time:** 8:00 AM - 9:00 AM\n- **Activity:** Enjoy a hearty breakfast at this iconic spot known for its omelets and French toast.\n\n#### Stop 2: Coit Tower\n- **Time:** 9:30 AM - 11:00 AM\n- **Activity:** Visit Coit Tower for panoramic views of the city. Explore its history and admire the murals inside.\n\n#### Stop 3: Fisherman\u2019s Wharf and Pier 39\n- **Time:** 11:30 AM - 1:30 PM\n- **Activity:** Walk around Fisherman\u2019s Wharf, savor some clam chowder, and watch the sea lions at Pier 39.\n\n#### Stop 4: Lunch and Shopping in Chinatown\n- **Time:** 2:00 PM - 3:30 PM\n- **Activity:** Have lunch at a dim sum restaurant and explore the shops and markets in Chinatown.\n\n#### Stop 5: Golden Gate Park\n- **Time:** 4:00 PM - 6:00 PM\n- **Activity:** Visit the Japanese Tea Garden or take a peaceful stroll through the park\u2019s scenic gardens.\n\n#### Stop 6: Dinner in North Beach\n- **Time:** 6:30 PM - 8:00 PM\n- **Activity:** End the day with dinner at an Italian restaurant in North Beach.\n\n### Total Duration\n\n1. **Breakfast at Mama\u2019s on Washington Square:** 1 hour\n2. **Coit Tower:** 1.5 hours\n3. **Fisherman\u2019s Wharf and Pier 39:** 2 hours\n4. **Lunch in Chinatown:** 1.5 hours\n5. **Golden Gate Park:** 2 hours\n6. **Dinner in North Beach:** 1.5 hours\n\n**Total Activity Time:** 9.5 hours\n\n**Note:** Additional time for transit between locations should be included; typically, plan for at least 30 minutes to 1 hour extra.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 432,
+            "prompt_tokens": 2714,
+            "total_tokens": 3146,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 2048
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--710294a1-c2a2-49f1-887d-4d8eabf4fadc-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "### Day Trip Plan\n\n**Destination:** San Francisco, California\n\n#### Stop 1: Breakfast at Mama\u2019s on Washington Square\n- **Time:** 8:00 AM - 9:00 AM\n- **Activity:** Enjoy a hearty breakfast at this iconic spot known for its omelets and French toast.\n\n#### Stop 2: Coit Tower\n- **Time:** 9:30 AM - 11:00 AM\n- **Activity:** Visit Coit Tower for panoramic views of the city. Explore its history and admire the murals inside.\n\n#### Stop 3: Fisherman\u2019s Wharf and Pier 39\n- **Time:** 11:30 AM - 1:30 PM\n- **Activity:** Walk around Fisherman\u2019s Wharf, savor some clam chowder, and watch the sea lions lounging at Pier 39.\n\n#### Stop 4: Lunch and Shopping in Chinatown\n- **Time:** 2:00 PM - 3:30 PM\n- **Activity:** Have lunch at a dim sum restaurant and explore the shops and markets in Chinatown.\n\n#### Stop 5: Golden Gate Park\n- **Time:** 4:00 PM - 6:00 PM\n- **Activity:** Visit the Japanese Tea Garden or take a peaceful stroll through the park\u2019s scenic gardens.\n\n#### Stop 6: Dinner in North Beach\n- **Time:** 6:30 PM - 8:00 PM\n- **Activity:** End the day with dinner at an Italian restaurant in North Beach.\n\n### Total Duration\n\n1. **Breakfast at Mama\u2019s on Washington Square:** 1 hour\n2. **Coit Tower:** 1.5 hours\n3. **Fisherman\u2019s Wharf and Pier 39:** 2 hours\n4. **Lunch in Chinatown:** 1.5 hours\n5. **Golden Gate Park:** 2 hours\n6. **Dinner in North Beach:** 1.5 hours\n\n**Total Activity Time:** 9.5 hours\n\n**Note:** Include additional time for transit between locations, likely adding 30 minutes to 1 hour to account for traveling and brief breaks between activities.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 435,
+            "prompt_tokens": 3149,
+            "total_tokens": 3584,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 2944
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--7c7248af-5a56-46fd-b640-5eca507b74d7-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "### Day Trip Plan\n\n**Destination:** San Francisco, California\n\n#### Stop 1: Breakfast at Mama\u2019s on Washington Square\n- **Time:** 8:00 AM - 9:00 AM\n- **Activity:** Enjoy a hearty breakfast at this iconic spot known for its omelets and French toast.\n\n#### Stop 2: Coit Tower\n- **Time:** 9:30 AM - 11:00 AM\n- **Activity:** Visit Coit Tower for panoramic views of the city. Explore its history and admire the murals inside.\n\n#### Stop 3: Fisherman\u2019s Wharf and Pier 39\n- **Time:** 11:30 AM - 1:30 PM\n- **Activity:** Walk around Fisherman\u2019s Wharf, savor some clam chowder, and watch the sea lions lounging at Pier 39.\n\n#### Stop 4: Lunch and Shopping in Chinatown\n- **Time:** 2:00 PM - 3:30 PM\n- **Activity:** Have lunch at a dim sum restaurant and explore the shops and markets in Chinatown.\n\n#### Stop 5: Golden Gate Park\n- **Time:** 4:00 PM - 6:00 PM\n- **Activity:** Visit the Japanese Tea Garden or take a peaceful stroll through the park\u2019s scenic gardens.\n\n#### Stop 6: Dinner in North Beach\n- **Time:** 6:30 PM - 8:00 PM\n- **Activity:** End the day with dinner at an Italian restaurant in North Beach.\n\n### Total Duration\n\n1. **Breakfast at Mama\u2019s on Washington Square:** 1 hour\n2. **Coit Tower:** 1.5 hours\n3. **Fisherman\u2019s Wharf and Pier 39:** 2 hours\n4. **Lunch and Shopping in Chinatown:** 1.5 hours\n5. **Golden Gate Park:** 2 hours\n6. **Dinner in North Beach:** 1.5 hours\n\n**Total Activity Time:** 9.5 hours\n\n**Note:** Include additional time for transit between locations. Depending on traffic and personal pace, consider adding 30 minutes to 1 hour for traveling and brief breaks between activities.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 442,
+            "prompt_tokens": 3587,
+            "total_tokens": 4029,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 3456
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--6121049a-696e-4b91-98e9-803c91366731-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "### Day Trip Plan\n\n**Destination:** San Francisco, California\n\n#### Stop 1: Breakfast at Mama\u2019s on Washington Square\n- **Time:** 8:00 AM - 9:00 AM\n- **Activity:** Enjoy a hearty breakfast at this iconic spot known for its omelets and French toast.\n\n#### Stop 2: Coit Tower\n- **Time:** 9:30 AM - 11:00 AM\n- **Activity:** Visit Coit Tower for panoramic views of the city. Explore its history and admire the murals inside.\n\n#### Stop 3: Fisherman\u2019s Wharf and Pier 39\n- **Time:** 11:30 AM - 1:30 PM\n- **Activity:** Walk around Fisherman\u2019s Wharf, savor some clam chowder, and watch the sea lions lounging at Pier 39.\n\n#### Stop 4: Lunch and Shopping in Chinatown\n- **Time:** 2:00 PM - 3:30 PM\n- **Activity:** Have lunch at a dim sum restaurant and explore the shops and markets in Chinatown.\n\n#### Stop 5: Golden Gate Park\n- **Time:** 4:00 PM - 6:00 PM\n- **Activity:** Visit the Japanese Tea Garden or take a peaceful stroll through the park\u2019s scenic gardens.\n\n#### Stop 6: Dinner in North Beach\n- **Time:** 6:30 PM - 8:00 PM\n- **Activity:** End the day with dinner at an Italian restaurant in North Beach.\n\n### Total Duration\n\n1. **Breakfast at Mama\u2019s on Washington Square:** 1 hour\n2. **Coit Tower:** 1.5 hours\n3. **Fisherman\u2019s Wharf and Pier 39:** 2 hours\n4. **Lunch and Shopping in Chinatown:** 1.5 hours\n5. **Golden Gate Park:** 2 hours\n6. **Dinner in North Beach:** 1.5 hours\n\n**Total Activity Time:** 9.5 hours\n\n**Note:** Include additional time for transit between locations. Depending on traffic and personal pace, consider adding 30 minutes to 1 hour for traveling and brief breaks between activities.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 442,
+            "prompt_tokens": 4032,
+            "total_tokens": 4474,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--151ce37b-6b84-4d2f-927e-1bbc0f2dfbcd-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "### Day Trip Plan\n\n**Destination:** San Francisco, California\n\n#### Stop 1: Breakfast at Mama\u2019s on Washington Square\n- **Time:** 8:00 AM - 9:00 AM\n- **Activity:** Enjoy a tasty breakfast at this popular spot known for its omelets and French toast.\n\n#### Stop 2: Coit Tower\n- **Time:** 9:30 AM - 11:00 AM\n- **Activity:** Visit Coit Tower for panoramic views of the city. Explore its history and admire the murals inside.\n\n#### Stop 3: Fisherman\u2019s Wharf and Pier 39\n- **Time:** 11:30 AM - 1:30 PM\n- **Activity:** Walk around Fisherman\u2019s Wharf, try some clam chowder, and watch the sea lions lounging at Pier 39.\n\n#### Stop 4: Lunch and Shopping in Chinatown\n- **Time:** 2:00 PM - 3:30 PM\n- **Activity:** Have lunch at a dim sum restaurant and explore the shops and markets in Chinatown.\n\n#### Stop 5: Golden Gate Park\n- **Time:** 4:00 PM - 6:00 PM\n- **Activity:** Visit the Japanese Tea Garden or take a tranquil stroll through the park\u2019s scenic gardens.\n\n#### Stop 6: Dinner in North Beach\n- **Time:** 6:30 PM - 8:00 PM\n- **Activity:** End the day with dinner at an Italian restaurant in North Beach.\n\n### Total Duration\n\n1. **Breakfast at Mama\u2019s on Washington Square:** 1 hour\n2. **Coit Tower:** 1.5 hours\n3. **Fisherman\u2019s Wharf and Pier 39:** 2 hours\n4. **Lunch and Shopping in Chinatown:** 1.5 hours\n5. **Golden Gate Park:** 2 hours\n6. **Dinner in North Beach:** 1.5 hours\n\n**Total Activity Time:** 9.5 hours\n\n**Note:** Allow additional time for transit between locations. Depending on traffic and personal pace, consider adding 30 minutes to 1 hour for traveling and brief breaks between activities.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 442,
+            "prompt_tokens": 4477,
+            "total_tokens": 4919,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--18eba2c4-1531-4f6e-9849-81c13003993b-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "### Day Trip Plan\n\n**Destination:** San Francisco, California\n\n#### Stop 1: Breakfast at Mama\u2019s on Washington Square\n- **Time:** 8:00 AM - 9:00 AM\n- **Activity:** Enjoy a delicious breakfast at this iconic spot known for its omelets and French toast.\n\n#### Stop 2: Coit Tower\n- **Time:** 9:30 AM - 11:00 AM\n- **Activity:** Visit Coit Tower for panoramic views of the city. Explore its history and admire the murals inside.\n\n#### Stop 3: Fisherman\u2019s Wharf and Pier 39\n- **Time:** 11:30 AM - 1:30 PM\n- **Activity:** Walk around Fisherman\u2019s Wharf, savor some clam chowder, and watch the sea lions lounging at Pier 39.\n\n#### Stop 4: Lunch and Shopping in Chinatown\n- **Time:** 2:00 PM - 3:30 PM\n- **Activity:** Have lunch at a dim sum restaurant and explore the vibrant shops and markets in Chinatown.\n\n#### Stop 5: Golden Gate Park\n- **Time:** 4:00 PM - 6:00 PM\n- **Activity:** Visit the Japanese Tea Garden or take a peaceful stroll through the park\u2019s scenic gardens.\n\n#### Stop 6: Dinner in North Beach\n- **Time:** 6:30 PM - 8:00 PM\n- **Activity:** End the day with dinner at an Italian restaurant in North Beach.\n\n### Total Duration\n\n1. **Breakfast at Mama\u2019s on Washington Square:** 1 hour\n2. **Coit Tower:** 1.5 hours\n3. **Fisherman\u2019s Wharf and Pier 39:** 2 hours\n4. **Lunch and Shopping in Chinatown:** 1.5 hours\n5. **Golden Gate Park:** 2 hours\n6. **Dinner in North Beach:** 1.5 hours\n\n**Total Activity Time:** 9.5 hours\n\n**Note:** Include additional time for transit between locations. Depending on traffic and personal pace, consider adding 30 minutes to 1 hour for traveling and brief breaks between activities.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 443,
+            "prompt_tokens": 4922,
+            "total_tokens": 5365,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 3840
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--43a283a4-15fd-43a2-886e-7b10e2f1da42-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "### Day Trip Plan\n\n**Destination:** San Francisco, California\n\n#### Stop 1: Breakfast at Mama\u2019s on Washington Square\n- **Time:** 8:00 AM - 9:00 AM\n- **Activity:** Enjoy a delicious breakfast at this iconic spot known for its omelets and French toast.\n\n#### Stop 2: Coit Tower\n- **Time:** 9:30 AM - 11:00 AM\n- **Activity:** Visit Coit Tower for panoramic views of the city. Explore its history and admire the murals inside.\n\n#### Stop 3: Fisherman\u2019s Wharf and Pier 39\n- **Time:** 11:30 AM - 1:30 PM\n- **Activity:** Stroll around Fisherman\u2019s Wharf, try some clam chowder, and watch the sea lions at Pier 39.\n\n#### Stop 4: Lunch and Shopping in Chinatown\n- **Time:** 2:00 PM - 3:30 PM\n- **Activity:** Have lunch at a dim sum restaurant and explore the vibrant shops and markets in Chinatown.\n\n#### Stop 5: Golden Gate Park\n- **Time:** 4:00 PM - 6:00 PM\n- **Activity:** Visit the Japanese Tea Garden or take a peaceful stroll through the park\u2019s scenic gardens.\n\n#### Stop 6: Dinner in North Beach\n- **Time:** 6:30 PM - 8:00 PM\n- **Activity:** End the day with dinner at an Italian restaurant in North Beach.\n\n### Total Duration\n\n1. **Breakfast at Mama\u2019s on Washington Square:** 1 hour\n2. **Coit Tower:** 1.5 hours\n3. **Fisherman\u2019s Wharf and Pier 39:** 2 hours\n4. **Lunch in Chinatown:** 1.5 hours\n5. **Golden Gate Park:** 2 hours\n6. **Dinner in North Beach:** 1.5 hours\n\n**Total Activity Time:** 9.5 hours\n\n**Note:** Consider additional time for transit between locations and relaxation, adding approximately 30 minutes to 1 hour to the total trip time.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 434,
+            "prompt_tokens": 5368,
+            "total_tokens": 5802,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--ab445f21-1a6c-46f1-afb0-8ce4f7a209c7-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "### Day Trip Plan\n\n**Destination:** San Francisco, California\n\n#### Stop 1: Breakfast at Mama\u2019s on Washington Square\n- **Time:** 8:00 AM - 9:00 AM\n- **Activity:** Enjoy a delicious breakfast at this iconic spot known for its omelets and French toast.\n\n#### Stop 2: Coit Tower\n- **Time:** 9:30 AM - 11:00 AM\n- **Activity:** Visit Coit Tower for panoramic views of the city. Explore its history and admire the murals inside.\n\n#### Stop 3: Fisherman\u2019s Wharf and Pier 39\n- **Time:** 11:30 AM - 1:30 PM\n- **Activity:** Stroll around Fisherman\u2019s Wharf, try some clam chowder, and watch the sea lions at Pier 39.\n\n#### Stop 4: Lunch and Shopping in Chinatown\n- **Time:** 2:00 PM - 3:30 PM\n- **Activity:** Have lunch at a dim sum restaurant and explore the vibrant shops and markets in Chinatown.\n\n#### Stop 5: Golden Gate Park\n- **Time:** 4:00 PM - 6:00 PM\n- **Activity:** Visit the Japanese Tea Garden or take a peaceful stroll through the park\u2019s scenic gardens.\n\n#### Stop 6: Dinner in North Beach\n- **Time:** 6:30 PM - 8:00 PM\n- **Activity:** End the day with dinner at an Italian restaurant in North Beach.\n\n### Total Duration\n\n1. **Breakfast at Mama\u2019s on Washington Square:** 1 hour\n2. **Coit Tower:** 1.5 hours\n3. **Fisherman\u2019s Wharf and Pier 39:** 2 hours\n4. **Lunch in Chinatown:** 1.5 hours\n5. **Golden Gate Park:** 2 hours\n6. **Dinner in North Beach:** 1.5 hours\n\n**Total Activity Time:** 9.5 hours\n\n**Note:** Consider additional time for transit between locations and relaxation, adding approximately 30 minutes to 1 hour to the total trip time.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 434,
+            "prompt_tokens": 5805,
+            "total_tokens": 6239,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 5248
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--0a34905e-7cd3-43ec-a34d-764112e0c338-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "### Day Trip Plan\n\n**Destination:** San Francisco, California\n\n#### Stop 1: Breakfast at Mama\u2019s on Washington Square\n- **Time:** 8:00 AM - 9:00 AM\n- **Activity:** Enjoy a tasty breakfast at this iconic spot known for its omelets and French toast.\n\n#### Stop 2: Coit Tower\n- **Time:** 9:30 AM - 11:00 AM\n- **Activity:** Visit Coit Tower for panoramic views of the city. Explore its history and admire the murals inside.\n\n#### Stop 3: Fisherman\u2019s Wharf and Pier 39\n- **Time:** 11:30 AM - 1:30 PM\n- **Activity:** Walk around Fisherman\u2019s Wharf, try some clam chowder, and watch the sea lions lounging at Pier 39.\n\n#### Stop 4: Lunch and Shopping in Chinatown\n- **Time:** 2:00 PM - 3:30 PM\n- **Activity:** Have lunch at a dim sum restaurant and explore the vibrant shops and markets in Chinatown.\n\n#### Stop 5: Golden Gate Park\n- **Time:** 4:00 PM - 6:00 PM\n- **Activity:** Visit the Japanese Tea Garden or take a tranquil stroll through the park\u2019s scenic gardens.\n\n#### Stop 6: Dinner in North Beach\n- **Time:** 6:30 PM - 8:00 PM\n- **Activity:** End the day with dinner at an Italian restaurant in North Beach.\n\n### Total Duration\n\n1. **Breakfast at Mama\u2019s on Washington Square:** 1 hour\n2. **Coit Tower:** 1.5 hours\n3. **Fisherman\u2019s Wharf and Pier 39:** 2 hours\n4. **Lunch and Shopping in Chinatown:** 1.5 hours\n5. **Golden Gate Park:** 2 hours\n6. **Dinner in North Beach:** 1.5 hours\n\n**Total Activity Time:** 9.5 hours\n\n**Note:** Allow additional time for transit between locations. Depending on traffic and personal pace, consider adding 30 minutes to 1 hour for traveling and brief breaks between activities.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 443,
+            "prompt_tokens": 6242,
+            "total_tokens": 6685,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 6016
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--87210d02-d99b-46a0-a24c-694b6f691efa-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "### Day Trip Plan\n\n**Destination:** San Francisco, California\n\n#### Stop 1: Breakfast at Mama\u2019s on Washington Square\n- **Time:** 8:00 AM - 9:00 AM\n- **Activity:** Enjoy a delicious breakfast at this iconic spot known for its omelets and French toast.\n\n#### Stop 2: Coit Tower\n- **Time:** 9:30 AM - 11:00 AM\n- **Activity:** Visit Coit Tower for panoramic views of the city. Explore its history and admire the murals inside.\n\n#### Stop 3: Fisherman\u2019s Wharf and Pier 39\n- **Time:** 11:30 AM - 1:30 PM\n- **Activity:** Stroll around Fisherman\u2019s Wharf, try some clam chowder, and watch the sea lions at Pier 39.\n\n#### Stop 4: Lunch and Shopping in Chinatown\n- **Time:** 2:00 PM - 3:30 PM\n- **Activity:** Have lunch at a dim sum restaurant and explore the vibrant shops and markets in Chinatown.\n\n#### Stop 5: Golden Gate Park\n- **Time:** 4:00 PM - 6:00 PM\n- **Activity:** Visit the Japanese Tea Garden or take a peaceful stroll through the park\u2019s scenic gardens.\n\n#### Stop 6: Dinner in North Beach\n- **Time:** 6:30 PM - 8:00 PM\n- **Activity:** End the day with dinner at an Italian restaurant in North Beach.\n\n### Total Duration\n\n1. **Breakfast at Mama\u2019s on Washington Square:** 1 hour\n2. **Coit Tower:** 1.5 hours\n3. **Fisherman\u2019s Wharf and Pier 39:** 2 hours\n4. **Lunch in Chinatown:** 1.5 hours\n5. **Golden Gate Park:** 2 hours\n6. **Dinner in North Beach:** 1.5 hours\n\n**Total Activity Time:** 9.5 hours\n\n**Note:** Consider additional time for transit between locations and relaxation, adding approximately 30 minutes to 1 hour to the total trip time.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 434,
+            "prompt_tokens": 6688,
+            "total_tokens": 7122,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 6528
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--2149710a-cbb9-43e2-a4a7-a6b43284197c-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "### Day Trip Plan\n\n**Destination:** San Francisco, California\n\n#### Stop 1: Breakfast at Mama\u2019s on Washington Square\n- **Time:** 8:00 AM - 9:00 AM\n- **Activity:** Enjoy a delicious breakfast at this iconic spot known for its omelets and French toast.\n\n#### Stop 2: Coit Tower\n- **Time:** 9:30 AM - 11:00 AM\n- **Activity:** Visit Coit Tower for panoramic views of the city. Explore its history and admire the murals inside.\n\n#### Stop 3: Fisherman\u2019s Wharf and Pier 39\n- **Time:** 11:30 AM - 1:30 PM\n- **Activity:** Stroll around Fisherman\u2019s Wharf, try some clam chowder, and watch the sea lions at Pier 39.\n\n#### Stop 4: Lunch and Shopping in Chinatown\n- **Time:** 2:00 PM - 3:30 PM\n- **Activity:** Have lunch at a dim sum restaurant and explore the vibrant shops and markets in Chinatown.\n\n#### Stop 5: Golden Gate Park\n- **Time:** 4:00 PM - 6:00 PM\n- **Activity:** Visit the Japanese Tea Garden or take a peaceful stroll through the park\u2019s scenic gardens.\n\n#### Stop 6: Dinner in North Beach\n- **Time:** 6:30 PM - 8:00 PM\n- **Activity:** End the day with dinner at an Italian restaurant in North Beach.\n\n### Total Duration\n\n1. **Breakfast at Mama\u2019s on Washington Square:** 1 hour\n2. **Coit Tower:** 1.5 hours\n3. **Fisherman\u2019s Wharf and Pier 39:** 2 hours\n4. **Lunch in Chinatown:** 1.5 hours\n5. **Golden Gate Park:** 2 hours\n6. **Dinner in North Beach:** 1.5 hours\n\n**Total Activity Time:** 9.5 hours\n\n**Note:** Consider additional time for transit between locations and relaxation, adding approximately 30 minutes to 1 hour to the total trip time.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 434,
+            "prompt_tokens": 7125,
+            "total_tokens": 7559,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 6912
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--93c01f75-ec4f-4bd1-a11f-41175fc7fbf6-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "### Day Trip Plan\n\n**Destination:** San Francisco, California\n\n#### Stop 1: Breakfast at Mama\u2019s on Washington Square\n- **Time:** 8:00 AM - 9:00 AM\n- **Activity:** Enjoy a hearty breakfast at this iconic spot known for its omelets and French toast.\n\n#### Stop 2: Coit Tower\n- **Time:** 9:30 AM - 11:00 AM\n- **Activity:** Visit Coit Tower for panoramic views of the city. Explore its history and admire the murals inside.\n\n#### Stop 3: Fisherman\u2019s Wharf and Pier 39\n- **Time:** 11:30 AM - 1:30 PM\n- **Activity:** Walk around Fisherman\u2019s Wharf, savor some clam chowder, and watch the sea lions lounging at Pier 39.\n\n#### Stop 4: Lunch and Shopping in Chinatown\n- **Time:** 2:00 PM - 3:30 PM\n- **Activity:** Have lunch at a dim sum restaurant and explore the shops and markets in Chinatown.\n\n#### Stop 5: Golden Gate Park\n- **Time:** 4:00 PM - 6:00 PM\n- **Activity:** Visit the Japanese Tea Garden or take a tranquil walk through the park\u2019s scenic gardens.\n\n#### Stop 6: Dinner in North Beach\n- **Time:** 6:30 PM - 8:00 PM\n- **Activity:** Wind down the day with dinner at one of North Beach\u2019s Italian restaurants.\n\n### Total Duration\n\n1. **Breakfast at Mama\u2019s on Washington Square:** 1 hour\n2. **Coit Tower:** 1.5 hours\n3. **Fisherman\u2019s Wharf and Pier 39:** 2 hours\n4. **Lunch and Shopping in Chinatown:** 1.5 hours\n5. **Golden Gate Park:** 2 hours\n6. **Dinner in North Beach:** 1.5 hours\n\n**Total Activity Time:** 9.5 hours\n\n**Note:** Additional time for transit between locations should be considered, adding around 30 minutes to 1 hour to accommodate traveling and relaxation.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 437,
+            "prompt_tokens": 7562,
+            "total_tokens": 7999,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 7424
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--87bc4901-345f-47da-8615-d1fa2a82d032-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "### Day Trip Plan\n\n**Destination:** San Francisco, California\n\n#### Stop 1: Breakfast at Mama\u2019s on Washington Square\n- **Time:** 8:00 AM - 9:00 AM\n- **Activity:** Enjoy a hearty breakfast at this iconic spot known for its omelets and French toast.\n\n#### Stop 2: Coit Tower\n- **Time:** 9:30 AM - 11:00 AM\n- **Activity:** Visit Coit Tower for panoramic views of the city. Explore its history and admire the murals inside.\n\n#### Stop 3: Fisherman\u2019s Wharf and Pier 39\n- **Time:** 11:30 AM - 1:30 PM\n- **Activity:** Walk around Fisherman\u2019s Wharf, savor some clam chowder, and watch the sea lions lounging at Pier 39.\n\n#### Stop 4: Lunch and Shopping in Chinatown\n- **Time:** 2:00 PM - 3:30 PM\n- **Activity:** Have lunch at a dim sum restaurant and explore the shops and markets in Chinatown.\n\n#### Stop 5: Golden Gate Park\n- **Time:** 4:00 PM - 6:00 PM\n- **Activity:** Visit the Japanese Tea Garden or take a tranquil walk through the park\u2019s scenic gardens.\n\n#### Stop 6: Dinner in North Beach\n- **Time:** 6:30 PM - 8:00 PM\n- **Activity:** Wind down the day with dinner at one of North Beach\u2019s Italian restaurants.\n\n### Total Duration\n\n1. **Breakfast at Mama\u2019s on Washington Square:** 1 hour\n2. **Coit Tower:** 1.5 hours\n3. **Fisherman\u2019s Wharf and Pier 39:** 2 hours\n4. **Lunch and Shopping in Chinatown:** 1.5 hours\n5. **Golden Gate Park:** 2 hours\n6. **Dinner in North Beach:** 1.5 hours\n\n**Total Activity Time:** 9.5 hours\n\n**Note:** Additional time for transit between locations should be considered, adding around 30 minutes to 1 hour to accommodate traveling and relaxation.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 437,
+            "prompt_tokens": 8002,
+            "total_tokens": 8439,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 4352
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--afbeccbe-ae1b-4198-a813-0c0c271f6d9a-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "### Day Trip Plan\n\n**Destination:** San Francisco, California\n\n#### Stop 1: Breakfast at Mama\u2019s on Washington Square\n- **Time:** 8:00 AM - 9:00 AM\n- **Activity:** Enjoy a hearty breakfast at this iconic spot known for its omelets and French toast.\n\n#### Stop 2: Coit Tower\n- **Time:** 9:30 AM - 11:00 AM\n- **Activity:** Visit Coit Tower for panoramic views of the city. Explore its history and admire the murals inside.\n\n#### Stop 3: Fisherman\u2019s Wharf and Pier 39\n- **Time:** 11:30 AM - 1:30 PM\n- **Activity:** Walk around Fisherman\u2019s Wharf, savor some clam chowder, and watch the sea lions lounging at Pier 39.\n\n#### Stop 4: Lunch and Shopping in Chinatown\n- **Time:** 2:00 PM - 3:30 PM\n- **Activity:** Have lunch at a dim sum restaurant and explore the shops and markets in Chinatown.\n\n#### Stop 5: Golden Gate Park\n- **Time:** 4:00 PM - 6:00 PM\n- **Activity:** Visit the Japanese Tea Garden or take a tranquil walk through the park\u2019s scenic gardens.\n\n#### Stop 6: Dinner in North Beach\n- **Time:** 6:30 PM - 8:00 PM\n- **Activity:** Wind down the day with dinner at one of North Beach\u2019s Italian restaurants.\n\n### Total Duration\n\n1. **Breakfast at Mama\u2019s on Washington Square:** 1 hour\n2. **Coit Tower:** 1.5 hours\n3. **Fisherman\u2019s Wharf and Pier 39:** 2 hours\n4. **Lunch and Shopping in Chinatown:** 1.5 hours\n5. **Golden Gate Park:** 2 hours\n6. **Dinner in North Beach:** 1.5 hours\n\n**Total Activity Time:** 9.5 hours\n\n**Note:** Additional time for transit between locations should be considered, adding around 30 minutes to 1 hour to accommodate traveling and relaxation.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 437,
+            "prompt_tokens": 8442,
+            "total_tokens": 8879,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 7808
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--94a98978-2f87-4568-bdb9-babda753a5e8-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "### Day Trip Plan\n\n**Destination:** San Francisco, California\n\n#### Stop 1: Breakfast at Mama\u2019s on Washington Square\n- **Time:** 8:00 AM - 9:00 AM\n- **Activity:** Enjoy a delicious breakfast at this iconic spot known for its omelets and French toast.\n\n#### Stop 2: Coit Tower\n- **Time:** 9:30 AM - 11:00 AM\n- **Activity:** Visit Coit Tower for panoramic views of the city. Explore its history and admire the murals inside.\n\n#### Stop 3: Fisherman\u2019s Wharf and Pier 39\n- **Time:** 11:30 AM - 1:30 PM\n- **Activity:** Walk around Fisherman\u2019s Wharf, savor some clam chowder, and observe the sea lions lounging at Pier 39.\n\n#### Stop 4: Lunch and Shopping in Chinatown\n- **Time:** 2:00 PM - 3:30 PM\n- **Activity:** Have lunch at a dim sum restaurant and explore the vibrant shops and markets in Chinatown.\n\n#### Stop 5: Golden Gate Park\n- **Time:** 4:00 PM - 6:00 PM\n- **Activity:** Visit the Japanese Tea Garden or take a peaceful stroll through the park\u2019s scenic gardens.\n\n#### Stop 6: Dinner in North Beach\n- **Time:** 6:30 PM - 8:00 PM\n- **Activity:** End the day with dinner at an Italian restaurant in North Beach.\n\n### Total Duration\n\n1. **Breakfast at Mama\u2019s on Washington Square:** 1 hour\n2. **Coit Tower:** 1.5 hours\n3. **Fisherman\u2019s Wharf and Pier 39:** 2 hours\n4. **Lunch in Chinatown:** 1.5 hours\n5. **Golden Gate Park:** 2 hours\n6. **Dinner in North Beach:** 1.5 hours\n\n**Total Activity Time:** 9.5 hours\n\n**Note:** Consider additional time for transit between locations and relaxation, adding approximately 30 minutes to 1 hour to the total trip time.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 434,
+            "prompt_tokens": 8882,
+            "total_tokens": 9316,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 8704
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--a6e2e50d-884f-4027-aa3a-17535e27cb46-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "### Day Trip Plan\n\n**Destination:** San Francisco, California\n\n#### Stop 1: Breakfast at Mama\u2019s on Washington Square\n- **Time:** 8:00 AM - 9:00 AM\n- **Activity:** Enjoy a delicious breakfast at this iconic spot known for its omelets and French toast.\n\n#### Stop 2: Coit Tower\n- **Time:** 9:30 AM - 11:00 AM\n- **Activity:** Visit Coit Tower for panoramic views of the city. Explore its history and admire the murals inside.\n\n#### Stop 3: Fisherman\u2019s Wharf and Pier 39\n- **Time:** 11:30 AM - 1:30 PM\n- **Activity:** Walk around Fisherman\u2019s Wharf, savor some clam chowder, and observe the sea lions lounging at Pier 39.\n\n#### Stop 4: Lunch and Shopping in Chinatown\n- **Time:** 2:00 PM - 3:30 PM\n- **Activity:** Have lunch at a dim sum restaurant and explore the vibrant shops and markets in Chinatown.\n\n#### Stop 5: Golden Gate Park\n- **Time:** 4:00 PM - 6:00 PM\n- **Activity:** Visit the Japanese Tea Garden or take a peaceful stroll through the park\u2019s scenic gardens.\n\n#### Stop 6: Dinner in North Beach\n- **Time:** 6:30 PM - 8:00 PM\n- **Activity:** End the day with dinner at an Italian restaurant in North Beach.\n\n### Total Duration\n\n1. **Breakfast at Mama\u2019s on Washington Square:** 1 hour\n2. **Coit Tower:** 1.5 hours\n3. **Fisherman\u2019s Wharf and Pier 39:** 2 hours\n4. **Lunch in Chinatown:** 1.5 hours\n5. **Golden Gate Park:** 2 hours\n6. **Dinner in North Beach:** 1.5 hours\n\n**Total Activity Time:** 9.5 hours\n\n**Note:** Factor in additional time for transit between locations and relaxation, adding approximately 30 minutes to 1 hour to the total trip time.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 435,
+            "prompt_tokens": 9319,
+            "total_tokens": 9754,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 9088
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--24b3b194-33c4-4101-b671-076838025236-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "### Day Trip Plan\n\n**Destination:** San Francisco, California\n\n#### Stop 1: Breakfast at Mama\u2019s on Washington Square\n- **Time:** 8:00 AM - 9:00 AM\n- **Activity:** Enjoy a delicious breakfast at this iconic spot known for its omelets and French toast.\n\n#### Stop 2: Coit Tower\n- **Time:** 9:30 AM - 11:00 AM\n- **Activity:** Visit Coit Tower for panoramic views of the city. Explore its history and admire the murals inside.\n\n#### Stop 3: Fisherman\u2019s Wharf and Pier 39\n- **Time:** 11:30 AM - 1:30 PM\n- **Activity:** Walk around Fisherman\u2019s Wharf, savor some clam chowder, and observe the sea lions lounging at Pier 39.\n\n#### Stop 4: Lunch and Shopping in Chinatown\n- **Time:** 2:00 PM - 3:30 PM\n- **Activity:** Have lunch at a dim sum restaurant and explore the vibrant shops and markets in Chinatown.\n\n#### Stop 5: Golden Gate Park\n- **Time:** 4:00 PM - 6:00 PM\n- **Activity:** Visit the Japanese Tea Garden or take a peaceful stroll through the park\u2019s scenic gardens.\n\n#### Stop 6: Dinner in North Beach\n- **Time:** 6:30 PM - 8:00 PM\n- **Activity:** End the day with dinner at an Italian restaurant in North Beach.\n\n### Total Duration\n\n1. **Breakfast at Mama\u2019s on Washington Square:** 1 hour\n2. **Coit Tower:** 1.5 hours\n3. **Fisherman\u2019s Wharf and Pier 39:** 2 hours\n4. **Lunch in Chinatown:** 1.5 hours\n5. **Golden Gate Park:** 2 hours\n6. **Dinner in North Beach:** 1.5 hours\n\n**Total Activity Time:** 9.5 hours\n\n**Note:** Factor in additional time for transit between locations and relaxation, adding approximately 30 minutes to 1 hour to the total trip time.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 435,
+            "prompt_tokens": 9757,
+            "total_tokens": 10192,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 9600
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--22136084-d093-4208-9568-6868fdbde82d-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "### Day Trip Plan\n\n**Destination:** San Francisco, California\n\n#### Stop 1: Breakfast at Mama\u2019s on Washington Square\n- **Time:** 8:00 AM - 9:00 AM\n- **Activity:** Enjoy a hearty breakfast at this iconic spot known for its omelets and French toast.\n\n#### Stop 2: Coit Tower\n- **Time:** 9:30 AM - 11:00 AM\n- **Activity:** Visit Coit Tower for panoramic views of the city. Explore its history and admire the murals inside.\n\n#### Stop 3: Fisherman\u2019s Wharf and Pier 39\n- **Time:** 11:30 AM - 1:30 PM\n- **Activity:** Stroll around Fisherman\u2019s Wharf, savor some clam chowder, and watch the sea lions lounging at Pier 39.\n\n#### Stop 4: Lunch and Shopping in Chinatown\n- **Time:** 2:00 PM - 3:30 PM\n- **Activity:** Have lunch at a dim sum restaurant and explore the shops and markets in Chinatown.\n\n#### Stop 5: Golden Gate Park\n- **Time:** 4:00 PM - 6:00 PM\n- **Activity:** Visit the Japanese Tea Garden or take a tranquil stroll through the park\u2019s scenic gardens.\n\n#### Stop 6: Dinner in North Beach\n- **Time:** 6:30 PM - 8:00 PM\n- **Activity:** Wind down the day with dinner at one of North Beach\u2019s Italian restaurants. Try some authentic pasta and pizza.\n\n### Total Activity Duration\n\n1. **Breakfast at Mama\u2019s on Washington Square:** 1 hour\n2. **Coit Tower:** 1.5 hours\n3. **Fisherman\u2019s Wharf and Pier 39:** 2 hours\n4. **Lunch in Chinatown:** 1.5 hours\n5. **Golden Gate Park:** 2 hours\n6. **Dinner in North Beach:** 1.5 hours\n\n**Total Activity Time:** 9.5 hours\n\n**Note:** Extra time for transit between locations and relaxation should be considered, typically adding around 30 minutes to 1 hour to account for traveling and brief breaks between activities.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 451,
+            "prompt_tokens": 10195,
+            "total_tokens": 10646,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 9984
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--718be0e7-0a34-402d-92b6-e377a4b1767c-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "### Day Trip Plan\n\n**Destination:** San Francisco, California\n\n#### Stop 1: Breakfast at Mama\u2019s on Washington Square\n- **Time:** 8:00 AM - 9:00 AM\n- **Activity:** Enjoy a hearty breakfast at this iconic spot known for its omelets and French toast.\n\n#### Stop 2: Coit Tower\n- **Time:** 9:30 AM - 11:00 AM\n- **Activity:** Visit Coit Tower for panoramic views of the city. Explore its history and admire the murals inside.\n\n#### Stop 3: Fisherman\u2019s Wharf and Pier 39\n- **Time:** 11:30 AM - 1:30 PM\n- **Activity:** Stroll around Fisherman\u2019s Wharf, enjoy some clam chowder, and check out the sea lions at Pier 39.\n\n#### Stop 4: Lunch and Shopping in Chinatown\n- **Time:** 2:00 PM - 3:30 PM\n- **Activity:** Have lunch at a dim sum restaurant and explore the shops and markets in Chinatown.\n\n#### Stop 5: Golden Gate Park\n- **Time:** 4:00 PM - 6:00 PM\n- **Activity:** Visit the Japanese Tea Garden or take a peaceful stroll through the park\u2019s gardens.\n\n#### Stop 6: Dinner in North Beach\n- **Time:** 6:30 PM - 8:00 PM\n- **Activity:** Wind down the day with dinner at one of North Beach\u2019s Italian restaurants. Try some authentic pasta and pizza.\n\n### Total Activity Duration\n\n1. **Breakfast at Mama\u2019s on Washington Square:** 1 hour\n2. **Coit Tower:** 1.5 hours\n3. **Fisherman\u2019s Wharf and Pier 39:** 2 hours\n4. **Lunch in Chinatown:** 1.5 hours\n5. **Golden Gate Park:** 2 hours\n6. **Dinner in North Beach:** 1.5 hours\n\n**Total Activity Time:** 9.5 hours\n\n**Note:** Additional time for transit between locations and relaxation should be considered, typically adding around 30 minutes to 1 hour for traveling and brief breaks between activities.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 448,
+            "prompt_tokens": 10649,
+            "total_tokens": 11097,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 10496
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--6bbd742d-3089-4cb4-8adb-e33df2468966-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 10649,
+          "output_tokens": 448,
+          "total_tokens": 11097,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 10496
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "2b2d9c86-99d1-4333-9239-3ae00b2f22a9",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04f04f-aac1-6474-8001-c100aabaa98a"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "### Day Trip Plan\n\n**Destination:** San Francisco, California\n\n#### Stop 1: Breakfast at Mama\u2019s on Washington Square\n- **Time:** 8:00 AM - 9:00 AM\n- **Activity:** Enjoy a hearty breakfast at this iconic spot known for its omelets and French toast.\n\n#### Stop 2: Coit Tower\n- **Time:** 9:30 AM - 11:00 AM\n- **Activity:** Visit Coit Tower for panoramic views of the city. Explore its history and admire the murals inside.\n\n#### Stop 3: Fisherman\u2019s Wharf and Pier 39\n- **Time:** 11:30 AM - 1:30 PM\n- **Activity:** Stroll around Fisherman\u2019s Wharf, enjoy some clam chowder, and check out the sea lions at Pier 39.\n\n#### Stop 4: Lunch and Shopping in Chinatown\n- **Time:** 2:00 PM - 3:30 PM\n- **Activity:** Have lunch at a dim sum restaurant and explore the shops and markets in Chinatown.\n\n#### Stop 5: Golden Gate Park\n- **Time:** 4:00 PM - 6:00 PM\n- **Activity:** Visit the Japanese Tea Garden or take a peaceful stroll through the park\u2019s gardens.\n\n#### Stop 6: Dinner in North Beach\n- **Time:** 6:30 PM - 8:00 PM\n- **Activity:** Wind down the day with dinner at one of North Beach\u2019s Italian restaurants. Try some authentic pasta and pizza.\n\n### Total Activity Duration\n\n1. **Breakfast at Mama\u2019s on Washington Square:** 1 hour\n2. **Coit Tower:** 1.5 hours\n3. **Fisherman\u2019s Wharf and Pier 39:** 2 hours\n4. **Lunch in Chinatown:** 1.5 hours\n5. **Golden Gate Park:** 2 hours\n6. **Dinner in North Beach:** 1.5 hours\n\n**Total Activity Time:** 9.5 hours\n\n**Note:** Additional time for transit between locations and relaxation should be considered, typically adding around 30 minutes to 1 hour for traveling and brief breaks between activities.",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 448,
+              "prompt_tokens": 10649,
+              "total_tokens": 11097,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 10496
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--6bbd742d-3089-4cb4-8adb-e33df2468966-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 10649,
+            "output_tokens": 448,
+            "total_tokens": 11097,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 10496
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 1,
+    "parents": {},
+    "thread_id": "416b39c2-9e7c-4b82-8983-a7dc67b43aee",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 98,
+    "langgraph_node": "delegate_to_agent",
+    "langgraph_triggers": ["branch:to:delegate_to_agent"],
+    "langgraph_path": ["__pregel_pull", "delegate_to_agent"],
+    "langgraph_checkpoint_ns": "delegate_to_agent:731ff4af-4922-3f60-ac50-b7d2bf406e6f"
+  },
+  "2025-06-22T01:05:25.252989+00:00",
+  {
+    "configurable": {
+      "thread_id": "2b2d9c86-99d1-4333-9239-3ae00b2f22a9",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04f04f-895b-6412-8000-9cc34b5072d8"
+    }
+  },
+  []
+]

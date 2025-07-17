@@ -1,0 +1,298 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Create a plan for a day trip, then calculate how many hours we'll need in total",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "e2b2e1dc-0c06-40e4-a25a-801abba71812",
+        "example": false
+      },
+      {
+        "content": "Certainly! Let's craft a day trip itinerary that balances adventure, relaxation, and good food. Here\u2019s a proposed plan, followed by an estimate of the total hours needed:\n\n### Day Trip Plan\n\n**Destination:** Assume we are planning a day trip to a nearby scenic town or natural park. For this example, we'll use a fictional town called \"Riverside Valley.\"\n\n#### Morning\n\n1. **7:00 AM - Departure**\n   - Leave home and head to Riverside Valley.\n   - Estimated travel time: 1.5 hours\n\n2. **8:30 AM - Breakfast**\n   - Enjoy breakfast at a local caf\u00e9 in Riverside Valley.\n   - Duration: 1 hour\n\n3. **9:30 AM - Explore Riverside Park**\n   - Take a leisurely walk and explore the beautiful Riverside Park.\n   - Activities could include walking trails, bird watching, or enjoying the scenic views.\n   - Duration: 2 hours\n\n#### Midday\n\n4. **11:30 AM - Visit Local Museum or Landmark**\n   - Spend some time visiting a local museum or historical landmark.\n   - Duration: 1.5 hours\n\n5. **1:00 PM - Lunch**\n   - Have lunch at a popular Riverside Valley restaurant.\n   - Duration: 1 hour\n\n#### Afternoon\n\n6. **2:00 PM - Outdoor Adventure**\n   - Choose an adventurous activity like kayaking, biking, or guided nature tours.\n   - Duration: 2 hours\n\n7. **4:00 PM - Relaxation**\n   - Relax at a local spa or enjoy a coffee at a riverside caf\u00e9.\n   - Duration: 1 hour\n\n#### Evening\n\n8. **5:00 PM - Local Shops Exploration**\n   - Walk around the local markets or shops for souvenirs and crafts.\n   - Duration: 1 hour\n\n9. **6:00 PM - Departure Back Home**\n   - Start the journey back home.\n   - Estimated travel time: 1.5 hours\n\n### Total Time Calculation\n\n- **Travel Time:** 3 hours (1.5 hours each way)\n- **Activities Duration:**\n  - Breakfast: 1 hour\n  - Riverside Park: 2 hours\n  - Museum: 1.5 hours\n  - Lunch: 1 hour\n  - Adventure: 2 hours\n  - Relaxation: 1 hour\n  - Shops: 1 hour\n\n- **Total Activity Time:** 9.5 hours\n\n### Grand Total\n\n- **Total Hours Needed:** 12.5 hours\n\nThis itinerary offers a balanced day of exploration and relaxation with plenty of time to enjoy Riverside Valley's amenities and attractions. Adjustments can be made based on specific interests or timing constraints.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 554,
+            "prompt_tokens": 24,
+            "total_tokens": 578,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--adfa5b9e-f8db-4bae-9e2a-f46071a0d0e3-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "Certainly! Let's craft a day trip itinerary that balances adventure, relaxation, and good food. Here\u2019s a proposed plan, followed by an estimate of the total hours needed:\n\n### Day Trip Plan\n\n**Destination:** Assume we are planning a day trip to a nearby scenic town or natural park. For this example, we'll use a fictional town called \"Riverside Valley.\"\n\n#### Morning\n\n1. **7:00 AM - Departure**\n   - Leave home and head to Riverside Valley.\n   - Estimated travel time: 1.5 hours\n\n2. **8:30 AM - Breakfast**\n   - Enjoy breakfast at a local caf\u00e9 in Riverside Valley.\n   - Duration: 1 hour\n\n3. **9:30 AM - Explore Riverside Park**\n   - Take a leisurely walk and explore the beautiful Riverside Park.\n   - Activities could include walking trails, bird watching, or enjoying the scenic views.\n   - Duration: 2 hours\n\n#### Midday\n\n4. **11:30 AM - Visit Local Museum or Landmark**\n   - Spend some time visiting a local museum or historical landmark.\n   - Duration: 1.5 hours\n\n5. **1:00 PM - Lunch**\n   - Have lunch at a popular Riverside Valley restaurant.\n   - Duration: 1 hour\n\n#### Afternoon\n\n6. **2:00 PM - Outdoor Adventure**\n   - Choose an adventurous activity like kayaking, biking, or guided nature tours.\n   - Duration: 2 hours\n\n7. **4:00 PM - Relaxation**\n   - Relax at a local spa or enjoy a coffee at a riverside caf\u00e9.\n   - Duration: 1 hour\n\n#### Evening\n\n8. **5:00 PM - Local Shops Exploration**\n   - Walk around the local markets or shops for souvenirs and crafts.\n   - Duration: 1 hour\n\n9. **6:00 PM - Departure Back Home**\n   - Start the journey back home.\n   - Estimated travel time: 1.5 hours\n\n### Total Time Calculation\n\n- **Travel Time:** 3 hours (1.5 hours each way)\n- **Activities Duration:**\n  - Breakfast: 1 hour\n  - Riverside Park: 2 hours\n  - Museum: 1.5 hours\n  - Lunch: 1 hour\n  - Adventure: 2 hours\n  - Relaxation: 1 hour\n  - Shops: 1 hour\n\n- **Total Activity Time:** 9.5 hours\n\n### Grand Total\n\n- **Total Hours Needed:** 12.5 hours\n\nThis itinerary offers a balanced day of exploration and relaxation with plenty of time to enjoy Riverside Valley's amenities and attractions. Adjustments can be made based on specific interests or timing constraints.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 554,
+            "prompt_tokens": 581,
+            "total_tokens": 1135,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--88ac58cc-a573-4455-b431-d7688e4d149e-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 581,
+          "output_tokens": 554,
+          "total_tokens": 1135,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "f2a64800-52c0-4317-a8a2-6f6419eedf00",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04ef8b-62b9-6bab-8001-72266dc57141"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "Certainly! Let's craft a day trip itinerary that balances adventure, relaxation, and good food. Here\u2019s a proposed plan, followed by an estimate of the total hours needed:\n\n### Day Trip Plan\n\n**Destination:** Assume we are planning a day trip to a nearby scenic town or natural park. For this example, we'll use a fictional town called \"Riverside Valley.\"\n\n#### Morning\n\n1. **7:00 AM - Departure**\n   - Leave home and head to Riverside Valley.\n   - Estimated travel time: 1.5 hours\n\n2. **8:30 AM - Breakfast**\n   - Enjoy breakfast at a local caf\u00e9 in Riverside Valley.\n   - Duration: 1 hour\n\n3. **9:30 AM - Explore Riverside Park**\n   - Take a leisurely walk and explore the beautiful Riverside Park.\n   - Activities could include walking trails, bird watching, or enjoying the scenic views.\n   - Duration: 2 hours\n\n#### Midday\n\n4. **11:30 AM - Visit Local Museum or Landmark**\n   - Spend some time visiting a local museum or historical landmark.\n   - Duration: 1.5 hours\n\n5. **1:00 PM - Lunch**\n   - Have lunch at a popular Riverside Valley restaurant.\n   - Duration: 1 hour\n\n#### Afternoon\n\n6. **2:00 PM - Outdoor Adventure**\n   - Choose an adventurous activity like kayaking, biking, or guided nature tours.\n   - Duration: 2 hours\n\n7. **4:00 PM - Relaxation**\n   - Relax at a local spa or enjoy a coffee at a riverside caf\u00e9.\n   - Duration: 1 hour\n\n#### Evening\n\n8. **5:00 PM - Local Shops Exploration**\n   - Walk around the local markets or shops for souvenirs and crafts.\n   - Duration: 1 hour\n\n9. **6:00 PM - Departure Back Home**\n   - Start the journey back home.\n   - Estimated travel time: 1.5 hours\n\n### Total Time Calculation\n\n- **Travel Time:** 3 hours (1.5 hours each way)\n- **Activities Duration:**\n  - Breakfast: 1 hour\n  - Riverside Park: 2 hours\n  - Museum: 1.5 hours\n  - Lunch: 1 hour\n  - Adventure: 2 hours\n  - Relaxation: 1 hour\n  - Shops: 1 hour\n\n- **Total Activity Time:** 9.5 hours\n\n### Grand Total\n\n- **Total Hours Needed:** 12.5 hours\n\nThis itinerary offers a balanced day of exploration and relaxation with plenty of time to enjoy Riverside Valley's amenities and attractions. Adjustments can be made based on specific interests or timing constraints.",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 554,
+              "prompt_tokens": 581,
+              "total_tokens": 1135,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--88ac58cc-a573-4455-b431-d7688e4d149e-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 581,
+            "output_tokens": 554,
+            "total_tokens": 1135,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 1,
+    "parents": {},
+    "thread_id": "d2f61f8f-aeef-4eb8-b51b-c5c5f58e66a3",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 6,
+    "langgraph_node": "delegate_to_agent",
+    "langgraph_triggers": ["branch:to:delegate_to_agent"],
+    "langgraph_path": ["__pregel_pull", "delegate_to_agent"],
+    "langgraph_checkpoint_ns": "delegate_to_agent:5f4966da-d5e2-c70d-3918-b4d1142580d1"
+  },
+  "2025-06-21T23:37:36.365236+00:00",
+  {
+    "configurable": {
+      "thread_id": "f2a64800-52c0-4317-a8a2-6f6419eedf00",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04ef8b-3c4a-6b2f-8000-692e3af5867d"
+    }
+  },
+  []
+]

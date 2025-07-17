@@ -1,0 +1,232 @@
+[
+  {
+    "messages": [
+      {
+        "content": "[@Influencer_230305]\nStats: 0 likes | 0 followers\nTrending: Nothing trending\nKeep it under 500 characters!",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "system",
+        "name": null,
+        "id": "dfb502a4-c792-4faf-9376-c596ce29205d"
+      },
+      {
+        "content": "\ud83d\udcac New thread: Social media conversation test\nPlatform: generic (max 500 chars)\nShare your thoughts! Go viral at 10 likes \ud83d\udd25",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "992b8395-1712-4f40-9882-ca99bf82dc59",
+        "example": false
+      },
+      {
+        "content": "Hey everyone! \ud83d\ude80 Let's get this conversation rolling! Social media is such a powerful tool to connect and share our thoughts. Whether it's about trending topics, personal stories, or just having a good laugh, I want to know what's on your mind! Share your thoughts and let's make this thread go viral! \ud83c\udf89 Can't wait to see what you all have to say. \ud83d\udcac\ud83d\udd25 #SocialMediaMagic #EngageWithMe",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 88,
+            "prompt_tokens": 221,
+            "total_tokens": 309,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--52e08d5c-8049-4ea8-8bef-2bb74594e837-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 221,
+          "output_tokens": 88,
+          "total_tokens": 309,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "Influencer_230305_agent_65834fd9",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057ba4-02aa-6188-8001-68de5a28190a"
+    }
+  },
+  {
+    "step": 1,
+    "debug": false,
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "Hey everyone! \ud83d\ude80 Let's get this conversation rolling! Social media is such a powerful tool to connect and share our thoughts. Whether it's about trending topics, personal stories, or just having a good laugh, I want to know what's on your mind! Share your thoughts and let's make this thread go viral! \ud83c\udf89 Can't wait to see what you all have to say. \ud83d\udcac\ud83d\udd25 #SocialMediaMagic #EngageWithMe",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "logprobs": null,
+            "model_name": "gpt-4o-2024-08-06",
+            "token_usage": {
+              "total_tokens": 309,
+              "prompt_tokens": 221,
+              "completion_tokens": 88,
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              },
+              "completion_tokens_details": {
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "accepted_prediction_tokens": 0,
+                "rejected_prediction_tokens": 0
+              }
+            },
+            "finish_reason": "stop",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--52e08d5c-8049-4ea8-8bef-2bb74594e837-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 221,
+            "output_tokens": 88,
+            "total_tokens": 309,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "parents": {},
+    "thread_id": "socialmedia_test_230305",
+    "langgraph_node": "execute_agent",
+    "langgraph_path": ["__pregel_pull", "execute_agent"],
+    "langgraph_step": 3,
+    "checkpoint_mode": "sync",
+    "recursion_limit": 50,
+    "langgraph_triggers": ["branch:to:execute_agent"],
+    "langgraph_checkpoint_ns": "execute_agent:40780ada-8ee3-1d83-4d7a-8dc5b5e01ab6"
+  },
+  "2025-07-03T03:03:10.055448+00:00",
+  {
+    "configurable": {
+      "thread_id": "Influencer_230305_agent_65834fd9",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057ba3-e289-6565-8000-54b88828dee2"
+    }
+  },
+  []
+]

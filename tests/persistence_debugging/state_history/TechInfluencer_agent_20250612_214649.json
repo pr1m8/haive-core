@@ -1,0 +1,404 @@
+[
+  {
+    "messages": [
+      {
+        "content": "[@TechInfluencer]\nStats: 0 likes | 0 followers\nTrending: #Innovation, #AI, #Tech\nKeep it under 500 characters!",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "system",
+        "name": null,
+        "id": "98d76743-b30e-4598-8b3d-ea719a069ec1"
+      },
+      {
+        "content": "Recent posts:\n@StartupFounder: \ud83d\ude80 Just shipped our new AI framework! It's 10x faster than before. \ud83d\udca5 #Innovation #AI #Tech AMA! What ... (2\u2764\ufe0f)",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "system",
+        "name": null,
+        "id": "0edacced-3f08-4d2c-a09e-babdeeef44b3"
+      },
+      {
+        "content": "\ud83d\udc26 New thread: \ud83d\ude80 Just shipped our new AI framework! It's 10x faster than before. AMA!\nPlatform: twitter (max 280 chars)\nShare your thoughts! Go viral at 8 likes \ud83d\udd25",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "bbdbcae1-a91d-4f71-9bb2-57d877a6690c",
+        "example": false
+      },
+      {
+        "content": "\ud83d\ude80 Just shipped our new AI framework! It's 10x faster than before. \ud83d\udca5 #Innovation #AI #Tech AMA! What would you like to know? \ud83c\udf1f",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 38,
+            "prompt_tokens": 272,
+            "total_tokens": 310,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BhnnEsnAoAmgMelBbITZUI2EhUFVG",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": "StartupFounder",
+        "id": "run-24af98fe-e05b-45f9-ab95-daff75c91e0b-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 272,
+          "output_tokens": 38,
+          "total_tokens": 310,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "tool_calls": [
+            {
+              "id": "call_b71RiYOXjf74taNUvaIfUlGR",
+              "function": {
+                "arguments": "{\"post_author\": \"StartupFounder\", \"reason\": \"Impressive AI framework speed!\"}",
+                "name": "like_post"
+              },
+              "type": "function"
+            },
+            {
+              "id": "call_ya9px2s0WNenP3tHZBQ37wH0",
+              "function": {
+                "arguments": "{\"reply_to\": \"StartupFounder\", \"content\": \"This sounds amazing! Can you share some insights on how you achieved this speed boost? \ud83d\ude4c #TechTalk\"}",
+                "name": "reply_to_post"
+              },
+              "type": "function"
+            },
+            {
+              "id": "call_PpLQyCvZPjA4sIoajTLDFXmB",
+              "function": {
+                "arguments": "{\"original_author\": \"StartupFounder\", \"comment\": \"\"}",
+                "name": "share_post"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 100,
+            "prompt_tokens": 371,
+            "total_tokens": 471,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BhnnFTGHfDqKzT0Wfi9o1Q4WaPKoQ",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "length",
+          "logprobs": null,
+          "content_filter_results": {}
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run-c1dd1a50-d49b-432d-acc0-9261cbb108cd-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "like_post",
+            "args": {
+              "post_author": "StartupFounder",
+              "reason": "Impressive AI framework speed!"
+            },
+            "id": "call_b71RiYOXjf74taNUvaIfUlGR",
+            "type": "tool_call"
+          },
+          {
+            "name": "reply_to_post",
+            "args": {
+              "reply_to": "StartupFounder",
+              "content": "This sounds amazing! Can you share some insights on how you achieved this speed boost? \ud83d\ude4c #TechTalk"
+            },
+            "id": "call_ya9px2s0WNenP3tHZBQ37wH0",
+            "type": "tool_call"
+          },
+          {
+            "name": "share_post",
+            "args": {
+              "original_author": "StartupFounder",
+              "comment": ""
+            },
+            "id": "call_PpLQyCvZPjA4sIoajTLDFXmB",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 371,
+          "output_tokens": 100,
+          "total_tokens": 471,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "f309eedb-d16b-4096-a044-d3d4a6a9e7ad",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f047f84-5b14-60b8-8001-a837164469f2"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "",
+          "additional_kwargs": {
+            "tool_calls": [
+              {
+                "id": "call_b71RiYOXjf74taNUvaIfUlGR",
+                "function": {
+                  "arguments": "{\"post_author\": \"StartupFounder\", \"reason\": \"Impressive AI framework speed!\"}",
+                  "name": "like_post"
+                },
+                "type": "function"
+              },
+              {
+                "id": "call_ya9px2s0WNenP3tHZBQ37wH0",
+                "function": {
+                  "arguments": "{\"reply_to\": \"StartupFounder\", \"content\": \"This sounds amazing! Can you share some insights on how you achieved this speed boost? \ud83d\ude4c #TechTalk\"}",
+                  "name": "reply_to_post"
+                },
+                "type": "function"
+              },
+              {
+                "id": "call_PpLQyCvZPjA4sIoajTLDFXmB",
+                "function": {
+                  "arguments": "{\"original_author\": \"StartupFounder\", \"comment\": \"\"}",
+                  "name": "share_post"
+                },
+                "type": "function"
+              }
+            ],
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 100,
+              "prompt_tokens": 371,
+              "total_tokens": 471,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "id": "chatcmpl-BhnnFTGHfDqKzT0Wfi9o1Q4WaPKoQ",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "length",
+            "logprobs": null,
+            "content_filter_results": {}
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run-c1dd1a50-d49b-432d-acc0-9261cbb108cd-0",
+          "example": false,
+          "tool_calls": [
+            {
+              "name": "like_post",
+              "args": {
+                "post_author": "StartupFounder",
+                "reason": "Impressive AI framework speed!"
+              },
+              "id": "call_b71RiYOXjf74taNUvaIfUlGR",
+              "type": "tool_call"
+            },
+            {
+              "name": "reply_to_post",
+              "args": {
+                "reply_to": "StartupFounder",
+                "content": "This sounds amazing! Can you share some insights on how you achieved this speed boost? \ud83d\ude4c #TechTalk"
+              },
+              "id": "call_ya9px2s0WNenP3tHZBQ37wH0",
+              "type": "tool_call"
+            },
+            {
+              "name": "share_post",
+              "args": {
+                "original_author": "StartupFounder",
+                "comment": ""
+              },
+              "id": "call_PpLQyCvZPjA4sIoajTLDFXmB",
+              "type": "tool_call"
+            }
+          ],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 371,
+            "output_tokens": 100,
+            "total_tokens": 471,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 1,
+    "parents": {},
+    "thread_id": "ba609c34-be55-42a2-881d-2ba4698289ef",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 7,
+    "langgraph_node": "execute_agent",
+    "langgraph_triggers": ["branch:to:execute_agent"],
+    "langgraph_path": ["__pregel_pull", "execute_agent"],
+    "langgraph_checkpoint_ns": "execute_agent:60642939-0353-9e2a-5891-585768bf3675",
+    "recursion_limit": 50
+  },
+  "2025-06-13T01:46:49.519103+00:00",
+  {
+    "configurable": {
+      "thread_id": "f309eedb-d16b-4096-a044-d3d4a6a9e7ad",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f047f84-50ae-6129-8000-bf33ce1b51df"
+    }
+  },
+  []
+]

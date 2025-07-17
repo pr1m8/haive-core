@@ -1,0 +1,95 @@
+[
+  {
+    "__shared_fields__": [
+      "active_agent_id",
+      "shared_state",
+      "structured_outputs"
+    ],
+    "__serializable_reducers__": {
+      "messages": "add_messages"
+    },
+    "__engine_io_mappings__": {},
+    "__input_fields__": {},
+    "__output_fields__": {},
+    "__structured_models__": {},
+    "__structured_model_fields__": {},
+    "messages": [
+      {
+        "content": "Create a plan for a day trip, then calculate how many hours we'll need if we spend 2 hours at each location",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "1f19cdd8-a4dc-450a-a8c3-1b86a6e5d0d7",
+        "example": false
+      }
+    ],
+    "agents": {},
+    "outputs": {},
+    "tool_routes": {},
+    "agent_tool_routes": {},
+    "available_nodes": [],
+    "shared_state": {},
+    "structured_outputs": {}
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "91862885-cf8e-4c06-9bda-8ec4111770e3",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04ee88-9adf-6b1b-8004-a339afe6ecab"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "process_results_decision": {
+        "__shared_fields__": [
+          "active_agent_id",
+          "shared_state",
+          "structured_outputs"
+        ],
+        "__serializable_reducers__": {
+          "messages": "add_messages"
+        },
+        "__engine_io_mappings__": {},
+        "__input_fields__": {},
+        "__output_fields__": {},
+        "__structured_models__": {},
+        "__structured_model_fields__": {},
+        "messages": [
+          {
+            "content": "Create a plan for a day trip, then calculate how many hours we'll need if we spend 2 hours at each location",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "1f19cdd8-a4dc-450a-a8c3-1b86a6e5d0d7",
+            "example": false
+          }
+        ],
+        "agents": {},
+        "outputs": {},
+        "tool_routes": {},
+        "agent_tool_routes": {},
+        "available_nodes": [],
+        "shared_state": {},
+        "structured_outputs": {}
+      }
+    },
+    "step": 4,
+    "parents": {},
+    "thread_id": "91862885-cf8e-4c06-9bda-8ec4111770e3",
+    "debug": false,
+    "checkpoint_mode": "sync"
+  },
+  "2025-06-21T21:41:49.774508+00:00",
+  {
+    "configurable": {
+      "thread_id": "91862885-cf8e-4c06-9bda-8ec4111770e3",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04ee88-9adb-69cc-8003-eb5c75a28eae"
+    }
+  },
+  []
+]

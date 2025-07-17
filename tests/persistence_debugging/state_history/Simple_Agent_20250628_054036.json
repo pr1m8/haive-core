@@ -1,0 +1,503 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Find out the age of earth and add it to itself, then plan a website.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "dc898fc7-6805-4c3d-97b4-868d9410ab11",
+        "example": false
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 82,
+            "output_tokens": 13,
+            "total_tokens": 95,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          },
+          "tool_calls": [
+            {
+              "id": "call_ux0iaeIPHhLiOtkLROnD7cui",
+              "function": {
+                "arguments": "{}",
+                "name": "get_earth_age"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 13,
+            "prompt_tokens": 82,
+            "total_tokens": 95,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BnMKqQuk6N51OAhmKvvUJcUmPCkM3",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "content_filter_results": {}
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run-9bfe9b75-21a8-4d42-96f0-2c8f2895f5e6-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "get_earth_age",
+            "args": {},
+            "id": "call_ux0iaeIPHhLiOtkLROnD7cui",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "4543000000",
+        "additional_kwargs": {
+          "status": "success"
+        },
+        "response_metadata": {},
+        "type": "tool",
+        "name": "get_earth_age",
+        "id": "0b1814da-ec8e-441d-9f39-39d25c291c5d",
+        "tool_call_id": "call_ux0iaeIPHhLiOtkLROnD7cui",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 108,
+            "output_tokens": 24,
+            "total_tokens": 132,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          },
+          "tool_calls": [
+            {
+              "id": "call_ZB5iGNSiOg1MsNqXj6CmNjmH",
+              "function": {
+                "arguments": "{\"a\":4543000000,\"b\":4543000000}",
+                "name": "add"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 24,
+            "prompt_tokens": 108,
+            "total_tokens": 132,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BnMKrp2mQLN04jwRgGdoC2PxqUpmG",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "content_filter_results": {}
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run-f3d6e339-e9a7-4b8a-b020-042b17571cef-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "add",
+            "args": {
+              "a": 4543000000,
+              "b": 4543000000
+            },
+            "id": "call_ZB5iGNSiOg1MsNqXj6CmNjmH",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "9086000000",
+        "additional_kwargs": {
+          "status": "success"
+        },
+        "response_metadata": {},
+        "type": "tool",
+        "name": "add",
+        "id": "ab1ff3d4-4a47-4588-847e-f810c35660dc",
+        "tool_call_id": "call_ZB5iGNSiOg1MsNqXj6CmNjmH",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "The age of Earth is approximately 4,543 million years. Adding this to itself results in 9,086 million years.\n\nNow, let's plan a website:\n\n### Website Planning\n\n1. **Purpose and Goals:**\n   - Define the main purpose of the website (e.g., informational, e-commerce, portfolio).\n   - Identify key goals (e.g., attract visitors, generate sales, showcase work).\n\n2. **Target Audience:**\n   - Determine the target audience and their needs.\n   - Consider demographics, preferences, and online behavior.\n\n3. **Content Strategy:**\n   - Plan the type of content to include (e.g., text, images, videos).\n   - Develop a content calendar for regular updates.\n\n4. **Design and Layout:**\n   - Choose a design theme and style.\n   - Plan the layout including homepage, navigation, and sub-pages.\n   - Ensure responsive design for mobile devices.\n\n5. **Features and Functionality:**\n   - Identify essential features (e.g., contact form, search bar, blog, e-commerce functionality).\n   - Plan integrations such as social media, payment gateways, etc.\n\n6. **SEO and Analytics:**\n   - Develop an SEO strategy to improve search engine ranking.\n   - Decide on analytics tools to track performance and user behavior.\n\n7. **Budget and Resources:**\n   - Determine budget constraints.\n   - Identify necessary resources including time, personnel, and technology.\n\n8. **Project Timeline:**\n   - Create a realistic timeline from planning to launch.\n   - Set milestones for progress tracking.\n\n9. **Launch and Maintenance:**\n   - Plan the launch strategy including any promotional activities.\n   - Establish the maintenance schedule for updates and improvements.\n\nBy following this structured plan, you can develop a website that effectively serves its intended purpose and meets the needs of its audience.",
+        "additional_kwargs": {
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 142,
+            "output_tokens": 374,
+            "total_tokens": 516,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          },
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 374,
+            "prompt_tokens": 142,
+            "total_tokens": 516,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BnMKsoqpr8EtwHSjPrixDAYBr4x6m",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run-795ab91b-5d57-4f68-be98-773167f1a744-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "tool_calls": [
+            {
+              "id": "call_acevnp12ITPLs0mupJDt2ujI",
+              "function": {
+                "arguments": "{\"steps\":[\"Define the main purpose of the website (e.g., informational, e-commerce, portfolio) and identify key goals (e.g., attract visitors, generate sales, showcase work).\",\"Determine the target audience and their needs, considering demographics, preferences, and online behavior.\",\"Plan the type of content to include on the website (e.g., text, images, videos) and develop a content calendar for regular updates.\",\"Choose a design theme and style, plan the layout including homepage, navigation, and sub-pages, and ensure responsive design for mobile devices.\",\"Identify essential features (e.g., contact form, search bar, blog, e-commerce functionality) and plan integrations such as social media and payment gateways.\",\"Develop an SEO strategy to improve search engine ranking and decide on analytics tools to track performance and user behavior.\",\"Determine budget constraints and identify necessary resources including time, personnel, and technology.\",\"Create a realistic timeline from planning to launch and set milestones for progress tracking.\",\"Plan the launch strategy including any promotional activities and establish the maintenance schedule for updates and improvements.\"]}",
+                "name": "Plan"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 214,
+            "prompt_tokens": 502,
+            "total_tokens": 716,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BnMKwV2nE4rfpAhpCTY7Eb3GukC01",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {}
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run-59598760-a2f1-4dd5-af0b-85a4a3daacc4-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "Plan",
+            "args": {
+              "steps": [
+                "Define the main purpose of the website (e.g., informational, e-commerce, portfolio) and identify key goals (e.g., attract visitors, generate sales, showcase work).",
+                "Determine the target audience and their needs, considering demographics, preferences, and online behavior.",
+                "Plan the type of content to include on the website (e.g., text, images, videos) and develop a content calendar for regular updates.",
+                "Choose a design theme and style, plan the layout including homepage, navigation, and sub-pages, and ensure responsive design for mobile devices.",
+                "Identify essential features (e.g., contact form, search bar, blog, e-commerce functionality) and plan integrations such as social media and payment gateways.",
+                "Develop an SEO strategy to improve search engine ranking and decide on analytics tools to track performance and user behavior.",
+                "Determine budget constraints and identify necessary resources including time, personnel, and technology.",
+                "Create a realistic timeline from planning to launch and set milestones for progress tracking.",
+                "Plan the launch strategy including any promotional activities and establish the maintenance schedule for updates and improvements."
+              ]
+            },
+            "id": "call_acevnp12ITPLs0mupJDt2ujI",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 502,
+          "output_tokens": 214,
+          "total_tokens": 716,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ],
+    "tools": [
+      {
+        "name": "<class 'packages.haive-agents.tests.multi.test_simple_user.Plan'>",
+        "description": "",
+        "type": "tool"
+      }
+    ],
+    "tool_routes": {
+      "tool_0": "unknown"
+    },
+    "name_attrs": ["name", "__name__", "func_name"],
+    "content": null,
+    "output_schemas": {},
+    "engine_route_config": {
+      "llm": ["langchain_tool", "function", "pydantic_model"],
+      "aug_llm": ["langchain_tool", "function", "pydantic_model"],
+      "retriever": ["retriever"],
+      "parser": ["pydantic_model"]
+    },
+    "plan": {
+      "steps": [
+        "Define the main purpose of the website (e.g., informational, e-commerce, portfolio) and identify key goals (e.g., attract visitors, generate sales, showcase work).",
+        "Determine the target audience and their needs, considering demographics, preferences, and online behavior.",
+        "Plan the type of content to include on the website (e.g., text, images, videos) and develop a content calendar for regular updates.",
+        "Choose a design theme and style, plan the layout including homepage, navigation, and sub-pages, and ensure responsive design for mobile devices.",
+        "Identify essential features (e.g., contact form, search bar, blog, e-commerce functionality) and plan integrations such as social media and payment gateways.",
+        "Develop an SEO strategy to improve search engine ranking and decide on analytics tools to track performance and user behavior.",
+        "Determine budget constraints and identify necessary resources including time, personnel, and technology.",
+        "Create a realistic timeline from planning to launch and set milestones for progress tracking.",
+        "Plan the launch strategy including any promotional activities and establish the maintenance schedule for updates and improvements."
+      ]
+    }
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "c5409eb1-0f93-47fb-b665-b692eb88131d",
+      "checkpoint_ns": "Simple Agent:6f107d0a-4885-81fa-f27a-bc6fcd8b5183",
+      "checkpoint_id": "1f05403f-1dd6-65ae-8003-5caab9e4374e",
+      "checkpoint_map": {
+        "": "1f05403e-dca9-6139-8001-09b04d966982",
+        "Simple Agent:6f107d0a-4885-81fa-f27a-bc6fcd8b5183": "1f05403f-1dd6-65ae-8003-5caab9e4374e"
+      }
+    }
+  },
+  {
+    "step": 3,
+    "debug": false,
+    "source": "loop",
+    "writes": {
+      "parse_output": {
+        "plan": {
+          "steps": [
+            "Define the main purpose of the website (e.g., informational, e-commerce, portfolio) and identify key goals (e.g., attract visitors, generate sales, showcase work).",
+            "Determine the target audience and their needs, considering demographics, preferences, and online behavior.",
+            "Plan the type of content to include on the website (e.g., text, images, videos) and develop a content calendar for regular updates.",
+            "Choose a design theme and style, plan the layout including homepage, navigation, and sub-pages, and ensure responsive design for mobile devices.",
+            "Identify essential features (e.g., contact form, search bar, blog, e-commerce functionality) and plan integrations such as social media and payment gateways.",
+            "Develop an SEO strategy to improve search engine ranking and decide on analytics tools to track performance and user behavior.",
+            "Determine budget constraints and identify necessary resources including time, personnel, and technology.",
+            "Create a realistic timeline from planning to launch and set milestones for progress tracking.",
+            "Plan the launch strategy including any promotional activities and establish the maintenance schedule for updates and improvements."
+          ]
+        }
+      }
+    },
+    "parents": {
+      "": "1f05403e-dca9-6139-8001-09b04d966982"
+    },
+    "thread_id": "c5409eb1-0f93-47fb-b665-b692eb88131d",
+    "langgraph_node": "Simple Agent",
+    "langgraph_path": ["__pregel_pull", "Simple Agent"],
+    "langgraph_step": 2,
+    "checkpoint_mode": "sync",
+    "langgraph_triggers": ["branch:to:Simple Agent"],
+    "langgraph_checkpoint_ns": "Simple Agent:6f107d0a-4885-81fa-f27a-bc6fcd8b5183"
+  },
+  "2025-06-28T09:40:36.793880+00:00",
+  {
+    "configurable": {
+      "thread_id": "c5409eb1-0f93-47fb-b665-b692eb88131d",
+      "checkpoint_ns": "Simple Agent:6f107d0a-4885-81fa-f27a-bc6fcd8b5183",
+      "checkpoint_id": "1f05403f-1d4b-6232-8002-68812c8b9800",
+      "checkpoint_map": {
+        "": "1f05403e-dca9-6139-8001-09b04d966982",
+        "Simple Agent:6f107d0a-4885-81fa-f27a-bc6fcd8b5183": "1f05403f-1d4b-6232-8002-68812c8b9800"
+      }
+    }
+  },
+  []
+]

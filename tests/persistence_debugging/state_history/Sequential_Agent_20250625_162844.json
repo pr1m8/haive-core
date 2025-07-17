@@ -1,0 +1,434 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Hello",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "c5605c52-ff09-48fd-a0f6-696a105a4a33",
+        "example": false
+      },
+      {
+        "content": "Hello! How can I assist you today?",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 11,
+            "prompt_tokens": 48,
+            "total_tokens": 59,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--ab263bab-d27b-4282-b03e-ec32c184ce5c-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 48,
+          "output_tokens": 11,
+          "total_tokens": 59,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ],
+    "tools": [],
+    "tool_routes": {},
+    "name_attrs": ["name", "__name__", "func_name"],
+    "content": null,
+    "output_schemas": {},
+    "engine_route_config": {
+      "llm": ["langchain_tool", "function", "pydantic_model"],
+      "aug_llm": ["langchain_tool", "function", "pydantic_model"],
+      "retriever": ["retriever"],
+      "parser": ["pydantic_model"]
+    },
+    "engines": {
+      "aug_llm_8c079898": {
+        "id": "ad853a45ac2d4e9ba5192a28b8fb6d04",
+        "name": "aug_llm_8c079898",
+        "engine_type": "llm",
+        "version": "1.0.0",
+        "metadata": {
+          "tool_names": ["add"],
+          "has_basemodel_tools": false,
+          "basemodel_tool_count": 0,
+          "tool_name_mapping": {
+            "add": "add"
+          }
+        },
+        "tool_routes": {
+          "add": "langchain_tool"
+        },
+        "tool_metadata": {
+          "add": {
+            "tool_type": "BaseTool",
+            "is_instance": true
+          }
+        },
+        "tools_dict": {},
+        "routed_tools": [],
+        "llm_config": {
+          "provider": "azure",
+          "model": "gpt-4o",
+          "name": "gpt-4o",
+          "api_key": "**********",
+          "cache_enabled": true,
+          "cache_ttl": 300,
+          "extra_params": {},
+          "debug": false
+        },
+        "prompt_template": {
+          "input_variables": [],
+          "optional_variables": ["messages"],
+          "partial_variables": {
+            "messages": []
+          }
+        },
+        "messages_placeholder_name": "messages",
+        "add_messages_placeholder": true,
+        "force_messages_optional": true,
+        "example_separator": "\n\n",
+        "tools": [],
+        "schemas": [],
+        "pydantic_tools": [],
+        "use_tool_for_format_instructions": false,
+        "tool_is_base_model": false,
+        "force_tool_use": false,
+        "tool_choice_mode": "auto",
+        "parse_raw_output": false,
+        "include_format_instructions": true,
+        "tool_kwargs": {},
+        "bind_tools_kwargs": {
+          "tool_choice": "auto"
+        },
+        "bind_tools_config": {},
+        "runtime_options": {},
+        "partial_variables": {},
+        "optional_variables": [],
+        "uses_messages_field": true
+      },
+      "main": {
+        "id": "1a9ba9ac528243cd8286b4d7743217b2",
+        "name": "aug_llm_ddf38c8b",
+        "engine_type": "EngineType.LLM"
+      },
+      "aug_llm_ddf38c8b": {
+        "id": "1a9ba9ac528243cd8286b4d7743217b2",
+        "name": "aug_llm_ddf38c8b",
+        "engine_type": "EngineType.LLM"
+      }
+    },
+    "plan": {
+      "steps": [
+        "Implement multi_tool_use.parallel functionality",
+        "Integrate functions.Plan within multi_tool_use.parallel",
+        "Execute multi_tool_use.parallel with concurrent tool calls"
+      ]
+    },
+    "meta_state": {
+      "active_agent_id": null,
+      "active_agent_name": null,
+      "agent_outputs": {},
+      "agent_execution_history": [],
+      "workflow_metadata": {},
+      "workflow_stage": null,
+      "shared_context": {},
+      "last_error": null,
+      "error_count": 0,
+      "should_continue": true,
+      "next_agent_hint": null
+    },
+    "active_agent_id": null,
+    "agent_outputs": {
+      "714289835e0949f8a0f3c70754a796bd": {
+        "messages": [
+          {
+            "content": "Hello",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "c5605c52-ff09-48fd-a0f6-696a105a4a33"
+          },
+          {
+            "content": "Hello! How can I assist you today?",
+            "additional_kwargs": {
+              "refusal": null
+            },
+            "response_metadata": {
+              "token_usage": {
+                "completion_tokens": 11,
+                "prompt_tokens": 48,
+                "total_tokens": 59,
+                "completion_tokens_details": {
+                  "accepted_prediction_tokens": 0,
+                  "audio_tokens": 0,
+                  "reasoning_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                },
+                "prompt_tokens_details": {
+                  "audio_tokens": 0,
+                  "cached_tokens": 0
+                }
+              },
+              "model_name": "gpt-4o-2024-08-06",
+              "system_fingerprint": "fp_ee1d74bde0",
+              "prompt_filter_results": [
+                {
+                  "prompt_index": 0,
+                  "content_filter_results": {
+                    "hate": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "self_harm": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "sexual": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "violence": {
+                      "filtered": false,
+                      "severity": "safe"
+                    }
+                  }
+                }
+              ],
+              "finish_reason": "stop",
+              "logprobs": null,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            },
+            "type": "ai",
+            "name": null,
+            "id": "run--ab263bab-d27b-4282-b03e-ec32c184ce5c-0"
+          }
+        ]
+      },
+      "509ff9ea49694e589f6f73dfdafa7c39": {
+        "plan": {
+          "steps": [
+            "Implement multi_tool_use.parallel functionality",
+            "Integrate functions.Plan within multi_tool_use.parallel",
+            "Execute multi_tool_use.parallel with concurrent tool calls"
+          ]
+        }
+      }
+    }
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "f0befa2c-e22d-4c64-b07e-2d629a1f2b17",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f05202f-db8b-6427-8002-5d433a722d2e"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "Simple Agent": {
+        "plan": {
+          "steps": [
+            "Implement multi_tool_use.parallel functionality",
+            "Integrate functions.Plan within multi_tool_use.parallel",
+            "Execute multi_tool_use.parallel with concurrent tool calls"
+          ]
+        },
+        "agent_outputs": {
+          "714289835e0949f8a0f3c70754a796bd": {
+            "messages": [
+              {
+                "content": "Hello",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "human",
+                "name": null,
+                "id": "c5605c52-ff09-48fd-a0f6-696a105a4a33"
+              },
+              {
+                "content": "Hello! How can I assist you today?",
+                "additional_kwargs": {
+                  "refusal": null
+                },
+                "response_metadata": {
+                  "token_usage": {
+                    "completion_tokens": 11,
+                    "prompt_tokens": 48,
+                    "total_tokens": 59,
+                    "completion_tokens_details": {
+                      "accepted_prediction_tokens": 0,
+                      "audio_tokens": 0,
+                      "reasoning_tokens": 0,
+                      "rejected_prediction_tokens": 0
+                    },
+                    "prompt_tokens_details": {
+                      "audio_tokens": 0,
+                      "cached_tokens": 0
+                    }
+                  },
+                  "model_name": "gpt-4o-2024-08-06",
+                  "system_fingerprint": "fp_ee1d74bde0",
+                  "prompt_filter_results": [
+                    {
+                      "prompt_index": 0,
+                      "content_filter_results": {
+                        "hate": {
+                          "filtered": false,
+                          "severity": "safe"
+                        },
+                        "self_harm": {
+                          "filtered": false,
+                          "severity": "safe"
+                        },
+                        "sexual": {
+                          "filtered": false,
+                          "severity": "safe"
+                        },
+                        "violence": {
+                          "filtered": false,
+                          "severity": "safe"
+                        }
+                      }
+                    }
+                  ],
+                  "finish_reason": "stop",
+                  "logprobs": null,
+                  "content_filter_results": {
+                    "hate": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "self_harm": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "sexual": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "violence": {
+                      "filtered": false,
+                      "severity": "safe"
+                    }
+                  }
+                },
+                "type": "ai",
+                "name": null,
+                "id": "run--ab263bab-d27b-4282-b03e-ec32c184ce5c-0"
+              }
+            ]
+          },
+          "509ff9ea49694e589f6f73dfdafa7c39": {
+            "plan": {
+              "steps": [
+                "Implement multi_tool_use.parallel functionality",
+                "Integrate functions.Plan within multi_tool_use.parallel",
+                "Execute multi_tool_use.parallel with concurrent tool calls"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "step": 2,
+    "parents": {},
+    "thread_id": "f0befa2c-e22d-4c64-b07e-2d629a1f2b17",
+    "debug": false,
+    "checkpoint_mode": "sync"
+  },
+  "2025-06-25T20:28:44.863775+00:00",
+  {
+    "configurable": {
+      "thread_id": "f0befa2c-e22d-4c64-b07e-2d629a1f2b17",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f05202f-d38a-6f2d-8001-84878a409383"
+    }
+  },
+  []
+]

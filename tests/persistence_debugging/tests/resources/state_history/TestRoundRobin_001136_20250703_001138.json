@@ -1,0 +1,77 @@
+[
+    {
+        "messages": [
+            {
+                "content": "Topic: Round robin discussion test\nLet's begin our round_robin discussion.",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "human",
+                "name": null,
+                "id": "7431f195-8b38-4703-862f-dc8961664c92",
+                "example": false
+            },
+            {
+                "content": "\ud83c\udfc1 Conversation ended: Reached maximum rounds (1)\n\ud83d\udcca Total rounds: 1\n\ud83d\udd04 Total turns: 1",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "system",
+                "name": null,
+                "id": "5af3bbde-530c-4272-8e92-b7104fe6522a"
+            }
+        ],
+        "current_speaker": null,
+        "speakers": [
+            "A_001136",
+            "B_001136"
+        ],
+        "turn_count": 1,
+        "max_rounds": 1,
+        "topic": "Round robin discussion test",
+        "conversation_ended": true,
+        "mode": "round_robin",
+        "speaker_history": [
+            "A_001136"
+        ]
+    },
+    [],
+    {
+        "configurable": {
+            "thread_id": "roundrobin_test_001136",
+            "checkpoint_ns": "",
+            "checkpoint_id": "1f057c3d-0f66-6fd0-8006-28b58aff3276"
+        }
+    },
+    {
+        "step": 6,
+        "debug": false,
+        "source": "loop",
+        "writes": {
+            "conclude": {
+                "messages": [
+                    {
+                        "content": "\ud83c\udfc1 Conversation ended: Reached maximum rounds (1)\n\ud83d\udcca Total rounds: 1\n\ud83d\udd04 Total turns: 1",
+                        "additional_kwargs": {},
+                        "response_metadata": {},
+                        "type": "system",
+                        "name": null,
+                        "id": "5af3bbde-530c-4272-8e92-b7104fe6522a"
+                    }
+                ],
+                "current_speaker": null,
+                "conversation_ended": true
+            }
+        },
+        "parents": {},
+        "thread_id": "roundrobin_test_001136",
+        "checkpoint_mode": "sync"
+    },
+    "2025-07-03T04:11:38.453592+00:00",
+    {
+        "configurable": {
+            "thread_id": "roundrobin_test_001136",
+            "checkpoint_ns": "",
+            "checkpoint_id": "1f057c3d-0f65-6e30-8005-7a2ccb5ac115"
+        }
+    },
+    []
+]

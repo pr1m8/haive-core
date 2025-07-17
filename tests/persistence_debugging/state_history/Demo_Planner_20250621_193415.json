@@ -1,0 +1,223 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Create a plan for a day trip, then calculate how many hours we'll need if we spend 2 hours at each location",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "c09631a1-a419-4525-96b6-2d793f6d4783",
+        "example": false
+      },
+      {
+        "content": "Creating a day trip plan involves selecting interesting locations to visit within a reasonable distance and estimating travel and activity times. I will outline a plan and then calculate the total duration needed.\n\n### Day Trip Plan:\n\n**1. Breakfast Spot:**\n   - Start your day with a hearty breakfast at a popular local cafe.\n   - Time: 2 hours\n\n**2. Attraction 1: Museum or Art Gallery**\n   - Visit a local museum or art gallery to explore exhibits and learn about culture and history.\n   - Time: 2 hours\n\n**Travel to Location 2:**\n   - Estimate travel time between the museum/gallery and the next destination.\n   - Time: 30 minutes \n\n**3. Attraction 2: Park or Nature Preserve**\n   - Spend time enjoying the outdoors, walking trails, or relaxing by a lake or garden.\n   - Time: 2 hours\n\n**Travel to Location 3:**\n   - Estimate travel time between the park/nature preserve and the next destination.\n   - Time: 30 minutes \n\n**4. Lunch: Local Restaurant**\n   - Enjoy a leisurely lunch at a restaurant known for local cuisine.\n   - Time: 2 hours\n\n**Travel to Location 4:**\n   - Estimate travel time between the lunch spot and the next destination.\n   - Time: 30 minutes \n\n**5. Attraction 3: Historical Landmark or Interesting Neighborhood**\n   - Tour a historical site or explore an interesting neighborhood with unique architecture or shops.\n   - Time: 2 hours\n\n**Travel to Location 5:**\n   - Estimate travel time back to your starting point or another chosen location.\n   - Time: 30 minutes \n\n**6. Evening Activity: Dinner and Relaxation**\n   - End the day with dinner at a cozy spot followed by relaxation or a walk.\n   - Time: 2 hours\n\n### Total Time Calculation:\n\n1. **Activity Time:**\n   - Breakfast: 2 hours\n   - Museum/Gallery: 2 hours\n   - Park/Nature Preserve: 2 hours\n   - Lunch: 2 hours\n   - Historical Landmark/Neighborhood: 2 hours\n   - Dinner and Relaxation: 2 hours\n\n   Total Activity Time: 12 hours\n\n2. **Travel Time:**\n   - Between Locations (4 segments at 30 minutes each): 2 hours\n\n   Total Travel Time: 2 hours\n\n**Total Planned Time for Day Trip:** 14 hours\n\nMake sure to consider opening hours, potential queues, and your own pace to adjust the schedule as needed. Enjoy your day trip!",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 528,
+            "prompt_tokens": 31,
+            "total_tokens": 559,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--16a15160-f740-4db7-ac53-c8783d1f7b79-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 31,
+          "output_tokens": 528,
+          "total_tokens": 559,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "e9ed43af-15bc-45b9-addb-55bfeecb04c2",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04ef83-e5be-69ff-8001-97be2b47ecec"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "Creating a day trip plan involves selecting interesting locations to visit within a reasonable distance and estimating travel and activity times. I will outline a plan and then calculate the total duration needed.\n\n### Day Trip Plan:\n\n**1. Breakfast Spot:**\n   - Start your day with a hearty breakfast at a popular local cafe.\n   - Time: 2 hours\n\n**2. Attraction 1: Museum or Art Gallery**\n   - Visit a local museum or art gallery to explore exhibits and learn about culture and history.\n   - Time: 2 hours\n\n**Travel to Location 2:**\n   - Estimate travel time between the museum/gallery and the next destination.\n   - Time: 30 minutes \n\n**3. Attraction 2: Park or Nature Preserve**\n   - Spend time enjoying the outdoors, walking trails, or relaxing by a lake or garden.\n   - Time: 2 hours\n\n**Travel to Location 3:**\n   - Estimate travel time between the park/nature preserve and the next destination.\n   - Time: 30 minutes \n\n**4. Lunch: Local Restaurant**\n   - Enjoy a leisurely lunch at a restaurant known for local cuisine.\n   - Time: 2 hours\n\n**Travel to Location 4:**\n   - Estimate travel time between the lunch spot and the next destination.\n   - Time: 30 minutes \n\n**5. Attraction 3: Historical Landmark or Interesting Neighborhood**\n   - Tour a historical site or explore an interesting neighborhood with unique architecture or shops.\n   - Time: 2 hours\n\n**Travel to Location 5:**\n   - Estimate travel time back to your starting point or another chosen location.\n   - Time: 30 minutes \n\n**6. Evening Activity: Dinner and Relaxation**\n   - End the day with dinner at a cozy spot followed by relaxation or a walk.\n   - Time: 2 hours\n\n### Total Time Calculation:\n\n1. **Activity Time:**\n   - Breakfast: 2 hours\n   - Museum/Gallery: 2 hours\n   - Park/Nature Preserve: 2 hours\n   - Lunch: 2 hours\n   - Historical Landmark/Neighborhood: 2 hours\n   - Dinner and Relaxation: 2 hours\n\n   Total Activity Time: 12 hours\n\n2. **Travel Time:**\n   - Between Locations (4 segments at 30 minutes each): 2 hours\n\n   Total Travel Time: 2 hours\n\n**Total Planned Time for Day Trip:** 14 hours\n\nMake sure to consider opening hours, potential queues, and your own pace to adjust the schedule as needed. Enjoy your day trip!",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 528,
+              "prompt_tokens": 31,
+              "total_tokens": 559,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--16a15160-f740-4db7-ac53-c8783d1f7b79-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 31,
+            "output_tokens": 528,
+            "total_tokens": 559,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 1,
+    "parents": {},
+    "thread_id": "1125d9ee-d1ef-466c-94fc-dd5e37e25f55",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 2,
+    "langgraph_node": "delegate_to_agent",
+    "langgraph_triggers": ["branch:to:delegate_to_agent"],
+    "langgraph_path": ["__pregel_pull", "delegate_to_agent"],
+    "langgraph_checkpoint_ns": "delegate_to_agent:22650312-53f3-82a0-4696-895e41c2719d"
+  },
+  "2025-06-21T23:34:15.355223+00:00",
+  {
+    "configurable": {
+      "thread_id": "e9ed43af-15bc-45b9-addb-55bfeecb04c2",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04ef83-bbe4-6b1b-8000-ff0c1c011d1c"
+    }
+  },
+  []
+]

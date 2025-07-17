@@ -1,0 +1,123 @@
+[
+  {
+    "__shared_fields__": [],
+    "__serializable_reducers__": {
+      "messages": "langgraph.graph.message._add_messages"
+    },
+    "__engine_io_mappings__": {
+      "engine_192db3eb": {
+        "inputs": ["messages"],
+        "outputs": ["plan", "Steps"]
+      }
+    },
+    "__input_fields__": {
+      "engine_192db3eb": ["messages"]
+    },
+    "__output_fields__": {
+      "engine_192db3eb": ["plan", "Steps"]
+    },
+    "__structured_model_schemas__": {},
+    "__structured_model_fields__": {},
+    "messages": [
+      {
+        "content": "Write a plan for building a website",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": null,
+        "example": false
+      }
+    ],
+    "plan": {
+      "Steps": [
+        "Define the purpose and goals of the website.",
+        "Conduct research to understand the target audience and competitors.",
+        "Choose a domain name and register it.",
+        "Select a web hosting service.",
+        "Plan the website structure and create a sitemap.",
+        "Design the website layout and user interface.",
+        "Develop the website using appropriate technologies (e.g., HTML, CSS, JavaScript).",
+        "Create and integrate content, including text, images, and videos.",
+        "Optimize the website for search engines (SEO).",
+        "Test the website for functionality, usability, and compatibility across different devices and browsers.",
+        "Launch the website and promote it through various channels.",
+        "Monitor website performance and make necessary updates and improvements."
+      ]
+    }
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "92f28c44-c386-46c3-85cd-ffff5aad792f",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f025cc2-d6bd-61cc-8001-609aa8999148"
+    }
+  },
+  {
+    "step": 1,
+    "debug": false,
+    "source": "loop",
+    "writes": {
+      "simple_agent_node": {
+        "plan": {
+          "Steps": [
+            "Define the purpose and goals of the website.",
+            "Conduct research to understand the target audience and competitors.",
+            "Choose a domain name and register it.",
+            "Select a web hosting service.",
+            "Plan the website structure and create a sitemap.",
+            "Design the website layout and user interface.",
+            "Develop the website using appropriate technologies (e.g., HTML, CSS, JavaScript).",
+            "Create and integrate content, including text, images, and videos.",
+            "Optimize the website for search engines (SEO).",
+            "Test the website for functionality, usability, and compatibility across different devices and browsers.",
+            "Launch the website and promote it through various channels.",
+            "Monitor website performance and make necessary updates and improvements."
+          ]
+        },
+        "messages": [
+          {
+            "content": "Write a plan for building a website",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null,
+            "example": false
+          }
+        ],
+        "__input_fields__": {
+          "engine_192db3eb": ["messages"]
+        },
+        "__output_fields__": {
+          "engine_192db3eb": ["plan", "Steps"]
+        },
+        "__shared_fields__": [],
+        "__engine_io_mappings__": {
+          "engine_192db3eb": {
+            "inputs": ["messages"],
+            "outputs": ["plan", "Steps"]
+          }
+        },
+        "__serializable_reducers__": {
+          "messages": "langgraph.graph.message._add_messages"
+        },
+        "__structured_model_fields__": {},
+        "__structured_model_schemas__": {}
+      }
+    },
+    "parents": {},
+    "thread_id": "92f28c44-c386-46c3-85cd-ffff5aad792f",
+    "recursion_limit": 200
+  },
+  "2025-04-30T14:05:31.408207+00:00",
+  {
+    "configurable": {
+      "thread_id": "92f28c44-c386-46c3-85cd-ffff5aad792f",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f025cc2-d60f-6a4a-8000-3c88a6603eb6"
+    }
+  },
+  []
+]

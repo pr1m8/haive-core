@@ -90,7 +90,6 @@ def test_comprehensive_system():
     enhanced_registry = registry_module.enhanced_registry
     stats = enhanced_registry.get_statistics()
 
-
     assert (
         stats["total_sources"] >= 13
     ), f"Expected at least 13 sources, got {stats['total_sources']}"
@@ -102,7 +101,6 @@ def test_comprehensive_system():
     SourceCategory = source_types_module.SourceCategory
     LoaderCapability = source_types_module.LoaderCapability
     CredentialType = source_types_module.CredentialType
-
 
     # Test category coverage
     categories_with_sources = [
@@ -125,7 +123,6 @@ def test_comprehensive_system():
         analysis = PathAnalyzer.analyze(path)
         registration = enhanced_registry.find_source_for_path(path)
 
-
         # PDF and CSV should definitely have sources
         if path.endswith((".pdf", ".csv")):
             assert registration is not None, f"No source found for {path}"
@@ -141,7 +138,8 @@ def test_comprehensive_system():
     assert csv_source is not None, "Failed to create CSV source"
 
     # Test web source creation
-    web_source = enhanced_registry.create_source("https://example.com/page.html")
+    web_source = enhanced_registry.create_source(
+        "https://example.com/page.html")
     assert web_source is not None, "Failed to create web source"
 
     # Test 5: Loader Selection and Preferences
@@ -156,15 +154,13 @@ def test_comprehensive_system():
             pdf_source, preference=LoaderPreference.QUALITY
         )
 
-
         # They should be different for PDF
         if fast_loader and quality_loader:
 
-    # Test 6: Bulk Loading Capabilities
+            # Test 6: Bulk Loading Capabilities
 
     bulk_loaders = enhanced_registry.find_bulk_loaders()
     recursive_loaders = enhanced_registry.find_recursive_loaders()
-
 
     assert (
         len(bulk_loaders) >= 2
@@ -185,7 +181,6 @@ def test_comprehensive_system():
         session_id="test_session",
     )
 
-
     # Test state schema
     state_schema = DocumentEngineStateSchema(
         input_config=input_schema,
@@ -193,7 +188,6 @@ def test_comprehensive_system():
         sources_queue=input_schema.source_paths,
         thread_id="test_thread_123",
     )
-
 
     # Test 8: Category-based Source Discovery
 
@@ -207,7 +201,6 @@ def test_comprehensive_system():
         SourceCategory.DATABASE_SQL
     )
 
-
     # Test 9: Capability-based Discovery
 
     bulk_capable = enhanced_registry.find_sources_with_capability(
@@ -217,15 +210,12 @@ def test_comprehensive_system():
         LoaderCapability.RECURSIVE
     )
 
-
     # Test 10: Essential Sources Validation
 
     essential_stats = essential_sources_module.get_essential_sources_statistics()
     validation_result = essential_sources_module.validate_essential_sources()
 
-
     assert validation_result, "Essential sources validation failed"
-
 
     return True
 
@@ -251,7 +241,6 @@ def test_decorator_system():
     class TestCustomSource(LocalFileSource):
         """Test custom source."""
 
-
     # Verify registration
     enhanced_registry = registry_module.enhanced_registry
     registration = enhanced_registry._sources.get("test_custom")
@@ -261,12 +250,10 @@ def test_decorator_system():
     assert registration.category == SourceCategory.FILE_DOCUMENT, "Wrong category"
     assert ".test" in registration.file_extensions, "File extension not registered"
 
-
     # Test finding the custom source
     custom_source = enhanced_registry.create_source("/path/to/file.test")
     assert custom_source is not None, "Failed to create custom source"
     assert custom_source.source_type == "test_custom", "Wrong source type"
-
 
     return True
 
@@ -281,11 +268,8 @@ def main():
         # Test decorator system
         test_decorator_system()
 
-
         enhanced_registry = registry_module.enhanced_registry
         final_stats = enhanced_registry.get_statistics()
-
-
 
         return True
 

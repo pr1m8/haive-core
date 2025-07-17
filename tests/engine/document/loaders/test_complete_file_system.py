@@ -92,7 +92,6 @@ def test_complete_file_system():
     # Test 1: Overall Registry Statistics
     stats = enhanced_registry.get_statistics()
 
-
     # Should have significantly more sources now
     assert (
         stats["total_sources"] >= 30
@@ -108,7 +107,6 @@ def test_complete_file_system():
     file_stats = file_sources_module.get_file_sources_statistics()
     file_validation = file_sources_module.validate_file_sources()
 
-
     assert file_validation, "File source validation failed"
     assert (
         file_stats["unstructured_loaders"] >= 5
@@ -118,7 +116,6 @@ def test_complete_file_system():
     bulk_stats = bulk_sources_module.get_bulk_sources_statistics()
     bulk_validation = bulk_sources_module.validate_bulk_sources()
     scrape_all_sources = bulk_sources_module.get_scrape_all_sources()
-
 
     assert bulk_validation, "Bulk source validation failed"
     assert (

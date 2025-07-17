@@ -1,0 +1,298 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Create a plan for a day trip, then calculate how many hours we'll need if we spend 2 hours at each location",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "f4902c34-4d32-464a-a519-3b7fbd277090",
+        "example": false
+      },
+      {
+        "content": "Sure! Here\u2019s a sample day trip itinerary with several locations you might enjoy:\n\n### Day Trip Itinerary\n\n1. **Early Morning: Visit a Local Cafe**\n   - **Activity:** Enjoy breakfast and coffee.\n   - **Duration:** 2 hours\n\n2. **Mid-Morning: Explore a Local Museum**\n   - **Activity:** Tour exhibits and learn about history/art.\n   - **Duration:** 2 hours\n\n3. **Late Morning: Visit a Botanical Garden**\n   - **Activity:** Walk through gardens and enjoy nature.\n   - **Duration:** 2 hours\n\n4. **Lunch: Dine at a Popular Restaurant**\n   - **Activity:** Enjoy a local meal.\n   - **Duration:** 2 hours\n\n5. **Afternoon: Explore a Historic Site**\n   - **Activity:** Guided tour and explore historic landmarks.\n   - **Duration:** 2 hours\n\n6. **Late Afternoon: Visit a Local Park**\n   - **Activity:** Relax and engage in recreational activities.\n   - **Duration:** 2 hours\n\n### Time Calculation\n\nLet's add up the time for each location:\n\n- Local Cafe: 2 hours\n- Museum: 2 hours\n- Botanical Garden: 2 hours\n- Restaurant: 2 hours\n- Historic Site: 2 hours\n- Park: 2 hours\n\nTotal time at each location: \\(6 \\times 2 = 12\\) hours\n\n### Note\n\n- **Travel Time:** Depending on the distance between each location, you may need to account for travel time, potentially extending the total duration of your day trip.\n\n- **Adjustments:** You might want to add breaks or adjust the time at each location based on your interests and pace.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 351,
+            "prompt_tokens": 31,
+            "total_tokens": 382,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--b5720183-fd7b-4be3-93f8-b3fa4c9d4d48-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "To further customize your plan or address logistical concerns, consider the following tips:\n\n### Additional Considerations\n\n1. **Travel Time**\n   - **Estimation:** Calculate travel time between locations. If each segment takes around 15-30 minutes, you\u2019ll need to add approximately 1-2 hours for travel throughout the day.\n   - **Planning Tip:** Use a mapping service to check distances and traffic conditions to avoid delays.\n\n2. **Rest Breaks**\n   - **Short Breaks:** Allow 15-30 minutes for snacks, bathroom breaks, or simply relaxing.\n   - **Walks Between Attractions:** If locations are close, consider walking as part of relaxation and exploration.\n\n3. **Interest & Flexibility**\n   - **Timing Adjustments:** Spend more or less time at specific locations based on your interests. If you find a place particularly captivating, feel free to linger longer.\n   - **Flexibility:** Be ready to skip a destination if you\u2019re short on time or if weather or other factors impact your plans.\n\n4. **Reservations**\n   - **Restaurants and Tours:** Ensure you have reservations where needed, particularly in popular areas or for guided tours.\n\n5. **Packing Essentials**\n   - **What to Bring:** Comfortable clothing, water bottles, and a daypack to carry essentials. Check weather forecasts for umbrella or sunscreen needs.\n\nBy factoring in all these considerations alongside your scheduled activities, you can maintain an enjoyable and balanced itinerary tailored to your interests and pace. Happy traveling!",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 302,
+            "prompt_tokens": 385,
+            "total_tokens": 687,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--678bc910-237b-4b74-9a30-0dbee39f02db-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 385,
+          "output_tokens": 302,
+          "total_tokens": 687,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "df8812c8-fce4-4404-9685-e6a1a502298b",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04f04c-4404-66fd-8001-7656854d224f"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "To further customize your plan or address logistical concerns, consider the following tips:\n\n### Additional Considerations\n\n1. **Travel Time**\n   - **Estimation:** Calculate travel time between locations. If each segment takes around 15-30 minutes, you\u2019ll need to add approximately 1-2 hours for travel throughout the day.\n   - **Planning Tip:** Use a mapping service to check distances and traffic conditions to avoid delays.\n\n2. **Rest Breaks**\n   - **Short Breaks:** Allow 15-30 minutes for snacks, bathroom breaks, or simply relaxing.\n   - **Walks Between Attractions:** If locations are close, consider walking as part of relaxation and exploration.\n\n3. **Interest & Flexibility**\n   - **Timing Adjustments:** Spend more or less time at specific locations based on your interests. If you find a place particularly captivating, feel free to linger longer.\n   - **Flexibility:** Be ready to skip a destination if you\u2019re short on time or if weather or other factors impact your plans.\n\n4. **Reservations**\n   - **Restaurants and Tours:** Ensure you have reservations where needed, particularly in popular areas or for guided tours.\n\n5. **Packing Essentials**\n   - **What to Bring:** Comfortable clothing, water bottles, and a daypack to carry essentials. Check weather forecasts for umbrella or sunscreen needs.\n\nBy factoring in all these considerations alongside your scheduled activities, you can maintain an enjoyable and balanced itinerary tailored to your interests and pace. Happy traveling!",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 302,
+              "prompt_tokens": 385,
+              "total_tokens": 687,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--678bc910-237b-4b74-9a30-0dbee39f02db-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 385,
+            "output_tokens": 302,
+            "total_tokens": 687,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 1,
+    "parents": {},
+    "thread_id": "75469e6b-42f6-4950-99e3-6883831a56d2",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 6,
+    "langgraph_node": "delegate_to_agent",
+    "langgraph_triggers": ["branch:to:delegate_to_agent"],
+    "langgraph_path": ["__pregel_pull", "delegate_to_agent"],
+    "langgraph_checkpoint_ns": "delegate_to_agent:9a1cde98-ad42-473f-6250-9abbd6cd6913"
+  },
+  "2025-06-22T01:03:53.949552+00:00",
+  {
+    "configurable": {
+      "thread_id": "df8812c8-fce4-4404-9685-e6a1a502298b",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04f04c-2e8d-6066-8000-d96ad9f4beff"
+    }
+  },
+  []
+]

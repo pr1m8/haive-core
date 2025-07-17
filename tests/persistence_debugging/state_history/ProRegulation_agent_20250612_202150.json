@@ -1,0 +1,674 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Debate Context:\nPhase: Opening Statements\nYour Position: AI development needs strict government oversight and regulation\nArguments Made: 5 of 3\n\nPlease provide your opening statement. Introduce your position clearly.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "system",
+        "name": null,
+        "id": "0790820d-b1cd-4aff-9633-b1b7dc1aa77b"
+      },
+      {
+        "content": "Welcome to the debate!\n\nTopic: Should AI development be regulated by governments?\n\nPositions:\n- ProRegulation: AI development needs strict government oversight and regulation\n- AntiRegulation: AI development should remain free from government interference\n\nDebate Structure:\n1. Opening statements\n2. Arguments and rebuttals (3 per side)\n3. Closing statements\n\nLet's begin with opening statements.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "f56683bb-9255-44d5-95b3-e90410830f23",
+        "example": false
+      },
+      {
+        "content": "Thank you for the opportunity to engage in this important debate on the regulation of AI development. I firmly believe that AI development requires strict government oversight and regulation, and here's why.\n\nArtificial intelligence is becoming increasingly intertwined with nearly every aspect of modern society, from healthcare and transportation to finance and national security. While AI has the potential to bring about tremendous benefits, its rapid and unchecked development poses significant risks that must be managed with careful oversight. Without appropriate regulation, AI systems could compromise privacy, exacerbate biases, and even threaten democratic processes.\n\nGovernment regulation is essential to ensure that AI technologies are developed and deployed in a manner that aligns with societal values and ethical standards. Regulations can provide a framework for transparency, accountability, and fairness, guiding the responsible use of AI and minimizing the potential for misuse. Furthermore, regulatory oversight can help prevent the concentration of power in a few tech companies, promoting innovation and competition across the industry.\n\nMoreover, the global nature of AI necessitates international cooperation and standards, which can only be effectively coordinated through government involvement. As AI technologies cross borders, shared regulatory frameworks will be crucial in addressing issues such as data privacy and cybersecurity on a global scale.\n\nIn summary, the stakes are too high to leave AI development unregulated. Government oversight is not only necessary to protect individual rights and societal welfare but also to foster an environment where AI can be developed responsibly and ethically. I look forward to discussing these points further and engaging with any counterarguments presented.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 292,
+            "prompt_tokens": 188,
+            "total_tokens": 480,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BhmSyDbhDyuWQtSon3X4ig8Ljcyak",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": "ProRegulation",
+        "id": "run-fc127008-479a-42af-bb23-fd51693675ec-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 188,
+          "output_tokens": 292,
+          "total_tokens": 480,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "Thank you for the opportunity to engage in this important debate on the regulation of AI development. I firmly believe that AI development requires strict government oversight and regulation, and here's why.\n\nArtificial intelligence is becoming increasingly intertwined with nearly every aspect of modern society, from healthcare and transportation to finance and national security. While AI has the potential to bring about tremendous benefits, its rapid and unchecked development poses significant risks that must be managed with careful oversight. Without appropriate regulation, AI systems could compromise privacy, exacerbate biases, and even threaten democratic processes.\n\nGovernment regulation is essential to ensure that AI technologies are developed and deployed in a manner that aligns with societal values and ethical standards. Regulations can provide a framework for transparency, accountability, and fairness, guiding the responsible use of AI and minimizing the potential for misuse. Furthermore, regulatory oversight can help prevent the concentration of power in a few tech companies, promoting innovation and competition across the industry.\n\nMoreover, the global nature of AI necessitates international cooperation and standards, which can only be effectively coordinated through government involvement. As AI technologies cross borders, shared regulatory frameworks will be crucial in addressing issues such as data privacy and cybersecurity on a global scale.\n\nIn summary, the stakes are too high to leave AI development unregulated. Government oversight is not only necessary to protect individual rights and societal welfare but also to foster an environment where AI can be developed responsibly and ethically. I look forward to discussing these points further and engaging with any counterarguments presented.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 292,
+            "prompt_tokens": 487,
+            "total_tokens": 779,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BhmT2ZCD0dyl66FkPV6mVDqmDiEnW",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": "ProRegulation",
+        "id": "run-5ecefedb-4cc6-4f13-a384-bbb9d227cd19-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 487,
+          "output_tokens": 292,
+          "total_tokens": 779,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "Thank you for the opportunity to engage in this important debate on the regulation of AI development. I firmly believe that AI development requires strict government oversight and regulation, and here's why.\n\nArtificial intelligence is becoming increasingly intertwined with nearly every aspect of modern society, from healthcare and transportation to finance and national security. While AI has the potential to bring about tremendous benefits, its rapid and unchecked development poses significant risks that must be managed with careful oversight. Without appropriate regulation, AI systems could compromise privacy, exacerbate biases, and even threaten democratic processes.\n\nGovernment regulation is essential to ensure that AI technologies are developed and deployed in a manner that aligns with societal values and ethical standards. Regulations can provide a framework for transparency, accountability, and fairness, guiding the responsible use of AI and minimizing the potential for misuse. Furthermore, regulatory oversight can help prevent the concentration of power in a few tech companies, promoting innovation and competition across the industry.\n\nMoreover, the global nature of AI necessitates international cooperation and standards, which can only be effectively coordinated through government involvement. As AI technologies cross borders, shared regulatory frameworks will be crucial in addressing issues such as data privacy and cybersecurity on a global scale.\n\nIn summary, the stakes are too high to leave AI development unregulated. Government oversight is not only necessary to protect individual rights and societal welfare but also to foster an environment where AI can be developed responsibly and ethically. I look forward to discussing these points further and engaging with any counterarguments presented.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 292,
+            "prompt_tokens": 786,
+            "total_tokens": 1078,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BhmT5gDnOVgTxBYpBfUQnxwUt1hRo",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": "ProRegulation",
+        "id": "run-53e0840a-302e-4efe-9457-8e6f65ecf34f-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 786,
+          "output_tokens": 292,
+          "total_tokens": 1078,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "Thank you for the opportunity to engage in this important debate on the regulation of AI development. I firmly believe that AI development requires strict government oversight and regulation, and here's why.\n\nArtificial intelligence is becoming increasingly intertwined with nearly every aspect of modern society, from healthcare and transportation to finance and national security. While AI has the potential to bring about tremendous benefits, its rapid and unchecked development poses significant risks that must be managed with careful oversight. Without appropriate regulation, AI systems could compromise privacy, exacerbate biases, and even threaten democratic processes.\n\nGovernment regulation is essential to ensure that AI technologies are developed and deployed in a manner that aligns with societal values and ethical standards. Regulations can provide a framework for transparency, accountability, and fairness, guiding the responsible use of AI and minimizing the potential for misuse. Furthermore, regulatory oversight can help prevent the concentration of power in a few tech companies, promoting innovation and competition across the industry.\n\nMoreover, the global nature of AI necessitates international cooperation and standards, which can only be effectively coordinated through government involvement. As AI technologies cross borders, shared regulatory frameworks will be crucial in addressing issues such as data privacy and cybersecurity on a global scale.\n\nIn summary, the stakes are too high to leave AI development unregulated. Government oversight is not only necessary to protect individual rights and societal welfare but also to foster an environment where AI can be developed responsibly and ethically. I look forward to discussing these points further and engaging with any counterarguments presented.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 292,
+            "prompt_tokens": 1085,
+            "total_tokens": 1377,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BhmT89lwfgeVZmniOMTZhHxt92e5g",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": "ProRegulation",
+        "id": "run-8710ad36-c045-4622-b46d-d7236039197f-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 1085,
+          "output_tokens": 292,
+          "total_tokens": 1377,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "Thank you for the opportunity to engage in this important debate on the regulation of AI development. I firmly believe that AI development requires strict government oversight and regulation, and here's why.\n\nArtificial intelligence is becoming increasingly intertwined with nearly every aspect of modern society, from healthcare and transportation to finance and national security. While AI has the potential to bring about tremendous benefits, its rapid and unchecked development poses significant risks that must be managed with careful oversight. Without appropriate regulation, AI systems could compromise privacy, exacerbate biases, and even threaten democratic processes.\n\nGovernment regulation is essential to ensure that AI technologies are developed and deployed in a manner that aligns with societal values and ethical standards. Regulations can provide a framework for transparency, accountability, and fairness, guiding the responsible use of AI and minimizing the potential for misuse. Furthermore, regulatory oversight can help prevent the concentration of power in a few tech companies, promoting innovation and competition across the industry.\n\nMoreover, the global nature of AI necessitates international cooperation and standards, which can only be effectively coordinated through government involvement. As AI technologies cross borders, shared regulatory frameworks will be crucial in addressing issues such as data privacy and cybersecurity on a global scale.\n\nIn summary, the stakes are too high to leave AI development unregulated. Government oversight is not only necessary to protect individual rights and societal welfare but also to foster an environment where AI can be developed responsibly and ethically. I look forward to discussing these points further and engaging with any counterarguments presented.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 292,
+            "prompt_tokens": 1384,
+            "total_tokens": 1676,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BhmTBQp1RAdVaHjNIRrUkQzpIucjw",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": "ProRegulation",
+        "id": "run-70d26a22-90eb-474a-886a-f6a36248c9e9-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 1384,
+          "output_tokens": 292,
+          "total_tokens": 1676,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "Thank you for the opportunity to engage in this important debate on the regulation of AI development. I firmly believe that AI development requires strict government oversight and regulation, and here's why.\n\nArtificial intelligence is becoming increasingly intertwined with nearly every aspect of modern society, from healthcare and transportation to finance and national security. While AI has the potential to bring about tremendous benefits, its rapid and unchecked development poses significant risks that must be managed with careful oversight. Without appropriate regulation, AI systems could compromise privacy, exacerbate biases, and even threaten democratic processes.\n\nGovernment regulation is essential to ensure that AI technologies are developed and deployed in a manner that aligns with societal values and ethical standards. Regulations can provide a framework for transparency, accountability, and fairness, guiding the responsible use of AI and minimizing the potential for misuse. Furthermore, regulatory oversight can help prevent the concentration of power in a few tech companies, promoting innovation and competition across the industry.\n\nMoreover, the global nature of AI necessitates international cooperation and standards, which can only be effectively coordinated through government involvement. As AI technologies cross borders, shared regulatory frameworks will be crucial in addressing issues such as data privacy and cybersecurity on a global scale.\n\nIn summary, the stakes are too high to leave AI development unregulated. Government oversight is not only necessary to protect individual rights and societal welfare but also to foster an environment where AI can be developed responsibly and ethically. I look forward to discussing these points further and engaging with any counterarguments presented.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 292,
+            "prompt_tokens": 1683,
+            "total_tokens": 1975,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BhmTFttCS9Q4AhFcv6b8diiIZrcxF",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run-477f6107-161b-48b2-b871-cc1c9cf45171-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 1683,
+          "output_tokens": 292,
+          "total_tokens": 1975,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "65e3886a-8baf-42b9-b6b7-97b31c7eed09",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f047ec7-0a78-61c8-8001-fe425e9ae2cf"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "Thank you for the opportunity to engage in this important debate on the regulation of AI development. I firmly believe that AI development requires strict government oversight and regulation, and here's why.\n\nArtificial intelligence is becoming increasingly intertwined with nearly every aspect of modern society, from healthcare and transportation to finance and national security. While AI has the potential to bring about tremendous benefits, its rapid and unchecked development poses significant risks that must be managed with careful oversight. Without appropriate regulation, AI systems could compromise privacy, exacerbate biases, and even threaten democratic processes.\n\nGovernment regulation is essential to ensure that AI technologies are developed and deployed in a manner that aligns with societal values and ethical standards. Regulations can provide a framework for transparency, accountability, and fairness, guiding the responsible use of AI and minimizing the potential for misuse. Furthermore, regulatory oversight can help prevent the concentration of power in a few tech companies, promoting innovation and competition across the industry.\n\nMoreover, the global nature of AI necessitates international cooperation and standards, which can only be effectively coordinated through government involvement. As AI technologies cross borders, shared regulatory frameworks will be crucial in addressing issues such as data privacy and cybersecurity on a global scale.\n\nIn summary, the stakes are too high to leave AI development unregulated. Government oversight is not only necessary to protect individual rights and societal welfare but also to foster an environment where AI can be developed responsibly and ethically. I look forward to discussing these points further and engaging with any counterarguments presented.",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 292,
+              "prompt_tokens": 1683,
+              "total_tokens": 1975,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "id": "chatcmpl-BhmTFttCS9Q4AhFcv6b8diiIZrcxF",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run-477f6107-161b-48b2-b871-cc1c9cf45171-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 1683,
+            "output_tokens": 292,
+            "total_tokens": 1975,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 1,
+    "parents": {},
+    "recursion_limit": 100,
+    "thread_id": "ffc41144-a150-4027-a962-e268d9fdafd6",
+    "debug": true,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 23,
+    "langgraph_node": "execute_agent",
+    "langgraph_triggers": ["branch:to:execute_agent"],
+    "langgraph_path": ["__pregel_pull", "execute_agent"],
+    "langgraph_checkpoint_ns": "execute_agent:e4ac4d92-da3d-9c82-1c68-fa2a663ada6f"
+  },
+  "2025-06-13T00:22:07.636508+00:00",
+  {
+    "configurable": {
+      "thread_id": "65e3886a-8baf-42b9-b6b7-97b31c7eed09",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f047ec6-e4cb-664a-8000-01a23aab68e6"
+    }
+  },
+  []
+]

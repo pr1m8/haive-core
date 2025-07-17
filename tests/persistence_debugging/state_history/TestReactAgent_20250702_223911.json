@@ -1,0 +1,219 @@
+[
+  {
+    "messages": [
+      {
+        "content": "What tools do you have available?",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "faee0160-1a65-4661-a72e-d87c864da592",
+        "example": false
+      },
+      {
+        "content": "I have access to a variety of tools and capabilities to assist you:\n\n1. **Natural Language Processing (NLP):** I can understand and generate human-like text based on the input provided.\n\n2. **Information Retrieval:** I can provide information on a wide range of topics and answer factual questions.\n\n3. **Language Translation:** I can translate text between multiple languages.\n\n4. **Text Summarization:** I can summarize lengthy documents or text into concise versions.\n\n5. **Sentiment Analysis:** I can analyze the sentiment or tone behind a piece of text.\n\n6. **Question Answering:** I can provide answers to questions based on existing knowledge.\n\n7. **Creative Writing:** I can help generate stories, poems, or other creative text.\n\n8. **Code Writing and Debugging:** I can assist with writing code snippets and provide explanations for various programming concepts.\n\n9. **Conversational AI:** I can engage in general chat or assist with customer service tasks.\n\nIf you need help with a specific task or topic not mentioned above, please feel free to ask!",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 215,
+            "prompt_tokens": 14,
+            "total_tokens": 229,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--1676e5b6-3b2d-49ce-9821-5fc3221ca7ff-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 14,
+          "output_tokens": 215,
+          "total_tokens": 229,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "react_test_20250702_223909",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057b6e-6e5e-67c0-8001-6b85dbe1ed35"
+    }
+  },
+  {
+    "step": 1,
+    "debug": false,
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "I have access to a variety of tools and capabilities to assist you:\n\n1. **Natural Language Processing (NLP):** I can understand and generate human-like text based on the input provided.\n\n2. **Information Retrieval:** I can provide information on a wide range of topics and answer factual questions.\n\n3. **Language Translation:** I can translate text between multiple languages.\n\n4. **Text Summarization:** I can summarize lengthy documents or text into concise versions.\n\n5. **Sentiment Analysis:** I can analyze the sentiment or tone behind a piece of text.\n\n6. **Question Answering:** I can provide answers to questions based on existing knowledge.\n\n7. **Creative Writing:** I can help generate stories, poems, or other creative text.\n\n8. **Code Writing and Debugging:** I can assist with writing code snippets and provide explanations for various programming concepts.\n\n9. **Conversational AI:** I can engage in general chat or assist with customer service tasks.\n\nIf you need help with a specific task or topic not mentioned above, please feel free to ask!",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "logprobs": null,
+            "model_name": "gpt-4o-2024-08-06",
+            "token_usage": {
+              "total_tokens": 229,
+              "prompt_tokens": 14,
+              "completion_tokens": 215,
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              },
+              "completion_tokens_details": {
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "accepted_prediction_tokens": 0,
+                "rejected_prediction_tokens": 0
+              }
+            },
+            "finish_reason": "stop",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--1676e5b6-3b2d-49ce-9821-5fc3221ca7ff-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 14,
+            "output_tokens": 215,
+            "total_tokens": 229,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "parents": {},
+    "thread_id": "react_test_20250702_223909",
+    "checkpoint_mode": "sync",
+    "recursion_limit": 100
+  },
+  "2025-07-03T02:39:11.797634+00:00",
+  {
+    "configurable": {
+      "thread_id": "react_test_20250702_223909",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057b6e-5aad-6888-8000-535ca806ef7e"
+    }
+  },
+  []
+]

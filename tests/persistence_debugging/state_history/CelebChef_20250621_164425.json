@@ -1,0 +1,340 @@
+[
+  {
+    "messages": [
+      {
+        "content": "[@CelebChef]\nStats: 0 likes | 0 followers\nTrending: Nothing trending\nKeep it under 500 characters!",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "system",
+        "name": null,
+        "id": "1e5169dd-b5e6-41e2-ab38-2143ccba41c9"
+      },
+      {
+        "content": "\ud83d\udc26 New thread: \ud83d\ude05 Tried to make a souffl\u00e9... it's now a pancake. Chef life! \ud83d\udc68\u200d\ud83c\udf73 #CookingFail\nPlatform: twitter (max 280 chars)\nShare your thoughts! Go viral at 5 likes \ud83d\udd25",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "5156fecd-0733-4c1c-a43c-50a374afd85a",
+        "example": false
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "tool_calls": [
+            {
+              "id": "call_wxZnGblVRx3iBiYxG9Ap7U8z",
+              "function": {
+                "arguments": "{\"reply_to\": \"twitter\", \"content\": \"Oh, the souffl\u00e9 shuffle! It's the pancake's way of saying, \\\"I'm fluffy on the inside too!\\\" \ud83d\ude1c Embrace the bouncy surprise and drizzle some syrup or top with berries\u2014now you've got yourself a breakfast masterpiece! \ud83c\udf53\ud83e\udd5e #ChefLife #CookingFail\"}",
+                "name": "reply_to_post"
+              },
+              "type": "function"
+            },
+            {
+              "id": "call_P08LttzlfF9ZoeXpjdSUO5tv",
+              "function": {
+                "arguments": "{\"post_author\": \"twitter\", \"reason\": \"Celebrating the fun side of cooking fails!\"}",
+                "name": "like_post"
+              },
+              "type": "function"
+            },
+            {
+              "id": "call_zOt95ahwbs0rxPX9jBRzcq5y",
+              "function": {
+                "arguments": "{\"original_author\": \"twitter\", \"comment\": \"When souffl\u00e9 turns pancake, you know the kitchen's got a sense of humor! \ud83d\ude02\ud83d\udc68\u200d\ud83c\udf73\"}",
+                "name": "share_post"
+              },
+              "type": "function"
+            },
+            {
+              "id": "call_bjOtLJzRvVIXswyD1ozYyqX0",
+              "function": {
+                "arguments": "{\"reply_to\": \"twitter\", \"content\": \"Hey, at least it didn't turn into a pie! \ud83c\udf82 Next time, try the souffl\u00e9 serenade\u2014sing to it, maybe it'll rise! \ud83c\udfb6\"}",
+                "name": "reply_to_post"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 215,
+            "prompt_tokens": 265,
+            "total_tokens": 480,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "content_filter_results": {}
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--11eeee6c-e071-41e5-8afb-3993739d814d-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "reply_to_post",
+            "args": {
+              "reply_to": "twitter",
+              "content": "Oh, the souffl\u00e9 shuffle! It's the pancake's way of saying, \"I'm fluffy on the inside too!\" \ud83d\ude1c Embrace the bouncy surprise and drizzle some syrup or top with berries\u2014now you've got yourself a breakfast masterpiece! \ud83c\udf53\ud83e\udd5e #ChefLife #CookingFail"
+            },
+            "id": "call_wxZnGblVRx3iBiYxG9Ap7U8z",
+            "type": "tool_call"
+          },
+          {
+            "name": "like_post",
+            "args": {
+              "post_author": "twitter",
+              "reason": "Celebrating the fun side of cooking fails!"
+            },
+            "id": "call_P08LttzlfF9ZoeXpjdSUO5tv",
+            "type": "tool_call"
+          },
+          {
+            "name": "share_post",
+            "args": {
+              "original_author": "twitter",
+              "comment": "When souffl\u00e9 turns pancake, you know the kitchen's got a sense of humor! \ud83d\ude02\ud83d\udc68\u200d\ud83c\udf73"
+            },
+            "id": "call_zOt95ahwbs0rxPX9jBRzcq5y",
+            "type": "tool_call"
+          },
+          {
+            "name": "reply_to_post",
+            "args": {
+              "reply_to": "twitter",
+              "content": "Hey, at least it didn't turn into a pie! \ud83c\udf82 Next time, try the souffl\u00e9 serenade\u2014sing to it, maybe it'll rise! \ud83c\udfb6"
+            },
+            "id": "call_bjOtLJzRvVIXswyD1ozYyqX0",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 265,
+          "output_tokens": 215,
+          "total_tokens": 480,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "e391eb7f-f6dc-411c-bab0-5f02c4f11401",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04ee09-22bd-6579-8001-2989cd7a782c"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "",
+          "additional_kwargs": {
+            "tool_calls": [
+              {
+                "id": "call_wxZnGblVRx3iBiYxG9Ap7U8z",
+                "function": {
+                  "arguments": "{\"reply_to\": \"twitter\", \"content\": \"Oh, the souffl\u00e9 shuffle! It's the pancake's way of saying, \\\"I'm fluffy on the inside too!\\\" \ud83d\ude1c Embrace the bouncy surprise and drizzle some syrup or top with berries\u2014now you've got yourself a breakfast masterpiece! \ud83c\udf53\ud83e\udd5e #ChefLife #CookingFail\"}",
+                  "name": "reply_to_post"
+                },
+                "type": "function"
+              },
+              {
+                "id": "call_P08LttzlfF9ZoeXpjdSUO5tv",
+                "function": {
+                  "arguments": "{\"post_author\": \"twitter\", \"reason\": \"Celebrating the fun side of cooking fails!\"}",
+                  "name": "like_post"
+                },
+                "type": "function"
+              },
+              {
+                "id": "call_zOt95ahwbs0rxPX9jBRzcq5y",
+                "function": {
+                  "arguments": "{\"original_author\": \"twitter\", \"comment\": \"When souffl\u00e9 turns pancake, you know the kitchen's got a sense of humor! \ud83d\ude02\ud83d\udc68\u200d\ud83c\udf73\"}",
+                  "name": "share_post"
+                },
+                "type": "function"
+              },
+              {
+                "id": "call_bjOtLJzRvVIXswyD1ozYyqX0",
+                "function": {
+                  "arguments": "{\"reply_to\": \"twitter\", \"content\": \"Hey, at least it didn't turn into a pie! \ud83c\udf82 Next time, try the souffl\u00e9 serenade\u2014sing to it, maybe it'll rise! \ud83c\udfb6\"}",
+                  "name": "reply_to_post"
+                },
+                "type": "function"
+              }
+            ],
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 215,
+              "prompt_tokens": 265,
+              "total_tokens": 480,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "tool_calls",
+            "logprobs": null,
+            "content_filter_results": {}
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--11eeee6c-e071-41e5-8afb-3993739d814d-0",
+          "example": false,
+          "tool_calls": [
+            {
+              "name": "reply_to_post",
+              "args": {
+                "reply_to": "twitter",
+                "content": "Oh, the souffl\u00e9 shuffle! It's the pancake's way of saying, \"I'm fluffy on the inside too!\" \ud83d\ude1c Embrace the bouncy surprise and drizzle some syrup or top with berries\u2014now you've got yourself a breakfast masterpiece! \ud83c\udf53\ud83e\udd5e #ChefLife #CookingFail"
+              },
+              "id": "call_wxZnGblVRx3iBiYxG9Ap7U8z",
+              "type": "tool_call"
+            },
+            {
+              "name": "like_post",
+              "args": {
+                "post_author": "twitter",
+                "reason": "Celebrating the fun side of cooking fails!"
+              },
+              "id": "call_P08LttzlfF9ZoeXpjdSUO5tv",
+              "type": "tool_call"
+            },
+            {
+              "name": "share_post",
+              "args": {
+                "original_author": "twitter",
+                "comment": "When souffl\u00e9 turns pancake, you know the kitchen's got a sense of humor! \ud83d\ude02\ud83d\udc68\u200d\ud83c\udf73"
+              },
+              "id": "call_zOt95ahwbs0rxPX9jBRzcq5y",
+              "type": "tool_call"
+            },
+            {
+              "name": "reply_to_post",
+              "args": {
+                "reply_to": "twitter",
+                "content": "Hey, at least it didn't turn into a pie! \ud83c\udf82 Next time, try the souffl\u00e9 serenade\u2014sing to it, maybe it'll rise! \ud83c\udfb6"
+              },
+              "id": "call_bjOtLJzRvVIXswyD1ozYyqX0",
+              "type": "tool_call"
+            }
+          ],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 265,
+            "output_tokens": 215,
+            "total_tokens": 480,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 1,
+    "parents": {},
+    "thread_id": "f84ac1e0-8dd2-450b-b231-69ea5b4b3db9",
+    "debug": true,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 99,
+    "langgraph_node": "execute_agent",
+    "langgraph_triggers": ["branch:to:execute_agent"],
+    "langgraph_path": ["__pregel_pull", "execute_agent"],
+    "langgraph_checkpoint_ns": "execute_agent:9fc75912-eff0-b847-9f16-48e93770a708",
+    "recursion_limit": 50
+  },
+  "2025-06-21T20:44:48.047229+00:00",
+  {
+    "configurable": {
+      "thread_id": "e391eb7f-f6dc-411c-bab0-5f02c4f11401",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04ee09-1123-6fa9-8000-6e48a9f0f327"
+    }
+  },
+  []
+]

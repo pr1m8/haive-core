@@ -5,14 +5,6 @@ import os
 import sys
 from typing import Any
 
-# Set up logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-# Add the src directory to the path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-# Import the registry components
 from haive.core.registry.registy import (
     AbstractRegistry,
     register_graph,
@@ -21,6 +13,15 @@ from haive.core.registry.registy import (
     register_tool,
     registry_manager,
 )
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Add the src directory to the path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+# Import the registry components
 
 
 # Test basic registry functionality
@@ -87,7 +88,7 @@ def test_basic_registry():
 
     # Verify update
     assert registry.get("item1") == "Updated Value 1"
-    assert registry.get_metadata("item1")["updated"] == True
+    assert registry.get_metadata("item1")["updated"]
     updated_tags = registry.get_by_tag("updated")
     assert "item1" in updated_tags
     example_tags = registry.get_by_tag("example")

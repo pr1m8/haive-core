@@ -101,13 +101,11 @@ def test_database_system():
         if detected == expected_type:
             detection_success += 1
 
-
     # Test 2: Database Sources Registration
 
     try:
         db_stats = database_sources_module.get_database_sources_statistics()
         db_validation = database_sources_module.validate_database_sources()
-
 
         registration_success = db_validation and db_stats["total_database_sources"] >= 9
 
@@ -132,7 +130,6 @@ def test_database_system():
 
                 loading_method = source.get_loading_method()
                 loader_kwargs = source.get_loader_kwargs()
-
 
                 # Validate strategy-specific configuration
                 if strategy == LoadingStrategy.LOAD_AND_SPLIT:

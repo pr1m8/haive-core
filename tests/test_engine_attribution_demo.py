@@ -5,7 +5,6 @@ This demo shows how engine_name is automatically added to AIMessage.additional_k
 when messages are processed through EngineNode.
 """
 
-import asyncio
 import logging
 from typing import Any, Dict, List
 
@@ -13,7 +12,6 @@ from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from langgraph.graph import StateGraph
 from pydantic import Field
 
-from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.graph.node.engine_node import EngineNodeConfig
 from haive.core.graph.node.message_transformation import (
     MessageTransformationNodeConfig,
@@ -170,8 +168,10 @@ async def run_demo():
         engine_count = {}
         for msg in final_state.messages + final_state.analysis_messages:
             if isinstance(msg, AIMessage) and hasattr(msg, "additional_kwargs"):
-                engine_name = msg.additional_kwargs.get("engine_name", "unknown")
-                engine_count[engine_name] = engine_count.get(engine_name, 0) + 1
+                engine_name = msg.additional_kwargs.get(
+                    "engine_name", "unknown")
+                engine_count[engine_name] = engine_count.get(
+                    engine_name, 0) + 1
 
         print("\n📊 Message Count by Engine:")
         for engine, count in engine_count.items():
@@ -206,14 +206,14 @@ def test_direct_attribution():
         content="Test response", additional_kwargs={"custom_field": "value"}
     )
 
-    print(f"\n📝 Original Message:")
+    print("\n📝 Original Message:"e: ")
     print(f"   Content: {original_msg.content}")
     print(f"   Additional kwargs: {original_msg.additional_kwargs}")
 
     # Add attribution
     attributed_msg = node._add_engine_attribution_to_message(original_msg)
 
-    print(f"\n✅ After Attribution:")
+    print("\n✅ After Attribution:":")
     print(f"   Content: {attributed_msg.content}")
     print(f"   Additional kwargs: {attributed_msg.additional_kwargs}")
     print(

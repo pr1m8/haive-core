@@ -1,0 +1,109 @@
+[
+  {
+    "messages": [
+      {
+        "content": "First message",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "71062d77-2826-4687-b5f8-f108555a63f5",
+        "example": false
+      },
+      {
+        "content": "Processed 1 previous messages",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "45f99bb6-37c7-4e9d-b8ac-8b38aec5089e",
+        "example": false
+      },
+      {
+        "content": "Second message",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "6b39fe20-99b8-420d-b378-ad493d13f8df",
+        "example": false
+      },
+      {
+        "content": "Processed 3 previous messages",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "01aa7134-e62d-4fdd-97ce-3ca27bfae0c3",
+        "example": false
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "persistence-test-123",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f052ccd-981e-676b-8004-432094a919df"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "process": {
+        "messages": [
+          {
+            "content": "First message",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "71062d77-2826-4687-b5f8-f108555a63f5",
+            "example": false
+          },
+          {
+            "content": "Processed 1 previous messages",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "45f99bb6-37c7-4e9d-b8ac-8b38aec5089e",
+            "example": false
+          },
+          {
+            "content": "Second message",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "6b39fe20-99b8-420d-b378-ad493d13f8df",
+            "example": false
+          },
+          {
+            "content": "Processed 3 previous messages",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "01aa7134-e62d-4fdd-97ce-3ca27bfae0c3",
+            "example": false
+          }
+        ]
+      }
+    },
+    "step": 4,
+    "parents": {},
+    "thread_id": "persistence-test-123",
+    "debug": false,
+    "checkpoint_mode": "sync"
+  },
+  "2025-06-26T20:33:42.446028+00:00",
+  {
+    "configurable": {
+      "thread_id": "persistence-test-123",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f052ccd-981b-6648-8003-86e5316d53ec"
+    }
+  },
+  []
+]

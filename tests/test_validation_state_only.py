@@ -5,9 +5,6 @@ import sys
 
 import pytest
 
-# Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../src"))
-
 from haive.core.schema.prebuilt.tools.validation_state import (
     RouteRecommendation,
     ToolValidationResult,
@@ -15,6 +12,9 @@ from haive.core.schema.prebuilt.tools.validation_state import (
     ValidationStateManager,
     ValidationStatus,
 )
+
+# Add src to path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../src"))
 
 
 class TestValidationState:

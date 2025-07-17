@@ -136,7 +136,7 @@ def test_load_project_env_files(monkeypatch, tmp_path):
                 del os.environ[key]
 
         # Load project env files
-        loaded_vars = load_project_env_files()
+        load_project_env_files()
 
         # Check if variables were loaded in correct priority order
         assert os.environ.get("ROOT_VAR") == "root_value"

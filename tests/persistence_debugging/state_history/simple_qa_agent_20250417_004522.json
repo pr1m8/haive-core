@@ -1,0 +1,58 @@
+[
+  {
+    "contents": "Marie Curie was a Polish-born physicist and chemist known for her pioneering research on radioactivity.",
+    "qas": {
+      "qas": [
+        {
+          "question": "What is the role of an AI assistant?",
+          "answer": "Generating questions and answers from text."
+        },
+        {
+          "question": "What are the specialties of the AI assistant?",
+          "answer": "The AI assistant specializes in generating questions and answers from text."
+        }
+      ]
+    },
+    "runnable_config": {},
+    "messages": []
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "ee85a717-1b8f-4f56-9c31-184707e36f3f",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f01b46c-5ac7-6537-8001-e5e5c73fe649"
+    }
+  },
+  {
+    "step": 1,
+    "source": "loop",
+    "writes": {
+      "process": {
+        "qas": {
+          "qas": [
+            {
+              "question": "What is the role of an AI assistant?",
+              "answer": "Generating questions and answers from text."
+            },
+            {
+              "question": "What are the specialties of the AI assistant?",
+              "answer": "The AI assistant specializes in generating questions and answers from text."
+            }
+          ]
+        }
+      }
+    },
+    "parents": {},
+    "thread_id": "ee85a717-1b8f-4f56-9c31-184707e36f3f"
+  },
+  "2025-04-17T04:45:22.655960+00:00",
+  {
+    "configurable": {
+      "thread_id": "ee85a717-1b8f-4f56-9c31-184707e36f3f",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f01b46c-5a3c-6752-8000-6eb21a48e415"
+    }
+  },
+  []
+]

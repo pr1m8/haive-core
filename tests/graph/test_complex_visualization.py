@@ -180,7 +180,8 @@ def hierarchical_graph(mock_engines, validation_tools):
     prompt_construction.add_edge("prompt_assembly", END)
 
     # Add nodes to generation
-    generation.add_node("prompt_builder", prompt_construction)  # Add subgraph as node
+    # Add subgraph as node
+    generation.add_node("prompt_builder", prompt_construction)
 
     generation.add_node(
         "generator",

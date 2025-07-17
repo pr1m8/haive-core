@@ -1,0 +1,52 @@
+[
+  {
+    "__shared_fields__": [],
+    "__reducer_fields__": {
+      "messages": {
+        "__function__": true,
+        "name": "_add_messages",
+        "module": "langgraph.graph.message"
+      }
+    },
+    "__name__": "Postgres_Test_4Eda73BaState",
+    "messages": [
+      {
+        "content": "Hello, my name is PostgresUser.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "9e723df7-6a75-476c-b6c1-f3601cb74afe",
+        "example": false
+      }
+    ],
+    "runnable_config": {}
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "postgres_thread_c9563ed1",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f01c428-6dfd-6f3a-8001-08958fb50a0c"
+    }
+  },
+  {
+    "step": 1,
+    "source": "loop",
+    "writes": {
+      "simple_agent_node": null
+    },
+    "parents": {},
+    "thread_id": "postgres_thread_c9563ed1",
+    "recursion_limit": 200
+  },
+  "2025-04-18T10:47:30.472316+00:00",
+  {
+    "configurable": {
+      "thread_id": "postgres_thread_c9563ed1",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f01c428-6df8-6e79-8000-86cc84b8bf67"
+    }
+  },
+  []
+]

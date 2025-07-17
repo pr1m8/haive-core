@@ -9,9 +9,6 @@ This script demonstrates the problems with:
 """
 
 import sys
-
-sys.path.insert(0, "/home/will/Projects/haive/backend/haive")
-
 from typing import Any, Dict, List, Optional
 
 from haive.agents.simple.agent import SimpleAgent
@@ -20,9 +17,12 @@ from pydantic import Field
 
 from haive.core.engine.llm.factories.litellm_factory import LiteLLMFactory
 from haive.core.schema.agent_schema_composer import AgentSchemaComposer, BuildMode
+from haive.core.schema.state_schema import StateSchema
+
+sys.path.insert(0, "/home/will/Projects/haive/backend/haive")
+
 
 # Core imports
-from haive.core.schema.state_schema import StateSchema
 
 
 class PlannerState(StateSchema):

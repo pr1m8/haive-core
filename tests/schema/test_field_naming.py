@@ -5,8 +5,6 @@ Test field naming utilities.
 
 import sys
 
-sys.path.insert(0, "/home/will/Projects/haive/backend/haive")
-
 from pydantic import BaseModel
 
 from haive.core.schema.field_utils import (
@@ -15,6 +13,8 @@ from haive.core.schema.field_utils import (
     field_name,
     get_field_info_from_model,
 )
+
+sys.path.insert(0, "/home/will/Projects/haive/backend/haive")
 
 
 # Test models

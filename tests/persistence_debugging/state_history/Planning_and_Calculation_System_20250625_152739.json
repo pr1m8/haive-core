@@ -1,0 +1,1696 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Create a plan for a day trip, then calculate how many hours we'll need if we spend 2 hours at each location",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "93c621f1-5576-4e3c-b47d-0d479793dfcd",
+        "example": false
+      },
+      {
+        "content": "Certainly! Here's a plan for a day trip:\n\n### Day Trip Itinerary\n\n1. **Location A: City Park**\n   - Spend time enjoying the natural beauty, walking trails, and perhaps have a picnic.\n   - Time spent: 2 hours\n\n2. **Location B: History Museum**\n   - Explore the exhibits and learn about the local history and culture.\n   - Time spent: 2 hours\n\n3. **Location C: Art Gallery**\n   - Admire contemporary artworks and perhaps participate in a workshop.\n   - Time spent: 2 hours\n\n4. **Location D: Local Restaurant**\n   - Enjoy a meal and experience local cuisine.\n   - Time spent: 2 hours\n\n### Calculation of Total Hours Needed\n\nSince we plan to spend 2 hours at each location and there are 4 locations, I'll calculate the total time needed using the addition tool. \n\nLet's calculate:\n- Total hours at all locations = 4 locations * 2 hours per location",
+        "additional_kwargs": {
+          "tool_calls": [
+            {
+              "id": "call_FLgiIZBPr3JOpAetp3GwTrrS",
+              "function": {
+                "arguments": "{\"a\":2,\"b\":2}",
+                "name": "add"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 219,
+            "prompt_tokens": 71,
+            "total_tokens": 290,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--68c672ec-1af9-4e32-8fe5-68a0d0269e8b-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "add",
+            "args": {
+              "a": 2,
+              "b": 2
+            },
+            "id": "call_FLgiIZBPr3JOpAetp3GwTrrS",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 71,
+          "output_tokens": 219,
+          "total_tokens": 290,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "4",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "add",
+        "id": "04d3c40f-a43b-4843-871a-cbd8513e2122",
+        "tool_call_id": "call_FLgiIZBPr3JOpAetp3GwTrrS",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "tool_calls": [
+            {
+              "id": "call_HgUmEshtTEF4poV8VM3SN6kF",
+              "function": {
+                "arguments": "{\"a\":4,\"b\":2}",
+                "name": "add"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 18,
+            "prompt_tokens": 299,
+            "total_tokens": 317,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "content_filter_results": {}
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--5bd6a095-928e-4684-9da0-1e01129e63a6-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "add",
+            "args": {
+              "a": 4,
+              "b": 2
+            },
+            "id": "call_HgUmEshtTEF4poV8VM3SN6kF",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 299,
+          "output_tokens": 18,
+          "total_tokens": 317,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "6",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "add",
+        "id": "223eedf1-373e-4e66-9358-66863d68d4ff",
+        "tool_call_id": "call_HgUmEshtTEF4poV8VM3SN6kF",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "tool_calls": [
+            {
+              "id": "call_FvujOYFlhj20tcC9p2pHP13F",
+              "function": {
+                "arguments": "{\"a\":6,\"b\":2}",
+                "name": "add"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 18,
+            "prompt_tokens": 324,
+            "total_tokens": 342,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "content_filter_results": {}
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--0d6bfc4c-fc54-4656-9dd8-a54e83cf2d4f-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "add",
+            "args": {
+              "a": 6,
+              "b": 2
+            },
+            "id": "call_FvujOYFlhj20tcC9p2pHP13F",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 324,
+          "output_tokens": 18,
+          "total_tokens": 342,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "8",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "add",
+        "id": "1e28e6a0-c7b7-4d53-a024-1beb0bb976f7",
+        "tool_call_id": "call_FvujOYFlhj20tcC9p2pHP13F",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "The total time needed for the day trip, spending 2 hours at each of the 4 locations, is 8 hours.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 28,
+            "prompt_tokens": 349,
+            "total_tokens": 377,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--81216c13-f7a6-4133-a499-f9bdc57ff85c-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 349,
+          "output_tokens": 28,
+          "total_tokens": 377,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ],
+    "tools": [],
+    "tool_routes": {},
+    "name_attrs": ["name", "__name__", "func_name"],
+    "content": null,
+    "output_schemas": {},
+    "engine_route_config": {
+      "llm": ["langchain_tool", "function", "pydantic_model"],
+      "aug_llm": ["langchain_tool", "function", "pydantic_model"],
+      "retriever": ["retriever"],
+      "parser": ["pydantic_model"]
+    },
+    "plan": {
+      "steps": [
+        "Decide on a destination for the day trip.",
+        "Research and list 3-4 popular tourist attractions or locations to visit in the chosen destination.",
+        "Plan the sequence of visiting each location to maximize time.",
+        "Allocate 2 hours of visit time for each location.",
+        "Calculate travel time between locations and returning home."
+      ]
+    },
+    "engines": {
+      "aug_llm_c26a9e5e": {
+        "id": "fc0bc4ab5295410aa482d3ef2d3a6abd",
+        "name": "aug_llm_c26a9e5e",
+        "engine_type": "EngineType.LLM"
+      },
+      "main": {
+        "id": "b74ed9dbe3204a8d894c65aa86827d71",
+        "name": "aug_llm_4ebf9db4",
+        "engine_type": "llm",
+        "version": "1.0.0",
+        "metadata": {
+          "tool_names": ["add"],
+          "has_basemodel_tools": false,
+          "basemodel_tool_count": 0,
+          "tool_name_mapping": {
+            "add": "add"
+          }
+        },
+        "tool_routes": {
+          "add": "langchain_tool"
+        },
+        "tool_metadata": {
+          "add": {
+            "tool_type": "BaseTool",
+            "is_instance": true
+          }
+        },
+        "tools_dict": {},
+        "routed_tools": [],
+        "llm_config": {
+          "provider": "azure",
+          "model": "gpt-4o",
+          "name": "gpt-4o",
+          "api_key": "**********",
+          "cache_enabled": true,
+          "cache_ttl": 300,
+          "extra_params": {},
+          "debug": false
+        },
+        "prompt_template": {
+          "input_variables": [],
+          "optional_variables": ["messages"],
+          "partial_variables": {
+            "messages": []
+          }
+        },
+        "messages_placeholder_name": "messages",
+        "add_messages_placeholder": true,
+        "force_messages_optional": true,
+        "example_separator": "\n\n",
+        "tools": [],
+        "schemas": [],
+        "pydantic_tools": [],
+        "use_tool_for_format_instructions": false,
+        "tool_is_base_model": false,
+        "force_tool_use": false,
+        "tool_choice_mode": "auto",
+        "parse_raw_output": false,
+        "include_format_instructions": true,
+        "tool_kwargs": {},
+        "bind_tools_kwargs": {
+          "tool_choice": "auto"
+        },
+        "bind_tools_config": {},
+        "runtime_options": {},
+        "partial_variables": {},
+        "optional_variables": [],
+        "uses_messages_field": true
+      },
+      "aug_llm_4ebf9db4": {
+        "id": "b74ed9dbe3204a8d894c65aa86827d71",
+        "name": "aug_llm_4ebf9db4",
+        "engine_type": "llm",
+        "version": "1.0.0",
+        "metadata": {
+          "tool_names": ["add"],
+          "has_basemodel_tools": false,
+          "basemodel_tool_count": 0,
+          "tool_name_mapping": {
+            "add": "add"
+          }
+        },
+        "tool_routes": {
+          "add": "langchain_tool"
+        },
+        "tool_metadata": {
+          "add": {
+            "tool_type": "BaseTool",
+            "is_instance": true
+          }
+        },
+        "tools_dict": {},
+        "routed_tools": [],
+        "llm_config": {
+          "provider": "azure",
+          "model": "gpt-4o",
+          "name": "gpt-4o",
+          "api_key": "**********",
+          "cache_enabled": true,
+          "cache_ttl": 300,
+          "extra_params": {},
+          "debug": false
+        },
+        "prompt_template": {
+          "input_variables": [],
+          "optional_variables": ["messages"],
+          "partial_variables": {
+            "messages": []
+          }
+        },
+        "messages_placeholder_name": "messages",
+        "add_messages_placeholder": true,
+        "force_messages_optional": true,
+        "example_separator": "\n\n",
+        "tools": [],
+        "schemas": [],
+        "pydantic_tools": [],
+        "use_tool_for_format_instructions": false,
+        "tool_is_base_model": false,
+        "force_tool_use": false,
+        "tool_choice_mode": "auto",
+        "parse_raw_output": false,
+        "include_format_instructions": true,
+        "tool_kwargs": {},
+        "bind_tools_kwargs": {
+          "tool_choice": "auto"
+        },
+        "bind_tools_config": {},
+        "runtime_options": {},
+        "partial_variables": {},
+        "optional_variables": [],
+        "uses_messages_field": true
+      }
+    },
+    "meta_state": {
+      "active_agent_id": null,
+      "active_agent_name": null,
+      "agent_outputs": {},
+      "agent_execution_history": [],
+      "workflow_metadata": {},
+      "workflow_stage": null,
+      "shared_context": {},
+      "last_error": null,
+      "error_count": 0,
+      "should_continue": true,
+      "next_agent_hint": null
+    },
+    "active_agent_id": null,
+    "agent_outputs": {
+      "d480946c19134bc399e0123413dda8df": {
+        "plan": {
+          "steps": [
+            "Decide on a destination for the day trip.",
+            "Research and list 3-4 popular tourist attractions or locations to visit in the chosen destination.",
+            "Plan the sequence of visiting each location to maximize time.",
+            "Allocate 2 hours of visit time for each location.",
+            "Calculate travel time between locations and returning home."
+          ]
+        }
+      },
+      "a04f70fef3a1441e845c5b919a57cf23": {
+        "messages": [
+          {
+            "content": "Create a plan for a day trip, then calculate how many hours we'll need if we spend 2 hours at each location",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "93c621f1-5576-4e3c-b47d-0d479793dfcd"
+          },
+          {
+            "content": "Certainly! Here's a plan for a day trip:\n\n### Day Trip Itinerary\n\n1. **Location A: City Park**\n   - Spend time enjoying the natural beauty, walking trails, and perhaps have a picnic.\n   - Time spent: 2 hours\n\n2. **Location B: History Museum**\n   - Explore the exhibits and learn about the local history and culture.\n   - Time spent: 2 hours\n\n3. **Location C: Art Gallery**\n   - Admire contemporary artworks and perhaps participate in a workshop.\n   - Time spent: 2 hours\n\n4. **Location D: Local Restaurant**\n   - Enjoy a meal and experience local cuisine.\n   - Time spent: 2 hours\n\n### Calculation of Total Hours Needed\n\nSince we plan to spend 2 hours at each location and there are 4 locations, I'll calculate the total time needed using the addition tool. \n\nLet's calculate:\n- Total hours at all locations = 4 locations * 2 hours per location",
+            "additional_kwargs": {
+              "tool_calls": [
+                {
+                  "id": "call_FLgiIZBPr3JOpAetp3GwTrrS",
+                  "function": {
+                    "arguments": "{\"a\":2,\"b\":2}",
+                    "name": "add"
+                  },
+                  "type": "function"
+                }
+              ],
+              "refusal": null
+            },
+            "response_metadata": {
+              "token_usage": {
+                "completion_tokens": 219,
+                "prompt_tokens": 71,
+                "total_tokens": 290,
+                "completion_tokens_details": {
+                  "accepted_prediction_tokens": 0,
+                  "audio_tokens": 0,
+                  "reasoning_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                },
+                "prompt_tokens_details": {
+                  "audio_tokens": 0,
+                  "cached_tokens": 0
+                }
+              },
+              "model_name": "gpt-4o-2024-08-06",
+              "system_fingerprint": "fp_ee1d74bde0",
+              "prompt_filter_results": [
+                {
+                  "prompt_index": 0,
+                  "content_filter_results": {
+                    "hate": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "self_harm": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "sexual": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "violence": {
+                      "filtered": false,
+                      "severity": "safe"
+                    }
+                  }
+                }
+              ],
+              "finish_reason": "tool_calls",
+              "logprobs": null,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            },
+            "type": "ai",
+            "name": null,
+            "id": "run--68c672ec-1af9-4e32-8fe5-68a0d0269e8b-0"
+          },
+          {
+            "content": "4",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "tool",
+            "name": "add",
+            "id": "04d3c40f-a43b-4843-871a-cbd8513e2122"
+          },
+          {
+            "content": "",
+            "additional_kwargs": {
+              "tool_calls": [
+                {
+                  "id": "call_HgUmEshtTEF4poV8VM3SN6kF",
+                  "function": {
+                    "arguments": "{\"a\":4,\"b\":2}",
+                    "name": "add"
+                  },
+                  "type": "function"
+                }
+              ],
+              "refusal": null
+            },
+            "response_metadata": {
+              "token_usage": {
+                "completion_tokens": 18,
+                "prompt_tokens": 299,
+                "total_tokens": 317,
+                "completion_tokens_details": {
+                  "accepted_prediction_tokens": 0,
+                  "audio_tokens": 0,
+                  "reasoning_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                },
+                "prompt_tokens_details": {
+                  "audio_tokens": 0,
+                  "cached_tokens": 0
+                }
+              },
+              "model_name": "gpt-4o-2024-08-06",
+              "system_fingerprint": "fp_ee1d74bde0",
+              "prompt_filter_results": [
+                {
+                  "prompt_index": 0,
+                  "content_filter_results": {
+                    "hate": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "self_harm": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "sexual": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "violence": {
+                      "filtered": false,
+                      "severity": "safe"
+                    }
+                  }
+                }
+              ],
+              "finish_reason": "tool_calls",
+              "logprobs": null,
+              "content_filter_results": {}
+            },
+            "type": "ai",
+            "name": null,
+            "id": "run--5bd6a095-928e-4684-9da0-1e01129e63a6-0"
+          },
+          {
+            "content": "6",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "tool",
+            "name": "add",
+            "id": "223eedf1-373e-4e66-9358-66863d68d4ff"
+          },
+          {
+            "content": "",
+            "additional_kwargs": {
+              "tool_calls": [
+                {
+                  "id": "call_FvujOYFlhj20tcC9p2pHP13F",
+                  "function": {
+                    "arguments": "{\"a\":6,\"b\":2}",
+                    "name": "add"
+                  },
+                  "type": "function"
+                }
+              ],
+              "refusal": null
+            },
+            "response_metadata": {
+              "token_usage": {
+                "completion_tokens": 18,
+                "prompt_tokens": 324,
+                "total_tokens": 342,
+                "completion_tokens_details": {
+                  "accepted_prediction_tokens": 0,
+                  "audio_tokens": 0,
+                  "reasoning_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                },
+                "prompt_tokens_details": {
+                  "audio_tokens": 0,
+                  "cached_tokens": 0
+                }
+              },
+              "model_name": "gpt-4o-2024-08-06",
+              "system_fingerprint": "fp_ee1d74bde0",
+              "prompt_filter_results": [
+                {
+                  "prompt_index": 0,
+                  "content_filter_results": {
+                    "hate": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "self_harm": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "sexual": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "violence": {
+                      "filtered": false,
+                      "severity": "safe"
+                    }
+                  }
+                }
+              ],
+              "finish_reason": "tool_calls",
+              "logprobs": null,
+              "content_filter_results": {}
+            },
+            "type": "ai",
+            "name": null,
+            "id": "run--0d6bfc4c-fc54-4656-9dd8-a54e83cf2d4f-0"
+          },
+          {
+            "content": "8",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "tool",
+            "name": "add",
+            "id": "1e28e6a0-c7b7-4d53-a024-1beb0bb976f7"
+          },
+          {
+            "content": "The total time needed for the day trip, spending 2 hours at each of the 4 locations, is 8 hours.",
+            "additional_kwargs": {
+              "refusal": null
+            },
+            "response_metadata": {
+              "token_usage": {
+                "completion_tokens": 28,
+                "prompt_tokens": 349,
+                "total_tokens": 377,
+                "completion_tokens_details": {
+                  "accepted_prediction_tokens": 0,
+                  "audio_tokens": 0,
+                  "reasoning_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                },
+                "prompt_tokens_details": {
+                  "audio_tokens": 0,
+                  "cached_tokens": 0
+                }
+              },
+              "model_name": "gpt-4o-2024-08-06",
+              "system_fingerprint": "fp_ee1d74bde0",
+              "prompt_filter_results": [
+                {
+                  "prompt_index": 0,
+                  "content_filter_results": {
+                    "hate": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "self_harm": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "sexual": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "violence": {
+                      "filtered": false,
+                      "severity": "safe"
+                    }
+                  }
+                }
+              ],
+              "finish_reason": "stop",
+              "logprobs": null,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            },
+            "type": "ai",
+            "name": null,
+            "id": "run--81216c13-f7a6-4133-a499-f9bdc57ff85c-0"
+          }
+        ]
+      }
+    }
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "34d2d6c5-446f-4897-93a3-8cdc63734128",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f051fa7-507f-62b4-8002-7707630c45be"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "React Agent": {
+        "messages": [
+          {
+            "content": "Create a plan for a day trip, then calculate how many hours we'll need if we spend 2 hours at each location",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "93c621f1-5576-4e3c-b47d-0d479793dfcd",
+            "example": false
+          },
+          {
+            "content": "Certainly! Here's a plan for a day trip:\n\n### Day Trip Itinerary\n\n1. **Location A: City Park**\n   - Spend time enjoying the natural beauty, walking trails, and perhaps have a picnic.\n   - Time spent: 2 hours\n\n2. **Location B: History Museum**\n   - Explore the exhibits and learn about the local history and culture.\n   - Time spent: 2 hours\n\n3. **Location C: Art Gallery**\n   - Admire contemporary artworks and perhaps participate in a workshop.\n   - Time spent: 2 hours\n\n4. **Location D: Local Restaurant**\n   - Enjoy a meal and experience local cuisine.\n   - Time spent: 2 hours\n\n### Calculation of Total Hours Needed\n\nSince we plan to spend 2 hours at each location and there are 4 locations, I'll calculate the total time needed using the addition tool. \n\nLet's calculate:\n- Total hours at all locations = 4 locations * 2 hours per location",
+            "additional_kwargs": {
+              "tool_calls": [
+                {
+                  "id": "call_FLgiIZBPr3JOpAetp3GwTrrS",
+                  "function": {
+                    "arguments": "{\"a\":2,\"b\":2}",
+                    "name": "add"
+                  },
+                  "type": "function"
+                }
+              ],
+              "refusal": null
+            },
+            "response_metadata": {
+              "token_usage": {
+                "completion_tokens": 219,
+                "prompt_tokens": 71,
+                "total_tokens": 290,
+                "completion_tokens_details": {
+                  "accepted_prediction_tokens": 0,
+                  "audio_tokens": 0,
+                  "reasoning_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                },
+                "prompt_tokens_details": {
+                  "audio_tokens": 0,
+                  "cached_tokens": 0
+                }
+              },
+              "model_name": "gpt-4o-2024-08-06",
+              "system_fingerprint": "fp_ee1d74bde0",
+              "prompt_filter_results": [
+                {
+                  "prompt_index": 0,
+                  "content_filter_results": {
+                    "hate": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "self_harm": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "sexual": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "violence": {
+                      "filtered": false,
+                      "severity": "safe"
+                    }
+                  }
+                }
+              ],
+              "finish_reason": "tool_calls",
+              "logprobs": null,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            },
+            "type": "ai",
+            "name": null,
+            "id": "run--68c672ec-1af9-4e32-8fe5-68a0d0269e8b-0",
+            "example": false,
+            "tool_calls": [
+              {
+                "name": "add",
+                "args": {
+                  "a": 2,
+                  "b": 2
+                },
+                "id": "call_FLgiIZBPr3JOpAetp3GwTrrS",
+                "type": "tool_call"
+              }
+            ],
+            "invalid_tool_calls": [],
+            "usage_metadata": {
+              "input_tokens": 71,
+              "output_tokens": 219,
+              "total_tokens": 290,
+              "input_token_details": {
+                "audio": 0,
+                "cache_read": 0
+              },
+              "output_token_details": {
+                "audio": 0,
+                "reasoning": 0
+              }
+            }
+          },
+          {
+            "content": "4",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "tool",
+            "name": "add",
+            "id": "04d3c40f-a43b-4843-871a-cbd8513e2122",
+            "tool_call_id": "call_FLgiIZBPr3JOpAetp3GwTrrS",
+            "artifact": null,
+            "status": "success"
+          },
+          {
+            "content": "",
+            "additional_kwargs": {
+              "tool_calls": [
+                {
+                  "id": "call_HgUmEshtTEF4poV8VM3SN6kF",
+                  "function": {
+                    "arguments": "{\"a\":4,\"b\":2}",
+                    "name": "add"
+                  },
+                  "type": "function"
+                }
+              ],
+              "refusal": null
+            },
+            "response_metadata": {
+              "token_usage": {
+                "completion_tokens": 18,
+                "prompt_tokens": 299,
+                "total_tokens": 317,
+                "completion_tokens_details": {
+                  "accepted_prediction_tokens": 0,
+                  "audio_tokens": 0,
+                  "reasoning_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                },
+                "prompt_tokens_details": {
+                  "audio_tokens": 0,
+                  "cached_tokens": 0
+                }
+              },
+              "model_name": "gpt-4o-2024-08-06",
+              "system_fingerprint": "fp_ee1d74bde0",
+              "prompt_filter_results": [
+                {
+                  "prompt_index": 0,
+                  "content_filter_results": {
+                    "hate": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "self_harm": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "sexual": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "violence": {
+                      "filtered": false,
+                      "severity": "safe"
+                    }
+                  }
+                }
+              ],
+              "finish_reason": "tool_calls",
+              "logprobs": null,
+              "content_filter_results": {}
+            },
+            "type": "ai",
+            "name": null,
+            "id": "run--5bd6a095-928e-4684-9da0-1e01129e63a6-0",
+            "example": false,
+            "tool_calls": [
+              {
+                "name": "add",
+                "args": {
+                  "a": 4,
+                  "b": 2
+                },
+                "id": "call_HgUmEshtTEF4poV8VM3SN6kF",
+                "type": "tool_call"
+              }
+            ],
+            "invalid_tool_calls": [],
+            "usage_metadata": {
+              "input_tokens": 299,
+              "output_tokens": 18,
+              "total_tokens": 317,
+              "input_token_details": {
+                "audio": 0,
+                "cache_read": 0
+              },
+              "output_token_details": {
+                "audio": 0,
+                "reasoning": 0
+              }
+            }
+          },
+          {
+            "content": "6",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "tool",
+            "name": "add",
+            "id": "223eedf1-373e-4e66-9358-66863d68d4ff",
+            "tool_call_id": "call_HgUmEshtTEF4poV8VM3SN6kF",
+            "artifact": null,
+            "status": "success"
+          },
+          {
+            "content": "",
+            "additional_kwargs": {
+              "tool_calls": [
+                {
+                  "id": "call_FvujOYFlhj20tcC9p2pHP13F",
+                  "function": {
+                    "arguments": "{\"a\":6,\"b\":2}",
+                    "name": "add"
+                  },
+                  "type": "function"
+                }
+              ],
+              "refusal": null
+            },
+            "response_metadata": {
+              "token_usage": {
+                "completion_tokens": 18,
+                "prompt_tokens": 324,
+                "total_tokens": 342,
+                "completion_tokens_details": {
+                  "accepted_prediction_tokens": 0,
+                  "audio_tokens": 0,
+                  "reasoning_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                },
+                "prompt_tokens_details": {
+                  "audio_tokens": 0,
+                  "cached_tokens": 0
+                }
+              },
+              "model_name": "gpt-4o-2024-08-06",
+              "system_fingerprint": "fp_ee1d74bde0",
+              "prompt_filter_results": [
+                {
+                  "prompt_index": 0,
+                  "content_filter_results": {
+                    "hate": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "self_harm": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "sexual": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "violence": {
+                      "filtered": false,
+                      "severity": "safe"
+                    }
+                  }
+                }
+              ],
+              "finish_reason": "tool_calls",
+              "logprobs": null,
+              "content_filter_results": {}
+            },
+            "type": "ai",
+            "name": null,
+            "id": "run--0d6bfc4c-fc54-4656-9dd8-a54e83cf2d4f-0",
+            "example": false,
+            "tool_calls": [
+              {
+                "name": "add",
+                "args": {
+                  "a": 6,
+                  "b": 2
+                },
+                "id": "call_FvujOYFlhj20tcC9p2pHP13F",
+                "type": "tool_call"
+              }
+            ],
+            "invalid_tool_calls": [],
+            "usage_metadata": {
+              "input_tokens": 324,
+              "output_tokens": 18,
+              "total_tokens": 342,
+              "input_token_details": {
+                "audio": 0,
+                "cache_read": 0
+              },
+              "output_token_details": {
+                "audio": 0,
+                "reasoning": 0
+              }
+            }
+          },
+          {
+            "content": "8",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "tool",
+            "name": "add",
+            "id": "1e28e6a0-c7b7-4d53-a024-1beb0bb976f7",
+            "tool_call_id": "call_FvujOYFlhj20tcC9p2pHP13F",
+            "artifact": null,
+            "status": "success"
+          },
+          {
+            "content": "The total time needed for the day trip, spending 2 hours at each of the 4 locations, is 8 hours.",
+            "additional_kwargs": {
+              "refusal": null
+            },
+            "response_metadata": {
+              "token_usage": {
+                "completion_tokens": 28,
+                "prompt_tokens": 349,
+                "total_tokens": 377,
+                "completion_tokens_details": {
+                  "accepted_prediction_tokens": 0,
+                  "audio_tokens": 0,
+                  "reasoning_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                },
+                "prompt_tokens_details": {
+                  "audio_tokens": 0,
+                  "cached_tokens": 0
+                }
+              },
+              "model_name": "gpt-4o-2024-08-06",
+              "system_fingerprint": "fp_ee1d74bde0",
+              "prompt_filter_results": [
+                {
+                  "prompt_index": 0,
+                  "content_filter_results": {
+                    "hate": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "self_harm": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "sexual": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "violence": {
+                      "filtered": false,
+                      "severity": "safe"
+                    }
+                  }
+                }
+              ],
+              "finish_reason": "stop",
+              "logprobs": null,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            },
+            "type": "ai",
+            "name": null,
+            "id": "run--81216c13-f7a6-4133-a499-f9bdc57ff85c-0",
+            "example": false,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": {
+              "input_tokens": 349,
+              "output_tokens": 28,
+              "total_tokens": 377,
+              "input_token_details": {
+                "audio": 0,
+                "cache_read": 0
+              },
+              "output_token_details": {
+                "audio": 0,
+                "reasoning": 0
+              }
+            }
+          }
+        ],
+        "agent_outputs": {
+          "d480946c19134bc399e0123413dda8df": {
+            "plan": {
+              "steps": [
+                "Decide on a destination for the day trip.",
+                "Research and list 3-4 popular tourist attractions or locations to visit in the chosen destination.",
+                "Plan the sequence of visiting each location to maximize time.",
+                "Allocate 2 hours of visit time for each location.",
+                "Calculate travel time between locations and returning home."
+              ]
+            }
+          },
+          "a04f70fef3a1441e845c5b919a57cf23": {
+            "messages": [
+              {
+                "content": "Create a plan for a day trip, then calculate how many hours we'll need if we spend 2 hours at each location",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "human",
+                "name": null,
+                "id": "93c621f1-5576-4e3c-b47d-0d479793dfcd"
+              },
+              {
+                "content": "Certainly! Here's a plan for a day trip:\n\n### Day Trip Itinerary\n\n1. **Location A: City Park**\n   - Spend time enjoying the natural beauty, walking trails, and perhaps have a picnic.\n   - Time spent: 2 hours\n\n2. **Location B: History Museum**\n   - Explore the exhibits and learn about the local history and culture.\n   - Time spent: 2 hours\n\n3. **Location C: Art Gallery**\n   - Admire contemporary artworks and perhaps participate in a workshop.\n   - Time spent: 2 hours\n\n4. **Location D: Local Restaurant**\n   - Enjoy a meal and experience local cuisine.\n   - Time spent: 2 hours\n\n### Calculation of Total Hours Needed\n\nSince we plan to spend 2 hours at each location and there are 4 locations, I'll calculate the total time needed using the addition tool. \n\nLet's calculate:\n- Total hours at all locations = 4 locations * 2 hours per location",
+                "additional_kwargs": {
+                  "tool_calls": [
+                    {
+                      "id": "call_FLgiIZBPr3JOpAetp3GwTrrS",
+                      "function": {
+                        "arguments": "{\"a\":2,\"b\":2}",
+                        "name": "add"
+                      },
+                      "type": "function"
+                    }
+                  ],
+                  "refusal": null
+                },
+                "response_metadata": {
+                  "token_usage": {
+                    "completion_tokens": 219,
+                    "prompt_tokens": 71,
+                    "total_tokens": 290,
+                    "completion_tokens_details": {
+                      "accepted_prediction_tokens": 0,
+                      "audio_tokens": 0,
+                      "reasoning_tokens": 0,
+                      "rejected_prediction_tokens": 0
+                    },
+                    "prompt_tokens_details": {
+                      "audio_tokens": 0,
+                      "cached_tokens": 0
+                    }
+                  },
+                  "model_name": "gpt-4o-2024-08-06",
+                  "system_fingerprint": "fp_ee1d74bde0",
+                  "prompt_filter_results": [
+                    {
+                      "prompt_index": 0,
+                      "content_filter_results": {
+                        "hate": {
+                          "filtered": false,
+                          "severity": "safe"
+                        },
+                        "self_harm": {
+                          "filtered": false,
+                          "severity": "safe"
+                        },
+                        "sexual": {
+                          "filtered": false,
+                          "severity": "safe"
+                        },
+                        "violence": {
+                          "filtered": false,
+                          "severity": "safe"
+                        }
+                      }
+                    }
+                  ],
+                  "finish_reason": "tool_calls",
+                  "logprobs": null,
+                  "content_filter_results": {
+                    "hate": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "self_harm": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "sexual": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "violence": {
+                      "filtered": false,
+                      "severity": "safe"
+                    }
+                  }
+                },
+                "type": "ai",
+                "name": null,
+                "id": "run--68c672ec-1af9-4e32-8fe5-68a0d0269e8b-0"
+              },
+              {
+                "content": "4",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "tool",
+                "name": "add",
+                "id": "04d3c40f-a43b-4843-871a-cbd8513e2122"
+              },
+              {
+                "content": "",
+                "additional_kwargs": {
+                  "tool_calls": [
+                    {
+                      "id": "call_HgUmEshtTEF4poV8VM3SN6kF",
+                      "function": {
+                        "arguments": "{\"a\":4,\"b\":2}",
+                        "name": "add"
+                      },
+                      "type": "function"
+                    }
+                  ],
+                  "refusal": null
+                },
+                "response_metadata": {
+                  "token_usage": {
+                    "completion_tokens": 18,
+                    "prompt_tokens": 299,
+                    "total_tokens": 317,
+                    "completion_tokens_details": {
+                      "accepted_prediction_tokens": 0,
+                      "audio_tokens": 0,
+                      "reasoning_tokens": 0,
+                      "rejected_prediction_tokens": 0
+                    },
+                    "prompt_tokens_details": {
+                      "audio_tokens": 0,
+                      "cached_tokens": 0
+                    }
+                  },
+                  "model_name": "gpt-4o-2024-08-06",
+                  "system_fingerprint": "fp_ee1d74bde0",
+                  "prompt_filter_results": [
+                    {
+                      "prompt_index": 0,
+                      "content_filter_results": {
+                        "hate": {
+                          "filtered": false,
+                          "severity": "safe"
+                        },
+                        "self_harm": {
+                          "filtered": false,
+                          "severity": "safe"
+                        },
+                        "sexual": {
+                          "filtered": false,
+                          "severity": "safe"
+                        },
+                        "violence": {
+                          "filtered": false,
+                          "severity": "safe"
+                        }
+                      }
+                    }
+                  ],
+                  "finish_reason": "tool_calls",
+                  "logprobs": null,
+                  "content_filter_results": {}
+                },
+                "type": "ai",
+                "name": null,
+                "id": "run--5bd6a095-928e-4684-9da0-1e01129e63a6-0"
+              },
+              {
+                "content": "6",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "tool",
+                "name": "add",
+                "id": "223eedf1-373e-4e66-9358-66863d68d4ff"
+              },
+              {
+                "content": "",
+                "additional_kwargs": {
+                  "tool_calls": [
+                    {
+                      "id": "call_FvujOYFlhj20tcC9p2pHP13F",
+                      "function": {
+                        "arguments": "{\"a\":6,\"b\":2}",
+                        "name": "add"
+                      },
+                      "type": "function"
+                    }
+                  ],
+                  "refusal": null
+                },
+                "response_metadata": {
+                  "token_usage": {
+                    "completion_tokens": 18,
+                    "prompt_tokens": 324,
+                    "total_tokens": 342,
+                    "completion_tokens_details": {
+                      "accepted_prediction_tokens": 0,
+                      "audio_tokens": 0,
+                      "reasoning_tokens": 0,
+                      "rejected_prediction_tokens": 0
+                    },
+                    "prompt_tokens_details": {
+                      "audio_tokens": 0,
+                      "cached_tokens": 0
+                    }
+                  },
+                  "model_name": "gpt-4o-2024-08-06",
+                  "system_fingerprint": "fp_ee1d74bde0",
+                  "prompt_filter_results": [
+                    {
+                      "prompt_index": 0,
+                      "content_filter_results": {
+                        "hate": {
+                          "filtered": false,
+                          "severity": "safe"
+                        },
+                        "self_harm": {
+                          "filtered": false,
+                          "severity": "safe"
+                        },
+                        "sexual": {
+                          "filtered": false,
+                          "severity": "safe"
+                        },
+                        "violence": {
+                          "filtered": false,
+                          "severity": "safe"
+                        }
+                      }
+                    }
+                  ],
+                  "finish_reason": "tool_calls",
+                  "logprobs": null,
+                  "content_filter_results": {}
+                },
+                "type": "ai",
+                "name": null,
+                "id": "run--0d6bfc4c-fc54-4656-9dd8-a54e83cf2d4f-0"
+              },
+              {
+                "content": "8",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "tool",
+                "name": "add",
+                "id": "1e28e6a0-c7b7-4d53-a024-1beb0bb976f7"
+              },
+              {
+                "content": "The total time needed for the day trip, spending 2 hours at each of the 4 locations, is 8 hours.",
+                "additional_kwargs": {
+                  "refusal": null
+                },
+                "response_metadata": {
+                  "token_usage": {
+                    "completion_tokens": 28,
+                    "prompt_tokens": 349,
+                    "total_tokens": 377,
+                    "completion_tokens_details": {
+                      "accepted_prediction_tokens": 0,
+                      "audio_tokens": 0,
+                      "reasoning_tokens": 0,
+                      "rejected_prediction_tokens": 0
+                    },
+                    "prompt_tokens_details": {
+                      "audio_tokens": 0,
+                      "cached_tokens": 0
+                    }
+                  },
+                  "model_name": "gpt-4o-2024-08-06",
+                  "system_fingerprint": "fp_ee1d74bde0",
+                  "prompt_filter_results": [
+                    {
+                      "prompt_index": 0,
+                      "content_filter_results": {
+                        "hate": {
+                          "filtered": false,
+                          "severity": "safe"
+                        },
+                        "self_harm": {
+                          "filtered": false,
+                          "severity": "safe"
+                        },
+                        "sexual": {
+                          "filtered": false,
+                          "severity": "safe"
+                        },
+                        "violence": {
+                          "filtered": false,
+                          "severity": "safe"
+                        }
+                      }
+                    }
+                  ],
+                  "finish_reason": "stop",
+                  "logprobs": null,
+                  "content_filter_results": {
+                    "hate": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "self_harm": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "sexual": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "violence": {
+                      "filtered": false,
+                      "severity": "safe"
+                    }
+                  }
+                },
+                "type": "ai",
+                "name": null,
+                "id": "run--81216c13-f7a6-4133-a499-f9bdc57ff85c-0"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "step": 2,
+    "parents": {},
+    "thread_id": "34d2d6c5-446f-4897-93a3-8cdc63734128",
+    "debug": false,
+    "checkpoint_mode": "sync"
+  },
+  "2025-06-25T19:27:39.561416+00:00",
+  {
+    "configurable": {
+      "thread_id": "34d2d6c5-446f-4897-93a3-8cdc63734128",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f051fa6-f270-67fd-8001-2a8e5483e611"
+    }
+  },
+  []
+]

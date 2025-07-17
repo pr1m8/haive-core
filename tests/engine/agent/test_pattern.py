@@ -47,7 +47,8 @@ class TestPatternConfig:
         assert merged.name == "test_pattern"
         assert merged.parameters["param1"] == "value1"  # From pattern1
         assert merged.parameters["param2"] == "value2"  # From pattern2
-        assert merged.parameters["common"] == "override"  # Overridden by pattern2
+        # Overridden by pattern2
+        assert merged.parameters["common"] == "override"
         assert merged.order == 1  # From pattern1
         assert merged.condition == "x > 0"  # From pattern2
 
@@ -142,7 +143,8 @@ class TestPatternManager:
         params2 = pattern_manager.get_pattern_parameters("test_pattern_2")
         assert params2["specific"] == "value2"
         assert params2["global_param"] == "global_value2"
-        assert params2["override"] == "specific_override"  # Specific overrides global
+        # Specific overrides global
+        assert params2["override"] == "specific_override"
 
     def test_pattern_ordering(self, pattern_manager):
         """Test pattern ordering based on order property."""

@@ -1,6 +1,8 @@
 """Configuration file for pytest with rich logging and test setup."""
 
+import asyncio
 import logging
+import sys
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -13,13 +15,6 @@ from rich.console import Console
 from rich.logging import RichHandler
 from rich.traceback import install
 
-# Install rich traceback handler
-install(show_locals=True)
-
-# Create rich console
-console = Console()
-
-# Import Haive core components
 from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.engine.base import (
     Engine,
@@ -35,6 +30,14 @@ from haive.core.engine.vectorstore.vectorstore import (
 )
 from haive.core.models.embeddings.base import HuggingFaceEmbeddingConfig
 from haive.core.models.llm.base import AzureLLMConfig
+
+# Install rich traceback handler
+install(show_locals=True)
+
+# Create rich console
+console = Console()
+
+# Import Haive core components
 
 
 # Configure root logger with rich handler
@@ -91,11 +94,6 @@ def generate_test_id(prefix: str) -> str:
     """Generate a unique test identifier."""
     return f"{prefix}-{uuid.uuid4().hex[:8]}"
 
-
-import asyncio
-import sys
-
-import pytest
 
 # Configure pytest-asyncio
 pytest_plugins = ["pytest_asyncio"]

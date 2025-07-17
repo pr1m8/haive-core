@@ -1,0 +1,135 @@
+[
+  {
+    "__shared_fields__": [
+      "active_agent_id",
+      "shared_state",
+      "structured_outputs"
+    ],
+    "__serializable_reducers__": {
+      "messages": "add_messages"
+    },
+    "__engine_io_mappings__": {
+      "multi_agent": {
+        "inputs": ["messages", "active_agent_id", "shared_state"],
+        "outputs": [
+          "messages",
+          "outputs",
+          "structured_outputs",
+          "active_agent_id",
+          "shared_state"
+        ]
+      }
+    },
+    "__input_fields__": {},
+    "__output_fields__": {
+      "multi_agent": [
+        "messages",
+        "outputs",
+        "structured_outputs",
+        "active_agent_id",
+        "shared_state"
+      ]
+    },
+    "__structured_models__": {},
+    "__structured_model_fields__": {},
+    "messages": [
+      {
+        "content": "Create a plan for a day trip with at least 4 stops, then calculate total hours",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "2180cfae-1235-4c50-ae2c-439ada0fe565",
+        "example": false
+      }
+    ],
+    "agents": {},
+    "active_agent_id": null,
+    "outputs": {},
+    "tool_routes": {},
+    "agent_tool_routes": {},
+    "available_nodes": [],
+    "shared_state": {},
+    "structured_outputs": {}
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "7443d14c-d55f-46b9-a456-fcb6c9e2b5a2",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04ee9c-3242-632c-8004-b70c3e9c2f2f"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "process_results_decision": {
+        "__shared_fields__": [
+          "active_agent_id",
+          "shared_state",
+          "structured_outputs"
+        ],
+        "__serializable_reducers__": {
+          "messages": "add_messages"
+        },
+        "__engine_io_mappings__": {
+          "multi_agent": {
+            "inputs": ["messages", "active_agent_id", "shared_state"],
+            "outputs": [
+              "messages",
+              "outputs",
+              "structured_outputs",
+              "active_agent_id",
+              "shared_state"
+            ]
+          }
+        },
+        "__input_fields__": {},
+        "__output_fields__": {
+          "multi_agent": [
+            "messages",
+            "outputs",
+            "structured_outputs",
+            "active_agent_id",
+            "shared_state"
+          ]
+        },
+        "__structured_models__": {},
+        "__structured_model_fields__": {},
+        "messages": [
+          {
+            "content": "Create a plan for a day trip with at least 4 stops, then calculate total hours",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "2180cfae-1235-4c50-ae2c-439ada0fe565",
+            "example": false
+          }
+        ],
+        "agents": {},
+        "active_agent_id": null,
+        "outputs": {},
+        "tool_routes": {},
+        "agent_tool_routes": {},
+        "available_nodes": [],
+        "shared_state": {},
+        "structured_outputs": {}
+      }
+    },
+    "step": 4,
+    "parents": {},
+    "thread_id": "7443d14c-d55f-46b9-a456-fcb6c9e2b5a2",
+    "debug": false,
+    "checkpoint_mode": "sync"
+  },
+  "2025-06-21T21:50:35.675718+00:00",
+  {
+    "configurable": {
+      "thread_id": "7443d14c-d55f-46b9-a456-fcb6c9e2b5a2",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04ee9c-323e-605d-8003-b0ef806d9145"
+    }
+  },
+  []
+]

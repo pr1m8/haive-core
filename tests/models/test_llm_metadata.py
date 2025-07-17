@@ -15,16 +15,17 @@ from rich.text import Text
 from rich.traceback import install
 from rich.tree import Tree
 
-# Install rich traceback handler for better error visualization
-install()
-
-# Import the LLM config classes
 from haive.core.models.llm.base import (
     AnthropicLLMConfig,
     AzureLLMConfig,
     MistralLLMConfig,
     OpenAILLMConfig,
 )
+
+# Install rich traceback handler for better error visualization
+install()
+
+# Import the LLM config classes
 
 # Configure rich logging
 logging.basicConfig(
@@ -249,7 +250,8 @@ def test_model_metadata_access(model_config):
     # Create the config
     config_class = model_config["class"]
     model = model_config["model"]
-    display_name = model_config["name"]  # Get the friendly name from model_config
+    # Get the friendly name from model_config
+    display_name = model_config["name"]
 
     logger.info(f"Testing metadata access for {display_name} ({model})")
 

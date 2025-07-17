@@ -1,0 +1,229 @@
+[
+    {
+        "messages": [
+            {
+                "content": "Topic: Planning a project sprint\nLet's begin our directed discussion.",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "human",
+                "name": null,
+                "id": "f334476d-0c3d-4803-b271-d3f842ba779f",
+                "example": false
+            },
+            {
+                "content": "Great choice! Planning a project sprint is essential for organizing work effectively and achieving set goals. Let's break it down step-by-step. Here are some guiding questions to structure our discussion:\n\n1. **Objective Setting**: What are the specific goals or deliverables we aim to achieve with this sprint? How do these align with the overall project objectives?\n\n2. **Team Roles and Responsibilities**: Who is part of this sprint? What roles will each team member play, and what are their specific responsibilities?\n\n3. **Sprint Duration and Timeline**: How long should the sprint be? What is the start date, and what is the end date? Are there any critical milestones or deadlines within the sprint?\n\n4. **Task Prioritization and Planning**: How will tasks be prioritized? What criteria will we use to determine the urgency or importance of tasks? Do we have a task breakdown or backlog to work from?\n\n5. **Resource Allocation**: What resources (tools, budget, personnel) are needed to complete this sprint successfully? Do we have everything we need, or are there gaps we need to address?\n\n6. **Risk Management**: What potential risks or obstacles might we face during this sprint? How can we prepare or mitigate these risks?\n\n7. **Review and Feedback Mechanism**: How will we review progress throughout the sprint? What methods will we use to gather feedback and adapt our approach if necessary?\n\nFeel free to dive into any of these areas, or add any other considerations you believe are crucial for effective sprint planning.",
+                "additional_kwargs": {
+                    "refusal": null
+                },
+                "response_metadata": {
+                    "token_usage": {
+                        "completion_tokens": 310,
+                        "prompt_tokens": 34,
+                        "total_tokens": 344,
+                        "completion_tokens_details": {
+                            "accepted_prediction_tokens": 0,
+                            "audio_tokens": 0,
+                            "reasoning_tokens": 0,
+                            "rejected_prediction_tokens": 0
+                        },
+                        "prompt_tokens_details": {
+                            "audio_tokens": 0,
+                            "cached_tokens": 0
+                        }
+                    },
+                    "model_name": "gpt-4o-2024-08-06",
+                    "system_fingerprint": "fp_ee1d74bde0",
+                    "prompt_filter_results": [
+                        {
+                            "prompt_index": 0,
+                            "content_filter_results": {
+                                "hate": {
+                                    "filtered": false,
+                                    "severity": "safe"
+                                },
+                                "self_harm": {
+                                    "filtered": false,
+                                    "severity": "safe"
+                                },
+                                "sexual": {
+                                    "filtered": false,
+                                    "severity": "safe"
+                                },
+                                "violence": {
+                                    "filtered": false,
+                                    "severity": "safe"
+                                }
+                            }
+                        }
+                    ],
+                    "finish_reason": "stop",
+                    "logprobs": null,
+                    "content_filter_results": {
+                        "hate": {
+                            "filtered": false,
+                            "severity": "safe"
+                        },
+                        "self_harm": {
+                            "filtered": false,
+                            "severity": "safe"
+                        },
+                        "sexual": {
+                            "filtered": false,
+                            "severity": "safe"
+                        },
+                        "violence": {
+                            "filtered": false,
+                            "severity": "safe"
+                        }
+                    }
+                },
+                "type": "ai",
+                "name": null,
+                "id": "run--f96b6bfc-ac08-43cb-84d9-a85f31151677-0",
+                "example": false,
+                "tool_calls": [],
+                "invalid_tool_calls": [],
+                "usage_metadata": {
+                    "input_tokens": 34,
+                    "output_tokens": 310,
+                    "total_tokens": 344,
+                    "input_token_details": {
+                        "audio": 0,
+                        "cache_read": 0
+                    },
+                    "output_token_details": {
+                        "audio": 0,
+                        "reasoning": 0
+                    }
+                }
+            }
+        ]
+    },
+    [],
+    {
+        "configurable": {
+            "thread_id": "Lead_001132_agent_6b20b4fd",
+            "checkpoint_ns": "",
+            "checkpoint_id": "1f057c3c-fc09-6096-8001-78fffe6df0a9"
+        }
+    },
+    {
+        "step": 1,
+        "debug": false,
+        "source": "loop",
+        "writes": {
+            "agent_node": {
+                "messages": {
+                    "content": "Great choice! Planning a project sprint is essential for organizing work effectively and achieving set goals. Let's break it down step-by-step. Here are some guiding questions to structure our discussion:\n\n1. **Objective Setting**: What are the specific goals or deliverables we aim to achieve with this sprint? How do these align with the overall project objectives?\n\n2. **Team Roles and Responsibilities**: Who is part of this sprint? What roles will each team member play, and what are their specific responsibilities?\n\n3. **Sprint Duration and Timeline**: How long should the sprint be? What is the start date, and what is the end date? Are there any critical milestones or deadlines within the sprint?\n\n4. **Task Prioritization and Planning**: How will tasks be prioritized? What criteria will we use to determine the urgency or importance of tasks? Do we have a task breakdown or backlog to work from?\n\n5. **Resource Allocation**: What resources (tools, budget, personnel) are needed to complete this sprint successfully? Do we have everything we need, or are there gaps we need to address?\n\n6. **Risk Management**: What potential risks or obstacles might we face during this sprint? How can we prepare or mitigate these risks?\n\n7. **Review and Feedback Mechanism**: How will we review progress throughout the sprint? What methods will we use to gather feedback and adapt our approach if necessary?\n\nFeel free to dive into any of these areas, or add any other considerations you believe are crucial for effective sprint planning.",
+                    "additional_kwargs": {
+                        "refusal": null
+                    },
+                    "response_metadata": {
+                        "logprobs": null,
+                        "model_name": "gpt-4o-2024-08-06",
+                        "token_usage": {
+                            "total_tokens": 344,
+                            "prompt_tokens": 34,
+                            "completion_tokens": 310,
+                            "prompt_tokens_details": {
+                                "audio_tokens": 0,
+                                "cached_tokens": 0
+                            },
+                            "completion_tokens_details": {
+                                "audio_tokens": 0,
+                                "reasoning_tokens": 0,
+                                "accepted_prediction_tokens": 0,
+                                "rejected_prediction_tokens": 0
+                            }
+                        },
+                        "finish_reason": "stop",
+                        "system_fingerprint": "fp_ee1d74bde0",
+                        "prompt_filter_results": [
+                            {
+                                "prompt_index": 0,
+                                "content_filter_results": {
+                                    "hate": {
+                                        "filtered": false,
+                                        "severity": "safe"
+                                    },
+                                    "sexual": {
+                                        "filtered": false,
+                                        "severity": "safe"
+                                    },
+                                    "violence": {
+                                        "filtered": false,
+                                        "severity": "safe"
+                                    },
+                                    "self_harm": {
+                                        "filtered": false,
+                                        "severity": "safe"
+                                    }
+                                }
+                            }
+                        ],
+                        "content_filter_results": {
+                            "hate": {
+                                "filtered": false,
+                                "severity": "safe"
+                            },
+                            "sexual": {
+                                "filtered": false,
+                                "severity": "safe"
+                            },
+                            "violence": {
+                                "filtered": false,
+                                "severity": "safe"
+                            },
+                            "self_harm": {
+                                "filtered": false,
+                                "severity": "safe"
+                            }
+                        }
+                    },
+                    "type": "ai",
+                    "name": null,
+                    "id": "run--f96b6bfc-ac08-43cb-84d9-a85f31151677-0",
+                    "example": false,
+                    "tool_calls": [],
+                    "invalid_tool_calls": [],
+                    "usage_metadata": {
+                        "input_tokens": 34,
+                        "output_tokens": 310,
+                        "total_tokens": 344,
+                        "input_token_details": {
+                            "audio": 0,
+                            "cache_read": 0
+                        },
+                        "output_token_details": {
+                            "audio": 0,
+                            "reasoning": 0
+                        }
+                    }
+                }
+            }
+        },
+        "parents": {},
+        "thread_id": "directed_test_001132",
+        "langgraph_node": "execute_agent",
+        "langgraph_path": [
+            "__pregel_pull",
+            "execute_agent"
+        ],
+        "langgraph_step": 3,
+        "checkpoint_mode": "sync",
+        "recursion_limit": 50,
+        "langgraph_triggers": [
+            "branch:to:execute_agent"
+        ],
+        "langgraph_checkpoint_ns": "execute_agent:84a3f51b-f0b9-f9c7-dde5-0f19162aeb88"
+    },
+    "2025-07-03T04:11:36.422808+00:00",
+    {
+        "configurable": {
+            "thread_id": "Lead_001132_agent_6b20b4fd",
+            "checkpoint_ns": "",
+            "checkpoint_id": "1f057c3c-e3d2-642c-8000-3cc6f3ae8a6c"
+        }
+    },
+    []
+]

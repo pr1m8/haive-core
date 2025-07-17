@@ -1,0 +1,99 @@
+[
+  {
+    "__shared_fields__": ["active_agent_id", "shared_state"],
+    "__serializable_reducers__": {
+      "messages": "add_messages"
+    },
+    "__engine_io_mappings__": {},
+    "__input_fields__": {},
+    "__output_fields__": {},
+    "__structured_models__": {},
+    "__structured_model_fields__": {},
+    "messages": [
+      {
+        "content": "You are a helpful assistant that researches and writes responses.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "system",
+        "name": null,
+        "id": "b7b06b72-5cfe-4c4e-8dd5-217484d3b7e6"
+      },
+      {
+        "content": "Tell me about multi-agent systems in AI.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "55ef7ee4-5b53-42ba-ade7-9773cb86c362",
+        "example": false
+      }
+    ],
+    "agents": {},
+    "outputs": {},
+    "tool_routes": {},
+    "available_nodes": [],
+    "shared_state": {}
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "667a67bc-ddb6-4350-9dea-efbceabfd847",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04e04e-db12-6476-8003-f946f5dae524"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "process_results": {
+        "__shared_fields__": ["active_agent_id", "shared_state"],
+        "__serializable_reducers__": {
+          "messages": "add_messages"
+        },
+        "__engine_io_mappings__": {},
+        "__input_fields__": {},
+        "__output_fields__": {},
+        "__structured_models__": {},
+        "__structured_model_fields__": {},
+        "messages": [
+          {
+            "content": "You are a helpful assistant that researches and writes responses.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "system",
+            "name": null,
+            "id": "b7b06b72-5cfe-4c4e-8dd5-217484d3b7e6"
+          },
+          {
+            "content": "Tell me about multi-agent systems in AI.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "55ef7ee4-5b53-42ba-ade7-9773cb86c362",
+            "example": false
+          }
+        ],
+        "agents": {},
+        "outputs": {},
+        "tool_routes": {},
+        "available_nodes": [],
+        "shared_state": {}
+      }
+    },
+    "step": 3,
+    "parents": {},
+    "thread_id": "667a67bc-ddb6-4350-9dea-efbceabfd847",
+    "debug": false,
+    "checkpoint_mode": "sync"
+  },
+  "2025-06-20T18:32:32.313038+00:00",
+  {
+    "configurable": {
+      "thread_id": "667a67bc-ddb6-4350-9dea-efbceabfd847",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04e04e-db0f-6562-8002-25127477b4b4"
+    }
+  },
+  []
+]

@@ -1,0 +1,356 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Calculate 10 + 20, then plan steps to build a calculator app",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "3f4b6aef-73df-4891-b02e-8b0e66552231",
+        "example": false
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "tool_calls": [
+            {
+              "id": "call_52sagDwQ3JptSJJmJt9lE3TB",
+              "function": {
+                "arguments": "{\"a\":10,\"b\":20}",
+                "name": "add"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 18,
+            "prompt_tokens": 62,
+            "total_tokens": 80,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BnMKUbTBCJ5DntrkRwY5QCY0yUiC8",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "content_filter_results": {}
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run-239a78ab-9d67-4397-bd19-a2d892f9a8b5-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "add",
+            "args": {
+              "a": 10,
+              "b": 20
+            },
+            "id": "call_52sagDwQ3JptSJJmJt9lE3TB",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 62,
+          "output_tokens": 18,
+          "total_tokens": 80,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "30",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "add",
+        "id": "b50f7764-4291-4eb4-b66f-557d9487ab79",
+        "tool_call_id": "call_52sagDwQ3JptSJJmJt9lE3TB",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "The result of 10 + 20 is 30.\n\nNow, let's outline the steps to build a calculator app:\n\n### Step 1: Define Requirements\n- Decide on the features the calculator will have (basic arithmetic, scientific functions, etc.).\n- Determine the platforms for the app (web, iOS, Android).\n\n### Step 2: Design the User Interface\n- Sketch wireframes for the app.\n- Choose design elements like fonts, colors, and layout.\n- Create a prototype using tools like Adobe XD or Figma.\n\n### Step 3: Set Up Development Environment\n- Choose a tech stack (e.g., React for web, Swift for iOS, Kotlin for Android).\n- Set up necessary frameworks and libraries.\n\n### Step 4: Implement Core Features\n- Write functions for the arithmetic operations.\n- Implement the user interface based on designs.\n\n### Step 5: Implement Additional Features\n- Add features like memory functions, scientific calculator operations, etc.\n- Enhance the interface with animations or interactive elements.\n\n### Step 6: Testing\n- Write unit tests for each function.\n- Perform user testing to gather feedback and refine the UI.\n\n### Step 7: Deployment\n- Prepare the app for deployment to the chosen platforms.\n- Submit the app to relevant app stores or make it live on your website.\n\n### Step 8: Maintenance and Updates\n- Monitor app performance and gather user analytics.\n- Release updates with bug fixes or additional features.\n\nBy following these steps, you can build a robust calculator app tailored to your requirements.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 314,
+            "prompt_tokens": 87,
+            "total_tokens": 401,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BnMKUUg0KrPdFFSzGhOMYPfPeCZPf",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run-fc03aef2-e36e-4a4f-aa93-20e1e748f5fa-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 87,
+          "output_tokens": 314,
+          "total_tokens": 401,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ],
+    "tools": [
+      {
+        "name": "{'name': 'add', 'description': 'Returns the sum of two numbers', 'args_schema': <class 'langchain_core.utils.pydantic.add'>, 'return_direct': False, 'verbose': False, 'tags': None, 'metadata': None, 'handle_tool_error': False, 'handle_validation_error': False, 'response_format': 'content', 'func': <function add at 0x736de83c0400>, 'coroutine': None}",
+        "description": "",
+        "type": "tool"
+      }
+    ],
+    "tool_routes": {
+      "tool_0": "unknown"
+    },
+    "name_attrs": ["name", "__name__", "func_name"],
+    "content": null,
+    "output_schemas": {},
+    "engine_route_config": {
+      "llm": ["langchain_tool", "function", "pydantic_model"],
+      "aug_llm": ["langchain_tool", "function", "pydantic_model"],
+      "retriever": ["retriever"],
+      "parser": ["pydantic_model"]
+    }
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "a5247a97-01fb-4219-ba21-21f2b31bc99e",
+      "checkpoint_ns": "Calculator:691cff35-ea1d-f328-08ae-0a1879426e05",
+      "checkpoint_id": "1f05403e-0c30-60c2-8004-61fdc310e341",
+      "checkpoint_map": {
+        "": "1f05403d-f15a-6d56-8000-72bef041620b",
+        "Calculator:691cff35-ea1d-f328-08ae-0a1879426e05": "1f05403e-0c30-60c2-8004-61fdc310e341"
+      }
+    }
+  },
+  {
+    "step": 4,
+    "debug": false,
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "The result of 10 + 20 is 30.\n\nNow, let's outline the steps to build a calculator app:\n\n### Step 1: Define Requirements\n- Decide on the features the calculator will have (basic arithmetic, scientific functions, etc.).\n- Determine the platforms for the app (web, iOS, Android).\n\n### Step 2: Design the User Interface\n- Sketch wireframes for the app.\n- Choose design elements like fonts, colors, and layout.\n- Create a prototype using tools like Adobe XD or Figma.\n\n### Step 3: Set Up Development Environment\n- Choose a tech stack (e.g., React for web, Swift for iOS, Kotlin for Android).\n- Set up necessary frameworks and libraries.\n\n### Step 4: Implement Core Features\n- Write functions for the arithmetic operations.\n- Implement the user interface based on designs.\n\n### Step 5: Implement Additional Features\n- Add features like memory functions, scientific calculator operations, etc.\n- Enhance the interface with animations or interactive elements.\n\n### Step 6: Testing\n- Write unit tests for each function.\n- Perform user testing to gather feedback and refine the UI.\n\n### Step 7: Deployment\n- Prepare the app for deployment to the chosen platforms.\n- Submit the app to relevant app stores or make it live on your website.\n\n### Step 8: Maintenance and Updates\n- Monitor app performance and gather user analytics.\n- Release updates with bug fixes or additional features.\n\nBy following these steps, you can build a robust calculator app tailored to your requirements.",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "id": "chatcmpl-BnMKUUg0KrPdFFSzGhOMYPfPeCZPf",
+            "logprobs": null,
+            "model_name": "gpt-4o-2024-08-06",
+            "token_usage": {
+              "total_tokens": 401,
+              "prompt_tokens": 87,
+              "completion_tokens": 314,
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              },
+              "completion_tokens_details": {
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "accepted_prediction_tokens": 0,
+                "rejected_prediction_tokens": 0
+              }
+            },
+            "finish_reason": "stop",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run-fc03aef2-e36e-4a4f-aa93-20e1e748f5fa-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 87,
+            "output_tokens": 314,
+            "total_tokens": 401,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "parents": {
+      "": "1f05403d-f15a-6d56-8000-72bef041620b"
+    },
+    "thread_id": "a5247a97-01fb-4219-ba21-21f2b31bc99e",
+    "langgraph_node": "Calculator",
+    "langgraph_path": ["__pregel_pull", "Calculator"],
+    "langgraph_step": 1,
+    "checkpoint_mode": "sync",
+    "langgraph_triggers": ["branch:to:Calculator"],
+    "langgraph_checkpoint_ns": "Calculator:691cff35-ea1d-f328-08ae-0a1879426e05"
+  },
+  "2025-06-28T09:40:08.099623+00:00",
+  {
+    "configurable": {
+      "thread_id": "a5247a97-01fb-4219-ba21-21f2b31bc99e",
+      "checkpoint_ns": "Calculator:691cff35-ea1d-f328-08ae-0a1879426e05",
+      "checkpoint_id": "1f05403d-f661-6519-8003-f4c62243b5c0",
+      "checkpoint_map": {
+        "": "1f05403d-f15a-6d56-8000-72bef041620b",
+        "Calculator:691cff35-ea1d-f328-08ae-0a1879426e05": "1f05403d-f661-6519-8003-f4c62243b5c0"
+      }
+    }
+  },
+  []
+]

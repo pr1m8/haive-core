@@ -1,0 +1,119 @@
+[
+  {
+    "__shared_fields__": [],
+    "__serializable_reducers__": {},
+    "__engine_io_mappings__": {
+      "engine_c48c418c": {
+        "inputs": ["messages"],
+        "outputs": ["plan"]
+      }
+    },
+    "__input_fields__": {
+      "engine_c48c418c": ["messages"]
+    },
+    "__output_fields__": {
+      "engine_c48c418c": ["plan"]
+    },
+    "__structured_models__": {},
+    "__structured_model_fields__": {},
+    "messages": [
+      {
+        "content": "Write a plan for building a website",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": null,
+        "example": false
+      }
+    ],
+    "plan": {
+      "Steps": [
+        "Define the purpose and goals of the website.",
+        "Conduct research to understand the target audience and competitors.",
+        "Choose a domain name and register it.",
+        "Select a web hosting service.",
+        "Plan the website structure and create a sitemap.",
+        "Design the website layout and user interface.",
+        "Develop the website using appropriate technologies (e.g., HTML, CSS, JavaScript).",
+        "Create and integrate content, including text, images, and videos.",
+        "Optimize the website for search engines (SEO).",
+        "Test the website for functionality, usability, and compatibility across different devices and browsers.",
+        "Launch the website and promote it through various channels.",
+        "Monitor website performance and make necessary updates and improvements."
+      ]
+    }
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "e39c4a1e-2b6e-4a96-b228-59d4ecdcef09",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f025cec-223e-6b28-8001-1010914443e0"
+    }
+  },
+  {
+    "step": 1,
+    "debug": false,
+    "source": "loop",
+    "writes": {
+      "simple_agent_node": {
+        "plan": {
+          "Steps": [
+            "Define the purpose and goals of the website.",
+            "Conduct research to understand the target audience and competitors.",
+            "Choose a domain name and register it.",
+            "Select a web hosting service.",
+            "Plan the website structure and create a sitemap.",
+            "Design the website layout and user interface.",
+            "Develop the website using appropriate technologies (e.g., HTML, CSS, JavaScript).",
+            "Create and integrate content, including text, images, and videos.",
+            "Optimize the website for search engines (SEO).",
+            "Test the website for functionality, usability, and compatibility across different devices and browsers.",
+            "Launch the website and promote it through various channels.",
+            "Monitor website performance and make necessary updates and improvements."
+          ]
+        },
+        "messages": [
+          {
+            "content": "Write a plan for building a website",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null,
+            "example": false
+          }
+        ],
+        "__input_fields__": {
+          "engine_c48c418c": ["messages"]
+        },
+        "__output_fields__": {
+          "engine_c48c418c": ["plan"]
+        },
+        "__shared_fields__": [],
+        "__structured_models__": {},
+        "__engine_io_mappings__": {
+          "engine_c48c418c": {
+            "inputs": ["messages"],
+            "outputs": ["plan"]
+          }
+        },
+        "__serializable_reducers__": {},
+        "__structured_model_fields__": {}
+      }
+    },
+    "parents": {},
+    "thread_id": "e39c4a1e-2b6e-4a96-b228-59d4ecdcef09",
+    "recursion_limit": 200
+  },
+  "2025-04-30T14:23:59.910971+00:00",
+  {
+    "configurable": {
+      "thread_id": "e39c4a1e-2b6e-4a96-b228-59d4ecdcef09",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f025cec-219b-6c1b-8000-7c375befff4c"
+    }
+  },
+  []
+]

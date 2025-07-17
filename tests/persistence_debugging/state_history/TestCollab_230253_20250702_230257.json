@@ -1,0 +1,80 @@
+[
+  {
+    "messages": [
+      {
+        "content": "\ud83d\udcdd Collaborative Session: Collaborative Document\n\nTopic: Testing collaborative persistence\n\nWe'll work together on these sections:\n- Issue\n- Solution\n\nFormat: markdown\nMin contributions per section: 1\n\nLet's start with: Issue",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "459a32a6-ecd9-4999-bd8e-5ef1a625e4cd",
+        "example": false
+      },
+      {
+        "content": "\ud83c\udfc1 Conversation ended: Reached maximum rounds (1)\n\ud83d\udcca Total rounds: 1\n\ud83d\udd04 Total turns: 1",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "system",
+        "name": null,
+        "id": "da0f048f-f8cc-4427-b387-1f8bc66bb1e3"
+      }
+    ],
+    "current_speaker": null,
+    "speakers": ["PM_230253", "Dev_230253"],
+    "turn_count": 1,
+    "max_rounds": 1,
+    "topic": "Testing collaborative persistence",
+    "conversation_ended": true,
+    "mode": "collaborative",
+    "speaker_history": ["PM_230253"],
+    "shared_document": "# Collaborative Document\n\n",
+    "document_sections": {
+      "Issue": "",
+      "Solution": ""
+    },
+    "current_section": "Issue",
+    "sections_order": ["Issue", "Solution"],
+    "output_format": "markdown"
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "collab_test_230253",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057ba3-8914-6e3c-8006-252865b42cc9"
+    }
+  },
+  {
+    "step": 6,
+    "debug": false,
+    "source": "loop",
+    "writes": {
+      "conclude": {
+        "messages": [
+          {
+            "content": "\ud83c\udfc1 Conversation ended: Reached maximum rounds (1)\n\ud83d\udcca Total rounds: 1\n\ud83d\udd04 Total turns: 1",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "system",
+            "name": null,
+            "id": "da0f048f-f8cc-4427-b387-1f8bc66bb1e3"
+          }
+        ],
+        "current_speaker": null,
+        "conversation_ended": true
+      }
+    },
+    "parents": {},
+    "thread_id": "collab_test_230253",
+    "checkpoint_mode": "sync"
+  },
+  "2025-07-03T03:02:57.306568+00:00",
+  {
+    "configurable": {
+      "thread_id": "collab_test_230253",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057ba3-8911-6391-8005-8cab8571ad0d"
+    }
+  },
+  []
+]

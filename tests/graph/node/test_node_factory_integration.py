@@ -316,7 +316,8 @@ def test_implicit_schema_from_engines(azure_llm_config, retriever):
     assert isinstance(result, dict)
     assert "context" in result  # Should contain retrieved documents
     assert isinstance(result["context"], list)
-    assert len(result["context"]) > 0  # Should have at least one retrieved document
+    # Should have at least one retrieved document
+    assert len(result["context"]) > 0
     assert "content" in result  # Should contain generated answer
 
 
@@ -352,11 +353,15 @@ def test_complex_field_mapping(azure_llm_config):
     node_config = NodeConfig(
         name="analyze_document",
         engine=analysis_llm,
-        input_mapping={"content": "document"},  # Map state.content to engine.document
+        # Map state.content to engine.document
+        input_mapping={"content": "document"},
         output_mapping={
-            "documentanalysis.topics": "extracted_topics",  # Map model's topics to state.extracted_topics
-            "documentanalysis.concepts": "extracted_concepts",  # Map model's concepts to state.extracted_concepts
-            "documentanalysis.summary": "document_summary",  # Map model's summary to state.document_summary
+            # Map model's topics to state.extracted_topics
+            "documentanalysis.topics": "extracted_topics",
+            # Map model's concepts to state.extracted_concepts
+            "documentanalysis.concepts": "extracted_concepts",
+            # Map model's summary to state.document_summary
+            "documentanalysis.summary": "document_summary",
         },
         command_goto=END,
     )

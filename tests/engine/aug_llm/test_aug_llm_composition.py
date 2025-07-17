@@ -26,7 +26,7 @@ from .conftest import WeatherQuery, check_api_keys, skip_if_no_api_keys
 
 # Define the decorator
 skip_if_no_api_keys = pytest.mark.skipif(
-    check_api_keys() == False,  # Make sure check_api_keys() is defined
+    not check_api_keys(),  # Make sure check_api_keys() is defined
     reason="No API keys available for LLM testing",
 )
 # Import your existing fixtures here
@@ -337,7 +337,8 @@ def recipe_search_tool():
                 for restriction in diet_restrictions:
                     if restriction.startswith("no_"):
                         # Check that recipe doesn't have this tag
-                        restricted_item = restriction[3:]  # Remove "no_" prefix
+                        # Remove "no_" prefix
+                        restricted_item = restriction[3:]
                         if any(
                             tag.endswith(restricted_item) for tag in recipe["diet_tags"]
                         ):

@@ -1,0 +1,232 @@
+[
+  {
+    "messages": [
+      {
+        "content": "[@Influencer_230643]\nStats: 0 likes | 0 followers\nTrending: Nothing trending\nKeep it under 500 characters!",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "system",
+        "name": null,
+        "id": "ffffd4e3-eea6-4ef8-845d-e4b100f79292"
+      },
+      {
+        "content": "\ud83d\udcac New thread: Social media conversation test\nPlatform: generic (max 500 chars)\nShare your thoughts! Go viral at 10 likes \ud83d\udd25",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "45650b62-9cae-4e1d-9064-8654e768cac7",
+        "example": false
+      },
+      {
+        "content": "Hey everyone! \ud83c\udf89 Just diving into the world of social media with an amazing conversation test. Let's shake things up and see what ideas we can spark. Your thoughts could be the next viral trend! \ud83d\udca1 Drop a comment, like, or share with your pals. Let's hit those viral vibes together at 10 likes! \ud83d\ude80 #SocialMediaMagic #TrendingNow",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 76,
+            "prompt_tokens": 221,
+            "total_tokens": 297,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--b67e2575-2641-428d-b456-6d66a524b5c2-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 221,
+          "output_tokens": 76,
+          "total_tokens": 297,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "Influencer_230643_agent_a0bfa1d7",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057bac-0c67-6325-8001-bf12e9c6149a"
+    }
+  },
+  {
+    "step": 1,
+    "debug": false,
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "Hey everyone! \ud83c\udf89 Just diving into the world of social media with an amazing conversation test. Let's shake things up and see what ideas we can spark. Your thoughts could be the next viral trend! \ud83d\udca1 Drop a comment, like, or share with your pals. Let's hit those viral vibes together at 10 likes! \ud83d\ude80 #SocialMediaMagic #TrendingNow",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "logprobs": null,
+            "model_name": "gpt-4o-2024-08-06",
+            "token_usage": {
+              "total_tokens": 297,
+              "prompt_tokens": 221,
+              "completion_tokens": 76,
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              },
+              "completion_tokens_details": {
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "accepted_prediction_tokens": 0,
+                "rejected_prediction_tokens": 0
+              }
+            },
+            "finish_reason": "stop",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--b67e2575-2641-428d-b456-6d66a524b5c2-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 221,
+            "output_tokens": 76,
+            "total_tokens": 297,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "parents": {},
+    "thread_id": "socialmedia_test_230643",
+    "langgraph_node": "execute_agent",
+    "langgraph_path": ["__pregel_pull", "execute_agent"],
+    "langgraph_step": 3,
+    "checkpoint_mode": "sync",
+    "recursion_limit": 50,
+    "langgraph_triggers": ["branch:to:execute_agent"],
+    "langgraph_checkpoint_ns": "execute_agent:b308b5f1-c8b8-c1be-fff4-0daa7e09f0a1"
+  },
+  "2025-07-03T03:06:45.824984+00:00",
+  {
+    "configurable": {
+      "thread_id": "Influencer_230643_agent_a0bfa1d7",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057bac-0437-6443-8000-26fc74c6c672"
+    }
+  },
+  []
+]

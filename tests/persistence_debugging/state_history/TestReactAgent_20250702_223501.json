@@ -1,0 +1,218 @@
+[
+  {
+    "messages": [
+      {
+        "content": "What tools do you have available?",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "1594bdad-054a-4071-87ff-f101d30de60c",
+        "example": false
+      },
+      {
+        "content": "I have a wide range of capabilities, including tools for text-based tasks, data analysis, programming assistance, language translation, and much more. Here are some key areas where I can assist:\n\n1. **Natural Language Processing:** \n   - Understanding and generating human-like text\n   - Answering questions\n   - Language translation\n\n2. **Data Analysis:** \n   - Basic data manipulation tasks\n   - Statistical analysis\n   - Data visualization guidance\n\n3. **Programming Assistance:**\n   - Debugging code\n   - Explaining programming concepts\n   - Code generation in various programming languages\n\n4. **General Knowledge & Learning:**\n   - Providing explanations on a wide range of topics\n   - Offering educational resources\n   - Summarizing information\n\n5. **Creative Tasks:**\n   - Writing creative content\n   - Brainstorming ideas\n   - Creating outlines and templates\n\nHowever, I don't have specific access to external tools, software, or databases directly. My capabilities are based on the training data up until October 2023 and my programming within that scope. Let me know if there's something specific you'd like assistance with!",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 231,
+            "prompt_tokens": 14,
+            "total_tokens": 245,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--7bbe005d-dd62-4c77-b4c7-2b439bd965d7-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 14,
+          "output_tokens": 231,
+          "total_tokens": 245,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "react_test_20250702_223459",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057b65-1ff1-6a07-8001-2936e743ee18"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "I have a wide range of capabilities, including tools for text-based tasks, data analysis, programming assistance, language translation, and much more. Here are some key areas where I can assist:\n\n1. **Natural Language Processing:** \n   - Understanding and generating human-like text\n   - Answering questions\n   - Language translation\n\n2. **Data Analysis:** \n   - Basic data manipulation tasks\n   - Statistical analysis\n   - Data visualization guidance\n\n3. **Programming Assistance:**\n   - Debugging code\n   - Explaining programming concepts\n   - Code generation in various programming languages\n\n4. **General Knowledge & Learning:**\n   - Providing explanations on a wide range of topics\n   - Offering educational resources\n   - Summarizing information\n\n5. **Creative Tasks:**\n   - Writing creative content\n   - Brainstorming ideas\n   - Creating outlines and templates\n\nHowever, I don't have specific access to external tools, software, or databases directly. My capabilities are based on the training data up until October 2023 and my programming within that scope. Let me know if there's something specific you'd like assistance with!",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 231,
+              "prompt_tokens": 14,
+              "total_tokens": 245,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--7bbe005d-dd62-4c77-b4c7-2b439bd965d7-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 14,
+            "output_tokens": 231,
+            "total_tokens": 245,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 1,
+    "parents": {},
+    "thread_id": "react_test_20250702_223459",
+    "debug": false,
+    "checkpoint_mode": "sync"
+  },
+  "2025-07-03T02:35:01.982242+00:00",
+  {
+    "configurable": {
+      "thread_id": "react_test_20250702_223459",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057b65-0a5a-6b08-8000-f039ad5c1bb5"
+    }
+  },
+  []
+]

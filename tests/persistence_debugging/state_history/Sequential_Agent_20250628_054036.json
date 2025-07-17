@@ -1,0 +1,1090 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Find out the age of earth and add it to itself, then plan a website.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "dc898fc7-6805-4c3d-97b4-868d9410ab11",
+        "example": false
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "tool_calls": [
+            {
+              "id": "call_ux0iaeIPHhLiOtkLROnD7cui",
+              "function": {
+                "arguments": "{}",
+                "name": "get_earth_age"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 13,
+            "prompt_tokens": 82,
+            "total_tokens": 95,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BnMKqQuk6N51OAhmKvvUJcUmPCkM3",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "content_filter_results": {}
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run-9bfe9b75-21a8-4d42-96f0-2c8f2895f5e6-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "get_earth_age",
+            "args": {},
+            "id": "call_ux0iaeIPHhLiOtkLROnD7cui",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 82,
+          "output_tokens": 13,
+          "total_tokens": 95,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "4543000000",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "get_earth_age",
+        "id": "0b1814da-ec8e-441d-9f39-39d25c291c5d",
+        "tool_call_id": "call_ux0iaeIPHhLiOtkLROnD7cui",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "tool_calls": [
+            {
+              "id": "call_ZB5iGNSiOg1MsNqXj6CmNjmH",
+              "function": {
+                "arguments": "{\"a\":4543000000,\"b\":4543000000}",
+                "name": "add"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 24,
+            "prompt_tokens": 108,
+            "total_tokens": 132,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BnMKrp2mQLN04jwRgGdoC2PxqUpmG",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "content_filter_results": {}
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run-f3d6e339-e9a7-4b8a-b020-042b17571cef-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "add",
+            "args": {
+              "a": 4543000000,
+              "b": 4543000000
+            },
+            "id": "call_ZB5iGNSiOg1MsNqXj6CmNjmH",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 108,
+          "output_tokens": 24,
+          "total_tokens": 132,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "9086000000",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "add",
+        "id": "ab1ff3d4-4a47-4588-847e-f810c35660dc",
+        "tool_call_id": "call_ZB5iGNSiOg1MsNqXj6CmNjmH",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "The age of Earth is approximately 4,543 million years. Adding this to itself results in 9,086 million years.\n\nNow, let's plan a website:\n\n### Website Planning\n\n1. **Purpose and Goals:**\n   - Define the main purpose of the website (e.g., informational, e-commerce, portfolio).\n   - Identify key goals (e.g., attract visitors, generate sales, showcase work).\n\n2. **Target Audience:**\n   - Determine the target audience and their needs.\n   - Consider demographics, preferences, and online behavior.\n\n3. **Content Strategy:**\n   - Plan the type of content to include (e.g., text, images, videos).\n   - Develop a content calendar for regular updates.\n\n4. **Design and Layout:**\n   - Choose a design theme and style.\n   - Plan the layout including homepage, navigation, and sub-pages.\n   - Ensure responsive design for mobile devices.\n\n5. **Features and Functionality:**\n   - Identify essential features (e.g., contact form, search bar, blog, e-commerce functionality).\n   - Plan integrations such as social media, payment gateways, etc.\n\n6. **SEO and Analytics:**\n   - Develop an SEO strategy to improve search engine ranking.\n   - Decide on analytics tools to track performance and user behavior.\n\n7. **Budget and Resources:**\n   - Determine budget constraints.\n   - Identify necessary resources including time, personnel, and technology.\n\n8. **Project Timeline:**\n   - Create a realistic timeline from planning to launch.\n   - Set milestones for progress tracking.\n\n9. **Launch and Maintenance:**\n   - Plan the launch strategy including any promotional activities.\n   - Establish the maintenance schedule for updates and improvements.\n\nBy following this structured plan, you can develop a website that effectively serves its intended purpose and meets the needs of its audience.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 374,
+            "prompt_tokens": 142,
+            "total_tokens": 516,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BnMKsoqpr8EtwHSjPrixDAYBr4x6m",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run-795ab91b-5d57-4f68-be98-773167f1a744-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 142,
+          "output_tokens": 374,
+          "total_tokens": 516,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ],
+    "tools": [],
+    "tool_routes": {},
+    "name_attrs": ["name", "__name__", "func_name"],
+    "content": null,
+    "output_schemas": {},
+    "engine_route_config": {
+      "llm": ["langchain_tool", "function", "pydantic_model"],
+      "aug_llm": ["langchain_tool", "function", "pydantic_model"],
+      "retriever": ["retriever"],
+      "parser": ["pydantic_model"]
+    },
+    "engines": {
+      "aug_llm_053beb1e": {
+        "id": "28eaa430460c40d9a8741e0016a2ff9b",
+        "name": "aug_llm_053beb1e",
+        "engine_type": "llm",
+        "version": "1.0.0",
+        "metadata": {
+          "tool_names": ["add", "get_earth_age"],
+          "has_basemodel_tools": false,
+          "basemodel_tool_count": 0,
+          "tool_name_mapping": {
+            "add": "add",
+            "get_earth_age": "get_earth_age"
+          }
+        },
+        "tool_routes": {
+          "add": "langchain_tool",
+          "get_earth_age": "langchain_tool"
+        },
+        "tool_metadata": {
+          "add": {
+            "tool_type": "BaseTool",
+            "is_instance": true
+          },
+          "get_earth_age": {
+            "tool_type": "BaseTool",
+            "is_instance": true
+          }
+        },
+        "tools_dict": {},
+        "routed_tools": [],
+        "include_format_instructions": true,
+        "partial_variables": {},
+        "tools": [],
+        "pydantic_tools": [],
+        "force_tool_use": false,
+        "tool_choice_mode": "auto",
+        "bind_tools_kwargs": {
+          "tool_choice": "auto"
+        },
+        "prompt_template": {
+          "input_variables": [],
+          "optional_variables": ["messages"],
+          "partial_variables": {
+            "messages": []
+          }
+        },
+        "llm_config": {
+          "provider": "azure",
+          "model": "gpt-4o",
+          "name": "gpt-4o",
+          "api_key": "**********",
+          "cache_enabled": true,
+          "cache_ttl": 300,
+          "extra_params": {},
+          "debug": false
+        },
+        "messages_placeholder_name": "messages",
+        "add_messages_placeholder": true,
+        "force_messages_optional": true,
+        "example_separator": "\n\n",
+        "schemas": [],
+        "use_tool_for_format_instructions": false,
+        "tool_is_base_model": false,
+        "parse_raw_output": false,
+        "tool_kwargs": {},
+        "bind_tools_config": {},
+        "runtime_options": {},
+        "optional_variables": [],
+        "uses_messages_field": true
+      },
+      "main": {
+        "id": "7efcc15120cd4d6eb7674c7b8c7c028a",
+        "name": "aug_llm_254d4d3f",
+        "engine_type": "EngineType.LLM"
+      },
+      "aug_llm_254d4d3f": {
+        "id": "7efcc15120cd4d6eb7674c7b8c7c028a",
+        "name": "aug_llm_254d4d3f",
+        "engine_type": "EngineType.LLM"
+      }
+    },
+    "plan": {
+      "steps": [
+        "Define the main purpose of the website (e.g., informational, e-commerce, portfolio) and identify key goals (e.g., attract visitors, generate sales, showcase work).",
+        "Determine the target audience and their needs, considering demographics, preferences, and online behavior.",
+        "Plan the type of content to include on the website (e.g., text, images, videos) and develop a content calendar for regular updates.",
+        "Choose a design theme and style, plan the layout including homepage, navigation, and sub-pages, and ensure responsive design for mobile devices.",
+        "Identify essential features (e.g., contact form, search bar, blog, e-commerce functionality) and plan integrations such as social media and payment gateways.",
+        "Develop an SEO strategy to improve search engine ranking and decide on analytics tools to track performance and user behavior.",
+        "Determine budget constraints and identify necessary resources including time, personnel, and technology.",
+        "Create a realistic timeline from planning to launch and set milestones for progress tracking.",
+        "Plan the launch strategy including any promotional activities and establish the maintenance schedule for updates and improvements."
+      ]
+    },
+    "meta_state": {
+      "active_agent_id": null,
+      "active_agent_name": null,
+      "agent_outputs": {},
+      "agent_execution_history": [],
+      "workflow_metadata": {},
+      "workflow_stage": null,
+      "shared_context": {},
+      "last_error": null,
+      "error_count": 0,
+      "should_continue": true,
+      "next_agent_hint": null
+    },
+    "active_agent_id": null,
+    "agent_outputs": {
+      "8b2743dd9b71444eb4be24bdf52a56e9": {
+        "messages": [
+          {
+            "content": "Find out the age of earth and add it to itself, then plan a website.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "dc898fc7-6805-4c3d-97b4-868d9410ab11",
+            "example": false
+          },
+          {
+            "content": "",
+            "additional_kwargs": {
+              "tool_calls": [
+                {
+                  "id": "call_ux0iaeIPHhLiOtkLROnD7cui",
+                  "function": {
+                    "arguments": "{}",
+                    "name": "get_earth_age"
+                  },
+                  "type": "function"
+                }
+              ],
+              "refusal": null
+            },
+            "response_metadata": {
+              "token_usage": {
+                "completion_tokens": 13,
+                "prompt_tokens": 82,
+                "total_tokens": 95,
+                "completion_tokens_details": {
+                  "accepted_prediction_tokens": 0,
+                  "audio_tokens": 0,
+                  "reasoning_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                },
+                "prompt_tokens_details": {
+                  "audio_tokens": 0,
+                  "cached_tokens": 0
+                }
+              },
+              "model_name": "gpt-4o-2024-08-06",
+              "system_fingerprint": "fp_ee1d74bde0",
+              "id": "chatcmpl-BnMKqQuk6N51OAhmKvvUJcUmPCkM3",
+              "prompt_filter_results": [
+                {
+                  "prompt_index": 0,
+                  "content_filter_results": {
+                    "hate": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "self_harm": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "sexual": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "violence": {
+                      "filtered": false,
+                      "severity": "safe"
+                    }
+                  }
+                }
+              ],
+              "finish_reason": "tool_calls",
+              "logprobs": null,
+              "content_filter_results": {}
+            },
+            "type": "ai",
+            "name": null,
+            "id": "run-9bfe9b75-21a8-4d42-96f0-2c8f2895f5e6-0",
+            "example": false,
+            "tool_calls": [
+              {
+                "name": "get_earth_age",
+                "args": {},
+                "id": "call_ux0iaeIPHhLiOtkLROnD7cui",
+                "type": "tool_call"
+              }
+            ],
+            "invalid_tool_calls": [],
+            "usage_metadata": {
+              "input_tokens": 82,
+              "output_tokens": 13,
+              "total_tokens": 95,
+              "input_token_details": {
+                "audio": 0,
+                "cache_read": 0
+              },
+              "output_token_details": {
+                "audio": 0,
+                "reasoning": 0
+              }
+            }
+          },
+          {
+            "content": "4543000000",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "tool",
+            "name": "get_earth_age",
+            "id": "0b1814da-ec8e-441d-9f39-39d25c291c5d",
+            "tool_call_id": "call_ux0iaeIPHhLiOtkLROnD7cui",
+            "artifact": null,
+            "status": "success"
+          },
+          {
+            "content": "",
+            "additional_kwargs": {
+              "tool_calls": [
+                {
+                  "id": "call_ZB5iGNSiOg1MsNqXj6CmNjmH",
+                  "function": {
+                    "arguments": "{\"a\":4543000000,\"b\":4543000000}",
+                    "name": "add"
+                  },
+                  "type": "function"
+                }
+              ],
+              "refusal": null
+            },
+            "response_metadata": {
+              "token_usage": {
+                "completion_tokens": 24,
+                "prompt_tokens": 108,
+                "total_tokens": 132,
+                "completion_tokens_details": {
+                  "accepted_prediction_tokens": 0,
+                  "audio_tokens": 0,
+                  "reasoning_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                },
+                "prompt_tokens_details": {
+                  "audio_tokens": 0,
+                  "cached_tokens": 0
+                }
+              },
+              "model_name": "gpt-4o-2024-08-06",
+              "system_fingerprint": "fp_ee1d74bde0",
+              "id": "chatcmpl-BnMKrp2mQLN04jwRgGdoC2PxqUpmG",
+              "prompt_filter_results": [
+                {
+                  "prompt_index": 0,
+                  "content_filter_results": {
+                    "hate": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "self_harm": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "sexual": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "violence": {
+                      "filtered": false,
+                      "severity": "safe"
+                    }
+                  }
+                }
+              ],
+              "finish_reason": "tool_calls",
+              "logprobs": null,
+              "content_filter_results": {}
+            },
+            "type": "ai",
+            "name": null,
+            "id": "run-f3d6e339-e9a7-4b8a-b020-042b17571cef-0",
+            "example": false,
+            "tool_calls": [
+              {
+                "name": "add",
+                "args": {
+                  "a": 4543000000,
+                  "b": 4543000000
+                },
+                "id": "call_ZB5iGNSiOg1MsNqXj6CmNjmH",
+                "type": "tool_call"
+              }
+            ],
+            "invalid_tool_calls": [],
+            "usage_metadata": {
+              "input_tokens": 108,
+              "output_tokens": 24,
+              "total_tokens": 132,
+              "input_token_details": {
+                "audio": 0,
+                "cache_read": 0
+              },
+              "output_token_details": {
+                "audio": 0,
+                "reasoning": 0
+              }
+            }
+          },
+          {
+            "content": "9086000000",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "tool",
+            "name": "add",
+            "id": "ab1ff3d4-4a47-4588-847e-f810c35660dc",
+            "tool_call_id": "call_ZB5iGNSiOg1MsNqXj6CmNjmH",
+            "artifact": null,
+            "status": "success"
+          },
+          {
+            "content": "The age of Earth is approximately 4,543 million years. Adding this to itself results in 9,086 million years.\n\nNow, let's plan a website:\n\n### Website Planning\n\n1. **Purpose and Goals:**\n   - Define the main purpose of the website (e.g., informational, e-commerce, portfolio).\n   - Identify key goals (e.g., attract visitors, generate sales, showcase work).\n\n2. **Target Audience:**\n   - Determine the target audience and their needs.\n   - Consider demographics, preferences, and online behavior.\n\n3. **Content Strategy:**\n   - Plan the type of content to include (e.g., text, images, videos).\n   - Develop a content calendar for regular updates.\n\n4. **Design and Layout:**\n   - Choose a design theme and style.\n   - Plan the layout including homepage, navigation, and sub-pages.\n   - Ensure responsive design for mobile devices.\n\n5. **Features and Functionality:**\n   - Identify essential features (e.g., contact form, search bar, blog, e-commerce functionality).\n   - Plan integrations such as social media, payment gateways, etc.\n\n6. **SEO and Analytics:**\n   - Develop an SEO strategy to improve search engine ranking.\n   - Decide on analytics tools to track performance and user behavior.\n\n7. **Budget and Resources:**\n   - Determine budget constraints.\n   - Identify necessary resources including time, personnel, and technology.\n\n8. **Project Timeline:**\n   - Create a realistic timeline from planning to launch.\n   - Set milestones for progress tracking.\n\n9. **Launch and Maintenance:**\n   - Plan the launch strategy including any promotional activities.\n   - Establish the maintenance schedule for updates and improvements.\n\nBy following this structured plan, you can develop a website that effectively serves its intended purpose and meets the needs of its audience.",
+            "additional_kwargs": {
+              "refusal": null
+            },
+            "response_metadata": {
+              "token_usage": {
+                "completion_tokens": 374,
+                "prompt_tokens": 142,
+                "total_tokens": 516,
+                "completion_tokens_details": {
+                  "accepted_prediction_tokens": 0,
+                  "audio_tokens": 0,
+                  "reasoning_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                },
+                "prompt_tokens_details": {
+                  "audio_tokens": 0,
+                  "cached_tokens": 0
+                }
+              },
+              "model_name": "gpt-4o-2024-08-06",
+              "system_fingerprint": "fp_ee1d74bde0",
+              "id": "chatcmpl-BnMKsoqpr8EtwHSjPrixDAYBr4x6m",
+              "prompt_filter_results": [
+                {
+                  "prompt_index": 0,
+                  "content_filter_results": {
+                    "hate": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "self_harm": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "sexual": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "violence": {
+                      "filtered": false,
+                      "severity": "safe"
+                    }
+                  }
+                }
+              ],
+              "finish_reason": "stop",
+              "logprobs": null,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            },
+            "type": "ai",
+            "name": null,
+            "id": "run-795ab91b-5d57-4f68-be98-773167f1a744-0",
+            "example": false,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": {
+              "input_tokens": 142,
+              "output_tokens": 374,
+              "total_tokens": 516,
+              "input_token_details": {
+                "audio": 0,
+                "cache_read": 0
+              },
+              "output_token_details": {
+                "audio": 0,
+                "reasoning": 0
+              }
+            }
+          }
+        ]
+      },
+      "e31d68a809f7448bafdf2df2b7c0554d": {
+        "plan": {
+          "steps": [
+            "Define the main purpose of the website (e.g., informational, e-commerce, portfolio) and identify key goals (e.g., attract visitors, generate sales, showcase work).",
+            "Determine the target audience and their needs, considering demographics, preferences, and online behavior.",
+            "Plan the type of content to include on the website (e.g., text, images, videos) and develop a content calendar for regular updates.",
+            "Choose a design theme and style, plan the layout including homepage, navigation, and sub-pages, and ensure responsive design for mobile devices.",
+            "Identify essential features (e.g., contact form, search bar, blog, e-commerce functionality) and plan integrations such as social media and payment gateways.",
+            "Develop an SEO strategy to improve search engine ranking and decide on analytics tools to track performance and user behavior.",
+            "Determine budget constraints and identify necessary resources including time, personnel, and technology.",
+            "Create a realistic timeline from planning to launch and set milestones for progress tracking.",
+            "Plan the launch strategy including any promotional activities and establish the maintenance schedule for updates and improvements."
+          ]
+        }
+      }
+    }
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "c5409eb1-0f93-47fb-b665-b692eb88131d",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f05403f-1df0-6191-8002-49ce16c91f78"
+    }
+  },
+  {
+    "step": 2,
+    "debug": false,
+    "source": "loop",
+    "writes": {
+      "Simple Agent": {
+        "plan": {
+          "steps": [
+            "Define the main purpose of the website (e.g., informational, e-commerce, portfolio) and identify key goals (e.g., attract visitors, generate sales, showcase work).",
+            "Determine the target audience and their needs, considering demographics, preferences, and online behavior.",
+            "Plan the type of content to include on the website (e.g., text, images, videos) and develop a content calendar for regular updates.",
+            "Choose a design theme and style, plan the layout including homepage, navigation, and sub-pages, and ensure responsive design for mobile devices.",
+            "Identify essential features (e.g., contact form, search bar, blog, e-commerce functionality) and plan integrations such as social media and payment gateways.",
+            "Develop an SEO strategy to improve search engine ranking and decide on analytics tools to track performance and user behavior.",
+            "Determine budget constraints and identify necessary resources including time, personnel, and technology.",
+            "Create a realistic timeline from planning to launch and set milestones for progress tracking.",
+            "Plan the launch strategy including any promotional activities and establish the maintenance schedule for updates and improvements."
+          ]
+        },
+        "agent_outputs": {
+          "8b2743dd9b71444eb4be24bdf52a56e9": {
+            "messages": [
+              {
+                "id": "dc898fc7-6805-4c3d-97b4-868d9410ab11",
+                "name": null,
+                "type": "human",
+                "content": "Find out the age of earth and add it to itself, then plan a website.",
+                "example": false,
+                "additional_kwargs": {},
+                "response_metadata": {}
+              },
+              {
+                "id": "run-9bfe9b75-21a8-4d42-96f0-2c8f2895f5e6-0",
+                "name": null,
+                "type": "ai",
+                "content": "",
+                "example": false,
+                "tool_calls": [
+                  {
+                    "id": "call_ux0iaeIPHhLiOtkLROnD7cui",
+                    "args": {},
+                    "name": "get_earth_age",
+                    "type": "tool_call"
+                  }
+                ],
+                "usage_metadata": {
+                  "input_tokens": 82,
+                  "total_tokens": 95,
+                  "output_tokens": 13,
+                  "input_token_details": {
+                    "audio": 0,
+                    "cache_read": 0
+                  },
+                  "output_token_details": {
+                    "audio": 0,
+                    "reasoning": 0
+                  }
+                },
+                "additional_kwargs": {
+                  "refusal": null,
+                  "tool_calls": [
+                    {
+                      "id": "call_ux0iaeIPHhLiOtkLROnD7cui",
+                      "type": "function",
+                      "function": {
+                        "name": "get_earth_age",
+                        "arguments": "{}"
+                      }
+                    }
+                  ]
+                },
+                "response_metadata": {
+                  "id": "chatcmpl-BnMKqQuk6N51OAhmKvvUJcUmPCkM3",
+                  "logprobs": null,
+                  "model_name": "gpt-4o-2024-08-06",
+                  "token_usage": {
+                    "total_tokens": 95,
+                    "prompt_tokens": 82,
+                    "completion_tokens": 13,
+                    "prompt_tokens_details": {
+                      "audio_tokens": 0,
+                      "cached_tokens": 0
+                    },
+                    "completion_tokens_details": {
+                      "audio_tokens": 0,
+                      "reasoning_tokens": 0,
+                      "accepted_prediction_tokens": 0,
+                      "rejected_prediction_tokens": 0
+                    }
+                  },
+                  "finish_reason": "tool_calls",
+                  "system_fingerprint": "fp_ee1d74bde0",
+                  "prompt_filter_results": [
+                    {
+                      "prompt_index": 0,
+                      "content_filter_results": {
+                        "hate": {
+                          "filtered": false,
+                          "severity": "safe"
+                        },
+                        "sexual": {
+                          "filtered": false,
+                          "severity": "safe"
+                        },
+                        "violence": {
+                          "filtered": false,
+                          "severity": "safe"
+                        },
+                        "self_harm": {
+                          "filtered": false,
+                          "severity": "safe"
+                        }
+                      }
+                    }
+                  ],
+                  "content_filter_results": {}
+                },
+                "invalid_tool_calls": []
+              },
+              {
+                "id": "0b1814da-ec8e-441d-9f39-39d25c291c5d",
+                "name": "get_earth_age",
+                "type": "tool",
+                "status": "success",
+                "content": "4543000000",
+                "artifact": null,
+                "tool_call_id": "call_ux0iaeIPHhLiOtkLROnD7cui",
+                "additional_kwargs": {},
+                "response_metadata": {}
+              },
+              {
+                "id": "run-f3d6e339-e9a7-4b8a-b020-042b17571cef-0",
+                "name": null,
+                "type": "ai",
+                "content": "",
+                "example": false,
+                "tool_calls": [
+                  {
+                    "id": "call_ZB5iGNSiOg1MsNqXj6CmNjmH",
+                    "args": {
+                      "a": 4543000000,
+                      "b": 4543000000
+                    },
+                    "name": "add",
+                    "type": "tool_call"
+                  }
+                ],
+                "usage_metadata": {
+                  "input_tokens": 108,
+                  "total_tokens": 132,
+                  "output_tokens": 24,
+                  "input_token_details": {
+                    "audio": 0,
+                    "cache_read": 0
+                  },
+                  "output_token_details": {
+                    "audio": 0,
+                    "reasoning": 0
+                  }
+                },
+                "additional_kwargs": {
+                  "refusal": null,
+                  "tool_calls": [
+                    {
+                      "id": "call_ZB5iGNSiOg1MsNqXj6CmNjmH",
+                      "type": "function",
+                      "function": {
+                        "name": "add",
+                        "arguments": "{\"a\":4543000000,\"b\":4543000000}"
+                      }
+                    }
+                  ]
+                },
+                "response_metadata": {
+                  "id": "chatcmpl-BnMKrp2mQLN04jwRgGdoC2PxqUpmG",
+                  "logprobs": null,
+                  "model_name": "gpt-4o-2024-08-06",
+                  "token_usage": {
+                    "total_tokens": 132,
+                    "prompt_tokens": 108,
+                    "completion_tokens": 24,
+                    "prompt_tokens_details": {
+                      "audio_tokens": 0,
+                      "cached_tokens": 0
+                    },
+                    "completion_tokens_details": {
+                      "audio_tokens": 0,
+                      "reasoning_tokens": 0,
+                      "accepted_prediction_tokens": 0,
+                      "rejected_prediction_tokens": 0
+                    }
+                  },
+                  "finish_reason": "tool_calls",
+                  "system_fingerprint": "fp_ee1d74bde0",
+                  "prompt_filter_results": [
+                    {
+                      "prompt_index": 0,
+                      "content_filter_results": {
+                        "hate": {
+                          "filtered": false,
+                          "severity": "safe"
+                        },
+                        "sexual": {
+                          "filtered": false,
+                          "severity": "safe"
+                        },
+                        "violence": {
+                          "filtered": false,
+                          "severity": "safe"
+                        },
+                        "self_harm": {
+                          "filtered": false,
+                          "severity": "safe"
+                        }
+                      }
+                    }
+                  ],
+                  "content_filter_results": {}
+                },
+                "invalid_tool_calls": []
+              },
+              {
+                "id": "ab1ff3d4-4a47-4588-847e-f810c35660dc",
+                "name": "add",
+                "type": "tool",
+                "status": "success",
+                "content": "9086000000",
+                "artifact": null,
+                "tool_call_id": "call_ZB5iGNSiOg1MsNqXj6CmNjmH",
+                "additional_kwargs": {},
+                "response_metadata": {}
+              },
+              {
+                "id": "run-795ab91b-5d57-4f68-be98-773167f1a744-0",
+                "name": null,
+                "type": "ai",
+                "content": "The age of Earth is approximately 4,543 million years. Adding this to itself results in 9,086 million years.\n\nNow, let's plan a website:\n\n### Website Planning\n\n1. **Purpose and Goals:**\n   - Define the main purpose of the website (e.g., informational, e-commerce, portfolio).\n   - Identify key goals (e.g., attract visitors, generate sales, showcase work).\n\n2. **Target Audience:**\n   - Determine the target audience and their needs.\n   - Consider demographics, preferences, and online behavior.\n\n3. **Content Strategy:**\n   - Plan the type of content to include (e.g., text, images, videos).\n   - Develop a content calendar for regular updates.\n\n4. **Design and Layout:**\n   - Choose a design theme and style.\n   - Plan the layout including homepage, navigation, and sub-pages.\n   - Ensure responsive design for mobile devices.\n\n5. **Features and Functionality:**\n   - Identify essential features (e.g., contact form, search bar, blog, e-commerce functionality).\n   - Plan integrations such as social media, payment gateways, etc.\n\n6. **SEO and Analytics:**\n   - Develop an SEO strategy to improve search engine ranking.\n   - Decide on analytics tools to track performance and user behavior.\n\n7. **Budget and Resources:**\n   - Determine budget constraints.\n   - Identify necessary resources including time, personnel, and technology.\n\n8. **Project Timeline:**\n   - Create a realistic timeline from planning to launch.\n   - Set milestones for progress tracking.\n\n9. **Launch and Maintenance:**\n   - Plan the launch strategy including any promotional activities.\n   - Establish the maintenance schedule for updates and improvements.\n\nBy following this structured plan, you can develop a website that effectively serves its intended purpose and meets the needs of its audience.",
+                "example": false,
+                "tool_calls": [],
+                "usage_metadata": {
+                  "input_tokens": 142,
+                  "total_tokens": 516,
+                  "output_tokens": 374,
+                  "input_token_details": {
+                    "audio": 0,
+                    "cache_read": 0
+                  },
+                  "output_token_details": {
+                    "audio": 0,
+                    "reasoning": 0
+                  }
+                },
+                "additional_kwargs": {
+                  "refusal": null
+                },
+                "response_metadata": {
+                  "id": "chatcmpl-BnMKsoqpr8EtwHSjPrixDAYBr4x6m",
+                  "logprobs": null,
+                  "model_name": "gpt-4o-2024-08-06",
+                  "token_usage": {
+                    "total_tokens": 516,
+                    "prompt_tokens": 142,
+                    "completion_tokens": 374,
+                    "prompt_tokens_details": {
+                      "audio_tokens": 0,
+                      "cached_tokens": 0
+                    },
+                    "completion_tokens_details": {
+                      "audio_tokens": 0,
+                      "reasoning_tokens": 0,
+                      "accepted_prediction_tokens": 0,
+                      "rejected_prediction_tokens": 0
+                    }
+                  },
+                  "finish_reason": "stop",
+                  "system_fingerprint": "fp_ee1d74bde0",
+                  "prompt_filter_results": [
+                    {
+                      "prompt_index": 0,
+                      "content_filter_results": {
+                        "hate": {
+                          "filtered": false,
+                          "severity": "safe"
+                        },
+                        "sexual": {
+                          "filtered": false,
+                          "severity": "safe"
+                        },
+                        "violence": {
+                          "filtered": false,
+                          "severity": "safe"
+                        },
+                        "self_harm": {
+                          "filtered": false,
+                          "severity": "safe"
+                        }
+                      }
+                    }
+                  ],
+                  "content_filter_results": {
+                    "hate": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "sexual": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "violence": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "self_harm": {
+                      "filtered": false,
+                      "severity": "safe"
+                    }
+                  }
+                },
+                "invalid_tool_calls": []
+              }
+            ]
+          },
+          "e31d68a809f7448bafdf2df2b7c0554d": null
+        }
+      }
+    },
+    "parents": {},
+    "thread_id": "c5409eb1-0f93-47fb-b665-b692eb88131d",
+    "checkpoint_mode": "sync"
+  },
+  "2025-06-28T09:40:36.804425+00:00",
+  {
+    "configurable": {
+      "thread_id": "c5409eb1-0f93-47fb-b665-b692eb88131d",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f05403e-dca9-6139-8001-09b04d966982"
+    }
+  },
+  []
+]

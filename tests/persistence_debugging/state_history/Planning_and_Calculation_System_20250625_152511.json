@@ -1,0 +1,1004 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Create a plan for a day trip, then calculate how many hours we'll need if we spend 2 hours at each location",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "fb2966df-eb8c-44b7-9a75-72d5fc241534",
+        "example": false
+      },
+      {
+        "content": "Sure! Here's a plan for a day trip with a few locations to visit:\n\n**Day Trip Plan:**\n\n1. **Start at the Museum**\n   - Time spent: 2 hours\n\n2. **Head to the Botanical Gardens**\n   - Time spent: 2 hours\n\n3. **Lunch at a nearby Cafe**\n   - Time spent: 1 hour\n\n4. **Visit the Historic Site**\n   - Time spent: 2 hours\n\n5. **End at the Art Gallery**\n   - Time spent: 2 hours\n\nNow, let's calculate the total hours you'll need for the trip, assuming 2 hours are spent at each location except for lunch, which is 1 hour.\n\nLocations:\n- Museum\n- Botanical Gardens\n- Historic Site\n- Art Gallery\n\nEach location will take 2 hours:\n- Museum: 2 hours\n- Botanical Gardens: 2 hours\n- Historic Site: 2 hours\n- Art Gallery: 2 hours\n\nLunch break will take 1 hour:\n- Lunch: 1 hour\n\nTotal hours needed = Sum of hours spent at each location and during lunch.\n\nLet's calculate the total hours needed using this plan.",
+        "additional_kwargs": {
+          "tool_calls": [
+            {
+              "id": "call_tmBP5uic8WTxdzZ7bcAjCqMr",
+              "function": {
+                "arguments": "{\"a\":8,\"b\":1}",
+                "name": "add"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 258,
+            "prompt_tokens": 71,
+            "total_tokens": 329,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--785b53bf-99e1-4710-9bd0-060890ea8f58-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "add",
+            "args": {
+              "a": 8,
+              "b": 1
+            },
+            "id": "call_tmBP5uic8WTxdzZ7bcAjCqMr",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 71,
+          "output_tokens": 258,
+          "total_tokens": 329,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "9",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "add",
+        "id": "551940a7-7e67-4e15-824c-adf729aced0d",
+        "tool_call_id": "call_tmBP5uic8WTxdzZ7bcAjCqMr",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "You will need a total of 9 hours for this day trip, including a 1-hour lunch break. Enjoy your trip!",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 28,
+            "prompt_tokens": 338,
+            "total_tokens": 366,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--22b321b4-1aa5-4c8a-bb06-36a0235088f7-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 338,
+          "output_tokens": 28,
+          "total_tokens": 366,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ],
+    "tools": [],
+    "tool_routes": {},
+    "name_attrs": ["name", "__name__", "func_name"],
+    "content": null,
+    "output_schemas": {},
+    "engine_route_config": {
+      "llm": ["langchain_tool", "function", "pydantic_model"],
+      "aug_llm": ["langchain_tool", "function", "pydantic_model"],
+      "retriever": ["retriever"],
+      "parser": ["pydantic_model"]
+    },
+    "plan": {
+      "steps": [
+        "Identify a location for the day trip.",
+        "Select three places to visit in the chosen location.",
+        "Determine travel time between each location and how to get around.",
+        "Plan time for meals or breaks.",
+        "Add buffer time for unexpected delays."
+      ]
+    },
+    "engines": {
+      "aug_llm_74cf6730": {
+        "id": "9389e99aedb34d428970904a74b28275",
+        "name": "aug_llm_74cf6730",
+        "engine_type": "EngineType.LLM"
+      },
+      "main": {
+        "id": "0019e533f075407c9d2220604c7ce695",
+        "name": "aug_llm_a515eebc",
+        "engine_type": "llm",
+        "version": "1.0.0",
+        "metadata": {
+          "tool_names": ["add"],
+          "has_basemodel_tools": false,
+          "basemodel_tool_count": 0,
+          "tool_name_mapping": {
+            "add": "add"
+          }
+        },
+        "tool_routes": {
+          "add": "langchain_tool"
+        },
+        "tool_metadata": {
+          "add": {
+            "tool_type": "BaseTool",
+            "is_instance": true
+          }
+        },
+        "tools_dict": {},
+        "routed_tools": [],
+        "llm_config": {
+          "provider": "azure",
+          "model": "gpt-4o",
+          "name": "gpt-4o",
+          "api_key": "**********",
+          "cache_enabled": true,
+          "cache_ttl": 300,
+          "extra_params": {},
+          "debug": false
+        },
+        "prompt_template": {
+          "input_variables": [],
+          "optional_variables": ["messages"],
+          "partial_variables": {
+            "messages": []
+          }
+        },
+        "messages_placeholder_name": "messages",
+        "add_messages_placeholder": true,
+        "force_messages_optional": true,
+        "example_separator": "\n\n",
+        "tools": [],
+        "schemas": [],
+        "pydantic_tools": [],
+        "use_tool_for_format_instructions": false,
+        "tool_is_base_model": false,
+        "force_tool_use": false,
+        "tool_choice_mode": "auto",
+        "parse_raw_output": false,
+        "include_format_instructions": true,
+        "tool_kwargs": {},
+        "bind_tools_kwargs": {
+          "tool_choice": "auto"
+        },
+        "bind_tools_config": {},
+        "runtime_options": {},
+        "partial_variables": {},
+        "optional_variables": [],
+        "uses_messages_field": true
+      },
+      "aug_llm_a515eebc": {
+        "id": "0019e533f075407c9d2220604c7ce695",
+        "name": "aug_llm_a515eebc",
+        "engine_type": "llm",
+        "version": "1.0.0",
+        "metadata": {
+          "tool_names": ["add"],
+          "has_basemodel_tools": false,
+          "basemodel_tool_count": 0,
+          "tool_name_mapping": {
+            "add": "add"
+          }
+        },
+        "tool_routes": {
+          "add": "langchain_tool"
+        },
+        "tool_metadata": {
+          "add": {
+            "tool_type": "BaseTool",
+            "is_instance": true
+          }
+        },
+        "tools_dict": {},
+        "routed_tools": [],
+        "llm_config": {
+          "provider": "azure",
+          "model": "gpt-4o",
+          "name": "gpt-4o",
+          "api_key": "**********",
+          "cache_enabled": true,
+          "cache_ttl": 300,
+          "extra_params": {},
+          "debug": false
+        },
+        "prompt_template": {
+          "input_variables": [],
+          "optional_variables": ["messages"],
+          "partial_variables": {
+            "messages": []
+          }
+        },
+        "messages_placeholder_name": "messages",
+        "add_messages_placeholder": true,
+        "force_messages_optional": true,
+        "example_separator": "\n\n",
+        "tools": [],
+        "schemas": [],
+        "pydantic_tools": [],
+        "use_tool_for_format_instructions": false,
+        "tool_is_base_model": false,
+        "force_tool_use": false,
+        "tool_choice_mode": "auto",
+        "parse_raw_output": false,
+        "include_format_instructions": true,
+        "tool_kwargs": {},
+        "bind_tools_kwargs": {
+          "tool_choice": "auto"
+        },
+        "bind_tools_config": {},
+        "runtime_options": {},
+        "partial_variables": {},
+        "optional_variables": [],
+        "uses_messages_field": true
+      }
+    },
+    "meta_state": {
+      "active_agent_id": null,
+      "active_agent_name": null,
+      "agent_outputs": {},
+      "agent_execution_history": [],
+      "workflow_metadata": {},
+      "workflow_stage": null,
+      "shared_context": {},
+      "last_error": null,
+      "error_count": 0,
+      "should_continue": true,
+      "next_agent_hint": null
+    },
+    "active_agent_id": null,
+    "agent_outputs": {
+      "f732c5f8c85146908ddfd5d08a13b3b2": {
+        "plan": {
+          "steps": [
+            "Identify a location for the day trip.",
+            "Select three places to visit in the chosen location.",
+            "Determine travel time between each location and how to get around.",
+            "Plan time for meals or breaks.",
+            "Add buffer time for unexpected delays."
+          ]
+        }
+      },
+      "291865e84d90454b91d6c6eb70706b68": {
+        "messages": [
+          {
+            "content": "Create a plan for a day trip, then calculate how many hours we'll need if we spend 2 hours at each location",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "fb2966df-eb8c-44b7-9a75-72d5fc241534"
+          },
+          {
+            "content": "Sure! Here's a plan for a day trip with a few locations to visit:\n\n**Day Trip Plan:**\n\n1. **Start at the Museum**\n   - Time spent: 2 hours\n\n2. **Head to the Botanical Gardens**\n   - Time spent: 2 hours\n\n3. **Lunch at a nearby Cafe**\n   - Time spent: 1 hour\n\n4. **Visit the Historic Site**\n   - Time spent: 2 hours\n\n5. **End at the Art Gallery**\n   - Time spent: 2 hours\n\nNow, let's calculate the total hours you'll need for the trip, assuming 2 hours are spent at each location except for lunch, which is 1 hour.\n\nLocations:\n- Museum\n- Botanical Gardens\n- Historic Site\n- Art Gallery\n\nEach location will take 2 hours:\n- Museum: 2 hours\n- Botanical Gardens: 2 hours\n- Historic Site: 2 hours\n- Art Gallery: 2 hours\n\nLunch break will take 1 hour:\n- Lunch: 1 hour\n\nTotal hours needed = Sum of hours spent at each location and during lunch.\n\nLet's calculate the total hours needed using this plan.",
+            "additional_kwargs": {
+              "tool_calls": [
+                {
+                  "id": "call_tmBP5uic8WTxdzZ7bcAjCqMr",
+                  "function": {
+                    "arguments": "{\"a\":8,\"b\":1}",
+                    "name": "add"
+                  },
+                  "type": "function"
+                }
+              ],
+              "refusal": null
+            },
+            "response_metadata": {
+              "token_usage": {
+                "completion_tokens": 258,
+                "prompt_tokens": 71,
+                "total_tokens": 329,
+                "completion_tokens_details": {
+                  "accepted_prediction_tokens": 0,
+                  "audio_tokens": 0,
+                  "reasoning_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                },
+                "prompt_tokens_details": {
+                  "audio_tokens": 0,
+                  "cached_tokens": 0
+                }
+              },
+              "model_name": "gpt-4o-2024-08-06",
+              "system_fingerprint": "fp_ee1d74bde0",
+              "prompt_filter_results": [
+                {
+                  "prompt_index": 0,
+                  "content_filter_results": {
+                    "hate": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "self_harm": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "sexual": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "violence": {
+                      "filtered": false,
+                      "severity": "safe"
+                    }
+                  }
+                }
+              ],
+              "finish_reason": "tool_calls",
+              "logprobs": null,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            },
+            "type": "ai",
+            "name": null,
+            "id": "run--785b53bf-99e1-4710-9bd0-060890ea8f58-0"
+          },
+          {
+            "content": "9",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "tool",
+            "name": "add",
+            "id": "551940a7-7e67-4e15-824c-adf729aced0d"
+          },
+          {
+            "content": "You will need a total of 9 hours for this day trip, including a 1-hour lunch break. Enjoy your trip!",
+            "additional_kwargs": {
+              "refusal": null
+            },
+            "response_metadata": {
+              "token_usage": {
+                "completion_tokens": 28,
+                "prompt_tokens": 338,
+                "total_tokens": 366,
+                "completion_tokens_details": {
+                  "accepted_prediction_tokens": 0,
+                  "audio_tokens": 0,
+                  "reasoning_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                },
+                "prompt_tokens_details": {
+                  "audio_tokens": 0,
+                  "cached_tokens": 0
+                }
+              },
+              "model_name": "gpt-4o-2024-08-06",
+              "system_fingerprint": "fp_ee1d74bde0",
+              "prompt_filter_results": [
+                {
+                  "prompt_index": 0,
+                  "content_filter_results": {
+                    "hate": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "self_harm": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "sexual": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "violence": {
+                      "filtered": false,
+                      "severity": "safe"
+                    }
+                  }
+                }
+              ],
+              "finish_reason": "stop",
+              "logprobs": null,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            },
+            "type": "ai",
+            "name": null,
+            "id": "run--22b321b4-1aa5-4c8a-bb06-36a0235088f7-0"
+          }
+        ]
+      }
+    }
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "79653b61-cccb-44ca-b842-4a6a67b6c658",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f051fa1-d073-64e2-8002-71ebfb790b2d"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "React Agent": {
+        "messages": [
+          {
+            "content": "Create a plan for a day trip, then calculate how many hours we'll need if we spend 2 hours at each location",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "fb2966df-eb8c-44b7-9a75-72d5fc241534",
+            "example": false
+          },
+          {
+            "content": "Sure! Here's a plan for a day trip with a few locations to visit:\n\n**Day Trip Plan:**\n\n1. **Start at the Museum**\n   - Time spent: 2 hours\n\n2. **Head to the Botanical Gardens**\n   - Time spent: 2 hours\n\n3. **Lunch at a nearby Cafe**\n   - Time spent: 1 hour\n\n4. **Visit the Historic Site**\n   - Time spent: 2 hours\n\n5. **End at the Art Gallery**\n   - Time spent: 2 hours\n\nNow, let's calculate the total hours you'll need for the trip, assuming 2 hours are spent at each location except for lunch, which is 1 hour.\n\nLocations:\n- Museum\n- Botanical Gardens\n- Historic Site\n- Art Gallery\n\nEach location will take 2 hours:\n- Museum: 2 hours\n- Botanical Gardens: 2 hours\n- Historic Site: 2 hours\n- Art Gallery: 2 hours\n\nLunch break will take 1 hour:\n- Lunch: 1 hour\n\nTotal hours needed = Sum of hours spent at each location and during lunch.\n\nLet's calculate the total hours needed using this plan.",
+            "additional_kwargs": {
+              "tool_calls": [
+                {
+                  "id": "call_tmBP5uic8WTxdzZ7bcAjCqMr",
+                  "function": {
+                    "arguments": "{\"a\":8,\"b\":1}",
+                    "name": "add"
+                  },
+                  "type": "function"
+                }
+              ],
+              "refusal": null
+            },
+            "response_metadata": {
+              "token_usage": {
+                "completion_tokens": 258,
+                "prompt_tokens": 71,
+                "total_tokens": 329,
+                "completion_tokens_details": {
+                  "accepted_prediction_tokens": 0,
+                  "audio_tokens": 0,
+                  "reasoning_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                },
+                "prompt_tokens_details": {
+                  "audio_tokens": 0,
+                  "cached_tokens": 0
+                }
+              },
+              "model_name": "gpt-4o-2024-08-06",
+              "system_fingerprint": "fp_ee1d74bde0",
+              "prompt_filter_results": [
+                {
+                  "prompt_index": 0,
+                  "content_filter_results": {
+                    "hate": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "self_harm": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "sexual": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "violence": {
+                      "filtered": false,
+                      "severity": "safe"
+                    }
+                  }
+                }
+              ],
+              "finish_reason": "tool_calls",
+              "logprobs": null,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            },
+            "type": "ai",
+            "name": null,
+            "id": "run--785b53bf-99e1-4710-9bd0-060890ea8f58-0",
+            "example": false,
+            "tool_calls": [
+              {
+                "name": "add",
+                "args": {
+                  "a": 8,
+                  "b": 1
+                },
+                "id": "call_tmBP5uic8WTxdzZ7bcAjCqMr",
+                "type": "tool_call"
+              }
+            ],
+            "invalid_tool_calls": [],
+            "usage_metadata": {
+              "input_tokens": 71,
+              "output_tokens": 258,
+              "total_tokens": 329,
+              "input_token_details": {
+                "audio": 0,
+                "cache_read": 0
+              },
+              "output_token_details": {
+                "audio": 0,
+                "reasoning": 0
+              }
+            }
+          },
+          {
+            "content": "9",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "tool",
+            "name": "add",
+            "id": "551940a7-7e67-4e15-824c-adf729aced0d",
+            "tool_call_id": "call_tmBP5uic8WTxdzZ7bcAjCqMr",
+            "artifact": null,
+            "status": "success"
+          },
+          {
+            "content": "You will need a total of 9 hours for this day trip, including a 1-hour lunch break. Enjoy your trip!",
+            "additional_kwargs": {
+              "refusal": null
+            },
+            "response_metadata": {
+              "token_usage": {
+                "completion_tokens": 28,
+                "prompt_tokens": 338,
+                "total_tokens": 366,
+                "completion_tokens_details": {
+                  "accepted_prediction_tokens": 0,
+                  "audio_tokens": 0,
+                  "reasoning_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                },
+                "prompt_tokens_details": {
+                  "audio_tokens": 0,
+                  "cached_tokens": 0
+                }
+              },
+              "model_name": "gpt-4o-2024-08-06",
+              "system_fingerprint": "fp_ee1d74bde0",
+              "prompt_filter_results": [
+                {
+                  "prompt_index": 0,
+                  "content_filter_results": {
+                    "hate": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "self_harm": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "sexual": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "violence": {
+                      "filtered": false,
+                      "severity": "safe"
+                    }
+                  }
+                }
+              ],
+              "finish_reason": "stop",
+              "logprobs": null,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            },
+            "type": "ai",
+            "name": null,
+            "id": "run--22b321b4-1aa5-4c8a-bb06-36a0235088f7-0",
+            "example": false,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": {
+              "input_tokens": 338,
+              "output_tokens": 28,
+              "total_tokens": 366,
+              "input_token_details": {
+                "audio": 0,
+                "cache_read": 0
+              },
+              "output_token_details": {
+                "audio": 0,
+                "reasoning": 0
+              }
+            }
+          }
+        ],
+        "agent_outputs": {
+          "f732c5f8c85146908ddfd5d08a13b3b2": {
+            "plan": {
+              "steps": [
+                "Identify a location for the day trip.",
+                "Select three places to visit in the chosen location.",
+                "Determine travel time between each location and how to get around.",
+                "Plan time for meals or breaks.",
+                "Add buffer time for unexpected delays."
+              ]
+            }
+          },
+          "291865e84d90454b91d6c6eb70706b68": {
+            "messages": [
+              {
+                "content": "Create a plan for a day trip, then calculate how many hours we'll need if we spend 2 hours at each location",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "human",
+                "name": null,
+                "id": "fb2966df-eb8c-44b7-9a75-72d5fc241534"
+              },
+              {
+                "content": "Sure! Here's a plan for a day trip with a few locations to visit:\n\n**Day Trip Plan:**\n\n1. **Start at the Museum**\n   - Time spent: 2 hours\n\n2. **Head to the Botanical Gardens**\n   - Time spent: 2 hours\n\n3. **Lunch at a nearby Cafe**\n   - Time spent: 1 hour\n\n4. **Visit the Historic Site**\n   - Time spent: 2 hours\n\n5. **End at the Art Gallery**\n   - Time spent: 2 hours\n\nNow, let's calculate the total hours you'll need for the trip, assuming 2 hours are spent at each location except for lunch, which is 1 hour.\n\nLocations:\n- Museum\n- Botanical Gardens\n- Historic Site\n- Art Gallery\n\nEach location will take 2 hours:\n- Museum: 2 hours\n- Botanical Gardens: 2 hours\n- Historic Site: 2 hours\n- Art Gallery: 2 hours\n\nLunch break will take 1 hour:\n- Lunch: 1 hour\n\nTotal hours needed = Sum of hours spent at each location and during lunch.\n\nLet's calculate the total hours needed using this plan.",
+                "additional_kwargs": {
+                  "tool_calls": [
+                    {
+                      "id": "call_tmBP5uic8WTxdzZ7bcAjCqMr",
+                      "function": {
+                        "arguments": "{\"a\":8,\"b\":1}",
+                        "name": "add"
+                      },
+                      "type": "function"
+                    }
+                  ],
+                  "refusal": null
+                },
+                "response_metadata": {
+                  "token_usage": {
+                    "completion_tokens": 258,
+                    "prompt_tokens": 71,
+                    "total_tokens": 329,
+                    "completion_tokens_details": {
+                      "accepted_prediction_tokens": 0,
+                      "audio_tokens": 0,
+                      "reasoning_tokens": 0,
+                      "rejected_prediction_tokens": 0
+                    },
+                    "prompt_tokens_details": {
+                      "audio_tokens": 0,
+                      "cached_tokens": 0
+                    }
+                  },
+                  "model_name": "gpt-4o-2024-08-06",
+                  "system_fingerprint": "fp_ee1d74bde0",
+                  "prompt_filter_results": [
+                    {
+                      "prompt_index": 0,
+                      "content_filter_results": {
+                        "hate": {
+                          "filtered": false,
+                          "severity": "safe"
+                        },
+                        "self_harm": {
+                          "filtered": false,
+                          "severity": "safe"
+                        },
+                        "sexual": {
+                          "filtered": false,
+                          "severity": "safe"
+                        },
+                        "violence": {
+                          "filtered": false,
+                          "severity": "safe"
+                        }
+                      }
+                    }
+                  ],
+                  "finish_reason": "tool_calls",
+                  "logprobs": null,
+                  "content_filter_results": {
+                    "hate": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "self_harm": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "sexual": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "violence": {
+                      "filtered": false,
+                      "severity": "safe"
+                    }
+                  }
+                },
+                "type": "ai",
+                "name": null,
+                "id": "run--785b53bf-99e1-4710-9bd0-060890ea8f58-0"
+              },
+              {
+                "content": "9",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "tool",
+                "name": "add",
+                "id": "551940a7-7e67-4e15-824c-adf729aced0d"
+              },
+              {
+                "content": "You will need a total of 9 hours for this day trip, including a 1-hour lunch break. Enjoy your trip!",
+                "additional_kwargs": {
+                  "refusal": null
+                },
+                "response_metadata": {
+                  "token_usage": {
+                    "completion_tokens": 28,
+                    "prompt_tokens": 338,
+                    "total_tokens": 366,
+                    "completion_tokens_details": {
+                      "accepted_prediction_tokens": 0,
+                      "audio_tokens": 0,
+                      "reasoning_tokens": 0,
+                      "rejected_prediction_tokens": 0
+                    },
+                    "prompt_tokens_details": {
+                      "audio_tokens": 0,
+                      "cached_tokens": 0
+                    }
+                  },
+                  "model_name": "gpt-4o-2024-08-06",
+                  "system_fingerprint": "fp_ee1d74bde0",
+                  "prompt_filter_results": [
+                    {
+                      "prompt_index": 0,
+                      "content_filter_results": {
+                        "hate": {
+                          "filtered": false,
+                          "severity": "safe"
+                        },
+                        "self_harm": {
+                          "filtered": false,
+                          "severity": "safe"
+                        },
+                        "sexual": {
+                          "filtered": false,
+                          "severity": "safe"
+                        },
+                        "violence": {
+                          "filtered": false,
+                          "severity": "safe"
+                        }
+                      }
+                    }
+                  ],
+                  "finish_reason": "stop",
+                  "logprobs": null,
+                  "content_filter_results": {
+                    "hate": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "self_harm": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "sexual": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "violence": {
+                      "filtered": false,
+                      "severity": "safe"
+                    }
+                  }
+                },
+                "type": "ai",
+                "name": null,
+                "id": "run--22b321b4-1aa5-4c8a-bb06-36a0235088f7-0"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "step": 2,
+    "parents": {},
+    "thread_id": "79653b61-cccb-44ca-b842-4a6a67b6c658",
+    "debug": false,
+    "checkpoint_mode": "sync"
+  },
+  "2025-06-25T19:25:11.917044+00:00",
+  {
+    "configurable": {
+      "thread_id": "79653b61-cccb-44ca-b842-4a6a67b6c658",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f051fa1-ad2f-67b6-8001-2f06d72b5af2"
+    }
+  },
+  []
+]

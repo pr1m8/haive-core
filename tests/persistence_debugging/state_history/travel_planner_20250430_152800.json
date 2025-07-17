@@ -1,0 +1,994 @@
+[
+  {
+    "messages": [
+      {
+        "content": "I want to plan a trip but I'm not sure where to go. Can you help?",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "36de3d02-ff12-4787-a479-3317369ad78e",
+        "example": false
+      },
+      {
+        "content": "That sounds great. What activities would you recommend?",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "844a0c1d-b02f-464f-9799-789a6773007e",
+        "example": false
+      },
+      {
+        "content": "I want to plan a trip but I'm not sure where to go. Can you help?",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "c07969d1-1d08-4cf3-ae34-8307f67b1a05",
+        "example": false
+      },
+      {
+        "content": "That sounds great. What activities would you recommend?",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "083f8723-0705-40f0-a5a1-98f35f14b93a",
+        "example": false
+      },
+      {
+        "content": "I want to plan a trip but I'm not sure where to go. Can you help?",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "c7331962-b7a7-4c4e-b688-1f06e30e1c75",
+        "example": false
+      },
+      {
+        "content": "That sounds great. What activities would you recommend?",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "edc1f83c-cf71-4796-a830-fffd4c9707e1",
+        "example": false
+      },
+      {
+        "content": "I want to plan a trip but I'm not sure where to go. Can you help?",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "f220280f-c49d-4be6-85ee-10dc9c06c25d",
+        "example": false
+      },
+      {
+        "content": "That sounds great. What activities would you recommend?",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "4c7c1ecf-dd8c-4bd3-9040-5f3cb97538c8",
+        "example": false
+      },
+      {
+        "content": "I want to plan a trip but I'm not sure where to go. Can you help?",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "96957a34-3170-4b57-bf1e-7b4cc70daf1f",
+        "example": false
+      },
+      {
+        "content": "That sounds great. What activities would you recommend?",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "2c7838bf-297f-4ca6-9b96-77087109d65f",
+        "example": false
+      },
+      {
+        "content": "I want to plan a trip but I'm not sure where to go. Can you help?",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "b5226f47-44b9-45f6-a612-fcac4cfbf89e",
+        "example": false
+      },
+      {
+        "content": "Of course! Here are a few suggestions based on different interests and activities:\n\n1. **Nature and Adventure**: \n   - **Costa Rica**: Perfect for wildlife and outdoor enthusiasts. You can enjoy rainforests, beaches, volcanoes, and activities like zip-lining, hiking, and surfing.\n   - **New Zealand**: Offers stunning landscapes with opportunities for hiking, bungee jumping, and exploring fjords.\n\n2. **Culture and History**:\n   - **Italy**: Known for its rich history, art, and architecture. Explore Rome, Florence, and Venice.\n   - **Japan**: Offers a mix of traditional culture and modern attractions. Visit temples, experience tea ceremonies, and explore bustling cities.\n\n3. **Relaxation and Luxury**:\n   - **Maldives**: Perfect for relaxing at lavish resorts with beautiful beaches and crystal-clear waters.\n   - **Bali**: Offers beautiful beaches, luxury spa experiences, and tranquil settings.\n\n4. **Urban Exploration**:\n   - **New York City, USA**: Known for its vibrant culture, iconic landmarks, and entertainment options.\n   - **Paris, France**: Experience the art, fashion, and cuisine of the city of lights.\n\n5. **Food and Drink**:\n   - **Thailand**: Famous for its delicious street food and cooking classes.\n   - **Spain**: Offers tapas tours, wine tasting, and diverse regional cuisines.\n\nConsider what kind of experience you're looking for, and let me know if you need more details on a particular destination!",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 314,
+            "prompt_tokens": 205,
+            "total_tokens": 519,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run-c04e97c5-5214-45e0-99af-83a7a08ed780-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 205,
+          "output_tokens": 314,
+          "total_tokens": 519,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "That sounds great. What activities would you recommend?",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "925e3f72-71eb-4dfb-ac9d-6e9850474a22",
+        "example": false
+      },
+      {
+        "content": "Once you've settled on a destination that aligns with your interests, here are some activities you might consider to make the most of your trip:\n\n1. **Costa Rica**:\n   - **Zip-lining** through the rainforest canopy.\n   - **Surfing** on the Pacific coast, especially at places like Tamarindo or Jaco.\n   - **Wildlife watching** in national parks like Manuel Antonio or Tortuguero.\n\n2. **New Zealand**:\n   - **Hiking** the Tongariro Alpine Crossing or in the Milford Sound area.\n   - **Bungee jumping** in Queenstown, the adventure capital.\n   - **Lord of the Rings tours** to explore film locations.\n\n3. **Italy**:\n   - **Visit historical landmarks** such as the Colosseum in Rome, Florence's cathedral, and the Leaning Tower of Pisa.\n   - **Enjoy a cooking class** to learn how to make traditional Italian dishes.\n   - **Wine tasting** in Tuscany.\n\n4. **Japan**:\n   - **Explore historical temples** and shrines, like those in Kyoto or Nikko.\n   - **Experience a traditional tea ceremony**.\n   - **Visit themed cafes** and unique shopping districts in Tokyo.\n\n5. **Maldives**:\n   - **Snorkeling or scuba diving** in the coral reefs.\n   - **Spa treatments** and beach relaxation at luxury resorts.\n   - **Sunset cruises**.\n\n6. **Bali**:\n   - **Yoga retreats** and wellness activities.\n   - **Explore rice terraces** and waterfalls.\n   - **Surfing** or lounging on the beaches.\n\n7. **New York City**:\n   - **Visit iconic landmarks** such as Times Square, the Statue of Liberty, and Central Park.\n   - **Catch a Broadway show**.\n   - **Museums and galleries**, like the MET or MoMA.\n\n8. **Paris**:\n   - **Explore the Louvre or Mus\u00e9e d'Orsay**.\n   - **Stroll along the Seine and Parisian streets**.\n   - **Enjoy a Seine river cruise**.\n\n9. **Thailand**:\n   - **Take a street food tour** in cities like Bangkok.\n   - **Visit ancient temples** like Wat Pho or Ayutthaya.\n   - **Thai cooking classes**.\n\n10. **Spain**:\n    - **Tapas tours** in cities like Madrid or Barcelona.\n    - **Explore Alhambra** in Granada or Sagrada Familia in Barcelona.\n    - **Flamenco shows** in Andalusia.\n\nLet me know if you need more tailored suggestions or further details on any of these activities!",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 539,
+            "prompt_tokens": 536,
+            "total_tokens": 1075,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run-13880cc4-6d02-4899-bbd5-90a458c152a2-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 536,
+          "output_tokens": 539,
+          "total_tokens": 1075,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "I want to plan a trip but I'm not sure where to go. Can you help?",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "ce78bcf9-2e14-4143-b2f6-c36cd6b60b31",
+        "example": false
+      },
+      {
+        "content": "Certainly! Choosing a destination depends on your interests, budget, travel dates, and the type of experience you're seeking. Here are a few ideas based on different themes:\n\n1. **Adventure and Nature**:\n   - **Iceland**: Known for its stunning landscapes, including waterfalls, geysers, and Northern Lights.\n   - **Peru**: Offers trekking adventures like the Inca Trail to Machu Picchu.\n\n2. **Cultural Exploration**:\n   - **Greece**: Explore ancient historical sites, beautiful islands, and rich cultural heritage.\n   - **Morocco**: Experience vibrant markets, desert landscapes, and historic cities like Marrakech.\n\n3. **City Escapes**:\n   - **Tokyo, Japan**: Dive into a bustling metropolis with a mix of traditional and modern attractions.\n   - **Barcelona, Spain**: Enjoy unique architecture, vibrant nightlife, and beautiful beaches.\n\n4. **Relaxation and Beaches**:\n   - **Hawaii, USA**: Offers stunning beaches, volcanoes, and a laid-back atmosphere.\n   - **Seychelles**: Perfect for picturesque beaches and luxury resorts.\n\n5. **Food and Culinary Experiences**:\n   - **Vietnam**: Known for its unique and flavorful street food and picturesque landscapes.\n   - **Italy**: Offers diverse regional cuisines and world-class wines.\n\n6. **Wildlife and Safaris**:\n   - **South Africa**: Explore the diverse wildlife with safaris in Kruger National Park.\n   - **Galapagos Islands, Ecuador**: Discover unique wildlife and marine activities.\n\nIf you can share more about what you're looking for in a trip (e.g., specific activities, travel season, budget), I can provide more tailored recommendations!",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 352,
+            "prompt_tokens": 1100,
+            "total_tokens": 1452,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run-19de4378-78d0-460c-a597-035fa7c7ac0b-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 1100,
+          "output_tokens": 352,
+          "total_tokens": 1452,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "That sounds great. What activities would you recommend?",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "b0bd2a3f-905c-4d96-acd5-1094d6ba8426",
+        "example": false
+      },
+      {
+        "content": "Absolutely! Depending on your chosen destination and interests, here are some activities you might consider:\n\n1. **Iceland**:\n   - **Explore the Golden Circle**: Visit \u00deingvellir National Park, Gullfoss Waterfall, and Geysir geothermal area.\n   - **Relax in the Blue Lagoon**.\n   - **Northern Lights tours**, especially from September to April.\n\n2. **Peru**:\n   - **Trek the Inca Trail** or alternative routes to Machu Picchu.\n   - **Discover Cusco\u2019s historic sites**.\n   - **Visit the Sacred Valley** and its archaeological sites.\n\n3. **Greece**:\n   - **Explore ancient ruins** such as the Acropolis in Athens.\n   - **Island hopping** in the Cyclades, including Santorini and Mykonos.\n   - **Explore the monasteries of Meteora**.\n\n4. **Morocco**:\n   - **Explore the souks** and historical sites in Marrakech and Fes.\n   - **Camel ride in the Sahara Desert**.\n   - **Visit Chefchaouen**, the blue city.\n\n5. **Tokyo, Japan**:\n   - **Visit historical temples and shrines** like Senso-ji and Meiji Jingu.\n   - **Explore neighborhoods** such as Shibuya and Akihabara for shopping and entertainment.\n   - **Enjoy traditional tea ceremonies**.\n\n6. **Barcelona, Spain**:\n   - **Explore Gaud\u00ed\u2019s architectural masterpieces** like Sagrada Familia.\n   - **Stroll through the Gothic Quarter**.\n   - **Relax on Barceloneta Beach**.\n\n7. **Hawaii, USA**:\n   - **Snorkeling or diving** in Hanauma Bay.\n   - **Hiking to Diamond Head**.\n   - **Luau experiences** to enjoy traditional Hawaiian culture.\n\n8. **Seychelles**:\n   - **Snorkel or dive in clear waters** to discover vibrant marine life.\n   - **Relax on stunning beaches** like Anse Source d\u2019Argent.\n   - **Explore nature reserves** and island trails.\n\n9. **Vietnam**:\n   - **Street food tours** in Hanoi or Ho Chi Minh City.\n   - **Cruise Halong Bay**.\n   - **Explore Hoi An\u2019s ancient town**.\n\n10. **Italy**:\n    - **Cooking classes** to make pasta or gelato.\n    - **Vineyard tours and wine tasting** in Tuscany.\n    - **Explore Venice by gondola**.\n\n11. **South Africa**:\n    - **Safari in Kruger National Park**.\n    - **Explore Cape Town\u2019s Table Mountain**.\n    - **Visit the Cape Winelands** for wine tasting.\n\n12. **Galapagos Islands**:\n    - **Snorkeling and diving tours** to see unique marine life.\n    - **Wildlife watching**, especially the giant tortoises.\n    - **Explore volcanic landscapes**.\n\nThese activities are just a start! Let me know if you want more detailed information on any specific destination or activity.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 632,
+            "prompt_tokens": 1469,
+            "total_tokens": 2101,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run-4d195d94-5e15-4e40-93f5-c95f63338d20-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 1469,
+          "output_tokens": 632,
+          "total_tokens": 2101,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ],
+    "tool_results": [],
+    "iteration": 0,
+    "intermediate_steps": [],
+    "requires_human_input": false
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "user-456",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f025f94-2a16-6683-8028-181940a55b61"
+    }
+  },
+  {
+    "step": 40,
+    "debug": false,
+    "source": "loop",
+    "writes": {
+      "simple_agent_node": {
+        "messages": [
+          {
+            "content": "I want to plan a trip but I'm not sure where to go. Can you help?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "36de3d02-ff12-4787-a479-3317369ad78e",
+            "example": false
+          },
+          {
+            "content": "That sounds great. What activities would you recommend?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "844a0c1d-b02f-464f-9799-789a6773007e",
+            "example": false
+          },
+          {
+            "content": "I want to plan a trip but I'm not sure where to go. Can you help?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "c07969d1-1d08-4cf3-ae34-8307f67b1a05",
+            "example": false
+          },
+          {
+            "content": "That sounds great. What activities would you recommend?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "083f8723-0705-40f0-a5a1-98f35f14b93a",
+            "example": false
+          },
+          {
+            "content": "I want to plan a trip but I'm not sure where to go. Can you help?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "c7331962-b7a7-4c4e-b688-1f06e30e1c75",
+            "example": false
+          },
+          {
+            "content": "That sounds great. What activities would you recommend?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "edc1f83c-cf71-4796-a830-fffd4c9707e1",
+            "example": false
+          },
+          {
+            "content": "I want to plan a trip but I'm not sure where to go. Can you help?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "f220280f-c49d-4be6-85ee-10dc9c06c25d",
+            "example": false
+          },
+          {
+            "content": "That sounds great. What activities would you recommend?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "4c7c1ecf-dd8c-4bd3-9040-5f3cb97538c8",
+            "example": false
+          },
+          {
+            "content": "I want to plan a trip but I'm not sure where to go. Can you help?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "96957a34-3170-4b57-bf1e-7b4cc70daf1f",
+            "example": false
+          },
+          {
+            "content": "That sounds great. What activities would you recommend?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "2c7838bf-297f-4ca6-9b96-77087109d65f",
+            "example": false
+          },
+          {
+            "content": "I want to plan a trip but I'm not sure where to go. Can you help?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "b5226f47-44b9-45f6-a612-fcac4cfbf89e",
+            "example": false
+          },
+          {
+            "content": "Of course! Here are a few suggestions based on different interests and activities:\n\n1. **Nature and Adventure**: \n   - **Costa Rica**: Perfect for wildlife and outdoor enthusiasts. You can enjoy rainforests, beaches, volcanoes, and activities like zip-lining, hiking, and surfing.\n   - **New Zealand**: Offers stunning landscapes with opportunities for hiking, bungee jumping, and exploring fjords.\n\n2. **Culture and History**:\n   - **Italy**: Known for its rich history, art, and architecture. Explore Rome, Florence, and Venice.\n   - **Japan**: Offers a mix of traditional culture and modern attractions. Visit temples, experience tea ceremonies, and explore bustling cities.\n\n3. **Relaxation and Luxury**:\n   - **Maldives**: Perfect for relaxing at lavish resorts with beautiful beaches and crystal-clear waters.\n   - **Bali**: Offers beautiful beaches, luxury spa experiences, and tranquil settings.\n\n4. **Urban Exploration**:\n   - **New York City, USA**: Known for its vibrant culture, iconic landmarks, and entertainment options.\n   - **Paris, France**: Experience the art, fashion, and cuisine of the city of lights.\n\n5. **Food and Drink**:\n   - **Thailand**: Famous for its delicious street food and cooking classes.\n   - **Spain**: Offers tapas tours, wine tasting, and diverse regional cuisines.\n\nConsider what kind of experience you're looking for, and let me know if you need more details on a particular destination!",
+            "additional_kwargs": {
+              "refusal": null
+            },
+            "response_metadata": {
+              "logprobs": null,
+              "model_name": "gpt-4o-2024-08-06",
+              "token_usage": {
+                "total_tokens": 519,
+                "prompt_tokens": 205,
+                "completion_tokens": 314,
+                "prompt_tokens_details": {
+                  "audio_tokens": 0,
+                  "cached_tokens": 0
+                },
+                "completion_tokens_details": {
+                  "audio_tokens": 0,
+                  "reasoning_tokens": 0,
+                  "accepted_prediction_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                }
+              },
+              "finish_reason": "stop",
+              "system_fingerprint": "fp_ee1d74bde0",
+              "prompt_filter_results": [
+                {
+                  "prompt_index": 0,
+                  "content_filter_results": {
+                    "hate": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "sexual": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "violence": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "self_harm": {
+                      "filtered": false,
+                      "severity": "safe"
+                    }
+                  }
+                }
+              ],
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            },
+            "type": "ai",
+            "name": null,
+            "id": "run-c04e97c5-5214-45e0-99af-83a7a08ed780-0",
+            "example": false,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": {
+              "input_tokens": 205,
+              "output_tokens": 314,
+              "total_tokens": 519,
+              "input_token_details": {
+                "audio": 0,
+                "cache_read": 0
+              },
+              "output_token_details": {
+                "audio": 0,
+                "reasoning": 0
+              }
+            }
+          },
+          {
+            "content": "That sounds great. What activities would you recommend?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "925e3f72-71eb-4dfb-ac9d-6e9850474a22",
+            "example": false
+          },
+          {
+            "content": "Once you've settled on a destination that aligns with your interests, here are some activities you might consider to make the most of your trip:\n\n1. **Costa Rica**:\n   - **Zip-lining** through the rainforest canopy.\n   - **Surfing** on the Pacific coast, especially at places like Tamarindo or Jaco.\n   - **Wildlife watching** in national parks like Manuel Antonio or Tortuguero.\n\n2. **New Zealand**:\n   - **Hiking** the Tongariro Alpine Crossing or in the Milford Sound area.\n   - **Bungee jumping** in Queenstown, the adventure capital.\n   - **Lord of the Rings tours** to explore film locations.\n\n3. **Italy**:\n   - **Visit historical landmarks** such as the Colosseum in Rome, Florence's cathedral, and the Leaning Tower of Pisa.\n   - **Enjoy a cooking class** to learn how to make traditional Italian dishes.\n   - **Wine tasting** in Tuscany.\n\n4. **Japan**:\n   - **Explore historical temples** and shrines, like those in Kyoto or Nikko.\n   - **Experience a traditional tea ceremony**.\n   - **Visit themed cafes** and unique shopping districts in Tokyo.\n\n5. **Maldives**:\n   - **Snorkeling or scuba diving** in the coral reefs.\n   - **Spa treatments** and beach relaxation at luxury resorts.\n   - **Sunset cruises**.\n\n6. **Bali**:\n   - **Yoga retreats** and wellness activities.\n   - **Explore rice terraces** and waterfalls.\n   - **Surfing** or lounging on the beaches.\n\n7. **New York City**:\n   - **Visit iconic landmarks** such as Times Square, the Statue of Liberty, and Central Park.\n   - **Catch a Broadway show**.\n   - **Museums and galleries**, like the MET or MoMA.\n\n8. **Paris**:\n   - **Explore the Louvre or Mus\u00e9e d'Orsay**.\n   - **Stroll along the Seine and Parisian streets**.\n   - **Enjoy a Seine river cruise**.\n\n9. **Thailand**:\n   - **Take a street food tour** in cities like Bangkok.\n   - **Visit ancient temples** like Wat Pho or Ayutthaya.\n   - **Thai cooking classes**.\n\n10. **Spain**:\n    - **Tapas tours** in cities like Madrid or Barcelona.\n    - **Explore Alhambra** in Granada or Sagrada Familia in Barcelona.\n    - **Flamenco shows** in Andalusia.\n\nLet me know if you need more tailored suggestions or further details on any of these activities!",
+            "additional_kwargs": {
+              "refusal": null
+            },
+            "response_metadata": {
+              "logprobs": null,
+              "model_name": "gpt-4o-2024-08-06",
+              "token_usage": {
+                "total_tokens": 1075,
+                "prompt_tokens": 536,
+                "completion_tokens": 539,
+                "prompt_tokens_details": {
+                  "audio_tokens": 0,
+                  "cached_tokens": 0
+                },
+                "completion_tokens_details": {
+                  "audio_tokens": 0,
+                  "reasoning_tokens": 0,
+                  "accepted_prediction_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                }
+              },
+              "finish_reason": "stop",
+              "system_fingerprint": "fp_ee1d74bde0",
+              "prompt_filter_results": [
+                {
+                  "prompt_index": 0,
+                  "content_filter_results": {
+                    "hate": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "sexual": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "violence": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "self_harm": {
+                      "filtered": false,
+                      "severity": "safe"
+                    }
+                  }
+                }
+              ],
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            },
+            "type": "ai",
+            "name": null,
+            "id": "run-13880cc4-6d02-4899-bbd5-90a458c152a2-0",
+            "example": false,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": {
+              "input_tokens": 536,
+              "output_tokens": 539,
+              "total_tokens": 1075,
+              "input_token_details": {
+                "audio": 0,
+                "cache_read": 0
+              },
+              "output_token_details": {
+                "audio": 0,
+                "reasoning": 0
+              }
+            }
+          },
+          {
+            "content": "I want to plan a trip but I'm not sure where to go. Can you help?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "ce78bcf9-2e14-4143-b2f6-c36cd6b60b31",
+            "example": false
+          },
+          {
+            "content": "Certainly! Choosing a destination depends on your interests, budget, travel dates, and the type of experience you're seeking. Here are a few ideas based on different themes:\n\n1. **Adventure and Nature**:\n   - **Iceland**: Known for its stunning landscapes, including waterfalls, geysers, and Northern Lights.\n   - **Peru**: Offers trekking adventures like the Inca Trail to Machu Picchu.\n\n2. **Cultural Exploration**:\n   - **Greece**: Explore ancient historical sites, beautiful islands, and rich cultural heritage.\n   - **Morocco**: Experience vibrant markets, desert landscapes, and historic cities like Marrakech.\n\n3. **City Escapes**:\n   - **Tokyo, Japan**: Dive into a bustling metropolis with a mix of traditional and modern attractions.\n   - **Barcelona, Spain**: Enjoy unique architecture, vibrant nightlife, and beautiful beaches.\n\n4. **Relaxation and Beaches**:\n   - **Hawaii, USA**: Offers stunning beaches, volcanoes, and a laid-back atmosphere.\n   - **Seychelles**: Perfect for picturesque beaches and luxury resorts.\n\n5. **Food and Culinary Experiences**:\n   - **Vietnam**: Known for its unique and flavorful street food and picturesque landscapes.\n   - **Italy**: Offers diverse regional cuisines and world-class wines.\n\n6. **Wildlife and Safaris**:\n   - **South Africa**: Explore the diverse wildlife with safaris in Kruger National Park.\n   - **Galapagos Islands, Ecuador**: Discover unique wildlife and marine activities.\n\nIf you can share more about what you're looking for in a trip (e.g., specific activities, travel season, budget), I can provide more tailored recommendations!",
+            "additional_kwargs": {
+              "refusal": null
+            },
+            "response_metadata": {
+              "logprobs": null,
+              "model_name": "gpt-4o-2024-08-06",
+              "token_usage": {
+                "total_tokens": 1452,
+                "prompt_tokens": 1100,
+                "completion_tokens": 352,
+                "prompt_tokens_details": {
+                  "audio_tokens": 0,
+                  "cached_tokens": 0
+                },
+                "completion_tokens_details": {
+                  "audio_tokens": 0,
+                  "reasoning_tokens": 0,
+                  "accepted_prediction_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                }
+              },
+              "finish_reason": "stop",
+              "system_fingerprint": "fp_ee1d74bde0",
+              "prompt_filter_results": [
+                {
+                  "prompt_index": 0,
+                  "content_filter_results": {
+                    "hate": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "sexual": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "violence": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "self_harm": {
+                      "filtered": false,
+                      "severity": "safe"
+                    }
+                  }
+                }
+              ],
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            },
+            "type": "ai",
+            "name": null,
+            "id": "run-19de4378-78d0-460c-a597-035fa7c7ac0b-0",
+            "example": false,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": {
+              "input_tokens": 1100,
+              "output_tokens": 352,
+              "total_tokens": 1452,
+              "input_token_details": {
+                "audio": 0,
+                "cache_read": 0
+              },
+              "output_token_details": {
+                "audio": 0,
+                "reasoning": 0
+              }
+            }
+          },
+          {
+            "content": "That sounds great. What activities would you recommend?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "b0bd2a3f-905c-4d96-acd5-1094d6ba8426",
+            "example": false
+          },
+          {
+            "content": "Absolutely! Depending on your chosen destination and interests, here are some activities you might consider:\n\n1. **Iceland**:\n   - **Explore the Golden Circle**: Visit \u00deingvellir National Park, Gullfoss Waterfall, and Geysir geothermal area.\n   - **Relax in the Blue Lagoon**.\n   - **Northern Lights tours**, especially from September to April.\n\n2. **Peru**:\n   - **Trek the Inca Trail** or alternative routes to Machu Picchu.\n   - **Discover Cusco\u2019s historic sites**.\n   - **Visit the Sacred Valley** and its archaeological sites.\n\n3. **Greece**:\n   - **Explore ancient ruins** such as the Acropolis in Athens.\n   - **Island hopping** in the Cyclades, including Santorini and Mykonos.\n   - **Explore the monasteries of Meteora**.\n\n4. **Morocco**:\n   - **Explore the souks** and historical sites in Marrakech and Fes.\n   - **Camel ride in the Sahara Desert**.\n   - **Visit Chefchaouen**, the blue city.\n\n5. **Tokyo, Japan**:\n   - **Visit historical temples and shrines** like Senso-ji and Meiji Jingu.\n   - **Explore neighborhoods** such as Shibuya and Akihabara for shopping and entertainment.\n   - **Enjoy traditional tea ceremonies**.\n\n6. **Barcelona, Spain**:\n   - **Explore Gaud\u00ed\u2019s architectural masterpieces** like Sagrada Familia.\n   - **Stroll through the Gothic Quarter**.\n   - **Relax on Barceloneta Beach**.\n\n7. **Hawaii, USA**:\n   - **Snorkeling or diving** in Hanauma Bay.\n   - **Hiking to Diamond Head**.\n   - **Luau experiences** to enjoy traditional Hawaiian culture.\n\n8. **Seychelles**:\n   - **Snorkel or dive in clear waters** to discover vibrant marine life.\n   - **Relax on stunning beaches** like Anse Source d\u2019Argent.\n   - **Explore nature reserves** and island trails.\n\n9. **Vietnam**:\n   - **Street food tours** in Hanoi or Ho Chi Minh City.\n   - **Cruise Halong Bay**.\n   - **Explore Hoi An\u2019s ancient town**.\n\n10. **Italy**:\n    - **Cooking classes** to make pasta or gelato.\n    - **Vineyard tours and wine tasting** in Tuscany.\n    - **Explore Venice by gondola**.\n\n11. **South Africa**:\n    - **Safari in Kruger National Park**.\n    - **Explore Cape Town\u2019s Table Mountain**.\n    - **Visit the Cape Winelands** for wine tasting.\n\n12. **Galapagos Islands**:\n    - **Snorkeling and diving tours** to see unique marine life.\n    - **Wildlife watching**, especially the giant tortoises.\n    - **Explore volcanic landscapes**.\n\nThese activities are just a start! Let me know if you want more detailed information on any specific destination or activity.",
+            "additional_kwargs": {
+              "refusal": null
+            },
+            "response_metadata": {
+              "logprobs": null,
+              "model_name": "gpt-4o-2024-08-06",
+              "token_usage": {
+                "total_tokens": 2101,
+                "prompt_tokens": 1469,
+                "completion_tokens": 632,
+                "prompt_tokens_details": {
+                  "audio_tokens": 0,
+                  "cached_tokens": 0
+                },
+                "completion_tokens_details": {
+                  "audio_tokens": 0,
+                  "reasoning_tokens": 0,
+                  "accepted_prediction_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                }
+              },
+              "finish_reason": "stop",
+              "system_fingerprint": "fp_ee1d74bde0",
+              "prompt_filter_results": [
+                {
+                  "prompt_index": 0,
+                  "content_filter_results": {
+                    "hate": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "sexual": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "violence": {
+                      "filtered": false,
+                      "severity": "safe"
+                    },
+                    "self_harm": {
+                      "filtered": false,
+                      "severity": "safe"
+                    }
+                  }
+                }
+              ],
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            },
+            "type": "ai",
+            "name": null,
+            "id": "run-4d195d94-5e15-4e40-93f5-c95f63338d20-0",
+            "example": false,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": {
+              "input_tokens": 1469,
+              "output_tokens": 632,
+              "total_tokens": 2101,
+              "input_token_details": {
+                "audio": 0,
+                "cache_read": 0
+              },
+              "output_token_details": {
+                "audio": 0,
+                "reasoning": 0
+              }
+            }
+          }
+        ],
+        "iteration": 0,
+        "tool_results": [],
+        "intermediate_steps": [],
+        "requires_human_input": false
+      }
+    },
+    "parents": {},
+    "thread_id": "user-456",
+    "checkpoint_mode": "async",
+    "recursion_limit": 200
+  },
+  "2025-04-30T19:28:14.344341+00:00",
+  {
+    "configurable": {
+      "thread_id": "user-456",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f025f93-d241-6300-8027-312a738c0e0e"
+    }
+  },
+  []
+]

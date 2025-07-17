@@ -1,0 +1,41 @@
+[
+  {
+    "messages": [
+      {
+        "content": "What is the capital of France?",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "ada4f1da-f21a-4678-86bf-76c04b7c314f",
+        "example": false
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "37fcc236-7a7a-4e88-94c7-b3a7a6210448",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f01b491-41a3-6aa7-8001-62179edec2af"
+    }
+  },
+  {
+    "step": 1,
+    "source": "loop",
+    "writes": {
+      "process": null
+    },
+    "parents": {},
+    "thread_id": "37fcc236-7a7a-4e88-94c7-b3a7a6210448"
+  },
+  "2025-04-17T05:01:53.231079+00:00",
+  {
+    "configurable": {
+      "thread_id": "37fcc236-7a7a-4e88-94c7-b3a7a6210448",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f01b491-3aca-69a3-8000-7400e779e510"
+    }
+  },
+  []
+]

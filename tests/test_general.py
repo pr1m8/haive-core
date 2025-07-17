@@ -114,7 +114,7 @@ class TestEngineIntegration(unittest.TestCase):
         graph.set_entry_point("retrieve")
 
         # Build the graph
-        built_graph = graph.build()
+        graph.build()
 
         # Test the graph structure
         self.assertEqual(len(graph.graph_editor.nodes), 2)
@@ -138,7 +138,7 @@ class TestEngineIntegration(unittest.TestCase):
         )
 
         graph.add_node("generate", config=self.llm_config, command_goto="END")
-        built_graph = graph.build()
+        graph.build()
 
         # Verify the config is set
         self.assertIsNotNone(graph.default_runnable_config)

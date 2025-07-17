@@ -1,0 +1,50 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Hello, my name is TestUser.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "d892327f-a0d1-4f9e-a8b2-3d10786c092b",
+        "example": false
+      },
+      {
+        "content": "What's my name?",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "44824d9c-d2ef-400c-8a89-24769d6a4be6",
+        "example": false
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "memory_thread_4bedf798",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f01b4ee-afb9-64f4-8004-b98ed905966e"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "process": null
+    },
+    "thread_id": "memory_thread_4bedf798",
+    "step": 4,
+    "parents": {}
+  },
+  "2025-04-17T05:43:41.224037+00:00",
+  {
+    "configurable": {
+      "thread_id": "memory_thread_4bedf798",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f01b4ee-af35-61d1-8003-50df64bbdfab"
+    }
+  },
+  []
+]

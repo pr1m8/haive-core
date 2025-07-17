@@ -1,0 +1,33 @@
+[
+  {
+    "context": "Paris is the capital of France. It is known for its art, culture, and the Eiffel Tower.",
+    "messages": [],
+    "runnable_config": {}
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "0243b785-62d0-4936-98da-8a8d1d6cae24",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f01b476-4dc4-623a-8001-6f6887a8ecab"
+    }
+  },
+  {
+    "step": 1,
+    "source": "loop",
+    "writes": {
+      "process": null
+    },
+    "parents": {},
+    "thread_id": "0243b785-62d0-4936-98da-8a8d1d6cae24"
+  },
+  "2025-04-17T04:49:49.726956+00:00",
+  {
+    "configurable": {
+      "thread_id": "0243b785-62d0-4936-98da-8a8d1d6cae24",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f01b476-48b8-6d33-8000-e41bf9ee0c95"
+    }
+  },
+  []
+]

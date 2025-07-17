@@ -3,7 +3,8 @@
 import sys
 
 # Direct imports to avoid cascading import issues
-sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
+sys.path.insert(
+    0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
 
 
 def test_path_analyzer():
@@ -26,7 +27,8 @@ def test_path_analyzer():
     assert result.file_category == FileCategory.DOCUMENT
 
     # Test GitHub URL
-    result = PathAnalyzer.analyze("https://github.com/user/repo/blob/main/README.md")
+    result = PathAnalyzer.analyze(
+        "https://github.com/user/repo/blob/main/README.md")
     print(
         f"  ✓ GitHub URL - Service: {result.service_detected}, Extension: {result.file_extension}"
     )
@@ -75,7 +77,8 @@ def test_source_classes():
     )
 
     kwargs = web_source.get_loader_kwargs()
-    print(f"  ✓ RemoteSource - URL: {web_source.url}, Kwargs: {list(kwargs.keys())}")
+    print(
+        f"  ✓ RemoteSource - URL: {web_source.url}, Kwargs: {list(kwargs.keys())}")
     assert kwargs["url"] == "https://example.com/page.html"
 
     # Test DatabaseSource

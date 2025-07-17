@@ -1,0 +1,131 @@
+[
+  {
+    "__shared_fields__": [],
+    "__serializable_reducers__": {
+      "messages": "langgraph.graph.message._add_messages"
+    },
+    "__engine_io_mappings__": {
+      "engine_5d0d9c90": {
+        "inputs": ["messages"],
+        "outputs": ["plan"]
+      }
+    },
+    "__input_fields__": {
+      "engine_5d0d9c90": ["messages"]
+    },
+    "__output_fields__": {
+      "engine_5d0d9c90": ["plan"]
+    },
+    "__structured_models__": {
+      "plan": "__main__.Plan"
+    },
+    "__structured_model_fields__": {
+      "plan": ["Steps"]
+    },
+    "messages": [
+      {
+        "content": "Write a plan for building a website",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": null,
+        "example": false
+      }
+    ],
+    "plan": {
+      "Steps": [
+        "Define the purpose and goals of the website.",
+        "Conduct research to understand the target audience and competitors.",
+        "Choose a domain name and register it.",
+        "Select a web hosting service.",
+        "Plan the website structure and create a sitemap.",
+        "Design the website layout and user interface.",
+        "Develop the website using appropriate technologies (e.g., HTML, CSS, JavaScript).",
+        "Create and integrate content, including text, images, and videos.",
+        "Optimize the website for search engines (SEO).",
+        "Test the website for functionality, usability, and compatibility across different devices and browsers.",
+        "Launch the website and promote it through various channels.",
+        "Monitor website performance and make necessary updates and improvements."
+      ]
+    }
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "3eba57e7-4380-43d4-941b-1dd1146257d0",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f025dbd-ea5f-6b54-8001-f8a6c53496b7"
+    }
+  },
+  {
+    "step": 1,
+    "debug": false,
+    "source": "loop",
+    "writes": {
+      "simple_agent_node": {
+        "plan": {
+          "Steps": [
+            "Define the purpose and goals of the website.",
+            "Conduct research to understand the target audience and competitors.",
+            "Choose a domain name and register it.",
+            "Select a web hosting service.",
+            "Plan the website structure and create a sitemap.",
+            "Design the website layout and user interface.",
+            "Develop the website using appropriate technologies (e.g., HTML, CSS, JavaScript).",
+            "Create and integrate content, including text, images, and videos.",
+            "Optimize the website for search engines (SEO).",
+            "Test the website for functionality, usability, and compatibility across different devices and browsers.",
+            "Launch the website and promote it through various channels.",
+            "Monitor website performance and make necessary updates and improvements."
+          ]
+        },
+        "messages": [
+          {
+            "content": "Write a plan for building a website",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null,
+            "example": false
+          }
+        ],
+        "__input_fields__": {
+          "engine_5d0d9c90": ["messages"]
+        },
+        "__output_fields__": {
+          "engine_5d0d9c90": ["plan"]
+        },
+        "__shared_fields__": [],
+        "__structured_models__": {
+          "plan": "__main__.Plan"
+        },
+        "__engine_io_mappings__": {
+          "engine_5d0d9c90": {
+            "inputs": ["messages"],
+            "outputs": ["plan"]
+          }
+        },
+        "__serializable_reducers__": {
+          "messages": "langgraph.graph.message._add_messages"
+        },
+        "__structured_model_fields__": {
+          "plan": ["Steps"]
+        }
+      }
+    },
+    "parents": {},
+    "thread_id": "3eba57e7-4380-43d4-941b-1dd1146257d0",
+    "recursion_limit": 200
+  },
+  "2025-04-30T15:57:51.197045+00:00",
+  {
+    "configurable": {
+      "thread_id": "3eba57e7-4380-43d4-941b-1dd1146257d0",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f025dbd-e9ac-6b37-8000-b14cf1f01f14"
+    }
+  },
+  []
+]

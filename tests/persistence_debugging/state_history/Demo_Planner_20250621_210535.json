@@ -1,0 +1,223 @@
+[
+  {
+    "messages": [
+      {
+        "content": "First plan a day trip with at least 3 stops, then calculate the total hours",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "bdafc190-ca80-4c07-833e-5c8591550bcd",
+        "example": false
+      },
+      {
+        "content": "Sure, here's a plan for a day trip including three exciting stops. For the purpose of this itinerary, let's assume the trip is in San Francisco, California:\n\n### Day Trip Itinerary\n\n#### Stop 1: Golden Gate Bridge\n- **Activity:** Walk across the iconic Golden Gate Bridge and enjoy the stunning views of the bay, the city skyline, and the Pacific Ocean.\n- **Duration:** Approximately 1.5 hours (including time for photos and taking in the views).\n\n#### Stop 2: Fisherman's Wharf\n- **Activity:** Explore Fisherman's Wharf. Visit Pier 39 to see the sea lions, enjoy lunch at one of the seafood restaurants, and browse the various shops.\n- **Duration:** Approximately 2 hours (including lunch time).\n\n#### Stop 3: Alcatraz Island\n- **Activity:** Take a ferry to Alcatraz Island for a guided tour of the historic former prison and learn about its fascinating history.\n- **Duration:** Approximately 3 hours (including ferry ride to and from the island and the tour).\n\n### Total Time\n\nTo calculate the total time for the day trip:\n- Golden Gate Bridge: 1.5 hours\n- Fisherman's Wharf: 2 hours\n- Alcatraz Island: 3 hours\n\n**Total Duration:** 6.5 hours\n\nThis plan allows for a unique blend of sightseeing, dining, and historical exploration, while providing plenty of opportunities to enjoy the vibrant atmosphere of San Francisco.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 297,
+            "prompt_tokens": 24,
+            "total_tokens": 321,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--b372848e-070f-4389-8fff-4284f6d3476a-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 24,
+          "output_tokens": 297,
+          "total_tokens": 321,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "7e61af46-e73c-40a2-86dc-9034976c60e6",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04f050-09ac-6961-8001-9bdc5bf6bca7"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "Sure, here's a plan for a day trip including three exciting stops. For the purpose of this itinerary, let's assume the trip is in San Francisco, California:\n\n### Day Trip Itinerary\n\n#### Stop 1: Golden Gate Bridge\n- **Activity:** Walk across the iconic Golden Gate Bridge and enjoy the stunning views of the bay, the city skyline, and the Pacific Ocean.\n- **Duration:** Approximately 1.5 hours (including time for photos and taking in the views).\n\n#### Stop 2: Fisherman's Wharf\n- **Activity:** Explore Fisherman's Wharf. Visit Pier 39 to see the sea lions, enjoy lunch at one of the seafood restaurants, and browse the various shops.\n- **Duration:** Approximately 2 hours (including lunch time).\n\n#### Stop 3: Alcatraz Island\n- **Activity:** Take a ferry to Alcatraz Island for a guided tour of the historic former prison and learn about its fascinating history.\n- **Duration:** Approximately 3 hours (including ferry ride to and from the island and the tour).\n\n### Total Time\n\nTo calculate the total time for the day trip:\n- Golden Gate Bridge: 1.5 hours\n- Fisherman's Wharf: 2 hours\n- Alcatraz Island: 3 hours\n\n**Total Duration:** 6.5 hours\n\nThis plan allows for a unique blend of sightseeing, dining, and historical exploration, while providing plenty of opportunities to enjoy the vibrant atmosphere of San Francisco.",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 297,
+              "prompt_tokens": 24,
+              "total_tokens": 321,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--b372848e-070f-4389-8fff-4284f6d3476a-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 24,
+            "output_tokens": 297,
+            "total_tokens": 321,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 1,
+    "parents": {},
+    "thread_id": "bf8b051b-28e7-404d-b499-84089755457d",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 2,
+    "langgraph_node": "delegate_to_agent",
+    "langgraph_triggers": ["branch:to:delegate_to_agent"],
+    "langgraph_path": ["__pregel_pull", "delegate_to_agent"],
+    "langgraph_checkpoint_ns": "delegate_to_agent:879dde4e-ec89-49bd-92ee-37d4fa9ee6bf"
+  },
+  "2025-06-22T01:05:35.206010+00:00",
+  {
+    "configurable": {
+      "thread_id": "7e61af46-e73c-40a2-86dc-9034976c60e6",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04f04f-f457-6b4a-8000-2d77ca7a2287"
+    }
+  },
+  []
+]

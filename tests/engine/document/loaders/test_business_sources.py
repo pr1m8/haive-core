@@ -16,7 +16,8 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 # Add the source path to sys.path
-base_path = Path("/home/will/Projects/haive/backend/haive/packages/haive-core/src")
+base_path = Path(
+    "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
 sys.path.insert(0, str(base_path))
 
 

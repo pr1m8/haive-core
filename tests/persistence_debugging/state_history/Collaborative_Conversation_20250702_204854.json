@@ -1,0 +1,160 @@
+[
+  {
+    "messages": [
+      {
+        "content": "\ud83d\udcdd Collaborative Session: Brainstorming: AI-powered productivity tools\n\nTopic: AI-powered productivity tools\n\nWe'll work together on these sections:\n- Problem Analysis\n- Solution Ideas\n\nFormat: outline\nMin contributions per section: 1\n\nLet's start with: Problem Analysis",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "10b777db-4663-4e4b-be04-7fc240845bee",
+        "example": false
+      },
+      {
+        "content": "[Error from ProductManager]: consuming input failed: SSL connection has been closed unexpectedly",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "ai",
+        "name": "ProductManager",
+        "id": "6301da56-9339-4c25-9ab2-a45b6deec015",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "[Error from Developer]: consuming input failed: SSL connection has been closed unexpectedly",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "ai",
+        "name": "Developer",
+        "id": "b9ec05eb-3632-4b88-940d-e43b75d54ce4",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "\u2705 Section 'Problem Analysis' complete. Moving to 'Solution Ideas'.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "system",
+        "name": null,
+        "id": "d24d5ccf-8637-49f9-a4de-e1e9a04b350b"
+      },
+      {
+        "content": "[Error from ProductManager]: consuming input failed: SSL connection has been closed unexpectedly",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "ai",
+        "name": "ProductManager",
+        "id": "daada97d-2612-430a-ba5f-323cc37447ce",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "\ud83d\udcc4 Document Complete!\n\nTitle: Brainstorming: AI-powered productivity tools\nTotal Contributions: 4\n\nContributors:\n- ProductManager: 3 contributions\n- Developer: 1 contributions\n\nThe final document has been compiled.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "system",
+        "name": null,
+        "id": "d78667e7-e3e3-4bcf-a219-4fdcbbee1e2f"
+      },
+      {
+        "content": "\ud83c\udfc1 Conversation ended: Conversation completed\n\ud83d\udcca Total rounds: 1\n\ud83d\udd04 Total turns: 1",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "system",
+        "name": null,
+        "id": "3342c104-abf7-470c-b2ec-56151adcbdb0"
+      }
+    ],
+    "current_speaker": null,
+    "speakers": ["ProductManager", "Developer"],
+    "turn_count": 1,
+    "max_rounds": 2,
+    "topic": "AI-powered productivity tools",
+    "conversation_ended": true,
+    "mode": "collaborative",
+    "speaker_history": ["Developer"],
+    "shared_document": "Brainstorming: AI-powered productivity tools\n============================================\n\nProblem Analysis:\n[ProductManager]: [Error from ProductManager]: consuming input failed: SSL connection has been closed unexpectedly\n[Developer]: [Error from Developer]: consuming input failed: SSL connection has been closed unexpectedly\n\nSolution Ideas:\n[ProductManager]: [Error from ProductManager]: consuming input failed: SSL connection has been closed unexpectedly\n[ProductManager]: [Error from ProductManager]: consuming input failed: SSL connection has been closed unexpectedly",
+    "document_sections": {
+      "Problem Analysis": "[ProductManager]: [Error from ProductManager]: consuming input failed: SSL connection has been closed unexpectedly\n[Developer]: [Error from Developer]: consuming input failed: SSL connection has been closed unexpectedly",
+      "Solution Ideas": "[ProductManager]: [Error from ProductManager]: consuming input failed: SSL connection has been closed unexpectedly\n[ProductManager]: [Error from ProductManager]: consuming input failed: SSL connection has been closed unexpectedly"
+    },
+    "contributions": [
+      [
+        "ProductManager",
+        "Problem Analysis",
+        "[Error from ProductManager]: consuming input failed: SSL connection has been closed unexpectedly"
+      ],
+      [
+        "Developer",
+        "Problem Analysis",
+        "[Error from Developer]: consuming input failed: SSL connection has been closed unexpectedly"
+      ],
+      [
+        "ProductManager",
+        "Solution Ideas",
+        "[Error from ProductManager]: consuming input failed: SSL connection has been closed unexpectedly"
+      ],
+      [
+        "ProductManager",
+        "Solution Ideas",
+        "[Error from ProductManager]: consuming input failed: SSL connection has been closed unexpectedly"
+      ]
+    ],
+    "contribution_count": {
+      "ProductManager": 3,
+      "Developer": 1
+    },
+    "current_section": "Solution Ideas",
+    "sections_order": ["Problem Analysis", "Solution Ideas"],
+    "completed_sections": ["Problem Analysis"],
+    "output_format": "outline"
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "detailed_test_001",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057a77-e568-609c-8057-1e2709e8f204"
+    }
+  },
+  {
+    "step": 87,
+    "debug": false,
+    "source": "loop",
+    "writes": {
+      "conclude": {
+        "messages": [
+          {
+            "content": "\ud83c\udfc1 Conversation ended: Conversation completed\n\ud83d\udcca Total rounds: 1\n\ud83d\udd04 Total turns: 1",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "system",
+            "name": null,
+            "id": "3342c104-abf7-470c-b2ec-56151adcbdb0"
+          }
+        ],
+        "current_speaker": null,
+        "conversation_ended": true
+      }
+    },
+    "parents": {},
+    "thread_id": "detailed_test_001",
+    "checkpoint_mode": "sync",
+    "recursion_limit": 100
+  },
+  "2025-07-03T00:48:53.923834+00:00",
+  {
+    "configurable": {
+      "thread_id": "detailed_test_001",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057a77-e563-6ca5-8056-674189471a10"
+    }
+  },
+  []
+]

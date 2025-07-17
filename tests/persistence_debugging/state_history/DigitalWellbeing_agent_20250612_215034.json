@@ -1,0 +1,762 @@
+[
+  {
+    "messages": [
+      {
+        "content": "\ud83c\udfad Debate Phase: Arguments\n\ud83d\udccc Your Position: Social media needs mental health reforms\n\ud83d\udcca Your Progress: 5 arguments, 0 rebuttals\n\ud83d\udcc8 Completion: 100%\n\n\ud83d\udcdd Instructions: Present argument 6 of 1. Make a specific, well-supported point for your position. You have -4 more arguments after this.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "system",
+        "name": null,
+        "id": "8d468f2d-c755-4e5b-9f8e-bd1014122384"
+      },
+      {
+        "content": "\ud83c\udfad Welcome to the Formal Debate!\n\n\ud83d\udccb **Topic**: The Impact of Social Media on Society\n\n\ud83d\udc65 **Participants and Positions**:\n  \u2022 TechOptimist: Social media is a net positive\n  \u2022 DigitalWellbeing: Social media needs mental health reforms\n  \u2022 PrivacyAdvocate: Social media violates privacy rights\n\n\ud83d\udcdc **Debate Format** (traditional):\n1. Main Arguments - Each participant makes 1 arguments\n2. Rebuttals - Participants respond to opposing arguments\n\n\u2696\ufe0f **Rules**:\n  \u2022 Participants must argue for their assigned position\n\nLet us begin! TechOptimist, please present your opening statement.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "d8766994-7be4-43a2-a53d-447cd96c7337",
+        "example": false
+      },
+      {
+        "content": "Social media has been overwhelmingly positive for society by democratizing access to information and amplifying voices that were previously marginalized. It enables global connectivity, fostering cultural exchange and mutual understanding. Platforms like Twitter and Facebook have been vital in raising awareness about social issues, empowering grassroots movements, and facilitating real-time communication during crises. Moreover, social media has revolutionized how we network professionally, opening doors to career opportunities regardless of geographical limitations. These benefits illustrate how social media has transformed society, creating a more informed, interconnected, and equitable world.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 106,
+            "prompt_tokens": 259,
+            "total_tokens": 365,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BhnqpgJ3uEFxhstzKO10P1sqzd5om",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": "TechOptimist",
+        "id": "run-3efa59b3-29c8-4f32-b179-adb830d51679-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 259,
+          "output_tokens": 106,
+          "total_tokens": 365,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "DigitalWellbeing: Social media has undeniably transformed communication, yet its pervasive nature demands mental health reforms to safeguard users. The addictive design of these platforms, driven by algorithms optimizing for engagement, often leads to increased anxiety, depression, and feelings of inadequacy. Constant comparisons and the fear of missing out (FOMO) are exacerbated by curated portrayals of perfection, distorting self-image and social expectations. Implementing features that promote mindful usage, such as screen time reminders and content moderation, can mitigate these effects, fostering healthier online environments that prioritize mental wellness alongside connectivity.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 115,
+            "prompt_tokens": 366,
+            "total_tokens": 481,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BhnqrzXWk15RjNiDbTrez1zwd5xjA",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": "DigitalWellbeing",
+        "id": "run-53ffeddf-3dab-4f6a-9e05-ce6325df02e5-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 366,
+          "output_tokens": 115,
+          "total_tokens": 481,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "PrivacyAdvocate",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 4,
+            "prompt_tokens": 488,
+            "total_tokens": 492,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BhnqsmrucnbsCXnF50D8kCxUoZBzh",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": "DigitalWellbeing",
+        "id": "run-849ffd15-9eb2-4cf5-8c47-36c5dde13071-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 488,
+          "output_tokens": 4,
+          "total_tokens": 492,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "Social media platforms routinely exploit user data, compromising privacy and eroding trust. By collecting vast amounts of personal information, these platforms create detailed profiles that are sold or shared with third parties, often without explicit consent or awareness. This lack of transparency and control over personal data poses significant risks, including identity theft and surveillance. Furthermore, the commodification of user data undermines autonomy and can lead to manipulation through targeted advertising and misinformation. Protecting privacy rights through stringent data protection measures and user-centric policies is crucial to restore trust and safeguard individual freedoms in the digital age.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 113,
+            "prompt_tokens": 499,
+            "total_tokens": 612,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BhnqtTTBXp67QoVLRUpxrPceEgTon",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": "DigitalWellbeing",
+        "id": "run-706ab808-110d-4122-b9b5-219dca238e69-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 499,
+          "output_tokens": 113,
+          "total_tokens": 612,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "Thank you, participants, for presenting your opening statements. We will now move to the rebuttals phase, where each participant can respond to the arguments presented by others.\n\nTechOptimist, please proceed with your rebuttal.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 46,
+            "prompt_tokens": 619,
+            "total_tokens": 665,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BhnqvXrBOcTmM9Vyoe93wq7VjcqR8",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": "DigitalWellbeing",
+        "id": "run-542d37cd-3d77-488e-adab-c13bef6925d4-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 619,
+          "output_tokens": 46,
+          "total_tokens": 665,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "While it's essential to acknowledge social media's challenges, the benefits far outweigh the negatives. The platforms have sparked unprecedented levels of social engagement and activism, empowering individuals to enact real-world change. Moreover, features that DigitalWellbeing suggests, like screen time reminders, are already being implemented by many platforms, showcasing a commitment to user well-being. As for PrivacyAdvocate's concerns, privacy settings and data protection laws are continuously evolving, allowing users more control over their information. These ongoing improvements demonstrate that, with responsible use and regulation, social media remains a powerful tool for positive societal impact.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 117,
+            "prompt_tokens": 672,
+            "total_tokens": 789,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BhnqvDcvORpb6vL4HSXgnXUWCJgam",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": "DigitalWellbeing",
+        "id": "run-2bbc2ad1-3f81-4daa-a951-b83e19a52931-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 672,
+          "output_tokens": 117,
+          "total_tokens": 789,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "DigitalWellbeing: In response to TechOptimist, while features like screen time reminders are being implemented, they often fall short of addressing the root causes of mental health issues exacerbated by social media. The addictive nature of these platforms is deeply embedded in their design, prioritizing engagement over user well-being. Moreover, while social media has facilitated activism, it also contributes to burnout and mental fatigue among users constantly exposed to distressing content. Reforms need to focus on systemic changes that alter how these platforms operate, ensuring mental health considerations are integral to their design and function.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 115,
+            "prompt_tokens": 796,
+            "total_tokens": 911,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-Bhnqx9Mfd5MPUDhHbnFQBLAaFbBHc",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run-fa50f10f-9851-4017-b964-db127c89bacf-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 796,
+          "output_tokens": 115,
+          "total_tokens": 911,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "81452af0-e5f4-465e-93a6-d1c41d4179a8",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f047f8c-efce-61a6-8001-e9c59eeee1ed"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "DigitalWellbeing: In response to TechOptimist, while features like screen time reminders are being implemented, they often fall short of addressing the root causes of mental health issues exacerbated by social media. The addictive nature of these platforms is deeply embedded in their design, prioritizing engagement over user well-being. Moreover, while social media has facilitated activism, it also contributes to burnout and mental fatigue among users constantly exposed to distressing content. Reforms need to focus on systemic changes that alter how these platforms operate, ensuring mental health considerations are integral to their design and function.",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 115,
+              "prompt_tokens": 796,
+              "total_tokens": 911,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "id": "chatcmpl-Bhnqx9Mfd5MPUDhHbnFQBLAaFbBHc",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run-fa50f10f-9851-4017-b964-db127c89bacf-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 796,
+            "output_tokens": 115,
+            "total_tokens": 911,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 1,
+    "parents": {},
+    "recursion_limit": 30,
+    "thread_id": "7e554d44-539f-4bed-b87c-bce8287c2b69",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 27,
+    "langgraph_node": "execute_agent",
+    "langgraph_triggers": ["branch:to:execute_agent"],
+    "langgraph_path": ["__pregel_pull", "execute_agent"],
+    "langgraph_checkpoint_ns": "execute_agent:058979f9-e8a3-4808-f709-3d448b0be617"
+  },
+  "2025-06-13T01:50:39.862603+00:00",
+  {
+    "configurable": {
+      "thread_id": "81452af0-e5f4-465e-93a6-d1c41d4179a8",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f047f8c-e52d-63a5-8000-275d928ae10a"
+    }
+  },
+  []
+]

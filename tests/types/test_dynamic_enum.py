@@ -34,26 +34,27 @@ def test_dynamic_removal():
         passe)
 
 
-def test_json_schema():
-    schema = Animal.model_json_schema()
+            def test_json_schema():
+            schema = Animal.model_json_schema()
 
 
-def test_dynamic_enum_factory():
-    PlanetType = create_dynamic_enum("PlanetType", ["earth", "mars", "venus"])
+            def test_dynamic_enum_factory():
+            PlanetType = create_dynamic_enum(
+          "PlanetType", ["earth", "mars", "venus"])
 
-    class Mission(BaseModel):
-        destination: PlanetType
+           class Mission(BaseModel):
+           destination: PlanetType
 
-    m = Mission(destination="mars")
-    assert m.destination == "mars"
-    PlanetType.register("pluto")
-    m2 = Mission(destination="pluto")
-    assert m2.destination == "pluto"
+           m = Mission(destination="mars")
+           assert m.destination == "mars"
+           PlanetType.register("pluto")
+           m2 = Mission(destination="pluto")
+           assert m2.destination == "pluto"
 
 
-if __name__ == "__main__":
-    test_valid_enum()
-    test_dynamic_registration()
-    test_dynamic_removal()
-    test_json_schema()
-    test_dynamic_enum_factory()
+           if __name__ == "__main__":
+           test_valid_enum()
+           test_dynamic_registration()
+           test_dynamic_removal()
+           test_json_schema()
+           test_dynamic_enum_factory()

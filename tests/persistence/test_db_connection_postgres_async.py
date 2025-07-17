@@ -7,6 +7,10 @@ import sys
 import uuid
 from datetime import datetime
 
+from haive.core.engine.aug_llm import AugLLMConfig
+from haive.core.models.llm.base import AzureLLMConfig
+from haive.core.persistence.postgres_config import PostgresCheckpointerConfig
+
 # Configure logging
 logging.basicConfig(
     level=logging.DEBUG,
@@ -14,11 +18,8 @@ logging.basicConfig(
     stream=sys.stdout,
 )
 
-from haive.core.engine.aug_llm import AugLLMConfig
 
 # Import your AugLLMEngine and other necessary components
-from haive.core.models.llm.base import AzureLLMConfig
-from haive.core.persistence.postgres_config import PostgresCheckpointerConfig
 
 
 async def test_postgres_with_augllm():

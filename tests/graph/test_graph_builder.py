@@ -4,7 +4,11 @@ import unittest
 from typing import Any
 from unittest.mock import MagicMock, Mock
 
+from pydantic import BaseModel, ConfigDict, Field
+
+from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.engine.base import EngineType
+from haive.core.models.llm.base import AzureLLMConfig
 
 # First, mock all dependencies BEFORE importing any modules
 # Create mock objects that will be used throughout
@@ -79,8 +83,6 @@ sys.modules["src.haive.core.graph.StateGraphEditor"] = mock_graph_editor_module
 sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../../"))
 )
-
-from pydantic import BaseModel, ConfigDict, Field
 
 
 # Create classes we expect to exist within GraphBuilder
@@ -373,8 +375,6 @@ sys.modules["src.haive.core.config.runnable"] = mock_config_module
 # Now import the modules we need for testing
 
 # Import the real engines
-from haive.core.engine.aug_llm import AugLLMConfig
-from haive.core.models.llm.base import AzureLLMConfig
 
 
 # Create a test state model

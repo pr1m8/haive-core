@@ -1,0 +1,353 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Calculate 5 + 3, then create a plan",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "4ab106ed-d628-4613-a0fe-038e3f4b8891",
+        "example": false
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "tool_calls": [
+            {
+              "id": "call_wSHCr2Rd6FMfmnj6P3QxUPKN",
+              "function": {
+                "arguments": "{\"a\":5,\"b\":3}",
+                "name": "add"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 18,
+            "prompt_tokens": 58,
+            "total_tokens": 76,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "content_filter_results": {}
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--ca40df86-4a42-416d-b70d-e19a7e22942e-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "add",
+            "args": {
+              "a": 5,
+              "b": 3
+            },
+            "id": "call_wSHCr2Rd6FMfmnj6P3QxUPKN",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 58,
+          "output_tokens": 18,
+          "total_tokens": 76,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "8",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "add",
+        "id": "0954298a-49a2-4007-bb65-8b5cedd28746",
+        "tool_call_id": "call_wSHCr2Rd6FMfmnj6P3QxUPKN",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "5 + 3 equals 8.\n\nNow, let's create a plan:\n\n**Plan: Improve Personal Productivity**\n\n1. **Set Clear Goals**\n   - Define short-term and long-term goals.\n   - Ensure that they are specific, measurable, achievable, relevant, and time-bound (SMART).\n\n2. **Prioritize Tasks**\n   - Use a priority matrix to determine urgent and important tasks.\n   - Focus on high-impact activities.\n\n3. **Time Management**\n   - Allocate specific times for tasks using a calendar.\n   - Break tasks into smaller, manageable chunks.\n\n4. **Remove Distractions**\n   - Identify common distractions and develop strategies to minimize them.\n   - Use tools like noise-canceling headphones or apps that block distracting websites.\n\n5. **Develop Routines**\n   - Create morning and evening routines that help you focus and unwind.\n   - Stick to consistent schedules that support productivity.\n\n6. **Utilize Productivity Tools**\n   - Use tools such as to-do lists, project management software, and note-taking apps.\n   - Regularly review and update tools to match evolving needs.\n\n7. **Monitor Progress**\n   - Set regular times to review goals and progress.\n   - Adjust plans and strategies as necessary.\n\n8. **Self-Care**\n   - Include time for physical, mental, and emotional health.\n   - Practice relaxation techniques like meditation or exercise regularly.\n\nThis plan will help increase efficiency and effectiveness in achieving goals.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 292,
+            "prompt_tokens": 83,
+            "total_tokens": 375,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--7baac58c-1563-4f9f-a3f2-b4987d76f27a-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 83,
+          "output_tokens": 292,
+          "total_tokens": 375,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ],
+    "tools": [
+      {
+        "name": "{'name': 'add', 'description': 'returns the sum of two numbers', 'args_schema': <class 'langchain_core.utils.pydantic.add'>, 'return_direct': False, 'verbose': False, 'tags': None, 'metadata': None, 'handle_tool_error': False, 'handle_validation_error': False, 'response_format': 'content', 'func': <function add at 0x7b055ef0e340>, 'coroutine': None}",
+        "description": "",
+        "type": "tool"
+      }
+    ],
+    "tool_routes": {
+      "tool_0": "unknown"
+    },
+    "name_attrs": ["name", "__name__", "func_name"],
+    "content": null,
+    "output_schemas": {},
+    "engine_route_config": {
+      "llm": ["langchain_tool", "function", "pydantic_model"],
+      "aug_llm": ["langchain_tool", "function", "pydantic_model"],
+      "retriever": ["retriever"],
+      "parser": ["pydantic_model"]
+    }
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "f7e86281-22ab-4f36-b838-57d936d08711",
+      "checkpoint_ns": "React Agent:e707ef4e-fe40-2192-fe4c-8d7d2520fb90",
+      "checkpoint_id": "1f051e37-3eeb-6d50-8004-968084b61263",
+      "checkpoint_map": {
+        "": "1f051e37-1fd4-622b-8000-8b40b3011501",
+        "React Agent:e707ef4e-fe40-2192-fe4c-8d7d2520fb90": "1f051e37-3eeb-6d50-8004-968084b61263"
+      }
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "5 + 3 equals 8.\n\nNow, let's create a plan:\n\n**Plan: Improve Personal Productivity**\n\n1. **Set Clear Goals**\n   - Define short-term and long-term goals.\n   - Ensure that they are specific, measurable, achievable, relevant, and time-bound (SMART).\n\n2. **Prioritize Tasks**\n   - Use a priority matrix to determine urgent and important tasks.\n   - Focus on high-impact activities.\n\n3. **Time Management**\n   - Allocate specific times for tasks using a calendar.\n   - Break tasks into smaller, manageable chunks.\n\n4. **Remove Distractions**\n   - Identify common distractions and develop strategies to minimize them.\n   - Use tools like noise-canceling headphones or apps that block distracting websites.\n\n5. **Develop Routines**\n   - Create morning and evening routines that help you focus and unwind.\n   - Stick to consistent schedules that support productivity.\n\n6. **Utilize Productivity Tools**\n   - Use tools such as to-do lists, project management software, and note-taking apps.\n   - Regularly review and update tools to match evolving needs.\n\n7. **Monitor Progress**\n   - Set regular times to review goals and progress.\n   - Adjust plans and strategies as necessary.\n\n8. **Self-Care**\n   - Include time for physical, mental, and emotional health.\n   - Practice relaxation techniques like meditation or exercise regularly.\n\nThis plan will help increase efficiency and effectiveness in achieving goals.",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 292,
+              "prompt_tokens": 83,
+              "total_tokens": 375,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--7baac58c-1563-4f9f-a3f2-b4987d76f27a-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 83,
+            "output_tokens": 292,
+            "total_tokens": 375,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 4,
+    "parents": {
+      "": "1f051e37-1fd4-622b-8000-8b40b3011501"
+    },
+    "thread_id": "f7e86281-22ab-4f36-b838-57d936d08711",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 1,
+    "langgraph_node": "React Agent",
+    "langgraph_triggers": ["branch:to:React Agent"],
+    "langgraph_path": ["__pregel_pull", "React Agent"],
+    "langgraph_checkpoint_ns": "React Agent:e707ef4e-fe40-2192-fe4c-8d7d2520fb90"
+  },
+  "2025-06-25T16:42:59.293713+00:00",
+  {
+    "configurable": {
+      "thread_id": "f7e86281-22ab-4f36-b838-57d936d08711",
+      "checkpoint_ns": "React Agent:e707ef4e-fe40-2192-fe4c-8d7d2520fb90",
+      "checkpoint_id": "1f051e37-25b5-6eee-8003-00e890e7a9b6",
+      "checkpoint_map": {
+        "": "1f051e37-1fd4-622b-8000-8b40b3011501",
+        "React Agent:e707ef4e-fe40-2192-fe4c-8d7d2520fb90": "1f051e37-25b5-6eee-8003-00e890e7a9b6"
+      }
+    }
+  },
+  []
+]

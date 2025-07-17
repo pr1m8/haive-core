@@ -1,0 +1,223 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Create a plan for a day trip, then calculate how many hours we'll need if we spend 2 hours at each location",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "1f65386d-fede-4e74-8feb-4fafc51be901",
+        "example": false
+      },
+      {
+        "content": "Creating a day trip plan involves selecting destinations within a reasonable distance and ensuring there is adequate time for travel and enjoyment at each location. For your trip, I'll include three destinations and calculate the time needed.\n\n### Day Trip Plan\n\n**Location 1: Local Botanical Garden**\n- **Activity**: Explore the gardens, take photographs, enjoy the tranquility.\n- **Time Spent**: 2 hours\n\n**Location 2: Art Museum**\n- **Activity**: View the exhibits, participate in any available guided tours.\n- **Time Spent**: 2 hours\n\n**Location 3: Historic Downtown Area**\n- **Activity**: Walk through the area, visit shops and cafes, appreciate the architecture.\n- **Time Spent**: 2 hours\n\n### Travel Time Estimation\n- **Travel from Home to Botanical Garden**: 30 minutes\n- **Travel from Botanical Garden to Art Museum**: 20 minutes\n- **Travel from Art Museum to Historic Downtown Area**: 15 minutes\n- **Travel from Historic Downtown Area back to Home**: 30 minutes\n\n### Total Time Calculation\n1. Time at each location: \\(3 \\times 2 \\, \\text{hours} = 6 \\, \\text{hours}\\)\n2. Total travel time: \n   - Home to Botanical Garden: 0.5 hours\n   - Botanical Garden to Art Museum: 0.33 hours\n   - Art Museum to Historic Downtown Area: 0.25 hours\n   - Historic Downtown Area back to Home: 0.5 hours\n\nTotal travel time: \\(0.5 + 0.33 + 0.25 + 0.5 = 1.58 \\approx 1.6 \\, \\text{hours}\\)\n\n### Total Day Trip Time\n- \\(6 \\, \\text{hours at locations} + 1.6 \\, \\text{hours travel} = 7.6 \\, \\text{hours}\\)\n\nFor a well-rounded day trip with adequate time to enjoy each location, you will need approximately 8 hours in total, including travel and any additional time for meals or unexpected delays.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 445,
+            "prompt_tokens": 31,
+            "total_tokens": 476,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--e07ffd5d-2c42-4aac-815c-19a825e1c917-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 31,
+          "output_tokens": 445,
+          "total_tokens": 476,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "0cbd96a1-6519-42e3-93dc-14c1865036a6",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04f04b-f351-6321-8001-75d989bbd68b"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "Creating a day trip plan involves selecting destinations within a reasonable distance and ensuring there is adequate time for travel and enjoyment at each location. For your trip, I'll include three destinations and calculate the time needed.\n\n### Day Trip Plan\n\n**Location 1: Local Botanical Garden**\n- **Activity**: Explore the gardens, take photographs, enjoy the tranquility.\n- **Time Spent**: 2 hours\n\n**Location 2: Art Museum**\n- **Activity**: View the exhibits, participate in any available guided tours.\n- **Time Spent**: 2 hours\n\n**Location 3: Historic Downtown Area**\n- **Activity**: Walk through the area, visit shops and cafes, appreciate the architecture.\n- **Time Spent**: 2 hours\n\n### Travel Time Estimation\n- **Travel from Home to Botanical Garden**: 30 minutes\n- **Travel from Botanical Garden to Art Museum**: 20 minutes\n- **Travel from Art Museum to Historic Downtown Area**: 15 minutes\n- **Travel from Historic Downtown Area back to Home**: 30 minutes\n\n### Total Time Calculation\n1. Time at each location: \\(3 \\times 2 \\, \\text{hours} = 6 \\, \\text{hours}\\)\n2. Total travel time: \n   - Home to Botanical Garden: 0.5 hours\n   - Botanical Garden to Art Museum: 0.33 hours\n   - Art Museum to Historic Downtown Area: 0.25 hours\n   - Historic Downtown Area back to Home: 0.5 hours\n\nTotal travel time: \\(0.5 + 0.33 + 0.25 + 0.5 = 1.58 \\approx 1.6 \\, \\text{hours}\\)\n\n### Total Day Trip Time\n- \\(6 \\, \\text{hours at locations} + 1.6 \\, \\text{hours travel} = 7.6 \\, \\text{hours}\\)\n\nFor a well-rounded day trip with adequate time to enjoy each location, you will need approximately 8 hours in total, including travel and any additional time for meals or unexpected delays.",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 445,
+              "prompt_tokens": 31,
+              "total_tokens": 476,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--e07ffd5d-2c42-4aac-815c-19a825e1c917-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 31,
+            "output_tokens": 445,
+            "total_tokens": 476,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 1,
+    "parents": {},
+    "thread_id": "1317b9a1-e89f-44ff-b6fc-3e4c6e2eb31d",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 2,
+    "langgraph_node": "delegate_to_agent",
+    "langgraph_triggers": ["branch:to:delegate_to_agent"],
+    "langgraph_path": ["__pregel_pull", "delegate_to_agent"],
+    "langgraph_checkpoint_ns": "delegate_to_agent:f3fc8187-a4c9-c1c9-4bfc-cc2bcde37546"
+  },
+  "2025-06-22T01:03:45.487526+00:00",
+  {
+    "configurable": {
+      "thread_id": "0cbd96a1-6519-42e3-93dc-14c1865036a6",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04f04b-d4a8-6891-8000-3dd43449f4a0"
+    }
+  },
+  []
+]

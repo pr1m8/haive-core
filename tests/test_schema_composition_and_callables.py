@@ -7,15 +7,12 @@ This shows how to:
 """
 
 import logging
-from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Dict, List
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
-from langgraph.types import Command
-from pydantic import BaseModel, Field, create_model
+from pydantic import Field, create_model
 
-from haive.core.graph.node.base_config import NodeConfig
-from haive.core.graph.node.types import NodeType
+from haive.core.graph.node.callable_node import CallableNodeConfig
 from haive.core.schema import StateSchema
 
 # Configure logging
@@ -73,7 +70,6 @@ def check_cost_threshold(total_cost: float, cost_limit: float = 5.0) -> bool:
 
 
 # Import the proper CallableNodeConfig instead of creating custom classes
-from haive.core.graph.node.callable_node import CallableNodeConfig
 
 
 def demonstrate_schema_composition():
@@ -127,7 +123,7 @@ def demonstrate_schema_composition():
     print("\n2. Creating composite schema with all required fields:")
     CompositeState = create_model("CompositeState", __base__=StateSchema, **all_fields)
 
-    print(f"\n  Composite schema fields:")
+    print("\n  Composite schema fields:")
     for name, field_info in CompositeState.model_fields.items():
         print(f"    - {name}: {field_info.annotation}")
 
@@ -187,7 +183,8 @@ def demonstrate_generic_extraction():
         callable_func=message_density_check,
         parameter_mapping={
             "messages": "messages",
-            "message_threshold": "message_threshold",  # Use default parameter instead of nested
+            # Use default parameter instead of nested
+            "message_threshold": "message_threshold",
         },
         result_key="conversation_density",
     )

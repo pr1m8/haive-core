@@ -227,7 +227,8 @@ class TestRunnableConfigManager:
 
         # engine1 should be merged
         assert "engine1" in engine_configs
-        assert engine_configs["engine1"]["param1"] == "override-value1"  # Override wins
+        # Override wins
+        assert engine_configs["engine1"]["param1"] == "override-value1"
         assert (
             engine_configs["engine1"]["param2"] == "base-value2"
         )  # Preserved from base

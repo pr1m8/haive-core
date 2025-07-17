@@ -1,0 +1,73 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Hello",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "ac3d5eb2-faea-4c6e-b09c-11a61656ec84",
+        "example": false
+      },
+      {
+        "content": "Agent response",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "0164201a-7020-44cb-8a4f-f2c4e98e1c29",
+        "example": false
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "test-thread-123",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f052cc4-6b3e-6215-8001-1cb9d3ce4445"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "start": {
+        "messages": [
+          {
+            "content": "Hello",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "ac3d5eb2-faea-4c6e-b09c-11a61656ec84",
+            "example": false
+          },
+          {
+            "content": "Agent response",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "0164201a-7020-44cb-8a4f-f2c4e98e1c29",
+            "example": false
+          }
+        ]
+      }
+    },
+    "step": 1,
+    "parents": {},
+    "thread_id": "test-thread-123",
+    "debug": false,
+    "checkpoint_mode": "sync"
+  },
+  "2025-06-26T20:29:36.148521+00:00",
+  {
+    "configurable": {
+      "thread_id": "test-thread-123",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f052cc4-6b34-6e6e-8000-e861461ef66d"
+    }
+  },
+  []
+]

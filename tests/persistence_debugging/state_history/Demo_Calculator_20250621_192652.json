@@ -1,0 +1,298 @@
+[
+  {
+    "messages": [
+      {
+        "content": "First plan a day trip, then calculate how many hours we need",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "7de27ffc-80c8-4182-98d3-28f9c0e64e54",
+        "example": false
+      },
+      {
+        "content": "To plan a successful day trip, it's essential to outline the activities, locations, and time allocations you'll need to make the most of the day. Here's an example itinerary based on a typical trip, adjusting as necessary for your preferences and destination:\n\n**Day Trip Itinerary:**\n\n1. **Departure (8:00 AM)**\n   - Begin your journey early to maximize your day. Depart from your home or hotel by 8:00 AM.\n\n2. **Arrival at Destination (9:00 AM)**\n   - Estimated travel time: 1 hour. Adjust based on your location and destination traffic conditions.\n\n3. **Morning Activity (9:30 AM - 11:30 AM)**\n   - Spend about 2 hours engaging in an outdoor activity or visiting a local museum, park, or landmark.\n\n4. **Lunch (12:00 PM - 1:00 PM)**\n   - Choose a local restaurant or picnic spot to enjoy lunch. Plan for about 1 hour.\n\n5. **Afternoon Activity (1:30 PM - 3:30 PM)**\n   - Continue exploring the area with another activity, such as a guided tour, hike, or shopping at local stores. Allocate 2 hours.\n\n6. **Coffee Break (4:00 PM - 4:30 PM)**\n   - Take a 30-minute coffee break at a local caf\u00e9 to relax and recharge.\n\n7. **Evening Exploration (5:00 PM - 6:30 PM)**\n   - Enjoy a leisurely stroll through a nearby neighborhood, beach, or attraction. About 1.5 hours.\n\n8. **Dinner (7:00 PM - 8:30 PM)**\n   - End the day with dinner at a local restaurant. Allocate 1.5 hours for dinner.\n\n9. **Return Home (9:00 PM)**\n   - Begin your journey back home. Estimated travel time: 1 hour, depending on your location.\n\n**Total Time Required:**\n\n1. 1 hour for departure and arrival time\n2. 2 hours for morning activities\n3. 1 hour for lunch\n4. 2 hours for afternoon activities\n5. 0.5 hours for a coffee break\n6. 1.5 hours for evening exploration\n7. 1.5 hours for dinner\n8. 1 hour for return travel\n\n**Total Duration: 10.5 hours (Approximately)**\n\nAdjust the itinerary based on the specific locations you are visiting, travel distances, and your personal interests. If certain activities require more time or if travel takes longer, be flexible in shifting your schedule. Enjoy your day trip!",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 541,
+            "prompt_tokens": 20,
+            "total_tokens": 561,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--c9859d68-305c-4baa-81bb-8ede4bca1480-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "To plan a successful day trip, it's essential to outline the activities, locations, and time allocations you'll need to make the most of the day. Here's an example itinerary based on a typical trip, adjusting as necessary for your preferences and destination:\n\n### Day Trip Itinerary:\n\n1. **Departure (8:00 AM)**\n   - Begin your journey early to maximize your day. Depart from your home or hotel by 8:00 AM.\n\n2. **Arrival at Destination (9:00 AM)**\n   - Estimated travel time: 1 hour. Adjust based on your location and destination traffic conditions.\n\n3. **Morning Activity (9:30 AM - 11:30 AM)**\n   - Spend about 2 hours engaging in an outdoor activity or visiting a local museum, park, or landmark.\n\n4. **Lunch (12:00 PM - 1:00 PM)**\n   - Choose a local restaurant or picnic spot to enjoy lunch. Plan for about 1 hour.\n\n5. **Afternoon Activity (1:30 PM - 3:30 PM)**\n   - Continue exploring the area with another activity, such as a guided tour, hike, or shopping at local stores. Allocate 2 hours.\n\n6. **Coffee Break (4:00 PM - 4:30 PM)**\n   - Take a 30-minute coffee break at a local caf\u00e9 to relax and recharge.\n\n7. **Evening Exploration (5:00 PM - 6:30 PM)**\n   - Enjoy a leisurely stroll through a nearby neighborhood, beach, or attraction. About 1.5 hours.\n\n8. **Dinner (7:00 PM - 8:30 PM)**\n   - End the day with dinner at a local restaurant. Allocate 1.5 hours for dinner.\n\n9. **Return Home (9:00 PM)**\n   - Begin your journey back home. Estimated travel time: 1 hour, depending on your location.\n\n### Total Time Required:\n\n1. 1 hour for departure and arrival time\n2. 2 hours for morning activities\n3. 1 hour for lunch\n4. 2 hours for afternoon activities\n5. 0.5 hours for a coffee break\n6. 1.5 hours for evening exploration\n7. 1.5 hours for dinner\n8. 1 hour for return travel\n\n**Total Duration: Approximately 10.5 hours**\n\nAdjust the itinerary based on the specific locations you are visiting, travel distances, and your personal interests. If certain activities require more time or if travel takes longer, be flexible in shifting your schedule. Enjoy your day trip!",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 537,
+            "prompt_tokens": 564,
+            "total_tokens": 1101,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--90da9d99-26ce-4096-b97f-427755551825-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 564,
+          "output_tokens": 537,
+          "total_tokens": 1101,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "1267de0e-5b3b-45ca-ad7d-d941ff0e13a9",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04ef73-6619-6178-8001-0de1bb0fa36f"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "To plan a successful day trip, it's essential to outline the activities, locations, and time allocations you'll need to make the most of the day. Here's an example itinerary based on a typical trip, adjusting as necessary for your preferences and destination:\n\n### Day Trip Itinerary:\n\n1. **Departure (8:00 AM)**\n   - Begin your journey early to maximize your day. Depart from your home or hotel by 8:00 AM.\n\n2. **Arrival at Destination (9:00 AM)**\n   - Estimated travel time: 1 hour. Adjust based on your location and destination traffic conditions.\n\n3. **Morning Activity (9:30 AM - 11:30 AM)**\n   - Spend about 2 hours engaging in an outdoor activity or visiting a local museum, park, or landmark.\n\n4. **Lunch (12:00 PM - 1:00 PM)**\n   - Choose a local restaurant or picnic spot to enjoy lunch. Plan for about 1 hour.\n\n5. **Afternoon Activity (1:30 PM - 3:30 PM)**\n   - Continue exploring the area with another activity, such as a guided tour, hike, or shopping at local stores. Allocate 2 hours.\n\n6. **Coffee Break (4:00 PM - 4:30 PM)**\n   - Take a 30-minute coffee break at a local caf\u00e9 to relax and recharge.\n\n7. **Evening Exploration (5:00 PM - 6:30 PM)**\n   - Enjoy a leisurely stroll through a nearby neighborhood, beach, or attraction. About 1.5 hours.\n\n8. **Dinner (7:00 PM - 8:30 PM)**\n   - End the day with dinner at a local restaurant. Allocate 1.5 hours for dinner.\n\n9. **Return Home (9:00 PM)**\n   - Begin your journey back home. Estimated travel time: 1 hour, depending on your location.\n\n### Total Time Required:\n\n1. 1 hour for departure and arrival time\n2. 2 hours for morning activities\n3. 1 hour for lunch\n4. 2 hours for afternoon activities\n5. 0.5 hours for a coffee break\n6. 1.5 hours for evening exploration\n7. 1.5 hours for dinner\n8. 1 hour for return travel\n\n**Total Duration: Approximately 10.5 hours**\n\nAdjust the itinerary based on the specific locations you are visiting, travel distances, and your personal interests. If certain activities require more time or if travel takes longer, be flexible in shifting your schedule. Enjoy your day trip!",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 537,
+              "prompt_tokens": 564,
+              "total_tokens": 1101,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--90da9d99-26ce-4096-b97f-427755551825-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 564,
+            "output_tokens": 537,
+            "total_tokens": 1101,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 1,
+    "parents": {},
+    "thread_id": "9ed9ff70-635a-49f2-8bdc-be0e61980c74",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 6,
+    "langgraph_node": "delegate_to_agent",
+    "langgraph_triggers": ["branch:to:delegate_to_agent"],
+    "langgraph_path": ["__pregel_pull", "delegate_to_agent"],
+    "langgraph_checkpoint_ns": "delegate_to_agent:2854ada7-5a27-3af3-c536-33e6a89867a7"
+  },
+  "2025-06-21T23:26:52.473744+00:00",
+  {
+    "configurable": {
+      "thread_id": "1267de0e-5b3b-45ca-ad7d-d941ff0e13a9",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04ef73-3d42-69c9-8000-d8339348d586"
+    }
+  },
+  []
+]

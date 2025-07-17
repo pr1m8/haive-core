@@ -1,0 +1,197 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Create a plan for a day trip, then calculate how many hours we'll need if we spend 2 hours at each location",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "5584a2dd-83c6-46d0-95e3-8bc9b610c2d4",
+        "example": false
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "tool_calls": [
+            {
+              "id": "call_1oO6lx5NF2WsjJDD5ak1Drqk",
+              "function": {
+                "arguments": "{\"steps\":[\"Choose a destination for the day trip.\",\"Research and list interesting locations at the destination.\",\"Determine the travel time to the destination.\",\"Allocate 2 hours to spend at each location.\",\"Include meal times and breaks.\",\"Estimate the total time needed including travel, visiting locations, and meals/breaks.\",\"Ensure the trip fits within a reasonable day-trip timeframe.\"]}",
+                "name": "Plan"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 75,
+            "prompt_tokens": 73,
+            "total_tokens": 148,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {}
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--13b844b4-e417-436d-9ad6-22989f183641-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "Plan",
+            "args": {
+              "steps": [
+                "Choose a destination for the day trip.",
+                "Research and list interesting locations at the destination.",
+                "Determine the travel time to the destination.",
+                "Allocate 2 hours to spend at each location.",
+                "Include meal times and breaks.",
+                "Estimate the total time needed including travel, visiting locations, and meals/breaks.",
+                "Ensure the trip fits within a reasonable day-trip timeframe."
+              ]
+            },
+            "id": "call_1oO6lx5NF2WsjJDD5ak1Drqk",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 73,
+          "output_tokens": 75,
+          "total_tokens": 148,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ],
+    "tools": [
+      {
+        "name": "<class '__main__.Plan'>",
+        "description": "",
+        "type": "tool"
+      }
+    ],
+    "tool_routes": {
+      "tool_0": "unknown"
+    },
+    "name_attrs": ["name", "__name__", "func_name"],
+    "content": null,
+    "output_schemas": {},
+    "engine_route_config": {
+      "llm": ["langchain_tool", "function", "pydantic_model"],
+      "aug_llm": ["langchain_tool", "function", "pydantic_model"],
+      "retriever": ["retriever"],
+      "parser": ["pydantic_model"]
+    },
+    "plan": {
+      "steps": [
+        "Choose a destination for the day trip.",
+        "Research and list interesting locations at the destination.",
+        "Determine the travel time to the destination.",
+        "Allocate 2 hours to spend at each location.",
+        "Include meal times and breaks.",
+        "Estimate the total time needed including travel, visiting locations, and meals/breaks.",
+        "Ensure the trip fits within a reasonable day-trip timeframe."
+      ]
+    }
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "e01b5fc4-8340-445b-865b-0c02464a6e7d",
+      "checkpoint_ns": "Simple Agent:12ba53a0-ae49-f296-c404-40eaa50e5991",
+      "checkpoint_id": "1f051fa0-6e10-6bb8-8003-d41d146159b0",
+      "checkpoint_map": {
+        "": "1f051fa0-5d59-6838-8000-ef9caec85d23",
+        "Simple Agent:12ba53a0-ae49-f296-c404-40eaa50e5991": "1f051fa0-6e10-6bb8-8003-d41d146159b0"
+      }
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "parse_output": {
+        "plan": {
+          "steps": [
+            "Choose a destination for the day trip.",
+            "Research and list interesting locations at the destination.",
+            "Determine the travel time to the destination.",
+            "Allocate 2 hours to spend at each location.",
+            "Include meal times and breaks.",
+            "Estimate the total time needed including travel, visiting locations, and meals/breaks.",
+            "Ensure the trip fits within a reasonable day-trip timeframe."
+          ]
+        }
+      }
+    },
+    "step": 3,
+    "parents": {
+      "": "1f051fa0-5d59-6838-8000-ef9caec85d23"
+    },
+    "thread_id": "e01b5fc4-8340-445b-865b-0c02464a6e7d",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 1,
+    "langgraph_node": "Simple Agent",
+    "langgraph_triggers": ["branch:to:Simple Agent"],
+    "langgraph_path": ["__pregel_pull", "Simple Agent"],
+    "langgraph_checkpoint_ns": "Simple Agent:12ba53a0-ae49-f296-c404-40eaa50e5991"
+  },
+  "2025-06-25T19:24:34.757092+00:00",
+  {
+    "configurable": {
+      "thread_id": "e01b5fc4-8340-445b-865b-0c02464a6e7d",
+      "checkpoint_ns": "Simple Agent:12ba53a0-ae49-f296-c404-40eaa50e5991",
+      "checkpoint_id": "1f051fa0-6d88-6031-8002-45c36dd5f5af",
+      "checkpoint_map": {
+        "": "1f051fa0-5d59-6838-8000-ef9caec85d23",
+        "Simple Agent:12ba53a0-ae49-f296-c404-40eaa50e5991": "1f051fa0-6d88-6031-8002-45c36dd5f5af"
+      }
+    }
+  },
+  []
+]

@@ -1,0 +1,165 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Test",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "40dae2b9-5dfa-40a5-9b4a-f8e56294bb64",
+        "example": false
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "tool_calls": [
+            {
+              "id": "call_P9Bn0hrV9UDZyIRrCV4GaXEi",
+              "function": {
+                "arguments": "{\"steps\":[\"Step 1: Test the functionality.\",\"Step 2: Analyze output.\",\"Step 3: Verify accuracy.\",\"Step 4: Document results.\"]}",
+                "name": "Plan"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 35,
+            "prompt_tokens": 50,
+            "total_tokens": 85,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {}
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--f6f06954-845e-47ce-af6c-69feb70d134e-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "Plan",
+            "args": {
+              "steps": [
+                "Step 1: Test the functionality.",
+                "Step 2: Analyze output.",
+                "Step 3: Verify accuracy.",
+                "Step 4: Document results."
+              ]
+            },
+            "id": "call_P9Bn0hrV9UDZyIRrCV4GaXEi",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 50,
+          "output_tokens": 35,
+          "total_tokens": 85,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ],
+    "tools": [],
+    "tool_routes": {},
+    "name_attrs": ["name", "__name__", "func_name"],
+    "content": null,
+    "output_schemas": {},
+    "engine_route_config": {
+      "llm": ["langchain_tool", "function", "pydantic_model"],
+      "aug_llm": ["langchain_tool", "function", "pydantic_model"],
+      "retriever": ["retriever"],
+      "parser": ["pydantic_model"]
+    },
+    "plan": {
+      "steps": [
+        "Step 1: Test the functionality.",
+        "Step 2: Analyze output.",
+        "Step 3: Verify accuracy.",
+        "Step 4: Document results."
+      ]
+    }
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "e1db5899-b9d8-4bb4-847c-ddb67b01085c",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f051db9-d7d2-682d-8003-7abce5c37202"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "parse_output": {
+        "plan": {
+          "steps": [
+            "Step 1: Test the functionality.",
+            "Step 2: Analyze output.",
+            "Step 3: Verify accuracy.",
+            "Step 4: Document results."
+          ]
+        }
+      }
+    },
+    "step": 3,
+    "parents": {},
+    "thread_id": "e1db5899-b9d8-4bb4-847c-ddb67b01085c",
+    "debug": false,
+    "checkpoint_mode": "sync"
+  },
+  "2025-06-25T15:46:53.039801+00:00",
+  {
+    "configurable": {
+      "thread_id": "e1db5899-b9d8-4bb4-847c-ddb67b01085c",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f051db9-d760-6a3a-8002-8696b36c24b0"
+    }
+  },
+  []
+]

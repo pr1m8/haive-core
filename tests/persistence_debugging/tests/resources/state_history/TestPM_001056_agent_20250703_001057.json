@@ -1,0 +1,245 @@
+[
+    {
+        "messages": [
+            {
+                "content": "Current Section: Problem\nYour total contributions: 0\nFormat: markdown",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "system",
+                "name": null,
+                "id": "dfdd0dd0-0098-44fe-bb61-94882264c90e"
+            },
+            {
+                "content": "Start the 'Problem' section. Provide a solid foundation for others to build on.",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "system",
+                "name": null,
+                "id": "64f685c6-99a4-428a-95f3-bdec2e7a2689"
+            },
+            {
+                "content": "\ud83d\udcdd Collaborative Session: Collaborative Document\n\nTopic: Testing persistence for collaborative agents\n\nWe'll work together on these sections:\n- Problem\n- Solution\n\nFormat: markdown\nMin contributions per section: 1\n\nLet's start with: Problem",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "human",
+                "name": null,
+                "id": "74b61d81-74fe-40df-866c-20d64e84cd73",
+                "example": false
+            },
+            {
+                "content": "Many collaborative agents lack robustness and consistency, leading to challenges in maintaining reliable interaction and data persistence across sessions and platforms.",
+                "additional_kwargs": {
+                    "refusal": null
+                },
+                "response_metadata": {
+                    "token_usage": {
+                        "completion_tokens": 24,
+                        "prompt_tokens": 112,
+                        "total_tokens": 136,
+                        "completion_tokens_details": {
+                            "accepted_prediction_tokens": 0,
+                            "audio_tokens": 0,
+                            "reasoning_tokens": 0,
+                            "rejected_prediction_tokens": 0
+                        },
+                        "prompt_tokens_details": {
+                            "audio_tokens": 0,
+                            "cached_tokens": 0
+                        }
+                    },
+                    "model_name": "gpt-4o-2024-08-06",
+                    "system_fingerprint": "fp_ee1d74bde0",
+                    "prompt_filter_results": [
+                        {
+                            "prompt_index": 0,
+                            "content_filter_results": {
+                                "hate": {
+                                    "filtered": false,
+                                    "severity": "safe"
+                                },
+                                "self_harm": {
+                                    "filtered": false,
+                                    "severity": "safe"
+                                },
+                                "sexual": {
+                                    "filtered": false,
+                                    "severity": "safe"
+                                },
+                                "violence": {
+                                    "filtered": false,
+                                    "severity": "safe"
+                                }
+                            }
+                        }
+                    ],
+                    "finish_reason": "stop",
+                    "logprobs": null,
+                    "content_filter_results": {
+                        "hate": {
+                            "filtered": false,
+                            "severity": "safe"
+                        },
+                        "self_harm": {
+                            "filtered": false,
+                            "severity": "safe"
+                        },
+                        "sexual": {
+                            "filtered": false,
+                            "severity": "safe"
+                        },
+                        "violence": {
+                            "filtered": false,
+                            "severity": "safe"
+                        }
+                    }
+                },
+                "type": "ai",
+                "name": null,
+                "id": "run--12b1c92c-1da9-4133-97fb-38abfc1b4159-0",
+                "example": false,
+                "tool_calls": [],
+                "invalid_tool_calls": [],
+                "usage_metadata": {
+                    "input_tokens": 112,
+                    "output_tokens": 24,
+                    "total_tokens": 136,
+                    "input_token_details": {
+                        "audio": 0,
+                        "cache_read": 0
+                    },
+                    "output_token_details": {
+                        "audio": 0,
+                        "reasoning": 0
+                    }
+                }
+            }
+        ]
+    },
+    [],
+    {
+        "configurable": {
+            "thread_id": "TestPM_001056_agent_f7420816",
+            "checkpoint_ns": "",
+            "checkpoint_id": "1f057c3b-8cc1-676f-8001-fafdb28f645c"
+        }
+    },
+    {
+        "step": 1,
+        "debug": false,
+        "source": "loop",
+        "writes": {
+            "agent_node": {
+                "messages": {
+                    "content": "Many collaborative agents lack robustness and consistency, leading to challenges in maintaining reliable interaction and data persistence across sessions and platforms.",
+                    "additional_kwargs": {
+                        "refusal": null
+                    },
+                    "response_metadata": {
+                        "logprobs": null,
+                        "model_name": "gpt-4o-2024-08-06",
+                        "token_usage": {
+                            "total_tokens": 136,
+                            "prompt_tokens": 112,
+                            "completion_tokens": 24,
+                            "prompt_tokens_details": {
+                                "audio_tokens": 0,
+                                "cached_tokens": 0
+                            },
+                            "completion_tokens_details": {
+                                "audio_tokens": 0,
+                                "reasoning_tokens": 0,
+                                "accepted_prediction_tokens": 0,
+                                "rejected_prediction_tokens": 0
+                            }
+                        },
+                        "finish_reason": "stop",
+                        "system_fingerprint": "fp_ee1d74bde0",
+                        "prompt_filter_results": [
+                            {
+                                "prompt_index": 0,
+                                "content_filter_results": {
+                                    "hate": {
+                                        "filtered": false,
+                                        "severity": "safe"
+                                    },
+                                    "sexual": {
+                                        "filtered": false,
+                                        "severity": "safe"
+                                    },
+                                    "violence": {
+                                        "filtered": false,
+                                        "severity": "safe"
+                                    },
+                                    "self_harm": {
+                                        "filtered": false,
+                                        "severity": "safe"
+                                    }
+                                }
+                            }
+                        ],
+                        "content_filter_results": {
+                            "hate": {
+                                "filtered": false,
+                                "severity": "safe"
+                            },
+                            "sexual": {
+                                "filtered": false,
+                                "severity": "safe"
+                            },
+                            "violence": {
+                                "filtered": false,
+                                "severity": "safe"
+                            },
+                            "self_harm": {
+                                "filtered": false,
+                                "severity": "safe"
+                            }
+                        }
+                    },
+                    "type": "ai",
+                    "name": null,
+                    "id": "run--12b1c92c-1da9-4133-97fb-38abfc1b4159-0",
+                    "example": false,
+                    "tool_calls": [],
+                    "invalid_tool_calls": [],
+                    "usage_metadata": {
+                        "input_tokens": 112,
+                        "output_tokens": 24,
+                        "total_tokens": 136,
+                        "input_token_details": {
+                            "audio": 0,
+                            "cache_read": 0
+                        },
+                        "output_token_details": {
+                            "audio": 0,
+                            "reasoning": 0
+                        }
+                    }
+                }
+            }
+        },
+        "parents": {},
+        "thread_id": "collab_test_001056",
+        "langgraph_node": "execute_agent",
+        "langgraph_path": [
+            "__pregel_pull",
+            "execute_agent"
+        ],
+        "langgraph_step": 3,
+        "checkpoint_mode": "sync",
+        "recursion_limit": 50,
+        "langgraph_triggers": [
+            "branch:to:execute_agent"
+        ],
+        "langgraph_checkpoint_ns": "execute_agent:a555271e-327e-e573-ed32-4a6b64588b2c"
+    },
+    "2025-07-03T04:10:57.910755+00:00",
+    {
+        "configurable": {
+            "thread_id": "TestPM_001056_agent_f7420816",
+            "checkpoint_ns": "",
+            "checkpoint_id": "1f057c3b-8834-61cd-8000-dd71098aae4b"
+        }
+    },
+    []
+]

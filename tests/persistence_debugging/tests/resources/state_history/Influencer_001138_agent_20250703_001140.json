@@ -1,0 +1,237 @@
+[
+    {
+        "messages": [
+            {
+                "content": "[@Influencer_001138]\nStats: 0 likes | 0 followers\nTrending: Nothing trending\nKeep it under 500 characters!",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "system",
+                "name": null,
+                "id": "c21de718-a289-4de4-a754-ad02d6e93331"
+            },
+            {
+                "content": "\ud83d\udcac New thread: Social media conversation test\nPlatform: generic (max 500 chars)\nShare your thoughts! Go viral at 10 likes \ud83d\udd25",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "human",
+                "name": null,
+                "id": "ce248ad7-5572-4f86-b8e4-591be2d93e7b",
+                "example": false
+            },
+            {
+                "content": "That's a fun challenge! To kick things off, what's one trend you think is here to stay in social media? Let's get this convo rolling! \ud83c\udf1f\u2728",
+                "additional_kwargs": {
+                    "refusal": null
+                },
+                "response_metadata": {
+                    "token_usage": {
+                        "completion_tokens": 34,
+                        "prompt_tokens": 221,
+                        "total_tokens": 255,
+                        "completion_tokens_details": {
+                            "accepted_prediction_tokens": 0,
+                            "audio_tokens": 0,
+                            "reasoning_tokens": 0,
+                            "rejected_prediction_tokens": 0
+                        },
+                        "prompt_tokens_details": {
+                            "audio_tokens": 0,
+                            "cached_tokens": 0
+                        }
+                    },
+                    "model_name": "gpt-4o-2024-08-06",
+                    "system_fingerprint": "fp_ee1d74bde0",
+                    "prompt_filter_results": [
+                        {
+                            "prompt_index": 0,
+                            "content_filter_results": {
+                                "hate": {
+                                    "filtered": false,
+                                    "severity": "safe"
+                                },
+                                "self_harm": {
+                                    "filtered": false,
+                                    "severity": "safe"
+                                },
+                                "sexual": {
+                                    "filtered": false,
+                                    "severity": "safe"
+                                },
+                                "violence": {
+                                    "filtered": false,
+                                    "severity": "safe"
+                                }
+                            }
+                        }
+                    ],
+                    "finish_reason": "stop",
+                    "logprobs": null,
+                    "content_filter_results": {
+                        "hate": {
+                            "filtered": false,
+                            "severity": "safe"
+                        },
+                        "self_harm": {
+                            "filtered": false,
+                            "severity": "safe"
+                        },
+                        "sexual": {
+                            "filtered": false,
+                            "severity": "safe"
+                        },
+                        "violence": {
+                            "filtered": false,
+                            "severity": "safe"
+                        }
+                    }
+                },
+                "type": "ai",
+                "name": null,
+                "id": "run--ec9aee69-71f6-47e3-a99c-ec374ff0129b-0",
+                "example": false,
+                "tool_calls": [],
+                "invalid_tool_calls": [],
+                "usage_metadata": {
+                    "input_tokens": 221,
+                    "output_tokens": 34,
+                    "total_tokens": 255,
+                    "input_token_details": {
+                        "audio": 0,
+                        "cache_read": 0
+                    },
+                    "output_token_details": {
+                        "audio": 0,
+                        "reasoning": 0
+                    }
+                }
+            }
+        ]
+    },
+    [],
+    {
+        "configurable": {
+            "thread_id": "Influencer_001138_agent_07da5129",
+            "checkpoint_ns": "",
+            "checkpoint_id": "1f057c3d-2487-6f16-8001-43464e6f9290"
+        }
+    },
+    {
+        "step": 1,
+        "debug": false,
+        "source": "loop",
+        "writes": {
+            "agent_node": {
+                "messages": {
+                    "content": "That's a fun challenge! To kick things off, what's one trend you think is here to stay in social media? Let's get this convo rolling! \ud83c\udf1f\u2728",
+                    "additional_kwargs": {
+                        "refusal": null
+                    },
+                    "response_metadata": {
+                        "logprobs": null,
+                        "model_name": "gpt-4o-2024-08-06",
+                        "token_usage": {
+                            "total_tokens": 255,
+                            "prompt_tokens": 221,
+                            "completion_tokens": 34,
+                            "prompt_tokens_details": {
+                                "audio_tokens": 0,
+                                "cached_tokens": 0
+                            },
+                            "completion_tokens_details": {
+                                "audio_tokens": 0,
+                                "reasoning_tokens": 0,
+                                "accepted_prediction_tokens": 0,
+                                "rejected_prediction_tokens": 0
+                            }
+                        },
+                        "finish_reason": "stop",
+                        "system_fingerprint": "fp_ee1d74bde0",
+                        "prompt_filter_results": [
+                            {
+                                "prompt_index": 0,
+                                "content_filter_results": {
+                                    "hate": {
+                                        "filtered": false,
+                                        "severity": "safe"
+                                    },
+                                    "sexual": {
+                                        "filtered": false,
+                                        "severity": "safe"
+                                    },
+                                    "violence": {
+                                        "filtered": false,
+                                        "severity": "safe"
+                                    },
+                                    "self_harm": {
+                                        "filtered": false,
+                                        "severity": "safe"
+                                    }
+                                }
+                            }
+                        ],
+                        "content_filter_results": {
+                            "hate": {
+                                "filtered": false,
+                                "severity": "safe"
+                            },
+                            "sexual": {
+                                "filtered": false,
+                                "severity": "safe"
+                            },
+                            "violence": {
+                                "filtered": false,
+                                "severity": "safe"
+                            },
+                            "self_harm": {
+                                "filtered": false,
+                                "severity": "safe"
+                            }
+                        }
+                    },
+                    "type": "ai",
+                    "name": null,
+                    "id": "run--ec9aee69-71f6-47e3-a99c-ec374ff0129b-0",
+                    "example": false,
+                    "tool_calls": [],
+                    "invalid_tool_calls": [],
+                    "usage_metadata": {
+                        "input_tokens": 221,
+                        "output_tokens": 34,
+                        "total_tokens": 255,
+                        "input_token_details": {
+                            "audio": 0,
+                            "cache_read": 0
+                        },
+                        "output_token_details": {
+                            "audio": 0,
+                            "reasoning": 0
+                        }
+                    }
+                }
+            }
+        },
+        "parents": {},
+        "thread_id": "socialmedia_test_001138",
+        "langgraph_node": "execute_agent",
+        "langgraph_path": [
+            "__pregel_pull",
+            "execute_agent"
+        ],
+        "langgraph_step": 3,
+        "checkpoint_mode": "sync",
+        "recursion_limit": 50,
+        "langgraph_triggers": [
+            "branch:to:execute_agent"
+        ],
+        "langgraph_checkpoint_ns": "execute_agent:47f9dbc0-6e7e-c67e-be13-40ab872388be"
+    },
+    "2025-07-03T04:11:40.669093+00:00",
+    {
+        "configurable": {
+            "thread_id": "Influencer_001138_agent_07da5129",
+            "checkpoint_ns": "",
+            "checkpoint_id": "1f057c3d-1d7d-621d-8000-191a4fa8a9fe"
+        }
+    },
+    []
+]

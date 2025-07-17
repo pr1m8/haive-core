@@ -1,0 +1,388 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Calculate 5 + 3, then create a plan",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "47aded0a-7ac5-4db4-9280-2cb15683f979",
+        "example": false
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 58,
+            "output_tokens": 18,
+            "total_tokens": 76,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          },
+          "tool_calls": [
+            {
+              "id": "call_zmZFXvN7IRYavg4REouk0EDs",
+              "function": {
+                "arguments": "{\"a\":5,\"b\":3}",
+                "name": "add"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 18,
+            "prompt_tokens": 58,
+            "total_tokens": 76,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "content_filter_results": {}
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--d0ce41bb-bb92-469f-af40-24086216c896-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "add",
+            "args": {
+              "a": 5,
+              "b": 3
+            },
+            "id": "call_zmZFXvN7IRYavg4REouk0EDs",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "8",
+        "additional_kwargs": {
+          "status": "success"
+        },
+        "response_metadata": {},
+        "type": "tool",
+        "name": "add",
+        "id": "92eb4dc7-dba8-4791-9969-f911b8d6bea8",
+        "tool_call_id": "call_zmZFXvN7IRYavg4REouk0EDs",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "5 + 3 equals 8.\n\nNow, let's create a plan for you. Could you please specify what the plan is for?",
+        "additional_kwargs": {
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 83,
+            "output_tokens": 29,
+            "total_tokens": 112,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          },
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 29,
+            "prompt_tokens": 83,
+            "total_tokens": 112,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--66703209-015b-4c5e-a2df-5223d7cccacd-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "tool_calls": [
+            {
+              "id": "call_u0yeD7jmDl7EDofMcPF8KfF3",
+              "function": {
+                "arguments": "{\"steps\":[\"Determine the objective of the plan\",\"Identify the required resources\",\"Assess potential obstacles\",\"Establish a timeline for completion\",\"Outline the key tasks and assign responsibilities\",\"Review and adjust the plan as necessary\"]}",
+                "name": "Plan"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 44,
+            "prompt_tokens": 116,
+            "total_tokens": 160,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {}
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--c3971ce5-eb51-479e-8e3c-e3c72d461efe-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "Plan",
+            "args": {
+              "steps": [
+                "Determine the objective of the plan",
+                "Identify the required resources",
+                "Assess potential obstacles",
+                "Establish a timeline for completion",
+                "Outline the key tasks and assign responsibilities",
+                "Review and adjust the plan as necessary"
+              ]
+            },
+            "id": "call_u0yeD7jmDl7EDofMcPF8KfF3",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 116,
+          "output_tokens": 44,
+          "total_tokens": 160,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ],
+    "tools": [
+      {
+        "name": "<class 'haive.agents.multi.debug_with_logging.Plan'>",
+        "description": "",
+        "type": "tool"
+      }
+    ],
+    "tool_routes": {
+      "tool_0": "unknown"
+    },
+    "name_attrs": ["name", "__name__", "func_name"],
+    "content": null,
+    "output_schemas": {},
+    "engine_route_config": {
+      "llm": ["langchain_tool", "function", "pydantic_model"],
+      "aug_llm": ["langchain_tool", "function", "pydantic_model"],
+      "retriever": ["retriever"],
+      "parser": ["pydantic_model"]
+    },
+    "plan": {
+      "steps": [
+        "Determine the objective of the plan",
+        "Identify the required resources",
+        "Assess potential obstacles",
+        "Establish a timeline for completion",
+        "Outline the key tasks and assign responsibilities",
+        "Review and adjust the plan as necessary"
+      ]
+    }
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "efe06169-c4f1-4702-a9ee-df61aa499cc7",
+      "checkpoint_ns": "Simple Agent:56734103-e4c9-a8f1-ddd3-424d80f3d5a0",
+      "checkpoint_id": "1f05202f-cdb0-627d-8003-84ddf70d9017",
+      "checkpoint_map": {
+        "": "1f05202f-c51f-6fa9-8001-ffcf2259253e",
+        "Simple Agent:56734103-e4c9-a8f1-ddd3-424d80f3d5a0": "1f05202f-cdb0-627d-8003-84ddf70d9017"
+      }
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "parse_output": {
+        "plan": {
+          "steps": [
+            "Determine the objective of the plan",
+            "Identify the required resources",
+            "Assess potential obstacles",
+            "Establish a timeline for completion",
+            "Outline the key tasks and assign responsibilities",
+            "Review and adjust the plan as necessary"
+          ]
+        }
+      }
+    },
+    "step": 3,
+    "parents": {
+      "": "1f05202f-c51f-6fa9-8001-ffcf2259253e"
+    },
+    "thread_id": "efe06169-c4f1-4702-a9ee-df61aa499cc7",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 2,
+    "langgraph_node": "Simple Agent",
+    "langgraph_triggers": ["branch:to:Simple Agent"],
+    "langgraph_path": ["__pregel_pull", "Simple Agent"],
+    "langgraph_checkpoint_ns": "Simple Agent:56734103-e4c9-a8f1-ddd3-424d80f3d5a0"
+  },
+  "2025-06-25T20:28:43.410883+00:00",
+  {
+    "configurable": {
+      "thread_id": "efe06169-c4f1-4702-a9ee-df61aa499cc7",
+      "checkpoint_ns": "Simple Agent:56734103-e4c9-a8f1-ddd3-424d80f3d5a0",
+      "checkpoint_id": "1f05202f-cd31-6974-8002-f9dcde2180e6",
+      "checkpoint_map": {
+        "": "1f05202f-c51f-6fa9-8001-ffcf2259253e",
+        "Simple Agent:56734103-e4c9-a8f1-ddd3-424d80f3d5a0": "1f05202f-cd31-6974-8002-f9dcde2180e6"
+      }
+    }
+  },
+  []
+]

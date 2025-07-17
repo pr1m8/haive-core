@@ -3,6 +3,8 @@
 
 from haive.core.engine.aug_llm.config import AugLLMConfig
 from haive.core.schema.composer import SchemaComposer
+from haive.core.schema.prebuilt.llm_state import LLMState
+from haive.core.schema.prebuilt.messages_state import MessagesState
 
 # Create AugLLMConfig
 config = AugLLMConfig(temperature=0.7)
@@ -13,13 +15,13 @@ print("=== Tracing Base Class Detection ===")
 composer = SchemaComposer(name="TestSchema")
 
 # Check initial state
-print(f"\nInitial state:")
+print("\nInitial state:")
 print(f"  has_messages: {composer.has_messages}")
 print(f"  has_tools: {composer.has_tools}")
 print(f"  detected_base_class: {composer.detected_base_class}")
 
 # Manually trace through the detection logic
-print(f"\nChecking component:")
+print("\nChecking component:")
 print(f"  hasattr(config, 'engine_type'): {hasattr(config, 'engine_type')}")
 if hasattr(config, "engine_type"):
     engine_type_value = getattr(config.engine_type, "value", config.engine_type)
@@ -29,10 +31,10 @@ if hasattr(config, "engine_type"):
     print(f"  engine_type_str == 'llm': {engine_type_str == 'llm'}")
 
 # Call the detection method
-print(f"\nCalling _detect_base_class_requirements...")
+print("\nCalling _detect_base_class_requirements...")
 composer._detect_base_class_requirements([config])
 
-print(f"\nAfter detection:")
+print("\nAfter detection:")
 print(f"  has_messages: {composer.has_messages}")
 print(f"  has_tools: {composer.has_tools}")
 print(f"  detected_base_class: {composer.detected_base_class}")
@@ -41,7 +43,7 @@ print(
 )
 
 # Check if it's detecting has_llm_engine correctly
-print(f"\nChecking has_llm_engine logic:")
+print("\nChecking has_llm_engine logic:")
 has_llm_engine = False
 if hasattr(config, "engine_type"):
     engine_type_value = getattr(config.engine_type, "value", config.engine_type)
@@ -51,11 +53,8 @@ if hasattr(config, "engine_type"):
         print(f"  ✓ Found LLM engine, has_llm_engine = {has_llm_engine}")
 
 # Import the base classes to check what should be used
-from haive.core.schema.prebuilt.llm_state import LLMState
-from haive.core.schema.prebuilt.messages_state import MessagesState
-from haive.core.schema.prebuilt.tool_state import ToolState
 
-print(f"\nExpected base class: LLMState")
+print("\nExpected base class: LLMState")
 print(
     f"Actual base class: {composer.detected_base_class.__name__ if composer.detected_base_class else 'None'}"
 )

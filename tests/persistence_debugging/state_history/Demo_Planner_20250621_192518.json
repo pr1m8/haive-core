@@ -1,0 +1,223 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Create a plan for a day trip, then calculate how many hours we'll need if we spend 2 hours at each location",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "813c2035-9b4e-4f66-9b8c-237f743fbb08",
+        "example": false
+      },
+      {
+        "content": "Certainly! Here's a suggested day trip plan with varying activities. Let me know if you have specific preferences or a location in mind.\n\n### Day Trip Plan\n\n#### 8:00 AM - Departure\n- Leave your place and start your journey to the first destination.\n\n#### 9:00 AM - Breakfast at Local Cafe\n- Enjoy a hearty breakfast to fuel up for the day.\n\n#### 10:00 AM - Visit a Museum\n- Spend 2 hours exploring exhibits and learning about history, art, or science.\n\n#### 12:00 PM - Explore a Botanical Garden\n- Take a leisurely stroll and admire the variety of plants and landscapes.\n\n#### 2:00 PM - Lunch at a Nearby Restaurant\n- Have a relaxing lunch break and try local specialties.\n\n#### 3:00 PM - Visit a Historic Site or Landmark\n- Take a guided tour or explore the site at your own pace.\n\n#### 5:00 PM - Walk Along a Scenic Beach or Nature Trail\n- Unwind with a walk, enjoy the scenery, and capture some photos.\n\n#### 7:00 PM - Dinner at a Local Eatery\n- Conclude the day with a delicious dinner at a popular local spot.\n\n#### 8:00 PM - Head Back Home\n- Begin your journey back home.\n\n### Calculation of Time\n\n- **Museum**: 2 hours\n- **Botanical Garden**: 2 hours\n- **Historic Site or Landmark**: 2 hours\n- **Beach or Nature Trail**: 2 hours\n\n### Total Time for Activities: 8 hours\nAdd additional time for meals, travel between locations, and any unexpected delays. Realistically, including meals and travel, you might want to allocate about 12-14 hours for the entire trip to enjoy each element at leisurely pace without feeling rushed.\n\nAdjust the starting time (departure) and anticipate late return home, accordingly.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 386,
+            "prompt_tokens": 31,
+            "total_tokens": 417,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--8db3c63f-458f-47ad-baaa-b8de3a2355a5-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 31,
+          "output_tokens": 386,
+          "total_tokens": 417,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "61424259-5fc8-4cae-909f-b767867cfeae",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04ef6f-e9b0-66a2-8001-66a3bab4952b"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "Certainly! Here's a suggested day trip plan with varying activities. Let me know if you have specific preferences or a location in mind.\n\n### Day Trip Plan\n\n#### 8:00 AM - Departure\n- Leave your place and start your journey to the first destination.\n\n#### 9:00 AM - Breakfast at Local Cafe\n- Enjoy a hearty breakfast to fuel up for the day.\n\n#### 10:00 AM - Visit a Museum\n- Spend 2 hours exploring exhibits and learning about history, art, or science.\n\n#### 12:00 PM - Explore a Botanical Garden\n- Take a leisurely stroll and admire the variety of plants and landscapes.\n\n#### 2:00 PM - Lunch at a Nearby Restaurant\n- Have a relaxing lunch break and try local specialties.\n\n#### 3:00 PM - Visit a Historic Site or Landmark\n- Take a guided tour or explore the site at your own pace.\n\n#### 5:00 PM - Walk Along a Scenic Beach or Nature Trail\n- Unwind with a walk, enjoy the scenery, and capture some photos.\n\n#### 7:00 PM - Dinner at a Local Eatery\n- Conclude the day with a delicious dinner at a popular local spot.\n\n#### 8:00 PM - Head Back Home\n- Begin your journey back home.\n\n### Calculation of Time\n\n- **Museum**: 2 hours\n- **Botanical Garden**: 2 hours\n- **Historic Site or Landmark**: 2 hours\n- **Beach or Nature Trail**: 2 hours\n\n### Total Time for Activities: 8 hours\nAdd additional time for meals, travel between locations, and any unexpected delays. Realistically, including meals and travel, you might want to allocate about 12-14 hours for the entire trip to enjoy each element at leisurely pace without feeling rushed.\n\nAdjust the starting time (departure) and anticipate late return home, accordingly.",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 386,
+              "prompt_tokens": 31,
+              "total_tokens": 417,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--8db3c63f-458f-47ad-baaa-b8de3a2355a5-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 31,
+            "output_tokens": 386,
+            "total_tokens": 417,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 1,
+    "parents": {},
+    "thread_id": "ff700268-9134-4c43-8951-d3aac5c59506",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 2,
+    "langgraph_node": "delegate_to_agent",
+    "langgraph_triggers": ["branch:to:delegate_to_agent"],
+    "langgraph_path": ["__pregel_pull", "delegate_to_agent"],
+    "langgraph_checkpoint_ns": "delegate_to_agent:1939cdb4-be18-5b05-5ecc-d985030e2947"
+  },
+  "2025-06-21T23:25:18.897919+00:00",
+  {
+    "configurable": {
+      "thread_id": "61424259-5fc8-4cae-909f-b767867cfeae",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04ef6f-cd9a-663f-8000-67b395c75dde"
+    }
+  },
+  []
+]

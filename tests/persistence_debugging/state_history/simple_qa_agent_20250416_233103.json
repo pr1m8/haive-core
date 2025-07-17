@@ -1,0 +1,33 @@
+[
+  {
+    "contents": "Marie Curie was a Polish-born physicist and chemist known for her pioneering research on radioactivity.",
+    "messages": [],
+    "runnable_config": {}
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "24d82484-bafe-4bca-ab00-6f8fa996e067",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f01b3c6-3d90-68b2-8001-4177d0d8ace3"
+    }
+  },
+  {
+    "step": 1,
+    "source": "loop",
+    "writes": {
+      "process": null
+    },
+    "parents": {},
+    "thread_id": "24d82484-bafe-4bca-ab00-6f8fa996e067"
+  },
+  "2025-04-17T03:31:03.564078+00:00",
+  {
+    "configurable": {
+      "thread_id": "24d82484-bafe-4bca-ab00-6f8fa996e067",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f01b3c6-3d0f-6485-8000-8ba4f334d20b"
+    }
+  },
+  []
+]

@@ -1,8 +1,13 @@
 # test_node_diagnostic.py
 import logging
 
+from langgraph.graph import END
 from rich.console import Console
 from rich.panel import Panel
+
+from haive.core.graph.node.config import NodeConfig
+from haive.core.graph.node.factory import NodeFactory
+from haive.core.graph.node.registry import NodeTypeRegistry
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -12,7 +17,6 @@ console = Console()
 console.print(Panel("Node System Diagnostic", expand=False))
 
 # Test registry
-from haive.core.graph.node.registry import NodeTypeRegistry
 
 registry = NodeTypeRegistry.get_instance()
 registry.register_default_processors()
@@ -22,10 +26,6 @@ for processor_type, processor in registry.node_processors.items():
     console.print(f"  {processor_type}: {processor.__class__.__name__}")
 
 # Create basic test components
-from langgraph.graph import END
-
-from haive.core.graph.node.config import NodeConfig
-from haive.core.graph.node.factory import NodeFactory
 
 
 # Create a simple test function

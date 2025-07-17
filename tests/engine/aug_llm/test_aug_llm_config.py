@@ -633,7 +633,8 @@ def test_runtime_config_integration():
             "max_tokens": 1000,
             "system_message": "You are a specialized coding assistant.",
             "engine_configs": {
-                "configurable_llm": {"temperature": 0.5}  # More specific override
+                # More specific override
+                "configurable_llm": {"temperature": 0.5}
             },
         }
     }

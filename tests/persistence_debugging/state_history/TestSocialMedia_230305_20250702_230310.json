@@ -1,0 +1,72 @@
+[
+  {
+    "messages": [
+      {
+        "content": "\ud83d\udcac New thread: Social media conversation test\nPlatform: generic (max 500 chars)\nShare your thoughts! Go viral at 10 likes \ud83d\udd25",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "992b8395-1712-4f40-9882-ca99bf82dc59",
+        "example": false
+      },
+      {
+        "content": "\ud83c\udfc1 Conversation ended: Reached maximum rounds (1)\n\ud83d\udcca Total rounds: 1\n\ud83d\udd04 Total turns: 1",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "system",
+        "name": null,
+        "id": "f452a604-4da4-42f8-9c06-7c804de42379"
+      }
+    ],
+    "current_speaker": null,
+    "speakers": ["User_230305", "Influencer_230305"],
+    "turn_count": 1,
+    "max_rounds": 1,
+    "topic": "Social media conversation test",
+    "conversation_ended": true,
+    "mode": "social_media",
+    "speaker_history": ["Influencer_230305"]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "socialmedia_test_230305",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057ba4-037d-6687-8006-567ec931e797"
+    }
+  },
+  {
+    "step": 6,
+    "debug": false,
+    "source": "loop",
+    "writes": {
+      "conclude": {
+        "messages": [
+          {
+            "content": "\ud83c\udfc1 Conversation ended: Reached maximum rounds (1)\n\ud83d\udcca Total rounds: 1\n\ud83d\udd04 Total turns: 1",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "system",
+            "name": null,
+            "id": "f452a604-4da4-42f8-9c06-7c804de42379"
+          }
+        ],
+        "current_speaker": null,
+        "conversation_ended": true
+      }
+    },
+    "parents": {},
+    "thread_id": "socialmedia_test_230305",
+    "checkpoint_mode": "sync"
+  },
+  "2025-07-03T03:03:10.142005+00:00",
+  {
+    "configurable": {
+      "thread_id": "socialmedia_test_230305",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057ba4-037a-66d0-8005-55ef7d58df0e"
+    }
+  },
+  []
+]

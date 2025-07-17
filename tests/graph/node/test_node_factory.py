@@ -273,7 +273,8 @@ def test_process_output():
     assert result_no_map == output_dict
 
     # Test with mapping
-    mapping = {"key1": "state1", "key3": "state3"}  # key3 doesn't exist in output
+    # key3 doesn't exist in output
+    mapping = {"key1": "state1", "key3": "state3"}
     logger.debug(
         f"Testing _process_output with dict and mapping: {output_dict}, {mapping}"
     )
@@ -294,5 +295,6 @@ def test_process_output():
     )
     result_non_dict_map = NodeFactory._process_output(output_str, mapping)
     logger.debug(f"Result (non-dict, mapping): {result_non_dict_map}")
-    assert result_non_dict_map == {"result": output_str}  # Mapping ignored for non-dict
+    # Mapping ignored for non-dict
+    assert result_non_dict_map == {"result": output_str}
     logger.debug("--- Finished test_process_output ---")

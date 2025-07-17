@@ -1,0 +1,353 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Calculate 5 + 3, then create a plan",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "f0a2df8a-dc9f-4791-a58d-8b25be291cd6",
+        "example": false
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "tool_calls": [
+            {
+              "id": "call_ijrKt7tUSmEh2hDrJ1wH7pRf",
+              "function": {
+                "arguments": "{\"a\": 5, \"b\": 3}",
+                "name": "add"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 34,
+            "prompt_tokens": 58,
+            "total_tokens": 92,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "content_filter_results": {}
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--36ae693e-e035-43aa-8dad-c058be0307b9-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "add",
+            "args": {
+              "a": 5,
+              "b": 3
+            },
+            "id": "call_ijrKt7tUSmEh2hDrJ1wH7pRf",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 58,
+          "output_tokens": 34,
+          "total_tokens": 92,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "8",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "add",
+        "id": "0f970470-28e8-4972-9599-82f763d64e18",
+        "tool_call_id": "call_ijrKt7tUSmEh2hDrJ1wH7pRf",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "The sum of 5 + 3 is 8.\n\nNow, let's create a plan:\n\n1. **Goal Setting:**\n   - Define the objective clearly. In the case of our calculation, the goal was to compute the sum of two numbers.\n\n2. **Resource Allocation:**\n   - Identify the necessary resources or tools needed for achieving the goal. For mathematical calculations, sufficient knowledge or a calculator may be required.\n\n3. **Execution Strategy:**\n   - Develop a step-by-step approach to execute the plan. Start by identifying the numbers to be added, perform the addition, and verify the result.\n\n4. **Verification and Feedback:**\n   - Check if the result meets the objective. Verify the calculation to ensure accuracy.\n\n5. **Adaptation and Improvement:**\n   - If necessary, adjust the approach or tools used for more efficient results in future calculations.\n\nThis plan structure can be adapted for various tasks or projects beyond simple calculations.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 193,
+            "prompt_tokens": 83,
+            "total_tokens": 276,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--d42ef795-9447-4a16-8077-bc3ecfe59dc4-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 83,
+          "output_tokens": 193,
+          "total_tokens": 276,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ],
+    "tools": [
+      {
+        "name": "{'name': 'add', 'description': 'returns the sum of two numbers', 'args_schema': <class 'langchain_core.utils.pydantic.add'>, 'return_direct': False, 'verbose': False, 'tags': None, 'metadata': None, 'handle_tool_error': False, 'handle_validation_error': False, 'response_format': 'content', 'func': <function add at 0x727c09326340>, 'coroutine': None}",
+        "description": "",
+        "type": "tool"
+      }
+    ],
+    "tool_routes": {
+      "tool_0": "unknown"
+    },
+    "name_attrs": ["name", "__name__", "func_name"],
+    "content": null,
+    "output_schemas": {},
+    "engine_route_config": {
+      "llm": ["langchain_tool", "function", "pydantic_model"],
+      "aug_llm": ["langchain_tool", "function", "pydantic_model"],
+      "retriever": ["retriever"],
+      "parser": ["pydantic_model"]
+    }
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "af3340c2-9694-4d31-944a-95fbc328f31f",
+      "checkpoint_ns": "React Agent:105cacdf-d197-1bbf-82fc-229d7bdb8023",
+      "checkpoint_id": "1f051e2a-79e8-6a01-8004-fad4c660fa2e",
+      "checkpoint_map": {
+        "": "1f051e2a-5ac5-6749-8000-6a5ea4445299",
+        "React Agent:105cacdf-d197-1bbf-82fc-229d7bdb8023": "1f051e2a-79e8-6a01-8004-fad4c660fa2e"
+      }
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "The sum of 5 + 3 is 8.\n\nNow, let's create a plan:\n\n1. **Goal Setting:**\n   - Define the objective clearly. In the case of our calculation, the goal was to compute the sum of two numbers.\n\n2. **Resource Allocation:**\n   - Identify the necessary resources or tools needed for achieving the goal. For mathematical calculations, sufficient knowledge or a calculator may be required.\n\n3. **Execution Strategy:**\n   - Develop a step-by-step approach to execute the plan. Start by identifying the numbers to be added, perform the addition, and verify the result.\n\n4. **Verification and Feedback:**\n   - Check if the result meets the objective. Verify the calculation to ensure accuracy.\n\n5. **Adaptation and Improvement:**\n   - If necessary, adjust the approach or tools used for more efficient results in future calculations.\n\nThis plan structure can be adapted for various tasks or projects beyond simple calculations.",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 193,
+              "prompt_tokens": 83,
+              "total_tokens": 276,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--d42ef795-9447-4a16-8077-bc3ecfe59dc4-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 83,
+            "output_tokens": 193,
+            "total_tokens": 276,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 4,
+    "parents": {
+      "": "1f051e2a-5ac5-6749-8000-6a5ea4445299"
+    },
+    "thread_id": "af3340c2-9694-4d31-944a-95fbc328f31f",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 1,
+    "langgraph_node": "React Agent",
+    "langgraph_triggers": ["branch:to:React Agent"],
+    "langgraph_path": ["__pregel_pull", "React Agent"],
+    "langgraph_checkpoint_ns": "React Agent:105cacdf-d197-1bbf-82fc-229d7bdb8023"
+  },
+  "2025-06-25T16:37:16.512905+00:00",
+  {
+    "configurable": {
+      "thread_id": "af3340c2-9694-4d31-944a-95fbc328f31f",
+      "checkpoint_ns": "React Agent:105cacdf-d197-1bbf-82fc-229d7bdb8023",
+      "checkpoint_id": "1f051e2a-619c-63b5-8003-a3037a7776df",
+      "checkpoint_map": {
+        "": "1f051e2a-5ac5-6749-8000-6a5ea4445299",
+        "React Agent:105cacdf-d197-1bbf-82fc-229d7bdb8023": "1f051e2a-619c-63b5-8003-a3037a7776df"
+      }
+    }
+  },
+  []
+]

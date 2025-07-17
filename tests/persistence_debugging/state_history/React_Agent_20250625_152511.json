@@ -1,0 +1,370 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Create a plan for a day trip, then calculate how many hours we'll need if we spend 2 hours at each location",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "fb2966df-eb8c-44b7-9a75-72d5fc241534",
+        "example": false
+      },
+      {
+        "content": "Sure! Here's a plan for a day trip with a few locations to visit:\n\n**Day Trip Plan:**\n\n1. **Start at the Museum**\n   - Time spent: 2 hours\n\n2. **Head to the Botanical Gardens**\n   - Time spent: 2 hours\n\n3. **Lunch at a nearby Cafe**\n   - Time spent: 1 hour\n\n4. **Visit the Historic Site**\n   - Time spent: 2 hours\n\n5. **End at the Art Gallery**\n   - Time spent: 2 hours\n\nNow, let's calculate the total hours you'll need for the trip, assuming 2 hours are spent at each location except for lunch, which is 1 hour.\n\nLocations:\n- Museum\n- Botanical Gardens\n- Historic Site\n- Art Gallery\n\nEach location will take 2 hours:\n- Museum: 2 hours\n- Botanical Gardens: 2 hours\n- Historic Site: 2 hours\n- Art Gallery: 2 hours\n\nLunch break will take 1 hour:\n- Lunch: 1 hour\n\nTotal hours needed = Sum of hours spent at each location and during lunch.\n\nLet's calculate the total hours needed using this plan.",
+        "additional_kwargs": {
+          "tool_calls": [
+            {
+              "id": "call_tmBP5uic8WTxdzZ7bcAjCqMr",
+              "function": {
+                "arguments": "{\"a\":8,\"b\":1}",
+                "name": "add"
+              },
+              "type": "function"
+            }
+          ],
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 258,
+            "prompt_tokens": 71,
+            "total_tokens": 329,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--785b53bf-99e1-4710-9bd0-060890ea8f58-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "add",
+            "args": {
+              "a": 8,
+              "b": 1
+            },
+            "id": "call_tmBP5uic8WTxdzZ7bcAjCqMr",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 71,
+          "output_tokens": 258,
+          "total_tokens": 329,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "9",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "add",
+        "id": "551940a7-7e67-4e15-824c-adf729aced0d",
+        "tool_call_id": "call_tmBP5uic8WTxdzZ7bcAjCqMr",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "You will need a total of 9 hours for this day trip, including a 1-hour lunch break. Enjoy your trip!",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 28,
+            "prompt_tokens": 338,
+            "total_tokens": 366,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--22b321b4-1aa5-4c8a-bb06-36a0235088f7-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 338,
+          "output_tokens": 28,
+          "total_tokens": 366,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ],
+    "tools": [
+      {
+        "name": "{'name': 'add', 'description': 'Returns the sum of two numbers.', 'args_schema': <class 'langchain_core.utils.pydantic.add'>, 'return_direct': False, 'verbose': False, 'tags': None, 'metadata': None, 'handle_tool_error': False, 'handle_validation_error': False, 'response_format': 'content', 'func': <function add at 0x770bcb25a8e0>, 'coroutine': None}",
+        "description": "",
+        "type": "tool"
+      }
+    ],
+    "tool_routes": {
+      "tool_0": "unknown"
+    },
+    "name_attrs": ["name", "__name__", "func_name"],
+    "content": null,
+    "output_schemas": {},
+    "engine_route_config": {
+      "llm": ["langchain_tool", "function", "pydantic_model"],
+      "aug_llm": ["langchain_tool", "function", "pydantic_model"],
+      "retriever": ["retriever"],
+      "parser": ["pydantic_model"]
+    }
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "79653b61-cccb-44ca-b842-4a6a67b6c658",
+      "checkpoint_ns": "React Agent:568a4c43-fe3c-3f88-d94b-c0c73c8a901c",
+      "checkpoint_id": "1f051fa1-d052-6039-8004-873d33ab966c",
+      "checkpoint_map": {
+        "": "1f051fa1-ad2f-67b6-8001-2f06d72b5af2",
+        "React Agent:568a4c43-fe3c-3f88-d94b-c0c73c8a901c": "1f051fa1-d052-6039-8004-873d33ab966c"
+      }
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "You will need a total of 9 hours for this day trip, including a 1-hour lunch break. Enjoy your trip!",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 28,
+              "prompt_tokens": 338,
+              "total_tokens": 366,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--22b321b4-1aa5-4c8a-bb06-36a0235088f7-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 338,
+            "output_tokens": 28,
+            "total_tokens": 366,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 4,
+    "parents": {
+      "": "1f051fa1-ad2f-67b6-8001-2f06d72b5af2"
+    },
+    "thread_id": "79653b61-cccb-44ca-b842-4a6a67b6c658",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 2,
+    "langgraph_node": "React Agent",
+    "langgraph_triggers": ["branch:to:React Agent"],
+    "langgraph_path": ["__pregel_pull", "React Agent"],
+    "langgraph_checkpoint_ns": "React Agent:568a4c43-fe3c-3f88-d94b-c0c73c8a901c"
+  },
+  "2025-06-25T19:25:11.903423+00:00",
+  {
+    "configurable": {
+      "thread_id": "79653b61-cccb-44ca-b842-4a6a67b6c658",
+      "checkpoint_ns": "React Agent:568a4c43-fe3c-3f88-d94b-c0c73c8a901c",
+      "checkpoint_id": "1f051fa1-ca96-6c06-8003-00946b4d7a98",
+      "checkpoint_map": {
+        "": "1f051fa1-ad2f-67b6-8001-2f06d72b5af2",
+        "React Agent:568a4c43-fe3c-3f88-d94b-c0c73c8a901c": "1f051fa1-ca96-6c06-8003-00946b4d7a98"
+      }
+    }
+  },
+  []
+]

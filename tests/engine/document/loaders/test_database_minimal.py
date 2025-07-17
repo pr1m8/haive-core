@@ -8,7 +8,8 @@ import sys
 from pathlib import Path
 
 # Add the source path to sys.path to enable imports
-base_path = Path("/home/will/Projects/haive/backend/haive/packages/haive-core/src")
+base_path = Path(
+    "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
 sys.path.insert(0, str(base_path))
 
 

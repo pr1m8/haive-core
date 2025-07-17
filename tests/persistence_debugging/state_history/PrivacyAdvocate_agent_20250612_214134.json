@@ -1,0 +1,594 @@
+[
+  {
+    "messages": [
+      {
+        "content": "\ud83c\udfad Debate Phase: Arguments\n\ud83d\udccc Your Position: Social media violates privacy rights\n\ud83d\udcca Your Progress: 0 arguments, 0 rebuttals\n\ud83d\udcc8 Completion: 0%\n\n\ud83d\udcdd Instructions: Present argument 1 of 1. Make a specific, well-supported point for your position. You have 1 more arguments after this.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "system",
+        "name": null,
+        "id": "7da32463-a9b2-4ecd-ac92-d8ad627962b0"
+      },
+      {
+        "content": "\ud83c\udfad Welcome to the Formal Debate!\n\n\ud83d\udccb **Topic**: The Impact of Social Media on Society\n\n\ud83d\udc65 **Participants and Positions**:\n  \u2022 TechOptimist: Social media is a net positive\n  \u2022 DigitalWellbeing: Social media needs mental health reforms\n  \u2022 PrivacyAdvocate: Social media violates privacy rights\n\n\ud83d\udcdc **Debate Format** (traditional):\n1. Opening Statements - Each participant presents their position\n2. Main Arguments - Each participant makes 1 arguments\n3. Rebuttals - Participants respond to opposing arguments\n4. Closing Statements - Final summaries from each participant\n\n\u2696\ufe0f **Rules**:\n  \u2022 Participants must argue for their assigned position\n\nLet us begin! TechOptimist, please present your opening statement.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "03c5053c-114f-4f8a-8b08-8e3b252b29a0",
+        "example": false
+      },
+      {
+        "content": "Ladies and gentlemen, thank you for joining this important discussion on the impact of social media. As a technology optimist, I am here to present the view that social media has been overwhelmingly positive for society.\n\nFirstly, social media has revolutionized the way we communicate, breaking down geographical barriers and enabling real-time interaction across the globe. This connectivity has fostered a sense of global community, allowing individuals to share experiences, ideas, and cultures more freely than ever before.\n\nSecondly, social media platforms have democratized information, giving a voice to those who might otherwise be unheard. From grassroots movements to inspiring personal stories, social media has empowered individuals to drive social change, mobilize support, and raise awareness on crucial issues. Consider movements like #MeToo and Black Lives Matter, which gained momentum through social media, highlighting its role in societal transformation.\n\nMoreover, social media plays a critical role in education and professional development. It provides access to a wealth of resources, learning opportunities, and networks that facilitate personal and career growth. Platforms such as LinkedIn have transformed job searching and professional networking, connecting users with industry leaders and potential employers worldwide.\n\nWhile recognizing the challenges associated with social media, it is essential to weigh these against the significant benefits it has brought to society. My arguments will explore these points in greater depth, demonstrating why social media's positive impact outweighs any negatives.\n\nThank you, and I look forward to a respectful and enlightening debate.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 288,
+            "prompt_tokens": 272,
+            "total_tokens": 560,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BhnhzsvxYAIAuwfgiRbmnrAGX8jed",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": "TechOptimist",
+        "id": "run-792d2008-ad61-4097-b4ee-055ac7724ada-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 272,
+          "output_tokens": 288,
+          "total_tokens": 560,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "Ladies and gentlemen, thank you for being here today to discuss an issue of growing importance: the impact of social media on mental health. As a digital wellbeing advocate, my position is clear: social media needs reform to better protect mental health.\n\nWhile social media has undeniably revolutionized communication and access to information, it has also introduced significant mental health challenges that cannot be ignored. My arguments will focus on the following key areas:\n\n1. **Increased Anxiety and Depression**: Numerous studies have demonstrated a correlation between excessive social media use and heightened levels of anxiety and depression. The constant exposure to idealized images and lifestyles can lead to feelings of inadequacy and low self-esteem. Social media platforms often employ algorithms that prioritize engagement over wellbeing, exacerbating these mental health issues.\n\n2. **Addictive Designs**: Many social media platforms are intentionally designed to be addictive, using features such as infinite scroll and notifications to keep users engaged for longer periods. This can lead to compulsive behavior, where individuals feel compelled to check their accounts repeatedly, disrupting daily life and contributing to mental strain.\n\n3. **Cyberbullying and Harassment**: Social media can also be a breeding ground for cyberbullying and harassment, which have profound impacts on mental health. The anonymity afforded by these platforms often leads to toxic behavior that can be devastating for victims, especially young users.\n\n4. **Privacy Concerns and Data Exploitation**: The exploitation of personal data by social media companies raises ethical concerns that can lead to anxiety and distrust among users. Knowing that one's personal information is being mined for profit can contribute to a pervasive sense of vulnerability and unease.\n\nIn summary, while social media has its benefits, the mental health risks associated with its current design and usage are significant. Reform is essential to create platforms that prioritize user wellbeing, and I look forward to delving deeper into these arguments throughout the debate. Thank you.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 382,
+            "prompt_tokens": 561,
+            "total_tokens": 943,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-Bhni13SMeYQKfT7rzQZyIZFOSqTp1",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": "DigitalWellbeing",
+        "id": "run-5eca3d7c-7b46-4fbf-ab7b-e245d6f09538-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 561,
+          "output_tokens": 382,
+          "total_tokens": 943,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "Ladies and gentlemen, thank you for joining this debate on the crucial topic of social media's impact on society. As a privacy rights advocate, it is clear to me that social media companies are violating user privacy on an unprecedented scale, and strict regulation is necessary to safeguard personal data and uphold user rights.\n\nSocial media platforms have become ubiquitous in our daily lives, yet they operate with alarming disregard for privacy. My position is centered around three key arguments:\n\n1. **Exploitation of Personal Data**: Social media companies systematically collect vast amounts of personal data from their users, often without explicit consent or transparency. This data is not only used to tailor advertisements but is also sold to third parties, creating an entire industry built on the commodification of personal information. Users are left vulnerable, with little control over how their data is used or shared.\n\n2. **Lack of Transparency and Informed Consent**: Many social media platforms employ opaque privacy policies and settings that confuse users, making it difficult to understand what data is being collected and for what purposes. This lack of transparency undermines informed consent, a fundamental principle of privacy rights. Users are often unaware of the extent of surveillance they are subjected to, and their autonomy in managing their personal data is severely compromised.\n\n3. **Inadequate Data Protection Measures**: Despite the sensitive nature of the information they handle, social media companies frequently fail to implement robust data protection measures. This negligence not only exposes users to data breaches and identity theft but also contravenes their right to privacy. The Cambridge Analytica scandal is a stark reminder of the consequences of lax data protection, where millions of users' data was harvested without consent for political manipulation.\n\nIn conclusion, the current practices of social media companies represent a significant violation of privacy rights, demanding urgent and stringent regulation. It is imperative that we prioritize data protection and user rights to prevent further exploitation and ensure a digital environment that respects privacy. I look forward to exploring these arguments further in the debate. Thank you.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 402,
+            "prompt_tokens": 951,
+            "total_tokens": 1353,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-Bhni708gwQkrxBw6WE7gHWMvyNfcw",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": "PrivacyAdvocate",
+        "id": "run-9d3779d9-e270-423e-b971-2a0183f24951-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 951,
+          "output_tokens": 402,
+          "total_tokens": 1353,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "\n\ud83d\udd04 Opening statements complete. Moving to main arguments.\n",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "system",
+        "name": null,
+        "id": "76394ebb-8554-4f5e-9da4-447c77236f33"
+      },
+      {
+        "content": "Social media has been a force for good in numerous ways, and one of its most significant positive impacts has been in the realm of social activism and community engagement. Platforms such as Twitter, Facebook, and Instagram have become powerful tools for mobilizing social movements, raising awareness, and facilitating civic engagement.\n\nA prime example of this is the role social media played in the Arab Spring. Activists utilized social media to organize protests, share real-time information, and draw international attention to their causes. This digital connectivity was instrumental in circumventing government censorship, allowing people to communicate freely and rally for democratic reforms. Similarly, movements like #MeToo and Black Lives Matter have gained traction globally, largely thanks to the amplification provided by social media platforms. These movements have sparked vital conversations and led to tangible changes in policies and societal attitudes.\n\nMoreover, social media fosters community building and provides a platform for marginalized voices. It offers individuals the opportunity to find like-minded communities, share their experiences, and support each other. Whether it's advocacy groups, support networks for mental health, or forums for discussing niche interests, social media connects people in ways that were previously unimaginable.\n\nAdditionally, social media has democratized the dissemination of information, allowing citizens to participate in civic discourse and hold leaders accountable. This transparency and engagement are crucial in promoting democratic principles and ensuring that voices from all segments of society can be heard.\n\nIn summary, social media's ability to empower social movements, connect communities, and facilitate civic participation illustrates its overwhelmingly positive impact on society. It is a tool that has revolutionized how we engage with the world, enabling progress and fostering inclusive dialogue.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 324,
+            "prompt_tokens": 1387,
+            "total_tokens": 1711,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BhniBFYQaHQvGvZNq9Q05ohz3UxTh",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": "TechOptimist",
+        "id": "run-14072e19-5c46-444e-97b6-09ea043359a1-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 1387,
+          "output_tokens": 324,
+          "total_tokens": 1711,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      },
+      {
+        "content": "One of the most critical issues with social media is its exploitation of user privacy through the collection, use, and sharing of personal data without meaningful consent. Social media companies have built their business models around harvesting vast amounts of personal information, often in ways that users are not fully aware of or have not explicitly agreed to.\n\nFirstly, social media platforms collect an extensive array of data points about their users, including location data, browsing habits, personal preferences, and even biometric information such as facial recognition data. This data is used to create detailed profiles that are not only utilized for targeted advertising but also sold to third-party companies. Users are often not given clear explanations of what data is being collected or how it will be used, leading to a significant transparency gap.\n\nSecondly, the notion of informed consent is largely absent in the operations of these platforms. Privacy policies are frequently lengthy and filled with legal jargon, discouraging users from fully understanding the implications of agreeing to them. As a result, users inadvertently give up substantial control over their personal information, with little recourse if their data is misused.\n\nThe consequences of this data exploitation are severe. Users are exposed to risks such as identity theft, manipulation through targeted content, and breaches of sensitive information. Furthermore, the lack of robust data protection measures has resulted in high-profile data breaches, compromising the privacy of millions of individuals. The Cambridge Analytica scandal is a prime example, where data from millions of Facebook users was harvested without consent and used for political purposes.\n\nTo address these violations of privacy rights, it is imperative that we implement strict regulations that enforce transparency, ensure informed consent, and mandate robust data protection practices. Users should have control over their data, with the ability to opt out of data collection and the right to be forgotten. Only through stringent regulation can we safeguard individual privacy and prevent the exploitation of personal data in the digital age.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 377,
+            "prompt_tokens": 1713,
+            "total_tokens": 2090,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "id": "chatcmpl-BhniD2lnuPPxcL2ibdCs7gRcSIvWn",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run-f918b5c0-ec5b-4e8f-9b6b-7c6ab2e0af50-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 1713,
+          "output_tokens": 377,
+          "total_tokens": 2090,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "da67a8e3-e0a8-4e25-b73e-a85c6ff0881e",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f047f78-db01-6364-8001-7558c30d7132"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "One of the most critical issues with social media is its exploitation of user privacy through the collection, use, and sharing of personal data without meaningful consent. Social media companies have built their business models around harvesting vast amounts of personal information, often in ways that users are not fully aware of or have not explicitly agreed to.\n\nFirstly, social media platforms collect an extensive array of data points about their users, including location data, browsing habits, personal preferences, and even biometric information such as facial recognition data. This data is used to create detailed profiles that are not only utilized for targeted advertising but also sold to third-party companies. Users are often not given clear explanations of what data is being collected or how it will be used, leading to a significant transparency gap.\n\nSecondly, the notion of informed consent is largely absent in the operations of these platforms. Privacy policies are frequently lengthy and filled with legal jargon, discouraging users from fully understanding the implications of agreeing to them. As a result, users inadvertently give up substantial control over their personal information, with little recourse if their data is misused.\n\nThe consequences of this data exploitation are severe. Users are exposed to risks such as identity theft, manipulation through targeted content, and breaches of sensitive information. Furthermore, the lack of robust data protection measures has resulted in high-profile data breaches, compromising the privacy of millions of individuals. The Cambridge Analytica scandal is a prime example, where data from millions of Facebook users was harvested without consent and used for political purposes.\n\nTo address these violations of privacy rights, it is imperative that we implement strict regulations that enforce transparency, ensure informed consent, and mandate robust data protection practices. Users should have control over their data, with the ability to opt out of data collection and the right to be forgotten. Only through stringent regulation can we safeguard individual privacy and prevent the exploitation of personal data in the digital age.",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 377,
+              "prompt_tokens": 1713,
+              "total_tokens": 2090,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "id": "chatcmpl-BhniD2lnuPPxcL2ibdCs7gRcSIvWn",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run-f918b5c0-ec5b-4e8f-9b6b-7c6ab2e0af50-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 1713,
+            "output_tokens": 377,
+            "total_tokens": 2090,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 1,
+    "parents": {},
+    "recursion_limit": 80,
+    "thread_id": "35504488-ca63-4fe1-aa1d-79514fa5133b",
+    "debug": true,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 19,
+    "langgraph_node": "execute_agent",
+    "langgraph_triggers": ["branch:to:execute_agent"],
+    "langgraph_path": ["__pregel_pull", "execute_agent"],
+    "langgraph_checkpoint_ns": "execute_agent:eea693f0-2913-9125-bd3e-e3835950ad69"
+  },
+  "2025-06-13T01:41:40.810618+00:00",
+  {
+    "configurable": {
+      "thread_id": "da67a8e3-e0a8-4e25-b73e-a85c6ff0881e",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f047f78-b5c7-6a3d-8000-13ecb7dcfbc4"
+    }
+  },
+  []
+]

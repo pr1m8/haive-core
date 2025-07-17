@@ -1,0 +1,108 @@
+[
+    {
+        "messages": [
+            {
+                "content": "\ud83d\udcdd Collaborative Session: Collaborative Document\n\nTopic: Final test\n\nWe'll work together on these sections:\n- Test\n\nFormat: markdown\nMin contributions per section: 1\n\nLet's start with: Test",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "human",
+                "name": null,
+                "id": "928d8139-54ca-468c-966a-3509fa01dba1",
+                "example": false
+            },
+            {
+                "content": "[Error from TestA]: consuming input failed: SSL connection has been closed unexpectedly",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "ai",
+                "name": "TestA",
+                "id": "2758343d-8a87-461b-95b4-229ec6832d45",
+                "example": false,
+                "tool_calls": [],
+                "invalid_tool_calls": [],
+                "usage_metadata": null
+            },
+            {
+                "content": "\ud83c\udfc1 Conversation ended: Reached maximum rounds (1)\n\ud83d\udcca Total rounds: 1\n\ud83d\udd04 Total turns: 1",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "system",
+                "name": null,
+                "id": "c8e7f3bc-c28d-4aed-8b93-e9a186a23a28"
+            }
+        ],
+        "current_speaker": null,
+        "speakers": [
+            "TestA",
+            "TestB"
+        ],
+        "turn_count": 1,
+        "max_rounds": 1,
+        "topic": "Final test",
+        "conversation_ended": true,
+        "mode": "collaborative",
+        "speaker_history": [
+            "TestA"
+        ],
+        "shared_document": "# Collaborative Document\n\n## Test\n[TestA]: [Error from TestA]: consuming input failed: SSL connection has been closed unexpectedly",
+        "document_sections": {
+            "Test": "[TestA]: [Error from TestA]: consuming input failed: SSL connection has been closed unexpectedly"
+        },
+        "contributions": [
+            [
+                "TestA",
+                "Test",
+                "[Error from TestA]: consuming input failed: SSL connection has been closed unexpectedly"
+            ]
+        ],
+        "contribution_count": {
+            "TestA": 1
+        },
+        "current_section": "Test",
+        "sections_order": [
+            "Test"
+        ],
+        "output_format": "markdown"
+    },
+    [],
+    {
+        "configurable": {
+            "thread_id": "final_test_collab",
+            "checkpoint_ns": "",
+            "checkpoint_id": "1f057c24-01a4-6baf-8006-788ce8c23309"
+        }
+    },
+    {
+        "step": 6,
+        "debug": false,
+        "source": "loop",
+        "writes": {
+            "conclude": {
+                "messages": [
+                    {
+                        "content": "\ud83c\udfc1 Conversation ended: Reached maximum rounds (1)\n\ud83d\udcca Total rounds: 1\n\ud83d\udd04 Total turns: 1",
+                        "additional_kwargs": {},
+                        "response_metadata": {},
+                        "type": "system",
+                        "name": null,
+                        "id": "c8e7f3bc-c28d-4aed-8b93-e9a186a23a28"
+                    }
+                ],
+                "current_speaker": null,
+                "conversation_ended": true
+            }
+        },
+        "parents": {},
+        "thread_id": "final_test_collab",
+        "checkpoint_mode": "sync"
+    },
+    "2025-07-03T04:00:25.922230+00:00",
+    {
+        "configurable": {
+            "thread_id": "final_test_collab",
+            "checkpoint_ns": "",
+            "checkpoint_id": "1f057c24-01a1-6384-8005-187b362d9f6c"
+        }
+    },
+    []
+]

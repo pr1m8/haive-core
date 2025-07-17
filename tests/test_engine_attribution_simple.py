@@ -5,11 +5,10 @@ testing the relevant methods without requiring a full LLM execution.
 """
 
 import logging
-from typing import Any, Dict, List
+from typing import List
 
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
-from langgraph.types import Command
-from pydantic import BaseModel, Field
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
+from pydantic import Field
 
 from haive.core.schema import StateSchema
 
@@ -49,7 +48,8 @@ def test_engine_attribution_mechanism():
         content="This is a test response", additional_kwargs={"existing_field": "value"}
     )
 
-    print(f"   Original message additional_kwargs: {ai_message.additional_kwargs}")
+    print(
+        f"   Original message additional_kwargs: {ai_message.additional_kwargs}")
 
     # Mock the engine attribute on the node
     class MockEngine:
@@ -58,7 +58,8 @@ def test_engine_attribution_mechanism():
     engine_node.engine = MockEngine()
 
     # Call the attribution method
-    attributed_message = engine_node._add_engine_attribution_to_message(ai_message)
+    attributed_message = engine_node._add_engine_attribution_to_message(
+        ai_message)
 
     print(
         f"   After attribution additional_kwargs: {attributed_message.additional_kwargs}"
@@ -72,7 +73,7 @@ def test_engine_attribution_mechanism():
         attributed_message.additional_kwargs["existing_field"] == "value"
     )  # Original data preserved
 
-    print(f"\n✅ SUCCESS: Engine attribution added correctly")
+    print("\n✅ SUCCESS: Engine attribution added correctly"y")
     print(f"   engine_name = '{attributed_message.additional_kwargs['engine_name']}'")
 
 
@@ -124,7 +125,7 @@ def test_message_transformation_preservation():
     assert transformed_msg.additional_kwargs.get("engine_name") == "source_engine"
     assert transformed_msg.additional_kwargs.get("custom_data") == "preserved"
 
-    print(f"\n✅ SUCCESS: Attribution preserved during transformation")
+    print("\n✅ SUCCESS: Attribution preserved during transformation"n")
 
 
 def test_complete_attribution_flow():
@@ -204,7 +205,7 @@ def test_complete_attribution_flow():
     assert reflected_msg.additional_kwargs.get("engine_name") == "gpt4_engine"
     assert reflected_msg.additional_kwargs.get("engine_id") == "engine_123"
 
-    print(f"\n✅ SUCCESS: Complete attribution flow works correctly")
+    print("\n✅ SUCCESS: Complete attribution flow works correctly"y")
 
 
 def test_multiple_engine_attribution():
@@ -263,7 +264,7 @@ def test_multiple_engine_attribution():
     assert engine_counts["analyzer_engine"] == 1
     assert engine_counts["summarizer_engine"] == 1
 
-    print(f"\n✅ SUCCESS: Multiple engines properly attributed")
+    print("\n✅ SUCCESS: Multiple engines properly attributed"d")
 
 
 if __name__ == "__main__":

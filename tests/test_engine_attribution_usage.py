@@ -8,8 +8,8 @@ import logging
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
-from pydantic import BaseModel, Field
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
+from pydantic import Field
 
 from haive.core.schema import StateSchema
 
@@ -73,18 +73,18 @@ def track_engine_usage(state: ConversationState) -> Dict[str, Any]:
 
     print("\n📊 Engine Usage Statistics:")
     print(f"Total AI messages: {engine_stats['total_ai_messages']}")
-    print(f"\nMessages by engine:")
+    print("\nMessages by engine:")
     for engine, count in engine_stats["messages_by_engine"].items():
         print(f"  - {engine}: {count} messages")
 
     if engine_stats["response_times"]:
-        print(f"\nAverage response times:")
+        print("\nAverage response times:")
         for engine, times in engine_stats["response_times"].items():
             avg_time = sum(times) / len(times)
             print(f"  - {engine}: {avg_time:.2f}ms")
 
     if engine_stats["token_usage"]:
-        print(f"\nToken usage by engine:")
+        print("\nToken usage by engine:")
         for engine, tokens in engine_stats["token_usage"].items():
             print(f"  - {engine}: {tokens} tokens")
 
@@ -121,7 +121,7 @@ def route_based_on_engine(messages: List[BaseMessage]) -> str:
 
     route = routing_rules.get(engine_name, "default")
 
-    print(f"\n🔀 Routing Decision:")
+    print("\n🔀 Routing Decision:"n: ")
     print(f"Last message from: {engine_name}")
     print(f"Routing to: {route}")
 
@@ -289,13 +289,13 @@ def main():
     )
 
     # Run all examples
-    stats = track_engine_usage(state)
+    track_engine_usage(state)
 
-    route = route_based_on_engine(state.messages)
+    route_based_on_engine(state.messages)
 
-    audit_log = create_audit_log(state)
+    create_audit_log(state)
 
-    filtered = filter_messages_by_engine(state.messages, "gpt4_engine")
+    filter_messages_by_engine(state.messages, "gpt4_engine")
 
     debug_engine_behavior(state)
 

@@ -1,0 +1,103 @@
+[
+  {
+    "messages": [
+      {
+        "content": "\ud83d\udcdd Collaborative Session: Brainstorming: Database Persistence Test\n\nTopic: Database Persistence Test\n\nWe'll work together on these sections:\n- Overview\n- Testing\n\nFormat: outline\nMin contributions per section: 1\n\nLet's start with: Overview",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "3c67e251-8ed0-4f5a-af32-54287c491131",
+        "example": false
+      },
+      {
+        "content": "[Error from Alice]: prepared statement \"_pg3_3\" already exists",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "ai",
+        "name": "Alice",
+        "id": "b65c1291-8666-47c9-b603-b2bcc982264b",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "\ud83c\udfc1 Conversation ended: Reached maximum rounds (1)\n\ud83d\udcca Total rounds: 1\n\ud83d\udd04 Total turns: 1",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "system",
+        "name": null,
+        "id": "8128857f-baaa-40f6-ae8e-bff9065811f3"
+      }
+    ],
+    "current_speaker": null,
+    "speakers": ["Alice", "Bob"],
+    "turn_count": 1,
+    "max_rounds": 1,
+    "topic": "Database Persistence Test",
+    "conversation_ended": true,
+    "mode": "collaborative",
+    "speaker_history": ["Alice"],
+    "shared_document": "Brainstorming: Database Persistence Test\n========================================\n\nOverview:\n[Alice]: [Error from Alice]: prepared statement \"_pg3_3\" already exists",
+    "document_sections": {
+      "Overview": "[Alice]: [Error from Alice]: prepared statement \"_pg3_3\" already exists",
+      "Testing": ""
+    },
+    "contributions": [
+      [
+        "Alice",
+        "Overview",
+        "[Error from Alice]: prepared statement \"_pg3_3\" already exists"
+      ]
+    ],
+    "contribution_count": {
+      "Alice": 1
+    },
+    "current_section": "Overview",
+    "sections_order": ["Overview", "Testing"],
+    "output_format": "outline"
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "test_persistence_fix_001",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057a41-24c0-619c-8006-b0c5f18b7918"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "conclude": {
+        "messages": [
+          {
+            "content": "\ud83c\udfc1 Conversation ended: Reached maximum rounds (1)\n\ud83d\udcca Total rounds: 1\n\ud83d\udd04 Total turns: 1",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "system",
+            "name": null,
+            "id": "8128857f-baaa-40f6-ae8e-bff9065811f3"
+          }
+        ],
+        "conversation_ended": true,
+        "current_speaker": null
+      }
+    },
+    "step": 6,
+    "parents": {},
+    "thread_id": "test_persistence_fix_001",
+    "recursion_limit": 50,
+    "debug": false,
+    "checkpoint_mode": "sync"
+  },
+  "2025-07-03T00:24:24.170930+00:00",
+  {
+    "configurable": {
+      "thread_id": "test_persistence_fix_001",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057a41-24ba-6d38-8005-2c0a7a2624fe"
+    }
+  },
+  []
+]

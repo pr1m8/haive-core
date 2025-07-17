@@ -1,0 +1,224 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Topic: Planning a project sprint\nLet's begin our directed discussion.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "97f074ef-8926-471d-b09b-d7e127364b62",
+        "example": false
+      },
+      {
+        "content": "Great! Planning a project sprint is a crucial part of agile project management and can significantly impact the team's productivity and the project's success. Let's break this down into key areas to focus on during this discussion:\n\n1. **Objectives and Goals:**\n   - What are the main objectives for this sprint?\n   - How do these goals align with the overall project roadmap?\n\n2. **Team and Resources:**\n   - Who will be involved in the sprint?\n   - Are there any resource constraints or availability issues that need to be addressed?\n\n3. **Sprint Duration:**\n   - How long should the sprint last?\n   - Do we have any dependencies or deadlines that affect the sprint timeline?\n\n4. **Task Prioritization:**\n   - What criteria will be used to prioritize tasks?\n   - Are there any high-priority tasks that must be completed in this sprint?\n\n5. **Estimation and Capacity Planning:**\n   - How will task estimates be determined?\n   - What is the team's capacity, and how does it affect sprint planning?\n\n6. **Review and Retrospective:**\n   - How will the team conduct sprint reviews and retrospectives?\n   - What steps will be taken to ensure continuous improvement?\n\nPlease feel free to expand on any of these points or to introduce other areas that might be relevant to your specific project sprint planning.",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 271,
+            "prompt_tokens": 34,
+            "total_tokens": 305,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--b461197f-54ab-40d2-a675-e9283609551a-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 34,
+          "output_tokens": 271,
+          "total_tokens": 305,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "Lead_230258_agent_8d4b057d",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057ba3-c05e-6bdf-8001-ab9b53e30bb8"
+    }
+  },
+  {
+    "step": 1,
+    "debug": false,
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "Great! Planning a project sprint is a crucial part of agile project management and can significantly impact the team's productivity and the project's success. Let's break this down into key areas to focus on during this discussion:\n\n1. **Objectives and Goals:**\n   - What are the main objectives for this sprint?\n   - How do these goals align with the overall project roadmap?\n\n2. **Team and Resources:**\n   - Who will be involved in the sprint?\n   - Are there any resource constraints or availability issues that need to be addressed?\n\n3. **Sprint Duration:**\n   - How long should the sprint last?\n   - Do we have any dependencies or deadlines that affect the sprint timeline?\n\n4. **Task Prioritization:**\n   - What criteria will be used to prioritize tasks?\n   - Are there any high-priority tasks that must be completed in this sprint?\n\n5. **Estimation and Capacity Planning:**\n   - How will task estimates be determined?\n   - What is the team's capacity, and how does it affect sprint planning?\n\n6. **Review and Retrospective:**\n   - How will the team conduct sprint reviews and retrospectives?\n   - What steps will be taken to ensure continuous improvement?\n\nPlease feel free to expand on any of these points or to introduce other areas that might be relevant to your specific project sprint planning.",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "logprobs": null,
+            "model_name": "gpt-4o-2024-08-06",
+            "token_usage": {
+              "total_tokens": 305,
+              "prompt_tokens": 34,
+              "completion_tokens": 271,
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              },
+              "completion_tokens_details": {
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "accepted_prediction_tokens": 0,
+                "rejected_prediction_tokens": 0
+              }
+            },
+            "finish_reason": "stop",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--b461197f-54ab-40d2-a675-e9283609551a-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 34,
+            "output_tokens": 271,
+            "total_tokens": 305,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "parents": {},
+    "thread_id": "directed_test_230258",
+    "langgraph_node": "execute_agent",
+    "langgraph_path": ["__pregel_pull", "execute_agent"],
+    "langgraph_step": 3,
+    "checkpoint_mode": "sync",
+    "recursion_limit": 50,
+    "langgraph_triggers": ["branch:to:execute_agent"],
+    "langgraph_checkpoint_ns": "execute_agent:7b6b893c-5b69-890e-e40d-37bfcb5a0b4d"
+  },
+  "2025-07-03T03:03:03.103981+00:00",
+  {
+    "configurable": {
+      "thread_id": "Lead_230258_agent_8d4b057d",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f057ba3-a1c1-6403-8000-a196f508fa79"
+    }
+  },
+  []
+]

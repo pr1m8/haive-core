@@ -1,0 +1,223 @@
+[
+  {
+    "messages": [
+      {
+        "content": "Create a plan for a day trip, then calculate how many hours we'll need if we spend 2 hours at each location",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "98fc4e72-a650-4adf-809f-af139e7d9477",
+        "example": false
+      },
+      {
+        "content": "Creating a day trip plan with specific locations and calculating the total time required is a fun exercise! I'll design a sample plan assuming the trip is in a city that offers a mix of cultural, historical, and leisure attractions. Let's say we're exploring New York City:\n\n### Day Trip Plan in New York City\n\n#### Morning\n1. **Central Park**\n   - Activity: Walking tour or relaxing in Sheep Meadow\n   - Time: 2 hours\n\n#### Late Morning\n2. **The Metropolitan Museum of Art**\n   - Activity: Explore the vast collection of art and exhibits\n   - Time: 2 hours\n\n#### Lunch\n3. **Lunch at a Local Cafe/Bistro**\n   - Suggestion: Try a popular spot in Upper East Side\n   - Time: 1 hour\n\n#### Afternoon\n4. **Empire State Building Observation Deck**\n   - Activity: Take in the panoramic views of Manhattan\n   - Time: 2 hours\n\n#### Late Afternoon\n5. **Times Square**\n   - Activity: Experience the vibrant atmosphere and shop for souvenirs\n   - Time: 2 hours\n\n#### Evening\n6. **Dinner in the Theater District**\n   - Suggestion: Pre-dinner walk or meal at a renowned restaurant\n   - Time: 1.5 hours\n\n#### Night\n7. **Broadway Show**\n   - Activity: Enjoy a popular musical or play\n   - Time: 2.5 hours\n\n### Total Time\n\nNow, let's calculate the total time needed:\n\n- Central Park: 2 hours\n- Metropolitan Museum of Art: 2 hours\n- Lunch: 1 hour\n- Empire State Building: 2 hours\n- Times Square: 2 hours\n- Dinner: 1.5 hours\n- Broadway Show: 2.5 hours\n\n**Total Time Required: 15 hours**\n\nThis plan spans approximately 15 hours, including lunch and dinner. You might also want to account for travel time between locations.\n\nMake sure your starting and ending points fit comfortably within your day's schedule, and adjust as necessary based on transit options, opening hours, and your personal interests. Have a great trip!",
+        "additional_kwargs": {
+          "refusal": null
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 437,
+            "prompt_tokens": 31,
+            "total_tokens": 468,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cached_tokens": 0
+            }
+          },
+          "model_name": "gpt-4o-2024-08-06",
+          "system_fingerprint": "fp_ee1d74bde0",
+          "prompt_filter_results": [
+            {
+              "prompt_index": 0,
+              "content_filter_results": {
+                "hate": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "self_harm": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "sexual": {
+                  "filtered": false,
+                  "severity": "safe"
+                },
+                "violence": {
+                  "filtered": false,
+                  "severity": "safe"
+                }
+              }
+            }
+          ],
+          "finish_reason": "stop",
+          "logprobs": null,
+          "content_filter_results": {
+            "hate": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "self_harm": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "sexual": {
+              "filtered": false,
+              "severity": "safe"
+            },
+            "violence": {
+              "filtered": false,
+              "severity": "safe"
+            }
+          }
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run--a87ed058-a09e-43b1-b8cb-2932a612a36a-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 31,
+          "output_tokens": 437,
+          "total_tokens": 468,
+          "input_token_details": {
+            "audio": 0,
+            "cache_read": 0
+          },
+          "output_token_details": {
+            "audio": 0,
+            "reasoning": 0
+          }
+        }
+      }
+    ]
+  },
+  [],
+  {
+    "configurable": {
+      "thread_id": "a846a8d7-4fd2-4354-9182-6dbbd49014ec",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04ef00-6094-6372-8001-0992d3e9a06c"
+    }
+  },
+  {
+    "source": "loop",
+    "writes": {
+      "agent_node": {
+        "messages": {
+          "content": "Creating a day trip plan with specific locations and calculating the total time required is a fun exercise! I'll design a sample plan assuming the trip is in a city that offers a mix of cultural, historical, and leisure attractions. Let's say we're exploring New York City:\n\n### Day Trip Plan in New York City\n\n#### Morning\n1. **Central Park**\n   - Activity: Walking tour or relaxing in Sheep Meadow\n   - Time: 2 hours\n\n#### Late Morning\n2. **The Metropolitan Museum of Art**\n   - Activity: Explore the vast collection of art and exhibits\n   - Time: 2 hours\n\n#### Lunch\n3. **Lunch at a Local Cafe/Bistro**\n   - Suggestion: Try a popular spot in Upper East Side\n   - Time: 1 hour\n\n#### Afternoon\n4. **Empire State Building Observation Deck**\n   - Activity: Take in the panoramic views of Manhattan\n   - Time: 2 hours\n\n#### Late Afternoon\n5. **Times Square**\n   - Activity: Experience the vibrant atmosphere and shop for souvenirs\n   - Time: 2 hours\n\n#### Evening\n6. **Dinner in the Theater District**\n   - Suggestion: Pre-dinner walk or meal at a renowned restaurant\n   - Time: 1.5 hours\n\n#### Night\n7. **Broadway Show**\n   - Activity: Enjoy a popular musical or play\n   - Time: 2.5 hours\n\n### Total Time\n\nNow, let's calculate the total time needed:\n\n- Central Park: 2 hours\n- Metropolitan Museum of Art: 2 hours\n- Lunch: 1 hour\n- Empire State Building: 2 hours\n- Times Square: 2 hours\n- Dinner: 1.5 hours\n- Broadway Show: 2.5 hours\n\n**Total Time Required: 15 hours**\n\nThis plan spans approximately 15 hours, including lunch and dinner. You might also want to account for travel time between locations.\n\nMake sure your starting and ending points fit comfortably within your day's schedule, and adjust as necessary based on transit options, opening hours, and your personal interests. Have a great trip!",
+          "additional_kwargs": {
+            "refusal": null
+          },
+          "response_metadata": {
+            "token_usage": {
+              "completion_tokens": 437,
+              "prompt_tokens": 31,
+              "total_tokens": 468,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-2024-08-06",
+            "system_fingerprint": "fp_ee1d74bde0",
+            "prompt_filter_results": [
+              {
+                "prompt_index": 0,
+                "content_filter_results": {
+                  "hate": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "self_harm": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "sexual": {
+                    "filtered": false,
+                    "severity": "safe"
+                  },
+                  "violence": {
+                    "filtered": false,
+                    "severity": "safe"
+                  }
+                }
+              }
+            ],
+            "finish_reason": "stop",
+            "logprobs": null,
+            "content_filter_results": {
+              "hate": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "self_harm": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "sexual": {
+                "filtered": false,
+                "severity": "safe"
+              },
+              "violence": {
+                "filtered": false,
+                "severity": "safe"
+              }
+            }
+          },
+          "type": "ai",
+          "name": null,
+          "id": "run--a87ed058-a09e-43b1-b8cb-2932a612a36a-0",
+          "example": false,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": {
+            "input_tokens": 31,
+            "output_tokens": 437,
+            "total_tokens": 468,
+            "input_token_details": {
+              "audio": 0,
+              "cache_read": 0
+            },
+            "output_token_details": {
+              "audio": 0,
+              "reasoning": 0
+            }
+          }
+        }
+      }
+    },
+    "step": 1,
+    "parents": {},
+    "thread_id": "ecd885f2-059f-48e2-8bff-470b2f97f49e",
+    "debug": false,
+    "checkpoint_mode": "sync",
+    "langgraph_step": 2,
+    "langgraph_node": "delegate_to_agent",
+    "langgraph_triggers": ["branch:to:delegate_to_agent"],
+    "langgraph_path": ["__pregel_pull", "delegate_to_agent"],
+    "langgraph_checkpoint_ns": "delegate_to_agent:47187270-39f0-f9f7-f7f2-8d1d5a688128"
+  },
+  "2025-06-21T22:35:24.887318+00:00",
+  {
+    "configurable": {
+      "thread_id": "a846a8d7-4fd2-4354-9182-6dbbd49014ec",
+      "checkpoint_ns": "",
+      "checkpoint_id": "1f04ef00-3e66-6505-8000-03017f65d7df"
+    }
+  },
+  []
+]
