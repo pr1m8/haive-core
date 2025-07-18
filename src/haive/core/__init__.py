@@ -48,6 +48,43 @@ See Also:
 - haive.core.graph: Graph building guide
 """
 
+# ============================================================================
+# PERFORMANCE OPTIMIZATIONS - Applied automatically on import
+# ============================================================================
+import logging
+import os
+
+# Configure reduced logging verbosity
+logging.basicConfig(level=logging.WARNING, format="%(levelname)s: %(message)s")
+
+# Suppress the noisiest loggers that cause slow startup
+_noisy_loggers = [
+    "haive.dataflow.registry.core",
+    "haive.core.engine.document.loaders.strategy",
+    "haive.core.engine.document.loaders.auto_registry",
+    "httpcore.connection",
+    "httpcore.http2",
+    "hpack.hpack",
+    "urllib3",
+    "requests",
+    "httpx",
+    "supabase",
+    "google.cloud.storage",
+    "langchain_community.utils.user_agent",
+]
+
+for _logger_name in _noisy_loggers:
+    logging.getLogger(_logger_name).setLevel(logging.ERROR)
+
+# Set environment variables to skip heavy initialization
+os.environ.setdefault("HAIVE_SKIP_HEAVY_INIT", "1")
+os.environ.setdefault("HAIVE_QUIET_IMPORTS", "1")
+os.environ.setdefault("HAIVE_DEBUG_CONFIG", "false")
+
+# ============================================================================
+# Core Imports
+# ============================================================================
+
 from haive.core.engine import (
     AugLLMConfig,
     AugLLMFactory,
@@ -69,13 +106,6 @@ from haive.core.schema import (  # BasicAgentState,  # Module doesn't exist
 )
 
 __version__ = "0.1.0"
-
-# Suppress noisy HTTP/connection logs
-import logging
-
-logging.getLogger("httpcore").setLevel(logging.WARNING)
-logging.getLogger("httpx").setLevel(logging.WARNING)
-logging.getLogger("hpack").setLevel(logging.WARNING)
 
 # Core imports for convenience
 

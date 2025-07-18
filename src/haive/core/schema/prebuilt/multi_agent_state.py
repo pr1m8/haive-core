@@ -4,6 +4,8 @@ This module provides a state schema for managing multiple agents without schema
 flattening, maintaining hierarchical access with proper typing for the graph API.
 """
 
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Any, Optional
 
 from pydantic import Field, computed_field, field_validator, model_validator
