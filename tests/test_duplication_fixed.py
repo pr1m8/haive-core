@@ -11,7 +11,7 @@ from haive.core.engine.aug_llm import AugLLMConfig
 logging.getLogger().setLevel(logging.ERROR)
 
 
-class TestModel(BaseModel):
+class SampleTestModel(BaseModel):
     """Simple test model for structured output."""
 
     analysis: str = Field(description="Analysis result")
@@ -23,10 +23,12 @@ def test_duplication_fix():
     print("=== TESTING DUPLICATION FIX ===\n")
 
     # Create agent with structured output
-    engine = AugLLMConfig(temperature=0.1, structured_output_model=TestModel)
+    engine = AugLLMConfig(temperature=0.1, structured_output_model=SampleTestModel)
 
     agent = SimpleAgentV2(
-        name="duplication_fix_test", engine=engine, structured_output_model=TestModel
+        name="duplication_fix_test",
+        engine=engine,
+        structured_output_model=SampleTestModel,
     )
 
     # Disable persistence to avoid database issues
