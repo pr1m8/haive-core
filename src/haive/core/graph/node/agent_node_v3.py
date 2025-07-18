@@ -5,6 +5,8 @@ between container states (like MultiAgentState) and individual agent states,
 maintaining type safety and hierarchical access patterns.
 """
 
+from __future__ import annotations
+
 import logging
 from typing import TYPE_CHECKING, Any, Dict, Optional, TypeVar
 
@@ -20,6 +22,7 @@ from haive.core.graph.node.base_node_config import BaseNodeConfig
 from haive.core.schema.field_definition import FieldDefinition
 from haive.core.schema.field_registry import StandardFields
 
+# Handle Agent import - use TYPE_CHECKING to avoid circular import
 if TYPE_CHECKING:
     from haive.agents.base.agent import Agent
 
@@ -59,12 +62,6 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
     agent: Optional["Agent"] = Field(
         default=None,
         description="Agent instance (extracted from state if not provided)",
-        exclude=True,
-    )
-
-    # Container state handling
-    extract_from_container: bool = Field(
-        default=True, description="Whether to extract agent from container state"
     )
 
     agent_state_field: str = Field(
@@ -105,6 +102,10 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
         """Validate configuration."""
         if not self.agent_name and not self.agent:
             raise ValueError("Either agent_name or agent must be provided")
+
+        # If agent is provided directly, we should use it regardless of extract_from_container
+        # The runtime logic in _get_agent already handles this correctly
+
         return self
 
     def get_default_input_fields(self) -> list[FieldDefinition]:
@@ -124,16 +125,15 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
             )
         )
 
-        # Need agents field if extracting
-        if self.extract_from_container:
-            fields.append(
-                FieldDefinition(
-                    name=self.agents_field,
-                    field_type=dict[str, "Agent"],
-                    default_factory=dict,
-                    description="Agent instances",
-                )
+        # Always need agents field for state pattern (like engines field)
+        fields.append(
+            FieldDefinition(
+                name=self.agents_field,
+                field_type=dict[str, "Agent"],
+                default_factory=dict,
+                description="Agent instances",
             )
+        )
 
         return fields
 
@@ -248,15 +248,18 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
             return Command(update=error_update, goto=self._get_goto_node())
 
     def _get_agent(self, state: StateLike) -> Optional["Agent"]:
-        """Get agent from state or use provided agent."""
+        """Get agent from direct reference or state's agents dict."""
+        # Priority 1: Direct agent reference
         if self.agent:
             return self.agent
 
-        if self.extract_from_container:
-            # Extract from container state
-            agents = getattr(state, self.agents_field, {})
-            if isinstance(agents, dict):
-                return agents.get(self.agent_name)
+        # Priority 2: Get from state's agents dict using agent_name
+        if self.agent_name and state:
+            # Try to get from agents dict in state
+            if hasattr(state, self.agents_field):
+                agents_dict = getattr(state, self.agents_field, {})
+                if isinstance(agents_dict, dict):
+                    return agents_dict.get(self.agent_name)
 
         return None
 
@@ -359,55 +362,110 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
     def _process_agent_output(
         self, result: Any, state: StateLike, agent: "Agent"
     ) -> dict[str, Any]:
-        """Process agent output and prepare state update."""
+        """Process agent output and prepare state update.
+
+        For agents with output_schema: Direct field updates (like engine nodes)
+        For agents without: Use messages or agent_outputs pattern
+        """
         state_update = {}
 
-        # Convert result to dict
-        if isinstance(result, dict):
-            result_dict = result
-        elif isinstance(result, BaseModel):
-            # Preserve messages
-            messages = getattr(result, "messages", None)
-            result_dict = result.model_dump()
-            if messages is not None:
-                result_dict["messages"] = messages
+        # Check if agent has structured output
+        has_output_schema = hasattr(agent, "output_schema") and agent.output_schema
+
+        if has_output_schema:
+            # STRUCTURED OUTPUT - Direct field updates
+            if isinstance(result, BaseModel):
+                # Agent returned a Pydantic model instance
+                state_update = result.model_dump()
+
+                # Special handling for messages if present
+                if hasattr(result, "messages"):
+                    messages = getattr(result, "messages", None)
+                    if messages is not None:
+                        state_update["messages"] = messages
+
+            elif isinstance(result, dict):
+                # Agent returned dict - use directly
+                state_update = result
+            else:
+                # Fallback - shouldn't happen with structured output
+                state_update = {"result": result}
+
+            # Optional: Track in agent_states for history/debugging
+            # But this is NOT the primary output mechanism
+            if self.update_container_state:
+                agent_states = getattr(state, self.agent_state_field, {})
+                # Only store metadata, not duplicate all data
+                agent_state_data = {
+                    "executed": True,
+                    "output_type": type(result).__name__,
+                    "has_schema": True,
+                }
+                state_update[self.agent_state_field] = {
+                    **agent_states,
+                    self.agent_name: agent_state_data,
+                }
+
         else:
-            result_dict = {"result": result}
+            # NO STRUCTURED OUTPUT - Original behavior
+            if isinstance(result, dict):
+                result_dict = result
+            elif isinstance(result, BaseModel):
+                # Preserve messages
+                messages = getattr(result, "messages", None)
+                result_dict = result.model_dump()
+                if messages is not None:
+                    result_dict["messages"] = messages
+            else:
+                result_dict = {"result": result}
 
-        # Update agent's isolated state
-        if self.update_container_state:
-            agent_states = getattr(state, self.agent_state_field, {})
-            current_agent_state = agent_states.get(self.agent_name, {})
+            # Check if this is message-based output
+            if "messages" in result_dict:
+                # Message-based - just pass through messages
+                state_update["messages"] = result_dict["messages"]
 
-            if self.output_mode == "merge":
-                updated_state = {**current_agent_state, **result_dict}
-            elif self.output_mode == "replace":
-                updated_state = result_dict
-            else:  # isolate
-                updated_state = current_agent_state
+                # Optional: Track in agent_states
+                if self.update_container_state:
+                    agent_states = getattr(state, self.agent_state_field, {})
+                    state_update[self.agent_state_field] = {
+                        **agent_states,
+                        self.agent_name: {
+                            "executed": True,
+                            "message_count": len(result_dict["messages"]),
+                        },
+                    }
+            else:
+                # Unstructured output - use agent_outputs pattern
+                if self.update_container_state:
+                    agent_states = getattr(state, self.agent_state_field, {})
+                    current_agent_state = agent_states.get(self.agent_name, {})
 
-            state_update[self.agent_state_field] = {
-                **agent_states,
-                self.agent_name: updated_state,
-            }
+                    if self.output_mode == "merge":
+                        updated_state = {**current_agent_state, **result_dict}
+                    elif self.output_mode == "replace":
+                        updated_state = result_dict
+                    else:  # isolate
+                        updated_state = current_agent_state
 
-        # Update agent outputs
-        current_outputs = getattr(state, "agent_outputs", {})
-        state_update["agent_outputs"] = {
-            **current_outputs,
-            self.agent_name: result_dict,
-        }
+                    state_update[self.agent_state_field] = {
+                        **agent_states,
+                        self.agent_name: updated_state,
+                    }
 
-        # Update shared fields
+                # Update agent outputs
+                current_outputs = getattr(state, "agent_outputs", {})
+                state_update["agent_outputs"] = {
+                    **current_outputs,
+                    self.agent_name: result_dict,
+                }
+
+        # Check for shared fields (from agent state_schema if it has one)
         if hasattr(agent, "state_schema"):
             schema_shared = getattr(agent.state_schema, "__shared_fields__", set())
+            # Only process shared fields if we haven't already updated them
             for field in schema_shared:
-                if field in result_dict:
+                if field not in state_update and field in result_dict:
                     state_update[field] = result_dict[field]
-
-        # Always update messages if present
-        if "messages" in result_dict:
-            state_update["messages"] = result_dict["messages"]
 
         return state_update
 
@@ -718,7 +776,25 @@ def create_agent_node_v3(
     Returns:
         AgentNodeV3Config instance
     """
+    # Ensure model is rebuilt if needed
+    try:
+        from haive.agents.base.agent import Agent
+
+        AgentNodeV3Config.model_rebuild()
+    except ImportError:
+        pass
+
     if not name:
         name = f"agent_{agent_name}"
 
     return AgentNodeV3Config(name=name, agent_name=agent_name, agent=agent, **kwargs)
+
+
+# Rebuild the model after Agent is available to resolve forward references
+try:
+    from haive.agents.base.agent import Agent
+
+    AgentNodeV3Config.model_rebuild()
+except ImportError:
+    # Will rebuild when Agent becomes available
+    pass
