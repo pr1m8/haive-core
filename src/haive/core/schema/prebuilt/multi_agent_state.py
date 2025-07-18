@@ -408,7 +408,8 @@ class MultiAgentState(ToolState):
             states_branch = branch.add(f"🤖 Agent States ({len(self.agent_states)})")
             for agent_name, state in self.agent_states.items():
                 state_branch = states_branch.add(f"{agent_name} ({len(state)} fields)")
-                for key, value in list(state.items())[:3]:  # Show first 3 fields
+                # Show first 3 fields
+                for key, value in list(state.items())[:3]:
                     if isinstance(value, list):
                         state_branch.add(f"📋 {key}: [{len(value)} items]")
                     elif isinstance(value, dict):

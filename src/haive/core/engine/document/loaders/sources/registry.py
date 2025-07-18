@@ -18,7 +18,13 @@ from haive.core.engine.document.loaders.path_analyzer import (
     PathAnalysisResult,
     analyze_path,
 )
-from haive.core.engine.document.loaders.sources.source_base import BaseSource
+from haive.core.engine.document.loaders.sources.source_base import (
+    BaseSource,
+    DatabaseSource,
+    DirectorySource,
+    LocalSource,
+    RemoteSource,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +84,8 @@ class SourceRegistry:
 
         # Indexes for fast lookup
         self._extension_index: Dict[str, Set[str]] = {}  # ext -> source names
-        self._url_pattern_index: Dict[str, Set[str]] = {}  # pattern -> source names
+        # pattern -> source names
+        self._url_pattern_index: Dict[str, Set[str]] = {}
         self._scheme_index: Dict[str, Set[str]] = {}  # scheme -> source names
         self._mime_index: Dict[str, Set[str]] = {}  # mime -> source names
 
@@ -321,12 +328,6 @@ source_registry = SourceRegistry()
 
 
 # Import to ensure LocalSource is available
-from haive.core.engine.document.loaders.sources.source_base import (
-    DatabaseSource,
-    DirectorySource,
-    LocalSource,
-    RemoteSource,
-)
 
 
 def register_source(

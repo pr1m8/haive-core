@@ -297,7 +297,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
                 print(f"    {agent_name}: {type(output)} - {str(output)[:100]}...")
 
         if not self.project_state:
-            print(f"  ❌ project_state=False, returning isolated state only")
+            print("  ❌ project_state=False, returning isolated state only")
             return projected
 
         # Add shared fields from container
@@ -337,7 +337,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
         if missing:
             print(f"  ❌ MISSING INPUTS: {missing}")
         else:
-            print(f"  ✅ All required inputs available")
+            print("  ✅ All required inputs available")
 
         # Let the agent handle its own state schema validation
         # AgentNodeV3 just provides the projected data

@@ -67,7 +67,8 @@ class SchemaGraph(StateGraph):
         """
 
         # Display schema information
-        schema_name = getattr(self.state_schema, "__name__", str(self.state_schema))
+        schema_name = getattr(
+            self.state_schema, "__name__", str(self.state_schema))
 
         # Display basic graph info
         for name, _node in self.nodes.items():

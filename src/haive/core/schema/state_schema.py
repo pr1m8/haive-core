@@ -92,6 +92,8 @@ from typing_extensions import (
     TypedDict,
 )
 
+from haive.core.engine.base import Engine
+
 # Get logger instance
 logger = logging.getLogger(__name__)
 
@@ -105,7 +107,6 @@ if TYPE_CHECKING:
 
 # This is needed because with __future__ annotations, type hints become strings
 # and LangGraph's get_type_hints() needs Engine in the global namespace
-from haive.core.engine.base import Engine
 
 # Type variables for generic state schema
 T = TypeVar("T", bound=BaseModel)

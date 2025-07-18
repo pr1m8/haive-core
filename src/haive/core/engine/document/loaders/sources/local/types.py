@@ -109,9 +109,6 @@ class CodeFileType(str, Enum):
     M = "m"
 
 
-from enum import Enum
-
-
 class LocalSourceFileType(str, Enum):
     """Supported file types with their actual file extensions."""
 

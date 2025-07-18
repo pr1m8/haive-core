@@ -16,6 +16,13 @@ The messages submodule provides additional functionality:
 
 from haive.core.schema.multi_agent_state_schema import MultiAgentStateSchema
 
+# Import document and query state components
+from haive.core.schema.prebuilt.document_state import (
+    DocumentEngineInputSchema,
+    DocumentEngineOutputSchema,
+    DocumentState,
+)
+
 # from haive.core.schema.prebuilt.basic_agent_state import BasicAgentState
 from haive.core.schema.prebuilt.dynamic_activation_state import DynamicActivationState
 from haive.core.schema.prebuilt.llm_state import LLMState
@@ -30,7 +37,19 @@ from haive.core.schema.prebuilt.messages import (
     extract_token_usage_from_message,
 )
 from haive.core.schema.prebuilt.messages_state import MessagesState
+from haive.core.schema.prebuilt.meta_state import MetaStateSchema
 from haive.core.schema.prebuilt.multi_agent_state import MultiAgentState
+from haive.core.schema.prebuilt.query_state import (
+    QueryComplexity,
+    QueryIntent,
+    QueryMetrics,
+    QueryProcessingConfig,
+    QueryProcessingState,
+    QueryResult,
+    QueryState,
+    QueryType,
+    RetrievalStrategy,
+)
 from haive.core.schema.prebuilt.tool_state import ToolState
 
 # Convenient aliases
@@ -47,6 +66,20 @@ __all__ = [
     "MultiAgentStateSchema",
     "MultiAgentState",
     "LLMState",
+    # Document and query schemas
+    "DocumentState",
+    "DocumentEngineInputSchema",
+    "DocumentEngineOutputSchema",
+    "MetaStateSchema",
+    "QueryState",
+    "QueryProcessingState",
+    "QueryType",
+    "RetrievalStrategy",
+    "QueryComplexity",
+    "QueryIntent",
+    "QueryProcessingConfig",
+    "QueryMetrics",
+    "QueryResult",
     # Token usage components
     "TokenUsage",
     "TokenUsageMixin",

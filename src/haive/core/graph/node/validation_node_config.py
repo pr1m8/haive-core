@@ -494,7 +494,8 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
             combined = all_schemas + all_tools  # Schemas first for priority
             self.sync_tool_routes_from_tools(combined)
             logger.debug(f"  Generated {len(self.tool_routes)} tool routes")
-            for name, route in list(self.tool_routes.items())[:5]:  # Log first 5
+            # Log first 5
+            for name, route in list(self.tool_routes.items())[:5]:
                 logger.debug(f"    {name} -> {route}")
 
         return all_tools, all_schemas
@@ -539,7 +540,8 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                             f"    {attr}: {len(attr_value) if attr_value else 0} messages"
                         )
                         if attr_value:
-                            for i, msg in enumerate(attr_value[-3:]):  # Last 3 messages
+                            # Last 3 messages
+                            for i, msg in enumerate(attr_value[-3:]):
                                 logger.debug(
                                     f"      [{i}] {type(msg).__name__}: {str(msg)[:100]}..."
                                 )
@@ -625,7 +627,8 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
 
             # Log detailed schema information
             logger.debug("[bold cyan]VALIDATION SCHEMAS DETAILS[/bold cyan]")
-            for i, schema in enumerate(validation_schemas[:10]):  # Log first 10
+            # Log first 10
+            for i, schema in enumerate(validation_schemas[:10]):
                 schema_name = getattr(schema, "__name__", f"schema_{i}")
                 schema_type = type(schema).__name__
                 logger.debug(f"  [{i}] {schema_name} ({schema_type})")
@@ -824,7 +827,8 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                 route == "pydantic_model"
                 and hasattr(tool_or_schema, "model_fields")
                 and hasattr(tool_or_schema, "model_validate")
-                and not hasattr(tool_or_schema, "invoke")  # Not a LangChain tool
+                # Not a LangChain tool
+                and not hasattr(tool_or_schema, "invoke")
                 and not hasattr(tool_or_schema, "run")  # Not a LangChain tool
                 and not hasattr(tool_or_schema, "_run")  # Not a LangChain tool
             )
@@ -902,7 +906,8 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                     logger.info(
                         "  [bold yellow]Created error ToolMessage, routing to agent[/bold yellow]"
                     )
-                    destinations.add(self.agent_node)  # Route to agent on error
+                    # Route to agent on error
+                    destinations.add(self.agent_node)
                 continue
 
             # Check if should skip validation for direct routes
@@ -999,7 +1004,8 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                     },
                 )
                 tool_messages_to_add.append(error_message)
-                destinations.add(self.agent_node)  # Route to agent on exception
+                # Route to agent on exception
+                destinations.add(self.agent_node)
                 has_errors = True
 
         # CRITICAL: Add all tool messages to the state - this was working before

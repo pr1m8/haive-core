@@ -1,4 +1,4 @@
-from typing import Annotated, Any, Dict, List, Optional, Union
+from typing import Annotated, Any, Dict, List, Optional, Type, Union
 
 from langchain_core.messages import (
     AIMessage,
@@ -11,9 +11,10 @@ from langchain_core.messages import (
     get_buffer_string,
 )
 from langchain_core.messages.utils import convert_to_openai_messages, messages_from_dict
+from langchain_core.output_parsers import BaseOutputParser, PydanticToolsParser
 from langgraph.graph import add_messages
 from langgraph.types import Send
-from pydantic import Field, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from haive.core.schema.state_schema import StateSchema
 
@@ -73,6 +74,22 @@ class MessagesState(StateSchema):
         default_factory=list, description="Conversation messages"
     )
 
+    # Structured output parsing configuration
+    structured_output_models: Optional[List[Type[BaseModel]]] = Field(
+        default=None,
+        description="Pydantic models for parsing structured outputs from AI messages",
+    )
+
+    structured_output_parser: Optional[BaseOutputParser] = Field(
+        default=None,
+        description="Output parser for structured outputs (auto-configured if not provided)",
+    )
+
+    parse_structured_outputs: bool = Field(
+        default=False,
+        description="Enable automatic parsing of AI messages as structured outputs",
+    )
+
     # Configuration for LangGraph compatibility
     __shared_fields__ = ["messages"]
     __serializable_reducers__ = {"messages": "add_messages"}
@@ -86,6 +103,24 @@ class MessagesState(StateSchema):
         """Automatically convert message dicts to proper Message objects"""
         if isinstance(data, dict) and "messages" in data:
             data["messages"] = convert_to_messages(data["messages"])
+        return data
+
+    @model_validator(mode="before")
+    @classmethod
+    def setup_structured_output_parser(cls, data: Any) -> Any:
+        """Setup structured output parser if models are provided but parser isn't."""
+        if isinstance(data, dict):
+            # Auto-configure parser if we have models but no parser
+            if (
+                data.get("structured_output_models")
+                and not data.get("structured_output_parser")
+                and data.get("parse_structured_outputs", False)
+            ):
+
+                # Use PydanticToolsParser to convert models to tool calls
+                data["structured_output_parser"] = PydanticToolsParser(
+                    tools=data["structured_output_models"]
+                )
         return data
 
     # Basic message handling
@@ -116,6 +151,55 @@ class MessagesState(StateSchema):
                 i += 1
 
         return instance
+
+    @field_validator("messages", mode="after")
+    @classmethod
+    def parse_ai_structured_outputs(
+        cls, messages: List[AnyMessage], info
+    ) -> List[AnyMessage]:
+        """Parse AI messages with structured output using PydanticToolsParser.
+
+        This validator automatically parses AI message content that matches
+        the configured structured output models and adds corresponding tool
+        messages to the conversation.
+        """
+        # Skip if not enabled or no parser configured
+        if not info.data.get("parse_structured_outputs", False):
+            return messages
+
+        parser = info.data.get("structured_output_parser")
+        if not parser:
+            return messages
+
+        # Process messages and add tool calls for structured outputs
+        enhanced_messages = []
+
+        for msg in messages:
+            enhanced_messages.append(msg)
+
+            # Only process AI messages with content
+            if isinstance(msg, AIMessage) and msg.content:
+                try:
+                    # Parse with PydanticToolsParser
+                    if isinstance(parser, PydanticToolsParser):
+                        # This returns a list of instantiated Pydantic models
+                        parsed_tools = parser.parse(msg.content)
+
+                        # Create tool messages for each parsed model
+                        for idx, tool_instance in enumerate(parsed_tools):
+                            tool_msg = ToolMessage(
+                                content=tool_instance.json(),
+                                tool_call_id=f"parse_{id(msg)}_{idx}",
+                                name=tool_instance.__class__.__name__,
+                            )
+                            enhanced_messages.append(tool_msg)
+
+                except Exception:
+                    # If parsing fails, just keep the original message
+                    # This is expected for non-structured AI responses
+                    pass
+
+        return enhanced_messages
 
     # NOTE: Token tracking validators moved to MessagesStateWithTokenUsage
     # The base MessagesState doesn't have token_usage fields
@@ -543,3 +627,63 @@ class MessagesState(StateSchema):
 
         adapter = MessagesStateAdapter(self)
         adapter.transform_ai_to_human(preserve_metadata, engine_id)
+
+    # ========================================================================
+    # STRUCTURED OUTPUT METHODS
+    # ========================================================================
+
+    def enable_structured_output_parsing(
+        self, models: List[Type[BaseModel]], parser: Optional[BaseOutputParser] = None
+    ) -> None:
+        """Enable structured output parsing for AI messages.
+
+        Args:
+            models: List of Pydantic models to parse outputs into
+            parser: Optional custom parser (defaults to PydanticToolsParser)
+        """
+        self.structured_output_models = models
+        self.parse_structured_outputs = True
+
+        if parser:
+            self.structured_output_parser = parser
+        else:
+            # Auto-configure PydanticToolsParser
+            self.structured_output_parser = PydanticToolsParser(tools=models)
+
+    def get_parsed_tool_calls(self) -> List[ToolMessage]:
+        """Get all tool messages created from parsed structured outputs.
+
+        Returns:
+            List of ToolMessage objects created by structured output parsing
+        """
+        return [
+            msg
+            for msg in self.messages
+            if isinstance(msg, ToolMessage) and msg.tool_call_id.startswith("parse_")
+        ]
+
+    def get_latest_structured_output(self) -> Optional[ToolMessage]:
+        """Get the most recent parsed structured output as a tool message.
+
+        Returns:
+            The latest ToolMessage from structured output parsing, or None
+        """
+        parsed_tools = self.get_parsed_tool_calls()
+        return parsed_tools[-1] if parsed_tools else None
+
+    def format_for_structured_output(self) -> str:
+        """Get format instructions for the configured output models.
+
+        Returns:
+            String with formatting instructions for the LLM
+        """
+        if self.structured_output_parser and hasattr(
+            self.structured_output_parser, "get_format_instructions"
+        ):
+            return self.structured_output_parser.get_format_instructions()
+
+        if self.structured_output_models:
+            model_names = [model.__name__ for model in self.structured_output_models]
+            return f"Please format your response as one of: {', '.join(model_names)}"
+
+        return ""

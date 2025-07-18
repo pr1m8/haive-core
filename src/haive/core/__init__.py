@@ -48,17 +48,6 @@ See Also:
 - haive.core.graph: Graph building guide
 """
 
-# Set version
-__version__ = "0.1.0"
-
-# Suppress noisy HTTP/connection logs
-import logging
-
-logging.getLogger("httpcore").setLevel(logging.WARNING)
-logging.getLogger("httpx").setLevel(logging.WARNING)
-logging.getLogger("hpack").setLevel(logging.WARNING)
-
-# Core imports for convenience
 from haive.core.engine import (
     AugLLMConfig,
     AugLLMFactory,
@@ -73,9 +62,22 @@ from haive.core.registry import (
     DynamicRegistry,
     RegistryItem,
 )
+
+# Set version
 from haive.core.schema import (  # BasicAgentState,  # Module doesn't exist
     SchemaComposer,
 )
+
+__version__ = "0.1.0"
+
+# Suppress noisy HTTP/connection logs
+import logging
+
+logging.getLogger("httpcore").setLevel(logging.WARNING)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("hpack").setLevel(logging.WARNING)
+
+# Core imports for convenience
 
 # Public API
 __all__ = [

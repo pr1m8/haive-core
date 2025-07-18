@@ -102,7 +102,8 @@ class PostgresStoreWrapper(SerializableStoreWrapper):
             # Create connection with prepared statements disabled
             connection_kwargs = {
                 "autocommit": True,
-                "prepare_threshold": None,  # Completely disable prepared statements (not just 0)
+                # Completely disable prepared statements (not just 0)
+                "prepare_threshold": None,
                 "row_factory": dict_row,
             }
 
@@ -249,7 +250,8 @@ class AsyncPostgresStoreWrapper(SerializableStoreWrapper):
             # Create async connection with prepared statements disabled
             connection_kwargs = {
                 "autocommit": True,
-                "prepare_threshold": None,  # Completely disable prepared statements (not just 0)
+                # Completely disable prepared statements (not just 0)
+                "prepare_threshold": None,
                 "row_factory": dict_row,
             }
 

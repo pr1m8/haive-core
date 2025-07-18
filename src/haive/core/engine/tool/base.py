@@ -249,15 +249,17 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
 
         return result
 
-    @field_validator("engine_type")
-    def validate_engine_type(self, v):
+    @field_validatorvalidate_engine_type
+    @classmethod
+    def validate_engine_type(cls, v):
         """Validate engine type is TOOL."""
         if v != EngineType.TOOL:
             raise ValueError("engine_type must be TOOL")
         return v
 
-    @field_validator("tools")
-    def validate_tools(self, v):
+    @field_validatorvalidate_tools
+    @classmethod
+    def validate_tools(cls, v):
         """Validate tools are of the correct type."""
         if v is None:
             return v
@@ -271,8 +273,9 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
 
         return valid_tools
 
-    @field_validator("toolkit")
-    def validate_toolkit(self, v):
+    @field_validatorvalidate_toolkit
+    @classmethod
+    def validate_toolkit(cls, v):
         """Validate toolkit is of the correct type."""
         if v is None:
             return v
@@ -292,8 +295,9 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
         logger.warning(f"Ignoring invalid toolkit type: {type(v).__name__}")
         return None
 
-    @field_validator("tool_choice")
-    def validate_tool_choice(self, v):
+    @field_validatorvalidate_tool_choice
+    @classmethod
+    def validate_tool_choice(cls, v):
         """Validate tool_choice has a valid value."""
         valid_choices = ["auto", "required", "none"]
         if v not in valid_choices:

@@ -16,7 +16,7 @@ Key Features:
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Set, Type, Union, get_type_hints
+from typing import Any, Dict, List, Optional, Set, Type, get_type_hints
 
 from langchain_core.messages import BaseMessage
 from langgraph.types import Command
@@ -25,7 +25,6 @@ from pydantic import BaseModel, Field
 from haive.core.graph.common.types import ConfigLike, StateLike
 from haive.core.graph.node.base_node_config import BaseNodeConfig
 from haive.core.graph.node.types import NodeType
-from haive.core.schema.field_definition import FieldDefinition
 
 logger = logging.getLogger(__name__)
 
@@ -323,7 +322,7 @@ class StatefulNodeConfig(BaseNodeConfig, ABC):
         sig = inspect.signature(callable_func)
         type_hints = get_type_hints(callable_func)
 
-        for param_name, param in sig.parameters.items():
+        for param_name, _param in sig.parameters.items():
             if param_name in type_hints:
                 param_type = type_hints[param_name]
 

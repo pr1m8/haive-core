@@ -719,7 +719,8 @@ def example_system_capabilities():
         sources_info = loader.get_supported_sources()
         print(f"   Total supported sources: {len(sources_info)}")
 
-        for source_type, info in list(sources_info.items())[:5]:  # Show first 5
+        # Show first 5
+        for source_type, info in list(sources_info.items())[:5]:
             print(f"   {source_type}: {info.get('description', 'No description')}")
 
     except Exception as e:

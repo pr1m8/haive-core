@@ -7,9 +7,6 @@ This tests that LLM engines always get LLMState as their base class.
 import sys
 from typing import Any, Dict
 
-# Add the src directory to the path
-sys.path.insert(0, "src")
-
 from haive.core.engine.aug_llm.config import AugLLMConfig
 from haive.core.schema.prebuilt.llm_state import LLMState
 from haive.core.schema.prebuilt.messages.messages_with_token_usage import (
@@ -18,6 +15,9 @@ from haive.core.schema.prebuilt.messages.messages_with_token_usage import (
 from haive.core.schema.prebuilt.tool_state import ToolState
 from haive.core.schema.schema_composer import SchemaComposer
 from haive.core.schema.state_schema import StateSchema
+
+# Add the src directory to the path
+sys.path.insert(0, "src")
 
 
 def test_base_class_selection():

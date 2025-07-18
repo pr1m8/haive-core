@@ -15,9 +15,11 @@ class RuntimeComponentProtocol(Protocol[I, O], ExtensibleProtocol):
     """Protocol for runtime components built from engine configs."""
 
     def initialize(self, **kwargs) -> None: ...
+
     def invoke(
         self, input_data: I, config: RunnableConfig | None = None, **kwargs
     ) -> O: ...
+
     async def ainvoke(
         self, input_data: I, config: RunnableConfig | None = None, **kwargs
     ) -> O: ...

@@ -95,7 +95,7 @@ def demonstrate_basic_functionality():
     print("-" * 40)
 
     loader = AutoLoader()
-    print("✅ AutoLoader initialized successfully"y")
+    print("✅ AutoLoader initialized successfully")
     print(f"   Default preference: {loader.config.preference}")
     print(f"   Max concurrency: {loader.config.max_concurrency}")
     print(f"   Caching enabled: {loader.config.enable_caching}")
@@ -111,7 +111,7 @@ def demonstrate_basic_functionality():
         timeout=120,
     )
     custom_loader = AutoLoader(custom_config)
-    print("✅ Custom loader initialized"d")
+    print("✅ Custom loader initialized")
     print(f"   Preference: {custom_loader.config.preference}")
     print(f"   Max concurrency: {custom_loader.config.max_concurrency}")
     print(f"   Caching: {custom_loader.config.enable_caching}")
@@ -159,7 +159,7 @@ def demonstrate_basic_functionality():
 
     try:
         status = get_registration_status()
-        print("✅ Registry status retrieved:":")
+        print("✅ Registry status retrieved:")
         print(f"   Total sources: {status.get('total_sources', 0)}")
         print(f"   Categories: {status.get('categories_count', 0)}")
         print(f"   Errors: {status.get('total_errors', 0)}")

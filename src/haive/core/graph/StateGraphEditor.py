@@ -8,7 +8,7 @@ from typing import Any, Literal
 
 from langchain_core.runnables import RunnableConfig
 from langgraph.graph import END, StateGraph
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from haive.core.engine.base import Engine
 from haive.core.graph.graph_pattern_registry import register_graph_component
@@ -16,10 +16,6 @@ from haive.core.graph.graph_pattern_registry import register_graph_component
 logger = logging.getLogger(__name__)
 
 # Updated NodeConfig in src/haive/core/graph/StateGraphEditor.py
-
-import logging
-
-from pydantic import ConfigDict
 
 
 class NodeConfig(BaseModel):

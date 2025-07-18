@@ -117,7 +117,8 @@ class EngineNodeConfig(NodeConfig):
                 # V2 structured output: Tool calls in AIMessage are extracted by downstream validation nodes
                 # V1 regular output: AI response appended to messages
                 self.output_field_defs = [
-                    StandardFields.messages(use_enhanced=True),  # ONLY messages field
+                    # ONLY messages field
+                    StandardFields.messages(use_enhanced=True),
                 ]
 
         elif self.engine.engine_type == EngineType.RETRIEVER:

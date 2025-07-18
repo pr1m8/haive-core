@@ -5,10 +5,9 @@ handle state projection between the container state and individual agent states.
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Type, TypeVar, Union
+from typing import Any, TypeVar
 
 from haive.agents.base.agent import Agent
-from langchain_core.messages import BaseMessage
 from langgraph.types import Command
 from pydantic import BaseModel, Field, model_validator
 

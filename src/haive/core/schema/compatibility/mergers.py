@@ -36,7 +36,8 @@ class MergeContext:
     def __init__(self):
         self.conflicts: List[Dict[str, Any]] = []
         self.warnings: List[str] = []
-        self.field_sources: Dict[str, List[str]] = {}  # field -> [schema_names]
+        # field -> [schema_names]
+        self.field_sources: Dict[str, List[str]] = {}
         self.resolution_log: List[str] = []
 
     def add_conflict(

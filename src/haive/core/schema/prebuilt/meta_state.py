@@ -119,9 +119,12 @@ class MetaStateSchema(StateSchema, RecompileMixin):
 
     # Define reducers for graph-specific fields
     __reducer_fields__ = {
-        "execution_result": lambda a, b: {**(a or {}), **(b or {})},  # Merge dicts
-        "graph_context": lambda a, b: {**(a or {}), **(b or {})},  # Merge dicts
-        "composition_metadata": lambda a, b: {**(a or {}), **(b or {})},  # Merge dicts
+        # Merge dicts
+        "execution_result": lambda a, b: {**(a or {}), **(b or {})},
+        # Merge dicts
+        "graph_context": lambda a, b: {**(a or {}), **(b or {})},
+        # Merge dicts
+        "composition_metadata": lambda a, b: {**(a or {}), **(b or {})},
     }
 
     @model_validator(mode="after")

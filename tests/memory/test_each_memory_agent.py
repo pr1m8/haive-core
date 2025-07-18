@@ -536,6 +536,8 @@ async def test_multi_agent_coordinator():
             kg_generator_config=kg_config,
             agentic_rag_config=rag_config,
             coordinator_llm=AugLLMConfig(temperature=0.2),
+            # Disable PostgreSQL persistence for tests
+            persistence=False,
         )
 
         coordinator = MultiAgentMemoryCoordinator(coordinator_config)

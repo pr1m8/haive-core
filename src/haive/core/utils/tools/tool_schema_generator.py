@@ -16,8 +16,6 @@ from typing import (
     Optional,
     Type,
     Union,
-    get_args,
-    get_origin,
     get_type_hints,
 )
 
@@ -759,7 +757,7 @@ if __name__ == "__main__":
     # Test signature info
     sig_info = get_signature_info(schemas["input"])
     if sig_info:
-        print(f"\nSignature info available:")
+        print("\nSignature info available:")
         print(f"  Parameter count: {sig_info.get('parameter_count', 'N/A')}")
         print(f"  Required params: {sig_info.get('required_params', [])}")
         print(f"  Optional params: {sig_info.get('optional_params', [])}")

@@ -215,27 +215,7 @@ try:
     logger = logging.getLogger(__name__)
 
     logger.info("🚀 Initializing Haive Document Loaders...")
-
-    # Trigger auto-registration of all sources
-    _registration_stats = auto_register_all()
-
-    logger.info(
-        f"✅ Auto-registration complete: {_registration_stats.total_sources_registered} "
-        f"sources registered from {_registration_stats.total_modules_scanned} modules "
-        f"in {_registration_stats.registration_time:.2f}s"
-    )
-
-    if _registration_stats.registration_errors:
-        logger.warning(
-            f"⚠️ Registration completed with {len(_registration_stats.registration_errors)} errors"
-        )
-
-    # Quick validation
-    status = get_registration_status()
-    logger.info(
-        f"📊 System ready: {status['total_sources']} sources, "
-        f"{status['categories_count']} categories available"
-    )
+    logger.info("✅ Lazy loading enabled - sources will be registered on first use")
 
 except Exception as e:
     # Fallback gracefully if auto-registration fails

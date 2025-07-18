@@ -12,6 +12,15 @@ from haive.core.graph.node.composer.extract_functions import (
     extract_with_projection,
 )
 from haive.core.graph.node.composer.field_mapping import FieldMapping
+from haive.core.graph.node.composer.node_schema_composer import (
+    ComposedCallableNode,
+    ComposedNode,
+    NodeSchemaComposer,
+    SchemaAdapter,
+    change_input_key,
+    change_output_key,
+    remap_fields,
+)
 from haive.core.graph.node.composer.path_resolver import PathResolver
 from haive.core.graph.node.composer.protocols import (
     ExtractFunction,
@@ -31,12 +40,38 @@ from haive.core.graph.node.composer.update_functions import (
     update_with_transform,
 )
 
+# Import advanced features if available
+try:
+    from haive.core.graph.node.composer.advanced_node_composer import (
+        AdvancedComposedNode,
+        AdvancedNodeComposer,
+        TypedCallableNode,
+        as_node,
+        callable_to_node,
+        node_with_custom_logic,
+    )
+
+    _advanced_available = True
+except ImportError:
+    _advanced_available = False
+
 __all__ = [
+    # Core composer
+    "NodeSchemaComposer",
+    "ComposedNode",
+    "ComposedCallableNode",
+    "SchemaAdapter",
+    # Quick factory functions
+    "change_output_key",
+    "change_input_key",
+    "remap_fields",
+    # Foundation classes
     "FieldMapping",
     "PathResolver",
     "ExtractFunction",
     "UpdateFunction",
     "TransformFunction",
+    # Extract functions
     "ExtractFunctions",
     "extract_functions",
     "extract_simple_field",
@@ -46,6 +81,7 @@ __all__ = [
     "extract_conditional",
     "extract_multi_field",
     "extract_typed",
+    # Update functions
     "UpdateFunctions",
     "update_functions",
     "update_simple_field",
@@ -57,3 +93,44 @@ __all__ = [
     "update_with_transform",
     "update_hierarchical",
 ]
+
+# Add advanced features to __all__ if available
+if _advanced_available:
+    __all__.extend(
+        [
+            "AdvancedNodeComposer",
+            "AdvancedComposedNode",
+            "TypedCallableNode",
+            "callable_to_node",
+            "node_with_custom_logic",
+            "as_node",
+        ]
+    )
+
+# Import integrated features if available
+try:
+    from haive.core.graph.node.composer.integrated_node_composer import (
+        IntegratedNodeComposer,
+        SchemaAwareComposedNode,
+        StateSchemaAdapter,
+        create_schema_aware_node,
+        integrate_node_with_schema,
+        with_state_schema,
+    )
+
+    _integrated_available = True
+except ImportError:
+    _integrated_available = False
+
+# Add integrated features to __all__ if available
+if _integrated_available:
+    __all__.extend(
+        [
+            "IntegratedNodeComposer",
+            "SchemaAwareComposedNode",
+            "StateSchemaAdapter",
+            "integrate_node_with_schema",
+            "create_schema_aware_node",
+            "with_state_schema",
+        ]
+    )

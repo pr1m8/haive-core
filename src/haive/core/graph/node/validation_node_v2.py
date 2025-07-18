@@ -296,6 +296,22 @@ class ValidationNodeV2(NodeConfig, ToolRouteMixin):
 
             logger.info(f"Processing tool call: {tool_name}")
 
+            # CHECK IF TOOLMESSAGE ALREADY EXISTS FOR THIS TOOL CALL
+            tool_message_exists = False
+            for msg in messages:
+                if (
+                    isinstance(msg, ToolMessage)
+                    and getattr(msg, "tool_call_id", None) == tool_id
+                ):
+                    tool_message_exists = True
+                    logger.debug(
+                        f"ToolMessage already exists for tool call {tool_id}, skipping"
+                    )
+                    break
+
+            if tool_message_exists:
+                continue  # Skip processing this tool call
+
             # Get route for this tool
             route = tool_routes.get(tool_name, "unknown")
             logger.debug(f"Tool route: {tool_name} -> {route}")

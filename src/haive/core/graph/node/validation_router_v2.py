@@ -129,11 +129,13 @@ def validation_router_v2(state: dict[str, Any]) -> str | list[str] | Send:
                 # We have a ToolMessage from V2 validation
                 if has_tool_error_v2(tool_message):
                     logger.warning(f"Pydantic validation failed for {tool_name}")
-                    destinations.add("agent_node")  # Route errors back to agent
+                    # Route errors back to agent
+                    destinations.add("agent_node")
                     has_errors = True
                 else:
                     logger.info(f"Pydantic validation passed for {tool_name}")
-                    destinations.add("parse_output")  # Route to parser for processing
+                    # Route to parser for processing
+                    destinations.add("parse_output")
             else:
                 # No ToolMessage found - this shouldn't happen with V2
                 logger.warning(f"No ToolMessage found for Pydantic model {tool_name}")

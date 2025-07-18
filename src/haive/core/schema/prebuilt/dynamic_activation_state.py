@@ -13,7 +13,7 @@ from typing import Any, Dict, List, Optional, TypeVar
 
 from pydantic import Field, field_validator, model_validator
 
-from haive.core.registry import DynamicRegistry, RegistryItem
+from haive.core.registry import DynamicRegistry
 from haive.core.schema.prebuilt.meta_state import MetaStateSchema
 from haive.core.schema.state_schema import StateSchema
 

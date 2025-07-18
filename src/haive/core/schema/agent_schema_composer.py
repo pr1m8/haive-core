@@ -48,6 +48,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type
 
 from langchain_core.messages import AnyMessage
 
+from haive.core.schema.preserve_messages_reducer import preserve_messages_reducer
 from haive.core.schema.schema_composer import SchemaComposer
 from haive.core.schema.state_schema import StateSchema
 
@@ -58,7 +59,6 @@ if TYPE_CHECKING:
     from haive.agents.base.agent import Agent
 
 # Import preserve_messages_reducer
-from haive.core.schema.preserve_messages_reducer import preserve_messages_reducer
 
 
 # Helper function for message reducer - now uses preserve_messages_reducer
@@ -221,7 +221,8 @@ class AgentSchemaComposer(SchemaComposer):
         name: Optional[str] = None,
         include_meta: bool = None,  # Auto-detect if None
         separation: str = "smart",  # "smart", "shared", "namespaced"
-        build_mode: Optional[BuildMode] = None,  # Build mode for schema generation
+        # Build mode for schema generation
+        build_mode: Optional[BuildMode] = None,
     ) -> Type[StateSchema]:
         """Compose a state schema from multiple agents with intelligent defaults.
 
@@ -524,7 +525,8 @@ class AgentSchemaComposer(SchemaComposer):
                 should_share = (
                     field_name in ["messages", "meta_state"]
                     or field_name.startswith("shared_")
-                    or len(unique_agent_ids) == len(agents)  # All agents use it
+                    # All agents use it
+                    or len(unique_agent_ids) == len(agents)
                 )
 
                 # Handle field info properly

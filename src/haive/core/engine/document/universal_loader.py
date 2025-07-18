@@ -335,7 +335,8 @@ class SmartSourceRegistry:
                 candidates.append((WhatsAppSource, 0.90))
             if "telegram" in path.lower():
                 # Telegram could be chat export or web
-                candidates.append((WhatsAppSource, 0.85))  # Generic chat handler
+                # Generic chat handler
+                candidates.append((WhatsAppSource, 0.85))
 
         # Check for database connection strings
         if any(

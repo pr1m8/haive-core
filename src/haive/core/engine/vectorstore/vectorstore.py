@@ -871,7 +871,8 @@ class VectorStoreProviderRegistry:
         if factory := cls.provider_factories.get(provider_name):
             try:
                 provider_class = factory()
-                cls.providers[provider_name] = provider_class  # Cache the result
+                # Cache the result
+                cls.providers[provider_name] = provider_class
                 return provider_class
             except Exception as e:
                 logger.error(f"Error creating vector store class from factory: {e}")

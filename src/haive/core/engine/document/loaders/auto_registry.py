@@ -679,6 +679,7 @@ def get_registration_status() -> dict[str, Any]:
             status = get_registration_status()
             print(f"Total sources: {status['total_sources']}")
     """
+    ensure_registration()
     return auto_registry.get_registration_status()
 
 
@@ -696,6 +697,7 @@ def list_available_sources() -> list[str]:
             sources = list_available_sources()
             print(f"Available: {', '.join(sources)}")
     """
+    ensure_registration()
     return list(auto_registry.registered_sources.keys())
 
 
@@ -717,20 +719,39 @@ def get_sources_by_category(category: SourceCategory) -> list[str]:
             file_sources = get_sources_by_category(SourceCategory.LOCAL_FILE)
             print(f"File sources: {file_sources}")
     """
+    ensure_registration()
     by_category = auto_registry.list_sources_by_category()
     return by_category.get(category, [])
 
 
-# Auto-register on import
-logger.info("Starting automatic source registration on import...")
-try:
-    _stats = auto_register_all()
-    logger.info(
-        f"Auto-registration completed: {_stats.total_sources_registered} sources "
-        f"from {_stats.total_modules_scanned} modules"
-    )
-except Exception as e:
-    logger.exception(f"Auto-registration failed: {e}")
+# Lazy auto-registration - only register when needed
+_registration_done = False
+_stats = None
+
+
+def ensure_registration():
+    """Ensure auto-registration has been completed (lazy loading)."""
+    global _registration_done, _stats
+
+    if _registration_done:
+        return _stats
+
+    logger.info("Starting lazy auto-registration...")
+    try:
+        _stats = auto_register_all()
+        _registration_done = True
+        logger.info(
+            f"Lazy registration completed: {_stats.total_sources_registered} sources "
+            f"from {_stats.total_modules_scanned} modules"
+        )
+        return _stats
+    except Exception as e:
+        logger.exception(f"Lazy auto-registration failed: {e}")
+        return None
+
+
+# Don't auto-register on import - wait until needed
+logger.debug("Auto-registry initialized (lazy loading enabled)")
 
 
 # Export main functions

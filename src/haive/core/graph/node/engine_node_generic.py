@@ -228,7 +228,8 @@ class LLMNodeConfig(GenericEngineNodeConfig[BaseModel, BaseModel]):
                 # LLM engines should ONLY output to messages field
                 # V2 structured output: Tool calls in AIMessage are extracted by downstream validation nodes
                 kwargs["output_field_defs"] = [
-                    StandardFields.messages(use_enhanced=True),  # ONLY messages field
+                    # ONLY messages field
+                    StandardFields.messages(use_enhanced=True),
                 ]
 
         super().__init__(**kwargs)

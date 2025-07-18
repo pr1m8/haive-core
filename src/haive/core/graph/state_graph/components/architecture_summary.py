@@ -38,12 +38,12 @@ def analyze_codebase():
 
     total_new_lines = 0
 
-    for name, filename in component_files.items():
+    for _name, filename in component_files.items():
         filepath = components_dir / filename
         lines = count_lines_in_file(filepath)
         total_new_lines += lines
 
-    reduction = ((original_lines - total_new_lines) / original_lines) * 100
+    ((original_lines - total_new_lines) / original_lines) * 100
 
     return original_lines, total_new_lines
 
@@ -64,7 +64,7 @@ def show_architecture_benefits():
         "Extensibility - New components can be added without affecting others",
     ]
 
-    for i, benefit in enumerate(benefits, 1):
+    for _i, _benefit in enumerate(benefits, 1):
         pass
 
 
@@ -110,8 +110,8 @@ def show_component_responsibilities():
         ],
     }
 
-    for component, responsibilities in components.items():
-        for responsibility in responsibilities:
+    for _component, responsibilities in components.items():
+        for _responsibility in responsibilities:
             pass
 
 
@@ -127,7 +127,7 @@ def show_design_patterns():
         "Delegation Pattern": "ModularBaseGraph delegates operations to appropriate managers",
     }
 
-    for pattern, description in patterns.items():
+    for _pattern, _description in patterns.items():
         pass
 
 
@@ -147,7 +147,7 @@ def show_coding_style_compliance():
         "Validation and error messages",
     ]
 
-    for compliance in compliances:
+    for _compliance in compliances:
         pass
 
 

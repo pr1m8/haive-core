@@ -21,6 +21,7 @@ Key advantages of the Supabase implementation include:
 
 import json
 import logging
+import os
 import uuid
 from datetime import datetime
 from typing import Any
@@ -41,13 +42,31 @@ try:
 except ImportError:
     SUPABASE_AVAILABLE = False
 
-# Try to import the shared Supabase client utility
-try:
-    from haive.dataflow.db.supabase import get_supabase_client, sanitize_sql
+# Minimal dataflow integration - no heavy imports
+DATAFLOW_AVAILABLE = False
 
-    DATAFLOW_AVAILABLE = True
-except ImportError:
-    DATAFLOW_AVAILABLE = False
+
+def get_supabase_client():
+    """Lazy import of supabase client to avoid heavy initialization."""
+    # Only import when actually needed
+    if os.getenv("HAIVE_ENABLE_DATAFLOW") == "1":
+        try:
+            from haive.dataflow.db.supabase import get_supabase_client as _get_client
+
+            return _get_client()
+        except ImportError:
+            pass
+    return None
+
+
+def sanitize_sql(sql: str) -> str:
+    """Basic SQL sanitization without dataflow dependency."""
+    # Simple sanitization - could be enhanced if needed
+    return sql.replace("'", "''").replace(";", "")
+
+
+# Only set flag if environment enables dataflow
+DATAFLOW_AVAILABLE = os.getenv("HAIVE_ENABLE_DATAFLOW") == "1"
 
 
 class SupabaseSaver:

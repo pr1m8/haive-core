@@ -457,8 +457,17 @@ class AutoLoader:
         self.registry = registry or enhanced_registry
         self.path_analyzer = path_analyzer or PathAnalyzer()
         self._cache: dict[str, tuple[list[Document], datetime]] = {}
+        self._registration_ensured = False
 
         logger.info(f"AutoLoader initialized with {self.config.preference} preference")
+
+    def _ensure_registration(self):
+        """Ensure auto-registration has been completed (lazy loading)."""
+        if not self._registration_ensured:
+            from .auto_registry import ensure_registration
+
+            ensure_registration()
+            self._registration_ensured = True
 
     def detect_source(self, path_or_url: str) -> SourceInfo:
         """Detect source type and get source information.
@@ -514,6 +523,9 @@ class AutoLoader:
                 info = loader.detect_source("document.pdf")
                 loader_name, loader_config = loader.get_best_loader(info)
         """
+        # Ensure registration is complete before using registry
+        self._ensure_registration()
+
         try:
             loader_name = self.registry.get_loader_for_source(
                 source_info.source_type, preference=self.config.preference
@@ -1360,8 +1372,7 @@ def load_document(path_or_url: str, **kwargs) -> list[Document]:
             documents = load_document("file.pdf")
             documents = load_document("https://example.com")
     """
-    loader = AutoLoader()
-    return loader.load(path_or_url, **kwargs)
+    return get_default_loader().load(path_or_url, **kwargs)
 
 
 def load_documents_bulk(sources: list[str], **kwargs) -> list[Document]:
@@ -1385,7 +1396,7 @@ def load_documents_bulk(sources: list[str], **kwargs) -> list[Document]:
                 "https://example.com"
             ])
     """
-    loader = AutoLoader()
+    loader = get_default_loader()
     result = loader.load_bulk(sources, **kwargs)
 
     # Flatten all documents
@@ -1413,12 +1424,33 @@ async def aload_document(path_or_url: str, **kwargs) -> list[Document]:
 
             documents = await aload_document("https://example.com")
     """
-    loader = AutoLoader()
-    return await loader.aload(path_or_url, **kwargs)
+    return await get_default_loader().aload(path_or_url, **kwargs)
 
 
-# Global default loader instance
-default_loader = AutoLoader()
+# Global default loader instance (lazy loaded)
+_default_loader = None
+
+
+def get_default_loader() -> AutoLoader:
+    """Get the default AutoLoader instance (lazy loaded)."""
+    global _default_loader
+    if _default_loader is None:
+        _default_loader = AutoLoader()
+    return _default_loader
+
+
+# Create a module-level property for backward compatibility
+class _DefaultLoaderProperty:
+    """Lazy loading property for default_loader."""
+
+    def __getattr__(self, name):
+        return getattr(get_default_loader(), name)
+
+    def __call__(self, *args, **kwargs):
+        return get_default_loader()(*args, **kwargs)
+
+
+default_loader = _DefaultLoaderProperty()
 
 # Export main classes and functions
 __all__ = [

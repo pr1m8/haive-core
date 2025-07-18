@@ -89,7 +89,8 @@ class FieldDefinition:
         name: str,
         field_type: type[Any] | None = None,
         *,
-        type_hint: type[Any] | None = None,  # Alias for field_type used in some modules
+        # Alias for field_type used in some modules
+        type_hint: type[Any] | None = None,
         field_info: Any = None,
         default: Any = None,
         default_factory: Callable[[], Any] | None = None,

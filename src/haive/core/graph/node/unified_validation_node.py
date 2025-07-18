@@ -14,7 +14,6 @@ from pydantic import Field, model_validator
 
 from haive.core.graph.node.base_node_config import BaseNodeConfig
 from haive.core.graph.node.types import NodeType
-from haive.core.logging import get_logger
 
 logger = logging.getLogger(__name__)
 

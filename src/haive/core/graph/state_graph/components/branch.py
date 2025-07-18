@@ -139,7 +139,8 @@ class Branch(BaseModel, Generic[T, C, O]):
             resolved = self.function_ref.resolve()
             # Handle case where resolve returns a tuple
             if isinstance(resolved, tuple) and len(resolved) > 0:
-                self.function = resolved[0]  # Extract the function from the tuple
+                # Extract the function from the tuple
+                self.function = resolved[0]
             else:
                 self.function = resolved
 

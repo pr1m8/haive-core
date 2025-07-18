@@ -21,6 +21,7 @@ from langgraph.prebuilt import ToolNode, ValidationNode
 from langgraph.types import Command, RetryPolicy, Send
 from pydantic import BaseModel
 
+from haive.core.graph.node.agent_node_v3 import AgentNodeV3Config, create_agent_node_v3
 from haive.core.graph.node.config import NodeConfig
 
 # Decorators for easy node creation
@@ -282,7 +283,6 @@ def register_custom_node_type(name: str, config_class: Type[NodeConfig]) -> None
 
 
 # Import V3 agent node
-from haive.core.graph.node.agent_node_v3 import AgentNodeV3Config, create_agent_node_v3
 
 # Node factory singleton for convenience
 factory = NodeFactory()

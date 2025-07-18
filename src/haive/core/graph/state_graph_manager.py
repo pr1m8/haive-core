@@ -89,7 +89,8 @@ class StateGraphManager:
 
         # If function is not provided, try to extract from the existing graph
         if func is None:
-            func = getattr(self.graph, node, None)  # Try extracting from existing graph
+            # Try extracting from existing graph
+            func = getattr(self.graph, node, None)
             if not callable(func):
                 raise ValueError(
                     f"No callable function found for `{node}`. Provide `func` explicitly."

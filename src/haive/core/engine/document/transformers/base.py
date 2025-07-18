@@ -13,7 +13,7 @@ from pydantic import ConfigDict, Field
 
 from haive.core.engine.base import EngineType, InvokableEngine
 from haive.core.engine.document.transformers.types import DocTransformerType
-from haive.core.models.embeddings.base import BaseEmbeddingConfig
+from haive.core.registry.base import AbstractRegistry
 from haive.core.registry.decorators import register_component
 
 
@@ -444,8 +444,6 @@ def create_translate_transformer(
 
 
 # Document Transformer Registry
-
-from haive.core.registry.base import AbstractRegistry
 
 
 class DocTransformerRegistry(AbstractRegistry[DocTransformerEngine]):

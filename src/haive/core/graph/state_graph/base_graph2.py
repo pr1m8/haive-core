@@ -6,6 +6,7 @@ graphs with consistent interfaces, serialization support, and dynamic compositio
 """
 
 # Import RichLogger
+import inspect
 import logging
 import uuid
 from datetime import datetime
@@ -53,7 +54,6 @@ BranchResultType = Union[
 # Setup rich logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
-import inspect
 
 
 class BranchType(str, Enum):
@@ -4138,7 +4138,8 @@ class BaseGraph(BaseModel, ValidationMixin):
                 include_subgraphs=include_subgraphs,
                 highlight_nodes=all_highlight_nodes if all_highlight_nodes else None,
                 theme=theme,
-                show_branch_labels=show_default_branches,  # Map show_default_branches to show_branch_labels
+                # Map show_default_branches to show_branch_labels
+                show_branch_labels=show_default_branches,
                 direction="TD",
                 compact=False,
                 max_depth=3,
@@ -4481,7 +4482,7 @@ class BaseGraph(BaseModel, ValidationMixin):
 
         if issues:
             logger.error(
-                f"Graph Validation Issues:\n"
+                "Graph Validation Issues:\n"
                 + "\n".join([f"- {issue}" for issue in issues])
             )
 
@@ -4611,6 +4612,328 @@ class BaseGraph(BaseModel, ValidationMixin):
         ]
 
         logger.info("\n".join(tips), title="💡 Routing Tips", style="blue")
+
+    # ============================================================================
+    # INTELLIGENT ROUTING METHODS
+    # ============================================================================
+
+    def add_intelligent_agent_routing(
+        self,
+        agents: Dict[str, Any],
+        execution_mode: str = "infer",
+        branches: Optional[Dict[str, Dict[str, Any]]] = None,
+        prefix: str = "agent_",
+    ) -> "BaseGraph":
+        """Add intelligent agent routing with sequence inference and branching.
+
+        Args:
+            agents: Dictionary of agent name -> agent instance
+            execution_mode: Execution mode (infer, sequential, parallel, branch, conditional)
+            branches: Branch configurations for conditional routing
+            prefix: Prefix for agent node names
+
+        Returns:
+            Self for method chaining
+        """
+        if not agents:
+            logger.warning("No agents provided for intelligent routing")
+            return self
+
+        # Add nodes for each agent
+        for agent_name, agent in agents.items():
+            node_name = f"{prefix}{agent_name}"
+            self.add_node(node_name, agent)
+
+        # Add intelligent routing logic
+        if execution_mode == "infer":
+            self._add_inferred_routing(agents, prefix)
+        elif execution_mode == "sequential":
+            self._add_sequential_routing(agents, prefix)
+        elif execution_mode == "parallel":
+            self._add_parallel_routing(agents, prefix)
+        elif execution_mode == "branch":
+            self._add_branch_routing(agents, branches or {}, prefix)
+        elif execution_mode == "conditional":
+            self._add_conditional_routing(agents, prefix)
+
+        self._mark_needs_recompile(
+            f"Added intelligent agent routing with {len(agents)} agents"
+        )
+        return self
+
+    def _add_inferred_routing(self, agents: Dict[str, Any], prefix: str):
+        """Add routing with inferred sequence."""
+        # Infer sequence
+        sequence = self._infer_agent_sequence(agents)
+        logger.info(f"Inferred agent sequence: {sequence}")
+
+        # Add sequential routing with inferred order
+        self._add_sequential_routing_with_sequence(sequence, prefix)
+
+    def _add_sequential_routing(self, agents: Dict[str, Any], prefix: str):
+        """Add sequential routing in dict order."""
+        agent_names = list(agents.keys())
+        self._add_sequential_routing_with_sequence(agent_names, prefix)
+
+    def _add_sequential_routing_with_sequence(self, sequence: List[str], prefix: str):
+        """Add sequential routing with specific sequence."""
+        if not sequence:
+            return
+
+        # Connect START to first agent
+        self.add_edge(START, f"{prefix}{sequence[0]}")
+
+        # Connect agents in sequence
+        for i in range(len(sequence) - 1):
+            current = f"{prefix}{sequence[i]}"
+            next_agent = f"{prefix}{sequence[i + 1]}"
+            self.add_edge(current, next_agent)
+
+        # Connect last agent to END
+        self.add_edge(f"{prefix}{sequence[-1]}", END)
+
+    def _add_parallel_routing(self, agents: Dict[str, Any], prefix: str):
+        """Add parallel routing."""
+        agent_names = list(agents.keys())
+
+        # Connect START to all agents
+        for agent_name in agent_names:
+            node_name = f"{prefix}{agent_name}"
+            self.add_edge(START, node_name)
+            self.add_edge(node_name, END)
+
+    def _add_branch_routing(
+        self, agents: Dict[str, Any], branches: Dict[str, Dict[str, Any]], prefix: str
+    ):
+        """Add branch routing with conditions."""
+        agent_names = list(agents.keys())
+
+        if not agent_names:
+            return
+
+        # Start with first agent
+        self.add_edge(START, f"{prefix}{agent_names[0]}")
+
+        # Add branch logic
+        for i, agent_name in enumerate(agent_names):
+            current_node = f"{prefix}{agent_name}"
+
+            if agent_name in branches:
+                # Add branch condition
+                branch_config = branches[agent_name]
+                self._add_agent_branch(current_node, branch_config, prefix)
+            else:
+                # Default to next agent or END
+                if i < len(agent_names) - 1:
+                    next_node = f"{prefix}{agent_names[i + 1]}"
+                    self.add_edge(current_node, next_node)
+                else:
+                    self.add_edge(current_node, END)
+
+    def _add_conditional_routing(self, agents: Dict[str, Any], prefix: str):
+        """Add conditional routing with decision points."""
+        agent_names = list(agents.keys())
+
+        if not agent_names:
+            return
+
+        # Start with first agent
+        self.add_edge(START, f"{prefix}{agent_names[0]}")
+
+        # Add conditional logic between agents
+        for i in range(len(agent_names) - 1):
+            current_node = f"{prefix}{agent_names[i]}"
+            next_node = f"{prefix}{agent_names[i + 1]}"
+
+            # Add condition evaluator
+            def make_condition(current=agent_names[i], next=agent_names[i + 1]):
+                def condition(state):
+                    # Simple condition - can be enhanced
+                    return f"{prefix}{next}"
+
+                return condition
+
+            condition_node = f"condition_{i}"
+            self.add_node(condition_node, make_condition())
+            self.add_edge(current_node, condition_node)
+            self.add_edge(condition_node, next_node)
+
+        # Connect last agent to END
+        self.add_edge(f"{prefix}{agent_names[-1]}", END)
+
+    def _add_agent_branch(
+        self, source_node: str, branch_config: Dict[str, Any], prefix: str
+    ):
+        """Add branch logic for an agent."""
+        targets = branch_config.get("targets", [])
+
+        if not targets:
+            self.add_edge(source_node, END)
+            return
+
+        # Create branch condition function
+        def branch_condition(state):
+            condition = branch_config.get("condition", "default")
+
+            if condition == "default":
+                return f"{prefix}{targets[0]}" if targets else END
+
+            # Add sophisticated condition logic here
+            return f"{prefix}{targets[0]}" if targets else END
+
+        # Add branch node
+        branch_node = f"branch_{source_node}"
+        self.add_node(branch_node, branch_condition)
+        self.add_edge(source_node, branch_node)
+
+        # Connect to target agents
+        for target in targets:
+            target_node = f"{prefix}{target}"
+            self.add_edge(branch_node, target_node)
+
+    def _infer_agent_sequence(self, agents: Dict[str, Any]) -> List[str]:
+        """Infer optimal agent execution sequence."""
+        agent_names = list(agents.keys())
+
+        if len(agent_names) <= 1:
+            return agent_names
+
+        # Strategy 1: Naming patterns
+        sequence = self._infer_from_naming_patterns(agent_names)
+        if sequence:
+            return sequence
+
+        # Strategy 2: Agent types
+        sequence = self._infer_from_agent_types(agent_names, agents)
+        if sequence:
+            return sequence
+
+        # Strategy 3: Prompt dependencies
+        sequence = self._infer_from_prompt_dependencies(agent_names, agents)
+        if sequence:
+            return sequence
+
+        # Fallback: dict order
+        return agent_names
+
+    def _infer_from_naming_patterns(self, agent_names: List[str]) -> List[str]:
+        """Infer sequence from naming patterns."""
+        patterns = [
+            "planner",
+            "plan",
+            "planning",
+            "analyzer",
+            "analysis",
+            "analyze",
+            "researcher",
+            "research",
+            "search",
+            "executor",
+            "execute",
+            "execution",
+            "worker",
+            "validator",
+            "validate",
+            "validation",
+            "reviewer",
+            "review",
+            "critique",
+            "replanner",
+            "replan",
+            "replanning",
+            "formatter",
+            "format",
+            "output",
+            "summary",
+            "summarize",
+            "summarizer",
+        ]
+
+        agent_scores = {}
+        for agent_name in agent_names:
+            score = len(patterns)  # Default to end
+            for i, pattern in enumerate(patterns):
+                if pattern in agent_name.lower():
+                    score = i
+                    break
+            agent_scores[agent_name] = score
+
+        sorted_agents = sorted(agent_names, key=lambda x: agent_scores[x])
+
+        # Only return if we found meaningful patterns
+        if len(set(agent_scores.values())) > 1:
+            return sorted_agents
+
+        return []
+
+    def _infer_from_agent_types(
+        self, agent_names: List[str], agents: Dict[str, Any]
+    ) -> List[str]:
+        """Infer sequence from agent types."""
+        type_priority = {
+            "ReactAgent": 1,
+            "SimpleAgent": 2,
+            "RAGAgent": 3,
+            "ToolAgent": 4,
+        }
+
+        agent_scores = {}
+        for agent_name in agent_names:
+            agent = agents[agent_name]
+            agent_type = type(agent).__name__
+            agent_scores[agent_name] = type_priority.get(agent_type, 5)
+
+        sorted_agents = sorted(agent_names, key=lambda x: agent_scores[x])
+
+        if len(set(agent_scores.values())) > 1:
+            return sorted_agents
+
+        return []
+
+    def _infer_from_prompt_dependencies(
+        self, agent_names: List[str], agents: Dict[str, Any]
+    ) -> List[str]:
+        """Infer sequence from prompt dependencies."""
+        dependencies = {}
+
+        for agent_name in agent_names:
+            agent = agents[agent_name]
+            dependencies[agent_name] = set()
+
+            if hasattr(agent, "engine") and hasattr(agent.engine, "prompt_template"):
+                prompt = str(agent.engine.prompt_template)
+
+                for other_agent in agent_names:
+                    if other_agent != agent_name:
+                        if any(
+                            field in prompt.lower()
+                            for field in [
+                                f"{other_agent}_result",
+                                f"{other_agent}_output",
+                                f"result_from_{other_agent}",
+                                f"output_from_{other_agent}",
+                            ]
+                        ):
+                            dependencies[agent_name].add(other_agent)
+
+        # Build sequence based on dependencies
+        sequence = []
+        remaining = set(agent_names)
+
+        while remaining:
+            ready = []
+            for agent_name in remaining:
+                if not (dependencies[agent_name] & remaining):
+                    ready.append(agent_name)
+
+            if not ready:
+                ready = [list(remaining)[0]]
+
+            for agent_name in ready:
+                sequence.append(agent_name)
+                remaining.remove(agent_name)
+
+        return sequence if len(sequence) > 1 else []
 
 
 # Utility functions for common graph operations
@@ -4792,3 +5115,9 @@ def create_debug_has_tool_calls(original_func):
         return original_result
 
     return debug_wrapper
+
+
+# Global debug wrapper function
+def debug_wrapper(original_func):
+    """Debug wrapper function for external use."""
+    pass

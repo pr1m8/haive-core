@@ -7,15 +7,15 @@ detect and load documents from any source with intelligent source detection.
 import sys
 from pathlib import Path
 
-# Add the package root to the path for import
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent.parent))
-
 from haive.core.engine.document import (
     CredentialManager,
     UniversalDocumentLoader,
     analyze_document_source,
     load_document,
 )
+
+# Add the package root to the path for import
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent.parent))
 
 
 def demo_universal_loader():

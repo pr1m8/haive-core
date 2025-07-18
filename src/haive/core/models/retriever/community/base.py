@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Any, Dict
+from typing import Any
 
 from dotenv import load_dotenv
 from langchain_core.retrievers import BaseRetriever

@@ -21,7 +21,7 @@ from haive.core.engine.document.config import (
     ProcessedDocument,
     ProcessingStrategy,
 )
-from haive.core.schema import StateSchema
+from haive.core.schema.state_schema import StateSchema
 
 
 class DocumentEngineInputSchema(StateSchema):

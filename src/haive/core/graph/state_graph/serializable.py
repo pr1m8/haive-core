@@ -311,14 +311,16 @@ class SerializableGraph(BaseModel):
             if hasattr(branch, "true_branch"):
                 true_branch = branch.true_branch
                 if isinstance(true_branch, str):
-                    branch_data["true_branch_id"] = true_branch  # Direct node name
+                    # Direct node name
+                    branch_data["true_branch_id"] = true_branch
                 elif hasattr(true_branch, "id"):
                     branch_data["true_branch_id"] = true_branch.id
 
             if hasattr(branch, "false_branch"):
                 false_branch = branch.false_branch
                 if isinstance(false_branch, str):
-                    branch_data["false_branch_id"] = false_branch  # Direct node name
+                    # Direct node name
+                    branch_data["false_branch_id"] = false_branch
                 elif hasattr(false_branch, "id"):
                     branch_data["false_branch_id"] = false_branch.id
 

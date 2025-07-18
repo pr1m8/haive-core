@@ -2482,6 +2482,63 @@ class SchemaComposer:
                 for name, schema_cls in output_schemas.items():
                     self.output_schemas[name] = schema_cls
 
+            # Initialize structured_output_models from class-level __structured_models__
+            if hasattr(self, "structured_output_models") and hasattr(
+                self.__class__, "__structured_models__"
+            ):
+                structured_models = getattr(self.__class__, "__structured_models__", {})
+                if structured_models and not self.structured_output_models:
+                    # Import models from their module paths
+                    models_list = []
+                    for model_name, model_path in structured_models.items():
+                        try:
+                            module_path, class_name = model_path.rsplit(".", 1)
+                            module = __import__(module_path, fromlist=[class_name])
+                            model_class = getattr(module, class_name)
+                            models_list.append(model_class)
+                            logger.debug(
+                                f"Loaded structured output model: {model_name} -> {model_class}"
+                            )
+                        except Exception as e:
+                            logger.warning(
+                                f"Failed to load structured output model {model_name}: {e}"
+                            )
+
+                    if models_list:
+                        self.structured_output_models = models_list
+                        logger.debug(
+                            f"Populated structured_output_models with {len(models_list)} models"
+                        )
+
+                        # Also set up the parser if we have models and parse_structured_outputs is True
+                        if (
+                            hasattr(self, "parse_structured_outputs")
+                            and self.parse_structured_outputs
+                        ):
+                            if (
+                                not hasattr(self, "structured_output_parser")
+                                or not self.structured_output_parser
+                            ):
+                                try:
+                                    from langchain_core.output_parsers.openai_tools import (
+                                        PydanticToolsParser,
+                                    )
+
+                                    self.structured_output_parser = PydanticToolsParser(
+                                        tools=models_list
+                                    )
+                                    logger.debug(
+                                        "Auto-configured structured_output_parser with PydanticToolsParser"
+                                    )
+                                except ImportError:
+                                    logger.warning(
+                                        "Could not import PydanticToolsParser for structured output"
+                                    )
+                                except Exception as e:
+                                    logger.warning(
+                                        f"Failed to create structured output parser: {e}"
+                                    )
+
         # Properly set the method on the schema class
         schema.model_post_init = schema_post_init
 
@@ -2489,7 +2546,7 @@ class SchemaComposer:
         logger.debug(f"Created schema {schema.__name__} with {len(field_defs)} fields")
         if is_state_schema_base:
             logger.debug(
-                f"Engine mappings: {len(getattr(schema, '__engine_io_mappings__', {})) } engines"
+                f"Engine mappings: {len(getattr(schema, '__engine_io_mappings__', {}))} engines"
             )
             if getattr(schema, "__serializable_reducers__", {}):
                 logger.debug(

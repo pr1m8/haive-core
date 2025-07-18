@@ -4,8 +4,14 @@ This module provides utilities for downloading, caching, and accessing
 model metadata from LiteLLM's model_prices_and_context_window.json.
 """
 
+import json
+import logging
 from dataclasses import dataclass
+from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Any
+
+import requests
 
 
 @dataclass
@@ -37,14 +43,6 @@ class ModelMetadata:
             "output": self.metadata.get("output_cost_per_token", 0.0),
         }
 
-
-import json
-import logging
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Any
-
-import requests
 
 logger = logging.getLogger(__name__)
 

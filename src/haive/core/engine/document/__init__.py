@@ -15,7 +15,6 @@ Key Components:
 - Processing strategies for chunking and transformation
 """
 
-# Configuration models
 from haive.core.engine.document.config import (
     ChunkingStrategy,
     DocumentChunk,
@@ -36,6 +35,11 @@ from haive.core.engine.document.engine import (
     create_file_document_engine,
     create_web_document_engine,
 )
+from haive.core.engine.document.factory import (
+    AutoLoaderFactory,
+    analyze_source,
+    create_document_loader,
+)
 
 # Loader components
 from haive.core.engine.document.loaders.base.base import (
@@ -50,6 +54,20 @@ from haive.core.engine.document.loaders.registry import (
     get_loader,
     register_loader,
 )
+from haive.core.engine.document.loaders.sources.implementation import (
+    CredentialManager,
+    EnhancedSource,
+)
+from haive.core.engine.document.loaders.specific import (  # Database sources
+    MongoDBSource,
+    PostgreSQLSource,
+)
+from haive.core.engine.document.loaders.strategy import (
+    LoaderCapability,
+    LoaderPriority,
+    LoaderStrategy,
+    strategy_registry,
+)
 
 # Path analysis
 from haive.core.engine.document.path_analysis import (
@@ -59,6 +77,15 @@ from haive.core.engine.document.path_analysis import (
     PathAnalysisResult,
     PathType,
     analyze_path_comprehensive,
+)
+
+# Configuration models
+from haive.core.engine.document.processors import (
+    ChunkingProcessor,
+    ContentNormalizer,
+    DocumentProcessor,
+    FormatDetector,
+    MetadataExtractor,
 )
 
 
@@ -122,42 +149,10 @@ except ImportError:
     WebDocumentAgent = None
 
 # Factory and enhanced loaders
-from haive.core.engine.document.factory import (
-    AutoLoaderFactory,
-    analyze_source,
-    create_document_loader,
-)
-from haive.core.engine.document.loaders.sources.implementation import (
-    CredentialManager,
-    EnhancedSource,
-)
-from haive.core.engine.document.loaders.sources.implementation import (
-    SourceType as EnhancedSourceType,
-)
-from haive.core.engine.document.loaders.sources.implementation import (
-    source_registry,
-)
 
 # Specific loader implementations - only import what exists
-from haive.core.engine.document.loaders.specific import (  # Database sources
-    MongoDBSource,
-    PostgreSQLSource,
-)
-from haive.core.engine.document.loaders.strategy import (
-    LoaderCapability,
-    LoaderPriority,
-    LoaderStrategy,
-    strategy_registry,
-)
 
 # Processors
-from haive.core.engine.document.processors import (
-    ChunkingProcessor,
-    ContentNormalizer,
-    DocumentProcessor,
-    FormatDetector,
-    MetadataExtractor,
-)
 
 # Universal loader system - temporarily commented out until dependencies are fixed
 # from .universal_loader import (

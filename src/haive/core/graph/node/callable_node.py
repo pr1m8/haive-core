@@ -6,10 +6,9 @@ as a proper graph node that returns Command or Send objects.
 
 import inspect
 import logging
-from typing import Any, Callable, Dict, List, Optional, TypeVar, Union, get_type_hints
+from typing import Any, Callable, Dict, List, Optional, TypeVar
 
-from langchain_core.messages import BaseMessage
-from langgraph.types import Command, Send
+from langgraph.types import Command
 from pydantic import BaseModel, Field, model_validator
 
 from haive.core.graph.common.types import ConfigLike, NodeType, StateLike

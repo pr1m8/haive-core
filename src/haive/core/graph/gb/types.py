@@ -135,7 +135,8 @@ class NodeType(str, Enum):
     """
 
     FUNCTION = "function"
-    ENGINE = "engine"  # Includes both regular engines and subgraphs (agent engines)
+    # Includes both regular engines and subgraphs (agent engines)
+    ENGINE = "engine"
     TOOL = "tool"
 
 

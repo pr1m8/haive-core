@@ -43,7 +43,8 @@ class NodeMixin(BaseModel, Generic[T]):
     def size(self) -> int:  # total nodes in subtree
         if isinstance(self, Leaf):
             return 1
-        return 1 + sum(child.size() for child in self.children)  # type: ignore[attr-defined]
+        # type: ignore[attr-defined]
+        return 1 + sum(child.size() for child in self.children)
 
 
 # Re‑define aliases so NodeMixin is recognised

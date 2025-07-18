@@ -11,6 +11,12 @@ to configure the connection pool with the configure parameter.
 
 import json
 
+import psycopg
+from langgraph.checkpoint.postgres import PostgresSaver as BasePostgresSaver
+from langgraph.checkpoint.postgres.aio import (
+    AsyncPostgresSaver as BaseAsyncPostgresSaver,
+)
+from psycopg.rows import dict_row
 from pydantic import BaseModel
 
 
@@ -42,9 +48,6 @@ def configure_postgres_json(connection):
 
 
 # Override classes for backward compatibility and direct connection string usage
-import psycopg
-from langgraph.checkpoint.postgres import PostgresSaver as BasePostgresSaver
-from psycopg.rows import dict_row
 
 
 class PostgresSaverNoPreparedStatements(BasePostgresSaver):
@@ -66,11 +69,6 @@ class PostgresSaverNoPreparedStatements(BasePostgresSaver):
         )
         configure_postgres_json(conn)
         return cls(conn)
-
-
-from langgraph.checkpoint.postgres.aio import (
-    AsyncPostgresSaver as BaseAsyncPostgresSaver,
-)
 
 
 class AsyncPostgresSaverNoPreparedStatements(BaseAsyncPostgresSaver):

@@ -2,7 +2,7 @@
 
 import logging
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Callable, List, Optional
 
 from langchain_core.messages import (
     AIMessage,
@@ -12,7 +12,7 @@ from langchain_core.messages import (
     ToolMessage,
 )
 from langgraph.types import Command
-from pydantic import BaseModel, Field, model_validator
+from pydantic import Field, model_validator
 from rich.console import Console
 
 from haive.core.graph.common.types import ConfigLike, StateLike
