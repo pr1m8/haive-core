@@ -2770,7 +2770,8 @@ The output should be valid JSON that conforms to the {model_name} schema."""
         if force_tool_use:
             tool_choice_mode = "required"
             if len(tool_models) == 1:
-                force_tool_choice = tool_models[0].__name__  # Use exact class name
+                # Use exact class name
+                force_tool_choice = tool_models[0].__name__
 
         # Create messages list
         messages = []
