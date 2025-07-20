@@ -1,4 +1,4 @@
-"""
+"""from typing import Any, Dict
 Serialization support for BaseGraph.
 
 This module provides serialization and deserialization utilities for BaseGraph,
@@ -10,7 +10,7 @@ import json
 import logging
 import uuid
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -25,15 +25,15 @@ logger = logging.getLogger(__name__)
 class TypeReference(BaseModel):
     """Reference to a type that can be serialized."""
 
-    module_path: Optional[str] = None
+    module_path: str | None = None
     name: str
     is_generic: bool = False
-    generic_params: Optional[List["TypeReference"]] = None
+    generic_params: list["TypeReference"] | None = None
 
     model_config = ConfigDict(extra="allow")
 
     @classmethod
-    def from_type(cls, type_obj):
+    def from_type(cls, type_obj) -> Any:
         if type_obj is None:
             return None
 
@@ -45,7 +45,7 @@ class TypeReference(BaseModel):
         # TODO: Add support for complex generic types
         return ref
 
-    def resolve(self):
+    def resolve(self) -> Any:
         """Resolve the reference back to a type."""
         if not self.module_path or not self.name:
             return None
@@ -67,15 +67,15 @@ class SerializableNode(BaseModel):
     node_type: str
 
     # Configuration
-    input_mapping: Optional[Dict[str, str]] = None
-    output_mapping: Optional[Dict[str, str]] = None
-    command_goto: Optional[Union[str, List[str]]] = None
-    retry_policy: Optional[Dict[str, Any]] = None
+    input_mapping: dict[str, str] | None = None
+    output_mapping: dict[str, str] | None = None
+    command_goto: str | list[str] | None = None
+    retry_policy: dict[str, Any] | None = None
 
     # Metadata
-    description: Optional[str] = None
-    metadata: Dict[str, Any] = Field(default_factory=dict)
-    created_at: Optional[str] = None
+    description: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    created_at: str | None = None
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -87,36 +87,36 @@ class SerializableBranch(BaseModel):
     id: str
     name: str
     source_node: str
-    mode: Optional[str] = None
+    mode: str | None = None
 
     # Core branch fields
-    key: Optional[str] = None
-    value: Optional[Any] = None
-    comparison: Optional[str] = None
-    default: Optional[str] = None
-    allow_none: Optional[bool] = None
-    message_key: Optional[str] = None
+    key: str | None = None
+    value: Any | None = None
+    comparison: str | None = None
+    default: str | None = None
+    allow_none: bool | None = None
+    message_key: str | None = None
 
     # Function references
-    function_ref: Optional[CallableReference] = None
-    condition_ref: Optional[CallableReference] = None
+    function_ref: CallableReference | None = None
+    condition_ref: CallableReference | None = None
 
     # Routing information
-    destinations: Dict[str, str] = Field(default_factory=dict)
+    destinations: dict[str, str] = Field(default_factory=dict)
 
     # Advanced branch features
-    send_mappings: Optional[List[Dict[str, Any]]] = None
-    send_generators: Optional[List[Dict[str, Any]]] = None
-    dynamic_mapping: Optional[Dict[str, Any]] = None
+    send_mappings: list[dict[str, Any]] | None = None
+    send_generators: list[dict[str, Any]] | None = None
+    dynamic_mapping: dict[str, Any] | None = None
 
     # Chain branches - these need special handling
-    chain_branches_ids: Optional[List[str]] = None
-    true_branch_id: Optional[str] = None
-    false_branch_id: Optional[str] = None
+    chain_branches_ids: list[str] | None = None
+    true_branch_id: str | None = None
+    false_branch_id: str | None = None
 
     # Metadata
-    description: Optional[str] = None
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    description: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -127,32 +127,32 @@ class SerializableGraph(BaseModel):
     # Basic identification
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
-    description: Optional[str] = None
+    description: str | None = None
 
     # Graph structure
-    nodes: Dict[str, SerializableNode] = Field(default_factory=dict)
+    nodes: dict[str, SerializableNode] = Field(default_factory=dict)
 
     # Edges stored as lists for easier serialization
-    direct_edges: List[Tuple[str, str]] = Field(default_factory=list)
+    direct_edges: list[tuple[str, str]] = Field(default_factory=list)
 
     # Branches
-    branches: Dict[str, SerializableBranch] = Field(default_factory=dict)
+    branches: dict[str, SerializableBranch] = Field(default_factory=dict)
 
     # Schema reference
-    state_schema: Optional[TypeReference] = None
+    state_schema: TypeReference | None = None
 
     # Metadata
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
     created_at: str
     updated_at: str
 
     # Configuration
-    config: Dict[str, Any] = Field(default_factory=dict)
+    config: dict[str, Any] = Field(default_factory=dict)
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @classmethod
-    def from_graph(cls, graph):
+    def from_graph(cls, graph) -> Any:
         """Create a serializable representation from a BaseGraph."""
         from haive.core.graph.state_graph.base_graph import BaseGraph
 
@@ -280,9 +280,11 @@ class SerializableGraph(BaseModel):
                     for g in branch.send_generators
                 ]
 
-            # Handle dynamic mapping - this part is fixed to correctly map key to field
+            # Handle dynamic mapping - this part is fixed to correctly map key
+            # to field
             if hasattr(branch, "dynamic_mapping") and branch.dynamic_mapping:
-                # Serialize dynamic mapping - The important fix: use key for field
+                # Serialize dynamic mapping - The important fix: use key for
+                # field
                 mapping = branch.dynamic_mapping
                 branch_data["dynamic_mapping"] = {
                     "field": mapping.key,  # Store the key attribute under 'field' key
@@ -329,7 +331,7 @@ class SerializableGraph(BaseModel):
 
         return serializable
 
-    def to_graph(self):
+    def to_graph(self) -> Any:
         """Convert serializable representation back to a BaseGraph."""
         from haive.core.graph.branches import BranchMode, ComparisonType
         from haive.core.graph.state_graph.base_graph import BaseGraph, Node, NodeType
@@ -386,13 +388,14 @@ class SerializableGraph(BaseModel):
                 graph.nodes[name] = node
 
             except Exception as e:
-                logger.error(f"Error reconstructing node {name}: {e}")
+                logger.exception(f"Error reconstructing node {name}: {e}")
 
         # Add direct edges
         for source, target in self.direct_edges:
             graph.edges.append((source, target))
 
-        # First pass to create all branches (without references to other branches)
+        # First pass to create all branches (without references to other
+        # branches)
         temp_branches = {}
         for branch_id, branch_data in self.branches.items():
             try:
@@ -421,7 +424,8 @@ class SerializableGraph(BaseModel):
                     except (ValueError, TypeError):
                         pass  # Keep as string if not an enum value
 
-                # Create dynamic mapping if provided - Fixed to correctly map field to key
+                # Create dynamic mapping if provided - Fixed to correctly map
+                # field to key
                 dynamic_mapping = None
                 if branch_data.dynamic_mapping:
                     # The important fix: use field for key
@@ -457,7 +461,8 @@ class SerializableGraph(BaseModel):
                         )
                         send_generators.append(generator)
 
-                # Convert string keys in destinations to proper types (bool/int)
+                # Convert string keys in destinations to proper types
+                # (bool/int)
                 destinations = {}
                 if branch_data.destinations:
                     for k, v in branch_data.destinations.items():
@@ -506,7 +511,7 @@ class SerializableGraph(BaseModel):
                 graph.branches[branch_id] = branch
 
             except Exception as e:
-                logger.error(f"Error reconstructing branch {branch_id}: {e}")
+                logger.exception(f"Error reconstructing branch {branch_id}: {e}")
 
         # Second pass to link branches to each other
         for branch_id, branch_data in self.branches.items():
@@ -539,20 +544,20 @@ class SerializableGraph(BaseModel):
 
         return graph
 
-    def to_dict(self):
+    def to_dict(self) -> Any:
         """Convert to a dictionary for serialization."""
         return self.model_dump()
 
     @classmethod
-    def from_dict(cls, data):
+    def from_dict(cls, data: dict[str, Any]):
         """Create from a dictionary."""
         return cls.model_validate(data)
 
     # @classmethod
-    def to_json(cls, **kwargs):
+    def to_json(self, **kwargs) -> Any:
         """Convert to JSON string."""
         # First convert to a dict
-        data = cls.to_dict()
+        data = self.to_dict()
 
         # Ensure all data is JSON serializable (handle functions, etc.)
         serializable_data = ensure_json_serializable(data)
@@ -561,6 +566,6 @@ class SerializableGraph(BaseModel):
         return json.dumps(serializable_data, **kwargs)
 
     @classmethod
-    def from_json(cls, json_str):
+    def from_json(cls, json_str) -> Any:
         """Create from JSON string."""
         return cls.model_validate_json(json_str)

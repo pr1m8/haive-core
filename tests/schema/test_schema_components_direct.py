@@ -8,15 +8,11 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../src"))
 
 def test_direct_imports():
     """Test direct imports of schema components."""
-    print("🧪 Testing Direct Schema Component Imports...")
-
     try:
         # Import schema components directly
 
-        print("✅ Direct imports successful")
         return True
-    except Exception as e:
-        print(f"❌ Direct import failed: {e}")
+    except Exception:
         import traceback
 
         traceback.print_exc()
@@ -25,8 +21,6 @@ def test_direct_imports():
 
 def test_state_schema_direct():
     """Test StateSchema directly."""
-    print("🧪 Testing StateSchema Direct...")
-
     try:
         from haive.core.schema.state_schema import StateSchema
 
@@ -41,10 +35,8 @@ def test_state_schema_direct():
         assert hasattr(state, "model_dump")
         assert hasattr(state, "to_dict")
 
-        print("✅ StateSchema direct test successful")
         return True
-    except Exception as e:
-        print(f"❌ StateSchema direct test failed: {e}")
+    except Exception:
         import traceback
 
         traceback.print_exc()
@@ -53,8 +45,6 @@ def test_state_schema_direct():
 
 def test_schema_composer_direct():
     """Test SchemaComposer directly."""
-    print("🧪 Testing SchemaComposer Direct...")
-
     try:
         from haive.core.schema.schema_composer import SchemaComposer
 
@@ -73,10 +63,8 @@ def test_schema_composer_direct():
         instance = schema_class()
         assert instance is not None
 
-        print("✅ SchemaComposer direct test successful")
         return True
-    except Exception as e:
-        print(f"❌ SchemaComposer direct test failed: {e}")
+    except Exception:
         import traceback
 
         traceback.print_exc()
@@ -85,8 +73,6 @@ def test_schema_composer_direct():
 
 def test_messages_state_direct():
     """Test MessagesState directly."""
-    print("🧪 Testing MessagesState Direct...")
-
     try:
         from haive.core.schema.prebuilt.messages_state import MessagesState
 
@@ -101,10 +87,8 @@ def test_messages_state_direct():
         assert hasattr(messages_state, "add_message")
         assert hasattr(messages_state, "get_last_message")
 
-        print("✅ MessagesState direct test successful")
         return True
-    except Exception as e:
-        print(f"❌ MessagesState direct test failed: {e}")
+    except Exception:
         import traceback
 
         traceback.print_exc()
@@ -113,8 +97,6 @@ def test_messages_state_direct():
 
 def test_token_usage_direct():
     """Test TokenUsage directly."""
-    print("🧪 Testing TokenUsage Direct...")
-
     try:
         from haive.core.schema.prebuilt.messages.token_usage import TokenUsage
         from haive.core.schema.prebuilt.messages.token_usage_mixin import (
@@ -134,10 +116,8 @@ def test_token_usage_direct():
         state = TestState()
         assert hasattr(state, "get_token_usage")
 
-        print("✅ TokenUsage direct test successful")
         return True
-    except Exception as e:
-        print(f"❌ TokenUsage direct test failed: {e}")
+    except Exception:
         import traceback
 
         traceback.print_exc()
@@ -146,8 +126,6 @@ def test_token_usage_direct():
 
 def test_multi_agent_state_direct():
     """Test MultiAgentStateSchema directly."""
-    print("🧪 Testing MultiAgentStateSchema Direct...")
-
     try:
         from haive.core.schema.multi_agent_state_schema import MultiAgentStateSchema
 
@@ -158,10 +136,8 @@ def test_multi_agent_state_direct():
         assert multi_state is not None
         assert hasattr(multi_state, "engines")
 
-        print("✅ MultiAgentStateSchema direct test successful")
         return True
-    except Exception as e:
-        print(f"❌ MultiAgentStateSchema direct test failed: {e}")
+    except Exception:
         import traceback
 
         traceback.print_exc()
@@ -170,9 +146,6 @@ def test_multi_agent_state_direct():
 
 def run_all_tests():
     """Run all direct schema component tests."""
-    print("🚀 Running Direct Schema Component Tests")
-    print("=" * 50)
-
     tests = [
         test_direct_imports,
         test_state_schema_direct,
@@ -191,24 +164,13 @@ def run_all_tests():
                 passed += 1
             else:
                 failed += 1
-        except Exception as e:
-            print(f"❌ Test {test.__name__} crashed: {e}")
+        except Exception:
             failed += 1
 
-    print("\n" + "=" * 50)
-    print("📊 TEST RESULTS SUMMARY")
-    print("=" * 50)
-    print(f"✅ Passed: {passed}")
-    print(f"❌ Failed: {failed}")
-    print(
-        f"📈 Success Rate: {passed}/{passed + failed} ({100 * passed / (passed + failed):.1f}%)"
-    )
-
     if failed == 0:
-        print("\n🎉 ALL TESTS PASSED! Schema components work correctly.")
-        print("✅ Fixed import issues and verified core functionality.")
+        pass
     else:
-        print(f"\n⚠️  {failed} tests failed. Need to fix issues before proceeding.")
+        pass
 
     return failed == 0
 

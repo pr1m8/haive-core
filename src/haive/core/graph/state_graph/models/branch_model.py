@@ -32,15 +32,20 @@ class BranchModel(SerializableModel):
         """Validate branch type."""
         valid_types = ["conditional", "parallel", "switch"]
         if v not in valid_types:
-            raise ValueError(f"Invalid branch type: {v}. Must be one of {valid_types}")
+            raise ValueError(
+                f"Invalid branch type: {v}. Must be one of {valid_types}")
         return v
 
     @model_validator(mode="after")
-    def ensure_valid_branch(self) -> "BranchModel":
+
+
+    @classmethod
+    def ensure_valid_branch(cls) -> "BranchModel":
         """Ensure the branch specification is valid."""
         # For conditional branches, we need either ends or then
         if self.branch_type == "conditional" and not self.ends and not self.then:
-            raise ValueError("Conditional branch must have either 'ends' or 'then'")
+            raise ValueError(
+                "Conditional branch must have either 'ends' or 'then'")
         return self
 
     @classmethod
@@ -65,7 +70,9 @@ class BranchModel(SerializableModel):
                 branch_model.ends = dict(branch.ends)  # Make a copy
             elif isinstance(branch.ends, list | tuple):
                 # Convert list/tuple to dict with index keys
-                branch_model.ends = {str(i): v for i, v in enumerate(branch.ends)}
+                branch_model.ends = {
+                    str(i): v for i, v in enumerate(
+                        branch.ends)}
             else:
                 branch_model.ends = {"target": str(branch.ends)}
 

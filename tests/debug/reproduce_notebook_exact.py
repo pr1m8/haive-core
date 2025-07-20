@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
 
-from haive.agents.simple.agent_v2 import SimpleAgentV2
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
 
+from haive.agents.simple.agent_v2 import SimpleAgentV2
 from haive.core.engine.aug_llm import AugLLMConfig
 
 # Define the exact prompt from the notebook

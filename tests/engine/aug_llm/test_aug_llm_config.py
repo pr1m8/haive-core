@@ -1,11 +1,10 @@
-"""
-Tests for AugLLMConfig with focus on various prompt templates, output parsing,
+"""Tests for AugLLMConfig with focus on various prompt templates, output parsing,
 and integration with the StateSchema system.
 """
 
 import logging
 import operator
-from typing import Annotated, Any, Dict, List, Optional
+from typing import Annotated, Any
 
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 from langchain_core.output_parsers import PydanticOutputParser, StrOutputParser
@@ -39,7 +38,9 @@ class SearchResult(BaseModel):
     """Search result schema for testing structured output."""
 
     answer: str = Field(description="Answer to the query")
-    sources: List[str] = Field(default_factory=list, description="Source documents")
+    sources: list[str] = Field(
+        default_factory=list,
+        description="Source documents")
     confidence: float = Field(default=0.0, description="Confidence score")
 
 
@@ -48,7 +49,7 @@ class AgentAction(BaseModel):
 
     action: str = Field(description="Action to take")
     thought: str = Field(description="Reasoning behind the action")
-    parameters: Dict[str, Any] = Field(
+    parameters: dict[str, Any] = Field(
         default_factory=dict, description="Action parameters"
     )
 
@@ -57,12 +58,14 @@ class AgentAction(BaseModel):
 class ConversationState(StateSchema):
     """State schema for conversation with reducible messages field."""
 
-    messages: Annotated[List[BaseMessage], operator.add] = Field(
+    messages: Annotated[list[BaseMessage], operator.add] = Field(
         default_factory=list, description="Conversation messages"
     )
-    context: List[str] = Field(default_factory=list, description="Context documents")
-    query: Optional[str] = Field(default=None, description="User query")
-    response: Optional[str] = Field(default=None, description="AI response")
+    context: list[str] = Field(
+        default_factory=list,
+        description="Context documents")
+    query: str | None = Field(default=None, description="User query")
+    response: str | None = Field(default=None, description="AI response")
 
 
 # Tests for different prompt templates
@@ -153,7 +156,8 @@ def test_few_shot_prompt_template():
     assert "content" in input_schema.model_fields
     assert "messages" in input_schema.model_fields
 
-    # Check that it detected messages field correctly (should be False for FewShot)
+    # Check that it detected messages field correctly (should be False for
+    # FewShot)
     assert aug_llm.uses_messages_field in [False, None]
 
     # Create state from this engine
@@ -221,7 +225,9 @@ def test_get_input_variables():
     # Log available values for debugging
     logger.info(f"Chat prompt attributes: {dir(chat_prompt)}")
     if hasattr(chat_prompt, "input_variables"):
-        logger.info(f"Chat prompt input_variables: {chat_prompt.input_variables}")
+        logger.info(
+            f"Chat prompt input_variables: {
+                chat_prompt.input_variables}")
 
     # Test with regular PromptTemplate
     text_prompt = PromptTemplate(
@@ -322,7 +328,10 @@ def test_pydantic_output_parser():
     assert hasattr(output_schema, "model_fields")
 
     # Log the available fields for debugging
-    logger.info(f"Output schema fields: {list(output_schema.model_fields.keys())}")
+    logger.info(
+        f"Output schema fields: {
+            list(
+                output_schema.model_fields.keys())}")
 
     # Check fields that should always be present
     assert "content" in output_schema.model_fields
@@ -331,13 +340,17 @@ def test_pydantic_output_parser():
     # If SearchResult fields are extracted properly, they should be in the schema
     # Just log whether they're present for debugging
     for field in ["answer", "sources", "confidence"]:
-        logger.info(f"Field '{field}' present: {field in output_schema.model_fields}")
+        logger.info(
+            f"Field '{field}' present: {
+                field in output_schema.model_fields}")
 
     # Also log the structured_output_model to confirm it's being set correctly
     logger.info(f"Structured output model: {aug_llm.structured_output_model}")
     if aug_llm.structured_output_model:
         logger.info(
-            f"Model fields: {list(aug_llm.structured_output_model.model_fields.keys())}"
+            f"Model fields: {
+                list(
+                    aug_llm.structured_output_model.model_fields.keys())}"
         )
 
 
@@ -409,16 +422,20 @@ def test_schema_composer_with_aug_llm():
     # Test that messages field is always included by SchemaComposer
     assert "messages" in schema.model_fields
 
-    # For any fields found in the structured output model, log whether they're present
+    # For any fields found in the structured output model, log whether they're
+    # present
     if hasattr(SearchResult, "model_fields"):
         for field in SearchResult.model_fields:
             logger.info(
-                f"Output model field '{field}' present: {field in schema.model_fields}"
+                f"Output model field '{field}' present: {
+                    field in schema.model_fields}"
             )
 
     # Log whether input variables were included
     for var in input_vars:
-        logger.info(f"Input variable '{var}' present: {var in schema.model_fields}")
+        logger.info(
+            f"Input variable '{var}' present: {
+                var in schema.model_fields}")
 
     # Log what's in the engine I/O mappings
     if hasattr(schema, "__engine_io_mappings__"):
@@ -491,22 +508,28 @@ def test_multiple_engines_schema():
 
     # Log which input variables from each engine were included
     for var in qa_vars:
-        logger.info(f"QA input var '{var}' present: {var in schema.model_fields}")
+        logger.info(
+            f"QA input var '{var}' present: {
+                var in schema.model_fields}")
 
     for var in agent_vars:
-        logger.info(f"Agent input var '{var}' present: {var in schema.model_fields}")
+        logger.info(
+            f"Agent input var '{var}' present: {
+                var in schema.model_fields}")
 
     # Log which output model fields were included
     if hasattr(SearchResult, "model_fields"):
         for field in SearchResult.model_fields:
             logger.info(
-                f"SearchResult field '{field}' present: {field in schema.model_fields}"
+                f"SearchResult field '{field}' present: {
+                    field in schema.model_fields}"
             )
 
     if hasattr(AgentAction, "model_fields"):
         for field in AgentAction.model_fields:
             logger.info(
-                f"AgentAction field '{field}' present: {field in schema.model_fields}"
+                f"AgentAction field '{field}' present: {
+                    field in schema.model_fields}"
             )
 
     # Log metadata about engine I/O mappings
@@ -523,10 +546,10 @@ def test_schema_with_reducers():
 
     # Create existing state schema with reducers
     class CustomState(StateSchema):
-        messages: Annotated[List[BaseMessage], operator.add] = Field(
+        messages: Annotated[list[BaseMessage], operator.add] = Field(
             default_factory=list, description="Messages with add reducer"
         )
-        context: Annotated[List[str], operator.add] = Field(
+        context: Annotated[list[str], operator.add] = Field(
             default_factory=list, description="Context documents with add reducer"
         )
 
@@ -539,7 +562,8 @@ def test_schema_with_reducers():
     )
 
     # Combine them with SchemaComposer
-    schema = SchemaComposer.from_components([CustomState, aug_llm], name="ReducerState")
+    schema = SchemaComposer.from_components(
+        [CustomState, aug_llm], name="ReducerState")
     logger.info(f"Created reducer schema: {schema.__name__}")
 
     # Display schema with rich UI

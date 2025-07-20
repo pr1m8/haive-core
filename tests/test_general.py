@@ -23,7 +23,8 @@ from haive.core.graph.schema.SchemaComposer import SchemaComposer
 from haive.core.models.embeddings.base import HuggingFaceEmbeddingConfig
 from haive.core.models.llm.base import AzureLLMConfig
 
-# Sample schema model for testing - using create_model to avoid constructor issues
+# Sample schema model for testing - using create_model to avoid
+# constructor issues
 TestStateModel = create_model(
     "TestStateModel",
     query=(str, ""),
@@ -68,10 +69,10 @@ class TestEngineIntegration(unittest.TestCase):
         """Test that schemas can be properly derived from engines."""
         # Test deriving schema from a single engine
         llm_schema = self.llm_config.derive_input_schema()
-        self.assertIsNotNone(llm_schema)
+        assert llm_schema is not None
 
         retriever_schema = self.retriever_config.derive_input_schema()
-        self.assertIsNotNone(retriever_schema)
+        assert retriever_schema is not None
 
         # Test composing schemas from multiple engines
         components = [self.llm_config, self.retriever_config]
@@ -79,10 +80,10 @@ class TestEngineIntegration(unittest.TestCase):
             components, name="TestComposedSchema"
         )
 
-        # Check if the composed schema has expected fields - for Pydantic models, we check their fields
-        self.assertTrue(
-            hasattr(composed_schema, "model_fields")
-            or hasattr(composed_schema, "__fields__")
+        # Check if the composed schema has expected fields - for Pydantic
+        # models, we check their fields
+        assert hasattr(composed_schema, "model_fields") or hasattr(
+            composed_schema, "__fields__"
         )
 
         # Get the field names based on Pydantic version
@@ -92,8 +93,8 @@ class TestEngineIntegration(unittest.TestCase):
             field_names = composed_schema.__fields__.keys()
 
         # Verify fields exist
-        self.assertIn("messages", field_names)
-        self.assertIn("query", field_names)
+        assert "messages" in field_names
+        assert "query" in field_names
 
     def test_dynamic_graph_building(self):
         """Test building a graph with different engines."""
@@ -108,7 +109,10 @@ class TestEngineIntegration(unittest.TestCase):
         )
 
         # Add LLM node
-        graph.add_node(name="generate", config=self.llm_config, command_goto="END")
+        graph.add_node(
+            name="generate",
+            config=self.llm_config,
+            command_goto="END")
 
         # Set entry point
         graph.set_entry_point("retrieve")
@@ -117,8 +121,8 @@ class TestEngineIntegration(unittest.TestCase):
         graph.build()
 
         # Test the graph structure
-        self.assertEqual(len(graph.graph_editor.nodes), 2)
-        self.assertEqual(graph.graph_editor.entry_point, "retrieve")
+        assert len(graph.graph_editor.nodes) == 2
+        assert graph.graph_editor.entry_point == "retrieve"
 
     def test_runnable_config_integration(self):
         """Test that runnable_config is properly propagated."""
@@ -141,9 +145,9 @@ class TestEngineIntegration(unittest.TestCase):
         graph.build()
 
         # Verify the config is set
-        self.assertIsNotNone(graph.default_runnable_config)
-        self.assertEqual(
-            graph.default_runnable_config["configurable"]["thread_id"], "test_thread"
+        assert graph.default_runnable_config is not None
+        assert (
+            graph.default_runnable_config["configurable"]["thread_id"] == "test_thread"
         )
 
     def test_agent_construction(self):
@@ -159,7 +163,10 @@ class TestEngineIntegration(unittest.TestCase):
         prompt_template = ChatPromptTemplate.from_messages(messages)
 
         # Create the LLM config
-        llm_config = AzureLLMConfig(model="gpt-4o", parameters={"temperature": 0.7})
+        llm_config = AzureLLMConfig(
+            model="gpt-4o",
+            parameters={
+                "temperature": 0.7})
 
         # Create the AugLLM config
         aug_llm = AugLLMConfig(
@@ -177,19 +184,19 @@ class TestEngineIntegration(unittest.TestCase):
         agent = SimpleAgent(config=agent_config)
 
         # Test that the agent is properly set up
-        self.assertEqual(agent.config.name, "test_simple_agent")
-        self.assertEqual(agent.config.engine.name, "test_llm")
+        assert agent.config.name == "test_simple_agent"
+        assert agent.config.engine.name == "test_llm"
 
         # Verify the workflow was set up
-        self.assertIsNotNone(agent.graph)
+        assert agent.graph is not None
 
         # Verify the schema includes message field
         schema_fields = agent_config.get_schema_fields()
-        self.assertIn("messages", schema_fields)
+        assert "messages" in schema_fields
 
         # Test that we can create a runnable
         runnable = agent_config.create_runnable()
-        self.assertIsNotNone(runnable)
+        assert runnable is not None
 
 
 if __name__ == "__main__":

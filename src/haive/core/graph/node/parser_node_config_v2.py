@@ -1,5 +1,4 @@
-"""
-Parser Node Configuration V2 - With ToolMessage safety net.
+"""Parser Node Configuration V2 - With ToolMessage safety net.
 
 This version extends the original parser node with an optional safety net feature
 that can create ToolMessages if they don't already exist in state.
@@ -16,7 +15,7 @@ Config options:
 
 import json
 import logging
-from typing import Any, List, Optional, Type
+from typing import Any
 
 from langchain_core.messages import AIMessage, BaseMessage, ToolMessage
 from langchain_core.output_parsers import PydanticOutputParser
@@ -57,7 +56,7 @@ class ParserNodeConfigV2(NodeConfig):
         default="agent", description="Node to return to after parsing"
     )
 
-    def model_post_init(self, __context):
+    def model_post_init(self, __context) -> None:
         """Setup default field definitions for parser node."""
         if not self.input_field_defs:
             from haive.core.schema.field_registry import StandardFields
@@ -75,14 +74,15 @@ class ParserNodeConfigV2(NodeConfig):
             # Parser nodes output updated messages and parsed structured output
             self.output_field_defs = [
                 StandardFields.messages(use_enhanced=True),
-                # Structured output fields will be added dynamically based on tools
+                # Structured output fields will be added dynamically based on
+                # tools
             ]
 
         # Call parent post_init to handle schema setup
         super().model_post_init(__context)
 
     # Engine reference for getting tools
-    engine_name: Optional[str] = Field(
+    engine_name: str | None = Field(
         default=None, description="Name of engine to get tools from"
     )
 
@@ -102,7 +102,7 @@ class ParserNodeConfigV2(NodeConfig):
         description="Content for error ToolMessages created by safety net",
     )
 
-    def _get_engine_from_state(self, state: StateLike) -> Optional[Any]:
+    def _get_engine_from_state(self, state: StateLike) -> Any | None:
         """Get engine from state - same logic as V1."""
         logger.debug(f"Getting engine: {self.engine_name}")
 
@@ -113,13 +113,19 @@ class ParserNodeConfigV2(NodeConfig):
         if hasattr(state, "engines") and isinstance(state.engines, dict):
             engine = state.engines.get(self.engine_name)
             if engine:
-                logger.info(f"Found engine in state.engines: {self.engine_name}")
+                logger.info(
+                    f"Found engine in state.engines: {
+                        self.engine_name}"
+                )
                 return engine
 
             # Try by engine.name attribute
             for _key, eng in state.engines.items():
                 if hasattr(eng, "name") and eng.name == self.engine_name:
-                    logger.info(f"Found engine by name attribute: {self.engine_name}")
+                    logger.info(
+                        f"Found engine by name attribute: {
+                            self.engine_name}"
+                    )
                     return eng
 
         # Try state attribute
@@ -143,7 +149,7 @@ class ParserNodeConfigV2(NodeConfig):
         logger.warning(f"Engine not found: {self.engine_name}")
         return None
 
-    def _find_tool_in_engine(self, engine: Any, tool_name: str) -> Optional[Any]:
+    def _find_tool_in_engine(self, engine: Any, tool_name: str) -> Any | None:
         """Find a tool/schema in the engine by name - same as V1."""
         logger.debug(f"Searching for tool: '{tool_name}' in engine")
 
@@ -187,8 +193,8 @@ class ParserNodeConfigV2(NodeConfig):
         return None
 
     def _extract_tool_from_messages(
-        self, messages: List[BaseMessage]
-    ) -> tuple[Optional[str], Optional[Any], Optional[ToolMessage]]:
+        self, messages: list[BaseMessage]
+    ) -> tuple[str | None, Any | None, ToolMessage | None]:
         """Extract tool information from messages - V2 with engine attribution."""
         logger.debug("Extracting tool information from messages")
 
@@ -196,10 +202,7 @@ class ParserNodeConfigV2(NodeConfig):
         last_ai_message = None
         for _i, msg in enumerate(reversed(messages)):
             if isinstance(msg, AIMessage):
-                if hasattr(msg, "tool_calls") and msg.tool_calls:
-                    last_ai_message = msg
-                    break
-                elif (
+                if (hasattr(msg, "tool_calls") and msg.tool_calls) or (
                     hasattr(msg, "additional_kwargs")
                     and "tool_calls" in msg.additional_kwargs
                 ):
@@ -222,9 +225,13 @@ class ParserNodeConfigV2(NodeConfig):
                 logger.info(
                     f"Found engine attribution in AI message: {engine_name_from_message}"
                 )
-                # Override the parser's engine_name with the one from the message
+                # Override the parser's engine_name with the one from the
+                # message
                 self.engine_name = engine_name_from_message
-                logger.debug(f"Updated parser engine_name to: {self.engine_name}")
+                logger.debug(
+                    f"Updated parser engine_name to: {
+                        self.engine_name}"
+                )
             else:
                 logger.debug(
                     "No engine attribution found in AI message additional_kwargs"
@@ -270,21 +277,20 @@ class ParserNodeConfigV2(NodeConfig):
         tool_message = None
         ai_msg_index = messages.index(last_ai_message)
         for msg in messages[ai_msg_index:]:
-            if isinstance(msg, ToolMessage):
-                if (
-                    getattr(msg, "name", None) == tool_name
-                    or getattr(msg, "tool_call_id", None) == tool_id
-                ):
-                    tool_message = msg
-                    logger.info("Found matching ToolMessage")
-                    break
+            if isinstance(msg, ToolMessage) and (
+                getattr(msg, "name", None) == tool_name
+                or getattr(msg, "tool_call_id", None) == tool_id
+            ):
+                tool_message = msg
+                logger.info("Found matching ToolMessage")
+                break
 
         if not tool_message:
             logger.warning(f"No ToolMessage found for tool '{tool_name}'")
 
         return tool_name, tool_call, tool_message
 
-    def _parse_tool_content(self, content: Any, tool_class: Type[BaseModel]) -> Any:
+    def _parse_tool_content(self, content: Any, tool_class: type[BaseModel]) -> Any:
         """Parse tool content into a Pydantic model - same as V1."""
         logger.debug(f"Parsing content for: {tool_class.__name__}")
 
@@ -298,7 +304,8 @@ class ParserNodeConfigV2(NodeConfig):
             try:
                 json_data = json.loads(content)
 
-                # V2 CHECK: If this looks like a V2 validation wrapper, extract the data
+                # V2 CHECK: If this looks like a V2 validation wrapper, extract
+                # the data
                 if (
                     isinstance(json_data, dict)
                     and "data" in json_data
@@ -310,7 +317,10 @@ class ParserNodeConfigV2(NodeConfig):
                     json_data = json_data["data"]
 
                 model_instance = tool_class.model_validate(json_data)
-                logger.info(f"Successfully created {tool_class.__name__} from JSON")
+                logger.info(
+                    f"Successfully created {
+                        tool_class.__name__} from JSON"
+                )
                 return model_instance
             except (json.JSONDecodeError, Exception) as e:
                 logger.debug(f"JSON parsing failed: {e}")
@@ -318,7 +328,8 @@ class ParserNodeConfigV2(NodeConfig):
         # Try direct model validation if content is dict
         if isinstance(content, dict):
             try:
-                # V2 CHECK: If this looks like a V2 validation wrapper, extract the data
+                # V2 CHECK: If this looks like a V2 validation wrapper, extract
+                # the data
                 if "data" in content and "validated" in content:
                     logger.debug(
                         "Detected V2 validation wrapper, extracting data field"
@@ -326,7 +337,10 @@ class ParserNodeConfigV2(NodeConfig):
                     content = content["data"]
 
                 model_instance = tool_class.model_validate(content)
-                logger.info(f"Successfully created {tool_class.__name__} from dict")
+                logger.info(
+                    f"Successfully created {
+                        tool_class.__name__} from dict"
+                )
                 return model_instance
             except Exception as e:
                 logger.debug(f"Direct validation failed: {e}")
@@ -338,7 +352,7 @@ class ParserNodeConfigV2(NodeConfig):
             logger.info("Successfully parsed with PydanticOutputParser")
             return model_instance
         except Exception as e:
-            logger.error(f"PydanticOutputParser failed: {e}")
+            logger.exception(f"PydanticOutputParser failed: {e}")
 
         # Final fallback
         logger.warning("All parsing attempts failed, returning content as dict")
@@ -350,7 +364,7 @@ class ParserNodeConfigV2(NodeConfig):
         tool_call: Any,
         success: bool = True,
         parsed_result: Any = None,
-        error: str = None,
+        error: str | None = None,
     ) -> ToolMessage:
         """Create a ToolMessage as safety net when one is missing."""
         tool_id = getattr(tool_call, "id", tool_call.get("id", "unknown"))
@@ -372,37 +386,35 @@ class ParserNodeConfigV2(NodeConfig):
                     "success": True,
                 },
             )
-        else:
-            # Error ToolMessage
-            error_content = {
-                "success": False,
-                "error": error or "Unknown parsing error",
-                "tool": tool_name,
-            }
+        # Error ToolMessage
+        error_content = {
+            "success": False,
+            "error": error or "Unknown parsing error",
+            "tool": tool_name,
+        }
 
-            return ToolMessage(
-                content=json.dumps(error_content),
-                tool_call_id=tool_id,
-                name=tool_name,
-                additional_kwargs={
-                    "is_error": True,
-                    "created_by": "parser_safety_net",
-                    "success": False,
-                },
-            )
+        return ToolMessage(
+            content=json.dumps(error_content),
+            tool_call_id=tool_id,
+            name=tool_name,
+            additional_kwargs={
+                "is_error": True,
+                "created_by": "parser_safety_net",
+                "success": False,
+            },
+        )
 
     def _apply_safety_net(
         self,
-        messages: List[BaseMessage],
+        messages: list[BaseMessage],
         tool_name: str,
         tool_call: Any,
-        tool_message: Optional[ToolMessage],
+        tool_message: ToolMessage | None,
         parsed_result: Any = None,
         parsing_success: bool = True,
-        error: str = None,
-    ) -> List[BaseMessage]:
+        error: str | None = None,
+    ) -> list[BaseMessage]:
         """Apply safety net by adding missing ToolMessage if needed."""
-
         if not self.add_tool_message_safety_net:
             return messages
 
@@ -421,7 +433,7 @@ class ParserNodeConfigV2(NodeConfig):
             )
             return messages
 
-        elif self.safety_net_mode == "create":
+        if self.safety_net_mode == "create":
             logger.info(f"Safety net: Creating missing ToolMessage for {tool_name}")
 
             # Create the missing ToolMessage
@@ -430,15 +442,13 @@ class ParserNodeConfigV2(NodeConfig):
             )
 
             # Add it to messages
-            updated_messages = list(messages) + [safety_tool_message]
+            updated_messages = [*list(messages), safety_tool_message]
             logger.info("Safety net: Added ToolMessage to state")
             return updated_messages
 
         return messages
 
-    def __call__(
-        self, state: StateLike, config: Optional[ConfigLike] = None
-    ) -> Command:
+    def __call__(self, state: StateLike, config: ConfigLike | None = None) -> Command:
         """Parse the tool message into a Pydantic model with V2 safety net."""
         logger.info("=== ParserNodeConfigV2 Execution ===")
         logger.debug(f"Safety net enabled: {self.add_tool_message_safety_net}")
@@ -537,7 +547,10 @@ class ParserNodeConfigV2(NodeConfig):
             if isinstance(tool_class, type) and issubclass(tool_class, BaseModel):
                 parsed_result = self._parse_tool_content(content, tool_class)
             else:
-                logger.warning(f"Tool is not a Pydantic model: {type(tool_class)}")
+                logger.warning(
+                    f"Tool is not a Pydantic model: {
+                        type(tool_class)}"
+                )
                 parsed_result = content
 
             # Determine field name for the result using proper naming utilities

@@ -1,22 +1,17 @@
-"""
+"""from typing import Any
 Examples demonstrating the use of the enhanced MessagesState system.
 
 This file contains complete examples of common usage patterns, demonstrating
 both the classic API and the enhanced features.
 """
 
-from langchain_core.messages import (
-    AIMessage,
-    HumanMessage,
-    SystemMessage,
-    ToolMessage,
-)
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
 
 # The examples below use try/except to handle the case where the enhanced
 # features are not available, making them safe to run in any environment
 
 
-def basic_usage_example():
+def basic_usage_example() -> Any:
     """Demonstrates basic usage of MessagesState."""
     from haive.core.schema.prebuilt.messages import MessagesState
 
@@ -37,18 +32,14 @@ def basic_usage_example():
     )
 
     # Access messages
-    print(f"Last message: {state.get_last_message().content}")
-    print(f"Last human message: {state.get_last_human_message().content}")
-    print(f"Last AI message: {state.get_last_ai_message().content}")
 
     # Format conversion
-    openai_format = state.to_openai_format()
-    print(f"OpenAI format has {len(openai_format)} messages")
+    state.to_openai_format()
 
     return state
 
 
-def tool_usage_example():
+def tool_usage_example() -> Any:
     """Demonstrates tool usage with MessagesState."""
     from haive.core.schema.prebuilt.messages import MessagesState
 
@@ -86,58 +77,41 @@ def tool_usage_example():
     )
 
     # Check for tool calls
-    print(f"Has tool calls: {state.has_tool_calls()}")
 
     # Get tool calls from a specific message
-    tool_calls = state.get_tool_calls(ai_msg)
-    print(f"Tool calls: {tool_calls}")
+    state.get_tool_calls(ai_msg)
 
     return state
 
 
-def enhanced_features_example():
+def enhanced_features_example() -> Any:
     """Demonstrates enhanced features of MessagesState."""
-
     # Create state with conversation including tools
     state = tool_usage_example()
 
     try:
         # Get conversation rounds
-        print("\nConversation Rounds:")
         rounds = state.get_conversation_rounds()
-        for i, round_info in enumerate(rounds):
-            print(f"Round {i+1}:")
-            print(f"  Human: {round_info.human_message.content}")
-            print(f"  AI responses: {len(round_info.ai_responses)}")
-            print(f"  Tool calls: {len(round_info.tool_calls)}")
-            print(f"  Tool responses: {len(round_info.tool_responses)}")
-            print(f"  Complete: {round_info.is_complete}")
-            print(f"  Has errors: {round_info.has_errors}")
+        for _i, _round_info in enumerate(rounds):
+            pass
 
         # Get completed tool calls
-        print("\nCompleted Tool Calls:")
         completed_calls = state.get_completed_tool_calls()
-        for call in completed_calls:
-            print(f"  Tool: {call.tool_call.get('name')}")
-            print(f"  Args: {call.tool_call.get('args')}")
-            print(f"  Success: {call.is_successful}")
+        for _call in completed_calls:
+            pass
 
         # Check if messages are from real humans
-        print("\nMessage Sources:")
         for msg in state.messages:
             if isinstance(msg, HumanMessage):
-                is_real = state.is_real_human_message(msg)
-                print(
-                    f"  '{msg.content[:20]}...' is from a {'real human' if is_real else 'transformed source'}"
-                )
+                state.is_real_human_message(msg)
 
-    except NotImplementedError as e:
-        print(f"Enhanced features not available: {e}")
+    except NotImplementedError:
+        pass
 
     return state
 
 
-def agent_handoff_example():
+def agent_handoff_example() -> Any:
     """Demonstrates agent-to-agent handoff with message transformation."""
     from haive.core.schema.prebuilt.messages import MessagesState
 
@@ -151,9 +125,8 @@ def agent_handoff_example():
         )
     )
 
-    print("Agent 1 conversation:")
     for msg in agent1.messages:
-        print(f"  [{msg.type}] {msg.content[:40]}...")
+        pass
 
     # Second agent's state
     agent2 = MessagesState()
@@ -166,36 +139,30 @@ def agent_handoff_example():
             preserve_metadata=True, engine_id="agent1", engine_name="DataAnalysisAgent"
         )
 
-        print("\nAgent 1 conversation after transformation:")
         for msg in agent1.messages:
-            print(f"  [{msg.type}] {msg.content[:40]}...")
+            pass
 
         # Copy transformed messages to agent2 (skipping system message)
         for msg in agent1.messages:
             if not isinstance(msg, SystemMessage):
                 agent2.add_message(msg)
 
-        print("\nAgent 2 conversation after handoff:")
         for msg in agent2.messages:
-            print(f"  [{msg.type}] {msg.content[:40]}...")
 
             # Check metadata on transferred messages
             if hasattr(msg, "additional_kwargs") and msg.additional_kwargs:
-                print(f"  Metadata: {msg.additional_kwargs}")
+                pass
 
-    except NotImplementedError as e:
-        print(f"Enhanced features not available: {e}")
+    except NotImplementedError:
+        pass
 
     return agent1, agent2
 
 
-def enhanced_implementation_example():
+def enhanced_implementation_example() -> Any:
     """Demonstrates using the enhanced implementation directly."""
     try:
-        from haive.core.schema.prebuilt.messages import (
-            EnhancedMessagesState,
-            MessageList,
-        )
+        from haive.core.schema.prebuilt.messages import EnhancedMessagesState
 
         # Create new state with the enhanced implementation
         state = EnhancedMessagesState()
@@ -212,45 +179,30 @@ def enhanced_implementation_example():
         )
 
         # Access computed properties
-        print("\nEnhanced State Properties:")
-        print(f"  Message count: {state.message_count}")
-        print(f"  Round count: {state.round_count}")
-        print(f"  Has tool calls: {state.has_tool_calls}")
-        print(f"  Has tool errors: {state.has_tool_errors}")
 
         # Use the message list directly
-        print("\nMessage List Operations:")
-        print(f"  First human: '{state.messages.first_real_human_message.content}'")
 
         # Use filtering
-        human_messages = state.messages.filter_by_type(HumanMessage)
-        print(f"  Human messages: {len(human_messages)}")
+        state.messages.filter_by_type(HumanMessage)
 
         # Use transformation
         state.transform_for_reflection()
-        print("\nAfter Reflection Transformation:")
-        for msg in state.messages:
-            print(f"  [{msg.type}] {msg.content[:40]}...")
+        for _msg in state.messages:
+            pass
 
         return state
 
     except (ImportError, AttributeError):
-        print("Enhanced implementation (EnhancedMessagesState) not available")
         return None
 
 
 if __name__ == "__main__":
-    print("=== Basic Usage Example ===")
     basic_usage_example()
 
-    print("\n=== Tool Usage Example ===")
     tool_usage_example()
 
-    print("\n=== Enhanced Features Example ===")
     enhanced_features_example()
 
-    print("\n=== Agent Handoff Example ===")
     agent_handoff_example()
 
-    print("\n=== Enhanced Implementation Example ===")
     enhanced_implementation_example()

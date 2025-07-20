@@ -91,7 +91,10 @@ class EngineStateMixin(BaseModel):
     model_config = ConfigDict(validate_assignment=True, arbitrary_types_allowed=True)
 
     @model_validator(mode="after")
-    def validate_and_organize_engines(self) -> "EngineStateMixin":
+
+
+    @classmethod
+    def validate_and_organize_engines(cls) -> "EngineStateMixin":
         """Ensure engines are properly organized by type and validated.
 
         This validator rebuilds the engines_by_type index to ensure consistency
@@ -156,7 +159,10 @@ class EngineStateMixin(BaseModel):
             "performance": {"total_calls": 0, "total_time": 0.0, "avg_time": 0.0},
         }
 
-        logger.debug(f"Added engine '{engine_name}' of type {engine.engine_type}")
+        logger.debug(
+            f"Added engine '{engine_name}' of type {
+                engine.engine_type}"
+        )
 
     def get_engine(self, name: str) -> Engine | None:
         """Get an engine by name with access logging.
@@ -438,21 +444,33 @@ class EngineStateMixin(BaseModel):
 
                 if show_metadata and llm.name in self.engine_metadata:
                     meta = self.engine_metadata[llm.name]
-                    node.add(f"[dim]Access count: {meta.get('access_count', 0)}[/dim]")
                     node.add(
-                        f"[dim]Last accessed: {meta.get('last_accessed', 'Never')}[/dim]"
+                        f"[dim]Access count: {
+                            meta.get(
+                                'access_count',
+                                0)}[/dim]"
+                    )
+                    node.add(
+                        f"[dim]Last accessed: {
+                            meta.get(
+                                'last_accessed',
+                                'Never')}[/dim]"
                     )
 
                 if show_performance and llm.name in self.engine_metadata:
                     perf = self.engine_metadata[llm.name].get("performance", {})
                     node.add(
-                        f"[dim]Avg response time: {perf.get('avg_time', 0):.3f}s[/dim]"
+                        f"[dim]Avg response time: {
+                            perf.get(
+                                'avg_time',
+                                0):.3f}s[/dim]"
                     )
 
         # Retrievers
         if retrievers := self.get_retrievers():
             ret_branch = tree.add(
-                f"🔍 [bold magenta]Retrievers[/bold magenta] ({len(retrievers)})"
+                f"🔍 [bold magenta]Retrievers[/bold magenta] ({
+                    len(retrievers)})"
             )
             for ret in retrievers:
                 ret_info = f"[green]{ret.name}[/green]"
@@ -474,7 +492,8 @@ class EngineStateMixin(BaseModel):
         # Vector Stores
         if vector_stores := self.get_vector_stores():
             vs_branch = tree.add(
-                f"💾 [bold blue]Vector Stores[/bold blue] ({len(vector_stores)})"
+                f"💾 [bold blue]Vector Stores[/bold blue] ({
+                    len(vector_stores)})"
             )
             for vs in vector_stores:
                 vs_info = f"[green]{vs.name}[/green]"
@@ -520,7 +539,10 @@ class EngineStateMixin(BaseModel):
                 console.print("\n[bold]Top Accessed Engines:[/bold]")
                 for name, meta in sorted_by_access:
                     if meta.get("access_count", 0) > 0:
-                        console.print(f"  {name}: {meta['access_count']} accesses")
+                        console.print(
+                            f"  {name}: {
+                                meta['access_count']} accesses"
+                        )
 
     def display_engine_details(self, name: str) -> None:
         """Display detailed information about a specific engine.
@@ -566,7 +588,7 @@ class EngineStateMixin(BaseModel):
         if tools:
             details.add_row("Tools:", f"{len(tools)} available")
             for i, tool in enumerate(tools[:3]):
-                tool_name = getattr(tool, "name", f"Tool {i+1}")
+                tool_name = getattr(tool, "name", f"Tool {i + 1}")
                 details.add_row("", f"  - {tool_name}")
             if len(tools) > 3:
                 details.add_row("", f"  ... and {len(tools) - 3} more")

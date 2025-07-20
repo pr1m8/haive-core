@@ -1,5 +1,6 @@
 """Haive-specific extension of runnable config management with PostgreSQL integration.
 
+from typing import Any
 This module extends RunnableConfigManager to provide both Supabase authentication
 integration and PostgreSQL persistence support for the Haive framework. It creates
 a unified configuration system that handles authentication, session management,
@@ -543,10 +544,13 @@ class HaiveRunnableConfigManager(RunnableConfigManager):
         """
 
         # Use a custom encoder function to handle datetime objects
-        def encoder(obj):
+        def encoder(obj) -> Any:
             if isinstance(obj, datetime):
                 return obj.isoformat()
-            raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
+            raise TypeError(
+                f"Object of type {
+                    type(obj)} is not JSON serializable"
+            )
 
         return json.dumps(config, default=encoder)
 

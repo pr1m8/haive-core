@@ -59,7 +59,10 @@ def test_reference_creation():
 def test_from_engine():
     """Test creating reference from engine."""
     # Create engine
-    engine = TestEngine(id="test_id", name="test_engine", engine_type=EngineType.LLM)
+    engine = TestEngine(
+        id="test_id",
+        name="test_engine",
+        engine_type=EngineType.LLM)
 
     # Create reference from engine
     ref = ComponentRef.from_engine(engine)
@@ -73,7 +76,10 @@ def test_from_engine():
 def test_resolve_by_id():
     """Test resolving reference by ID."""
     # Create and register engine
-    TestEngine(id="test_id", name="test_engine", param="engine_param").register()
+    TestEngine(
+        id="test_id",
+        name="test_engine",
+        param="engine_param").register()
 
     # Create reference by ID
     ref = ComponentRef(id="test_id")

@@ -1,5 +1,6 @@
 """LanceDB Vector Store implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the LanceDB vector store,
 which is a modern, high-performance vector database built on Lance format.
 
@@ -146,7 +147,7 @@ class LanceDBVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
     )
 
     @validator("distance")
-    def validate_distance(self, v):
+    def validate_distance(self, v) -> Any:
         """Validate distance metric is supported."""
         valid_distances = ["cosine", "l2", "dot", "hamming"]
         if v not in valid_distances:
@@ -154,7 +155,7 @@ class LanceDBVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
         return v
 
     @validator("mode")
-    def validate_mode(self, v):
+    def validate_mode(self, v) -> Any:
         """Validate mode is supported."""
         valid_modes = ["overwrite", "append"]
         if v not in valid_modes:
@@ -162,7 +163,7 @@ class LanceDBVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
         return v
 
     @validator("uri")
-    def validate_uri(self, v):
+    def validate_uri(self, v) -> Any:
         """Basic validation of LanceDB URI."""
         if v.startswith("db://") and len(v) < 6:
             raise ValueError(
@@ -188,7 +189,7 @@ class LanceDBVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a LanceDB vector store from this configuration.
 
         Returns:

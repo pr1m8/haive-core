@@ -1,5 +1,4 @@
-"""
-Enhanced graph visualization utilities for Haive graphs with automatic Agent detection and expansion.
+"""Enhanced graph visualization utilities for Haive graphs with automatic Agent detection and expansion.
 
 This module provides comprehensive visualization that automatically detects nodes with Agent engines
 or nodes that are Agents themselves, expanding them to show their complete internal graph structure.
@@ -10,13 +9,11 @@ import os
 import uuid
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
 from langgraph.graph import END, START
 
-from haive.core.utils.mermaid_utils import (
-    display_mermaid,
-)
+from haive.core.utils.mermaid_utils import display_mermaid
 
 # Set up module logger
 logger = logging.getLogger(__name__)
@@ -30,7 +27,7 @@ class AgentInfo:
     node: Any
     graph: Any
     depth: int
-    parent_path: List[str]
+    parent_path: list[str]
     reason: str
 
 
@@ -38,11 +35,11 @@ class AgentInfo:
 class VisualizationContext:
     """Context object for tracking visualization state."""
 
-    processed_nodes: Set[str]
-    processed_edges: Set[str]
-    agent_graphs: Dict[str, AgentInfo]
-    node_mappings: Dict[str, str]
-    highlight_nodes: Set[str]
+    processed_nodes: set[str]
+    processed_edges: set[str]
+    agent_graphs: dict[str, AgentInfo]
+    node_mappings: dict[str, str]
+    highlight_nodes: set[str]
     debug: bool = False
 
 
@@ -70,8 +67,7 @@ class NodeStyle(Enum):
 
 
 class GraphVisualizer:
-    """
-    Enhanced visualization utilities with automatic Agent detection and expansion.
+    """Enhanced visualization utilities with automatic Agent detection and expansion.
 
     Key features:
     - Detects nodes that are Agents or contain Agent engines
@@ -200,7 +196,7 @@ class GraphVisualizer:
         cls,
         graph: Any,
         include_subgraphs: bool = True,
-        highlight_nodes: Optional[List[str]] = None,
+        highlight_nodes: list[str] | None = None,
         theme: str = "base",
         show_branch_labels: bool = True,
         direction: str = "TB",
@@ -208,8 +204,7 @@ class GraphVisualizer:
         max_depth: int = 3,
         debug: bool = False,
     ) -> str:
-        """
-        Generate a comprehensive Mermaid diagram with automatic Agent expansion.
+        """Generate a comprehensive Mermaid diagram with automatic Agent expansion.
 
         Args:
             graph: The graph to visualize
@@ -226,7 +221,11 @@ class GraphVisualizer:
             Complete Mermaid diagram string
         """
         logger.info(
-            f"Generating Mermaid for graph: {getattr(graph, 'name', 'Unnamed')}"
+            f"Generating Mermaid for graph: {
+                getattr(
+                    graph,
+                    'name',
+                    'Unnamed')}"
         )
 
         # Initialize diagram
@@ -261,7 +260,7 @@ class GraphVisualizer:
     @classmethod
     def _initialize_diagram(
         cls, theme: str, direction: str, compact: bool
-    ) -> List[str]:
+    ) -> list[str]:
         """Initialize the Mermaid diagram with settings."""
         spacing = "30" if compact else "50"
         padding = "10" if compact else "15"
@@ -281,7 +280,7 @@ class GraphVisualizer:
         ]
 
     @classmethod
-    def _add_style_definitions(cls, lines: List[str]):
+    def _add_style_definitions(cls, lines: list[str]):
         """Add comprehensive style definitions."""
         lines.append("    %% ===== STYLE DEFINITIONS =====")
 
@@ -312,9 +311,8 @@ class GraphVisualizer:
     @classmethod
     def _detect_all_agents(
         cls, graph: Any, max_depth: int, debug: bool, current_depth: int = 0
-    ) -> Dict[str, AgentInfo]:
-        """
-        Recursively detect all agent nodes in the graph and nested subgraphs.
+    ) -> dict[str, AgentInfo]:
+        """Recursively detect all agent nodes in the graph and nested subgraphs.
 
         Returns:
             Dict mapping node_id -> AgentInfo(node, graph, depth, parent_path)
@@ -329,7 +327,11 @@ class GraphVisualizer:
             return agents
 
         logger.info(
-            f"Detecting agents at depth {current_depth} in {getattr(graph, 'name', 'Unknown')}"
+            f"Detecting agents at depth {current_depth} in {
+                getattr(
+                    graph,
+                    'name',
+                    'Unknown')}"
         )
 
         for node_name, node in (graph.nodes or {}).items():
@@ -356,7 +358,7 @@ class GraphVisualizer:
 
                     # Add nested agents with updated paths
                     for nested_id, nested_info in nested_agents.items():
-                        full_path = [node_name] + nested_info.parent_path
+                        full_path = [node_name, *nested_info.parent_path]
                         agents[f"{node_name}_{nested_id}"] = AgentInfo(
                             node=nested_info.node,
                             graph=nested_info.graph,
@@ -371,9 +373,8 @@ class GraphVisualizer:
     @classmethod
     def _check_if_agent(
         cls, node: Any, node_name: str, debug: bool
-    ) -> Optional[Dict[str, Any]]:
-        """
-        Comprehensive check if a node is an agent with detailed detection logic.
+    ) -> dict[str, Any] | None:
+        """Comprehensive check if a node is an agent with detailed detection logic.
 
         Returns:
             Dict with 'graph' and 'reason' if agent, None otherwise
@@ -435,14 +436,10 @@ class GraphVisualizer:
             return True
 
         # Check MRO
-        for base in type(obj).__mro__:
-            if base.__name__ == "Agent":
-                return True
-
-        return False
+        return any(base.__name__ == "Agent" for base in type(obj).__mro__)
 
     @classmethod
-    def _get_engine_type(cls, engine: Any) -> Optional[str]:
+    def _get_engine_type(cls, engine: Any) -> str | None:
         """Extract engine type from an engine object."""
         if hasattr(engine, "engine_type"):
             engine_type = engine.engine_type
@@ -450,13 +447,12 @@ class GraphVisualizer:
             # Handle enum
             if hasattr(engine_type, "value"):
                 return engine_type.value
-            else:
-                return str(engine_type)
+            return str(engine_type)
 
         return None
 
     @classmethod
-    def _get_graph_from_object(cls, obj: Any, debug: bool) -> Optional[Any]:
+    def _get_graph_from_object(cls, obj: Any, debug: bool) -> Any | None:
         """Try to get a graph from an object using various methods."""
         # Direct graph attribute
         if hasattr(obj, "graph") and obj.graph:
@@ -469,7 +465,8 @@ class GraphVisualizer:
             try:
                 if debug:
                     logger.debug(
-                        f"Attempting to build graph from {type(obj).__name__}.build_graph()"
+                        f"Attempting to build graph from {
+                            type(obj).__name__}.build_graph()"
                     )
                 graph = obj.build_graph()
                 if graph:
@@ -482,7 +479,8 @@ class GraphVisualizer:
             try:
                 if debug:
                     logger.debug(
-                        f"Attempting to compile graph from {type(obj).__name__}.compile()"
+                        f"Attempting to compile graph from {
+                            type(obj).__name__}.compile()"
                     )
                 compiled = obj.compile()
                 if hasattr(compiled, "graph"):
@@ -495,12 +493,12 @@ class GraphVisualizer:
     @classmethod
     def _build_graph(
         cls,
-        lines: List[str],
+        lines: list[str],
         graph: Any,
         context: VisualizationContext,
         depth: int = 0,
         parent_prefix: str = "",
-        subgraph_id: Optional[str] = None,
+        subgraph_id: str | None = None,
     ):
         """Recursively build the graph with proper node and edge handling."""
         indent = "    " * (depth + 1)
@@ -526,7 +524,8 @@ class GraphVisualizer:
         if hasattr(graph, "branches"):
             cls._process_branches(lines, graph, context, depth, parent_prefix)
 
-        # If this is a top-level graph with agent subgraphs, add connection edges
+        # If this is a top-level graph with agent subgraphs, add connection
+        # edges
         if depth == 0 and hasattr(graph, "nodes") and context.agent_graphs:
             # Add connections for agents in the main graph
             cls._add_agent_connections(lines, graph, context)
@@ -534,12 +533,12 @@ class GraphVisualizer:
     @classmethod
     def _process_nodes(
         cls,
-        lines: List[str],
+        lines: list[str],
         graph: Any,
         context: VisualizationContext,
         depth: int,
         parent_prefix: str,
-        subgraph_id: Optional[str],
+        subgraph_id: str | None,
     ):
         """Process all nodes in a graph."""
         indent = "    " * (depth + 1)
@@ -554,13 +553,17 @@ class GraphVisualizer:
             if start_id not in context.processed_nodes:
                 # Use consistent shapes for START/END
                 lines.append(
-                    f'{indent}{start_id}(["▶ START"]):::{NodeStyle.START.value}'
+                    f'{indent}{start_id}(["▶ START"]):::{
+                        NodeStyle.START.value}'
                 )
                 context.processed_nodes.add(start_id)
                 context.node_mappings[f"{parent_prefix}START"] = start_id
 
             if end_id not in context.processed_nodes:
-                lines.append(f'{indent}{end_id}(["■ END"]):::{NodeStyle.END.value}')
+                lines.append(
+                    f'{indent}{end_id}(["■ END"]):::{
+                        NodeStyle.END.value}'
+                )
                 context.processed_nodes.add(end_id)
                 context.node_mappings[f"{parent_prefix}END"] = end_id
 
@@ -604,7 +607,7 @@ class GraphVisualizer:
     @classmethod
     def _add_regular_node(
         cls,
-        lines: List[str],
+        lines: list[str],
         node_name: str,
         node_id: str,
         node: Any,
@@ -622,7 +625,7 @@ class GraphVisualizer:
         label = cls._create_node_label(node_name, node)
 
         # Determine shape based on style
-        if style == NodeStyle.START or style == NodeStyle.END:
+        if style in (NodeStyle.START, NodeStyle.END):
             shape_start, shape_end = '(["', '"])'
         elif style == NodeStyle.TOOL:
             shape_start, shape_end = '[["', '"]]'  # Stadium shape for tools
@@ -647,7 +650,7 @@ class GraphVisualizer:
     @classmethod
     def _create_agent_subgraph(
         cls,
-        lines: List[str],
+        lines: list[str],
         node_name: str,
         node_id: str,
         agent_info: AgentInfo,
@@ -662,11 +665,13 @@ class GraphVisualizer:
         # Create subgraph
         lines.append("")
         lines.append(
-            f'{indent}subgraph {subgraph_id}["🤖 {cls._sanitize_label(node_name)} Agent"]'
+            f'{indent}subgraph {subgraph_id}["🤖 {
+                cls._sanitize_label(node_name)} Agent"]'
         )
         lines.append(f"{indent}    direction TB")
 
-        # Create START/END nodes directly in the subgraph with improved positioning
+        # Create START/END nodes directly in the subgraph with improved
+        # positioning
         start_id = f"{node_id}_START"
         end_id = f"{node_id}_END"
 
@@ -674,13 +679,17 @@ class GraphVisualizer:
         if start_id not in context.processed_nodes:
             # Add START at the top of the subgraph
             lines.append(
-                f'{indent}    {start_id}(["▶ START"]):::{NodeStyle.START.value}'
+                f'{indent}    {start_id}(["▶ START"]):::{
+                    NodeStyle.START.value}'
             )
             context.processed_nodes.add(start_id)
 
         if end_id not in context.processed_nodes:
             # Add END at the bottom (will be rendered later after other nodes)
-            lines.append(f'{indent}    {end_id}(["■ END"]):::{NodeStyle.END.value}')
+            lines.append(
+                f'{indent}    {end_id}(["■ END"]):::{
+                    NodeStyle.END.value}'
+            )
             context.processed_nodes.add(end_id)
 
         # Map START/END nodes for proper edge connections
@@ -711,7 +720,10 @@ class GraphVisualizer:
 
         # Style the subgraph
         style = cls.SUBGRAPH_STYLES["agent"]
-        style_str = f"fill:{style['fill']},stroke:{style['stroke']},stroke-width:{style['strokeWidth']}"
+        style_str = f"fill:{
+            style['fill']},stroke:{
+            style['stroke']},stroke-width:{
+            style['strokeWidth']}"
         lines.append(f"{indent}style {subgraph_id} {style_str}")
 
         # Mark the original node as processed
@@ -720,7 +732,7 @@ class GraphVisualizer:
     @classmethod
     def _process_edges(
         cls,
-        lines: List[str],
+        lines: list[str],
         graph: Any,
         context: VisualizationContext,
         depth: int,
@@ -760,7 +772,7 @@ class GraphVisualizer:
     @classmethod
     def _process_branches(
         cls,
-        lines: List[str],
+        lines: list[str],
         graph: Any,
         context: VisualizationContext,
         depth: int,
@@ -803,13 +815,13 @@ class GraphVisualizer:
     @classmethod
     def _resolve_node_id(
         cls, node_name: str, parent_prefix: str, context: VisualizationContext
-    ) -> Optional[str]:
+    ) -> str | None:
         """Resolve a node name to its actual ID in the graph."""
         # Handle START/END nodes and their variants
         if node_name in (START, "__start__", "START"):
             key = f"{parent_prefix}START"
             return context.node_mappings.get(key, "START")
-        elif node_name in (END, "__end__", "END"):
+        if node_name in (END, "__end__", "END"):
             key = f"{parent_prefix}END"
             return context.node_mappings.get(key, "END")
 
@@ -840,8 +852,8 @@ class GraphVisualizer:
 
     @classmethod
     def _find_agent_key(
-        cls, node_name: str, parent_prefix: str, agent_graphs: Dict[str, AgentInfo]
-    ) -> Optional[str]:
+        cls, node_name: str, parent_prefix: str, agent_graphs: dict[str, AgentInfo]
+    ) -> str | None:
         """Find the agent key for a given node."""
         # Try exact match with prefix
         for key in agent_graphs:
@@ -862,35 +874,34 @@ class GraphVisualizer:
                     return NodeStyle[type_str]
 
         # Check node.node_type
-        if hasattr(node, "node_type"):
-            if hasattr(node.node_type, "value"):
-                type_str = node.node_type.value.upper()
-                if hasattr(NodeStyle, type_str):
-                    return NodeStyle[type_str]
+        if hasattr(node, "node_type") and hasattr(node.node_type, "value"):
+            type_str = node.node_type.value.upper()
+            if hasattr(NodeStyle, type_str):
+                return NodeStyle[type_str]
 
         # Pattern matching on class name
         if node is not None:
             class_name = type(node).__name__.lower()
             if "tool" in class_name:
                 return NodeStyle.TOOL
-            elif "validation" in class_name or "validator" in class_name:
+            if "validation" in class_name or "validator" in class_name:
                 return NodeStyle.VALIDATION
-            elif "parser" in class_name or "parse" in class_name:
+            if "parser" in class_name or "parse" in class_name:
                 return NodeStyle.PARSER
-            elif "agent" in class_name:
+            if "agent" in class_name:
                 return NodeStyle.AGENT
-            elif "engine" in class_name:
+            if "engine" in class_name:
                 return NodeStyle.ENGINE
 
         # Pattern matching on node name
         node_name_lower = node_name.lower()
         if "tool" in node_name_lower:
             return NodeStyle.TOOL
-        elif "validat" in node_name_lower:
+        if "validat" in node_name_lower:
             return NodeStyle.VALIDATION
-        elif "parse" in node_name_lower:
+        if "parse" in node_name_lower:
             return NodeStyle.PARSER
-        elif "agent" in node_name_lower:
+        if "agent" in node_name_lower:
             return NodeStyle.AGENT
 
         # Default
@@ -977,7 +988,7 @@ class GraphVisualizer:
         return safe_id
 
     @classmethod
-    def _get_branch_destinations(cls, branch: Any) -> Dict[str, str]:
+    def _get_branch_destinations(cls, branch: Any) -> dict[str, str]:
         """Extract destinations from a branch object."""
         for attr in ["destinations", "condition_map", "routes", "ends"]:
             if hasattr(branch, attr):
@@ -1032,7 +1043,7 @@ class GraphVisualizer:
         return str(condition).replace("_", " ").title()
 
     @classmethod
-    def _add_highlights(cls, lines: List[str], context: VisualizationContext):
+    def _add_highlights(cls, lines: list[str], context: VisualizationContext):
         """Add highlight styling for specified nodes."""
         if not context.highlight_nodes:
             return
@@ -1049,18 +1060,21 @@ class GraphVisualizer:
 
         if highlight_ids:
             lines.append(
-                f"    class {','.join(highlight_ids)} {NodeStyle.HIGHLIGHT.value}"
+                f"    class {
+                    ','.join(highlight_ids)} {
+                    NodeStyle.HIGHLIGHT.value}"
             )
 
     @classmethod
     def _add_agent_connections(
-        cls, lines: List[str], graph: Any, context: VisualizationContext
+        cls, lines: list[str], graph: Any, context: VisualizationContext
     ):
         """Add connections between main graph and agent subgraphs."""
         # First find all agent nodes and their START/END nodes
         agent_connections = []
 
-        # Keep track of which connections we've already processed to avoid duplicates
+        # Keep track of which connections we've already processed to avoid
+        # duplicates
         processed_connections = set()
 
         # Find all agent nodes by looking at processed_nodes
@@ -1147,17 +1161,20 @@ class GraphVisualizer:
             lines.append("    %% ===== AGENT CONNECTIONS =====")
 
             # Add connections between main graph and subgraphs
-            # We need to find proper connections from main graph to subgraphs and vice versa
+            # We need to find proper connections from main graph to subgraphs
+            # and vice versa
             seen_connections = set()
             explicit_connections = []
 
             # First, explicitly add START --> react_START connection
-            # This ensures the flow goes from main graph START to the subgraph's START
+            # This ensures the flow goes from main graph START to the
+            # subgraph's START
             if "react_START" in context.node_mappings:
                 explicit_connections.append("    START --> react_START")
 
             # Second, explicitly add react_END --> agent_node connection
-            # This ensures the flow continues from subgraph's END to the next node
+            # This ensures the flow continues from subgraph's END to the next
+            # node
             if "react_END" in context.processed_nodes:
                 explicit_connections.append("    react_END --> agent_node")
 
@@ -1177,7 +1194,8 @@ class GraphVisualizer:
                 if "START --> " in connection and "_START" in connection:
                     continue
 
-                # Skip any react_END connections since we're handling those explicitly
+                # Skip any react_END connections since we're handling those
+                # explicitly
                 if "react_END -->" in connection:
                     continue
 
@@ -1197,10 +1215,10 @@ class GraphVisualizer:
     def display_graph(
         cls,
         graph: Any,
-        output_path: Optional[str] = None,
+        output_path: str | None = None,
         include_subgraphs: bool = True,
-        highlight_nodes: Optional[List[str]] = None,
-        highlight_paths: Optional[List[List[str]]] = None,
+        highlight_nodes: list[str] | None = None,
+        highlight_paths: list[list[str]] | None = None,
         save_png: bool = False,
         width: str = "100%",
         theme: str = "base",
@@ -1208,11 +1226,10 @@ class GraphVisualizer:
         show_default_branches: bool = True,
         direction: str = "TB",
         compact_mode: bool = False,
-        title: Optional[str] = None,
+        title: str | None = None,
         debug: bool = False,
     ) -> str:
-        """
-        Generate and display graph with Agent expansion.
+        """Generate and display graph with Agent expansion.
 
         Returns:
             Generated Mermaid code
@@ -1260,7 +1277,7 @@ class GraphVisualizer:
         return mermaid_code
 
     @classmethod
-    def debug_graph_structure(cls, graph: Any) -> Dict[str, Any]:
+    def debug_graph_structure(cls, graph: Any) -> dict[str, Any]:
         """Debug helper to analyze graph structure."""
         info = {
             "graph_name": getattr(graph, "name", "Unnamed"),

@@ -7,12 +7,10 @@ initialization by avoiding repeated scanning of 230+ loader modules.
 import hashlib
 import json
 import logging
-import os
 import pickle
-import time
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, Optional, Set
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +33,7 @@ class RegistryCacheManager:
 
     def __init__(
         self,
-        cache_dir: Optional[Path] = None,
+        cache_dir: Path | None = None,
         cache_ttl_days: int = 7,
         use_memory_cache: bool = True,
     ):
@@ -55,13 +53,13 @@ class RegistryCacheManager:
         self.metadata_file = self.cache_dir / "cache_metadata.json"
 
         # In-memory cache for current session
-        self._memory_cache: Dict[str, Any] = {}
+        self._memory_cache: dict[str, Any] = {}
         self._cache_loaded = False
 
         # Ensure cache directory exists
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
-    def get_cached_registry(self) -> Optional[Dict[str, Any]]:
+    def get_cached_registry(self) -> dict[str, Any] | None:
         """Get cached registry data if valid.
 
         Returns:
@@ -93,7 +91,7 @@ class RegistryCacheManager:
             return None
 
     def save_registry_cache(
-        self, registry_data: Dict[str, Any], source_files: Optional[Set[Path]] = None
+        self, registry_data: dict[str, Any], source_files: set[Path] | None = None
     ) -> bool:
         """Save registry data to cache.
 
@@ -132,13 +130,14 @@ class RegistryCacheManager:
                 self._cache_loaded = True
 
             logger.info(
-                f"Saved registry cache with {metadata['stats']['total_sources']} sources "
+                f"Saved registry cache with {
+                    metadata['stats']['total_sources']} sources "
                 f"and {metadata['stats']['total_loaders']} loaders"
             )
             return True
 
         except Exception as e:
-            logger.error(f"Failed to save cache: {e}")
+            logger.exception(f"Failed to save cache: {e}")
             return False
 
     def clear_cache(self) -> None:
@@ -167,7 +166,7 @@ class RegistryCacheManager:
 
         try:
             # Load metadata
-            with open(self.metadata_file, "r") as f:
+            with open(self.metadata_file) as f:
                 metadata = json.load(f)
 
             # Check cache age
@@ -180,7 +179,8 @@ class RegistryCacheManager:
             current_version = self._get_haive_version()
             if metadata.get("haive_version") != current_version:
                 logger.debug(
-                    f"Version mismatch: {metadata.get('haive_version')} != {current_version}"
+                    f"Version mismatch: {
+                        metadata.get('haive_version')} != {current_version}"
                 )
                 return False
 
@@ -199,10 +199,10 @@ class RegistryCacheManager:
             import haive
 
             return getattr(haive, "__version__", "unknown")
-        except:
+        except BaseException:
             return "unknown"
 
-    def _calculate_files_hash(self, source_files: Optional[Set[Path]]) -> str:
+    def _calculate_files_hash(self, source_files: set[Path] | None) -> str:
         """Calculate hash of source files for change detection."""
         if not source_files:
             return ""
@@ -219,7 +219,7 @@ class RegistryCacheManager:
 
         return hasher.hexdigest()
 
-    def get_cache_info(self) -> Dict[str, Any]:
+    def get_cache_info(self) -> dict[str, Any]:
         """Get information about current cache status.
 
         Returns:
@@ -234,11 +234,11 @@ class RegistryCacheManager:
 
         if self.metadata_file.exists():
             try:
-                with open(self.metadata_file, "r") as f:
+                with open(self.metadata_file) as f:
                     metadata = json.load(f)
                 info["metadata"] = metadata
                 info["cache_valid"] = self._is_cache_valid()
-            except:
+            except BaseException:
                 info["metadata"] = None
                 info["cache_valid"] = False
         else:
@@ -266,6 +266,6 @@ def clear_loader_cache() -> None:
     _cache_manager.clear_cache()
 
 
-def get_cache_status() -> Dict[str, Any]:
+def get_cache_status() -> dict[str, Any]:
     """Get current cache status information."""
     return _cache_manager.get_cache_info()

@@ -6,9 +6,9 @@ Kept under 300 lines as per code style guidelines.
 """
 
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Callable
 
 from langchain_core.document_loaders import BaseLoader
 from pydantic import BaseModel, Field
@@ -165,7 +165,9 @@ class BaseSource(BaseModel, ABC):
             return getattr(module, strategy.loader_class)
         except (ImportError, AttributeError) as e:
             raise ImportError(
-                f"Failed to import {strategy.loader_class} from {strategy.module}: {e}"
+                f"Failed to import {
+                    strategy.loader_class} from {
+                    strategy.module}: {e}"
             )
 
 

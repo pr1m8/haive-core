@@ -1,17 +1,6 @@
+from collections.abc import Callable
 from datetime import datetime
-from typing import (
-    Any,
-    Callable,
-    ClassVar,
-    Dict,
-    Generic,
-    List,
-    Optional,
-    Set,
-    Tuple,
-    TypeVar,
-    Union,
-)
+from typing import Any, ClassVar, Generic, TypeVar
 from uuid import uuid4
 
 from pydantic import (
@@ -33,8 +22,7 @@ TNode = TypeVar("TNode", bound=Any)
 
 
 class StateGraphSerializable(BaseModel, Generic[TNode]):
-    """
-    Enhanced serializable representation of a StateGraph with modification methods.
+    """Enhanced serializable representation of a StateGraph with modification methods.
 
     This class provides a serializable representation of a LangGraph StateGraph with
     methods for modifying the graph structure and validating its correctness.
@@ -65,8 +53,8 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
     name: str = Field(default="unnamed_graph", description="Graph name")
 
     # Basic properties
-    edges: Set[Tuple[str, str]] = Field(default_factory=set, description="Graph edges")
-    waiting_edges: Set[Tuple[Tuple[str, ...], str]] = Field(
+    edges: set[tuple[str, str]] = Field(default_factory=set, description="Graph edges")
+    waiting_edges: set[tuple[tuple[str, ...], str]] = Field(
         default_factory=set, description="Edges that wait for multiple source nodes"
     )
     compiled: bool = Field(
@@ -74,37 +62,31 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
     )
 
     # Entry and exit points
-    entry_point: Optional[str] = Field(
-        default=None, description="Entry point node name"
-    )
-    finish_point: Optional[str] = Field(
-        default=None, description="Finish point node name"
-    )
+    entry_point: str | None = Field(default=None, description="Entry point node name")
+    finish_point: str | None = Field(default=None, description="Finish point node name")
 
     # Schemas
-    schema: Optional[TypeReference] = Field(
-        default=None, description="State schema type"
-    )
-    input_schema: Optional[TypeReference] = Field(
+    schema: TypeReference | None = Field(default=None, description="State schema type")
+    input_schema: TypeReference | None = Field(
         default=None, description="Input schema type"
     )
-    output_schema: Optional[TypeReference] = Field(
+    output_schema: TypeReference | None = Field(
         default=None, description="Output schema type"
     )
-    config_schema: Optional[TypeReference] = Field(
+    config_schema: TypeReference | None = Field(
         default=None, description="Config schema type"
     )
 
     # Nodes and branches
-    nodes: Dict[str, NodeSpec[TNode]] = Field(
+    nodes: dict[str, NodeSpec[TNode]] = Field(
         default_factory=dict, description="Node specifications"
     )
-    branches: Dict[str, Dict[str, BranchSpec]] = Field(
+    branches: dict[str, dict[str, BranchSpec]] = Field(
         default_factory=lambda: defaultdict(dict), description="Branch specifications"
     )
 
     # Metadata
-    metadata: Dict[str, Any] = Field(
+    metadata: dict[str, Any] = Field(
         default_factory=dict, description="Additional metadata"
     )
     version: str = Field(default="1.0.0", description="Graph format version")
@@ -117,7 +99,7 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
 
     # Private attribute for change tracking
     _modified: bool = PrivateAttr(default=False)
-    _reserved_nodes: ClassVar[List[str]] = ["__start__", "__end__"]
+    _reserved_nodes: ClassVar[list[str]] = ["__start__", "__end__"]
 
     model_config = ConfigDict(
         extra="allow",
@@ -127,7 +109,7 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
         json_encoders={datetime: lambda dt: dt.isoformat()},
     )
 
-    def __init__(self, **data):
+    def __init__(self, **data) -> None:
         super().__init__(**data)
         self._modified = False
 
@@ -140,17 +122,22 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
         return v
 
     @model_validator(mode="after")
-    def validate_graph_structure(self) -> "StateGraphSerializable":
+
+
+    @classmethod
+    def validate_graph_structure(cls) -> "StateGraphSerializable":
         """Validate the overall graph structure."""
         # Check that entry and finish points exist if set
         if self.entry_point and self.entry_point not in self.nodes:
             raise ValueError(
-                f"Entry point '{self.entry_point}' references non-existent node"
+                f"Entry point '{
+                    self.entry_point}' references non-existent node"
             )
 
         if self.finish_point and self.finish_point not in self.nodes:
             raise ValueError(
-                f"Finish point '{self.finish_point}' references non-existent node"
+                f"Finish point '{
+                    self.finish_point}' references non-existent node"
             )
 
         return self
@@ -173,7 +160,7 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
 
     @computed_field
     @property
-    def all_edges(self) -> List[Dict[str, Any]]:
+    def all_edges(self) -> list[dict[str, Any]]:
         """Get all edges in the graph in a structured format."""
         result = []
 
@@ -239,9 +226,7 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
             raise ValueError(f"Node '{name}' does not exist")
 
         # Remove edges to/from this node
-        self.edges = {
-            (src, dst) for src, dst in self.edges if src != name and dst != name
-        }
+        self.edges = {(src, dst) for src, dst in self.edges if name not in (src, dst)}
 
         # Remove waiting edges involving this node
         new_waiting_edges = set()
@@ -317,7 +302,7 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
         return self
 
     def add_waiting_edge(
-        self, sources: List[str], target: str
+        self, sources: list[str], target: str
     ) -> "StateGraphSerializable":
         """Add a waiting edge (edge that waits for multiple source nodes to complete)."""
         # Check nodes exist
@@ -334,7 +319,7 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
         return self
 
     def remove_waiting_edge(
-        self, sources: List[str], target: str
+        self, sources: list[str], target: str
     ) -> "StateGraphSerializable":
         """Remove a waiting edge."""
         source_tuple = tuple(sources)
@@ -366,10 +351,9 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
         return self
 
     def add_sequence(
-        self, nodes: List[Union[str, Tuple[str, Any]]]
+        self, nodes: list[str | tuple[str, Any]]
     ) -> "StateGraphSerializable":
-        """
-        Add a sequence of nodes that will be executed in order.
+        """Add a sequence of nodes that will be executed in order.
 
         Args:
             nodes: List of node names or (name, spec) tuples to add in sequence
@@ -407,12 +391,11 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
     def add_conditional_edge(
         self,
         source: str,
-        condition_func: Union[Callable, FunctionReference],
-        targets: Dict[str, str],
-        then: Optional[str] = None,
+        condition_func: Callable | FunctionReference,
+        targets: dict[str, str],
+        then: str | None = None,
     ) -> "StateGraphSerializable":
-        """
-        Add a conditional edge from a source node to multiple targets.
+        """Add a conditional edge from a source node to multiple targets.
 
         Args:
             source: Source node name
@@ -461,8 +444,7 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
     def remove_conditional_edge(
         self, source: str, branch_name: str
     ) -> "StateGraphSerializable":
-        """
-        Remove a conditional edge.
+        """Remove a conditional edge.
 
         Args:
             source: Source node name
@@ -484,9 +466,8 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
         self.mark_modified()
         return self
 
-    def get_node_connections(self, node: str) -> Dict[str, List[str]]:
-        """
-        Get all connections for a node (incoming and outgoing).
+    def get_node_connections(self, node: str) -> dict[str, list[str]]:
+        """Get all connections for a node (incoming and outgoing).
 
         Args:
             node: Node name to get connections for
@@ -541,8 +522,7 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
         return result
 
     def is_node_reachable(self, node: str) -> bool:
-        """
-        Check if a node is reachable from the entry point.
+        """Check if a node is reachable from the entry point.
 
         Args:
             node: Node to check
@@ -601,8 +581,7 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
         return False
 
     def validate(self) -> bool:
-        """
-        Validate the graph structure.
+        """Validate the graph structure.
 
         Checks:
         - All nodes referenced in edges exist
@@ -650,15 +629,22 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
                     and branch.then not in self.nodes
                 ):
                     raise ValueError(
-                        f"Branch 'then' references non-existent node '{branch.then}'"
+                        f"Branch 'then' references non-existent node '{
+                            branch.then}'"
                     )
 
         # Check entry and finish points
         if self.entry_point and self.entry_point not in self.nodes:
-            raise ValueError(f"Entry point '{self.entry_point}' does not exist")
+            raise ValueError(
+                f"Entry point '{
+                    self.entry_point}' does not exist"
+            )
 
         if self.finish_point and self.finish_point not in self.nodes:
-            raise ValueError(f"Finish point '{self.finish_point}' does not exist")
+            raise ValueError(
+                f"Finish point '{
+                    self.finish_point}' does not exist"
+            )
 
         # Check all nodes are reachable
         if self.entry_point:
@@ -676,12 +662,12 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
         """Reset the modified flag."""
         self._modified = False
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to a dictionary for serialization."""
         return self.model_dump()
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "StateGraphSerializable":
+    def from_dict(cls, data: dict[str, Any]) -> "StateGraphSerializable":
         """Create from a dictionary."""
         return cls.model_validate(data)
 
@@ -697,7 +683,6 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
     @classmethod
     def from_state_graph(cls, graph: Any) -> "StateGraphSerializable":
         """Create a serializable representation from a StateGraph."""
-
         serializable = cls(
             edges=set(graph.edges),
             waiting_edges=set(graph.waiting_edges),

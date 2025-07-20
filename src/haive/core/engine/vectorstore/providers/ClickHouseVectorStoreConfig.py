@@ -1,4 +1,4 @@
-"""
+"""from typing import Any
 ClickHouse Vector Store implementation for the Haive framework.
 
 This module provides a configuration class for the ClickHouse vector store,
@@ -25,7 +25,7 @@ The implementation integrates with LangChain's ClickHouse while providing
 a consistent Haive configuration interface.
 """
 
-from typing import Any, Dict, List, Optional, Tuple, Type, Union
+from typing import Any
 
 from langchain_core.documents import Document
 from pydantic import Field, validator
@@ -36,8 +36,7 @@ from haive.core.engine.vectorstore.types import VectorStoreType
 
 @BaseVectorStoreConfig.register(VectorStoreType.CLICKHOUSE)
 class ClickHouseVectorStoreConfig(BaseVectorStoreConfig):
-    """
-    Configuration for ClickHouse vector store in the Haive framework.
+    """Configuration for ClickHouse vector store in the Haive framework.
 
     This vector store uses ClickHouse's columnar database engine for
     high-performance analytics combined with vector search capabilities.
@@ -94,11 +93,11 @@ class ClickHouseVectorStoreConfig(BaseVectorStoreConfig):
         default=8123, ge=1, le=65535, description="ClickHouse server port"
     )
 
-    username: Optional[str] = Field(
+    username: str | None = Field(
         default=None, description="Username for authentication"
     )
 
-    password: Optional[str] = Field(
+    password: str | None = Field(
         default=None,
         description="Password for authentication (auto-resolved from CLICKHOUSE_PASSWORD)",
     )
@@ -116,11 +115,11 @@ class ClickHouseVectorStoreConfig(BaseVectorStoreConfig):
     # Index configuration
     index_type: str = Field(default="annoy", description="Index type for vector search")
 
-    index_param: Optional[Union[List, Dict]] = Field(
+    index_param: list | dict | None = Field(
         default=["'L2Distance'", 100], description="Index build parameters"
     )
 
-    index_query_params: Dict[str, str] = Field(
+    index_query_params: dict[str, str] = Field(
         default_factory=dict, description="Index query parameters"
     )
 
@@ -131,7 +130,7 @@ class ClickHouseVectorStoreConfig(BaseVectorStoreConfig):
     )
 
     # Column mapping
-    column_map: Dict[str, str] = Field(
+    column_map: dict[str, str] = Field(
         default_factory=lambda: {
             "id": "id",
             "uuid": "uuid",
@@ -143,7 +142,7 @@ class ClickHouseVectorStoreConfig(BaseVectorStoreConfig):
     )
 
     @validator("metric")
-    def validate_metric(cls, v):
+    def validate_metric(self, v) -> Any:
         """Validate distance metric is supported."""
         valid_metrics = ["angular", "euclidean", "manhattan", "hamming", "dot"]
         if v not in valid_metrics:
@@ -151,7 +150,7 @@ class ClickHouseVectorStoreConfig(BaseVectorStoreConfig):
         return v
 
     @validator("password", pre=True, always=True)
-    def resolve_password(cls, v, values):
+    def resolve_password(self, v, values) -> Any:
         """Resolve password from value or environment."""
         if not v and values.get("username"):
             import os
@@ -160,7 +159,7 @@ class ClickHouseVectorStoreConfig(BaseVectorStoreConfig):
         return v
 
     @validator("index_type")
-    def validate_index_type(cls, v):
+    def validate_index_type(self, v) -> Any:
         """Validate index type."""
         # Currently, ClickHouse primarily supports Annoy for vector indexing
         valid_types = ["annoy"]
@@ -169,7 +168,7 @@ class ClickHouseVectorStoreConfig(BaseVectorStoreConfig):
         return v.lower()
 
     @validator("table")
-    def validate_table_name(cls, v):
+    def validate_table_name(self, v) -> Any:
         """Validate table name format."""
         if not v or len(v.strip()) == 0:
             raise ValueError("table name cannot be empty")
@@ -183,27 +182,26 @@ class ClickHouseVectorStoreConfig(BaseVectorStoreConfig):
             )
         return v
 
-    def get_input_fields(self) -> Dict[str, Tuple[Type, Any]]:
+    def get_input_fields(self) -> dict[str, tuple[type, Any]]:
         """Return input field definitions for ClickHouse vector store."""
         return {
             "documents": (
-                List[Document],
+                list[Document],
                 Field(description="Documents to add to the vector store"),
             ),
         }
 
-    def get_output_fields(self) -> Dict[str, Tuple[Type, Any]]:
+    def get_output_fields(self) -> dict[str, tuple[type, Any]]:
         """Return output field definitions for ClickHouse vector store."""
         return {
             "ids": (
-                List[str],
+                list[str],
                 Field(description="IDs of the added documents in ClickHouse"),
             ),
         }
 
-    def instantiate(self):
-        """
-        Create a ClickHouse vector store from this configuration.
+    def instantiate(self) -> Any:
+        """Create a ClickHouse vector store from this configuration.
 
         Returns:
             Clickhouse: Instantiated ClickHouse vector store.

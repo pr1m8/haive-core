@@ -1,5 +1,6 @@
 """Integration utilities for the pattern system.
 
+from typing import Any, Dict
 This module provides helper functions for integrating the pattern system with
 other components of the Haive framework, particularly with the DynamicGraph
 builder and the NodeFactory.
@@ -31,7 +32,8 @@ def apply_pattern_to_graph(
         components = getattr(graph, "components", [])
         missing = pattern.metadata.check_required_components(components)
         if missing:
-            error_msg = f"Missing required components for pattern: {', '.join(missing)}"
+            error_msg = f"Missing required components for pattern: {
+                ', '.join(missing)}"
             logger.error(error_msg)
             raise ValueError(error_msg)
 
@@ -112,14 +114,13 @@ def create_pattern_node_config(
     # Validate pattern parameters
     is_valid, errors = pattern.metadata.validate_parameters(pattern_params)
     if not is_valid:
-        error_msg = (
-            f"Invalid parameters for pattern {pattern_name}: {', '.join(errors)}"
-        )
+        error_msg = f"Invalid parameters for pattern {pattern_name}: {
+                ', '.join(errors)}"
         logger.error(error_msg)
         raise ValueError(error_msg)
 
     # Create a function that will apply the pattern when used as a node
-    def pattern_node(state, config=None):
+    def pattern_node(state: Dict[str, Any], config: Dict[str, Any] = None):
         """Node function that applies a pattern."""
         try:
             # This is a placeholder implementation
@@ -146,7 +147,7 @@ def create_pattern_node_config(
     return node_config
 
 
-def register_node_factory_integration():
+def register_node_factory_integration() -> Any:
     """Register integration with the NodeFactory.
 
     This adds a method to NodeFactory to create nodes from patterns.
@@ -158,7 +159,9 @@ def register_node_factory_integration():
         if not hasattr(NodeFactory, "create_pattern_node"):
 
             @classmethod
-            def create_pattern_node(cls, pattern_name, node_name, **pattern_params):
+            def create_pattern_node(
+                cls, pattern_name, node_name, **pattern_params
+            ) -> Any:
                 """Create a node function based on a pattern.
 
                 Args:
@@ -182,7 +185,7 @@ def register_node_factory_integration():
         logger.warning("NodeFactory not available, skipping integration")
 
 
-def register_dynamic_graph_integration():
+def register_dynamic_graph_integration() -> Any:
     """Register integration with the DynamicGraph.
 
     This enhances the apply_pattern method in DynamicGraph.
@@ -227,7 +230,7 @@ def register_dynamic_graph_integration():
         # Add branch application method if not present
         if not hasattr(DynamicGraph, "apply_branch"):
 
-            def apply_branch(self, branch_name, source_node, **kwargs):
+            def apply_branch(self, branch_name, source_node, **kwargs) -> Any:
                 """Apply a registered branch to this graph.
 
                 Args:
@@ -294,7 +297,7 @@ def find_compatible_patterns(components: list[Any]) -> list[str]:
 # Add to src/haive/core/graph/patterns/integration.py
 
 
-def register_callable_processor():
+def register_callable_processor() -> None:
     """Register the callable processor explicitly."""
     try:
         from haive.core.graph.node.processors import CallableNodeProcessor
@@ -311,7 +314,7 @@ def register_callable_processor():
         logger.warning(f"Could not register callable processor: {e}")
 
 
-def register_integrations():
+def register_integrations() -> None:
     """Register all integrations."""
     register_node_factory_integration()
     register_dynamic_graph_integration()

@@ -51,12 +51,14 @@ class ToolInjector:
         # If no suitable parameter found, raise error
         if state_param is None:
             raise ValueError(
-                f"Function {func.__name__} must have a parameter named 'state' or ending with '_state'"
+                f"Function {
+                    func.__name__} must have a parameter named 'state' or ending with '_state'"
             )
 
-        # Create a new function with the state parameter annotated for injection
+        # Create a new function with the state parameter annotated for
+        # injection
         @functools.wraps(func)
-        def wrapped_func(*args, **kwargs):
+        def wrapped_func(*args, **kwargs) -> Any:
             return func(*args, **kwargs)
 
         # Update type hints to include InjectedState
@@ -122,12 +124,14 @@ class ToolInjector:
         # If no suitable parameter found, raise error
         if store_param is None:
             raise ValueError(
-                f"Function {func.__name__} must have a parameter named 'store' or ending with '_store'"
+                f"Function {
+                    func.__name__} must have a parameter named 'store' or ending with '_store'"
             )
 
-        # Create a new function with the store parameter annotated for injection
+        # Create a new function with the store parameter annotated for
+        # injection
         @functools.wraps(func)
-        def wrapped_func(*args, **kwargs):
+        def wrapped_func(*args, **kwargs) -> Any:
             return func(*args, **kwargs)
 
         # Update type hints to include InjectedStore
@@ -198,17 +202,19 @@ class ToolInjector:
         # Check if we found both parameters
         if state_param is None:
             raise ValueError(
-                f"Function {func.__name__} must have a parameter named 'state' or ending with '_state'"
+                f"Function {
+                    func.__name__} must have a parameter named 'state' or ending with '_state'"
             )
 
         if store_param is None:
             raise ValueError(
-                f"Function {func.__name__} must have a parameter named 'store' or ending with '_store'"
+                f"Function {
+                    func.__name__} must have a parameter named 'store' or ending with '_store'"
             )
 
         # Create a new function with both parameters annotated for injection
         @functools.wraps(func)
-        def wrapped_func(*args, **kwargs):
+        def wrapped_func(*args, **kwargs) -> Any:
             return func(*args, **kwargs)
 
         # Update type hints to include InjectedState and InjectedStore

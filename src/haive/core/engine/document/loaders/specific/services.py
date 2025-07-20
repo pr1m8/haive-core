@@ -6,7 +6,6 @@ Notion, Obsidian, Slack, and other productivity tools.
 
 import logging
 from pathlib import Path
-from typing import List, Optional
 
 from langchain_core.document_loaders.base import BaseLoader
 
@@ -26,8 +25,8 @@ class NotionSource(EnhancedSource):
 
     def __init__(
         self,
-        database_id: Optional[str] = None,
-        page_ids: Optional[List[str]] = None,
+        database_id: str | None = None,
+        page_ids: list[str] | None = None,
         **kwargs,
     ):
         super().__init__(source_path="notion://workspace", **kwargs)
@@ -48,17 +47,14 @@ class NotionSource(EnhancedSource):
         """Notion requires authentication."""
         return True
 
-    def get_credential_requirements(self) -> List[CredentialType]:
+    def get_credential_requirements(self) -> list[CredentialType]:
         """Notion needs API key."""
         return [CredentialType.API_KEY]
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a Notion loader."""
         try:
-            from langchain_community.document_loaders import (
-                NotionDBLoader,
-                NotionDirectoryLoader,
-            )
+            from langchain_community.document_loaders import NotionDBLoader
 
             # Get Notion API key
             notion_key = None
@@ -77,11 +73,10 @@ class NotionSource(EnhancedSource):
                     integration_token=notion_key,
                     database_id=self.database_id,
                 )
-            else:
-                # Load from directory export
-                # This would need a local path to Notion export
-                logger.warning("NotionDirectoryLoader requires local export path")
-                return None
+            # Load from directory export
+            # This would need a local path to Notion export
+            logger.warning("NotionDirectoryLoader requires local export path")
+            return None
 
         except ImportError:
             logger.warning(
@@ -89,7 +84,7 @@ class NotionSource(EnhancedSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create Notion loader: {e}")
+            logger.exception(f"Failed to create Notion loader: {e}")
             return None
 
 
@@ -118,7 +113,7 @@ class ObsidianSource(EnhancedSource):
             return 0.0
         return 0.95
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create an Obsidian loader."""
         try:
             from langchain_community.document_loaders import ObsidianLoader
@@ -132,7 +127,7 @@ class ObsidianSource(EnhancedSource):
             logger.warning("ObsidianLoader not available")
             return None
         except Exception as e:
-            logger.error(f"Failed to create Obsidian loader: {e}")
+            logger.exception(f"Failed to create Obsidian loader: {e}")
             return None
 
 
@@ -143,8 +138,8 @@ class SlackSource(EnhancedSource):
 
     def __init__(
         self,
-        channel_id: Optional[str] = None,
-        export_path: Optional[str] = None,
+        channel_id: str | None = None,
+        export_path: str | None = None,
         **kwargs,
     ):
         super().__init__(source_path="slack://workspace", **kwargs)
@@ -165,11 +160,11 @@ class SlackSource(EnhancedSource):
         """Slack API requires authentication."""
         return self.export_path is None
 
-    def get_credential_requirements(self) -> List[CredentialType]:
+    def get_credential_requirements(self) -> list[CredentialType]:
         """Slack needs OAuth token."""
         return [CredentialType.OAUTH2, CredentialType.ACCESS_TOKEN]
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a Slack loader."""
         try:
             if self.export_path:
@@ -179,16 +174,15 @@ class SlackSource(EnhancedSource):
                 return SlackDirectoryLoader(
                     zip_path=self.export_path,
                 )
-            else:
-                # Load via API (would need implementation)
-                logger.warning("Slack API loader not yet implemented")
-                return None
+            # Load via API (would need implementation)
+            logger.warning("Slack API loader not yet implemented")
+            return None
 
         except ImportError:
             logger.warning("Slack loaders not available")
             return None
         except Exception as e:
-            logger.error(f"Failed to create Slack loader: {e}")
+            logger.exception(f"Failed to create Slack loader: {e}")
             return None
 
 
@@ -198,7 +192,7 @@ class GutenbergSource(EnhancedSource):
     source_type: SourceType = SourceType.WEB_URL
 
     def __init__(
-        self, book_url: Optional[str] = None, book_id: Optional[int] = None, **kwargs
+        self, book_url: str | None = None, book_id: int | None = None, **kwargs
     ):
         source_path = book_url or f"gutenberg://book/{book_id}"
         super().__init__(source_path=source_path, **kwargs)
@@ -215,23 +209,22 @@ class GutenbergSource(EnhancedSource):
             return 0.0
         return 0.9
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a Gutenberg loader."""
         try:
             from langchain_community.document_loaders import GutenbergLoader
 
             if self.book_url:
                 return GutenbergLoader(self.book_url)
-            else:
-                # Could construct URL from book ID
-                logger.warning("GutenbergLoader requires book URL")
-                return None
+            # Could construct URL from book ID
+            logger.warning("GutenbergLoader requires book URL")
+            return None
 
         except ImportError:
             logger.warning("GutenbergLoader not available")
             return None
         except Exception as e:
-            logger.error(f"Failed to create Gutenberg loader: {e}")
+            logger.exception(f"Failed to create Gutenberg loader: {e}")
             return None
 
 
@@ -243,8 +236,8 @@ class ConfluenceSource(EnhancedSource):
     def __init__(
         self,
         url: str,
-        space_key: Optional[str] = None,
-        page_ids: Optional[List[str]] = None,
+        space_key: str | None = None,
+        page_ids: list[str] | None = None,
         **kwargs,
     ):
         super().__init__(source_path=url, **kwargs)
@@ -266,11 +259,11 @@ class ConfluenceSource(EnhancedSource):
         """Confluence requires authentication."""
         return True
 
-    def get_credential_requirements(self) -> List[CredentialType]:
+    def get_credential_requirements(self) -> list[CredentialType]:
         """Confluence needs username/password or API token."""
         return [CredentialType.USERNAME_PASSWORD, CredentialType.API_KEY]
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a Confluence loader."""
         try:
             from langchain_community.document_loaders import ConfluenceLoader
@@ -307,7 +300,7 @@ class ConfluenceSource(EnhancedSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create Confluence loader: {e}")
+            logger.exception(f"Failed to create Confluence loader: {e}")
             return None
 
 
@@ -316,9 +309,7 @@ class ReadTheDocsSource(EnhancedSource):
 
     source_type: SourceType = SourceType.WEB_URL
 
-    def __init__(
-        self, project_url: str, features: Optional[List[str]] = None, **kwargs
-    ):
+    def __init__(self, project_url: str, features: list[str] | None = None, **kwargs):
         super().__init__(source_path=project_url, **kwargs)
         self.project_url = project_url
         self.features = features or ["page_content", "metadata"]
@@ -333,14 +324,12 @@ class ReadTheDocsSource(EnhancedSource):
             return 0.0
         return 0.9
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a Read the Docs loader."""
         try:
             # Extract project name from URL
             # e.g., https://project.readthedocs.io/ -> project
             import re
-
-            from langchain_community.document_loaders import ReadTheDocsLoader
 
             match = re.search(r"https?://([^.]+)\.readthedocs", self.project_url)
             if match:
@@ -352,24 +341,23 @@ class ReadTheDocsSource(EnhancedSource):
                     "ReadTheDocsLoader requires local path to downloaded docs"
                 )
                 return None
-            else:
-                logger.error("Could not extract project name from URL")
-                return None
+            logger.error("Could not extract project name from URL")
+            return None
 
         except ImportError:
             logger.warning("ReadTheDocsLoader not available")
             return None
         except Exception as e:
-            logger.error(f"Failed to create Read the Docs loader: {e}")
+            logger.exception(f"Failed to create Read the Docs loader: {e}")
             return None
 
 
 # Export service sources
 __all__ = [
+    "ConfluenceSource",
+    "GutenbergSource",
     "NotionSource",
     "ObsidianSource",
-    "SlackSource",
-    "GutenbergSource",
-    "ConfluenceSource",
     "ReadTheDocsSource",
+    "SlackSource",
 ]

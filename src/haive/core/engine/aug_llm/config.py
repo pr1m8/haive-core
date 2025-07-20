@@ -1,5 +1,6 @@
 """AugLLM configuration system for enhanced LLM chains.
 
+from typing import Any, Dict
 This module provides a comprehensive configuration system for creating and
 managing enhanced LLM chains within the Haive framework. The AugLLMConfig class
 serves as a central configuration point that integrates prompts, tools, output
@@ -23,18 +24,8 @@ from __future__ import annotations
 import json
 import logging
 import os
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    List,
-    Literal,
-    Sequence,
-    Type,
-    Union,
-    cast,
-)
+from collections.abc import Callable, Sequence
+from typing import TYPE_CHECKING, Any, Literal, Union, cast
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 from langchain_core.output_parsers import (
@@ -79,7 +70,7 @@ logger.setLevel(logging.WARNING)
 DEBUG_OUTPUT = os.getenv("HAIVE_DEBUG_CONFIG", "FALSE").lower() in ("true", "1", "yes")
 
 
-def debug_print(*args, **kwargs):
+def debug_print(*args, **kwargs) -> None:
     """Print debug output only if DEBUG_OUTPUT is enabled."""
     if DEBUG_OUTPUT:
         # Use rich print if available, otherwise regular print
@@ -201,7 +192,7 @@ class AugLLMConfig(
     )
 
     # Few-shot components
-    examples: List[Dict[str, Any]] | None = Field(
+    examples: list[dict[str, Any]] | None = Field(
         default=None, description="Examples for few-shot prompting"
     )
     example_prompt: PromptTemplate | None = Field(
@@ -216,7 +207,7 @@ class AugLLMConfig(
     example_separator: str = Field(
         default="\n\n", description="Separator between examples in few-shot prompting"
     )
-    input_variables: List[str] | None = Field(
+    input_variables: list[str] | None = Field(
         default=None, description="Input variables for the prompt template"
     )
 
@@ -225,7 +216,7 @@ class AugLLMConfig(
 
     # Tool routes (provided by ToolRouteMixin)
     schemas: Sequence[
-        Type[BaseTool] | Type[BaseModel] | Callable | StructuredTool | BaseModel
+        type[BaseTool] | type[BaseModel] | Callable | StructuredTool | BaseModel
     ] = Field(default_factory=list, description="Schemas for tools")
     pydantic_tools: list[type[BaseModel]] = Field(
         default_factory=list, description="Pydantic models for tool schemas"
@@ -245,7 +236,7 @@ class AugLLMConfig(
     force_tool_use: bool = Field(
         default=False, description="Whether to force the LLM to use a tool (any tool)"
     )
-    force_tool_choice: Union[bool, str, List[str]] | None = Field(
+    force_tool_choice: bool | str | list[str] | None = Field(
         default=None, description="Force specific tool(s) to be used"
     )
     tool_choice_mode: ToolChoiceMode = Field(
@@ -255,7 +246,7 @@ class AugLLMConfig(
     # Output handling
     # TODO: TYPED DICT and DICT, use tool choice mixin.
     # TODO: STructured output model mixin.
-    structured_output_model: Type[BaseModel] | None = Field(
+    structured_output_model: type[BaseModel] | None = Field(
         default=None, description="Pydantic model for structured output"
     )
     structured_output_version: StructuredOutputVersion | None = Field(
@@ -327,7 +318,7 @@ class AugLLMConfig(
     )
 
     # Custom runnables to chain
-    custom_runnables: List[Runnable] | None = Field(
+    custom_runnables: list[Runnable] | None = Field(
         default=None,
         description="Custom runnables to add to the chain",
         exclude=True,  # Exclude from serialization
@@ -364,7 +355,7 @@ class AugLLMConfig(
         arbitrary_types_allowed=True, validate_assignment=True, extra="forbid"
     )
 
-    def model_post_init(self, __context):
+    def model_post_init(self, __context) -> None:
         """Proper Pydantic post-initialization."""
         # Call parent post_init first
         super().model_post_init(__context)
@@ -418,9 +409,17 @@ class AugLLMConfig(
 
         # LLM config
         llm_info = tree.add("🤖 [cyan]LLM Configuration[/cyan]")
-        llm_info.add(f"Provider: [yellow]{type(self.llm_config).__name__}[/yellow]")
         llm_info.add(
-            f"Model: [yellow]{getattr(self.llm_config, 'model', 'Unknown')}[/yellow]"
+            f"Provider: [yellow]{
+                type(
+                    self.llm_config).__name__}[/yellow]"
+        )
+        llm_info.add(
+            f"Model: [yellow]{
+                getattr(
+                    self.llm_config,
+                    'model',
+                    'Unknown')}[/yellow]"
         )
 
         # Tools info
@@ -432,12 +431,17 @@ class AugLLMConfig(
         # Output config
         output_info = tree.add("📤 [cyan]Output Configuration[/cyan]")
         output_info.add(
-            f"Structured Output Model: [yellow]{self.structured_output_model.__name__ if self.structured_output_model else 'None'}[/yellow]"
+            f"Structured Output Model: [yellow]{
+                self.structured_output_model.__name__ if self.structured_output_model else 'None'}[/yellow]"
         )
         output_info.add(
-            f"Structured Output Version: [yellow]{self.structured_output_version or 'None'}[/yellow]"
+            f"Structured Output Version: [yellow]{
+                self.structured_output_version or 'None'}[/yellow]"
         )
-        output_info.add(f"Parser Type: [yellow]{self.parser_type or 'None'}[/yellow]")
+        output_info.add(
+            f"Parser Type: [yellow]{
+                self.parser_type or 'None'}[/yellow]"
+        )
 
         console.print(
             Panel(tree, title="Initialization Complete", border_style="green")
@@ -445,7 +449,7 @@ class AugLLMConfig(
 
     @field_validator("tools")
     @classmethod
-    def validate_tools(cls, v):
+    def validate_tools(cls, v) -> Any:
         """Validate and auto-name tools."""
         if not v:
             return v
@@ -462,7 +466,7 @@ class AugLLMConfig(
 
     @field_validator("schemas")
     @classmethod
-    def validate_schemas(cls, v):
+    def validate_schemas(cls, v) -> Any:
         """Validate and auto-name schemas."""
         if not v:
             return v
@@ -470,12 +474,13 @@ class AugLLMConfig(
 
     @field_validator("structured_output_model")
     @classmethod
-    def validate_structured_output_model(cls, v):
+    def validate_structured_output_model(cls, v) -> Any:
         """Validate structured output model and default to tools-based validation."""
         if not v:
             return v
 
-        # Just validate the model itself - version defaulting will be handled in model_validator
+        # Just validate the model itself - version defaulting will be handled
+        # in model_validator
         if not issubclass(v, BaseModel):
             raise ValueError("structured_output_model must be a BaseModel subclass")
 
@@ -483,7 +488,7 @@ class AugLLMConfig(
 
     @field_validator("prompt_template", mode="before")
     @classmethod
-    def validate_prompt_template(cls, v):
+    def validate_prompt_template(cls, v) -> Any:
         """Validate and reconstruct prompt template from dict data."""
         if not v:
             return v
@@ -492,10 +497,12 @@ class AugLLMConfig(
         if isinstance(v, BasePromptTemplate):
             return v
 
-        # If it's a dict (from serialization), try to reconstruct using LangChain's load
+        # If it's a dict (from serialization), try to reconstruct using
+        # LangChain's load
         if isinstance(v, dict):
             try:
-                # Try to use LangChain's load mechanism if the dict has the right structure
+                # Try to use LangChain's load mechanism if the dict has the
+                # right structure
                 from langchain_core.load.load import load
 
                 # Check if this looks like a LangChain serialized object
@@ -506,7 +513,8 @@ class AugLLMConfig(
                     reconstructed = load(v)
                     if isinstance(reconstructed, BasePromptTemplate):
                         logger.debug(
-                            f"Successfully reconstructed: {type(reconstructed)}"
+                            f"Successfully reconstructed: {
+                                type(reconstructed)}"
                         )
                         return reconstructed
 
@@ -515,7 +523,8 @@ class AugLLMConfig(
                     f"LangChain load failed: {e}, falling back to default template"
                 )
 
-            # Fallback: Create a default ChatPromptTemplate that works for most cases
+            # Fallback: Create a default ChatPromptTemplate that works for most
+            # cases
             logger.debug("Creating default ChatPromptTemplate from dict")
 
             # Check if the dict has messages structure (for ChatPromptTemplate)
@@ -563,20 +572,24 @@ class AugLLMConfig(
             )
 
         # For any other type, create a default
-        logger.debug(f"Unexpected type {type(v)}, creating default ChatPromptTemplate")
+        logger.debug(
+            f"Unexpected type {
+                type(v)}, creating default ChatPromptTemplate"
+        )
         return ChatPromptTemplate.from_messages(
             [("system", "You are a helpful assistant."), ("placeholder", "{messages}")]
         )
 
     @model_validator(mode="before")
     @classmethod
-    def set_default_structured_output_version(cls, data):
+    def set_default_structured_output_version(cls, data: dict[str, Any]):
         """Set default structured output version to v2 (tools) when model is provided but version is not."""
         if isinstance(data, dict):
             structured_output_model = data.get("structured_output_model")
             structured_output_version = data.get("structured_output_version")
 
-            # If model is provided but no version specified, default to v2 (tool-based)
+            # If model is provided but no version specified, default to v2
+            # (tool-based)
             if structured_output_model and not structured_output_version:
                 data["structured_output_version"] = "v2"
 
@@ -584,7 +597,7 @@ class AugLLMConfig(
 
     @model_validator(mode="before")
     @classmethod
-    def ensure_structured_output_as_tool(cls, data):
+    def ensure_structured_output_as_tool(cls, data: dict[str, Any]):
         """Ensure structured output model is properly configured for both v1 and v2."""
         if isinstance(data, dict):
             structured_output_model = data.get("structured_output_model")
@@ -620,7 +633,7 @@ class AugLLMConfig(
 
     @model_validator(mode="before")
     @classmethod
-    def default_schemas_to_tools(cls, data):
+    def default_schemas_to_tools(cls, data: dict[str, Any]):
         """Default schemas to tools if schemas isn't provided but tools has values."""
         if isinstance(data, dict):
             tools = data.get("tools", [])
@@ -633,7 +646,10 @@ class AugLLMConfig(
         return data
 
     @model_validator(mode="after")
-    def comprehensive_validation_and_setup(self):
+
+
+    @classmethod
+    def comprehensive_validation_and_setup(cls) -> Any:
         """Comprehensive validation and setup after initialization."""
         # Prevent infinite recursion
         if self._is_processing_validation:
@@ -695,7 +711,7 @@ class AugLLMConfig(
 
         return self
 
-    def _analyze_tool(self, tool: Any) -> tuple[str, Dict[str, Any] | None]:
+    def _analyze_tool(self, tool: Any) -> tuple[str, dict[str, Any] | None]:
         """Analyze tool with AugLLM-specific context awareness.
 
         Extends ToolRouteMixin's analysis with structured output detection.
@@ -756,7 +772,8 @@ class AugLLMConfig(
                 if tool not in self.pydantic_tools:
                     self.pydantic_tools.append(tool)
                     debug_print(
-                        f"➕ [green]Added BaseModel {tool.__name__} to pydantic_tools[/green]"
+                        f"➕ [green]Added BaseModel {
+                            tool.__name__} to pydantic_tools[/green]"
                     )
 
             # Track tool names and mapping
@@ -786,7 +803,9 @@ class AugLLMConfig(
         self.metadata["tool_name_mapping"] = tool_name_mapping
 
         debug_print(
-            f"📊 [cyan]Tool processing complete: {len(tool_names)} tools, {len(basemodel_tools)} BaseModel tools[/cyan]"
+            f"📊 [cyan]Tool processing complete: {
+                len(tool_names)} tools, {
+                len(basemodel_tools)} BaseModel tools[/cyan]"
         )
 
     def _setup_format_instructions(self):
@@ -809,7 +828,8 @@ class AugLLMConfig(
 
         try:
             debug_print(
-                f"📋 [green]Setting up format instructions for: {self.structured_output_model.__name__}[/green]"
+                f"📋 [green]Setting up format instructions for: {
+                    self.structured_output_model.__name__}[/green]"
             )
 
             # ✅ Use PydanticOutputParser ONLY for format instructions
@@ -900,7 +920,7 @@ class AugLLMConfig(
             return
 
         # Case 5: Pydantic tools exist but no structured output
-        elif self.pydantic_tools and not self.structured_output_model:
+        if self.pydantic_tools and not self.structured_output_model:
             debug_print(
                 "🔧 [cyan]Pydantic tools detected but no structured output model[/cyan]"
             )
@@ -923,7 +943,8 @@ class AugLLMConfig(
     def _setup_v2_structured_output(self):
         """Setup v2 (tool-based) approach - force tool usage with format instructions, NO parsing."""
         debug_print(
-            f"🔧 [cyan]Setting up v2 approach (tool + format instructions, NO PARSER) with {self.structured_output_model.__name__}[/cyan]"
+            f"🔧 [cyan]Setting up v2 approach (tool + format instructions, NO PARSER) with {
+                self.structured_output_model.__name__}[/cyan]"
         )
 
         # Ensure the model is in tools list
@@ -931,7 +952,8 @@ class AugLLMConfig(
             self.tools = list(self.tools) if self.tools else []
             self.tools.append(self.structured_output_model)
             debug_print(
-                f"➕ [green]Added {self.structured_output_model.__name__} to tools[/green]"
+                f"➕ [green]Added {
+                    self.structured_output_model.__name__} to tools[/green]"
             )
 
         # Add to pydantic_tools for tracking
@@ -989,7 +1011,8 @@ class AugLLMConfig(
     def _setup_v1_structured_output(self):
         """Setup v1 (traditional) structured output."""
         debug_print(
-            f"📋 [cyan]Setting up v1 structured output with {self.structured_output_model.__name__}[/cyan]"
+            f"📋 [cyan]Setting up v1 structured output with {
+                self.structured_output_model.__name__}[/cyan]"
         )
 
         self.parser_type = "pydantic"
@@ -1022,7 +1045,8 @@ class AugLLMConfig(
                 self.force_tool_use = False
                 self.force_tool_choice = None
             debug_print(
-                f"🔄 [yellow]Converted boolean force_tool_choice to mode: {self.tool_choice_mode}[/yellow]"
+                f"🔄 [yellow]Converted boolean force_tool_choice to mode: {
+                    self.tool_choice_mode}[/yellow]"
             )
 
         elif isinstance(self.force_tool_choice, str):
@@ -1036,7 +1060,8 @@ class AugLLMConfig(
                 and self.force_tool_choice not in tool_names
             ):
                 debug_print(
-                    f"⚠️ [yellow]Warning: force_tool_choice '{self.force_tool_choice}' not in available tools: {actual_tool_names}[/yellow]"
+                    f"⚠️ [yellow]Warning: force_tool_choice '{
+                        self.force_tool_choice}' not in available tools: {actual_tool_names}[/yellow]"
                 )
 
         elif (
@@ -1046,7 +1071,8 @@ class AugLLMConfig(
             self.tool_choice_mode = "required"
             self.force_tool_choice = self.force_tool_choice[0]
             debug_print(
-                f"📝 [yellow]Multiple forced tools not supported - using first: {self.force_tool_choice}[/yellow]"
+                f"📝 [yellow]Multiple forced tools not supported - using first: {
+                    self.force_tool_choice}[/yellow]"
             )
 
         elif self.force_tool_use and not self.force_tool_choice:
@@ -1056,10 +1082,12 @@ class AugLLMConfig(
                 actual_name = self._tool_name_mapping.get(display_name, display_name)
                 self.force_tool_choice = actual_name
                 debug_print(
-                    f"🎯 [green]Auto-selected single tool: {self.force_tool_choice}[/green]"
+                    f"🎯 [green]Auto-selected single tool: {
+                        self.force_tool_choice}[/green]"
                 )
 
-        # Set bind_tools_kwargs based on configuration (only if not v2 which handles it separately)
+        # Set bind_tools_kwargs based on configuration (only if not v2 which
+        # handles it separately)
         if self.structured_output_version != "v2":
             self._update_bind_tools_kwargs()
 
@@ -1089,7 +1117,8 @@ class AugLLMConfig(
                 "function": {"name": self.force_tool_choice},
             }
             debug_print(
-                f"🔧 [green]Set bind_tools_kwargs for v2: forcing tool '{self.force_tool_choice}'[/green]"
+                f"🔧 [green]Set bind_tools_kwargs for v2: forcing tool '{
+                    self.force_tool_choice}'[/green]"
             )
         else:
             # Fallback to required if no specific tool
@@ -1315,7 +1344,9 @@ class AugLLMConfig(
                     **self.partial_variables
                 )
                 debug_print(
-                    f"✅ [green]Applied {len(self.partial_variables)} partial variables[/green]"
+                    f"✅ [green]Applied {
+                        len(
+                            self.partial_variables)} partial variables[/green]"
                 )
         except Exception as e:
             debug_print(f"❌ [red]Error applying partial variables: {e}[/red]")
@@ -1362,7 +1393,7 @@ class AugLLMConfig(
                 return True
             if isinstance(self.prompt_template, FewShotPromptTemplate):
                 return False
-            elif hasattr(self.prompt_template, "input_variables"):
+            if hasattr(self.prompt_template, "input_variables"):
                 return (
                     self.messages_placeholder_name
                     in self.prompt_template.input_variables
@@ -1381,10 +1412,14 @@ class AugLLMConfig(
         self._computed_output_fields = self._compute_output_fields()
 
         debug_print(
-            f"📥 [cyan]Input fields: {list(self._computed_input_fields.keys())}[/cyan]"
+            f"📥 [cyan]Input fields: {
+                list(
+                    self._computed_input_fields.keys())}[/cyan]"
         )
         debug_print(
-            f"📤 [cyan]Output fields: {list(self._computed_output_fields.keys())}[/cyan]"
+            f"📤 [cyan]Output fields: {
+                list(
+                    self._computed_output_fields.keys())}[/cyan]"
         )
 
     def _compute_input_fields(self) -> dict[str, tuple[type, Any]]:
@@ -1397,7 +1432,8 @@ class AugLLMConfig(
         # Get required input variables from prompt template
         required_vars = self._get_input_variables()
 
-        # Get partial variables from prompt template (these should be optional with defaults)
+        # Get partial variables from prompt template (these should be optional
+        # with defaults)
         partial_vars = {}
         if self.prompt_template and hasattr(self.prompt_template, "partial_variables"):
             partial_vars = getattr(self.prompt_template, "partial_variables", {})
@@ -1428,7 +1464,8 @@ class AugLLMConfig(
                 and var not in fields
                 and var not in partial_vars
             ):  # Skip partial variables!
-                # Use None as default instead of Field(...) to avoid PydanticUndefined
+                # Use None as default instead of Field(...) to avoid
+                # PydanticUndefined
                 fields[var] = (AnyType, None)
 
         # Process optional variables from template
@@ -1659,8 +1696,14 @@ The output should be valid JSON that conforms to the {model_name} schema."""
         tools_section.add(
             f"Tool Is BaseModel: [yellow]{self.tool_is_base_model}[/yellow]"
         )
-        tools_section.add(f"Force Tool Use: [yellow]{self.force_tool_use}[/yellow]")
-        tools_section.add(f"Tool Choice Mode: [yellow]{self.tool_choice_mode}[/yellow]")
+        tools_section.add(
+            f"Force Tool Use: [yellow]{
+                self.force_tool_use}[/yellow]"
+        )
+        tools_section.add(
+            f"Tool Choice Mode: [yellow]{
+                self.tool_choice_mode}[/yellow]"
+        )
         tools_section.add(
             f"Force Tool Choice: [yellow]{self.force_tool_choice}[/yellow]"
         )
@@ -1668,16 +1711,19 @@ The output should be valid JSON that conforms to the {model_name} schema."""
         # Output section
         output_section = tree.add("📤 [cyan]Output Configuration[/cyan]")
         output_section.add(
-            f"Structured Output Model: [yellow]{self.structured_output_model.__name__ if self.structured_output_model else 'None'}[/yellow]"
+            f"Structured Output Model: [yellow]{
+                self.structured_output_model.__name__ if self.structured_output_model else 'None'}[/yellow]"
         )
         output_section.add(
-            f"Structured Output Version: [yellow]{self.structured_output_version or 'None'}[/yellow]"
+            f"Structured Output Version: [yellow]{
+                self.structured_output_version or 'None'}[/yellow]"
         )
         output_section.add(
             f"Parser Type: [yellow]{self.parser_type or 'None'}[/yellow]"
         )
         output_section.add(
-            f"Format Instructions: [yellow]{'Set' if self._format_instructions_text else 'None'}[/yellow]"
+            f"Format Instructions: [yellow]{
+                'Set' if self._format_instructions_text else 'None'}[/yellow]"
         )
 
         # Schema section
@@ -1802,7 +1848,7 @@ The output should be valid JSON that conforms to the {model_name} schema."""
         return params
 
     def _process_input(
-        self, input_data: str | Dict[str, Any] | List[BaseMessage]
+        self, input_data: str | dict[str, Any] | list[BaseMessage]
     ) -> dict[str, Any]:
         """Process input into a format usable by the runnable."""
         debug_print("[blue]Processing input data[/blue]")
@@ -1850,7 +1896,7 @@ The output should be valid JSON that conforms to the {model_name} schema."""
         return {self.messages_placeholder_name: [HumanMessage(content=str(input_data))]}
 
     def get_format_instructions(
-        self, model: Type[BaseModel] | None = None, as_tools: bool = False
+        self, model: type[BaseModel] | None = None, as_tools: bool = False
     ) -> str:
         """Get format instructions for a model without changing the config."""
         # Figure out which model to use
@@ -1878,9 +1924,8 @@ The output should be valid JSON that conforms to the {model_name} schema."""
                         "You must respond using one of the following formats:\n\n"
                         + "\n\n".join(tool_instructions)
                     )
-                else:
-                    # Use first tool
-                    target_model = self.pydantic_tools[0]
+                # Use first tool
+                target_model = self.pydantic_tools[0]
             elif (
                 len(self.tools) == 1
                 and isinstance(self.tools[0], type)
@@ -1903,7 +1948,7 @@ The output should be valid JSON that conforms to the {model_name} schema."""
 
     def add_format_instructions(
         self,
-        model: Type[BaseModel] | None = None,
+        model: type[BaseModel] | None = None,
         as_tools: bool = False,
         var_name: str = "format_instructions",
     ) -> AugLLMConfig:
@@ -2156,8 +2201,8 @@ The output should be valid JSON that conforms to the {model_name} schema."""
     def with_tools(
         self,
         tools: list[
-            Type[BaseTool]
-            | Type[BaseModel]
+            type[BaseTool]
+            | type[BaseModel]
             | Callable
             | StructuredTool
             | BaseTool
@@ -2192,7 +2237,8 @@ The output should be valid JSON that conforms to the {model_name} schema."""
     def add_prompt_template(self, prompt_template: BasePromptTemplate) -> AugLLMConfig:
         """Add a prompt template to the configuration."""
         debug_print(
-            f"[blue]Adding prompt template: {type(prompt_template).__name__}[/blue]"
+            f"[blue]Adding prompt template: {
+                type(prompt_template).__name__}[/blue]"
         )
 
         # Set prompt template
@@ -2203,7 +2249,8 @@ The output should be valid JSON that conforms to the {model_name} schema."""
             self.comprehensive_validation_and_setup()
 
         debug_print(
-            f"[green]Added prompt template: {type(prompt_template).__name__}[/green]"
+            f"[green]Added prompt template: {
+                type(prompt_template).__name__}[/green]"
         )
         return self
 
@@ -2224,7 +2271,10 @@ The output should be valid JSON that conforms to the {model_name} schema."""
                 auto_route = route or "manual"
                 self.tool_routes[auto_name] = auto_route
 
-            debug_print(f"➕ [green]Added tool: {name or type(tool).__name__}[/green]")
+            debug_print(
+                f"➕ [green]Added tool: {
+                    name or type(tool).__name__}[/green]"
+            )
 
             # Re-sync tool routes
             self._sync_tool_routes()
@@ -2246,7 +2296,8 @@ The output should be valid JSON that conforms to the {model_name} schema."""
                 del self.tool_routes[tool_name]
 
             debug_print(
-                f"➖ [yellow]Removed tool: {tool_name or type(tool).__name__}[/yellow]"
+                f"➖ [yellow]Removed tool: {
+                    tool_name or type(tool).__name__}[/yellow]"
             )
 
             # Re-sync and recompute fields
@@ -2312,7 +2363,7 @@ The output should be valid JSON that conforms to the {model_name} schema."""
                     )
 
             # Create the function that invokes the LLM
-            def llm_function(**inputs):
+            def llm_function(**inputs) -> Any:
                 """Invoke the configured LLM with inputs."""
                 runnable = self.create_runnable()
                 return runnable.invoke(inputs)
@@ -2359,7 +2410,7 @@ The output should be valid JSON that conforms to the {model_name} schema."""
         tool: Any,
         route: str,
         name: str | None = None,
-        metadata: Dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> AugLLMConfig:
         """Add a tool with explicit route and metadata."""
         # Add to tools list
@@ -2401,7 +2452,8 @@ The output should be valid JSON that conforms to the {model_name} schema."""
         """
         if not hasattr(config, "to_tool"):
             raise ValueError(
-                f"Config {type(config).__name__} does not support to_tool conversion"
+                f"Config {
+                    type(config).__name__} does not support to_tool conversion"
             )
 
         # Create the tool
@@ -2432,7 +2484,10 @@ The output should be valid JSON that conforms to the {model_name} schema."""
         if llm_config is None:
             llm_config = AzureLLMConfig(model="gpt-4o")
 
-        debug_print(f"[blue]Creating AugLLMConfig from {type(prompt).__name__}[/blue]")
+        debug_print(
+            f"[blue]Creating AugLLMConfig from {
+                type(prompt).__name__}[/blue]"
+        )
 
         # Handle partial variables if provided in kwargs
         partial_variables = kwargs.pop("partial_variables", {})
@@ -2686,7 +2741,7 @@ The output should be valid JSON that conforms to the {model_name} schema."""
     @classmethod
     def from_tools(
         cls,
-        tools: list[BaseTool | Type[BaseTool] | str | Type[BaseModel]],
+        tools: list[BaseTool | type[BaseTool] | str | type[BaseModel]],
         system_message: str | None = None,
         llm_config: LLMConfig | None = None,
         use_tool_for_format_instructions: bool | None = None,
@@ -2833,7 +2888,8 @@ The output should be valid JSON that conforms to the {model_name} schema."""
             llm_config = AzureLLMConfig(model="gpt-4o")
 
         debug_print(
-            f"[blue]Creating AugLLMConfig with format instructions from {model.__name__}[/blue]"
+            f"[blue]Creating AugLLMConfig with format instructions from {
+                model.__name__}[/blue]"
         )
 
         config = cls.from_system_prompt(
@@ -2857,7 +2913,8 @@ The output should be valid JSON that conforms to the {model_name} schema."""
             llm_config = AzureLLMConfig(model="gpt-4o")
 
         debug_print(
-            f"[blue]Creating AugLLMConfig with v1 structured output using {model.__name__}[/blue]"
+            f"[blue]Creating AugLLMConfig with v1 structured output using {
+                model.__name__}[/blue]"
         )
 
         # Set v1 specific parameters
@@ -2883,7 +2940,8 @@ The output should be valid JSON that conforms to the {model_name} schema."""
                 or messages_placeholder_name in optional_variables
             )
 
-            # Ensure optional_variables list includes messages_placeholder_name if needed
+            # Ensure optional_variables list includes messages_placeholder_name
+            # if needed
             if is_optional and messages_placeholder_name not in optional_variables:
                 optional_variables.append(messages_placeholder_name)
                 kwargs["optional_variables"] = optional_variables
@@ -2927,7 +2985,8 @@ The output should be valid JSON that conforms to the {model_name} schema."""
             llm_config = AzureLLMConfig(model="gpt-4o")
 
         debug_print(
-            f"[blue]Creating AugLLMConfig with v2 structured output using {model.__name__}[/blue]"
+            f"[blue]Creating AugLLMConfig with v2 structured output using {
+                model.__name__}[/blue]"
         )
 
         # Ensure proper settings for v2
@@ -2936,10 +2995,12 @@ The output should be valid JSON that conforms to the {model_name} schema."""
         kwargs["force_tool_use"] = True
         kwargs["tool_choice_mode"] = "required"
 
-        # V2 doesn't use structured output parsing - just forces tools with format instructions
+        # V2 doesn't use structured output parsing - just forces tools with
+        # format instructions
         kwargs["include_format_instructions"] = include_instructions
 
-        # Auto-set tool name if not specified - use the actual name that will be used in binding
+        # Auto-set tool name if not specified - use the actual name that will
+        # be used in binding
         if "force_tool_choice" not in kwargs:
             kwargs["force_tool_choice"] = (
                 model.__name__
@@ -2967,7 +3028,8 @@ The output should be valid JSON that conforms to the {model_name} schema."""
                 or messages_placeholder_name in optional_variables
             )
 
-            # Ensure optional_variables list includes messages_placeholder_name if needed
+            # Ensure optional_variables list includes messages_placeholder_name
+            # if needed
             if is_optional and messages_placeholder_name not in optional_variables:
                 optional_variables.append(messages_placeholder_name)
                 kwargs["optional_variables"] = optional_variables
@@ -2994,7 +3056,8 @@ The output should be valid JSON that conforms to the {model_name} schema."""
             **kwargs,
         )
 
-        # The tool will be added during validation, no need to manually add here
+        # The tool will be added during validation, no need to manually add
+        # here
         return instance
 
     def debug_tool_configuration(self) -> AugLLMConfig:
@@ -3007,10 +3070,22 @@ The output should be valid JSON that conforms to the {model_name} schema."""
         basic_tree = Tree("📋 [cyan]Basic Tool Information[/cyan]")
         basic_tree.add(f"Total Tools: [yellow]{len(self.tools)}[/yellow]")
         basic_tree.add(f"Pydantic Tools: [yellow]{len(self.pydantic_tools)}[/yellow]")
-        basic_tree.add(f"Tool Is BaseModel: [yellow]{self.tool_is_base_model}[/yellow]")
-        basic_tree.add(f"Force Tool Use: [yellow]{self.force_tool_use}[/yellow]")
-        basic_tree.add(f"Tool Choice Mode: [yellow]{self.tool_choice_mode}[/yellow]")
-        basic_tree.add(f"Force Tool Choice: [yellow]{self.force_tool_choice}[/yellow]")
+        basic_tree.add(
+            f"Tool Is BaseModel: [yellow]{
+                self.tool_is_base_model}[/yellow]"
+        )
+        basic_tree.add(
+            f"Force Tool Use: [yellow]{
+                self.force_tool_use}[/yellow]"
+        )
+        basic_tree.add(
+            f"Tool Choice Mode: [yellow]{
+                self.tool_choice_mode}[/yellow]"
+        )
+        basic_tree.add(
+            f"Force Tool Choice: [yellow]{
+                self.force_tool_choice}[/yellow]"
+        )
         console.print(basic_tree)
 
         # Tool details
@@ -3050,15 +3125,174 @@ The output should be valid JSON that conforms to the {model_name} schema."""
         if self.structured_output_model:
             struct_tree = Tree("📤 [cyan]Structured Output[/cyan]")
             struct_tree.add(
-                f"Model: [yellow]{self.structured_output_model.__name__}[/yellow]"
+                f"Model: [yellow]{
+                    self.structured_output_model.__name__}[/yellow]"
             )
             struct_tree.add(
                 f"Version: [yellow]{self.structured_output_version}[/yellow]"
             )
-            struct_tree.add(f"Parser Type: [yellow]{self.parser_type}[/yellow]")
+            struct_tree.add(
+                f"Parser Type: [yellow]{
+                    self.parser_type}[/yellow]"
+            )
             console.print(struct_tree)
 
         console.print("=" * 80 + "\n")
+        return self
+
+    # ========================================================================
+    # DIRECT TEMPLATE MANAGEMENT METHODS
+    # ========================================================================
+
+    def add_prompt_template(self, name: str, template: BasePromptTemplate) -> None:
+        """Add a named prompt template for easy switching.
+
+        Args:
+            name: Unique name for the template
+            template: The prompt template to store
+        """
+        if not hasattr(self, "_prompt_templates"):
+            self._prompt_templates = {}
+        self._prompt_templates[name] = template
+        debug_print(
+            f"Added prompt template '{name}': {
+                type(template).__name__}"
+        )
+
+    def use_prompt_template(self, name: str) -> AugLLMConfig:
+        """Switch to using a specific named template.
+
+        Args:
+            name: Name of the template to activate
+
+        Returns:
+            Self for method chaining
+
+        Raises:
+            ValueError: If template name not found
+        """
+        if not hasattr(self, "_prompt_templates"):
+            self._prompt_templates = {}
+
+        if name not in self._prompt_templates:
+            available = list(self._prompt_templates.keys())
+            raise ValueError(f"Template '{name}' not found. Available: {available}")
+
+        self.prompt_template = self._prompt_templates[name]
+        if not hasattr(self, "_active_template"):
+            self._active_template = None
+        self._active_template = name
+        debug_print(f"Activated prompt template '{name}'")
+        return self
+
+    def remove_prompt_template(self, name: str | None = None) -> AugLLMConfig:
+        """Remove a template or disable the active one.
+
+        Args:
+            name: Template name to remove. If None, disables active template.
+
+        Returns:
+            Self for method chaining
+        """
+        if not hasattr(self, "_prompt_templates"):
+            self._prompt_templates = {}
+        if not hasattr(self, "_active_template"):
+            self._active_template = None
+        if not hasattr(self, "_original_template"):
+            self._original_template = self.prompt_template
+
+        if name is None:
+            # Disable active template
+            self.prompt_template = self._original_template
+            self._active_template = None
+            debug_print("Disabled active prompt template")
+        # Remove specific template
+        elif name in self._prompt_templates:
+            del self._prompt_templates[name]
+            if self._active_template == name:
+                self._active_template = None
+                self.prompt_template = self._original_template
+            debug_print(f"Removed prompt template '{name}'")
+        else:
+            debug_print(f"Template '{name}' not found for removal")
+        return self
+
+    def list_prompt_templates(self) -> list[str]:
+        """List available template names."""
+        if not hasattr(self, "_prompt_templates"):
+            self._prompt_templates = {}
+        return list(self._prompt_templates.keys())
+
+    def get_active_template(self) -> str | None:
+        """Get the name of the currently active template."""
+        if not hasattr(self, "_active_template"):
+            self._active_template = None
+        return self._active_template
+
+    # ========================================================================
+    # TOOL MANAGEMENT METHODS
+    # ========================================================================
+
+    def add_tool(self, tool: Any) -> AugLLMConfig:
+        """Add a tool to the configuration.
+
+        Args:
+            tool: Tool to add (LangChain tool, Pydantic model, or callable)
+
+        Returns:
+            Self for method chaining
+        """
+        current_tools = list(self.tools) if self.tools else []
+        current_tools.append(tool)
+        self.tools = current_tools
+        debug_print(
+            f"Added tool: {
+                getattr(
+                    tool,
+                    'name',
+                    type(tool).__name__)}"
+        )
+        return self
+
+    def remove_tool(self, tool: Any) -> AugLLMConfig:
+        """Remove a tool from the configuration.
+
+        Args:
+            tool: Tool instance to remove
+
+        Returns:
+            Self for method chaining
+        """
+        if self.tools:
+            current_tools = list(self.tools)
+            if tool in current_tools:
+                current_tools.remove(tool)
+                self.tools = current_tools
+                debug_print(
+                    f"Removed tool: {
+                        getattr(
+                            tool,
+                            'name',
+                            type(tool).__name__)}"
+                )
+            else:
+                debug_print(
+                    f"Tool {
+                        getattr(
+                            tool,
+                            'name',
+                            type(tool).__name__)} not found for removal"
+                )
+        return self
+
+    def clear_tools(self) -> AugLLMConfig:
+        """Clear all tools.
+
+        Returns:
+            Self for method chaining
+        """
+        self.tools.clear()
+        debug_print("Cleared all tools")
         return self
 
     def instantiate_llm(self) -> Any:

@@ -57,7 +57,10 @@ class PostgresCheckpointerConfig(CheckpointerConfig):
     _checkpointer: Any | None = None
 
     @model_validator(mode="after")
-    def validate_postgres_available(self):
+
+
+    @classmethod
+    def validate_postgres_available(cls) -> Any:
         """Validate that postgres dependencies are available if this config is used."""
         if not POSTGRES_AVAILABLE:
             raise ImportError(
@@ -119,7 +122,7 @@ class PostgresCheckpointerConfig(CheckpointerConfig):
 
             return MemorySaver()
 
-    def close(self):
+    def close(self) -> None:
         """Close the connection pool if it exists and is open."""
         if self._pool is not None:
             try:
@@ -259,7 +262,8 @@ class PostgresCheckpointerConfig(CheckpointerConfig):
             param_names = list(sig.parameters.keys())
 
             if "metadata" in param_names and "new_versions" in param_names:
-                # New API pattern: put(config, checkpoint, metadata, new_versions)
+                # New API pattern: put(config, checkpoint, metadata,
+                # new_versions)
                 next_config = checkpointer.put(
                     config, checkpoint_data, checkpoint_metadata, channel_versions
                 )

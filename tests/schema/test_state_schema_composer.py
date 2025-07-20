@@ -79,7 +79,8 @@ def test_schema_from_engines(mock_engine):
     logger.info("Testing schema creation from engines")
 
     # Use compose_schema method
-    schema_cls = SchemaComposer.compose_schema([mock_engine], name="EngineSchema")
+    schema_cls = SchemaComposer.compose_schema(
+        [mock_engine], name="EngineSchema")
     logger.debug(f"Created schema class: {schema_cls.__name__}")
 
     # Verify schema has expected fields
@@ -106,7 +107,8 @@ def test_schema_from_model(sample_model):
     logger.info("Testing schema creation from model")
 
     # The required name field should be made optional, but it might not be
-    schema_cls = SchemaComposer.compose_schema([sample_model], name="ModelSchema")
+    schema_cls = SchemaComposer.compose_schema(
+        [sample_model], name="ModelSchema")
     logger.debug(f"Created schema class: {schema_cls.__name__}")
 
     # Verify schema has expected fields
@@ -182,7 +184,9 @@ def test_create_schema_for_components(mock_engine, sample_model):
         [mock_engine, sample_model], name="CombinedSchema"
     )
     logger.debug(
-        f"Created schema manager with fields: {list(schema_manager.fields.keys())}"
+        f"Created schema manager with fields: {
+            list(
+                schema_manager.fields.keys())}"
     )
 
     # Verify schema manager has expected fields
@@ -254,7 +258,8 @@ def test_add_fields_from_model():
 
     # Create with required field value since auto-optional may not be working
     try:
-        # Try creating without required fields to see if they were made optional
+        # Try creating without required fields to see if they were made
+        # optional
         instance = schema_cls()
         assert instance.required_field is None
     except Exception as e:
@@ -290,7 +295,8 @@ def test_message_state_creation():
     assert instance.query == ""
     assert instance.result == ""
 
-    # Check reducer is set up - use __serializable_reducers__ instead of __reducer_fields__
+    # Check reducer is set up - use __serializable_reducers__ instead of
+    # __reducer_fields__
     assert "messages" in schema_cls.__serializable_reducers__
     # The name might be either add_messages or _add_messages
     assert schema_cls.__serializable_reducers__["messages"] in [
@@ -382,7 +388,8 @@ def test_compose_with_dynamic_fields():
 
     # Create schema with Annotated field using reducer
     schema_cls = SchemaComposer.compose(
-        [{"count": (Annotated[int, add_count], 0), "messages": (list[str], [])}],
+        [{"count": (Annotated[int, add_count], 0),
+          "messages": (list[str], [])}],
         name="CounterSchema",
     )
 
@@ -514,7 +521,8 @@ def test_compose_as_state_schema():
     assert "messages" not in schema_no_msg.model_fields
 
     # Test with messages already in component
-    component_with_msg = {"query": (str, ""), "messages": (list[dict[str, Any]], [])}
+    component_with_msg = {
+        "query": (str, ""), "messages": (list[dict[str, Any]], [])}
 
     schema_with_msg = SchemaComposer.compose_as_state_schema(
         components=[component_with_msg],

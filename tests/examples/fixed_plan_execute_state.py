@@ -3,12 +3,9 @@
 from datetime import datetime
 from typing import Any
 
-from haive.agents.planning.p_and_e.models import (
-    ExecutionResult,
-    Plan,
-)
 from pydantic import Field, computed_field
 
+from haive.agents.planning.p_and_e.models import ExecutionResult, Plan
 from haive.core.schema.prebuilt.messages.messages_state import MessagesState
 
 
@@ -95,7 +92,8 @@ class FixedPlanExecuteState(MessagesState):
     @property
     def execution_time(self) -> float | None:
         """Total execution time in seconds."""
-        # Use getattr with defaults to avoid AttributeError during initialization
+        # Use getattr with defaults to avoid AttributeError during
+        # initialization
         started_at = getattr(self, "started_at", None)
         completed_at = getattr(self, "completed_at", None)
         if started_at and completed_at:
@@ -164,7 +162,8 @@ class FixedPlanExecuteState(MessagesState):
         completed_count = len(self.plan.completed_steps)
         return bool(completed_count > 0 and completed_count % 3 == 0)
 
-    # Configuration for LangGraph - messages is already shared from MessagesState
+    # Configuration for LangGraph - messages is already shared from
+    # MessagesState
     __shared_fields__ = [
         "messages",
         "objective",

@@ -26,7 +26,8 @@ def find_packages() -> List[Path]:
     return sorted(packages)
 
 
-def run_trunk_command(package_dir: Path, command: List[str]) -> Tuple[int, str, str]:
+def run_trunk_command(
+    package_dir: Path, command: List[str]) -> Tuple[int, str, str]:
     """Run a trunk command in the specified package directory."""
     try:
         result = subprocess.run(

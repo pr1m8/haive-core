@@ -5,7 +5,6 @@ and other special format files.
 """
 
 import logging
-from typing import Optional
 
 from langchain_core.document_loaders.base import BaseLoader
 
@@ -29,7 +28,7 @@ class PDFSource(LocalFileSource):
         self.strategy = strategy
         self.extract_images = extract_images
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a PDF loader based on strategy."""
         try:
             if self.strategy == "pymupdf":
@@ -40,32 +39,31 @@ class PDFSource(LocalFileSource):
                     extract_images=self.extract_images,
                 )
 
-            elif self.strategy == "pdfplumber":
+            if self.strategy == "pdfplumber":
                 from langchain_community.document_loaders import PDFPlumberLoader
 
                 return PDFPlumberLoader(file_path=self.file_path)
 
-            elif self.strategy == "pypdf":
+            if self.strategy == "pypdf":
                 from langchain_community.document_loaders import PyPDFLoader
 
                 return PyPDFLoader(file_path=self.file_path)
 
-            elif self.strategy == "unstructured":
+            if self.strategy == "unstructured":
                 from langchain_community.document_loaders import UnstructuredPDFLoader
 
                 return UnstructuredPDFLoader(file_path=self.file_path)
 
-            else:
-                # Default to PyMuPDF
-                from langchain_community.document_loaders import PyMuPDFLoader
+            # Default to PyMuPDF
+            from langchain_community.document_loaders import PyMuPDFLoader
 
-                return PyMuPDFLoader(file_path=self.file_path)
+            return PyMuPDFLoader(file_path=self.file_path)
 
         except ImportError as e:
             logger.warning(f"PDF loader dependency not available: {e}")
             return None
         except Exception as e:
-            logger.error(f"Failed to create PDF loader: {e}")
+            logger.exception(f"Failed to create PDF loader: {e}")
             return None
 
 
@@ -81,7 +79,7 @@ class ImageSource(LocalFileSource):
         self.file_path = file_path
         self.strategy = strategy
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create an image loader with OCR."""
         try:
             if self.strategy == "unstructured":
@@ -89,17 +87,16 @@ class ImageSource(LocalFileSource):
 
                 return UnstructuredImageLoader(file_path=self.file_path)
 
-            else:
-                # Default to unstructured
-                from langchain_community.document_loaders import UnstructuredImageLoader
+            # Default to unstructured
+            from langchain_community.document_loaders import UnstructuredImageLoader
 
-                return UnstructuredImageLoader(file_path=self.file_path)
+            return UnstructuredImageLoader(file_path=self.file_path)
 
         except ImportError as e:
             logger.warning(f"Image loader dependency not available: {e}")
             return None
         except Exception as e:
-            logger.error(f"Failed to create image loader: {e}")
+            logger.exception(f"Failed to create image loader: {e}")
             return None
 
 
@@ -114,7 +111,7 @@ class SubtitleSource(LocalFileSource):
         )
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a subtitle loader."""
         try:
             from langchain_community.document_loaders import SRTLoader
@@ -131,7 +128,7 @@ class SubtitleSource(LocalFileSource):
             except Exception:
                 return None
         except Exception as e:
-            logger.error(f"Failed to create subtitle loader: {e}")
+            logger.exception(f"Failed to create subtitle loader: {e}")
             return None
 
 
@@ -142,7 +139,7 @@ class EPubSource(LocalFileSource):
         super().__init__(source_path=file_path, file_extensions=[".epub"], **kwargs)
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create an EPub loader."""
         try:
             from langchain_community.document_loaders import UnstructuredEPubLoader
@@ -155,7 +152,7 @@ class EPubSource(LocalFileSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create EPub loader: {e}")
+            logger.exception(f"Failed to create EPub loader: {e}")
             return None
 
 
@@ -168,7 +165,7 @@ class MHTMLSource(LocalFileSource):
         )
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create an MHTML loader."""
         try:
             from langchain_community.document_loaders import MHTMLLoader
@@ -186,7 +183,7 @@ class MHTMLSource(LocalFileSource):
                 logger.warning("UnstructuredHTMLLoader not available")
                 return None
         except Exception as e:
-            logger.error(f"Failed to create MHTML loader: {e}")
+            logger.exception(f"Failed to create MHTML loader: {e}")
             return None
 
 
@@ -199,7 +196,7 @@ class HTMLSource(LocalFileSource):
         )
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create an HTML loader."""
         try:
             from langchain_community.document_loaders import UnstructuredHTMLLoader
@@ -217,7 +214,7 @@ class HTMLSource(LocalFileSource):
                 logger.warning("BSHTMLLoader not available")
                 return None
         except Exception as e:
-            logger.error(f"Failed to create HTML loader: {e}")
+            logger.exception(f"Failed to create HTML loader: {e}")
             return None
 
 
@@ -228,7 +225,7 @@ class CHMSource(LocalFileSource):
         super().__init__(source_path=file_path, file_extensions=[".chm"], **kwargs)
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a CHM loader."""
         try:
             # Try UnstructuredFileLoader as a general fallback
@@ -243,17 +240,17 @@ class CHMSource(LocalFileSource):
             logger.warning("UnstructuredFileLoader not available")
             return None
         except Exception as e:
-            logger.error(f"Failed to create CHM loader: {e}")
+            logger.exception(f"Failed to create CHM loader: {e}")
             return None
 
 
 # Export media file sources
 __all__ = [
-    "PDFSource",
-    "ImageSource",
-    "SubtitleSource",
-    "EPubSource",
-    "MHTMLSource",
-    "HTMLSource",
     "CHMSource",
+    "EPubSource",
+    "HTMLSource",
+    "ImageSource",
+    "MHTMLSource",
+    "PDFSource",
+    "SubtitleSource",
 ]

@@ -56,8 +56,10 @@ def test_compose_state_from_io_schemas():
     assert "default" in state_schema.__engine_io_mappings__
 
     # Verify messages field is properly configured as both input and output
-    assert "messages" in state_schema.__engine_io_mappings__["default"]["inputs"]
-    assert "messages" in state_schema.__engine_io_mappings__["default"]["outputs"]
+    assert "messages" in state_schema.__engine_io_mappings__[
+        "default"]["inputs"]
+    assert "messages" in state_schema.__engine_io_mappings__[
+        "default"]["outputs"]
 
 
 def test_state_instance_creation():
@@ -123,7 +125,8 @@ def test_compose_state_directly():
     )
 
     # Directly compose a state schema
-    state_schema = composer.compose_state_from_io(SampleInputSchema, SampleOutputSchema)
+    state_schema = composer.compose_state_from_io(
+        SampleInputSchema, SampleOutputSchema)
 
     # Verify it inherits from both input and output schemas
     assert issubclass(state_schema, StateSchema)

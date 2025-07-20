@@ -1,5 +1,4 @@
-"""
-Test suite for BaseGraph and SerializableGraph.
+"""Test suite for BaseGraph and SerializableGraph.
 
 Provides comprehensive tests for all major functionality without using mocks.
 """
@@ -91,18 +90,16 @@ class TestBaseGraph(unittest.TestCase):
             return state
 
         self.graph.add_node("test_node", test_node_func)
-        self.assertIn("test_node", self.graph.nodes)
+        assert "test_node" in self.graph.nodes
 
         # Test update_node
         self.graph.update_node("test_node", description="Updated description")
-        self.assertEqual(
-            self.graph.nodes["test_node"].description, "Updated description"
-        )
+        assert self.graph.nodes["test_node"].description == "Updated description"
 
         # Test get_node
         node = self.graph.get_node("test_node")
-        self.assertIsNotNone(node)
-        self.assertEqual(node.name, "test_node")
+        assert node is not None
+        assert node.name == "test_node"
 
         # Test replace_node
         new_node = Node(
@@ -113,34 +110,34 @@ class TestBaseGraph(unittest.TestCase):
             },  # Use predefined function for serialization
         )
         self.graph.replace_node("test_node", new_node)
-        self.assertIn("test_node", self.graph.nodes)  # Name stays the same
-        self.assertEqual(
-            self.graph.nodes["test_node"].id, new_node.id
+        assert "test_node" in self.graph.nodes  # Name stays the same
+        assert (
+            self.graph.nodes["test_node"].id == new_node.id
         )  # But content is from new_node
 
         # Test remove_node
         self.graph.remove_node("test_node")
-        self.assertNotIn("test_node", self.graph.nodes)
+        assert "test_node" not in self.graph.nodes
 
     def test_edge_management(self):
         """Test edge management methods."""
         # Test add_edge
         self.graph.add_edge("node1", "node3")
-        self.assertIn(("node1", "node3"), self.graph.edges)
+        assert ("node1", "node3") in self.graph.edges
 
         # Test get_edges
         edges = self.graph.get_edges(source="node1")
-        self.assertIn(("node1", "node2"), edges)
-        self.assertIn(("node1", "node3"), edges)
+        assert ("node1", "node2") in edges
+        assert ("node1", "node3") in edges
 
         # Test remove_edge
         self.graph.remove_edge("node1", "node3")
-        self.assertNotIn(("node1", "node3"), self.graph.edges)
+        assert ("node1", "node3") not in self.graph.edges
 
         # Test remove all edges from source
         self.graph.remove_edge("node1")
         edges = self.graph.get_edges(source="node1")
-        self.assertEqual(len(edges), 0)
+        assert len(edges) == 0
 
     def test_branch_management(self):
         """Test branch management methods."""
@@ -156,17 +153,18 @@ class TestBaseGraph(unittest.TestCase):
 
         # Test add_branch
         self.graph.add_branch(branch)
-        self.assertIn(branch.id, self.graph.branches)
+        assert branch.id in self.graph.branches
 
         # Test get_branch
         retrieved_branch = self.graph.get_branch(branch.id)
-        self.assertEqual(retrieved_branch.name, "test_branch")
+        assert retrieved_branch.name == "test_branch"
 
         # Test update_branch
         self.graph.update_branch(branch.id, default="END")
-        self.assertEqual(self.graph.branches[branch.id].default, "END")
+        assert self.graph.branches[branch.id].default == "END"
 
-        # Test add_function_branch with a module-level function for serialization
+        # Test add_function_branch with a module-level function for
+        # serialization
         self.graph.add_function_branch(
             source_node="node2",
             condition=test_condition_pytest,  # Use predefined function
@@ -176,77 +174,77 @@ class TestBaseGraph(unittest.TestCase):
 
         # Find function branch by name
         function_branch = self.graph.get_branch_by_name("function_branch")
-        self.assertIsNotNone(function_branch)
-        self.assertEqual(function_branch.mode, BranchMode.FUNCTION)
+        assert function_branch is not None
+        assert function_branch.mode == BranchMode.FUNCTION
 
         # Test remove_branch
         self.graph.remove_branch(branch.id)
-        self.assertNotIn(branch.id, self.graph.branches)
+        assert branch.id not in self.graph.branches
 
     def test_advanced_node_operations(self):
         """Test advanced node operations."""
         # Insert a node after with a module-level function
         self.graph.insert_node_after("node1", "inserted_after", node1_func)
-        self.assertIn("inserted_after", self.graph.nodes)
+        assert "inserted_after" in self.graph.nodes
         edges = self.graph.get_edges()
-        self.assertIn(("node1", "inserted_after"), edges)
-        self.assertIn(("inserted_after", "node2"), edges)
-        self.assertNotIn(("node1", "node2"), edges)
+        assert ("node1", "inserted_after") in edges
+        assert ("inserted_after", "node2") in edges
+        assert ("node1", "node2") not in edges
 
         # Insert a node before with a module-level function
         self.graph.insert_node_before("node3", "inserted_before", node2_func)
-        self.assertIn("inserted_before", self.graph.nodes)
+        assert "inserted_before" in self.graph.nodes
         edges = self.graph.get_edges()
-        self.assertIn(("node2", "inserted_before"), edges)
-        self.assertIn(("inserted_before", "node3"), edges)
-        self.assertNotIn(("node2", "node3"), edges)
+        assert ("node2", "inserted_before") in edges
+        assert ("inserted_before", "node3") in edges
+        assert ("node2", "node3") not in edges
 
         # Add prelude node with a module-level function
         self.graph.add_prelude_node("prelude", node3_func)
-        self.assertIn("prelude", self.graph.nodes)
+        assert "prelude" in self.graph.nodes
         edges = self.graph.get_edges()
-        self.assertIn((START_NODE, "prelude"), edges)
-        self.assertIn(("prelude", "node1"), edges)
-        self.assertNotIn((START_NODE, "node1"), edges)
+        assert (START_NODE, "prelude") in edges
+        assert ("prelude", "node1") in edges
+        assert (START_NODE, "node1") not in edges
 
         # Add postlude node with a module-level function
         self.graph.add_postlude_node("postlude", node1_func)
-        self.assertIn("postlude", self.graph.nodes)
+        assert "postlude" in self.graph.nodes
         edges = self.graph.get_edges()
-        self.assertIn(("node3", "postlude"), edges)
-        self.assertIn(("postlude", END_NODE), edges)
-        self.assertNotIn(("node3", END_NODE), edges)
+        assert ("node3", "postlude") in edges
+        assert ("postlude", END_NODE) in edges
+        assert ("node3", END_NODE) not in edges
 
     def test_analysis_methods(self):
         """Test graph analysis methods."""
         # Test get_node_dependencies
         deps = self.graph.get_node_dependencies("node2")
-        self.assertIn("node1", deps["in"])
-        self.assertIn("node3", deps["out"])
+        assert "node1" in deps["in"]
+        assert "node3" in deps["out"]
 
         # Test has_path
-        self.assertTrue(self.graph.has_path("node1", "node3"))
-        self.assertTrue(self.graph.has_path(START_NODE, END_NODE))
+        assert self.graph.has_path("node1", "node3")
+        assert self.graph.has_path(START_NODE, END_NODE)
 
         # Test get_start_nodes
         start_nodes = self.graph.get_start_nodes()
-        self.assertIn("node1", start_nodes)
+        assert "node1" in start_nodes
 
         # Test get_end_nodes
         end_nodes = self.graph.get_end_nodes()
-        self.assertIn("node3", end_nodes)
+        assert "node3" in end_nodes
 
         # Test validate method
-        self.assertTrue(self.graph.validate())
+        assert self.graph.validate()
 
         # Get orphan nodes (should be none)
         orphans = self.graph.get_orphan_nodes()
-        self.assertEqual(len(orphans), 0)
+        assert len(orphans) == 0
 
         # Create orphan and test detection
         self.graph.add_node("orphan_node", node1_func)
         orphans = self.graph.get_orphan_nodes()
-        self.assertIn("orphan_node", orphans)
+        assert "orphan_node" in orphans
 
     def test_sequence_and_parallel(self):
         """Test adding sequences and parallel branches."""
@@ -271,16 +269,16 @@ class TestBaseGraph(unittest.TestCase):
         self.graph.add_sequence(sequence, connect_start=True, connect_end=True)
 
         # Verify nodes added
-        self.assertIn("seq1", self.graph.nodes)
-        self.assertIn("seq2", self.graph.nodes)
-        self.assertIn("seq3", self.graph.nodes)
+        assert "seq1" in self.graph.nodes
+        assert "seq2" in self.graph.nodes
+        assert "seq3" in self.graph.nodes
 
         # Verify connections
         edges = self.graph.get_edges()
-        self.assertIn((START_NODE, "seq1"), edges)
-        self.assertIn(("seq1", "seq2"), edges)
-        self.assertIn(("seq2", "seq3"), edges)
-        self.assertIn(("seq3", END_NODE), edges)
+        assert (START_NODE, "seq1") in edges
+        assert ("seq1", "seq2") in edges
+        assert ("seq2", "seq3") in edges
+        assert ("seq3", END_NODE) in edges
 
         # Test add_parallel_branches
         source = "parallel_source"
@@ -328,16 +326,18 @@ class TestBaseGraph(unittest.TestCase):
         )
 
         # Verify all nodes added
-        self.assertIn("branch1_1", self.graph.nodes)
-        self.assertIn("branch1_2", self.graph.nodes)
-        self.assertIn("branch2_1", self.graph.nodes)
-        self.assertIn("branch2_2", self.graph.nodes)
-        self.assertIn(join, self.graph.nodes)
+        assert "branch1_1" in self.graph.nodes
+        assert "branch1_2" in self.graph.nodes
+        assert "branch2_1" in self.graph.nodes
+        assert "branch2_2" in self.graph.nodes
+        assert join in self.graph.nodes
 
     def test_to_from_dict(self):
         """Test serialization to/from dictionary."""
         # Create a graph with module-level functions
-        graph = BaseGraph(name="dict_test_graph", description="Test dict serialization")
+        graph = BaseGraph(
+            name="dict_test_graph",
+            description="Test dict serialization")
 
         # Add nodes with predefined functions
         graph.add_node("node1", node1_func)
@@ -352,24 +352,26 @@ class TestBaseGraph(unittest.TestCase):
         graph_dict = graph.to_dict()
 
         # Verify dictionary has expected structure
-        self.assertEqual(graph_dict["name"], "dict_test_graph")
-        self.assertEqual(graph_dict["description"], "Test dict serialization")
-        self.assertIn("nodes", graph_dict)
-        self.assertIn("direct_edges", graph_dict)
+        assert graph_dict["name"] == "dict_test_graph"
+        assert graph_dict["description"] == "Test dict serialization"
+        assert "nodes" in graph_dict
+        assert "direct_edges" in graph_dict
 
         # Reconstruct from dictionary
         reconstructed = BaseGraph.from_dict(graph_dict)
 
         # Verify reconstructed graph
-        self.assertEqual(reconstructed.name, graph.name)
-        self.assertEqual(reconstructed.description, graph.description)
-        self.assertEqual(len(reconstructed.nodes), len(graph.nodes))
-        self.assertEqual(len(reconstructed.edges), len(graph.edges))
+        assert reconstructed.name == graph.name
+        assert reconstructed.description == graph.description
+        assert len(reconstructed.nodes) == len(graph.nodes)
+        assert len(reconstructed.edges) == len(graph.edges)
 
     def test_to_from_json(self):
         """Test serialization to/from JSON string."""
         # Create a test graph with predefined functions only
-        graph = BaseGraph(name="json_test_graph", description="Test JSON serialization")
+        graph = BaseGraph(
+            name="json_test_graph",
+            description="Test JSON serialization")
 
         # Add nodes with predefined functions
         graph.add_node("node1", node1_func)
@@ -381,39 +383,40 @@ class TestBaseGraph(unittest.TestCase):
         graph.add_edge("node2", END_NODE)
 
         try:
-            # Convert to JSON - may raise an exception if serialization is not properly handled
+            # Convert to JSON - may raise an exception if serialization is not
+            # properly handled
             json_str = graph.to_json()
 
             # Verify valid JSON
             json_obj = json.loads(json_str)
-            self.assertEqual(json_obj["name"], "json_test_graph")
+            assert json_obj["name"] == "json_test_graph"
 
             # Reconstruct from JSON
             reconstructed = BaseGraph.from_json(json_str)
 
             # Verify reconstructed graph
-            self.assertEqual(reconstructed.name, graph.name)
-            self.assertEqual(len(reconstructed.nodes), len(graph.nodes))
+            assert reconstructed.name == graph.name
+            assert len(reconstructed.nodes) == len(graph.nodes)
         except (TypeError, ValueError) as e:
-            self.fail(f"Serialization failed: {str(e)}")
+            self.fail(f"Serialization failed: {e!s}")
 
     def test_to_mermaid(self):
         """Test Mermaid diagram generation."""
         mermaid = self.graph.to_mermaid()
 
         # Check if it contains basic elements
-        self.assertIn("graph TD;", mermaid)
-        self.assertIn("node1", mermaid)
-        self.assertIn("node2", mermaid)
-        self.assertIn("node3", mermaid)
-        self.assertIn(f"{START_NODE}", mermaid)
-        self.assertIn(f"{END_NODE}", mermaid)
+        assert "graph TD;" in mermaid
+        assert "node1" in mermaid
+        assert "node2" in mermaid
+        assert "node3" in mermaid
+        assert f"{START_NODE}" in mermaid
+        assert f"{END_NODE}" in mermaid
 
         # Check if edges are represented
-        self.assertIn(f"{START_NODE} --> node1", mermaid)
-        self.assertIn("node1 --> node2", mermaid)
-        self.assertIn("node2 --> node3", mermaid)
-        self.assertIn(f"node3 --> {END_NODE}", mermaid)
+        assert f"{START_NODE} --> node1" in mermaid
+        assert "node1 --> node2" in mermaid
+        assert "node2 --> node3" in mermaid
+        assert f"node3 --> {END_NODE}" in mermaid
 
     def test_from_langgraph(self):
         """Test conversion from LangGraph StateGraph."""
@@ -437,10 +440,10 @@ class TestBaseGraph(unittest.TestCase):
             result = BaseGraph.from_langgraph(sg, name="converted_graph")
 
             # Verify conversion
-            self.assertEqual(result.name, "converted_graph")
-            self.assertIn("test_node", result.nodes)
-            self.assertIn((START_NODE, "test_node"), result.get_edges())
-            self.assertIn(("test_node", END_NODE), result.get_edges())
+            assert result.name == "converted_graph"
+            assert "test_node" in result.nodes
+            assert (START_NODE, "test_node") in result.get_edges()
+            assert ("test_node", END_NODE) in result.get_edges()
 
         except ImportError:
             self.skipTest("langgraph not installed")
@@ -455,16 +458,16 @@ class TestBaseGraph(unittest.TestCase):
             result = self.graph.to_langgraph()
 
             # Verify basic structure
-            self.assertIsInstance(result, StateGraph)
-            self.assertIn("node1", result.nodes)
-            self.assertIn("node2", result.nodes)
-            self.assertIn("node3", result.nodes)
+            assert isinstance(result, StateGraph)
+            assert "node1" in result.nodes
+            assert "node2" in result.nodes
+            assert "node3" in result.nodes
 
             # Check edges
-            self.assertIn((START, "node1"), result.edges)
-            self.assertIn(("node1", "node2"), result.edges)
-            self.assertIn(("node2", "node3"), result.edges)
-            self.assertIn(("node3", END), result.edges)
+            assert (START, "node1") in result.edges
+            assert ("node1", "node2") in result.edges
+            assert ("node2", "node3") in result.edges
+            assert ("node3", END) in result.edges
 
         except ImportError:
             self.skipTest("langgraph not installed")
@@ -481,8 +484,10 @@ class TestSerializableGraph(unittest.TestCase):
         )
 
         # Add test nodes with properly defined functions
-        self.base_graph.add_node("node1", node1_func, node_type=NodeType.CALLABLE)
-        self.base_graph.add_node("node2", node2_func, node_type=NodeType.CALLABLE)
+        self.base_graph.add_node(
+            "node1", node1_func, node_type=NodeType.CALLABLE)
+        self.base_graph.add_node(
+            "node2", node2_func, node_type=NodeType.CALLABLE)
 
         # Add test edges
         self.base_graph.add_edge(START_NODE, "node1")
@@ -503,28 +508,28 @@ class TestSerializableGraph(unittest.TestCase):
     def test_from_graph(self):
         """Test conversion from BaseGraph to SerializableGraph."""
         # Verify basic properties
-        self.assertEqual(self.serializable.name, self.base_graph.name)
-        self.assertEqual(self.serializable.description, self.base_graph.description)
+        assert self.serializable.name == self.base_graph.name
+        assert self.serializable.description == self.base_graph.description
 
         # Verify nodes were converted
-        self.assertEqual(len(self.serializable.nodes), len(self.base_graph.nodes))
+        assert len(self.serializable.nodes) == len(self.base_graph.nodes)
         for name, node in self.base_graph.nodes.items():
-            self.assertIn(name, self.serializable.nodes)
+            assert name in self.serializable.nodes
             ser_node = self.serializable.nodes[name]
-            self.assertEqual(ser_node.name, node.name)
-            self.assertEqual(ser_node.node_type, node.node_type.value)
+            assert ser_node.name == node.name
+            assert ser_node.node_type == node.node_type.value
 
         # Verify edges were converted
-        self.assertEqual(
-            len(self.serializable.direct_edges), len(self.base_graph.edges)
-        )
+        assert len(
+            self.serializable.direct_edges) == len(
+            self.base_graph.edges)
         for edge in self.base_graph.edges:
-            self.assertIn(edge, self.serializable.direct_edges)
+            assert edge in self.serializable.direct_edges
 
         # Verify branches were converted
-        self.assertEqual(len(self.serializable.branches), len(self.base_graph.branches))
+        assert len(self.serializable.branches) == len(self.base_graph.branches)
         for branch_id in self.base_graph.branches:
-            self.assertIn(branch_id, self.serializable.branches)
+            assert branch_id in self.serializable.branches
 
     def test_function_references(self):
         """Test serialization and deserialization of function references."""
@@ -548,16 +553,16 @@ class TestSerializableGraph(unittest.TestCase):
 
         # Check branch
         branch = deserialized.get_branch_by_name("func_branch")
-        self.assertIsNotNone(branch)
+        assert branch is not None
 
         # Since we can't compare function objects directly, check function_ref
-        self.assertIsNotNone(branch.function_ref)
+        assert branch.function_ref is not None
 
         # Check if the function reference contains our function's name
-        self.assertEqual(branch.function_ref.name, "condition_func")
+        assert branch.function_ref.name == "condition_func"
 
         # Check module path matches this test module
-        self.assertEqual(branch.function_ref.module_path, __name__)
+        assert branch.function_ref.module_path == __name__
 
     def test_complex_branch_serialization(self):
         """Test serialization of complex branches."""
@@ -588,7 +593,8 @@ class TestSerializableGraph(unittest.TestCase):
             source_node="start_node",
             mode=BranchMode.DYNAMIC,
             dynamic_mapping=mapping,
-            # Use default destinations which reference the "continue" node we've now added
+            # Use default destinations which reference the "continue" node
+            # we've now added
             destinations={True: "continue", False: "END"},
             default="END",
         )
@@ -633,16 +639,16 @@ class TestSerializableGraph(unittest.TestCase):
 
         # Check dynamic branch
         dyn_branch = deserialized.get_branch_by_name("dynamic_branch")
-        self.assertIsNotNone(dyn_branch)
-        self.assertEqual(dyn_branch.mode, BranchMode.DYNAMIC)
-        self.assertIsNotNone(dyn_branch.dynamic_mapping)
-        self.assertEqual(dyn_branch.dynamic_mapping.key, "route_type")
-        self.assertGreaterEqual(len(dyn_branch.dynamic_mapping.mappings), 2)
+        assert dyn_branch is not None
+        assert dyn_branch.mode == BranchMode.DYNAMIC
+        assert dyn_branch.dynamic_mapping is not None
+        assert dyn_branch.dynamic_mapping.key == "route_type"
+        assert len(dyn_branch.dynamic_mapping.mappings) >= 2
 
         # Check chain branch
         chain = deserialized.get_branch_by_name("master_chain")
-        self.assertIsNotNone(chain)
-        self.assertEqual(chain.mode, BranchMode.CHAIN)
+        assert chain is not None
+        assert chain.mode == BranchMode.CHAIN
 
     def test_to_dict_from_dict(self):
         """Test to_dict and from_dict methods."""
@@ -650,21 +656,21 @@ class TestSerializableGraph(unittest.TestCase):
         dict_data = self.serializable.to_dict()
 
         # Verify dictionary structure
-        self.assertEqual(dict_data["name"], "test_serializable")
-        self.assertIn("nodes", dict_data)
-        self.assertIn("direct_edges", dict_data)
-        self.assertIn("branches", dict_data)
+        assert dict_data["name"] == "test_serializable"
+        assert "nodes" in dict_data
+        assert "direct_edges" in dict_data
+        assert "branches" in dict_data
 
         # Reconstruct from dictionary
         reconstructed = SerializableGraph.from_dict(dict_data)
 
         # Verify reconstructed serializable
-        self.assertEqual(reconstructed.name, self.serializable.name)
-        self.assertEqual(len(reconstructed.nodes), len(self.serializable.nodes))
-        self.assertEqual(
-            len(reconstructed.direct_edges), len(self.serializable.direct_edges)
-        )
-        self.assertEqual(len(reconstructed.branches), len(self.serializable.branches))
+        assert reconstructed.name == self.serializable.name
+        assert len(reconstructed.nodes) == len(self.serializable.nodes)
+        assert len(
+            reconstructed.direct_edges) == len(
+            self.serializable.direct_edges)
+        assert len(reconstructed.branches) == len(self.serializable.branches)
 
     def test_to_json_from_json(self):
         """Test to_json and from_json methods."""
@@ -699,24 +705,23 @@ class TestSerializableGraph(unittest.TestCase):
 
             # Verify valid JSON
             json_obj = json.loads(json_str)
-            self.assertEqual(json_obj["name"], "json_graph")
+            assert json_obj["name"] == "json_graph"
 
             # Reconstruct from JSON
             reconstructed = SerializableGraph.from_json(json_str)
 
             # Verify reconstructed serializable
-            self.assertEqual(reconstructed.name, clean_serializable.name)
-            self.assertEqual(len(reconstructed.nodes), len(clean_serializable.nodes))
-            self.assertEqual(
-                len(reconstructed.direct_edges), len(clean_serializable.direct_edges)
+            assert reconstructed.name == clean_serializable.name
+            assert len(reconstructed.nodes) == len(clean_serializable.nodes)
+            assert len(reconstructed.direct_edges) == len(
+                clean_serializable.direct_edges
             )
 
             # Verify specific branch data
-            self.assertIn(
-                "json_branch", [b.name for b in reconstructed.branches.values()]
-            )
+            assert "json_branch" in [
+                b.name for b in reconstructed.branches.values()]
         except (TypeError, ValueError) as e:
-            self.fail(f"JSON serialization failed: {str(e)}")
+            self.fail(f"JSON serialization failed: {e!s}")
 
     def test_round_trip_serialization(self):
         """Test complete round-trip serialization."""
@@ -756,24 +761,25 @@ class TestSerializableGraph(unittest.TestCase):
             final = deserialized_serializable.to_graph()
 
             # Verify round-trip
-            self.assertEqual(final.name, original.name)
-            self.assertEqual(final.description, original.description)
-            self.assertEqual(len(final.nodes), len(original.nodes))
-            self.assertEqual(len(final.edges), len(original.edges))
-            self.assertEqual(len(final.branches), len(original.branches))
+            assert final.name == original.name
+            assert final.description == original.description
+            assert len(final.nodes) == len(original.nodes)
+            assert len(final.edges) == len(original.edges)
+            assert len(final.branches) == len(original.branches)
 
             # Check node names
             for name in original.nodes:
-                self.assertIn(name, final.nodes)
+                assert name in final.nodes
 
             # Check edges
             for edge in original.edges:
-                self.assertIn(edge, final.edges)
+                assert edge in final.edges
 
             # Check branch
-            self.assertIn("roundtrip_branch", [b.name for b in final.branches.values()])
+            assert "roundtrip_branch" in [
+                b.name for b in final.branches.values()]
         except (TypeError, ValueError) as e:
-            self.fail(f"Round-trip serialization failed: {str(e)}")
+            self.fail(f"Round-trip serialization failed: {e!s}")
 
 
 if __name__ == "__main__":

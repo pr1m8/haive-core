@@ -2,7 +2,8 @@
 
 import json
 import logging
-from typing import Any, Callable, List
+from collections.abc import Callable
+from typing import Any
 
 from langchain_core.messages import AIMessage, ToolMessage
 from langgraph.graph import END
@@ -57,7 +58,9 @@ def has_tool_error(message: ToolMessage) -> bool:
         has_error_key = any(key in content for key in error_keys)
         if has_error_key:
             logger.debug(
-                f"[bold yellow]Tool error detected in dict:[/bold yellow] {list(content.keys())}"
+                f"[bold yellow]Tool error detected in dict:[/bold yellow] {
+                    list(
+                        content.keys())}"
             )
         return has_error_key
 
@@ -102,15 +105,15 @@ def get_tool_args(tool_call: Any) -> dict[str, Any]:
             if isinstance(args, str):
                 try:
                     return json.loads(args)
-                except:
+                except BaseException:
                     return {"raw_args": args}
             return args
-        elif "function" in tool_call and "arguments" in tool_call["function"]:
+        if "function" in tool_call and "arguments" in tool_call["function"]:
             args = tool_call["function"]["arguments"]
             if isinstance(args, str):
                 try:
                     return json.loads(args)
-                except:
+                except BaseException:
                     return {"raw_args": args}
             return args
 
@@ -259,18 +262,31 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
         # FIRST: Try to get from state.engines using engine name
         if hasattr(state, "engines") and isinstance(state.engines, dict):
             logger.debug(f"  State has engines dict with {len(state.engines)} engines")
-            logger.debug(f"  Available engine keys: {list(state.engines.keys())}")
+            logger.debug(
+                f"  Available engine keys: {
+                    list(
+                        state.engines.keys())}"
+            )
 
             # Try exact name match
             engine = state.engines.get(self.engine_name)
             if engine:
                 logger.info(
-                    f"[bold green]✓ Found engine in state.engines:[/bold green] {self.engine_name}"
+                    f"[bold green]✓ Found engine in state.engines:[/bold green] {
+                        self.engine_name}"
                 )
                 logger.debug(f"    Engine type: {type(engine).__name__}")
-                logger.debug(f"    Engine has tools: {hasattr(engine, 'tools')}")
                 logger.debug(
-                    f"    Engine has tool_routes: {hasattr(engine, 'tool_routes')}"
+                    f"    Engine has tools: {
+                        hasattr(
+                            engine,
+                            'tools')}"
+                )
+                logger.debug(
+                    f"    Engine has tool_routes: {
+                        hasattr(
+                            engine,
+                            'tool_routes')}"
                 )
                 return engine
 
@@ -278,15 +294,18 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
             for key, eng in state.engines.items():
                 if hasattr(eng, "name") and eng.name == self.engine_name:
                     logger.info(
-                        f"[bold green]✓ Found engine by name attribute:[/bold green] {self.engine_name} (key: {key})"
+                        f"[bold green]✓ Found engine by name attribute:[/bold green] {
+                            self.engine_name} (key: {key})"
                     )
                     return eng
 
-        # SECOND: Try to get from state directly (if engines are stored as attributes)
+        # SECOND: Try to get from state directly (if engines are stored as
+        # attributes)
         if hasattr(state, self.engine_name):
             engine = getattr(state, self.engine_name)
             logger.info(
-                f"[bold green]✓ Found engine as state attribute:[/bold green] {self.engine_name}"
+                f"[bold green]✓ Found engine as state attribute:[/bold green] {
+                    self.engine_name}"
             )
             return engine
 
@@ -299,11 +318,13 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
             engine = registry.find(self.engine_name)
             if engine:
                 logger.info(
-                    f"[bold green]✓ Found engine in EngineRegistry:[/bold green] {self.engine_name}"
+                    f"[bold green]✓ Found engine in EngineRegistry:[/bold green] {
+                        self.engine_name}"
                 )
                 return engine
             logger.warning(
-                f"[bold yellow]Engine not found in registry:[/bold yellow] {self.engine_name}"
+                f"[bold yellow]Engine not found in registry:[/bold yellow] {
+                    self.engine_name}"
             )
         except Exception as e:
             logger.exception(
@@ -311,7 +332,8 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
             )
 
         logger.error(
-            f"[bold red]Engine '{self.engine_name}' not found anywhere[/bold red]"
+            f"[bold red]Engine '{
+                self.engine_name}' not found anywhere[/bold red]"
         )
         return None
 
@@ -360,7 +382,9 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
             logger.debug(f"  Found structured_output_model: {model_name}")
 
         logger.info(
-            f"[bold cyan]Total extracted:[/bold cyan] {len(tools)} tools, {len(schemas)} schemas"
+            f"[bold cyan]Total extracted:[/bold cyan] {
+                len(tools)} tools, {
+                len(schemas)} schemas"
         )
         return tools, schemas
 
@@ -376,9 +400,11 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
             engine = self._get_engine_from_state(state)
             if engine:
                 # IMPORTANT: Only use tools/schemas from THIS specific engine
-                # Do not use tools from other engines in the state to prevent contamination
+                # Do not use tools from other engines in the state to prevent
+                # contamination
                 logger.info(
-                    f"[bold yellow]Using ONLY tools/schemas from engine: {self.engine_name}[/bold yellow]"
+                    f"[bold yellow]Using ONLY tools/schemas from engine: {
+                        self.engine_name}[/bold yellow]"
                 )
 
                 # Get tools and schemas ONLY from this specific engine
@@ -391,7 +417,8 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                 original_engine_tools = []
                 original_engine_schemas = []
 
-                # Get the original tools from the engine - filter out contaminated tools
+                # Get the original tools from the engine - filter out
+                # contaminated tools
                 if hasattr(engine, "tools") and engine.tools:
                     for tool in engine.tools:
                         tool_name = getattr(
@@ -399,7 +426,8 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                         )
 
                         # FILTER: Only include tools that are NOT Pydantic model classes
-                        # Pydantic models (like Plan) should only be in structured_output_model, not tools
+                        # Pydantic models (like Plan) should only be in
+                        # structured_output_model, not tools
                         if hasattr(tool, "__bases__") and any(
                             "BaseModel" in str(base) for base in tool.__bases__
                         ):
@@ -415,7 +443,8 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                         else:
                             logger.debug(f"  Skipping non-callable tool: {tool_name}")
 
-                # For schemas, only include structured_output_model if this engine has it
+                # For schemas, only include structured_output_model if this
+                # engine has it
                 if (
                     hasattr(engine, "structured_output_model")
                     and engine.structured_output_model
@@ -428,7 +457,8 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                     )
                     logger.debug(f"  Including structured output model: {model_name}")
 
-                # ADDITIONAL FILTER: Remove any non-tool items that might have been added incorrectly
+                # ADDITIONAL FILTER: Remove any non-tool items that might have
+                # been added incorrectly
                 filtered_tools = []
                 for tool in original_engine_tools:
                     # Skip if this looks like a Pydantic model class
@@ -446,7 +476,9 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                 all_schemas = original_engine_schemas
 
                 logger.info(
-                    f"[bold green]✓ Filtered to {len(all_tools)} tools and {len(all_schemas)} schemas from engine[/bold green]"
+                    f"[bold green]✓ Filtered to {
+                        len(all_tools)} tools and {
+                        len(all_schemas)} schemas from engine[/bold green]"
                 )
 
                 # Get tool routes from engine, but filter them too
@@ -469,7 +501,9 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
 
                     self.tool_routes = filtered_routes
                     logger.info(
-                        f"[bold green]✓ Filtered tool routes to {len(self.tool_routes)} entries[/bold green]"
+                        f"[bold green]✓ Filtered tool routes to {
+                            len(
+                                self.tool_routes)} entries[/bold green]"
                     )
                     for name, route in list(self.tool_routes.items())[
                         :5
@@ -477,7 +511,8 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                         logger.debug(f"    {name} -> {route}")
             else:
                 logger.error(
-                    f"[bold red]Could not find engine '{self.engine_name}'[/bold red]"
+                    f"[bold red]Could not find engine '{
+                        self.engine_name}'[/bold red]"
                 )
 
         # Add any manual overrides (these take precedence)
@@ -502,7 +537,7 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
 
     def __call__(
         self, state: StateLike, config: ConfigLike | None = None
-    ) -> str | List[str]:
+    ) -> str | list[str]:
         """Validate and route tool calls to appropriate nodes.
 
         Returns ONLY routing decisions - no state updates!
@@ -513,7 +548,8 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
 
         validation_start_time = datetime.now()
         logger.info(
-            f"[bold magenta]=== ValidationNodeConfig Execution START at {validation_start_time.strftime('%H:%M:%S.%f')} ===[/bold magenta]"
+            f"[bold magenta]=== ValidationNodeConfig Execution START at {
+                validation_start_time.strftime('%H:%M:%S.%f')} ===[/bold magenta]"
         )
 
         # Enhanced state debugging
@@ -529,7 +565,10 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
         logger.debug("[bold cyan]STATE INSPECTION[/bold cyan]")
         if hasattr(state, "__dict__"):
             state_attrs = list(state.__dict__.keys())
-            logger.debug(f"  State attributes ({len(state_attrs)}): {state_attrs}")
+            logger.debug(
+                f"  State attributes ({
+                    len(state_attrs)}): {state_attrs}"
+            )
 
             # Log values for key attributes
             for attr in ["messages", "engines", "tools", "tool_routes"]:
@@ -537,24 +576,34 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                     attr_value = getattr(state, attr)
                     if attr == "messages":
                         logger.debug(
-                            f"    {attr}: {len(attr_value) if attr_value else 0} messages"
+                            f"    {attr}: {
+                                len(attr_value) if attr_value else 0} messages"
                         )
                         if attr_value:
                             # Last 3 messages
                             for i, msg in enumerate(attr_value[-3:]):
                                 logger.debug(
-                                    f"      [{i}] {type(msg).__name__}: {str(msg)[:100]}..."
+                                    f"      [{i}] {
+                                        type(msg).__name__}: {
+                                        str(msg)[
+                                            :100]}..."
                                 )
                     elif attr == "engines":
                         if isinstance(attr_value, dict):
-                            logger.debug(f"    {attr}: {list(attr_value.keys())}")
+                            logger.debug(
+                                f"    {attr}: {
+                                    list(
+                                        attr_value.keys())}"
+                            )
                         else:
                             logger.debug(
-                                f"    {attr}: {type(attr_value)} - {attr_value}"
+                                f"    {attr}: {
+                                    type(attr_value)} - {attr_value}"
                             )
                     elif attr == "tools":
                         logger.debug(
-                            f"    {attr}: {len(attr_value) if attr_value else 0} tools"
+                            f"    {attr}: {
+                                len(attr_value) if attr_value else 0} tools"
                         )
                         if attr_value:
                             tool_names = [
@@ -563,12 +612,16 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                             logger.debug(f"      Tools: {tool_names}")
                     elif attr == "tool_routes":
                         if isinstance(attr_value, dict):
-                            logger.debug(f"    {attr}: {len(attr_value)} routes")
+                            logger.debug(
+                                f"    {attr}: {
+                                    len(attr_value)} routes"
+                            )
                             for k, v in list(attr_value.items())[:5]:
                                 logger.debug(f"      {k} -> {v}")
                         else:
                             logger.debug(
-                                f"    {attr}: {type(attr_value)} - {attr_value}"
+                                f"    {attr}: {
+                                    type(attr_value)} - {attr_value}"
                             )
                 else:
                     logger.debug(f"    {attr}: NOT PRESENT")
@@ -578,10 +631,16 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
             logger.debug("[bold yellow]ENGINE INSPECTION[/bold yellow]")
             if isinstance(engines, dict):
                 logger.debug(
-                    f"  Engines dict with {len(engines)} engines: {list(engines.keys())}"
+                    f"  Engines dict with {
+                        len(engines)} engines: {
+                        list(
+                            engines.keys())}"
                 )
                 for name, engine in engines.items():
-                    logger.debug(f"    Engine '{name}': {type(engine).__name__}")
+                    logger.debug(
+                        f"    Engine '{name}': {
+                            type(engine).__name__}"
+                    )
                     if hasattr(engine, "tools"):
                         tools_count = len(engine.tools) if engine.tools else 0
                         logger.debug(f"      Tools: {tools_count}")
@@ -594,7 +653,10 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                         schemas_count = len(engine.schemas) if engine.schemas else 0
                         logger.debug(f"      Schemas: {schemas_count}")
             else:
-                logger.debug(f"  Engines is not dict: {type(engines)} - {engines}")
+                logger.debug(
+                    f"  Engines is not dict: {
+                        type(engines)} - {engines}"
+                )
 
         # Log configuration state
         logger.debug("[bold green]VALIDATION CONFIG[/bold green]")
@@ -611,7 +673,9 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
         try:
             validation_tools, validation_schemas = self._sync_tools_and_schemas(state)
             logger.info(
-                f"[bold green]✓ Sync complete:[/bold green] {len(validation_tools)} tools, {len(validation_schemas)} schemas"
+                f"[bold green]✓ Sync complete:[/bold green] {
+                    len(validation_tools)} tools, {
+                    len(validation_schemas)} schemas"
             )
 
             # Log detailed tool information
@@ -649,10 +713,15 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
         logger.info("[bold magenta]STEP 2: Extracting messages[/bold magenta]")
         if not hasattr(state, self.messages_key):
             logger.error(
-                f"[bold red]State missing messages key:[/bold red] {self.messages_key}"
+                f"[bold red]State missing messages key:[/bold red] {
+                    self.messages_key}"
             )
             logger.error(
-                f"[bold red]Available state attributes: {list(state.__dict__.keys()) if hasattr(state, '__dict__') else 'None'}[/bold red]"
+                f"[bold red]Available state attributes: {
+                    list(
+                        state.__dict__.keys()) if hasattr(
+                        state,
+                        '__dict__') else 'None'}[/bold red]"
             )
             return "has_errors"
 
@@ -663,7 +732,10 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
             logger.debug(f"Messages type: {type(messages)}")
             return "no_tool_calls"
 
-        logger.info(f"[bold cyan]Processing {len(messages)} messages[/bold cyan]")
+        logger.info(
+            f"[bold cyan]Processing {
+                len(messages)} messages[/bold cyan]"
+        )
 
         # Log all messages for debugging
         logger.debug("[bold cyan]MESSAGE ANALYSIS[/bold cyan]")
@@ -682,15 +754,19 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
 
         last_message = messages[-1]
         logger.debug(
-            f"[bold blue]Last message type: {type(last_message).__name__}[/bold blue]"
+            f"[bold blue]Last message type: {
+                type(last_message).__name__}[/bold blue]"
         )
         logger.debug(
-            f"[bold blue]Last message content: {str(last_message)[:200]}...[/bold blue]"
+            f"[bold blue]Last message content: {
+                str(last_message)[
+                    :200]}...[/bold blue]"
         )
 
         if not isinstance(last_message, AIMessage):
             logger.warning(
-                f"[bold yellow]Last message is not AIMessage: {type(last_message).__name__}[/bold yellow]"
+                f"[bold yellow]Last message is not AIMessage: {
+                    type(last_message).__name__}[/bold yellow]"
             )
             logger.debug(f"Message content: {last_message}")
             return "no_tool_calls"
@@ -703,7 +779,8 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
         if hasattr(last_message, "tool_calls") and last_message.tool_calls:
             tool_calls = last_message.tool_calls
             logger.info(
-                f"[bold green]✓ Found {len(tool_calls)} tool calls in message.tool_calls[/bold green]"
+                f"[bold green]✓ Found {
+                    len(tool_calls)} tool calls in message.tool_calls[/bold green]"
             )
         # Check alternative location
         elif (
@@ -712,7 +789,8 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
         ):
             tool_calls = last_message.additional_kwargs["tool_calls"]
             logger.info(
-                f"[bold green]✓ Found {len(tool_calls)} tool calls in additional_kwargs[/bold green]"
+                f"[bold green]✓ Found {
+                    len(tool_calls)} tool calls in additional_kwargs[/bold green]"
             )
         else:
             # Enhanced debugging for missing tool calls
@@ -722,7 +800,9 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
             logger.debug(f"Last message attributes: {dir(last_message)}")
             if hasattr(last_message, "additional_kwargs"):
                 logger.debug(
-                    f"Additional kwargs keys: {list(last_message.additional_kwargs.keys())}"
+                    f"Additional kwargs keys: {
+                        list(
+                            last_message.additional_kwargs.keys())}"
                 )
             logger.debug(f"Last message full content: {last_message}")
             return "no_tool_calls"
@@ -765,12 +845,15 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                 logger.debug(f"  Tool (by __name__): {tool.__name__}")
 
         logger.info(
-            f"[bold cyan]Total tools/schemas available:[/bold cyan] {len(tool_name_mapping)}"
+            f"[bold cyan]Total tools/schemas available:[/bold cyan] {
+                len(tool_name_mapping)}"
         )
 
-        # Process tool calls and determine routing with enhanced validation and message creation
+        # Process tool calls and determine routing with enhanced validation and
+        # message creation
         logger.info(
-            f"[bold magenta]STEP 5: Processing {len(tool_calls)} tool calls for validation and routing[/bold magenta]"
+            f"[bold magenta]STEP 5: Processing {
+                len(tool_calls)} tool calls for validation and routing[/bold magenta]"
         )
         destinations = set()
         has_errors = False
@@ -782,11 +865,18 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
             tool_args = get_tool_args(tool_call)
 
             logger.info(
-                f"\n[bold cyan]Processing tool call {i+1}/{len(tool_calls)}: {tool_name}[/bold cyan]"
+                f"\n[bold cyan]Processing tool call {
+                    i + 1}/{
+                    len(tool_calls)}: {tool_name}[/bold cyan]"
             )
             logger.debug(f"  Tool ID: {tool_id}")
             logger.debug(
-                f"  Tool args: {json.dumps(tool_args, indent=2) if isinstance(tool_args, dict) else tool_args}"
+                f"  Tool args: {
+                    json.dumps(
+                        tool_args,
+                        indent=2) if isinstance(
+                        tool_args,
+                        dict) else tool_args}"
             )
 
             # Check if tool exists in our mapping
@@ -794,7 +884,11 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                 logger.error(
                     f"  [bold red]✗ Tool '{tool_name}' not found in available tools![/bold red]"
                 )
-                logger.debug(f"  Available tools: {list(tool_name_mapping.keys())}")
+                logger.debug(
+                    f"  Available tools: {
+                        list(
+                            tool_name_mapping.keys())}"
+                )
 
                 # Create error tool message for unknown tool
                 error_message = ToolMessage(
@@ -844,15 +938,29 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
             logger.debug("  Tool type analysis:")
             logger.debug(f"    Route: {route}")
             logger.debug(
-                f"    Has model_fields: {hasattr(tool_or_schema, 'model_fields')}"
+                f"    Has model_fields: {
+                    hasattr(
+                        tool_or_schema,
+                        'model_fields')}"
             )
             logger.debug(
-                f"    Has model_validate: {hasattr(tool_or_schema, 'model_validate')}"
+                f"    Has model_validate: {
+                    hasattr(
+                        tool_or_schema,
+                        'model_validate')}"
             )
-            logger.debug(f"    Has invoke: {hasattr(tool_or_schema, 'invoke')}")
+            logger.debug(
+                f"    Has invoke: {
+                    hasattr(
+                        tool_or_schema,
+                        'invoke')}"
+            )
             logger.debug(f"    Has run: {hasattr(tool_or_schema, 'run')}")
             logger.debug(
-                f"    Has args_schema: {hasattr(tool_or_schema, 'args_schema')}"
+                f"    Has args_schema: {
+                    hasattr(
+                        tool_or_schema,
+                        'args_schema')}"
             )
             logger.debug(f"    Is Pydantic model: {is_pydantic_model}")
             logger.debug(f"    Is structured tool: {is_structured_tool}")
@@ -918,7 +1026,8 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                 destinations.add(destination)
                 continue
 
-            # For other tools (langchain tools, functions, etc.), validate and route appropriately
+            # For other tools (langchain tools, functions, etc.), validate and
+            # route appropriately
             logger.debug(
                 f"  [bold blue]Processing other tool (non-Pydantic): {tool_name}[/bold blue]"
             )
@@ -940,7 +1049,8 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                 result = validation_node.invoke({"messages": temp_messages})
                 validated_messages = result.get("messages", [])
                 logger.debug(
-                    f"    ValidationNode returned {len(validated_messages)} messages"
+                    f"    ValidationNode returned {
+                        len(validated_messages)} messages"
                 )
 
                 # Check for validation errors
@@ -960,7 +1070,8 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                             logger.debug(f"    Error content: {msg.content}")
                             validation_failed = True
 
-                            # For other tools: Only create error tool message on validation failure
+                            # For other tools: Only create error tool message
+                            # on validation failure
                             tool_messages_to_add.append(msg)
                             logger.info(
                                 "  [bold yellow]Created error ToolMessage, routing to agent[/bold yellow]"
@@ -972,7 +1083,8 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                             logger.info(
                                 f"  [bold green]✓ Validation passed for {tool_name}[/bold green]"
                             )
-                            # For other tools: Validation passed, route to tool_node (tool_node will create messages)
+                            # For other tools: Validation passed, route to
+                            # tool_node (tool_node will create messages)
                             destinations.add(destination)
 
                         break
@@ -989,10 +1101,12 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                     f"[bold red]Validation exception for {tool_name}:[/bold red] {e}"
                 )
                 logger.exception(
-                    f"[bold red]Full traceback: {traceback.format_exc()}[/bold red]"
+                    f"[bold red]Full traceback: {
+                        traceback.format_exc()}[/bold red]"
                 )
 
-                # Create error tool message for validation exception and route to agent
+                # Create error tool message for validation exception and route
+                # to agent
                 error_message = ToolMessage(
                     content=f"Validation exception: {e!s}",
                     tool_call_id=tool_id,
@@ -1008,16 +1122,19 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                 destinations.add(self.agent_node)
                 has_errors = True
 
-        # CRITICAL: Add all tool messages to the state - this was working before
+        # CRITICAL: Add all tool messages to the state - this was working
+        # before
         if tool_messages_to_add:
             logger.info(
-                f"[bold magenta]STEP 6: Adding {len(tool_messages_to_add)} tool messages to state[/bold magenta]"
+                f"[bold magenta]STEP 6: Adding {
+                    len(tool_messages_to_add)} tool messages to state[/bold magenta]"
             )
 
             # Create updated messages list
             updated_messages = list(messages) + tool_messages_to_add
 
-            # Update state with new messages - MULTIPLE approaches to ensure it works
+            # Update state with new messages - MULTIPLE approaches to ensure it
+            # works
             state_updated = False
 
             # Method 1: Direct attribute setting (for Pydantic models)
@@ -1026,7 +1143,9 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                     setattr(state, self.messages_key, updated_messages)
                     state_updated = True
                     logger.info(
-                        f"  [bold green]✓ Method 1: Updated state.{self.messages_key} with {len(tool_messages_to_add)} new tool messages[/bold green]"
+                        f"  [bold green]✓ Method 1: Updated state.{
+                            self.messages_key} with {
+                            len(tool_messages_to_add)} new tool messages[/bold green]"
                     )
                 except Exception as e:
                     logger.warning(f"  Method 1 failed: {e}")
@@ -1037,7 +1156,9 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                     state[self.messages_key] = updated_messages
                     state_updated = True
                     logger.info(
-                        f"  [bold green]✓ Method 2: Updated state['{self.messages_key}'] with {len(tool_messages_to_add)} new tool messages[/bold green]"
+                        f"  [bold green]✓ Method 2: Updated state['{
+                            self.messages_key}'] with {
+                            len(tool_messages_to_add)} new tool messages[/bold green]"
                     )
                 except Exception as e:
                     logger.warning(f"  Method 2 failed: {e}")
@@ -1048,7 +1169,9 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                     state[self.messages_key] = updated_messages
                     state_updated = True
                     logger.info(
-                        f"  [bold green]✓ Method 3: Updated dict state['{self.messages_key}'] with {len(tool_messages_to_add)} new tool messages[/bold green]"
+                        f"  [bold green]✓ Method 3: Updated dict state['{
+                            self.messages_key}'] with {
+                            len(tool_messages_to_add)} new tool messages[/bold green]"
                     )
                 except Exception as e:
                     logger.warning(f"  Method 3 failed: {e}")
@@ -1063,7 +1186,12 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
             # Log the tool messages that were added
             for i, tm in enumerate(tool_messages_to_add):
                 logger.debug(
-                    f"    [{i}] ToolMessage: {tm.name} (ID: {getattr(tm, 'tool_call_id', 'unknown')})"
+                    f"    [{i}] ToolMessage: {
+                        tm.name} (ID: {
+                        getattr(
+                            tm,
+                            'tool_call_id',
+                            'unknown')})"
                 )
                 logger.debug(f"        Content: {tm.content[:100]}...")
                 if hasattr(tm, "additional_kwargs") and tm.additional_kwargs:
@@ -1082,14 +1210,17 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
         logger.info(f"  Has errors: {has_errors}")
         logger.info(f"  Tool messages created: {len(tool_messages_to_add)}")
         logger.info(
-            f"  Validation duration: {validation_duration.total_seconds():.3f}s"
+            f"  Validation duration: {
+                validation_duration.total_seconds():.3f}s"
         )
 
         # Log detailed routing analysis
         logger.debug("[bold cyan]ROUTING ANALYSIS[/bold cyan]")
         logger.debug(f"  Total tool calls processed: {len(tool_calls)}")
         logger.debug(
-            f"  Tool calls with errors: {sum(1 for tc in tool_calls if get_tool_name(tc) not in tool_name_mapping)}"
+            f"  Tool calls with errors: {
+                sum(
+                    1 for tc in tool_calls if get_tool_name(tc) not in tool_name_mapping)}"
         )
         logger.debug(f"  Successful validations: {len(destinations)}")
 
@@ -1127,13 +1258,17 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
 
         # Final summary logging
         logger.info(
-            f"[bold magenta]=== ValidationNodeConfig Complete at {validation_end_time.strftime('%H:%M:%S.%f')} ===[/bold magenta]"
+            f"[bold magenta]=== ValidationNodeConfig Complete at {
+                validation_end_time.strftime('%H:%M:%S.%f')} ===[/bold magenta]"
         )
         logger.info(
             f"[bold green]✓ Validation result: {validation_result}[/bold green]"
         )
         logger.info("[bold cyan]Processing summary:[/bold cyan]")
-        logger.info(f"  • Duration: {validation_duration.total_seconds():.3f}s")
+        logger.info(
+            f"  • Duration: {
+                validation_duration.total_seconds():.3f}s"
+        )
         logger.info(f"  • Tool calls: {len(tool_calls)}")
         logger.info(f"  • Tool messages created: {len(tool_messages_to_add)}")
         logger.info(f"  • Validation errors: {has_errors}")

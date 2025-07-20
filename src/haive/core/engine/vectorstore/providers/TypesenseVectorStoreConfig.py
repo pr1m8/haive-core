@@ -1,5 +1,6 @@
 """Typesense Vector Store implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Typesense vector store,
 which combines typo-tolerant search with vector similarity.
 
@@ -120,7 +121,7 @@ class TypesenseVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
     )
 
     @validator("protocol")
-    def validate_protocol(self, v):
+    def validate_protocol(self, v) -> Any:
         """Validate protocol is supported."""
         valid_protocols = ["http", "https"]
         if v not in valid_protocols:
@@ -128,7 +129,7 @@ class TypesenseVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
         return v
 
     @validator("port")
-    def validate_port(self, v):
+    def validate_port(self, v) -> Any:
         """Validate port is numeric."""
         try:
             port_num = int(v)
@@ -139,7 +140,7 @@ class TypesenseVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
         return v
 
     @validator("collection_name")
-    def validate_collection_name(self, v):
+    def validate_collection_name(self, v) -> Any:
         """Validate collection name format."""
         if not v or len(v.strip()) == 0:
             raise ValueError("collection_name cannot be empty")
@@ -170,7 +171,7 @@ class TypesenseVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a Typesense vector store from this configuration.
 
         Returns:

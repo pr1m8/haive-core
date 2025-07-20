@@ -2,7 +2,8 @@
 
 import logging
 from collections import defaultdict
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from haive.core.schema.field_definition import FieldDefinition
 
@@ -19,7 +20,7 @@ class FieldManagerMixin:
     - Engine I/O field mapping
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         """Initialize field tracking structures."""
         super().__init__(*args, **kwargs)
 
@@ -144,18 +145,23 @@ class FieldManagerMixin:
         from haive.core.schema.state_schema import StateSchema
 
         if inspect.isclass(field_type) and issubclass(field_type, StateSchema):
-            logger.debug(f"Field '{name}' is a StateSchema type: {field_type.__name__}")
+            logger.debug(
+                f"Field '{name}' is a StateSchema type: {
+                    field_type.__name__}"
+            )
             self.nested_schemas[name] = field_type
         elif getattr(field_type, "__origin__", None) is Union and any(
             inspect.isclass(arg) and issubclass(arg, StateSchema)
             for arg in field_type.__args__
             if inspect.isclass(arg)
         ):
-            # Handle Optional[StateSchema] and Union types containing StateSchema
+            # Handle Optional[StateSchema] and Union types containing
+            # StateSchema
             for arg in field_type.__args__:
                 if inspect.isclass(arg) and issubclass(arg, StateSchema):
                     logger.debug(
-                        f"Field '{name}' contains StateSchema type: {arg.__name__}"
+                        f"Field '{name}' contains StateSchema type: {
+                            arg.__name__}"
                     )
                     self.nested_schemas[name] = arg
                     break

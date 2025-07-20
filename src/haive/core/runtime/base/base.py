@@ -23,7 +23,7 @@ class RuntimeComponent(Runnable[I, O], Generic[EC, I, O]):
         self.config = config
         self.initialize(**kwargs)
 
-    def initialize(self, **kwargs):
+    def initialize(self, **kwargs) -> None:
         """Initialize the component.
 
         This method can be overridden by subclasses.

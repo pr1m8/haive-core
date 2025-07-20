@@ -1,3 +1,5 @@
+from typing import Any
+
 r"""PromptTemplateEngine: InvokableEngine wrapper for LangChain prompt templates.
 
 This module provides the PromptTemplateEngine class, which wraps LangChain prompt
@@ -88,7 +90,7 @@ Version:
     1.0.0
 """
 
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Optional, Union
 from uuid import uuid4
 
 from langchain_core.messages import AnyMessage
@@ -106,7 +108,7 @@ from haive.core.engine.base import EngineType, InvokableEngine
 from haive.core.schema.schema_composer import SchemaComposer
 
 
-class PromptTemplateEngine(InvokableEngine[Dict[str, Any], FormatOutputType]):
+class PromptTemplateEngine(InvokableEngine[dict[str, Any], FormatOutputType]):
     """An invokable engine that wraps LangChain prompt templates with automatic schema derivation.
 
     This engine makes prompt templates first-class citizens in the Haive framework,
@@ -178,11 +180,11 @@ class PromptTemplateEngine(InvokableEngine[Dict[str, Any], FormatOutputType]):
     )
 
     # Optional overrides
-    custom_input_schema: Optional[Type[BaseModel]] = Field(
+    custom_input_schema: type[BaseModel] | None = Field(
         default=None, description="Custom input schema to use instead of deriving"
     )
 
-    def __init__(self, **data):
+    def __init__(self, **data) -> None:
         """Initialize the prompt template engine with automatic ID generation.
 
         Args:
@@ -197,7 +199,7 @@ class PromptTemplateEngine(InvokableEngine[Dict[str, Any], FormatOutputType]):
         # Don't override name field - let parent class handle it
         super().__init__(**data)
 
-    def derive_input_schema(self) -> Type[BaseModel]:
+    def derive_input_schema(self) -> type[BaseModel]:
         """Derive input schema from prompt template variables with intelligent type inference.
 
         This method analyzes the prompt template to extract all input variables and
@@ -241,7 +243,8 @@ class PromptTemplateEngine(InvokableEngine[Dict[str, Any], FormatOutputType]):
         ):
             optional_vars.update(self.prompt_template.optional_variables)
 
-        # For chat prompts, inspect messages for placeholders and extract variables
+        # For chat prompts, inspect messages for placeholders and extract
+        # variables
         if isinstance(self.prompt_template, ChatPromptTemplate):
             import re
 
@@ -262,7 +265,8 @@ class PromptTemplateEngine(InvokableEngine[Dict[str, Any], FormatOutputType]):
                         if clean_var and clean_var not in partial_vars:
                             input_vars.add(clean_var)
 
-        # Remove partial variables from required inputs (they're already filled)
+        # Remove partial variables from required inputs (they're already
+        # filled)
         input_vars = input_vars - partial_vars
 
         # Build schema fields with type inference
@@ -298,7 +302,7 @@ class PromptTemplateEngine(InvokableEngine[Dict[str, Any], FormatOutputType]):
             "chat_history",
             "conversation",
         ]:
-            base_type = List[AnyMessage]
+            base_type = list[AnyMessage]
             description = f"Chat messages for {var_name}"
 
         # List-type variables
@@ -306,7 +310,7 @@ class PromptTemplateEngine(InvokableEngine[Dict[str, Any], FormatOutputType]):
             pattern in var_lower
             for pattern in ["list", "items", "examples", "docs", "documents"]
         ):
-            base_type = List[str]
+            base_type = list[str]
             description = f"List of items for {var_name}"
 
         # Common specific types
@@ -326,16 +330,15 @@ class PromptTemplateEngine(InvokableEngine[Dict[str, Any], FormatOutputType]):
         # Wrap in Optional if needed
         if optional:
             return Optional[base_type], description
-        else:
-            return base_type, description
+        return base_type, description
 
-    def derive_output_schema(self) -> Type[BaseModel]:
+    def derive_output_schema(self) -> type[BaseModel]:
         """Derive output schema based on prompt template type."""
         # Determine output type based on prompt template
         if isinstance(
-            self.prompt_template, (ChatPromptTemplate, FewShotChatMessagePromptTemplate)
+            self.prompt_template, ChatPromptTemplate | FewShotChatMessagePromptTemplate
         ):
-            output_type = List[AnyMessage]
+            output_type = list[AnyMessage]
             field_name = "messages"
             description = "Formatted chat messages"
         else:
@@ -352,8 +355,8 @@ class PromptTemplateEngine(InvokableEngine[Dict[str, Any], FormatOutputType]):
         )
 
     def invoke(
-        self, input_data: Dict[str, Any], config: Optional[Dict[str, Any]] = None
-    ) -> Union[str, List[AnyMessage]]:
+        self, input_data: dict[str, Any], config: dict[str, Any] | None = None
+    ) -> str | list[AnyMessage]:
         """Format the prompt template with input data using langchain's robust formatting."""
         # Validate input against schema
         input_schema = self.derive_input_schema()
@@ -369,7 +372,7 @@ class PromptTemplateEngine(InvokableEngine[Dict[str, Any], FormatOutputType]):
             # Convert PromptValue to appropriate output format
             if isinstance(
                 self.prompt_template,
-                (ChatPromptTemplate, FewShotChatMessagePromptTemplate),
+                ChatPromptTemplate | FewShotChatMessagePromptTemplate,
             ):
                 # Return as messages for chat templates
                 result = prompt_value.to_messages()
@@ -381,7 +384,7 @@ class PromptTemplateEngine(InvokableEngine[Dict[str, Any], FormatOutputType]):
             # Fallback to direct formatting if PromptValue fails
             if isinstance(
                 self.prompt_template,
-                (ChatPromptTemplate, FewShotChatMessagePromptTemplate),
+                ChatPromptTemplate | FewShotChatMessagePromptTemplate,
             ):
                 result = self.prompt_template.format_messages(**input_dict)
             else:
@@ -393,7 +396,7 @@ class PromptTemplateEngine(InvokableEngine[Dict[str, Any], FormatOutputType]):
 
         return result
 
-    def _prepare_input_dict(self, input_dict: Dict[str, Any]) -> Dict[str, Any]:
+    def _prepare_input_dict(self, input_dict: dict[str, Any]) -> dict[str, Any]:
         """Prepare input dictionary, handling special cases like message serialization."""
         prepared = {}
 
@@ -408,7 +411,8 @@ class PromptTemplateEngine(InvokableEngine[Dict[str, Any], FormatOutputType]):
                     # Already proper message objects
                     prepared[key] = value
                 else:
-                    # Convert if needed (shouldn't normally happen with our schema)
+                    # Convert if needed (shouldn't normally happen with our
+                    # schema)
                     prepared[key] = value
             else:
                 prepared[key] = value
@@ -416,13 +420,13 @@ class PromptTemplateEngine(InvokableEngine[Dict[str, Any], FormatOutputType]):
         return prepared
 
     async def ainvoke(
-        self, input_data: Dict[str, Any], config: Optional[Dict[str, Any]] = None
-    ) -> Union[str, List[AnyMessage]]:
+        self, input_data: dict[str, Any], config: dict[str, Any] | None = None
+    ) -> str | list[AnyMessage]:
         """Async format the prompt template with input data."""
         # For now, prompt formatting is synchronous
         return self.invoke(input_data, config)
 
-    def get_input_fields(self) -> Dict[str, Any]:
+    def get_input_fields(self) -> dict[str, Any]:
         """Get input fields for this engine."""
         schema = self.derive_input_schema()
         if schema:
@@ -432,7 +436,7 @@ class PromptTemplateEngine(InvokableEngine[Dict[str, Any], FormatOutputType]):
             return fields
         return {}
 
-    def get_output_fields(self) -> Dict[str, Any]:
+    def get_output_fields(self) -> dict[str, Any]:
         """Get output fields for this engine."""
         schema = self.derive_output_schema()
         if schema:
@@ -440,32 +444,33 @@ class PromptTemplateEngine(InvokableEngine[Dict[str, Any], FormatOutputType]):
             for name, field_info in schema.model_fields.items():
                 fields[name] = (field_info.annotation, field_info.default)
             return fields
-        return {"formatted_output": (Union[str, List[AnyMessage]], None)}
+        return {"formatted_output": (Union[str, list[AnyMessage]], None)}
 
-    def create_runnable(self, config: Optional[Dict[str, Any]] = None):
+    def create_runnable(self, config: dict[str, Any] | None = None):
         """Create a runnable from this engine."""
         # The prompt template itself is already a runnable
         return self.prompt_template
 
-    def to_runnable(self):
+    def to_runnable(self) -> Any:
         """Convert to a LangChain runnable."""
         # The prompt template itself is already a runnable
         return self.prompt_template
 
     @classmethod
     def from_template(
-        cls, template: Union[str, BasePromptTemplate], **kwargs
+        cls, template: str | BasePromptTemplate, **kwargs
     ) -> "PromptTemplateEngine":
         """Create from a template string or prompt template."""
-        if isinstance(template, str):
-            prompt = PromptTemplate.from_template(template)
-        else:
-            prompt = template
+        prompt = (
+            PromptTemplate.from_template(template)
+            if isinstance(template, str)
+            else template
+        )
 
         return cls(prompt_template=prompt, **kwargs)
 
     @classmethod
-    def from_messages(cls, messages: List[Any], **kwargs) -> "PromptTemplateEngine":
+    def from_messages(cls, messages: list[Any], **kwargs) -> "PromptTemplateEngine":
         """Create from chat messages."""
         prompt = ChatPromptTemplate.from_messages(messages)
         return cls(prompt_template=prompt, **kwargs)

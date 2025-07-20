@@ -5,7 +5,8 @@ enabling graphs to know when they need recompilation.
 """
 
 import logging
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from pydantic import PrivateAttr
 
@@ -45,7 +46,12 @@ class DynamicToolRouteMixin(ToolRouteMixin):
             Callback ID for later removal
         """
         self._route_change_callbacks.append(callback)
-        callback_id = callback_id or f"callback_{len(self._route_change_callbacks)}"
+        callback_id = (
+            callback_id
+            or f"callback_{
+            len(
+                self._route_change_callbacks)}"
+        )
 
         if callback_id not in self._route_observers:
             self._route_observers[callback_id] = []

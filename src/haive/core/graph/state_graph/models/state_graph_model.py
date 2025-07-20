@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Any, ClassVar, Dict, Generic, List, Optional, Set, Tuple, TypeVar
+from typing import Any, ClassVar, Generic, TypeVar
 
 from pydantic import Field, computed_field, model_validator
 
@@ -16,41 +16,38 @@ class GraphModel(SerializableModel, Generic[TNode]):
     """Serializable representation of a state graph with modification methods."""
 
     # Basic properties
-    edges: Set[Tuple[str, str]] = Field(
+    edges: set[tuple[str, str]] = Field(
         default_factory=set, description="Standard edges"
     )
-    waiting_edges: Set[Tuple[Tuple[str, ...], str]] = Field(
+    waiting_edges: set[tuple[tuple[str, ...], str]] = Field(
         default_factory=set, description="Waiting edges"
     )
     compiled: bool = Field(default=False, description="Compilation status")
 
     # Entry and exit points
-    entry_point: Optional[str] = Field(
-        default=None, description="Entry point node name"
-    )
-    finish_point: Optional[str] = Field(
-        default=None, description="Finish point node name"
-    )
+    entry_point: str | None = Field(
+        default=None, description="Entry point node name")
+    finish_point: str | None = Field(
+        default=None, description="Finish point node name")
 
     # Schemas
-    schema: Optional[TypeReference] = Field(
-        default=None, description="State schema type"
-    )
-    input_schema: Optional[TypeReference] = Field(
+    schema: TypeReference | None = Field(
+        default=None, description="State schema type")
+    input_schema: TypeReference | None = Field(
         default=None, description="Input schema type"
     )
-    output_schema: Optional[TypeReference] = Field(
+    output_schema: TypeReference | None = Field(
         default=None, description="Output schema type"
     )
-    config_schema: Optional[TypeReference] = Field(
+    config_schema: TypeReference | None = Field(
         default=None, description="Config schema type"
     )
 
     # Nodes and branches - using our models
-    nodes: Dict[str, NodeModel[TNode]] = Field(
+    nodes: dict[str, NodeModel[TNode]] = Field(
         default_factory=dict, description="Node specifications"
     )
-    branches: Dict[str, Dict[str, BranchModel]] = Field(
+    branches: dict[str, dict[str, BranchModel]] = Field(
         default_factory=lambda: defaultdict(dict), description="Branch specifications"
     )
 
@@ -61,7 +58,7 @@ class GraphModel(SerializableModel, Generic[TNode]):
     __abstract__ = False
 
     # Private attributes
-    _reserved_nodes: ClassVar[List[str]] = ["__start__", "__end__"]
+    _reserved_nodes: ClassVar[list[str]] = ["__start__", "__end__"]
 
     @computed_field
     @property
@@ -77,14 +74,15 @@ class GraphModel(SerializableModel, Generic[TNode]):
             len(self.edges)
             + len(self.waiting_edges)
             + sum(
-                sum(1 for branch in branch_dict.values() if branch.ends or branch.then)
+                sum(1 for branch in branch_dict.values()
+                    if branch.ends or branch.then)
                 for branch_dict in self.branches.values()
             )
         )
 
     @computed_field
     @property
-    def all_edges(self) -> List[EdgeModel]:
+    def all_edges(self) -> list[EdgeModel]:
         """Get all edges in the graph as EdgeModel objects."""
         result = []
 
@@ -102,27 +100,34 @@ class GraphModel(SerializableModel, Generic[TNode]):
                 if branch.ends:
                     for condition, target in branch.ends.items():
                         result.append(
-                            EdgeModel.create_branch(src, target, branch_name, condition)
+                            EdgeModel.create_branch(
+                                src, target, branch_name, condition)
                         )
                 if branch.then:
                     result.append(
-                        EdgeModel.create_branch_then(src, branch.then, branch_name)
+                        EdgeModel.create_branch_then(
+                            src, branch.then, branch_name)
                     )
 
         return result
 
     @model_validator(mode="after")
-    def validate_graph_structure(self) -> "GraphModel":
+
+
+    @classmethod
+    def validate_graph_structure(cls) -> "GraphModel":
         """Validate the overall graph structure."""
         # Check that entry and finish points exist if set
         if self.entry_point and self.entry_point not in self.nodes:
             raise ValueError(
-                f"Entry point '{self.entry_point}' references non-existent node"
+                f"Entry point '{
+                    self.entry_point}' references non-existent node"
             )
 
         if self.finish_point and self.finish_point not in self.nodes:
             raise ValueError(
-                f"Finish point '{self.finish_point}' references non-existent node"
+                f"Finish point '{
+                    self.finish_point}' references non-existent node"
             )
 
         return self
@@ -148,9 +153,8 @@ class GraphModel(SerializableModel, Generic[TNode]):
             raise ValueError(f"Node '{name}' does not exist")
 
         # Remove edges to/from this node
-        self.edges = {
-            (src, dst) for src, dst in self.edges if src != name and dst != name
-        }
+        self.edges = {(src, dst)
+                      for src, dst in self.edges if name not in (src, dst)}
 
         # Remove waiting edges involving this node
         new_waiting_edges = set()
@@ -173,7 +177,8 @@ class GraphModel(SerializableModel, Generic[TNode]):
             for branch_name, branch in list(branch_dict.items()):
                 if branch.ends:
                     # Filter out ends that point to the removed node
-                    branch.ends = {k: v for k, v in branch.ends.items() if v != name}
+                    branch.ends = {
+                        k: v for k, v in branch.ends.items() if v != name}
 
                     # Remove branch if it has no ends left
                     if not branch.ends and not branch.then:
@@ -216,9 +221,9 @@ class GraphModel(SerializableModel, Generic[TNode]):
         self.mark_modified()
         return self
 
-    def add_sequence(self, nodes: List[Union[str, Tuple[str, Any]]]) -> "GraphModel":
-        """
-        Add a sequence of nodes that will be executed in order.
+    def add_sequence(
+            self, nodes: list[Union[str, tuple[str, Any]]]) -> "GraphModel":
+        """Add a sequence of nodes that will be executed in order.
 
         Args:
             nodes: List of node names or (name, spec) tuples to add in sequence
@@ -242,7 +247,8 @@ class GraphModel(SerializableModel, Generic[TNode]):
             if name not in self.nodes and node_spec is not None:
                 self.add_node(name, node_spec)
             elif name not in self.nodes:
-                raise ValueError(f"Node '{name}' does not exist and no spec provided")
+                raise ValueError(
+                    f"Node '{name}' does not exist and no spec provided")
 
             # Connect to previous node
             if previous_name is not None:
@@ -254,7 +260,8 @@ class GraphModel(SerializableModel, Generic[TNode]):
         return self
 
     @classmethod
-    def from_state_graph(cls, graph: Any, name: str = "unnamed_graph") -> "GraphModel":
+    def from_state_graph(cls, graph: Any,
+                         name: str = "unnamed_graph") -> "GraphModel":
         """Create a GraphModel from a StateGraph."""
         model = cls(name=name)
 
@@ -283,7 +290,8 @@ class GraphModel(SerializableModel, Generic[TNode]):
         # Copy branches
         for source, branch_dict in graph.branches.items():
             for branch_name, branch in branch_dict.items():
-                branch_model = BranchModel.from_branch(branch_name, source, branch)
+                branch_model = BranchModel.from_branch(
+                    branch_name, source, branch)
                 if branch_model:
                     model.branches[source][branch_name] = branch_model
 

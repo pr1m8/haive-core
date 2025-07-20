@@ -10,8 +10,9 @@ The registry enables automatic source detection and loader selection.
 """
 
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional, Set, Type, Union
+from typing import Any
 
 from haive.core.engine.document.config import LoaderPreference
 from haive.core.engine.document.loaders.path_analyzer import (
@@ -41,12 +42,12 @@ class LoaderMapping:
     quality: str = "medium"  # low, medium, high
 
     # Requirements
-    requires_packages: List[str] = field(default_factory=list)
+    requires_packages: list[str] = field(default_factory=list)
     requires_auth: bool = False
 
     # When to use this loader
-    best_for: List[str] = field(default_factory=list)
-    conditions: Dict[str, Any] = field(
+    best_for: list[str] = field(default_factory=list)
+    conditions: dict[str, Any] = field(
         default_factory=dict
     )  # e.g., {"file_size": "<100MB"}
 
@@ -56,55 +57,54 @@ class SourceRegistration:
     """Complete registration info for a source."""
 
     name: str
-    source_class: Type[BaseSource]
+    source_class: type[BaseSource]
 
     # Pattern matching
-    file_extensions: Set[str] = field(default_factory=set)
-    mime_types: Set[str] = field(default_factory=set)
-    url_patterns: Set[str] = field(default_factory=set)
-    schemes: Set[str] = field(default_factory=set)
-    path_patterns: Set[str] = field(default_factory=set)
+    file_extensions: set[str] = field(default_factory=set)
+    mime_types: set[str] = field(default_factory=set)
+    url_patterns: set[str] = field(default_factory=set)
+    schemes: set[str] = field(default_factory=set)
+    path_patterns: set[str] = field(default_factory=set)
 
     # Associated loaders
-    loaders: Dict[str, LoaderMapping] = field(default_factory=dict)
-    default_loader: Optional[str] = None
+    loaders: dict[str, LoaderMapping] = field(default_factory=dict)
+    default_loader: str | None = None
 
     # Matching priority (higher = preferred)
     priority: int = 0
 
     # Custom matcher function
-    custom_matcher: Optional[Callable[[PathAnalysisResult], bool]] = None
+    custom_matcher: Callable[[PathAnalysisResult], bool] | None = None
 
 
 class SourceRegistry:
     """Registry for document sources and their loaders."""
 
-    def __init__(self):
-        self._sources: Dict[str, SourceRegistration] = {}
+    def __init__(self) -> None:
+        self._sources: dict[str, SourceRegistration] = {}
 
         # Indexes for fast lookup
-        self._extension_index: Dict[str, Set[str]] = {}  # ext -> source names
+        self._extension_index: dict[str, set[str]] = {}  # ext -> source names
         # pattern -> source names
-        self._url_pattern_index: Dict[str, Set[str]] = {}
-        self._scheme_index: Dict[str, Set[str]] = {}  # scheme -> source names
-        self._mime_index: Dict[str, Set[str]] = {}  # mime -> source names
+        self._url_pattern_index: dict[str, set[str]] = {}
+        self._scheme_index: dict[str, set[str]] = {}  # scheme -> source names
+        self._mime_index: dict[str, set[str]] = {}  # mime -> source names
 
     def register(
         self,
         name: str,
-        source_class: Type[BaseSource],
-        file_extensions: Optional[List[str]] = None,
-        mime_types: Optional[List[str]] = None,
-        url_patterns: Optional[List[str]] = None,
-        schemes: Optional[List[str]] = None,
-        path_patterns: Optional[List[str]] = None,
-        loaders: Optional[Dict[str, Union[str, Dict[str, Any]]]] = None,
-        default_loader: Optional[str] = None,
+        source_class: type[BaseSource],
+        file_extensions: list[str] | None = None,
+        mime_types: list[str] | None = None,
+        url_patterns: list[str] | None = None,
+        schemes: list[str] | None = None,
+        path_patterns: list[str] | None = None,
+        loaders: dict[str, str | dict[str, Any]] | None = None,
+        default_loader: str | None = None,
         priority: int = 0,
-        custom_matcher: Optional[Callable[[PathAnalysisResult], bool]] = None,
+        custom_matcher: Callable[[PathAnalysisResult], bool] | None = None,
     ) -> SourceRegistration:
         """Register a source with the registry."""
-
         # Create registration
         registration = SourceRegistration(
             name=name,
@@ -147,7 +147,9 @@ class SourceRegistry:
         self._update_indexes(name, registration)
 
         logger.info(
-            f"Registered source '{name}' with {len(registration.loaders)} loaders, "
+            f"Registered source '{name}' with {
+                len(
+                    registration.loaders)} loaders, "
             f"{len(registration.file_extensions)} extensions"
         )
 
@@ -180,14 +182,14 @@ class SourceRegistry:
             self._mime_index[mime].add(name)
 
     def find_source_for_path(
-        self, path: str, analysis: Optional[PathAnalysisResult] = None
-    ) -> Optional[SourceRegistration]:
+        self, path: str, analysis: PathAnalysisResult | None = None
+    ) -> SourceRegistration | None:
         """Find the best source for a given path."""
         # Analyze path if not provided
         if not analysis:
             analysis = analyze_path(path)
 
-        candidates: List[SourceRegistration] = []
+        candidates: list[SourceRegistration] = []
 
         # Check file extension
         if analysis.file_extension:
@@ -224,8 +226,8 @@ class SourceRegistry:
         return None
 
     def create_source(
-        self, path: str, source_type: Optional[str] = None, **kwargs
-    ) -> Optional[BaseSource]:
+        self, path: str, source_type: str | None = None, **kwargs
+    ) -> BaseSource | None:
         """Create a source instance for a path."""
         # Use specific source if provided
         if source_type and source_type in self._sources:
@@ -264,15 +266,15 @@ class SourceRegistry:
             return registration.source_class(**source_kwargs)
 
         except Exception as e:
-            logger.error(f"Failed to create source for {path}: {e}")
+            logger.exception(f"Failed to create source for {path}: {e}")
             return None
 
     def get_loader_for_source(
         self,
         source: BaseSource,
-        loader_name: Optional[str] = None,
+        loader_name: str | None = None,
         preference: LoaderPreference = LoaderPreference.BALANCED,
-    ) -> Optional[LoaderMapping]:
+    ) -> LoaderMapping | None:
         """Get the best loader for a source."""
         # Get source registration
         registration = self._sources.get(source.source_type)
@@ -314,11 +316,11 @@ class SourceRegistry:
         # Return first available
         return next(iter(registration.loaders.values()))
 
-    def list_sources(self) -> List[str]:
+    def list_sources(self) -> list[str]:
         """List all registered source names."""
         return list(self._sources.keys())
 
-    def get_source_info(self, name: str) -> Optional[SourceRegistration]:
+    def get_source_info(self, name: str) -> SourceRegistration | None:
         """Get registration info for a source."""
         return self._sources.get(name)
 
@@ -331,17 +333,17 @@ source_registry = SourceRegistry()
 
 
 def register_source(
-    name: Optional[str] = None,
-    file_extensions: Optional[List[str]] = None,
-    mime_types: Optional[List[str]] = None,
-    url_patterns: Optional[List[str]] = None,
-    schemes: Optional[List[str]] = None,
-    path_patterns: Optional[List[str]] = None,
-    loaders: Optional[Dict[str, Union[str, Dict[str, Any]]]] = None,
-    default_loader: Optional[str] = None,
+    name: str | None = None,
+    file_extensions: list[str] | None = None,
+    mime_types: list[str] | None = None,
+    url_patterns: list[str] | None = None,
+    schemes: list[str] | None = None,
+    path_patterns: list[str] | None = None,
+    loaders: dict[str, str | dict[str, Any]] | None = None,
+    default_loader: str | None = None,
     priority: int = 0,
-    custom_matcher: Optional[Callable[[PathAnalysisResult], bool]] = None,
-) -> Callable[[Type[BaseSource]], Type[BaseSource]]:
+    custom_matcher: Callable[[PathAnalysisResult], bool] | None = None,
+) -> Callable[[type[BaseSource]], type[BaseSource]]:
     """Decorator to register a source class.
 
     Example:
@@ -371,7 +373,7 @@ def register_source(
             pass
     """
 
-    def decorator(source_class: Type[BaseSource]) -> Type[BaseSource]:
+    def decorator(source_class: type[BaseSource]) -> type[BaseSource]:
         # Use class name if no name provided
         source_name = name or source_class.__name__.lower().replace("source", "")
 
@@ -400,9 +402,9 @@ def register_source(
 
 
 __all__ = [
-    "SourceRegistry",
-    "SourceRegistration",
     "LoaderMapping",
-    "source_registry",
+    "SourceRegistration",
+    "SourceRegistry",
     "register_source",
+    "source_registry",
 ]

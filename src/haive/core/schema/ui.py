@@ -244,11 +244,10 @@ class SchemaUI:
                 )
                 return f"{{{formatted}, ... ({len(value)} items)}}"
             return f"{{{', '.join(f'{k}: {SchemaUI._format_value(v)}' for k, v in value.items())}}}"
-        elif hasattr(value, "model_dump"):  # Pydantic v2
+        if hasattr(value, "model_dump"):  # Pydantic v2
             class_name = value.__class__.__name__
             return f"{class_name}(...)"
-        else:
-            return str(value)
+        return str(value)
 
     @staticmethod
     def schema_to_code(schema: type[BaseModel]) -> str:
@@ -302,7 +301,10 @@ class SchemaUI:
             # Add shared fields
             if hasattr(schema, "__shared_fields__") and schema.__shared_fields__:
                 lines.append("")
-                lines.append(f"    __shared_fields__ = {schema.__shared_fields__}")
+                lines.append(
+                    f"    __shared_fields__ = {
+                        schema.__shared_fields__}"
+                )
 
             # Add serializable reducers
             if (
@@ -311,7 +313,8 @@ class SchemaUI:
             ):
                 lines.append("")
                 lines.append(
-                    f"    __serializable_reducers__ = {schema.__serializable_reducers__}"
+                    f"    __serializable_reducers__ = {
+                        schema.__serializable_reducers__}"
                 )
 
         return "\n".join(lines)
@@ -413,7 +416,12 @@ class SchemaUI:
             default_str = f"default_factory={factory_name}"
         else:
             default = field_info.default
-            default_str = "required" if default is ... else f"default={default!r}"
+            default_str = (
+                "required"
+                if default is ...
+                else f"default={
+                default!r}"
+            )
 
         return f"{type_str} ({default_str})"
 

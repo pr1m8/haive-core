@@ -15,7 +15,6 @@ def test_aug_llm_config_uses_llm_state():
 
     # Check the MRO to see which base class was used
     mro_names = [cls.__name__ for cls in schema.__mro__]
-    print(f"Schema MRO: {mro_names}")
 
     # LLMState should be in the MRO
     assert "LLMState" in mro_names, f"Expected LLMState in MRO but got: {mro_names}"
@@ -24,7 +23,8 @@ def test_aug_llm_config_uses_llm_state():
     # But it will appear later in the chain through LLMState
     llm_index = mro_names.index("LLMState")
     messages_index = (
-        mro_names.index("MessagesState") if "MessagesState" in mro_names else -1
+        mro_names.index(
+            "MessagesState") if "MessagesState" in mro_names else -1
     )
 
     if messages_index != -1:

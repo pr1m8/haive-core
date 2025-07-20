@@ -27,8 +27,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 # Test basic registry functionality
 def test_basic_registry():
     """Test basic registry operations."""
-    print("\n=== Testing Basic Registry Operations ===")
-
     # Create a new registry
     registry = AbstractRegistry[str, Any](
         name="test_registry", description="Registry for testing"
@@ -56,25 +54,21 @@ def test_basic_registry():
 
     # Get by tag
     tag_results = registry.get_by_tag("test")
-    print(f"Items with 'test' tag: {list(tag_results.keys())}")
     assert len(tag_results) == 2
     assert "item1" in tag_results
     assert "item2" in tag_results
 
     # Get by multiple tags
     multi_tag = registry.get_by_tags(["test", "dict"])
-    print(f"Items with 'test' OR 'dict' tags: {list(multi_tag.keys())}")
     assert len(multi_tag) == 2
 
     # With require_all=True
     strict_tag = registry.get_by_tags(["test", "dict"], require_all=True)
-    print(f"Items with 'test' AND 'dict' tags: {list(strict_tag.keys())}")
     assert len(strict_tag) == 1
     assert "item2" in strict_tag
 
     # Get metadata
     metadata = registry.get_metadata("item3")
-    print(f"Metadata for item3: {metadata}")
     assert metadata["description"] == "Doubles input"
 
     # Update an item
@@ -95,17 +89,14 @@ def test_basic_registry():
     assert "item1" not in example_tags
 
     # Remove an item
-    removed = registry.remove("item2")
-    print(f"Removed item2: {removed}")
+    registry.remove("item2")
     assert not registry.has("item2")
 
     # Item description
-    description = registry.describe("item3")
-    print(f"Description of item3:\n{description}")
+    registry.describe("item3")
 
     # Statistics
-    stats = registry.get_statistics()
-    print(f"Registry statistics: {stats}")
+    registry.get_statistics()
 
     return registry
 
@@ -113,33 +104,30 @@ def test_basic_registry():
 # Test dependencies
 def test_registry_dependencies():
     """Test registry dependency tracking."""
-    print("\n=== Testing Registry Dependencies ===")
-
     registry = AbstractRegistry[str, Any](name="dependency_test")
 
     # Register items with dependencies
     registry.register("base", "Base item")
     registry.register("dependent1", "Depends on base", dependencies=["base"])
     registry.register("dependent2", "Depends on base", dependencies=["base"])
-    registry.register("nested", "Depends on dependent1", dependencies=["dependent1"])
+    registry.register(
+        "nested",
+        "Depends on dependent1",
+        dependencies=["dependent1"])
 
     # Check dependencies
     base_deps = registry.get_dependencies("base")
-    print(f"Dependencies of 'base': {base_deps}")
     assert len(base_deps) == 0
 
     dep1_deps = registry.get_dependencies("dependent1")
-    print(f"Dependencies of 'dependent1': {dep1_deps}")
     assert "base" in dep1_deps
 
     # Check dependents
     base_dependents = registry.get_dependents("base")
-    print(f"Dependents of 'base': {base_dependents}")
     assert "dependent1" in base_dependents
     assert "dependent2" in base_dependents
 
     dep1_dependents = registry.get_dependents("dependent1")
-    print(f"Dependents of 'dependent1': {dep1_dependents}")
     assert "nested" in dep1_dependents
 
     # Try removing with dependents
@@ -151,8 +139,6 @@ def test_registry_dependencies():
 # Test registry decorator
 def test_registry_decorator():
     """Test registry decorator functionality."""
-    print("\n=== Testing Registry Decorators ===")
-
     registry = AbstractRegistry[str, Any](name="decorator_test")
 
     # Create a decorator
@@ -179,12 +165,10 @@ def test_registry_decorator():
 
     # Get by tag
     functions = registry.get_by_tag("function")
-    print(f"Registered functions: {list(functions.keys())}")
     assert len(functions) == 2
 
     # Test function introspection
     add_desc = registry.describe("add_numbers")
-    print(f"Function description:\n{add_desc}")
     assert "parameters" in add_desc["item_info"]
     assert "doc" in add_desc["item_info"]
 
@@ -194,7 +178,6 @@ def test_registry_decorator():
 # Test specialized registries
 def test_specialized_registries():
     """Test the specialized registry types."""
-    print("\n=== Testing Specialized Registries ===")
 
     # Test tool registry
     @register_tool("calculator", tags=["math"])
@@ -223,29 +206,17 @@ def test_specialized_registries():
         return ["node1", "node2", "node3"]
 
     # Verify registrations
-    print(
-        f"Tool registry items: {list(registry_manager.get_registry('tools').get_all().keys())}"
-    )
-    print(
-        f"Schema registry items: {list(registry_manager.get_registry('schemas').get_all().keys())}"
-    )
-    print(
-        f"Node registry items: {list(registry_manager.get_registry('nodes').get_all().keys())}"
-    )
-    print(
-        f"Graph registry items: {list(registry_manager.get_registry('graphs').get_all().keys())}"
-    )
 
     # Test registry manager
-    all_registries = registry_manager.list_registries()
-    print(f"Available registries: {all_registries}")
+    registry_manager.list_registries()
 
     # Get items from registries
     calculator_fn = registry_manager.get_registry("tools").get("calculator")
     assert calculator_fn("2 + 3 * 4") == 14
 
     # Get tags
-    workflow_items = registry_manager.get_registry("graphs").get_by_tag("workflow")
+    workflow_items = registry_manager.get_registry(
+        "graphs").get_by_tag("workflow")
     assert "linear_workflow" in workflow_items
 
     return registry_manager
@@ -254,15 +225,12 @@ def test_specialized_registries():
 # Test registry events with listeners
 def test_registry_events():
     """Test registry event listeners."""
-    print("\n=== Testing Registry Events ===")
-
     registry = AbstractRegistry[str, Any](name="event_test")
     events = []
 
     # Add a listener
     def event_listener(event_type, key, item):
         events.append((event_type, key))
-        print(f"Event: {event_type} - {key}")
 
     registry.add_listener(event_listener)
 
@@ -272,7 +240,6 @@ def test_registry_events():
     registry.remove("item1")
 
     # Check events
-    print(f"Recorded events: {events}")
     assert len(events) == 3
     assert events[0][0] == "register"
     assert events[1][0] == "update"
@@ -295,5 +262,3 @@ if __name__ == "__main__":
     decorator_registry = test_registry_decorator()
     specialized_registries = test_specialized_registries()
     event_registry = test_registry_events()
-
-    print("\n=== All registry tests completed successfully ===")

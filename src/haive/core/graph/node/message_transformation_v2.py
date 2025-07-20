@@ -3,8 +3,9 @@
 # ============================================================================
 
 import logging
+from collections.abc import Callable
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, TypeVar
+from typing import Any, Optional, TypeVar
 
 from langchain_core.messages import (
     AIMessage,
@@ -45,8 +46,7 @@ class TransformationType(str, Enum):
 
 
 class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
-    """
-    Configuration for a node that transforms messages in various ways.
+    """Configuration for a node that transforms messages in various ways.
 
     Supports multiple transformation types including role swapping,
     metadata manipulation, and agent-to-agent communication.
@@ -71,7 +71,7 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
         default="messages", description="Name of the messages field in input schema"
     )
 
-    output_field: Optional[str] = Field(
+    output_field: str | None = Field(
         default=None,
         description="Name of the output field in output schema (defaults to messages_field)",
     )
@@ -82,13 +82,13 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
     )
 
     # Engine ID configuration
-    engine_id: Optional[str] = Field(
+    engine_id: str | None = Field(
         default=None,
         description="Engine ID to add to messages (for ADD_ENGINE_ID transformation)",
     )
 
     # Engine name configuration
-    engine_name: Optional[str] = Field(
+    engine_name: str | None = Field(
         default=None,
         description="Engine name to add to messages (for engine attribution)",
     )
@@ -110,23 +110,23 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
     )
 
     # Filter by type configuration
-    include_types: Optional[List[str]] = Field(
+    include_types: list[str] | None = Field(
         default=None, description="Message types to include (for FILTER_BY_TYPE)"
     )
 
-    exclude_types: Optional[List[str]] = Field(
+    exclude_types: list[str] | None = Field(
         default=None, description="Message types to exclude (for FILTER_BY_TYPE)"
     )
 
     # Agent-specific configuration
-    agent_name: Optional[str] = Field(
+    agent_name: str | None = Field(
         default=None,
         description="Agent name for filtering (for AGENT_TO_AGENT transformation)",
     )
 
     # Custom transformation
-    custom_transformer: Optional[Callable[[List[BaseMessage]], List[BaseMessage]]] = (
-        Field(default=None, description="Custom transformation function", exclude=True)
+    custom_transformer: Callable[[list[BaseMessage]], list[BaseMessage]] | None = Field(
+        default=None, description="Custom transformation function", exclude=True
     )
 
     # Additional options
@@ -138,7 +138,10 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
     debug: bool = Field(default=False, description="Enable debug output")
 
     @model_validator(mode="after")
-    def validate_transformation_config(self) -> "MessageTransformationNodeConfig":
+
+
+    @classmethod
+    def validate_transformation_config(cls) -> "MessageTransformationNodeConfig":
         """Validate transformation-specific configuration."""
         if (
             self.transformation_type == TransformationType.ADD_ENGINE_ID
@@ -163,21 +166,21 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
 
         return self
 
-    def get_default_input_fields(self) -> List[FieldDefinition]:
+    def get_default_input_fields(self) -> list[FieldDefinition]:
         """Get default input field definitions."""
         return [StandardFields.messages(use_enhanced=True)]
 
-    def get_default_output_fields(self) -> List[FieldDefinition]:
+    def get_default_output_fields(self) -> list[FieldDefinition]:
         """Get default output field definitions."""
         output_field_name = self.output_field or self.messages_field
 
         fields = [
             FieldDefinition(
                 name=output_field_name,
-                field_type=List[BaseMessage],
+                field_type=list[BaseMessage],
                 default_factory=list,
                 description="Transformed messages",
-                shared=True if output_field_name == "messages" else False,
+                shared=output_field_name == "messages",
                 reducer_name=(
                     "add_messages" if output_field_name == "messages" else None
                 ),
@@ -192,14 +195,12 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
 
         return fields
 
-    def __call__(
-        self, state: StateLike, config: Optional[ConfigLike] = None
-    ) -> Command:
+    def __call__(self, state: StateLike, config: ConfigLike | None = None) -> Command:
         """Execute the message transformation."""
-
         if self.debug:
             console.print(
-                f"[cyan]MessageTransformation[/] Starting {self.transformation_type} transformation"
+                f"[cyan]MessageTransformation[/] Starting {
+                    self.transformation_type} transformation"
             )
 
         try:
@@ -207,7 +208,10 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
             messages = self._get_messages_from_state(state)
 
             if not messages:
-                logger.warning(f"No messages found in field '{self.messages_field}'")
+                logger.warning(
+                    f"No messages found in field '{
+                        self.messages_field}'"
+                )
                 return self._create_output_command({}, goto=self._get_goto_node())
 
             if self.debug:
@@ -218,7 +222,8 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
 
             if self.debug:
                 console.print(
-                    f"[green]Transformed to {len(transformed_messages)} messages[/]"
+                    f"[green]Transformed to {
+                        len(transformed_messages)} messages[/]"
                 )
 
             # Create update dictionary
@@ -228,13 +233,13 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
             return self._create_output_command(update, goto=self._get_goto_node())
 
         except Exception as e:
-            logger.error(f"Error in message transformation: {e}")
+            logger.exception(f"Error in message transformation: {e}")
             output_field = self.output_field or self.messages_field
             return self._create_output_command(
                 {output_field: [], self.error_field: str(e)}, goto=self._get_goto_node()
             )
 
-    def _get_messages_from_state(self, state: StateLike) -> List[BaseMessage]:
+    def _get_messages_from_state(self, state: StateLike) -> list[BaseMessage]:
         """Extract messages from state."""
         if hasattr(state, self.messages_field):
             messages = getattr(state, self.messages_field)
@@ -253,13 +258,12 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
         """Get the node to go to after transformation."""
         return self.command_goto or "agent"
 
-    def _create_output_command(self, update: Dict[str, Any], goto: str) -> Command:
+    def _create_output_command(self, update: dict[str, Any], goto: str) -> Command:
         """Create output command with proper typing."""
         return Command(update=update, goto=goto)
 
-    def _apply_transformation(self, messages: List[BaseMessage]) -> List[BaseMessage]:
+    def _apply_transformation(self, messages: list[BaseMessage]) -> list[BaseMessage]:
         """Apply the specified transformation to messages."""
-
         transformation_map = {
             TransformationType.AI_TO_HUMAN: self._transform_ai_to_human,
             TransformationType.HUMAN_TO_AI: self._transform_human_to_ai,
@@ -280,7 +284,7 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
 
         return transformer(messages)
 
-    def _transform_ai_to_human(self, messages: List[BaseMessage]) -> List[BaseMessage]:
+    def _transform_ai_to_human(self, messages: list[BaseMessage]) -> list[BaseMessage]:
         """Transform AI messages to Human messages, preserving metadata."""
         transformed = []
 
@@ -323,7 +327,7 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
 
         return transformed
 
-    def _transform_human_to_ai(self, messages: List[BaseMessage]) -> List[BaseMessage]:
+    def _transform_human_to_ai(self, messages: list[BaseMessage]) -> list[BaseMessage]:
         """Transform Human messages to AI messages, preserving metadata."""
         transformed = []
 
@@ -366,9 +370,8 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
 
         return transformed
 
-    def _transform_reflection(self, messages: List[BaseMessage]) -> List[BaseMessage]:
-        """
-        Apply reflection transformation: swap AI ↔ Human roles.
+    def _transform_reflection(self, messages: list[BaseMessage]) -> list[BaseMessage]:
+        """Apply reflection transformation: swap AI ↔ Human roles.
 
         Based on the reflection pattern where:
         - First message (original user request) is preserved
@@ -416,21 +419,19 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
                     console.print(
                         f"[green]Reflection swap {msg.type} → {target_cls.__name__.lower()}:[/] {msg.content[:50]}..."
                     )
-            else:
-                # Keep non-human/ai messages unchanged (unless excluded)
-                if not (
-                    (self.exclude_system_messages and isinstance(msg, SystemMessage))
-                    or (self.exclude_tool_messages and isinstance(msg, ToolMessage))
-                ):
-                    transformed.append(msg)
+            # Keep non-human/ai messages unchanged (unless excluded)
+            elif not (
+                (self.exclude_system_messages and isinstance(msg, SystemMessage))
+                or (self.exclude_tool_messages and isinstance(msg, ToolMessage))
+            ):
+                transformed.append(msg)
 
         return transformed
 
     def _transform_agent_to_agent(
-        self, messages: List[BaseMessage]
-    ) -> List[BaseMessage]:
-        """
-        Transform messages for agent-to-agent communication.
+        self, messages: list[BaseMessage]
+    ) -> list[BaseMessage]:
+        """Transform messages for agent-to-agent communication.
 
         Excludes system messages and converts AI messages to Human messages.
         """
@@ -477,7 +478,7 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
 
         return transformed
 
-    def _add_engine_id(self, messages: List[BaseMessage]) -> List[BaseMessage]:
+    def _add_engine_id(self, messages: list[BaseMessage]) -> list[BaseMessage]:
         """Add engine_id and engine_name to all AI messages."""
         if not self.engine_id and not self.engine_name:
             return messages
@@ -511,7 +512,8 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
 
                 if self.debug:
                     console.print(
-                        f"[green]Added engine_id to AI message:[/] {self.engine_id}"
+                        f"[green]Added engine_id to AI message:[/] {
+                            self.engine_id}"
                     )
             else:
                 # Keep other messages unchanged
@@ -519,16 +521,16 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
 
         return transformed
 
-    def _extract_first_human(self, messages: List[BaseMessage]) -> List[BaseMessage]:
-        """
-        Extract the first real human input (content-only, no metadata).
+    def _extract_first_human(self, messages: list[BaseMessage]) -> list[BaseMessage]:
+        """Extract the first real human input (content-only, no metadata).
 
         Returns only the first human message that has pure content without
         metadata like engine_id or name.
         """
         for msg in messages:
             if isinstance(msg, HumanMessage):
-                # Check if this is a "real" human message (no metadata indicating transformation)
+                # Check if this is a "real" human message (no metadata
+                # indicating transformation)
                 has_metadata = (hasattr(msg, "name") and msg.name) or (
                     hasattr(msg, "additional_kwargs")
                     and msg.additional_kwargs
@@ -549,7 +551,7 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
             console.print("[yellow]No real human input found[/]")
         return []
 
-    def _filter_by_type(self, messages: List[BaseMessage]) -> List[BaseMessage]:
+    def _filter_by_type(self, messages: list[BaseMessage]) -> list[BaseMessage]:
         """Filter messages by type (include or exclude)."""
         transformed = []
 
@@ -562,11 +564,10 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
                     transformed.append(msg)
                     if self.debug:
                         console.print(f"[green]Including {msg_type} message[/]")
-                else:
-                    if self.debug:
-                        console.print(
-                            f"[dim]Excluding {msg_type} message (not in include list)[/]"
-                        )
+                elif self.debug:
+                    console.print(
+                        f"[dim]Excluding {msg_type} message (not in include list)[/]"
+                    )
 
             # Check exclusion
             elif self.exclude_types:
@@ -574,15 +575,14 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
                     transformed.append(msg)
                     if self.debug:
                         console.print(f"[green]Including {msg_type} message[/]")
-                else:
-                    if self.debug:
-                        console.print(
-                            f"[dim]Excluding {msg_type} message (in exclude list)[/]"
-                        )
+                elif self.debug:
+                    console.print(
+                        f"[dim]Excluding {msg_type} message (in exclude list)[/]"
+                    )
 
         return transformed
 
-    def _merge_consecutive(self, messages: List[BaseMessage]) -> List[BaseMessage]:
+    def _merge_consecutive(self, messages: list[BaseMessage]) -> list[BaseMessage]:
         """Merge consecutive messages of the same type."""
         if not messages:
             return []
@@ -592,7 +592,7 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
 
         for msg in messages[1:]:
             # Check if same type as current group
-            if type(msg) == type(current_group[0]):
+            if isinstance(msg, type(current_group[0])):
                 current_group.append(msg)
             else:
                 # Different type - merge current group and start new one
@@ -608,14 +608,14 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
 
         if self.debug:
             console.print(
-                f"[green]Merged {len(messages)} messages into {len(transformed)}[/]"
+                f"[green]Merged {
+                    len(messages)} messages into {
+                    len(transformed)}[/]"
             )
 
         return transformed
 
-    def _merge_message_group(
-        self, messages: List[BaseMessage]
-    ) -> Optional[BaseMessage]:
+    def _merge_message_group(self, messages: list[BaseMessage]) -> BaseMessage | None:
         """Merge a group of messages of the same type."""
         if not messages:
             return None
@@ -649,8 +649,8 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
         return msg_class(**kwargs)
 
     def _apply_custom_transformation(
-        self, messages: List[BaseMessage]
-    ) -> List[BaseMessage]:
+        self, messages: list[BaseMessage]
+    ) -> list[BaseMessage]:
         """Apply custom transformation function."""
         if not self.custom_transformer:
             return messages
@@ -660,12 +660,14 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
 
             if self.debug:
                 console.print(
-                    f"[green]Applied custom transformation:[/] {len(messages)} → {len(result)} messages"
+                    f"[green]Applied custom transformation:[/] {
+                        len(messages)} → {
+                        len(result)} messages"
                 )
 
             return result
         except Exception as e:
-            logger.error(f"Custom transformation failed: {e}")
+            logger.exception(f"Custom transformation failed: {e}")
             return messages
 
 
@@ -677,9 +679,9 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
 def create_ai_to_human_transformer(
     name: str = "ai_to_human",
     messages_field: str = "messages",
-    output_field: Optional[str] = None,
-    engine_id: Optional[str] = None,
-    engine_name: Optional[str] = None,
+    output_field: str | None = None,
+    engine_id: str | None = None,
+    engine_name: str | None = None,
     preserve_metadata: bool = True,
     **kwargs,
 ) -> MessageTransformationNodeConfig:
@@ -699,7 +701,7 @@ def create_ai_to_human_transformer(
 def create_reflection_transformer(
     name: str = "reflection",
     messages_field: str = "messages",
-    output_field: Optional[str] = None,
+    output_field: str | None = None,
     preserve_first_message: bool = True,
     **kwargs,
 ) -> MessageTransformationNodeConfig:
@@ -715,7 +717,7 @@ def create_reflection_transformer(
 
 
 def create_agent_to_agent_transformer(
-    agent_name: Optional[str] = None,
+    agent_name: str | None = None,
     name: str = "agent_to_agent",
     messages_field: str = "messages",
     output_field: str = "transformed_messages",
@@ -736,10 +738,10 @@ def create_agent_to_agent_transformer(
 
 def create_message_filter(
     name: str = "message_filter",
-    include_types: Optional[List[str]] = None,
-    exclude_types: Optional[List[str]] = None,
+    include_types: list[str] | None = None,
+    exclude_types: list[str] | None = None,
     messages_field: str = "messages",
-    output_field: Optional[str] = None,
+    output_field: str | None = None,
     **kwargs,
 ) -> MessageTransformationNodeConfig:
     """Create a message filter by type."""
@@ -757,7 +759,7 @@ def create_message_filter(
 def create_message_merger(
     name: str = "message_merger",
     messages_field: str = "messages",
-    output_field: Optional[str] = None,
+    output_field: str | None = None,
     **kwargs,
 ) -> MessageTransformationNodeConfig:
     """Create a transformer that merges consecutive messages of the same type."""

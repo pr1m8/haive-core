@@ -12,7 +12,7 @@ This module completes the comprehensive document loader system with:
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import Field
 
@@ -134,21 +134,19 @@ class GovDocsSource(RemoteSource):
     # Government portal configuration
     portal_url: str = Field(..., description="Government portal URL")
     country_code: str = Field("US", description="Country code")
-    department: Optional[str] = Field(None, description="Specific department")
+    department: str | None = Field(None, description="Specific department")
 
     # Content filtering
-    document_types: List[str] = Field(
+    document_types: list[str] = Field(
         default=["pdf", "doc", "html"], description="Document types to include"
     )
-    date_range: Optional[tuple[datetime, datetime]] = Field(
-        None, description="Date range"
-    )
-    topics: Optional[List[str]] = Field(None, description="Topic filters")
+    date_range: tuple[datetime, datetime] | None = Field(None, description="Date range")
+    topics: list[str] | None = Field(None, description="Topic filters")
 
     # Language options
-    languages: List[str] = Field(default=["en"], description="Document languages")
+    languages: list[str] = Field(default=["en"], description="Document languages")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -170,7 +168,7 @@ class GovDocsSource(RemoteSource):
 
         return kwargs
 
-    def scrape_all(self) -> Dict[str, Any]:
+    def scrape_all(self) -> dict[str, Any]:
         """Scrape entire government portal."""
         return {
             "portal_url": self.portal_url,
@@ -212,20 +210,20 @@ class LegalDatabaseSource(RemoteSource):
 
     # Database configuration
     database_name: str = Field(..., description="Legal database name")
-    api_key: Optional[str] = Field(None, description="API key")
+    api_key: str | None = Field(None, description="API key")
 
     # Search parameters
-    query: Optional[str] = Field(None, description="Legal search query")
-    jurisdiction: Optional[str] = Field(None, description="Jurisdiction filter")
-    court_level: Optional[str] = Field(None, description="Court level filter")
-    practice_area: Optional[str] = Field(None, description="Practice area")
+    query: str | None = Field(None, description="Legal search query")
+    jurisdiction: str | None = Field(None, description="Jurisdiction filter")
+    court_level: str | None = Field(None, description="Court level filter")
+    practice_area: str | None = Field(None, description="Practice area")
 
     # Date filtering
-    date_range: Optional[tuple[datetime, datetime]] = Field(
+    date_range: tuple[datetime, datetime] | None = Field(
         None, description="Decision date range"
     )
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -291,22 +289,22 @@ class FHIRSource(RemoteSource):
 
     # FHIR server configuration
     server_url: str = Field(..., description="FHIR server URL")
-    access_token: Optional[str] = Field(None, description="OAuth access token")
+    access_token: str | None = Field(None, description="OAuth access token")
 
     # Resource selection
-    resource_types: List[str] = Field(
+    resource_types: list[str] = Field(
         default=["Patient", "Observation", "Condition"],
         description="FHIR resource types",
     )
-    patient_id: Optional[str] = Field(None, description="Specific patient ID")
+    patient_id: str | None = Field(None, description="Specific patient ID")
 
     # Query parameters
-    search_params: Optional[Dict[str, Any]] = Field(
+    search_params: dict[str, Any] | None = Field(
         None, description="FHIR search parameters"
     )
     include_references: bool = Field(True, description="Include referenced resources")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -370,7 +368,7 @@ class DICOMSource(LocalFileSource):
         (1024, 1024), description="Max image dimensions"
     )
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -428,11 +426,11 @@ class CanvasSource(RemoteSource):
 
     # Canvas configuration
     canvas_url: str = Field(..., description="Canvas instance URL")
-    access_token: Optional[str] = Field(None, description="API access token")
+    access_token: str | None = Field(None, description="API access token")
 
     # Course selection
-    course_ids: Optional[List[int]] = Field(None, description="Specific course IDs")
-    user_id: Optional[int] = Field(None, description="User ID for enrollment filter")
+    course_ids: list[int] | None = Field(None, description="Specific course IDs")
+    user_id: int | None = Field(None, description="User ID for enrollment filter")
 
     # Content options
     include_assignments: bool = Field(True, description="Include assignments")
@@ -442,7 +440,7 @@ class CanvasSource(RemoteSource):
     include_files: bool = Field(True, description="Include course files")
     include_grades: bool = Field(False, description="Include grade data")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -502,11 +500,11 @@ class MoodleSource(RemoteSource):
 
     # Moodle configuration
     moodle_url: str = Field(..., description="Moodle instance URL")
-    token: Optional[str] = Field(None, description="Web service token")
+    token: str | None = Field(None, description="Web service token")
 
     # Course selection
-    course_ids: Optional[List[int]] = Field(None, description="Course IDs")
-    category_id: Optional[int] = Field(None, description="Course category ID")
+    course_ids: list[int] | None = Field(None, description="Course IDs")
+    category_id: int | None = Field(None, description="Course category ID")
 
     # Content options
     include_forums: bool = Field(True, description="Include forum discussions")
@@ -514,7 +512,7 @@ class MoodleSource(RemoteSource):
     include_activities: bool = Field(True, description="Include activities")
     include_grades: bool = Field(False, description="Include gradebook")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -576,7 +574,7 @@ class BaiduSource(RemoteSource):
     platform: FinalPlatform = FinalPlatform.BAIDU
 
     # Baidu configuration
-    api_key: Optional[str] = Field(None, description="Baidu API key")
+    api_key: str | None = Field(None, description="Baidu API key")
     service_type: str = Field("search", description="Baidu service type")
 
     # Search options
@@ -584,7 +582,7 @@ class BaiduSource(RemoteSource):
     num_results: int = Field(10, description="Number of results")
     language: str = Field("zh", description="Content language")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -635,7 +633,7 @@ class YandexSource(RemoteSource):
     platform: FinalPlatform = FinalPlatform.YANDEX
 
     # Yandex configuration
-    api_key: Optional[str] = Field(None, description="Yandex API key")
+    api_key: str | None = Field(None, description="Yandex API key")
     service_type: str = Field("search", description="Yandex service type")
 
     # Search options
@@ -644,7 +642,7 @@ class YandexSource(RemoteSource):
     language: str = Field("ru", description="Content language")
     region: str = Field("ru", description="Search region")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -701,20 +699,20 @@ class BlockchainSource(RemoteSource):
 
     # Blockchain configuration
     network: str = Field("ethereum", description="Blockchain network")
-    rpc_url: Optional[str] = Field(None, description="RPC endpoint URL")
-    api_key: Optional[str] = Field(None, description="API key for service")
+    rpc_url: str | None = Field(None, description="RPC endpoint URL")
+    api_key: str | None = Field(None, description="API key for service")
 
     # Data selection
-    contract_address: Optional[str] = Field(None, description="Smart contract address")
-    wallet_address: Optional[str] = Field(None, description="Wallet address")
-    block_range: Optional[tuple[int, int]] = Field(None, description="Block range")
+    contract_address: str | None = Field(None, description="Smart contract address")
+    wallet_address: str | None = Field(None, description="Wallet address")
+    block_range: tuple[int, int] | None = Field(None, description="Block range")
 
     # Options
     include_transactions: bool = Field(True, description="Include transactions")
     include_events: bool = Field(True, description="Include contract events")
     include_metadata: bool = Field(True, description="Include metadata")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -776,20 +774,18 @@ class IoTPlatformSource(RemoteSource):
     # IoT platform configuration
     platform_type: str = Field(..., description="IoT platform type")
     endpoint_url: str = Field(..., description="Platform endpoint URL")
-    api_key: Optional[str] = Field(None, description="API key")
+    api_key: str | None = Field(None, description="API key")
 
     # Device selection
-    device_ids: Optional[List[str]] = Field(None, description="Specific device IDs")
-    device_types: Optional[List[str]] = Field(None, description="Device types")
+    device_ids: list[str] | None = Field(None, description="Specific device IDs")
+    device_types: list[str] | None = Field(None, description="Device types")
 
     # Data options
-    metrics: Optional[List[str]] = Field(None, description="Specific metrics")
-    time_range: Optional[tuple[datetime, datetime]] = Field(
-        None, description="Time range"
-    )
-    aggregation: Optional[str] = Field(None, description="Data aggregation method")
+    metrics: list[str] | None = Field(None, description="Specific metrics")
+    time_range: tuple[datetime, datetime] | None = Field(None, description="Time range")
+    aggregation: str | None = Field(None, description="Data aggregation method")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -859,10 +855,10 @@ class XMLFeedSource(LocalFileSource):
 
     # Parsing options
     encoding: str = Field("utf-8", description="File encoding")
-    namespaces: Optional[Dict[str, str]] = Field(None, description="XML namespaces")
-    xpath_filters: Optional[List[str]] = Field(None, description="XPath filters")
+    namespaces: dict[str, str] | None = Field(None, description="XML namespaces")
+    xpath_filters: list[str] | None = Field(None, description="XPath filters")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -917,7 +913,7 @@ class GeospatialSource(RemoteSource):
     format_type: str = Field("geojson", description="Data format")
 
     # Spatial filtering
-    bounding_box: Optional[tuple[float, float, float, float]] = Field(
+    bounding_box: tuple[float, float, float, float] | None = Field(
         None, description="Bounding box (minx, miny, maxx, maxy)"
     )
     coordinate_system: str = Field(
@@ -925,12 +921,12 @@ class GeospatialSource(RemoteSource):
     )
 
     # Feature filtering
-    layer_name: Optional[str] = Field(None, description="Specific layer name")
-    attribute_filters: Optional[Dict[str, Any]] = Field(
+    layer_name: str | None = Field(None, description="Specific layer name")
+    attribute_filters: dict[str, Any] | None = Field(
         None, description="Attribute filters"
     )
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -956,7 +952,7 @@ class GeospatialSource(RemoteSource):
 # =============================================================================
 
 
-def get_final_sources_statistics() -> Dict[str, Any]:
+def get_final_sources_statistics() -> dict[str, Any]:
     """Get statistics about final specialized sources."""
     registry = enhanced_registry
 
@@ -1027,12 +1023,7 @@ def validate_final_sources() -> bool:
         if source_name not in registry._sources:
             missing.append(source_name)
 
-    if missing:
-        print(f"Missing final sources: {missing}")
-        return False
-
-    print("✅ All essential final sources registered!")
-    return True
+    return not missing
 
 
 def get_total_loader_count() -> int:
@@ -1041,7 +1032,7 @@ def get_total_loader_count() -> int:
     return len(registry._sources)
 
 
-def completion_summary() -> Dict[str, Any]:
+def completion_summary() -> dict[str, Any]:
     """Generate completion summary for the entire loader system."""
     registry = enhanced_registry
 
@@ -1093,5 +1084,3 @@ if __name__ == "__main__":
     validate_final_sources()
     stats = get_final_sources_statistics()
     summary = completion_summary()
-    print(f"Final Sources Statistics: {stats}")
-    print(f"Completion Summary: {summary}")

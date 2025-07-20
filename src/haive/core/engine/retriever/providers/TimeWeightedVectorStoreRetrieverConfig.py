@@ -1,5 +1,6 @@
 """Time-Weighted Vector Store Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Time-Weighted Vector Store retriever,
 which combines vector similarity search with time-based scoring to prioritize recent
 documents while still considering semantic relevance.
@@ -119,7 +120,7 @@ class TimeWeightedVectorStoreRetrieverConfig(BaseRetrieverConfig):
     )
 
     @validator("fetch_k")
-    def validate_fetch_k(self, v, values):
+    def validate_fetch_k(self, v, values) -> Any:
         """Validate that fetch_k is greater than or equal to k."""
         k = values.get("k", 4)
         if v < k:
@@ -127,7 +128,7 @@ class TimeWeightedVectorStoreRetrieverConfig(BaseRetrieverConfig):
         return v
 
     @validator("search_type")
-    def validate_search_type(self, v):
+    def validate_search_type(self, v) -> Any:
         """Validate search type."""
         valid_types = ["similarity", "mmr"]
         if v not in valid_types:
@@ -155,7 +156,7 @@ class TimeWeightedVectorStoreRetrieverConfig(BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a Time-Weighted Vector Store retriever from this configuration.
 
         Returns:

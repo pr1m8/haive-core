@@ -1,11 +1,12 @@
-"""
+"""from typing import Any
 Examples demonstrating the schema compatibility module.
 
 This file shows various use cases and patterns for using the
 schema compatibility system in the Haive framework.
 """
 
-from typing import Any, Dict, List, Optional
+import contextlib
+from typing import Any
 
 from langchain_core.documents import Document
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
@@ -25,40 +26,31 @@ from haive.core.schema.compatibility import (
 
 
 # Example 1: Basic Schema Compatibility Check
-def example_basic_compatibility():
+def example_basic_compatibility() -> None:
     """Check basic compatibility between two schemas."""
-    print("=== Example 1: Basic Compatibility Check ===\n")
 
     # Define source schema
     class UserInput(BaseModel):
         name: str
         email: str
         age: int
-        preferences: List[str] = Field(default_factory=list)
+        preferences: list[str] = Field(default_factory=list)
 
     # Define target schema
     class UserProfile(BaseModel):
         name: str
         email: str
-        age: Optional[int] = None
+        age: int | None = None
         bio: str = ""
-        preferences: List[str] = Field(default_factory=list)
+        preferences: list[str] = Field(default_factory=list)
 
     # Check compatibility
-    result = check_compatibility(UserInput, UserProfile)
-
-    print(f"Compatible: {result.is_compatible}")
-    print(f"Level: {result.level}")
-    print(f"Missing required fields: {result.missing_required_fields}")
-    print(f"Extra fields: {result.extra_fields}")
-    print()
+    check_compatibility(UserInput, UserProfile)
 
 
 # Example 2: Type Conversion with LangChain Types
-def example_langchain_conversion():
+def example_langchain_conversion() -> None:
     """Convert between LangChain types."""
-    print("=== Example 2: LangChain Type Conversion ===\n")
-
     # Create converter registry
     registry = ConverterRegistry()
 
@@ -68,15 +60,11 @@ def example_langchain_conversion():
     # Convert HumanMessage to AIMessage
     human_msg = HumanMessage(content="Hello, how are you?")
 
-    ai_msg = registry.convert(
+    registry.convert(
         human_msg,
         source_type=HumanMessage,
         target_type=AIMessage,
     )
-
-    print(f"Original: {human_msg}")
-    print(f"Converted: {ai_msg}")
-    print()
 
     # Convert Document to HumanMessage
     Document(
@@ -89,10 +77,8 @@ def example_langchain_conversion():
 
 
 # Example 3: Field Mapping
-def example_field_mapping():
+def example_field_mapping() -> None:
     """Map fields between incompatible schemas."""
-    print("=== Example 3: Field Mapping ===\n")
-
     # Source data structure
     source_data = {
         "user": {
@@ -136,16 +122,13 @@ def example_field_mapping():
     # Apply mappings
     result = mapper.map_data(source_data)
 
-    print("Mapped result:")
-    for key, value in result.items():
-        print(f"  {key}: {value}")
-    print()
+    for _key, _value in result.items():
+        pass
 
 
 # Example 4: Schema Merging
-def example_schema_merging():
+def example_schema_merging() -> None:
     """Merge multiple schemas with different strategies."""
-    print("=== Example 4: Schema Merging ===\n")
 
     # Define schemas to merge
     class BasicInfo(BaseModel):
@@ -156,7 +139,7 @@ def example_schema_merging():
     class ContactInfo(BaseModel):
         name: str  # Overlapping field
         email: str
-        phone: Optional[str] = None
+        phone: str | None = None
 
     class Preferences(BaseModel):
         theme: str = "light"
@@ -168,27 +151,21 @@ def example_schema_merging():
         [BasicInfo, ContactInfo, Preferences], strategy="union", name="UnionUser"
     )
 
-    print("Union merge - all fields:")
-    for field_name, field_info in UnionUser.model_fields.items():
-        print(f"  {field_name}: {field_info.annotation}")
-    print()
+    for _field_name, _field_info in UnionUser.model_fields.items():
+        pass
 
     # Merge with intersection strategy (common fields only)
     CommonUser = merge_schemas(
         [BasicInfo, ContactInfo], strategy="intersection", name="CommonUser"
     )
 
-    print("Intersection merge - common fields only:")
-    for field_name, field_info in CommonUser.model_fields.items():
-        print(f"  {field_name}: {field_info.annotation}")
-    print()
+    for _field_name, _field_info in CommonUser.model_fields.items():
+        pass
 
 
 # Example 5: Custom Type Converter
-def example_custom_converter():
+def example_custom_converter() -> Any:
     """Create and register a custom type converter."""
-    print("=== Example 5: Custom Type Converter ===\n")
-
     from haive.core.schema.compatibility.converters import TypeConverter
     from haive.core.schema.compatibility.types import (
         ConversionContext,
@@ -224,64 +201,54 @@ def example_custom_converter():
                 # Convert to Celsius
                 if value.unit == "C":
                     return Celsius(degrees=value.value)
-                else:  # Fahrenheit
-                    celsius = (value.value - 32) * 5 / 9
-                    return Celsius(degrees=celsius)
-            elif isinstance(value, Celsius):
+                # Fahrenheit
+                celsius = (value.value - 32) * 5 / 9
+                return Celsius(degrees=celsius)
+            if isinstance(value, Celsius):
                 # Convert to Temperature (default to Celsius)
                 return Temperature(value=value.degrees, unit="C")
+            return None
 
     # Register converter
     register_converter(TemperatureConverter())
 
     # Use converter
     temp_f = Temperature(value=98.6, unit="F")
-    temp_c = ConverterRegistry().convert(
-        temp_f, source_type=Temperature, target_type=Celsius
-    )
-
-    print(f"Original: {temp_f}")
-    print(f"Converted: {temp_c}")
-    print()
+    ConverterRegistry().convert(temp_f, source_type=Temperature, target_type=Celsius)
 
 
 # Example 6: Compatibility Report Generation
-def example_compatibility_report():
+def example_compatibility_report() -> None:
     """Generate detailed compatibility report."""
-    print("=== Example 6: Compatibility Report ===\n")
 
     # Define schemas with various compatibility issues
     class SourceAgent(BaseModel):
-        messages: List[BaseMessage]
+        messages: list[BaseMessage]
         context: str
         temperature: float = 0.7
         max_tokens: int = 1000
 
     class TargetAgent(BaseModel):
-        messages: List[BaseMessage]
-        context: List[str]  # Different type!
+        messages: list[BaseMessage]
+        context: list[str]  # Different type!
         model_name: str  # Required field missing in source
         temperature: float = 0.5
         stream: bool = False
 
     # Generate report
-    report = generate_report(SourceAgent, TargetAgent)
+    generate_report(SourceAgent, TargetAgent)
 
     # Print markdown report
-    print(report.to_markdown())
-    print()
 
 
 # Example 7: Haive StateSchema Integration
-def example_state_schema_compatibility():
+def example_state_schema_compatibility() -> None:
     """Check compatibility with Haive StateSchema features."""
-    print("=== Example 7: StateSchema Compatibility ===\n")
-
     from haive.core.schema.compatibility.analyzer import TypeAnalyzer
 
     # Simulate StateSchema with special attributes
     class ChatState(BaseModel):
-        messages: List[BaseMessage] = Field(default_factory=list)
+        messages: list[BaseMessage] = Field(default_factory=list)
         query: str = ""
         response: str = ""
 
@@ -298,20 +265,12 @@ def example_state_schema_compatibility():
 
     # Analyze schema
     analyzer = TypeAnalyzer()
-    schema_info = analyzer.analyze_schema(ChatState)
-
-    print(f"Schema: {schema_info.name}")
-    print(f"Shared fields: {schema_info.shared_fields}")
-    print(f"Reducer fields: {schema_info.reducer_fields}")
-    print(f"Engine I/O mappings: {schema_info.engine_io_mappings}")
-    print()
+    analyzer.analyze_schema(ChatState)
 
 
 # Example 8: Complex Field Validation
-def example_field_validation():
+def example_field_validation() -> Any:
     """Create complex field validators."""
-    print("=== Example 8: Field Validation ===\n")
-
     from haive.core.schema.compatibility.validators import (
         ModelValidator,
         ValidatorBuilder,
@@ -324,7 +283,7 @@ def example_field_validation():
         age: int
         password: str
         confirm_password: str
-        interests: List[str] = Field(default_factory=list)
+        interests: list[str] = Field(default_factory=list)
 
     # Create model validator
     validator = ModelValidator()
@@ -360,16 +319,12 @@ def example_field_validation():
         "interests": ["coding", "reading"],
     }
 
-    result = validator.validate(test_data, None)
-    print(f"Valid: {result.is_valid}")
-    print(f"Errors: {[e.message for e in result.errors]}")
-    print()
+    validator.validate(test_data, None)
 
 
 # Example 9: Schema Evolution
-def example_schema_evolution():
+def example_schema_evolution() -> Any:
     """Handle schema version migration."""
-    print("=== Example 9: Schema Evolution ===\n")
 
     # V1 Schema
     class UserV1(BaseModel):
@@ -418,16 +373,12 @@ def example_schema_evolution():
     v2_user = migrate_v1_to_v2(v1_user)
 
     # Validate against V2 schema
-    user_v2_instance = UserV2(**v2_user)
-    print(f"Migrated user: {user_v2_instance}")
-    print()
+    UserV2(**v2_user)
 
 
 # Example 10: Performance Optimization
-def example_performance_optimization():
+def example_performance_optimization() -> None:
     """Demonstrate performance features."""
-    print("=== Example 10: Performance Optimization ===\n")
-
     import time
 
     # Create analyzer with cache
@@ -437,25 +388,20 @@ def example_performance_optimization():
     class ComplexSchema(BaseModel):
         field1: str
         field2: int
-        field3: List[str]
-        field4: Dict[str, Any]
-        field5: Optional[bool]
+        field3: list[str]
+        field4: dict[str, Any]
+        field5: bool | None
         # ... many more fields
 
     # First analysis (not cached)
     start = time.time()
     analyzer.analyze_schema(ComplexSchema)
-    time1 = time.time() - start
+    time.time() - start
 
     # Second analysis (cached)
     start = time.time()
     analyzer.analyze_schema(ComplexSchema)
-    time2 = time.time() - start
-
-    print(f"First analysis: {time1*1000:.2f}ms")
-    print(f"Cached analysis: {time2*1000:.2f}ms")
-    print(f"Speedup: {time1/time2:.1f}x")
-    print()
+    time.time() - start
 
 
 # Run all examples
@@ -474,8 +420,5 @@ if __name__ == "__main__":
     ]
 
     for example in examples:
-        try:
+        with contextlib.suppress(Exception):
             example()
-        except Exception as e:
-            print(f"Error in {example.__name__}: {e}")
-            print()

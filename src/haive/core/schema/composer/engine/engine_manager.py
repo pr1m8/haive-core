@@ -17,7 +17,7 @@ class EngineComposerMixin:
     - Engine field extraction
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         """Initialize engine tracking structures."""
         super().__init__(*args, **kwargs)
 
@@ -113,7 +113,11 @@ class EngineComposerMixin:
                             updated_count += 1
 
         logger.info(
-            f"Updated {updated_count} fields across {len(self.engines_by_type.get(engine_type, []))} {engine_type} engines"
+            f"Updated {updated_count} fields across {
+                len(
+                    self.engines_by_type.get(
+                        engine_type,
+                        []))} {engine_type} engines"
         )
 
         # Add tracking entry

@@ -1,5 +1,6 @@
 """Marqo Vector Store implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Marqo vector store,
 which is an open-source tensor search engine with multimodal capabilities.
 
@@ -135,14 +136,14 @@ class MarqoVectorStoreConfig(BaseVectorStoreConfig):
     )
 
     @validator("marqo_url")
-    def validate_marqo_url(self, v):
+    def validate_marqo_url(self, v) -> Any:
         """Validate Marqo URL format."""
         if not v.startswith(("http://", "https://")):
             raise ValueError("marqo_url must start with http:// or https://")
         return v
 
     @validator("index_name")
-    def validate_index_name(self, v):
+    def validate_index_name(self, v) -> Any:
         """Validate index name format."""
         if not v or len(v.strip()) == 0:
             raise ValueError("index_name cannot be empty")
@@ -156,7 +157,7 @@ class MarqoVectorStoreConfig(BaseVectorStoreConfig):
         return v
 
     @validator("model")
-    def validate_model(self, v):
+    def validate_model(self, v) -> Any:
         """Validate model format."""
         if not v or len(v.strip()) == 0:
             raise ValueError("model cannot be empty")
@@ -172,7 +173,7 @@ class MarqoVectorStoreConfig(BaseVectorStoreConfig):
             )
         return v
 
-    def validate_embedding(self):
+    def validate_embedding(self) -> None:
         """Override to make embedding optional for Marqo.
 
         Marqo manages its own embeddings internally based on the specified model,
@@ -195,7 +196,7 @@ class MarqoVectorStoreConfig(BaseVectorStoreConfig):
             "ids": (list[str], Field(description="Document IDs in Marqo")),
         }
 
-    def instantiate(self, client=None):
+    def instantiate(self, client=None) -> Any:
         """Create a Marqo vector store from this configuration.
 
         Args:

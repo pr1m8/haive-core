@@ -12,7 +12,6 @@ This module implements additional loaders from langchain_community including:
 """
 
 from datetime import datetime
-from typing import Dict, List, Optional
 
 from pydantic import Field
 
@@ -102,8 +101,8 @@ class SSRNSource(RemoteSource):
     """SSRN research paper source."""
 
     source_type: str = "ssrn"
-    paper_id: Optional[str] = Field(None, description="SSRN paper ID")
-    query: Optional[str] = Field(None, description="Search query")
+    paper_id: str | None = Field(None, description="SSRN paper ID")
+    query: str | None = Field(None, description="Search query")
 
 
 # =============================================================================
@@ -135,9 +134,9 @@ class NewsAPISource(RemoteSource):
 
     source_type: str = "news_api"
     query: str = Field(..., description="Search query")
-    sources: Optional[List[str]] = Field(None, description="News sources")
-    from_date: Optional[datetime] = Field(None, description="Start date")
-    to_date: Optional[datetime] = Field(None, description="End date")
+    sources: list[str] | None = Field(None, description="News sources")
+    from_date: datetime | None = Field(None, description="Start date")
+    to_date: datetime | None = Field(None, description="End date")
 
 
 @register_source(
@@ -189,8 +188,8 @@ class GuardianSource(RemoteSource):
 
     source_type: str = "the_guardian"
     query: str = Field(..., description="Search query")
-    section: Optional[str] = Field(None, description="News section")
-    from_date: Optional[datetime] = Field(None, description="Start date")
+    section: str | None = Field(None, description="News section")
+    from_date: datetime | None = Field(None, description="Start date")
 
 
 # =============================================================================
@@ -272,7 +271,7 @@ class GitLabSource(RemoteSource):
     source_type: str = "gitlab"
     project_id: str = Field(..., description="GitLab project ID")
     branch: str = Field("main", description="Branch name")
-    file_pattern: Optional[str] = Field(None, description="File pattern to match")
+    file_pattern: str | None = Field(None, description="File pattern to match")
 
 
 # =============================================================================
@@ -383,8 +382,8 @@ class LinkedInSource(RemoteSource):
     """LinkedIn social media source."""
 
     source_type: str = "linkedin"
-    profile_url: Optional[str] = Field(None, description="Profile URL")
-    company_url: Optional[str] = Field(None, description="Company page URL")
+    profile_url: str | None = Field(None, description="Profile URL")
+    company_url: str | None = Field(None, description="Company page URL")
 
 
 @register_source(
@@ -410,8 +409,8 @@ class FacebookSource(RemoteSource):
     """Facebook social media source."""
 
     source_type: str = "facebook"
-    page_id: Optional[str] = Field(None, description="Facebook page ID")
-    group_id: Optional[str] = Field(None, description="Facebook group ID")
+    page_id: str | None = Field(None, description="Facebook page ID")
+    group_id: str | None = Field(None, description="Facebook group ID")
 
 
 @register_source(
@@ -606,8 +605,8 @@ class VimeoSource(RemoteSource):
     """Vimeo video platform source."""
 
     source_type: str = "vimeo"
-    video_id: Optional[str] = Field(None, description="Specific video ID")
-    channel_id: Optional[str] = Field(None, description="Channel ID")
+    video_id: str | None = Field(None, description="Specific video ID")
+    channel_id: str | None = Field(None, description="Channel ID")
 
 
 @register_source(
@@ -668,8 +667,8 @@ class OneNoteSource(RemoteSource):
     """Microsoft OneNote source."""
 
     source_type: str = "onenote"
-    notebook_id: Optional[str] = Field(None, description="Specific notebook ID")
-    section_id: Optional[str] = Field(None, description="Specific section ID")
+    notebook_id: str | None = Field(None, description="Specific notebook ID")
+    section_id: str | None = Field(None, description="Specific section ID")
 
 
 @register_source(
@@ -723,8 +722,8 @@ class LookerSource(RemoteSource):
     """Looker BI platform source."""
 
     source_type: str = "looker"
-    dashboard_id: Optional[str] = Field(None, description="Dashboard ID")
-    look_id: Optional[str] = Field(None, description="Look ID")
+    dashboard_id: str | None = Field(None, description="Dashboard ID")
+    look_id: str | None = Field(None, description="Look ID")
 
 
 @register_source(
@@ -750,8 +749,8 @@ class MetabaseSource(RemoteSource):
     """Metabase analytics source."""
 
     source_type: str = "metabase"
-    question_id: Optional[int] = Field(None, description="Question ID")
-    collection_id: Optional[int] = Field(None, description="Collection ID")
+    question_id: int | None = Field(None, description="Question ID")
+    collection_id: int | None = Field(None, description="Collection ID")
 
 
 # =============================================================================
@@ -810,7 +809,7 @@ class FreshdeskSource(RemoteSource):
 
     source_type: str = "freshdesk"
     domain: str = Field(..., description="Freshdesk domain")
-    ticket_filter: Optional[str] = Field(None, description="Ticket filter")
+    ticket_filter: str | None = Field(None, description="Ticket filter")
 
 
 # =============================================================================
@@ -841,7 +840,7 @@ class ClickHouseSource(DatabaseSource):
     """ClickHouse database source."""
 
     source_type: str = "clickhouse"
-    cluster: Optional[str] = Field(None, description="ClickHouse cluster")
+    cluster: str | None = Field(None, description="ClickHouse cluster")
 
 
 @register_source(
@@ -949,10 +948,10 @@ class OpenStreetMapSource(RemoteSource):
     """OpenStreetMap geographic data source."""
 
     source_type: str = "openstreetmap"
-    bbox: List[float] = Field(
+    bbox: list[float] = Field(
         ..., description="Bounding box [min_lon, min_lat, max_lon, max_lat]"
     )
-    tags: Optional[Dict[str, str]] = Field(None, description="OSM tags to filter")
+    tags: dict[str, str] | None = Field(None, description="OSM tags to filter")
 
 
 # =============================================================================
@@ -983,8 +982,8 @@ class SteamSource(RemoteSource):
     """Steam gaming platform source."""
 
     source_type: str = "steam"
-    app_id: Optional[int] = Field(None, description="Steam app ID")
-    user_id: Optional[str] = Field(None, description="Steam user ID")
+    app_id: int | None = Field(None, description="Steam app ID")
+    user_id: str | None = Field(None, description="Steam user ID")
 
 
 # =============================================================================
@@ -1078,7 +1077,7 @@ class SECEdgarSource(RemoteSource):
     source_type: str = "sec_edgar"
     ticker: str = Field(..., description="Company ticker symbol")
     filing_type: str = Field("10-K", description="Filing type (10-K, 10-Q, 8-K)")
-    start_date: Optional[datetime] = Field(None, description="Start date")
+    start_date: datetime | None = Field(None, description="Start date")
 
 
 # =============================================================================
@@ -1265,76 +1264,76 @@ class GoogleCalendarSource(RemoteSource):
 
     source_type: str = "google_calendar"
     calendar_id: str = Field("primary", description="Calendar ID")
-    time_min: Optional[datetime] = Field(None, description="Start time")
-    time_max: Optional[datetime] = Field(None, description="End time")
+    time_min: datetime | None = Field(None, description="Start time")
+    time_max: datetime | None = Field(None, description="End time")
 
 
 # Register all sources on import
 __all__ = [
-    # Academic
-    "BiorxivSource",
-    "MedrxivSource",
-    "SSRNSource",
-    # News
-    "NewsAPISource",
-    "HackerNewsSearchSource",
-    "GuardianSource",
-    # Developer
-    "PostmanCollectionSource",
-    "SwaggerAPISource",
-    "GitLabSource",
-    # Knowledge
-    "RoamResearchSource",
-    "LogseqSource",
-    "DendronSource",
-    # Social
-    "LinkedInSource",
-    "FacebookSource",
-    "InstagramSource",
-    # File formats
-    "AsciiDocSource",
-    "OrgModeSource",
-    "TextileSource",
-    # Business
-    "StripeSource",
-    "SquareSource",
-    # Media
-    "VimeoSource",
-    "TwitchSource",
-    # Productivity
-    "OneNoteSource",
-    "AppleNotesSource",
-    # Analytics
-    "LookerSource",
-    "MetabaseSource",
-    # Support
-    "ZendeskSource",
-    "FreshdeskSource",
-    # Database
-    "ClickHouseSource",
-    "DuckDBSource",
-    # OCR
-    "TesseractOCRSource",
-    "CamelotTablesSource",
-    # Geographic
-    "OpenStreetMapSource",
-    # Gaming
-    "SteamSource",
     # Financial
     "AlphaVantageSource",
-    # IoT
-    "MQTTSource",
-    # Legal
-    "SECEdgarSource",
-    # Package repos
-    "PyPISource",
-    "NPMSource",
-    # Time tracking
-    "TogglSource",
-    # Weather
-    "OpenWeatherSource",
+    "AppleNotesSource",
+    # File formats
+    "AsciiDocSource",
+    # Academic
+    "BiorxivSource",
+    "CamelotTablesSource",
+    # Database
+    "ClickHouseSource",
+    "DendronSource",
+    "DuckDBSource",
     # Blockchain
     "EtherscanSource",
+    "FacebookSource",
+    "FreshdeskSource",
+    "GitLabSource",
     # Calendar
     "GoogleCalendarSource",
+    "GuardianSource",
+    "HackerNewsSearchSource",
+    "InstagramSource",
+    # Social
+    "LinkedInSource",
+    "LogseqSource",
+    # Analytics
+    "LookerSource",
+    # IoT
+    "MQTTSource",
+    "MedrxivSource",
+    "MetabaseSource",
+    "NPMSource",
+    # News
+    "NewsAPISource",
+    # Productivity
+    "OneNoteSource",
+    # Geographic
+    "OpenStreetMapSource",
+    # Weather
+    "OpenWeatherSource",
+    "OrgModeSource",
+    # Developer
+    "PostmanCollectionSource",
+    # Package repos
+    "PyPISource",
+    # Knowledge
+    "RoamResearchSource",
+    # Legal
+    "SECEdgarSource",
+    "SSRNSource",
+    "SquareSource",
+    # Gaming
+    "SteamSource",
+    # Business
+    "StripeSource",
+    "SwaggerAPISource",
+    # OCR
+    "TesseractOCRSource",
+    "TextileSource",
+    # Time tracking
+    "TogglSource",
+    "TwitchSource",
+    # Media
+    "VimeoSource",
+    # Support
+    "ZendeskSource",
 ]

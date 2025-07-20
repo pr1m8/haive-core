@@ -18,7 +18,8 @@ class MockEngine(InvokableEngine):
     max_tokens: int | None = 1024
     special_param: str | None = None
 
-    def create_runnable(self, runnable_config: RunnableConfig | None = None) -> Any:
+    def create_runnable(
+            self, runnable_config: RunnableConfig | None = None) -> Any:
         # Simple mock implementation
         return lambda x: {"result": f"Result from {self.model_name}"}
 
@@ -30,7 +31,8 @@ class MockRetrieverEngine(InvokableEngine):
     similarity_threshold: float = 0.8
     filter_criteria: dict[str, Any] | None = None
 
-    def create_runnable(self, runnable_config: RunnableConfig | None = None) -> Any:
+    def create_runnable(
+            self, runnable_config: RunnableConfig | None = None) -> Any:
         # Simple mock implementation
         return lambda x: {"documents": ["doc1", "doc2", "doc3"]}
 
@@ -176,7 +178,8 @@ class TestRunnableConfigManager:
         )
 
         # Merge configs
-        merged_config = RunnableConfigManager.merge(base_config, override_config)
+        merged_config = RunnableConfigManager.merge(
+            base_config, override_config)
 
         # Check merged values
         assert (
@@ -220,7 +223,8 @@ class TestRunnableConfigManager:
         }
 
         # Merge configs
-        merged_config = RunnableConfigManager.merge(base_config, override_config)
+        merged_config = RunnableConfigManager.merge(
+            base_config, override_config)
 
         # Check engine configs
         engine_configs = merged_config["configurable"]["engine_configs"]
@@ -251,15 +255,19 @@ class TestRunnableConfigManager:
         )
 
         # Extract values
-        assert RunnableConfigManager.extract_value(config, "thread_id") == "test-thread"
-        assert RunnableConfigManager.extract_value(config, "user_id") == "test-user"
+        assert RunnableConfigManager.extract_value(
+            config, "thread_id") == "test-thread"
+        assert RunnableConfigManager.extract_value(
+            config, "user_id") == "test-user"
         assert (
             RunnableConfigManager.extract_value(config, "custom_param")
             == "custom-value"
         )
-        assert RunnableConfigManager.extract_value(config, "non_existent") is None
+        assert RunnableConfigManager.extract_value(
+            config, "non_existent") is None
         assert (
-            RunnableConfigManager.extract_value(config, "non_existent", "default")
+            RunnableConfigManager.extract_value(
+                config, "non_existent", "default")
             == "default"
         )
 
@@ -290,14 +298,17 @@ class TestRunnableConfigManager:
         }
 
         # Extract engine configs
-        engine1_config = RunnableConfigManager.extract_engine_config(config, "engine1")
+        engine1_config = RunnableConfigManager.extract_engine_config(
+            config, "engine1")
         assert engine1_config == {"param1": "value1", "param2": "value2"}
 
-        engine2_config = RunnableConfigManager.extract_engine_config(config, "engine2")
+        engine2_config = RunnableConfigManager.extract_engine_config(
+            config, "engine2")
         assert engine2_config == {"param3": "value3"}
 
         # Non-existent engine
-        assert RunnableConfigManager.extract_engine_config(config, "non_existent") == {}
+        assert RunnableConfigManager.extract_engine_config(
+            config, "non_existent") == {}
 
     def test_extract_engine_type_config(self):
         """Test extracting configuration for a specific engine type."""
@@ -313,7 +324,8 @@ class TestRunnableConfigManager:
         }
 
         # Extract engine type configs
-        llm_config = RunnableConfigManager.extract_engine_type_config(config, "llm")
+        llm_config = RunnableConfigManager.extract_engine_type_config(
+            config, "llm")
         assert llm_config == {"model": "gpt-4", "temperature": 0.7}
 
         retriever_config = RunnableConfigManager.extract_engine_type_config(
@@ -323,7 +335,8 @@ class TestRunnableConfigManager:
 
         # Non-existent engine type
         assert (
-            RunnableConfigManager.extract_engine_type_config(config, "non_existent")
+            RunnableConfigManager.extract_engine_type_config(
+                config, "non_existent")
             == {}
         )
 

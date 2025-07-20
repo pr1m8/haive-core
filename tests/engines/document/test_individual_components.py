@@ -18,25 +18,18 @@ def test_path_analyzer_direct():
         PathType,
     )
 
-    print("Testing PathAnalyzer directly...")
-
     # Test PDF file
     result = PathAnalyzer.analyze("/path/to/document.pdf")
-    print(f"✓ Path type: {result.path_type}")
-    print(f"✓ Extension: {result.file_extension}")
-    print(f"✓ Category: {result.file_category}")
 
     assert result.path_type == PathType.LOCAL_FILE
     assert result.file_extension == ".pdf"
     assert result.file_category == FileCategory.DOCUMENT
 
     # Test GitHub URL
-    result = PathAnalyzer.analyze("https://github.com/user/repo/blob/main/README.md")
-    print(f"✓ GitHub detected: {result.service_detected}")
+    result = PathAnalyzer.analyze(
+        "https://github.com/user/repo/blob/main/README.md")
 
     assert result.service_detected == "github"
-
-    print("PathAnalyzer tests passed!")
 
 
 def test_source_base_direct():
@@ -45,8 +38,6 @@ def test_source_base_direct():
         LocalSource,
         RemoteSource,
     )
-
-    print("Testing source base classes...")
 
     # Test LocalSource
     pdf_source = LocalSource(
@@ -66,8 +57,6 @@ def test_source_base_direct():
     assert kwargs["file_path"] == "/path/to/test.pdf"
     assert kwargs["encoding"] == "utf-8"
 
-    print("✓ LocalSource creation and kwargs")
-
     # Test RemoteSource
     web_source = RemoteSource(
         source_type="web",
@@ -83,18 +72,11 @@ def test_source_base_direct():
     assert "url" in kwargs
     assert kwargs["url"] == "https://example.com/page.html"
 
-    print("✓ RemoteSource creation and kwargs")
-    print("Source base classes tests passed!")
-
 
 def test_registry_direct():
     """Test registry functionality directly."""
-    from haive.core.engine.document.loaders.sources.registry import (
-        SourceRegistry,
-    )
+    from haive.core.engine.document.loaders.sources.registry import SourceRegistry
     from haive.core.engine.document.loaders.sources.source_base import LocalSource
-
-    print("Testing registry functionality...")
 
     # Create fresh registry
     registry = SourceRegistry()
@@ -102,8 +84,6 @@ def test_registry_direct():
     # Define test source
     class TestPDFSource(LocalSource):
         """Test PDF source."""
-
-        pass
 
     # Register source
     registration = registry.register(
@@ -127,14 +107,10 @@ def test_registry_direct():
     assert "fast" in registration.loaders
     assert "quality" in registration.loaders
 
-    print("✓ Source registration")
-
     # Test finding source
     found = registry.find_source_for_path("/path/to/test.pdf")
     assert found is not None
     assert found.name == "test_pdf"
-
-    print("✓ Source lookup by extension")
 
     # Test creating source
     source = registry.create_source("/path/to/test.pdf")
@@ -142,15 +118,10 @@ def test_registry_direct():
     assert source.source_type == "test_pdf"
     assert source.file_path == "/path/to/test.pdf"
 
-    print("✓ Source creation")
-
     # Test loader selection
     loader_mapping = registry.get_loader_for_source(source)
     assert loader_mapping is not None
     assert loader_mapping.name == "PyPDFLoader"  # default_loader
-
-    print("✓ Loader selection")
-    print("Registry tests passed!")
 
 
 def test_auto_factory_direct():
@@ -161,8 +132,6 @@ def test_auto_factory_direct():
         source_registry,
     )
     from haive.core.engine.document.loaders.sources.source_base import LocalSource
-
-    print("Testing auto factory...")
 
     # Clear registry
     source_registry._sources.clear()
@@ -192,38 +161,24 @@ def test_auto_factory_direct():
     assert source.source_type == "pdf"
     assert source.file_path == "/path/to/document.pdf"
 
-    print("✓ Factory source creation")
-
     # Test path analysis
     analysis = factory.analyze_path_with_sources("/path/to/document.pdf")
     assert analysis["source"]["name"] == "pdf"
     assert "fast" in analysis["loaders"]
     assert "quality" in analysis["loaders"]
 
-    print("✓ Factory path analysis")
-
     # Test find available loaders
     loaders = factory.find_available_loaders("/path/to/document.pdf")
     assert "fast" in loaders
     assert "quality" in loaders
 
-    print("✓ Factory loader discovery")
-    print("Auto factory tests passed!")
-
 
 if __name__ == "__main__":
-    print("Running direct component tests...\n")
 
     test_path_analyzer_direct()
-    print()
 
     test_source_base_direct()
-    print()
 
     test_registry_direct()
-    print()
 
     test_auto_factory_direct()
-    print()
-
-    print("All component tests passed! ✅")

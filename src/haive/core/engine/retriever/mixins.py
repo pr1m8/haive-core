@@ -2,7 +2,7 @@
 
 """Retriever mixins for the Haive framework."""
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from langchain_core.documents import Document
 from pydantic import field_validator
@@ -29,7 +29,7 @@ class RetrieverMixin:
 
     @field_validator("engine", mode="before")
     @classmethod
-    def convert_vectorstore_to_retriever(cls, v):
+    def convert_vectorstore_to_retriever(cls, v) -> Any:
         """Convert VectorStoreConfig to VectorStoreRetrieverConfig if needed."""
         if isinstance(v, VectorStoreConfig):
             return VectorStoreRetrieverConfig(
@@ -41,7 +41,7 @@ class RetrieverMixin:
     def from_vectorstore(
         cls,
         vector_store_config: VectorStoreConfig,
-        retriever_kwargs: Optional[Dict[str, Any]] = None,
+        retriever_kwargs: dict[str, Any] | None = None,
         **kwargs,
     ):
         """Create instance with a retriever from a vector store configuration.
@@ -65,10 +65,10 @@ class RetrieverMixin:
     @classmethod
     def from_documents(
         cls,
-        documents: List[Document],
-        embedding_model: Optional[BaseEmbeddingConfig] = None,
+        documents: list[Document],
+        embedding_model: BaseEmbeddingConfig | None = None,
         vector_store_provider: str = "FAISS",
-        retriever_kwargs: Optional[Dict[str, Any]] = None,
+        retriever_kwargs: dict[str, Any] | None = None,
         **kwargs,
     ):
         """Create instance with a retriever from documents.

@@ -1,5 +1,6 @@
 """Tool schema extraction utilities for the Haive framework.
 
+from typing import Any
 This module provides utilities to extract Pydantic input schemas from various
 callable types including regular functions, LangChain tools, and other tool types.
 Also includes utilities for creating StructuredTool instances and ToolNode configurations.
@@ -8,16 +9,8 @@ Also includes utilities for creating StructuredTool instances and ToolNode confi
 import inspect
 import logging
 import re
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Type,
-    Union,
-    get_type_hints,
-)
+from collections.abc import Callable
+from typing import Any, get_type_hints
 
 from langchain_core.tools import BaseTool, StructuredTool
 from pydantic import BaseModel, Field, create_model
@@ -40,14 +33,13 @@ except ImportError:
 
 
 def extract_input_schema(
-    tool_or_callable: Union[Callable, Any],
-    schema_name: Optional[str] = None,
+    tool_or_callable: Callable | Any,
+    schema_name: str | None = None,
     include_docstring: bool = True,
     strict_typing: bool = False,
     include_signature: bool = True,
-) -> Type[BaseModel]:
-    """
-    Extract a Pydantic input schema from a callable or tool.
+) -> type[BaseModel]:
+    """Extract a Pydantic input schema from a callable or tool.
 
     This function can handle:
     - Regular Python functions with type hints
@@ -70,7 +62,7 @@ def extract_input_schema(
         def my_function(name: str, age: int = 25, active: bool = True):
             '''Process user information.
 
-            Args:
+    Args:
                 name: User's full name
                 age: User's age in years
                 active: Whether the user is active
@@ -92,9 +84,9 @@ def extract_input_schema(
             schema_name = "ToolInput"
 
     # Handle different tool types
-    if LANGCHAIN_AVAILABLE and isinstance(tool_or_callable, Type[BaseTool]):
+    if LANGCHAIN_AVAILABLE and isinstance(tool_or_callable, type[BaseTool]):
         return _extract_from_langchain_tool(tool_or_callable, schema_name)
-    elif callable(tool_or_callable):
+    if callable(tool_or_callable):
         return _extract_from_callable(
             tool_or_callable,
             schema_name,
@@ -102,13 +94,11 @@ def extract_input_schema(
             strict_typing,
             include_signature,
         )
-    else:
-        raise ValueError(f"Unsupported tool type: {type(tool_or_callable)}")
+    raise ValueError(f"Unsupported tool type: {type(tool_or_callable)}")
 
 
-def _extract_from_langchain_tool(tool: Any, schema_name: str) -> Type[BaseModel]:
+def _extract_from_langchain_tool(tool: Any, schema_name: str) -> type[BaseModel]:
     """Extract schema from a LangChain tool."""
-
     # Check if tool already has an input schema
     if hasattr(tool, "args_schema") and tool.args_schema is not None:
         # Return existing schema or create a copy with new name
@@ -132,7 +122,9 @@ def _extract_from_langchain_tool(tool: Any, schema_name: str) -> Type[BaseModel]
 
     # Fallback: create a generic schema
     logger.warning(
-        f"Could not extract specific schema from tool {tool.name if hasattr(tool, 'name') else 'unknown'}"
+        f"Could not extract specific schema from tool {
+            tool.name if hasattr(
+                tool, 'name') else 'unknown'}"
     )
     return create_model(schema_name, input=(str, Field(description="Tool input")))
 
@@ -143,9 +135,8 @@ def _extract_from_callable(
     include_docstring: bool = True,
     strict_typing: bool = False,
     include_signature: bool = True,
-) -> Type[BaseModel]:
+) -> type[BaseModel]:
     """Extract schema from a regular callable."""
-
     # Get function signature
     signature = None
     try:
@@ -220,7 +211,10 @@ def _extract_from_callable(
     # Handle case where function has no parameters
     if not fields:
         logger.warning(
-            f"Function {func.__name__ if hasattr(func, '__name__') else 'unknown'} has no extractable parameters"
+            f"Function {
+                func.__name__ if hasattr(
+                    func,
+                    '__name__') else 'unknown'} has no extractable parameters"
         )
         schema = create_model(schema_name)
         if include_signature:
@@ -257,7 +251,7 @@ def _extract_from_callable(
 
         return schema
     except Exception as e:
-        logger.error(f"Failed to create model {schema_name}: {e}")
+        logger.exception(f"Failed to create model {schema_name}: {e}")
         # Fallback to a simple model
         fallback_schema = create_model(
             schema_name, input=(str, Field(description="Function input"))
@@ -271,9 +265,8 @@ def _extract_from_callable(
         return fallback_schema
 
 
-def _extract_param_descriptions(docstring: str) -> Dict[str, str]:
-    """
-    Extract parameter descriptions from a docstring.
+def _extract_param_descriptions(docstring: str) -> dict[str, str]:
+    """Extract parameter descriptions from a docstring.
 
     Supports multiple docstring formats:
     - Google style
@@ -290,7 +283,8 @@ def _extract_param_descriptions(docstring: str) -> Dict[str, str]:
     )
     if google_match:
         args_section = google_match.group(1)
-        # Match parameter lines: "param_name: description" or "param_name (type): description"
+        # Match parameter lines: "param_name: description" or "param_name
+        # (type): description"
         param_matches = re.findall(
             r"^\s*(\w+)(?:\s*\([^)]+\))?\s*:\s*(.+?)(?=^\s*\w+(?:\s*\([^)]+\))?\s*:|$)",
             args_section,
@@ -327,12 +321,11 @@ def _extract_param_descriptions(docstring: str) -> Dict[str, str]:
 
 
 def extract_output_schema(
-    tool_or_callable: Union[Callable, Any],
-    schema_name: Optional[str] = None,
+    tool_or_callable: Callable | Any,
+    schema_name: str | None = None,
     include_docstring: bool = True,
-) -> Optional[Type[BaseModel]]:
-    """
-    Extract a Pydantic output schema from a callable or tool.
+) -> type[BaseModel] | None:
+    """Extract a Pydantic output schema from a callable or tool.
 
     Args:
         tool_or_callable: The callable or tool to extract schema from
@@ -353,7 +346,8 @@ def extract_output_schema(
 
     # Handle LangChain tools
     if LANGCHAIN_AVAILABLE and isinstance(tool_or_callable, BaseTool):
-        # Most LangChain tools return strings, but check if there's a specific schema
+        # Most LangChain tools return strings, but check if there's a specific
+        # schema
         return create_model(schema_name, output=(str, Field(description="Tool output")))
 
     # Handle regular callables
@@ -385,15 +379,14 @@ def extract_output_schema(
 
 
 def create_tool_schemas(
-    tool_or_callable: Union[Callable, Any],
-    input_schema_name: Optional[str] = None,
-    output_schema_name: Optional[str] = None,
+    tool_or_callable: Callable | Any,
+    input_schema_name: str | None = None,
+    output_schema_name: str | None = None,
     include_docstring: bool = True,
     strict_typing: bool = False,
     include_signature: bool = True,
-) -> Dict[str, Optional[Type[BaseModel]]]:
-    """
-    Create both input and output schemas for a tool or callable.
+) -> dict[str, type[BaseModel] | None]:
+    """Create both input and output schemas for a tool or callable.
 
     Args:
         tool_or_callable: The callable or tool to extract schemas from
@@ -422,8 +415,7 @@ def create_tool_schemas(
 
 
 def invoke_from_schema(schema_instance: BaseModel, **extra_kwargs) -> Any:
-    """
-    Invoke the original callable using a schema instance.
+    """Invoke the original callable using a schema instance.
 
     This function uses the stored signature information to properly
     invoke the original callable with the validated input data.
@@ -473,7 +465,7 @@ def invoke_from_schema(schema_instance: BaseModel, **extra_kwargs) -> Any:
             # Call the function with bound arguments
             return callable_func(*bound_args.args, **bound_args.kwargs)
         except TypeError as e:
-            logger.error(f"Failed to bind arguments to signature: {e}")
+            logger.exception(f"Failed to bind arguments to signature: {e}")
             # Fallback to direct call
             return callable_func(**input_dict)
     else:
@@ -481,9 +473,8 @@ def invoke_from_schema(schema_instance: BaseModel, **extra_kwargs) -> Any:
         return callable_func(**input_dict)
 
 
-def get_signature_info(schema_class: Type[BaseModel]) -> Optional[Dict[str, Any]]:
-    """
-    Get stored signature information from a schema class.
+def get_signature_info(schema_class: type[BaseModel]) -> dict[str, Any] | None:
+    """Get stored signature information from a schema class.
 
     Args:
         schema_class: Schema class created by extract_input_schema
@@ -496,12 +487,11 @@ def get_signature_info(schema_class: Type[BaseModel]) -> Optional[Dict[str, Any]
 
 def create_structured_tool_from_callable(
     callable_func: Callable,
-    name: Optional[str] = None,
-    description: Optional[str] = None,
+    name: str | None = None,
+    description: str | None = None,
     extract_schema: bool = True,
-) -> Optional[Any]:
-    """
-    Create a LangChain StructuredTool from a callable.
+) -> Any | None:
+    """Create a LangChain StructuredTool from a callable.
 
     Args:
         callable_func: The function to wrap
@@ -543,22 +533,20 @@ def create_structured_tool_from_callable(
                 description=tool_description,
                 args_schema=args_schema,
             )
-        else:
-            return StructuredTool.from_function(
-                func=callable_func, name=tool_name, description=tool_description
-            )
+        return StructuredTool.from_function(
+            func=callable_func, name=tool_name, description=tool_description
+        )
     except Exception as e:
-        logger.error(f"Failed to create StructuredTool for {tool_name}: {e}")
+        logger.exception(f"Failed to create StructuredTool for {tool_name}: {e}")
         return None
 
 
 def create_goal_tool_node(
-    goal_schemas: List[Type[BaseModel]],
+    goal_schemas: list[type[BaseModel]],
     executor_function: Callable,
-    executor_name: Optional[str] = None,
-) -> Optional[Any]:
-    """
-    Create a ToolNode for "goal tools" pattern.
+    executor_name: str | None = None,
+) -> Any | None:
+    """Create a ToolNode for "goal tools" pattern.
 
     This creates a ToolNode where:
     1. Each goal schema becomes a StructuredTool that calls the executor
@@ -605,17 +593,21 @@ def create_goal_tool_node(
     for schema_class in goal_schemas:
         schema_name = schema_class.__name__
 
-        # Create a wrapper function that converts the schema to the expected format
-        def create_wrapper(schema_cls):
-            def wrapper(**kwargs):
+        # Create a wrapper function that converts the schema to the expected
+        # format
+        def create_wrapper(schema_cls) -> Any:
+            def wrapper(**kwargs) -> Any:
                 # Convert kwargs to schema instance
                 try:
                     goal_instance = schema_cls(**kwargs)
                     # Call executor with the goal instance
                     return executor_function(goal_instance, **kwargs)
                 except Exception as e:
-                    logger.error(f"Error executing goal {schema_cls.__name__}: {e}")
-                    return f"Error: {str(e)}"
+                    logger.exception(
+                        f"Error executing goal {
+                            schema_cls.__name__}: {e}"
+                    )
+                    return f"Error: {e!s}"
 
             # Copy metadata
             wrapper.__name__ = f"execute_{schema_cls.__name__.lower()}"
@@ -636,7 +628,7 @@ def create_goal_tool_node(
             )
             tools.append(tool)
         except Exception as e:
-            logger.error(f"Failed to create tool for {schema_name}: {e}")
+            logger.exception(f"Failed to create tool for {schema_name}: {e}")
 
     if not tools:
         logger.error("No tools created for goal tool node")
@@ -646,17 +638,16 @@ def create_goal_tool_node(
     try:
         return ToolNode(tools)
     except Exception as e:
-        logger.error(f"Failed to create ToolNode: {e}")
+        logger.exception(f"Failed to create ToolNode: {e}")
         return None
 
 
 def create_batch_goal_tool_node(
-    goal_schemas: List[Type[BaseModel]],
+    goal_schemas: list[type[BaseModel]],
     batch_executor_function: Callable,
-    executor_name: Optional[str] = None,
-) -> Optional[Any]:
-    """
-    Create a ToolNode for batch "goal tools" pattern like the tavily example.
+    executor_name: str | None = None,
+) -> Any | None:
+    """Create a ToolNode for batch "goal tools" pattern like the tavily example.
 
     This creates a ToolNode where multiple goal schemas can share the same
     underlying batch executor function.
@@ -695,7 +686,8 @@ def create_batch_goal_tool_node(
     for schema_class in goal_schemas:
         schema_name = schema_class.__name__
 
-        # Create StructuredTool that uses the schema name and calls batch executor
+        # Create StructuredTool that uses the schema name and calls batch
+        # executor
         try:
             tool = StructuredTool.from_function(
                 func=batch_executor_function,
@@ -705,7 +697,7 @@ def create_batch_goal_tool_node(
             )
             tools.append(tool)
         except Exception as e:
-            logger.error(f"Failed to create batch tool for {schema_name}: {e}")
+            logger.exception(f"Failed to create batch tool for {schema_name}: {e}")
 
     if not tools:
         logger.error("No tools created for batch goal tool node")
@@ -715,7 +707,7 @@ def create_batch_goal_tool_node(
     try:
         return ToolNode(tools)
     except Exception as e:
-        logger.error(f"Failed to create batch ToolNode: {e}")
+        logger.exception(f"Failed to create batch ToolNode: {e}")
         return None
 
 
@@ -724,7 +716,7 @@ if __name__ == "__main__":
     # Test with a regular function
     def search_documents(
         query: str, limit: int = 10, include_metadata: bool = True
-    ) -> List[str]:
+    ) -> list[str]:
         """Search for documents matching a query.
 
         Args:
@@ -739,54 +731,41 @@ if __name__ == "__main__":
 
     # Extract schema
     SearchSchema = extract_input_schema(search_documents)
-    print("Generated schema fields:")
-    for name, field_info in SearchSchema.model_fields.items():
-        print(f"  {name}: {field_info.annotation} = {field_info.default}")
+    for _name, field_info in SearchSchema.model_fields.items():
         if field_info.description:
-            print(f"    Description: {field_info.description}")
+            pass
 
     # Test creating an instance
     search_input = SearchSchema(query="test query", limit=5)
-    print(f"\nExample usage: {search_input}")
 
     # Test schemas creation with signature
     schemas = create_tool_schemas(search_documents, include_signature=True)
-    print(f"\nInput schema: {schemas['input']}")
-    print(f"Output schema: {schemas['output']}")
 
     # Test signature info
     sig_info = get_signature_info(schemas["input"])
     if sig_info:
-        print("\nSignature info available:")
-        print(f"  Parameter count: {sig_info.get('parameter_count', 'N/A')}")
-        print(f"  Required params: {sig_info.get('required_params', [])}")
-        print(f"  Optional params: {sig_info.get('optional_params', [])}")
+        pass
 
     # Test goal tool node creation
-    print(f"\n{'='*50}")
-    print("Testing Goal Tool Node Creation")
-    print(f"{'='*50}")
 
     # Define some goal schemas
     class SearchQueries(BaseModel):
-        search_queries: List[str] = Field(
+        search_queries: list[str] = Field(
             description="List of search queries to execute"
         )
 
     class AnswerQuestion(BaseModel):
         answer: str = Field(description="The answer to provide")
-        sources: List[str] = Field(
+        sources: list[str] = Field(
             default_factory=list, description="Sources for the answer"
         )
 
     # Define executor function
-    def execute_search_goal(goal_data, **kwargs):
+    def execute_search_goal(goal_data, **kwargs) -> Any:
         """Execute search-related goals."""
         if isinstance(goal_data, SearchQueries):
-            print(f"Executing search queries: {goal_data.search_queries}")
             return f"Search results for: {', '.join(goal_data.search_queries)}"
-        elif isinstance(goal_data, AnswerQuestion):
-            print(f"Providing answer: {goal_data.answer}")
+        if isinstance(goal_data, AnswerQuestion):
             return f"Answer: {goal_data.answer} (Sources: {goal_data.sources})"
         return "Unknown goal type"
 
@@ -795,17 +774,14 @@ if __name__ == "__main__":
         goal_tool_node = create_goal_tool_node(
             [SearchQueries, AnswerQuestion], execute_search_goal
         )
-        print(f"Goal tool node created: {goal_tool_node is not None}")
 
         # Test batch version too
-        def run_queries(search_queries: List[str], **kwargs):
+        def run_queries(search_queries: list[str], **kwargs):
             """Run the generated queries."""
-            print(f"Batch executing queries: {search_queries}")
             return [f"Result for: {query}" for query in search_queries]
 
         batch_tool_node = create_batch_goal_tool_node(
             [SearchQueries, AnswerQuestion], run_queries
         )
-        print(f"Batch goal tool node created: {batch_tool_node is not None}")
     else:
-        print("LangChain not available, skipping goal tool node creation")
+        pass

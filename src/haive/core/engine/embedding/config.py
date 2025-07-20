@@ -138,7 +138,8 @@ class EmbeddingConfigFactory:
         if config_class is None:
             return {}
 
-        # Get basic information without instantiation to avoid dependency issues
+        # Get basic information without instantiation to avoid dependency
+        # issues
         info = {
             "provider": provider_str,
             "class": config_class.__name__,
@@ -153,7 +154,8 @@ class EmbeddingConfigFactory:
 
         # Try to get additional info from class methods if available
         try:
-            # Some methods might be available as class methods or static methods
+            # Some methods might be available as class methods or static
+            # methods
             if hasattr(config_class, "get_supported_models"):
                 method = config_class.get_supported_models
                 if callable(method):
@@ -161,7 +163,7 @@ class EmbeddingConfigFactory:
                         models = method()
                         if isinstance(models, list):
                             info["supported_models"] = models
-                    except:
+                    except BaseException:
                         pass
 
             if hasattr(config_class, "get_default_model"):
@@ -171,7 +173,7 @@ class EmbeddingConfigFactory:
                         default = method()
                         if isinstance(default, str):
                             info["default_model"] = default
-                    except:
+                    except BaseException:
                         pass
         except Exception:
             pass

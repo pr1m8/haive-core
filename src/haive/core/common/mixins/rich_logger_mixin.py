@@ -68,7 +68,9 @@ class RichLoggerMixin(BaseModel):
         """
         if self._logger is None or not self._logger_setup:
             # Create logger with module.class name
-            logger_name = f"{self.__class__.__module__}.{self.__class__.__name__}"
+            logger_name = f"{
+                self.__class__.__module__}.{
+                self.__class__.__name__}"
             self._logger = logging.getLogger(logger_name)
 
             # Only add handler if not already present

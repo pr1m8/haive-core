@@ -38,7 +38,8 @@ def decode_checkpoint_blobs(thread_id: str):
 
                 blobs = cur.fetchall()
 
-                for i, (version, channel, blob_type, blob_data) in enumerate(blobs):
+                for i, (version, channel, blob_type,
+                        blob_data) in enumerate(blobs):
 
                     if blob_type == "msgpack" and blob_data:
                         try:

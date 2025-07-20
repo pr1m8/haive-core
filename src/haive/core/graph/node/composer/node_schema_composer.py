@@ -9,9 +9,10 @@ schemas or create composed nodes with custom field mappings.
 """
 
 import logging
-from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
+from collections.abc import Callable
+from typing import Any, TypeVar
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from haive.core.graph.node.composer.extract_functions import ExtractFunctions
 from haive.core.graph.node.composer.field_mapping import FieldMapping
@@ -64,16 +65,16 @@ class NodeSchemaComposer:
         )
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize composer with built-in functions."""
         self.path_resolver = PathResolver()
         self.extract_functions = ExtractFunctions()
         self.update_functions = UpdateFunctions()
 
         # Registries for custom functions
-        self._extract_registry: Dict[str, ExtractFunction] = {}
-        self._update_registry: Dict[str, UpdateFunction] = {}
-        self._transform_registry: Dict[str, TransformFunction] = {}
+        self._extract_registry: dict[str, ExtractFunction] = {}
+        self._update_registry: dict[str, UpdateFunction] = {}
+        self._transform_registry: dict[str, TransformFunction] = {}
 
         # Register built-in transforms
         self._register_builtin_transforms()
@@ -123,7 +124,7 @@ class NodeSchemaComposer:
         logger.debug(f"Registered transform function: {name}")
 
     def create_extract_function(
-        self, mappings: List[FieldMapping], fallback_extract: Optional[str] = None
+        self, mappings: list[FieldMapping], fallback_extract: str | None = None
     ) -> ExtractFunction:
         """Create extract function from field mappings.
 
@@ -135,7 +136,7 @@ class NodeSchemaComposer:
             Extract function that handles all mappings
         """
 
-        def _extract(state: Any, config: Dict[str, Any]) -> Any:
+        def _extract(state: Any, config: dict[str, Any]) -> Any:
             """Extract values according to field mappings."""
             if len(mappings) == 1:
                 # Single mapping - return value directly
@@ -144,21 +145,20 @@ class NodeSchemaComposer:
                     state, mapping.source_path, mapping.default
                 )
                 return self._apply_transforms(value, mapping.transform)
-            else:
-                # Multiple mappings - return dict
-                result = {}
-                for mapping in mappings:
-                    value = self.path_resolver.extract_value(
-                        state, mapping.source_path, mapping.default
-                    )
-                    transformed = self._apply_transforms(value, mapping.transform)
-                    result[mapping.target_path] = transformed
-                return result
+            # Multiple mappings - return dict
+            result = {}
+            for mapping in mappings:
+                value = self.path_resolver.extract_value(
+                    state, mapping.source_path, mapping.default
+                )
+                transformed = self._apply_transforms(value, mapping.transform)
+                result[mapping.target_path] = transformed
+            return result
 
         return _extract
 
     def create_update_function(
-        self, mappings: List[FieldMapping], merge_mode: str = "replace"
+        self, mappings: list[FieldMapping], merge_mode: str = "replace"
     ) -> UpdateFunction:
         """Create update function from field mappings.
 
@@ -170,7 +170,7 @@ class NodeSchemaComposer:
             Update function that handles all mappings
         """
 
-        def _update(result: Any, state: Any, config: Dict[str, Any]) -> Dict[str, Any]:
+        def _update(result: Any, state: Any, config: dict[str, Any]) -> dict[str, Any]:
             """Update state according to field mappings."""
             updates = {}
 
@@ -178,12 +178,11 @@ class NodeSchemaComposer:
                 # Extract value from result using source_path
                 if isinstance(result, dict):
                     value = result.get(mapping.source_path, mapping.default)
+                # For single values, use source_path as key or the whole result
+                elif mapping.source_path in {"result", ""}:
+                    value = result
                 else:
-                    # For single values, use source_path as key or the whole result
-                    if mapping.source_path == "result" or mapping.source_path == "":
-                        value = result
-                    else:
-                        value = getattr(result, mapping.source_path, mapping.default)
+                    value = getattr(result, mapping.source_path, mapping.default)
 
                 # Apply transforms
                 transformed = self._apply_transforms(value, mapping.transform)
@@ -195,9 +194,7 @@ class NodeSchemaComposer:
 
         return _update
 
-    def _apply_transforms(
-        self, value: Any, transform_names: Optional[List[str]]
-    ) -> Any:
+    def _apply_transforms(self, value: Any, transform_names: list[str] | None) -> Any:
         """Apply transform pipeline to value.
 
         Args:
@@ -223,9 +220,9 @@ class NodeSchemaComposer:
     def compose_node(
         self,
         base_node: Any,
-        input_mappings: Optional[List[FieldMapping]] = None,
-        output_mappings: Optional[List[FieldMapping]] = None,
-        name: Optional[str] = None,
+        input_mappings: list[FieldMapping] | None = None,
+        output_mappings: list[FieldMapping] | None = None,
+        name: str | None = None,
     ) -> "ComposedNode":
         """Compose a node with custom I/O mappings.
 
@@ -269,9 +266,9 @@ class NodeSchemaComposer:
     def from_callable(
         self,
         func: Callable,
-        input_mappings: Optional[List[FieldMapping]] = None,
-        output_mappings: Optional[List[FieldMapping]] = None,
-        name: Optional[str] = None,
+        input_mappings: list[FieldMapping] | None = None,
+        output_mappings: list[FieldMapping] | None = None,
+        name: str | None = None,
         **callable_kwargs,
     ) -> "ComposedCallableNode":
         """Create a composed node from a callable function.
@@ -327,10 +324,10 @@ class NodeSchemaComposer:
 
     def create_adapter(
         self,
-        source_schema: Type[BaseModel],
-        target_schema: Type[BaseModel],
-        field_mappings: List[FieldMapping],
-        name: Optional[str] = None,
+        source_schema: type[BaseModel],
+        target_schema: type[BaseModel],
+        field_mappings: list[FieldMapping],
+        name: str | None = None,
     ) -> "SchemaAdapter":
         """Create an adapter between two schemas.
 
@@ -374,8 +371,8 @@ class ComposedNode:
     def __init__(
         self,
         base_node: Any,
-        input_mappings: List[FieldMapping],
-        output_mappings: List[FieldMapping],
+        input_mappings: list[FieldMapping],
+        output_mappings: list[FieldMapping],
         name: str,
         composer: NodeSchemaComposer,
     ):
@@ -396,7 +393,7 @@ class ComposedNode:
         else:
             self.update_func = None
 
-    def __call__(self, state: Any, config: Optional[Dict[str, Any]] = None) -> Any:
+    def __call__(self, state: Any, config: dict[str, Any] | None = None) -> Any:
         """Execute the composed node with I/O mappings."""
         config = config or {}
 
@@ -441,17 +438,13 @@ class ComposedNode:
                 final_updates = {**result.update, **mapped_updates}
                 if hasattr(result, "model_copy"):
                     return result.model_copy(update={"update": final_updates})
-                else:
-                    # Reconstruct command-like object
-                    result.update = final_updates
-                    return result
-            else:
-                # Return new Command with mapped updates
-                from langgraph.types import Command
+                # Reconstruct command-like object
+                result.update = final_updates
+                return result
+            # Return new Command with mapped updates
+            from langgraph.types import Command
 
-                return Command(
-                    update=mapped_updates, goto=getattr(result, "goto", None)
-                )
+            return Command(update=mapped_updates, goto=getattr(result, "goto", None))
 
         return result
 
@@ -462,8 +455,8 @@ class ComposedCallableNode(ComposedNode):
     def __init__(
         self,
         base_node: Any,  # CallableNodeConfig
-        input_mappings: List[FieldMapping],
-        output_mappings: List[FieldMapping],
+        input_mappings: list[FieldMapping],
+        output_mappings: list[FieldMapping],
         name: str,
         composer: NodeSchemaComposer,
     ):
@@ -475,9 +468,9 @@ class SchemaAdapter:
 
     def __init__(
         self,
-        source_schema: Type[BaseModel],
-        target_schema: Type[BaseModel],
-        field_mappings: List[FieldMapping],
+        source_schema: type[BaseModel],
+        target_schema: type[BaseModel],
+        field_mappings: list[FieldMapping],
         name: str,
         composer: NodeSchemaComposer,
     ):
@@ -546,8 +539,8 @@ def change_input_key(node: Any, old_key: str, new_key: str) -> ComposedNode:
 
 def remap_fields(
     node: Any,
-    input_mapping: Optional[Dict[str, str]] = None,
-    output_mapping: Optional[Dict[str, str]] = None,
+    input_mapping: dict[str, str] | None = None,
+    output_mapping: dict[str, str] | None = None,
 ) -> ComposedNode:
     """Quick function to remap multiple fields.
 

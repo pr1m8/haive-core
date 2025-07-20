@@ -1,13 +1,12 @@
-"""
-Field and model validation framework with async support.
-"""
+"""Field and model validation framework with async support."""
 
 from __future__ import annotations
 
 import asyncio
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -22,18 +21,18 @@ from haive.core.schema.compatibility.types import (
 class ValidationContext(BaseModel):
     """Context passed through validation chain."""
 
-    current_path: List[str] = []
+    current_path: list[str] = []
     root_value: Any = None
     parent_value: Any = None
-    field_info: Optional[FieldInfo] = None
-    schema_info: Optional[SchemaInfo] = None
-    custom_data: Dict[str, Any] = {}
+    field_info: FieldInfo | None = None
+    schema_info: SchemaInfo | None = None
+    custom_data: dict[str, Any] = {}
 
     def push_path(self, segment: str) -> None:
         """Push a path segment."""
         self.current_path.append(segment)
 
-    def pop_path(self) -> Optional[str]:
+    def pop_path(self) -> str | None:
         """Pop a path segment."""
         return self.current_path.pop() if self.current_path else None
 
@@ -54,7 +53,6 @@ class Validator(ABC):
     @abstractmethod
     def validate(self, value: Any, context: ValidationContext) -> ValidationResult:
         """Validate a value."""
-        pass
 
     @property
     def supports_async(self) -> bool:
@@ -76,8 +74,8 @@ class FieldValidator(Validator):
     def __init__(
         self,
         field_name: str,
-        validators: Optional[List[Callable[[Any], bool]]] = None,
-        error_messages: Optional[Dict[str, str]] = None,
+        validators: list[Callable[[Any], bool]] | None = None,
+        error_messages: dict[str, str] | None = None,
     ):
         self.field_name = field_name
         self.validators = validators or []
@@ -86,7 +84,7 @@ class FieldValidator(Validator):
     def add_validator(
         self,
         validator: Callable[[Any], bool],
-        error_message: Optional[str] = None,
+        error_message: str | None = None,
     ) -> None:
         """Add a validator function."""
         self.validators.append(validator)
@@ -101,7 +99,9 @@ class FieldValidator(Validator):
             try:
                 if not validator(value):
                     error_msg = self.error_messages.get(
-                        str(validator), f"Validation failed for {self.field_name}"
+                        str(validator),
+                        f"Validation failed for {
+                            self.field_name}",
                     )
                     result.add_error(
                         ValidationError(
@@ -115,7 +115,7 @@ class FieldValidator(Validator):
                 result.add_error(
                     ValidationError(
                         field=self.field_name,
-                        message=f"Validator error: {str(e)}",
+                        message=f"Validator error: {e!s}",
                         error_type="validator_exception",
                         context={"exception": str(e)},
                     )
@@ -129,9 +129,9 @@ class ModelValidator(Validator):
 
     def __init__(
         self,
-        schema_info: Optional[SchemaInfo] = None,
-        field_validators: Optional[Dict[str, FieldValidator]] = None,
-        cross_field_validators: Optional[List[Callable]] = None,
+        schema_info: SchemaInfo | None = None,
+        field_validators: dict[str, FieldValidator] | None = None,
+        cross_field_validators: list[Callable] | None = None,
     ):
         self.schema_info = schema_info
         self.field_validators = field_validators or {}
@@ -203,7 +203,7 @@ class ModelValidator(Validator):
                 result.add_error(
                     ValidationError(
                         field=None,
-                        message=f"Cross-field validator error: {str(e)}",
+                        message=f"Cross-field validator error: {e!s}",
                         error_type="validator_exception",
                     )
                 )
@@ -215,11 +215,11 @@ class ModelValidator(Validator):
 class ValidatorChain:
     """Chain multiple validators together."""
 
-    validators: List[Validator]
+    validators: list[Validator]
     stop_on_first_error: bool = False
 
     def validate(
-        self, value: Any, context: Optional[ValidationContext] = None
+        self, value: Any, context: ValidationContext | None = None
     ) -> ValidationResult:
         """Run all validators in chain."""
         if context is None:
@@ -243,7 +243,7 @@ class ValidatorChain:
         return result
 
     async def avalidate(
-        self, value: Any, context: Optional[ValidationContext] = None
+        self, value: Any, context: ValidationContext | None = None
     ) -> ValidationResult:
         """Async validation of chain."""
         if context is None:
@@ -288,8 +288,8 @@ class ValidatorBuilder:
 
     @staticmethod
     def for_range(
-        min_value: Optional[float] = None,
-        max_value: Optional[float] = None,
+        min_value: float | None = None,
+        max_value: float | None = None,
         field_name: str = "value",
     ) -> FieldValidator:
         """Create range validator."""
@@ -309,8 +309,8 @@ class ValidatorBuilder:
 
     @staticmethod
     def for_length(
-        min_length: Optional[int] = None,
-        max_length: Optional[int] = None,
+        min_length: int | None = None,
+        max_length: int | None = None,
         field_name: str = "value",
     ) -> FieldValidator:
         """Create length validator."""
@@ -389,7 +389,7 @@ class CommonValidators:
 # Convenience function
 def create_validator(
     schema_info: SchemaInfo,
-    custom_validators: Optional[Dict[str, List[Callable]]] = None,
+    custom_validators: dict[str, list[Callable]] | None = None,
 ) -> ModelValidator:
     """Create a model validator from schema info."""
     model_validator = ModelValidator(schema_info=schema_info)

@@ -48,7 +48,8 @@ def setup_logging():
         rich_tracebacks=True, markup=True, show_path=False, enable_link_path=True
     )
 
-    # Instead of configuring the root logger, create a specific logger for conftest
+    # Instead of configuring the root logger, create a specific logger for
+    # conftest
     conftest_logger = logging.getLogger("conftest")
     conftest_logger.setLevel(logging.DEBUG)
     conftest_logger.addHandler(rich_handler)
@@ -162,7 +163,8 @@ class MockInvokableEngine(InvokableEngine):
 
     def create_runnable(self, runnable_config: RunnableConfig | None = None) -> Any:
         conftest_logger.debug(
-            f"[green]MockInvokableEngine[/green] '{self.name}' create_runnable called"
+            f"[green]MockInvokableEngine[/green] '{
+                self.name}' create_runnable called"
         )
         return self
 
@@ -196,7 +198,8 @@ class MockNonInvokableEngine(NonInvokableEngine):
 
     def create_runnable(self, runnable_config: RunnableConfig | None = None) -> Any:
         conftest_logger.debug(
-            f"[yellow]MockNonInvokableEngine[/yellow] '{self.name}' create_runnable called"
+            f"[yellow]MockNonInvokableEngine[/yellow] '{
+                self.name}' create_runnable called"
         )
         return {"instance_created_by": self.name}
 

@@ -4,6 +4,7 @@ This module provides a path analysis system for the document loader engine,
 which analyzes paths and URLs to determine their nature and properties.
 """
 
+import contextlib
 import logging
 import mimetypes
 import os
@@ -684,10 +685,8 @@ def analyze_local_path(path: str) -> PathAnalysisResult:
                 )
 
             # Get file size
-            try:
+            with contextlib.suppress(OSError, Exception):
                 result.file_size = os.path.getsize(path)
-            except (OSError, Exception):
-                pass
 
             # Get MIME type
             result.mime_type = detect_mime_type(path)

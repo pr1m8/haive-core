@@ -1,5 +1,6 @@
 """Support Vector Machine Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the SVM (Support Vector Machine) retriever,
 which uses Support Vector Machine algorithm for document retrieval. SVM retriever treats
 document retrieval as a binary classification problem where the query represents the
@@ -126,7 +127,7 @@ class SVMRetrieverConfig(BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create an SVM retriever from this configuration.
 
         Returns:

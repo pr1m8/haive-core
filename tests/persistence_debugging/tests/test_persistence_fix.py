@@ -30,7 +30,8 @@ def test_persistence_fix():
 
     result = session.run({}, config=config)
 
-    # Test 2: Try to retrieve state from the same thread_id to verify persistence
+    # Test 2: Try to retrieve state from the same thread_id to verify
+    # persistence
 
     # Create another session with the same persistence config
     session2 = CollaborativeConversation.create_brainstorming_session(

@@ -2,7 +2,8 @@
 
 import logging
 import time
-from typing import Any, Callable, Dict, List, Optional
+from collections.abc import Callable
+from typing import Any
 
 from langchain_core.messages import AIMessage, ToolMessage
 from pydantic import Field
@@ -65,7 +66,7 @@ class ValidationNodeWithRouting(ValidationNodeConfig):
     def create_validation_function_with_routing(self) -> Callable:
         """Create validation function with message updates and routing."""
 
-        def validation_node_with_routing(state: Dict[str, Any]) -> Dict[str, Any]:
+        def validation_node_with_routing(state: dict[str, Any]) -> dict[str, Any]:
             import traceback
             from datetime import datetime
 
@@ -73,17 +74,21 @@ class ValidationNodeWithRouting(ValidationNodeConfig):
             start_datetime = datetime.now()
 
             logger.info(
-                f"[bold magenta]=== ValidationNodeWithRouting START at {start_datetime.strftime('%H:%M:%S.%f')} ===[/bold magenta]"
+                f"[bold magenta]=== ValidationNodeWithRouting START at {
+                    start_datetime.strftime('%H:%M:%S.%f')} ===[/bold magenta]"
             )
             logger.debug(
-                f"[bold blue]Input state keys: {list(state.keys())}[/bold blue]"
+                f"[bold blue]Input state keys: {
+                    list(
+                        state.keys())}[/bold blue]"
             )
             logger.debug(f"[bold blue]State type: {type(state)}[/bold blue]")
 
             # Create validation routing state
             routing_state = ValidationStateManager.create_routing_state()
             logger.debug(
-                f"[bold cyan]Created routing state: {type(routing_state)}[/bold cyan]"
+                f"[bold cyan]Created routing state: {
+                    type(routing_state)}[/bold cyan]"
             )
 
             try:
@@ -108,12 +113,15 @@ class ValidationNodeWithRouting(ValidationNodeConfig):
                                 f"Last message type: {type(last_msg).__name__}"
                             )
                             logger.debug(
-                                f"Last message content: {str(last_msg)[:200]}..."
+                                f"Last message content: {
+                                    str(last_msg)[
+                                        :200]}..."
                             )
                     return self._handle_no_tool_calls(state, routing_state)
 
                 logger.info(
-                    f"[bold green]✓ Found {len(tool_calls)} tool calls for validation[/bold green]"
+                    f"[bold green]✓ Found {
+                        len(tool_calls)} tool calls for validation[/bold green]"
                 )
 
                 # Log tool call details
@@ -140,13 +148,19 @@ class ValidationNodeWithRouting(ValidationNodeConfig):
                 )
 
                 logger.info(
-                    f"[bold green]✓ Resources gathered:[/bold green] {len(available_tools)} tools, {len(validation_schemas)} schemas"
+                    f"[bold green]✓ Resources gathered:[/bold green] {
+                        len(available_tools)} tools, {
+                        len(validation_schemas)} schemas"
                 )
                 logger.debug(
-                    f"[bold cyan]Available tools: {list(available_tools.keys())}[/bold cyan]"
+                    f"[bold cyan]Available tools: {
+                        list(
+                            available_tools.keys())}[/bold cyan]"
                 )
                 logger.debug(
-                    f"[bold cyan]Available schemas: {list(validation_schemas.keys())}[/bold cyan]"
+                    f"[bold cyan]Available schemas: {
+                        list(
+                            validation_schemas.keys())}[/bold cyan]"
                 )
 
                 # Validate each tool call
@@ -160,7 +174,9 @@ class ValidationNodeWithRouting(ValidationNodeConfig):
                         else getattr(tool_call, "name", "unknown")
                     )
                     logger.info(
-                        f"[bold cyan]Validating tool call {i+1}/{len(tool_calls)}: {tc_name}[/bold cyan]"
+                        f"[bold cyan]Validating tool call {
+                            i + 1}/{
+                            len(tool_calls)}: {tc_name}[/bold cyan]"
                     )
 
                     try:
@@ -169,9 +185,13 @@ class ValidationNodeWithRouting(ValidationNodeConfig):
                         )
                         routing_state.add_validation_result(result)
 
-                        logger.debug(f"  Validation result: {result.status.value}")
                         logger.debug(
-                            f"  Route recommendation: {result.route_recommendation.value}"
+                            f"  Validation result: {
+                                result.status.value}"
+                        )
+                        logger.debug(
+                            f"  Route recommendation: {
+                                result.route_recommendation.value}"
                         )
                         logger.debug(f"  Target node: {result.target_node}")
                         if result.errors:
@@ -180,11 +200,12 @@ class ValidationNodeWithRouting(ValidationNodeConfig):
                             logger.debug(f"  Warnings: {result.warnings}")
 
                     except Exception as e:
-                        logger.error(
+                        logger.exception(
                             f"[bold red]Error validating tool call {tc_name}: {e}[/bold red]"
                         )
-                        logger.error(
-                            f"[bold red]Traceback: {traceback.format_exc()}[/bold red]"
+                        logger.exception(
+                            f"[bold red]Traceback: {
+                                traceback.format_exc()}[/bold red]"
                         )
                         # Create error result
                         error_result = ValidationStateManager.create_validation_result(
@@ -192,7 +213,7 @@ class ValidationNodeWithRouting(ValidationNodeConfig):
                             tool_name=tc_name,
                             status=ValidationStatus.ERROR,
                             route_recommendation=RouteRecommendation.AGENT,
-                            errors=[f"Validation exception: {str(e)}"],
+                            errors=[f"Validation exception: {e!s}"],
                             target_node=self.agent_node,
                         )
                         routing_state.add_validation_result(error_result)
@@ -200,7 +221,8 @@ class ValidationNodeWithRouting(ValidationNodeConfig):
                 # Update validation duration
                 routing_state.validation_duration = time.time() - start_time
                 logger.debug(
-                    f"[bold blue]Total validation duration: {routing_state.validation_duration:.3f}s[/bold blue]"
+                    f"[bold blue]Total validation duration: {
+                        routing_state.validation_duration:.3f}s[/bold blue]"
                 )
 
                 # Update state with validation results
@@ -222,14 +244,26 @@ class ValidationNodeWithRouting(ValidationNodeConfig):
                     f"  Total results: {len(routing_state.validation_results)}"
                 )
                 logger.debug(
-                    f"  Should continue: {routing_state.should_continue_execution()}"
+                    f"  Should continue: {
+                        routing_state.should_continue_execution()}"
                 )
                 logger.debug(
-                    f"  Should return to agent: {routing_state.should_return_to_agent()}"
+                    f"  Should return to agent: {
+                        routing_state.should_return_to_agent()}"
                 )
-                logger.debug(f"  Should end: {routing_state.should_end_processing()}")
-                logger.debug(f"  Target nodes: {list(routing_state.target_nodes)}")
-                logger.debug(f"  Next action: {routing_state.next_action.value}")
+                logger.debug(
+                    f"  Should end: {
+                        routing_state.should_end_processing()}"
+                )
+                logger.debug(
+                    f"  Target nodes: {
+                        list(
+                            routing_state.target_nodes)}"
+                )
+                logger.debug(
+                    f"  Next action: {
+                        routing_state.next_action.value}"
+                )
 
                 # Log state changes
                 logger.debug("[bold cyan]STATE CHANGES[/bold cyan]")
@@ -242,27 +276,34 @@ class ValidationNodeWithRouting(ValidationNodeConfig):
                 end_datetime = datetime.now()
                 total_duration = end_datetime - start_datetime
                 logger.info(
-                    f"[bold magenta]=== ValidationNodeWithRouting COMPLETE at {end_datetime.strftime('%H:%M:%S.%f')} ===[/bold magenta]"
+                    f"[bold magenta]=== ValidationNodeWithRouting COMPLETE at {
+                        end_datetime.strftime('%H:%M:%S.%f')} ===[/bold magenta]"
                 )
                 logger.info(
-                    f"[bold green]Total processing time: {total_duration.total_seconds():.3f}s[/bold green]"
+                    f"[bold green]Total processing time: {
+                        total_duration.total_seconds():.3f}s[/bold green]"
                 )
 
                 return updated_state
 
             except Exception as e:
-                logger.error(f"[bold red]Validation failed with error: {e}[/bold red]")
-                logger.error(
-                    f"[bold red]Full traceback: {traceback.format_exc()}[/bold red]"
+                logger.exception(
+                    f"[bold red]Validation failed with error: {e}[/bold red]"
+                )
+                logger.exception(
+                    f"[bold red]Full traceback: {
+                        traceback.format_exc()}[/bold red]"
                 )
 
                 end_datetime = datetime.now()
                 error_duration = end_datetime - start_datetime
-                logger.error(
-                    f"[bold red]=== ValidationNodeWithRouting FAILED at {end_datetime.strftime('%H:%M:%S.%f')} ===[/bold red]"
+                logger.exception(
+                    f"[bold red]=== ValidationNodeWithRouting FAILED at {
+                        end_datetime.strftime('%H:%M:%S.%f')} ===[/bold red]"
                 )
-                logger.error(
-                    f"[bold red]Error occurred after: {error_duration.total_seconds():.3f}s[/bold red]"
+                logger.exception(
+                    f"[bold red]Error occurred after: {
+                        error_duration.total_seconds():.3f}s[/bold red]"
                 )
 
                 return self._handle_validation_error(state, routing_state, str(e))
@@ -270,8 +311,8 @@ class ValidationNodeWithRouting(ValidationNodeConfig):
         return validation_node_with_routing
 
     def _extract_tool_calls_from_state(
-        self, state: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+        self, state: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """Extract tool calls from state messages."""
         messages = state.get(self.messages_key, [])
         if not messages:
@@ -290,8 +331,8 @@ class ValidationNodeWithRouting(ValidationNodeConfig):
         return tool_calls
 
     def _get_validation_resources(
-        self, state: Dict[str, Any]
-    ) -> tuple[Dict[str, Any], Dict[str, Any]]:
+        self, state: dict[str, Any]
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
         """Get available tools and validation schemas."""
         # Get tools from engine or state
         available_tools = {}
@@ -337,13 +378,12 @@ class ValidationNodeWithRouting(ValidationNodeConfig):
 
     def _validate_single_tool_call(
         self,
-        tool_call: Dict[str, Any],
-        available_tools: Dict[str, Any],
-        validation_schemas: Dict[str, Any],
-        state: Dict[str, Any],
+        tool_call: dict[str, Any],
+        available_tools: dict[str, Any],
+        validation_schemas: dict[str, Any],
+        state: dict[str, Any],
     ) -> ToolValidationResult:
         """Validate a single tool call and return detailed result."""
-
         # Extract tool call information
         tool_call_id = tool_call.get("id", f"call_{id(tool_call)}")
         tool_name = tool_call.get("name", "unknown")
@@ -380,7 +420,7 @@ class ValidationNodeWithRouting(ValidationNodeConfig):
             corrected_args = validation_result.get("corrected_args")
 
         except Exception as e:
-            validation_errors.append(f"Validation failed: {str(e)}")
+            validation_errors.append(f"Validation failed: {e!s}")
 
         # Determine status and recommendation
         if validation_errors:
@@ -414,8 +454,8 @@ class ValidationNodeWithRouting(ValidationNodeConfig):
         )
 
     def _validate_tool_arguments(
-        self, tool: Any, args: Dict[str, Any], schemas: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, tool: Any, args: dict[str, Any], schemas: dict[str, Any]
+    ) -> dict[str, Any]:
         """Validate tool arguments and attempt corrections."""
         result = {"errors": [], "warnings": [], "corrected_args": None}
 
@@ -427,7 +467,7 @@ class ValidationNodeWithRouting(ValidationNodeConfig):
                 result["corrected_args"] = validated_args.model_dump()
 
             except Exception as e:
-                result["errors"].append(f"Argument validation failed: {str(e)}")
+                result["errors"].append(f"Argument validation failed: {e!s}")
 
                 # Attempt auto-correction if enabled
                 if self.auto_correct_args:
@@ -443,8 +483,8 @@ class ValidationNodeWithRouting(ValidationNodeConfig):
         return result
 
     def _attempt_argument_correction(
-        self, schema: Any, args: Dict[str, Any]
-    ) -> Optional[Dict[str, Any]]:
+        self, schema: Any, args: dict[str, Any]
+    ) -> dict[str, Any] | None:
         """Attempt to auto-correct invalid arguments."""
         try:
             # Simple correction strategies
@@ -482,7 +522,7 @@ class ValidationNodeWithRouting(ValidationNodeConfig):
             return None
 
     def _determine_target_node_for_tool(
-        self, tool_name: str, state: Dict[str, Any]
+        self, tool_name: str, state: dict[str, Any]
     ) -> str:
         """Determine target node for a validated tool."""
         # Get tool route
@@ -509,8 +549,8 @@ class ValidationNodeWithRouting(ValidationNodeConfig):
         return route_to_node.get(route, self.tool_node)
 
     def _update_state_with_validation_results(
-        self, state: Dict[str, Any], routing_state: ValidationRoutingState
-    ) -> Dict[str, Any]:
+        self, state: dict[str, Any], routing_state: ValidationRoutingState
+    ) -> dict[str, Any]:
         """Update state with validation results and routing information."""
         updated_state = state.copy()
 
@@ -542,8 +582,8 @@ class ValidationNodeWithRouting(ValidationNodeConfig):
         return updated_state
 
     def _update_tool_messages_with_validation(
-        self, state: Dict[str, Any], routing_state: ValidationRoutingState
-    ) -> Dict[str, Any]:
+        self, state: dict[str, Any], routing_state: ValidationRoutingState
+    ) -> dict[str, Any]:
         """Update tool messages with validation status."""
         messages = state.get(self.messages_key, []).copy()
 
@@ -570,8 +610,8 @@ class ValidationNodeWithRouting(ValidationNodeConfig):
         return updated_state
 
     def _handle_no_tool_calls(
-        self, state: Dict[str, Any], routing_state: ValidationRoutingState
-    ) -> Dict[str, Any]:
+        self, state: dict[str, Any], routing_state: ValidationRoutingState
+    ) -> dict[str, Any]:
         """Handle case when no tool calls are found."""
         # Set routing to end processing
         routing_state.next_action = RouteRecommendation.END
@@ -590,10 +630,10 @@ class ValidationNodeWithRouting(ValidationNodeConfig):
 
     def _handle_validation_error(
         self,
-        state: Dict[str, Any],
+        state: dict[str, Any],
         routing_state: ValidationRoutingState,
         error_message: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Handle validation errors."""
         # Set routing to return to agent
         routing_state.next_action = RouteRecommendation.AGENT

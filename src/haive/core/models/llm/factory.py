@@ -108,7 +108,7 @@ class LLMFactory:
             )
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the LLM Factory."""
         # No need for internal registries - we use the providers module
 
@@ -166,7 +166,10 @@ class LLMFactory:
             except ValueError:
                 raise ValueError(
                     f"Unknown provider: {provider}. "
-                    f"Available providers: {', '.join([p.value for p in LLMProvider])}"
+                    f"Available providers: {
+                        ', '.join(
+                            [
+                                p.value for p in LLMProvider])}"
                 )
 
         # Get provider class
@@ -199,7 +202,9 @@ class LLMFactory:
         try:
             provider_instance = provider_class(**provider_params)
         except Exception as e:
-            raise ValueError(f"Failed to create provider for {provider}: {e!s}")
+            raise ValueError(
+                f"Failed to create provider for {provider}: {
+                    e!s}")
 
         # Create LLM instance
         try:
@@ -208,7 +213,10 @@ class LLMFactory:
             # Re-raise with original clear message
             raise
         except Exception as e:
-            raise RuntimeError(f"Failed to create {provider.value} LLM: {e!s}") from e
+            raise RuntimeError(
+                f"Failed to create {
+                    provider.value} LLM: {
+                    e!s}") from e
 
         return llm
 
@@ -274,7 +282,7 @@ class LLMFactory:
             try:
                 temp_instance = provider_class()
                 package = temp_instance._get_import_package()
-            except:
+            except BaseException:
                 package = "Unknown"
         else:
             package = "Unknown"
@@ -291,7 +299,8 @@ class LLMFactory:
 _factory = LLMFactory()
 
 
-def create_llm(provider: LLMProvider | str, model: str | None = None, **kwargs) -> Any:
+def create_llm(provider: LLMProvider | str, model: str |
+               None = None, **kwargs) -> Any:
     """Create an LLM instance using the global factory.
 
     This is a convenience function that uses a global LLMFactory instance

@@ -80,7 +80,7 @@ class BranchDefinition(BaseModel):
         """
         if self.condition_func is None:
             # Create a default condition function based on routes
-            def default_condition(state):
+            def default_condition(state: dict[str, Any]):
                 # Look for route matches in state
                 for route_key in self.routes:
                     if route_key in state:
@@ -107,7 +107,7 @@ class GraphPatternRegistry:
             cls._instance = cls()
         return cls._instance
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.patterns: dict[str, GraphPattern] = {}
         self.branches: dict[str, BranchDefinition] = {}
 
@@ -208,7 +208,7 @@ def register_pattern(
         Decorator function
     """
 
-    def decorator(func):
+    def decorator(func) -> Any:
         pattern = GraphPattern(
             name=name,
             pattern_type=pattern_type,
@@ -243,7 +243,7 @@ def register_branch(
         Decorator function
     """
 
-    def decorator(func):
+    def decorator(func) -> Any:
         branch = BranchDefinition(
             name=name,
             condition_type=condition_type,
@@ -335,7 +335,7 @@ def apply_persistence(graph, storage_type: str, auto_save: bool, **kwargs):
     default_route="fallback_node",
     description="Route based on detected intent",
 )
-def intent_router(state):
+def intent_router(state: dict[str, Any]):
     """Route based on intent in state.
 
     Args:

@@ -1,11 +1,10 @@
 """State schema with structured output parsing capabilities using LangChain output parsers."""
 
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any
 
 from langchain_core.messages import AIMessage, ToolMessage
 from langchain_core.output_parsers import (
     BaseOutputParser,
-    JsonOutputToolsParser,
     PydanticOutputParser,
     PydanticToolsParser,
 )
@@ -58,11 +57,11 @@ class StructuredOutputState(MessagesStateWithTokenUsage):
     """
 
     # Configuration for structured output parsing
-    output_models: Optional[List[Type[BaseModel]]] = Field(
+    output_models: list[type[BaseModel]] | None = Field(
         default=None, description="Pydantic models to parse outputs into"
     )
 
-    output_parser: Optional[BaseOutputParser] = Field(
+    output_parser: BaseOutputParser | None = Field(
         default=None, description="Custom output parser to use"
     )
 
@@ -75,13 +74,13 @@ class StructuredOutputState(MessagesStateWithTokenUsage):
         description="Automatically parse AI messages with structured output",
     )
 
-    parsed_outputs: Dict[str, Any] = Field(
+    parsed_outputs: dict[str, Any] = Field(
         default_factory=dict, description="Storage for parsed structured outputs"
     )
 
     @model_validator(mode="before")
     @classmethod
-    def setup_output_parser(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+    def setup_output_parser(cls, values: dict[str, Any]) -> dict[str, Any]:
         """Setup the appropriate output parser based on configuration."""
         if not values.get("output_parser") and values.get("output_models"):
             output_models = values["output_models"]
@@ -100,7 +99,7 @@ class StructuredOutputState(MessagesStateWithTokenUsage):
 
     @field_validator("messages", mode="after")
     @classmethod
-    def parse_structured_outputs(cls, messages: List[Any], info) -> List[Any]:
+    def parse_structured_outputs(cls, messages: list[Any], info) -> list[Any]:
         """Parse AI messages with structured output into appropriate format."""
         if not info.data.get("auto_parse_ai_messages"):
             return messages
@@ -151,27 +150,27 @@ class StructuredOutputState(MessagesStateWithTokenUsage):
                             )
                             parsed_messages.append(tool_msg)
 
-                except Exception as e:
+                except Exception:
                     # If parsing fails, just keep the original message
                     # Could optionally log the error or store it
                     pass
 
         return parsed_messages
 
-    def get_parsed_output(self, message_index: int) -> Optional[BaseModel]:
+    def get_parsed_output(self, message_index: int) -> BaseModel | None:
         """Get parsed output for a specific message index."""
         return self.parsed_outputs.get(f"msg_{message_index}")
 
-    def get_latest_parsed_output(self) -> Optional[BaseModel]:
+    def get_latest_parsed_output(self) -> BaseModel | None:
         """Get the most recent parsed output."""
         if not self.parsed_outputs:
             return None
 
         # Get the highest message index
-        max_idx = max(int(key.split("_")[1]) for key in self.parsed_outputs.keys())
+        max_idx = max(int(key.split("_")[1]) for key in self.parsed_outputs)
         return self.parsed_outputs.get(f"msg_{max_idx}")
 
-    def get_tool_calls(self) -> List[ToolMessage]:
+    def get_tool_calls(self) -> list[ToolMessage]:
         """Get all tool call messages from the conversation."""
         return [msg for msg in self.messages if isinstance(msg, ToolMessage)]
 
@@ -193,8 +192,7 @@ class StructuredOutputMixin:
 
     @field_validator("messages", mode="after")
     @classmethod
-    def parse_structured_outputs_mixin(cls, messages: List[Any], info) -> List[Any]:
+    def parse_structured_outputs_mixin(cls, messages: list[Any], info) -> list[Any]:
         """Parse structured outputs in messages (mixin version)."""
         # Same logic as above but as a mixin
         # This allows adding to any state schema
-        pass

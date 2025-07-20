@@ -97,7 +97,10 @@ class MCPAugLLMConfig(MCPMixin, AugLLMConfig):
     )
 
     @model_validator(mode="after")
-    def _validate_mcp_integration(self) -> "MCPAugLLMConfig":
+
+
+    @classmethod
+    def _validate_mcp_integration(cls) -> "MCPAugLLMConfig":
         """Validate MCP integration with AugLLMConfig.
 
         Ensures that MCP configuration is compatible with the base
@@ -167,7 +170,10 @@ class MCPAugLLMConfig(MCPMixin, AugLLMConfig):
             if name not in self.tools:
                 self.tools.append(name)
 
-        logger.debug(f"Integrated {len(mcp_tool_names)} MCP tools into configuration")
+        logger.debug(
+            f"Integrated {
+                len(mcp_tool_names)} MCP tools into configuration"
+        )
 
     def get_all_tools(self) -> list[str]:
         """Get all available tool names including MCP tools.

@@ -1,5 +1,6 @@
 """Annoy Vector Store implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Annoy vector store,
 which provides memory-efficient approximate nearest neighbor search.
 
@@ -105,7 +106,7 @@ class AnnoyVectorStoreConfig(BaseVectorStoreConfig):
     )
 
     @validator("metric")
-    def validate_metric(self, v):
+    def validate_metric(self, v) -> Any:
         """Validate distance metric is supported by Annoy."""
         valid_metrics = ["angular", "euclidean", "manhattan", "hamming", "dot"]
         if v not in valid_metrics:
@@ -113,7 +114,7 @@ class AnnoyVectorStoreConfig(BaseVectorStoreConfig):
         return v
 
     @validator("n_jobs")
-    def validate_n_jobs(self, v):
+    def validate_n_jobs(self, v) -> Any:
         """Validate n_jobs parameter."""
         if v < -1 or v == 0:
             raise ValueError("n_jobs must be -1 (all cores) or positive integer")

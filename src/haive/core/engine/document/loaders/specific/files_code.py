@@ -5,7 +5,6 @@ programming-related files.
 """
 
 import logging
-from typing import Optional
 
 from langchain_core.document_loaders.base import BaseLoader
 
@@ -23,7 +22,7 @@ class PythonCodeSource(LocalFileSource):
         )
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a Python code loader."""
         try:
             from langchain_community.document_loaders import PythonLoader
@@ -40,7 +39,7 @@ class PythonCodeSource(LocalFileSource):
             except Exception:
                 return None
         except Exception as e:
-            logger.error(f"Failed to create Python loader: {e}")
+            logger.exception(f"Failed to create Python loader: {e}")
             return None
 
 
@@ -51,7 +50,7 @@ class JupyterNotebookSource(LocalFileSource):
         self,
         file_path: str,
         include_outputs: bool = False,
-        max_output_length: Optional[int] = None,
+        max_output_length: int | None = None,
         **kwargs,
     ):
         super().__init__(source_path=file_path, file_extensions=[".ipynb"], **kwargs)
@@ -59,7 +58,7 @@ class JupyterNotebookSource(LocalFileSource):
         self.include_outputs = include_outputs
         self.max_output_length = max_output_length
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a Jupyter Notebook loader."""
         try:
             from langchain_community.document_loaders import NotebookLoader
@@ -76,7 +75,7 @@ class JupyterNotebookSource(LocalFileSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create notebook loader: {e}")
+            logger.exception(f"Failed to create notebook loader: {e}")
             return None
 
 
@@ -91,14 +90,14 @@ class JavaScriptSource(LocalFileSource):
         )
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a JavaScript loader."""
         try:
             from langchain_community.document_loaders import TextLoader
 
             return TextLoader(file_path=self.file_path, encoding="utf-8")
         except Exception as e:
-            logger.error(f"Failed to create JavaScript loader: {e}")
+            logger.exception(f"Failed to create JavaScript loader: {e}")
             return None
 
 
@@ -113,14 +112,14 @@ class CppSource(LocalFileSource):
         )
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a C++ loader."""
         try:
             from langchain_community.document_loaders import TextLoader
 
             return TextLoader(file_path=self.file_path, encoding="utf-8")
         except Exception as e:
-            logger.error(f"Failed to create C++ loader: {e}")
+            logger.exception(f"Failed to create C++ loader: {e}")
             return None
 
 
@@ -131,14 +130,14 @@ class JavaSource(LocalFileSource):
         super().__init__(source_path=file_path, file_extensions=[".java"], **kwargs)
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a Java loader."""
         try:
             from langchain_community.document_loaders import TextLoader
 
             return TextLoader(file_path=self.file_path, encoding="utf-8")
         except Exception as e:
-            logger.error(f"Failed to create Java loader: {e}")
+            logger.exception(f"Failed to create Java loader: {e}")
             return None
 
 
@@ -149,14 +148,14 @@ class GoSource(LocalFileSource):
         super().__init__(source_path=file_path, file_extensions=[".go"], **kwargs)
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a Go loader."""
         try:
             from langchain_community.document_loaders import TextLoader
 
             return TextLoader(file_path=self.file_path, encoding="utf-8")
         except Exception as e:
-            logger.error(f"Failed to create Go loader: {e}")
+            logger.exception(f"Failed to create Go loader: {e}")
             return None
 
 
@@ -167,14 +166,14 @@ class RustSource(LocalFileSource):
         super().__init__(source_path=file_path, file_extensions=[".rs"], **kwargs)
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a Rust loader."""
         try:
             from langchain_community.document_loaders import TextLoader
 
             return TextLoader(file_path=self.file_path, encoding="utf-8")
         except Exception as e:
-            logger.error(f"Failed to create Rust loader: {e}")
+            logger.exception(f"Failed to create Rust loader: {e}")
             return None
 
 
@@ -185,14 +184,14 @@ class RubySource(LocalFileSource):
         super().__init__(source_path=file_path, file_extensions=[".rb"], **kwargs)
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a Ruby loader."""
         try:
             from langchain_community.document_loaders import TextLoader
 
             return TextLoader(file_path=self.file_path, encoding="utf-8")
         except Exception as e:
-            logger.error(f"Failed to create Ruby loader: {e}")
+            logger.exception(f"Failed to create Ruby loader: {e}")
             return None
 
 
@@ -207,26 +206,26 @@ class ShellScriptSource(LocalFileSource):
         )
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a shell script loader."""
         try:
             from langchain_community.document_loaders import TextLoader
 
             return TextLoader(file_path=self.file_path, encoding="utf-8")
         except Exception as e:
-            logger.error(f"Failed to create shell script loader: {e}")
+            logger.exception(f"Failed to create shell script loader: {e}")
             return None
 
 
 # Export code file sources
 __all__ = [
-    "PythonCodeSource",
-    "JupyterNotebookSource",
-    "JavaScriptSource",
     "CppSource",
-    "JavaSource",
     "GoSource",
-    "RustSource",
+    "JavaScriptSource",
+    "JavaSource",
+    "JupyterNotebookSource",
+    "PythonCodeSource",
     "RubySource",
+    "RustSource",
     "ShellScriptSource",
 ]

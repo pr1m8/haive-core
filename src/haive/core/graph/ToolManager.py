@@ -88,7 +88,7 @@ class ToolManager:
     - Tool filtering based on context
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the tool manager."""
         # Initialize internal tracking
         self._executed_tools: set[str] = set()
@@ -197,12 +197,13 @@ class ToolManager:
 
         if state_param is None:
             raise ValueError(
-                f"Function {func.__name__} must have a parameter named 'state' or ending with '_state'"
+                f"Function {
+                    func.__name__} must have a parameter named 'state' or ending with '_state'"
             )
 
         # Create wrapper function with state injection
         @functools.wraps(func)
-        def wrapped_func(*args, **kwargs):
+        def wrapped_func(*args, **kwargs) -> Any:
             return func(*args, **kwargs)
 
         # Annotate the state parameter
@@ -253,12 +254,13 @@ class ToolManager:
 
         if store_param is None:
             raise ValueError(
-                f"Function {func.__name__} must have a parameter named 'store' or ending with '_store'"
+                f"Function {
+                    func.__name__} must have a parameter named 'store' or ending with '_store'"
             )
 
         # Create wrapper function with store injection
         @functools.wraps(func)
-        def wrapped_func(*args, **kwargs):
+        def wrapped_func(*args, **kwargs) -> Any:
             return func(*args, **kwargs)
 
         # Annotate the store parameter
@@ -315,17 +317,19 @@ class ToolManager:
 
         if state_param is None:
             raise ValueError(
-                f"Function {func.__name__} must have a parameter named 'state' or ending with '_state'"
+                f"Function {
+                    func.__name__} must have a parameter named 'state' or ending with '_state'"
             )
 
         if store_param is None:
             raise ValueError(
-                f"Function {func.__name__} must have a parameter named 'store' or ending with '_store'"
+                f"Function {
+                    func.__name__} must have a parameter named 'store' or ending with '_store'"
             )
 
         # Create wrapper function with injections
         @functools.wraps(func)
-        def wrapped_func(*args, **kwargs):
+        def wrapped_func(*args, **kwargs) -> Any:
             return func(*args, **kwargs)
 
         # Annotate the parameters
@@ -668,14 +672,16 @@ class ToolManager:
                 elif hasattr(tool_obj, "run"):
                     # BaseTool or StructuredTool
                     if args and kwargs:
-                        # Both args and kwargs - use first arg and merge with kwargs
+                        # Both args and kwargs - use first arg and merge with
+                        # kwargs
                         result = tool_obj.run(args[0], **kwargs)
                     elif args:
                         # Just args
                         if len(args) == 1:
                             result = tool_obj.run(args[0])
                         else:
-                            # Multiple args - this may fail depending on the tool
+                            # Multiple args - this may fail depending on the
+                            # tool
                             result = tool_obj.run(*args)
                     else:
                         # Just kwargs
@@ -736,14 +742,16 @@ class ToolManager:
                 elif hasattr(tool_obj, "arun"):
                     # Async BaseTool or StructuredTool
                     if args and kwargs:
-                        # Both args and kwargs - use first arg and merge with kwargs
+                        # Both args and kwargs - use first arg and merge with
+                        # kwargs
                         result = await tool_obj.arun(args[0], **kwargs)
                     elif args:
                         # Just args
                         if len(args) == 1:
                             result = await tool_obj.arun(args[0])
                         else:
-                            # Multiple args - this may fail depending on the tool
+                            # Multiple args - this may fail depending on the
+                            # tool
                             result = await tool_obj.arun(*args)
                     else:
                         # Just kwargs
@@ -878,7 +886,7 @@ def state_tool(state_field: str | None = None, **tool_kwargs):
 
 
 # Decorator for registering store-injected tools
-def store_tool(**tool_kwargs):
+def store_tool(**tool_kwargs) -> Any:
     """Decorator to create a tool that injects store.
 
     Args:

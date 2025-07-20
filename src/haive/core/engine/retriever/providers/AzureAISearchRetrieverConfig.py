@@ -1,5 +1,6 @@
 """Azure AI Search Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Azure AI Search (formerly Azure Cognitive Search)
 retriever, which retrieves documents from Azure's cloud search service.
 
@@ -115,7 +116,7 @@ class AzureAISearchRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create an Azure AI Search retriever from this configuration.
 
         Returns:

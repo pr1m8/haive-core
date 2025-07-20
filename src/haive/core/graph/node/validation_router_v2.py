@@ -43,7 +43,7 @@ def has_tool_error_v2(message: ToolMessage) -> bool:
                     return True
                 if "error" in content_dict:
                     return True
-        except:
+        except BaseException:
             pass
 
         # String-based error detection

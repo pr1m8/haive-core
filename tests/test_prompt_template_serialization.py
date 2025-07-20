@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Test script to reproduce BasePromptTemplate serialization issue."""
 
+import contextlib
 import sys
 
 from langchain_core.prompts import ChatPromptTemplate
@@ -9,8 +10,10 @@ from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.persistence.serializers import SecureSecretStrSerializer
 
 # Add the packages to Python path
-sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
-sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-agents/src")
+sys.path.insert(
+    0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
+sys.path.insert(
+    0, "/home/will/Projects/haive/backend/haive/packages/haive-agents/src")
 
 
 def test_prompt_template_serialization():
@@ -23,18 +26,9 @@ def test_prompt_template_serialization():
     # Create AugLLMConfig with prompt template
     config = AugLLMConfig(name="test_config", prompt_template=chat_prompt)
 
-    print(f"Original prompt_template type: {type(config.prompt_template)}")
-    print(f"Original prompt_template: {config.prompt_template}")
-
     # Test model_dump
-    try:
-        dumped = config.model_dump()
-        print(
-            f"model_dump() prompt_template type: {type(dumped.get('prompt_template'))}"
-        )
-        print(f"model_dump() prompt_template: {dumped.get('prompt_template')}")
-    except Exception as e:
-        print(f"Error in model_dump(): {e}")
+    with contextlib.suppress(Exception):
+        config.model_dump()
 
     # Test serializer
     serializer = SecureSecretStrSerializer()
@@ -42,18 +36,11 @@ def test_prompt_template_serialization():
     try:
         # Test serializing the config object
         serialized = serializer.dumps(config)
-        print(f"Serialization successful: {len(serialized)} bytes")
 
         # Test deserializing
-        deserialized = serializer.loads(serialized)
-        print(f"Deserialization successful: {type(deserialized)}")
-        print(
-            f"Deserialized prompt_template type: {type(deserialized.prompt_template) if hasattr(deserialized, 'prompt_template') else 'No prompt_template attr'}"
-        )
+        serializer.loads(serialized)
 
-    except Exception as e:
-        print(f"Serialization error: {e}")
-        print(f"Error type: {type(e)}")
+    except Exception:
         import traceback
 
         traceback.print_exc()

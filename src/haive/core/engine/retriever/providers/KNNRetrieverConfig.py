@@ -1,5 +1,6 @@
 """K-Nearest Neighbors Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the KNN (K-Nearest Neighbors) retriever,
 which uses k-nearest neighbors algorithm for document retrieval based on vector similarity.
 KNN finds the k most similar documents to a query by computing distances in the embedding space.
@@ -115,7 +116,7 @@ class KNNRetrieverConfig(BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a KNN retriever from this configuration.
 
         Returns:

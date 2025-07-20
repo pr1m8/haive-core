@@ -1,5 +1,6 @@
 """LlamaIndex Graph Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the LlamaIndex Graph retriever,
 which performs graph-based retrieval using knowledge graphs and graph databases
 like Neo4j, providing semantic relationships and graph traversal capabilities.
@@ -138,7 +139,7 @@ class LlamaIndexGraphRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
     )
 
     @validator("graph_type")
-    def validate_graph_type(self, v):
+    def validate_graph_type(self, v) -> Any:
         """Validate graph type."""
         valid_types = ["neo4j", "networkx", "knowledge_graph"]
         if v not in valid_types:
@@ -146,7 +147,7 @@ class LlamaIndexGraphRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
         return v
 
     @validator("query_type")
-    def validate_query_type(self, v):
+    def validate_query_type(self, v) -> Any:
         """Validate query type."""
         valid_types = ["node", "relationship", "path", "subgraph"]
         if v not in valid_types:
@@ -154,7 +155,7 @@ class LlamaIndexGraphRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
         return v
 
     @validator("connection_url")
-    def validate_connection_url(self, v, values):
+    def validate_connection_url(self, v, values) -> Any:
         """Validate connection URL for Neo4j."""
         graph_type = values.get("graph_type", "")
         if graph_type == "neo4j" and not v:
@@ -179,7 +180,7 @@ class LlamaIndexGraphRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a LlamaIndex Graph retriever from this configuration.
 
         Returns:

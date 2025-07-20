@@ -104,7 +104,8 @@ def test_loader_selection_fix():
     assert (
         fast_loader.name == "PyPDFLoader"
     ), f"Expected PyPDFLoader for speed, got {fast_loader.name}"
-    assert fast_loader.speed == "fast", f"Expected fast speed, got {fast_loader.speed}"
+    assert fast_loader.speed == "fast", f"Expected fast speed, got {
+        fast_loader.speed}"
 
     assert (
         quality_loader.name == "UnstructuredPDFLoader"

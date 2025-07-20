@@ -20,11 +20,7 @@ from typing import Any
 from pydantic import Field, SecretStr
 
 from haive.core.persistence.base import CheckpointerConfig
-from haive.core.persistence.types import (
-    CheckpointerMode,
-    CheckpointerType,
-    CheckpointStorageMode,
-)
+from haive.core.persistence.types import CheckpointerMode, CheckpointerType
 
 logger = logging.getLogger(__name__)
 
@@ -278,16 +274,10 @@ class PostgresCheckpointerConfig(CheckpointerConfig[dict[str, Any]]):
 
             from psycopg_pool import ConnectionPool
 
-            # Import appropriate checkpointer class
-            if self.storage_mode == CheckpointStorageMode.SHALLOW:
-                try:
-                    from langgraph.checkpoint.postgres import (
-                        ShallowPostgresSaver as PostgresSaver,
-                    )
-                except ImportError:
-                    from langgraph.checkpoint.postgres import PostgresSaver
-            else:
-                from langgraph.checkpoint.postgres import PostgresSaver
+            # Import our enhanced PostgresSaver with thread creation
+            from haive.core.persistence.postgres_saver_with_thread_creation import (
+                create_postgres_saver_with_thread_creation,
+            )
 
             # Create connection pool with forced parameters to avoid SSL issues
             connection_kwargs = self.get_connection_kwargs()
@@ -333,7 +323,11 @@ class PostgresCheckpointerConfig(CheckpointerConfig[dict[str, Any]]):
             production_serializer = create_encrypted_serializer_for_postgres(
                 connection_string=self.get_connection_uri()
             )
-            checkpointer = PostgresSaver(pool, serde=production_serializer)
+
+            # Create PostgresSaver with automatic thread creation
+            checkpointer = create_postgres_saver_with_thread_creation(
+                pool, serde=production_serializer
+            )
 
             # Setup tables if needed
             if self.setup_needed:
@@ -400,65 +394,10 @@ class PostgresCheckpointerConfig(CheckpointerConfig[dict[str, Any]]):
 
             from psycopg_pool import AsyncConnectionPool
 
-            # Import standard AsyncPostgresSaver
-            # Note: prepared statements are disabled via connection kwargs
-            # and Pydantic JSON handling is configured via the pool's configure parameter
-            # Import appropriate checkpointer class
-            try:
-                if self.storage_mode == CheckpointStorageMode.SHALLOW:
-                    from langgraph.checkpoint.postgres.aio import (
-                        AsyncShallowPostgresSaver as AsyncPostgresSaver,
-                    )
-                else:
-                    from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
-
-                logger.info(
-                    "Successfully imported AsyncPostgresSaver from langgraph.checkpoint.postgres.aio"
-                )
-            except ImportError as e:
-                logger.exception(
-                    f"Failed to import AsyncPostgresSaver from aio module: {e}"
-                )
-
-                # Try alternative import paths
-                try:
-                    # Some versions might have it in the main postgres module
-                    from langgraph.checkpoint.postgres import AsyncPostgresSaver
-
-                    logger.info(
-                        "Successfully imported AsyncPostgresSaver from langgraph.checkpoint.postgres"
-                    )
-                except ImportError:
-                    try:
-                        # Try langgraph_checkpoint_postgres package
-                        from langgraph_checkpoint_postgres.aio import (
-                            AsyncPostgresSaver,
-                        )
-
-                        logger.info(
-                            "Successfully imported AsyncPostgresSaver from langgraph_checkpoint_postgres.aio"
-                        )
-                    except ImportError:
-                        try:
-                            from langgraph_checkpoint_postgres import (
-                                AsyncPostgresSaver,
-                            )
-
-                            logger.info(
-                                "Successfully imported AsyncPostgresSaver from langgraph_checkpoint_postgres"
-                            )
-                        except ImportError:
-                            logger.exception(
-                                "AsyncPostgresSaver not available in any known location. "
-                                "Please ensure langgraph-checkpoint-postgres is installed with async support."
-                            )
-                            # Fall back to sync checkpointer with warning
-                            logger.warning(
-                                "Falling back to sync PostgresSaver for async operations (not recommended)"
-                            )
-                            from langgraph.checkpoint.postgres import (
-                                PostgresSaver as AsyncPostgresSaver,
-                            )
+            # Import our enhanced AsyncPostgresSaver with thread creation
+            from haive.core.persistence.postgres_saver_with_thread_creation import (
+                create_async_postgres_saver_with_thread_creation,
+            )
 
             # Create connection pool with forced parameters to avoid SSL issues
             connection_kwargs = self.get_connection_kwargs()
@@ -506,7 +445,11 @@ class PostgresCheckpointerConfig(CheckpointerConfig[dict[str, Any]]):
             production_serializer = create_encrypted_serializer_for_postgres(
                 connection_string=self.get_connection_uri()
             )
-            checkpointer = AsyncPostgresSaver(pool, serde=production_serializer)
+
+            # Create AsyncPostgresSaver with automatic thread creation
+            checkpointer = await create_async_postgres_saver_with_thread_creation(
+                pool, serde=production_serializer
+            )
 
             # Setup tables if needed
             if self.setup_needed:

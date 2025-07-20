@@ -1,5 +1,6 @@
 """Agent configuration for the Haive framework with protocol support.
 
+from typing import Any, Optional
 This module provides the AgentConfig base class for configuring agent components
 with protocol-based validation and type checking to ensure that agent implementations
 conform to the expected interfaces.
@@ -16,9 +17,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
-    Dict,
     Generic,
-    Type,
     TypeVar,
     Union,
     get_args,
@@ -48,7 +47,6 @@ from haive.core.schema.schema_composer import SchemaComposer
 
 # Check if PostgreSQL dependencies are available
 try:
-    from langgraph.checkpoint.postgres import PostgresSaver
 
     from haive.core.persistence.memory import MemoryCheckpointerConfig
     from haive.core.persistence.postgres_config import PostgresCheckpointerConfig
@@ -159,9 +157,9 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
     engines: dict[str, Engine | str] = Field(default_factory=dict)
 
     # Schema definitions
-    state_schema: Type[BaseModel] | Dict[str, Any] | None = None
-    input_schema: Type[BaseModel] | Dict[str, Any] | None = None
-    output_schema: Type[BaseModel] | Dict[str, Any] | None = None
+    state_schema: type[BaseModel] | dict[str, Any] | None = None
+    input_schema: type[BaseModel] | dict[str, Any] | None = None
+    output_schema: type[BaseModel] | dict[str, Any] | None = None
 
     # Node configurations
     node_configs: dict[str, NodeConfig] = Field(
@@ -244,7 +242,10 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
     _testing_mode: bool = False
 
     @model_validator(mode="after")
-    def ensure_engine(self):
+
+
+    @classmethod
+    def ensure_engine(cls) -> Any:
         """Ensure at least one engine is available."""
         if not self.engine and not self.engines and not self.node_configs:
             from haive.core.engine.aug_llm import AugLLMConfig
@@ -253,9 +254,13 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
         return self
 
     @model_validator(mode="after")
-    def ensure_state_schema(self):
+
+
+    @classmethod
+    def ensure_state_schema(cls) -> Any:
         """Ensure state schema is derived if not provided."""
-        # Only auto-generate schema if explicitly requested AND no schema is provided
+        # Only auto-generate schema if explicitly requested AND no schema is
+        # provided
         if self.state_schema is None and getattr(self, "set_schema", False):
             self.state_schema = self.derive_schema()
         return self
@@ -378,7 +383,7 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
 
         return self
 
-    def get_schema_manager(self, schema_instance=None):
+    def get_schema_manager(self, schema_instance=None) -> Optional[Any]:
         """Get a StateSchemaManager for the agent's schema.
 
         Args:
@@ -524,7 +529,8 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
                 if pattern:
                     # Extract requirements from pattern metadata
                     for req in pattern.metadata.get("required_components", []):
-                        # This is a simplified approach - actual implementation would be more sophisticated
+                        # This is a simplified approach - actual implementation
+                        # would be more sophisticated
                         component_type = req.get("type")
                         if component_type == "llm" and self.engine is None:
                             from haive.core.engine.aug_llm import AugLLMConfig
@@ -733,7 +739,7 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
         self._output_schema_instance = schema
         return schema
 
-    def resolve_engine(self, engine_ref=None) -> Engine:
+    def resolve_engine(self, engine_ref: Any = None) -> Engine:
         """Resolve an engine reference to an actual engine.
 
         Args:
@@ -742,7 +748,8 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
         Returns:
             Resolved Engine object
         """
-        # Use the provided reference, default engine, or first from engines dict
+        # Use the provided reference, default engine, or first from engines
+        # dict
         ref = engine_ref or self.engine or next(iter(self.engines.values()), None)
 
         if ref is None:
@@ -791,7 +798,10 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
             agent_class = self._resolve_agent_class_by_name()
 
         if agent_class is None:
-            raise TypeError(f"No agent class found for {self.__class__.__name__}")
+            raise TypeError(
+                f"No agent class found for {
+                    self.__class__.__name__}"
+            )
 
         # Instantiate the agent
         agent = agent_class(config=self)
@@ -813,28 +823,33 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
         # Verify that agent implements the core protocol
         if not isinstance(agent, AgentProtocol):
             raise TypeError(
-                f"Agent class {agent.__class__.__name__} must implement AgentProtocol"
+                f"Agent class {
+                    agent.__class__.__name__} must implement AgentProtocol"
             )
 
         # Log warnings for optional protocols
         if not isinstance(agent, StreamingAgentProtocol):
             logger.warning(
-                f"Agent class {agent.__class__.__name__} doesn't implement StreamingAgentProtocol"
+                f"Agent class {
+                    agent.__class__.__name__} doesn't implement StreamingAgentProtocol"
             )
 
         if not isinstance(agent, PersistentAgentProtocol):
             logger.warning(
-                f"Agent class {agent.__class__.__name__} doesn't implement PersistentAgentProtocol"
+                f"Agent class {
+                    agent.__class__.__name__} doesn't implement PersistentAgentProtocol"
             )
 
         if not isinstance(agent, VisualizationAgentProtocol):
             logger.warning(
-                f"Agent class {agent.__class__.__name__} doesn't implement VisualizationAgentProtocol"
+                f"Agent class {
+                    agent.__class__.__name__} doesn't implement VisualizationAgentProtocol"
             )
 
         if not isinstance(agent, ExtensibilityAgentProtocol):
             logger.warning(
-                f"Agent class {agent.__class__.__name__} doesn't implement ExtensibilityAgentProtocol"
+                f"Agent class {
+                    agent.__class__.__name__} doesn't implement ExtensibilityAgentProtocol"
             )
 
     def _resolve_agent_class_by_name(self) -> type["Agent"] | None:
@@ -1097,7 +1112,11 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
                 data["persistence"] = data["persistence"].to_dict()
 
         # Add class information for type reconstruction
-        data["agent_class"] = f"{self.__class__.__module__}.{self.__class__.__name__}"
+        data["agent_class"] = (
+            f"{
+            self.__class__.__module__}.{
+            self.__class__.__name__}"
+        )
 
         return data
 
@@ -1155,7 +1174,7 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
         return cls.from_dict(data)
 
     @classmethod
-    def clear_schema_caches(cls):
+    def clear_schema_caches(cls) -> None:
         """Clear all schema caches completely for this class and its subclasses.
 
         This ensures both class-level and instance-level caches are reset.
@@ -1241,7 +1260,7 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
 
         return self
 
-    def set_testing_mode(self, enabled=True):
+    def set_testing_mode(self, enabled: bool = True):
         """Enable or disable testing mode to bypass caching behavior.
 
         Args:
@@ -1405,22 +1424,26 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
             test_config = cls(name="protocol_test_config")
 
             # Attempt to create an instance for testing protocols
-            # This might fail if the agent class has special __init__ requirements
+            # This might fail if the agent class has special __init__
+            # requirements
             try:
                 test_instance = agent_class(config=test_config)
             except Exception as e:
                 logger.warning(
-                    f"Could not create test instance of {agent_class.__name__}: {e}"
+                    f"Could not create test instance of {
+                        agent_class.__name__}: {e}"
                 )
 
             # If we have an instance, verify it implements required protocols
             if test_instance and not isinstance(test_instance, AgentProtocol):
                 raise TypeError(
-                    f"Agent class {agent_class.__name__} must implement AgentProtocol"
+                    f"Agent class {
+                        agent_class.__name__} must implement AgentProtocol"
                 )
         except Exception as e:
             logger.warning(f"Protocol validation failed: {e}")
-            # Even if validation fails, we still register the class but with a warning
+            # Even if validation fails, we still register the class but with a
+            # warning
 
         # Register with the agent registry
         AGENT_REGISTRY[cls] = agent_class
@@ -1429,5 +1452,7 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
         agent_class.config_class = cls
 
         logger.info(
-            f"Registered agent class {agent_class.__name__} for config {cls.__name__}"
+            f"Registered agent class {
+                agent_class.__name__} for config {
+                cls.__name__}"
         )

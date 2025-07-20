@@ -57,7 +57,8 @@ def step_3_test_serialization(config):
         # Deserialize
         deserialized = serializer.loads(serialized)
 
-        if hasattr(deserialized, "prompt_template") and deserialized.prompt_template:
+        if hasattr(deserialized,
+                   "prompt_template") and deserialized.prompt_template:
             pass
 
         return deserialized

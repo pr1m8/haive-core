@@ -6,7 +6,7 @@ relationships and transformation details.
 """
 
 import time
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from langchain.schema import Document
 from pydantic import BaseModel, Field
@@ -38,15 +38,15 @@ class DocTransformerConfig(BaseModel):
     )
 
     # BeautifulSoup options
-    unwanted_tags: List[str] = Field(
+    unwanted_tags: list[str] = Field(
         default_factory=lambda: ["script", "style"],
         description="Tags to remove from HTML",
     )
-    tags_to_extract: List[str] = Field(
+    tags_to_extract: list[str] = Field(
         default_factory=lambda: ["p", "li", "div", "a"],
         description="Tags to extract from HTML",
     )
-    unwanted_classnames: List[str] = Field(
+    unwanted_classnames: list[str] = Field(
         default_factory=list, description="Classnames to remove from HTML"
     )
     remove_comments: bool = Field(
@@ -65,7 +65,7 @@ class DocTransformerConfig(BaseModel):
     similarity_threshold: float = Field(
         default=0.95, description="Threshold for embedding similarity filtering"
     )
-    embeddings_model: Optional[Any] = Field(
+    embeddings_model: Any | None = Field(
         default=None, description="Embeddings model for similarity filtering"
     )
 
@@ -113,7 +113,7 @@ class DocumentTransformerEngine(InvokableEngine[DocumentState, DocumentState]):
             result = runnable.invoke(document_state)
     """
 
-    def __init__(self, config: Optional[DocTransformerConfig] = None):
+    def __init__(self, config: DocTransformerConfig | None = None):
         """Initialize the document transformer engine.
 
         Args:
@@ -124,7 +124,7 @@ class DocumentTransformerEngine(InvokableEngine[DocumentState, DocumentState]):
         self.engine_type = EngineType.DOCUMENT_TRANSFORMER
 
     def create_runnable(
-        self, runnable_config: Optional[Dict[str, Any]] = None
+        self, runnable_config: dict[str, Any] | None = None
     ) -> "DocumentTransformerEngine":
         """Create a runnable instance with optional configuration overrides.
 
@@ -147,8 +147,8 @@ class DocumentTransformerEngine(InvokableEngine[DocumentState, DocumentState]):
 
     def invoke(
         self,
-        input_data: Union[DocumentState, List[Document], Dict[str, Any]],
-        config: Optional[RunnableConfig] = None,
+        input_data: DocumentState | list[Document] | dict[str, Any],
+        config: RunnableConfig | None = None,
     ) -> DocumentState:
         """Transform documents using the configured transformer.
 
@@ -257,7 +257,8 @@ class DocumentTransformerEngine(InvokableEngine[DocumentState, DocumentState]):
                         content=transformed_doc.page_content,
                         metadata=enhanced_metadata,
                         source_type=document_state.source_type,
-                        loader_name=f"transformer_{self.config.transformer_type.value}",
+                        loader_name=f"transformer_{
+                            self.config.transformer_type.value}",
                         character_count=len(transformed_doc.page_content),
                         word_count=len(transformed_doc.page_content.split()),
                         chunk_count=1,
@@ -324,8 +325,8 @@ class DocumentTransformerEngine(InvokableEngine[DocumentState, DocumentState]):
 
     async def ainvoke(
         self,
-        input_data: Union[DocumentState, List[Document], Dict[str, Any]],
-        config: Optional[RunnableConfig] = None,
+        input_data: DocumentState | list[Document] | dict[str, Any],
+        config: RunnableConfig | None = None,
     ) -> DocumentState:
         """Asynchronously transform documents.
 
@@ -362,7 +363,7 @@ class DocumentTransformerEngine(InvokableEngine[DocumentState, DocumentState]):
                     ignore_images=self.config.ignore_images,
                 )
 
-            elif transformer_type == DocTransformerType.HTML_TO_MARKDOWN:
+            if transformer_type == DocTransformerType.HTML_TO_MARKDOWN:
                 from langchain_community.document_transformers import (
                     MarkdownifyTransformer,
                 )
@@ -372,19 +373,19 @@ class DocumentTransformerEngine(InvokableEngine[DocumentState, DocumentState]):
                     autolinks=self.config.autolinks,
                 )
 
-            elif transformer_type == DocTransformerType.BEAUTIFUL_SOUP:
+            if transformer_type == DocTransformerType.BEAUTIFUL_SOUP:
                 from langchain_community.document_transformers import (
                     BeautifulSoupTransformer,
                 )
 
                 return BeautifulSoupTransformer()
 
-            elif transformer_type == DocTransformerType.LONG_CONTEXT_REORDER:
+            if transformer_type == DocTransformerType.LONG_CONTEXT_REORDER:
                 from langchain_community.document_transformers import LongContextReorder
 
                 return LongContextReorder()
 
-            elif transformer_type == DocTransformerType.EMBEDDINGS_REDUNDANT_FILTER:
+            if transformer_type == DocTransformerType.EMBEDDINGS_REDUNDANT_FILTER:
                 from langchain_community.document_transformers import (
                     EmbeddingsRedundantFilter,
                 )
@@ -398,7 +399,7 @@ class DocumentTransformerEngine(InvokableEngine[DocumentState, DocumentState]):
                     similarity_threshold=self.config.similarity_threshold,
                 )
 
-            elif transformer_type == DocTransformerType.EMBEDDINGS_CLUSTERING_FILTER:
+            if transformer_type == DocTransformerType.EMBEDDINGS_CLUSTERING_FILTER:
                 from langchain_community.document_transformers import (
                     EmbeddingsClusteringFilter,
                 )
@@ -411,7 +412,7 @@ class DocumentTransformerEngine(InvokableEngine[DocumentState, DocumentState]):
                     embeddings=self.config.embeddings_model
                 )
 
-            elif transformer_type == DocTransformerType.GOOGLE_TRANSLATE:
+            if transformer_type == DocTransformerType.GOOGLE_TRANSLATE:
                 from langchain_community.document_transformers import (
                     GoogleTranslateTransformer,
                 )
@@ -420,20 +421,17 @@ class DocumentTransformerEngine(InvokableEngine[DocumentState, DocumentState]):
                     target_language=self.config.target_language
                 )
 
-            elif transformer_type == DocTransformerType.OPENAI_METADATA_TAGGER:
+            if transformer_type == DocTransformerType.OPENAI_METADATA_TAGGER:
                 from langchain_community.document_transformers import (
                     OpenAIMetadataTagger,
                 )
 
                 return OpenAIMetadataTagger()
 
-            else:
-                # Default to HTML to text transformer
-                from langchain_community.document_transformers import (
-                    Html2TextTransformer,
-                )
+            # Default to HTML to text transformer
+            from langchain_community.document_transformers import Html2TextTransformer
 
-                return Html2TextTransformer()
+            return Html2TextTransformer()
 
         except ImportError as e:
             raise ValueError(
@@ -445,7 +443,7 @@ class DocumentTransformerEngine(InvokableEngine[DocumentState, DocumentState]):
     @staticmethod
     def get_transformed_docs(
         document_state: DocumentState, original_id: str
-    ) -> List[Document]:
+    ) -> list[Document]:
         """Get all transformed documents for a given original document ID.
 
         Args:
@@ -464,7 +462,7 @@ class DocumentTransformerEngine(InvokableEngine[DocumentState, DocumentState]):
     @staticmethod
     def get_original_doc(
         document_state: DocumentState, transform_id: str
-    ) -> Optional[Document]:
+    ) -> Document | None:
         """Get original document for a given transformed document ID.
 
         Args:
@@ -493,7 +491,7 @@ class DocumentTransformerEngine(InvokableEngine[DocumentState, DocumentState]):
         return None
 
     @staticmethod
-    def build_transformation_tree(document_state: DocumentState) -> Dict[str, Any]:
+    def build_transformation_tree(document_state: DocumentState) -> dict[str, Any]:
         """Build a tree structure showing document transformation relationships.
 
         Args:

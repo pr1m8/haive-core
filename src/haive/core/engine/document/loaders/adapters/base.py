@@ -83,5 +83,6 @@ class LoaderAdapter(ABC):
             NotImplementedError: If the adapter doesn't support fetch_all
         """
         raise NotImplementedError(
-            f"This loader adapter ({self.__class__.__name__}) doesn't support fetch_all"
+            f"This loader adapter ({
+                self.__class__.__name__}) doesn't support fetch_all"
         )

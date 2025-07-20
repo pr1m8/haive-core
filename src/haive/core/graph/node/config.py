@@ -1,6 +1,7 @@
 import logging
 import uuid
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type, Union
+from collections.abc import Callable, Sequence
+from typing import Any
 
 from langchain_core.tools import BaseTool
 from langgraph.graph import END
@@ -14,8 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class NodeConfig(BaseModel):
-    """
-    Configuration for a node in a graph.
+    """Configuration for a node in a graph.
 
     A NodeConfig defines all aspects of a node's behavior, including:
     - Core identification (id, name)
@@ -32,110 +32,109 @@ class NodeConfig(BaseModel):
         description="Unique identifier for this node",
     )
     name: str = Field(description="Name of the node in the graph")
-    node_type: Optional[NodeType] = Field(
+    node_type: NodeType | None = Field(
         default=None,  # Will be determined based on engine/options
         description="Type of node (determined automatically if not specified)",
     )
-    schemas: Sequence[Union[BaseTool, Type[BaseModel], Callable]] = Field(
+    schemas: Sequence[BaseTool | type[BaseModel] | Callable] = Field(
         default_factory=list, description="The schemas to use for the node"
     )
     # Engine/Callable (one of these must be set)
-    engine: Optional[Engine] = Field(
+    engine: Engine | None = Field(
         default=None, description="Engine instance to use for this node"
     )
-    engine_name: Optional[str] = Field(
+    engine_name: str | None = Field(
         default=None, description="Name of engine to look up in registry"
     )
-    callable_func: Optional[Callable] = Field(
+    callable_func: Callable | None = Field(
         default=None,
         description="Callable function to use for this node",
         exclude=True,  # Exclude only non-serializable callables
     )
-    callable_ref: Optional[str] = Field(
+    callable_ref: str | None = Field(
         default=None, description="Reference to callable function (module.function)"
     )
 
     # State schema - CRUCIAL ELEMENT
-    state_schema: Optional[Type[BaseModel]] = Field(
+    state_schema: type[BaseModel] | None = Field(
         default=None, description="State schema class for this node"
     )
 
     # Schema integration
-    input_schema: Optional[Type[BaseModel]] = Field(
+    input_schema: type[BaseModel] | None = Field(
         default=None, description="Input schema for this node"
     )
-    output_schema: Optional[Type[BaseModel]] = Field(
+    output_schema: type[BaseModel] | None = Field(
         default=None, description="Output schema for this node"
     )
 
     # Input/Output mapping
-    input_fields: Optional[Union[List[str], Dict[str, str]]] = Field(
+    input_fields: list[str] | dict[str, str] | None = Field(
         default=None,
         description="List of input fields or mapping from state keys to node input keys",
     )
-    output_fields: Optional[Union[List[str], Dict[str, str]]] = Field(
+    output_fields: list[str] | dict[str, str] | None = Field(
         default=None,
         description="List of output fields or mapping from node output keys to state keys",
     )
 
     # Control flow
-    command_goto: Optional[CommandGoto] = Field(
+    command_goto: CommandGoto | None = Field(
         default=None, description="Next node to go to after this node (or END)"
     )
 
     # Execution options
-    retry_policy: Optional[RetryPolicy] = Field(
+    retry_policy: RetryPolicy | None = Field(
         default=None, description="Retry policy for node execution"
     )
 
     # Node type specific options
     # Tool node options
-    tools: Optional[List[Any]] = Field(default=None, description="Tools for tool nodes")
-    messages_field: Optional[str] = Field(
+    tools: list[Any] | None = Field(default=None, description="Tools for tool nodes")
+    messages_field: str | None = Field(
         default="messages",
         description="Field containing messages for tool/validation nodes",
     )
-    handle_tool_errors: Union[bool, str, Callable] = Field(
+    handle_tool_errors: bool | str | Callable = Field(
         default=True, description="How to handle tool errors"
     )
 
     # Validation node options
-    validation_schemas: Optional[List[Union[Type[BaseModel], Callable]]] = Field(
+    validation_schemas: list[type[BaseModel] | Callable] | None = Field(
         default=None, description="Validation schemas for validation nodes"
     )
 
     # Branch node options
-    condition: Optional[Callable] = Field(
+    condition: Callable | None = Field(
         default=None, description="Condition function for branch nodes", exclude=True
     )
-    condition_ref: Optional[str] = Field(
+    condition_ref: str | None = Field(
         default=None, description="Reference to condition function (module.function)"
     )
-    routes: Optional[Dict[Any, str]] = Field(
+    routes: dict[Any, str] | None = Field(
         default=None, description="Routes mapping condition results to node names"
     )
 
     # Send node options
-    send_targets: Optional[List[str]] = Field(
+    send_targets: list[str] | None = Field(
         default=None, description="Target nodes for send operations"
     )
-    send_field: Optional[str] = Field(
+    send_field: str | None = Field(
         default=None, description="Field containing items to distribute to targets"
     )
 
     # Runtime configuration
-    config_overrides: Dict[str, Any] = Field(
+    config_overrides: dict[str, Any] = Field(
         default_factory=dict, description="Engine configuration overrides for this node"
     )
-    metadata: Dict[str, Any] = Field(
+    metadata: dict[str, Any] = Field(
         default_factory=dict, description="Additional metadata for this node"
     )
 
     model_config = {"arbitrary_types_allowed": True, "validate_assignment": True}
 
-    def to_dict(self) -> Dict[str, Any]:
-        """
-        Convert this node config to a dictionary representation.
+    def to_dict(self) -> dict[str, Any]:
+        """Convert this node config to a dictionary representation.
 
         Returns:
             Dictionary representation of this node config
@@ -181,10 +180,11 @@ class NodeConfig(BaseModel):
         return data
 
     @model_validator(mode="after")
-    def validate_and_determine_node_type(self) -> "NodeConfig":
-        """
-        Validate the configuration and determine the node type automatically if not specified.
-        """
+
+
+    @classmethod
+    def validate_and_determine_node_type(cls) -> "NodeConfig":
+        """Validate the configuration and determine the node type automatically if not specified."""
         # Convert END string to Literal
         if self.command_goto == "END":
             self.command_goto = END
@@ -202,7 +202,8 @@ class NodeConfig(BaseModel):
                 "At least one of engine, engine_name, tools,schemas or callable_func must be set"
             )
 
-        # Convert input_fields and output_fields to dictionaries if they're lists
+        # Convert input_fields and output_fields to dictionaries if they're
+        # lists
         if isinstance(self.input_fields, list):
             self.input_fields = {field: field for field in self.input_fields}
 
@@ -220,16 +221,13 @@ class NodeConfig(BaseModel):
                 self.node_type = NodeType.BRANCH
             elif self.send_targets is not None:
                 self.node_type = NodeType.SEND
+            # Determine from engine/callable
+            elif self.engine is not None or self.engine_name is not None:
+                self.node_type = NodeType.ENGINE
+            elif self.callable_func is not None:
+                self.node_type = NodeType.CALLABLE
             else:
-                # Determine from engine/callable
-                if self.engine is not None:
-                    self.node_type = NodeType.ENGINE
-                elif self.engine_name is not None:
-                    self.node_type = NodeType.ENGINE
-                elif self.callable_func is not None:
-                    self.node_type = NodeType.CALLABLE
-                else:
-                    self.node_type = NodeType.CUSTOM
+                self.node_type = NodeType.CUSTOM
 
         # Auto-generate schema from engine if available
         if self.engine and not self.state_schema:
@@ -279,9 +277,8 @@ class NodeConfig(BaseModel):
 
         return self
 
-    def get_engine(self) -> Tuple[Optional[Engine], Optional[str]]:
-        """
-        Get the engine for this node, resolving from registry if needed.
+    def get_engine(self) -> tuple[Engine | None, str | None]:
+        """Get the engine for this node, resolving from registry if needed.
 
         Returns:
             Tuple of (engine_instance, engine_id)
@@ -307,15 +304,15 @@ class NodeConfig(BaseModel):
                 return engine, engine_id
         except ImportError:
             logger.warning(
-                f"Could not import EngineRegistry to resolve engine: {self.engine_name}"
+                f"Could not import EngineRegistry to resolve engine: {
+                    self.engine_name}"
             )
 
         # Not found - return None
         return None, None
 
-    def get_input_mapping(self) -> Dict[str, str]:
-        """
-        Get the input mapping for this node.
+    def get_input_mapping(self) -> dict[str, str]:
+        """Get the input mapping for this node.
 
         Returns:
             Dictionary mapping state keys to node input keys
@@ -324,9 +321,8 @@ class NodeConfig(BaseModel):
             return dict(self.input_fields)
         return {}
 
-    def get_output_mapping(self) -> Dict[str, str]:
-        """
-        Get the output mapping for this node.
+    def get_output_mapping(self) -> dict[str, str]:
+        """Get the output mapping for this node.
 
         Returns:
             Dictionary mapping node output keys to state keys

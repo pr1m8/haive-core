@@ -7,7 +7,7 @@ This shows:
 """
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from langgraph.graph import StateGraph
@@ -27,11 +27,12 @@ logger = logging.getLogger(__name__)
 
 # Example 1: Simple threshold check function
 def check_summarization_needed(
-    messages: List[BaseMessage], threshold: int = 1000
+    messages: list[BaseMessage], threshold: int = 1000
 ) -> bool:
     """Check if total message length exceeds threshold."""
     total_length = sum(len(msg.content) for msg in messages)
-    logger.info(f"Total message length: {total_length}, threshold: {threshold}")
+    logger.info(
+        f"Total message length: {total_length}, threshold: {threshold}")
     return total_length > threshold
 
 
@@ -39,7 +40,9 @@ def check_summarization_needed(
 def check_token_limit(token_count: int, max_tokens: int = 4000) -> bool:
     """Check if token count is approaching limit."""
     utilization = token_count / max_tokens
-    logger.info(f"Token utilization: {utilization:.1%} ({token_count}/{max_tokens})")
+    logger.info(
+        f"Token utilization: {
+            utilization:.1%} ({token_count}/{max_tokens})")
     return utilization > 0.8  # 80% threshold
 
 
@@ -47,10 +50,10 @@ def check_token_limit(token_count: int, max_tokens: int = 4000) -> bool:
 class MessagesWithTokenTracking(StateSchema):
     """State with message and token tracking."""
 
-    messages: List[BaseMessage] = Field(default_factory=list)
+    messages: list[BaseMessage] = Field(default_factory=list)
     token_count: int = Field(default=0)
     total_cost: float = Field(default=0.0)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 def needs_summarization(state: MessagesWithTokenTracking) -> bool:
@@ -64,7 +67,11 @@ def needs_summarization(state: MessagesWithTokenTracking) -> bool:
 
     result = any(conditions)
     logger.info(
-        f"Summarization check: tokens={state.token_count}, messages={len(state.messages)}, cost=${state.total_cost:.2f} -> {result}"
+        f"Summarization check: tokens={
+            state.token_count}, messages={
+            len(
+                state.messages)}, cost=${
+                state.total_cost:.2f} -> {result}"
     )
     return result
 
@@ -75,12 +82,13 @@ def check_field_threshold(
 ) -> bool:
     """Generic threshold checker for any numeric field."""
     result = value > threshold
-    logger.info(f"Field '{field_name}' check: {value} > {threshold} = {result}")
+    logger.info(
+        f"Field '{field_name}' check: {value} > {threshold} = {result}")
     return result
 
 
 # Example 5: Multi-value categorizer
-def categorize_conversation(messages: List[BaseMessage]) -> str:
+def categorize_conversation(messages: list[BaseMessage]) -> str:
     """Categorize conversation based on content."""
     if not messages:
         return "empty"
@@ -91,12 +99,11 @@ def categorize_conversation(messages: List[BaseMessage]) -> str:
 
     if total_length < 100:
         return "brief"
-    elif ai_messages > 10:
+    if ai_messages > 10:
         return "extended"
-    elif total_length > 5000:
+    if total_length > 5000:
         return "verbose"
-    else:
-        return "normal"
+    return "normal"
 
 
 # Example 6: Using the decorator
@@ -106,7 +113,7 @@ def categorize_conversation(messages: List[BaseMessage]) -> str:
     result_key="needs_summary",
 )
 def smart_summary_check(
-    messages: List[BaseMessage], token_count: Optional[int] = None
+    messages: list[BaseMessage], token_count: int | None = None
 ) -> bool:
     """Smart check combining multiple factors."""
     # Length-based check
@@ -122,12 +129,7 @@ def smart_summary_check(
 
 def demonstrate_callable_nodes():
     """Demonstrate various callable node patterns."""
-    print("\n" + "=" * 80)
-    print("CALLABLE NODE DEMONSTRATIONS")
-    print("=" * 80)
-
     # 1. Simple threshold check
-    print("\n1. Simple Threshold Check Node:")
     threshold_node = wrap_callable(
         check_summarization_needed,
         goto_on_true="summarize",
@@ -137,7 +139,7 @@ def demonstrate_callable_nodes():
 
     # Test state
     class SimpleState(StateSchema):
-        messages: List[BaseMessage] = Field(default_factory=list)
+        messages: list[BaseMessage] = Field(default_factory=list)
         summary_threshold: int = Field(default=1000)
 
     state1 = SimpleState(
@@ -148,11 +150,9 @@ def demonstrate_callable_nodes():
         summary_threshold=500,
     )
 
-    result1 = threshold_node(state1)
-    print(f"   Result: {result1}")
+    threshold_node(state1)
 
     # 2. Token-based check
-    print("\n2. Token Limit Check Node:")
     token_node = CallableNodeConfig(
         name="check_tokens",
         callable_func=check_token_limit,
@@ -169,11 +169,9 @@ def demonstrate_callable_nodes():
         token_limit: int = Field(default=4000)
 
     state2 = TokenState(current_tokens=3500, token_limit=4000)
-    result2 = token_node(state2)
-    print(f"   Result: {result2}")
+    token_node(state2)
 
     # 3. Full state function
-    print("\n3. State-based Function Node:")
     state_node = CallableNodeConfig(
         name="check_summary_needed",
         callable_func=needs_summarization,
@@ -187,11 +185,9 @@ def demonstrate_callable_nodes():
         messages=[HumanMessage(content="Test")] * 25, token_count=3500, total_cost=0.5
     )
 
-    result3 = state_node(state3)
-    print(f"   Result: {result3}")
+    state_node(state3)
 
     # 4. Generic field extraction
-    print("\n4. Generic Field Extraction:")
     cost_check_node = CallableNodeConfig(
         name="check_cost",
         callable_func=check_field_threshold,
@@ -205,17 +201,15 @@ def demonstrate_callable_nodes():
     class CostState(StateSchema):
         total_cost: float = Field(default=0.0)
         cost_limit: float = Field(default=5.0)
-        metadata: Dict[str, Any] = Field(default_factory=dict)
+        metadata: dict[str, Any] = Field(default_factory=dict)
 
     state4 = CostState(
         total_cost=6.5, cost_limit=5.0, metadata={"cost_field_name": "api_costs"}
     )
 
-    result4 = cost_check_node(state4)
-    print(f"   Result: {result4}")
+    cost_check_node(state4)
 
     # 5. Multi-value routing
-    print("\n5. Multi-value Routing:")
     categorizer_node = CallableNodeConfig(
         name="categorize",
         callable_func=categorize_conversation,
@@ -237,16 +231,11 @@ def demonstrate_callable_nodes():
         ]
     )
 
-    result5 = categorizer_node(state5)
-    print(f"   Result: {result5}")
+    categorizer_node(state5)
 
 
 def demonstrate_schema_composition():
     """Demonstrate composing schemas from nodes."""
-    print("\n" + "=" * 80)
-    print("SCHEMA COMPOSITION FROM NODES")
-    print("=" * 80)
-
     # Define multiple nodes with different requirements
     nodes = [
         wrap_callable(
@@ -266,12 +255,13 @@ def demonstrate_schema_composition():
             callable_func=check_field_threshold,
             goto_on_true="expensive",
             goto_on_false="continue",
-            parameter_mapping={"value": "total_cost", "threshold": "cost_limit"},
+            parameter_mapping={
+                "value": "total_cost",
+                "threshold": "cost_limit"},
         ),
     ]
 
     # Compose required fields from all nodes
-    print("\n1. Extracting Required Fields from Nodes:")
     all_fields = set()
     field_sources = {}
 
@@ -283,19 +273,16 @@ def demonstrate_schema_composition():
                 field_sources[field.name] = []
             field_sources[field.name].append(node.name)
 
-    print("\nRequired fields across all nodes:")
     for field_name in sorted(all_fields):
-        sources = field_sources[field_name]
-        print(f"  - {field_name}: needed by {', '.join(sources)}")
+        field_sources[field_name]
 
     # Create composite schema
-    print("\n2. Creating Composite Schema:")
 
     # Dynamic schema creation
     from pydantic import create_model
 
     field_definitions = {
-        "messages": (List[BaseMessage], Field(default_factory=list)),
+        "messages": (list[BaseMessage], Field(default_factory=list)),
         "threshold": (int, Field(default=1000)),
         "token_count": (int, Field(default=0)),
         "max_tokens": (int, Field(default=4000)),
@@ -307,32 +294,24 @@ def demonstrate_schema_composition():
         "CompositeState", __base__=StateSchema, **field_definitions
     )
 
-    print("\nComposite schema fields:")
-    for name, field in CompositeState.model_fields.items():
-        print(f"  - {name}: {field.annotation}")
+    for _name, field in CompositeState.model_fields.items():
+        pass
 
     # Test with composite state
-    print("\n3. Testing with Composite State:")
     composite_state = CompositeState(
         messages=[HumanMessage(content="Test " * 200)], token_count=3500, total_cost=2.5
     )
 
     for node in nodes:
-        result = node(composite_state)
-        print(f"\n{node.name}:")
-        print(f"  Update: {result.update}")
-        print(f"  Goto: {result.goto}")
+        node(composite_state)
 
 
 def create_example_graph():
     """Create a graph using callable nodes."""
-    print("\n" + "=" * 80)
-    print("EXAMPLE GRAPH WITH CALLABLE NODES")
-    print("=" * 80)
 
     # Define state
     class ConversationState(StateSchema):
-        messages: List[BaseMessage] = Field(default_factory=list)
+        messages: list[BaseMessage] = Field(default_factory=list)
         token_count: int = Field(default=0)
         summary_count: int = Field(default=0)
         should_summarize: bool = Field(default=False)
@@ -352,7 +331,9 @@ def create_example_graph():
     )
 
     # Mock nodes for complete flow
-    graph.add_node("summarize", lambda s: {"summary_count": s.summary_count + 1})
+    graph.add_node(
+        "summarize", lambda s: {
+            "summary_count": s.summary_count + 1})
     graph.add_node("respond", lambda s: {"token_count": s.token_count + 100})
 
     # Define flow
@@ -363,20 +344,12 @@ def create_example_graph():
     # Compile
     app = graph.compile()
 
-    print("\nGraph structure:")
-    print("  Entry: check_summary")
-    print("  Nodes: check_summary, summarize, respond")
-    print("  Edges: check_summary -> (summarize | respond) -> END")
-
     return app
 
 
 if __name__ == "__main__":
-    print("\nRunning Callable Node Examples...")
 
     # Run demonstrations
     demonstrate_callable_nodes()
     demonstrate_schema_composition()
     create_example_graph()
-
-    print("\n✅ All demonstrations complete!")

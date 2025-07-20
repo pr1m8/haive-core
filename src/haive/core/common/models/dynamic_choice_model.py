@@ -5,19 +5,9 @@ strings, dicts, BaseModels, or any custom class with a name attribute.
 """
 
 import logging
-from typing import (
-    Any,
-    Generic,
-    TypeVar,
-)
+from typing import Any, Generic, TypeVar
 
-from pydantic import (
-    BaseModel,
-    Field,
-    PrivateAttr,
-    create_model,
-    field_validator,
-)
+from pydantic import BaseModel, Field, PrivateAttr, create_model, field_validator
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
@@ -29,7 +19,8 @@ console = Console()
 logger = logging.getLogger(__name__)
 
 
-# Generic type that can be string, dict with name key, or any object with name attribute
+# Generic type that can be string, dict with name key, or any object with
+# name attribute
 OptionItem = TypeVar("OptionItem", str, dict[str, Any], Nameable)
 
 
@@ -46,7 +37,8 @@ class DynamicChoiceModel(BaseModel, Generic[OptionItem]):
     name_field: str = Field(
         default="name", description="Field/attribute to extract names from"
     )
-    include_end: bool = Field(default=True, description="Always include END option")
+    include_end: bool = Field(default=True,
+                              description="Always include END option")
     model_name: str = Field(
         default="DynamicChoice", description="Base name for generated models"
     )
@@ -59,7 +51,7 @@ class DynamicChoiceModel(BaseModel, Generic[OptionItem]):
     class Config:
         arbitrary_types_allowed = True
 
-    def __init__(self, **data):
+    def __init__(self, **data) -> None:
         super().__init__(**data)
         self._regenerate_model()
         self._debug_print_initial()
@@ -90,7 +82,8 @@ class DynamicChoiceModel(BaseModel, Generic[OptionItem]):
                 name = self._extract_name_from_option(option)
                 names.append(name)
             except Exception as e:
-                logger.warning(f"Failed to extract name from option {option}: {e}")
+                logger.warning(
+                    f"Failed to extract name from option {option}: {e}")
                 names.append(str(option))
 
         # Always include END if specified
@@ -109,7 +102,8 @@ class DynamicChoiceModel(BaseModel, Generic[OptionItem]):
 
         def validate_choice_field(cls, v: str) -> str:
             if v not in valid_options:
-                raise ValueError(f"Choice '{v}' must be one of: {valid_options}")
+                raise ValueError(
+                    f"Choice '{v}' must be one of: {valid_options}")
             return v
 
         # Create unique model name
@@ -120,7 +114,8 @@ class DynamicChoiceModel(BaseModel, Generic[OptionItem]):
             model_name,
             choice=(
                 str,
-                Field(..., description=f"Must be one of: {', '.join(valid_options)}"),
+                Field(...,
+                      description=f"Must be one of: {', '.join(valid_options)}"),
             ),
             __validators__={
                 "validate_choice": field_validator("choice", mode="after")(
@@ -129,7 +124,8 @@ class DynamicChoiceModel(BaseModel, Generic[OptionItem]):
             },
         )
 
-        logger.debug(f"Generated model {model_name} with options: {valid_options}")
+        logger.debug(
+            f"Generated model {model_name} with options: {valid_options}")
 
     def __call__(self) -> type[BaseModel]:
         """Make the builder callable to return current choice model."""
@@ -164,7 +160,8 @@ class DynamicChoiceModel(BaseModel, Generic[OptionItem]):
         name = self._extract_name_from_option(option)
 
         if name == "END" and self.include_end:
-            console.print("[red]Cannot remove END option when include_end=True[/red]")
+            console.print(
+                "[red]Cannot remove END option when include_end=True[/red]")
             return False
 
         # Find and remove the option
@@ -183,7 +180,8 @@ class DynamicChoiceModel(BaseModel, Generic[OptionItem]):
     def remove_option_by_name(self, name: str) -> bool:
         """Remove option by name string."""
         if name == "END" and self.include_end:
-            console.print("[red]Cannot remove END option when include_end=True[/red]")
+            console.print(
+                "[red]Cannot remove END option when include_end=True[/red]")
             return False
 
         for i, option in enumerate(self.options):
@@ -275,14 +273,17 @@ class DynamicChoiceModel(BaseModel, Generic[OptionItem]):
         if self._current_model:
             table.add_row("Current Model", self._current_model.__name__)
             table.add_row(
-                "Model Fields", str(list(self._current_model.model_fields.keys()))
+                "Model Fields", str(
+                    list(self._current_model.model_fields.keys()))
             )
 
             # Field details
             choice_field = self._current_model.model_fields.get("choice")
             if choice_field:
                 table.add_row("Field Type", str(choice_field.annotation))
-                table.add_row("Field Description", str(choice_field.description))
+                table.add_row(
+                    "Field Description", str(
+                        choice_field.description))
 
         console.print(table)
 
@@ -300,7 +301,8 @@ class DynamicChoiceModel(BaseModel, Generic[OptionItem]):
             self.print_full_state()
 
             try:
-                cmd = console.input("\n[bold cyan]Enter command:[/bold cyan] ").strip()
+                cmd = console.input(
+                    "\n[bold cyan]Enter command:[/bold cyan] ").strip()
 
                 if cmd.lower() == "quit":
                     break

@@ -1,28 +1,19 @@
-"""
+"""from typing import Any, Dict, Optional
 Base graph implementation for the Haive framework.
 
 Provides a comprehensive system for building, manipulating, and executing
 graphs with consistent interfaces, serialization support, and dynamic composition.
 """
 
-# Import RichLogger
 import inspect
 import logging
 import uuid
+
+# Import RichLogger
+from collections.abc import Callable
 from datetime import datetime
 from enum import Enum
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Generic,
-    List,
-    Literal,
-    Optional,
-    Tuple,
-    Type,
-    Union,
-)
+from typing import Any, Generic, Literal, Union
 
 from langchain_core.runnables import RunnableConfig
 from langgraph.graph import END, START  # Import the actual constants
@@ -34,6 +25,9 @@ from haive.core.graph.branches.branch import Branch
 from haive.core.graph.branches.types import BranchMode, ComparisonType
 from haive.core.graph.common.references import CallableReference
 from haive.core.graph.common.types import ConfigLike, NodeOutput, NodeType, StateLike
+
+# Import agent node v3 for proper agent node creation
+from haive.core.graph.node.agent_node_v3 import create_agent_node_v3
 from haive.core.graph.node.config import NodeConfig
 from haive.core.graph.state_graph.graph_path import GraphPath
 
@@ -44,8 +38,8 @@ from haive.core.graph.state_graph.validation_mixin import ValidationMixin
 BranchResultType = Union[
     str,  # Node name
     bool,  # Boolean condition
-    List[str],  # List of node names
-    List[Send],  # List of Send objects
+    list[str],  # List of node names
+    list[Send],  # List of Send objects
     Send,  # Single Send object
     Command,  # Command object
     None,  # Default case
@@ -74,7 +68,7 @@ class EdgeType(str, Enum):
 
 
 # Simple edge: (source_node_name, target_node_name)
-SimpleEdge = Tuple[str, str]
+SimpleEdge = tuple[str, str]
 
 # Complete edge type - now just simple edges
 Edge = SimpleEdge
@@ -88,21 +82,19 @@ class Node(BaseModel, Generic[StateLike, ConfigLike, NodeOutput]):
     node_type: NodeType
 
     # Configuration
-    input_mapping: Optional[Dict[str, str]] = None
-    output_mapping: Optional[Dict[str, str]] = None
-    command_goto: Optional[Union[str, List[str]]] = None
-    retry_policy: Optional[RetryPolicy] = None
+    input_mapping: dict[str, str] | None = None
+    output_mapping: dict[str, str] | None = None
+    command_goto: str | list[str] | None = None
+    retry_policy: RetryPolicy | None = None
 
     # Metadata
-    description: Optional[str] = None
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    description: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
     created_at: datetime = Field(default_factory=datetime.now)
 
     model_config = {"arbitrary_types_allowed": True}
 
-    def process(
-        self, state: StateLike, config: Optional[ConfigLike] = None
-    ) -> NodeOutput:
+    def process(self, state: StateLike, config: ConfigLike | None = None) -> NodeOutput:
         """Process state and return output."""
         raise NotImplementedError("Subclasses must implement process method")
 
@@ -111,7 +103,7 @@ class Node(BaseModel, Generic[StateLike, ConfigLike, NodeOutput]):
         """Get a human-readable display name."""
         return self.name
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to serializable dictionary."""
         return {
             "id": self.id,
@@ -127,8 +119,7 @@ class Node(BaseModel, Generic[StateLike, ConfigLike, NodeOutput]):
 
 
 class BaseGraph(BaseModel, ValidationMixin):
-    """
-    Base class for graph management in the Haive framework.
+    """Base class for graph management in the Haive framework.
 
     Provides comprehensive graph management capabilities including:
     - Node management (add, remove, update)
@@ -141,37 +132,35 @@ class BaseGraph(BaseModel, ValidationMixin):
     # Unique identifier and metadata
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
-    description: Optional[str] = None
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    description: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
     # Core graph components - branches now handle conditional routing
-    nodes: Dict[str, Optional[Union[Node, NodeConfig, Any]]] = Field(
-        default_factory=dict
-    )
-    edges: List[Edge] = Field(default_factory=list)
-    branches: Dict[str, Branch] = Field(default_factory=dict)
+    nodes: dict[str, Node | NodeConfig | Any | None] = Field(default_factory=dict)
+    edges: list[Edge] = Field(default_factory=list)
+    branches: dict[str, Branch] = Field(default_factory=dict)
 
     # Entry and finish points - consistent plurals
-    entry_points: List[str] = Field(default_factory=list)
-    finish_points: List[str] = Field(default_factory=list)
-    conditional_entries: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
-    conditional_exits: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
+    entry_points: list[str] = Field(default_factory=list)
+    finish_points: list[str] = Field(default_factory=list)
+    conditional_entries: dict[str, dict[str, Any]] = Field(default_factory=dict)
+    conditional_exits: dict[str, dict[str, Any]] = Field(default_factory=dict)
 
     # Keep backward compatibility fields for singular points
-    entry_point: Optional[str] = Field(
+    entry_point: str | None = Field(
         default=None, description="Deprecated: Use entry_points instead"
     )
-    finish_point: Optional[str] = Field(
+    finish_point: str | None = Field(
         default=None, description="Deprecated: Use finish_points instead"
     )
 
     # Configuration
-    state_schema: Optional[Any] = None
-    default_config: Optional[RunnableConfig] = None
+    state_schema: Any | None = None
+    default_config: RunnableConfig | None = None
 
     # Additional components for advanced functionality
-    subgraphs: Dict[str, Any] = Field(default_factory=dict)
-    node_types: Dict[str, NodeType] = Field(default_factory=dict)
+    subgraphs: dict[str, Any] = Field(default_factory=dict)
+    node_types: dict[str, NodeType] = Field(default_factory=dict)
 
     # Tracking fields
     created_at: datetime = Field(default_factory=datetime.now)
@@ -179,18 +168,18 @@ class BaseGraph(BaseModel, ValidationMixin):
 
     # Recompilation tracking (excluded from serialization)
     needs_recompile_flag: bool = Field(default=False, exclude=True)
-    last_compiled_at: Optional[datetime] = Field(default=None, exclude=True)
-    compilation_state_hash: Optional[str] = Field(default=None, exclude=True)
+    last_compiled_at: datetime | None = Field(default=None, exclude=True)
+    compilation_state_hash: str | None = Field(default=None, exclude=True)
 
     # Schema tracking for recompilation (excluded from serialization)
-    last_input_schema: Optional[Any] = Field(default=None, exclude=True)
-    last_output_schema: Optional[Any] = Field(default=None, exclude=True)
-    last_config_schema: Optional[Any] = Field(default=None, exclude=True)
+    last_input_schema: Any | None = Field(default=None, exclude=True)
+    last_output_schema: Any | None = Field(default=None, exclude=True)
+    last_config_schema: Any | None = Field(default=None, exclude=True)
 
     # Compilation parameters tracking (excluded from serialization)
-    last_interrupt_before: Optional[list] = Field(default=None, exclude=True)
-    last_interrupt_after: Optional[list] = Field(default=None, exclude=True)
-    last_compile_kwargs: Optional[Dict[str, Any]] = Field(default=None, exclude=True)
+    last_interrupt_before: list | None = Field(default=None, exclude=True)
+    last_interrupt_after: list | None = Field(default=None, exclude=True)
+    last_compile_kwargs: dict[str, Any] | None = Field(default=None, exclude=True)
 
     model_config = {"arbitrary_types_allowed": True}
 
@@ -203,7 +192,10 @@ class BaseGraph(BaseModel, ValidationMixin):
     )
 
     @model_validator(mode="after")
-    def validate_graph(self) -> "BaseGraph":
+
+
+    @classmethod
+    def validate_graph(cls) -> "BaseGraph":
         """Validate the graph structure."""
         # Filter out None values from nodes and check uniqueness
         non_none_nodes = {k: v for k, v in self.nodes.items() if v is not None}
@@ -214,7 +206,8 @@ class BaseGraph(BaseModel, ValidationMixin):
             if hasattr(node, "name"):
                 node_names.add(node.name)
             else:
-                # For nodes without a name property (like callables), use the key
+                # For nodes without a name property (like callables), use the
+                # key
                 node_names.add(name)
 
         if len(node_names) != len(non_none_nodes):
@@ -222,7 +215,10 @@ class BaseGraph(BaseModel, ValidationMixin):
 
         # Validate entry/end points
         if self.entry_points and self.entry_points[0] not in self.nodes:
-            raise ValueError(f"Entry point '{self.entry_points[0]}' not found in nodes")
+            raise ValueError(
+                f"Entry point '{
+                    self.entry_points[0]}' not found in nodes"
+            )
 
         if self.finish_points and self.finish_points[0] not in self.nodes:
             raise ValueError(
@@ -278,7 +274,10 @@ class BaseGraph(BaseModel, ValidationMixin):
         """
         self.needs_recompile_flag = True
         if reason:
-            logger.debug(f"Graph '{self.name}' marked for recompilation: {reason}")
+            logger.debug(
+                f"Graph '{
+                    self.name}' marked for recompilation: {reason}"
+            )
 
     def needs_recompile(self) -> bool:
         """Check if the graph needs recompilation.
@@ -290,11 +289,11 @@ class BaseGraph(BaseModel, ValidationMixin):
 
     def mark_compiled(
         self,
-        input_schema: Optional[Any] = None,
-        output_schema: Optional[Any] = None,
-        config_schema: Optional[Any] = None,
-        interrupt_before: Optional[list] = None,
-        interrupt_after: Optional[list] = None,
+        input_schema: Any | None = None,
+        output_schema: Any | None = None,
+        config_schema: Any | None = None,
+        interrupt_before: list | None = None,
+        interrupt_after: list | None = None,
         **compile_kwargs,
     ) -> None:
         """Mark the graph as compiled and reset the recompilation flag.
@@ -326,10 +325,12 @@ class BaseGraph(BaseModel, ValidationMixin):
         self.last_compile_kwargs = compile_kwargs.copy() if compile_kwargs else {}
 
         logger.debug(
-            f"Graph '{self.name}' marked as compiled at {self.last_compiled_at}"
+            f"Graph '{
+                self.name}' marked as compiled at {
+                self.last_compiled_at}"
         )
 
-    def get_compilation_info(self) -> Dict[str, Any]:
+    def get_compilation_info(self) -> dict[str, Any]:
         """Get information about the compilation state.
 
         Returns:
@@ -391,9 +392,9 @@ class BaseGraph(BaseModel, ValidationMixin):
 
     def needs_recompile_for_schemas(
         self,
-        input_schema: Optional[Any] = None,
-        output_schema: Optional[Any] = None,
-        config_schema: Optional[Any] = None,
+        input_schema: Any | None = None,
+        output_schema: Any | None = None,
+        config_schema: Any | None = None,
     ) -> bool:
         """Check if recompilation is needed due to schema changes.
 
@@ -413,15 +414,12 @@ class BaseGraph(BaseModel, ValidationMixin):
             return True
         if output_schema != self.last_output_schema:
             return True
-        if config_schema != self.last_config_schema:
-            return True
-
-        return False
+        return config_schema != self.last_config_schema
 
     def needs_recompile_for_interrupts(
         self,
-        interrupt_before: Optional[list] = None,
-        interrupt_after: Optional[list] = None,
+        interrupt_before: list | None = None,
+        interrupt_after: list | None = None,
     ) -> bool:
         """Check if recompilation is needed due to interrupt changes.
 
@@ -438,20 +436,17 @@ class BaseGraph(BaseModel, ValidationMixin):
         # Check if interrupt configuration has changed
         if interrupt_before != self.last_interrupt_before:
             return True
-        if interrupt_after != self.last_interrupt_after:
-            return True
-
-        return False
+        return interrupt_after != self.last_interrupt_after
 
     def check_full_recompilation_needed(
         self,
-        input_schema: Optional[Any] = None,
-        output_schema: Optional[Any] = None,
-        config_schema: Optional[Any] = None,
-        interrupt_before: Optional[list] = None,
-        interrupt_after: Optional[list] = None,
+        input_schema: Any | None = None,
+        output_schema: Any | None = None,
+        config_schema: Any | None = None,
+        interrupt_before: list | None = None,
+        interrupt_after: list | None = None,
         **compile_kwargs,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Check if recompilation is needed for any reason and provide details.
 
         Args:
@@ -474,25 +469,30 @@ class BaseGraph(BaseModel, ValidationMixin):
         # Check schema changes
         if input_schema != self.last_input_schema:
             reasons.append(
-                f"Input schema changed: {self.last_input_schema} -> {input_schema}"
+                f"Input schema changed: {
+                    self.last_input_schema} -> {input_schema}"
             )
         if output_schema != self.last_output_schema:
             reasons.append(
-                f"Output schema changed: {self.last_output_schema} -> {output_schema}"
+                f"Output schema changed: {
+                    self.last_output_schema} -> {output_schema}"
             )
         if config_schema != self.last_config_schema:
             reasons.append(
-                f"Config schema changed: {self.last_config_schema} -> {config_schema}"
+                f"Config schema changed: {
+                    self.last_config_schema} -> {config_schema}"
             )
 
         # Check interrupt changes
         if interrupt_before != self.last_interrupt_before:
             reasons.append(
-                f"Interrupt before changed: {self.last_interrupt_before} -> {interrupt_before}"
+                f"Interrupt before changed: {
+                    self.last_interrupt_before} -> {interrupt_before}"
             )
         if interrupt_after != self.last_interrupt_after:
             reasons.append(
-                f"Interrupt after changed: {self.last_interrupt_after} -> {interrupt_after}"
+                f"Interrupt after changed: {
+                    self.last_interrupt_after} -> {interrupt_after}"
             )
 
         # Check kwargs changes
@@ -512,7 +512,7 @@ class BaseGraph(BaseModel, ValidationMixin):
             "kwargs_changes": compile_kwargs != last_kwargs,
         }
 
-    def set_state_schema(self, schema: Optional[Type[BaseModel]]) -> "BaseGraph":
+    def set_state_schema(self, schema: type[BaseModel] | None) -> "BaseGraph":
         """Set the state schema and mark the graph as needing recompilation.
 
         Args:
@@ -532,8 +532,7 @@ class BaseGraph(BaseModel, ValidationMixin):
         return self
 
     def _infer_node_type(self, node: Any) -> NodeType:
-        """
-        Infer the node type from a node object.
+        """Infer the node type from a node object.
 
         Args:
             node: Node object to infer type from
@@ -550,12 +549,11 @@ class BaseGraph(BaseModel, ValidationMixin):
             # Different NodeConfig classes map to different node types
             if "EngineNodeConfig" in node.__class__.__name__:
                 return NodeType.ENGINE
-            elif "ToolNodeConfig" in node.__class__.__name__:
+            if "ToolNodeConfig" in node.__class__.__name__:
                 return NodeType.TOOL
-            elif "ValidationNodeConfig" in node.__class__.__name__:
+            if "ValidationNodeConfig" in node.__class__.__name__:
                 return NodeType.VALIDATION
-            else:
-                return NodeType.CALLABLE
+            return NodeType.CALLABLE
 
         # Check for engine objects
         if hasattr(node, "engine_type") and hasattr(node, "create_runnable"):
@@ -574,12 +572,11 @@ class BaseGraph(BaseModel, ValidationMixin):
 
     def add_node(
         self,
-        node_or_name: Union[Node, Dict[str, Any], str, NodeConfig],
-        node_like: Optional[Any] = None,
+        node_or_name: Node | dict[str, Any] | str | NodeConfig,
+        node_like: Any | None = None,
         **kwargs,
     ) -> "BaseGraph":
-        """
-        Add a node to the graph with flexible input options.
+        """Add a node to the graph with flexible input options.
 
         Args:
             node_or_name: Node object, dictionary, node name, or NodeConfig
@@ -596,7 +593,8 @@ class BaseGraph(BaseModel, ValidationMixin):
             # String name with node_like object
             name = node_or_name
 
-            # If node_like is None, store it directly (useful for pattern placeholders)
+            # If node_like is None, store it directly (useful for pattern
+            # placeholders)
             if node_like is None and not kwargs:
                 self.nodes[name] = None
                 self._mark_needs_recompile(f"Added placeholder node '{name}'")
@@ -715,7 +713,10 @@ class BaseGraph(BaseModel, ValidationMixin):
 
         # Check for existing node
         if node_obj.name in self.nodes:
-            raise ValueError(f"Node '{node_obj.name}' already exists in the graph")
+            raise ValueError(
+                f"Node '{
+                    node_obj.name}' already exists in the graph"
+            )
 
         # Add the node
         self.nodes[node_obj.name] = node_obj
@@ -732,11 +733,10 @@ class BaseGraph(BaseModel, ValidationMixin):
     def _track_node_type(
         self,
         node_name: str,
-        node_type: Optional[NodeType] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        node_type: NodeType | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
-        """
-        Track node type for a node.
+        """Track node type for a node.
 
         Args:
             node_name: Name of the node
@@ -766,8 +766,7 @@ class BaseGraph(BaseModel, ValidationMixin):
         self.node_types[node_name] = determined_type
 
     def set_entry_point(self, node_name: str) -> "BaseGraph":
-        """
-        Set an entry point of the graph.
+        """Set an entry point of the graph.
 
         Args:
             node_name: Name of the node to set as an entry point
@@ -789,14 +788,16 @@ class BaseGraph(BaseModel, ValidationMixin):
         if not any(src == START and dst == node_name for src, dst in self.edges):
             self.add_edge(START, node_name)
 
-        logger.debug(f"Set entry point to '{node_name}' in graph '{self.name}'")
+        logger.debug(
+            f"Set entry point to '{node_name}' in graph '{
+                self.name}'"
+        )
         self.updated_at = datetime.now()
         return self
 
     # Rename for consistency
     def set_finish_point(self, node_name: str) -> "BaseGraph":
-        """
-        Set a finish point of the graph.
+        """Set a finish point of the graph.
 
         Args:
             node_name: Name of the node to set as a finish point
@@ -818,14 +819,16 @@ class BaseGraph(BaseModel, ValidationMixin):
         if not any(src == node_name and dst == END for src, dst in self.edges):
             self.add_edge(node_name, END)
 
-        logger.debug(f"Set finish point to '{node_name}' in graph '{self.name}'")
+        logger.debug(
+            f"Set finish point to '{node_name}' in graph '{
+                self.name}'"
+        )
         self.updated_at = datetime.now()
         return self
 
     # Backward compatibility alias
     def set_end_point(self, node_name: str) -> "BaseGraph":
-        """
-        Deprecated: Use set_finish_point instead.
+        """Deprecated: Use set_finish_point instead.
 
         Set a finish point of the graph.
 
@@ -839,12 +842,11 @@ class BaseGraph(BaseModel, ValidationMixin):
 
     def set_conditional_entry(
         self,
-        condition: Callable[[StateLike, Optional[ConfigLike]], bool],
+        condition: Callable[[StateLike, ConfigLike | None], bool],
         entry_node: str,
-        default_entry: Optional[str] = None,
+        default_entry: str | None = None,
     ) -> "BaseGraph":
-        """
-        Set a conditional entry point for the graph.
+        """Set a conditional entry point for the graph.
 
         Args:
             condition: Function that takes state and config, returns boolean
@@ -882,7 +884,8 @@ class BaseGraph(BaseModel, ValidationMixin):
             self.add_edge(START, false_node)
 
         logger.debug(
-            f"Added conditional entry point to '{entry_node}' in graph '{self.name}'"
+            f"Added conditional entry point to '{entry_node}' in graph '{
+                self.name}'"
         )
         self.updated_at = datetime.now()
         return self
@@ -890,11 +893,10 @@ class BaseGraph(BaseModel, ValidationMixin):
     def set_conditional_exit(
         self,
         node_name: str,
-        condition: Callable[[StateLike, Optional[ConfigLike]], bool],
+        condition: Callable[[StateLike, ConfigLike | None], bool],
         exit_if_true: bool = True,
     ) -> "BaseGraph":
-        """
-        Set a conditional exit point for the graph.
+        """Set a conditional exit point for the graph.
 
         Args:
             node_name: Name of the node to set as conditional exit
@@ -923,14 +925,14 @@ class BaseGraph(BaseModel, ValidationMixin):
             self.add_edge(node_name, END)
 
         logger.debug(
-            f"Added conditional exit point at '{node_name}' in graph '{self.name}'"
+            f"Added conditional exit point at '{node_name}' in graph '{
+                self.name}'"
         )
         self.updated_at = datetime.now()
         return self
 
     def remove_conditional_entry(self, entry_id: str) -> "BaseGraph":
-        """
-        Remove a conditional entry point.
+        """Remove a conditional entry point.
 
         Args:
             entry_id: ID of the conditional entry to remove
@@ -945,14 +947,14 @@ class BaseGraph(BaseModel, ValidationMixin):
         del self.conditional_entries[entry_id]
 
         logger.debug(
-            f"Removed conditional entry point '{entry_id}' from graph '{self.name}'"
+            f"Removed conditional entry point '{entry_id}' from graph '{
+                self.name}'"
         )
         self.updated_at = datetime.now()
         return self
 
     def remove_conditional_exit(self, exit_id: str) -> "BaseGraph":
-        """
-        Remove a conditional exit point.
+        """Remove a conditional exit point.
 
         Args:
             exit_id: ID of the conditional exit to remove
@@ -967,23 +969,22 @@ class BaseGraph(BaseModel, ValidationMixin):
         del self.conditional_exits[exit_id]
 
         logger.debug(
-            f"Removed conditional exit point '{exit_id}' from graph '{self.name}'"
+            f"Removed conditional exit point '{exit_id}' from graph '{
+                self.name}'"
         )
         self.updated_at = datetime.now()
         return self
 
-    def get_conditional_entries(self) -> Dict[str, Dict[str, Any]]:
-        """
-        Get all conditional entry points.
+    def get_conditional_entries(self) -> dict[str, dict[str, Any]]:
+        """Get all conditional entry points.
 
         Returns:
             Dictionary of conditional entries indexed by ID
         """
         return self.conditional_entries
 
-    def get_conditional_exits(self) -> Dict[str, Dict[str, Any]]:
-        """
-        Get all conditional exit points.
+    def get_conditional_exits(self) -> dict[str, dict[str, Any]]:
+        """Get all conditional exit points.
 
         Returns:
             Dictionary of conditional exits indexed by ID
@@ -991,9 +992,8 @@ class BaseGraph(BaseModel, ValidationMixin):
         return self.conditional_exits
 
     @property
-    def all_entry_points(self) -> Dict[str, Any]:
-        """
-        Property that returns all entry points (regular and conditional).
+    def all_entry_points(self) -> dict[str, Any]:
+        """Property that returns all entry points (regular and conditional).
 
         Returns:
             Dictionary containing all entry points information
@@ -1012,9 +1012,8 @@ class BaseGraph(BaseModel, ValidationMixin):
 
     # Rename for consistency
     @property
-    def all_finish_points(self) -> Dict[str, Any]:
-        """
-        Property that returns all finish points (regular and conditional).
+    def all_finish_points(self) -> dict[str, Any]:
+        """Property that returns all finish points (regular and conditional).
 
         Returns:
             Dictionary containing all finish points information
@@ -1033,25 +1032,24 @@ class BaseGraph(BaseModel, ValidationMixin):
 
     # Backward compatibility aliases
     @property
-    def entry_points_data(self) -> Dict[str, Any]:
+    def entry_points_data(self) -> dict[str, Any]:
         """Deprecated: Use all_entry_points instead."""
         return self.all_entry_points
 
     @property
-    def exit_points(self) -> Dict[str, Any]:
+    def exit_points(self) -> dict[str, Any]:
         """Deprecated: Use all_finish_points instead."""
         return self.all_finish_points
 
     @property
-    def all_exit_points(self) -> Dict[str, Any]:
+    def all_exit_points(self) -> dict[str, Any]:
         """Deprecated: Use all_finish_points instead."""
         return self.all_finish_points
 
     def add_tool_node(
         self, node_name: str, node_type: NodeType = NodeType.TOOL, **kwargs
     ) -> "BaseGraph":
-        """
-        Add a tool node to the graph.
+        """Add a tool node to the graph.
 
         Args:
             node_name: Name of the node
@@ -1066,8 +1064,7 @@ class BaseGraph(BaseModel, ValidationMixin):
         return self
 
     def add_subgraph(self, name: str, subgraph: "BaseGraph", **kwargs) -> "BaseGraph":
-        """
-        Add a subgraph as a node.
+        """Add a subgraph as a node.
 
         Args:
             name: Name for the subgraph node
@@ -1083,7 +1080,8 @@ class BaseGraph(BaseModel, ValidationMixin):
         # Store subgraph
         self.subgraphs[name] = subgraph
 
-        # Create node - this represents the subgraph as a single node in the main graph
+        # Create node - this represents the subgraph as a single node in the
+        # main graph
         node_obj = Node(
             name=name,
             node_type=NodeType.SUBGRAPH,
@@ -1102,8 +1100,7 @@ class BaseGraph(BaseModel, ValidationMixin):
         return self
 
     def remove_node(self, node_name: str) -> "BaseGraph":
-        """
-        Remove a node from the graph.
+        """Remove a node from the graph.
 
         Args:
             node_name: Name of the node to remove
@@ -1156,9 +1153,8 @@ class BaseGraph(BaseModel, ValidationMixin):
         self._mark_needs_recompile(f"Removed node '{node_name}'")
         return self
 
-    def get_node(self, node_name: str) -> Optional[Any]:
-        """
-        Get a node by name.
+    def get_node(self, node_name: str) -> Any | None:
+        """Get a node by name.
 
         Args:
             node_name: Name of the node to retrieve
@@ -1169,8 +1165,7 @@ class BaseGraph(BaseModel, ValidationMixin):
         return self.nodes.get(node_name)
 
     def update_node(self, node_name: str, **updates) -> "BaseGraph":
-        """
-        Update a node's properties.
+        """Update a node's properties.
 
         Args:
             node_name: Name of the node to update
@@ -1204,11 +1199,10 @@ class BaseGraph(BaseModel, ValidationMixin):
     def replace_node(
         self,
         node_name: str,
-        new_node: Union[Node, Dict, Any],
+        new_node: Node | dict | Any,
         preserve_connections: bool = True,
     ) -> "BaseGraph":
-        """
-        Replace a node while optionally preserving its connections.
+        """Replace a node while optionally preserving its connections.
 
         Args:
             node_name: Name of the node to replace
@@ -1299,12 +1293,11 @@ class BaseGraph(BaseModel, ValidationMixin):
     def insert_node_after(
         self,
         target_node: str,
-        new_node: Union[str, Node, Dict, Any],
-        new_node_obj: Optional[Any] = None,
+        new_node: str | Node | dict | Any,
+        new_node_obj: Any | None = None,
         **kwargs,
     ) -> "BaseGraph":
-        """
-        Insert a new node after an existing node, redirecting all outgoing connections.
+        """Insert a new node after an existing node, redirecting all outgoing connections.
 
         Args:
             target_node: Name of the existing node
@@ -1398,19 +1391,19 @@ class BaseGraph(BaseModel, ValidationMixin):
             self.add_branch(new_branch)
 
         logger.debug(
-            f"Inserted node '{new_node_name}' after '{target_node}' in graph '{self.name}'"
+            f"Inserted node '{new_node_name}' after '{target_node}' in graph '{
+                self.name}'"
         )
         return self
 
     def insert_node_before(
         self,
         target_node: str,
-        new_node: Union[str, Node, Dict, Any],
-        new_node_obj: Optional[Any] = None,
+        new_node: str | Node | dict | Any,
+        new_node_obj: Any | None = None,
         **kwargs,
     ) -> "BaseGraph":
-        """
-        Insert a new node before an existing node, redirecting all incoming connections.
+        """Insert a new node before an existing node, redirecting all incoming connections.
 
         Args:
             target_node: Name of the existing node
@@ -1503,19 +1496,19 @@ class BaseGraph(BaseModel, ValidationMixin):
                 branch.destinations[condition] = new_node_name
 
         logger.debug(
-            f"Inserted node '{new_node_name}' before '{target_node}' in graph '{self.name}'"
+            f"Inserted node '{new_node_name}' before '{target_node}' in graph '{
+                self.name}'"
         )
         return self
 
     # Advanced node operations
     def add_prelude_node(
         self,
-        prelude_node: Union[str, Node, Dict, Any],
-        node_obj: Optional[Any] = None,
+        prelude_node: str | Node | dict | Any,
+        node_obj: Any | None = None,
         **kwargs,
     ) -> "BaseGraph":
-        """
-        Add a node at the beginning of the graph (after START).
+        """Add a node at the beginning of the graph (after START).
 
         Args:
             prelude_node: Node to add at the start
@@ -1592,17 +1585,19 @@ class BaseGraph(BaseModel, ValidationMixin):
             # Remove the old branch
             self.remove_branch(branch.id)
 
-        logger.debug(f"Added prelude node '{prelude_name}' to graph '{self.name}'")
+        logger.debug(
+            f"Added prelude node '{prelude_name}' to graph '{
+                self.name}'"
+        )
         return self
 
     def add_postlude_node(
         self,
-        postlude_node: Union[str, Node, Dict, Any],
-        node_obj: Optional[Any] = None,
+        postlude_node: str | Node | dict | Any,
+        node_obj: Any | None = None,
         **kwargs,
     ) -> "BaseGraph":
-        """
-        Add a node at the end of the graph (before END).
+        """Add a node at the end of the graph (before END).
 
         Args:
             postlude_node: Node to add at the end
@@ -1677,19 +1672,21 @@ class BaseGraph(BaseModel, ValidationMixin):
             else:
                 branch.destinations[condition] = postlude_name
 
-        logger.debug(f"Added postlude node '{postlude_name}' to graph '{self.name}'")
+        logger.debug(
+            f"Added postlude node '{postlude_name}' to graph '{
+                self.name}'"
+        )
         return self
 
     def add_sequence(
         self,
-        nodes: List[Union[str, Node, Dict, Any]],
-        node_objects: Optional[List[Any]] = None,
+        nodes: list[str | Node | dict | Any],
+        node_objects: list[Any] | None = None,
         connect_start: bool = False,
         connect_end: bool = False,
         **kwargs,
     ) -> "BaseGraph":
-        """
-        Add a sequence of nodes and connect them in order.
+        """Add a sequence of nodes and connect them in order.
 
         Args:
             nodes: List of nodes to add (names, objects, or dictionaries)
@@ -1769,14 +1766,13 @@ class BaseGraph(BaseModel, ValidationMixin):
     def add_parallel_branches(
         self,
         source_node: str,
-        branches: List[Union[List[str], List[Node], List[Dict], List[Any]]],
-        branch_names: Optional[List[str]] = None,
-        join_node: Optional[Union[str, Node, Dict, Any]] = None,
-        join_node_obj: Optional[Any] = None,
+        branches: list[list[str] | list[Node] | list[dict] | list[Any]],
+        branch_names: list[str] | None = None,
+        join_node: str | Node | dict | Any | None = None,
+        join_node_obj: Any | None = None,
         **kwargs,
     ) -> "BaseGraph":
-        """
-        Add parallel branches from a source node, optionally joining at a common node.
+        """Add parallel branches from a source node, optionally joining at a common node.
 
         Args:
             source_node: Name of the source node
@@ -1899,13 +1895,16 @@ class BaseGraph(BaseModel, ValidationMixin):
             for end_node in branch_ends:
                 self.add_edge(end_node, join_name)
 
-        logger.debug(f"Added {len(branches)} parallel branches to graph '{self.name}'")
+        logger.debug(
+            f"Added {
+                len(branches)} parallel branches to graph '{
+                self.name}'"
+        )
         return self
 
     # Edge management methods
     def add_edge(self, source: str, target: str) -> "BaseGraph":
-        """
-        Add a direct edge to the graph.
+        """Add a direct edge to the graph.
 
         Args:
             source: Source node name
@@ -1936,9 +1935,8 @@ class BaseGraph(BaseModel, ValidationMixin):
         self._mark_needs_recompile(f"Added edge {source} -> {target}")
         return self
 
-    def remove_edge(self, source: str, target: Optional[str] = None) -> "BaseGraph":
-        """
-        Remove an edge from the graph.
+    def remove_edge(self, source: str, target: str | None = None) -> "BaseGraph":
+        """Remove an edge from the graph.
 
         Args:
             source: Source node name
@@ -1958,7 +1956,10 @@ class BaseGraph(BaseModel, ValidationMixin):
         else:
             # Remove all edges from source
             self.edges = [edge for edge in self.edges if edge[0] != source]
-            logger.debug(f"Removed all edges from {source} in graph '{self.name}'")
+            logger.debug(
+                f"Removed all edges from {source} in graph '{
+                    self.name}'"
+            )
 
         self.updated_at = datetime.now()
         self._mark_needs_recompile(f"Removed edges from {source}")
@@ -1966,12 +1967,11 @@ class BaseGraph(BaseModel, ValidationMixin):
 
     def get_edges(
         self,
-        source: Optional[str] = None,
-        target: Optional[str] = None,
+        source: str | None = None,
+        target: str | None = None,
         include_branches: bool = True,
-    ) -> List[Tuple[str, str]]:
-        """
-        Get edges matching criteria.
+    ) -> list[tuple[str, str]]:
+        """Get edges matching criteria.
 
         Args:
             source: Filter by source node
@@ -2018,8 +2018,7 @@ class BaseGraph(BaseModel, ValidationMixin):
         include_loops=False,
         debug=False,
     ):
-        """
-        Find all possible paths between two nodes.
+        """Find all possible paths between two nodes.
 
         Args:
             start_node: Starting node (defaults to START)
@@ -2046,7 +2045,7 @@ class BaseGraph(BaseModel, ValidationMixin):
 
         paths = []
 
-        def dfs(current, path_obj, visited=None, depth=0, parent_branch=None):
+        def dfs(current, path_obj, visited=None, depth=0, parent_branch=None) -> None:
             """Depth-first search to find all paths."""
             # Initialize visited set for this path
             if visited is None:
@@ -2071,7 +2070,11 @@ class BaseGraph(BaseModel, ValidationMixin):
                     )
                 else:
                     logger.debug(f"{prefix}├── Exploring node: {current}")
-                logger.debug(f"{prefix}│   Path so far: {' → '.join(path_obj.nodes)}")
+                logger.debug(
+                    f"{prefix}│   Path so far: {
+                        ' → '.join(
+                            path_obj.nodes)}"
+                )
                 logger.debug(f"{prefix}│   Depth: {depth}, Visited: {visited}")
 
             # Check if we reached the target
@@ -2086,22 +2089,28 @@ class BaseGraph(BaseModel, ValidationMixin):
 
                 if debug:
                     logger.debug(f"{prefix}│   ✓ Found path to target!")
-                    logger.debug(f"{prefix}│   Path: {' → '.join(new_path.nodes)}")
+                    logger.debug(
+                        f"{prefix}│   Path: {
+                            ' → '.join(
+                                new_path.nodes)}"
+                    )
 
                 # Don't immediately return when include_loops is True and this isn't the END node
-                # This allows us to find loops that pass through the target node
+                # This allows us to find loops that pass through the target
+                # node
                 if not include_loops or end_node == END:
                     if debug:
                         logger.debug(
                             f"{prefix}│   Stopping exploration of this branch (target found)"
                         )
                     return
-                elif debug:
+                if debug:
                     logger.debug(
                         f"{prefix}│   Continuing exploration past target to find loops"
                     )
 
-            # Skip already visited nodes to prevent infinite loops (unless include_loops is True)
+            # Skip already visited nodes to prevent infinite loops (unless
+            # include_loops is True)
             if current in visited and not include_loops:
                 if debug:
                     logger.debug(
@@ -2116,7 +2125,8 @@ class BaseGraph(BaseModel, ValidationMixin):
             # Try direct edges first
             for src, dst in self.edges:
                 if src == current:
-                    # Skip if we've seen this node before (unless including loops)
+                    # Skip if we've seen this node before (unless including
+                    # loops)
                     if dst in visited and not include_loops:
                         if debug:
                             logger.debug(
@@ -2142,11 +2152,15 @@ class BaseGraph(BaseModel, ValidationMixin):
                     stats["branches_explored"] += 1
 
                     if debug:
-                        logger.debug(f"{prefix}│   Exploring branch: {branch.name}")
+                        logger.debug(
+                            f"{prefix}│   Exploring branch: {
+                                branch.name}"
+                        )
 
                     # Check all possible destinations
                     for condition, target in branch.destinations.items():
-                        # Skip if we've seen this node before (unless including loops)
+                        # Skip if we've seen this node before (unless including
+                        # loops)
                         if target in visited and not include_loops:
                             if debug:
                                 logger.debug(
@@ -2178,17 +2192,20 @@ class BaseGraph(BaseModel, ValidationMixin):
                     if (
                         branch.default and branch.default != END
                     ):  # Skip checking END for now
-                        # Skip if we've seen this node before (unless including loops)
+                        # Skip if we've seen this node before (unless including
+                        # loops)
                         if branch.default in visited and not include_loops:
                             if debug:
                                 logger.debug(
-                                    f"{prefix}│   Skipping default branch to {branch.default} (already visited)"
+                                    f"{prefix}│   Skipping default branch to {
+                                        branch.default} (already visited)"
                                 )
                             continue
 
                         if debug:
                             logger.debug(
-                                f"{prefix}│   → Following default branch to {branch.default}"
+                                f"{prefix}│   → Following default branch to {
+                                    branch.default}"
                             )
 
                         # Create new path with this node
@@ -2239,7 +2256,8 @@ class BaseGraph(BaseModel, ValidationMixin):
                     if debug:
                         logger.debug(f"✓ Path contains target {end_node}")
 
-                    # For looping paths, check if the target appears more than once
+                    # For looping paths, check if the target appears more than
+                    # once
                     if path.nodes.count(end_node) > 1 and debug:
                         logger.debug(
                             f"  This path contains multiple occurrences of {end_node} (loop)"
@@ -2252,14 +2270,14 @@ class BaseGraph(BaseModel, ValidationMixin):
 
         if debug:
             logger.info(
-                f"Found {len(result_paths)} paths from {start_node} to {end_node}"
+                f"Found {
+                    len(result_paths)} paths from {start_node} to {end_node}"
             )
 
         return result_paths
 
-    def check_graph_validity(self):
-        """
-        Validate the graph structure.
+    def check_graph_validity(self) -> Any:
+        """Validate the graph structure.
 
         Returns:
             List of validation issues (empty if graph is valid)
@@ -2286,9 +2304,8 @@ class BaseGraph(BaseModel, ValidationMixin):
 
         return issues
 
-    def find_unreachable_nodes(self):
-        """
-        Find nodes that can't be reached from START.
+    def find_unreachable_nodes(self) -> Any | None:
+        """Find nodes that can't be reached from START.
 
         Returns:
             List of unreachable node names
@@ -2296,7 +2313,7 @@ class BaseGraph(BaseModel, ValidationMixin):
         # Get all nodes reachable from START
         reachable = set()
 
-        def dfs(node):
+        def dfs(node) -> None:
             if node in reachable:
                 return
 
@@ -2325,9 +2342,8 @@ class BaseGraph(BaseModel, ValidationMixin):
             if node not in reachable and self.nodes[node] is not None
         ]
 
-    def find_nodes_without_end_path(self):
-        """
-        Find nodes that can't reach END.
+    def find_nodes_without_end_path(self) -> Any | None:
+        """Find nodes that can't reach END.
 
         Returns:
             List of node names that can't reach END
@@ -2345,9 +2361,8 @@ class BaseGraph(BaseModel, ValidationMixin):
 
         return no_end_path
 
-    def find_nodes_without_finish_path(self):
-        """
-        Find nodes that can't reach a finish point.
+    def find_nodes_without_finish_path(self) -> Any | None:
+        """Find nodes that can't reach a finish point.
         Alias for find_nodes_without_end_path for API consistency.
 
         Returns:
@@ -2355,9 +2370,8 @@ class BaseGraph(BaseModel, ValidationMixin):
         """
         return self.find_nodes_without_end_path()
 
-    def get_source_nodes(self):
-        """
-        Get nodes that have no incoming edges (other than START).
+    def get_source_nodes(self) -> Any | None:
+        """Get nodes that have no incoming edges (other than START).
 
         Returns:
             List of source node names
@@ -2384,9 +2398,8 @@ class BaseGraph(BaseModel, ValidationMixin):
             and self.nodes[node] is not None
         ]
 
-    def get_sink_nodes(self):
-        """
-        Get nodes that have no outgoing edges (other than to END).
+    def get_sink_nodes(self) -> Any | None:
+        """Get nodes that have no outgoing edges (other than to END).
 
         Returns:
             List of sink node names
@@ -2410,15 +2423,14 @@ class BaseGraph(BaseModel, ValidationMixin):
 
     def add_branch(
         self,
-        branch_or_name: Union[Branch, str],
-        source_node: Optional[str] = None,
-        condition: Optional[Any] = None,
-        routes: Optional[Dict[Union[bool, str], str]] = None,
-        branch_type: Optional[BranchType] = None,
+        branch_or_name: Branch | str,
+        source_node: str | None = None,
+        condition: Any | None = None,
+        routes: dict[bool | str, str] | None = None,
+        branch_type: BranchType | None = None,
         **kwargs,
     ) -> "BaseGraph":
-        """
-        Add a branch to the graph with flexible input options.
+        """Add a branch to the graph with flexible input options.
 
         Args:
             branch_or_name: Branch object or branch name
@@ -2453,7 +2465,10 @@ class BaseGraph(BaseModel, ValidationMixin):
 
             # Validate default node
             if branch.default != END and branch.default not in self.nodes:
-                raise ValueError(f"Default node '{branch.default}' not found in graph")
+                raise ValueError(
+                    f"Default node '{
+                        branch.default}' not found in graph"
+                )
 
             # Add the branch
             self.branches[branch.id] = branch
@@ -2511,7 +2526,10 @@ class BaseGraph(BaseModel, ValidationMixin):
             self.branches[branch.id] = branch
 
         logger.debug(
-            f"Added branch '{branch.name}' from node '{branch.source_node}' to graph '{self.name}'"
+            f"Added branch '{
+                branch.name}' from node '{
+                branch.source_node}' to graph '{
+                self.name}'"
         )
         self.updated_at = datetime.now()
         return self
@@ -2519,17 +2537,14 @@ class BaseGraph(BaseModel, ValidationMixin):
     def add_conditional_edges(
         self,
         source_node: str,
-        condition: Union[
-            Branch, Callable[[StateLike, Optional[ConfigLike]], BranchResultType], Any
-        ],
-        destinations: Optional[
-            Union[str, List[str], Dict[Union[bool, str, int], str]]
-        ] = None,
-        default: Union[str, Literal["END"], None] = END,
+        condition: (
+            Branch | Callable[[StateLike, ConfigLike | None], BranchResultType] | Any
+        ),
+        destinations: str | list[str] | dict[bool | str | int, str] | None = None,
+        default: str | Literal["END"] | None = END,
         create_missing_nodes: bool = False,
     ) -> "BaseGraph":
-        """
-        Add conditional edges from a source node based on a condition.
+        """Add conditional edges from a source node based on a condition.
 
         This method supports multiple ways to handle True/False routing:
 
@@ -2607,10 +2622,12 @@ class BaseGraph(BaseModel, ValidationMixin):
                             False: destinations[1],
                         }
                     elif len(destinations) == 1:
-                        # Single destination in list maps True to destination, False to END
+                        # Single destination in list maps True to destination,
+                        # False to END
                         branch.destinations = {True: destinations[0], False: END}
                     else:
-                        # Empty list uses default {True: "continue", False: END}
+                        # Empty list uses default {True: "continue", False:
+                        # END}
                         branch.destinations = {True: "continue", False: END}
                 elif isinstance(destinations, dict):
                     # Dictionary maps directly - NO MODIFICATION
@@ -2619,7 +2636,8 @@ class BaseGraph(BaseModel, ValidationMixin):
                     # NO DEFAULT - EVER
                     branch.default = None
             else:
-                # No destinations provided - use default {True: "continue", False: END}
+                # No destinations provided - use default {True: "continue",
+                # False: END}
                 branch.destinations = {True: "continue", False: END}
                 branch.default = default
 
@@ -2684,11 +2702,7 @@ class BaseGraph(BaseModel, ValidationMixin):
         # Validate destination nodes exist or create them if requested
         if not create_missing_nodes:
             for dest_key, dest_name in destination_map.items():
-                if (
-                    dest_name != END
-                    and dest_name != "continue"
-                    and dest_name not in self.nodes
-                ):
+                if dest_name not in (END, "continue") and dest_name not in self.nodes:
                     raise ValueError(
                         f"Destination node '{dest_name}' for condition '{dest_key}' not found in graph. "
                         f"Use create_missing_nodes=True to create it automatically."
@@ -2700,7 +2714,8 @@ class BaseGraph(BaseModel, ValidationMixin):
 
         metadata = {"condition_object": condition} if not callable(condition) else {}
 
-        # Create wrapper for callable conditions to log results and handle None returns
+        # Create wrapper for callable conditions to log results and handle None
+        # returns
         if callable(condition):
             function_to_use = self._create_branch_wrapper(
                 condition, destination_map, use_default
@@ -2714,7 +2729,10 @@ class BaseGraph(BaseModel, ValidationMixin):
         if callable(condition) and hasattr(condition, "__name__"):
             logger.info(f"Using branch function: {condition.__name__}")
         elif hasattr(condition, "__class__"):
-            logger.info(f"Using condition of type: {condition.__class__.__name__}")
+            logger.info(
+                f"Using condition of type: {
+                    condition.__class__.__name__}"
+            )
 
         # Special handling for ValidationNodeConfig
         if (
@@ -2724,7 +2742,8 @@ class BaseGraph(BaseModel, ValidationMixin):
             logger.info("Detected ValidationNodeConfig - ensuring correct routing")
             metadata["is_validation_node"] = True
 
-            # Ensure ValidationNodeConfig function knows to return exact routing keys
+            # Ensure ValidationNodeConfig function knows to return exact
+            # routing keys
             function_to_use = self._create_validation_wrapper(
                 condition, destination_map
             )
@@ -2768,25 +2787,34 @@ class BaseGraph(BaseModel, ValidationMixin):
         valid_keys = list(destination_map.keys())
         logger.info(f"Valid routing keys: {valid_keys}")
 
-        def validation_wrapper(state, config=None):
+        def validation_wrapper(
+            state: dict[str, Any], config: dict[str, Any] | None = None
+        ):
             try:
-                # ValidationNodeConfig uses __call__ method, not process_validation
+                # ValidationNodeConfig uses __call__ method, not
+                # process_validation
                 if callable(validation_config):
                     # Call the ValidationNodeConfig directly
                     result = validation_config(state, config)
-                    logger.info(f"ValidationNodeConfig result: {type(result).__name__}")
+                    logger.info(
+                        f"ValidationNodeConfig result: {
+                            type(result).__name__}"
+                    )
 
-                    # Handle Send objects directly - this is the primary return type
+                    # Handle Send objects directly - this is the primary return
+                    # type
                     if isinstance(result, list) and all(
                         isinstance(item, Send) for item in result
                     ):
                         logger.info(
-                            f"ValidationNodeConfig returned {len(result)} Send objects"
+                            f"ValidationNodeConfig returned {
+                                len(result)} Send objects"
                         )
                         return result
-                    elif isinstance(result, Send):
+                    if isinstance(result, Send):
                         logger.info(
-                            f"ValidationNodeConfig returned single Send object to {result.node}"
+                            f"ValidationNodeConfig returned single Send object to {
+                                result.node}"
                         )
                         return result
 
@@ -2798,14 +2826,16 @@ class BaseGraph(BaseModel, ValidationMixin):
                         logger.info("ValidationNodeConfig returned Command object")
                         return result
 
-                    # If result is already a string in our routing map, use it directly
+                    # If result is already a string in our routing map, use it
+                    # directly
                     if isinstance(result, str) and result in destination_map:
                         logger.info(
                             f"ValidationNodeConfig returned string key: {result}"
                         )
                         return result
 
-                    # Handle special case where ValidationNodeConfig returns "no_tool_calls"
+                    # Handle special case where ValidationNodeConfig returns
+                    # "no_tool_calls"
                     if isinstance(result, str) and result == "no_tool_calls":
                         # Look for a key that maps to END or similar
                         for key, dest in destination_map.items():
@@ -2834,7 +2864,8 @@ class BaseGraph(BaseModel, ValidationMixin):
                                 logger.info(f"Found True key: {key}")
                                 return key
 
-                    # For any validation failure, default to 'has_errors' if available
+                    # For any validation failure, default to 'has_errors' if
+                    # available
                     if "has_errors" in destination_map:
                         logger.info("Defaulting to has_errors")
                         return "has_errors"
@@ -2842,20 +2873,22 @@ class BaseGraph(BaseModel, ValidationMixin):
                     # Last resort - return first routing key
                     if valid_keys:
                         logger.warning(
-                            f"No routing match found - using first key: {valid_keys[0]}"
+                            f"No routing match found - using first key: {
+                                valid_keys[0]}"
                         )
                         return valid_keys[0]
 
                     return False
 
-                # If validation_config doesn't have __call__, just return first key
+                # If validation_config doesn't have __call__, just return first
+                # key
                 if valid_keys:
                     logger.warning("ValidationNodeConfig doesn't have __call__ method")
                     return valid_keys[0]
                 return False
 
             except Exception as e:
-                logger.error(f"Error in validation function: {e}")
+                logger.exception(f"Error in validation function: {e}")
                 import traceback
 
                 traceback.print_exc()
@@ -2868,32 +2901,35 @@ class BaseGraph(BaseModel, ValidationMixin):
 
     def _create_branch_wrapper(self, func, destination_map, default_dest):
         """Wrapper for branch functions that handles boolean to string conversion."""
-
         param_count = len(inspect.signature(func).parameters)
 
         # Check if we have a boolean function with string destinations
-        has_boolean_keys = any(isinstance(k, bool) for k in destination_map.keys())
-        has_string_keys = any(isinstance(k, str) for k in destination_map.keys())
+        has_boolean_keys = any(isinstance(k, bool) for k in destination_map)
+        has_string_keys = any(isinstance(k, str) for k in destination_map)
 
-        def wrapper(state, config=None):
+        def wrapper(state: dict[str, Any], config: dict[str, Any] | None = None):
             try:
                 # Call with appropriate number of parameters
-                if param_count == 1:
-                    result = func(state)
-                else:
-                    result = func(state, config)
+                result = func(state) if param_count == 1 else func(state, config)
 
                 # Log the raw result for debugging
                 logger.debug(
-                    f"Branch function returned: {result} (type: {type(result).__name__})"
+                    f"Branch function returned: {result} (type: {
+                        type(result).__name__})"
                 )
 
-                # CRITICAL FIX: Add detailed debugging for has_tool_calls function
+                # CRITICAL FIX: Add detailed debugging for has_tool_calls
+                # function
                 if hasattr(func, "__name__") and "has_tool_calls" in func.__name__:
                     logger.info("=== DEBUGGING has_tool_calls function ===")
-                    logger.info(f"Function result: {result} (type: {type(result)})")
                     logger.info(
-                        f"Available routing keys: {list(destination_map.keys())}"
+                        f"Function result: {result} (type: {
+                            type(result)})"
+                    )
+                    logger.info(
+                        f"Available routing keys: {
+                            list(
+                                destination_map.keys())}"
                     )
                     logger.info(f"State type: {type(state)}")
 
@@ -2918,7 +2954,8 @@ class BaseGraph(BaseModel, ValidationMixin):
                                 logger.info(f"additional_kwargs: {additional_kwargs}")
                                 if "tool_calls" in additional_kwargs:
                                     logger.info(
-                                        f"tool_calls in additional_kwargs: {additional_kwargs['tool_calls']}"
+                                        f"tool_calls in additional_kwargs: {
+                                            additional_kwargs['tool_calls']}"
                                     )
 
                     logger.info("=== END DEBUGGING ===")
@@ -2932,7 +2969,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                     # Convert boolean to string for routing
                     if result is True:
                         # Look for common "true" patterns
-                        for key in destination_map.keys():
+                        for key in destination_map:
                             if key in [
                                 "has_tool_calls",
                                 "has_tools",
@@ -2943,39 +2980,37 @@ class BaseGraph(BaseModel, ValidationMixin):
                                 logger.debug(f"Converting True to string key: {key}")
                                 return key
                         # Fallback: use first key
-                        first_key = list(destination_map.keys())[0]
+                        first_key = next(iter(destination_map.keys()))
                         logger.debug(f"Converting True to first key: {first_key}")
                         return first_key
-                    else:  # result is False
-                        # Look for common "false" patterns
-                        for key in destination_map.keys():
-                            if key in [
-                                "no_tool_calls",
-                                "no_tools",
-                                "false",
-                                "no",
-                                "end",
-                            ]:
-                                logger.debug(f"Converting False to string key: {key}")
-                                return key
-                        # Fallback: use last key or default
-                        if default_dest and default_dest in destination_map.values():
-                            # Find the key that maps to default_dest
-                            for k, v in destination_map.items():
-                                if v == default_dest:
-                                    logger.debug(
-                                        f"Converting False to default key: {k}"
-                                    )
-                                    return k
-                        # Last resort: use last key
-                        last_key = list(destination_map.keys())[-1]
-                        logger.debug(f"Converting False to last key: {last_key}")
-                        return last_key
+                    # result is False
+                    # Look for common "false" patterns
+                    for key in destination_map:
+                        if key in [
+                            "no_tool_calls",
+                            "no_tools",
+                            "false",
+                            "no",
+                            "end",
+                        ]:
+                            logger.debug(f"Converting False to string key: {key}")
+                            return key
+                    # Fallback: use last key or default
+                    if default_dest and default_dest in destination_map.values():
+                        # Find the key that maps to default_dest
+                        for k, v in destination_map.items():
+                            if v == default_dest:
+                                logger.debug(f"Converting False to default key: {k}")
+                                return k
+                    # Last resort: use last key
+                    last_key = list(destination_map.keys())[-1]
+                    logger.debug(f"Converting False to last key: {last_key}")
+                    return last_key
 
                 # Return result as-is if no conversion needed
                 return result
             except Exception as e:
-                logger.error(f"Error in branch function: {e}")
+                logger.exception(f"Error in branch function: {e}")
                 import traceback
 
                 traceback.print_exc()
@@ -2984,9 +3019,8 @@ class BaseGraph(BaseModel, ValidationMixin):
         return wrapper
 
     @property
-    def conditional_edges(self):
-        """
-        Property for accessing branches as conditional edges (compatibility).
+    def conditional_edges(self) -> Any:
+        """Property for accessing branches as conditional edges (compatibility).
 
         Returns:
             Dictionary of branches indexed by ID
@@ -2997,12 +3031,11 @@ class BaseGraph(BaseModel, ValidationMixin):
         self,
         source_node: str,
         condition: Callable[[Any], Any],
-        routes: Dict[Union[bool, str], str],
+        routes: dict[bool | str, str],
         default_route: str = END,
-        name: Optional[str] = None,
+        name: str | None = None,
     ) -> "BaseGraph":
-        """
-        Add a function-based branch.
+        """Add a function-based branch.
 
         Args:
             source_node: Source node name
@@ -3043,7 +3076,9 @@ class BaseGraph(BaseModel, ValidationMixin):
         self.branches[branch.id] = branch
 
         logger.debug(
-            f"Added function branch '{branch.name}' from {source_node} to graph '{self.name}'"
+            f"Added function branch '{
+                branch.name}' from {source_node} to graph '{
+                self.name}'"
         )
         return self
 
@@ -3052,13 +3087,12 @@ class BaseGraph(BaseModel, ValidationMixin):
         source_node: str,
         key: str,
         value: Any,
-        comparison: Union[ComparisonType, str] = ComparisonType.EQUALS,
+        comparison: ComparisonType | str = ComparisonType.EQUALS,
         true_dest: str = "continue",
         false_dest: str = END,
-        name: Optional[str] = None,
+        name: str | None = None,
     ) -> "BaseGraph":
-        """
-        Add a key-value comparison branch.
+        """Add a key-value comparison branch.
 
         Args:
             source_node: Source node name
@@ -3102,13 +3136,14 @@ class BaseGraph(BaseModel, ValidationMixin):
         self.branches[branch.id] = branch
 
         logger.debug(
-            f"Added key-value branch '{branch.name}' from {source_node} to graph '{self.name}'"
+            f"Added key-value branch '{
+                branch.name}' from {source_node} to graph '{
+                self.name}'"
         )
         return self
 
     def remove_branch(self, branch_id: str) -> "BaseGraph":
-        """
-        Remove a branch from the graph.
+        """Remove a branch from the graph.
 
         Args:
             branch_id: ID of the branch to remove
@@ -3127,8 +3162,7 @@ class BaseGraph(BaseModel, ValidationMixin):
         return self
 
     def update_branch(self, branch_id: str, **updates) -> "BaseGraph":
-        """
-        Update a branch's properties.
+        """Update a branch's properties.
 
         Args:
             branch_id: ID of the branch to update
@@ -3170,8 +3204,7 @@ class BaseGraph(BaseModel, ValidationMixin):
         return self
 
     def replace_branch(self, branch_id: str, new_branch: Branch) -> "BaseGraph":
-        """
-        Replace a branch with a new one.
+        """Replace a branch with a new one.
 
         Args:
             branch_id: ID of the branch to replace
@@ -3194,7 +3227,10 @@ class BaseGraph(BaseModel, ValidationMixin):
                 raise ValueError(f"Destination node '{dest}' not found in graph")
 
         if new_branch.default != END and new_branch.default not in self.nodes:
-            raise ValueError(f"Default node '{new_branch.default}' not found in graph")
+            raise ValueError(
+                f"Default node '{
+                    new_branch.default}' not found in graph"
+            )
 
         # Update the branch ID to match if needed
         if new_branch.id != branch_id:
@@ -3208,9 +3244,8 @@ class BaseGraph(BaseModel, ValidationMixin):
         self.updated_at = datetime.now()
         return self
 
-    def get_branches_for_node(self, node_name: str) -> List[Branch]:
-        """
-        Get all branches with a given source node.
+    def get_branches_for_node(self, node_name: str) -> list[Branch]:
+        """Get all branches with a given source node.
 
         Args:
             node_name: Name of the source node
@@ -3224,9 +3259,8 @@ class BaseGraph(BaseModel, ValidationMixin):
             if branch.source_node == node_name
         ]
 
-    def get_branch(self, branch_id: str) -> Optional[Branch]:
-        """
-        Get a branch by ID.
+    def get_branch(self, branch_id: str) -> Branch | None:
+        """Get a branch by ID.
 
         Args:
             branch_id: ID of the branch to retrieve
@@ -3236,9 +3270,8 @@ class BaseGraph(BaseModel, ValidationMixin):
         """
         return self.branches.get(branch_id)
 
-    def get_branch_by_name(self, name: str) -> Optional[Branch]:
-        """
-        Get a branch by name.
+    def get_branch_by_name(self, name: str) -> Branch | None:
+        """Get a branch by name.
 
         Args:
             name: Name of the branch to retrieve
@@ -3253,8 +3286,7 @@ class BaseGraph(BaseModel, ValidationMixin):
 
     # Graph traversal and analysis
     def has_path(self, source: str, target: str) -> bool:
-        """
-        Check if there is a path between source and target nodes.
+        """Check if there is a path between source and target nodes.
 
         Args:
             source: Source node name
@@ -3285,9 +3317,8 @@ class BaseGraph(BaseModel, ValidationMixin):
 
         return False
 
-    def get_node_pattern(self, pattern: str) -> List[Node]:
-        """
-        Get nodes matching a pattern.
+    def get_node_pattern(self, pattern: str) -> list[Node]:
+        """Get nodes matching a pattern.
 
         Args:
             pattern: Pattern to match (supports * wildcard)
@@ -3304,9 +3335,8 @@ class BaseGraph(BaseModel, ValidationMixin):
         ]
 
     # Extension methods
-    def extend_from(self, other_graph, prefix=""):
-        """
-        Extend this graph with nodes and edges from another graph.
+    def extend_from(self, other_graph, prefix="") -> Any:
+        """Extend this graph with nodes and edges from another graph.
 
         Args:
             other_graph: Graph to extend from
@@ -3419,7 +3449,12 @@ class BaseGraph(BaseModel, ValidationMixin):
                     # Create new branch with same properties
                     new_branch = Branch(
                         id=str(uuid.uuid4()),
-                        name=f"{prefix}_{branch.name}" if prefix else branch.name,
+                        name=(
+                            f"{prefix}_{
+                            branch.name}"
+                            if prefix
+                            else branch.name
+                        ),
                         source_node=new_src,
                         function=getattr(branch, "function", None),
                         key=getattr(branch, "key", None),
@@ -3434,7 +3469,10 @@ class BaseGraph(BaseModel, ValidationMixin):
                 self.branches[new_branch.id] = new_branch
 
         logger.info(
-            f"Extended graph with {len(other_graph.nodes)} nodes from {other_graph.name}"
+            f"Extended graph with {
+                len(
+                    other_graph.nodes)} nodes from {
+                other_graph.name}"
         )
         self.updated_at = datetime.now()
         return self
@@ -3442,14 +3480,13 @@ class BaseGraph(BaseModel, ValidationMixin):
     # Integration with LangGraph StateGraph
     def to_langgraph(
         self,
-        state_schema: Optional[Type[BaseModel]] = None,
-        input_schema: Optional[Type[BaseModel]] = None,
-        output_schema: Optional[Type[BaseModel]] = None,
-        config_schema: Optional[Type[BaseModel]] = None,
+        state_schema: type[BaseModel] | None = None,
+        input_schema: type[BaseModel] | None = None,
+        output_schema: type[BaseModel] | None = None,
+        config_schema: type[BaseModel] | None = None,
         **kwargs,
     ) -> Any:
-        """
-        Convert to LangGraph StateGraph with proper schema handling.
+        """Convert to LangGraph StateGraph with proper schema handling.
 
         Schema Resolution Logic:
         1. If state_schema provided: use it, default input/output to state_schema
@@ -3482,7 +3519,10 @@ class BaseGraph(BaseModel, ValidationMixin):
                 resolved_output_schema = (
                     output_schema or state_schema
                 )  # Default to state
-                logger.info(f"Using provided state_schema: {state_schema.__name__}")
+                logger.info(
+                    f"Using provided state_schema: {
+                        state_schema.__name__}"
+                )
 
             # Case 2: Both input and output provided, but no state
             elif input_schema is not None and output_schema is not None:
@@ -3495,7 +3535,9 @@ class BaseGraph(BaseModel, ValidationMixin):
 
                 resolved_state_schema = PassThroughState
                 logger.info(
-                    f"Created PassThroughState, input: {input_schema.__name__}, output: {output_schema.__name__}"
+                    f"Created PassThroughState, input: {
+                        input_schema.__name__}, output: {
+                        output_schema.__name__}"
                 )
 
             # Case 3: Only input_schema provided
@@ -3505,7 +3547,10 @@ class BaseGraph(BaseModel, ValidationMixin):
                 resolved_output_schema = (
                     output_schema or input_schema
                 )  # Default output to input/state
-                logger.info(f"Using input_schema as state: {input_schema.__name__}")
+                logger.info(
+                    f"Using input_schema as state: {
+                        input_schema.__name__}"
+                )
 
             # Case 4: Only output_schema provided
             elif output_schema is not None:
@@ -3514,7 +3559,10 @@ class BaseGraph(BaseModel, ValidationMixin):
                 resolved_input_schema = (
                     input_schema or output_schema
                 )  # Default input to output/state
-                logger.info(f"Using output_schema as state: {output_schema.__name__}")
+                logger.info(
+                    f"Using output_schema as state: {
+                        output_schema.__name__}"
+                )
 
             # Case 5: Nothing provided, use graph's state_schema or dict
             else:
@@ -3557,10 +3605,11 @@ class BaseGraph(BaseModel, ValidationMixin):
             logger.info("Created StateGraph")
 
             # Direct debug function - doesn't wrap, just adds a print
-            def log_function_call(func, name):
+            def log_function_call(func, name: str):
                 import inspect
 
-                # Check the function signature to see how many parameters it accepts
+                # Check the function signature to see how many parameters it
+                # accepts
                 sig = inspect.signature(func)
                 param_count = len(sig.parameters)
 
@@ -3568,7 +3617,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                     f"Node [yellow]{name}[/yellow]: Function accepts {param_count} parameter(s)"
                 )
 
-                def inner(state, config=None):
+                def inner(state: dict[str, Any], config: dict[str, Any] | None = None):
                     try:
                         # Call with appropriate number of parameters
                         if param_count == 1:
@@ -3585,7 +3634,10 @@ class BaseGraph(BaseModel, ValidationMixin):
                             result = func(state, config)
 
                         # Log the result
-                        logger.debug(f"Node {name} returned: {type(result).__name__}")
+                        logger.debug(
+                            f"Node {name} returned: {
+                                type(result).__name__}"
+                        )
 
                         # Special debug for Command objects
                         from langgraph.types import Command
@@ -3601,12 +3653,13 @@ class BaseGraph(BaseModel, ValidationMixin):
 
                         return result
                     except Exception as e:
-                        logger.error(f"Error in {name}: {str(e)}")
+                        logger.exception(f"Error in {name}: {e!s}")
                         raise
 
                 return inner
 
-            # SIMPLE: Add nodes with direct callable functions - no complex extraction
+            # SIMPLE: Add nodes with direct callable functions - no complex
+            # extraction
             logger.info("Adding Nodes")
             for node_name, node in self.nodes.items():
                 # Skip special nodes and None nodes
@@ -3644,7 +3697,9 @@ class BaseGraph(BaseModel, ValidationMixin):
                         f"Node [yellow]{node_name}[/yellow]: No callable found, using pass-through"
                     )
 
-                    def action(state, config=None):
+                    def action(
+                        state: dict[str, Any], config: dict[str, Any] | None = None
+                    ):
                         return state
 
                 # Add logger for debugging if not in production
@@ -3673,11 +3728,14 @@ class BaseGraph(BaseModel, ValidationMixin):
                     destinations[key] = value
 
                 logger.info(
-                    f"Branch from [yellow]{source}[/yellow] with conditions: {list(destinations.keys())}"
+                    f"Branch from [yellow]{source}[/yellow] with conditions: {
+                        list(
+                            destinations.keys())}"
                 )
                 logger.debug(f"Destinations dict: {destinations}")
 
-                # Check branch function and add parameter-aware wrapper if needed
+                # Check branch function and add parameter-aware wrapper if
+                # needed
                 if branch.mode == BranchMode.FUNCTION and branch.function:
                     # Check branch function signature
                     import inspect
@@ -3686,20 +3744,25 @@ class BaseGraph(BaseModel, ValidationMixin):
                         sig = inspect.signature(branch.function)
                         param_count = len(sig.parameters)
 
-                        # Check if this is a ValidationNodeConfig for special handling
+                        # Check if this is a ValidationNodeConfig for special
+                        # handling
                         is_validation_node = getattr(branch, "metadata", {}).get(
                             "is_validation_node", False
                         )
                         if is_validation_node:
                             logger.info(
-                                f"[bold magenta]Special handling for ValidationNodeConfig in '{branch.name}'[/bold magenta]"
+                                f"[bold magenta]Special handling for ValidationNodeConfig in '{
+                                    branch.name}'[/bold magenta]"
                             )
 
                         # Create parameter-aware branch function
                         def branch_wrapper(
                             branch_func, param_count, branch_name, dest_dict
                         ):
-                            def wrapper(state, config=None):
+                            def wrapper(
+                                state: dict[str, Any],
+                                config: dict[str, Any] | None = None,
+                            ):
                                 try:
                                     # Call with appropriate parameter count
                                     if param_count == 1:
@@ -3712,16 +3775,19 @@ class BaseGraph(BaseModel, ValidationMixin):
                                         isinstance(item, Send) for item in result
                                     ):
                                         logger.info(
-                                            f"Branch returning list of {len(result)} Send objects"
+                                            f"Branch returning list of {
+                                                len(result)} Send objects"
                                         )
                                         return result
-                                    elif isinstance(result, Send):
+                                    if isinstance(result, Send):
                                         logger.info(
-                                            f"Branch returning Send object to {result.target}"
+                                            f"Branch returning Send object to {
+                                                result.target}"
                                         )
                                         return result
 
-                                    # Special handling for ValidationNodeConfig results
+                                    # Special handling for ValidationNodeConfig
+                                    # results
                                     if is_validation_node and isinstance(result, dict):
                                         # Try to extract routing keys
                                         for key in [
@@ -3739,13 +3805,15 @@ class BaseGraph(BaseModel, ValidationMixin):
                                                 )
                                                 return key
 
-                                        # Look for any True values that match routing keys
+                                        # Look for any True values that match
+                                        # routing keys
                                         for key, value in result.items():
                                             if value is True and key in dest_dict:
                                                 logger.info(f"Found True key: {key}")
                                                 return key
 
-                                        # For validation failure, use has_errors if available
+                                        # For validation failure, use
+                                        # has_errors if available
                                         if "has_errors" in dest_dict:
                                             logger.info(
                                                 "Using has_errors for validation result"
@@ -3755,7 +3823,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                                     # Return other results directly
                                     return result
                                 except Exception as e:
-                                    logger.error(f"Error in branch: {str(e)}")
+                                    logger.exception(f"Error in branch: {e!s}")
                                     return False
 
                             return wrapper
@@ -3766,7 +3834,8 @@ class BaseGraph(BaseModel, ValidationMixin):
                         )
 
                         # Add conditional edges with the wrapped function
-                        # SIMPLIFIED: Just use the basic LangGraph API without complications
+                        # SIMPLIFIED: Just use the basic LangGraph API without
+                        # complications
                         try:
                             logger.debug(
                                 f"Adding conditional edges: {source} -> {destinations}"
@@ -3781,15 +3850,19 @@ class BaseGraph(BaseModel, ValidationMixin):
                             )
 
                         except Exception as e:
-                            logger.error(
+                            logger.exception(
                                 f"Error adding conditional edges for {source}: {e}"
                             )
-                            logger.error(f"  Destinations: {destinations}")
-                            logger.error(f"  Function: {branch_func}")
+                            logger.exception(f"  Destinations: {destinations}")
+                            logger.exception(f"  Function: {branch_func}")
                             raise
                     except Exception as e:
-                        # If anything goes wrong with signature inspection, use original function
-                        logger.warning(f"Could not inspect branch function: {str(e)}")
+                        # If anything goes wrong with signature inspection, use
+                        # original function
+                        logger.warning(
+                            f"Could not inspect branch function: {
+                                e!s}"
+                        )
                         logger.warning("Falling back to original function")
 
                         try:
@@ -3800,15 +3873,21 @@ class BaseGraph(BaseModel, ValidationMixin):
                                 f"✓ Successfully added conditional edges for {source} (fallback)"
                             )
                         except Exception as fallback_error:
-                            logger.error(
+                            logger.exception(
                                 f"Fallback also failed for {source}: {fallback_error}"
                             )
-                            logger.error(f"  Destinations: {destinations}")
-                            logger.error(f"  Original function: {branch.function}")
+                            logger.exception(f"  Destinations: {destinations}")
+                            logger.exception(
+                                f"  Original function: {
+                                    branch.function}"
+                            )
                             raise
                 else:
                     # Use branch object's __call__ method
-                    logger.info(f"Using branch object directly for {branch.name}")
+                    logger.info(
+                        f"Using branch object directly for {
+                            branch.name}"
+                    )
 
                     try:
                         graph_builder.add_conditional_edges(
@@ -3818,9 +3897,9 @@ class BaseGraph(BaseModel, ValidationMixin):
                             f"✓ Successfully added conditional edges for {source} (branch object)"
                         )
                     except Exception as e:
-                        logger.error(f"Error using branch object for {source}: {e}")
-                        logger.error(f"  Destinations: {destinations}")
-                        logger.error(f"  Branch: {branch}")
+                        logger.exception(f"Error using branch object for {source}: {e}")
+                        logger.exception(f"  Destinations: {destinations}")
+                        logger.exception(f"  Branch: {branch}")
                         raise
 
             logger.info("LangGraph conversion complete!")
@@ -3836,11 +3915,8 @@ class BaseGraph(BaseModel, ValidationMixin):
             )
 
     @classmethod
-    def from_langgraph(
-        cls, state_graph: Any, name: Optional[str] = None
-    ) -> "BaseGraph":
-        """
-        Create a BaseGraph from a LangGraph StateGraph.
+    def from_langgraph(cls, state_graph: Any, name: str | None = None) -> "BaseGraph":
+        """Create a BaseGraph from a LangGraph StateGraph.
 
         Args:
             state_graph: LangGraph StateGraph instance
@@ -3937,13 +4013,12 @@ class BaseGraph(BaseModel, ValidationMixin):
             return graph
 
         except ImportError:
-            logger.error("LangGraph not installed or not found")
+            logger.exception("LangGraph not installed or not found")
             raise ImportError("LangGraph must be installed to convert from StateGraph")
 
     # Serialization and conversion
-    def to_dict(self) -> Dict[str, Any]:
-        """
-        Convert the graph to a serializable dictionary.
+    def to_dict(self) -> dict[str, Any]:
+        """Convert the graph to a serializable dictionary.
 
         Returns:
             Dictionary representation of the graph
@@ -3958,9 +4033,8 @@ class BaseGraph(BaseModel, ValidationMixin):
         return serializable.to_dict()
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "BaseGraph":
-        """
-        Create a graph from a dictionary.
+    def from_dict(cls, data: dict[str, Any]) -> "BaseGraph":
+        """Create a graph from a dictionary.
 
         Args:
             data: Dictionary representation of the graph
@@ -3978,8 +4052,7 @@ class BaseGraph(BaseModel, ValidationMixin):
         return serializable.to_graph()
 
     def to_json(self, **kwargs) -> str:
-        """
-        Convert graph to JSON string.
+        """Convert graph to JSON string.
 
         Args:
             **kwargs: Additional parameters for JSON serialization
@@ -3998,8 +4071,7 @@ class BaseGraph(BaseModel, ValidationMixin):
 
     @classmethod
     def from_json(cls, json_str: str) -> "BaseGraph":
-        """
-        Create a graph from a JSON string.
+        """Create a graph from a JSON string.
 
         Args:
             json_str: JSON string representation of the graph
@@ -4018,10 +4090,10 @@ class BaseGraph(BaseModel, ValidationMixin):
 
     def visualize(
         self,
-        output_path: Optional[str] = None,
+        output_path: str | None = None,
         include_subgraphs: bool = True,
-        highlight_nodes: Optional[List[str]] = None,
-        highlight_paths: Optional[List[List[str]]] = None,
+        highlight_nodes: list[str] | None = None,
+        highlight_paths: list[list[str]] | None = None,
         save_png: bool = True,
         width: str = "100%",
         theme: str = "default",
@@ -4029,8 +4101,7 @@ class BaseGraph(BaseModel, ValidationMixin):
         show_default_branches: bool = False,
         debug: bool = False,
     ) -> str:
-        """
-        Generate and display a visualization of the graph.
+        """Generate and display a visualization of the graph.
 
         This method attempts multiple rendering approaches based on the environment,
         with fallbacks to ensure something is always displayed.
@@ -4070,9 +4141,17 @@ class BaseGraph(BaseModel, ValidationMixin):
                     # Check each node for graph attributes
                     for name, node in self.nodes.items():
                         logger.debug(
-                            f"Node '{name}' - Type: {type(node).__name__ if node else 'None'}, "
-                            f"Has graph: {hasattr(node, 'graph') if node else False}, "
-                            f"Graph type: {type(node.graph).__name__ if node and hasattr(node, 'graph') and node.graph else None}"
+                            f"Node '{name}' - Type: {
+                                type(node).__name__ if node else 'None'}, "
+                            f"Has graph: {
+                                hasattr(
+                                    node,
+                                    'graph') if node else False}, "
+                            f"Graph type: {
+                                type(
+                                    node.graph).__name__ if node and hasattr(
+                                    node,
+                                    'graph') and node.graph else None}"
                         )
 
             if hasattr(self, "edges"):
@@ -4092,14 +4171,20 @@ class BaseGraph(BaseModel, ValidationMixin):
             logger.debug(f"Graph Structure: {debug_info}")
 
         logger.debug(
-            f"Visualizing graph: {self.name} (nodes: {len(self.nodes) if self.nodes else 0}, edges: {len(self.edges) if self.edges else 0})"
+            f"Visualizing graph: {
+                self.name} (nodes: {
+                len(
+                    self.nodes) if self.nodes else 0}, edges: {
+                len(
+                    self.edges) if self.edges else 0})"
         )
 
         # Log some debug info about subgraphs if they exist
         if include_subgraphs and hasattr(self, "subgraphs") and self.subgraphs:
             subgraph_info = ", ".join(
                 [
-                    f"{name} ({len(sg.nodes) if hasattr(sg, 'nodes') and sg.nodes else 0} nodes)"
+                    f"{name} ({len(sg.nodes) if hasattr(sg,
+                                                        'nodes') and sg.nodes else 0} nodes)"
                     for name, sg in self.subgraphs.items()
                 ]
             )
@@ -4121,7 +4206,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                 debug_info = GraphVisualizer.debug_graph_structure(self)
                 logger.debug(f"Structure Analysis: {debug_info}")
             except Exception as e:
-                logger.error(f"Error in structure analysis: {e}")
+                logger.exception(f"Error in structure analysis: {e}")
                 if debug:
                     import traceback
 
@@ -4132,7 +4217,8 @@ class BaseGraph(BaseModel, ValidationMixin):
             if debug:
                 logger.info("Attempting to generate Mermaid code...")
 
-            # Use only the parameters that GraphVisualizer.generate_mermaid actually accepts
+            # Use only the parameters that GraphVisualizer.generate_mermaid
+            # actually accepts
             mermaid_code = GraphVisualizer.generate_mermaid(
                 self,
                 include_subgraphs=include_subgraphs,
@@ -4148,19 +4234,23 @@ class BaseGraph(BaseModel, ValidationMixin):
 
             if debug:
                 logger.info(
-                    f"Successfully generated Mermaid code: {len(mermaid_code)} characters"
+                    f"Successfully generated Mermaid code: {
+                        len(mermaid_code)} characters"
                 )
 
-            logger.debug(f"Generated Mermaid code: {len(mermaid_code)} characters")
+            logger.debug(
+                f"Generated Mermaid code: {
+                    len(mermaid_code)} characters"
+            )
 
         except Exception as e:
             if debug:
-                logger.error(f"Error generating Mermaid code: {e}")
+                logger.exception(f"Error generating Mermaid code: {e}")
                 import traceback
 
                 traceback.print_exc()
 
-            logger.error(f"Error generating Mermaid code: {str(e)}")
+            logger.exception(f"Error generating Mermaid code: {e!s}")
 
             # Try again with subgraphs disabled as a fallback
             if include_subgraphs and hasattr(self, "subgraphs") and self.subgraphs:
@@ -4188,19 +4278,20 @@ class BaseGraph(BaseModel, ValidationMixin):
                         )
                 except Exception as e2:
                     if debug:
-                        logger.error(f"Failed even without subgraphs: {e2}")
+                        logger.exception(f"Failed even without subgraphs: {e2}")
                         import traceback
 
                         traceback.print_exc()
 
-                    logger.error(
-                        f"Failed to generate Mermaid code even without subgraphs: {str(e2)}"
+                    logger.exception(
+                        f"Failed to generate Mermaid code even without subgraphs: {
+                            e2!s}"
                     )
-                    return f"Error generating graph visualization: {str(e)}"
+                    return f"Error generating graph visualization: {e!s}"
             else:
                 if debug:
-                    logger.error("No subgraphs to disable, returning error")
-                return f"Error generating graph visualization: {str(e)}"
+                    logger.exception("No subgraphs to disable, returning error")
+                return f"Error generating graph visualization: {e!s}"
 
         try:
             if debug:
@@ -4211,7 +4302,7 @@ class BaseGraph(BaseModel, ValidationMixin):
             # Based on the GraphVisualizer class definition, display_graph signature is:
             # display_graph(graph, output_path, include_subgraphs, highlight_nodes,
             #               highlight_paths, save_png, width, theme, subgraph_mode,
-            #               show_default_branches, direction, compact_mode, title, debug)
+            # show_default_branches, direction, compact_mode, title, debug)
 
             # But since we're getting errors, let's try with just the basic parameters
             # that match what display_mermaid expects
@@ -4254,14 +4345,14 @@ class BaseGraph(BaseModel, ValidationMixin):
 
                 # Provide helpful error message based on environment
                 if debug:
-                    logger.error(f"Error displaying graph: {e}")
-                    logger.error(f"Error with alternative display: {e2}")
+                    logger.exception(f"Error displaying graph: {e}")
+                    logger.exception(f"Error with alternative display: {e2}")
                     import traceback
 
                     traceback.print_exc()
 
-                logger.error(f"Error displaying graph: {e}")
-                logger.error(f"Detected environment: {env}")
+                logger.exception(f"Error displaying graph: {e}")
+                logger.exception(f"Detected environment: {env}")
 
                 if env == Environment.JUPYTER_LAB:
                     suggestions = [
@@ -4300,8 +4391,7 @@ class BaseGraph(BaseModel, ValidationMixin):
         subgraph_mode: str = "cluster",
         show_default_branches: bool = False,
     ) -> str:
-        """
-        Generate a Mermaid graph diagram string.
+        """Generate a Mermaid graph diagram string.
 
         Args:
             include_subgraphs: Whether to visualize subgraphs as clusters
@@ -4329,14 +4419,14 @@ class BaseGraph(BaseModel, ValidationMixin):
         )
 
     # Implementation of ValidationMixin required methods
-    def analyze_cycles(self) -> List[List[str]]:
+    def analyze_cycles(self) -> list[list[str]]:
         """Find all cycles in the graph."""
         cycles = []
         visited = set()
         path = []
         path_set = set()
 
-        def dfs(node):
+        def dfs(node) -> None:
             if node in path_set:
                 # Found a cycle, extract it
                 cycle_start = path.index(node)
@@ -4375,7 +4465,7 @@ class BaseGraph(BaseModel, ValidationMixin):
 
         return cycles
 
-    def find_orphan_nodes(self) -> List[str]:
+    def find_orphan_nodes(self) -> list[str]:
         """Find nodes with no incoming or outgoing edges."""
         orphans = []
 
@@ -4418,7 +4508,7 @@ class BaseGraph(BaseModel, ValidationMixin):
 
         return orphans
 
-    def find_dangling_edges(self) -> List[Tuple[str, str]]:
+    def find_dangling_edges(self) -> list[tuple[str, str]]:
         """Find edges pointing to non-existent nodes."""
         dangling = []
 
@@ -4457,16 +4547,11 @@ class BaseGraph(BaseModel, ValidationMixin):
                 return True
 
         # Check for branches from START
-        for branch in self.branches.values():
-            if branch.source_node == START:
-                return True
-
-        return False
+        return any(branch.source_node == START for branch in self.branches.values())
 
     # Add compile method that validates first
     def compile(self, raise_on_validation_error: bool = False) -> Any:
-        """
-        Validate and compile the graph to a runnable LangGraph StateGraph.
+        """Validate and compile the graph to a runnable LangGraph StateGraph.
 
         Args:
             raise_on_validation_error: Whether to raise an exception on validation errors
@@ -4487,7 +4572,10 @@ class BaseGraph(BaseModel, ValidationMixin):
             )
 
             if raise_on_validation_error:
-                raise ValueError(f"Graph validation failed with {len(issues)} issues")
+                raise ValueError(
+                    f"Graph validation failed with {
+                        len(issues)} issues"
+                )
 
             logger.warning("Proceeding with compilation despite validation issues")
 
@@ -4507,8 +4595,7 @@ class BaseGraph(BaseModel, ValidationMixin):
         false_destination: str = END,
         also_accept_strings: bool = True,
     ) -> "BaseGraph":
-        """
-        Add conditional edges that explicitly handle boolean results.
+        """Add conditional edges that explicitly handle boolean results.
 
         This is a convenience method for the common case where you have a condition
         that returns True/False and you want clear routing.
@@ -4538,7 +4625,8 @@ class BaseGraph(BaseModel, ValidationMixin):
 
         # If requested, also add string-based keys for common patterns
         if also_accept_strings:
-            # Add common string patterns that might be returned instead of booleans
+            # Add common string patterns that might be returned instead of
+            # booleans
             if (
                 "tool" in true_destination.lower()
                 or "validation" in true_destination.lower()
@@ -4564,8 +4652,7 @@ class BaseGraph(BaseModel, ValidationMixin):
         )
 
     def debug_conditional_routing(self, source_node: str) -> None:
-        """
-        Debug conditional routing for a specific node.
+        """Debug conditional routing for a specific node.
 
         This shows how boolean and string results will be routed for debugging purposes.
 
@@ -4582,7 +4669,7 @@ class BaseGraph(BaseModel, ValidationMixin):
         logger.info(f"Conditional Routing Debug for '{source_node}'")
 
         for i, branch in enumerate(node_branches):
-            logger.info(f"\n[cyan]Branch {i+1}: {branch.name}[/cyan]")
+            logger.info(f"\n[cyan]Branch {i + 1}: {branch.name}[/cyan]")
 
             # Create routing map data
             routing_data = {}
@@ -4619,9 +4706,9 @@ class BaseGraph(BaseModel, ValidationMixin):
 
     def add_intelligent_agent_routing(
         self,
-        agents: Dict[str, Any],
+        agents: dict[str, Any],
         execution_mode: str = "infer",
-        branches: Optional[Dict[str, Dict[str, Any]]] = None,
+        branches: dict[str, dict[str, Any]] | None = None,
         prefix: str = "agent_",
     ) -> "BaseGraph":
         """Add intelligent agent routing with sequence inference and branching.
@@ -4642,7 +4729,10 @@ class BaseGraph(BaseModel, ValidationMixin):
         # Add nodes for each agent
         for agent_name, agent in agents.items():
             node_name = f"{prefix}{agent_name}"
-            self.add_node(node_name, agent)
+            agent_node = create_agent_node_v3(
+                agent_name=agent_name, agent=agent, name=node_name
+            )
+            self.add_node(node_name, agent_node)
 
         # Add intelligent routing logic
         if execution_mode == "infer":
@@ -4661,7 +4751,7 @@ class BaseGraph(BaseModel, ValidationMixin):
         )
         return self
 
-    def _add_inferred_routing(self, agents: Dict[str, Any], prefix: str):
+    def _add_inferred_routing(self, agents: dict[str, Any], prefix: str):
         """Add routing with inferred sequence."""
         # Infer sequence
         sequence = self._infer_agent_sequence(agents)
@@ -4670,12 +4760,12 @@ class BaseGraph(BaseModel, ValidationMixin):
         # Add sequential routing with inferred order
         self._add_sequential_routing_with_sequence(sequence, prefix)
 
-    def _add_sequential_routing(self, agents: Dict[str, Any], prefix: str):
+    def _add_sequential_routing(self, agents: dict[str, Any], prefix: str):
         """Add sequential routing in dict order."""
         agent_names = list(agents.keys())
         self._add_sequential_routing_with_sequence(agent_names, prefix)
 
-    def _add_sequential_routing_with_sequence(self, sequence: List[str], prefix: str):
+    def _add_sequential_routing_with_sequence(self, sequence: list[str], prefix: str):
         """Add sequential routing with specific sequence."""
         if not sequence:
             return
@@ -4692,7 +4782,7 @@ class BaseGraph(BaseModel, ValidationMixin):
         # Connect last agent to END
         self.add_edge(f"{prefix}{sequence[-1]}", END)
 
-    def _add_parallel_routing(self, agents: Dict[str, Any], prefix: str):
+    def _add_parallel_routing(self, agents: dict[str, Any], prefix: str):
         """Add parallel routing."""
         agent_names = list(agents.keys())
 
@@ -4703,7 +4793,7 @@ class BaseGraph(BaseModel, ValidationMixin):
             self.add_edge(node_name, END)
 
     def _add_branch_routing(
-        self, agents: Dict[str, Any], branches: Dict[str, Dict[str, Any]], prefix: str
+        self, agents: dict[str, Any], branches: dict[str, dict[str, Any]], prefix: str
     ):
         """Add branch routing with conditions."""
         agent_names = list(agents.keys())
@@ -4722,15 +4812,14 @@ class BaseGraph(BaseModel, ValidationMixin):
                 # Add branch condition
                 branch_config = branches[agent_name]
                 self._add_agent_branch(current_node, branch_config, prefix)
+            # Default to next agent or END
+            elif i < len(agent_names) - 1:
+                next_node = f"{prefix}{agent_names[i + 1]}"
+                self.add_edge(current_node, next_node)
             else:
-                # Default to next agent or END
-                if i < len(agent_names) - 1:
-                    next_node = f"{prefix}{agent_names[i + 1]}"
-                    self.add_edge(current_node, next_node)
-                else:
-                    self.add_edge(current_node, END)
+                self.add_edge(current_node, END)
 
-    def _add_conditional_routing(self, agents: Dict[str, Any], prefix: str):
+    def _add_conditional_routing(self, agents: dict[str, Any], prefix: str):
         """Add conditional routing with decision points."""
         agent_names = list(agents.keys())
 
@@ -4746,8 +4835,8 @@ class BaseGraph(BaseModel, ValidationMixin):
             next_node = f"{prefix}{agent_names[i + 1]}"
 
             # Add condition evaluator
-            def make_condition(current=agent_names[i], next=agent_names[i + 1]):
-                def condition(state):
+            def make_condition(current=agent_names[i], next=agent_names[i + 1]) -> Any:
+                def condition(state: dict[str, Any]):
                     # Simple condition - can be enhanced
                     return f"{prefix}{next}"
 
@@ -4762,7 +4851,7 @@ class BaseGraph(BaseModel, ValidationMixin):
         self.add_edge(f"{prefix}{agent_names[-1]}", END)
 
     def _add_agent_branch(
-        self, source_node: str, branch_config: Dict[str, Any], prefix: str
+        self, source_node: str, branch_config: dict[str, Any], prefix: str
     ):
         """Add branch logic for an agent."""
         targets = branch_config.get("targets", [])
@@ -4772,7 +4861,7 @@ class BaseGraph(BaseModel, ValidationMixin):
             return
 
         # Create branch condition function
-        def branch_condition(state):
+        def branch_condition(state: dict[str, Any]):
             condition = branch_config.get("condition", "default")
 
             if condition == "default":
@@ -4791,7 +4880,7 @@ class BaseGraph(BaseModel, ValidationMixin):
             target_node = f"{prefix}{target}"
             self.add_edge(branch_node, target_node)
 
-    def _infer_agent_sequence(self, agents: Dict[str, Any]) -> List[str]:
+    def _infer_agent_sequence(self, agents: dict[str, Any]) -> list[str]:
         """Infer optimal agent execution sequence."""
         agent_names = list(agents.keys())
 
@@ -4816,7 +4905,7 @@ class BaseGraph(BaseModel, ValidationMixin):
         # Fallback: dict order
         return agent_names
 
-    def _infer_from_naming_patterns(self, agent_names: List[str]) -> List[str]:
+    def _infer_from_naming_patterns(self, agent_names: list[str]) -> list[str]:
         """Infer sequence from naming patterns."""
         patterns = [
             "planner",
@@ -4867,8 +4956,8 @@ class BaseGraph(BaseModel, ValidationMixin):
         return []
 
     def _infer_from_agent_types(
-        self, agent_names: List[str], agents: Dict[str, Any]
-    ) -> List[str]:
+        self, agent_names: list[str], agents: dict[str, Any]
+    ) -> list[str]:
         """Infer sequence from agent types."""
         type_priority = {
             "ReactAgent": 1,
@@ -4891,8 +4980,8 @@ class BaseGraph(BaseModel, ValidationMixin):
         return []
 
     def _infer_from_prompt_dependencies(
-        self, agent_names: List[str], agents: Dict[str, Any]
-    ) -> List[str]:
+        self, agent_names: list[str], agents: dict[str, Any]
+    ) -> list[str]:
         """Infer sequence from prompt dependencies."""
         dependencies = {}
 
@@ -4904,17 +4993,16 @@ class BaseGraph(BaseModel, ValidationMixin):
                 prompt = str(agent.engine.prompt_template)
 
                 for other_agent in agent_names:
-                    if other_agent != agent_name:
-                        if any(
-                            field in prompt.lower()
-                            for field in [
-                                f"{other_agent}_result",
-                                f"{other_agent}_output",
-                                f"result_from_{other_agent}",
-                                f"output_from_{other_agent}",
-                            ]
-                        ):
-                            dependencies[agent_name].add(other_agent)
+                    if other_agent != agent_name and any(
+                        field in prompt.lower()
+                        for field in [
+                            f"{other_agent}_result",
+                            f"{other_agent}_output",
+                            f"result_from_{other_agent}",
+                            f"output_from_{other_agent}",
+                        ]
+                    ):
+                        dependencies[agent_name].add(other_agent)
 
         # Build sequence based on dependencies
         sequence = []
@@ -4927,7 +5015,7 @@ class BaseGraph(BaseModel, ValidationMixin):
                     ready.append(agent_name)
 
             if not ready:
-                ready = [list(remaining)[0]]
+                ready = [next(iter(remaining))]
 
             for agent_name in ready:
                 sequence.append(agent_name)
@@ -4937,9 +5025,8 @@ class BaseGraph(BaseModel, ValidationMixin):
 
 
 # Utility functions for common graph operations
-def has_tool_calls_fixed(state) -> bool:
-    """
-    FIXED VERSION: Check if the last AI message has tool calls.
+def has_tool_calls_fixed(state: dict[str, Any]) -> bool:
+    """FIXED VERSION: Check if the last AI message has tool calls.
 
     This function properly checks for tool calls in various message formats
     and handles edge cases that the original function missed.
@@ -4985,8 +5072,7 @@ def has_tool_calls_fixed(state) -> bool:
         if tool_calls:
             logger.debug(f"Found {len(tool_calls)} tool calls")
             return True
-        else:
-            logger.debug("tool_calls attribute exists but is empty/None")
+        logger.debug("tool_calls attribute exists but is empty/None")
 
     # Check additional_kwargs as fallback
     if hasattr(last_msg, "additional_kwargs"):
@@ -4997,19 +5083,18 @@ def has_tool_calls_fixed(state) -> bool:
 
             if tool_calls_in_kwargs:
                 logger.debug(
-                    f"Found {len(tool_calls_in_kwargs)} tool calls in additional_kwargs"
+                    f"Found {
+                        len(tool_calls_in_kwargs)} tool calls in additional_kwargs"
                 )
                 return True
-            else:
-                logger.debug("tool_calls in additional_kwargs is empty/None")
+            logger.debug("tool_calls in additional_kwargs is empty/None")
 
     logger.debug("No tool calls found")
     return False
 
 
-def create_debug_has_tool_calls(original_func):
-    """
-    Create a debug wrapper around a has_tool_calls function to help diagnose issues.
+def create_debug_has_tool_calls(original_func) -> Any:
+    """Create a debug wrapper around a has_tool_calls function to help diagnose issues.
 
     Args:
         original_func: The original has_tool_calls function
@@ -5018,7 +5103,7 @@ def create_debug_has_tool_calls(original_func):
         A wrapped function with detailed debugging
     """
 
-    def debug_wrapper(state):
+    def debug_wrapper(state: dict[str, Any]):
         from langchain_core.messages import AIMessage
 
         logger.debug("Starting has_tool_calls debug")
@@ -5118,6 +5203,5 @@ def create_debug_has_tool_calls(original_func):
 
 
 # Global debug wrapper function
-def debug_wrapper(original_func):
+def debug_wrapper(original_func) -> None:
     """Debug wrapper function for external use."""
-    pass

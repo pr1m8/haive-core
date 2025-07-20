@@ -1,18 +1,9 @@
 # src/haive/core/graph/state/messages_state.py
 
+from collections.abc import Callable, Iterator
 from datetime import datetime
 from functools import cached_property
-from typing import (
-    Annotated,
-    Any,
-    Callable,
-    ClassVar,
-    Dict,
-    Iterator,
-    List,
-    Optional,
-    Union,
-)
+from typing import Annotated, Any, ClassVar
 
 import tiktoken
 from langchain_core.messages import (
@@ -46,7 +37,7 @@ class ToolCallInfo(BaseModel):
     """Information about a completed tool call."""
 
     tool_call_id: str = Field(description="ID of the tool call")
-    tool_call: Dict[str, Any] = Field(description="Original tool call object")
+    tool_call: dict[str, Any] = Field(description="Original tool call object")
     tool_message: ToolMessage = Field(description="Corresponding tool message")
     ai_message: AIMessage = Field(description="AI message that made the tool call")
     is_successful: bool = Field(description="Whether the tool call was successful")
@@ -60,13 +51,13 @@ class MessageRound(BaseModel):
     human_message: HumanMessage = Field(
         description="The human message that started this round"
     )
-    ai_responses: List[AIMessage] = Field(
+    ai_responses: list[AIMessage] = Field(
         default_factory=list, description="AI responses in this round"
     )
-    tool_calls: List[Dict[str, Any]] = Field(
+    tool_calls: list[dict[str, Any]] = Field(
         default_factory=list, description="Tool calls made in this round"
     )
-    tool_responses: List[ToolMessage] = Field(
+    tool_responses: list[ToolMessage] = Field(
         default_factory=list, description="Tool responses in this round"
     )
     is_complete: bool = Field(
@@ -77,9 +68,8 @@ class MessageRound(BaseModel):
     )
 
 
-class MessageList(RootModel[List[AnyMessage]]):
-    """
-    Enhanced root model for managing conversation messages with advanced filtering,
+class MessageList(RootModel[list[AnyMessage]]):
+    """Enhanced root model for managing conversation messages with advanced filtering,
     analysis, and transformation capabilities.
 
     Key Features:
@@ -93,48 +83,47 @@ class MessageList(RootModel[List[AnyMessage]]):
     - Comprehensive testing support
     """
 
-    root: Annotated[List[AnyMessage], add_messages] = Field(
+    root: Annotated[list[AnyMessage], add_messages] = Field(
         default_factory=list,
         description="List of conversation messages with add_messages reducer",
     )
 
     # Class-level configuration for StateSchema compatibility
-    __shared_fields__: ClassVar[List[str]] = ["root"]
-    __serializable_reducers__: ClassVar[Dict[str, str]] = {"root": "add_messages"}
-    __reducer_fields__: ClassVar[Dict[str, Callable]] = {"root": add_messages}
+    __shared_fields__: ClassVar[list[str]] = ["root"]
+    __serializable_reducers__: ClassVar[dict[str, str]] = {"root": "add_messages"}
+    __reducer_fields__: ClassVar[dict[str, Callable]] = {"root": add_messages}
 
     # Tokenizer for message processing
     tokenizer: ClassVar = tiktoken.get_encoding("cl100k_base")
 
     @field_validator("root", mode="before")
     @classmethod
-    def convert_strings_to_messages(cls, v: Any) -> List[AnyMessage]:
+    def convert_strings_to_messages(cls, v: Any) -> list[AnyMessage]:
         """Automatically convert strings and dicts to proper Message objects."""
         if isinstance(v, str):
             # Single string -> HumanMessage
             return [HumanMessage(content=v)]
-        elif isinstance(v, dict):
+        if isinstance(v, dict):
             if "messages" in v:
                 # Handle legacy format with "messages" key
                 messages_data = v["messages"]
                 return cls._convert_message_data(messages_data)
-            elif "root" in v:
+            if "root" in v:
                 # Handle direct root format
                 return cls._convert_message_data(v["root"])
-            else:
-                # Treat as single message dict
-                return [messages_from_dict([v])[0]]
-        elif isinstance(v, list):
+            # Treat as single message dict
+            return [messages_from_dict([v])[0]]
+        if isinstance(v, list):
             return cls._convert_message_data(v)
-        elif hasattr(v, "__class__") and issubclass(
-            v.__class__, (AIMessage, HumanMessage, SystemMessage, ToolMessage)
+        if hasattr(v, "__class__") and issubclass(
+            v.__class__, AIMessage | HumanMessage | SystemMessage | ToolMessage
         ):
             return [v]
 
         return v or []
 
     @classmethod
-    def _convert_message_data(cls, data: Any) -> List[AnyMessage]:
+    def _convert_message_data(cls, data: Any) -> list[AnyMessage]:
         """Convert various message data formats to AnyMessage list."""
         if isinstance(data, list):
             converted = []
@@ -171,27 +160,30 @@ class MessageList(RootModel[List[AnyMessage]]):
                         converted.append(convert_to_messages([item])[0])
                 elif hasattr(item, "__class__") and issubclass(
                     item.__class__,
-                    (AIMessage, HumanMessage, SystemMessage, ToolMessage),
+                    AIMessage | HumanMessage | SystemMessage | ToolMessage,
                 ):
                     # It's already a Message object
                     converted.append(item)
                 else:
                     raise ValueError(f"Unsupported message type: {type(item)}")
             return converted
-        elif isinstance(data, str):
+        if isinstance(data, str):
             return [HumanMessage(content=data)]
-        elif hasattr(data, "__class__") and issubclass(
-            data.__class__, (AIMessage, HumanMessage, SystemMessage, ToolMessage)
+        if hasattr(data, "__class__") and issubclass(
+            data.__class__, AIMessage | HumanMessage | SystemMessage | ToolMessage
         ):
             return [data]
-        else:
-            return convert_to_messages(data)
+        return convert_to_messages(data)
 
     @model_validator(mode="after")
-    def ensure_proper_messages_and_ordering(self) -> "MessageList":
+
+
+    @classmethod
+    def ensure_proper_messages_and_ordering(cls) -> "MessageList":
         """Ensure all messages are proper Message objects and system messages come before human."""
         # First ensure all items are proper Message objects
-        # This handles cases where persistence returns dicts instead of Message objects
+        # This handles cases where persistence returns dicts instead of Message
+        # objects
         for i, item in enumerate(self.root):
             if isinstance(item, dict):
                 # Convert dict to proper message type
@@ -215,7 +207,8 @@ class MessageList(RootModel[List[AnyMessage]]):
                 else:
                     self.root[i] = convert_to_messages([item])[0]
 
-        # Then handle ordering - ensure system messages come before human messages
+        # Then handle ordering - ensure system messages come before human
+        # messages
         if len(self.root) < 2:
             return self
 
@@ -242,13 +235,13 @@ class MessageList(RootModel[List[AnyMessage]]):
 
     @computed_field
     # @cached_property
-    def last_message(self) -> Optional[AnyMessage]:
+    def last_message(self) -> AnyMessage | None:
         """Get the last message in the conversation."""
         return self.root[-1] if self.root else None
 
     @computed_field
     # @cached_property
-    def last_human_message(self) -> Optional[HumanMessage]:
+    def last_human_message(self) -> HumanMessage | None:
         """Get the last human message (including transformed ones)."""
         for msg in reversed(self.root):
             if isinstance(msg, HumanMessage):
@@ -257,7 +250,7 @@ class MessageList(RootModel[List[AnyMessage]]):
 
     @computed_field
     # @cached_property
-    def last_ai_message(self) -> Optional[AIMessage]:
+    def last_ai_message(self) -> AIMessage | None:
         """Get the last AI message."""
         for msg in reversed(self.root):
             if isinstance(msg, AIMessage):
@@ -266,7 +259,7 @@ class MessageList(RootModel[List[AnyMessage]]):
 
     @computed_field
     # @cached_property
-    def first_real_human_message(self) -> Optional[HumanMessage]:
+    def first_real_human_message(self) -> HumanMessage | None:
         """Get the first real human message (not transformed)."""
         for msg in self.root:
             if isinstance(msg, HumanMessage) and self._is_real_human_message(msg):
@@ -275,7 +268,7 @@ class MessageList(RootModel[List[AnyMessage]]):
 
     @computed_field
     # @cached_property
-    def system_message(self) -> Optional[SystemMessage]:
+    def system_message(self) -> SystemMessage | None:
         """Get the first system message if one exists."""
         for msg in self.root:
             if isinstance(msg, SystemMessage):
@@ -295,21 +288,19 @@ class MessageList(RootModel[List[AnyMessage]]):
             return True
 
         # Also check in additional_kwargs
-        if hasattr(last_ai, "additional_kwargs") and last_ai.additional_kwargs.get(
-            "tool_calls"
-        ):
-            return True
-
-        return False
+        return bool(
+            hasattr(last_ai, "additional_kwargs")
+            and last_ai.additional_kwargs.get("tool_calls")
+        )
 
     @computed_field
     # @cached_property
     def has_tool_errors(self) -> bool:
         """Check if there are any tool messages with errors."""
-        for msg in self.root:
-            if isinstance(msg, ToolMessage) and self._is_tool_error(msg):
-                return True
-        return False
+        return any(
+            isinstance(msg, ToolMessage) and self._is_tool_error(msg)
+            for msg in self.root
+        )
 
     @computed_field
     @cached_property
@@ -325,7 +316,7 @@ class MessageList(RootModel[List[AnyMessage]]):
 
     @computed_field
     @cached_property
-    def tool_call_errors(self) -> List[ToolMessage]:
+    def tool_call_errors(self) -> list[ToolMessage]:
         """Get all tool messages with errors."""
         return [
             msg
@@ -335,19 +326,19 @@ class MessageList(RootModel[List[AnyMessage]]):
 
     @computed_field
     @cached_property
-    def completed_tool_calls(self) -> List[ToolCallInfo]:
+    def completed_tool_calls(self) -> list[ToolCallInfo]:
         """Get all completed tool calls with their responses."""
         return self._get_completed_tool_calls()
 
     @computed_field
     @cached_property
-    def conversation_rounds(self) -> List[MessageRound]:
+    def conversation_rounds(self) -> list[MessageRound]:
         """Get detailed information about each conversation round."""
         return self._get_conversation_rounds()
 
     @computed_field
     @cached_property
-    def real_human_messages(self) -> List[HumanMessage]:
+    def real_human_messages(self) -> list[HumanMessage]:
         """Get only real human messages (not transformed)."""
         return [
             msg
@@ -357,7 +348,7 @@ class MessageList(RootModel[List[AnyMessage]]):
 
     @computed_field
     @cached_property
-    def transformed_human_messages(self) -> List[HumanMessage]:
+    def transformed_human_messages(self) -> list[HumanMessage]:
         """Get human messages that were transformed from AI messages."""
         return [
             msg
@@ -377,27 +368,25 @@ class MessageList(RootModel[List[AnyMessage]]):
         """Get the length of the messages list."""
         return len(self.root)
 
-    def __getitem__(
-        self, index: Union[int, slice]
-    ) -> Union[AnyMessage, List[AnyMessage]]:
+    def __getitem__(self, index: int | slice) -> AnyMessage | list[AnyMessage]:
         """Support indexing and slicing."""
         return self.root[index]
 
-    def __setitem__(self, index: int, value: Union[AnyMessage, str]) -> None:
+    def __setitem__(self, index: int, value: AnyMessage | str) -> None:
         """Support item assignment with auto-conversion."""
         if isinstance(value, str):
             value = HumanMessage(content=value)
         self.root[index] = value
         self._invalidate_cache()
 
-    def append(self, message: Union[AnyMessage, str]) -> None:
+    def append(self, message: AnyMessage | str) -> None:
         """Append a message to the list with auto-conversion."""
         if isinstance(message, str):
             message = HumanMessage(content=message)
         self.root.append(message)
         self._invalidate_cache()
 
-    def extend(self, messages: List[Union[AnyMessage, str]]) -> None:
+    def extend(self, messages: list[AnyMessage | str]) -> None:
         """Extend the list with multiple messages with auto-conversion."""
         converted = [
             HumanMessage(content=msg) if isinstance(msg, str) else msg
@@ -406,7 +395,7 @@ class MessageList(RootModel[List[AnyMessage]]):
         self.root.extend(converted)
         self._invalidate_cache()
 
-    def insert(self, index: int, message: Union[AnyMessage, str]) -> None:
+    def insert(self, index: int, message: AnyMessage | str) -> None:
         """Insert a message at a specific index with auto-conversion."""
         if isinstance(message, str):
             message = HumanMessage(content=message)
@@ -423,7 +412,7 @@ class MessageList(RootModel[List[AnyMessage]]):
         self.root.clear()
         self._invalidate_cache()
 
-    def copy(self) -> List[AnyMessage]:
+    def copy(self) -> list[AnyMessage]:
         """Create a copy of the messages list."""
         return self.root.copy()
 
@@ -453,7 +442,7 @@ class MessageList(RootModel[List[AnyMessage]]):
     # ADVANCED FILTERING
     # ============================================================================
 
-    def filter_by_type(self, message_type: Union[type, List[type]]) -> List[AnyMessage]:
+    def filter_by_type(self, message_type: type | list[type]) -> list[AnyMessage]:
         """Filter messages by type(s)."""
         if not isinstance(message_type, list):
             message_type = [message_type]
@@ -462,7 +451,7 @@ class MessageList(RootModel[List[AnyMessage]]):
 
     def filter_by_content_pattern(
         self, pattern: str, case_sensitive: bool = False
-    ) -> List[AnyMessage]:
+    ) -> list[AnyMessage]:
         """Filter messages by content pattern."""
         import re
 
@@ -474,7 +463,7 @@ class MessageList(RootModel[List[AnyMessage]]):
             if hasattr(msg, "content") and re.search(pattern, msg.content, flags)
         ]
 
-    def filter_by_metadata(self, key: str, value: Any = None) -> List[AnyMessage]:
+    def filter_by_metadata(self, key: str, value: Any = None) -> list[AnyMessage]:
         """Filter messages by metadata key/value."""
         filtered = []
         for msg in self.root:
@@ -483,31 +472,34 @@ class MessageList(RootModel[List[AnyMessage]]):
                     # Just check for key existence
                     if key in msg.additional_kwargs:
                         filtered.append(msg)
-                else:
-                    # Check for key and value
-                    if msg.additional_kwargs.get(key) == value:
-                        filtered.append(msg)
+                # Check for key and value
+                elif msg.additional_kwargs.get(key) == value:
+                    filtered.append(msg)
         return filtered
 
     def filter_by_engine(
-        self, engine_id: Optional[str] = None, engine_name: Optional[str] = None
-    ) -> List[AnyMessage]:
+        self, engine_id: str | None = None, engine_name: str | None = None
+    ) -> list[AnyMessage]:
         """Filter messages by engine ID or name."""
         filtered = []
         for msg in self.root:
-            if hasattr(msg, "additional_kwargs") and msg.additional_kwargs:
-                if engine_id and msg.additional_kwargs.get("engine_id") == engine_id:
-                    filtered.append(msg)
-                elif (
-                    engine_name
-                    and msg.additional_kwargs.get("engine_name") == engine_name
-                ):
-                    filtered.append(msg)
+            if (
+                hasattr(msg, "additional_kwargs")
+                and msg.additional_kwargs
+                and (
+                    (engine_id and msg.additional_kwargs.get("engine_id") == engine_id)
+                    or (
+                        engine_name
+                        and msg.additional_kwargs.get("engine_name") == engine_name
+                    )
+                )
+            ):
+                filtered.append(msg)
         return filtered
 
     def filter_by_time_range(
-        self, start_index: int = 0, end_index: Optional[int] = None
-    ) -> List[AnyMessage]:
+        self, start_index: int = 0, end_index: int | None = None
+    ) -> list[AnyMessage]:
         """Filter messages by index range (time-based ordering)."""
         if end_index is None:
             end_index = len(self.root)
@@ -516,7 +508,7 @@ class MessageList(RootModel[List[AnyMessage]]):
 
     def get_messages_since_last_human(
         self, include_human: bool = True
-    ) -> List[AnyMessage]:
+    ) -> list[AnyMessage]:
         """Get all messages since the last real human message."""
         if not self.last_human_message:
             return []
@@ -534,7 +526,7 @@ class MessageList(RootModel[List[AnyMessage]]):
         start_idx = last_human_idx if include_human else last_human_idx + 1
         return self.root[start_idx:]
 
-    def get_messages_in_current_round(self) -> List[AnyMessage]:
+    def get_messages_in_current_round(self) -> list[AnyMessage]:
         """Get all messages in the current (potentially incomplete) round."""
         if not self.conversation_rounds:
             return []
@@ -551,8 +543,7 @@ class MessageList(RootModel[List[AnyMessage]]):
     # ============================================================================
 
     def deduplicate_tool_calls(self) -> int:
-        """
-        Remove duplicate tool calls based on tool call ID.
+        """Remove duplicate tool calls based on tool call ID.
 
         Returns:
             Number of duplicates removed
@@ -591,8 +582,8 @@ class MessageList(RootModel[List[AnyMessage]]):
         return duplicates_removed
 
     def get_tool_calls_from_message(
-        self, message: Optional[AIMessage] = None
-    ) -> List[Dict]:
+        self, message: AIMessage | None = None
+    ) -> list[dict]:
         """Get tool calls from an AI message."""
         msg = message or self.last_ai_message
         if not msg:
@@ -610,7 +601,7 @@ class MessageList(RootModel[List[AnyMessage]]):
 
         return []
 
-    def get_pending_tool_calls(self) -> List[Dict[str, Any]]:
+    def get_pending_tool_calls(self) -> list[dict[str, Any]]:
         """Get tool calls that don't have corresponding responses yet."""
         all_tool_calls = {}
         tool_responses = set()
@@ -646,8 +637,8 @@ class MessageList(RootModel[List[AnyMessage]]):
         return pending
 
     def inject_state_into_tool_calls(
-        self, tool_calls: List[Dict], state_data: Optional[Dict[str, Any]] = None
-    ) -> List[Dict]:
+        self, tool_calls: list[dict], state_data: dict[str, Any] | None = None
+    ) -> list[dict]:
         """Inject state data into tool call arguments."""
         if not tool_calls:
             return []
@@ -671,7 +662,7 @@ class MessageList(RootModel[List[AnyMessage]]):
 
         return injected_calls
 
-    def send_tool_calls(self, node_name: str = "tools") -> Union[str, List[Send]]:
+    def send_tool_calls(self, node_name: str = "tools") -> str | list[Send]:
         """Convert tool calls from the last AI message into Send objects."""
         tool_calls = self.get_tool_calls_from_message()
         if not tool_calls:
@@ -730,7 +721,7 @@ class MessageList(RootModel[List[AnyMessage]]):
 
         return rounds
 
-    def _get_completed_tool_calls(self) -> List[ToolCallInfo]:
+    def _get_completed_tool_calls(self) -> list[ToolCallInfo]:
         """Get all completed tool calls with their responses."""
         completed = []
 
@@ -771,7 +762,7 @@ class MessageList(RootModel[List[AnyMessage]]):
 
         return completed
 
-    def _get_conversation_rounds(self) -> List[MessageRound]:
+    def _get_conversation_rounds(self) -> list[MessageRound]:
         """Get detailed information about each conversation round."""
         rounds = []
         current_round = None
@@ -840,8 +831,8 @@ class MessageList(RootModel[List[AnyMessage]]):
     def transform_ai_to_human(
         self,
         preserve_metadata: bool = True,
-        engine_id: Optional[str] = None,
-        engine_name: Optional[str] = None,
+        engine_id: str | None = None,
+        engine_name: str | None = None,
     ) -> None:
         """Transform AI messages to Human messages in place."""
         transformed_messages = []
@@ -911,7 +902,7 @@ class MessageList(RootModel[List[AnyMessage]]):
 
     def transform_for_agent_handoff(
         self,
-        source_agent: Optional[str] = None,
+        source_agent: str | None = None,
         exclude_system: bool = True,
         exclude_tools: bool = False,
     ) -> None:
@@ -952,7 +943,7 @@ class MessageList(RootModel[List[AnyMessage]]):
     # UTILITY METHODS
     # ============================================================================
 
-    def add_message(self, message: Union[AnyMessage, str, Dict]) -> None:
+    def add_message(self, message: AnyMessage | str | dict) -> None:
         """Add a message to the conversation with auto-conversion."""
         if isinstance(message, str):
             message = HumanMessage(content=message)
@@ -962,7 +953,7 @@ class MessageList(RootModel[List[AnyMessage]]):
         self.append(message)
 
     def add_system_message(
-        self, content: str, metadata: Optional[Dict[str, Any]] = None
+        self, content: str, metadata: dict[str, Any] | None = None
     ) -> None:
         """Add a system message at the beginning of the conversation."""
         kwargs = {"content": content}
@@ -978,14 +969,15 @@ class MessageList(RootModel[List[AnyMessage]]):
         self.insert(0, system_msg)
 
     def add_engine_metadata(
-        self, engine_id: Optional[str] = None, engine_name: Optional[str] = None
+        self, engine_id: str | None = None, engine_name: str | None = None
     ) -> None:
         """Add engine metadata to all AI messages."""
         for msg in self.root:
             if isinstance(msg, AIMessage):
-                if not hasattr(msg, "additional_kwargs"):
-                    msg.additional_kwargs = {}
-                elif msg.additional_kwargs is None:
+                if (
+                    not hasattr(msg, "additional_kwargs")
+                    or msg.additional_kwargs is None
+                ):
                     msg.additional_kwargs = {}
 
                 if engine_id:
@@ -997,7 +989,7 @@ class MessageList(RootModel[List[AnyMessage]]):
     # FORMAT CONVERSION
     # ============================================================================
 
-    def to_openai_format(self) -> List[Dict]:
+    def to_openai_format(self) -> list[dict]:
         """Convert messages to OpenAI API format."""
         return convert_to_openai_messages(self.root)
 
@@ -1005,7 +997,7 @@ class MessageList(RootModel[List[AnyMessage]]):
         """Convert message history to LangChain compatible prompt string."""
         return get_buffer_string(self.root, human_prefix="User", ai_prefix="Assistant")
 
-    def get_filtered_messages(self, **filter_kwargs) -> List[AnyMessage]:
+    def get_filtered_messages(self, **filter_kwargs) -> list[AnyMessage]:
         """Filter messages using LangChain's built-in filter_messages utility."""
         limit = filter_kwargs.pop("limit", None)
         filtered_messages = filter_messages(self.root, **filter_kwargs)
@@ -1020,19 +1012,18 @@ class MessageList(RootModel[List[AnyMessage]]):
     # ============================================================================
 
     @classmethod
-    def from_messages(cls, messages: List[Union[AnyMessage, str]]) -> "MessageList":
+    def from_messages(cls, messages: list[AnyMessage | str]) -> "MessageList":
         """Create instance from a list of messages."""
         return cls(root=messages)
 
     @classmethod
-    def from_dict(cls, data: Union[List[Dict], Dict[str, Any]]) -> "MessageList":
+    def from_dict(cls, data: list[dict] | dict[str, Any]) -> "MessageList":
         """Create instance from dictionary format."""
         if isinstance(data, dict) and "messages" in data:
             return cls(root=data["messages"])
-        elif isinstance(data, list):
+        if isinstance(data, list):
             return cls(root=data)
-        else:
-            return cls()
+        return cls()
 
     @classmethod
     def with_system_message(cls, system_content: str) -> "MessageList":
@@ -1051,12 +1042,13 @@ class MessageList(RootModel[List[AnyMessage]]):
     # ============================================================================
 
     @model_serializer
-    def serialize_model(self):
+    def serialize_model(self) -> Any:
         """Custom serializer to properly handle MessageList for LangGraph compatibility."""
         # Get the root list - handle both MessageList objects and plain lists
         messages = self.root if hasattr(self, "root") else self
 
-        # Use LangChain's built-in serialization with proper BaseMessage checking
+        # Use LangChain's built-in serialization with proper BaseMessage
+        # checking
         serialized_messages = []
         for msg in messages:
             if isinstance(msg, BaseMessage):
@@ -1088,14 +1080,13 @@ class MessageList(RootModel[List[AnyMessage]]):
         """Support addition for LangGraph reducers."""
         if isinstance(other, MessageList):
             return MessageList(root=add_messages(self.root, other.root))
-        elif isinstance(other, list):
+        if isinstance(other, list):
             return MessageList(root=add_messages(self.root, other))
         return NotImplemented
 
 
 class MessagesState(StateSchema):
-    """
-    Enhanced state schema that uses MessageList as a field.
+    """Enhanced state schema that uses MessageList as a field.
 
     Use this when you need additional state fields beyond just messages.
     """
@@ -1106,7 +1097,7 @@ class MessagesState(StateSchema):
     )
 
     # Additional state fields
-    transformation_history: List[Dict[str, Any]] = Field(
+    transformation_history: list[dict[str, Any]] = Field(
         default_factory=list, description="History of transformations applied"
     )
 
@@ -1115,7 +1106,7 @@ class MessagesState(StateSchema):
     __serializable_reducers__ = {"messages": "add_messages"}
     __reducer_fields__ = {"messages": add_messages}
 
-    def __init__(self, messages=None, **data):
+    def __init__(self, messages: list[dict[str, Any]] | None = None, **data):
         """Initialize with optional messages parameter for compatibility."""
         if messages is not None and "messages" not in data:
             # Handle direct list/string initialization
@@ -1127,27 +1118,27 @@ class MessagesState(StateSchema):
     # ============================================================================
 
     @property
-    def last_message(self) -> Optional[AnyMessage]:
+    def last_message(self) -> AnyMessage | None:
         """Delegate to messages state."""
         return self.messages.last_message
 
     @property
-    def last_human_message(self) -> Optional[HumanMessage]:
+    def last_human_message(self) -> HumanMessage | None:
         """Delegate to messages state."""
         return self.messages.last_human_message
 
     @property
-    def last_ai_message(self) -> Optional[AIMessage]:
+    def last_ai_message(self) -> AIMessage | None:
         """Delegate to messages state."""
         return self.messages.last_ai_message
 
     @property
-    def first_real_human_message(self) -> Optional[HumanMessage]:
+    def first_real_human_message(self) -> HumanMessage | None:
         """Delegate to messages state."""
         return self.messages.first_real_human_message
 
     @property
-    def system_message(self) -> Optional[SystemMessage]:
+    def system_message(self) -> SystemMessage | None:
         """Delegate to messages state."""
         return self.messages.system_message
 
@@ -1172,27 +1163,27 @@ class MessagesState(StateSchema):
         return self.messages.round_count
 
     @property
-    def tool_call_errors(self) -> List[ToolMessage]:
+    def tool_call_errors(self) -> list[ToolMessage]:
         """Delegate to messages state."""
         return self.messages.tool_call_errors
 
     @property
-    def completed_tool_calls(self) -> List[ToolCallInfo]:
+    def completed_tool_calls(self) -> list[ToolCallInfo]:
         """Delegate to messages state."""
         return self.messages.completed_tool_calls
 
     @property
-    def conversation_rounds(self) -> List[MessageRound]:
+    def conversation_rounds(self) -> list[MessageRound]:
         """Delegate to messages state."""
         return self.messages.conversation_rounds
 
     @property
-    def real_human_messages(self) -> List[HumanMessage]:
+    def real_human_messages(self) -> list[HumanMessage]:
         """Delegate to messages state."""
         return self.messages.real_human_messages
 
     @property
-    def transformed_human_messages(self) -> List[HumanMessage]:
+    def transformed_human_messages(self) -> list[HumanMessage]:
         """Delegate to messages state."""
         return self.messages.transformed_human_messages
 
@@ -1208,25 +1199,23 @@ class MessagesState(StateSchema):
         """Get the length of messages."""
         return len(self.messages)
 
-    def __getitem__(
-        self, index: Union[int, slice]
-    ) -> Union[AnyMessage, List[AnyMessage]]:
+    def __getitem__(self, index: int | slice) -> AnyMessage | list[AnyMessage]:
         """Support indexing and slicing."""
         return self.messages[index]
 
-    def __setitem__(self, index: int, value: Union[AnyMessage, str]) -> None:
+    def __setitem__(self, index: int, value: AnyMessage | str) -> None:
         """Support item assignment."""
         self.messages[index] = value
 
-    def append(self, message: Union[AnyMessage, str]) -> None:
+    def append(self, message: AnyMessage | str) -> None:
         """Append a message."""
         self.messages.append(message)
 
-    def extend(self, messages: List[Union[AnyMessage, str]]) -> None:
+    def extend(self, messages: list[AnyMessage | str]) -> None:
         """Extend with multiple messages."""
         self.messages.extend(messages)
 
-    def insert(self, index: int, message: Union[AnyMessage, str]) -> None:
+    def insert(self, index: int, message: AnyMessage | str) -> None:
         """Insert a message at index."""
         self.messages.insert(index, message)
 
@@ -1242,7 +1231,7 @@ class MessagesState(StateSchema):
     # DELEGATED METHODS
     # ============================================================================
 
-    def add_message(self, message: Union[AnyMessage, str, Dict]) -> None:
+    def add_message(self, message: AnyMessage | str | dict) -> None:
         """Delegate to messages state."""
         self.messages.add_message(message)
 
@@ -1250,41 +1239,41 @@ class MessagesState(StateSchema):
         """Delegate to messages state."""
         return self.messages.deduplicate_tool_calls()
 
-    def get_pending_tool_calls(self) -> List[Dict[str, Any]]:
+    def get_pending_tool_calls(self) -> list[dict[str, Any]]:
         """Delegate to messages state."""
         return self.messages.get_pending_tool_calls()
 
-    def filter_by_type(self, message_type: Union[type, List[type]]) -> List[AnyMessage]:
+    def filter_by_type(self, message_type: type | list[type]) -> list[AnyMessage]:
         """Delegate to messages state."""
         return self.messages.filter_by_type(message_type)
 
     def filter_by_content_pattern(
         self, pattern: str, case_sensitive: bool = False
-    ) -> List[AnyMessage]:
+    ) -> list[AnyMessage]:
         """Delegate to messages state."""
         return self.messages.filter_by_content_pattern(pattern, case_sensitive)
 
-    def filter_by_metadata(self, key: str, value: Any = None) -> List[AnyMessage]:
+    def filter_by_metadata(self, key: str, value: Any = None) -> list[AnyMessage]:
         """Delegate to messages state."""
         return self.messages.filter_by_metadata(key, value)
 
     def filter_by_engine(
-        self, engine_id: Optional[str] = None, engine_name: Optional[str] = None
-    ) -> List[AnyMessage]:
+        self, engine_id: str | None = None, engine_name: str | None = None
+    ) -> list[AnyMessage]:
         """Delegate to messages state."""
         return self.messages.filter_by_engine(engine_id, engine_name)
 
     def get_messages_since_last_human(
         self, include_human: bool = True
-    ) -> List[AnyMessage]:
+    ) -> list[AnyMessage]:
         """Delegate to messages state."""
         return self.messages.get_messages_since_last_human(include_human)
 
     def transform_ai_to_human(
         self,
         preserve_metadata: bool = True,
-        engine_id: Optional[str] = None,
-        engine_name: Optional[str] = None,
+        engine_id: str | None = None,
+        engine_name: str | None = None,
     ) -> None:
         """Delegate to messages state."""
         self.messages.transform_ai_to_human(preserve_metadata, engine_id, engine_name)
@@ -1295,7 +1284,7 @@ class MessagesState(StateSchema):
 
     def transform_for_agent_handoff(
         self,
-        source_agent: Optional[str] = None,
+        source_agent: str | None = None,
         exclude_system: bool = True,
         exclude_tools: bool = False,
     ) -> None:
@@ -1305,13 +1294,13 @@ class MessagesState(StateSchema):
         )
 
     def add_system_message(
-        self, content: str, metadata: Optional[Dict[str, Any]] = None
+        self, content: str, metadata: dict[str, Any] | None = None
     ) -> None:
         """Delegate to messages state."""
         self.messages.add_system_message(content, metadata)
 
     def add_engine_metadata(
-        self, engine_id: Optional[str] = None, engine_name: Optional[str] = None
+        self, engine_id: str | None = None, engine_name: str | None = None
     ) -> None:
         """Delegate to messages state."""
         self.messages.add_engine_metadata(engine_id, engine_name)
@@ -1321,19 +1310,18 @@ class MessagesState(StateSchema):
     # ============================================================================
 
     @classmethod
-    def from_messages(cls, messages: List[Union[AnyMessage, str]]) -> "MessagesState":
+    def from_messages(cls, messages: list[AnyMessage | str]) -> "MessagesState":
         """Create instance from a list of messages."""
         return cls(messages=messages)
 
     @classmethod
-    def from_dict(cls, data: Union[List[Dict], Dict[str, Any]]) -> "MessagesState":
+    def from_dict(cls, data: list[dict] | dict[str, Any]) -> "MessagesState":
         """Create instance from dictionary format."""
         if isinstance(data, dict) and "messages" in data:
             return cls(**data)
-        elif isinstance(data, list):
+        if isinstance(data, list):
             return cls(messages=data)
-        else:
-            return cls()
+        return cls()
 
     @classmethod
     def with_system_message(cls, system_content: str) -> "MessagesState":

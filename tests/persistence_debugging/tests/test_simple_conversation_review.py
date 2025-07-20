@@ -20,7 +20,6 @@ def test_basic_conversation():
         from haive.agents.conversation.collaberative.agent import (
             CollaborativeConversation,
         )
-
         from haive.core.engine.aug_llm import AugLLMConfig
 
         # Create a simple test

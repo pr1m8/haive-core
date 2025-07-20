@@ -1,18 +1,11 @@
-"""Schema composition module.
+"""Module exports."""
 
-This module provides tools for dynamically building state schemas from components,
-engines, and other sources. It's organized into focused submodules:
+from composer.schema_composer import SchemaComposer
+from composer.schema_composer import add_fields_from_components
+from composer.schema_composer import add_fields_from_dict
+from composer.schema_composer import add_fields_from_engine
+from composer.schema_composer import add_fields_from_model
+from composer.schema_composer import build
+from composer.schema_composer import from_components
 
-- engine: Engine management and integration
-- field: Field extraction and composition
-- builder: Core schema building logic
-- utils: Utility functions and helpers
-"""
-
-from haive.core.schema.composer.engine.engine_manager import EngineComposerMixin
-from haive.core.schema.composer.schema_composer import SchemaComposer
-
-__all__ = [
-    "SchemaComposer",
-    "EngineComposerMixin",
-]
+__all__ = ['SchemaComposer', 'add_fields_from_components', 'add_fields_from_dict', 'add_fields_from_engine', 'add_fields_from_model', 'build', 'from_components']

@@ -1,10 +1,10 @@
-"""
-Test module for the graph_visualization_utils.py module.
+"""Test module for the graph_visualization_utils.py module.
 
 This demonstrates how to use the enhanced visualization functionality
 with DynamicGraph instances.
 """
 
+import contextlib
 import logging
 import uuid
 
@@ -30,7 +30,6 @@ logging.basicConfig(
 # from haive.core.graph.utils.mermaid_visualizer import visualize_graph, replace_visualization_method
 def create_sample_graph():
     """Create a sample graph for testing visualization."""
-
     # Create sample engines
     llm_engine = AugLLMConfig(
         name="gpt4_engine", id="llm-" + uuid.uuid4().hex[:8], model="gpt-4o"
@@ -63,7 +62,11 @@ def create_sample_graph():
     # Create a graph
     graph = DynamicGraph(
         name="TestRAGWorkflow",
-        components=[llm_engine, retriever_engine, vectorstore_engine, retrieve_engine],
+        components=[
+            llm_engine,
+            retriever_engine,
+            vectorstore_engine,
+            retrieve_engine],
         description="A test RAG workflow for visualization",
         visualize=True,
         debug_level="verbose",
@@ -92,14 +95,21 @@ def create_sample_graph():
         query_length = len(state.get("query", ""))
         if query_length > 100:
             return "complex"
-        elif query_length > 50:
+        if query_length > 50:
             return "medium"
-        else:
-            return "simple"
+        return "simple"
 
     # Add branching nodes with clear names and configurations
-    graph.add_node("complex_retrieval", retriever_engine, config_overrides={"k": 10})
-    graph.add_node("simple_retrieval", retriever_engine, config_overrides={"k": 3})
+    graph.add_node(
+        "complex_retrieval",
+        retriever_engine,
+        config_overrides={
+            "k": 10})
+    graph.add_node(
+        "simple_retrieval",
+        retriever_engine,
+        config_overrides={
+            "k": 3})
     graph.add_node("medium_retrieval", retrieve_engine)
 
     # Add conditional routing - this will create the conditional edges
@@ -122,19 +132,14 @@ def create_sample_graph():
     graph.add_edge("process_results", "generate")
 
     # Compile the graph to check for errors
-    try:
+    with contextlib.suppress(Exception):
         graph.compile()
-        print("Graph compiled successfully.")
-    except Exception as e:
-        print(f"Compilation error: {e}")
 
     return graph
 
 
 def test_direct_visualization():
     """Test direct visualization without replacing methods."""
-    print("\n=== Testing Direct Visualization ===")
-
     # Create sample graph
     graph = create_sample_graph()
     graph.visualize_graph()
@@ -142,13 +147,9 @@ def test_direct_visualization():
 
 def main():
     """Main test function."""
-    print("=== Graph Visualization Test ===")
-
     # Run tests
     test_direct_visualization()
     test_method_replacement()
-
-    print("\n=== All Tests Completed ===")
 
 
 if __name__ == "__main__":

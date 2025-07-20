@@ -1,5 +1,6 @@
 """TF-IDF Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the TF-IDF (Term Frequency-Inverse Document Frequency)
 retriever, which uses classical TF-IDF scoring for document retrieval. TF-IDF is a numerical
 statistic that reflects how important a word is to a document in a collection of documents.
@@ -105,7 +106,7 @@ class TFIDFRetrieverConfig(BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a TF-IDF retriever from this configuration.
 
         Returns:

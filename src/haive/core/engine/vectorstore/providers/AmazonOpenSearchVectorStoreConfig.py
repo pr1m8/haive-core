@@ -1,5 +1,6 @@
 """Amazon OpenSearch Vector Store implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Amazon OpenSearch Service vector store,
 which is AWS's managed version of OpenSearch with enhanced features.
 
@@ -114,7 +115,8 @@ class AmazonOpenSearchVectorStoreConfig(BaseVectorStoreConfig):
         default=False, description="Whether this is an AOSS (serverless) deployment"
     )
 
-    # Engine configuration (inherited from OpenSearch but with AOSS constraints)
+    # Engine configuration (inherited from OpenSearch but with AOSS
+    # constraints)
     engine: str = Field(
         default="nmslib",
         description="Vector engine: 'nmslib' or 'faiss' (lucene not supported on AOSS)",
@@ -183,7 +185,7 @@ class AmazonOpenSearchVectorStoreConfig(BaseVectorStoreConfig):
     )
 
     @validator("opensearch_url")
-    def validate_opensearch_url(self, v):
+    def validate_opensearch_url(self, v) -> Any:
         """Validate Amazon OpenSearch URL format."""
         if not v.startswith("https://"):
             raise ValueError("Amazon OpenSearch URL must use HTTPS")
@@ -194,7 +196,7 @@ class AmazonOpenSearchVectorStoreConfig(BaseVectorStoreConfig):
         return v
 
     @validator("engine")
-    def validate_engine(self, v, values):
+    def validate_engine(self, v, values) -> Any:
         """Validate vector engine is supported, considering AOSS limitations."""
         is_aoss = values.get("is_aoss", False)
         if is_aoss:
@@ -208,7 +210,7 @@ class AmazonOpenSearchVectorStoreConfig(BaseVectorStoreConfig):
         return v
 
     @validator("aws_region")
-    def validate_aws_region(self, v):
+    def validate_aws_region(self, v) -> Any:
         """Validate AWS region format."""
         import re
 
@@ -217,7 +219,7 @@ class AmazonOpenSearchVectorStoreConfig(BaseVectorStoreConfig):
         return v
 
     @validator("index_name")
-    def validate_index_name(self, v):
+    def validate_index_name(self, v) -> Any:
         """Validate index name format."""
         if not v or len(v.strip()) == 0:
             raise ValueError("index_name cannot be empty")
@@ -247,7 +249,7 @@ class AmazonOpenSearchVectorStoreConfig(BaseVectorStoreConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create an Amazon OpenSearch Service vector store from this configuration.
 
         Returns:

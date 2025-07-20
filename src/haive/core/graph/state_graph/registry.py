@@ -4,7 +4,7 @@ This module provides a singleton registry for managing state graph models
 in the Haive framework.
 """
 
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import Any, ClassVar, Optional
 
 from haive.core.graph.models.graph_model import GraphModel
 from haive.core.registry.base import AbstractRegistry
@@ -37,10 +37,10 @@ class GraphRegistry(AbstractRegistry[GraphModel]):
             cls._instance = cls()
         return cls._instance
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the registry with empty graph collections."""
-        self.graphs: Dict[str, GraphModel] = {}
-        self.graph_ids: Dict[str, GraphModel] = {}
+        self.graphs: dict[str, GraphModel] = {}
+        self.graph_ids: dict[str, GraphModel] = {}
 
     def register(self, item: GraphModel) -> GraphModel:
         """Register a graph model in the registry.
@@ -55,7 +55,7 @@ class GraphRegistry(AbstractRegistry[GraphModel]):
         self.graph_ids[item.id] = item
         return item
 
-    def get(self, item_type: Any, name: str) -> Optional[GraphModel]:
+    def get(self, item_type: Any, name: str) -> GraphModel | None:
         """Get a graph model by name.
 
         Args:
@@ -67,7 +67,7 @@ class GraphRegistry(AbstractRegistry[GraphModel]):
         """
         return self.graphs.get(name)
 
-    def find_by_id(self, id: str) -> Optional[GraphModel]:
+    def find_by_id(self, id: str) -> GraphModel | None:
         """Find a graph model by its unique identifier.
 
         Args:
@@ -78,7 +78,7 @@ class GraphRegistry(AbstractRegistry[GraphModel]):
         """
         return self.graph_ids.get(id)
 
-    def list(self, item_type: Any) -> List[str]:
+    def list(self, item_type: Any) -> list[str]:
         """List all registered graph names.
 
         Args:
@@ -89,7 +89,7 @@ class GraphRegistry(AbstractRegistry[GraphModel]):
         """
         return list(self.graphs.keys())
 
-    def get_all(self, item_type: Any) -> Dict[str, GraphModel]:
+    def get_all(self, item_type: Any) -> dict[str, GraphModel]:
         """Get all registered graph models.
 
         Args:

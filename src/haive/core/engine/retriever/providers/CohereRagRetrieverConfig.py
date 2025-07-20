@@ -1,5 +1,6 @@
 """Cohere RAG Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Cohere RAG retriever,
 which uses Cohere's Retrieval-Augmented Generation API for document retrieval
 and generation. Cohere RAG provides enterprise-grade retrieval with built-in
@@ -157,7 +158,7 @@ class CohereRagRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a Cohere RAG retriever from this configuration.
 
         Returns:

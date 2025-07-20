@@ -1,33 +1,19 @@
-"""
-Advanced type analysis engine for deep type introspection.
-"""
+"""Advanced type analysis engine for deep type introspection."""
 
 from __future__ import annotations
 
 import inspect
 import sys
 from functools import lru_cache
-from typing import (
-    Any,
-    Dict,
-    ForwardRef,
-    Optional,
-    Type,
-    Union,
-    get_args,
-    get_origin,
-)
+
+# Handle different Python versions
+from types import UnionType
+from typing import Any, ForwardRef, Union, get_args, get_origin
 
 from pydantic import BaseModel
 from pydantic.fields import FieldInfo as PydanticFieldInfo
 
 from haive.core.schema.compatibility.types import FieldInfo, SchemaInfo, TypeInfo
-
-# Handle different Python versions
-if sys.version_info >= (3, 10):
-    from types import UnionType
-else:
-    UnionType = type(None)
 
 
 class TypeAnalyzer:
@@ -46,7 +32,7 @@ class TypeAnalyzer:
             self._get_type_info_impl
         )
 
-    def analyze_schema(self, schema_type: Type[BaseModel]) -> SchemaInfo:
+    def analyze_schema(self, schema_type: type[BaseModel]) -> SchemaInfo:
         """Analyze a Pydantic BaseModel schema."""
         if not inspect.isclass(schema_type) or not issubclass(schema_type, BaseModel):
             raise ValueError(f"{schema_type} is not a BaseModel subclass")
@@ -123,7 +109,7 @@ class TypeAnalyzer:
 
         return field_info
 
-    def _analyze_type_impl(self, type_hint: Type[Any]) -> Dict[str, Any]:
+    def _analyze_type_impl(self, type_hint: type[Any]) -> dict[str, Any]:
         """Implementation of type analysis (cached)."""
         origin = get_origin(type_hint)
         args = get_args(type_hint)
@@ -140,7 +126,7 @@ class TypeAnalyzer:
             "is_literal": origin is not None
             and hasattr(origin, "__name__")
             and origin.__name__ == "Literal",
-            "is_forward_ref": isinstance(type_hint, (ForwardRef, str)),
+            "is_forward_ref": isinstance(type_hint, ForwardRef | str),
             "is_basemodel": self._is_basemodel(type_hint),
             "is_callable": callable(type_hint),
         }
@@ -155,7 +141,7 @@ class TypeAnalyzer:
 
         return analysis
 
-    def _get_type_info_impl(self, type_hint: Type[Any]) -> TypeInfo:
+    def _get_type_info_impl(self, type_hint: type[Any]) -> TypeInfo:
         """Implementation of get_type_info (cached)."""
         analysis = self.analyze_type(type_hint)
 
@@ -175,12 +161,12 @@ class TypeAnalyzer:
             qualname=analysis.get("qualname"),
         )
 
-    def _is_union(self, type_hint: Type[Any]) -> bool:
+    def _is_union(self, type_hint: type[Any]) -> bool:
         """Check if type is a Union."""
         origin = get_origin(type_hint)
         return origin is Union or (sys.version_info >= (3, 10) and origin is UnionType)
 
-    def _is_optional(self, type_hint: Type[Any]) -> bool:
+    def _is_optional(self, type_hint: type[Any]) -> bool:
         """Check if type is Optional (Union[X, None])."""
         if not self._is_union(type_hint):
             return False
@@ -188,7 +174,7 @@ class TypeAnalyzer:
         args = get_args(type_hint)
         return type(None) in args
 
-    def _is_protocol(self, type_hint: Type[Any]) -> bool:
+    def _is_protocol(self, type_hint: type[Any]) -> bool:
         """Check if type is a Protocol."""
         if not inspect.isclass(type_hint):
             return False
@@ -200,7 +186,7 @@ class TypeAnalyzer:
             if hasattr(base, "__module__") and "typing" in base.__module__
         )
 
-    def _is_typeddict(self, type_hint: Type[Any]) -> bool:
+    def _is_typeddict(self, type_hint: type[Any]) -> bool:
         """Check if type is a TypedDict."""
         if not hasattr(type_hint, "__annotations__"):
             return False
@@ -213,7 +199,7 @@ class TypeAnalyzer:
             if hasattr(base, "__module__") and "typing" in base.__module__
         )
 
-    def _is_basemodel(self, type_hint: Type[Any]) -> bool:
+    def _is_basemodel(self, type_hint: type[Any]) -> bool:
         """Check if type is a Pydantic BaseModel."""
         if not inspect.isclass(type_hint):
             return False
@@ -225,10 +211,10 @@ class TypeAnalyzer:
 
     def resolve_forward_refs(
         self,
-        type_hint: Type[Any],
-        globalns: Optional[Dict[str, Any]] = None,
-        localns: Optional[Dict[str, Any]] = None,
-    ) -> Type[Any]:
+        type_hint: type[Any],
+        globalns: dict[str, Any] | None = None,
+        localns: dict[str, Any] | None = None,
+    ) -> type[Any]:
         """Resolve forward references in a type hint."""
         if isinstance(type_hint, str):
             # It's a string forward reference
@@ -258,7 +244,7 @@ class TypeAnalyzer:
 
         return type_hint
 
-    def get_generic_parameters(self, type_hint: Type[Any]) -> Dict[str, Type[Any]]:
+    def get_generic_parameters(self, type_hint: type[Any]) -> dict[str, type[Any]]:
         """Extract generic type parameters."""
         params = {}
 
@@ -272,13 +258,13 @@ class TypeAnalyzer:
         if origin is not None:
             args = get_args(type_hint)
             if hasattr(origin, "__parameters__"):
-                for param, arg in zip(origin.__parameters__, args):
+                for param, arg in zip(origin.__parameters__, args, strict=False):
                     param_name = getattr(param, "__name__", f"T{id(param)}")
                     params[param_name] = arg
 
         return params
 
-    def is_subtype(self, subtype: Type[Any], supertype: Type[Any]) -> bool:
+    def is_subtype(self, subtype: type[Any], supertype: type[Any]) -> bool:
         """Check if subtype is a subtype of supertype."""
         # Handle None
         if subtype is type(None):
@@ -308,7 +294,7 @@ class TypeAnalyzer:
                 return False
 
             # Check each argument
-            for sub_arg, super_arg in zip(sub_args, super_args):
+            for sub_arg, super_arg in zip(sub_args, super_args, strict=False):
                 if not self.is_subtype(sub_arg, super_arg):
                     return False
 

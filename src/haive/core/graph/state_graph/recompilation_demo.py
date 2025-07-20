@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Demonstration of BaseGraph2 recompilation tracking.
 
+from typing import Any, Dict
 This script shows how the new recompilation tracking works and when
 recompilation is needed vs when it's not.
 """
@@ -31,7 +32,7 @@ class ExtendedState(BaseModel):
     status: str = "pending"
 
 
-def demo_recompilation_tracking():
+def demo_recompilation_tracking() -> Any:
     """Demonstrate recompilation tracking functionality."""
     # Create a new graph
     graph = BaseGraph(name="recompilation_demo")
@@ -40,13 +41,13 @@ def demo_recompilation_tracking():
 
     # Add some nodes - should mark as needing recompilation
 
-    def start_func(state):
+    def start_func(state: Dict[str, Any]):
         return {"status": "started"}
 
-    def process_func(state):
+    def process_func(state: Dict[str, Any]):
         return {"status": "processed"}
 
-    def finish_func(state):
+    def finish_func(state: Dict[str, Any]):
         return {"status": "finished"}
 
     graph.add_node("start", start_func)
@@ -62,7 +63,7 @@ def demo_recompilation_tracking():
 
     # Add conditional routing - should mark as needing recompilation
 
-    def router(state):
+    def router(state: Dict[str, Any]):
         return "continue" if state.get("count", 0) < 5 else "finish"
 
     destinations = {"continue": "process", "finish": "finish"}
@@ -87,7 +88,7 @@ def demo_recompilation_tracking():
 
     # Now make changes that require recompilation
 
-    def validate_func(state):
+    def validate_func(state: Dict[str, Any]):
         return {"status": "validated"}
 
     graph.add_node("validate", validate_func)
@@ -102,7 +103,7 @@ def demo_recompilation_tracking():
     return graph
 
 
-def demo_what_needs_recompilation():
+def demo_what_needs_recompilation() -> None:
     """Show what changes require recompilation vs what doesn't."""
     changes_requiring_recompilation = [
         "✅ Adding nodes (graph.add_node())",
@@ -132,11 +133,11 @@ def demo_what_needs_recompilation():
         pass
 
 
-def demo_usage_patterns():
+def demo_usage_patterns() -> None:
     """Show recommended usage patterns."""
 
 
-def main():
+def main() -> Any:
     """Run all demonstrations."""
     # Run the recompilation tracking demo
     graph = demo_recompilation_tracking()

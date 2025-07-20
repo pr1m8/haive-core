@@ -3,6 +3,9 @@
 This module provides the SchemaGraph class, which is a StateGraph with
 enhanced schema management capabilities.
 """
+"""
+"""
+"""
 
 import logging
 from typing import Any, Type
@@ -21,6 +24,9 @@ class SchemaGraph(StateGraph):
     SchemaGraph is a StateGraph with additional methods for schema
     validation and handling.
     """
+"""
+"""
+"""
 
     def __init__(self, name: str, state_schema: type[BaseModel], **kwargs):
         """Initialize a SchemaGraph.
@@ -30,6 +36,9 @@ class SchemaGraph(StateGraph):
             state_schema: Schema for graph state
             **kwargs: Additional graph properties
         """
+"""
+"""
+"""
         super().__init__(name=name, state_schema=state_schema, **kwargs)
 
     def validate_state(self, state: Any) -> Any:
@@ -41,6 +50,9 @@ class SchemaGraph(StateGraph):
         Returns:
             Validated state
         """
+"""
+"""
+"""
         return self.create_state(state)
 
     def update_state_schema(self, new_schema: type[BaseModel]) -> "SchemaGraph":
@@ -52,6 +64,9 @@ class SchemaGraph(StateGraph):
         Returns:
             Self for method chaining
         """
+"""
+"""
+"""
         self.state_schema = new_schema
 
         # Track schema change
@@ -65,6 +80,9 @@ class SchemaGraph(StateGraph):
         Outputs information about nodes, edges, branches, and generates
         a Mermaid diagram for visualization.
         """
+"""
+"""
+"""
 
         # Display schema information
         schema_name = getattr(
@@ -75,13 +93,13 @@ class SchemaGraph(StateGraph):
             node_type = self.node_types.get(name, "unknown")
 
         for src, dst in self.edges:
-            pass")
+            pass
 
         for _branch_id, branch in self.branches.items():
             for cond, dest in branch.destinations.items():
-                pass")
+                pass
             if branch.default:
-                pass")
+                pass
 
         # Display validation issues if any
         issues = self.validate_graph()

@@ -20,7 +20,8 @@ class TimeWeightedRetrieverConfig(RetrieverConfig):
     decay_rate: float = Field(
         default=0.01, description="Rate at which document relevance decays with time"
     )
-    decay_offset: float = Field(default=1, description="Offset for decay calculation")
+    decay_offset: float = Field(
+        default=1, description="Offset for decay calculation")
     importance_weight: float = Field(
         default=0.5, description="Weight of importance vs recency"
     )

@@ -1,18 +1,50 @@
-# src/haive/core/registry/__init__.py
+"""Module exports."""
 
-from haive.core.registry.base import AbstractRegistry
-from haive.core.registry.dynamic_registry import DynamicRegistry, RegistryItem
-from haive.core.registry.manager import RegistryManager
-from haive.core.registry.memory import MemoryRegistry
+from registry.base import AbstractRegistry
+from registry.base import clear
+from registry.base import find_by_id
+from registry.base import get
+from registry.base import get_all
+from registry.base import list
+from registry.base import register
+from registry.decorators import decorator
+from registry.decorators import new_init
+from registry.decorators import register_component
+from registry.decorators import register_instance
+from registry.dynamic_registry import DynamicRegistry
+from registry.dynamic_registry import RegistryItem
+from registry.dynamic_registry import activate
+from registry.dynamic_registry import clear_inactive
+from registry.dynamic_registry import deactivate
+from registry.dynamic_registry import get_active_components
+from registry.dynamic_registry import get_active_items
+from registry.dynamic_registry import get_component
+from registry.dynamic_registry import get_inactive_items
+from registry.dynamic_registry import get_item
+from registry.dynamic_registry import get_stats
+from registry.dynamic_registry import is_active
+from registry.dynamic_registry import list_components
+from registry.dynamic_registry import register
+from registry.dynamic_registry import validate_active_items
+from registry.dynamic_registry import validate_id
+from registry.dynamic_registry import validate_max_active
+from registry.dynamic_registry import validate_name
+from registry.factory import RegistryFactory
+from registry.factory import create
+from registry.factory import register_registry_type
+from registry.manager import RegistryManager
+from registry.manager import create_registry
+from registry.manager import get_instance
+from registry.manager import get_registry
+from registry.manager import register_registry_type
+from registry.manager import set_registry
+from registry.memory import MemoryRegistry
+from registry.memory import clear
+from registry.memory import find
+from registry.memory import find_by_id
+from registry.memory import get
+from registry.memory import get_all
+from registry.memory import list
+from registry.memory import register
 
-# Initialize registry types
-RegistryManager.register_registry_type("memory", MemoryRegistry)
-
-# Export primary classes
-__all__ = [
-    "AbstractRegistry",
-    "DynamicRegistry",
-    "MemoryRegistry",
-    "RegistryItem",
-    "RegistryManager",
-]
+__all__ = ['AbstractRegistry', 'DynamicRegistry', 'MemoryRegistry', 'RegistryFactory', 'RegistryItem', 'RegistryManager', 'activate', 'clear', 'clear_inactive', 'create', 'create_registry', 'deactivate', 'decorator', 'find', 'find_by_id', 'get', 'get_active_components', 'get_active_items', 'get_all', 'get_component', 'get_inactive_items', 'get_instance', 'get_item', 'get_registry', 'get_stats', 'is_active', 'list', 'list_components', 'new_init', 'register', 'register_component', 'register_instance', 'register_registry_type', 'set_registry', 'validate_active_items', 'validate_id', 'validate_max_active', 'validate_name']

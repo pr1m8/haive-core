@@ -138,7 +138,8 @@ class MockDynamicGraph(BaseModel):
 
     def _lookup_engine(self, name, engine_type=None):
         return next(
-            (e for e in self.components if hasattr(e, "name") and e.name == name), None
+            (e for e in self.components if hasattr(
+                e, "name") and e.name == name), None
         )
 
     def with_runnable_config(self, runnable_config):
@@ -200,14 +201,18 @@ class MockDynamicGraph(BaseModel):
         self, name="set_config", runnable_config=None, command_goto=None
     ):
         # Create a node function using NodeFactory
-        # This now explicitly calls the factory method to pass the test assertion
+        # This now explicitly calls the factory method to pass the test
+        # assertion
         node_fn = mock_node_factory.create_runnable_config_node(
             runnable_config=runnable_config or self.default_runnable_config,
             command_goto=command_goto,
         )
 
         # Add to graph editor
-        self.graph_editor.add_node(name=name, engine=node_fn, command_goto=command_goto)
+        self.graph_editor.add_node(
+            name=name,
+            engine=node_fn,
+            command_goto=command_goto)
 
         return self
 
@@ -221,7 +226,8 @@ class MockDynamicGraph(BaseModel):
         model_to_use = model or self.structured_output_model
 
         # Create a node function using NodeFactory
-        # This now explicitly calls the factory method to pass the test assertion
+        # This now explicitly calls the factory method to pass the test
+        # assertion
         node_fn = mock_node_factory.create_structured_output_node(
             model=model_to_use,
             command_goto=command_goto,
@@ -229,7 +235,10 @@ class MockDynamicGraph(BaseModel):
         )
 
         # Add to graph editor
-        self.graph_editor.add_node(name=name, engine=node_fn, command_goto=command_goto)
+        self.graph_editor.add_node(
+            name=name,
+            engine=node_fn,
+            command_goto=command_goto)
 
         return self
 
@@ -246,7 +255,8 @@ class MockDynamicGraph(BaseModel):
             )
 
         # Create a node function using NodeFactory
-        # This now explicitly calls the factory method to pass the test assertion
+        # This now explicitly calls the factory method to pass the test
+        # assertion
         node_fn = mock_node_factory.create_tool_node(
             tools=tools,
             post_processor=post_processor,
@@ -255,7 +265,10 @@ class MockDynamicGraph(BaseModel):
         )
 
         # Add to graph editor
-        self.graph_editor.add_node(name=name, engine=node_fn, command_goto=command_goto)
+        self.graph_editor.add_node(
+            name=name,
+            engine=node_fn,
+            command_goto=command_goto)
 
         return self
 
@@ -263,7 +276,8 @@ class MockDynamicGraph(BaseModel):
         self.graph_editor.add_edge(from_node, to_node)
         return self
 
-    def add_conditional_edges(self, from_node, condition_or_branch, routes=None):
+    def add_conditional_edges(
+            self, from_node, condition_or_branch, routes=None):
         # Handle Branch objects specially
         if hasattr(condition_or_branch, "evaluator"):
             self.graph_editor.add_conditional_edges(
@@ -366,8 +380,10 @@ sys.modules["src.haive.core.graph.GraphBuilder"] = mock_graph_builder_module
 
 # Mock config manager
 mock_config_manager = MagicMock()
-mock_config_manager.create.return_value = {"configurable": {"thread_id": "test-thread"}}
-mock_config_manager.merge.return_value = {"configurable": {"thread_id": "test-thread"}}
+mock_config_manager.create.return_value = {
+    "configurable": {"thread_id": "test-thread"}}
+mock_config_manager.merge.return_value = {
+    "configurable": {"thread_id": "test-thread"}}
 mock_config_module = MagicMock()
 mock_config_module.RunnableConfigManager = mock_config_manager
 sys.modules["src.haive.core.config.runnable"] = mock_config_module
@@ -408,7 +424,8 @@ class DynamicGraphTests(unittest.TestCase):
 
     def setUp(self):
         # Create test engines
-        self.llm_engine = RealEngine(name="llm_engine", engine_type=EngineType.LLM)
+        self.llm_engine = RealEngine(
+            name="llm_engine", engine_type=EngineType.LLM)
         self.retriever_engine = RealEngine(
             name="retriever_engine", engine_type=EngineType.RETRIEVER
         )
@@ -519,7 +536,8 @@ class DynamicGraphTests(unittest.TestCase):
         assert kwargs["command_goto"] == "next_node"
         assert kwargs["input_mapping"] == {"state_input": "engine_input"}
         assert kwargs["output_mapping"] == {"engine_output": "state_output"}
-        assert kwargs["runnable_config"] == {"configurable": {"temperature": 0.7}}
+        assert kwargs["runnable_config"] == {
+            "configurable": {"temperature": 0.7}}
 
         # Check that engine was stored
         assert graph.engines["test_node"] == self.llm_engine
@@ -657,7 +675,8 @@ class DynamicGraphTests(unittest.TestCase):
         routes = {"route1": "node1", "route2": "node2"}
 
         # Add conditional edges
-        result = graph.add_conditional_edges("source_node", condition_function, routes)
+        result = graph.add_conditional_edges(
+            "source_node", condition_function, routes)
 
         # Check that conditional edges were added to graph editor
         mock_state_graph_editor.return_value.add_conditional_edges.assert_called_once_with(
@@ -695,7 +714,9 @@ class DynamicGraphTests(unittest.TestCase):
         # Create graph
         graph = MockDynamicGraph(
             name="test_graph",
-            default_runnable_config={"configurable": {"thread_id": "test-thread"}},
+            default_runnable_config={
+                "configurable": {
+                    "thread_id": "test-thread"}},
             visualize=False,
         )
 
@@ -718,7 +739,9 @@ class DynamicGraphTests(unittest.TestCase):
             name="test_graph",
             description="Test graph description",
             components=[self.llm_engine, self.retriever_engine],
-            default_runnable_config={"configurable": {"thread_id": "test-thread"}},
+            default_runnable_config={
+                "configurable": {
+                    "thread_id": "test-thread"}},
             visualize=True,
         )
 

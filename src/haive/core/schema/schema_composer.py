@@ -1,5 +1,6 @@
 """SchemaComposer for the Haive Schema System.
 
+from typing import Any, Optional
 This module provides the SchemaComposer class, which offers a streamlined API for
 building state schemas dynamically from various components. The SchemaComposer is
 designed for schema composition, enabling the creation of complex state schemas by
@@ -69,7 +70,8 @@ import inspect
 import logging
 import sys
 from collections import defaultdict
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type, Union
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel, create_model
@@ -100,7 +102,6 @@ console = Console()
 
 # Check if rich is available for UI
 try:
-    from rich import console as _
 
     RICH_AVAILABLE = True
 except ImportError:
@@ -136,7 +137,7 @@ class SchemaComposer:
     def __init__(
         self,
         name: str = "ComposedSchema",
-        base_state_schema: Optional[Type[StateSchema]] = None,
+        base_state_schema: type[StateSchema] | None = None,
     ):
         """Initialize a new SchemaComposer.
 
@@ -211,16 +212,16 @@ class SchemaComposer:
     def _visualize_creation(self):
         """Display creation information using Rich."""
         tree = Tree(
-            f"[bold green]SchemaComposer[/bold green]: [blue]{self.name}[/blue]"
+            f"[bold green]SchemaComposer[/bold green]: [blue]{
+                self.name}[/blue]"
         )
         tree.add("[yellow]Ready to compose schema[/yellow]")
         console.print(tree)
 
     def _detect_base_class_requirements(
-        self, components: Optional[List[Any]] = None
+        self, components: list[Any] | None = None
     ) -> None:
-        """
-        Detect which base class should be used based on components and current fields.
+        """Detect which base class should be used based on components and current fields.
         Must be called before adding fields to avoid duplicates.
 
         Priority order:
@@ -247,7 +248,8 @@ class SchemaComposer:
         # If custom base schema was provided, skip detection
         if self.custom_base_schema:
             logger.debug(
-                f"Using custom base schema: {self.detected_base_class.__name__}"
+                f"Using custom base schema: {
+                    self.detected_base_class.__name__}"
             )
             return
 
@@ -273,7 +275,11 @@ class SchemaComposer:
 
                     if engine_type_str == "llm":
                         logger.debug(
-                            f"Found AugLLM engine: {getattr(component, 'name', 'unnamed')}"
+                            f"Found AugLLM engine: {
+                                getattr(
+                                    component,
+                                    'name',
+                                    'unnamed')}"
                         )
                         self.has_messages = True
 
@@ -291,7 +297,16 @@ class SchemaComposer:
                     component, "__class__", None
                 ).__name__.lower().endswith("agent"):
                     logger.debug(
-                        f"Found agent component: {getattr(component, 'name', getattr(component, '__class__', {}).get('__name__', 'unnamed'))}"
+                        f"Found agent component: {
+                            getattr(
+                                component,
+                                'name',
+                                getattr(
+                                    component,
+                                    '__class__',
+                                    {}).get(
+                                    '__name__',
+                                    'unnamed'))}"
                     )
                     self.has_messages = True
 
@@ -351,9 +366,12 @@ class SchemaComposer:
             has_llm_engine = True
             break
 
-        # Priority: LLMState for LLM engines (includes messages + tools + token tracking)
+        # Priority: LLMState for LLM engines (includes messages + tools + token
+        # tracking)
         logger.debug(
-            f"DEBUG: has_llm_engine={has_llm_engine}, has_tools={self.has_tools}, has_messages={self.has_messages}"
+            f"DEBUG: has_llm_engine={has_llm_engine}, has_tools={
+                self.has_tools}, has_messages={
+                self.has_messages}"
         )
         if has_llm_engine:
             from haive.core.schema.prebuilt.llm_state import LLMState
@@ -388,13 +406,15 @@ class SchemaComposer:
         # Extract fields from base class to avoid duplicates
         if hasattr(base_class, "model_fields"):
             self.base_class_fields = set(base_class.model_fields.keys())
-            logger.debug(f"Base class provides fields: {self.base_class_fields}")
+            logger.debug(
+                f"Base class provides fields: {
+                    self.base_class_fields}"
+            )
         else:
             self.base_class_fields = set()
 
-    def add_engine(self, engine: Any) -> "SchemaComposer":
-        """
-        Add an engine to the composer for tracking and later updates.
+    def add_engine(self, engine: Any) -> SchemaComposer:
+        """Add an engine to the composer for tracking and later updates.
 
         Args:
             engine: Engine to add
@@ -439,7 +459,7 @@ class SchemaComposer:
 
         return self
 
-    def resolve_engine_types(self) -> Dict[str, type]:
+    def resolve_engine_types(self) -> dict[str, type]:
         """Resolve engine types from added engines for generic typing.
 
         Returns:
@@ -451,12 +471,13 @@ class SchemaComposer:
             if engine is not None:
                 resolved_types[engine_name] = type(engine)
                 logger.debug(
-                    f"Resolved engine '{engine_name}' to type {type(engine).__name__}"
+                    f"Resolved engine '{engine_name}' to type {
+                        type(engine).__name__}"
                 )
 
         return resolved_types
 
-    def get_engine_union_type(self):
+    def get_engine_union_type(self) -> Any | None:
         """Get a Union type of all concrete engine types."""
         from typing import Union
 
@@ -467,12 +488,11 @@ class SchemaComposer:
 
         if not unique_types:
             return Engine  # Fallback to base Engine type
-        elif len(unique_types) == 1:
+        if len(unique_types) == 1:
             return unique_types[0]
-        else:
-            return Union[tuple(unique_types)]
+        return Union[tuple(unique_types)]
 
-    def build_with_engine_generics(self, name: str = None) -> Type[StateSchema]:
+    def build_with_engine_generics(self, name: str | None = None) -> type[StateSchema]:
         """Build a StateSchema with resolved engine generics.
 
         Args:
@@ -481,11 +501,9 @@ class SchemaComposer:
         Returns:
             StateSchema class with concrete engine types
         """
-        from typing import Dict
-
         # Resolve engine types
         engine_union_type = self.get_engine_union_type()
-        engines_dict_type = Dict[str, engine_union_type]
+        engines_dict_type = dict[str, engine_union_type]
 
         # Build the schema with generic resolution
         schema_class = self.build()
@@ -520,10 +538,9 @@ class SchemaComposer:
         return resolved_schema
 
     def update_engine_provider(
-        self, engine_type: str, updates: Dict[str, Any]
-    ) -> "SchemaComposer":
-        """
-        Update configuration for all engines of a specific type.
+        self, engine_type: str, updates: dict[str, Any]
+    ) -> SchemaComposer:
+        """Update configuration for all engines of a specific type.
 
         Args:
             engine_type: Type of engines to update (e.g., "llm", "retriever")
@@ -558,7 +575,11 @@ class SchemaComposer:
                             updated_count += 1
 
         logger.info(
-            f"Updated {updated_count} fields across {len(self.engines_by_type.get(engine_type, []))} {engine_type} engines"
+            f"Updated {updated_count} fields across {
+                len(
+                    self.engines_by_type.get(
+                        engine_type,
+                        []))} {engine_type} engines"
         )
 
         # Add tracking entry
@@ -573,9 +594,8 @@ class SchemaComposer:
 
         return self
 
-    def get_engines_by_type(self, engine_type: str) -> List[Any]:
-        """
-        Get all engines of a specific type.
+    def get_engines_by_type(self, engine_type: str) -> list[Any]:
+        """Get all engines of a specific type.
 
         Args:
             engine_type: Type of engines to retrieve
@@ -589,16 +609,16 @@ class SchemaComposer:
     def add_field(
         self,
         name: str,
-        field_type: Type,
+        field_type: type,
         default: Any = None,
-        default_factory: Optional[Callable[[], Any]] = None,
-        description: Optional[str] = None,
+        default_factory: Callable[[], Any] | None = None,
+        description: str | None = None,
         shared: bool = False,
-        reducer: Optional[Callable] = None,
-        source: Optional[str] = None,
-        input_for: Optional[List[str]] = None,
-        output_from: Optional[List[str]] = None,
-    ) -> "SchemaComposer":
+        reducer: Callable | None = None,
+        source: str | None = None,
+        input_for: list[str] | None = None,
+        output_from: list[str] | None = None,
+    ) -> SchemaComposer:
         """Add a field definition to the schema.
 
         This method adds a field to the schema being composed, with comprehensive
@@ -641,7 +661,7 @@ class SchemaComposer:
             ```
         """
         # Skip special fields
-        if name == "__runnable_config__" or name == "runnable_config":
+        if name in {"__runnable_config__", "runnable_config"}:
             logger.warning(f"Skipping special field {name}")
             return self
 
@@ -649,17 +669,15 @@ class SchemaComposer:
         if field_type is None:
             field_type = Any
         elif not isinstance(field_type, type) and not hasattr(field_type, "__origin__"):
-            # Handle non-type values (like from tuple unpacking or invalid inputs)
-            if isinstance(field_type, (dict, list, tuple)) and not hasattr(
-                field_type, "__origin__"
-            ):
-                logger.warning(
-                    f"Invalid field type for '{name}': {field_type}, using Any"
+            # Handle non-type values (like from tuple unpacking or invalid
+            # inputs)
+            if (
+                (
+                    isinstance(field_type, dict | list | tuple)
+                    and not hasattr(field_type, "__origin__")
                 )
-                field_type = Any
-            # Allow typing constructs like Union, Optional, etc.
-            elif not hasattr(field_type, "__module__") or "typing" not in str(
-                getattr(field_type, "__module__", "")
+                or not hasattr(field_type, "__module__")
+                or "typing" not in str(getattr(field_type, "__module__", ""))
             ):
                 logger.warning(
                     f"Invalid field type for '{name}': {field_type}, using Any"
@@ -709,18 +727,23 @@ class SchemaComposer:
 
         # Check if field is a StateSchema type - mark for special handling
         if inspect.isclass(field_type) and issubclass(field_type, StateSchema):
-            logger.debug(f"Field '{name}' is a StateSchema type: {field_type.__name__}")
+            logger.debug(
+                f"Field '{name}' is a StateSchema type: {
+                    field_type.__name__}"
+            )
             self.nested_schemas[name] = field_type
         elif getattr(field_type, "__origin__", None) is Union and any(
             inspect.isclass(arg) and issubclass(arg, StateSchema)
             for arg in field_type.__args__
             if inspect.isclass(arg)
         ):
-            # Handle Optional[StateSchema] and Union types containing StateSchema
+            # Handle Optional[StateSchema] and Union types containing
+            # StateSchema
             for arg in field_type.__args__:
                 if inspect.isclass(arg) and issubclass(arg, StateSchema):
                     logger.debug(
-                        f"Field '{name}' contains StateSchema type: {arg.__name__}"
+                        f"Field '{name}' contains StateSchema type: {
+                            arg.__name__}"
                     )
                     self.nested_schemas[name] = arg
                     break
@@ -785,7 +808,7 @@ class SchemaComposer:
 
         return self
 
-    def add_standard_field(self, field_name: str, **kwargs) -> "SchemaComposer":
+    def add_standard_field(self, field_name: str, **kwargs) -> SchemaComposer:
         """Add a standard field from the field registry.
 
         Args:
@@ -828,9 +851,8 @@ class SchemaComposer:
 
         return self
 
-    def add_fields_from_dict(self, fields_dict: Dict[str, Any]) -> "SchemaComposer":
-        """
-        Add fields from a dictionary definition.
+    def add_fields_from_dict(self, fields_dict: dict[str, Any]) -> SchemaComposer:
+        """Add fields from a dictionary definition.
 
         Args:
             fields_dict: Dictionary mapping field names to type/value information
@@ -838,11 +860,14 @@ class SchemaComposer:
         Returns:
             Self for chaining
         """
-        logger.debug(f"Adding fields from dictionary with {len(fields_dict)} entries")
+        logger.debug(
+            f"Adding fields from dictionary with {
+                len(fields_dict)} entries"
+        )
 
         for field_name, field_info in fields_dict.items():
             # Skip special fields
-            if field_name == "__runnable_config__" or field_name == "runnable_config":
+            if field_name in {"__runnable_config__", "runnable_config"}:
                 logger.warning(f"Skipping special field {field_name}")
                 continue
 
@@ -902,7 +927,8 @@ class SchemaComposer:
                     field_info, "__origin__"
                 ):
                     logger.warning(
-                        f"Unexpected field_info type for '{field_name}': {type(field_info)}, using Any"
+                        f"Unexpected field_info type for '{field_name}': {
+                            type(field_info)}, using Any"
                     )
                     field_info = Any
 
@@ -915,9 +941,8 @@ class SchemaComposer:
 
         return self
 
-    def add_fields_from_model(self, model: Type[BaseModel]) -> "SchemaComposer":
-        """
-        Extract fields from a Pydantic model with improved handling of nested schemas.
+    def add_fields_from_model(self, model: type[BaseModel]) -> SchemaComposer:
+        """Extract fields from a Pydantic model with improved handling of nested schemas.
 
         Args:
             model: Pydantic model to extract fields from
@@ -952,7 +977,10 @@ class SchemaComposer:
             # Extract engine IO mappings
             if hasattr(model, "__engine_io_mappings__"):
                 engine_io = getattr(model, "__engine_io_mappings__", {})
-                logger.debug(f"Found engine IO mappings: {len(engine_io)} engines")
+                logger.debug(
+                    f"Found engine IO mappings: {
+                        len(engine_io)} engines"
+                )
 
                 # Update our engine mappings
                 for engine_name, mapping in engine_io.items():
@@ -988,12 +1016,14 @@ class SchemaComposer:
         if hasattr(model, "model_fields"):
             # Pydantic v2
             logger.debug(
-                f"Processing Pydantic v2 model: {len(model.model_fields)} fields"
+                f"Processing Pydantic v2 model: {
+                    len(
+                        model.model_fields)} fields"
             )
 
             for field_name, field_info in model.model_fields.items():
                 # Skip special fields and private fields
-                if field_name.startswith("__") or field_name.startswith("_"):
+                if field_name.startswith(("__", "_")):
                     continue
 
                 # Get field type and defaults
@@ -1046,7 +1076,8 @@ class SchemaComposer:
                 # Check if field is a nested StateSchema
                 if inspect.isclass(field_type) and issubclass(field_type, StateSchema):
                     logger.debug(
-                        f"Field '{field_name}' is a StateSchema: {field_type.__name__}"
+                        f"Field '{field_name}' is a StateSchema: {
+                            field_type.__name__}"
                     )
                     self.nested_schemas[field_name] = field_type
 
@@ -1099,7 +1130,8 @@ class SchemaComposer:
                                 self.structured_model_fields[model_name].add(field)
 
                     logger.debug(
-                        f"Imported structured model {model_name}: {structured_model.__name__}"
+                        f"Imported structured model {model_name}: {
+                            structured_model.__name__}"
                     )
                 except (ImportError, AttributeError, ValueError) as e:
                     logger.warning(
@@ -1108,9 +1140,8 @@ class SchemaComposer:
 
         return self
 
-    def add_fields_from_engine(self, engine: Any) -> "SchemaComposer":
-        """
-        Extract fields from an Engine object with enhanced nested schema handling.
+    def add_fields_from_engine(self, engine: Any) -> SchemaComposer:
+        """Extract fields from an Engine object with enhanced nested schema handling.
 
         Args:
             engine: Engine to extract fields from
@@ -1161,7 +1192,8 @@ class SchemaComposer:
                     f"AugLLM {engine_name} has explicit output field: {aug_llm_output_field}"
                 )
             elif not has_structured_output:
-                # Default to messages for conversational agents without structured output
+                # Default to messages for conversational agents without
+                # structured output
                 aug_llm_output_field = "messages"
                 logger.debug(
                     f"AugLLM {engine_name} defaulting output to 'messages' field"
@@ -1182,13 +1214,19 @@ class SchemaComposer:
             engine.input_schema, BaseModel
         ):
             input_schema = engine.input_schema
-            logger.debug(f"Using input_schema from engine: {input_schema.__name__}")
+            logger.debug(
+                f"Using input_schema from engine: {
+                    input_schema.__name__}"
+            )
         elif hasattr(engine, "derive_input_schema") and callable(
             engine.derive_input_schema
         ):
             try:
                 input_schema = engine.derive_input_schema()
-                logger.debug(f"Using derived input schema: {input_schema.__name__}")
+                logger.debug(
+                    f"Using derived input schema: {
+                        input_schema.__name__}"
+                )
             except Exception as e:
                 logger.warning(f"Error deriving input schema from {engine_name}: {e}")
 
@@ -1199,7 +1237,8 @@ class SchemaComposer:
             ):
                 output_schema = engine.output_schema
                 logger.debug(
-                    f"Using output_schema from engine: {output_schema.__name__}"
+                    f"Using output_schema from engine: {
+                        output_schema.__name__}"
                 )
             elif hasattr(engine, "derive_output_schema") and callable(
                 engine.derive_output_schema
@@ -1207,7 +1246,8 @@ class SchemaComposer:
                 try:
                     output_schema = engine.derive_output_schema()
                     logger.debug(
-                        f"Using derived output schema: {output_schema.__name__}"
+                        f"Using derived output schema: {
+                            output_schema.__name__}"
                     )
                 except Exception as e:
                     logger.warning(
@@ -1245,7 +1285,8 @@ class SchemaComposer:
                             f"Marked field '{field_name}' as input for engine '{engine_name}'"
                         )
 
-        # 1.4 Process output schema if found (skip for AugLLM without structured output)
+        # 1.4 Process output schema if found (skip for AugLLM without
+        # structured output)
         if (
             output_schema
             and not isinstance(output_schema, dict)
@@ -1294,7 +1335,8 @@ class SchemaComposer:
             model_name = field_info_dict["field_name"]
 
             logger.debug(
-                f"Found structured_output_model in {source}: {model.__name__} -> {model_name}"
+                f"Found structured_output_model in {source}: {
+                    model.__name__} -> {model_name}"
             )
 
             # Store structured model
@@ -1351,7 +1393,8 @@ class SchemaComposer:
             try:
                 input_fields = engine.get_input_fields()
                 logger.debug(
-                    f"Engine {engine_name} has {len(input_fields)} input fields from get_input_fields()"
+                    f"Engine {engine_name} has {
+                        len(input_fields)} input fields from get_input_fields()"
                 )
 
                 for field_name, (field_type, field_info) in input_fields.items():
@@ -1375,10 +1418,7 @@ class SchemaComposer:
                         continue
 
                     # Skip special fields
-                    if (
-                        field_name == "__runnable_config__"
-                        or field_name == "runnable_config"
-                    ):
+                    if field_name in {"__runnable_config__", "runnable_config"}:
                         logger.warning(f"Skipping special field {field_name}")
                         continue
 
@@ -1418,9 +1458,11 @@ class SchemaComposer:
             and callable(engine.get_output_fields)
         ):
             try:
-                # For AugLLM without structured output, just mark the output field
+                # For AugLLM without structured output, just mark the output
+                # field
                 if is_aug_llm and aug_llm_output_field and not has_structured_output:
-                    # Don't extract new fields, just mark the existing field as output
+                    # Don't extract new fields, just mark the existing field as
+                    # output
                     if (
                         aug_llm_output_field in self.fields
                         or aug_llm_output_field in self.base_class_fields
@@ -1444,7 +1486,8 @@ class SchemaComposer:
                     # Normal output field extraction for non-AugLLM engines
                     output_fields = engine.get_output_fields()
                     logger.debug(
-                        f"Got {len(output_fields)} output fields from get_output_fields()"
+                        f"Got {
+                            len(output_fields)} output fields from get_output_fields()"
                     )
 
                     for field_name, (field_type, field_info) in output_fields.items():
@@ -1468,10 +1511,7 @@ class SchemaComposer:
                             continue
 
                         # Skip special fields
-                        if (
-                            field_name == "__runnable_config__"
-                            or field_name == "runnable_config"
-                        ):
+                        if field_name in {"__runnable_config__", "runnable_config"}:
                             logger.warning(f"Skipping special field {field_name}")
                             continue
 
@@ -1552,11 +1592,10 @@ class SchemaComposer:
 
             # Add tools field if not present and not in base class
             if "tools" not in self.fields and "tools" not in self.base_class_fields:
-                from typing import List
 
                 self.add_field(
                     name="tools",
-                    field_type=List[Any],
+                    field_type=list[Any],
                     default_factory=list,
                     description="Tools for this engine",
                     source=source,
@@ -1567,7 +1606,10 @@ class SchemaComposer:
         # 5. Check for tool routes (from ToolRouteMixin)
         if hasattr(engine, "tool_routes") and engine.tool_routes:
             tool_routes = engine.tool_routes
-            logger.debug(f"Engine {engine_name} has {len(tool_routes)} tool routes")
+            logger.debug(
+                f"Engine {engine_name} has {
+                    len(tool_routes)} tool routes"
+            )
 
             # Add tool_routes field if not present and not in base class
             if (
@@ -1601,15 +1643,16 @@ class SchemaComposer:
             )
 
         logger.debug(
-            f"Engine '{engine_name}' IO mappings: {len(self.input_fields[engine_name])} inputs, "
+            f"Engine '{engine_name}' IO mappings: {
+                len(
+                    self.input_fields[engine_name])} inputs, "
             f"{len(self.output_fields[engine_name])} outputs"
         )
 
         return self
 
-    def extract_tool_schemas(self, tools: List[Any]) -> None:
-        """
-        Extract input and output schemas from tools with improved parsing detection.
+    def extract_tool_schemas(self, tools: list[Any]) -> None:
+        """Extract input and output schemas from tools with improved parsing detection.
 
         Args:
             tools: List of tools to analyze
@@ -1629,7 +1672,8 @@ class SchemaComposer:
 
             logger.debug(f"Processing tool: {tool_name}")
 
-            # Check for structured_output_model - tools with this go to parse_output
+            # Check for structured_output_model - tools with this go to
+            # parse_output
             if (
                 hasattr(tool, "structured_output_model")
                 and tool.structured_output_model
@@ -1680,7 +1724,7 @@ class SchemaComposer:
                 # Add to tool_schemas dictionary in state
                 self.add_field(
                     name=field_name,
-                    field_type=Type[BaseModel],
+                    field_type=type[BaseModel],
                     default=input_schema,
                     description=f"Schema for {tool_name}",
                 )
@@ -1712,7 +1756,7 @@ class SchemaComposer:
                                     output_field_name = f"output_schemas.{name}"
                                     self.add_field(
                                         name=output_field_name,
-                                        field_type=Type[BaseModel],
+                                        field_type=type[BaseModel],
                                         default=output_class,
                                         description=f"Output schema for {tool_name}",
                                     )
@@ -1725,7 +1769,8 @@ class SchemaComposer:
                                         )
 
                                     # Note: Cannot assign tool_name attribute to BaseModel class
-                                    # This will be handled at runtime in ToolState
+                                    # This will be handled at runtime in
+                                    # ToolState
                                     logger.debug(
                                         f"Found output schema {name} for {tool_name}"
                                     )
@@ -1760,7 +1805,7 @@ class SchemaComposer:
         if "tools" not in self.fields and "tools" not in self.base_class_fields:
             self.add_field(
                 name="tools",
-                field_type=List[Any],
+                field_type=list[Any],
                 default_factory=list,
                 description="Tool instances indexed by name",
             )
@@ -1770,7 +1815,7 @@ class SchemaComposer:
         if not any(name.startswith("tool_schemas.") for name in self.fields):
             self.add_field(
                 name="tool_schemas",
-                field_type=Dict[str, Type[BaseModel]],
+                field_type=dict[str, type[BaseModel]],
                 default_factory=dict,
                 description="Tool schemas indexed by name",
             )
@@ -1779,12 +1824,12 @@ class SchemaComposer:
         if not any(name.startswith("output_schemas.") for name in self.fields):
             self.add_field(
                 name="output_schemas",
-                field_type=Dict[str, Type[BaseModel]],
+                field_type=dict[str, type[BaseModel]],
                 default_factory=dict,
                 description="Output schemas indexed by name",
             )
 
-    def add_fields_from_components(self, components: List[Any]) -> "SchemaComposer":
+    def add_fields_from_components(self, components: list[Any]) -> SchemaComposer:
         """Add fields from multiple components to the schema.
 
         This method intelligently processes a list of heterogeneous components, automatically
@@ -1884,15 +1929,14 @@ class SchemaComposer:
             f"Added {field_count_added} fields from components (total: {field_count_after})"
         )
 
-        # Always ensure we have 'messages' and 'runnable_config' if we found engines
+        # Always ensure we have 'messages' and 'runnable_config' if we found
+        # engines
         self._ensure_standard_fields()
 
         return self
 
     def _ensure_standard_fields(self) -> None:
-        """
-        Ensure standard fields are present if not already added.
-        """
+        """Ensure standard fields are present if not already added."""
         # Ensure runnable_config if we found engines
         has_engines = any(
             entry.get("action") == "process_component"
@@ -1905,11 +1949,11 @@ class SchemaComposer:
             and "runnable_config" not in self.fields
             and "runnable_config" not in self.base_class_fields
         ):
-            from typing import Any, Dict, Optional
+            from typing import Any, Optional
 
             self.add_field(
                 name="runnable_config",
-                field_type=Optional[Dict[str, Any]],
+                field_type=Optional[dict[str, Any]],
                 default=None,
                 description="Runtime configuration for engines",
                 source="auto_added",
@@ -1922,16 +1966,16 @@ class SchemaComposer:
             and "engines" not in self.fields
             and "engines" not in self.base_class_fields
         ):
-            from typing import Any, Dict
+            from typing import Any
 
             # Create a default factory that returns the class engines
-            def get_class_engines():
+            def get_class_engines() -> Any | None:
                 # This will be bound to the schema class later
                 return {}
 
             self.add_field(
                 name="engines",
-                field_type=Dict[str, Any],
+                field_type=dict[str, Any],
                 default_factory=get_class_engines,
                 description="Engine instances indexed by name",
                 source="auto_added",
@@ -1954,7 +1998,7 @@ class SchemaComposer:
             self.configure_messages_field(with_reducer=True, force_add=True)
             logger.debug("Added standard field 'messages' with reducer")
 
-    def add_engine_management(self) -> "SchemaComposer":
+    def add_engine_management(self) -> SchemaComposer:
         """Add standardized engine management fields to the schema.
 
         This method adds the new engine management pattern to support:
@@ -1994,7 +2038,7 @@ class SchemaComposer:
         if "engines" not in self.fields and "engines" not in self.base_class_fields:
             self.add_field(
                 name="engines",
-                field_type=Dict[str, Any],
+                field_type=dict[str, Any],
                 default_factory=dict,
                 description="Engine registry for this state (backward compatible)",
                 source="engine_management",
@@ -2005,9 +2049,8 @@ class SchemaComposer:
 
     def configure_messages_field(
         self, with_reducer: bool = True, force_add: bool = False
-    ) -> "SchemaComposer":
-        """
-        Configure a messages field with appropriate settings if it exists or if requested.
+    ) -> SchemaComposer:
+        """Configure a messages field with appropriate settings if it exists or if requested.
 
         Args:
             with_reducer: Whether to add a reducer for the messages field
@@ -2029,7 +2072,6 @@ class SchemaComposer:
 
         # Only proceed if the field exists or we're forcing its addition
         if "messages" in self.fields or force_add:
-            from typing import List
 
             # Try to use langgraph's add_messages if requested
             if with_reducer:
@@ -2041,7 +2083,7 @@ class SchemaComposer:
                     if force_add and "messages" not in self.fields:
                         self.add_field(
                             name="messages",
-                            field_type=List[BaseMessage],
+                            field_type=list[BaseMessage],
                             default_factory=list,
                             description="Messages for agent conversation",
                             reducer=add_messages,
@@ -2068,14 +2110,14 @@ class SchemaComposer:
                     from typing import Any
 
                     # Create simple concat lists reducer
-                    def concat_lists(a, b):
+                    def concat_lists(a, b) -> Any:
                         return (a or []) + (b or [])
 
                     # If force_add is True and the field doesn't exist, add it
                     if force_add and "messages" not in self.fields:
                         self.add_field(
                             name="messages",
-                            field_type=List[Any],
+                            field_type=list[Any],
                             default_factory=list,
                             description="Messages for agent conversation",
                             reducer=concat_lists,
@@ -2099,11 +2141,8 @@ class SchemaComposer:
 
         return self
 
-    def mark_as_input_field(
-        self, field_name: str, engine_name: str
-    ) -> "SchemaComposer":
-        """
-        Mark a field as input field for a specific engine.
+    def mark_as_input_field(self, field_name: str, engine_name: str) -> SchemaComposer:
+        """Mark a field as input field for a specific engine.
 
         Args:
             field_name: Name of the field
@@ -2134,11 +2173,8 @@ class SchemaComposer:
 
         return self
 
-    def mark_as_output_field(
-        self, field_name: str, engine_name: str
-    ) -> "SchemaComposer":
-        """
-        Mark a field as output field for a specific engine.
+    def mark_as_output_field(self, field_name: str, engine_name: str) -> SchemaComposer:
+        """Mark a field as output field for a specific engine.
 
         Args:
             field_name: Name of the field
@@ -2169,7 +2205,7 @@ class SchemaComposer:
 
         return self
 
-    def build(self) -> Type[StateSchema]:
+    def build(self) -> type[StateSchema]:
         """Build and return a StateSchema class with all defined fields and metadata.
 
         This method finalizes the schema composition process by generating a concrete
@@ -2210,7 +2246,8 @@ class SchemaComposer:
 
         base_class = self.detected_base_class
 
-        # Auto-add engine management if we have engines and using StateSchema base
+        # Auto-add engine management if we have engines and using StateSchema
+        # base
         if self.engines and issubclass(base_class, StateSchema):
             self.add_engine_management()
             logger.debug(
@@ -2219,13 +2256,18 @@ class SchemaComposer:
 
         # Show what we're building
         logger.debug(
-            f"Building {self.name} with {len(self.fields)} fields using base class {base_class.__name__}"
+            f"Building {
+                self.name} with {
+                len(
+                    self.fields)} fields using base class {
+                base_class.__name__}"
         )
 
         # Create field definitions for the model (excluding base class fields)
         field_defs = {}
         for name, field_def in self.fields.items():
-            # Skip schema dictionary entries for now (handle nested dictionaries later)
+            # Skip schema dictionary entries for now (handle nested
+            # dictionaries later)
             if "." in name:
                 logger.debug(f"Skipping nested field {name} for now")
                 continue
@@ -2241,7 +2283,8 @@ class SchemaComposer:
         # Create the base schema
         schema = create_model(self.name, __base__=base_class, **field_defs)
 
-        # Only add StateSchema-specific attributes if the base class is a StateSchema
+        # Only add StateSchema-specific attributes if the base class is a
+        # StateSchema
         is_state_schema_base = issubclass(base_class, StateSchema)
 
         # Copy attributes from base class if they exist
@@ -2253,7 +2296,13 @@ class SchemaComposer:
             schema.__shared_fields__ = list(self.shared_fields)
 
         if is_state_schema_base:
-            logger.debug(f"Shared fields: {getattr(schema, '__shared_fields__', [])}")
+            logger.debug(
+                f"Shared fields: {
+                    getattr(
+                        schema,
+                        '__shared_fields__',
+                        [])}"
+            )
 
         # Handle reducers - merge base class reducers with ours
         if is_state_schema_base:
@@ -2277,13 +2326,15 @@ class SchemaComposer:
                     schema.__serializable_reducers__[name] = reducer_name
                     schema.__reducer_fields__[name] = field_def.reducer
 
-        # Make sure to deep copy the engine I/O mappings to avoid reference issues
+        # Make sure to deep copy the engine I/O mappings to avoid reference
+        # issues
         if is_state_schema_base:
             schema.__engine_io_mappings__ = {}
             for engine_name, mapping in self.engine_io_mappings.items():
                 schema.__engine_io_mappings__[engine_name] = mapping.copy()
 
-            # Same for input/output fields - convert sets to lists and deep copy
+            # Same for input/output fields - convert sets to lists and deep
+            # copy
             schema.__input_fields__ = {}
             for engine_name, fields in self.input_fields.items():
                 schema.__input_fields__[engine_name] = list(fields)
@@ -2292,20 +2343,23 @@ class SchemaComposer:
             for engine_name, fields in self.output_fields.items():
                 schema.__output_fields__[engine_name] = list(fields)
 
-            # Add structured model fields metadata safely - use field names instead of class references
+            # Add structured model fields metadata safely - use field names
+            # instead of class references
             if self.structured_model_fields:
                 schema.__structured_model_fields__ = {
                     k: list(v) for k, v in self.structured_model_fields.items()
                 }
 
-            # Add structured models safely - use string identifiers instead of class references
+            # Add structured models safely - use string identifiers instead of
+            # class references
             if self.structured_models:
                 schema.__structured_models__ = {
                     k: f"{v.__module__}.{v.__name__}"
                     for k, v in self.structured_models.items()
                 }
 
-            # CRITICAL: Store engines directly on the schema class (not private)
+            # CRITICAL: Store engines directly on the schema class (not
+            # private)
             schema.engines = self.engines
             schema.engines_by_type = dict(self.engines_by_type)
             logger.debug(f"Stored {len(schema.engines)} engines on schema class")
@@ -2313,7 +2367,7 @@ class SchemaComposer:
             # Update the engines field default factory to return class engines
             if "engines" in schema.model_fields:
                 # Create a factory that returns the class engines
-                def engines_factory(cls=schema):
+                def engines_factory(cls=schema) -> Any:
                     return cls.engines.copy() if hasattr(cls, "engines") else {}
 
                 # Update the field's default_factory
@@ -2342,15 +2396,20 @@ class SchemaComposer:
                     output_schemas[parts[1]] = field_def.default
 
         # Create post_init method to handle nested fields and engine setup
-        def schema_post_init(self, __context):
+        def schema_post_init(self, __context) -> None:
             """Enhanced post-init to sync tools from engines."""
-            # IMPORTANT: In Pydantic v2, model_post_init takes a context parameter
-            logger.debug(f"schema_post_init called for {self.__class__.__name__}")
+            # IMPORTANT: In Pydantic v2, model_post_init takes a context
+            # parameter
+            logger.debug(
+                f"schema_post_init called for {
+                    self.__class__.__name__}"
+            )
 
             # First, fix any PydanticUndefined fields before parent post_init
             from pydantic_core import PydanticUndefined
 
-            # Fix ALL PydanticUndefined fields to prevent msgpack serialization errors
+            # Fix ALL PydanticUndefined fields to prevent msgpack serialization
+            # errors
             for field_name, field_info in self.model_fields.items():
                 if hasattr(self, field_name):
                     field_value = getattr(self, field_name)
@@ -2373,28 +2432,22 @@ class SchemaComposer:
                             logger.debug(
                                 f"Fixed PydanticUndefined '{field_name}' with explicit default"
                             )
+                        # Use type-specific defaults
+                        elif field_name == "engines":
+                            setattr(self, field_name, {})
+                            logger.debug(
+                                f"Fixed PydanticUndefined '{field_name}' -> {{}}"
+                            )
+                        elif field_name in {"tools", "messages"}:
+                            setattr(self, field_name, [])
+                            logger.debug(
+                                f"Fixed PydanticUndefined '{field_name}' -> []"
+                            )
                         else:
-                            # Use type-specific defaults
-                            if field_name == "engines":
-                                setattr(self, field_name, {})
-                                logger.debug(
-                                    f"Fixed PydanticUndefined '{field_name}' -> {{}}"
-                                )
-                            elif field_name == "tools":
-                                setattr(self, field_name, [])
-                                logger.debug(
-                                    f"Fixed PydanticUndefined '{field_name}' -> []"
-                                )
-                            elif field_name == "messages":
-                                setattr(self, field_name, [])
-                                logger.debug(
-                                    f"Fixed PydanticUndefined '{field_name}' -> []"
-                                )
-                            else:
-                                setattr(self, field_name, None)
-                                logger.debug(
-                                    f"Fixed PydanticUndefined '{field_name}' -> None"
-                                )
+                            setattr(self, field_name, None)
+                            logger.debug(
+                                f"Fixed PydanticUndefined '{field_name}' -> None"
+                            )
 
             # Call parent post_init if it exists
             if hasattr(super(self.__class__, self), "model_post_init"):
@@ -2410,7 +2463,9 @@ class SchemaComposer:
                     for engine_name, engine in self.__class__.engines.items():
                         self.engines[engine_name] = engine
                     logger.debug(
-                        f"Populated instance engines field with {len(self.engines)} engines from class"
+                        f"Populated instance engines field with {
+                            len(
+                                self.engines)} engines from class"
                     )
 
             # Sync tools from class engines if available
@@ -2419,9 +2474,13 @@ class SchemaComposer:
                     f"Found {len(self.__class__.engines)} class-level engines (legacy)"
                 )
 
-                # If this is a ToolState subclass or has tools field, sync tools
+                # If this is a ToolState subclass or has tools field, sync
+                # tools
                 if hasattr(self, "tools"):
-                    logger.debug(f"Syncing tools for {self.__class__.__name__}")
+                    logger.debug(
+                        f"Syncing tools for {
+                            self.__class__.__name__}"
+                    )
 
                     # Initialize tools list if it's None
                     if self.tools is None:
@@ -2432,7 +2491,9 @@ class SchemaComposer:
 
                         if hasattr(engine, "tools") and engine.tools:
                             logger.debug(
-                                f"Engine '{engine_name}' has {len(engine.tools)} tools"
+                                f"Engine '{engine_name}' has {
+                                    len(
+                                        engine.tools)} tools"
                             )
 
                             # For ToolState, use add_tool method if available
@@ -2482,7 +2543,8 @@ class SchemaComposer:
                 for name, schema_cls in output_schemas.items():
                     self.output_schemas[name] = schema_cls
 
-            # Initialize structured_output_models from class-level __structured_models__
+            # Initialize structured_output_models from class-level
+            # __structured_models__
             if hasattr(self, "structured_output_models") and hasattr(
                 self.__class__, "__structured_models__"
             ):
@@ -2507,10 +2569,12 @@ class SchemaComposer:
                     if models_list:
                         self.structured_output_models = models_list
                         logger.debug(
-                            f"Populated structured_output_models with {len(models_list)} models"
+                            f"Populated structured_output_models with {
+                                len(models_list)} models"
                         )
 
-                        # Also set up the parser if we have models and parse_structured_outputs is True
+                        # Also set up the parser if we have models and
+                        # parse_structured_outputs is True
                         if (
                             hasattr(self, "parse_structured_outputs")
                             and self.parse_structured_outputs
@@ -2543,14 +2607,22 @@ class SchemaComposer:
         schema.model_post_init = schema_post_init
 
         # Print summary
-        logger.debug(f"Created schema {schema.__name__} with {len(field_defs)} fields")
+        logger.debug(
+            f"Created schema {
+                schema.__name__} with {
+                len(field_defs)} fields"
+        )
         if is_state_schema_base:
             logger.debug(
-                f"Engine mappings: {len(getattr(schema, '__engine_io_mappings__', {}))} engines"
+                f"Engine mappings: {len(getattr(schema,
+                                                '__engine_io_mappings__',
+                                                {}))} engines"
             )
             if getattr(schema, "__serializable_reducers__", {}):
                 logger.debug(
-                    f"Reducers: {len(getattr(schema, '__serializable_reducers__', {}))} fields have reducers"
+                    f"Reducers: {len(getattr(schema,
+                                             '__serializable_reducers__',
+                                             {}))} fields have reducers"
                 )
 
         # Create rich table for field display (only for StateSchema bases)
@@ -2559,7 +2631,7 @@ class SchemaComposer:
 
         return schema
 
-    def _display_schema_summary(self, schema: Type[StateSchema]) -> None:
+    def _display_schema_summary(self, schema: type[StateSchema]) -> None:
         """Display a visual summary of the created schema."""
         # Only display if debug logging is enabled
         if logger.level > logging.DEBUG:
@@ -2569,7 +2641,11 @@ class SchemaComposer:
         is_state_schema = issubclass(schema, StateSchema)
 
         # Create a table for field display
-        table = Table(title=f"{schema.__name__} Schema Fields", show_header=True)
+        table = Table(
+            title=f"{
+                schema.__name__} Schema Fields",
+            show_header=True,
+        )
         table.add_column("Field Name", style="cyan")
         table.add_column("Type", style="yellow")
         table.add_column("Description", style="blue")
@@ -2592,7 +2668,8 @@ class SchemaComposer:
                 serializable_reducers = getattr(schema, "__serializable_reducers__", {})
                 if field_name in serializable_reducers:
                     metadata.append(
-                        f"[yellow]reducer={serializable_reducers[field_name]}[/yellow]"
+                        f"[yellow]reducer={
+                            serializable_reducers[field_name]}[/yellow]"
                     )
 
                 # Check if field is input or output for any engine
@@ -2652,9 +2729,8 @@ class SchemaComposer:
 
                 console.print(engine_table)
 
-    def to_manager(self) -> "StateSchemaManager":
-        """
-        Convert to a StateSchemaManager for further manipulation.
+    def to_manager(self) -> StateSchemaManager:
+        """Convert to a StateSchemaManager for further manipulation.
 
         Returns:
             StateSchemaManager instance
@@ -2666,12 +2742,11 @@ class SchemaComposer:
     @classmethod
     def merge(
         cls,
-        first: "SchemaComposer",
-        second: "SchemaComposer",
+        first: SchemaComposer,
+        second: SchemaComposer,
         name: str = "MergedSchema",
-    ) -> "SchemaComposer":
-        """
-        Merge two SchemaComposer instances.
+    ) -> SchemaComposer:
+        """Merge two SchemaComposer instances.
 
         Args:
             first: First composer
@@ -2782,10 +2857,10 @@ class SchemaComposer:
     @classmethod
     def from_components(
         cls,
-        components: List[Any],
+        components: list[Any],
         name: str = "ComposedSchema",
-        base_state_schema: Optional[Type[StateSchema]] = None,
-    ) -> Type[StateSchema]:
+        base_state_schema: type[StateSchema] | None = None,
+    ) -> type[StateSchema]:
         """Create and build a StateSchema directly from a list of components.
 
         This convenience class method provides a simplified, one-step approach to schema
@@ -2838,7 +2913,10 @@ class SchemaComposer:
             When messages are detected, it now uses MessagesStateWithTokenUsage by default
             for better token tracking.
         """
-        logger.debug(f"Creating schema {name} from {len(components)} components")
+        logger.debug(
+            f"Creating schema {name} from {
+                len(components)} components"
+        )
         composer = cls(name=name, base_state_schema=base_state_schema)
 
         # Detect base class requirements early
@@ -2863,7 +2941,10 @@ class SchemaComposer:
                 # Dictionary
                 composer.add_fields_from_dict(component)
             else:
-                logger.debug(f"Skipping unsupported component: {type(component)}")
+                logger.debug(
+                    f"Skipping unsupported component: {
+                        type(component)}"
+                )
 
         # Ensure standard fields if needed
         composer._ensure_standard_fields()
@@ -2883,7 +2964,8 @@ class SchemaComposer:
 
         for engine_type, engine_names in self.engines_by_type.items():
             type_node = tree.add(
-                f"[bold cyan]{engine_type}[/bold cyan] ({len(engine_names)} engines)"
+                f"[bold cyan]{engine_type}[/bold cyan] ({
+                    len(engine_names)} engines)"
             )
 
             for engine_name in engine_names:
@@ -2899,7 +2981,10 @@ class SchemaComposer:
                         info_parts.append(f"model={engine.model}")
 
                     info_str = (
-                        f" [dim]({', '.join(info_parts)})[/dim]" if info_parts else ""
+                        f" [dim]({
+                            ', '.join(info_parts)})[/dim]"
+                        if info_parts
+                        else ""
                     )
                     type_node.add(f"[yellow]{engine_name}[/yellow]{info_str}")
 
@@ -2909,10 +2994,9 @@ class SchemaComposer:
 
     @classmethod
     def compose_input_schema(
-        cls, components: List[Any], name: str = "InputSchema"
-    ) -> Type[BaseModel]:
-        """
-        Create an input schema from components, focusing on input fields.
+        cls, components: list[Any], name: str = "InputSchema"
+    ) -> type[BaseModel]:
+        """Create an input schema from components, focusing on input fields.
 
         Args:
             components: List of components to extract fields from
@@ -2943,10 +3027,7 @@ class SchemaComposer:
                             continue
 
                         # Skip special fields
-                        if (
-                            field_name == "__runnable_config__"
-                            or field_name == "runnable_config"
-                        ):
+                        if field_name in {"__runnable_config__", "runnable_config"}:
                             continue
 
                         # Get default and default_factory
@@ -2984,7 +3065,8 @@ class SchemaComposer:
                         f"Error extracting input fields from {component}: {e}"
                     )
 
-            # Handle BaseModel components differently - only extract specific input-related fields
+            # Handle BaseModel components differently - only extract specific
+            # input-related fields
             elif isinstance(component, BaseModel) or (
                 isinstance(component, type) and issubclass(component, BaseModel)
             ):
@@ -3007,7 +3089,8 @@ class SchemaComposer:
                 if hasattr(model, "model_fields"):
                     # Pydantic v2
                     for field_name, field_info in model.model_fields.items():
-                        # Only include common input fields and skip special fields
+                        # Only include common input fields and skip special
+                        # fields
                         if (
                             field_name not in input_field_names
                             or field_name.startswith("__")
@@ -3015,10 +3098,7 @@ class SchemaComposer:
                             continue
 
                         # Skip runnable_config
-                        if (
-                            field_name == "__runnable_config__"
-                            or field_name == "runnable_config"
-                        ):
+                        if field_name in {"__runnable_config__", "runnable_config"}:
                             continue
 
                         # Get field type and defaults
@@ -3044,7 +3124,8 @@ class SchemaComposer:
                 elif hasattr(model, "__fields__"):
                     # Pydantic v1
                     for field_name, field_info in model.__fields__.items():
-                        # Only include common input fields and skip special fields
+                        # Only include common input fields and skip special
+                        # fields
                         if (
                             field_name not in input_field_names
                             or field_name.startswith("__")
@@ -3052,10 +3133,7 @@ class SchemaComposer:
                             continue
 
                         # Skip runnable_config
-                        if (
-                            field_name == "__runnable_config__"
-                            or field_name == "runnable_config"
-                        ):
+                        if field_name in {"__runnable_config__", "runnable_config"}:
                             continue
 
                         # Get field type and defaults
@@ -3080,7 +3158,6 @@ class SchemaComposer:
                         )
 
         # Add standard input fields if not already present
-        from typing import List
 
         from langchain_core.messages import BaseMessage
 
@@ -3088,7 +3165,7 @@ class SchemaComposer:
         if "messages" not in composer.fields:
             composer.add_field(
                 name="messages",
-                field_type=List[BaseMessage],
+                field_type=list[BaseMessage],
                 default_factory=list,
                 description="Messages for agent conversation",
             )
@@ -3104,10 +3181,9 @@ class SchemaComposer:
 
     @classmethod
     def compose_output_schema(
-        cls, components: List[Any], name: str = "OutputSchema"
-    ) -> Type[BaseModel]:
-        """
-        Create an output schema from components, focusing on output fields.
+        cls, components: list[Any], name: str = "OutputSchema"
+    ) -> type[BaseModel]:
+        """Create an output schema from components, focusing on output fields.
 
         Args:
             components: List of components to extract fields from
@@ -3138,10 +3214,7 @@ class SchemaComposer:
                             continue
 
                         # Skip special fields
-                        if (
-                            field_name == "__runnable_config__"
-                            or field_name == "runnable_config"
-                        ):
+                        if field_name in {"__runnable_config__", "runnable_config"}:
                             continue
 
                         # Get default and default_factory
@@ -3205,7 +3278,7 @@ class SchemaComposer:
                     )
 
         # Add standard output fields if not already present
-        from typing import List, Optional
+        from typing import Optional
 
         from langchain_core.messages import BaseMessage
 
@@ -3213,7 +3286,7 @@ class SchemaComposer:
         if "messages" not in composer.fields:
             composer.add_field(
                 name="messages",
-                field_type=List[BaseMessage],
+                field_type=list[BaseMessage],
                 default_factory=list,
                 description="Messages from agent conversation",
             )
@@ -3233,11 +3306,10 @@ class SchemaComposer:
     @classmethod
     def create_message_state(
         cls,
-        additional_fields: Optional[Dict[str, Any]] = None,
+        additional_fields: dict[str, Any] | None = None,
         name: str = "MessageState",
-    ) -> Type[StateSchema]:
-        """
-        Create a schema with messages field and additional fields.
+    ) -> type[StateSchema]:
+        """Create a schema with messages field and additional fields.
 
         Args:
             additional_fields: Optional dictionary of additional fields to add
@@ -3250,7 +3322,7 @@ class SchemaComposer:
         composer = cls(name=name)
 
         # Add messages field with reducer
-        from typing import List, Sequence
+        from collections.abc import Sequence
 
         try:
             from langchain_core.messages import BaseMessage
@@ -3269,12 +3341,12 @@ class SchemaComposer:
             from typing import Any
 
             # Create simple concat lists reducer
-            def concat_lists(a, b):
+            def concat_lists(a, b) -> Any:
                 return (a or []) + (b or [])
 
             composer.add_field(
                 name="messages",
-                field_type=List[Any],
+                field_type=list[Any],
                 default_factory=list,
                 description="Messages for conversation",
                 reducer=concat_lists,
@@ -3308,12 +3380,11 @@ class SchemaComposer:
     @classmethod
     def create_state_from_io_schemas(
         cls,
-        input_schema: Type[BaseModel],
-        output_schema: Type[BaseModel],
+        input_schema: type[BaseModel],
+        output_schema: type[BaseModel],
         name: str = "ComposedStateSchema",
-    ) -> Type[StateSchema]:
-        """
-        Create a state schema that combines input and output schemas.
+    ) -> type[StateSchema]:
+        """Create a state schema that combines input and output schemas.
 
         Args:
             input_schema: Input schema class
@@ -3323,8 +3394,6 @@ class SchemaComposer:
         Returns:
             StateSchema subclass that inherits from both input and output schemas
         """
-        from typing import List
-
         from langchain_core.messages import BaseMessage
 
         # Create composer
@@ -3336,7 +3405,7 @@ class SchemaComposer:
 
             composer.add_field(
                 name="messages",
-                field_type=List[BaseMessage],
+                field_type=list[BaseMessage],
                 default_factory=list,
                 description="Messages for conversation",
                 reducer=add_messages,
@@ -3344,12 +3413,12 @@ class SchemaComposer:
             )
         except ImportError:
             # Fallback if add_messages is not available
-            def concat_lists(a, b):
+            def concat_lists(a, b) -> Any:
                 return (a or []) + (b or [])
 
             composer.add_field(
                 name="messages",
-                field_type=List[BaseMessage],
+                field_type=list[BaseMessage],
                 default_factory=list,
                 description="Messages for conversation",
                 reducer=concat_lists,
@@ -3427,10 +3496,9 @@ class SchemaComposer:
         return schema
 
     def compose_state_from_io(
-        self, input_schema: Type[BaseModel], output_schema: Type[BaseModel]
-    ) -> Type[StateSchema]:
-        """
-        Compose a state schema from input and output schemas using this composer.
+        self, input_schema: type[BaseModel], output_schema: type[BaseModel]
+    ) -> type[StateSchema]:
+        """Compose a state schema from input and output schemas using this composer.
 
         Args:
             input_schema: Input schema class
@@ -3460,9 +3528,8 @@ class SchemaComposer:
 
     # Add this method to the SchemaComposer class
 
-    def extract_tool_schemas(self, tools: List[Any]) -> None:
-        """
-        Extract input and output schemas from tools.
+    def extract_tool_schemas(self, tools: list[Any]) -> None:
+        """Extract input and output schemas from tools.
 
         Args:
             tools: List of tools to analyze
@@ -3484,14 +3551,13 @@ class SchemaComposer:
                 input_schema = tool.args_schema
 
             # For class types, try to instantiate
-            elif isinstance(tool, type):
-                if issubclass(tool, BaseTool):
-                    try:
-                        instance = tool()
-                        if hasattr(instance, "args_schema"):
-                            input_schema = instance.args_schema
-                    except Exception:
-                        pass
+            elif isinstance(tool, type) and issubclass(tool, BaseTool):
+                try:
+                    instance = tool()
+                    if hasattr(instance, "args_schema"):
+                        input_schema = instance.args_schema
+                except Exception:
+                    pass
 
             # For BaseModel types
             if isinstance(tool, type) and issubclass(tool, BaseModel):
@@ -3506,7 +3572,7 @@ class SchemaComposer:
                 # Add to tool_schemas dictionary in state
                 self.add_field(
                     name=f"tool_schemas.{tool_name}",
-                    field_type=Type[BaseModel],
+                    field_type=type[BaseModel],
                     default=input_schema,
                     description=f"Schema for {tool_name}",
                 )
@@ -3537,7 +3603,7 @@ class SchemaComposer:
                                     # Add to output_schemas
                                     self.add_field(
                                         name=f"output_schemas.{name}",
-                                        field_type=Type[BaseModel],
+                                        field_type=type[BaseModel],
                                         default=output_class,
                                         description=f"Output schema for {tool_name}",
                                     )
@@ -3549,7 +3615,7 @@ class SchemaComposer:
         # Add tool field to track tool instances
         self.add_field(
             name="tools",
-            field_type=Dict[str, Any],
+            field_type=dict[str, Any],
             default_factory=dict,
             description="Tool instances indexed by name",
         )

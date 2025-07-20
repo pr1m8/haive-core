@@ -6,7 +6,7 @@ interact with the store system for memory management, similar to LangMem.
 
 import json
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from langchain_core.tools import Tool, tool
 from pydantic import BaseModel, Field
@@ -27,10 +27,10 @@ class StoreMemoryInput(BaseModel):
     importance: float = Field(
         default=0.5, ge=0.0, le=1.0, description="Importance score from 0.0 to 1.0"
     )
-    tags: Optional[List[str]] = Field(
+    tags: list[str] | None = Field(
         default=None, description="Optional tags for the memory"
     )
-    metadata: Optional[Dict[str, Any]] = Field(
+    metadata: dict[str, Any] | None = Field(
         default=None, description="Optional additional metadata"
     )
 
@@ -39,13 +39,11 @@ class SearchMemoryInput(BaseModel):
     """Input schema for searching memories."""
 
     query: str = Field(description="Search query to find relevant memories")
-    category: Optional[str] = Field(
-        default=None, description="Filter by memory category"
-    )
-    min_importance: Optional[float] = Field(
+    category: str | None = Field(default=None, description="Filter by memory category")
+    min_importance: float | None = Field(
         default=None, ge=0.0, le=1.0, description="Minimum importance score"
     )
-    tags: Optional[List[str]] = Field(
+    tags: list[str] | None = Field(
         default=None, description="Required tags to filter by"
     )
     limit: int = Field(default=10, ge=1, le=50, description="Maximum number of results")
@@ -61,19 +59,15 @@ class UpdateMemoryInput(BaseModel):
     """Input schema for updating memories."""
 
     memory_id: str = Field(description="The ID of the memory to update")
-    content: Optional[str] = Field(
-        default=None, description="New content for the memory"
-    )
-    category: Optional[str] = Field(
+    content: str | None = Field(default=None, description="New content for the memory")
+    category: str | None = Field(
         default=None, description="New category for the memory"
     )
-    importance: Optional[float] = Field(
+    importance: float | None = Field(
         default=None, ge=0.0, le=1.0, description="New importance score"
     )
-    tags: Optional[List[str]] = Field(
-        default=None, description="New tags for the memory"
-    )
-    metadata: Optional[Dict[str, Any]] = Field(
+    tags: list[str] | None = Field(default=None, description="New tags for the memory")
+    metadata: dict[str, Any] | None = Field(
         default=None, description="Additional metadata to merge"
     )
 
@@ -86,7 +80,7 @@ class DeleteMemoryInput(BaseModel):
 
 def create_store_memory_tool(
     store_manager: StoreManager,
-    namespace: Optional[Tuple[str, ...]] = None,
+    namespace: tuple[str, ...] | None = None,
     tool_name: str = "store_memory",
 ) -> Tool:
     """Create a tool for storing memories.
@@ -105,8 +99,8 @@ def create_store_memory_tool(
         content: str,
         category: str = "general",
         importance: float = 0.5,
-        tags: Optional[List[str]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        tags: list[str] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> str:
         """Store important information in memory for later retrieval. Use this to remember user preferences, facts, events, or any important information.
 
@@ -145,7 +139,7 @@ def create_store_memory_tool(
                 "error": str(e),
                 "message": "Failed to store memory",
             }
-            logger.error(f"Failed to store memory: {e}")
+            logger.exception(f"Failed to store memory: {e}")
             return json.dumps(error_result)
 
     return store_memory_func
@@ -153,7 +147,7 @@ def create_store_memory_tool(
 
 def create_search_memory_tool(
     store_manager: StoreManager,
-    namespace: Optional[Tuple[str, ...]] = None,
+    namespace: tuple[str, ...] | None = None,
     tool_name: str = "search_memory",
 ) -> Tool:
     """Create a tool for searching memories.
@@ -170,9 +164,9 @@ def create_search_memory_tool(
     @tool(tool_name, args_schema=SearchMemoryInput)
     def search_memory_func(
         query: str,
-        category: Optional[str] = None,
-        min_importance: Optional[float] = None,
-        tags: Optional[List[str]] = None,
+        category: str | None = None,
+        min_importance: float | None = None,
+        tags: list[str] | None = None,
         limit: int = 10,
     ) -> str:
         """Search for relevant memories based on a query. Use this to recall information about users, facts, or past events.
@@ -218,7 +212,10 @@ def create_search_memory_tool(
                 "message": f"Found {len(results)} relevant memories",
             }
 
-            logger.debug(f"Search returned {len(results)} memories for query: {query}")
+            logger.debug(
+                f"Search returned {
+                    len(results)} memories for query: {query}"
+            )
             return json.dumps(result, indent=2)
 
         except Exception as e:
@@ -227,7 +224,7 @@ def create_search_memory_tool(
                 "error": str(e),
                 "message": "Failed to search memories",
             }
-            logger.error(f"Failed to search memories: {e}")
+            logger.exception(f"Failed to search memories: {e}")
             return json.dumps(error_result)
 
     return search_memory_func
@@ -235,7 +232,7 @@ def create_search_memory_tool(
 
 def create_retrieve_memory_tool(
     store_manager: StoreManager,
-    namespace: Optional[Tuple[str, ...]] = None,
+    namespace: tuple[str, ...] | None = None,
     tool_name: str = "retrieve_memory",
 ) -> Tool:
     """Create a tool for retrieving specific memories.
@@ -292,7 +289,7 @@ def create_retrieve_memory_tool(
                 "error": str(e),
                 "message": f"Failed to retrieve memory {memory_id}",
             }
-            logger.error(f"Failed to retrieve memory {memory_id}: {e}")
+            logger.exception(f"Failed to retrieve memory {memory_id}: {e}")
             return json.dumps(error_result)
 
     return retrieve_memory_func
@@ -300,7 +297,7 @@ def create_retrieve_memory_tool(
 
 def create_update_memory_tool(
     store_manager: StoreManager,
-    namespace: Optional[Tuple[str, ...]] = None,
+    namespace: tuple[str, ...] | None = None,
     tool_name: str = "update_memory",
 ) -> Tool:
     """Create a tool for updating memories.
@@ -317,11 +314,11 @@ def create_update_memory_tool(
     @tool(tool_name, args_schema=UpdateMemoryInput)
     def update_memory_func(
         memory_id: str,
-        content: Optional[str] = None,
-        category: Optional[str] = None,
-        importance: Optional[float] = None,
-        tags: Optional[List[str]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        content: str | None = None,
+        category: str | None = None,
+        importance: float | None = None,
+        tags: list[str] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> str:
         """Update an existing memory with new information.
 
@@ -367,7 +364,7 @@ def create_update_memory_tool(
                 "error": str(e),
                 "message": f"Failed to update memory {memory_id}",
             }
-            logger.error(f"Failed to update memory {memory_id}: {e}")
+            logger.exception(f"Failed to update memory {memory_id}: {e}")
             return json.dumps(error_result)
 
     return update_memory_func
@@ -375,7 +372,7 @@ def create_update_memory_tool(
 
 def create_delete_memory_tool(
     store_manager: StoreManager,
-    namespace: Optional[Tuple[str, ...]] = None,
+    namespace: tuple[str, ...] | None = None,
     tool_name: str = "delete_memory",
 ) -> Tool:
     """Create a tool for deleting memories.
@@ -422,7 +419,7 @@ def create_delete_memory_tool(
                 "error": str(e),
                 "message": f"Failed to delete memory {memory_id}",
             }
-            logger.error(f"Failed to delete memory {memory_id}: {e}")
+            logger.exception(f"Failed to delete memory {memory_id}: {e}")
             return json.dumps(error_result)
 
     return delete_memory_func
@@ -430,9 +427,9 @@ def create_delete_memory_tool(
 
 def create_memory_tools_suite(
     store_manager: StoreManager,
-    namespace: Optional[Tuple[str, ...]] = None,
-    include_tools: Optional[List[str]] = None,
-) -> List[Tool]:
+    namespace: tuple[str, ...] | None = None,
+    include_tools: list[str] | None = None,
+) -> list[Tool]:
     """Create a complete suite of memory tools.
 
     Args:
@@ -468,7 +465,7 @@ def create_memory_tools_suite(
 
 # Convenience function similar to LangMem's API
 def create_manage_memory_tool(
-    store_manager: StoreManager, namespace: Optional[Tuple[str, ...]] = None
+    store_manager: StoreManager, namespace: tuple[str, ...] | None = None
 ) -> Tool:
     """Create a manage memory tool (alias for store_memory_tool).
 
@@ -478,7 +475,7 @@ def create_manage_memory_tool(
 
 
 def create_search_memory_tool_alias(
-    store_manager: StoreManager, namespace: Optional[Tuple[str, ...]] = None
+    store_manager: StoreManager, namespace: tuple[str, ...] | None = None
 ) -> Tool:
     """Create a search memory tool (alias for better naming consistency).
 

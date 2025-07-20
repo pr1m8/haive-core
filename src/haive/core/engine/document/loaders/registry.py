@@ -1,13 +1,14 @@
-"""
-Document loader registry system.
+"""Document loader registry system.
 
 This module provides a registry for document loaders, allowing them to be
 registered, looked up, and managed throughout the application.
 """
 
+import builtins
 import inspect
 import logging
-from typing import Any, Callable, Dict, List, Optional, Type
+from collections.abc import Callable
+from typing import Any
 
 from langchain_core.document_loaders.base import BaseLoader
 from pydantic import BaseModel, ConfigDict, Field, create_model
@@ -29,26 +30,25 @@ class LoaderMetadata(BaseModel):
     requires_async: bool = Field(
         default=False, description="Whether this loader requires async operations"
     )
-    file_extensions: List[str] = Field(
+    file_extensions: list[str] = Field(
         default_factory=list,
         description="List of file extensions this loader can handle",
     )
-    url_patterns: List[str] = Field(
+    url_patterns: list[str] = Field(
         default_factory=list, description="List of URL patterns this loader can handle"
     )
     has_config_schema: bool = Field(
         default=False, description="Whether this loader has a configuration schema"
     )
-    config_schema: Optional[Type[BaseModel]] = Field(
+    config_schema: type[BaseModel] | None = Field(
         default=None, description="Pydantic model for loader configuration"
     )
 
     model_config = {"arbitrary_types_allowed": True}
 
 
-class DocumentLoaderRegistry(AbstractRegistry[Type[BaseLoader]]):
-    """
-    Registry for document loaders.
+class DocumentLoaderRegistry(AbstractRegistry[type[BaseLoader]]):
+    """Registry for document loaders.
 
     This registry keeps track of document loader classes and their metadata,
     allowing for discovery and instantiation of loaders based on source types.
@@ -63,19 +63,18 @@ class DocumentLoaderRegistry(AbstractRegistry[Type[BaseLoader]]):
             cls._instance = cls()
         return cls._instance
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the registry with empty storage."""
-        self.loaders_by_source: Dict[SourceType, Dict[str, Type[BaseLoader]]] = {
+        self.loaders_by_source: dict[SourceType, dict[str, type[BaseLoader]]] = {
             source_type: {} for source_type in SourceType
         }
-        self.loaders_by_name: Dict[str, Type[BaseLoader]] = {}
-        self.loader_metadata: Dict[str, LoaderMetadata] = {}
+        self.loaders_by_name: dict[str, type[BaseLoader]] = {}
+        self.loader_metadata: dict[str, LoaderMetadata] = {}
 
     def register(
-        self, loader_class: Type[BaseLoader], metadata: LoaderMetadata
-    ) -> Type[BaseLoader]:
-        """
-        Register a document loader with metadata.
+        self, loader_class: type[BaseLoader], metadata: LoaderMetadata
+    ) -> type[BaseLoader]:
+        """Register a document loader with metadata.
 
         Args:
             loader_class: Loader class to register
@@ -96,9 +95,8 @@ class DocumentLoaderRegistry(AbstractRegistry[Type[BaseLoader]]):
         )
         return loader_class
 
-    def get(self, item_type: SourceType, name: str) -> Optional[Type[BaseLoader]]:
-        """
-        Get a loader by source type and name.
+    def get(self, item_type: SourceType, name: str) -> type[BaseLoader] | None:
+        """Get a loader by source type and name.
 
         Args:
             item_type: Source type
@@ -109,9 +107,8 @@ class DocumentLoaderRegistry(AbstractRegistry[Type[BaseLoader]]):
         """
         return self.loaders_by_source[item_type].get(name)
 
-    def find_by_id(self, id: str) -> Optional[Type[BaseLoader]]:
-        """
-        Find a loader by name (used for compatibility with AbstractRegistry).
+    def find_by_id(self, id: str) -> type[BaseLoader] | None:
+        """Find a loader by name (used for compatibility with AbstractRegistry).
 
         Args:
             id: Loader name
@@ -121,9 +118,8 @@ class DocumentLoaderRegistry(AbstractRegistry[Type[BaseLoader]]):
         """
         return self.loaders_by_name.get(id)
 
-    def find_by_name(self, name: str) -> Optional[Type[BaseLoader]]:
-        """
-        Find a loader by name.
+    def find_by_name(self, name: str) -> type[BaseLoader] | None:
+        """Find a loader by name.
 
         Args:
             name: Loader name
@@ -133,9 +129,8 @@ class DocumentLoaderRegistry(AbstractRegistry[Type[BaseLoader]]):
         """
         return self.loaders_by_name.get(name)
 
-    def get_metadata(self, name: str) -> Optional[LoaderMetadata]:
-        """
-        Get metadata for a specific loader.
+    def get_metadata(self, name: str) -> LoaderMetadata | None:
+        """Get metadata for a specific loader.
 
         Args:
             name: Loader name
@@ -145,9 +140,8 @@ class DocumentLoaderRegistry(AbstractRegistry[Type[BaseLoader]]):
         """
         return self.loader_metadata.get(name)
 
-    def list(self, item_type: SourceType) -> List[str]:
-        """
-        List all loader names for a specific source type.
+    def list(self, item_type: SourceType) -> list[str]:
+        """List all loader names for a specific source type.
 
         Args:
             item_type: Source type
@@ -157,9 +151,8 @@ class DocumentLoaderRegistry(AbstractRegistry[Type[BaseLoader]]):
         """
         return list(self.loaders_by_source[item_type].keys())
 
-    def get_all(self, item_type: SourceType) -> Dict[str, Type[BaseLoader]]:
-        """
-        Get all loaders for a specific source type.
+    def get_all(self, item_type: SourceType) -> dict[str, type[BaseLoader]]:
+        """Get all loaders for a specific source type.
 
         Args:
             item_type: Source type
@@ -169,18 +162,16 @@ class DocumentLoaderRegistry(AbstractRegistry[Type[BaseLoader]]):
         """
         return self.loaders_by_source[item_type]
 
-    def get_all_metadata(self) -> Dict[str, LoaderMetadata]:
-        """
-        Get metadata for all registered loaders.
+    def get_all_metadata(self) -> dict[str, LoaderMetadata]:
+        """Get metadata for all registered loaders.
 
         Returns:
             Dictionary mapping loader names to metadata
         """
         return self.loader_metadata
 
-    def find_loader_for_file(self, file_path: str) -> List[Type[BaseLoader]]:
-        """
-        Find loaders that can handle a specific file extension.
+    def find_loader_for_file(self, file_path: str) -> builtins.list[type[BaseLoader]]:
+        """Find loaders that can handle a specific file extension.
 
         Args:
             file_path: Path to the file
@@ -203,9 +194,8 @@ class DocumentLoaderRegistry(AbstractRegistry[Type[BaseLoader]]):
 
         return matching_loaders
 
-    def find_loader_for_url(self, url: str) -> List[Type[BaseLoader]]:
-        """
-        Find loaders that can handle a specific URL pattern.
+    def find_loader_for_url(self, url: str) -> builtins.list[type[BaseLoader]]:
+        """Find loaders that can handle a specific URL pattern.
 
         Args:
             url: URL to handle
@@ -233,15 +223,14 @@ class DocumentLoaderRegistry(AbstractRegistry[Type[BaseLoader]]):
 
 def register_loader(
     source_type: SourceType,
-    name: Optional[str] = None,
-    description: Optional[str] = None,
+    name: str | None = None,
+    description: str | None = None,
     requires_async: bool = False,
-    file_extensions: Optional[List[str]] = None,
-    url_patterns: Optional[List[str]] = None,
-    config_schema: Optional[Type[BaseModel]] = None,
-) -> Callable[[Type[BaseLoader]], Type[BaseLoader]]:
-    """
-    Decorator to register a document loader.
+    file_extensions: list[str] | None = None,
+    url_patterns: list[str] | None = None,
+    config_schema: type[BaseModel] | None = None,
+) -> Callable[[type[BaseLoader]], type[BaseLoader]]:
+    """Decorator to register a document loader.
 
     Args:
         source_type: Type of source this loader handles
@@ -256,7 +245,7 @@ def register_loader(
         Decorator function
     """
 
-    def decorator(loader_class: Type[BaseLoader]) -> Type[BaseLoader]:
+    def decorator(loader_class: type[BaseLoader]) -> type[BaseLoader]:
         registry = DocumentLoaderRegistry.get_instance()
 
         # Generate a name if not provided
@@ -322,12 +311,12 @@ def get_default_registry() -> DocumentLoaderRegistry:
     return document_loader_registry
 
 
-def get_loader(loader_name: str) -> Optional[Type[BaseLoader]]:
+def get_loader(loader_name: str) -> type[BaseLoader] | None:
     """Get a loader by name from the default registry."""
     return document_loader_registry.find_by_name(loader_name)
 
 
-def create_loader(loader_name: str, **kwargs) -> Optional[BaseLoader]:
+def create_loader(loader_name: str, **kwargs) -> BaseLoader | None:
     """Create a loader instance by name."""
     loader_class = get_loader(loader_name)
     if loader_class:

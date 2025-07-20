@@ -1,4 +1,6 @@
-from pydantic import Field, HttpUrl, field_validator
+from typing import Any
+
+from pydantic import Field, HttpUrl
 
 from haive.core.engine.loaders.sources.remote.base import URLSource
 from haive.core.engine.loaders.sources.types import SourceType
@@ -12,7 +14,7 @@ class HackerNewsSource(URLSource):
 
     @field_validatorvalidate_url
     @classmethod
-    def validate_url(cls, v):
+    def validate_url(cls, v) -> Any:
         if not v.startswith("https://news.ycombinator.com/"):
             raise ValueError(f"Invalid url: {v}")
         return v

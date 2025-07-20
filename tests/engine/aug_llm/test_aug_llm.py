@@ -25,13 +25,16 @@ def log_test_result(test_name, result):
     # Pretty format the result based on type
     if hasattr(result, "model_dump"):
         try:
-            log_msg += f"RESULT:\n{json.dumps(result.model_dump(), indent=2)}\n"
-        except:
+            log_msg += f"RESULT:\n{
+                json.dumps(
+                    result.model_dump(),
+                    indent=2)}\n"
+        except BaseException:
             log_msg += f"RESULT:\n{result}\n"
     elif isinstance(result, dict):
         try:
             log_msg += f"RESULT:\n{json.dumps(result, indent=2)}\n"
-        except:
+        except BaseException:
             log_msg += f"RESULT:\n{result}\n"
     else:
         log_msg += f"RESULT:\n{result}\n"

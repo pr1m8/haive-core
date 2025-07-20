@@ -24,7 +24,7 @@ class CheckpointerConfig(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
-    def create_checkpointer(self):
+    def create_checkpointer(self) -> Any:
         """Create a checkpointer instance based on this configuration.
 
         Returns:

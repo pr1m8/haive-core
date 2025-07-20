@@ -82,7 +82,7 @@ class CohereEmbeddingConfig(BaseEmbeddingConfig):
 
     @validator("model")
     @classmethod
-    def validate_model(cls, v):
+    def validate_model(cls, v) -> Any:
         """Validate the Cohere model name."""
         valid_models = {
             "embed-english-v3.0",
@@ -106,7 +106,7 @@ class CohereEmbeddingConfig(BaseEmbeddingConfig):
 
     @validator("input_type")
     @classmethod
-    def validate_input_type(cls, v):
+    def validate_input_type(cls, v) -> Any:
         """Validate input type."""
         if v is None:
             return v
@@ -125,7 +125,7 @@ class CohereEmbeddingConfig(BaseEmbeddingConfig):
 
     @validator("truncate")
     @classmethod
-    def validate_truncate(cls, v):
+    def validate_truncate(cls, v) -> Any:
         """Validate truncate parameter."""
         if v is None:
             return v

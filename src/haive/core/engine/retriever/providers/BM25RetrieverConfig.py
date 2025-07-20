@@ -1,5 +1,6 @@
 """BM25 Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the BM25 (Best Matching 25) retriever,
 which uses the BM25 ranking function for text retrieval. BM25 is a probabilistic
 ranking function used by search engines to estimate the relevance of documents
@@ -124,7 +125,7 @@ class BM25RetrieverConfig(BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a BM25 retriever from this configuration.
 
         Returns:

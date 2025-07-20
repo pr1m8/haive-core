@@ -5,8 +5,9 @@ loaders with easy decorator-based registration, bulk capabilities, and comprehen
 """
 
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional, Set, Type, TypeVar, Union
+from typing import Any, TypeVar
 
 from .registry import LoaderMapping
 from .source_types import (
@@ -43,7 +44,7 @@ class EnhancedSourceRegistration:
 
     # Basic info
     name: str
-    source_class: Type[BaseSource]
+    source_class: type[BaseSource]
     category: SourceCategory
     description: str
 
@@ -52,39 +53,39 @@ class EnhancedSourceRegistration:
     bulk_info: BulkLoaderInfo
 
     # Loaders
-    loaders: Dict[str, LoaderMapping]
+    loaders: dict[str, LoaderMapping]
     default_loader: str
 
     # Matching criteria
-    file_extensions: Set[str]
-    url_patterns: Set[str]
-    schemes: Set[str]
-    mime_types: Set[str]
+    file_extensions: set[str]
+    url_patterns: set[str]
+    schemes: set[str]
+    mime_types: set[str]
 
     # Priority and metadata
     priority: int = 0
-    author: Optional[str] = None
+    author: str | None = None
     version: str = "1.0.0"
-    dependencies: Set[str] = field(default_factory=set)
+    dependencies: set[str] = field(default_factory=set)
 
 
 class EnhancedSourceRegistry:
     """Enhanced registry supporting all langchain_community loaders."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         # Core registry data
-        self._sources: Dict[str, EnhancedSourceRegistration] = {}
+        self._sources: dict[str, EnhancedSourceRegistration] = {}
 
         # Indexing for fast lookup
-        self._extension_index: Dict[str, List[str]] = {}
-        self._url_pattern_index: Dict[str, List[str]] = {}
-        self._scheme_index: Dict[str, List[str]] = {}
-        self._mime_index: Dict[str, List[str]] = {}
-        self._category_index: Dict[SourceCategory, List[str]] = {}
+        self._extension_index: dict[str, list[str]] = {}
+        self._url_pattern_index: dict[str, list[str]] = {}
+        self._scheme_index: dict[str, list[str]] = {}
+        self._mime_index: dict[str, list[str]] = {}
+        self._category_index: dict[SourceCategory, list[str]] = {}
 
         # Bulk loader tracking
-        self._bulk_loaders: Set[str] = set()
-        self._recursive_loaders: Set[str] = set()
+        self._bulk_loaders: set[str] = set()
+        self._recursive_loaders: set[str] = set()
 
         # Statistics
         self._registration_count = 0
@@ -93,35 +94,34 @@ class EnhancedSourceRegistry:
     def register(
         self,
         name: str,
-        source_class: Type[BaseSource],
+        source_class: type[BaseSource],
         category: SourceCategory,
         description: str = "",
         # Capabilities
-        capabilities: Optional[SourceCapabilities] = None,
+        capabilities: SourceCapabilities | None = None,
         is_bulk_loader: bool = False,
         supports_recursive: bool = False,
         supports_filtering: bool = False,
         max_concurrent: int = 1,
         rate_limit_delay: float = 0.0,
         # Loaders
-        loaders: Optional[Dict[str, Union[str, Dict[str, Any]]]] = None,
+        loaders: dict[str, str | dict[str, Any]] | None = None,
         default_loader: str = "default",
         # Matching criteria
-        file_extensions: Optional[List[str]] = None,
-        url_patterns: Optional[List[str]] = None,
-        schemes: Optional[List[str]] = None,
-        mime_types: Optional[List[str]] = None,
+        file_extensions: list[str] | None = None,
+        url_patterns: list[str] | None = None,
+        schemes: list[str] | None = None,
+        mime_types: list[str] | None = None,
         # Metadata
         priority: int = 0,
-        author: Optional[str] = None,
+        author: str | None = None,
         version: str = "1.0.0",
-        dependencies: Optional[List[str]] = None,
+        dependencies: list[str] | None = None,
         # Credential requirements
         requires_credentials: bool = False,
         credential_type: CredentialType = CredentialType.NONE,
     ) -> EnhancedSourceRegistration:
         """Register a source type with comprehensive metadata."""
-
         # Create capabilities if not provided
         if capabilities is None:
             capabilities = SourceCapabilities(
@@ -205,7 +205,8 @@ class EnhancedSourceRegistry:
             self._recursive_loaders.add(name)
 
         logger.info(
-            f"Registered source '{name}' with {len(processed_loaders)} loaders, "
+            f"Registered source '{name}' with {
+                len(processed_loaders)} loaders, "
             f"{len(file_extensions or [])} extensions"
         )
 
@@ -213,7 +214,6 @@ class EnhancedSourceRegistry:
 
     def _update_indexes(self, name: str, registration: EnhancedSourceRegistration):
         """Update all lookup indexes."""
-
         # File extensions
         for ext in registration.file_extensions:
             if ext not in self._extension_index:
@@ -243,19 +243,19 @@ class EnhancedSourceRegistry:
             self._category_index[registration.category] = []
         self._category_index[registration.category].append(name)
 
-    def find_bulk_loaders(self) -> List[str]:
+    def find_bulk_loaders(self) -> list[str]:
         """Find all sources that support bulk loading."""
         return list(self._bulk_loaders)
 
-    def find_recursive_loaders(self) -> List[str]:
+    def find_recursive_loaders(self) -> list[str]:
         """Find all sources that support recursive loading."""
         return list(self._recursive_loaders)
 
-    def find_sources_by_category(self, category: SourceCategory) -> List[str]:
+    def find_sources_by_category(self, category: SourceCategory) -> list[str]:
         """Find all sources in a specific category."""
         return self._category_index.get(category, [])
 
-    def find_sources_with_capability(self, capability: LoaderCapability) -> List[str]:
+    def find_sources_with_capability(self, capability: LoaderCapability) -> list[str]:
         """Find all sources with a specific capability."""
         result = []
         for name, registration in self._sources.items():
@@ -263,7 +263,7 @@ class EnhancedSourceRegistry:
                 result.append(name)
         return result
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """Get registry statistics."""
         category_counts = {
             category.value: len(sources)
@@ -280,16 +280,16 @@ class EnhancedSourceRegistry:
             "schemes_covered": len(self._scheme_index),
         }
 
-    def get_source_loaders(self, source_name: str) -> Dict[str, LoaderMapping]:
+    def get_source_loaders(self, source_name: str) -> dict[str, LoaderMapping]:
         """Get all loaders for a given source name."""
         registration = self._sources.get(source_name)
         if registration:
             return registration.loaders
         return {}
 
-    def find_source_for_path(self, path: str) -> Optional[EnhancedSourceRegistration]:
+    def find_source_for_path(self, path: str) -> EnhancedSourceRegistration | None:
         """Find the best source for a given path."""
-        from ..path_analyzer import PathAnalyzer
+        from core.engine.document.loaders.path_analyzer import PathAnalyzer
 
         # Analyze the path
         analysis = PathAnalyzer.analyze(path)
@@ -327,13 +327,13 @@ class EnhancedSourceRegistry:
 
         return None
 
-    def create_source(self, path: str, **kwargs) -> Optional[BaseSource]:
+    def create_source(self, path: str, **kwargs) -> BaseSource | None:
         """Create a source instance for the given path."""
         registration = self.find_source_for_path(path)
         if not registration:
             return None
 
-        from ..path_analyzer import PathAnalyzer
+        from core.engine.document.loaders.path_analyzer import PathAnalyzer
 
         analysis = PathAnalyzer.analyze(path)
 
@@ -355,7 +355,7 @@ class EnhancedSourceRegistry:
         try:
             return registration.source_class(**source_kwargs)
         except Exception as e:
-            logger.error(f"Failed to create source for {path}: {e}")
+            logger.exception(f"Failed to create source for {path}: {e}")
             return None
 
 
@@ -373,19 +373,19 @@ def register_source(
     category: SourceCategory,
     description: str = "",
     # Quick setup for common cases
-    file_extensions: Optional[List[str]] = None,
-    url_patterns: Optional[List[str]] = None,
-    schemes: Optional[List[str]] = None,
-    mime_types: Optional[List[str]] = None,
+    file_extensions: list[str] | None = None,
+    url_patterns: list[str] | None = None,
+    schemes: list[str] | None = None,
+    mime_types: list[str] | None = None,
     # Loader definitions
-    loaders: Optional[Dict[str, Union[str, Dict[str, Any]]]] = None,
+    loaders: dict[str, str | dict[str, Any]] | None = None,
     default_loader: str = "default",
     # Capabilities
     is_bulk_loader: bool = False,
     supports_recursive: bool = False,
     supports_filtering: bool = False,
     supports_scrape_all: bool = False,
-    capabilities: Optional[List[LoaderCapability]] = None,
+    capabilities: list[LoaderCapability] | None = None,
     # Performance characteristics
     max_concurrent: int = 1,
     rate_limit_delay: float = 0.0,
@@ -397,13 +397,13 @@ def register_source(
     credential_type: CredentialType = CredentialType.NONE,
     # Metadata
     priority: int = 0,
-    author: Optional[str] = None,
+    author: str | None = None,
     version: str = "1.0.0",
-    dependencies: Optional[List[str]] = None,
-) -> Callable[[Type[TSource]], Type[TSource]]:
+    dependencies: list[str] | None = None,
+) -> Callable[[type[TSource]], type[TSource]]:
     """Enhanced decorator for registering source types."""
 
-    def decorator(source_class: Type[TSource]) -> Type[TSource]:
+    def decorator(source_class: type[TSource]) -> type[TSource]:
 
         # Create capabilities
         source_capabilities = SourceCapabilities(
@@ -459,18 +459,17 @@ def register_source(
 
 def register_file_source(
     name: str,
-    extensions: List[str],
-    loaders: Dict[str, Union[str, Dict[str, Any]]],
+    extensions: list[str],
+    loaders: dict[str, str | dict[str, Any]],
     **kwargs,
-) -> Callable[[Type[LocalFileSource]], Type[LocalFileSource]]:
+) -> Callable[[type[LocalFileSource]], type[LocalFileSource]]:
     """Convenience decorator for file-based sources."""
-
     # Determine category from extensions
     doc_extensions = {".pdf", ".doc", ".docx", ".odt", ".rtf"}
     data_extensions = {".csv", ".json", ".xml", ".yaml", ".yml"}
     code_extensions = {".py", ".js", ".ts", ".java", ".cpp", ".c"}
 
-    ext_set = set(ext.lower() for ext in extensions)
+    ext_set = {ext.lower() for ext in extensions}
     if ext_set & doc_extensions:
         category = SourceCategory.FILE_DOCUMENT
     elif ext_set & data_extensions:
@@ -491,13 +490,12 @@ def register_file_source(
 
 def register_web_source(
     name: str,
-    url_patterns: List[str],
-    loaders: Dict[str, Union[str, Dict[str, Any]]],
+    url_patterns: list[str],
+    loaders: dict[str, str | dict[str, Any]],
     is_documentation: bool = False,
     **kwargs,
-) -> Callable[[Type[RemoteSource]], Type[RemoteSource]]:
+) -> Callable[[type[RemoteSource]], type[RemoteSource]]:
     """Convenience decorator for web-based sources."""
-
     category = (
         SourceCategory.WEB_DOCUMENTATION
         if is_documentation
@@ -519,12 +517,11 @@ def register_web_source(
 def register_bulk_source(
     name: str,
     category: SourceCategory,
-    loaders: Dict[str, Union[str, Dict[str, Any]]],
+    loaders: dict[str, str | dict[str, Any]],
     max_concurrent: int = 4,
     **kwargs,
-) -> Callable[[Type[BaseSource]], Type[BaseSource]]:
+) -> Callable[[type[BaseSource]], type[BaseSource]]:
     """Convenience decorator for bulk loading sources."""
-
     # Merge capabilities instead of overriding
     default_capabilities = [
         LoaderCapability.BULK_LOADING,
@@ -555,11 +552,10 @@ def register_bulk_source(
 def register_database_source(
     name: str,
     database_type: str,
-    loaders: Dict[str, Union[str, Dict[str, Any]]],
+    loaders: dict[str, str | dict[str, Any]],
     **kwargs,
-) -> Callable[[Type[DatabaseSource]], Type[DatabaseSource]]:
+) -> Callable[[type[DatabaseSource]], type[DatabaseSource]]:
     """Convenience decorator for database sources."""
-
     # Determine category
     sql_types = {"postgresql", "mysql", "sqlite", "mssql", "oracle"}
     nosql_types = {"mongodb", "cassandra", "couchbase", "redis"}

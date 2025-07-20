@@ -24,15 +24,12 @@ logging.basicConfig(
 
 async def test_postgres_with_augllm():
     """Test PostgreSQL connection using AugLLM engine."""
-
     # Get database connection details
     DB_HOST = os.environ.get("DB_HOST", "localhost")
     DB_PORT = int(os.environ.get("DB_PORT", "5432"))
     DB_NAME = os.environ.get("DB_NAME", "postgres")
     DB_USER = os.environ.get("DB_USER", "postgres")
     DB_PASSWORD = os.environ.get("DB_PASSWORD", "postgres")
-
-    print(f"Testing PostgreSQL connection with AugLLM at {DB_HOST}:{DB_PORT}/{DB_NAME}")
 
     try:
         # Create PostgreSQL config
@@ -48,7 +45,6 @@ async def test_postgres_with_augllm():
 
         # Create checkpointer to test connection
         await postgres_config.acreate_checkpointer()
-        print("✅ Successfully created async PostgreSQL checkpointer")
 
         # Create thread ID
         thread_id = f"augllm-test-{uuid.uuid4()}"
@@ -56,7 +52,8 @@ async def test_postgres_with_augllm():
         # Create a simple AugLLMConfig (minimal example)
         azure_config = AzureLLMConfig(
             api_key=os.environ.get("AZURE_OPENAI_API_KEY", "demo-key"),
-            api_version=os.environ.get("AZURE_OPENAI_API_VERSION", "2023-05-15"),
+            api_version=os.environ.get(
+                "AZURE_OPENAI_API_VERSION", "2023-05-15"),
             api_base=os.environ.get(
                 "AZURE_OPENAI_API_BASE", "https://example.azure.openai.com/"
             ),
@@ -78,7 +75,6 @@ async def test_postgres_with_augllm():
         }
 
         # Register thread
-        print(f"Registering thread {thread_id}")
         await postgres_config.aregister_thread(
             thread_id,
             metadata={
@@ -87,7 +83,6 @@ async def test_postgres_with_augllm():
                 "config": str(llm_config),
             },
         )
-        print("✅ Thread registered")
 
         # Create test data
         test_data = {
@@ -97,37 +92,28 @@ async def test_postgres_with_augllm():
         }
 
         # Store data
-        print("Writing test data to PostgreSQL")
         updated_config = await postgres_config.aput_checkpoint(
             config=config, data=test_data
         )
 
-        checkpoint_id = updated_config["configurable"].get("checkpoint_id")
-        print(f"✅ Created checkpoint with ID: {checkpoint_id}")
+        updated_config["configurable"].get("checkpoint_id")
 
         # Retrieve data
-        print("Reading data back")
         retrieved = await postgres_config.aget_checkpoint(updated_config)
 
         # Verify data
         if retrieved and "messages" in retrieved:
-            print(
-                f"✅ Successfully retrieved data with {len(retrieved['messages'])} messages"
-            )
-            for msg in retrieved["messages"]:
-                print(f"  - {msg.get('role')}: {msg.get('content')}")
+            for _msg in retrieved["messages"]:
+                pass
         else:
-            print("❌ Failed to retrieve data")
+            pass
 
         # Close connection
-        print("Closing connection")
         await postgres_config.aclose()
-        print("✅ Connection closed")
 
         return True
 
-    except Exception as e:
-        print(f"❌ Error during test: {e}")
+    except Exception:
         import traceback
 
         traceback.print_exc()
@@ -135,10 +121,8 @@ async def test_postgres_with_augllm():
 
 
 if __name__ == "__main__":
-    print("🔄 Testing PostgreSQL integration with AugLLM...")
     success = asyncio.run(test_postgres_with_augllm())
     if success:
-        print("✅ Test completed successfully!")
+        pass
     else:
-        print("❌ Test failed!")
         sys.exit(1)

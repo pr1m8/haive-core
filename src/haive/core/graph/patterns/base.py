@@ -54,7 +54,8 @@ class ComponentRequirement(BaseModel):
         Returns:
             True if the component meets this requirement
         """
-        # Basic type check (simplified - real implementation would be more thorough)
+        # Basic type check (simplified - real implementation would be more
+        # thorough)
         if hasattr(component, "engine_type"):
             component_type = component.engine_type.value
             if component_type == self.type:
@@ -247,7 +248,10 @@ class GraphPattern(BaseModel):
         ):
             # This is an instance that has overridden the apply method
             # so we should use the instance method directly
-            logger.debug(f"Using overridden apply method for pattern {self.name}")
+            logger.debug(
+                f"Using overridden apply method for pattern {
+                    self.name}"
+            )
             try:
                 result = instance_method(self, graph, **kwargs)
                 # Track pattern application
@@ -270,7 +274,9 @@ class GraphPattern(BaseModel):
         components = getattr(graph, "components", [])
         is_valid, errors = self.validate_for_application(components, kwargs)
         if not is_valid:
-            error_msg = f"Cannot apply pattern {self.name}: {', '.join(errors)}"
+            error_msg = f"Cannot apply pattern {
+                self.name}: {
+                ', '.join(errors)}"
             logger.error(error_msg)
             raise ValueError(error_msg)
 

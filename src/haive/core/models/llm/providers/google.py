@@ -107,7 +107,10 @@ class GeminiProvider(BaseLLMProvider):
     top_k: int | None = Field(
         default=None, ge=1, description="Top-k sampling parameter"
     )
-    n: int | None = Field(default=None, ge=1, description="Number of responses")
+    n: int | None = Field(
+        default=None,
+        ge=1,
+        description="Number of responses")
 
     def _get_chat_class(self) -> type[Any]:
         """Get the Gemini chat class.
@@ -163,7 +166,12 @@ class GeminiProvider(BaseLLMProvider):
         params = super()._get_initialization_params(**kwargs)
 
         # Add Gemini-specific parameters if set
-        optional_params = ["temperature", "max_output_tokens", "top_p", "top_k", "n"]
+        optional_params = [
+            "temperature",
+            "max_output_tokens",
+            "top_p",
+            "top_k",
+            "n"]
 
         for param in optional_params:
             value = getattr(self, param)
@@ -247,8 +255,11 @@ class VertexAIProvider(BaseLLMProvider):
     )
 
     # Vertex AI specific parameters
-    project: str | None = Field(default=None, description="Google Cloud project ID")
-    location: str = Field(default="us-central1", description="Google Cloud region")
+    project: str | None = Field(default=None,
+                                description="Google Cloud project ID")
+    location: str = Field(
+        default="us-central1",
+        description="Google Cloud region")
     temperature: float | None = Field(
         default=None, ge=0, le=1, description="Sampling temperature"
     )
@@ -340,7 +351,11 @@ class VertexAIProvider(BaseLLMProvider):
         params["model_name"] = params.pop("model")
 
         # Add optional parameters if set
-        optional_params = ["temperature", "max_output_tokens", "top_p", "top_k"]
+        optional_params = [
+            "temperature",
+            "max_output_tokens",
+            "top_p",
+            "top_k"]
 
         for param in optional_params:
             value = getattr(self, param)

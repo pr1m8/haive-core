@@ -4,8 +4,6 @@ This module provides THE standard messages state schema with automatic token tra
 This should be used as the base for all conversational agents that need token awareness.
 """
 
-from typing import Dict, Union
-
 from langchain_core.messages import AnyMessage, messages_from_dict
 from pydantic import model_validator
 
@@ -52,9 +50,11 @@ class MessagesStateWithTokenUsage(MessagesState, TokenUsageMixin):
     """
 
     @model_validator(mode="after")
-    def auto_track_all_tokens(self) -> "MessagesStateWithTokenUsage":
-        """
-        Automatically track token usage for ALL messages in the state.
+
+
+    @classmethod
+    def auto_track_all_tokens(cls) -> "MessagesStateWithTokenUsage":
+        """Automatically track token usage for ALL messages in the state.
         This ensures token tracking happens no matter how messages are added.
         """
         # Track tokens for ALL messages
@@ -64,7 +64,7 @@ class MessagesStateWithTokenUsage(MessagesState, TokenUsageMixin):
 
         return self
 
-    def add_message(self, message: Union[AnyMessage, Dict]) -> None:
+    def add_message(self, message: AnyMessage | dict) -> None:
         """Add a message to the conversation and track token usage.
 
         This overrides the base add_message to automatically extract
@@ -99,7 +99,7 @@ class MessagesStateWithTokenUsage(MessagesState, TokenUsageMixin):
         state.add_system_message(system_content)
         return state
 
-    def get_conversation_cost_analysis(self) -> Dict[str, Union[float, int, str]]:
+    def get_conversation_cost_analysis(self) -> dict[str, float | int | str]:
         """Get detailed cost analysis for the conversation.
 
         Returns:

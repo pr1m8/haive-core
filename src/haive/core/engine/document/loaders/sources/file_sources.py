@@ -4,7 +4,7 @@ This module implements all file-based document loaders from langchain_community
 with focus on unstructured processing, generic loaders, and code language support.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .enhanced_registry import (
     enhanced_registry,
@@ -55,7 +55,7 @@ class UnstructuredFileSource(LocalFileSource):
     include_metadata: bool = True
     coordinates: bool = False
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -96,7 +96,7 @@ class GenericFileSource(LocalFileSource):
     autodetect_encoding: bool = True
     fallback_encoding: str = "utf-8"
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -141,7 +141,7 @@ class PythonCodeSource(LocalFileSource):
     include_comments: bool = True
     parse_functions: bool = True
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -175,7 +175,7 @@ class NotebookSource(LocalFileSource):
     max_output_length: int = 10000
     remove_newline: bool = True
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -214,7 +214,7 @@ class PowerPointSource(LocalFileSource):
 
     mode: str = "elements"
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs["mode"] = self.mode
         return kwargs
@@ -241,7 +241,7 @@ class ODTDocumentSource(LocalFileSource):
 
     mode: str = "elements"
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs["mode"] = self.mode
         return kwargs
@@ -268,7 +268,7 @@ class RTFDocumentSource(LocalFileSource):
 
     mode: str = "elements"
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs["mode"] = self.mode
         return kwargs
@@ -309,7 +309,7 @@ class EmailSource(LocalFileSource):
     mode: str = "elements"
     extract_attachments: bool = False
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {"mode": self.mode, "extract_attachments": self.extract_attachments}
@@ -344,7 +344,7 @@ class EPubSource(LocalFileSource):
 
     mode: str = "elements"
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs["mode"] = self.mode
         return kwargs
@@ -376,7 +376,7 @@ class CHMHelpSource(LocalFileSource):
 
     mode: str = "elements"
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs["mode"] = self.mode
         return kwargs
@@ -407,7 +407,7 @@ class TOMLConfigSource(LocalFileSource):
 
     parse_structure: bool = True
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs["parse_structure"] = self.parse_structure
         return kwargs
@@ -440,7 +440,7 @@ class YAMLConfigSource(LocalFileSource):
 
     parse_yaml: bool = True
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs["parse_yaml"] = self.parse_yaml
         return kwargs
@@ -468,7 +468,7 @@ class XMLDataSource(LocalFileSource):
 
     mode: str = "elements"
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs["mode"] = self.mode
         return kwargs
@@ -506,7 +506,7 @@ class SubtitleSource(LocalFileSource):
 
     include_timestamps: bool = True
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs["include_timestamps"] = self.include_timestamps
         return kwargs
@@ -544,7 +544,7 @@ class PDFDirectorySource(DirectorySource):
     extract_images: bool = False
     silent_errors: bool = True
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {"extract_images": self.extract_images, "silent_errors": self.silent_errors}
@@ -577,9 +577,9 @@ class UnstructuredDirectorySource(DirectorySource):
     """Directory source with unstructured processing."""
 
     loader_cls_name: str = "UnstructuredFileLoader"
-    loader_kwargs: Dict[str, Any] = {}
+    loader_kwargs: dict[str, Any] = {}
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {"loader_cls": self.loader_cls_name, "loader_kwargs": self.loader_kwargs}
@@ -621,9 +621,9 @@ class ImageDocumentSource(LocalFileSource):
 
     mode: str = "elements"
     strategy: str = "auto"
-    ocr_languages: List[str] = ["eng"]
+    ocr_languages: list[str] = ["eng"]
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -660,9 +660,9 @@ class BibtexSource(LocalFileSource):
     """BibTeX bibliography source."""
 
     file_path: str
-    max_docs: Optional[int] = None
+    max_docs: int | None = None
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         if self.max_docs:
             kwargs["max_docs"] = self.max_docs
@@ -688,7 +688,7 @@ class BibtexSource(LocalFileSource):
 class CoNLLULinguisticSource(LocalFileSource):
     """CoNLL-U linguistic data source."""
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         return super().get_loader_kwargs()
 
 
@@ -697,7 +697,7 @@ class CoNLLULinguisticSource(LocalFileSource):
 # =============================================================================
 
 
-def get_file_sources_statistics() -> Dict[str, Any]:
+def get_file_sources_statistics() -> dict[str, Any]:
     """Get statistics about registered file sources."""
     registry = enhanced_registry
     stats = registry.get_statistics()
@@ -735,11 +735,7 @@ def get_file_sources_statistics() -> Dict[str, Any]:
         },
         "extensions_covered": stats["extensions_covered"],
         "unstructured_loaders": len(
-            [
-                name
-                for name in registry._sources.keys()
-                if "unstructured" in name.lower()
-            ]
+            [name for name in registry._sources if "unstructured" in name.lower()]
         ),
     }
 
@@ -764,16 +760,10 @@ def validate_file_sources() -> bool:
         if source_name not in registry._sources:
             missing.append(source_name)
 
-    if missing:
-        print(f"Missing file sources: {missing}")
-        return False
-
-    print(f"All {len(required_file_types)} essential file sources registered!")
-    return True
+    return not missing
 
 
 # Auto-validate on import
 if __name__ == "__main__":
     validate_file_sources()
     stats = get_file_sources_statistics()
-    print(f"File Sources Statistics: {stats}")

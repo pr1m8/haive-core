@@ -1,4 +1,4 @@
-from typing import Annotated, Any, Dict, List, Optional, Type, Union
+from typing import Annotated, Any
 
 from langchain_core.messages import (
     AIMessage,
@@ -22,8 +22,6 @@ from haive.core.schema.state_schema import StateSchema
 try:
     from haive.core.schema.prebuilt.messages.compatibility import MessagesStateAdapter
     from haive.core.schema.prebuilt.messages.utils import (
-        MessageRound,
-        ToolCallInfo,
         is_real_human_message,
         is_tool_error,
     )
@@ -70,17 +68,17 @@ class MessagesState(StateSchema):
     """
 
     # Core messages field with reducer annotation
-    messages: Annotated[List[AnyMessage], add_messages] = Field(
+    messages: Annotated[list[AnyMessage], add_messages] = Field(
         default_factory=list, description="Conversation messages"
     )
 
     # Structured output parsing configuration
-    structured_output_models: Optional[List[Type[BaseModel]]] = Field(
+    structured_output_models: list[type[BaseModel]] | None = Field(
         default=None,
         description="Pydantic models for parsing structured outputs from AI messages",
     )
 
-    structured_output_parser: Optional[BaseOutputParser] = Field(
+    structured_output_parser: BaseOutputParser | None = Field(
         default=None,
         description="Output parser for structured outputs (auto-configured if not provided)",
     )
@@ -99,8 +97,8 @@ class MessagesState(StateSchema):
     # tokenizer: ClassVar = tiktoken.get_encoding("cl100k_base")
 
     @model_validator(mode="before")
-    def validate_message_format(cls, data: Any) -> Any:
-        """Automatically convert message dicts to proper Message objects"""
+    def validate_message_format(self, data: Any) -> Any:
+        """Automatically convert message dicts to proper Message objects."""
         if isinstance(data, dict) and "messages" in data:
             data["messages"] = convert_to_messages(data["messages"])
         return data
@@ -125,9 +123,8 @@ class MessagesState(StateSchema):
 
     # Basic message handling
     @model_validator(mode="after")
-    def ensure_system_before_human(cls, instance: "MessagesState") -> "MessagesState":
-        """
-        Ensure system messages come before human messages.
+    def ensure_system_before_human(self, instance: "MessagesState") -> "MessagesState":
+        """Ensure system messages come before human messages.
         If a human message is followed by a system message, flip their order.
         """
         if len(instance.messages) < 2:
@@ -155,8 +152,8 @@ class MessagesState(StateSchema):
     @field_validator("messages", mode="after")
     @classmethod
     def parse_ai_structured_outputs(
-        cls, messages: List[AnyMessage], info
-    ) -> List[AnyMessage]:
+        cls, messages: list[AnyMessage], info
+    ) -> list[AnyMessage]:
         """Parse AI messages with structured output using PydanticToolsParser.
 
         This validator automatically parses AI message content that matches
@@ -205,7 +202,10 @@ class MessagesState(StateSchema):
     # The base MessagesState doesn't have token_usage fields
 
     @model_validator(mode="after")
-    def sync_message_engine_settings(self) -> "MessagesState":
+
+
+    @classmethod
+    def sync_message_engine_settings(cls) -> "MessagesState":
         """Sync message-related settings with engine if present.
 
         This enhances MessagesState to work better with the new engine management.
@@ -233,7 +233,7 @@ class MessagesState(StateSchema):
 
         return self
 
-    def add_message(self, message: Union[AnyMessage, Dict]) -> None:
+    def add_message(self, message: AnyMessage | dict) -> None:
         """Add a message to the conversation and track token usage."""
         if isinstance(message, dict):
             message = messages_from_dict([message])[0]
@@ -242,7 +242,7 @@ class MessagesState(StateSchema):
         # NOTE: Token tracking moved to MessagesStateWithTokenUsage
         # The base MessagesState doesn't have token tracking methods
 
-    def get_last_message(self) -> Optional[AnyMessage]:
+    def get_last_message(self) -> AnyMessage | None:
         """Get the last message in the conversation."""
         if not self.messages:
             return None
@@ -251,10 +251,9 @@ class MessagesState(StateSchema):
     # System message handling
 
     def add_system_message(
-        self, content: str, metadata: Optional[Dict[str, Any]] = None
+        self, content: str, metadata: dict[str, Any] | None = None
     ) -> None:
-        """
-        Add a system message at the beginning of the conversation.
+        """Add a system message at the beginning of the conversation.
         If a system message already exists, it will be replaced.
         """
         # Create system message
@@ -276,16 +275,15 @@ class MessagesState(StateSchema):
         # Add at the beginning
         self.messages.insert(0, system_msg)
 
-    def get_system_message(self) -> Optional[SystemMessage]:
+    def get_system_message(self) -> SystemMessage | None:
         """Get the first system message if one exists."""
         system_msgs = self.get_filtered_messages(include_types=[SystemMessage])
         return system_msgs[0] if system_msgs else None
 
     # Message filtering
 
-    def get_filtered_messages(self, **filter_kwargs) -> List[AnyMessage]:
-        """
-        Filter messages using LangChain's built-in filter_messages utility.
+    def get_filtered_messages(self, **filter_kwargs) -> list[AnyMessage]:
+        """Filter messages using LangChain's built-in filter_messages utility.
 
         Args:
             **filter_kwargs: Arguments for LangChain's filter_messages
@@ -297,7 +295,8 @@ class MessagesState(StateSchema):
                 - exclude_ids: List of message IDs to exclude
                 - exclude_tool_calls: Tool call IDs to exclude
         """
-        # Extract limit parameter if provided (not supported by filter_messages)
+        # Extract limit parameter if provided (not supported by
+        # filter_messages)
         limit = filter_kwargs.pop("limit", None)
 
         # Apply filter_messages with supported parameters
@@ -311,17 +310,17 @@ class MessagesState(StateSchema):
 
     # Type-specific message getters
 
-    def get_last_human_message(self) -> Optional[HumanMessage]:
+    def get_last_human_message(self) -> HumanMessage | None:
         """Get the last human message."""
         human_msgs = self.get_filtered_messages(include_types=[HumanMessage])
         return human_msgs[-1] if human_msgs else None
 
-    def get_last_ai_message(self) -> Optional[AIMessage]:
+    def get_last_ai_message(self) -> AIMessage | None:
         """Get the last AI message."""
         ai_msgs = self.get_filtered_messages(include_types=[AIMessage])
         return ai_msgs[-1] if ai_msgs else None
 
-    def get_last_tool_message(self) -> Optional[ToolMessage]:
+    def get_last_tool_message(self) -> ToolMessage | None:
         """Get the last tool message."""
         tool_msgs = self.get_filtered_messages(include_types=[ToolMessage])
         return tool_msgs[-1] if tool_msgs else None
@@ -357,9 +356,8 @@ class MessagesState(StateSchema):
 
         return bool(getattr(last_ai, "additional_kwargs", {}).get("tool_calls"))
 
-    def get_tool_calls(self, message: Optional[AIMessage] = None) -> List[Dict]:
-        """
-        Get tool calls from an AI message.
+    def get_tool_calls(self, message: AIMessage | None = None) -> list[dict]:
+        """Get tool calls from an AI message.
 
         Args:
             message: The AI message to extract tool calls from (defaults to last AI message)
@@ -384,10 +382,9 @@ class MessagesState(StateSchema):
         return []
 
     def inject_state_into_tool_calls(
-        self, tool_calls: List[Dict], keys: Optional[List[str]] = None
-    ) -> List[Dict]:
-        """
-        Inject state data into tool call arguments.
+        self, tool_calls: list[dict], keys: list[str] | None = None
+    ) -> list[dict]:
+        """Inject state data into tool call arguments.
 
         Args:
             tool_calls: List of tool call dictionaries
@@ -424,9 +421,8 @@ class MessagesState(StateSchema):
 
         return injected_calls
 
-    def send_tool_calls(self, node_name: str = "tools") -> Union[str, List[Send]]:
-        """
-        Convert tool calls from the last AI message into Send objects for LangGraph routing.
+    def send_tool_calls(self, node_name: str = "tools") -> str | list[Send]:
+        """Convert tool calls from the last AI message into Send objects for LangGraph routing.
 
         Args:
             node_name: The name of the node to send tool calls to
@@ -444,9 +440,8 @@ class MessagesState(StateSchema):
         # Create a Send object for each tool call
         return [Send(node_name, tool_call) for tool_call in injected_calls]
 
-    def decide_next_node(self) -> Union[str, List[Send]]:
-        """
-        Decide which node to go to next based on the last message.
+    def decide_next_node(self) -> str | list[Send]:
+        """Decide which node to go to next based on the last message.
 
         Returns:
             Either a string node name or a list of Send objects for parallel tool execution
@@ -480,7 +475,7 @@ class MessagesState(StateSchema):
 
     # Format conversion
 
-    def to_openai_format(self) -> List[Dict]:
+    def to_openai_format(self) -> list[dict]:
         """Convert messages to OpenAI API format."""
         return convert_to_openai_messages(self.messages)
 
@@ -493,14 +488,13 @@ class MessagesState(StateSchema):
     # Static constructors
 
     @classmethod
-    def from_dict(cls, data: Union[List[Dict], Dict[str, Any]]) -> "MessagesState":
+    def from_dict(cls, data: list[dict] | dict[str, Any]) -> "MessagesState":
         """Create instance from dictionary format."""
         if isinstance(data, dict) and "messages" in data:
             messages = convert_to_messages(data["messages"])
             return cls(messages=messages)
-        else:
-            messages = convert_to_messages(data)
-            return cls(messages=messages)
+        messages = convert_to_messages(data)
+        return cls(messages=messages)
 
     @classmethod
     def with_system_message(cls, system_content: str) -> "MessagesState":
@@ -511,9 +505,8 @@ class MessagesState(StateSchema):
 
     # NEW METHODS FROM ENHANCED IMPLEMENTATION
 
-    def get_conversation_rounds(self) -> List[Any]:
-        """
-        Get detailed information about each conversation round.
+    def get_conversation_rounds(self) -> list[Any]:
+        """Get detailed information about each conversation round.
 
         A conversation round typically consists of a human message,
         followed by one or more AI responses and possibly tool calls/responses.
@@ -530,8 +523,7 @@ class MessagesState(StateSchema):
         return adapter.get_conversation_rounds()
 
     def deduplicate_tool_calls(self) -> int:
-        """
-        Remove duplicate tool calls based on tool call ID.
+        """Remove duplicate tool calls based on tool call ID.
 
         This is useful when the same API call might be made multiple times
         due to agent or LLM quirks.
@@ -547,9 +539,8 @@ class MessagesState(StateSchema):
         adapter = MessagesStateAdapter(self)
         return adapter.deduplicate_tool_calls()
 
-    def get_completed_tool_calls(self) -> List[Any]:
-        """
-        Get all completed tool calls with their responses.
+    def get_completed_tool_calls(self) -> list[Any]:
+        """Get all completed tool calls with their responses.
 
         This method matches tool calls in AI messages with their
         corresponding tool responses.
@@ -566,8 +557,7 @@ class MessagesState(StateSchema):
         return adapter.get_completed_tool_calls()
 
     def is_real_human_message(self, msg: HumanMessage) -> bool:
-        """
-        Check if a human message is from a real user (not transformed).
+        """Check if a human message is from a real user (not transformed).
 
         Args:
             msg: The message to check
@@ -588,8 +578,7 @@ class MessagesState(StateSchema):
         return is_real_human_message(msg)
 
     def is_tool_error(self, msg: ToolMessage) -> bool:
-        """
-        Check if a tool message represents an error.
+        """Check if a tool message represents an error.
 
         Args:
             msg: The tool message to check
@@ -608,10 +597,9 @@ class MessagesState(StateSchema):
     def transform_ai_to_human(
         self,
         preserve_metadata: bool = True,
-        engine_id: Optional[str] = None,
+        engine_id: str | None = None,
     ) -> None:
-        """
-        Transform AI messages to Human messages in place.
+        """Transform AI messages to Human messages in place.
 
         This is useful for agent-to-agent communication or for
         creating synthetic conversations.
@@ -633,7 +621,7 @@ class MessagesState(StateSchema):
     # ========================================================================
 
     def enable_structured_output_parsing(
-        self, models: List[Type[BaseModel]], parser: Optional[BaseOutputParser] = None
+        self, models: list[type[BaseModel]], parser: BaseOutputParser | None = None
     ) -> None:
         """Enable structured output parsing for AI messages.
 
@@ -650,7 +638,7 @@ class MessagesState(StateSchema):
             # Auto-configure PydanticToolsParser
             self.structured_output_parser = PydanticToolsParser(tools=models)
 
-    def get_parsed_tool_calls(self) -> List[ToolMessage]:
+    def get_parsed_tool_calls(self) -> list[ToolMessage]:
         """Get all tool messages created from parsed structured outputs.
 
         Returns:
@@ -662,7 +650,7 @@ class MessagesState(StateSchema):
             if isinstance(msg, ToolMessage) and msg.tool_call_id.startswith("parse_")
         ]
 
-    def get_latest_structured_output(self) -> Optional[ToolMessage]:
+    def get_latest_structured_output(self) -> ToolMessage | None:
         """Get the most recent parsed structured output as a tool message.
 
         Returns:

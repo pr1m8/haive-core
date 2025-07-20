@@ -1,6 +1,6 @@
 # src/haive/core/engine/agent/persistence/integration.py
 import logging
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any
 
 from langchain_core.runnables import RunnableConfig
 
@@ -12,10 +12,9 @@ logger = logging.getLogger(__name__)
 
 
 def create_persistence_manager(
-    persistence_config: Optional[Union[Dict[str, Any], CheckpointerConfig]] = None,
+    persistence_config: dict[str, Any] | CheckpointerConfig | None = None,
 ) -> PersistenceManager:
-    """
-    Create a PersistenceManager from a configuration.
+    """Create a PersistenceManager from a configuration.
 
     Args:
         persistence_config: Configuration for persistence
@@ -28,12 +27,11 @@ def create_persistence_manager(
 
 def prepare_agent_run(
     persistence_manager: PersistenceManager,
-    thread_id: Optional[str] = None,
-    user_info: Optional[Dict[str, Any]] = None,
+    thread_id: str | None = None,
+    user_info: dict[str, Any] | None = None,
     **kwargs,
-) -> Tuple[RunnableConfig, str]:
-    """
-    Prepare for an agent run with proper persistence setup.
+) -> tuple[RunnableConfig, str]:
+    """Prepare for an agent run with proper persistence setup.
 
     Args:
         persistence_manager: The persistence manager
@@ -55,12 +53,11 @@ def prepare_agent_run(
 
 async def aprepare_agent_run(
     persistence_manager: PersistenceManager,
-    thread_id: Optional[str] = None,
-    user_info: Optional[Dict[str, Any]] = None,
+    thread_id: str | None = None,
+    user_info: dict[str, Any] | None = None,
     **kwargs,
-) -> Tuple[RunnableConfig, str]:
-    """
-    Asynchronously prepare for an agent run with persistence setup.
+) -> tuple[RunnableConfig, str]:
+    """Asynchronously prepare for an agent run with persistence setup.
 
     Args:
         persistence_manager: The persistence manager
@@ -82,9 +79,8 @@ async def aprepare_agent_run(
     return config, current_thread_id
 
 
-def extract_persistence_config(agent_config: Any) -> Optional[CheckpointerConfig]:
-    """
-    Extract persistence configuration from an agent configuration.
+def extract_persistence_config(agent_config: Any) -> CheckpointerConfig | None:
+    """Extract persistence configuration from an agent configuration.
 
     Args:
         agent_config: Agent configuration
@@ -108,7 +104,7 @@ def extract_persistence_config(agent_config: Any) -> Optional[CheckpointerConfig
             # Pydantic v2
             persistence_dict = persistence.model_dump()
             return load_checkpointer_config(persistence_dict)
-        elif hasattr(persistence, "dict"):
+        if hasattr(persistence, "dict"):
             # Pydantic v1
             persistence_dict = persistence.dict()
             return load_checkpointer_config(persistence_dict)

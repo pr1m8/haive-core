@@ -1,5 +1,5 @@
 # src/haive/core/engine/agent/persistence/memory_config.py
-from typing import Literal
+from typing import Any, Literal
 
 from langgraph.checkpoint.memory import MemorySaver
 from pydantic import Field
@@ -16,7 +16,7 @@ class MemoryCheckpointerConfig(CheckpointerConfig):
 
     type: Literal[CheckpointerType.memory] = Field(default=CheckpointerType.memory)
 
-    def create_checkpointer(self):
+    def create_checkpointer(self) -> Any:
         """Create a memory checkpointer.
 
         Returns:

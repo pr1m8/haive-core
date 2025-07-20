@@ -44,7 +44,7 @@ Note:
 
 import logging
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type
+from typing import TYPE_CHECKING, Any, Optional
 
 from langchain_core.messages import AnyMessage
 
@@ -63,8 +63,8 @@ if TYPE_CHECKING:
 
 # Helper function for message reducer - now uses preserve_messages_reducer
 def add_messages(
-    current_msgs: List[AnyMessage], new_msgs: List[AnyMessage]
-) -> List[AnyMessage]:
+    current_msgs: list[AnyMessage], new_msgs: list[AnyMessage]
+) -> list[AnyMessage]:
     """Combine message lists while preserving BaseMessage objects.
 
     This function uses preserve_messages_reducer to maintain all fields in
@@ -134,11 +134,11 @@ class AgentSchemaComposer(SchemaComposer):
     @classmethod
     def from_agents_with_multiagent_base(
         cls,
-        agents: List["Agent"],
-        name: Optional[str] = None,
+        agents: list["Agent"],
+        name: str | None = None,
         separation: str = "smart",  # "smart", "shared", "namespaced"
-        build_mode: Optional[BuildMode] = None,
-    ) -> Type[StateSchema]:
+        build_mode: BuildMode | None = None,
+    ) -> type[StateSchema]:
         """Compose a state schema that inherits from MultiAgentState with agent fields.
 
         This method creates a schema that MARRIES AgentSchemaComposer with MultiAgentState:
@@ -182,10 +182,12 @@ class AgentSchemaComposer(SchemaComposer):
             base_state_schema=MultiAgentState,
         )
 
-        # Collect all fields from all agents (excluding MultiAgentState fields to avoid conflicts)
+        # Collect all fields from all agents (excluding MultiAgentState fields
+        # to avoid conflicts)
         all_fields, engine_io_mappings = cls._collect_all_fields(agents)
 
-        # Filter out fields that already exist in MultiAgentState to avoid conflicts
+        # Filter out fields that already exist in MultiAgentState to avoid
+        # conflicts
         multiagent_fields = set(MultiAgentState.model_fields.keys())
         filtered_fields = {}
         for agent_name, agent_fields in all_fields.items():
@@ -211,19 +213,20 @@ class AgentSchemaComposer(SchemaComposer):
             for field_name in mapping["outputs"]:
                 composer.output_fields[engine_name].add(field_name)
 
-        # Build the composed schema (inheriting from MultiAgentState + agent fields)
+        # Build the composed schema (inheriting from MultiAgentState + agent
+        # fields)
         return composer.build()
 
     @classmethod
     def from_agents(
         cls,
-        agents: List["Agent"],
-        name: Optional[str] = None,
-        include_meta: bool = None,  # Auto-detect if None
+        agents: list["Agent"],
+        name: str | None = None,
+        include_meta: bool | None = None,  # Auto-detect if None
         separation: str = "smart",  # "smart", "shared", "namespaced"
         # Build mode for schema generation
-        build_mode: Optional[BuildMode] = None,
-    ) -> Type[StateSchema]:
+        build_mode: BuildMode | None = None,
+    ) -> type[StateSchema]:
         """Compose a state schema from multiple agents with intelligent defaults.
 
         This method is the primary entry point for creating multi-agent state schemas.
@@ -269,7 +272,6 @@ class AgentSchemaComposer(SchemaComposer):
             to ensure tool_call_id and other fields are maintained across
             agent boundaries.
         """
-
         # Auto-detect meta state need
         if include_meta is None:
             include_meta = (
@@ -316,14 +318,13 @@ class AgentSchemaComposer(SchemaComposer):
                 cls._apply_namespaced_separation(composer, all_fields, agents)
         elif build_mode == BuildMode.HIERARCHICAL:
             cls._apply_hierarchical_mode(composer, all_fields, agents)
-        else:
-            # Custom mode - use default separation
-            if separation == "smart":
-                cls._apply_smart_separation(composer, all_fields, agents)
-            elif separation == "shared":
-                cls._apply_shared_separation(composer, all_fields)
-            elif separation == "namespaced":
-                cls._apply_namespaced_separation(composer, all_fields, agents)
+        # Custom mode - use default separation
+        elif separation == "smart":
+            cls._apply_smart_separation(composer, all_fields, agents)
+        elif separation == "shared":
+            cls._apply_shared_separation(composer, all_fields)
+        elif separation == "namespaced":
+            cls._apply_namespaced_separation(composer, all_fields, agents)
 
         # Add implicit fields
         cls._add_implicit_fields(composer, agents, include_meta)
@@ -348,9 +349,9 @@ class AgentSchemaComposer(SchemaComposer):
 
     @staticmethod
     def _collect_all_fields(
-        agents: List["Agent"],
-    ) -> Tuple[
-        Dict[str, List[Tuple[str, str, Type, Any]]], Dict[str, Dict[str, List[str]]]
+        agents: list["Agent"],
+    ) -> tuple[
+        dict[str, list[tuple[str, str, type, Any]]], dict[str, dict[str, list[str]]]
     ]:
         """Collect all fields from agents and their engine I/O mappings.
 
@@ -445,7 +446,7 @@ class AgentSchemaComposer(SchemaComposer):
                                 engine_io_mappings[prefixed_engine_name][
                                     "inputs"
                                 ].append(fname)
-                    except:
+                    except BaseException:
                         pass
 
                 # Get output fields
@@ -473,7 +474,7 @@ class AgentSchemaComposer(SchemaComposer):
                                 engine_io_mappings[prefixed_engine_name][
                                     "outputs"
                                 ].append(fname)
-                    except:
+                    except BaseException:
                         pass
 
         # Return the fields and the engine IO mappings
@@ -481,7 +482,7 @@ class AgentSchemaComposer(SchemaComposer):
 
     @staticmethod
     def _apply_smart_separation(
-        composer: SchemaComposer, all_fields: Dict, agents: List["Agent"]
+        composer: SchemaComposer, all_fields: dict, agents: list["Agent"]
     ):
         """Apply intelligent field separation based on usage patterns.
 
@@ -508,13 +509,12 @@ class AgentSchemaComposer(SchemaComposer):
             If only agent1 has "tool_results", it becomes "agent1_tool_results"
             in a multi-agent setup.
         """
-
         # Create agent ID to name mapping
         agent_id_to_name = {agent.id: agent.name for agent in agents}
 
         for field_name, field_sources in all_fields.items():
             # Check if field appears in multiple agents (using agent IDs)
-            unique_agent_ids = set(source[0] for source in field_sources)
+            unique_agent_ids = {source[0] for source in field_sources}
 
             if len(unique_agent_ids) > 1:
                 # Field used by multiple agents - share it
@@ -575,48 +575,45 @@ class AgentSchemaComposer(SchemaComposer):
                             ),
                             shared=False,
                         )
+                # Single agent, use as is
+                elif hasattr(finfo, "default_factory"):
+                    composer.add_field(
+                        field_name, ftype, default_factory=finfo.default_factory
+                    )
                 else:
-                    # Single agent, use as is
-                    if hasattr(finfo, "default_factory"):
-                        composer.add_field(
-                            field_name, ftype, default_factory=finfo.default_factory
-                        )
-                    else:
-                        composer.add_field(
-                            field_name,
-                            ftype,
-                            default=(
-                                finfo.default if hasattr(finfo, "default") else None
-                            ),
-                        )
+                    composer.add_field(
+                        field_name,
+                        ftype,
+                        default=(finfo.default if hasattr(finfo, "default") else None),
+                    )
 
     @staticmethod
     def _add_implicit_fields(
-        composer: SchemaComposer, agents: List["Agent"], include_meta: bool
+        composer: SchemaComposer, agents: list["Agent"], include_meta: bool
     ):
         """Add fields that should be implicitly included."""
 
-        # Check if field exists using has_field method or by checking the fields dict
+        # Check if field exists using has_field method or by checking the
+        # fields dict
         def field_exists(name: str) -> bool:
             if hasattr(composer, "has_field"):
                 return composer.has_field(name)
-            elif hasattr(composer, "fields"):
+            if hasattr(composer, "fields"):
                 return name in composer.fields
-            elif hasattr(composer, "_field_definitions"):
+            if hasattr(composer, "_field_definitions"):
                 return name in composer._field_definitions
-            else:
-                # Try to access through the model fields if already built
-                try:
-                    temp_model = composer.build()
-                    return name in temp_model.model_fields
-                except:
-                    return False
+            # Try to access through the model fields if already built
+            try:
+                temp_model = composer.build()
+                return name in temp_model.model_fields
+            except BaseException:
+                return False
 
         # Always ensure messages field exists
         if not field_exists("messages"):
             composer.add_field(
                 "messages",
-                List[AnyMessage],
+                list[AnyMessage],
                 default_factory=list,
                 shared=True,
                 reducer=add_messages,
@@ -639,7 +636,7 @@ class AgentSchemaComposer(SchemaComposer):
                 # If meta_state module doesn't exist, create a dummy Dict type
                 composer.add_field(
                     "meta_state",
-                    Dict[str, Any],
+                    dict[str, Any],
                     default_factory=dict,
                     shared=True,
                     description="Shared meta state for agent coordination",
@@ -655,22 +652,21 @@ class AgentSchemaComposer(SchemaComposer):
             if not field_exists("agent_outputs"):
                 composer.add_field(
                     "agent_outputs",
-                    Dict[str, Any],
+                    dict[str, Any],
                     default_factory=dict,
                     shared=True,
                     description="Collected outputs from each agent",
                 )
 
     @staticmethod
-    def _generate_name(agents: List["Agent"]) -> str:
+    def _generate_name(agents: list["Agent"]) -> str:
         """Generate a name for the composed schema."""
         if len(agents) == 1:
             return f"{agents[0].__class__.__name__}State"
-        else:
-            return "MultiAgentState"
+        return "MultiAgentState"
 
     @staticmethod
-    def _apply_shared_separation(composer: SchemaComposer, all_fields: Dict):
+    def _apply_shared_separation(composer: SchemaComposer, all_fields: dict):
         """Apply shared separation - all fields are shared."""
         for field_name, field_sources in all_fields.items():
             # Use first occurrence for type info
@@ -693,7 +689,7 @@ class AgentSchemaComposer(SchemaComposer):
 
     @staticmethod
     def _apply_namespaced_separation(
-        composer: SchemaComposer, all_fields: Dict, agents: List["Agent"]
+        composer: SchemaComposer, all_fields: dict, agents: list["Agent"]
     ):
         """Apply namespaced separation - each agent gets its own namespace."""
         # Create agent ID to name mapping
@@ -702,7 +698,9 @@ class AgentSchemaComposer(SchemaComposer):
         for _field_name, field_sources in all_fields.items():
             for agent_id, fname, ftype, finfo in field_sources:
                 agent_name = agent_id_to_name.get(agent_id, agent_id)
-                namespaced_name = f"{agent_name.lower().replace(' ', '_')}_{fname}"
+                namespaced_name = f"{
+                    agent_name.lower().replace(
+                        ' ', '_')}_{fname}"
 
                 if hasattr(finfo, "default_factory"):
                     composer.add_field(
@@ -722,12 +720,11 @@ class AgentSchemaComposer(SchemaComposer):
     @staticmethod
     def _apply_sequence_mode(
         composer: SchemaComposer,
-        all_fields: Dict,
-        agents: List["Agent"],
-        engine_io_mappings: Dict[str, Dict[str, List[str]]],
+        all_fields: dict,
+        agents: list["Agent"],
+        engine_io_mappings: dict[str, dict[str, list[str]]],
     ):
-        """
-        Apply sequence mode logic where agents execute in order.
+        """Apply sequence mode logic where agents execute in order.
 
         In sequence mode:
         - First agent's input fields are required
@@ -782,10 +779,9 @@ class AgentSchemaComposer(SchemaComposer):
                 for engine_name, mapping in engine_io_mappings.items():
                     if engine_name.startswith(
                         first_agent.name.lower().replace(" ", "_")
-                    ):
-                        if field_name in mapping.get("inputs", []):
-                            is_required = True
-                            break
+                    ) and field_name in mapping.get("inputs", []):
+                        is_required = True
+                        break
 
             # Add field with appropriate optionality
             if hasattr(finfo, "default_factory"):
@@ -817,7 +813,7 @@ class AgentSchemaComposer(SchemaComposer):
 
     @staticmethod
     def _apply_hierarchical_mode(
-        composer: SchemaComposer, all_fields: Dict, agents: List["Agent"]
+        composer: SchemaComposer, all_fields: dict, agents: list["Agent"]
     ):
         """Apply hierarchical mode for parent-child agent relationships."""
         # For now, just use smart separation

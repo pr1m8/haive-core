@@ -5,7 +5,7 @@ in the BaseGraph architecture, maintaining clean separation of concerns.
 """
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any
 
 from haive.core.graph.state_graph.components.base_component import BaseGraphComponent
 
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 # Type alias for edges
-Edge = Tuple[str, str]
+Edge = tuple[str, str]
 
 
 class EdgeManager(BaseGraphComponent):
@@ -118,7 +118,7 @@ class EdgeManager(BaseGraphComponent):
 
         return self.graph
 
-    def remove_edge(self, source: str, target: Optional[str] = None) -> "BaseGraph":
+    def remove_edge(self, source: str, target: str | None = None) -> "BaseGraph":
         """Remove edge(s) from the graph.
 
         Args:
@@ -153,7 +153,8 @@ class EdgeManager(BaseGraphComponent):
                 raise ValueError(f"No edges found from node '{source}'")
 
             logger.debug(
-                f"Removed {removed_count} edges from '{source}' in graph '{self.graph.name}'"
+                f"Removed {removed_count} edges from '{source}' in graph '{
+                    self.graph.name}'"
             )
         else:
             # Remove specific edge
@@ -173,8 +174,8 @@ class EdgeManager(BaseGraphComponent):
         return self.graph
 
     def get_edges(
-        self, source: Optional[str] = None, target: Optional[str] = None
-    ) -> List[Edge]:
+        self, source: str | None = None, target: str | None = None
+    ) -> list[Edge]:
         """Get edges matching the specified criteria.
 
         Args:
@@ -211,7 +212,7 @@ class EdgeManager(BaseGraphComponent):
 
         return edges
 
-    def get_outgoing_edges(self, node_name: str) -> List[Edge]:
+    def get_outgoing_edges(self, node_name: str) -> list[Edge]:
         """Get all outgoing edges from a node.
 
         Args:
@@ -222,7 +223,7 @@ class EdgeManager(BaseGraphComponent):
         """
         return self.get_edges(source=node_name)
 
-    def get_incoming_edges(self, node_name: str) -> List[Edge]:
+    def get_incoming_edges(self, node_name: str) -> list[Edge]:
         """Get all incoming edges to a node.
 
         Args:
@@ -249,7 +250,7 @@ class EdgeManager(BaseGraphComponent):
         """Get total number of edges in the graph."""
         return len(self.graph.edges)
 
-    def find_dangling_edges(self) -> List[Edge]:
+    def find_dangling_edges(self) -> list[Edge]:
         """Find edges that reference non-existent nodes.
 
         Returns:
@@ -276,7 +277,7 @@ class EdgeManager(BaseGraphComponent):
 
         return dangling_edges
 
-    def get_connected_components(self) -> List[List[str]]:
+    def get_connected_components(self) -> list[list[str]]:
         """Find all connected components in the graph.
 
         Returns:
@@ -307,7 +308,7 @@ class EdgeManager(BaseGraphComponent):
 
         return components
 
-    def get_isolated_nodes(self) -> List[str]:
+    def get_isolated_nodes(self) -> list[str]:
         """Find nodes with no incoming or outgoing edges.
 
         Returns:
@@ -324,7 +325,7 @@ class EdgeManager(BaseGraphComponent):
 
         return list(isolated)
 
-    def validate_state(self) -> List[str]:
+    def validate_state(self) -> list[str]:
         """Validate the edge manager state.
 
         Returns:
@@ -363,8 +364,8 @@ class EdgeManager(BaseGraphComponent):
             raise ValueError(f"Target node '{target}' not found in graph")
 
     def _dfs_component(
-        self, start_node: str, adjacency: Dict[str, set], visited: set
-    ) -> List[str]:
+        self, start_node: str, adjacency: dict[str, set], visited: set
+    ) -> list[str]:
         """Depth-first search to find connected component."""
         component = []
         stack = [start_node]
@@ -388,7 +389,7 @@ class EdgeManager(BaseGraphComponent):
 
         return datetime.now()
 
-    def get_component_info(self) -> Dict[str, Any]:
+    def get_component_info(self) -> dict[str, Any]:
         """Get detailed component information."""
         base_info = super().get_component_info()
 

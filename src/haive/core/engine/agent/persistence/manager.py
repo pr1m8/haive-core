@@ -1,5 +1,6 @@
 """PostgreSQL persistence manager for the Haive framework.
 
+from typing import Any, Dict, List, Optional
 This module provides a comprehensive persistence manager that integrates
 Supabase authentication with PostgreSQL persistence for agent state management.
 It centralizes thread registration, checkpoint management, and connection
@@ -51,7 +52,7 @@ class PersistenceManager:
     5. Integration with HaiveRunnableConfigManager for authentication
     """
 
-    def __init__(self, config=None):
+    def __init__(self, config: Dict[str, Any] = None):
         """Initialize persistence manager with optional configuration.
 
         Args:
@@ -63,7 +64,9 @@ class PersistenceManager:
         self.pool = None
         self.pool_opened = False
 
-    def get_checkpointer(self, persistence_type=None, persistence_config=None):
+    def get_checkpointer(
+        self, persistence_type=None, persistence_config: Dict[str, Any] = None
+    ):
         """Create and return the appropriate checkpointer based on configuration and available dependencies.
 
         Args:
@@ -104,7 +107,8 @@ class PersistenceManager:
             db_uri = self._get_db_uri(config)
             connection_kwargs = self._get_connection_kwargs(config)
 
-            # For the connection failure test, specifically check if we're using a non-existent host
+            # For the connection failure test, specifically check if we're
+            # using a non-existent host
             if "non-existent-host" in db_uri:
                 logger.warning(
                     "Using non-existent host in configuration, falling back to memory checkpointer"
@@ -149,7 +153,9 @@ class PersistenceManager:
             self.postgres_setup_needed = setup_needed
 
             logger.info(
-                f"Using PostgreSQL checkpointer with {'async' if use_async else 'sync'} {'pool' if use_pool else 'connection'}"
+                f"Using PostgreSQL checkpointer with {
+                    'async' if use_async else 'sync'} {
+                    'pool' if use_pool else 'connection'}"
             )
             return checkpointer
 
@@ -205,7 +211,7 @@ class PersistenceManager:
             "prepare_threshold": config.get("prepare_threshold", 0),
         }
 
-    def setup(self):
+    def setup(self) -> bool:
         """Setup the checkpointer, including database tables if needed.
 
         Returns:
@@ -233,7 +239,7 @@ class PersistenceManager:
             logger.exception(f"Error during checkpointer setup: {e}")
             return False
 
-    def ensure_pool_open(self):
+    def ensure_pool_open(self) -> bool:
         """Ensure the PostgreSQL connection pool is open.
 
         Returns:
@@ -271,7 +277,7 @@ class PersistenceManager:
             logger.error(f"Error ensuring pool is open: {e}", exc_info=True)
             return False
 
-    def close_pool_if_needed(self):
+    def close_pool_if_needed(self) -> None:
         """Close the PostgreSQL connection pool if it was opened by this manager."""
         # Skip if not PostgreSQL or pool not opened by us
         if (
@@ -292,7 +298,7 @@ class PersistenceManager:
         except Exception as e:
             logger.exception(f"Error closing pool: {e}")
 
-    def register_thread(self, thread_id, auth_info=None):
+    def register_thread(self, thread_id: str, auth_info=None):
         """Register a thread in the PostgreSQL database, including user context from Supabase.
 
         Args:
@@ -320,7 +326,8 @@ class PersistenceManager:
             user_id = None
 
             if auth_info:
-                # Extract supabase_user_id specifically to match the test expectations
+                # Extract supabase_user_id specifically to match the test
+                # expectations
                 user_id = auth_info.get("supabase_user_id")
                 logger.debug(f"Registering thread {thread_id} with user_id={user_id}")
 
@@ -418,7 +425,11 @@ class PersistenceManager:
             )
             result = cursor.fetchone()
             if result:
-                logger.debug(f"Verified thread {result[0]} with user_id={result[1]}")
+                logger.debug(
+                    f"Verified thread {
+                        result[0]} with user_id={
+                        result[1]}"
+                )
             else:
                 logger.warning(f"Failed to verify thread {thread_id} after insertion")
 
@@ -442,7 +453,9 @@ class PersistenceManager:
             (thread_id, metadata_json, metadata_json),
         )
 
-    def create_runnable_config(self, thread_id=None, user_info=None, **kwargs):
+    def create_runnable_config(
+        self, thread_id: str | None = None, user_info=None, **kwargs
+    ):
         """Create a RunnableConfig with proper thread ID and authentication context.
 
         Args:
@@ -483,7 +496,9 @@ class PersistenceManager:
 
         return config, current_thread_id
 
-    def prepare_for_agent_run(self, thread_id=None, user_info=None, **kwargs):
+    def prepare_for_agent_run(
+        self, thread_id: str | None = None, user_info=None, **kwargs
+    ):
         """Comprehensive preparation for an agent run, handling thread registration,
         configuration creation, and database setup.
 
@@ -525,7 +540,7 @@ class PersistenceManager:
         return config, current_thread_id
 
     @staticmethod
-    def get_or_create_thread_id(config=None):
+    def get_or_create_thread_id(config: Dict[str, Any] = None):
         """Get thread ID from config or create a new one.
 
         Args:
@@ -542,7 +557,13 @@ class PersistenceManager:
             return config["configurable"]["thread_id"]
         return str(uuid.uuid4())
 
-    def list_threads(self, user_id=None, thread_id=None, limit=100, offset=0):
+    def list_threads(
+        self,
+        user_id: str | None = None,
+        thread_id: str | None = None,
+        limit: int = 100,
+        offset: int = 0,
+    ):
         """List threads from the PostgreSQL database.
 
         Args:
@@ -591,7 +612,8 @@ class PersistenceManager:
                     params = (thread_id,)
                 elif user_id:
                     logger.debug(
-                        f"Filtering by user_id={user_id} (type: {type(user_id).__name__})"
+                        f"Filtering by user_id={user_id} (type: {
+                            type(user_id).__name__})"
                     )
                     query = """
                             SELECT thread_id, metadata, user_id, created_at, last_access
@@ -618,7 +640,10 @@ class PersistenceManager:
                 results = cursor.fetchall()
 
                 if user_id:
-                    logger.debug(f"Found {len(results)} threads for user_id={user_id}")
+                    logger.debug(
+                        f"Found {
+                            len(results)} threads for user_id={user_id}"
+                    )
 
                     # For debugging purposes
                     if logger.isEnabledFor(logging.DEBUG):
@@ -693,7 +718,7 @@ class PersistenceManager:
             "metadata": metadata,
         }
 
-    def delete_thread(self, thread_id):
+    def delete_thread(self, thread_id: str):
         """Delete a thread from the PostgreSQL database.
 
         Args:
@@ -800,7 +825,7 @@ class PersistenceManager:
         return manager
 
     @classmethod
-    def from_env(cls):
+    def from_env(cls) -> Any:
         """Create a PersistenceManager from environment variables.
 
         Returns:

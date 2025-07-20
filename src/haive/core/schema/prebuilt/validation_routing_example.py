@@ -7,7 +7,7 @@ This example demonstrates:
 4. Examples of splitting tool calls based on validation
 """
 
-from typing import Any, Dict, List, Union
+from typing import Any
 
 from langchain_core.messages import AIMessage, ToolMessage
 from langgraph.graph import END, StateGraph
@@ -34,7 +34,7 @@ class ValidationExample(BaseModel):
     error_count: int = Field(default=0, description="Number of errors encountered")
 
 
-def validation_node(state: EnhancedToolState) -> Union[str, List[Send]]:
+def validation_node(state: EnhancedToolState) -> str | list[Send]:
     """Validation node that routes tool calls based on validation results.
 
     This node demonstrates:
@@ -151,12 +151,11 @@ def validation_node(state: EnhancedToolState) -> Union[str, List[Send]]:
     if sends:
         # We have valid tools to execute
         return sends
-    elif validation_state.should_return_to_agent():
+    if validation_state.should_return_to_agent():
         # Need agent clarification
         return "agent"
-    else:
-        # No valid tools, end processing
-        return END
+    # No valid tools, end processing
+    return END
 
 
 def _get_target_node_for_route(tool_route: str) -> str:
@@ -175,16 +174,12 @@ def _get_target_node_for_route(tool_route: str) -> str:
     return route_to_node.get(tool_route, "tools")
 
 
-def langchain_tools_node(tool_call: Dict[str, Any]) -> Dict[str, Any]:
+def langchain_tools_node(tool_call: dict[str, Any]) -> dict[str, Any]:
     """Execute LangChain tools."""
     # This node receives individual tool calls via Send
     tool_name = tool_call.get("name")
     tool_call.get("args", {})
-    validation_info = tool_call.get("validation", {})
-
-    print(f"Executing LangChain tool: {tool_name}")
-    print(f"  Priority: {validation_info.get('priority', 0)}")
-    print(f"  Engine: {validation_info.get('engine', 'default')}")
+    tool_call.get("validation", {})
 
     # Execute the tool and return result
     result = f"Result from {tool_name}"
@@ -200,12 +195,10 @@ def langchain_tools_node(tool_call: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def pydantic_tools_node(tool_call: Dict[str, Any]) -> Dict[str, Any]:
+def pydantic_tools_node(tool_call: dict[str, Any]) -> dict[str, Any]:
     """Execute Pydantic model tools."""
     tool_name = tool_call.get("name")
-    tool_args = tool_call.get("args", {})
-
-    print(f"Executing Pydantic tool: {tool_name} with args: {tool_args}")
+    tool_call.get("args", {})
 
     # Validate args against Pydantic model and execute
     result = f"Pydantic result for {tool_name}"
@@ -221,13 +214,12 @@ def pydantic_tools_node(tool_call: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def agent_node(state: EnhancedToolState) -> Dict[str, Any]:
+def agent_node(state: EnhancedToolState) -> dict[str, Any]:
     """Agent node that can make tool calls."""
     # Get validation feedback if any
     if state.validation_state.invalid_tool_calls:
-        print("Agent received validation feedback:")
-        for result in state.validation_state.get_invalid_tool_calls():
-            print(f"  - {result.tool_name}: {', '.join(result.errors)}")
+        for _result in state.validation_state.get_invalid_tool_calls():
+            pass
 
     # Make new tool calls or provide response
     return {

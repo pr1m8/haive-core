@@ -1,4 +1,4 @@
-from typing import Any, Optional, TypeVar, Union
+from typing import Any, TypeVar, Union
 
 # from langchain_core.output_parsers
 from pydantic import BaseModel, Field
@@ -18,7 +18,6 @@ import logging
 import uuid
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Type
 
 from langchain_core.messages import BaseMessage
 from langchain_core.runnables import RunnableConfig
@@ -31,32 +30,25 @@ logger = logging.getLogger(__name__)
 # Define a bounded type variable for output types
 TOut = TypeVar(
     "TOut",
-    bound=Union[
-        # Primitive types
-        bool,
-        str,
-        int,
-        float,
-        datetime,
-        # Collection types
-        List[Any],
-        Dict[str, Any],
-        List[Dict[str, Any]],
-        # Pydantic models (handled specially)
-        BaseModel,
-        # Any for truly custom parsers
-        Any,
-    ],
+    bound=bool
+    | str
+    | int
+    | float
+    | datetime
+    | list[Any]
+    | dict[str, Any]
+    | list[dict[str, Any]]
+    | BaseModel
+    | Any,
 )
 
 # Input can be string, message, or collection
-TIn = TypeVar("TIn", bound=Union[str, BaseMessage, List[BaseMessage], Dict[str, Any]])
+TIn = TypeVar("TIn", bound=str | BaseMessage | list[BaseMessage] | dict[str, Any])
 
 
 @register_component(registry_getter="engine_registry", component_type=EngineType.TOOL)
 class OutputParserEngine(InvokableEngine[TIn, TOut]):
-    """
-    Engine that wraps LangChain OutputParsers to convert text to structured data.
+    """Engine that wraps LangChain OutputParsers to convert text to structured data.
 
     The generic parameter TOut represents the specific return type of the parser.
     This allows for type-safe usage of parsers in your workflows.
@@ -88,47 +80,47 @@ class OutputParserEngine(InvokableEngine[TIn, TOut]):
         description="Type of parser to use (from OutputParserType enum)"
     )
 
-    parser_config: Dict[str, Any] = Field(
+    parser_config: dict[str, Any] = Field(
         default_factory=dict,
         description="Additional configuration parameters for the parser",
     )
 
     # Special configuration fields for specific parsers
-    pydantic_model: Optional[Type[BaseModel]] = Field(
+    pydantic_model: type[BaseModel] | None = Field(
         default=None,
         description="Pydantic model for PydanticOutputParser",
         exclude=True,  # Exclude from serialization
     )
 
-    regex_pattern: Optional[str] = Field(
+    regex_pattern: str | None = Field(
         default=None, description="Regex pattern for RegexParser"
     )
 
-    enum_class: Optional[Type[Enum]] = Field(
+    enum_class: type[Enum] | None = Field(
         default=None, description="Enum class for EnumOutputParser", exclude=True
     )
 
-    response_schemas: Optional[List[Dict[str, Any]]] = Field(
+    response_schemas: list[dict[str, Any]] | None = Field(
         default=None, description="Response schemas for StructuredOutputParser"
     )
 
-    def get_input_fields(self) -> Dict[str, tuple]:
+    def get_input_fields(self) -> dict[str, tuple]:
         """Define input field requirements."""
         return {
             "input": (
-                Union[str, BaseMessage, List[BaseMessage], Dict[str, Any]],
+                Union[str, BaseMessage, list[BaseMessage], dict[str, Any]],
                 Field(
                     description="Text, message, or dictionary to parse into structured data"
                 ),
             )
         }
 
-    def get_output_fields(self) -> Dict[str, tuple]:
+    def get_output_fields(self) -> dict[str, tuple]:
         """Define output field requirements based on parser type."""
         if self.parser_type == OutputParserType.BOOLEAN:
             return {"result": (bool, Field(description="Parsed boolean result"))}
 
-        elif self.parser_type in [
+        if self.parser_type in [
             OutputParserType.LIST,
             OutputParserType.COMMA_SEPARATED_LIST,
             OutputParserType.NUMBERED_LIST,
@@ -136,15 +128,15 @@ class OutputParserEngine(InvokableEngine[TIn, TOut]):
         ]:
             return {
                 "result": (
-                    List[str],
+                    list[str],
                     Field(default_factory=list, description="Parsed list result"),
                 )
             }
 
-        elif self.parser_type == OutputParserType.DATETIME:
+        if self.parser_type == OutputParserType.DATETIME:
             return {"result": (datetime, Field(description="Parsed datetime result"))}
 
-        elif self.parser_type in [
+        if self.parser_type in [
             OutputParserType.JSON,
             OutputParserType.SIMPLE_JSON,
             OutputParserType.COMBINING,
@@ -154,12 +146,12 @@ class OutputParserEngine(InvokableEngine[TIn, TOut]):
         ]:
             return {
                 "result": (
-                    Dict[str, Any],
+                    dict[str, Any],
                     Field(default_factory=dict, description="Parsed dictionary result"),
                 )
             }
 
-        elif self.parser_type == OutputParserType.PYDANTIC and self.pydantic_model:
+        if self.parser_type == OutputParserType.PYDANTIC and self.pydantic_model:
             return {
                 "result": (
                     self.pydantic_model,
@@ -167,17 +159,18 @@ class OutputParserEngine(InvokableEngine[TIn, TOut]):
                 )
             }
 
-        elif self.parser_type == OutputParserType.STRING:
+        if self.parser_type == OutputParserType.STRING:
             return {"result": (str, Field(description="Parsed string result"))}
 
-        elif self.parser_type == OutputParserType.PANDAS_DATAFRAME:
-            # Using Any here since we can't import pandas directly in the type hint
+        if self.parser_type == OutputParserType.PANDAS_DATAFRAME:
+            # Using Any here since we can't import pandas directly in the type
+            # hint
             return {"result": (Any, Field(description="Parsed pandas DataFrame"))}
 
-        elif self.parser_type == OutputParserType.ENUM and self.enum_class:
+        if self.parser_type == OutputParserType.ENUM and self.enum_class:
             return {"result": (self.enum_class, Field(description="Parsed enum value"))}
 
-        elif self.parser_type in [
+        if self.parser_type in [
             OutputParserType.OPENAI_TOOLS,
             OutputParserType.OPENAI_TOOLS_KEY,
             OutputParserType.PYDANTIC_TOOLS,
@@ -187,9 +180,8 @@ class OutputParserEngine(InvokableEngine[TIn, TOut]):
         # Default for unknown types
         return {"result": (Any, Field(description="Parsed result"))}
 
-    def create_runnable(self, runnable_config: Optional[RunnableConfig] = None) -> Any:
-        """
-        Create the appropriate parser based on configuration.
+    def create_runnable(self, runnable_config: RunnableConfig | None = None) -> Any:
+        """Create the appropriate parser based on configuration.
 
         Args:
             runnable_config: Optional runtime configuration
@@ -357,16 +349,21 @@ class OutputParserEngine(InvokableEngine[TIn, TOut]):
             return parser_class(**params)
 
         except ImportError as e:
-            logger.error(f"Failed to import parser for {self.parser_type}: {str(e)}")
+            logger.exception(
+                f"Failed to import parser for {
+                    self.parser_type}: {
+                    e!s}"
+            )
             raise ImportError(
-                f"Required package for {self.parser_type} parser not installed: {str(e)}"
+                f"Required package for {
+                    self.parser_type} parser not installed: {
+                    e!s}"
             )
 
     def invoke(
-        self, input_data: TIn, runnable_config: Optional[RunnableConfig] = None
+        self, input_data: TIn, runnable_config: RunnableConfig | None = None
     ) -> TOut:
-        """
-        Invoke the parser with the input data.
+        """Invoke the parser with the input data.
 
         Args:
             input_data: Input text, message, or dictionary
@@ -399,7 +396,7 @@ class OutputParserEngine(InvokableEngine[TIn, TOut]):
             return parser.parse(text)
         except Exception as e:
             # Handle parsing errors
-            logger.error(f"Error parsing with {self.parser_type}: {str(e)}")
+            logger.exception(f"Error parsing with {self.parser_type}: {e!s}")
             if "error_handler" in self.parser_config:
                 error_handler = self.parser_config["error_handler"]
                 return error_handler(text, e)
@@ -407,10 +404,9 @@ class OutputParserEngine(InvokableEngine[TIn, TOut]):
             raise
 
     async def ainvoke(
-        self, input_data: TIn, runnable_config: Optional[RunnableConfig] = None
+        self, input_data: TIn, runnable_config: RunnableConfig | None = None
     ) -> TOut:
-        """
-        Asynchronously invoke the parser with the input data.
+        """Asynchronously invoke the parser with the input data.
 
         Args:
             input_data: Input text, message, or dictionary
@@ -434,16 +430,15 @@ class OutputParserEngine(InvokableEngine[TIn, TOut]):
             ):
                 prompt = runnable_config["configurable"]["prompt"]
                 return await parser.aparse_with_prompt(text, prompt)
-            elif hasattr(parser, "aparse"):
+            if hasattr(parser, "aparse"):
                 return await parser.aparse(text)
-            else:
-                # Fall back to synchronous parsing in an async context
-                import asyncio
+            # Fall back to synchronous parsing in an async context
+            import asyncio
 
-                return await asyncio.to_thread(parser.parse, text)
+            return await asyncio.to_thread(parser.parse, text)
         except Exception as e:
-            logger.error(
-                f"Error parsing asynchronously with {self.parser_type}: {str(e)}"
+            logger.exception(
+                f"Error parsing asynchronously with {self.parser_type}: {e!s}"
             )
             if "error_handler" in self.parser_config:
                 error_handler = self.parser_config["error_handler"]
@@ -451,8 +446,7 @@ class OutputParserEngine(InvokableEngine[TIn, TOut]):
             raise
 
     def _extract_text(self, input_data: TIn) -> str:
-        """
-        Extract text content from various input types.
+        """Extract text content from various input types.
 
         Args:
             input_data: Input data in various formats
@@ -467,11 +461,11 @@ class OutputParserEngine(InvokableEngine[TIn, TOut]):
             # If input is already a string, use it directly
             return input_data
 
-        elif hasattr(input_data, "content") and isinstance(input_data.content, str):
+        if hasattr(input_data, "content") and isinstance(input_data.content, str):
             # If input is a message with text content, extract it
             return input_data.content
 
-        elif isinstance(input_data, list) and all(
+        if isinstance(input_data, list) and all(
             hasattr(m, "content") for m in input_data
         ):
             # If input is a list of messages, concatenate their contents
@@ -479,22 +473,22 @@ class OutputParserEngine(InvokableEngine[TIn, TOut]):
                 m.content for m in input_data if isinstance(m.content, str)
             )
 
-        elif isinstance(input_data, dict):
+        if isinstance(input_data, dict):
             # Try to extract text from dictionary
             if "text" in input_data:
                 return str(input_data["text"])
-            elif "content" in input_data:
+            if "content" in input_data:
                 return str(input_data["content"])
-            elif "input" in input_data:
+            if "input" in input_data:
                 return str(input_data["input"])
 
         # Try to convert to string as a fallback
         try:
             return str(input_data)
         except Exception as e:
-            raise ValueError(f"Cannot extract text from input: {str(e)}")
+            raise ValueError(f"Cannot extract text from input: {e!s}")
 
-    def _import_class(self, module_path: str, class_name: str) -> Type:
+    def _import_class(self, module_path: str, class_name: str) -> type:
         """Dynamically import a class."""
         import importlib
 
@@ -502,8 +496,8 @@ class OutputParserEngine(InvokableEngine[TIn, TOut]):
         return getattr(module, class_name)
 
     def _filter_kwargs_for_class(
-        self, cls: Type, kwargs: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, cls: type, kwargs: dict[str, Any]
+    ) -> dict[str, Any]:
         """Filter kwargs to only include those accepted by the class's __init__."""
         if not hasattr(cls, "__init__"):
             return {}
@@ -516,7 +510,7 @@ class OutputParserEngine(InvokableEngine[TIn, TOut]):
         # Return only the kwargs that are valid parameters
         return {k: v for k, v in kwargs.items() if k in valid_params}
 
-    def _create_structured_parser(self, schemas: List[Dict[str, Any]]) -> Any:
+    def _create_structured_parser(self, schemas: list[dict[str, Any]]) -> Any:
         """Create a StructuredOutputParser instance."""
         from langchain.output_parsers import ResponseSchema, StructuredOutputParser
 
@@ -525,10 +519,9 @@ class OutputParserEngine(InvokableEngine[TIn, TOut]):
 
 
 def create_output_parser_engine(
-    parser_type: Union[str, OutputParserType], name: Optional[str] = None, **kwargs
+    parser_type: str | OutputParserType, name: str | None = None, **kwargs
 ) -> OutputParserEngine:
-    """
-    Factory function to create an OutputParserEngine.
+    """Factory function to create an OutputParserEngine.
 
     Args:
         parser_type: Type of parser (from OutputParserType enum or string)
@@ -568,16 +561,15 @@ def create_output_parser_engine(
 
 
 # Convenience functions for common parser types
-def create_str_parser(name: Optional[str] = None, **kwargs) -> OutputParserEngine:
+def create_str_parser(name: str | None = None, **kwargs) -> OutputParserEngine:
     """Create a StrOutputParser engine."""
     return create_output_parser_engine(OutputParserType.STRING, name, **kwargs)
 
 
 def create_list_parser(
-    list_type: str = "list", name: Optional[str] = None, **kwargs
+    list_type: str = "list", name: str | None = None, **kwargs
 ) -> OutputParserEngine:
-    """
-    Create a list parser engine.
+    """Create a list parser engine.
 
     Args:
         list_type: Type of list parser ('list', 'comma_separated', 'numbered', 'markdown')
@@ -596,14 +588,16 @@ def create_list_parser(
 
     if list_type not in type_map:
         raise ValueError(
-            f"Unknown list type: {list_type}. Must be one of {list(type_map.keys())}"
+            f"Unknown list type: {list_type}. Must be one of {
+                list(
+                    type_map.keys())}"
         )
 
     return create_output_parser_engine(type_map[list_type], name, **kwargs)
 
 
 def create_json_parser(
-    name: Optional[str] = None, schema: Optional[Dict] = None, **kwargs
+    name: str | None = None, schema: dict | None = None, **kwargs
 ) -> OutputParserEngine:
     """Create a JsonOutputParser engine."""
     if schema:
@@ -612,7 +606,7 @@ def create_json_parser(
 
 
 def create_pydantic_parser(
-    pydantic_model: Type[BaseModel], name: Optional[str] = None, **kwargs
+    pydantic_model: type[BaseModel], name: str | None = None, **kwargs
 ) -> OutputParserEngine:
     """Create a PydanticOutputParser engine."""
     return create_output_parser_engine(
@@ -621,7 +615,7 @@ def create_pydantic_parser(
 
 
 def create_structured_parser(
-    response_schemas: List[Dict[str, Any]], name: Optional[str] = None, **kwargs
+    response_schemas: list[dict[str, Any]], name: str | None = None, **kwargs
 ) -> OutputParserEngine:
     """Create a StructuredOutputParser engine."""
     return create_output_parser_engine(
@@ -630,7 +624,7 @@ def create_structured_parser(
 
 
 def create_regex_parser(
-    regex_pattern: str, output_keys: List[str], name: Optional[str] = None, **kwargs
+    regex_pattern: str, output_keys: list[str], name: str | None = None, **kwargs
 ) -> OutputParserEngine:
     """Create a RegexParser engine."""
     return create_output_parser_engine(
@@ -643,7 +637,7 @@ def create_regex_parser(
 
 
 def create_enum_parser(
-    enum_class: Type[Enum], name: Optional[str] = None, **kwargs
+    enum_class: type[Enum], name: str | None = None, **kwargs
 ) -> OutputParserEngine:
     """Create an EnumOutputParser engine."""
     return create_output_parser_engine(

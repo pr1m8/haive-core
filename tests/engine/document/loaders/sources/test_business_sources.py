@@ -5,7 +5,7 @@ e-commerce platforms, productivity tools, and enterprise integrations.
 """
 
 from datetime import datetime, timedelta
-from typing import Any, Dict
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -40,7 +40,7 @@ def mock_registry():
 
 
 @pytest.fixture
-def business_source_config() -> Dict[str, Any]:
+def business_source_config() -> dict[str, Any]:
     """Create a basic business source configuration."""
     return {
         "platform": BusinessPlatform.HUBSPOT,
@@ -113,7 +113,7 @@ class TestBusinessPlatformDetection:
         assert result is None
 
     @pytest.mark.parametrize(
-        "url,expected",
+        ("url", "expected"),
         [
             ("https://mystore.myshopify.com", BusinessPlatform.SHOPIFY),
             ("https://notion.so/workspace", BusinessPlatform.NOTION),
@@ -122,7 +122,8 @@ class TestBusinessPlatformDetection:
             ("https://company.atlassian.net/wiki", BusinessPlatform.CONFLUENCE),
         ],
     )
-    def test_detect_various_platforms(self, url: str, expected: BusinessPlatform):
+    def test_detect_various_platforms(
+            self, url: str, expected: BusinessPlatform):
         """Test detecting various business platforms."""
         result = detect_business_platform(url)
         assert result == expected
@@ -194,7 +195,7 @@ class TestBusinessSource:
         assert kwargs["parallel_streams"] == 5
 
     @pytest.mark.parametrize(
-        "sync_mode,expected",
+        ("sync_mode", "expected"),
         [
             (SyncMode.FULL_REFRESH, "full_refresh"),
             (SyncMode.INCREMENTAL, "incremental"),
@@ -234,7 +235,11 @@ class TestHubSpotSource:
         source = HubSpotSource(
             source_id="hubspot-test-002",
             category=SourceCategory.BUSINESS,
-            contact_properties=["email", "firstname", "lastname", "custom_score"],
+            contact_properties=[
+                "email",
+                "firstname",
+                "lastname",
+                "custom_score"],
             company_properties=["name", "domain", "industry"],
         )
 
@@ -429,7 +434,7 @@ class TestBusinessDataTypes:
     """Test suite for business data type enumerations."""
 
     @pytest.mark.parametrize(
-        "data_type,expected",
+        ("data_type", "expected"),
         [
             (BusinessDataType.CONTACTS, "contacts"),
             (BusinessDataType.LEADS, "leads"),
@@ -476,7 +481,8 @@ class TestBusinessUtilityFunctions:
     def test_get_business_sources_statistics(self, mock_registry):
         """Test business sources statistics calculation."""
         # Mock registry responses
-        mock_registry.find_sources_by_category.return_value = ["hubspot", "salesforce"]
+        mock_registry.find_sources_by_category.return_value = [
+            "hubspot", "salesforce"]
         mock_registry._sources = {
             "hubspot": MagicMock(
                 requires_credentials=True, credential_type=CredentialType.API_KEY
@@ -518,7 +524,9 @@ class TestBusinessUtilityFunctions:
     def test_validate_business_sources_missing(self, mock_registry):
         """Test validation failure when sources are missing."""
         # Mock only some sources as present
-        mock_registry._sources = {"hubspot": MagicMock(), "salesforce": MagicMock()}
+        mock_registry._sources = {
+            "hubspot": MagicMock(),
+            "salesforce": MagicMock()}
 
         result = validate_business_sources()
         assert result is False
@@ -529,7 +537,8 @@ class TestBusinessSourceIntegration:
     """Integration tests for business sources with mock loaders."""
 
     @patch("langchain_community.document_loaders.HubSpotLoader")
-    async def test_hubspot_loader_integration(self, mock_loader_class, hubspot_source):
+    async def test_hubspot_loader_integration(
+            self, mock_loader_class, hubspot_source):
         """Test HubSpot source integration with mock loader."""
         # Mock the loader instance
         mock_loader = MagicMock()
@@ -551,7 +560,7 @@ class TestBusinessSourceIntegration:
         mock_loader_class.assert_called_once()
 
     @pytest.mark.parametrize(
-        "platform,loader_class",
+        ("platform", "loader_class"),
         [
             (BusinessPlatform.HUBSPOT, "HubSpotLoader"),
             (BusinessPlatform.SALESFORCE, "SalesforceLoader"),

@@ -5,7 +5,6 @@ and other academic file types.
 """
 
 import logging
-from typing import Optional
 
 from langchain_core.document_loaders.base import BaseLoader
 
@@ -17,14 +16,14 @@ logger = logging.getLogger(__name__)
 class BibtexSource(LocalFileSource):
     """BibTeX bibliography file source."""
 
-    def __init__(self, file_path: str, max_docs: Optional[int] = None, **kwargs):
+    def __init__(self, file_path: str, max_docs: int | None = None, **kwargs):
         super().__init__(
             source_path=file_path, file_extensions=[".bib", ".bibtex"], **kwargs
         )
         self.file_path = file_path
         self.max_docs = max_docs
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a BibTeX loader."""
         try:
             from langchain_community.document_loaders import BibtexLoader
@@ -40,7 +39,7 @@ class BibtexSource(LocalFileSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create BibTeX loader: {e}")
+            logger.exception(f"Failed to create BibTeX loader: {e}")
             return None
 
 
@@ -53,7 +52,7 @@ class CONLLUSource(LocalFileSource):
         )
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a CoNLL-U loader."""
         try:
             from langchain_community.document_loaders import CoNLLULoader
@@ -70,7 +69,7 @@ class CONLLUSource(LocalFileSource):
             except Exception:
                 return None
         except Exception as e:
-            logger.error(f"Failed to create CoNLL-U loader: {e}")
+            logger.exception(f"Failed to create CoNLL-U loader: {e}")
             return None
 
 
@@ -83,7 +82,7 @@ class MathMLSource(LocalFileSource):
         )
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a MathML loader."""
         try:
             # Use UnstructuredXMLLoader for MathML
@@ -101,7 +100,7 @@ class MathMLSource(LocalFileSource):
             except Exception:
                 return None
         except Exception as e:
-            logger.error(f"Failed to create MathML loader: {e}")
+            logger.exception(f"Failed to create MathML loader: {e}")
             return None
 
 
@@ -116,14 +115,14 @@ class FortranSource(LocalFileSource):
         )
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a Fortran loader."""
         try:
             from langchain_community.document_loaders import TextLoader
 
             return TextLoader(file_path=self.file_path, encoding="utf-8")
         except Exception as e:
-            logger.error(f"Failed to create Fortran loader: {e}")
+            logger.exception(f"Failed to create Fortran loader: {e}")
             return None
 
 
@@ -136,14 +135,14 @@ class MatlabSource(LocalFileSource):
         )
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a MATLAB loader."""
         try:
             from langchain_community.document_loaders import TextLoader
 
             return TextLoader(file_path=self.file_path, encoding="utf-8")
         except Exception as e:
-            logger.error(f"Failed to create MATLAB loader: {e}")
+            logger.exception(f"Failed to create MATLAB loader: {e}")
             return None
 
 
@@ -158,14 +157,14 @@ class RSource(LocalFileSource):
         )
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create an R loader."""
         try:
             from langchain_community.document_loaders import TextLoader
 
             return TextLoader(file_path=self.file_path, encoding="utf-8")
         except Exception as e:
-            logger.error(f"Failed to create R loader: {e}")
+            logger.exception(f"Failed to create R loader: {e}")
             return None
 
 
@@ -173,8 +172,8 @@ class RSource(LocalFileSource):
 __all__ = [
     "BibtexSource",
     "CONLLUSource",
-    "MathMLSource",
     "FortranSource",
+    "MathMLSource",
     "MatlabSource",
     "RSource",
 ]

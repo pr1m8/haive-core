@@ -103,13 +103,15 @@ def view_recent_errors(limit: int = 10) -> list[dict[str, Any]]:
                         elif key == "contributions" and isinstance(value, list):
                             # Check contributions for errors
                             for i, contrib in enumerate(value):
-                                if isinstance(contrib, list) and len(contrib) >= 3:
+                                if isinstance(contrib, list) and len(
+                                    contrib) >= 3:
                                     agent_name, section, content = (
                                         contrib[0],
                                         contrib[1],
                                         contrib[2],
                                     )
-                                    if "prepared statement" in str(content).lower():
+                                    if "prepared statement" in str(
+                                        content).lower():
                                         error_info["errors_found"].append(
                                             {
                                                 "location": f"contributions[{i}]",
@@ -249,7 +251,6 @@ def test_conversation_agent_with_new_id():
         from haive.agents.conversation.collaberative.agent import (
             CollaborativeConversation,
         )
-
         from haive.core.engine.aug_llm import AugLLMConfig
 
         # Create fresh participant agents with unique names
@@ -278,7 +279,8 @@ def test_conversation_agent_with_new_id():
         agent.compile()
 
         # Use completely fresh thread ID
-        fresh_thread_id = f"fresh_test_{timestamp}_{datetime.now().microsecond}"
+        fresh_thread_id = f"fresh_test_{timestamp}_{
+    datetime.now().microsecond}"
         config = {"configurable": {"thread_id": fresh_thread_id}}
 
         test_input = {

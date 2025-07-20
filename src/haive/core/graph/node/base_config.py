@@ -82,7 +82,7 @@ class NodeConfig(ABC, BaseModel):
 
     model_config = {"arbitrary_types_allowed": True}
 
-    def model_post_init(self, __context):
+    def model_post_init(self, __context) -> None:
         """Post-initialization to setup schemas from field definitions."""
         super().model_post_init(__context)
         self._setup_schemas_from_field_defs()

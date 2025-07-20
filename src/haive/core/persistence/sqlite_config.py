@@ -1,5 +1,6 @@
 """SQLite-based persistence implementation for the Haive framework.
 
+from typing import Any, Dict
 This module provides a SQLite-backed checkpoint persistence implementation that
 stores state data in a local SQLite database file. This allows for durable state
 persistence without requiring external database services, making it ideal for
@@ -92,7 +93,7 @@ class SQLiteSaver:
         if db_dir and not os.path.exists(db_dir):
             os.makedirs(db_dir, exist_ok=True)
 
-    def setup(self):
+    def setup(self) -> None:
         """Set up the SQLite database schema.
 
         This method creates the necessary database tables for storing checkpoints

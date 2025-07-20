@@ -1,5 +1,4 @@
-"""
-Comprehensive test suite for all new retriever configurations.
+"""Comprehensive test suite for all new retriever configurations.
 
 This module tests all the newly implemented retriever configs to ensure
 they instantiate properly and have correct configuration validation.
@@ -15,21 +14,19 @@ logger = logging.getLogger(__name__)
 
 def test_sparse_retriever_configs(sample_documents):
     """Test sparse/classical retriever configurations."""
-    print("\n🧪 Testing Sparse Retriever Configurations...")
-
     # Test BM25 Retriever
     try:
         from haive.core.engine.retriever.providers.BM25RetrieverConfig import (
             BM25RetrieverConfig,
         )
 
-        config = BM25RetrieverConfig(name="test_bm25", documents=sample_documents, k=2)
+        config = BM25RetrieverConfig(
+            name="test_bm25", documents=sample_documents, k=2)
         assert config.name == "test_bm25"
         assert len(config.documents) == len(sample_documents)
         assert config.k == 2
-        print("✅ BM25RetrieverConfig - Configuration validation passed")
-    except Exception as e:
-        print(f"❌ BM25RetrieverConfig - Error: {e}")
+    except Exception:
+        pass
 
     # Test TF-IDF Retriever
     try:
@@ -42,9 +39,8 @@ def test_sparse_retriever_configs(sample_documents):
         )
         assert config.name == "test_tfidf"
         assert len(config.documents) == len(sample_documents)
-        print("✅ TFIDFRetrieverConfig - Configuration validation passed")
-    except Exception as e:
-        print(f"❌ TFIDFRetrieverConfig - Error: {e}")
+    except Exception:
+        pass
 
     # Test KNN Retriever
     try:
@@ -56,9 +52,8 @@ def test_sparse_retriever_configs(sample_documents):
             name="test_knn", documents=sample_documents, k=2, distance_metric="cosine"
         )
         assert config.distance_metric == "cosine"
-        print("✅ KNNRetrieverConfig - Configuration validation passed")
-    except Exception as e:
-        print(f"❌ KNNRetrieverConfig - Error: {e}")
+    except Exception:
+        pass
 
     # Test SVM Retriever
     try:
@@ -70,15 +65,12 @@ def test_sparse_retriever_configs(sample_documents):
             name="test_svm", documents=sample_documents, k=2, kernel="rbf"
         )
         assert config.kernel == "rbf"
-        print("✅ SVMRetrieverConfig - Configuration validation passed")
-    except Exception as e:
-        print(f"❌ SVMRetrieverConfig - Error: {e}")
+    except Exception:
+        pass
 
 
 def test_api_retriever_configs():
     """Test API-based retriever configurations."""
-    print("\n🌐 Testing API Retriever Configurations...")
-
     # Test You.com Retriever
     try:
         from haive.core.engine.retriever.providers.YouRetrieverConfig import (
@@ -90,9 +82,8 @@ def test_api_retriever_configs():
         )
         assert config.num_web_results == 5
         assert config.safesearch == "moderate"
-        print("✅ YouRetrieverConfig - Configuration validation passed")
-    except Exception as e:
-        print(f"❌ YouRetrieverConfig - Error: {e}")
+    except Exception:
+        pass
 
     # Test AskNews Retriever
     try:
@@ -105,9 +96,8 @@ def test_api_retriever_configs():
         )
         assert config.k == 10
         assert config.hours_back == 24
-        print("✅ AskNewsRetrieverConfig - Configuration validation passed")
-    except Exception as e:
-        print(f"❌ AskNewsRetrieverConfig - Error: {e}")
+    except Exception:
+        pass
 
     # Test PubMed Retriever
     try:
@@ -120,15 +110,12 @@ def test_api_retriever_configs():
         )
         assert config.top_k_results == 5
         assert config.load_max_docs == 25
-        print("✅ PubMedRetrieverConfig - Configuration validation passed")
-    except Exception as e:
-        print(f"❌ PubMedRetrieverConfig - Error: {e}")
+    except Exception:
+        pass
 
 
 def test_cloud_retriever_configs():
     """Test cloud service retriever configurations."""
-    print("\n☁️ Testing Cloud Service Retriever Configurations...")
-
     # Test Kendra Retriever
     try:
         from haive.core.engine.retriever.providers.KendraRetrieverConfig import (
@@ -143,9 +130,8 @@ def test_cloud_retriever_configs():
         )
         assert config.index_id == "test-index-123"
         assert config.region_name == "us-east-1"
-        print("✅ KendraRetrieverConfig - Configuration validation passed")
-    except Exception as e:
-        print(f"❌ KendraRetrieverConfig - Error: {e}")
+    except Exception:
+        pass
 
     # Test Amazon Knowledge Bases Retriever
     try:
@@ -161,11 +147,8 @@ def test_cloud_retriever_configs():
         )
         assert config.knowledge_base_id == "ABCDEFGHIJ"
         assert config.number_of_results == 10
-        print(
-            "✅ AmazonKnowledgeBasesRetrieverConfig - Configuration validation passed"
-        )
-    except Exception as e:
-        print(f"❌ AmazonKnowledgeBasesRetrieverConfig - Error: {e}")
+    except Exception:
+        pass
 
     # Test Google Vertex AI Search Retriever
     try:
@@ -181,17 +164,12 @@ def test_cloud_retriever_configs():
         )
         assert config.project_id == "test-project"
         assert config.data_store_id == "test-store"
-        print(
-            "✅ GoogleVertexAISearchRetrieverConfig - Configuration validation passed"
-        )
-    except Exception as e:
-        print(f"❌ GoogleVertexAISearchRetrieverConfig - Error: {e}")
+    except Exception:
+        pass
 
 
 def test_hybrid_retriever_configs():
     """Test hybrid search retriever configurations."""
-    print("\n🔀 Testing Hybrid Search Retriever Configurations...")
-
     # Test Weaviate Hybrid Search Retriever
     try:
         from haive.core.engine.retriever.providers.WeaviateHybridSearchRetrieverConfig import (
@@ -206,11 +184,8 @@ def test_hybrid_retriever_configs():
         )
         assert config.weaviate_url == "https://test-cluster.weaviate.network"
         assert config.alpha == 0.5
-        print(
-            "✅ WeaviateHybridSearchRetrieverConfig - Configuration validation passed"
-        )
-    except Exception as e:
-        print(f"❌ WeaviateHybridSearchRetrieverConfig - Error: {e}")
+    except Exception:
+        pass
 
     # Test Qdrant Sparse Vector Retriever
     try:
@@ -226,15 +201,12 @@ def test_hybrid_retriever_configs():
         )
         assert config.qdrant_url == "https://test-cluster.qdrant.tech"
         assert config.sparse_vector_name == "sparse_text"
-        print("✅ QdrantSparseVectorRetrieverConfig - Configuration validation passed")
-    except Exception as e:
-        print(f"❌ QdrantSparseVectorRetrieverConfig - Error: {e}")
+    except Exception:
+        pass
 
 
 def test_specialized_retriever_configs(sample_documents):
     """Test specialized platform retriever configurations."""
-    print("\n🎯 Testing Specialized Retriever Configurations...")
-
     # Test Metal Retriever
     try:
         from haive.core.engine.retriever.providers.MetalRetrieverConfig import (
@@ -245,9 +217,8 @@ def test_specialized_retriever_configs(sample_documents):
             name="test_metal", index_id="my-metal-index-123", k=10
         )
         assert config.index_id == "my-metal-index-123"
-        print("✅ MetalRetrieverConfig - Configuration validation passed")
-    except Exception as e:
-        print(f"❌ MetalRetrieverConfig - Error: {e}")
+    except Exception:
+        pass
 
     # Test DocArray Retriever
     try:
@@ -262,9 +233,8 @@ def test_specialized_retriever_configs(sample_documents):
             similarity_metric="cosine",
         )
         assert config.similarity_metric == "cosine"
-        print("✅ DocArrayRetrieverConfig - Configuration validation passed")
-    except Exception as e:
-        print(f"❌ DocArrayRetrieverConfig - Error: {e}")
+    except Exception:
+        pass
 
     # Test NeuralDB Retriever
     try:
@@ -276,9 +246,8 @@ def test_specialized_retriever_configs(sample_documents):
             name="test_neuraldb", documents=sample_documents, k=5, training_steps=100
         )
         assert config.training_steps == 100
-        print("✅ NeuralDBRetrieverConfig - Configuration validation passed")
-    except Exception as e:
-        print(f"❌ NeuralDBRetrieverConfig - Error: {e}")
+    except Exception:
+        pass
 
     # Test Zep Retriever
     try:
@@ -293,9 +262,8 @@ def test_specialized_retriever_configs(sample_documents):
             top_k=10,
         )
         assert config.session_id == "test-session-123"
-        print("✅ ZepRetrieverConfig - Configuration validation passed")
-    except Exception as e:
-        print(f"❌ ZepRetrieverConfig - Error: {e}")
+    except Exception:
+        pass
 
     # Test Zep Cloud Retriever
     try:
@@ -310,15 +278,12 @@ def test_specialized_retriever_configs(sample_documents):
             top_k=10,
         )
         assert config.api_url == "https://api.getzep.com"
-        print("✅ ZepCloudRetrieverConfig - Configuration validation passed")
-    except Exception as e:
-        print(f"❌ ZepCloudRetrieverConfig - Error: {e}")
+    except Exception:
+        pass
 
 
 def test_integration_retriever_configs(sample_documents):
     """Test integration retriever configurations."""
-    print("\n🔗 Testing Integration Retriever Configurations...")
-
     # Test LlamaIndex Retriever
     try:
         from haive.core.engine.retriever.providers.LlamaIndexRetrieverConfig import (
@@ -329,9 +294,8 @@ def test_integration_retriever_configs(sample_documents):
             name="test_llamaindex", documents=sample_documents, k=3, index_type="vector"
         )
         assert config.index_type == "vector"
-        print("✅ LlamaIndexRetrieverConfig - Configuration validation passed")
-    except Exception as e:
-        print(f"❌ LlamaIndexRetrieverConfig - Error: {e}")
+    except Exception:
+        pass
 
     # Test ChatGPT Plugin Retriever
     try:
@@ -347,15 +311,12 @@ def test_integration_retriever_configs(sample_documents):
         )
         assert config.plugin_url == "https://api.example-plugin.com"
         assert config.plugin_name == "ExamplePlugin"
-        print("✅ ChatGPTPluginRetrieverConfig - Configuration validation passed")
-    except Exception as e:
-        print(f"❌ ChatGPTPluginRetrieverConfig - Error: {e}")
+    except Exception:
+        pass
 
 
 def test_validation_errors():
     """Test that configurations properly validate input parameters."""
-    print("\n⚠️ Testing Configuration Validation...")
-
     # Test that k parameter is properly validated
     try:
         from haive.core.engine.retriever.providers.BM25RetrieverConfig import (
@@ -367,9 +328,8 @@ def test_validation_errors():
             BM25RetrieverConfig(
                 name="test_invalid", documents=[], k=0  # Invalid: k must be >= 1
             )
-        print("✅ k parameter validation working correctly")
     except ImportError:
-        print("❌ Could not import BM25RetrieverConfig for validation testing")
+        pass
 
     # Test that required fields are enforced
     try:
@@ -383,15 +343,12 @@ def test_validation_errors():
                 name="test_invalid"
                 # Missing required index_id field
             )
-        print("✅ Required field validation working correctly")
     except ImportError:
-        print("❌ Could not import KendraRetrieverConfig for validation testing")
+        pass
 
 
 def test_retriever_registration():
     """Test that all retrievers are properly registered."""
-    print("\n📋 Testing Retriever Registration...")
-
     from haive.core.engine.retriever.retriever import BaseRetrieverConfig
     from haive.core.engine.retriever.types import RetrieverType
 
@@ -411,11 +368,8 @@ def test_retriever_registration():
         for retriever_type in expected_types:
             assert retriever_type in registry, f"{retriever_type} not found in registry"
 
-        print(f"✅ Registration test passed - {len(registry)} retrievers registered")
-        print(f"   Tested types: {[rt.value for rt in expected_types]}")
-
-    except Exception as e:
-        print(f"❌ Registration test failed: {e}")
+    except Exception:
+        pass
 
 
 if __name__ == "__main__":
@@ -439,9 +393,6 @@ if __name__ == "__main__":
         ),
     ]
 
-    print("🚀 Running Comprehensive Retriever Configuration Tests...")
-    print("=" * 70)
-
     # Run all tests
     test_sparse_retriever_configs(sample_docs)
     test_api_retriever_configs()
@@ -451,6 +402,3 @@ if __name__ == "__main__":
     test_integration_retriever_configs(sample_docs)
     test_validation_errors()
     test_retriever_registration()
-
-    print("\n" + "=" * 70)
-    print("🎉 All configuration tests completed!")

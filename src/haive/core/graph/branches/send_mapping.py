@@ -1,9 +1,8 @@
-"""
-Send mapping functionality for routing and state transformation.
-"""
+"""Send mapping functionality for routing and state transformation."""
 
 import logging
-from typing import Any, Callable, Dict, List, Optional
+from collections.abc import Callable
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -16,36 +15,38 @@ logger = logging.getLogger(__name__)
 
 
 class SendMapping(BaseModel):
-    """
-    Mapping configuration for generating Send objects.
-    """
+    """Mapping configuration for generating Send objects."""
 
     node: str = Field(..., description="Target node name")
-    fields: Dict[str, str] = Field(
+    fields: dict[str, str] = Field(
         default_factory=dict, description="Field mapping from state to Send arg"
     )
-    condition: Optional[str] = Field(
+    condition: str | None = Field(
         None, description="Optional condition expression to evaluate"
     )
-    transform: Optional[Dict[str, Callable]] = Field(
+    transform: dict[str, Callable] | None = Field(
         None, description="Transformations to apply to fields"
     )
 
     model_config = {"arbitrary_types_allowed": True}
 
-    def create_send(self, state: StateLike) -> Optional[Any]:
+    def create_send(self, state: StateLike) -> Any | None:
         """Create a Send object from state using this mapping."""
         from langgraph.types import Send
 
         # Check condition if specified
         if self.condition:
             try:
-                # Simple condition check - could be expanded to full expression evaluation
+                # Simple condition check - could be expanded to full expression
+                # evaluation
                 condition_value = extract_field(state, self.condition)
                 if not condition_value:
                     return None
             except Exception as e:
-                logger.error(f"Error evaluating condition {self.condition}: {e}")
+                logger.exception(
+                    f"Error evaluating condition {
+                        self.condition}: {e}"
+                )
                 return None
 
         # Extract and transform values for Send
@@ -59,7 +60,7 @@ class SendMapping(BaseModel):
                 try:
                     value = self.transform[target_field](value)
                 except Exception as e:
-                    logger.error(f"Error applying transform to {target_field}: {e}")
+                    logger.exception(f"Error applying transform to {target_field}: {e}")
 
             arg[target_field] = value
 
@@ -67,9 +68,7 @@ class SendMapping(BaseModel):
 
 
 class SendGenerator(BaseModel):
-    """
-    Generator for Send objects based on lists or collections.
-    """
+    """Generator for Send objects based on lists or collections."""
 
     target_node: str = Field(..., description="Target node name")
     collection_field: str = Field(
@@ -78,19 +77,19 @@ class SendGenerator(BaseModel):
     item_field: str = Field(
         "item", description="Field name for the item in the send object"
     )
-    filter_function: Optional[Callable[[Any], bool]] = Field(
+    filter_function: Callable[[Any], bool] | None = Field(
         None, description="Function to filter items"
     )
 
     model_config = {"arbitrary_types_allowed": True}
 
-    def create_sends(self, state: StateLike) -> List[Any]:
+    def create_sends(self, state: StateLike) -> list[Any]:
         """Create multiple Send objects from a collection in state."""
         from langgraph.types import Send
 
         # Extract collection
         collection = extract_field(state, self.collection_field)
-        if not collection or not isinstance(collection, (list, tuple, set)):
+        if not collection or not isinstance(collection, list | tuple | set):
             return []
 
         sends = []
@@ -110,12 +109,12 @@ class SendGenerator(BaseModel):
 class SendMappingList(BaseModel):
     """Collection of send mappings."""
 
-    mappings: List[SendMapping] = Field(default_factory=list)
-    generators: List[SendGenerator] = Field(default_factory=list)
+    mappings: list[SendMapping] = Field(default_factory=list)
+    generators: list[SendGenerator] = Field(default_factory=list)
 
     model_config = {"arbitrary_types_allowed": True}
 
-    def create_sends(self, state: StateLike) -> List[Any]:
+    def create_sends(self, state: StateLike) -> list[Any]:
         """Apply all mappings and generators to state."""
         sends = []
 

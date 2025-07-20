@@ -46,7 +46,7 @@ class StateGraphManager:
 
         return metadata
 
-    def ensure_compiled(self):
+    def ensure_compiled(self) -> None:
         """Recompile the graph if modifications were made."""
         if self.needs_recompile:
             self.graph.compile()
@@ -65,7 +65,8 @@ class StateGraphManager:
             self.graph.edges.remove((src, dst))
             self.needs_recompile = True
 
-    # def insert_node(self, node: str, between: Tuple[str, str], func: callable = None):
+    # def insert_node(self, node: str, between: Tuple[str, str], func:
+    # callable = None):
     def insert_node(
         self, node: str, between: tuple[str, str], func: callable | None = None
     ):
@@ -156,7 +157,7 @@ class StateGraphManager:
         self.graph.branches[node][condition] = target
         self.needs_recompile = True
 
-    def get_metadata(self):
+    def get_metadata(self) -> Any | None:
         """Return the extracted metadata."""
         return self.metadata
 
@@ -264,13 +265,13 @@ class StateGraphManager:
         plt.savefig(output_file, bbox_inches="tight")
         plt.show()
 
-    def get_metadata(self):
+    def get_metadata(self) -> Any | None:
         """Return the extracted metadata."""
         return self.metadata
 
     # Add this static method to create a manager and attach it to a graph
     @staticmethod
-    def attach_to_graph(graph):
+    def attach_to_graph(graph) -> Any:
         """Create a manager and attach it to a StateGraph.
 
         This modifies the graph object to add a get_manager method.
@@ -285,7 +286,7 @@ class StateGraphManager:
         manager = StateGraphManager(graph)
 
         # Add get_manager method to the graph
-        def get_manager():
+        def get_manager() -> Any | None:
             return manager
 
         # Attach the method to the graph

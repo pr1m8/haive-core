@@ -5,12 +5,12 @@
 import logging
 from typing import Any, Literal, Optional, TypeVar
 
-from haive.agents.base.agent import Agent
 from langchain_core.messages import BaseMessage
 from langgraph.types import Command
 from pydantic import BaseModel, Field, model_validator
 from rich.console import Console
 
+from haive.agents.base.agent import Agent
 from haive.core.graph.common.types import ConfigLike, NodeType, StateLike
 from haive.core.graph.node.base_node_config import BaseNodeConfig
 from haive.core.schema.field_definition import FieldDefinition
@@ -86,7 +86,10 @@ class AgentNodeConfig(BaseNodeConfig[TInput, TOutput]):
     )
 
     @model_validator(mode="after")
-    def validate_agent_schema(self) -> "AgentNodeConfig":
+
+
+    @classmethod
+    def validate_agent_schema(cls) -> "AgentNodeConfig":
         """Extract agent's state schema if not provided."""
         if not self.agent_state_schema and hasattr(self.agent, "state_schema"):
             self.agent_state_schema = self.agent.state_schema
@@ -148,10 +151,10 @@ class AgentNodeConfig(BaseNodeConfig[TInput, TOutput]):
 
     def __call__(self, state: StateLike, config: ConfigLike | None = None) -> Command:
         """Execute the agent with proper state management."""
-        logger.info(f"{'='*60}")
+        logger.info(f"{'=' * 60}")
         logger.info(f"AGENT NODE V2: {self.name}")
         logger.info(f"Agent: {self.agent.name}")
-        logger.info(f"{'='*60}")
+        logger.info(f"{'=' * 60}")
 
         try:
             # Extract state for agent
@@ -179,7 +182,10 @@ class AgentNodeConfig(BaseNodeConfig[TInput, TOutput]):
                 metadata = self._track_end(metadata, result)
                 state_update[self.metadata_field] = metadata
 
-            logger.info(f"✅ Agent completed with {len(state_update)} field updates")
+            logger.info(
+                f"✅ Agent completed with {
+                    len(state_update)} field updates"
+            )
 
             return Command(update=state_update, goto=self._get_goto_node())
 
@@ -202,7 +208,8 @@ class AgentNodeConfig(BaseNodeConfig[TInput, TOutput]):
         # If agent has specific schema, extract those fields
         if self.agent_state_schema:
             logger.debug(
-                f"Using agent's state schema: {self.agent_state_schema.__name__}"
+                f"Using agent's state schema: {
+                    self.agent_state_schema.__name__}"
             )
 
             # Extract fields that exist in both state and agent schema
@@ -267,7 +274,7 @@ class AgentNodeConfig(BaseNodeConfig[TInput, TOutput]):
         # Try to iterate
         try:
             return list(messages)
-        except:
+        except BaseException:
             logger.warning(f"Cannot extract messages from {type(messages)}")
             return []
 
@@ -455,7 +462,8 @@ class CoordinatorNodeConfig(BaseNodeConfig[TInput, TOutput]):
 
     def _handle_sequence(self, state: StateLike, config: ConfigLike | None) -> Command:
         """Handle sequential agent execution tracking."""
-        # This is more of a tracking node - actual sequencing is in graph structure
+        # This is more of a tracking node - actual sequencing is in graph
+        # structure
         current_index = state.get("agent_index", 0) if hasattr(state, "get") else 0
 
         return Command(

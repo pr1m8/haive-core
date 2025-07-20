@@ -9,14 +9,14 @@ This test demonstrates:
 """
 
 import asyncio
-from typing import Any, Dict
+from typing import Any
 
 import pytest
-from haive.agents.simple.agent_v2 import SimpleAgentV2
 from langchain_core.messages import HumanMessage
 from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 
+from haive.agents.simple.agent_v2 import SimpleAgentV2
 from haive.core.common.mixins.recompile_mixin import RecompileMixin
 from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.models.llm.base import AzureLLMConfig
@@ -41,7 +41,7 @@ def calculator(expression: str) -> float:
         result = eval(expression, {"__builtins__": {}}, {})
         return float(result)
     except Exception as e:
-        return f"Error: {str(e)}"
+        return f"Error: {e!s}"
 
 
 @tool
@@ -60,7 +60,8 @@ class TestMetaAgentStateWithSimpleV2:
         agent = SimpleAgentV2(
             name="analyzer_v2",
             engine=AugLLMConfig(
-                llm_config=AzureLLMConfig(model="gpt-4o-mini", temperature=0.7),
+                llm_config=AzureLLMConfig(
+                    model="gpt-4o-mini", temperature=0.7),
                 system_message="You are a helpful analysis agent.",
             ),
             tools=[calculator],  # Start with one tool
@@ -77,9 +78,11 @@ class TestMetaAgentStateWithSimpleV2:
             # Mix in recompilation capability for testing
             class RecompilableSimpleAgentV2(SimpleAgentV2, RecompileMixin):
 
-                def add_tool_with_recompile(self, tool, route="langchain_tool"):
+                def add_tool_with_recompile(
+                        self, tool, route="langchain_tool"):
                     """Add tool and mark for recompilation."""
-                    # Manually add tool - simplified approach without using _get_tool_name
+                    # Manually add tool - simplified approach without using
+                    # _get_tool_name
                     tool_name = getattr(
                         tool, "name", getattr(tool, "__name__", str(tool))
                     )
@@ -92,7 +95,8 @@ class TestMetaAgentStateWithSimpleV2:
                     return self
 
             # Create a new agent instance of the recompilable type
-            # We need to recreate the agent to get proper Pydantic initialization
+            # We need to recreate the agent to get proper Pydantic
+            # initialization
             new_agent = RecompilableSimpleAgentV2(
                 name=original_name,
                 engine=agent.engine,
@@ -111,7 +115,8 @@ class TestMetaAgentStateWithSimpleV2:
             agent=simple_agent_v2,
             agent_input={
                 "messages": [
-                    HumanMessage(content="Analyze the number 42 and its significance")
+                    HumanMessage(
+                        content="Analyze the number 42 and its significance")
                 ]
             },
             meta_context={
@@ -177,10 +182,6 @@ class TestMetaAgentStateWithSimpleV2:
         agent = meta_state_with_agent.agent
 
         # Debug agent attributes
-        print("\n=== AGENT DEBUG INFO ===")
-        print(f"Agent type: {type(agent)}")
-        print(f"Agent name: {getattr(agent, 'name', 'NO NAME')}")
-        print(f"Agent MRO: {[cls.__name__ for cls in type(agent).__mro__]}")
 
         # Check all relevant attributes
         attrs_to_check = [
@@ -193,19 +194,14 @@ class TestMetaAgentStateWithSimpleV2:
         ]
         for attr in attrs_to_check:
             has_attr = hasattr(agent, attr)
-            value = getattr(agent, attr, "NOT_FOUND") if has_attr else "NOT_FOUND"
-            print(f"  {attr}: {has_attr} -> {value}")
+            getattr(agent, attr, "NOT_FOUND") if has_attr else "NOT_FOUND"
 
         # Check engine tools
         if hasattr(agent, "engine") and agent.engine:
-            engine_tools = getattr(agent.engine, "tools", "NO_TOOLS")
-            print(f"  engine.tools: {engine_tools}")
-
-        print("=== END DEBUG INFO ===\n")
+            getattr(agent.engine, "tools", "NO_TOOLS")
 
         # Skip test if agent doesn't have recompilation capability
         if not hasattr(agent, "needs_recompile"):
-            print("SKIPPING: Agent doesn't have recompilation capability")
             return
 
         # Use either add_tool or add_tool_with_recompile
@@ -216,7 +212,6 @@ class TestMetaAgentStateWithSimpleV2:
             add_tool_method = agent.add_tool
 
         if add_tool_method is None:
-            print("SKIPPING: Agent doesn't have add_tool method")
             return
 
         # Get initial tools (might be None, need to initialize)
@@ -225,25 +220,19 @@ class TestMetaAgentStateWithSimpleV2:
             # Initialize tools list if it's None
             agent.tools = []
             initial_tools = agent.tools
-            print("Initialized empty tools list")
-
-        print(f"Initial tools count: {len(initial_tools)}")
 
         # Debug needs_recompile attribute
-        print(f"needs_recompile type: {type(agent.needs_recompile)}")
-        print(f"needs_recompile value: {agent.needs_recompile}")
 
         # Initial state
         assert not agent.needs_recompile
 
         # Add a new tool dynamically
-        print("Adding word_counter tool...")
         add_tool_method(word_counter)
 
         # Should be marked for recompilation
         assert agent.needs_recompile
-        print(f"Recompile reasons: {agent.recompile_reasons}")
-        assert any("Tool added:" in reason for reason in agent.recompile_reasons)
+        assert any(
+            "Tool added:" in reason for reason in agent.recompile_reasons)
 
         # Trigger recompilation
         if agent.auto_recompile:
@@ -251,18 +240,16 @@ class TestMetaAgentStateWithSimpleV2:
             assert not agent.needs_recompile
         else:
             # Manual recompilation
-            print("Forcing manual recompilation...")
             agent.force_recompile("Manual test recompilation")
             assert not agent.needs_recompile
 
         # Verify tools are updated
         final_tools = getattr(agent, "tools", [])
-        print(f"Final tools count: {len(final_tools)}")
         # The tool should be added (allowing for flexibility in counting)
         assert len(final_tools) >= len(initial_tools)
-        print("✅ Recompilation test completed successfully!")
 
-    def test_state_persistence_through_recompilation(self, meta_state_with_agent):
+    def test_state_persistence_through_recompilation(
+            self, meta_state_with_agent):
         """Test that state persists through agent recompilation."""
         # Execute once to establish state
         meta_state_with_agent.execute_agent()
@@ -287,7 +274,8 @@ class TestMetaAgentStateWithSimpleV2:
         meta_state_with_agent.execute_agent(input_data=new_input)
 
         # Verify state persistence
-        assert len(meta_state_with_agent.execution_history) == initial_history_count + 1
+        assert len(
+            meta_state_with_agent.execution_history) == initial_history_count + 1
         assert meta_state_with_agent.meta_context["execution_count"] == 2
 
         # Both executions should be successful
@@ -334,10 +322,14 @@ class TestMetaAgentStateWithSimpleV2:
         """Test execution summary functionality."""
         # Execute multiple times
         for i in range(3):
-            input_data = {"messages": [HumanMessage(content=f"Test execution {i+1}")]}
+            input_data = {
+                "messages": [
+                    HumanMessage(
+                        content=f"Test execution {
+                            i + 1}")]}
             try:
                 meta_state_with_agent.execute_agent(input_data=input_data)
-            except:
+            except BaseException:
                 pass  # Allow some failures for testing
 
         # Get summary
@@ -359,10 +351,10 @@ class TestAsyncMetaAgentState:
     async def aexecute_agent(
         self,
         meta_state: MetaStateSchema,
-        input_data: Dict[str, Any] | None = None,
-        config: Dict[str, Any] | None = None,
+        input_data: dict[str, Any] | None = None,
+        config: dict[str, Any] | None = None,
         update_state: bool = True,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Async version of execute_agent.
 
         This is what we need to implement in MetaStateSchema.

@@ -28,7 +28,8 @@ class MultiQueryRetrieverConfig(RetrieverConfig):
     def instantiate(self) -> BaseRetriever:
         """Create the multi-query retriever."""
         if not self.vector_store_config or not self.llm_config:
-            raise ValueError("Both vector_store_config and llm_config are required")
+            raise ValueError(
+                "Both vector_store_config and llm_config are required")
 
         # Import the specific retriever class
         from langchain_community.retrievers import MultiQueryRetriever

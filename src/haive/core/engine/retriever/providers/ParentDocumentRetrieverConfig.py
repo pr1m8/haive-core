@@ -1,5 +1,6 @@
 """Parent Document Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Parent Document retriever,
 which retrieves small chunks for embedding similarity but returns larger parent
 documents containing those chunks, providing better context while maintaining
@@ -110,7 +111,7 @@ class ParentDocumentRetrieverConfig(BaseRetrieverConfig):
     )
 
     @validator("docstore_type")
-    def validate_docstore_type(self, v):
+    def validate_docstore_type(self, v) -> Any:
         """Validate document store type."""
         valid_types = ["in_memory", "file_system"]
         if v not in valid_types:
@@ -118,7 +119,7 @@ class ParentDocumentRetrieverConfig(BaseRetrieverConfig):
         return v
 
     @validator("child_chunk_overlap")
-    def validate_child_chunk_overlap(self, v, values):
+    def validate_child_chunk_overlap(self, v, values) -> Any:
         """Validate that child chunk overlap is less than chunk size."""
         chunk_size = values.get("child_chunk_size", 200)
         if v >= chunk_size:
@@ -128,7 +129,7 @@ class ParentDocumentRetrieverConfig(BaseRetrieverConfig):
         return v
 
     @validator("docstore_path")
-    def validate_docstore_path(self, v, values):
+    def validate_docstore_path(self, v, values) -> Any:
         """Validate docstore path is provided when needed."""
         docstore_type = values.get("docstore_type", "")
         if docstore_type == "file_system" and not v:
@@ -155,7 +156,7 @@ class ParentDocumentRetrieverConfig(BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a Parent Document retriever from this configuration.
 
         Returns:
@@ -199,7 +200,10 @@ class ParentDocumentRetrieverConfig(BaseRetrieverConfig):
                     "Install with: pip install langchain[storage]"
                 )
         else:
-            raise ValueError(f"Unsupported docstore_type: {self.docstore_type}")
+            raise ValueError(
+                f"Unsupported docstore_type: {
+                    self.docstore_type}"
+            )
 
         # Create child splitter
         child_splitter = RecursiveCharacterTextSplitter(

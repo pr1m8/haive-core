@@ -72,7 +72,8 @@ class TestParameterDefinition:
 
     def test_initialization(self):
         """Test basic initialization."""
-        param = ParameterDefinition(type="str", description="A string parameter")
+        param = ParameterDefinition(
+            type="str", description="A string parameter")
         assert param.type == "str"
         assert param.description == "A string parameter"
         assert param.default is None
@@ -94,7 +95,8 @@ class TestParameterDefinition:
 
     def test_validation_with_type_checking(self):
         """Test validation with type checking."""
-        param = ParameterDefinition(type="str", description="A string parameter")
+        param = ParameterDefinition(
+            type="str", description="A string parameter")
 
         # Correct type
         is_valid, error = param.validate_value("test")
@@ -224,7 +226,8 @@ class TestPatternMetadata:
             parameters={"param1": param_def},
         )
 
-        is_valid, errors = metadata.validate_parameters({"param1": "test_value"})
+        is_valid, errors = metadata.validate_parameters(
+            {"param1": "test_value"})
         assert is_valid is True
         assert len(errors) == 0
 
@@ -257,7 +260,8 @@ class TestPatternMetadata:
         )
 
         # Unknown parameter
-        is_valid, errors = metadata.validate_parameters({"unknown_param": "value"})
+        is_valid, errors = metadata.validate_parameters(
+            {"unknown_param": "value"})
         assert is_valid is False
         assert len(errors) == 1
         assert "Unknown parameters" in errors[0]

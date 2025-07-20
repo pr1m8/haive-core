@@ -1,5 +1,6 @@
 """Remote LangChain Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Remote LangChain retriever,
 which enables retrieval from remote LangChain services and endpoints,
 allowing distributed and federated retrieval architectures.
@@ -109,14 +110,14 @@ class RemoteLangChainRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
     )
 
     @validator("endpoint_url")
-    def validate_endpoint_url(self, v):
+    def validate_endpoint_url(self, v) -> Any:
         """Validate endpoint URL format."""
         if not v.startswith(("http://", "https://")):
             raise ValueError("endpoint_url must start with http:// or https://")
         return v
 
     @validator("auth_method")
-    def validate_auth_method(self, v):
+    def validate_auth_method(self, v) -> Any:
         """Validate authentication method."""
         valid_methods = ["api_key", "bearer_token", "basic", "none"]
         if v not in valid_methods:
@@ -144,7 +145,7 @@ class RemoteLangChainRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a Remote LangChain retriever from this configuration.
 
         Returns:

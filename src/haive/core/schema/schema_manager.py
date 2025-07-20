@@ -67,19 +67,8 @@ from __future__ import annotations
 import inspect
 import logging
 from collections import defaultdict
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Set,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-)
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from pydantic import BaseModel, create_model
 
@@ -131,51 +120,50 @@ class StateSchemaManager:
 
     def __init__(
         self,
-        data: Optional[
-            Union[Dict[str, Any], Type[BaseModel], BaseModel, "SchemaComposer"]
-        ] = None,
-        name: Optional[str] = None,
-        config: Optional[Dict[str, Any]] = None,
+        data: (
+            dict[str, Any] | type[BaseModel] | BaseModel | SchemaComposer | None
+        ) = None,
+        name: str | None = None,
+        config: dict[str, Any] | None = None,
     ):
-        """
-        Initialize a new StateSchemaManager.
+        """Initialize a new StateSchemaManager.
 
         Args:
             data: Source data to initialize from
             name: Custom schema name
             config: Optional configuration dictionary
         """
-        self.fields: Dict[str, Tuple[Type, Any]] = {}
-        self.field_definitions: Dict[str, FieldDefinition] = (
+        self.fields: dict[str, tuple[type, Any]] = {}
+        self.field_definitions: dict[str, FieldDefinition] = (
             {}
         )  # New field definitions store
-        self.validators: Dict[str, Callable] = {}
-        self.properties: Dict[str, Callable] = {}
-        self.computed_properties: Dict[str, Tuple[Callable, Callable]] = {}
-        self.field_descriptions: Dict[str, str] = {}
-        self.instance_methods: Dict[str, Callable] = {}
-        self.class_methods: Dict[str, Callable] = {}
-        self.static_methods: Dict[str, Callable] = {}
+        self.validators: dict[str, Callable] = {}
+        self.properties: dict[str, Callable] = {}
+        self.computed_properties: dict[str, tuple[Callable, Callable]] = {}
+        self.field_descriptions: dict[str, str] = {}
+        self.instance_methods: dict[str, Callable] = {}
+        self.class_methods: dict[str, Callable] = {}
+        self.static_methods: dict[str, Callable] = {}
         self.locked = False
         self.config = config or {}
 
         # Special field sets for state schema
-        self._shared_fields: Set[str] = set()
-        self._reducer_names: Dict[str, str] = (
+        self._shared_fields: set[str] = set()
+        self._reducer_names: dict[str, str] = (
             {}
         )  # Field name -> reducer name (serializable)
-        self._reducer_functions: Dict[str, Callable] = (
+        self._reducer_functions: dict[str, Callable] = (
             {}
         )  # Field name -> reducer function
 
         # Input/output tracking for engines
-        self._input_fields: Dict[str, Set[str]] = defaultdict(
+        self._input_fields: dict[str, set[str]] = defaultdict(
             set
         )  # Engine name -> input fields
-        self._output_fields: Dict[str, Set[str]] = defaultdict(
+        self._output_fields: dict[str, set[str]] = defaultdict(
             set
         )  # Engine name -> output fields
-        self._engine_io_mappings: Dict[str, Dict[str, List[str]]] = (
+        self._engine_io_mappings: dict[str, dict[str, list[str]]] = (
             {}
         )  # Engine name -> IO mapping
 
@@ -209,9 +197,8 @@ class StateSchemaManager:
         else:
             raise TypeError(f"Unsupported data type: {type(data)}")
 
-    def _load_from_model(self, model_cls: Type[BaseModel]) -> None:
-        """
-        Load fields and methods from a Pydantic model.
+    def _load_from_model(self, model_cls: type[BaseModel]) -> None:
+        """Load fields and methods from a Pydantic model.
 
         Args:
             model_cls: Pydantic model class to load from
@@ -269,27 +256,25 @@ class StateSchemaManager:
                     for field_name in mapping.get("inputs", []):
                         self._input_fields[engine_name].add(field_name)
                         # Update field definition
-                        if field_name in self.field_definitions:
-                            if (
+                        if field_name in self.field_definitions and (
+                            engine_name
+                            not in self.field_definitions[field_name].input_for
+                        ):
+                            self.field_definitions[field_name].input_for.append(
                                 engine_name
-                                not in self.field_definitions[field_name].input_for
-                            ):
-                                self.field_definitions[field_name].input_for.append(
-                                    engine_name
-                                )
+                            )
 
                     # Extract output fields
                     for field_name in mapping.get("outputs", []):
                         self._output_fields[engine_name].add(field_name)
                         # Update field definition
-                        if field_name in self.field_definitions:
-                            if (
+                        if field_name in self.field_definitions and (
+                            engine_name
+                            not in self.field_definitions[field_name].output_from
+                        ):
+                            self.field_definitions[field_name].output_from.append(
                                 engine_name
-                                not in self.field_definitions[field_name].output_from
-                            ):
-                                self.field_definitions[field_name].output_from.append(
-                                    engine_name
-                                )
+                            )
 
             # Extract input/output fields (alternative format)
             if hasattr(model_cls, "__input_fields__"):
@@ -297,28 +282,26 @@ class StateSchemaManager:
                     self._input_fields[engine_name].update(fields_list)
                     # Update field definitions
                     for field_name in fields_list:
-                        if field_name in self.field_definitions:
-                            if (
+                        if field_name in self.field_definitions and (
+                            engine_name
+                            not in self.field_definitions[field_name].input_for
+                        ):
+                            self.field_definitions[field_name].input_for.append(
                                 engine_name
-                                not in self.field_definitions[field_name].input_for
-                            ):
-                                self.field_definitions[field_name].input_for.append(
-                                    engine_name
-                                )
+                            )
 
             if hasattr(model_cls, "__output_fields__"):
                 for engine_name, fields_list in model_cls.__output_fields__.items():
                     self._output_fields[engine_name].update(fields_list)
                     # Update field definitions
                     for field_name in fields_list:
-                        if field_name in self.field_definitions:
-                            if (
+                        if field_name in self.field_definitions and (
+                            engine_name
+                            not in self.field_definitions[field_name].output_from
+                        ):
+                            self.field_definitions[field_name].output_from.append(
                                 engine_name
-                                not in self.field_definitions[field_name].output_from
-                            ):
-                                self.field_definitions[field_name].output_from.append(
-                                    engine_name
-                                )
+                            )
 
             # Load methods and validators
             for name, attr in inspect.getmembers(model_cls):
@@ -336,12 +319,15 @@ class StateSchemaManager:
                         self.properties[name] = getter
                 elif inspect.ismethod(attr) or inspect.isfunction(attr):
                     # Handle methods
-                    if name.startswith("validate_"):
-                        self.validators[name] = attr
-                    elif getattr(attr, "__validator__", False):
+                    if name.startswith("validate_") or getattr(
+                        attr, "__validator__", False
+                    ):
                         self.validators[name] = attr
         except Exception as e:
-            logger.error(f"Error loading from model {model_cls.__name__}: {e}")
+            logger.exception(
+                f"Error loading from model {
+                    model_cls.__name__}: {e}"
+            )
             # Add a placeholder field as fallback
             self.fields["placeholder"] = (str, create_field(str, "")[1])
             self.field_definitions["placeholder"] = FieldDefinition(
@@ -349,8 +335,7 @@ class StateSchemaManager:
             )
 
     def _load_from_composer(self, composer: Any) -> None:
-        """
-        Load fields and metadata from a SchemaComposer.
+        """Load fields and metadata from a SchemaComposer.
 
         Args:
             composer: SchemaComposer instance
@@ -398,16 +383,15 @@ class StateSchemaManager:
                 for engine_name, fields in composer.output_fields.items():
                     self._output_fields[engine_name].update(fields)
         except Exception as e:
-            logger.error(f"Error loading from composer: {e}")
+            logger.exception(f"Error loading from composer: {e}")
             # Add a placeholder field as fallback
             self.fields["placeholder"] = (str, create_field(str, "")[1])
             self.field_definitions["placeholder"] = FieldDefinition(
                 name="placeholder", field_type=str, default=""
             )
 
-    def _load_from_dict(self, data: Dict[str, Any]) -> None:
-        """
-        Load fields from a dictionary.
+    def _load_from_dict(self, data: dict[str, Any]) -> None:
+        """Load fields from a dictionary.
 
         Args:
             data: Dictionary containing field data
@@ -521,7 +505,7 @@ class StateSchemaManager:
                     self.field_definitions[key] = field_def
                     self.fields[key] = field_def.to_field_info()
         except Exception as e:
-            logger.error(f"Error loading from dict: {e}")
+            logger.exception(f"Error loading from dict: {e}")
             # Add a placeholder field as fallback
             self.fields["placeholder"] = (str, create_field(str, "")[1])
             self.field_definitions["placeholder"] = FieldDefinition(
@@ -531,19 +515,18 @@ class StateSchemaManager:
     def add_field(
         self,
         name: str,
-        field_type: Type[T],
+        field_type: type[T],
         default: Any = None,
-        default_factory: Optional[Callable[[], T]] = None,
-        description: Optional[str] = None,
+        default_factory: Callable[[], T] | None = None,
+        description: str | None = None,
         shared: bool = False,
-        reducer: Optional[Callable] = None,
-        input_for: Optional[List[str]] = None,
-        output_from: Optional[List[str]] = None,
+        reducer: Callable | None = None,
+        input_for: list[str] | None = None,
+        output_from: list[str] | None = None,
         optional: bool = True,
         **kwargs,
-    ) -> "StateSchemaManager":
-        """
-        Add a field to the schema with comprehensive options.
+    ) -> StateSchemaManager:
+        """Add a field to the schema with comprehensive options.
 
         Args:
             name: Field name
@@ -629,9 +612,8 @@ class StateSchemaManager:
 
         return self
 
-    def remove_field(self, name: str) -> "StateSchemaManager":
-        """
-        Remove a field from the schema.
+    def remove_field(self, name: str) -> StateSchemaManager:
+        """Remove a field from the schema.
 
         Args:
             name: Name of the field to remove
@@ -689,20 +671,19 @@ class StateSchemaManager:
     def modify_field(
         self,
         name: str,
-        new_type: Optional[Type] = None,
+        new_type: type | None = None,
         new_default: Any = None,
-        new_default_factory: Optional[Callable] = None,
-        new_description: Optional[str] = None,
-        new_shared: Optional[bool] = None,
-        new_reducer: Optional[Callable] = None,
-        add_input_for: Optional[List[str]] = None,
-        add_output_from: Optional[List[str]] = None,
-        remove_input_for: Optional[List[str]] = None,
-        remove_output_from: Optional[List[str]] = None,
+        new_default_factory: Callable | None = None,
+        new_description: str | None = None,
+        new_shared: bool | None = None,
+        new_reducer: Callable | None = None,
+        add_input_for: list[str] | None = None,
+        add_output_from: list[str] | None = None,
+        remove_input_for: list[str] | None = None,
+        remove_output_from: list[str] | None = None,
         **kwargs,
-    ) -> "StateSchemaManager":
-        """
-        Modify an existing field's properties.
+    ) -> StateSchemaManager:
+        """Modify an existing field's properties.
 
         Args:
             name: Name of the field to modify
@@ -885,8 +866,7 @@ class StateSchemaManager:
         return self
 
     def has_field(self, name: str) -> bool:
-        """
-        Check if the schema has a specific field.
+        """Check if the schema has a specific field.
 
         Args:
             name: Field name to check
@@ -900,11 +880,10 @@ class StateSchemaManager:
         self,
         lock: bool = False,
         as_state_schema: bool = True,
-        name: Optional[str] = None,
+        name: str | None = None,
         use_annotated: bool = True,
-    ) -> Type[BaseModel]:
-        """
-        Create a Pydantic model with all configured options.
+    ) -> type[BaseModel]:
+        """Create a Pydantic model with all configured options.
 
         Args:
             lock: Whether to lock the schema against further modifications
@@ -997,9 +976,8 @@ class StateSchemaManager:
 
     def mark_as_input_field(
         self, field_name: str, engine_name: str
-    ) -> "StateSchemaManager":
-        """
-        Mark a field as an input field for an engine.
+    ) -> StateSchemaManager:
+        """Mark a field as an input field for an engine.
 
         Args:
             field_name: Name of the field
@@ -1027,9 +1005,8 @@ class StateSchemaManager:
 
     def mark_as_output_field(
         self, field_name: str, engine_name: str
-    ) -> "StateSchemaManager":
-        """
-        Mark a field as an output field for an engine.
+    ) -> StateSchemaManager:
+        """Mark a field as an output field for an engine.
 
         Args:
             field_name: Name of the field
@@ -1056,8 +1033,7 @@ class StateSchemaManager:
         return self
 
     def _update_engine_io_mapping(self, engine_name: str) -> None:
-        """
-        Update engine I/O mapping for a specific engine.
+        """Update engine I/O mapping for a specific engine.
 
         Args:
             engine_name: Engine name to update mapping for
@@ -1078,9 +1054,8 @@ class StateSchemaManager:
                 self._output_fields[engine_name]
             )
 
-    def to_composer(self) -> "SchemaComposer":
-        """
-        Convert to a SchemaComposer instance.
+    def to_composer(self) -> SchemaComposer:
+        """Convert to a SchemaComposer instance.
 
         Returns:
             SchemaComposer with current fields and metadata
@@ -1098,12 +1073,9 @@ class StateSchemaManager:
 
     def merge(
         self,
-        other: Union[
-            "StateSchemaManager", Type[BaseModel], BaseModel, "SchemaComposer"
-        ],
-    ) -> "StateSchemaManager":
-        """
-        Merge with another schema, preserving first occurrences.
+        other: StateSchemaManager | type[BaseModel] | BaseModel | SchemaComposer,
+    ) -> StateSchemaManager:
+        """Merge with another schema, preserving first occurrences.
 
         Args:
             other: Another object to merge with
@@ -1220,11 +1192,10 @@ class StateSchemaManager:
     def add_method(
         self,
         method: Callable,
-        method_name: Optional[str] = None,
+        method_name: str | None = None,
         method_type: str = "instance",
-    ) -> "StateSchemaManager":
-        """
-        Add a method to the schema.
+    ) -> StateSchemaManager:
+        """Add a method to the schema.
 
         Args:
             method: Method callable to add
@@ -1253,12 +1224,11 @@ class StateSchemaManager:
     @classmethod
     def from_components(
         cls,
-        components: List[Any],
+        components: list[Any],
         name: str = "ComponentSchema",
         include_messages_field: bool = True,
-    ) -> "StateSchemaManager":
-        """
-        Create a schema manager from a list of components.
+    ) -> StateSchemaManager:
+        """Create a schema manager from a list of components.
 
         Args:
             components: List of components to extract fields from
@@ -1282,11 +1252,10 @@ class StateSchemaManager:
     @classmethod
     def create_message_state(
         cls,
-        additional_fields: Optional[Dict[str, Any]] = None,
+        additional_fields: dict[str, Any] | None = None,
         name: str = "MessageState",
-    ) -> Type[StateSchema]:
-        """
-        Create a schema with messages field and additional fields.
+    ) -> type[StateSchema]:
+        """Create a schema with messages field and additional fields.
 
         Args:
             additional_fields: Optional dictionary of additional fields to add

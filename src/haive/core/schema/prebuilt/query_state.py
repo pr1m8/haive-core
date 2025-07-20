@@ -55,16 +55,15 @@ Author: Claude (Haive AI Agent Framework)
 Version: 1.0.0
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from langchain_core.documents import Document
 from pydantic import BaseModel, Field, field_validator
 
 from haive.core.schema.prebuilt.document_state import DocumentState
 from haive.core.schema.prebuilt.messages_state import MessagesState
-from haive.core.schema.state_schema import StateSchema
 
 
 class QueryType(str, Enum):
@@ -162,9 +161,9 @@ class QueryResult(BaseModel):
     query_id: str = Field(description="Unique identifier for the query")
     response: str = Field(description="Generated response to the query")
     confidence: float = Field(default=0.0, ge=0.0, le=1.0)
-    source_documents: List[Document] = Field(default_factory=list)
-    citations: List[Dict[str, Any]] = Field(default_factory=list)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    source_documents: list[Document] = Field(default_factory=list)
+    citations: list[dict[str, Any]] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
     processing_metrics: QueryMetrics = Field(default_factory=QueryMetrics)
 
     class Config:
@@ -225,20 +224,23 @@ class QueryState(MessagesState, DocumentState):
 
     # Core Query Information
     original_query: str = Field(description="The original user query")
-    query_id: str = Field(default_factory=lambda: f"query_{datetime.now().timestamp()}")
+    query_id: str = Field(
+        default_factory=lambda: f"query_{
+            datetime.now().timestamp()}"
+    )
     query_type: QueryType = Field(default=QueryType.SIMPLE)
     query_intent: QueryIntent = Field(default=QueryIntent.INFORMATION_SEEKING)
     query_complexity: QueryComplexity = Field(default=QueryComplexity.MEDIUM)
 
     # Query Processing
-    refined_queries: List[str] = Field(default_factory=list)
-    expanded_queries: List[str] = Field(default_factory=list)
-    query_variations: List[str] = Field(default_factory=list)
+    refined_queries: list[str] = Field(default_factory=list)
+    expanded_queries: list[str] = Field(default_factory=list)
+    query_variations: list[str] = Field(default_factory=list)
     processed_query: str = Field(default="")
 
     # Retrieval Configuration
     retrieval_strategy: RetrievalStrategy = Field(default=RetrievalStrategy.ADAPTIVE)
-    retrieval_config: Dict[str, Any] = Field(default_factory=dict)
+    retrieval_config: dict[str, Any] = Field(default_factory=dict)
 
     # Query Enhancement
     query_expansion_enabled: bool = Field(default=True)
@@ -248,27 +250,27 @@ class QueryState(MessagesState, DocumentState):
     time_weighted_retrieval: bool = Field(default=False)
 
     # Filtering and Constraints
-    source_filters: List[str] = Field(default_factory=list)
-    metadata_filters: Dict[str, Any] = Field(default_factory=dict)
-    time_range_filter: Optional[Dict[str, datetime]] = Field(default=None)
+    source_filters: list[str] = Field(default_factory=list)
+    metadata_filters: dict[str, Any] = Field(default_factory=dict)
+    time_range_filter: dict[str, datetime] | None = Field(default=None)
     similarity_threshold: float = Field(default=0.7, ge=0.0, le=1.0)
     max_results: int = Field(default=10, ge=1, le=100)
 
     # Context and Memory
-    context_documents: List[Document] = Field(default_factory=list)
-    retrieved_documents: List[Document] = Field(default_factory=list)
-    relevant_contexts: List[str] = Field(default_factory=list)
-    memory_contexts: List[str] = Field(default_factory=list)
+    context_documents: list[Document] = Field(default_factory=list)
+    retrieved_documents: list[Document] = Field(default_factory=list)
+    relevant_contexts: list[str] = Field(default_factory=list)
+    memory_contexts: list[str] = Field(default_factory=list)
 
     # Results and Tracking
-    query_results: List[QueryResult] = Field(default_factory=list)
-    current_result: Optional[QueryResult] = Field(default=None)
-    intermediate_results: List[Dict[str, Any]] = Field(default_factory=list)
+    query_results: list[QueryResult] = Field(default_factory=list)
+    current_result: QueryResult | None = Field(default=None)
+    intermediate_results: list[dict[str, Any]] = Field(default_factory=list)
 
     # Citations and Provenance
-    citations: List[Dict[str, Any]] = Field(default_factory=list)
-    source_provenance: Dict[str, Any] = Field(default_factory=dict)
-    confidence_scores: Dict[str, float] = Field(default_factory=dict)
+    citations: list[dict[str, Any]] = Field(default_factory=list)
+    source_provenance: dict[str, Any] = Field(default_factory=dict)
+    confidence_scores: dict[str, float] = Field(default_factory=dict)
 
     # Processing Configuration
     processing_config: QueryProcessingConfig = Field(
@@ -277,17 +279,17 @@ class QueryState(MessagesState, DocumentState):
 
     # Metrics and Analytics
     processing_metrics: QueryMetrics = Field(default_factory=QueryMetrics)
-    query_history: List[Dict[str, Any]] = Field(default_factory=list)
+    query_history: list[dict[str, Any]] = Field(default_factory=list)
 
     # Execution State
     current_stage: str = Field(default="initialized")
-    execution_path: List[str] = Field(default_factory=list)
-    error_history: List[Dict[str, Any]] = Field(default_factory=list)
+    execution_path: list[str] = Field(default_factory=list)
+    error_history: list[dict[str, Any]] = Field(default_factory=list)
 
     # Caching and Optimization
-    cache_key: Optional[str] = Field(default=None)
-    cached_results: Dict[str, Any] = Field(default_factory=dict)
-    optimization_hints: Dict[str, Any] = Field(default_factory=dict)
+    cache_key: str | None = Field(default=None)
+    cached_results: dict[str, Any] = Field(default_factory=dict)
+    optimization_hints: dict[str, Any] = Field(default_factory=dict)
 
     class Config:
         arbitrary_types_allowed = True
@@ -302,19 +304,18 @@ class QueryState(MessagesState, DocumentState):
 
     @field_validator("refined_queries")
     @classmethod
-    def validate_refined_queries(cls, v: List[str]) -> List[str]:
+    def validate_refined_queries(cls, v: list[str]) -> list[str]:
         """Validate refined queries are not empty."""
         return [q.strip() for q in v if q and q.strip()]
 
     @field_validator("time_range_filter")
     @classmethod
     def validate_time_range(
-        cls, v: Optional[Dict[str, datetime]]
-    ) -> Optional[Dict[str, datetime]]:
+        cls, v: dict[str, datetime] | None
+    ) -> dict[str, datetime] | None:
         """Validate time range filter has valid start and end dates."""
-        if v and "start" in v and "end" in v:
-            if v["start"] > v["end"]:
-                raise ValueError("Start date must be before end date")
+        if v and "start" in v and "end" in v and v["start"] > v["end"]:
+            raise ValueError("Start date must be before end date")
         return v
 
     def add_refined_query(self, query: str) -> None:
@@ -342,7 +343,7 @@ class QueryState(MessagesState, DocumentState):
         if document not in self.retrieved_documents:
             self.retrieved_documents.append(document)
 
-    def add_citation(self, citation: Dict[str, Any]) -> None:
+    def add_citation(self, citation: dict[str, Any]) -> None:
         """Add a citation to the state."""
         if citation not in self.citations:
             self.citations.append(citation)
@@ -356,7 +357,7 @@ class QueryState(MessagesState, DocumentState):
         """Get confidence score for a source."""
         return self.confidence_scores.get(source, 0.0)
 
-    def add_intermediate_result(self, result: Dict[str, Any]) -> None:
+    def add_intermediate_result(self, result: dict[str, Any]) -> None:
         """Add an intermediate result to tracking."""
         result["timestamp"] = datetime.now().isoformat()
         self.intermediate_results.append(result)
@@ -366,7 +367,7 @@ class QueryState(MessagesState, DocumentState):
         self.current_stage = stage
         self.execution_path.append(stage)
 
-    def add_error(self, error: str, context: Optional[Dict[str, Any]] = None) -> None:
+    def add_error(self, error: str, context: dict[str, Any] | None = None) -> None:
         """Add an error to the history."""
         error_entry = {
             "error": error,
@@ -376,7 +377,7 @@ class QueryState(MessagesState, DocumentState):
         }
         self.error_history.append(error_entry)
 
-    def get_all_queries(self) -> List[str]:
+    def get_all_queries(self) -> list[str]:
         """Get all queries including original, refined, and expanded."""
         all_queries = [self.original_query]
         all_queries.extend(self.refined_queries)
@@ -384,10 +385,11 @@ class QueryState(MessagesState, DocumentState):
         all_queries.extend(self.query_variations)
         return list(set(all_queries))  # Remove duplicates
 
-    def get_all_documents(self) -> List[Document]:
+    def get_all_documents(self) -> list[Document]:
         """Get all documents including raw, context, and retrieved."""
         all_docs = []
-        all_docs.extend(self.raw_documents)  # Use raw_documents from DocumentState
+        # Use raw_documents from DocumentState
+        all_docs.extend(self.raw_documents)
         all_docs.extend(self.context_documents)
         all_docs.extend(self.retrieved_documents)
 
@@ -402,7 +404,7 @@ class QueryState(MessagesState, DocumentState):
 
         return unique_docs
 
-    def get_processing_summary(self) -> Dict[str, Any]:
+    def get_processing_summary(self) -> dict[str, Any]:
         """Get a summary of processing statistics."""
         return {
             "query_id": self.query_id,
@@ -438,7 +440,7 @@ class QueryState(MessagesState, DocumentState):
             QueryType.CLASSIFICATION,
         ]
 
-    def get_active_filters(self) -> Dict[str, Any]:
+    def get_active_filters(self) -> dict[str, Any]:
         """Get all active filters for the query."""
         filters = {}
 
@@ -483,13 +485,13 @@ QueryProcessingState = QueryState
 
 # Export all classes
 __all__ = [
-    "QueryState",
-    "QueryProcessingState",
-    "QueryType",
-    "RetrievalStrategy",
     "QueryComplexity",
     "QueryIntent",
-    "QueryProcessingConfig",
     "QueryMetrics",
+    "QueryProcessingConfig",
+    "QueryProcessingState",
     "QueryResult",
+    "QueryState",
+    "QueryType",
+    "RetrievalStrategy",
 ]

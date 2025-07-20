@@ -91,7 +91,7 @@ class HuggingFaceEmbeddingConfig(BaseEmbeddingConfig):
 
     @validator("model")
     @classmethod
-    def validate_model(cls, v):
+    def validate_model(cls, v) -> Any:
         """Validate the HuggingFace model name."""
         if not v or not v.strip():
             raise ValueError("Model name is required and cannot be empty")
@@ -99,7 +99,7 @@ class HuggingFaceEmbeddingConfig(BaseEmbeddingConfig):
 
     @validator("model_kwargs")
     @classmethod
-    def validate_model_kwargs(cls, v):
+    def validate_model_kwargs(cls, v) -> Any:
         """Validate and set default model kwargs."""
         if not v:
             v = {}
@@ -117,7 +117,7 @@ class HuggingFaceEmbeddingConfig(BaseEmbeddingConfig):
 
     @validator("cache_folder")
     @classmethod
-    def validate_cache_folder(cls, v, values):
+    def validate_cache_folder(cls, v, values) -> Any:
         """Set default cache folder if not specified."""
         if v is None and values.get("use_cache", True):
             # Use a default cache folder
@@ -183,7 +183,8 @@ class HuggingFaceEmbeddingConfig(BaseEmbeddingConfig):
                     namespace=self.model.replace("/", "_"),
                 )
             except ImportError:
-                # If caching dependencies not available, continue without caching
+                # If caching dependencies not available, continue without
+                # caching
                 import logging
 
                 logger = logging.getLogger(__name__)
@@ -203,7 +204,10 @@ class HuggingFaceEmbeddingConfig(BaseEmbeddingConfig):
             try:
                 os.makedirs(self.cache_folder, exist_ok=True)
             except OSError as e:
-                raise ValueError(f"Cannot create cache folder {self.cache_folder}: {e}")
+                raise ValueError(
+                    f"Cannot create cache folder {
+                        self.cache_folder}: {e}"
+                )
 
     def get_default_model(self) -> str:
         """Get the default model for HuggingFace embeddings."""

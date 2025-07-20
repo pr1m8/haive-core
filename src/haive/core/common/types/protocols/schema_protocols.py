@@ -1,8 +1,4 @@
-from typing import (
-    Any,
-    Protocol,
-    runtime_checkable,
-)
+from typing import Any, Protocol, runtime_checkable
 
 from pydantic import BaseModel
 

@@ -1,11 +1,8 @@
-"""
-Subgraph management mixin for the state graph system.
+"""Subgraph management mixin for the state graph system.
 
 This module provides the SubgraphMixin class for managing subgraphs
 in a graph.
 """
-
-from typing import Dict, List, Optional
 
 from pydantic import Field
 
@@ -16,8 +13,7 @@ from haive.core.graph.state_graph.components.subgraph_registry import SubgraphRe
 
 
 class SubgraphMixin:
-    """
-    Mixin that adds subgraph management capabilities to a graph.
+    """Mixin that adds subgraph management capabilities to a graph.
 
     This mixin allows the graph to register, configure, and use
     subgraphs within the main graph.
@@ -29,12 +25,11 @@ class SubgraphMixin:
         self,
         subgraph_name: str,
         graph: GraphBase,
-        input_mapping: Optional[Dict[str, str]] = None,
-        output_mapping: Optional[Dict[str, str]] = None,
+        input_mapping: dict[str, str] | None = None,
+        output_mapping: dict[str, str] | None = None,
         **kwargs
     ) -> "GraphBase":
-        """
-        Add a subgraph to the graph.
+        """Add a subgraph to the graph.
 
         Args:
             subgraph_name: Name for the subgraph
@@ -67,8 +62,7 @@ class SubgraphMixin:
         return self
 
     def remove_subgraph(self, subgraph_name: str) -> "GraphBase":
-        """
-        Remove a subgraph from the graph.
+        """Remove a subgraph from the graph.
 
         Args:
             subgraph_name: Name of the subgraph to remove
@@ -97,9 +91,8 @@ class SubgraphMixin:
 
         return self
 
-    def get_subgraph(self, subgraph_name: str) -> Optional[Subgraph]:
-        """
-        Get a subgraph by name.
+    def get_subgraph(self, subgraph_name: str) -> Subgraph | None:
+        """Get a subgraph by name.
 
         Args:
             subgraph_name: Name of the subgraph
@@ -109,9 +102,8 @@ class SubgraphMixin:
         """
         return self._subgraph_registry.get_subgraph(subgraph_name)
 
-    def get_subgraph_graph(self, subgraph_name: str) -> Optional[GraphBase]:
-        """
-        Get the underlying graph for a subgraph.
+    def get_subgraph_graph(self, subgraph_name: str) -> GraphBase | None:
+        """Get the underlying graph for a subgraph.
 
         Args:
             subgraph_name: Name of the subgraph
@@ -124,9 +116,8 @@ class SubgraphMixin:
             return subgraph.get_graph()
         return None
 
-    def list_subgraphs(self) -> List[str]:
-        """
-        List all subgraph names.
+    def list_subgraphs(self) -> list[str]:
+        """List all subgraph names.
 
         Returns:
             List of subgraph names
@@ -136,11 +127,10 @@ class SubgraphMixin:
     def update_subgraph_mappings(
         self,
         subgraph_name: str,
-        input_mapping: Optional[Dict[str, str]] = None,
-        output_mapping: Optional[Dict[str, str]] = None,
+        input_mapping: dict[str, str] | None = None,
+        output_mapping: dict[str, str] | None = None,
     ) -> "GraphBase":
-        """
-        Update the input/output mappings for a subgraph.
+        """Update the input/output mappings for a subgraph.
 
         Args:
             subgraph_name: Name of the subgraph
@@ -174,8 +164,7 @@ class SubgraphMixin:
         return self
 
     def check_subgraphs_compilation(self) -> bool:
-        """
-        Check if any subgraphs need recompilation.
+        """Check if any subgraphs need recompilation.
 
         Returns:
             True if any subgraph needs recompilation, False otherwise

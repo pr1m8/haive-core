@@ -37,11 +37,8 @@ Usage:
 
 import inspect
 import logging
-from typing import (
-    Any,
-    Callable,
-    get_type_hints,
-)
+from collections.abc import Callable
+from typing import Any, get_type_hints
 
 from pydantic import BaseModel, Field, model_validator
 from rich.console import Console
@@ -224,7 +221,10 @@ class ToolRouteMixin(BaseModel):
         return self
 
     @model_validator(mode="after")
-    def _validate_and_process_tools(self) -> "ToolRouteMixin":
+
+
+    @classmethod
+    def _validate_and_process_tools(cls) -> "ToolRouteMixin":
         """Process tools_dict and routed_tools into tool_routes after initialization."""
         # Process tools_dict into tool_routes
         self._process_tools_dict()
@@ -318,7 +318,8 @@ class ToolRouteMixin(BaseModel):
                 "tool_type": "pydantic_model",
             }
             # Check if it has explicitly defined __call__ method (executable tool)
-            # Only consider it executable if __call__ is defined in the class itself
+            # Only consider it executable if __call__ is defined in the class
+            # itself
             has_explicit_call = (
                 "__call__" in tool.__dict__ if hasattr(tool, "__dict__") else False
             )
@@ -450,7 +451,8 @@ class ToolRouteMixin(BaseModel):
 
             self.set_tool_route(tool_name, new_route, metadata)
             logger.debug(
-                f"Updated route for '{tool_name}': {metadata['previous_route']} -> {new_route}"
+                f"Updated route for '{tool_name}': {
+                    metadata['previous_route']} -> {new_route}"
             )
 
         return self
@@ -682,7 +684,8 @@ class ToolRouteMixin(BaseModel):
             for i, (tool, route) in enumerate(self.routed_tools):
                 tool_name = self._generate_tool_name(tool, f"routed_{route}", i)
                 routed_tree.add(
-                    f"{tool_name} → [yellow]{route}[/yellow] [dim]({type(tool).__name__})[/dim]"
+                    f"{tool_name} → [yellow]{route}[/yellow] [dim]({
+                        type(tool).__name__})[/dim]"
                 )
             console.print(routed_tree)
 

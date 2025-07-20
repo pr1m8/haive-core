@@ -1,5 +1,6 @@
 """InMemory Vector Store implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the InMemory vector store,
 which provides simple in-memory vector operations for development and testing.
 
@@ -82,7 +83,7 @@ class InMemoryVectorStoreConfig(BaseVectorStoreConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create an InMemory vector store from this configuration.
 
         Returns:

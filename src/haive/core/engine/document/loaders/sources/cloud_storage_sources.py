@@ -9,7 +9,7 @@ This module implements comprehensive cloud storage and data platform loaders inc
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import Field
 
@@ -103,15 +103,15 @@ class S3FileSource(RemoteSource):
     key: str = Field(..., description="S3 object key")
 
     # AWS credentials
-    aws_access_key_id: Optional[str] = Field(None, description="AWS access key")
-    aws_secret_access_key: Optional[str] = Field(None, description="AWS secret key")
+    aws_access_key_id: str | None = Field(None, description="AWS access key")
+    aws_secret_access_key: str | None = Field(None, description="AWS secret key")
     region_name: str = Field("us-east-1", description="AWS region")
 
     # Options
     use_aws_profile: bool = Field(False, description="Use AWS profile credentials")
-    endpoint_url: Optional[str] = Field(None, description="Custom endpoint URL")
+    endpoint_url: str | None = Field(None, description="Custom endpoint URL")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -166,14 +166,14 @@ class S3DirectorySource(RemoteSource):
 
     # Filtering
     glob: str = Field("**/*", description="Glob pattern for files")
-    exclude: Optional[List[str]] = Field(None, description="Patterns to exclude")
-    max_files: Optional[int] = Field(None, description="Maximum files to load")
+    exclude: list[str] | None = Field(None, description="Patterns to exclude")
+    max_files: int | None = Field(None, description="Maximum files to load")
 
     # Processing
     use_multithreading: bool = Field(True, description="Enable parallel loading")
     max_concurrency: int = Field(10, ge=1, le=50, description="Max concurrent loads")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -193,7 +193,7 @@ class S3DirectorySource(RemoteSource):
 
         return kwargs
 
-    def scrape_all(self) -> Dict[str, Any]:
+    def scrape_all(self) -> dict[str, Any]:
         """Scrape entire S3 bucket or prefix."""
         return {
             "bucket": self.bucket,
@@ -239,12 +239,12 @@ class GCSFileSource(RemoteSource):
     blob: str = Field(..., description="Blob name (file path)")
 
     # Credentials
-    service_account_path: Optional[str] = Field(
+    service_account_path: str | None = Field(
         None, description="Service account JSON path"
     )
-    project_id: Optional[str] = Field(None, description="GCP project ID")
+    project_id: str | None = Field(None, description="GCP project ID")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update({"bucket": self.bucket, "blob": self.blob})
@@ -296,13 +296,13 @@ class GCSDirectorySource(RemoteSource):
 
     # Filtering
     glob: str = Field("**/*", description="Glob pattern")
-    exclude: Optional[List[str]] = Field(None, description="Exclude patterns")
+    exclude: list[str] | None = Field(None, description="Exclude patterns")
 
     # Processing
     max_concurrency: int = Field(10, ge=1, le=50, description="Max concurrent loads")
     continue_on_failure: bool = Field(True, description="Continue if file fails")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -358,13 +358,11 @@ class AzureBlobFileSource(RemoteSource):
     blob_name: str = Field(..., description="Blob name")
 
     # Authentication
-    connection_string: Optional[str] = Field(
-        None, description="Azure connection string"
-    )
-    account_url: Optional[str] = Field(None, description="Storage account URL")
-    credential: Optional[str] = Field(None, description="Azure credential")
+    connection_string: str | None = Field(None, description="Azure connection string")
+    account_url: str | None = Field(None, description="Storage account URL")
+    credential: str | None = Field(None, description="Azure credential")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update({"container": self.container, "blob": self.blob_name})
@@ -416,11 +414,11 @@ class AzureBlobDirectorySource(RemoteSource):
     prefix: str = Field("", description="Blob prefix")
 
     # Filtering
-    name_starts_with: Optional[str] = Field(None, description="Filter by name prefix")
-    include: Optional[List[str]] = Field(None, description="Include patterns")
-    exclude: Optional[List[str]] = Field(None, description="Exclude patterns")
+    name_starts_with: str | None = Field(None, description="Filter by name prefix")
+    include: list[str] | None = Field(None, description="Include patterns")
+    exclude: list[str] | None = Field(None, description="Exclude patterns")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update({"container": self.container, "prefix": self.prefix})
@@ -471,15 +469,15 @@ class DropboxSource(RemoteSource):
     platform: CloudPlatform = CloudPlatform.DROPBOX
 
     # Dropbox configuration
-    access_token: Optional[str] = Field(None, description="Dropbox access token")
+    access_token: str | None = Field(None, description="Dropbox access token")
     folder_path: str = Field("/", description="Folder path to load from")
 
     # Options
     recursive: bool = Field(True, description="Load recursively")
     include_shared: bool = Field(True, description="Include shared files")
-    file_types: Optional[List[str]] = Field(None, description="Filter by file types")
+    file_types: list[str] | None = Field(None, description="Filter by file types")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -533,21 +531,21 @@ class GoogleDriveSource(RemoteSource):
     platform: CloudPlatform = CloudPlatform.GOOGLE_DRIVE
 
     # Drive configuration
-    folder_id: Optional[str] = Field(None, description="Specific folder ID")
-    file_ids: Optional[List[str]] = Field(None, description="Specific file IDs")
+    folder_id: str | None = Field(None, description="Specific folder ID")
+    file_ids: list[str] | None = Field(None, description="Specific file IDs")
 
     # Authentication
-    service_account_key: Optional[str] = Field(
+    service_account_key: str | None = Field(
         None, description="Service account key path"
     )
-    credentials_path: Optional[str] = Field(None, description="OAuth credentials path")
+    credentials_path: str | None = Field(None, description="OAuth credentials path")
 
     # Options
     recursive: bool = Field(True, description="Load folders recursively")
-    file_types: Optional[List[str]] = Field(None, description="Filter by MIME types")
-    max_files: Optional[int] = Field(None, description="Maximum files to load")
+    file_types: list[str] | None = Field(None, description="Filter by MIME types")
+    max_files: int | None = Field(None, description="Maximum files to load")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         if self.folder_id:
@@ -569,7 +567,7 @@ class GoogleDriveSource(RemoteSource):
 
         return kwargs
 
-    def scrape_all(self) -> Dict[str, Any]:
+    def scrape_all(self) -> dict[str, Any]:
         """Scrape entire Google Drive or folder."""
         return {
             "folder_id": self.folder_id or "root",
@@ -613,15 +611,15 @@ class OneDriveSource(RemoteSource):
     platform: CloudPlatform = CloudPlatform.ONEDRIVE
 
     # OneDrive configuration
-    client_id: Optional[str] = Field(None, description="Azure app client ID")
-    client_secret: Optional[str] = Field(None, description="Azure app client secret")
-    tenant_id: Optional[str] = Field(None, description="Azure tenant ID")
+    client_id: str | None = Field(None, description="Azure app client ID")
+    client_secret: str | None = Field(None, description="Azure app client secret")
+    tenant_id: str | None = Field(None, description="Azure tenant ID")
 
     # Path options
     folder_path: str = Field("/", description="Folder path")
     recursive: bool = Field(True, description="Load recursively")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -673,20 +671,18 @@ class DeltaLakeSource(RemoteSource):
 
     # Delta Lake configuration
     table_path: str = Field(..., description="Path to Delta table")
-    version: Optional[int] = Field(None, description="Table version to read")
-    timestamp: Optional[datetime] = Field(None, description="Read table at timestamp")
+    version: int | None = Field(None, description="Table version to read")
+    timestamp: datetime | None = Field(None, description="Read table at timestamp")
 
     # Query options
-    columns: Optional[List[str]] = Field(None, description="Columns to select")
-    filter_expression: Optional[str] = Field(None, description="Filter expression")
-    limit: Optional[int] = Field(None, description="Row limit")
+    columns: list[str] | None = Field(None, description="Columns to select")
+    filter_expression: str | None = Field(None, description="Filter expression")
+    limit: int | None = Field(None, description="Row limit")
 
     # Storage options
-    storage_options: Optional[Dict[str, str]] = Field(
-        None, description="Storage options"
-    )
+    storage_options: dict[str, str] | None = Field(None, description="Storage options")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update({"table_path": self.table_path})
@@ -743,16 +739,14 @@ class IcebergSource(RemoteSource):
     catalog_uri: str = Field(..., description="Catalog URI")
 
     # Query options
-    snapshot_id: Optional[int] = Field(None, description="Snapshot ID to read")
-    as_of_timestamp: Optional[datetime] = Field(
-        None, description="Read as of timestamp"
-    )
+    snapshot_id: int | None = Field(None, description="Snapshot ID to read")
+    as_of_timestamp: datetime | None = Field(None, description="Read as of timestamp")
 
     # Scan options
-    columns: Optional[List[str]] = Field(None, description="Columns to select")
-    filter_expression: Optional[str] = Field(None, description="Filter expression")
+    columns: list[str] | None = Field(None, description="Columns to select")
+    filter_expression: str | None = Field(None, description="Filter expression")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update({"table": self.table_identifier, "catalog_uri": self.catalog_uri})
@@ -813,16 +807,16 @@ class SharePointSource(RemoteSource):
     folder_path: str = Field("/", description="Folder path within library")
 
     # Authentication
-    client_id: Optional[str] = Field(None, description="Azure app client ID")
-    client_secret: Optional[str] = Field(None, description="Azure app client secret")
-    tenant_id: Optional[str] = Field(None, description="Azure tenant ID")
+    client_id: str | None = Field(None, description="Azure app client ID")
+    client_secret: str | None = Field(None, description="Azure app client secret")
+    tenant_id: str | None = Field(None, description="Azure tenant ID")
 
     # Options
     recursive: bool = Field(True, description="Load folders recursively")
-    file_types: Optional[List[str]] = Field(None, description="Filter by extensions")
+    file_types: list[str] | None = Field(None, description="Filter by extensions")
     include_metadata: bool = Field(True, description="Include file metadata")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -843,7 +837,7 @@ class SharePointSource(RemoteSource):
 
         return kwargs
 
-    def scrape_all(self) -> Dict[str, Any]:
+    def scrape_all(self) -> dict[str, Any]:
         """Scrape entire SharePoint library."""
         return {
             "document_library": self.document_library,
@@ -897,15 +891,15 @@ class MinioSource(RemoteSource):
     prefix: str = Field("", description="Object prefix")
 
     # Authentication
-    access_key: Optional[str] = Field(None, description="Access key")
-    secret_key: Optional[str] = Field(None, description="Secret key")
+    access_key: str | None = Field(None, description="Access key")
+    secret_key: str | None = Field(None, description="Secret key")
     secure: bool = Field(True, description="Use HTTPS")
 
     # Options
     recursive: bool = Field(True, description="List recursively")
     include_version: bool = Field(False, description="Include object versions")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -933,7 +927,7 @@ class MinioSource(RemoteSource):
 # =============================================================================
 
 
-def get_cloud_storage_statistics() -> Dict[str, Any]:
+def get_cloud_storage_statistics() -> dict[str, Any]:
     """Get statistics about cloud storage sources."""
     registry = enhanced_registry
 
@@ -1004,15 +998,10 @@ def validate_cloud_sources() -> bool:
         if source_name not in registry._sources:
             missing.append(source_name)
 
-    if missing:
-        print(f"Missing cloud sources: {missing}")
-        return False
-
-    print("✅ All essential cloud storage sources registered!")
-    return True
+    return not missing
 
 
-def detect_cloud_platform(url_or_path: str) -> Optional[CloudPlatform]:
+def detect_cloud_platform(url_or_path: str) -> CloudPlatform | None:
     """Auto-detect cloud platform from URL or path."""
     lower = url_or_path.lower()
 
@@ -1037,4 +1026,3 @@ def detect_cloud_platform(url_or_path: str) -> Optional[CloudPlatform]:
 if __name__ == "__main__":
     validate_cloud_sources()
     stats = get_cloud_storage_statistics()
-    print(f"Cloud Storage Statistics: {stats}")

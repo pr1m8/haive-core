@@ -1,4 +1,6 @@
-from pydantic import Field, HttpUrl, field_validator
+from typing import Any
+
+from pydantic import Field, HttpUrl
 
 from haive.core.engine.loaders.sources.base import BaseSource
 from haive.core.engine.loaders.sources.types import SourceType
@@ -13,7 +15,7 @@ class URLSource(BaseSource):
 
     @field_validatorvalidate_url
     @classmethod
-    def validate_url(cls, v):
+    def validate_url(cls, v) -> Any:
         if not v.is_valid():
             raise ValueError(f"Invalid url: {v}")
         return v
@@ -32,7 +34,7 @@ class URLSource(BaseSource):
 
     @field_validatorvalidate_url
     @classmethod
-    def validate_url(cls, v):
+    def validate_url(cls, v) -> Any:
         if not v.is_valid():
             raise ValueError(f"Invalid url: {v}")
         return v

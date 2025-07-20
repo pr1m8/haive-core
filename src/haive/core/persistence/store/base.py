@@ -42,7 +42,7 @@ class SerializableStoreWrapper(BaseModel, ABC):
 
         arbitrary_types_allowed = True
 
-    def __init__(self, **data):
+    def __init__(self, **data) -> None:
         """Initialize store wrapper."""
         super().__init__(**data)
         # Generate connection ID if not provided

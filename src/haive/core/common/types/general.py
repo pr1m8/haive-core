@@ -1,9 +1,5 @@
 from collections.abc import Callable, Sequence
-from typing import (
-    Any,
-    TypeVar,
-    Union,
-)
+from typing import Any, TypeVar, Union
 
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import BaseTool, BaseToolkit, StructuredTool, Tool
@@ -13,7 +9,8 @@ from pydantic import BaseModel
 from haive.core.common.types.protocols.general_protocols import Nameable
 from haive.core.schema.state_schema import StateSchema
 
-# Generic type that can be string, dict with name key, or any object with name attribute
+# Generic type that can be string, dict with name key, or any object with
+# name attribute
 OptionItem = TypeVar("OptionItem", str, dict[str, Any], Nameable)
 ToolLike = Sequence[
     Tool | type[BaseTool] | BaseModel | Callable | StructuredTool | BaseToolkit

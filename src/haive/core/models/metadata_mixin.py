@@ -181,7 +181,8 @@ class ModelMetadataMixin:
             Dictionary of model metadata
         """
         # Use model_alias if available, otherwise use model name
-        model_name_for_lookup = getattr(self, "model_alias", None) or self.model
+        model_name_for_lookup = getattr(
+            self, "model_alias", None) or self.model
 
         # Get provider value, handling different formats
         if hasattr(self.provider, "value"):

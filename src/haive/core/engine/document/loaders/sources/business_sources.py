@@ -7,7 +7,7 @@ including CRM systems (HubSpot, Salesforce), e-commerce (Shopify), productivity 
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import Field
 
@@ -103,27 +103,25 @@ class BusinessSource(RemoteSource):
     platform: BusinessPlatform = Field(..., description="Business platform type")
 
     # Data selection
-    data_types: List[BusinessDataType] = Field(
+    data_types: list[BusinessDataType] = Field(
         default=[BusinessDataType.CONTACTS], description="Types of data to extract"
     )
 
     # Sync configuration
     sync_mode: SyncMode = Field(SyncMode.FULL_REFRESH, description="Data sync mode")
-    last_sync_date: Optional[datetime] = Field(None, description="Last sync timestamp")
+    last_sync_date: datetime | None = Field(None, description="Last sync timestamp")
 
     # Data limits
-    max_records: Optional[int] = Field(
+    max_records: int | None = Field(
         None, ge=1, description="Maximum records to retrieve"
     )
     page_size: int = Field(100, ge=1, le=1000, description="Page size for API requests")
 
     # Filtering
-    custom_fields: Optional[List[str]] = Field(
+    custom_fields: list[str] | None = Field(
         None, description="Specific fields to include"
     )
-    filter_query: Optional[str] = Field(
-        None, description="Platform-specific filter query"
-    )
+    filter_query: str | None = Field(None, description="Platform-specific filter query")
 
     # Performance
     batch_processing: bool = Field(True, description="Enable batch processing")
@@ -131,7 +129,7 @@ class BusinessSource(RemoteSource):
         3, ge=1, le=10, description="Number of parallel data streams"
     )
 
-    def get_sync_params(self) -> Dict[str, Any]:
+    def get_sync_params(self) -> dict[str, Any]:
         """Get synchronization parameters."""
         params = {"sync_mode": self.sync_mode.value, "page_size": self.page_size}
 
@@ -143,7 +141,7 @@ class BusinessSource(RemoteSource):
 
         return params
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         """Get loader arguments for business sources."""
         kwargs = super().get_loader_kwargs()
 
@@ -203,8 +201,8 @@ class HubSpotSource(BusinessSource):
     platform: BusinessPlatform = BusinessPlatform.HUBSPOT
 
     # HubSpot-specific options
-    api_key: Optional[str] = Field(None, description="HubSpot API key")
-    portal_id: Optional[str] = Field(None, description="HubSpot portal ID")
+    api_key: str | None = Field(None, description="HubSpot API key")
+    portal_id: str | None = Field(None, description="HubSpot portal ID")
 
     # Object types
     include_contacts: bool = Field(True, description="Include contacts")
@@ -213,14 +211,14 @@ class HubSpotSource(BusinessSource):
     include_tickets: bool = Field(False, description="Include support tickets")
 
     # Properties
-    contact_properties: Optional[List[str]] = Field(
+    contact_properties: list[str] | None = Field(
         None, description="Specific contact properties"
     )
-    company_properties: Optional[List[str]] = Field(
+    company_properties: list[str] | None = Field(
         None, description="Specific company properties"
     )
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -275,19 +273,19 @@ class SalesforceSource(BusinessSource):
     platform: BusinessPlatform = BusinessPlatform.SALESFORCE
 
     # Salesforce authentication
-    username: Optional[str] = Field(None, description="Salesforce username")
-    password: Optional[str] = Field(None, description="Salesforce password")
-    security_token: Optional[str] = Field(None, description="Salesforce security token")
+    username: str | None = Field(None, description="Salesforce username")
+    password: str | None = Field(None, description="Salesforce password")
+    security_token: str | None = Field(None, description="Salesforce security token")
     domain: str = Field("login", description="Salesforce domain (login/test)")
 
     # Query options
-    soql_query: Optional[str] = Field(None, description="SOQL query string")
-    object_types: List[str] = Field(
+    soql_query: str | None = Field(None, description="SOQL query string")
+    object_types: list[str] = Field(
         default=["Account", "Contact", "Lead", "Opportunity"],
         description="Salesforce object types to query",
     )
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -336,7 +334,7 @@ class PipedriveSource(BusinessSource):
     platform: BusinessPlatform = BusinessPlatform.PIPEDRIVE
 
     # Pipedrive configuration
-    api_token: Optional[str] = Field(None, description="Pipedrive API token")
+    api_token: str | None = Field(None, description="Pipedrive API token")
     company_domain: str = Field(..., description="Pipedrive company domain")
 
     # Data selection
@@ -345,7 +343,7 @@ class PipedriveSource(BusinessSource):
     include_deals: bool = Field(True, description="Include deals")
     include_activities: bool = Field(False, description="Include activities")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -401,8 +399,8 @@ class ShopifySource(BusinessSource):
 
     # Shopify configuration
     shop_domain: str = Field(..., description="Shopify shop domain")
-    api_key: Optional[str] = Field(None, description="Shopify API key")
-    api_secret: Optional[str] = Field(None, description="Shopify API secret")
+    api_key: str | None = Field(None, description="Shopify API key")
+    api_secret: str | None = Field(None, description="Shopify API secret")
     api_version: str = Field("2024-01", description="Shopify API version")
 
     # Data selection
@@ -411,7 +409,7 @@ class ShopifySource(BusinessSource):
     include_customers: bool = Field(True, description="Include customers")
     include_inventory: bool = Field(False, description="Include inventory")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -468,18 +466,16 @@ class NotionSource(BusinessSource):
     platform: BusinessPlatform = BusinessPlatform.NOTION
 
     # Notion configuration
-    integration_token: Optional[str] = Field(
-        None, description="Notion integration token"
-    )
-    database_id: Optional[str] = Field(None, description="Specific database ID")
-    workspace_id: Optional[str] = Field(None, description="Workspace ID")
+    integration_token: str | None = Field(None, description="Notion integration token")
+    database_id: str | None = Field(None, description="Specific database ID")
+    workspace_id: str | None = Field(None, description="Workspace ID")
 
     # Content options
     include_pages: bool = Field(True, description="Include pages")
     include_databases: bool = Field(True, description="Include databases")
     include_comments: bool = Field(False, description="Include comments")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -525,15 +521,15 @@ class AirtableSource(BusinessSource):
     platform: BusinessPlatform = BusinessPlatform.AIRTABLE
 
     # Airtable configuration
-    api_key: Optional[str] = Field(None, description="Airtable API key")
+    api_key: str | None = Field(None, description="Airtable API key")
     base_id: str = Field(..., description="Airtable base ID")
     table_name: str = Field(..., description="Table name")
 
     # Query options
-    view: Optional[str] = Field(None, description="Specific view to use")
-    formula: Optional[str] = Field(None, description="Airtable formula filter")
+    view: str | None = Field(None, description="Specific view to use")
+    formula: str | None = Field(None, description="Airtable formula filter")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -581,8 +577,8 @@ class TrelloSource(BusinessSource):
     platform: BusinessPlatform = BusinessPlatform.TRELLO
 
     # Trello configuration
-    api_key: Optional[str] = Field(None, description="Trello API key")
-    api_token: Optional[str] = Field(None, description="Trello API token")
+    api_key: str | None = Field(None, description="Trello API key")
+    api_token: str | None = Field(None, description="Trello API token")
     board_id: str = Field(..., description="Trello board ID")
 
     # Content options
@@ -590,7 +586,7 @@ class TrelloSource(BusinessSource):
     include_checklists: bool = Field(True, description="Include checklists")
     include_comments: bool = Field(False, description="Include comments")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -646,19 +642,19 @@ class JiraSource(BusinessSource):
 
     # Jira configuration
     server_url: str = Field(..., description="Jira server URL")
-    username: Optional[str] = Field(None, description="Jira username")
-    api_token: Optional[str] = Field(None, description="Jira API token")
+    username: str | None = Field(None, description="Jira username")
+    api_token: str | None = Field(None, description="Jira API token")
 
     # Query options
-    jql_query: Optional[str] = Field(None, description="JQL query string")
-    project_key: Optional[str] = Field(None, description="Specific project key")
+    jql_query: str | None = Field(None, description="JQL query string")
+    project_key: str | None = Field(None, description="Specific project key")
 
     # Content options
     include_attachments: bool = Field(False, description="Include attachments")
     include_comments: bool = Field(True, description="Include comments")
     include_history: bool = Field(False, description="Include issue history")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -719,18 +715,18 @@ class ConfluenceSource(BusinessSource):
 
     # Confluence configuration
     server_url: str = Field(..., description="Confluence server URL")
-    username: Optional[str] = Field(None, description="Confluence username")
-    api_token: Optional[str] = Field(None, description="Confluence API token")
+    username: str | None = Field(None, description="Confluence username")
+    api_token: str | None = Field(None, description="Confluence API token")
 
     # Content selection
-    space_key: Optional[str] = Field(None, description="Specific space key")
-    page_ids: Optional[List[str]] = Field(None, description="Specific page IDs")
+    space_key: str | None = Field(None, description="Specific space key")
+    page_ids: list[str] | None = Field(None, description="Specific page IDs")
 
     # Options
     include_attachments: bool = Field(False, description="Include attachments")
     include_comments: bool = Field(False, description="Include comments")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -795,14 +791,14 @@ class AirbyteSource(BusinessSource):
 
     # Airbyte configuration
     connection_id: str = Field(..., description="Airbyte connection ID")
-    api_key: Optional[str] = Field(None, description="Airbyte API key")
+    api_key: str | None = Field(None, description="Airbyte API key")
     api_url: str = Field("http://localhost:8000", description="Airbyte API URL")
 
     # Sync options
-    stream_name: Optional[str] = Field(None, description="Specific stream to sync")
-    namespace: Optional[str] = Field(None, description="Stream namespace")
+    stream_name: str | None = Field(None, description="Specific stream to sync")
+    namespace: str | None = Field(None, description="Stream namespace")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -860,23 +856,21 @@ class GoogleAnalyticsSource(BusinessSource):
 
     # GA configuration
     property_id: str = Field(..., description="Google Analytics property ID")
-    credentials_path: Optional[str] = Field(
-        None, description="Path to credentials JSON"
-    )
+    credentials_path: str | None = Field(None, description="Path to credentials JSON")
 
     # Report options
-    dimensions: List[str] = Field(
+    dimensions: list[str] = Field(
         default=["date", "country"], description="Report dimensions"
     )
-    metrics: List[str] = Field(
+    metrics: list[str] = Field(
         default=["sessions", "users"], description="Report metrics"
     )
-    date_ranges: List[Dict[str, str]] = Field(
+    date_ranges: list[dict[str, str]] = Field(
         default=[{"start_date": "7daysAgo", "end_date": "today"}],
         description="Date ranges for reports",
     )
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -897,7 +891,7 @@ class GoogleAnalyticsSource(BusinessSource):
 # =============================================================================
 
 
-def get_business_sources_statistics() -> Dict[str, Any]:
+def get_business_sources_statistics() -> dict[str, Any]:
     """Get statistics about business sources."""
     registry = enhanced_registry
 
@@ -928,7 +922,7 @@ def get_business_sources_statistics() -> Dict[str, Any]:
     bulk_business = len(
         [
             name
-            for name in registry._sources.keys()
+            for name in registry._sources
             if any(keyword in name for keyword in ["airbyte", "salesforce", "hubspot"])
         ]
     )
@@ -964,17 +958,10 @@ def validate_business_sources() -> bool:
         if source_name not in registry._sources:
             missing.append(source_name)
 
-    if missing:
-        print(f"Missing business sources: {missing}")
-        return False
-
-    print(
-        f"✅ All {len(required_business_sources)} essential business sources registered!"
-    )
-    return True
+    return not missing
 
 
-def detect_business_platform(url_or_id: str) -> Optional[BusinessPlatform]:
+def detect_business_platform(url_or_id: str) -> BusinessPlatform | None:
     """Auto-detect business platform from URL or identifier."""
     url_lower = url_or_id.lower()
 
@@ -1000,4 +987,3 @@ def detect_business_platform(url_or_id: str) -> Optional[BusinessPlatform]:
 if __name__ == "__main__":
     validate_business_sources()
     stats = get_business_sources_statistics()
-    print(f"Business Sources Statistics: {stats}")

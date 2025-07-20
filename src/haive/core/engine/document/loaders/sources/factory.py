@@ -1,5 +1,4 @@
-"""
-Source object factory for creating sources from various input formats.
+"""Source object factory for creating sources from various input formats.
 
 This module provides utility functions for creating source objects from
 strings, paths, and dictionaries, determining the correct source type.
@@ -8,7 +7,7 @@ strings, paths, and dictionaries, determining the correct source type.
 import os
 import re
 from pathlib import Path
-from typing import Any, Dict, Union
+from typing import Any
 
 from haive.core.engine.document.loaders.sources.base.base import BaseSource
 from haive.core.engine.document.loaders.sources.local.base import (
@@ -19,8 +18,7 @@ from haive.core.engine.document.loaders.sources.remote.base import URLSource
 
 
 def create_source_from_string(source_string: str) -> BaseSource:
-    """
-    Create a source object from a string.
+    """Create a source object from a string.
 
     Args:
         source_string: String representing a source
@@ -40,7 +38,7 @@ def create_source_from_string(source_string: str) -> BaseSource:
         path = Path(source_string)
         if path.is_dir():
             return DirectorySource(directory_path=path)
-        elif path.is_file():
+        if path.is_file():
             return FileSource(file_path=path)
 
     # If we get here, we couldn't determine the source type
@@ -48,8 +46,7 @@ def create_source_from_string(source_string: str) -> BaseSource:
 
 
 def create_source_from_path(path: Path) -> BaseSource:
-    """
-    Create a source object from a Path.
+    """Create a source object from a Path.
 
     Args:
         path: Path object representing a file or directory
@@ -65,16 +62,15 @@ def create_source_from_path(path: Path) -> BaseSource:
 
     if path.is_dir():
         return DirectorySource(directory_path=path)
-    elif path.is_file():
+    if path.is_file():
         return FileSource(file_path=path)
 
     # Should not get here unless path exists but is neither file nor directory
     raise ValueError(f"Path exists but is neither file nor directory: {path}")
 
 
-def create_source_from_dict(source_dict: Dict[str, Any]) -> BaseSource:
-    """
-    Create a source object from a dictionary.
+def create_source_from_dict(source_dict: dict[str, Any]) -> BaseSource:
+    """Create a source object from a dictionary.
 
     Args:
         source_dict: Dictionary with source configuration
@@ -96,16 +92,17 @@ def create_source_from_dict(source_dict: Dict[str, Any]) -> BaseSource:
     # Create source based on the fields present
     if "url" in source_dict:
         return URLSource(**source_dict)
-    elif "file_path" in source_dict:
+    if "file_path" in source_dict:
         return FileSource(**source_dict)
-    elif "directory_path" in source_dict:
+    if "directory_path" in source_dict:
         return DirectorySource(**source_dict)
-    elif "source" in source_dict:
+    if "source" in source_dict:
         # Try to create a source from the "source" field
         source = source_dict.pop("source")
         if isinstance(source, str):
             base_source = create_source_from_string(source)
-            # If we have additional configuration, create a new instance with it
+            # If we have additional configuration, create a new instance with
+            # it
             if source_dict:
                 return type(base_source)(**{**base_source.model_dump(), **source_dict})
             return base_source
@@ -115,8 +112,7 @@ def create_source_from_dict(source_dict: Dict[str, Any]) -> BaseSource:
 
 
 def infer_source_type_from_url(url: str) -> SourceType:
-    """
-    Infer the source type from a URL.
+    """Infer the source type from a URL.
 
     Args:
         url: URL string
@@ -145,9 +141,8 @@ def infer_source_type_from_url(url: str) -> SourceType:
     return SourceType.URL
 
 
-def infer_source_type_from_file(file_path: Union[str, Path]) -> SourceType:
-    """
-    Infer the source type from a file path.
+def infer_source_type_from_file(file_path: str | Path) -> SourceType:
+    """Infer the source type from a file path.
 
     Args:
         file_path: Path to the file

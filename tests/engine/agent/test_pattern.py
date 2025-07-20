@@ -254,7 +254,8 @@ class TestPatternManager:
         registry_instance = MagicMock()
         mock_registry.get_instance.return_value = registry_instance
 
-        # Mock get_pattern to return True for valid_pattern and False for invalid_pattern
+        # Mock get_pattern to return True for valid_pattern and False for
+        # invalid_pattern
         def mock_get_pattern(name):
             return name == "valid_pattern"
 

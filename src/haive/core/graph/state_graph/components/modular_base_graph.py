@@ -6,8 +6,9 @@ functionality into focused, testable components following the coding style guide
 
 import logging
 import uuid
+from collections.abc import Callable
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Literal, Optional, Union
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -65,26 +66,26 @@ class ModularBaseGraph(BaseModel, ValidationMixin):
     # Core graph data
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str = Field(..., description="Unique graph identifier")
-    description: Optional[str] = Field(None, description="Graph description")
+    description: str | None = Field(None, description="Graph description")
 
     # Graph structure
-    nodes: Dict[str, Any] = Field(default_factory=dict, description="Graph nodes")
-    edges: List[tuple[str, str]] = Field(
+    nodes: dict[str, Any] = Field(default_factory=dict, description="Graph nodes")
+    edges: list[tuple[str, str]] = Field(
         default_factory=list, description="Direct edges"
     )
-    branches: Dict[str, Any] = Field(
+    branches: dict[str, Any] = Field(
         default_factory=dict, description="Conditional branches"
     )
 
     # Entry and exit points
-    entry_point: Optional[str] = Field(None, description="Main entry point")
-    finish_point: Optional[str] = Field(None, description="Main finish point")
-    conditional_entries: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
-    conditional_exits: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
+    entry_point: str | None = Field(None, description="Main entry point")
+    finish_point: str | None = Field(None, description="Main finish point")
+    conditional_entries: dict[str, dict[str, Any]] = Field(default_factory=dict)
+    conditional_exits: dict[str, dict[str, Any]] = Field(default_factory=dict)
 
     # Schema and metadata
-    state_schema: Optional[type] = Field(None, description="Graph state schema")
-    metadata: Dict[str, Any] = Field(
+    state_schema: type | None = Field(None, description="Graph state schema")
+    metadata: dict[str, Any] = Field(
         default_factory=dict, description="Additional metadata"
     )
 
@@ -100,12 +101,12 @@ class ModularBaseGraph(BaseModel, ValidationMixin):
     }
 
     # Private attributes (not Pydantic fields)
-    _component_registry: Optional[ComponentRegistry] = None
-    _node_manager: Optional[NodeManager] = None
-    _edge_manager: Optional[EdgeManager] = None
-    _branch_manager: Optional[BranchManager] = None
+    _component_registry: ComponentRegistry | None = None
+    _node_manager: NodeManager | None = None
+    _edge_manager: EdgeManager | None = None
+    _branch_manager: BranchManager | None = None
 
-    def __init__(self, **data):
+    def __init__(self, **data) -> None:
         """Initialize modular graph with components."""
         super().__init__(**data)
         self._initialize_components()
@@ -128,7 +129,10 @@ class ModularBaseGraph(BaseModel, ValidationMixin):
         self._component_registry.initialize_all()
 
         logger.debug(
-            f"Initialized ModularBaseGraph '{self.name}' with {len(self._component_registry.get_all())} components"
+            f"Initialized ModularBaseGraph '{
+                self.name}' with {
+                len(
+                    self._component_registry.get_all())} components"
         )
 
     # =================================================================
@@ -137,8 +141,8 @@ class ModularBaseGraph(BaseModel, ValidationMixin):
 
     def add_node(
         self,
-        node_or_name: Union[Any, Dict[str, Any], str],
-        node_like: Optional[Any] = None,
+        node_or_name: Any | dict[str, Any] | str,
+        node_like: Any | None = None,
         **kwargs,
     ) -> "ModularBaseGraph":
         """Add a node to the graph.
@@ -169,7 +173,7 @@ class ModularBaseGraph(BaseModel, ValidationMixin):
         self._node_manager.remove_node(node_name, cleanup_edges)
         return self
 
-    def get_node(self, node_name: str) -> Optional[Any]:
+    def get_node(self, node_name: str) -> Any | None:
         """Get a node by name."""
         return self._node_manager.get_node(node_name)
 
@@ -178,7 +182,7 @@ class ModularBaseGraph(BaseModel, ValidationMixin):
         self._node_manager.update_node(node_name, **updates)
         return self
 
-    def get_nodes_by_type(self, node_type: NodeType) -> List[str]:
+    def get_nodes_by_type(self, node_type: NodeType) -> list[str]:
         """Get all nodes of a specific type."""
         return self._node_manager.get_nodes_by_type(node_type)
 
@@ -206,9 +210,7 @@ class ModularBaseGraph(BaseModel, ValidationMixin):
         self._edge_manager.add_edge(source, target, validate_nodes)
         return self
 
-    def remove_edge(
-        self, source: str, target: Optional[str] = None
-    ) -> "ModularBaseGraph":
+    def remove_edge(self, source: str, target: str | None = None) -> "ModularBaseGraph":
         """Remove edge(s) from the graph.
 
         Args:
@@ -222,8 +224,8 @@ class ModularBaseGraph(BaseModel, ValidationMixin):
         return self
 
     def get_edges(
-        self, source: Optional[str] = None, target: Optional[str] = None
-    ) -> List[tuple[str, str]]:
+        self, source: str | None = None, target: str | None = None
+    ) -> list[tuple[str, str]]:
         """Get edges matching the specified criteria."""
         return self._edge_manager.get_edges(source, target)
 
@@ -235,7 +237,7 @@ class ModularBaseGraph(BaseModel, ValidationMixin):
         """Get total number of edges in the graph."""
         return self._edge_manager.get_edge_count()
 
-    def find_dangling_edges(self) -> List[tuple[str, str]]:
+    def find_dangling_edges(self) -> list[tuple[str, str]]:
         """Find edges that reference non-existent nodes."""
         return self._edge_manager.find_dangling_edges()
 
@@ -246,11 +248,9 @@ class ModularBaseGraph(BaseModel, ValidationMixin):
     def add_conditional_edges(
         self,
         source_node: str,
-        condition: Union[Any, Callable, Any],
-        destinations: Optional[
-            Union[str, List[str], Dict[Union[bool, str, int], str]]
-        ] = None,
-        default: Union[str, Literal["END"], None] = "END",
+        condition: Any | Callable | Any,
+        destinations: str | list[str] | dict[bool | str | int, str] | None = None,
+        default: str | Literal["END"] | None = "END",
         create_missing_nodes: bool = False,
     ) -> "ModularBaseGraph":
         """Add conditional edges from a source node.
@@ -274,7 +274,7 @@ class ModularBaseGraph(BaseModel, ValidationMixin):
         self,
         source_node: str,
         function: Callable,
-        default_destination: Union[str, Literal["END"]] = "END",
+        default_destination: str | Literal["END"] = "END",
     ) -> "ModularBaseGraph":
         """Add a function-based branch."""
         self._branch_manager.add_function_branch(
@@ -286,8 +286,8 @@ class ModularBaseGraph(BaseModel, ValidationMixin):
         self,
         source_node: str,
         key: str,
-        value_map: Dict[Any, str],
-        default_destination: Union[str, Literal["END"]] = "END",
+        value_map: dict[Any, str],
+        default_destination: str | Literal["END"] = "END",
     ) -> "ModularBaseGraph":
         """Add a key-value conditional branch."""
         self._branch_manager.add_key_value_branch(
@@ -300,7 +300,7 @@ class ModularBaseGraph(BaseModel, ValidationMixin):
         self._branch_manager.remove_branch(branch_id)
         return self
 
-    def get_branches_for_node(self, node_name: str) -> List[Any]:
+    def get_branches_for_node(self, node_name: str) -> list[Any]:
         """Get all branches originating from a specific node."""
         return self._branch_manager.get_branches_for_node(node_name)
 
@@ -330,7 +330,10 @@ class ModularBaseGraph(BaseModel, ValidationMixin):
         self.entry_point = node_name
         self.updated_at = datetime.now()
 
-        logger.debug(f"Set entry point to '{node_name}' in graph '{self.name}'")
+        logger.debug(
+            f"Set entry point to '{node_name}' in graph '{
+                self.name}'"
+        )
 
         return self
 
@@ -352,7 +355,10 @@ class ModularBaseGraph(BaseModel, ValidationMixin):
         self.finish_point = node_name
         self.updated_at = datetime.now()
 
-        logger.debug(f"Set finish point to '{node_name}' in graph '{self.name}'")
+        logger.debug(
+            f"Set finish point to '{node_name}' in graph '{
+                self.name}'"
+        )
 
         return self
 
@@ -364,7 +370,7 @@ class ModularBaseGraph(BaseModel, ValidationMixin):
     # VALIDATION AND ANALYSIS
     # =================================================================
 
-    def validate_graph(self) -> List[str]:
+    def validate_graph(self) -> list[str]:
         """Validate the entire graph structure.
 
         Returns:
@@ -414,16 +420,19 @@ class ModularBaseGraph(BaseModel, ValidationMixin):
         # Validate graph before compilation
         validation_errors = self.validate_graph()
         if validation_errors:
-            error_msg = f"Graph validation failed: {'; '.join(validation_errors)}"
+            error_msg = f"Graph validation failed: {
+                '; '.join(validation_errors)}"
             if raise_on_validation_error:
                 raise ValueError(error_msg)
-            else:
-                logger.warning(error_msg)
+            logger.warning(error_msg)
 
         # TODO: Implement actual compilation to LangGraph
         # This would integrate with the existing LangGraph compilation logic
         logger.info(
-            f"Compiling graph '{self.name}' with {self.get_node_count()} nodes and {self.get_edge_count()} edges"
+            f"Compiling graph '{
+                self.name}' with {
+                self.get_node_count()} nodes and {
+                self.get_edge_count()} edges"
         )
 
         # Placeholder - return self for now
@@ -433,7 +442,7 @@ class ModularBaseGraph(BaseModel, ValidationMixin):
     # UTILITY METHODS
     # =================================================================
 
-    def get_graph_summary(self) -> Dict[str, Any]:
+    def get_graph_summary(self) -> dict[str, Any]:
         """Get comprehensive graph statistics and information.
 
         Returns:

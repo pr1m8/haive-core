@@ -17,8 +17,9 @@ sys.path.insert(
 def test_message_persistence():
     """Test that messages are actually persisted and retrievable."""
 
-    from haive.agents.simple.agent import SimpleAgent
     from langchain_core.messages import HumanMessage
+
+    from haive.agents.simple.agent import SimpleAgent
 
     timestamp = datetime.now().strftime("%H%M%S")
     thread_id = f"msg_test_{timestamp}"
@@ -85,7 +86,8 @@ def test_message_persistence():
 
             checkpoints = cur.fetchall()
             print(
-                f"\n📊 Found {len(checkpoints)} checkpoints for thread {thread_id}"
+                f"\n📊 Found {
+    len(checkpoints)} checkpoints for thread {thread_id}"
             )
 
             # Check latest checkpoint
@@ -112,7 +114,7 @@ def test_message_persistence():
                     for i, msg in enumerate(messages):
                         msg_type = msg.get("type", "unknown")
                         content = msg.get("content", "")[:80]
-                        print(f"   {i+1}. [{msg_type}]: {content}...")
+                        print(f"   {i + 1}. [{msg_type}]: {content}...")
 
                         # Verify our messages are there
                         if (

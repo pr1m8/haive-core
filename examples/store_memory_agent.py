@@ -8,10 +8,8 @@ tools similar to LangMem, using our PostgreSQL store infrastructure.
 import asyncio
 import logging
 import os
-from typing import Optional
 
 from haive.agents.simple import SimpleAgent
-
 from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.persistence.store.factory import create_store
 from haive.core.persistence.store.types import StoreType
@@ -29,8 +27,8 @@ class MemoryAgent:
     def __init__(
         self,
         name: str = "memory_agent",
-        user_id: Optional[str] = None,
-        connection_string: Optional[str] = None,
+        user_id: str | None = None,
+        connection_string: str | None = None,
         use_postgres: bool = True,
     ):
         """Initialize the memory agent.
@@ -85,7 +83,8 @@ class MemoryAgent:
         )
 
         logger.info(
-            f"Created memory agent '{name}' with {len(memory_tools)} memory tools"
+            f"Created memory agent '{name}' with {
+                len(memory_tools)} memory tools"
         )
 
     def _get_namespace(self) -> tuple:
@@ -137,9 +136,6 @@ Always be helpful and use your memory tools wisely to provide personalized assis
 
 async def demo_memory_agent():
     """Demonstrate the memory agent capabilities."""
-
-    print("=== Haive Memory Agent Demo ===\n")
-
     # Get PostgreSQL connection if available
     postgres_connection = os.getenv("POSTGRES_CONNECTION_STRING")
 
@@ -150,9 +146,6 @@ async def demo_memory_agent():
         connection_string=postgres_connection,
         use_postgres=bool(postgres_connection),
     )
-
-    print(f"Created agent with store: {type(agent.store_manager.store).__name__}")
-    print(f"Namespace: {agent._get_namespace()}\n")
 
     # Conversation scenarios
     scenarios = [
@@ -173,31 +166,24 @@ async def demo_memory_agent():
     ]
 
     for _i, message in enumerate(scenarios, 1):
-        print(f"User: {message}")
 
         try:
-            response = await agent.chat(message)
-            print(f"Agent: {response}\n")
+            await agent.chat(message)
 
             # Add a small delay to make it easier to follow
             await asyncio.sleep(1)
 
-        except Exception as e:
-            print(f"Error: {e}\n")
+        except Exception:
+            pass
 
     # Show memory stats
-    print("=== Memory Statistics ===")
     stats = agent.get_memory_stats()
-    for key, value in stats.items():
-        print(f"{key}: {value}")
+    for _key, _value in stats.items():
+        pass
 
 
 async def interactive_memory_agent():
     """Interactive session with the memory agent."""
-
-    print("=== Interactive Memory Agent ===")
-    print("Type 'quit' to exit\n")
-
     # Get PostgreSQL connection if available
     postgres_connection = os.getenv("POSTGRES_CONNECTION_STRING")
 
@@ -209,28 +195,22 @@ async def interactive_memory_agent():
         use_postgres=bool(postgres_connection),
     )
 
-    print(f"Agent ready with store: {type(agent.store_manager.store).__name__}")
-    print("The agent can remember information across our conversation.\n")
-
     while True:
         try:
             user_input = input("You: ").strip()
 
             if user_input.lower() in ["quit", "exit", "bye"]:
-                print("Goodbye!")
                 break
 
             if not user_input:
                 continue
 
-            response = await agent.chat(user_input)
-            print(f"Agent: {response}\n")
+            await agent.chat(user_input)
 
         except KeyboardInterrupt:
-            print("\nGoodbye!")
             break
-        except Exception as e:
-            print(f"Error: {e}\n")
+        except Exception:
+            pass
 
 
 if __name__ == "__main__":

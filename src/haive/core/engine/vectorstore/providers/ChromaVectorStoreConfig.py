@@ -1,5 +1,6 @@
 """Chroma Vector Store implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Chroma vector store,
 which is an open-source embedding database designed for AI applications.
 
@@ -100,7 +101,7 @@ class ChromaVectorStoreConfig(BaseVectorStoreConfig):
     )
 
     @validator("distance_metric")
-    def validate_distance_metric(self, v):
+    def validate_distance_metric(self, v) -> Any:
         """Validate distance metric is supported."""
         valid_metrics = ["cosine", "l2", "ip"]
         if v not in valid_metrics:
@@ -122,7 +123,7 @@ class ChromaVectorStoreConfig(BaseVectorStoreConfig):
             "ids": (list[str], Field(description="IDs of the added documents")),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a Chroma vector store from this configuration.
 
         Returns:
@@ -151,7 +152,6 @@ class ChromaVectorStoreConfig(BaseVectorStoreConfig):
         client_settings = None
         if self.chroma_server_host:
             try:
-                import chromadb
                 from chromadb.config import Settings
 
                 client_settings = Settings(

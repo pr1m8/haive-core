@@ -70,7 +70,8 @@ def test_proper_conversation_flow():
 
         # Show contributions if available
         if hasattr(result, "contributions"):
-            for i, (contributor, section, content) in enumerate(result.contributions):
+            for i, (contributor, section, content) in enumerate(
+                result.contributions):
                 content_preview = (
                     content[:100] + "..." if len(content) > 100 else content
                 )

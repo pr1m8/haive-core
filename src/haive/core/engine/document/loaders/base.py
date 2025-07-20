@@ -1,3 +1,4 @@
+import contextlib
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -182,10 +183,8 @@ class DocumentLoaderEngine(
                 if isinstance(source_type_value, SourceType):
                     source_type = source_type_value
                 elif isinstance(source_type_value, str):
-                    try:
+                    with contextlib.suppress(ValueError):
                         source_type = SourceType(source_type_value)
-                    except ValueError:
-                        pass
 
             # Create source
             source = SourceFactory.create_source(input_data, source_type=source_type)
@@ -215,8 +214,12 @@ class DocumentLoaderEngine(
             and source.source_type not in self.supported_source_types
         ):
             raise ValueError(
-                f"Source type {source.source_type} not supported by {self.loader_name}. "
-                f"Supported types: {', '.join(self.supported_source_types_names)}"
+                f"Source type {
+                    source.source_type} not supported by {
+                    self.loader_name}. "
+                f"Supported types: {
+                    ', '.join(
+                        self.supported_source_types_names)}"
             )
 
     def invoke(

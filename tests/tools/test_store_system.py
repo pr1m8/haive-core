@@ -41,7 +41,10 @@ class TestMemoryEntry:
 
     def test_memory_entry_serialization(self):
         """Test memory entry to/from store value conversion."""
-        entry = MemoryEntry(content="Test memory", category="test", importance=0.8)
+        entry = MemoryEntry(
+            content="Test memory",
+            category="test",
+            importance=0.8)
 
         # Convert to store value
         store_value = entry.to_store_value()
@@ -65,7 +68,8 @@ class TestStoreManager:
     def store_manager(self):
         """Create a test store manager with memory store."""
         store = create_store(store_type=StoreType.MEMORY)
-        return StoreManager(store=store, default_namespace=("test", "memories"))
+        return StoreManager(
+            store=store, default_namespace=("test", "memories"))
 
     def test_store_manager_initialization(self, store_manager):
         """Test store manager initialization."""
@@ -121,7 +125,8 @@ class TestStoreManager:
     def test_delete_memory(self, store_manager):
         """Test deleting a memory."""
         # Store a memory
-        memory_id = store_manager.store_memory(content="To be deleted", category="test")
+        memory_id = store_manager.store_memory(
+            content="To be deleted", category="test")
 
         # Verify it exists
         memory = store_manager.retrieve_memory(memory_id)
@@ -224,7 +229,10 @@ class TestStoreTools:
         tool = create_search_memory_tool(store_manager)
 
         # Search for memories
-        result = tool.func(query="test memory", category="search_test", limit=5)
+        result = tool.func(
+            query="test memory",
+            category="search_test",
+            limit=5)
 
         # Parse result
         result_data = json.loads(result)
@@ -408,9 +416,15 @@ class TestStoreSystemIntegration:
         # Store same memory ID in different namespaces
         test_id = "same_id"
 
-        memory1 = MemoryEntry(id=test_id, content="User 1 memory", category="test")
+        memory1 = MemoryEntry(
+            id=test_id,
+            content="User 1 memory",
+            category="test")
 
-        memory2 = MemoryEntry(id=test_id, content="User 2 memory", category="test")
+        memory2 = MemoryEntry(
+            id=test_id,
+            content="User 2 memory",
+            category="test")
 
         # Store in different namespaces
         store_manager.store.put(namespace1, test_id, memory1.to_store_value())

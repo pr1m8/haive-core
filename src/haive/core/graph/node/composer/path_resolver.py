@@ -185,8 +185,7 @@ class PathResolver:
                     index = int(index_str)
                     if hasattr(obj, "__getitem__"):
                         return obj[index]
-                    else:
-                        return default
+                    return default
                 except (ValueError, IndexError, TypeError):
                     return default
 

@@ -1,5 +1,6 @@
 """Specialized platform source registrations.
 
+from typing import Any
 This module implements specialized loaders from langchain_community including:
 - Academic and research platforms (arXiv, PubMed, bioRxiv)
 - Media platforms (YouTube, audio/video processing)
@@ -9,7 +10,7 @@ This module implements specialized loaders from langchain_community including:
 
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import Field, validator
 
@@ -123,22 +124,22 @@ class ArxivSource(RemoteSource):
     platform: SpecializedPlatform = SpecializedPlatform.ARXIV
 
     # Search parameters
-    query: Optional[str] = Field(None, description="Search query string")
-    arxiv_ids: Optional[List[str]] = Field(None, description="Specific arXiv IDs")
+    query: str | None = Field(None, description="Search query string")
+    arxiv_ids: list[str] | None = Field(None, description="Specific arXiv IDs")
     max_results: int = Field(10, ge=1, le=100, description="Maximum papers to retrieve")
 
     # Filtering
-    categories: Optional[List[str]] = Field(
+    categories: list[str] | None = Field(
         None, description="arXiv categories (e.g., cs.AI)"
     )
-    date_filter: Optional[Dict[str, str]] = Field(None, description="Date range filter")
+    date_filter: dict[str, str] | None = Field(None, description="Date range filter")
 
     # Content options
     load_full_text: bool = Field(True, description="Load full paper text")
     load_abstract_only: bool = Field(False, description="Only load abstracts")
     include_metadata: bool = Field(True, description="Include paper metadata")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         if self.arxiv_ids:
@@ -198,7 +199,7 @@ class PubMedSource(RemoteSource):
     include_abstracts: bool = Field(True, description="Include abstracts")
     include_metadata: bool = Field(True, description="Include article metadata")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update({"query": self.query, "load_max_docs": self.max_results})
@@ -236,13 +237,13 @@ class SemanticScholarSource(RemoteSource):
     platform: SpecializedPlatform = SpecializedPlatform.SEMANTIC_SCHOLAR
 
     # Search options
-    query: Optional[str] = Field(None, description="Search query")
-    paper_ids: Optional[List[str]] = Field(None, description="Specific paper IDs")
-    author_id: Optional[str] = Field(None, description="Author ID to get papers from")
+    query: str | None = Field(None, description="Search query")
+    paper_ids: list[str] | None = Field(None, description="Specific paper IDs")
+    author_id: str | None = Field(None, description="Author ID to get papers from")
 
     # Filters
-    year_range: Optional[tuple[int, int]] = Field(None, description="Year range filter")
-    fields_of_study: Optional[List[str]] = Field(
+    year_range: tuple[int, int] | None = Field(None, description="Year range filter")
+    fields_of_study: list[str] | None = Field(
         None, description="Fields of study filter"
     )
 
@@ -250,7 +251,7 @@ class SemanticScholarSource(RemoteSource):
     include_citations: bool = Field(True, description="Include citation information")
     include_references: bool = Field(True, description="Include references")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         if self.paper_ids:
@@ -314,16 +315,16 @@ class YouTubeSource(RemoteSource):
     platform: SpecializedPlatform = SpecializedPlatform.YOUTUBE
 
     # Video identification
-    video_url: Optional[str] = Field(None, description="YouTube video URL")
-    video_id: Optional[str] = Field(None, description="YouTube video ID")
-    playlist_id: Optional[str] = Field(None, description="YouTube playlist ID")
-    channel_url: Optional[str] = Field(None, description="YouTube channel URL")
+    video_url: str | None = Field(None, description="YouTube video URL")
+    video_id: str | None = Field(None, description="YouTube video ID")
+    playlist_id: str | None = Field(None, description="YouTube playlist ID")
+    channel_url: str | None = Field(None, description="YouTube channel URL")
 
     # Content options
     media_type: MediaType = Field(
         MediaType.TRANSCRIPT, description="Type of content to load"
     )
-    language: Optional[str] = Field(None, description="Transcript language")
+    language: str | None = Field(None, description="Transcript language")
     include_metadata: bool = Field(True, description="Include video metadata")
 
     # Audio options (for audio loader)
@@ -331,7 +332,7 @@ class YouTubeSource(RemoteSource):
     audio_format: str = Field("mp3", description="Audio format for download")
 
     @validator("video_id", always=True)
-    def extract_video_id(cls, v, values):
+    def extract_video_id(self, v, values) -> Any:
         """Extract video ID from URL if provided."""
         if not v and values.get("video_url"):
             url = values["video_url"]
@@ -341,7 +342,7 @@ class YouTubeSource(RemoteSource):
                 v = url.split("youtu.be/")[1].split("?")[0]
         return v
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         if self.media_type == MediaType.TRANSCRIPT:
@@ -385,14 +386,14 @@ class BilibiliSource(RemoteSource):
     platform: SpecializedPlatform = SpecializedPlatform.BILIBILI
 
     # Video identification
-    video_urls: List[str] = Field(..., description="Bilibili video URLs")
+    video_urls: list[str] = Field(..., description="Bilibili video URLs")
 
     # Authentication
-    sessdata: Optional[str] = Field(None, description="SESSDATA cookie value")
-    bili_jct: Optional[str] = Field(None, description="bili_jct cookie value")
-    buvid3: Optional[str] = Field(None, description="buvid3 cookie value")
+    sessdata: str | None = Field(None, description="SESSDATA cookie value")
+    bili_jct: str | None = Field(None, description="bili_jct cookie value")
+    buvid3: str | None = Field(None, description="buvid3 cookie value")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -445,16 +446,14 @@ class AudioFileSource(LocalFileSource):
     category: SourceCategory = SourceCategory.SPECIALIZED
 
     # Transcription options
-    language: Optional[str] = Field(None, description="Audio language")
+    language: str | None = Field(None, description="Audio language")
     speaker_labels: bool = Field(False, description="Enable speaker diarization")
     timestamps: bool = Field(True, description="Include timestamps")
 
     # API configuration (for cloud services)
-    api_key: Optional[str] = Field(
-        None, description="API key for transcription service"
-    )
+    api_key: str | None = Field(None, description="API key for transcription service")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -516,22 +515,22 @@ class GitHubSource(RemoteSource):
 
     # Repository identification
     repo: str = Field(..., description="Repository name (owner/repo)")
-    access_token: Optional[str] = Field(None, description="GitHub access token")
+    access_token: str | None = Field(None, description="GitHub access token")
 
     # Content selection
-    data_types: List[DevelopmentDataType] = Field(
+    data_types: list[DevelopmentDataType] = Field(
         default=[DevelopmentDataType.ISSUES], description="Types of data to load"
     )
 
     # Filtering
     branch: str = Field("main", description="Branch name")
-    file_filter: Optional[str] = Field(None, description="File path filter")
+    file_filter: str | None = Field(None, description="File path filter")
     issue_state: str = Field("all", description="Issue state filter (open/closed/all)")
 
     # For file loading
-    file_path: Optional[str] = Field(None, description="Specific file path")
+    file_path: str | None = Field(None, description="Specific file path")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -589,10 +588,10 @@ class GitSource(LocalFileSource):
     branch: str = Field("main", description="Branch to load from")
 
     # Content filtering
-    file_filter: Optional[str] = Field(None, description="File pattern filter")
+    file_filter: str | None = Field(None, description="File pattern filter")
     include_commits: bool = Field(False, description="Include commit history")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -637,16 +636,16 @@ class WikipediaSource(RemoteSource):
     platform: SpecializedPlatform = SpecializedPlatform.WIKIPEDIA
 
     # Search/load options
-    query: Optional[str] = Field(None, description="Search query")
-    page_titles: Optional[List[str]] = Field(None, description="Specific page titles")
+    query: str | None = Field(None, description="Search query")
+    page_titles: list[str] | None = Field(None, description="Specific page titles")
     lang: str = Field("en", description="Wikipedia language")
     load_max_docs: int = Field(10, ge=1, le=50, description="Maximum documents")
 
     # Content options
     load_all_available_meta: bool = Field(True, description="Load all metadata")
-    doc_content_chars_max: Optional[int] = Field(None, description="Max content length")
+    doc_content_chars_max: int | None = Field(None, description="Max content length")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         if self.query:
@@ -698,10 +697,10 @@ class MediaWikiSource(LocalFileSource):
 
     # Dump file options
     encoding: str = Field("utf-8", description="File encoding")
-    namespaces: Optional[List[int]] = Field(None, description="Namespaces to include")
+    namespaces: list[int] | None = Field(None, description="Namespaces to include")
     skip_redirects: bool = Field(True, description="Skip redirect pages")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -750,10 +749,10 @@ class WeatherSource(RemoteSource):
     platform: SpecializedPlatform = SpecializedPlatform.WEATHER
 
     # Location
-    locations: List[str] = Field(..., description="City names or coordinates")
+    locations: list[str] = Field(..., description="City names or coordinates")
 
     # API configuration
-    openweathermap_api_key: Optional[str] = Field(
+    openweathermap_api_key: str | None = Field(
         None, description="OpenWeatherMap API key"
     )
 
@@ -762,7 +761,7 @@ class WeatherSource(RemoteSource):
     forecast_days: int = Field(5, ge=1, le=16, description="Number of forecast days")
     units: str = Field("metric", description="Units (metric/imperial)")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -807,17 +806,17 @@ class FinancialNewsSource(RemoteSource):
     platform: SpecializedPlatform = SpecializedPlatform.FINANCIAL
 
     # Query options
-    symbols: Optional[List[str]] = Field(None, description="Stock symbols")
-    topics: Optional[List[str]] = Field(None, description="News topics")
+    symbols: list[str] | None = Field(None, description="Stock symbols")
+    topics: list[str] | None = Field(None, description="News topics")
 
     # API configuration
-    api_key: Optional[str] = Field(None, description="Alpha Vantage API key")
+    api_key: str | None = Field(None, description="Alpha Vantage API key")
 
     # Time range
-    time_from: Optional[str] = Field(None, description="Start time (YYYYMMDDTHHMM)")
-    time_to: Optional[str] = Field(None, description="End time (YYYYMMDDTHHMM)")
+    time_from: str | None = Field(None, description="Start time (YYYYMMDDTHHMM)")
+    time_to: str | None = Field(None, description="End time (YYYYMMDDTHHMM)")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs["api_key"] = (
@@ -841,7 +840,7 @@ class FinancialNewsSource(RemoteSource):
 # =============================================================================
 
 
-def get_specialized_sources_statistics() -> Dict[str, Any]:
+def get_specialized_sources_statistics() -> dict[str, Any]:
     """Get statistics about specialized sources."""
     registry = enhanced_registry
 
@@ -906,15 +905,10 @@ def validate_specialized_sources() -> bool:
         if source_name not in registry._sources:
             missing.append(source_name)
 
-    if missing:
-        print(f"Missing specialized sources: {missing}")
-        return False
-
-    print("✅ All essential specialized sources registered!")
-    return True
+    return not missing
 
 
-def detect_specialized_platform(url_or_path: str) -> Optional[SpecializedPlatform]:
+def detect_specialized_platform(url_or_path: str) -> SpecializedPlatform | None:
     """Auto-detect specialized platform from URL or path."""
     lower = url_or_path.lower()
 
@@ -938,4 +932,3 @@ def detect_specialized_platform(url_or_path: str) -> Optional[SpecializedPlatfor
 if __name__ == "__main__":
     validate_specialized_sources()
     stats = get_specialized_sources_statistics()
-    print(f"Specialized Sources Statistics: {stats}")

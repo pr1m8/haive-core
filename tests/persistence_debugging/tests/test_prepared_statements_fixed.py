@@ -54,7 +54,6 @@ def test_conversation_agent():
     """Test a conversation agent to see if it creates prepared statements."""
 
     from haive.agents.conversation.collaberative.agent import CollaborativeConversation
-
     from haive.core.engine.aug_llm import AugLLMConfig
 
     timestamp = datetime.now().strftime("%H%M%S")

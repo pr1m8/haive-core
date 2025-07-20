@@ -1,5 +1,6 @@
 """Pinecone Vector Store implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Pinecone vector store,
 which is a fully managed vector database service designed for production workloads.
 
@@ -131,7 +132,7 @@ class PineconeVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
     )
 
     @validator("metric")
-    def validate_metric(self, v):
+    def validate_metric(self, v) -> Any:
         """Validate distance metric is supported."""
         valid_metrics = ["cosine", "euclidean", "dotproduct"]
         if v not in valid_metrics:
@@ -153,7 +154,7 @@ class PineconeVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
             "ids": (list[str], Field(description="IDs of the added documents")),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a Pinecone vector store from this configuration.
 
         Returns:

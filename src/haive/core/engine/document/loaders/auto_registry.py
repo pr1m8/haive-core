@@ -1,5 +1,6 @@
 """Auto-Registry System for Document Loaders.
 
+from typing import Any
 This module provides automatic registration and discovery of all document loader
 sources and loaders. It scans the sources directory and automatically imports
 and registers all available source types without manual intervention.
@@ -112,7 +113,7 @@ class AutoRegistry:
             stats = registry.register_sources_by_category(SourceCategory.LOCAL_FILE)
     """
 
-    def __init__(self, registry=None):
+    def __init__(self, registry=None) -> None:
         """Initialize the AutoRegistry.
 
         Args:
@@ -249,7 +250,10 @@ class AutoRegistry:
             required_attrs = ["source_type", "category"]
             for attr in required_attrs:
                 if not hasattr(source_class, attr):
-                    logger.warning(f"Source {source_class.__name__} missing {attr}")
+                    logger.warning(
+                        f"Source {
+                            source_class.__name__} missing {attr}"
+                    )
                     return False
 
             # Check if source_type is a string
@@ -261,7 +265,10 @@ class AutoRegistry:
 
             # Check if category is valid
             if not isinstance(source_class.category, SourceCategory):
-                logger.warning(f"Source {source_class.__name__} has invalid category")
+                logger.warning(
+                    f"Source {
+                        source_class.__name__} has invalid category"
+                )
                 return False
 
             # Try to get default instance attributes
@@ -269,7 +276,10 @@ class AutoRegistry:
                 # This will validate the class structure
                 pass
             except Exception as e:
-                logger.warning(f"Source {source_class.__name__} validation failed: {e}")
+                logger.warning(
+                    f"Source {
+                        source_class.__name__} validation failed: {e}"
+                )
                 return False
 
             return True
@@ -302,7 +312,8 @@ class AutoRegistry:
         try:
             # Validate the source class
             if not self.validate_source_class(source_class):
-                error_msg = f"Source class {source_class.__name__} failed validation"
+                error_msg = f"Source class {
+                    source_class.__name__} failed validation"
                 logger.warning(error_msg)
                 self.registration_errors.append(error_msg)
                 return False
@@ -437,7 +448,7 @@ class AutoRegistry:
 
         # Count categories covered
         categories_covered = len(
-            set(info.category for info in self.registered_sources.values())
+            {info.category for info in self.registered_sources.values()}
         )
 
         stats = RegistrationStats(
@@ -451,12 +462,15 @@ class AutoRegistry:
 
         logger.info(
             f"Auto-registration completed: {total_sources_registered}/{total_sources_found} "
-            f"sources registered from {total_modules_scanned} modules in {registration_time:.2f}s"
+            f"sources registered from {total_modules_scanned} modules in {
+                registration_time:.2f}s"
         )
 
         if self.registration_errors:
             logger.warning(
-                f"Registration completed with {len(self.registration_errors)} errors"
+                f"Registration completed with {
+                    len(
+                        self.registration_errors)} errors"
             )
 
         return stats
@@ -504,7 +518,8 @@ class AutoRegistry:
                         registered_count += 1
 
         logger.info(
-            f"Registered {registered_count} sources for category {category.value}"
+            f"Registered {registered_count} sources for category {
+                category.value}"
         )
         return registered_count
 
@@ -729,7 +744,7 @@ _registration_done = False
 _stats = None
 
 
-def ensure_registration():
+def ensure_registration() -> Any:
     """Ensure auto-registration has been completed (lazy loading)."""
     global _registration_done, _stats
 
@@ -741,7 +756,8 @@ def ensure_registration():
         _stats = auto_register_all()
         _registration_done = True
         logger.info(
-            f"Lazy registration completed: {_stats.total_sources_registered} sources "
+            f"Lazy registration completed: {
+                _stats.total_sources_registered} sources "
             f"from {_stats.total_modules_scanned} modules"
         )
         return _stats

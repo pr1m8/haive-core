@@ -24,13 +24,13 @@ pytestmark = pytest.mark.skipif(
 
 
 class TestPostgresCheckpointerConfig:
-    """
-    Integration tests for PostgresCheckpointerConfig using real PostgreSQL database.
+    """Integration tests for PostgresCheckpointerConfig using real PostgreSQL database.
 
     These tests require a PostgreSQL server running on localhost with default credentials.
     """
 
-    # Test database connection parameters - modify if your test DB has different settings
+    # Test database connection parameters - modify if your test DB has
+    # different settings
     DB_HOST = "localhost"
     DB_PORT = 5432
     DB_NAME = "postgres"
@@ -107,15 +107,14 @@ class TestPostgresCheckpointerConfig:
             config.register_thread(thread_id)
 
             # Verify thread exists - using direct pool access to test
-            with config._pool.connection() as conn:
-                with conn.cursor() as cursor:
-                    cursor.execute(
-                        "SELECT 1 FROM threads WHERE thread_id = %s", (thread_id,)
-                    )
-                    result = cursor.fetchone()
-                    assert (
-                        result is not None
-                    ), "Thread registration should work with custom parameters"
+            with config._pool.connection() as conn, conn.cursor() as cursor:
+                cursor.execute(
+                    "SELECT 1 FROM threads WHERE thread_id = %s", (thread_id,)
+                )
+                result = cursor.fetchone()
+                assert (
+                    result is not None
+                ), "Thread registration should work with custom parameters"
         finally:
             config.close()
 
@@ -128,7 +127,8 @@ class TestPostgresCheckpointerConfig:
         checkpointer = config.create_checkpointer()
 
         # Verify fallback to memory saver
-        assert isinstance(checkpointer, MemorySaver), "Should fallback to MemorySaver"
+        assert isinstance(
+            checkpointer, MemorySaver), "Should fallback to MemorySaver"
 
     def test_thread_registration(self, test_config):
         """Test thread registration in the database."""
@@ -147,28 +147,29 @@ class TestPostgresCheckpointerConfig:
         test_config.register_thread(thread_id, metadata=metadata)
 
         # Verify thread exists in database by querying directly
-        with test_config._pool.connection() as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(
-                    "SELECT metadata FROM threads WHERE thread_id = %s", (thread_id,)
-                )
-                result = cursor.fetchone()
+        with test_config._pool.connection() as conn, conn.cursor() as cursor:
+            cursor.execute(
+                "SELECT metadata FROM threads WHERE thread_id = %s", (
+                    thread_id,)
+            )
+            result = cursor.fetchone()
 
-                # Thread should be found
-                assert result is not None, f"Thread {thread_id} not found in database"
+            # Thread should be found
+            assert result is not None, f"Thread {thread_id} not found in database"
 
-                # Get metadata - it could be a dict or a string depending on how it's stored
-                db_metadata = result[0]
-                if isinstance(db_metadata, str):
-                    db_metadata = json.loads(db_metadata)
+            # Get metadata - it could be a dict or a string depending on how
+            # it's stored
+            db_metadata = result[0]
+            if isinstance(db_metadata, str):
+                db_metadata = json.loads(db_metadata)
 
-                # Verify key metadata elements match
-                assert (
-                    db_metadata.get("test") == "integration"
-                ), "Metadata test field should match"
-                assert (
-                    db_metadata.get("complex", {}).get("value") == 42
-                ), "Nested metadata should match"
+            # Verify key metadata elements match
+            assert (
+                db_metadata.get("test") == "integration"
+            ), "Metadata test field should match"
+            assert (
+                db_metadata.get("complex", {}).get("value") == 42
+            ), "Nested metadata should match"
 
     def test_updating_existing_thread(self, test_config):
         """Test registering an already existing thread."""
@@ -189,28 +190,28 @@ class TestPostgresCheckpointerConfig:
         test_config.register_thread(thread_id, metadata=updated_metadata)
 
         # Verify thread exists with original metadata (ON CONFLICT DO NOTHING)
-        with test_config._pool.connection() as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(
-                    "SELECT metadata FROM threads WHERE thread_id = %s", (thread_id,)
-                )
-                result = cursor.fetchone()
+        with test_config._pool.connection() as conn, conn.cursor() as cursor:
+            cursor.execute(
+                "SELECT metadata FROM threads WHERE thread_id = %s", (
+                    thread_id,)
+            )
+            result = cursor.fetchone()
 
-                # Thread should be found
-                assert result is not None, f"Thread {thread_id} not found in database"
+            # Thread should be found
+            assert result is not None, f"Thread {thread_id} not found in database"
 
-                # Get metadata - could be a dict or string
-                db_metadata = result[0]
-                if isinstance(db_metadata, str):
-                    db_metadata = json.loads(db_metadata)
+            # Get metadata - could be a dict or string
+            db_metadata = result[0]
+            if isinstance(db_metadata, str):
+                db_metadata = json.loads(db_metadata)
 
-                # Query result might vary based on ON CONFLICT behavior - test appropriately
-                # Just verifying that the thread exists after multiple registrations is sufficient
+            # Query result might vary based on ON CONFLICT behavior - test appropriately
+            # Just verifying that the thread exists after multiple
+            # registrations is sufficient
 
-                # Log what was actually found for diagnosis
-                logger.info(
-                    f"Thread metadata after multiple registrations: {db_metadata}"
-                )
+            # Log what was actually found for diagnosis
+            logger.info(
+                f"Thread metadata after multiple registrations: {db_metadata}")
 
     def test_thread_registration_without_metadata(self, test_config):
         """Test thread registration without providing metadata."""
@@ -222,19 +223,19 @@ class TestPostgresCheckpointerConfig:
         test_config.register_thread(thread_id)
 
         # Verify thread exists with default metadata
-        with test_config._pool.connection() as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(
-                    "SELECT metadata FROM threads WHERE thread_id = %s", (thread_id,)
-                )
-                result = cursor.fetchone()
+        with test_config._pool.connection() as conn, conn.cursor() as cursor:
+            cursor.execute(
+                "SELECT metadata FROM threads WHERE thread_id = %s", (
+                    thread_id,)
+            )
+            result = cursor.fetchone()
 
-                # Thread should be found
-                assert result is not None, f"Thread {thread_id} not found in database"
+            # Thread should be found
+            assert result is not None, f"Thread {thread_id} not found in database"
 
-                # Metadata should exist - whatever the default is
-                # For testing, we just verify the thread registration worked
-                assert result[0] is not None, "Thread should have some metadata value"
+            # Metadata should exist - whatever the default is
+            # For testing, we just verify the thread registration worked
+            assert result[0] is not None, "Thread should have some metadata value"
 
     def test_pool_reuse(self, test_config):
         """Test that pool is reused across multiple checkpointer creations."""
@@ -280,8 +281,9 @@ class TestPostgresCheckpointerConfig:
         # Close the pool to simulate it being in closed state
         config.close()
 
-        # Set _pool to a mock that is "closed" - this avoids direct dependency on pool implementation
-        import unittest.mock as mock
+        # Set _pool to a mock that is "closed" - this avoids direct dependency
+        # on pool implementation
+        from unittest import mock
 
         mock_pool = mock.MagicMock()
         mock_pool.is_open.return_value = False
@@ -306,29 +308,28 @@ class TestPostgresCheckpointerConfig:
         test_config.create_checkpointer()
 
         # Query database to check if tables exist
-        with test_config._pool.connection() as conn:
-            with conn.cursor() as cursor:
-                # Check if checkpoints table exists
-                cursor.execute(
-                    """
+        with test_config._pool.connection() as conn, conn.cursor() as cursor:
+            # Check if checkpoints table exists
+            cursor.execute(
+                """
                     SELECT EXISTS (
-                        SELECT FROM information_schema.tables 
+                        SELECT FROM information_schema.tables
                         WHERE table_name = 'checkpoints'
                     );
                 """
-                )
-                checkpoints_exists = cursor.fetchone()[0]
+            )
+            checkpoints_exists = cursor.fetchone()[0]
 
-                # Check if threads table exists
-                cursor.execute(
-                    """
+            # Check if threads table exists
+            cursor.execute(
+                """
                     SELECT EXISTS (
-                        SELECT FROM information_schema.tables 
+                        SELECT FROM information_schema.tables
                         WHERE table_name = 'threads'
                     );
                 """
-                )
-                threads_exists = cursor.fetchone()[0]
+            )
+            threads_exists = cursor.fetchone()[0]
 
         # Verify tables exist
         assert checkpoints_exists, "Checkpoints table should exist"
@@ -336,7 +337,8 @@ class TestPostgresCheckpointerConfig:
 
     def test_auto_commit_setting(self):
         """Test auto_commit setting affects transaction behavior."""
-        # This test demonstrates explicitly that auto_commit affects transaction behavior
+        # This test demonstrates explicitly that auto_commit affects
+        # transaction behavior
 
         # First with auto_commit=True
         config_autocommit = self.create_test_config(auto_commit=True)
@@ -346,25 +348,22 @@ class TestPostgresCheckpointerConfig:
             # Create checkpointer
             config_autocommit.create_checkpointer()
 
-            # With autocommit, changes should be visible immediately without explicit commit
-            with config_autocommit._pool.connection() as conn:
-                with conn.cursor() as cursor:
-                    cursor.execute(
-                        "INSERT INTO threads (thread_id, metadata) VALUES (%s, %s)",
-                        (thread_id_autocommit, "{}"),
-                    )
+            # With autocommit, changes should be visible immediately without
+            # explicit commit
+            with config_autocommit._pool.connection() as conn, conn.cursor() as cursor:
+                cursor.execute(
+                    "INSERT INTO threads (thread_id, metadata) VALUES (%s, %s)",
+                    (thread_id_autocommit, "{}"),
+                )
 
             # Verify thread exists in new connection
-            with config_autocommit._pool.connection() as conn:
-                with conn.cursor() as cursor:
-                    cursor.execute(
-                        "SELECT 1 FROM threads WHERE thread_id = %s",
-                        (thread_id_autocommit,),
-                    )
-                    result = cursor.fetchone()
-                    assert (
-                        result is not None
-                    ), "Thread should exist with auto_commit=True"
+            with config_autocommit._pool.connection() as conn, conn.cursor() as cursor:
+                cursor.execute(
+                    "SELECT 1 FROM threads WHERE thread_id = %s",
+                    (thread_id_autocommit,),
+                )
+                result = cursor.fetchone()
+                assert result is not None, "Thread should exist with auto_commit=True"
         finally:
             config_autocommit.close()
 
@@ -401,7 +400,8 @@ class TestPostgresCheckpointerConfig:
                         result is not None
                     ), "Thread should be visible within transaction"
 
-                    # Now check visibility in separate connection without commit
+                    # Now check visibility in separate connection without
+                    # commit
                     with config_no_autocommit._pool.connection() as conn2:
                         with conn2.cursor() as cursor2:
                             cursor2.execute(
@@ -409,7 +409,8 @@ class TestPostgresCheckpointerConfig:
                                 (thread_id_no_autocommit,),
                             )
                             result = cursor2.fetchone()
-                            # Should not be visible yet in a different connection
+                            # Should not be visible yet in a different
+                            # connection
                             assert (
                                 result is None
                             ), "Thread should not be visible before commit"
@@ -435,8 +436,9 @@ class TestPostgresCheckpointerConfig:
                         conn.rollback()  # Ensure rollback if we didn't commit
                     config_no_autocommit._pool.putconn(conn)
             except Exception as e:
-                # If this fails, it likely means auto_commit is not being properly applied
-                logger.error(f"Transaction test failed: {e}")
+                # If this fails, it likely means auto_commit is not being
+                # properly applied
+                logger.exception(f"Transaction test failed: {e}")
                 pytest.fail(f"Transaction test failed: {e}")
         finally:
             config_no_autocommit.close()
@@ -459,8 +461,10 @@ class TestPostgresCheckpointerConfig:
         config = {"configurable": {"thread_id": thread_id}}
 
         # Check if the checkpointer has the expected methods
-        assert hasattr(checkpointer, "get"), "Checkpointer should have get method"
-        assert hasattr(checkpointer, "put"), "Checkpointer should have put method"
+        assert hasattr(
+            checkpointer, "get"), "Checkpointer should have get method"
+        assert hasattr(
+            checkpointer, "put"), "Checkpointer should have put method"
 
         # Put data
         checkpointer.put(config, test_data)
@@ -475,7 +479,8 @@ class TestPostgresCheckpointerConfig:
             retrieved_data["test_key"] == "test_value"
         ), "Retrieved test_key should match"
         assert "numbers" in retrieved_data, "Retrieved data should contain numbers"
-        assert retrieved_data["numbers"] == [1, 2, 3], "Retrieved numbers should match"
+        assert retrieved_data["numbers"] == [
+            1, 2, 3], "Retrieved numbers should match"
 
     def test_list_checkpoints(self, test_config):
         """Test listing checkpoints for a thread."""
@@ -516,4 +521,5 @@ class TestPostgresCheckpointerConfig:
 
         # Check the data in first checkpoint
         checkpoint_data = checkpoints[0].checkpoint
-        assert isinstance(checkpoint_data, dict), "Checkpoint data should be a dict"
+        assert isinstance(
+            checkpoint_data, dict), "Checkpoint data should be a dict"

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from collections import defaultdict
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Type
+from typing import TYPE_CHECKING, Any
 
 from pydantic import create_model
 
@@ -25,29 +25,29 @@ class _SchemaComposerBase:
 
     name: str
     include_engine_fields: bool
-    fields: Dict[str, FieldDefinition]
-    shared_fields: Set[str]
-    field_sources: Dict[str, Set[str]]
-    input_fields: Dict[str, Set[str]]
-    output_fields: Dict[str, Set[str]]
-    engine_io_mappings: Dict[str, Dict[str, List[str]]]
-    structured_models: Dict[str, Type]
-    structured_model_fields: Dict[str, Set[str]]
-    nested_schemas: Dict[str, Type[StateSchema]]
+    fields: dict[str, FieldDefinition]
+    shared_fields: set[str]
+    field_sources: dict[str, set[str]]
+    input_fields: dict[str, set[str]]
+    output_fields: dict[str, set[str]]
+    engine_io_mappings: dict[str, dict[str, list[str]]]
+    structured_models: dict[str, type]
+    structured_model_fields: dict[str, set[str]]
+    nested_schemas: dict[str, type[StateSchema]]
     has_tools: bool
     has_messages: bool
-    engines: Dict[str, Any]
-    engines_by_type: Dict[str, List[str]]
-    detected_base_class: Optional[Type]
+    engines: dict[str, Any]
+    engines_by_type: dict[str, list[str]]
+    detected_base_class: type | None
     custom_base_schema: bool
-    base_class_fields: Set[str]
-    processing_history: List[Dict[str, Any]]
-    metadata: Dict[str, Any]
+    base_class_fields: set[str]
+    processing_history: list[dict[str, Any]]
+    metadata: dict[str, Any]
 
     def __init__(
         self,
         name: str = "ComposedSchema",
-        base_state_schema: Optional[Type[StateSchema]] = None,
+        base_state_schema: type[StateSchema] | None = None,
         include_engine_fields: bool = True,
     ):
         """Initialize a new SchemaComposer.
@@ -108,7 +108,7 @@ class _SchemaComposerBase:
         logger.debug(f"Created SchemaComposer for '{name}'")
         self._visualize_creation()
 
-    def build(self) -> Type[StateSchema]:
+    def build(self) -> type[StateSchema]:
         """Build and return a StateSchema class with all defined fields and metadata.
 
         This method finalizes the schema composition process by generating a concrete
@@ -126,7 +126,8 @@ class _SchemaComposerBase:
             # Should not happen if _detect_base_class_requirements is called
             base_class = StateSchema
 
-        # Auto-add engine management if we have engines and using StateSchema base
+        # Auto-add engine management if we have engines and using StateSchema
+        # base
         if self.engines and issubclass(base_class, StateSchema):
             self.add_engine_management()
             logger.debug(
@@ -134,7 +135,11 @@ class _SchemaComposerBase:
             )
 
         logger.debug(
-            f"Building {self.name} with {len(self.fields)} fields using base class {base_class.__name__}"
+            f"Building {
+                self.name} with {
+                len(
+                    self.fields)} fields using base class {
+                base_class.__name__}"
         )
 
         field_defs = {}
@@ -153,7 +158,13 @@ class _SchemaComposerBase:
         if is_state_schema_base:
             base_shared = set(getattr(base_class, "__shared_fields__", []))
             schema.__shared_fields__ = list(base_shared | self.shared_fields)
-            logger.debug(f"Shared fields: {getattr(schema, '__shared_fields__', [])}")
+            logger.debug(
+                f"Shared fields: {
+                    getattr(
+                        schema,
+                        '__shared_fields__',
+                        [])}"
+            )
 
             schema.__serializable_reducers__ = {}
             schema.__reducer_fields__ = {}
@@ -208,13 +219,13 @@ class _SchemaComposerBase:
                 elif parts[0] == "output_schemas":
                     output_schemas[parts[1]] = field_def.default
 
-        def schema_post_init(self, __context):
+        def schema_post_init(self, __context) -> None:
             if hasattr(super(self.__class__, self), "model_post_init"):
                 super(self.__class__, self).model_post_init(__context)
 
             if hasattr(self.__class__, "engines"):
                 if hasattr(self, "engines") and not self.engines:
-                    self.engines = {k: v for k, v in self.__class__.engines.items()}
+                    self.engines = dict(self.__class__.engines.items())
 
             if hasattr(self.__class__, "engines") and hasattr(self, "tools"):
                 if self.tools is None:

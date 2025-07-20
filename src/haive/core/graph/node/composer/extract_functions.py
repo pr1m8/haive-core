@@ -7,7 +7,7 @@ Based on analysis of 6 node types, these functions handle the most common
 extraction patterns found in actual Haive nodes.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from haive.core.graph.node.composer.path_resolver import PathResolver
 from haive.core.graph.node.composer.protocols import ExtractFunction
@@ -16,7 +16,7 @@ from haive.core.graph.node.composer.protocols import ExtractFunction
 class ExtractFunctions:
     """Library of common extract functions for node I/O composition."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize with shared PathResolver instance."""
         self._path_resolver = PathResolver()
 
@@ -45,7 +45,7 @@ class ExtractFunctions:
             temp = extract_temp(state, {})
         """
 
-        def _extract(state: Any, config: Dict[str, Any]) -> Any:
+        def _extract(state: Any, config: dict[str, Any]) -> Any:
             """Extract simple field from state."""
             return self._path_resolver.extract_value(state, field_name, default)
 
@@ -74,14 +74,14 @@ class ExtractFunctions:
             temp = extract_temp(state, {})
         """
 
-        def _extract(state: Any, config: Dict[str, Any]) -> Any:
+        def _extract(state: Any, config: dict[str, Any]) -> Any:
             """Extract value using complex path."""
             return self._path_resolver.extract_value(state, path, default)
 
         return _extract
 
     def extract_with_projection(
-        self, field_name: str, projection_fields: List[str]
+        self, field_name: str, projection_fields: list[str]
     ) -> ExtractFunction:
         """Create extract function with field projection.
 
@@ -101,7 +101,7 @@ class ExtractFunctions:
             projected = extract_agents(state, {})
         """
 
-        def _extract(state: Any, config: Dict[str, Any]) -> Dict[str, Any]:
+        def _extract(state: Any, config: dict[str, Any]) -> dict[str, Any]:
             """Extract with field projection."""
             obj = self._path_resolver.extract_value(state, field_name, {})
 
@@ -143,7 +143,7 @@ class ExtractFunctions:
             # Returns: ["Hello", "Hi there", "How are you?"]
         """
 
-        def _extract(state: Any, config: Dict[str, Any]) -> List[str]:
+        def _extract(state: Any, config: dict[str, Any]) -> list[str]:
             """Extract content from all messages."""
             messages = self._path_resolver.extract_value(state, messages_field, [])
 
@@ -197,21 +197,18 @@ class ExtractFunctions:
             input_data = extract_input(state, {})
         """
 
-        def _extract(state: Any, config: Dict[str, Any]) -> Any:
+        def _extract(state: Any, config: dict[str, Any]) -> Any:
             """Extract conditionally based on state."""
             condition = self._path_resolver.extract_value(state, condition_path, False)
 
             if condition:
                 return self._path_resolver.extract_value(state, true_path, true_default)
-            else:
-                return self._path_resolver.extract_value(
-                    state, false_path, false_default
-                )
+            return self._path_resolver.extract_value(state, false_path, false_default)
 
         return _extract
 
     def extract_multi_field(
-        self, field_paths: Dict[str, str], defaults: Optional[Dict[str, Any]] = None
+        self, field_paths: dict[str, str], defaults: dict[str, Any] | None = None
     ) -> ExtractFunction:
         """Create extract function for multiple fields.
 
@@ -237,7 +234,7 @@ class ExtractFunctions:
             # Returns: {"query": "...", "context": "...", "temperature": 0.7}
         """
 
-        def _extract(state: Any, config: Dict[str, Any]) -> Dict[str, Any]:
+        def _extract(state: Any, config: dict[str, Any]) -> dict[str, Any]:
             """Extract multiple fields."""
             result = {}
             default_values = defaults or {}
@@ -274,7 +271,7 @@ class ExtractFunctions:
             count = extract_count(state, {})  # Always returns int
         """
 
-        def _extract(state: Any, config: Dict[str, Any]) -> Any:
+        def _extract(state: Any, config: dict[str, Any]) -> Any:
             """Extract with type validation."""
             value = self._path_resolver.extract_value(state, path, default)
 
@@ -301,12 +298,12 @@ extract_typed = extract_functions.extract_typed
 
 __all__ = [
     "ExtractFunctions",
+    "extract_conditional",
     "extract_functions",
+    "extract_messages_content",
+    "extract_multi_field",
     "extract_simple_field",
+    "extract_typed",
     "extract_with_path",
     "extract_with_projection",
-    "extract_messages_content",
-    "extract_conditional",
-    "extract_multi_field",
-    "extract_typed",
 ]

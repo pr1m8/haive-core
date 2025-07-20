@@ -3,17 +3,8 @@
 # ============================================================================
 
 import logging
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-)
+from collections.abc import Callable
+from typing import Any, Optional, TypeVar
 
 from langchain_core.messages import AIMessage, BaseMessage, ToolMessage
 from langchain_core.tools import BaseTool
@@ -36,8 +27,7 @@ TOutput = TypeVar("TOutput", bound=BaseModel)
 
 
 class ToolNodeConfig(BaseNodeConfig[TInput, TOutput]):
-    """
-    Configuration for a schema-aware tool node in a graph.
+    """Configuration for a schema-aware tool node in a graph.
 
     Tool nodes execute LangChain tools and handle tool calls from LLM messages.
     This version supports typed input/output schemas for better state management.
@@ -74,26 +64,26 @@ class ToolNodeConfig(BaseNodeConfig[TInput, TOutput]):
     )
 
     # Tool configuration
-    tags: Optional[List[str]] = Field(
+    tags: list[str] | None = Field(
         default=None, description="Optional tags for the tool node"
     )
 
-    handle_tool_errors: Union[
-        bool, str, Callable[..., str], Tuple[Type[Exception], ...]
-    ] = Field(default=True, description="How to handle tool errors")
+    handle_tool_errors: (
+        bool | str | Callable[..., str] | tuple[type[Exception], ...]
+    ) = Field(default=True, description="How to handle tool errors")
 
     # Engine reference for getting tools
-    engine_name: Optional[str] = Field(
+    engine_name: str | None = Field(
         default=None, description="Name of engine to get tools from"
     )
 
     # Direct tools (if not using engine)
-    tools: Optional[List[BaseTool]] = Field(
+    tools: list[BaseTool] | None = Field(
         default=None, description="Direct list of tools to use", exclude=True
     )
 
     # Tool filtering - which routes should this node handle
-    allowed_routes: List[str] = Field(
+    allowed_routes: list[str] = Field(
         default_factory=lambda: ["langchain_tool", "function", "tool_node"],
         description="Tool routes this node should handle",
     )
@@ -108,13 +98,16 @@ class ToolNodeConfig(BaseNodeConfig[TInput, TOutput]):
     )
 
     @model_validator(mode="after")
-    def validate_tool_source(self) -> "ToolNodeConfig":
+
+
+    @classmethod
+    def validate_tool_source(cls) -> "ToolNodeConfig":
         """Validate that we have a source for tools."""
         if not self.tools and not self.engine_name:
             raise ValueError("Either 'tools' or 'engine_name' must be provided")
         return self
 
-    def get_default_input_fields(self) -> List[FieldDefinition]:
+    def get_default_input_fields(self) -> list[FieldDefinition]:
         """Get default input field definitions."""
         fields = [
             StandardFields.messages(use_enhanced=True),
@@ -126,7 +119,7 @@ class ToolNodeConfig(BaseNodeConfig[TInput, TOutput]):
             fields.append(
                 FieldDefinition(
                     name=self.engines_field,
-                    field_type=Dict[str, Any],
+                    field_type=dict[str, Any],
                     default_factory=dict,
                     description="Dictionary of available engines",
                 )
@@ -134,7 +127,7 @@ class ToolNodeConfig(BaseNodeConfig[TInput, TOutput]):
 
         return fields
 
-    def get_default_output_fields(self) -> List[FieldDefinition]:
+    def get_default_output_fields(self) -> list[FieldDefinition]:
         """Get default output field definitions."""
         return [
             StandardFields.messages(use_enhanced=True),
@@ -146,11 +139,8 @@ class ToolNodeConfig(BaseNodeConfig[TInput, TOutput]):
             ),
         ]
 
-    def __call__(
-        self, state: StateLike, config: Optional[ConfigLike] = None
-    ) -> Command:
-        """
-        Execute the tool node with the given state and configuration.
+    def __call__(self, state: StateLike, config: ConfigLike | None = None) -> Command:
+        """Execute the tool node with the given state and configuration.
 
         Args:
             state: The current state of the graph
@@ -176,9 +166,8 @@ class ToolNodeConfig(BaseNodeConfig[TInput, TOutput]):
             if self.require_tool_calls:
                 logger.warning("No tool calls in last message")
                 return self._create_no_op_response()
-            else:
-                logger.info("No tool calls but not required, passing through")
-                return self._create_no_op_response()
+            logger.info("No tool calls but not required, passing through")
+            return self._create_no_op_response()
 
         logger.info(f"Found {len(last_message.tool_calls)} tool calls to process")
 
@@ -199,7 +188,9 @@ class ToolNodeConfig(BaseNodeConfig[TInput, TOutput]):
         if not filtered_tools:
             logger.warning("No tools available after filtering")
             return self._create_error_response(
-                messages, f"No tools match allowed routes: {self.allowed_routes}"
+                messages,
+                f"No tools match allowed routes: {
+                    self.allowed_routes}",
             )
 
         logger.info(f"Using {len(filtered_tools)} tools after filtering")
@@ -210,10 +201,10 @@ class ToolNodeConfig(BaseNodeConfig[TInput, TOutput]):
             return result
 
         except Exception as e:
-            logger.error(f"Error executing tools: {e}")
+            logger.exception(f"Error executing tools: {e}")
             return self._create_error_response(messages, str(e))
 
-    def _get_messages_from_state(self, state: StateLike) -> List[BaseMessage]:
+    def _get_messages_from_state(self, state: StateLike) -> list[BaseMessage]:
         """Extract messages from state."""
         if hasattr(state, self.messages_field):
             messages = getattr(state, self.messages_field)
@@ -234,7 +225,7 @@ class ToolNodeConfig(BaseNodeConfig[TInput, TOutput]):
             return False
         return bool(getattr(message, "tool_calls", None))
 
-    def _get_tools(self, state: StateLike) -> List[BaseTool]:
+    def _get_tools(self, state: StateLike) -> list[BaseTool]:
         """Get tools from direct list or engine."""
         if self.tools:
             return self.tools
@@ -255,11 +246,14 @@ class ToolNodeConfig(BaseNodeConfig[TInput, TOutput]):
                 attr_value = getattr(engine, attr)
                 if attr_value:
                     tools.extend(attr_value)
-                    logger.debug(f"Found {len(attr_value)} tools in engine.{attr}")
+                    logger.debug(
+                        f"Found {
+                            len(attr_value)} tools in engine.{attr}"
+                    )
 
         return tools
 
-    def _get_engine_from_state(self, state: StateLike) -> Optional[Any]:
+    def _get_engine_from_state(self, state: StateLike) -> Any | None:
         """Get engine from state."""
         if hasattr(state, self.engines_field):
             engines = getattr(state, self.engines_field, {})
@@ -274,7 +268,7 @@ class ToolNodeConfig(BaseNodeConfig[TInput, TOutput]):
 
         return engines.get(self.engine_name)
 
-    def _get_tool_routes(self, state: StateLike) -> Dict[str, str]:
+    def _get_tool_routes(self, state: StateLike) -> dict[str, str]:
         """Get tool routes from state or engine."""
         # First try state
         if hasattr(state, self.tool_routes_field):
@@ -290,8 +284,8 @@ class ToolNodeConfig(BaseNodeConfig[TInput, TOutput]):
         return {}
 
     def _filter_tools_by_route(
-        self, tools: List[BaseTool], tool_routes: Dict[str, str]
-    ) -> List[BaseTool]:
+        self, tools: list[BaseTool], tool_routes: dict[str, str]
+    ) -> list[BaseTool]:
         """Filter tools by allowed routes."""
         filtered = []
 
@@ -313,9 +307,9 @@ class ToolNodeConfig(BaseNodeConfig[TInput, TOutput]):
     def _execute_tools(
         self,
         state: StateLike,
-        tools: List[BaseTool],
-        messages: List[BaseMessage],
-        config: Optional[ConfigLike],
+        tools: list[BaseTool],
+        messages: list[BaseMessage],
+        config: ConfigLike | None,
     ) -> Command:
         """Execute tools and return updated state."""
         # Create the tool node
@@ -351,18 +345,17 @@ class ToolNodeConfig(BaseNodeConfig[TInput, TOutput]):
                 update={self.messages_field: updated_messages, self.error_field: None},
                 goto=self._get_goto_node(),
             )
-        else:
-            logger.error(f"Unexpected result from ToolNode: {type(result)}")
-            return self._create_error_response(
-                messages, "Unexpected result format from tool execution"
-            )
+        logger.error(f"Unexpected result from ToolNode: {type(result)}")
+        return self._create_error_response(
+            messages, "Unexpected result format from tool execution"
+        )
 
     def _create_no_op_response(self) -> Command:
         """Create a no-operation response."""
         return Command(update={self.error_field: None}, goto=self._get_goto_node())
 
     def _create_error_response(
-        self, messages: List[BaseMessage], error_msg: str
+        self, messages: list[BaseMessage], error_msg: str
     ) -> Command:
         """Create an error response."""
         update = {self.error_field: error_msg}
@@ -409,7 +402,7 @@ class ToolNodeConfig(BaseNodeConfig[TInput, TOutput]):
 class LangChainToolNode(ToolNodeConfig):
     """Tool node specifically for LangChain tools."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         if "allowed_routes" not in kwargs:
             kwargs["allowed_routes"] = ["langchain_tool", "tool_node"]
         super().__init__(**kwargs)
@@ -418,7 +411,7 @@ class LangChainToolNode(ToolNodeConfig):
 class FunctionToolNode(ToolNodeConfig):
     """Tool node specifically for function tools."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         if "allowed_routes" not in kwargs:
             kwargs["allowed_routes"] = ["function"]
         super().__init__(**kwargs)
@@ -427,7 +420,7 @@ class FunctionToolNode(ToolNodeConfig):
 class PydanticToolNode(ToolNodeConfig):
     """Tool node specifically for Pydantic model tools."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         if "allowed_routes" not in kwargs:
             kwargs["allowed_routes"] = ["pydantic_model", "parse_output"]
         super().__init__(**kwargs)
@@ -440,9 +433,9 @@ class PydanticToolNode(ToolNodeConfig):
 
 def create_tool_node(
     name: str = "tool_node",
-    engine_name: Optional[str] = None,
-    tools: Optional[List[BaseTool]] = None,
-    allowed_routes: Optional[List[str]] = None,
+    engine_name: str | None = None,
+    tools: list[BaseTool] | None = None,
+    allowed_routes: list[str] | None = None,
     **kwargs,
 ) -> ToolNodeConfig:
     """Create a generic tool node."""
@@ -456,8 +449,8 @@ def create_tool_node(
 
 def create_langchain_tool_node(
     name: str = "langchain_tools",
-    engine_name: Optional[str] = None,
-    tools: Optional[List[BaseTool]] = None,
+    engine_name: str | None = None,
+    tools: list[BaseTool] | None = None,
     **kwargs,
 ) -> LangChainToolNode:
     """Create a tool node for LangChain tools."""
@@ -466,8 +459,8 @@ def create_langchain_tool_node(
 
 def create_function_tool_node(
     name: str = "function_tools",
-    engine_name: Optional[str] = None,
-    tools: Optional[List[BaseTool]] = None,
+    engine_name: str | None = None,
+    tools: list[BaseTool] | None = None,
     **kwargs,
 ) -> FunctionToolNode:
     """Create a tool node for function tools."""
@@ -476,8 +469,8 @@ def create_function_tool_node(
 
 def create_pydantic_tool_node(
     name: str = "pydantic_tools",
-    engine_name: Optional[str] = None,
-    tools: Optional[List[BaseTool]] = None,
+    engine_name: str | None = None,
+    tools: list[BaseTool] | None = None,
     **kwargs,
 ) -> PydanticToolNode:
     """Create a tool node for Pydantic model tools."""
@@ -485,10 +478,9 @@ def create_pydantic_tool_node(
 
 
 def create_tool_node_from_route_filter(
-    allowed_routes: List[str], engine_name: str, name: Optional[str] = None, **kwargs
+    allowed_routes: list[str], engine_name: str, name: str | None = None, **kwargs
 ) -> ToolNodeConfig:
-    """
-    Create a tool node configuration for specific routes.
+    """Create a tool node configuration for specific routes.
 
     Args:
         allowed_routes: List of tool routes this node should handle

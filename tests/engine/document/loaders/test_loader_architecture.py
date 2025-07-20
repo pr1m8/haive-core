@@ -20,7 +20,9 @@ def test_path_analyzer():
     # Test PDF file
     result = PathAnalyzer.analyze("/path/to/document.pdf")
     print(
-        f"  ✓ PDF file - Type: {result.path_type}, Extension: {result.file_extension}"
+        f"  ✓ PDF file - Type: {
+    result.path_type}, Extension: {
+        result.file_extension}"
     )
     assert result.path_type == PathType.LOCAL_FILE
     assert result.file_extension == ".pdf"
@@ -30,7 +32,9 @@ def test_path_analyzer():
     result = PathAnalyzer.analyze(
         "https://github.com/user/repo/blob/main/README.md")
     print(
-        f"  ✓ GitHub URL - Service: {result.service_detected}, Extension: {result.file_extension}"
+        f"  ✓ GitHub URL - Service: {
+    result.service_detected}, Extension: {
+        result.file_extension}"
     )
     assert result.service_detected == "github"
     assert result.file_extension == ".md"
@@ -63,7 +67,10 @@ def test_source_classes():
 
     kwargs = pdf_source.get_loader_kwargs()
     print(
-        f"  ✓ LocalSource - Path: {pdf_source.file_path}, Kwargs: {list(kwargs.keys())}"
+        f"  ✓ LocalSource - Path: {
+    pdf_source.file_path}, Kwargs: {
+        list(
+            kwargs.keys())}"
     )
     assert kwargs["file_path"] == "/path/to/test.pdf"
     assert kwargs["encoding"] == "utf-8"

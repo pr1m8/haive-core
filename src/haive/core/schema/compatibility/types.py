@@ -1,12 +1,11 @@
-"""
-Core type definitions for the schema compatibility module.
-"""
+"""Core type definitions for the schema compatibility module."""
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Type, Union
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -47,9 +46,9 @@ class MergeStrategy(str, Enum):
 class TypeInfo:
     """Detailed information about a type."""
 
-    type_hint: Type[Any]
-    origin: Optional[Type[Any]] = None
-    args: Tuple[Type[Any], ...] = field(default_factory=tuple)
+    type_hint: type[Any]
+    origin: type[Any] | None = None
+    args: tuple[type[Any], ...] = field(default_factory=tuple)
     is_generic: bool = False
     is_union: bool = False
     is_optional: bool = False
@@ -58,19 +57,18 @@ class TypeInfo:
     is_literal: bool = False
     is_forward_ref: bool = False
     is_basemodel: bool = False
-    module: Optional[str] = None
-    qualname: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    module: str | None = None
+    qualname: str | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     @property
     def full_name(self) -> str:
         """Get fully qualified type name."""
         if self.module and self.qualname:
             return f"{self.module}.{self.qualname}"
-        elif self.qualname:
+        if self.qualname:
             return self.qualname
-        else:
-            return str(self.type_hint)
+        return str(self.type_hint)
 
 
 @dataclass
@@ -82,17 +80,17 @@ class FieldInfo:
     is_required: bool = True
     has_default: bool = False
     default_value: Any = None
-    default_factory: Optional[Callable[[], Any]] = None
-    description: Optional[str] = None
-    alias: Optional[str] = None
-    validators: List[Callable[[Any], Any]] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    default_factory: Callable[[], Any] | None = None
+    description: str | None = None
+    alias: str | None = None
+    validators: list[Callable[[Any], Any]] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     # Haive-specific metadata
     is_shared: bool = False
-    reducer: Optional[Union[str, Callable]] = None
-    input_for_engines: Set[str] = field(default_factory=set)
-    output_from_engines: Set[str] = field(default_factory=set)
+    reducer: str | Callable | None = None
+    input_for_engines: set[str] = field(default_factory=set)
+    output_from_engines: set[str] = field(default_factory=set)
 
     @property
     def field_path(self) -> str:
@@ -106,28 +104,28 @@ class SchemaInfo:
 
     name: str
     type_info: TypeInfo
-    fields: Dict[str, FieldInfo] = field(default_factory=dict)
-    methods: Dict[str, Callable] = field(default_factory=dict)
-    base_classes: List[Type[Any]] = field(default_factory=list)
+    fields: dict[str, FieldInfo] = field(default_factory=dict)
+    methods: dict[str, Callable] = field(default_factory=dict)
+    base_classes: list[type[Any]] = field(default_factory=list)
 
     # Haive StateSchema specific
-    shared_fields: Set[str] = field(default_factory=set)
-    reducer_fields: Dict[str, Union[str, Callable]] = field(default_factory=dict)
-    engine_io_mappings: Dict[str, Dict[str, List[str]]] = field(default_factory=dict)
+    shared_fields: set[str] = field(default_factory=set)
+    reducer_fields: dict[str, str | Callable] = field(default_factory=dict)
+    engine_io_mappings: dict[str, dict[str, list[str]]] = field(default_factory=dict)
 
     # Validation and conversion
-    validators: List[Callable] = field(default_factory=list)
-    computed_fields: Dict[str, Callable] = field(default_factory=dict)
+    validators: list[Callable] = field(default_factory=list)
+    computed_fields: dict[str, Callable] = field(default_factory=dict)
 
     # Metadata
-    version: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    version: str | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def get_required_fields(self) -> List[FieldInfo]:
+    def get_required_fields(self) -> list[FieldInfo]:
         """Get all required fields."""
         return [f for f in self.fields.values() if f.is_required]
 
-    def get_optional_fields(self) -> List[FieldInfo]:
+    def get_optional_fields(self) -> list[FieldInfo]:
         """Get all optional fields."""
         return [f for f in self.fields.values() if not f.is_required]
 
@@ -136,11 +134,11 @@ class SchemaInfo:
 class ConversionPath:
     """Represents a conversion path between types."""
 
-    source_type: Type[Any]
-    target_type: Type[Any]
-    steps: List[ConversionStep] = field(default_factory=list)
+    source_type: type[Any]
+    target_type: type[Any]
+    steps: list[ConversionStep] = field(default_factory=list)
     total_quality: ConversionQuality = ConversionQuality.LOSSLESS
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def add_step(self, step: ConversionStep) -> None:
         """Add a conversion step and update quality."""
@@ -159,11 +157,11 @@ class ConversionPath:
 class ConversionStep:
     """Single step in a conversion path."""
 
-    from_type: Type[Any]
-    to_type: Type[Any]
+    from_type: type[Any]
+    to_type: type[Any]
     converter_name: str
     quality: ConversionQuality
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class ConversionContext(BaseModel):
@@ -172,15 +170,15 @@ class ConversionContext(BaseModel):
     source_type: str
     target_type: str
     quality: ConversionQuality = ConversionQuality.LOSSLESS
-    conversion_path: List[str] = Field(default_factory=list)
-    warnings: List[str] = Field(default_factory=list)
-    errors: List[str] = Field(default_factory=list)
-    lost_fields: Dict[str, Any] = Field(default_factory=dict)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    conversion_path: list[str] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+    errors: list[str] = Field(default_factory=list)
+    lost_fields: dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
     # Performance tracking
-    conversion_time_ms: Optional[float] = None
-    memory_usage_bytes: Optional[int] = None
+    conversion_time_ms: float | None = None
+    memory_usage_bytes: int | None = None
 
     def add_warning(self, warning: str) -> None:
         """Add a conversion warning."""
@@ -210,9 +208,9 @@ class ValidationResult:
     """Result of a validation operation."""
 
     is_valid: bool
-    errors: List[ValidationError] = field(default_factory=list)
-    warnings: List[ValidationWarning] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    errors: list[ValidationError] = field(default_factory=list)
+    warnings: list[ValidationWarning] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def add_error(self, error: ValidationError) -> None:
         """Add validation error."""
@@ -228,20 +226,20 @@ class ValidationResult:
 class ValidationError:
     """Validation error details."""
 
-    field: Optional[str]
+    field: str | None
     message: str
     error_type: str = "validation_error"
-    context: Dict[str, Any] = field(default_factory=dict)
+    context: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class ValidationWarning:
     """Validation warning details."""
 
-    field: Optional[str]
+    field: str | None
     message: str
     warning_type: str = "validation_warning"
-    context: Dict[str, Any] = field(default_factory=dict)
+    context: dict[str, Any] = field(default_factory=dict)
 
 
 # Type aliases for better readability

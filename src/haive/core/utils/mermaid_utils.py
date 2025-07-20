@@ -4,6 +4,7 @@ This module provides utilities for generating and displaying Mermaid diagrams
 in different environments, with fallback mechanisms.
 """
 
+import contextlib
 import os
 import subprocess
 import tempfile
@@ -36,7 +37,6 @@ def detect_environment() -> Environment:
         if shell == "ZMQInteractiveShell":  # Jupyter environment
             try:
                 # Check for Colab
-                import google.colab
 
                 return Environment.COLAB
             except ImportError:
@@ -55,7 +55,7 @@ def detect_environment() -> Environment:
                     if "jupyter-lab" in app_name or "jpserver" in app_name:
                         return Environment.JUPYTER_LAB
                     return Environment.JUPYTER_NOTEBOOK
-                except:
+                except BaseException:
                     # Fallback to classic notebook
                     return Environment.JUPYTER_NOTEBOOK
         else:
@@ -141,10 +141,8 @@ def mermaid_to_png(mermaid_code: str, output_path: str | None = None) -> str | N
                 return None
     finally:
         # Clean up the temporary file
-        try:
+        with contextlib.suppress(Exception):
             os.unlink(mmd_path)
-        except:
-            pass
 
 
 def display_mermaid(
@@ -183,7 +181,7 @@ def display_mermaid(
             try:
                 display(Markdown(f"```mermaid\n{mermaid_code}\n```"))
                 return
-            except:
+            except BaseException:
                 pass
 
             # Second approach: Use HTML with CDN
@@ -200,7 +198,7 @@ def display_mermaid(
                 """
                 display(HTML(html))
                 return
-            except:
+            except BaseException:
                 pass
 
             # Third approach: Use require.js if available (JupyterLab)
@@ -223,7 +221,7 @@ def display_mermaid(
                 """
                 display(HTML(html))
                 return
-            except:
+            except BaseException:
                 pass
 
             # Fourth approach: Save to PNG and display the image

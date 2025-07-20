@@ -1,12 +1,11 @@
-"""
-Test cases for the Haive Branch system.
+"""Test cases for the Haive Branch system.
 
 This module provides comprehensive tests for branch functionality
 including Send objects, dynamic mapping, and serialization.
 """
 
 import logging
-from typing import Any, List, Optional, Union
+from typing import Any
 
 import pytest
 from langchain_core.messages import AIMessage, HumanMessage
@@ -43,10 +42,10 @@ class _TestState(StateSchema):
     """Test state schema for branch tests."""
 
     query: str = Field(default="")
-    messages: List[Union[HumanMessage, AIMessage]] = Field(default_factory=list)
+    messages: list[HumanMessage | AIMessage] = Field(default_factory=list)
     count: int = Field(default=0)
     flag: bool = Field(default=False)
-    contents: List[str] = Field(default_factory=list)
+    contents: list[str] = Field(default_factory=list)
 
     def has_greeting(self) -> bool:
         """Check if any message contains a greeting."""
@@ -55,7 +54,8 @@ class _TestState(StateSchema):
 
         for message in self.messages:
             content = message.content.lower()
-            if any(word in content for word in ["hello", "hi", "hey", "greetings"]):
+            if any(word in content for word in [
+                   "hello", "hi", "hey", "greetings"]):
                 return True
 
         return False
@@ -63,7 +63,7 @@ class _TestState(StateSchema):
 
 # Debugging helper to display test information
 def log_test(
-    title: str, state: Any = None, branch: Optional[Branch] = None, result: Any = None
+    title: str, state: Any = None, branch: Branch | None = None, result: Any = None
 ):
     """Log test information with rich formatting."""
     console.rule(f"[bold magenta]{title}")
@@ -134,13 +134,15 @@ def schema_state():
 def mapper_function():
     """Create a function that maps contents to Send objects."""
 
-    def map_contents(state: Any) -> List[Send]:
-        if hasattr(state, "contents"):
-            contents = state.contents
-        else:
-            contents = state.get("contents", [])
+    def map_contents(state: Any) -> list[Send]:
+        contents = (
+            state.contents if hasattr(
+                state, "contents") else state.get(
+                "contents", [])
+        )
 
-        return [Send("process_content", {"content": content}) for content in contents]
+        return [Send("process_content", {"content": content})
+                for content in contents]
 
     return map_contents
 
@@ -382,7 +384,9 @@ def test_dynamic_output_mapping():
 
     # For debugging - print the dynamic_mapping config
     console.print(
-        f"\nDynamic Mapping: key={branch.dynamic_mapping.key}, value={branch.dynamic_mapping.value}, "
+        f"\nDynamic Mapping: key={
+            branch.dynamic_mapping.key}, value={
+            branch.dynamic_mapping.value}, "
         f"comparison={branch.dynamic_mapping.comparison}"
     )
 

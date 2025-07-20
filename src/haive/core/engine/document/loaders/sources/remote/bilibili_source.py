@@ -14,4 +14,5 @@ class BilibiliSource(URLSource):
     buvid3: str = Field(default="", description="The buvid3 of the user.")
 
 
-# from langchain_community.document_loaders.bilibili.BiliBiliLoader (takes in video urls ? (List[str]))
+# from langchain_community.document_loaders.bilibili.BiliBiliLoader (takes
+# in video urls ? (List[str]))

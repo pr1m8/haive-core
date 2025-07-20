@@ -8,31 +8,19 @@ sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-agent
 sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
 
 
-print("🔍 Checking state schema...")
-print(f"Agent name: {self_discovery.name}")
-print(f"State schema: {self_discovery.state_schema}")
-print(f"State schema name: {self_discovery.state_schema.__name__}")
-print(f"Use prebuilt base: {self_discovery.use_prebuilt_base}")
-
 # Check the fields in the state schema
-print("\nState schema fields:")
 if hasattr(self_discovery.state_schema, "model_fields"):
-    for field_name, field_info in self_discovery.state_schema.model_fields.items():
-        print(f"  {field_name}: {field_info.annotation}")
+    for _field_name, _field_info in self_discovery.state_schema.model_fields.items():
+        pass
 else:
-    print("  No model_fields found")
+    pass
 
 # Check what engines are available
-print("\nEngines:")
-for engine_name in self_discovery.engines.keys():
-    print(f"  {engine_name}")
+for _engine_name in self_discovery.engines:
+    pass
 
 # Check individual agents
-print("\nIndividual agents:")
-for agent_name, agent in self_discovery.agents.items():
-    print(f"  {agent_name}: {type(agent).__name__}")
-    if hasattr(agent, "state_schema"):
-        print(f"    State schema: {agent.state_schema.__name__}")
-        if hasattr(agent.state_schema, "model_fields"):
-            for field_name, field_info in agent.state_schema.model_fields.items():
-                print(f"      {field_name}: {field_info.annotation}")
+for _agent_name, agent in self_discovery.agents.items():
+    if hasattr(agent, "state_schema") and hasattr(agent.state_schema, "model_fields"):
+        for _field_name, _field_info in agent.state_schema.model_fields.items():
+            pass

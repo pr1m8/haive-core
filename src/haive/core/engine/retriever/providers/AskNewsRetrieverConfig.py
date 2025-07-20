@@ -1,5 +1,6 @@
 """AskNews Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the AskNews retriever,
 which retrieves news articles and current events using AskNews API.
 AskNews provides access to real-time news content from various sources
@@ -140,7 +141,7 @@ class AskNewsRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create an AskNews retriever from this configuration.
 
         Returns:

@@ -50,7 +50,7 @@ class EngineRegistry(AbstractRegistry[Engine]):
             cls._instance = cls()
         return cls._instance
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the registry with empty dictionaries.
 
         Creates an empty registry structure with dictionaries for each engine type
@@ -82,7 +82,10 @@ class EngineRegistry(AbstractRegistry[Engine]):
         self.engines[item.engine_type][item.name] = item
         self.engine_ids[item.id] = item
         logger.debug(
-            f"Registered engine {item.name} (id: {item.id}) of type {item.engine_type}"
+            f"Registered engine {
+                item.name} (id: {
+                item.id}) of type {
+                item.engine_type}"
         )
         return item
 

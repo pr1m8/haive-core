@@ -13,7 +13,6 @@ NO MESSAGES - pure graph composition focus.
 from unittest.mock import Mock
 
 from haive.agents.simple.agent import SimpleAgent
-
 from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.schema.prebuilt.meta_state import MetaStateSchema
 
@@ -296,7 +295,10 @@ class TestMetaStateCoreFunctionality:
         meta_state = MetaStateSchema()
 
         # Should have graph-focused shared fields
-        expected_shared = ["execution_result", "execution_status", "graph_context"]
+        expected_shared = [
+            "execution_result",
+            "execution_status",
+            "graph_context"]
         assert meta_state.__shared_fields__ == expected_shared
 
         # Should not have message-related shared fields

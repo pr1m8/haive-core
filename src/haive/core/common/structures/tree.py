@@ -178,7 +178,7 @@ class AutoTree(BaseModel, Generic[T]):
         # Get type hints to understand Union types
         try:
             hints = get_type_hints(self.content.__class__)
-        except:
+        except BaseException:
             hints = {}
 
         # Check each field in the content
@@ -208,7 +208,8 @@ class AutoTree(BaseModel, Generic[T]):
                         )
                         self._children.append(child_tree)
                     elif not can_contain_basemodels and not isinstance(item, BaseModel):
-                        # If we don't have type hints, still check if it's a BaseModel
+                        # If we don't have type hints, still check if it's a
+                        # BaseModel
                         pass
 
             # Handle single BaseModel fields

@@ -1,7 +1,5 @@
 # Additional tests for AugLLMConfig formats and schemas
 
-import json
-import pprint
 from typing import Any, Literal
 
 import pytest
@@ -56,7 +54,9 @@ class UserProfile(BaseModel):
     username: str = Field(description="User's handle")
     name: str | None = Field(None, description="User's full name")
     age: int | None = Field(None, description="User's age")
-    interests: list[str] = Field(default_factory=list, description="User's interests")
+    interests: list[str] = Field(
+        default_factory=list,
+        description="User's interests")
     bio: str | None = Field(None, description="User's biography")
     contact_info: dict[str, str] | None = Field(
         None, description="User's contact information"
@@ -72,7 +72,8 @@ class RecipeIngredient(BaseModel):
     name: str = Field(description="Ingredient name")
     quantity: float | None = Field(None, description="Amount needed")
     unit: str | None = Field(None, description="Unit of measurement")
-    notes: str | None = Field(None, description="Special notes about this ingredient")
+    notes: str | None = Field(
+        None, description="Special notes about this ingredient")
 
 
 class RecipeStep(BaseModel):
@@ -93,9 +94,11 @@ class Recipe(BaseModel):
     prep_time_minutes: int | None = Field(
         None, description="Preparation time in minutes"
     )
-    cook_time_minutes: int | None = Field(None, description="Cooking time in minutes")
+    cook_time_minutes: int | None = Field(
+        None, description="Cooking time in minutes")
     servings: int | None = Field(None, description="Number of servings")
-    ingredients: list[RecipeIngredient] = Field(description="List of ingredients")
+    ingredients: list[RecipeIngredient] = Field(
+        description="List of ingredients")
     steps: list[RecipeStep] = Field(description="List of steps")
     tags: list[str] | None = Field(None, description="Recipe tags")
 
@@ -106,7 +109,10 @@ class MovieReview(BaseModel):
     movie_title: str = Field(description="Title of the movie")
     year: int | None = Field(None, description="Release year")
     director: str | None = Field(None, description="Movie director")
-    rating: float = Field(description="Rating from 0.0 to 10.0", ge=0.0, le=10.0)
+    rating: float = Field(
+        description="Rating from 0.0 to 10.0",
+        ge=0.0,
+        le=10.0)
     review_text: str = Field(description="The main review text")
     pros: list[str] | None = Field(None, description="Positive aspects")
     cons: list[str] | None = Field(None, description="Negative aspects")
@@ -128,11 +134,11 @@ def complex_chat_prompt():
             SystemMessage(
                 content="""
         You are a specialized assistant with varied capabilities.
-        
+
         When analyzing content, provide detailed breakdowns.
         When summarizing, be concise and focus on key points.
         When explaining, use simple language and examples.
-        
+
         Always format your responses clearly using markdown when appropriate.
         """
             ),
@@ -160,7 +166,9 @@ def custom_template_with_variables():
             HumanMessagePromptTemplate.from_template(
                 "I want to know about {query}. Remember to include {important_aspect}."
             ),
-            MessagesPlaceholder(variable_name="additional_context", optional=True),
+            MessagesPlaceholder(
+                variable_name="additional_context",
+                optional=True),
             MessagesPlaceholder(variable_name="messages", optional=True),
         ]
     )
@@ -320,7 +328,8 @@ def recipe_search_tool():
         query_terms = query.lower().split()
         for recipe in recipes:
             # Search in title and ingredients
-            title_matches = any(term in recipe["title"].lower() for term in query_terms)
+            title_matches = any(
+                term in recipe["title"].lower() for term in query_terms)
             ingredient_matches = any(
                 any(term in ingredient.lower() for term in query_terms)
                 for ingredient in recipe["ingredients"]
@@ -393,7 +402,8 @@ def test_schema_pretty_printing(azure_llm_config, structured_chat_prompt):
     user_schema = SchemaComposer.create_model(
         [person_extractor], name="UserProfileSchema"
     )
-    recipe_schema = SchemaComposer.create_model([recipe_analyzer], name="RecipeSchema")
+    recipe_schema = SchemaComposer.create_model(
+        [recipe_analyzer], name="RecipeSchema")
     movie_schema = SchemaComposer.create_model(
         [movie_reviewer], name="MovieReviewSchema"
     )
@@ -404,22 +414,18 @@ def test_schema_pretty_printing(azure_llm_config, structured_chat_prompt):
         ("Recipe", recipe_schema),
         ("MovieReview", movie_schema),
     ]:
-        print(f"\n{'='*20} {schema_name} Schema {'='*20}")
 
         # Print model fields
-        print(f"\nFields in {schema.__name__}:")
-        for field_name, field_info in schema.model_fields.items():
-            field_type = field_info.annotation
+        for _field_name, field_info in schema.model_fields.items():
             field_default = field_info.default
-            print(f"  - {field_name}: {field_type}")
             if field_default is not ...:
-                print(f"      Default: {field_default}")
+                pass
             if field_info.description:
-                print(f"      Description: {field_info.description}")
+                pass
 
         # Create an example instance
         if schema_name == "UserProfile":
-            instance = schema(
+            schema(
                 username="jdoe",
                 name="John Doe",
                 age=30,
@@ -428,7 +434,7 @@ def test_schema_pretty_printing(azure_llm_config, structured_chat_prompt):
                 preferences={"theme": "dark", "notifications": True},
             )
         elif schema_name == "Recipe":
-            instance = schema(
+            schema(
                 title="Chocolate Chip Cookies",
                 description="Classic homemade cookies",
                 prep_time_minutes=15,
@@ -450,12 +456,14 @@ def test_schema_pretty_printing(azure_llm_config, structured_chat_prompt):
                         "instruction": "Add chocolate chips",
                         "time_minutes": 1,
                     },
-                    {"number": 3, "instruction": "Bake at 350°F", "time_minutes": 10},
+                    {"number": 3,
+                     "instruction": "Bake at 350°F",
+                     "time_minutes": 10},
                 ],
                 tags=["dessert", "baking", "cookies"],
             )
         elif schema_name == "MovieReview":
-            instance = schema(
+            schema(
                 movie_title="Inception",
                 year=2010,
                 director="Christopher Nolan",
@@ -467,43 +475,28 @@ def test_schema_pretty_printing(azure_llm_config, structured_chat_prompt):
             )
 
         # Pretty print the instance
-        print(f"\nExample {schema_name} instance:")
-        pprint.pprint(instance.model_dump(), width=80, sort_dicts=False)
 
         # Convert to JSON and pretty print
-        print(f"\n{schema_name} as JSON:")
-        print(json.dumps(instance.model_dump(), indent=2))
 
     # Create a combined schema
     combined_schema = SchemaComposer.compose_schema(
         [person_extractor, recipe_analyzer, movie_reviewer], name="CombinedSchema"
     )
 
-    print("\n" + "=" * 20 + " Combined Schema " + "=" * 20)
-    print(f"\nFields in {combined_schema.__name__}:")
-    for field_name, field_info in combined_schema.model_fields.items():
-        field_type = field_info.annotation
-        print(f"  - {field_name}: {field_type}")
+    for _field_name, field_info in combined_schema.model_fields.items():
+        pass
 
     # Test StateSchema creation
     state_schema = SchemaComposer.create_model(
-        [person_extractor, recipe_analyzer, movie_reviewer], name="ContentAnalysisState"
+        [person_extractor, recipe_analyzer,
+            movie_reviewer], name="ContentAnalysisState"
     )
-    print("-" * 100)
-    print("State Schema")
     state_schema.pretty_print()
-    print(state_schema)
-    print("-" * 100)
 
-    print("\n" + "=" * 20 + " State Schema " + "=" * 20)
-    print(f"\nFields in {state_schema.__name__}:")
-    for field_name, field_info in state_schema.model_fields.items():
-        field_type = field_info.annotation
-        print(f"  - {field_name}: {field_type}")
+    for _field_name, field_info in state_schema.model_fields.items():
+        pass
 
     # Verify this is a StateSchema with shared fields and reducers
-    print(f"\nShared fields: {state_schema.__shared_fields__}")
-    print(f"Reducer fields: {list(state_schema.__reducer_fields__.keys())}")
 
     # No assertions needed - this test is for demonstration purposes
     assert True
@@ -528,8 +521,6 @@ def test_various_input_formats(
 
     # Test 1: Simple string input
     result1 = aug_llm.create_runnable().invoke("Tell me about quantum computing")
-    print("\n" + "=" * 20 + " Result from string input " + "=" * 20)
-    print(result1.content if hasattr(result1, "content") else result1)
 
     # Test 2: Message list input
     messages_input = [
@@ -541,13 +532,12 @@ def test_various_input_formats(
     ]
 
     result2 = aug_llm.invoke({"messages": messages_input})
-    print("\n" + "=" * 20 + " Result from message list input " + "=" * 20)
-    print(result2.content if hasattr(result2, "content") else result2)
 
     # Test 3: Complex input with all template variables
     complex_input = {
         "context": [
-            SystemMessage(content="Azure is Microsoft's cloud computing platform.")
+            SystemMessage(
+                content="Azure is Microsoft's cloud computing platform.")
         ],
         "examples": [
             HumanMessage(content="What services does Azure offer?"),
@@ -556,14 +546,13 @@ def test_various_input_formats(
             ),
         ],
         "messages": [
-            HumanMessage(content="How do Azure Functions compare to AWS Lambda?")
+            HumanMessage(
+                content="How do Azure Functions compare to AWS Lambda?")
         ],
         "instructions": "Compare pricing, features, and integration capabilities",
     }
 
     result3 = aug_llm.invoke(complex_input)
-    print("\n" + "=" * 20 + " Result from complex input " + "=" * 20)
-    print(result3.content if hasattr(result3, "content") else result3)
 
     # Test 4: Custom template with variables
     custom_template = custom_template_with_variables  # Now using the fixture directly
@@ -580,13 +569,12 @@ def test_various_input_formats(
         "query": "the impact of large language models",
         "important_aspect": "bias and fairness",
         "additional_context": [
-            SystemMessage(content="Large language models have revolutionized NLP.")
+            SystemMessage(
+                content="Large language models have revolutionized NLP.")
         ],
     }
 
     result4 = custom_llm.invoke(custom_input)
-    print("\n" + "=" * 20 + " Result from custom template " + "=" * 20)
-    print(result4.content if hasattr(result4, "content") else result4)
 
     # All tests should produce reasonable results
     assert result1 is not None
@@ -615,8 +603,6 @@ def test_different_output_parsers(
     )
 
     str_result = str_llm.invoke("List 3 programming languages")
-    print("\n" + "=" * 20 + " String Parser Result " + "=" * 20)
-    print(str_result)
     assert isinstance(str_result, str)
 
     # Test 2: JSON output parser
@@ -642,9 +628,7 @@ def test_different_output_parsers(
     json_result = json_llm.invoke(
         "Generate a list of 3 users with name, age, and email fields"
     )
-    print("\n" + "=" * 20 + " JSON Parser Result " + "=" * 20)
-    print(json.dumps(json_result, indent=2))
-    assert isinstance(json_result, (dict, list))
+    assert isinstance(json_result, dict | list)
 
     # Test 3: Pydantic output parser
     pydantic_parser = PydanticOutputParser(pydantic_object=ProductReview)
@@ -677,8 +661,6 @@ def test_different_output_parsers(
     """
 
     pydantic_result = pydantic_llm.invoke(review_text)
-    print("\n" + "=" * 20 + " Pydantic Parser Result " + "=" * 20)
-    print(pydantic_result.model_dump_json(indent=2))
     assert isinstance(pydantic_result, ProductReview)
 
     # Test 4: Custom output processor using lambda
@@ -686,8 +668,10 @@ def test_different_output_parsers(
         """Custom function to extract key points from text."""
         # In a real scenario, this might use regex or more complex parsing
         lines = text.split("\n")
-        points = [line.strip() for line in lines if line.strip().startswith("-")]
-        return points if points else [line.strip() for line in lines if line.strip()]
+        points = [line.strip()
+                  for line in lines if line.strip().startswith("-")]
+        return points if points else [line.strip()
+                                      for line in lines if line.strip()]
 
     system_prompt = """
     You are a summarization assistant. Provide key points from the given text.
@@ -711,14 +695,13 @@ def test_different_output_parsers(
 
     custom_result = custom_llm.invoke(
         """
-    Summarize the key features of modern smartphones, including 
+    Summarize the key features of modern smartphones, including
     cameras, processors, displays, and battery technology.
     """
     )
 
-    print("\n" + "=" * 20 + " Custom Processor Result " + "=" * 20)
-    for i, point in enumerate(custom_result, 1):
-        print(f"{i}. {point}")
+    for _i, _point in enumerate(custom_result, 1):
+        pass
 
     assert isinstance(custom_result, list)
     assert len(custom_result) > 0
@@ -765,10 +748,6 @@ def test_advanced_tools_with_structured_output(
     )
     weather_result = weather_llm.invoke(weather_query)
 
-    print("\n" + "=" * 20 + " Weather Forecast Tool With Structured Output " + "=" * 20)
-    print(f"Query: {weather_query}")
-    print(f"Structured Output: {weather_result.model_dump()}")
-
     # 2. Recipe search tool with full Recipe output model
     recipe_system_prompt = """
     You are a culinary assistant that can search for recipes and provide detailed information.
@@ -794,10 +773,6 @@ def test_advanced_tools_with_structured_output(
     # Test recipe search query
     recipe_query = "Find me a vegetarian recipe"
     recipe_result = recipe_llm.invoke(recipe_query)
-
-    print("\n" + "=" * 20 + " Recipe Tool With Structured Output " + "=" * 20)
-    print(f"Query: {recipe_query}")
-    print(f"Structured Output: {json.dumps(recipe_result.model_dump(), indent=2)}")
 
     # 3. Tool combination with product review output
     combined_system_prompt = """
@@ -880,23 +855,17 @@ def test_advanced_tools_with_structured_output(
     product_query = "Write a review of the latest iPhone"
     product_result = combined_llm.invoke(product_query)
 
-    print("\n" + "=" * 20 + " Product Review Tool With Structured Output " + "=" * 20)
-    print(f"Query: {product_query}")
-    print(f"Structured Output: {json.dumps(product_result.model_dump(), indent=2)}")
-
     # Verify basic functionality
     assert isinstance(weather_result, WeatherQuery)
     assert isinstance(recipe_result, Recipe)
     assert isinstance(product_result, ProductReview)
 
-    # Enhanced schema creation - show how the schema builder works with tools and structured outputs
-    print("\n" + "=" * 20 + " Schema From Tool Configs " + "=" * 20)
+    # Enhanced schema creation - show how the schema builder works with tools
+    # and structured outputs
     combined_schema = SchemaComposer.create_model(
         [weather_llm, recipe_llm, combined_llm], name="ToolsSchema"
     )
 
     # Print model fields
-    print(f"\nFields in {combined_schema.__name__}:")
-    for field_name, field_info in combined_schema.model_fields.items():
-        field_type = field_info.annotation
-        print(f"  - {field_name}: {field_type}")
+    for _field_name, _field_info in combined_schema.model_fields.items():
+        pass

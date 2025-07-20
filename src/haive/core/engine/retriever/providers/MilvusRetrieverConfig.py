@@ -1,5 +1,6 @@
 """Milvus Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Milvus retriever,
 which uses Milvus vector database for high-performance similarity search.
 Milvus is an open-source vector database built for scalable similarity search
@@ -131,7 +132,7 @@ class MilvusRetrieverConfig(BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a Milvus retriever from this configuration.
 
         Returns:

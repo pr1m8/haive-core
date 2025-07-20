@@ -1,10 +1,9 @@
-"""
-Basic test structure for the schema compatibility module.
+"""Basic test structure for the schema compatibility module.
 
 This provides a template for comprehensive testing of all module components.
 """
 
-from typing import List, Optional
+from typing import Optional
 
 import pytest
 from pydantic import BaseModel, Field
@@ -39,7 +38,7 @@ class TestTypeAnalyzer:
         analyzer = TypeAnalyzer()
 
         # Test List[str]
-        info = analyzer.get_type_info(List[str])
+        info = analyzer.get_type_info(list[str])
         assert info.is_generic
         assert info.origin == list
         assert str in info.args
@@ -59,7 +58,7 @@ class TestTypeAnalyzer:
         class TestSchema(BaseModel):
             name: str
             age: int = 0
-            tags: List[str] = Field(default_factory=list)
+            tags: list[str] = Field(default_factory=list)
 
         analyzer = TypeAnalyzer()
         schema_info = analyzer.analyze_schema(TestSchema)
@@ -121,7 +120,7 @@ class TestCompatibilityChecker:
             field: str
 
         class Target(BaseModel):
-            field: Optional[str] = None
+            field: str | None = None
 
         result = check_compatibility(Source, Target)
         assert result.is_compatible
@@ -371,7 +370,9 @@ class TestLangChainConverters:
         )
 
         converter = MessageConverter()
-        context = ConversionContext(source_type="HumanMessage", target_type="AIMessage")
+        context = ConversionContext(
+            source_type="HumanMessage",
+            target_type="AIMessage")
 
         human_msg = HumanMessage(content="Hello")
         ai_msg = converter.convert(human_msg, context)
@@ -418,11 +419,11 @@ class TestIntegration:
         # Define schemas
         class SourceAgent(BaseModel):
             query: str
-            context: List[str] = Field(default_factory=list)
+            context: list[str] = Field(default_factory=list)
 
         class TargetAgent(BaseModel):
             question: str  # Different name!
-            context: List[str] = Field(default_factory=list)
+            context: list[str] = Field(default_factory=list)
             max_tokens: int = 1000
 
         # Check compatibility

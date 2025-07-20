@@ -9,9 +9,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from haive.core.engine.document.loaders.sources.source_types import (
-    SourceCategory,
-)
+from haive.core.engine.document.loaders.sources.source_types import SourceCategory
 from haive.core.engine.document.loaders.sources.specialized_sources import (
     ArxivSource,
     AudioFileSource,
@@ -71,7 +69,9 @@ def github_source() -> GitHubSource:
         category=SourceCategory.SPECIALIZED,
         repo="owner/repository",
         access_token="test-token",
-        data_types=[DevelopmentDataType.ISSUES, DevelopmentDataType.PULL_REQUESTS],
+        data_types=[
+            DevelopmentDataType.ISSUES,
+            DevelopmentDataType.PULL_REQUESTS],
     )
 
 
@@ -115,15 +115,17 @@ class TestSpecializedPlatformDetection:
         assert result is None
 
     @pytest.mark.parametrize(
-        "url,expected",
+        ("url", "expected"),
         [
             ("https://pubmed.ncbi.nlm.nih.gov/12345678", SpecializedPlatform.PUBMED),
             ("pmid:12345678", SpecializedPlatform.PUBMED),
             ("https://en.wikipedia.org/wiki/Python", SpecializedPlatform.WIKIPEDIA),
-            ("https://www.bilibili.com/video/BV1234567", SpecializedPlatform.BILIBILI),
+            ("https://www.bilibili.com/video/BV1234567",
+             SpecializedPlatform.BILIBILI),
         ],
     )
-    def test_detect_various_platforms(self, url: str, expected: SpecializedPlatform):
+    def test_detect_various_platforms(
+            self, url: str, expected: SpecializedPlatform):
         """Test detecting various specialized platforms."""
         result = detect_specialized_platform(url)
         assert result == expected
@@ -181,7 +183,7 @@ class TestAcademicSources:
         assert source.max_results == 20
 
     @pytest.mark.parametrize(
-        "field,expected",
+        ("field", "expected"),
         [
             (ResearchField.PHYSICS, "physics"),
             (ResearchField.COMPUTER_SCIENCE, "cs"),
@@ -259,7 +261,7 @@ class TestMediaSources:
         assert kwargs["timestamps"] is True
 
     @pytest.mark.parametrize(
-        "media_type,expected",
+        ("media_type", "expected"),
         [
             (MediaType.VIDEO, "video"),
             (MediaType.AUDIO, "audio"),
@@ -325,7 +327,7 @@ class TestDevelopmentSources:
         assert kwargs["file_filter"] == "*.py"
 
     @pytest.mark.parametrize(
-        "data_type,expected",
+        ("data_type", "expected"),
         [
             (DevelopmentDataType.REPOSITORIES, "repositories"),
             (DevelopmentDataType.ISSUES, "issues"),
@@ -454,13 +456,16 @@ class TestSpecializedSourceIntegration:
     """Integration tests for specialized sources with mock loaders."""
 
     @patch("langchain_community.document_loaders.ArxivLoader")
-    async def test_arxiv_loader_integration(self, mock_loader_class, arxiv_source):
+    async def test_arxiv_loader_integration(
+            self, mock_loader_class, arxiv_source):
         """Test arXiv source integration with mock loader."""
         # Mock the loader instance
         mock_loader = MagicMock()
         mock_loader.load.return_value = [
-            {"content": "Paper 1 abstract", "metadata": {"title": "Quantum Computing"}},
-            {"content": "Paper 2 abstract", "metadata": {"title": "Machine Learning"}},
+            {"content": "Paper 1 abstract",
+             "metadata": {"title": "Quantum Computing"}},
+            {"content": "Paper 2 abstract",
+             "metadata": {"title": "Machine Learning"}},
         ]
         mock_loader_class.return_value = mock_loader
 
@@ -476,7 +481,7 @@ class TestSpecializedSourceIntegration:
         mock_loader_class.assert_called_once()
 
     @pytest.mark.parametrize(
-        "platform,loader_class",
+        ("platform", "loader_class"),
         [
             (SpecializedPlatform.ARXIV, "ArxivLoader"),
             (SpecializedPlatform.PUBMED, "PubMedLoader"),

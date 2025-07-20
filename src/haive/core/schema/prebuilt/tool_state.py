@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from langchain_core.tools import BaseTool
 from pydantic import Field, computed_field, model_validator
@@ -63,13 +63,13 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
     # Tool-related fields - inherited from ToolRouteMixin
     # tools: List[Any] - provided by ToolRouteMixin
     # tool_routes: Dict[str, str] - provided by ToolRouteMixin
-    content: Optional[str] = Field(default=None, description="Content field")
-    output_schemas: Dict[str, Any] = Field(
+    content: str | None = Field(default=None, description="Content field")
+    output_schemas: dict[str, Any] = Field(
         default_factory=dict, description="Output schemas for tools"
     )
 
     # Tool routing configuration
-    engine_route_config: Dict[str, List[str]] = Field(
+    engine_route_config: dict[str, list[str]] = Field(
         default_factory=lambda: {
             "llm": ["langchain_tool", "function", "pydantic_model"],
             "aug_llm": ["langchain_tool", "function", "pydantic_model"],
@@ -80,9 +80,11 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
     )
 
     @model_validator(mode="after")
-    def sync_tools_and_update_routes(self) -> "ToolState":
-        """
-        Sync tools from engines and update tool routes after model creation.
+
+
+    @classmethod
+    def sync_tools_and_update_routes(cls) -> "ToolState":
+        """Sync tools from engines and update tool routes after model creation.
 
         This runs after the parent validators, so engines and tool routes are already set up.
         """
@@ -118,7 +120,8 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
         # Sync tools from class-level engines if they haven't been synced yet
         if hasattr(self.__class__, "engines") and not self.tools:
             logger.debug(
-                f"Initial tool sync from class engines for {self.__class__.__name__}"
+                f"Initial tool sync from class engines for {
+                    self.__class__.__name__}"
             )
             self._sync_tools_from_class_engines()
 
@@ -136,7 +139,9 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
         for field_name, field_value in self.__dict__.items():
             if hasattr(field_value, "tools") and hasattr(field_value, "engine_type"):
                 logger.debug(
-                    f"Found instance engine field '{field_name}' with {len(field_value.tools)} tools"
+                    f"Found instance engine field '{field_name}' with {
+                        len(
+                            field_value.tools)} tools"
                 )
 
                 # Sync tools from this engine
@@ -151,14 +156,16 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
                 # Sync tool routes from this engine
                 if hasattr(field_value, "tool_routes") and field_value.tool_routes:
                     logger.debug(
-                        f"Syncing tool routes from instance engine '{field_name}': {field_value.tool_routes}"
+                        f"Syncing tool routes from instance engine '{field_name}': {
+                            field_value.tool_routes}"
                     )
                     self.tool_routes.update(field_value.tool_routes)
 
                 # Sync tool metadata from this engine
                 if hasattr(field_value, "tool_metadata") and field_value.tool_metadata:
                     logger.debug(
-                        f"Syncing tool metadata from instance engine '{field_name}': {field_value.tool_metadata}"
+                        f"Syncing tool metadata from instance engine '{field_name}': {
+                            field_value.tool_metadata}"
                     )
                     self.tool_metadata.update(field_value.tool_metadata)
 
@@ -181,8 +188,7 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
                         )
 
     def _sync_tools_to_engines_by_route(self) -> None:
-        """
-        Sync tools to appropriate engines based on their routes and engine types.
+        """Sync tools to appropriate engines based on their routes and engine types.
         Only syncs tools to engines that can handle their specific route type.
         """
         # Sync to class-level engines
@@ -213,8 +219,7 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
         engine_type: Any,
         is_class_level: bool = False,
     ) -> None:
-        """
-        Sync tools to a specific engine based on routing compatibility.
+        """Sync tools to a specific engine based on routing compatibility.
 
         Args:
             engine: The engine object
@@ -226,10 +231,9 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
         level_str = "class" if is_class_level else "instance"
 
         # Convert engine_type to string if it's an enum
-        if hasattr(engine_type, "value"):
-            engine_type_str = engine_type.value
-        else:
-            engine_type_str = str(engine_type)
+        engine_type_str = (
+            engine_type.value if hasattr(engine_type, "value") else str(engine_type)
+        )
 
         for tool in self.tools:
             tool_name = getattr(tool, "name", str(tool))
@@ -254,8 +258,7 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
     def _should_sync_tool_to_engine(
         self, tool_route: str, engine_type: str, engine: Any
     ) -> bool:
-        """
-        Determine if a tool should be synced to an engine based on routing logic.
+        """Determine if a tool should be synced to an engine based on routing logic.
 
         Args:
             tool_route: The route type of the tool (e.g., 'langchain_tool', 'pydantic_model', etc.)
@@ -280,9 +283,8 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
         # Default: don't sync unless we're sure
         return False
 
-    def configure_engine_routes(self, engine_type: str, routes: List[str]) -> None:
-        """
-        Configure which tool routes an engine type should accept.
+    def configure_engine_routes(self, engine_type: str, routes: list[str]) -> None:
+        """Configure which tool routes an engine type should accept.
 
         Args:
             engine_type: The engine type (e.g., 'llm', 'retriever', etc.)
@@ -297,8 +299,7 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
         self._sync_tools_to_engines_by_route()
 
     def add_engine_route(self, engine_type: str, route: str) -> None:
-        """
-        Add a tool route to an engine type's accepted routes.
+        """Add a tool route to an engine type's accepted routes.
 
         Args:
             engine_type: The engine type
@@ -315,8 +316,7 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
             self._sync_tools_to_engines_by_route()
 
     def remove_engine_route(self, engine_type: str, route: str) -> None:
-        """
-        Remove a tool route from an engine type's accepted routes.
+        """Remove a tool route from an engine type's accepted routes.
 
         Args:
             engine_type: The engine type
@@ -357,25 +357,23 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
         # Fallback to local implementation
         if hasattr(tool, "name"):
             return tool.name
-        elif isinstance(tool, type) and hasattr(tool, "__name__"):
+        if (isinstance(tool, type) and hasattr(tool, "__name__")) or hasattr(
+            tool, "__name__"
+        ):
             return tool.__name__
-        elif hasattr(tool, "__name__"):
-            return tool.__name__
-        else:
-            return f"tool_{index}"
+        return f"tool_{index}"
 
     def _get_tool_route(self, tool: Any) -> str:
         """Determine the route type for a tool."""
         if isinstance(tool, type) and self._is_basemodel_subclass(tool):
             return "pydantic_model"
-        elif isinstance(tool, BaseTool) or (
+        if isinstance(tool, BaseTool) or (
             isinstance(tool, type) and issubclass(tool, BaseTool)
         ):
             return "langchain_tool"
-        elif callable(tool):
+        if callable(tool):
             return "function"
-        else:
-            return "unknown"
+        return "unknown"
 
     def _is_basemodel_subclass(self, tool: Any) -> bool:
         """Check if tool is a BaseModel subclass."""
@@ -388,9 +386,8 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
 
     @computed_field
     @property
-    def tool_types(self) -> Dict[str, str]:
-        """
-        Computed field for backward compatibility.
+    def tool_types(self) -> dict[str, str]:
+        """Computed field for backward compatibility.
 
         Maps the new tool_routes to the old tool_types interface:
         - pydantic_model → parse_output
@@ -417,11 +414,10 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
     def add_tool(
         self,
         tool: Any,
-        route: Optional[str] = None,
-        target_engine: Optional[str] = None,
+        route: str | None = None,
+        target_engine: str | None = None,
     ) -> None:
-        """
-        Add a tool and update tool routes - matches AugLLMConfig pattern.
+        """Add a tool and update tool routes - matches AugLLMConfig pattern.
         Syncs to appropriate engines based on routing logic.
 
         Args:
@@ -435,14 +431,16 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
             # Determine tool name
             tool_name = self._get_tool_name(tool, len(self.tools))
 
-            # Set route - use explicit route if provided, otherwise auto-determine
+            # Set route - use explicit route if provided, otherwise
+            # auto-determine
             if route:
                 self.tool_routes[tool_name] = route
             else:
                 self.tool_routes[tool_name] = self._get_tool_route(tool)
 
             logger.debug(
-                f"Added tool '{tool_name}' with route '{self.tool_routes[tool_name]}'"
+                f"Added tool '{tool_name}' with route '{
+                    self.tool_routes[tool_name]}'"
             )
 
             # Sync this new tool to engines
@@ -452,10 +450,9 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
                 self._sync_single_tool_to_engines(tool)
 
     def add_tool_to_engine(
-        self, tool: Any, engine_name: str, route: Optional[str] = None
+        self, tool: Any, engine_name: str, route: str | None = None
     ) -> None:
-        """
-        Add a tool to a specific engine, bypassing routing logic.
+        """Add a tool to a specific engine, bypassing routing logic.
 
         Args:
             tool: Tool to add
@@ -574,8 +571,7 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
                     )
 
     def remove_tool(self, tool: Any) -> None:
-        """
-        Remove a tool and update tool routes.
+        """Remove a tool and update tool routes.
         Also removes from all engines.
 
         Args:
@@ -637,9 +633,8 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
                         f"Removed tool '{tool_name}' from instance engine '{engine_name}'"
                     )
 
-    def get_tool_by_name(self, tool_name: str) -> Optional[Any]:
-        """
-        Get a tool by its name.
+    def get_tool_by_name(self, tool_name: str) -> Any | None:
+        """Get a tool by its name.
 
         Args:
             tool_name: Name of tool to retrieve
@@ -652,9 +647,8 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
                 return tool
         return None
 
-    def get_tools_by_route(self, route: str) -> List[Any]:
-        """
-        Get all tools of a specific route type.
+    def get_tools_by_route(self, route: str) -> list[Any]:
+        """Get all tools of a specific route type.
 
         Args:
             route: Route type to retrieve (pydantic_model, langchain_tool, function, unknown)
@@ -670,9 +664,8 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
                     result.append(tool)
         return result
 
-    def get_tools_by_type(self, tool_type: str) -> List[Any]:
-        """
-        Get all tools of a specific type (legacy interface).
+    def get_tools_by_type(self, tool_type: str) -> list[Any]:
+        """Get all tools of a specific type (legacy interface).
 
         Args:
             tool_type: Type of tools to retrieve (parse_output, tool_node)
@@ -693,8 +686,7 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
         return result
 
     def has_tool_route(self, route: str) -> bool:
-        """
-        Check if any tools of a specific route exist.
+        """Check if any tools of a specific route exist.
 
         Args:
             route: Route to check for (pydantic_model, langchain_tool, function, unknown)
@@ -705,8 +697,7 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
         return route in self.tool_routes.values()
 
     def has_tool_type(self, tool_type: str) -> bool:
-        """
-        Check if any tools of a specific type exist (legacy interface).
+        """Check if any tools of a specific type exist (legacy interface).
 
         Args:
             tool_type: Type to check for (parse_output, tool_node)
@@ -717,20 +708,15 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
         return tool_type in self.tool_types.values()
 
     def refresh_tool_routes(self) -> None:
-        """
-        Manually refresh tool routes if needed.
-        """
+        """Manually refresh tool routes if needed."""
         self._sync_tool_routes()
 
     def update_tool_types(self) -> None:
-        """
-        Legacy interface - now calls refresh_tool_routes.
-        """
+        """Legacy interface - now calls refresh_tool_routes."""
         self.refresh_tool_routes()
 
-    def get_tool_route(self, tool_name: str) -> Optional[str]:
-        """
-        Get the route of a specific tool.
+    def get_tool_route(self, tool_name: str) -> str | None:
+        """Get the route of a specific tool.
 
         Args:
             tool_name: Name of the tool
@@ -740,9 +726,8 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
         """
         return self.tool_routes.get(tool_name)
 
-    def get_tool_type(self, tool_name: str) -> Optional[str]:
-        """
-        Get the type of a specific tool (legacy interface).
+    def get_tool_type(self, tool_name: str) -> str | None:
+        """Get the type of a specific tool (legacy interface).
 
         Args:
             tool_name: Name of the tool

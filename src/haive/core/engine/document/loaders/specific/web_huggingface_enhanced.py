@@ -5,7 +5,6 @@ organizations, and extended dataset/model features.
 """
 
 import logging
-from typing import List, Optional
 
 from langchain_core.document_loaders.base import BaseLoader
 from langchain_core.documents import Document
@@ -20,9 +19,9 @@ class HuggingFacePapersSource(WebSource):
 
     def __init__(
         self,
-        model_id: Optional[str] = None,
-        dataset_id: Optional[str] = None,
-        paper_id: Optional[str] = None,
+        model_id: str | None = None,
+        dataset_id: str | None = None,
+        paper_id: str | None = None,
         include_abstract: bool = True,
         include_authors: bool = True,
         include_citations: bool = False,
@@ -44,7 +43,7 @@ class HuggingFacePapersSource(WebSource):
         self.include_authors = include_authors
         self.include_citations = include_citations
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a HuggingFace Papers loader."""
         try:
             return HuggingFacePapersLoader(
@@ -57,7 +56,7 @@ class HuggingFacePapersSource(WebSource):
             )
 
         except Exception as e:
-            logger.error(f"Failed to create HuggingFace Papers loader: {e}")
+            logger.exception(f"Failed to create HuggingFace Papers loader: {e}")
             return None
 
 
@@ -66,8 +65,8 @@ class HuggingFaceCollectionsSource(WebSource):
 
     def __init__(
         self,
-        collection_id: Optional[str] = None,
-        username: Optional[str] = None,
+        collection_id: str | None = None,
+        username: str | None = None,
         include_models: bool = True,
         include_datasets: bool = True,
         include_spaces: bool = True,
@@ -87,7 +86,7 @@ class HuggingFaceCollectionsSource(WebSource):
         self.include_datasets = include_datasets
         self.include_spaces = include_spaces
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a HuggingFace Collections loader."""
         try:
             return HuggingFaceCollectionsLoader(
@@ -99,7 +98,7 @@ class HuggingFaceCollectionsSource(WebSource):
             )
 
         except Exception as e:
-            logger.error(f"Failed to create HuggingFace Collections loader: {e}")
+            logger.exception(f"Failed to create HuggingFace Collections loader: {e}")
             return None
 
 
@@ -123,7 +122,7 @@ class HuggingFaceOrganizationsSource(WebSource):
         self.include_datasets = include_datasets
         self.include_spaces = include_spaces
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a HuggingFace Organizations loader."""
         try:
             return HuggingFaceOrganizationsLoader(
@@ -135,7 +134,7 @@ class HuggingFaceOrganizationsSource(WebSource):
             )
 
         except Exception as e:
-            logger.error(f"Failed to create HuggingFace Organizations loader: {e}")
+            logger.exception(f"Failed to create HuggingFace Organizations loader: {e}")
             return None
 
 
@@ -145,13 +144,13 @@ class HuggingFaceExtendedDatasetSource(WebSource):
     def __init__(
         self,
         dataset_name: str,
-        config_name: Optional[str] = None,
-        split: Optional[str] = None,
+        config_name: str | None = None,
+        split: str | None = None,
         streaming: bool = False,
-        num_examples: Optional[int] = None,
+        num_examples: int | None = None,
         include_dataset_info: bool = True,
         include_feature_info: bool = True,
-        cache_dir: Optional[str] = None,
+        cache_dir: str | None = None,
         **kwargs,
     ):
         source_path = f"huggingface://datasets/{dataset_name}"
@@ -165,7 +164,7 @@ class HuggingFaceExtendedDatasetSource(WebSource):
         self.include_feature_info = include_feature_info
         self.cache_dir = cache_dir
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create an extended HuggingFace Dataset loader."""
         try:
             from langchain_community.document_loaders import HuggingFaceDatasetLoader
@@ -196,7 +195,9 @@ class HuggingFaceExtendedDatasetSource(WebSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create extended HuggingFace Dataset loader: {e}")
+            logger.exception(
+                f"Failed to create extended HuggingFace Dataset loader: {e}"
+            )
             return None
 
 
@@ -222,7 +223,7 @@ class HuggingFaceModelCardSource(WebSource):
         self.include_training_args = include_training_args
         self.include_carbon_footprint = include_carbon_footprint
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a HuggingFace Model Card loader."""
         try:
             return HuggingFaceModelCardLoader(
@@ -235,7 +236,7 @@ class HuggingFaceModelCardSource(WebSource):
             )
 
         except Exception as e:
-            logger.error(f"Failed to create HuggingFace Model Card loader: {e}")
+            logger.exception(f"Failed to create HuggingFace Model Card loader: {e}")
             return None
 
 
@@ -247,9 +248,9 @@ class HuggingFacePapersLoader(BaseLoader):
 
     def __init__(
         self,
-        model_id: Optional[str] = None,
-        dataset_id: Optional[str] = None,
-        paper_id: Optional[str] = None,
+        model_id: str | None = None,
+        dataset_id: str | None = None,
+        paper_id: str | None = None,
         include_abstract: bool = True,
         include_authors: bool = True,
         include_citations: bool = False,
@@ -261,7 +262,7 @@ class HuggingFacePapersLoader(BaseLoader):
         self.include_authors = include_authors
         self.include_citations = include_citations
 
-    def load(self) -> List[Document]:
+    def load(self) -> list[Document]:
         """Load papers from HuggingFace."""
         try:
             from huggingface_hub import HfApi
@@ -303,14 +304,15 @@ class HuggingFacePapersLoader(BaseLoader):
                             Document(page_content=content, metadata=metadata)
                         )
                 except Exception as e:
-                    logger.error(f"Failed to get model papers: {e}")
+                    logger.exception(f"Failed to get model papers: {e}")
 
             elif self.dataset_id:
                 # Load papers associated with a dataset
                 try:
                     dataset_info = api.dataset_info(self.dataset_id)
                     if hasattr(dataset_info, "citation") and dataset_info.citation:
-                        content = f"# Citation for Dataset: {self.dataset_id}\n\n"
+                        content = f"# Citation for Dataset: {
+                            self.dataset_id}\n\n"
                         content += f"```bibtex\n{dataset_info.citation}\n```\n"
 
                         metadata = {
@@ -323,7 +325,7 @@ class HuggingFacePapersLoader(BaseLoader):
                             Document(page_content=content, metadata=metadata)
                         )
                 except Exception as e:
-                    logger.error(f"Failed to get dataset papers: {e}")
+                    logger.exception(f"Failed to get dataset papers: {e}")
 
             return documents
 
@@ -333,7 +335,7 @@ class HuggingFacePapersLoader(BaseLoader):
             )
             return []
         except Exception as e:
-            logger.error(f"Failed to load HuggingFace papers: {e}")
+            logger.exception(f"Failed to load HuggingFace papers: {e}")
             return []
 
 
@@ -342,8 +344,8 @@ class HuggingFaceCollectionsLoader(BaseLoader):
 
     def __init__(
         self,
-        collection_id: Optional[str] = None,
-        username: Optional[str] = None,
+        collection_id: str | None = None,
+        username: str | None = None,
         include_models: bool = True,
         include_datasets: bool = True,
         include_spaces: bool = True,
@@ -354,7 +356,7 @@ class HuggingFaceCollectionsLoader(BaseLoader):
         self.include_datasets = include_datasets
         self.include_spaces = include_spaces
 
-    def load(self) -> List[Document]:
+    def load(self) -> list[Document]:
         """Load collections from HuggingFace."""
         try:
             from huggingface_hub import HfApi
@@ -394,7 +396,7 @@ class HuggingFaceCollectionsLoader(BaseLoader):
             )
             return []
         except Exception as e:
-            logger.error(f"Failed to load HuggingFace collections: {e}")
+            logger.exception(f"Failed to load HuggingFace collections: {e}")
             return []
 
 
@@ -415,7 +417,7 @@ class HuggingFaceOrganizationsLoader(BaseLoader):
         self.include_datasets = include_datasets
         self.include_spaces = include_spaces
 
-    def load(self) -> List[Document]:
+    def load(self) -> list[Document]:
         """Load organization data from HuggingFace."""
         try:
             from huggingface_hub import HfApi
@@ -438,7 +440,7 @@ class HuggingFaceOrganizationsLoader(BaseLoader):
                             content += f"  - Likes: {model.likes}\n"
                     content += "\n"
                 except Exception as e:
-                    logger.error(f"Failed to get organization models: {e}")
+                    logger.exception(f"Failed to get organization models: {e}")
 
             # Get organization datasets
             if self.include_datasets:
@@ -453,7 +455,7 @@ class HuggingFaceOrganizationsLoader(BaseLoader):
                             content += f"  - Likes: {dataset.likes}\n"
                     content += "\n"
                 except Exception as e:
-                    logger.error(f"Failed to get organization datasets: {e}")
+                    logger.exception(f"Failed to get organization datasets: {e}")
 
             # Get organization spaces
             if self.include_spaces:
@@ -466,7 +468,7 @@ class HuggingFaceOrganizationsLoader(BaseLoader):
                             content += f"  - Likes: {space.likes}\n"
                     content += "\n"
                 except Exception as e:
-                    logger.error(f"Failed to get organization spaces: {e}")
+                    logger.exception(f"Failed to get organization spaces: {e}")
 
             metadata = {
                 "source": f"huggingface://organizations/{self.org_name}",
@@ -484,7 +486,7 @@ class HuggingFaceOrganizationsLoader(BaseLoader):
             )
             return []
         except Exception as e:
-            logger.error(f"Failed to load HuggingFace organization: {e}")
+            logger.exception(f"Failed to load HuggingFace organization: {e}")
             return []
 
 
@@ -495,10 +497,10 @@ class ExtendedHuggingFaceDatasetLoader(BaseLoader):
         self,
         base_loader: BaseLoader,
         dataset_name: str,
-        config_name: Optional[str] = None,
-        split: Optional[str] = None,
+        config_name: str | None = None,
+        split: str | None = None,
         streaming: bool = False,
-        num_examples: Optional[int] = None,
+        num_examples: int | None = None,
         include_dataset_info: bool = True,
         include_feature_info: bool = True,
     ):
@@ -511,7 +513,7 @@ class ExtendedHuggingFaceDatasetLoader(BaseLoader):
         self.include_dataset_info = include_dataset_info
         self.include_feature_info = include_feature_info
 
-    def load(self) -> List[Document]:
+    def load(self) -> list[Document]:
         """Load dataset with extended information."""
         documents = []
 
@@ -525,7 +527,8 @@ class ExtendedHuggingFaceDatasetLoader(BaseLoader):
 
                 builder = load_dataset_builder(self.dataset_name, self.config_name)
                 info_content = f"# Dataset Info: {self.dataset_name}\n\n"
-                info_content += f"**Description:** {builder.info.description}\n"
+                info_content += f"**Description:** {
+                    builder.info.description}\n"
                 info_content += f"**Version:** {builder.info.version}\n"
                 info_content += f"**License:** {builder.info.license}\n"
 
@@ -549,12 +552,12 @@ class ExtendedHuggingFaceDatasetLoader(BaseLoader):
             documents.extend(base_docs)
 
         except Exception as e:
-            logger.error(f"Failed to load extended dataset info: {e}")
+            logger.exception(f"Failed to load extended dataset info: {e}")
             # Fallback to base loader
             try:
                 documents = self.base_loader.load()
             except Exception as e2:
-                logger.error(f"Failed to load base dataset: {e2}")
+                logger.exception(f"Failed to load base dataset: {e2}")
 
         return documents
 
@@ -578,7 +581,7 @@ class HuggingFaceModelCardLoader(BaseLoader):
         self.include_training_args = include_training_args
         self.include_carbon_footprint = include_carbon_footprint
 
-    def load(self) -> List[Document]:
+    def load(self) -> list[Document]:
         """Load model card and extended information."""
         try:
             from huggingface_hub import HfApi, hf_hub_download
@@ -609,7 +612,7 @@ class HuggingFaceModelCardLoader(BaseLoader):
                         filename="README.md",
                         repo_type="model",
                     )
-                    with open(readme_path, "r") as f:
+                    with open(readme_path) as f:
                         readme_content = f.read()
                     content += "## Model Card\n\n"
                     content += readme_content + "\n\n"
@@ -624,7 +627,7 @@ class HuggingFaceModelCardLoader(BaseLoader):
                         filename="config.json",
                         repo_type="model",
                     )
-                    with open(config_path, "r") as f:
+                    with open(config_path) as f:
                         config_content = f.read()
                     content += "## Model Config\n\n```json\n"
                     content += config_content + "\n```\n\n"
@@ -651,20 +654,20 @@ class HuggingFaceModelCardLoader(BaseLoader):
             )
             return []
         except Exception as e:
-            logger.error(f"Failed to load model card: {e}")
+            logger.exception(f"Failed to load model card: {e}")
             return []
 
 
 # Export enhanced HuggingFace sources
 __all__ = [
-    "HuggingFacePapersSource",
-    "HuggingFaceCollectionsSource",
-    "HuggingFaceOrganizationsSource",
-    "HuggingFaceExtendedDatasetSource",
-    "HuggingFaceModelCardSource",
-    "HuggingFacePapersLoader",
-    "HuggingFaceCollectionsLoader",
-    "HuggingFaceOrganizationsLoader",
     "ExtendedHuggingFaceDatasetLoader",
+    "HuggingFaceCollectionsLoader",
+    "HuggingFaceCollectionsSource",
+    "HuggingFaceExtendedDatasetSource",
     "HuggingFaceModelCardLoader",
+    "HuggingFaceModelCardSource",
+    "HuggingFaceOrganizationsLoader",
+    "HuggingFaceOrganizationsSource",
+    "HuggingFacePapersLoader",
+    "HuggingFacePapersSource",
 ]

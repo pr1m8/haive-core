@@ -2,7 +2,6 @@
 
 import logging
 import uuid
-from typing import List
 
 from langchain_core.documents import Document
 from langchain_core.prompts import ChatPromptTemplate
@@ -100,7 +99,8 @@ def create_test_components():
         embedding_model=state.embedding_model,
         k=2,
     )
-    console.print("[green]✓[/green] Created vector store with sample documents")
+    console.print(
+        "[green]✓[/green] Created vector store with sample documents")
 
     # Create retriever
     state.retriever = VectorStoreRetrieverConfig(
@@ -119,10 +119,10 @@ def create_test_components():
                 "human",
                 """
         Please analyze the following documents based on this query: {query}
-        
+
         Context documents:
         {context}
-        
+
         Provide an analysis including:
         - Main topics discussed
         - Key points
@@ -136,11 +136,12 @@ def create_test_components():
     # Define the structured output model
     class AnalysisOutput(BaseModel):
         topic: str = Field(description="Main topic of the documents")
-        key_points: List[str] = Field(
+        key_points: list[str] = Field(
             description="Key points extracted from the documents"
         )
         sentiment: str = Field(description="Overall sentiment analysis")
-        questions: List[str] = Field(description="Questions for further research")
+        questions: list[str] = Field(
+            description="Questions for further research")
 
     state.analysis_llm = AugLLMConfig(
         name="document_analyzer",
@@ -149,7 +150,8 @@ def create_test_components():
         structured_output_model=AnalysisOutput,
         llm_config=AzureLLMConfig(model="gpt-4o"),
     )
-    console.print("[green]✓[/green] Created analysis LLM with structured output model")
+    console.print(
+        "[green]✓[/green] Created analysis LLM with structured output model")
 
     # Create summary LLM
     summary_prompt = ChatPromptTemplate.from_messages(
@@ -159,13 +161,13 @@ def create_test_components():
                 "human",
                 """
         Create a summary report based on this analysis:
-        
+
         Topic: {topic}
         Key Points: {key_points}
         Sentiment: {sentiment}
         Questions: {questions}
         References: {references}
-        
+
         Provide a concise summary of the information.
         """,
             ),
@@ -227,15 +229,18 @@ def create_node_functions(registry):
     NodeFactory.set_registry(registry)
 
     # Debug each node creation separately
-    state.retrieval_node = create_node_function_safe("retrieve", state.retrieval_config)
+    state.retrieval_node = create_node_function_safe(
+        "retrieve", state.retrieval_config)
     if state.retrieval_node:
         console.print("[green]✓[/green] Created retrieval node function")
 
-    state.analysis_node = create_node_function_safe("analyze", state.analysis_config)
+    state.analysis_node = create_node_function_safe(
+        "analyze", state.analysis_config)
     if state.analysis_node:
         console.print("[green]✓[/green] Created analysis node function")
 
-    state.summary_node = create_node_function_safe("summarize", state.summary_config)
+    state.summary_node = create_node_function_safe(
+        "summarize", state.summary_config)
     if state.summary_node:
         console.print("[green]✓[/green] Created summary node function")
 
@@ -427,7 +432,10 @@ def examine_retrieval_result(retrieval_result):
 
         # Check update attribute
         console.print(
-            f"[dim]Command has update: {hasattr(retrieval_result, 'update')}[/dim]"
+            f"[dim]Command has update: {
+                hasattr(
+                    retrieval_result,
+                    'update')}[/dim]"
         )
 
         # Handle update as attribute or method
@@ -440,7 +448,8 @@ def examine_retrieval_result(retrieval_result):
                 try:
                     update_data = retrieval_result.update()
                     console.print(
-                        f"[dim]Update() returned type: {type(update_data)}[/dim]"
+                        f"[dim]Update() returned type: {
+                            type(update_data)}[/dim]"
                     )
                 except Exception as e:
                     console.print(f"[red]Error calling update(): {e}[/red]")
@@ -460,7 +469,8 @@ def examine_retrieval_result(retrieval_result):
                         if len(doc.page_content) > 50
                         else doc.page_content
                     )
-                    console.print(f"  {i}. [italic]{source}[/italic]: {content}")
+                    console.print(
+                        f"  {i}. [italic]{source}[/italic]: {content}")
     else:
         # Not a Command object
         console.print("[dim]Result is not a Command object[/dim]")
@@ -479,7 +489,10 @@ def examine_analysis_result(analysis_result):
 
         # Check update attribute
         console.print(
-            f"[dim]Command has update: {hasattr(analysis_result, 'update')}[/dim]"
+            f"[dim]Command has update: {
+                hasattr(
+                    analysis_result,
+                    'update')}[/dim]"
         )
 
         # Handle update as attribute or method
@@ -492,7 +505,8 @@ def examine_analysis_result(analysis_result):
                 try:
                     update_data = analysis_result.update()
                     console.print(
-                        f"[dim]Update() returned type: {type(update_data)}[/dim]"
+                        f"[dim]Update() returned type: {
+                            type(update_data)}[/dim]"
                     )
                 except Exception as e:
                     console.print(f"[red]Error calling update(): {e}[/red]")
@@ -509,7 +523,8 @@ def examine_analysis_result(analysis_result):
                         display_value = (
                             value[:100] + "..." if len(value) > 100 else value
                         )
-                        console.print(f"  [italic]{key}[/italic]: {display_value}")
+                        console.print(
+                            f"  [italic]{key}[/italic]: {display_value}")
                     elif isinstance(value, list):
                         console.print(f"  [italic]{key}[/italic]:")
                         for item in value[:3]:  # Show first 3 items
@@ -543,7 +558,10 @@ def examine_summary_result(summary_result):
 
         # Check update attribute
         console.print(
-            f"[dim]Command has update: {hasattr(summary_result, 'update')}[/dim]"
+            f"[dim]Command has update: {
+                hasattr(
+                    summary_result,
+                    'update')}[/dim]"
         )
 
         # Handle update as attribute or method
@@ -556,7 +574,8 @@ def examine_summary_result(summary_result):
                 try:
                     update_data = summary_result.update()
                     console.print(
-                        f"[dim]Update() returned type: {type(update_data)}[/dim]"
+                        f"[dim]Update() returned type: {
+                            type(update_data)}[/dim]"
                     )
                 except Exception as e:
                     console.print(f"[red]Error calling update(): {e}[/red]")
@@ -573,7 +592,8 @@ def examine_summary_result(summary_result):
                         display_value = (
                             value[:150] + "..." if len(value) > 150 else value
                         )
-                        console.print(f"  [italic]{key}[/italic]: {display_value}")
+                        console.print(
+                            f"  [italic]{key}[/italic]: {display_value}")
                     else:
                         console.print(
                             f"  [italic]{key}[/italic]: {str(value)[:100]}..."

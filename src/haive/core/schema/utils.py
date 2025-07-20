@@ -317,7 +317,8 @@ class SchemaUtils:
                 reducer_name = getattr(reducer, "__name__", str(reducer))
                 serializable_reducers[field] = reducer_name
 
-            # Store both the serializable names and the actual reducer functions
+            # Store both the serializable names and the actual reducer
+            # functions
             model.__serializable_reducers__ = serializable_reducers
             model.__reducer_fields__ = reducers
 

@@ -16,7 +16,8 @@ logger = logging.getLogger("test_node_factory")
 
 # Define a proper BaseModel for structured output
 class Plan(BaseModel):
-    steps: list[str] = Field(description="A list of steps to complete the task")
+    steps: list[str] = Field(
+        description="A list of steps to complete the task")
 
 
 def test_node_creation_with_schema_composer():
@@ -24,7 +25,8 @@ def test_node_creation_with_schema_composer():
     logger.info("Starting test_node_creation_with_schema_composer")
 
     # Create an AugLLMConfig instance with a proper BaseModel structured output
-    logger.debug("Creating AugLLMConfig instance with Plan structured output model")
+    logger.debug(
+        "Creating AugLLMConfig instance with Plan structured output model")
     aug_llm = AugLLMConfig(
         name="test_llm",
         id="llm_12345",
@@ -47,9 +49,24 @@ def test_node_creation_with_schema_composer():
     output_schema = schema_composer.create_output_schema()
     state_schema = schema_composer  # .build()
 
-    logger.debug(f"Input schema fields: {getattr(input_schema, 'model_fields', {})}")
-    logger.debug(f"Output schema fields: {getattr(output_schema, 'model_fields', {})}")
-    logger.debug(f"State schema fields: {getattr(state_schema, 'model_fields', {})}")
+    logger.debug(
+        f"Input schema fields: {
+            getattr(
+                input_schema,
+                'model_fields',
+                {})}")
+    logger.debug(
+        f"Output schema fields: {
+            getattr(
+                output_schema,
+                'model_fields',
+                {})}")
+    logger.debug(
+        f"State schema fields: {
+            getattr(
+                state_schema,
+                'model_fields',
+                {})}")
 
     # Verify engine I/O mappings were detected
     assert hasattr(
@@ -64,7 +81,8 @@ def test_node_creation_with_schema_composer():
     logger.debug(f"Structured models: {state_schema.__structured_models__}")
 
     # Create a NodeConfig with explicit schema settings for clarity
-    logger.debug("Creating NodeConfig with AugLLMConfig engine and explicit schemas")
+    logger.debug(
+        "Creating NodeConfig with AugLLMConfig engine and explicit schemas")
     node_config = NodeConfig(
         id="test_node_1",
         name="test_llm_node",
@@ -154,7 +172,10 @@ def test_node_with_engine_specific_config():
     ), "Temperature override not set correctly"
 
     # Create test state
-    state_schema(messages=[HumanMessage(content="What is the capital of France?")])
+    state_schema(
+        messages=[
+            HumanMessage(
+                content="What is the capital of France?")])
 
     # Create a config with engine-specific settings
     test_config = {
@@ -169,7 +190,8 @@ def test_node_with_engine_specific_config():
 
     logger.debug(f"Created test config: {test_config}")
 
-    # We're not actually invoking the function here, just verifying the config is properly structured
+    # We're not actually invoking the function here, just verifying the config
+    # is properly structured
     logger.info("Engine configuration test completed successfully")
 
 
@@ -229,10 +251,12 @@ def test_node_schema_integration():
     output_mappings = {}
 
     if "llm_integration" in engine_mappings:
-        for input_field in engine_mappings["llm_integration"].get("inputs", []):
+        for input_field in engine_mappings["llm_integration"].get("inputs", [
+        ]):
             input_mappings[input_field] = input_field
 
-        for output_field in engine_mappings["llm_integration"].get("outputs", []):
+        for output_field in engine_mappings["llm_integration"].get("outputs", [
+        ]):
             output_mappings[output_field] = output_field
 
     # Set mappings on node config

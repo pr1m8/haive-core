@@ -105,7 +105,10 @@ class OpenAIProvider(BaseLLMProvider):
     presence_penalty: float | None = Field(
         default=None, ge=-2, le=2, description="Presence penalty"
     )
-    n: int | None = Field(default=None, ge=1, description="Number of completions")
+    n: int | None = Field(
+        default=None,
+        ge=1,
+        description="Number of completions")
     organization: str | None = Field(
         default_factory=lambda: os.getenv("OPENAI_ORG_ID"),
         description="OpenAI organization ID",

@@ -29,9 +29,15 @@ def print_test_result(test_name, result):
 @pytest.fixture
 def test_engines():
     """Create test engines for testing."""
-    engine1 = AugLLMConfig(name="engine1", id="engine-1-id", model="test-model-1")
+    engine1 = AugLLMConfig(
+        name="engine1",
+        id="engine-1-id",
+        model="test-model-1")
 
-    engine2 = AugLLMConfig(name="engine2", id="engine-2-id", model="test-model-2")
+    engine2 = AugLLMConfig(
+        name="engine2",
+        id="engine-2-id",
+        model="test-model-2")
 
     return [engine1, engine2]
 
@@ -126,7 +132,8 @@ def test_add_edge(test_graph):
     test_graph.add_edge("node2", END)
 
     # Print results
-    result = {"edges": [{"from": e.source, "to": e.target} for e in test_graph.edges]}
+    result = {"edges": [{"from": e.source, "to": e.target}
+                        for e in test_graph.edges]}
 
     print_test_result("test_add_edge", result)
 
@@ -151,7 +158,8 @@ def test_insert_node(test_graph):
     test_graph.add_edge("start_node", "end_node")
 
     # Get current edges
-    initial_edges = [{"from": e.source, "to": e.target} for e in test_graph.edges]
+    initial_edges = [{"from": e.source, "to": e.target}
+                     for e in test_graph.edges]
     print_test_result(
         "test_insert_node (initial setup)", {"initial_edges": initial_edges}
     )
@@ -162,7 +170,8 @@ def test_insert_node(test_graph):
     test_graph.add_edge("middle_node", "end_node")
 
     # Check final edges
-    final_edges = [{"from": e.source, "to": e.target} for e in test_graph.edges]
+    final_edges = [{"from": e.source, "to": e.target}
+                   for e in test_graph.edges]
     print_test_result(
         "test_insert_node (after insertion)", {"final_edges": final_edges}
     )
@@ -182,7 +191,8 @@ def test_with_runnable_config(test_graph):
 
     # Check it has the config
     assert new_graph.default_runnable_config == test_config
-    assert "thread_id" in new_graph.default_runnable_config.get("configurable", {})
+    assert "thread_id" in new_graph.default_runnable_config.get(
+        "configurable", {})
 
     result = {
         "original_graph_name": test_graph.name,
@@ -225,7 +235,8 @@ def test_update_default_runnable_config(test_graph):
     test_graph.update_default_runnable_config(thread_id="test-thread")
 
     # Check initial state
-    assert "thread_id" in test_graph.default_runnable_config.get("configurable", {})
+    assert "thread_id" in test_graph.default_runnable_config.get(
+        "configurable", {})
 
     result = {
         "has_config": test_graph.default_runnable_config is not None,
@@ -243,7 +254,8 @@ def test_update_default_runnable_config(test_graph):
     test_graph.update_default_runnable_config(user_id="test-user")
 
     # Check updated config
-    assert "user_id" in test_graph.default_runnable_config.get("configurable", {})
+    assert "user_id" in test_graph.default_runnable_config.get(
+        "configurable", {})
 
     result = {
         "has_config": test_graph.default_runnable_config is not None,
@@ -255,7 +267,9 @@ def test_update_default_runnable_config(test_graph):
         ),
     }
 
-    print_test_result("test_update_default_runnable_config (after update)", result)
+    print_test_result(
+        "test_update_default_runnable_config (after update)",
+        result)
 
 
 # Test build and compile methods
@@ -389,7 +403,8 @@ def test_add_conditional_edges(test_graph):
     assert branch["routes"] == {"a": "path_a", "b": "path_b"}
 
     # Check conditional edges were added
-    conditional_edges = [e for e in test_graph.edges if e.condition is not None]
+    conditional_edges = [
+        e for e in test_graph.edges if e.condition is not None]
     assert len(conditional_edges) == 2
 
     result = {

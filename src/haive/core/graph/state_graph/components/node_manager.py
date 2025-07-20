@@ -6,7 +6,7 @@ in the BaseGraph architecture, following the modular design principles.
 
 import logging
 import uuid
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 from haive.core.graph.common.types import NodeType
 from haive.core.graph.node.config import NodeConfig
@@ -56,7 +56,7 @@ class NodeManager(BaseGraphComponent):
     def __init__(self, graph: "BaseGraph") -> None:
         """Initialize NodeManager with graph reference."""
         super().__init__(graph)
-        self._node_type_tracking: Dict[str, NodeType] = {}
+        self._node_type_tracking: dict[str, NodeType] = {}
 
     def initialize(self) -> None:
         """Initialize the node manager."""
@@ -72,8 +72,8 @@ class NodeManager(BaseGraphComponent):
 
     def add_node(
         self,
-        node_or_name: Union["Node", Dict[str, Any], str, NodeConfig],
-        node_like: Optional[Any] = None,
+        node_or_name: Union["Node", dict[str, Any], str, NodeConfig],
+        node_like: Any | None = None,
         **kwargs,
     ) -> "BaseGraph":
         """Add a node to the graph.
@@ -136,7 +136,8 @@ class NodeManager(BaseGraphComponent):
         self.graph.updated_at = self._get_current_time()
 
         logger.debug(
-            f"Added node '{node_name}' of type {node_type} to graph '{self.graph.name}'"
+            f"Added node '{node_name}' of type {node_type} to graph '{
+                self.graph.name}'"
         )
 
         return self.graph
@@ -198,7 +199,10 @@ class NodeManager(BaseGraphComponent):
         # Update graph metadata
         self.graph.updated_at = self._get_current_time()
 
-        logger.debug(f"Added configured node '{name}' to graph '{self.graph.name}'")
+        logger.debug(
+            f"Added configured node '{name}' to graph '{
+                self.graph.name}'"
+        )
 
         return self.graph
 
@@ -244,7 +248,10 @@ class NodeManager(BaseGraphComponent):
         # Update graph metadata
         self.graph.updated_at = self._get_current_time()
 
-        logger.debug(f"Removed node '{node_name}' from graph '{self.graph.name}'")
+        logger.debug(
+            f"Removed node '{node_name}' from graph '{
+                self.graph.name}'"
+        )
 
         return self.graph
 
@@ -293,11 +300,14 @@ class NodeManager(BaseGraphComponent):
         # Update graph metadata
         self.graph.updated_at = self._get_current_time()
 
-        logger.debug(f"Updated node '{node_name}' in graph '{self.graph.name}'")
+        logger.debug(
+            f"Updated node '{node_name}' in graph '{
+                self.graph.name}'"
+        )
 
         return self.graph
 
-    def get_nodes_by_type(self, node_type: NodeType) -> List[str]:
+    def get_nodes_by_type(self, node_type: NodeType) -> list[str]:
         """Get all nodes of a specific type.
 
         Args:
@@ -316,7 +326,7 @@ class NodeManager(BaseGraphComponent):
         """Get total number of nodes in the graph."""
         return len(self.graph.nodes)
 
-    def get_node_types_summary(self) -> Dict[NodeType, int]:
+    def get_node_types_summary(self) -> dict[NodeType, int]:
         """Get summary of node types and their counts.
 
         Returns:
@@ -327,7 +337,7 @@ class NodeManager(BaseGraphComponent):
             summary[node_type] = summary.get(node_type, 0) + 1
         return summary
 
-    def validate_state(self) -> List[str]:
+    def validate_state(self) -> list[str]:
         """Validate the node manager state.
 
         Returns:
@@ -351,30 +361,31 @@ class NodeManager(BaseGraphComponent):
         return errors
 
     def _parse_node_inputs(
-        self, node_or_name: Any, node_like: Optional[Any]
+        self, node_or_name: Any, node_like: Any | None
     ) -> tuple[str, Any]:
         """Parse and validate node input parameters."""
         if isinstance(node_or_name, str):
             if node_like is None:
                 raise ValueError("node_like cannot be None when node_or_name is string")
             return node_or_name, node_like
-        elif hasattr(node_or_name, "name"):
+        if hasattr(node_or_name, "name"):
             return node_or_name.name, node_or_name
-        elif isinstance(node_or_name, dict) and "name" in node_or_name:
+        if isinstance(node_or_name, dict) and "name" in node_or_name:
             return node_or_name["name"], node_or_name
-        else:
-            raise ValueError(f"Cannot determine node name from {type(node_or_name)}")
+        raise ValueError(
+            f"Cannot determine node name from {
+                type(node_or_name)}"
+        )
 
     def _infer_node_type(self, node_obj: Any) -> NodeType:
         """Infer node type from node object."""
         if hasattr(node_obj, "node_type"):
             return node_obj.node_type
-        elif callable(node_obj):
+        if callable(node_obj):
             return NodeType.FUNCTION
-        elif hasattr(node_obj, "tools"):
+        if hasattr(node_obj, "tools"):
             return NodeType.TOOL
-        else:
-            return NodeType.FUNCTION
+        return NodeType.FUNCTION
 
     def _track_node_type(self, node_name: str, node_type: NodeType) -> None:
         """Track node type for management purposes."""
@@ -428,7 +439,7 @@ class NodeManager(BaseGraphComponent):
 
         return datetime.now()
 
-    def get_component_info(self) -> Dict[str, Any]:
+    def get_component_info(self) -> dict[str, Any]:
         """Get detailed component information."""
         base_info = super().get_component_info()
         base_info.update(

@@ -5,7 +5,6 @@ ReStructuredText, LaTeX, and other document formats.
 """
 
 import logging
-from typing import Optional
 
 from langchain_core.document_loaders.base import BaseLoader
 
@@ -24,7 +23,7 @@ class TextFileSource(LocalFileSource):
         self.file_path = file_path
         self.encoding = encoding
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a text file loader."""
         try:
             from langchain_community.document_loaders import TextLoader
@@ -35,7 +34,7 @@ class TextFileSource(LocalFileSource):
             )
 
         except Exception as e:
-            logger.error(f"Failed to create text loader: {e}")
+            logger.exception(f"Failed to create text loader: {e}")
             return None
 
 
@@ -48,7 +47,7 @@ class MarkdownSource(LocalFileSource):
         )
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a Markdown loader."""
         try:
             from langchain_community.document_loaders import UnstructuredMarkdownLoader
@@ -65,7 +64,7 @@ class MarkdownSource(LocalFileSource):
             except Exception:
                 return None
         except Exception as e:
-            logger.error(f"Failed to create Markdown loader: {e}")
+            logger.exception(f"Failed to create Markdown loader: {e}")
             return None
 
 
@@ -78,7 +77,7 @@ class ReStructuredTextSource(LocalFileSource):
         )
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a ReStructuredText loader."""
         try:
             from langchain_community.document_loaders import UnstructuredRSTLoader
@@ -91,7 +90,7 @@ class ReStructuredTextSource(LocalFileSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create RST loader: {e}")
+            logger.exception(f"Failed to create RST loader: {e}")
             return None
 
 
@@ -104,7 +103,7 @@ class LaTeXSource(LocalFileSource):
         )
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a LaTeX loader."""
         try:
             # Use UnstructuredFileLoader for LaTeX
@@ -122,7 +121,7 @@ class LaTeXSource(LocalFileSource):
             except Exception:
                 return None
         except Exception as e:
-            logger.error(f"Failed to create LaTeX loader: {e}")
+            logger.exception(f"Failed to create LaTeX loader: {e}")
             return None
 
 
@@ -133,7 +132,7 @@ class OrgModeSource(LocalFileSource):
         super().__init__(source_path=file_path, file_extensions=[".org"], **kwargs)
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create an Org Mode loader."""
         try:
             from langchain_community.document_loaders import UnstructuredOrgModeLoader
@@ -146,7 +145,7 @@ class OrgModeSource(LocalFileSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create Org Mode loader: {e}")
+            logger.exception(f"Failed to create Org Mode loader: {e}")
             return None
 
 
@@ -161,7 +160,7 @@ class AsciiDocSource(LocalFileSource):
         )
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create an AsciiDoc loader."""
         try:
             # Use UnstructuredFileLoader for AsciiDoc
@@ -179,16 +178,16 @@ class AsciiDocSource(LocalFileSource):
             except Exception:
                 return None
         except Exception as e:
-            logger.error(f"Failed to create AsciiDoc loader: {e}")
+            logger.exception(f"Failed to create AsciiDoc loader: {e}")
             return None
 
 
 # Export text file sources
 __all__ = [
-    "TextFileSource",
-    "MarkdownSource",
-    "ReStructuredTextSource",
-    "LaTeXSource",
-    "OrgModeSource",
     "AsciiDocSource",
+    "LaTeXSource",
+    "MarkdownSource",
+    "OrgModeSource",
+    "ReStructuredTextSource",
+    "TextFileSource",
 ]

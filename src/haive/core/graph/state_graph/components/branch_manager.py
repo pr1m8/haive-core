@@ -6,7 +6,8 @@ and branch operations in the BaseGraph architecture.
 
 import logging
 import uuid
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal, Optional, Union
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any, Literal
 
 from langgraph.types import Send
 
@@ -69,7 +70,10 @@ class BranchManager(BaseGraphComponent):
         """Initialize the branch manager."""
         super().initialize()
         self._branch_counter = 0
-        logger.debug(f"BranchManager initialized for graph '{self.graph.name}'")
+        logger.debug(
+            f"BranchManager initialized for graph '{
+                self.graph.name}'"
+        )
 
     def cleanup(self) -> None:
         """Clean up branch manager resources."""
@@ -80,11 +84,9 @@ class BranchManager(BaseGraphComponent):
     def add_conditional_edges(
         self,
         source_node: str,
-        condition: Union[Branch, Callable, Any],
-        destinations: Optional[
-            Union[str, List[str], Dict[Union[bool, str, int], str]]
-        ] = None,
-        default: Union[str, Literal["END"], None] = "END",
+        condition: Branch | Callable | Any,
+        destinations: str | list[str] | dict[bool | str | int, str] | None = None,
+        default: str | Literal["END"] | None = "END",
         create_missing_nodes: bool = False,
     ) -> "BaseGraph":
         """Add conditional edges from a source node.
@@ -157,7 +159,8 @@ class BranchManager(BaseGraphComponent):
         self.graph.updated_at = self._get_current_time()
 
         logger.debug(
-            f"Added conditional edges from '{source_node}' with {len(destinations) if destinations else 0} destinations"
+            f"Added conditional edges from '{source_node}' with {
+                len(destinations) if destinations else 0} destinations"
         )
 
         return self.graph
@@ -166,7 +169,7 @@ class BranchManager(BaseGraphComponent):
         self,
         source_node: str,
         function: Callable,
-        default_destination: Union[str, Literal["END"]] = "END",
+        default_destination: str | Literal["END"] = "END",
     ) -> "BaseGraph":
         """Add a function-based branch.
 
@@ -204,9 +207,9 @@ class BranchManager(BaseGraphComponent):
         self,
         source_node: str,
         key: str,
-        value_map: Dict[Any, str],
+        value_map: dict[Any, str],
         comparison_type: ComparisonType = ComparisonType.EQUALS,
-        default_destination: Union[str, Literal["END"]] = "END",
+        default_destination: str | Literal["END"] = "END",
     ) -> "BaseGraph":
         """Add a key-value conditional branch.
 
@@ -248,8 +251,8 @@ class BranchManager(BaseGraphComponent):
     def add_send_branch(
         self,
         source_node: str,
-        send_function: Callable[[Any], Union[Send, List[Send]]],
-        default_destination: Union[str, Literal["END"]] = "END",
+        send_function: Callable[[Any], Send | list[Send]],
+        default_destination: str | Literal["END"] = "END",
     ) -> "BaseGraph":
         """Add a Send-based branch for parallel processing.
 
@@ -304,11 +307,14 @@ class BranchManager(BaseGraphComponent):
         # Update graph metadata
         self.graph.updated_at = self._get_current_time()
 
-        logger.debug(f"Removed branch '{branch_id}' from graph '{self.graph.name}'")
+        logger.debug(
+            f"Removed branch '{branch_id}' from graph '{
+                self.graph.name}'"
+        )
 
         return self.graph
 
-    def get_branch(self, branch_id: str) -> Optional[Branch]:
+    def get_branch(self, branch_id: str) -> Branch | None:
         """Get a branch by ID.
 
         Args:
@@ -319,7 +325,7 @@ class BranchManager(BaseGraphComponent):
         """
         return self.graph.branches.get(branch_id)
 
-    def get_branches_for_node(self, node_name: str) -> List[Branch]:
+    def get_branches_for_node(self, node_name: str) -> list[Branch]:
         """Get all branches originating from a specific node.
 
         Args:
@@ -363,7 +369,10 @@ class BranchManager(BaseGraphComponent):
         # Update graph metadata
         self.graph.updated_at = self._get_current_time()
 
-        logger.debug(f"Updated branch '{branch_id}' in graph '{self.graph.name}'")
+        logger.debug(
+            f"Updated branch '{branch_id}' in graph '{
+                self.graph.name}'"
+        )
 
         return self.graph
 
@@ -371,7 +380,7 @@ class BranchManager(BaseGraphComponent):
         """Get total number of branches in the graph."""
         return len(self.graph.branches)
 
-    def get_branches_by_mode(self, mode: BranchMode) -> List[Branch]:
+    def get_branches_by_mode(self, mode: BranchMode) -> list[Branch]:
         """Get all branches of a specific mode.
 
         Args:
@@ -386,7 +395,7 @@ class BranchManager(BaseGraphComponent):
             if hasattr(branch, "mode") and branch.mode == mode
         ]
 
-    def validate_state(self) -> List[str]:
+    def validate_state(self) -> list[str]:
         """Validate the branch manager state.
 
         Returns:
@@ -404,8 +413,8 @@ class BranchManager(BaseGraphComponent):
     def _create_branch_from_condition(
         self,
         condition: Callable,
-        destinations: Optional[Union[str, List[str], Dict[Union[bool, str, int], str]]],
-        default: Union[str, Literal["END"], None],
+        destinations: str | list[str] | dict[bool | str | int, str] | None,
+        default: str | Literal["END"] | None,
     ) -> Branch:
         """Create a Branch object from condition and destinations."""
         return Branch(
@@ -459,7 +468,7 @@ class BranchManager(BaseGraphComponent):
             metadata={"created_by": "branch_manager", "placeholder": True},
         )
 
-    def _validate_branch(self, branch_id: str, branch: Branch) -> List[str]:
+    def _validate_branch(self, branch_id: str, branch: Branch) -> list[str]:
         """Validate a single branch."""
         errors = []
 
@@ -501,7 +510,7 @@ class BranchManager(BaseGraphComponent):
 
         return datetime.now()
 
-    def get_component_info(self) -> Dict[str, Any]:
+    def get_component_info(self) -> dict[str, Any]:
         """Get detailed component information."""
         base_info = super().get_component_info()
 

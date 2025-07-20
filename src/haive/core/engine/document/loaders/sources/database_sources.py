@@ -1,5 +1,6 @@
 """Database source registrations with connection string auto-detection.
 
+from typing import Any
 This module implements comprehensive database loaders from langchain_community
 including SQL, NoSQL, Graph databases, and Data Warehouses with intelligent
 connection string detection and query optimization.
@@ -203,7 +204,7 @@ class DatabaseSource(BaseSource):
     retry_attempts: int = Field(3, ge=1, description="Number of retry attempts")
 
     @validator("connection_string")
-    def validate_connection_string(self, v):
+    def validate_connection_string(self, v) -> Any:
         """Validate connection string format."""
         if not v or not isinstance(v, str):
             raise ValueError("Connection string must be a non-empty string")
@@ -809,7 +810,7 @@ def validate_database_sources() -> bool:
     return not missing
 
 
-def test_connection_string_detection():
+def test_connection_string_detection() -> Any:
     """Test connection string auto-detection."""
     test_connections = {
         "postgresql://user:pass@host:5432/db": DatabaseType.POSTGRESQL,

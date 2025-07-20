@@ -14,5 +14,10 @@ class AzLyricsSource(URLSource):
     def from_artist_and_song(cls, artist: str, song: str) -> "AzLyricsSource":
         """Create an AzLyricsSource from an artist and song."""
         return cls(
-            url=f"{cls.url_prefix}{artist.lower().replace(' ', '')}/{song.lower().replace(' ', '')}.html"
+            url=f"{
+                cls.url_prefix}{
+                artist.lower().replace(
+                    ' ', '')}/{
+                song.lower().replace(
+                    ' ', '')}.html"
         )

@@ -5,7 +5,7 @@ adapted for the document engine framework.
 """
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 from urllib.parse import urlparse
 
 from langchain_core.document_loaders.base import BaseLoader
@@ -24,9 +24,9 @@ class MongoDBSource(DatabaseSource):
     def __init__(
         self,
         connection_string: str,
-        database_name: Optional[str] = None,
-        collection_name: Optional[str] = None,
-        filter_criteria: Optional[Dict[str, Any]] = None,
+        database_name: str | None = None,
+        collection_name: str | None = None,
+        filter_criteria: dict[str, Any] | None = None,
         **kwargs,
     ):
         super().__init__(source_path=connection_string, **kwargs)
@@ -53,11 +53,11 @@ class MongoDBSource(DatabaseSource):
         """MongoDB typically requires authentication."""
         return True
 
-    def get_credential_requirements(self) -> List[CredentialType]:
+    def get_credential_requirements(self) -> list[CredentialType]:
         """MongoDB needs connection credentials."""
         return [CredentialType.USERNAME_PASSWORD, CredentialType.CONNECTION_STRING]
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a MongoDB loader."""
         try:
             from langchain_community.document_loaders import MongodbLoader
@@ -104,7 +104,7 @@ class MongoDBSource(DatabaseSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create MongoDB loader: {e}")
+            logger.exception(f"Failed to create MongoDB loader: {e}")
             return None
 
 
@@ -114,8 +114,8 @@ class PostgreSQLSource(DatabaseSource):
     def __init__(
         self,
         connection_string: str,
-        query: Optional[str] = None,
-        table_name: Optional[str] = None,
+        query: str | None = None,
+        table_name: str | None = None,
         **kwargs,
     ):
         super().__init__(source_path=connection_string, **kwargs)
@@ -141,11 +141,11 @@ class PostgreSQLSource(DatabaseSource):
         """PostgreSQL typically requires authentication."""
         return True
 
-    def get_credential_requirements(self) -> List[CredentialType]:
+    def get_credential_requirements(self) -> list[CredentialType]:
         """PostgreSQL needs connection credentials."""
         return [CredentialType.USERNAME_PASSWORD, CredentialType.CONNECTION_STRING]
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a PostgreSQL loader."""
         try:
             from langchain_community.document_loaders.sql_database import (
@@ -197,7 +197,7 @@ class PostgreSQLSource(DatabaseSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create PostgreSQL loader: {e}")
+            logger.exception(f"Failed to create PostgreSQL loader: {e}")
             return None
 
 

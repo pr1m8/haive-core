@@ -11,7 +11,7 @@ import shutil
 import tempfile
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 from unittest.mock import Mock
 
 import pytest
@@ -149,7 +149,7 @@ def mock_pdf_source():
             self.path = path
             self.kwargs = kwargs
 
-        def get_loader_kwargs(self) -> Dict[str, Any]:
+        def get_loader_kwargs(self) -> dict[str, Any]:
             return {
                 "file_path": str(self.path),
                 "extract_images": False,
@@ -171,14 +171,14 @@ def mock_web_source():
             self.url = url
             self.kwargs = kwargs
 
-        def get_loader_kwargs(self) -> Dict[str, Any]:
+        def get_loader_kwargs(self) -> dict[str, Any]:
             return {
                 "web_path": self.url,
                 "header_template": {},
                 **self.kwargs,
             }
 
-        def scrape_all(self) -> Dict[str, Any]:
+        def scrape_all(self) -> dict[str, Any]:
             return {
                 "recursive": True,
                 "max_depth": 3,
@@ -197,15 +197,18 @@ def mock_document_loader():
             self.kwargs = kwargs
             self._documents = [
                 Document(
-                    page_content=f"Mock content from {kwargs.get('file_path', 'unknown')}",
+                    page_content=f"Mock content from {
+                        kwargs.get(
+                            'file_path',
+                            'unknown')}",
                     metadata={"loader": "mock", **kwargs},
                 )
             ]
 
-        def load(self) -> List[Document]:
+        def load(self) -> list[Document]:
             return self._documents.copy()
 
-        def load_and_split(self) -> List[Document]:
+        def load_and_split(self) -> list[Document]:
             # Split the document into smaller chunks
             return [
                 Document(
@@ -216,8 +219,7 @@ def mock_document_loader():
             ]
 
         def lazy_load(self):
-            for doc in self._documents:
-                yield doc
+            yield from self._documents
 
     return MockDocumentLoader
 
@@ -281,17 +283,14 @@ def mock_enhanced_registry():
         if source_type == "pdf":
             if preference == LoaderPreference.SPEED:
                 return "pypdf"
-            elif preference == LoaderPreference.QUALITY:
+            if preference == LoaderPreference.QUALITY:
                 return "pdfplumber"
-            else:
-                return "pypdf"
-        elif source_type == "web":
+            return "pypdf"
+        if source_type == "web":
             if preference == LoaderPreference.QUALITY:
                 return "playwright"
-            else:
-                return "beautiful_soup"
-        else:
-            raise ValueError(f"Unknown source type: {source_type}")
+            return "beautiful_soup"
+        raise ValueError(f"Unknown source type: {source_type}")
 
     def mock_get_loader_config(source_type: str, loader_name: str):
         return registry._sources[source_type].loaders[loader_name]
@@ -299,10 +298,9 @@ def mock_enhanced_registry():
     def mock_get_source_class(source_type: str):
         if source_type == "pdf":
             return mock_pdf_source
-        elif source_type == "web":
+        if source_type == "web":
             return mock_web_source
-        else:
-            raise ValueError(f"Unknown source type: {source_type}")
+        raise ValueError(f"Unknown source type: {source_type}")
 
     def mock_get_loader_class(source_type: str, loader_name: str):
         return mock_document_loader
@@ -329,7 +327,7 @@ def mock_path_analyzer():
                 metadata={"file_extension": ".pdf"},
                 capabilities=[LoaderCapability.TEXT_EXTRACTION],
             )
-        elif path_or_url.startswith("http"):
+        if path_or_url.startswith("http"):
             return SourceInfo(
                 source_type="web",
                 category=SourceCategory.WEB,
@@ -337,14 +335,13 @@ def mock_path_analyzer():
                 metadata={"protocol": "http"},
                 capabilities=[LoaderCapability.WEB_SCRAPING],
             )
-        else:
-            return SourceInfo(
-                source_type="unknown",
-                category=SourceCategory.UNKNOWN,
-                confidence=0.0,
-                metadata={},
-                capabilities=[],
-            )
+        return SourceInfo(
+            source_type="unknown",
+            category=SourceCategory.UNKNOWN,
+            confidence=0.0,
+            metadata={},
+            capabilities=[],
+        )
 
     analyzer.analyze_path.side_effect = mock_analyze_path
     return analyzer
@@ -533,10 +530,10 @@ def failing_loader():
         def __init__(self, **kwargs):
             self.kwargs = kwargs
 
-        def load(self) -> List[Document]:
+        def load(self) -> list[Document]:
             raise Exception("Simulated loader failure")
 
-        def load_and_split(self) -> List[Document]:
+        def load_and_split(self) -> list[Document]:
             raise Exception("Simulated loader failure")
 
     return FailingLoader
@@ -552,7 +549,7 @@ def slow_loader():
             self.delay = delay
             self.kwargs = kwargs
 
-        def load(self) -> List[Document]:
+        def load(self) -> list[Document]:
             time.sleep(self.delay)
             return [
                 Document(
@@ -571,12 +568,12 @@ def slow_loader():
 def assert_documents_equal():
     """Utility function to assert that two document lists are equal."""
 
-    def _assert_equal(docs1: List[Document], docs2: List[Document]):
+    def _assert_equal(docs1: list[Document], docs2: list[Document]):
         assert len(docs1) == len(
             docs2
         ), f"Document count mismatch: {len(docs1)} vs {len(docs2)}"
 
-        for i, (doc1, doc2) in enumerate(zip(docs1, docs2)):
+        for i, (doc1, doc2) in enumerate(zip(docs1, docs2, strict=False)):
             assert (
                 doc1.page_content == doc2.page_content
             ), f"Content mismatch at index {i}"
@@ -593,7 +590,7 @@ def assert_loading_result_valid():
         assert isinstance(result.documents, list)
         assert isinstance(result.source_info, SourceInfo)
         assert isinstance(result.loader_used, str)
-        assert isinstance(result.loading_time, (int, float))
+        assert isinstance(result.loading_time, int | float)
         assert result.loading_time >= 0
         assert isinstance(result.metadata, dict)
         assert isinstance(result.errors, list)
@@ -644,7 +641,7 @@ def integration_test_sources(test_files, test_urls):
         "local_files": list(test_files.values())[:3],  # First 3 files
         "web_urls": test_urls[:2],  # First 2 URLs
         "mixed": [
-            str(list(test_files.values())[0]),  # One file
+            str(next(iter(test_files.values()))),  # One file
             test_urls[0],  # One URL
         ],
     }
@@ -680,17 +677,15 @@ def performance_test_data():
 @pytest.fixture(autouse=True)
 def cleanup_cache():
     """Automatically cleanup any caches after each test."""
-    yield
+    return
     # Add cache cleanup logic here if needed
-    pass
 
 
 @pytest.fixture(autouse=True)
 def reset_global_state():
     """Reset any global state between tests."""
-    yield
+    return
     # Add global state reset logic here if needed
-    pass
 
 
 # Documentation and examples

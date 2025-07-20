@@ -1,288 +1,240 @@
-# src/haive/core/graph/node/__init__.py
-"""
-Node system for Haive graph workflows.
+"""Module exports."""
 
-This package provides a comprehensive system for creating, configuring, and
-managing nodes in a LangGraph-based workflow. It supports various node types,
-including engine nodes, callable nodes, tool nodes, validation nodes, branch nodes,
-and send nodes.
+from node.agent_node import AgentNodeConfig
+from node.agent_node import CoordinatorNodeConfig
+from node.agent_node import create_node_for_engine
+from node.agent_node_v2 import AgentNodeConfig
+from node.agent_node_v2 import CoordinatorNodeConfig
+from node.agent_node_v2 import create_agent_node
+from node.agent_node_v2 import create_coordinator_node
+from node.agent_node_v2 import get_default_input_fields
+from node.agent_node_v2 import get_default_output_fields
+from node.agent_node_v2 import validate_agent_schema
+from node.agent_node_v3 import AgentNodeV3Config
+from node.agent_node_v3 import create_agent_node_v3
+from node.agent_node_v3 import get_default_input_fields
+from node.agent_node_v3 import get_default_output_fields
+from node.agent_node_v3 import validate_agent_config
+from node.base_config import NodeConfig
+from node.base_config import create_output_for_state
+from node.base_config import extract_input_from_state
+from node.base_config import get_input_fields_for_state
+from node.base_config import get_output_fields_for_state
+from node.base_config import model_post_init
+from node.base_config import to_dict
+from node.base_node_config import BaseNodeConfig
+from node.callable_node import CallableNodeConfig
+from node.callable_node import as_node
+from node.callable_node import decorator
+from node.callable_node import get_default_input_fields
+from node.callable_node import validate_config
+from node.callable_node import wrap_callable
+from node.config import NodeConfig
+from node.config import get_engine
+from node.config import get_input_mapping
+from node.config import get_output_mapping
+from node.config import to_dict
+from node.config import validate_and_determine_node_type
+from node.decorators import branch_node
+from node.decorators import debug_node
+from node.decorators import decorator
+from node.decorators import register_node
+from node.decorators import send_node
+from node.decorators import tool_node
+from node.decorators import validation_node
+from node.decorators import wrapper
+from node.engine_node import EngineNodeConfig
+from node.engine_node import create_engine_node_config
+from node.engine_node import extract_input_from_state
+from node.engine_node import model_post_init
+from node.engine_node_generic import GenericEngineNodeConfig
+from node.engine_node_generic import LLMNodeConfig
+from node.engine_node_generic import NodeFactory
+from node.engine_node_generic import RAGNodeConfig
+from node.engine_node_generic import create_engine_node
+from node.engine_node_generic import get_input_fields_for_state
+from node.engine_node_generic import get_output_fields_for_state
+from node.engine_node_generic import llm_node
+from node.engine_node_generic import model_post_init
+from node.engine_node_generic import rag_node
+from node.engine_node_test import fix_common_syntax_errors
+from node.engine_node_test import main
+from node.factory import NodeFactory
+from node.factory import create_node_function
+from node.factory import node_function
+from node.handlers import DirectInputProcessor
+from node.handlers import MappedInputProcessor
+from node.handlers import StandardCommandHandler
+from node.handlers import StandardOutputProcessor
+from node.handlers import StructuredOutputProcessor
+from node.handlers import extract_input
+from node.handlers import process_output
+from node.handlers import process_result
+from node.intelligent_multi_agent_node import IntelligentMultiAgentNode
+from node.intelligent_multi_agent_node import add_branch_condition
+from node.intelligent_multi_agent_node import create_intelligent_multi_agent_node
+from node.intelligent_multi_agent_node import set_execution_sequence
+from node.intelligent_multi_agent_node import validate_config
+from node.message_transformation import MessageTransformationNodeConfig
+from node.message_transformation import TransformationType
+from node.message_transformation import create_agent_to_agent_transformer
+from node.message_transformation import create_ai_to_human_transformer
+from node.message_transformation import create_custom_transformer
+from node.message_transformation import create_engine_id_transformer
+from node.message_transformation import create_first_human_extractor
+from node.message_transformation import create_reflection_transformer
+from node.message_transformation import validate_transformation_config
+from node.message_transformation_v2 import MessageTransformationNodeConfig
+from node.message_transformation_v2 import TransformationType
+from node.message_transformation_v2 import create_agent_to_agent_transformer
+from node.message_transformation_v2 import create_ai_to_human_transformer
+from node.message_transformation_v2 import create_message_filter
+from node.message_transformation_v2 import create_message_merger
+from node.message_transformation_v2 import create_reflection_transformer
+from node.message_transformation_v2 import get_default_input_fields
+from node.message_transformation_v2 import get_default_output_fields
+from node.message_transformation_v2 import validate_transformation_config
+from node.meta_agent_node import MetaAgentNodeConfig
+from node.multi_agent_node import MultiAgentNode
+from node.multi_agent_node import StateProjectionNode
+from node.multi_agent_node import create_multi_agent_node
+from node.multi_agent_node import create_projection_node
+from node.multi_agent_node import validate_config
+from node.output_parsing import OutputParserNodeConfig
+from node.output_parsing import create_json_output_parser_node
+from node.output_parsing import create_output_parser_node_for_agent
+from node.output_parsing import create_pydantic_output_parser_node
+from node.output_parsing import create_string_output_parser_node
+from node.output_parsing import detect_output_parser_need
+from node.output_parsing_v2 import JsonParserNodeConfig
+from node.output_parsing_v2 import ListParserNodeConfig
+from node.output_parsing_v2 import OutputParserNodeConfig
+from node.output_parsing_v2 import PydanticParserNodeConfig
+from node.output_parsing_v2 import create_json_parser_node
+from node.output_parsing_v2 import create_list_parser_node
+from node.output_parsing_v2 import create_output_parser_node_for_agent
+from node.output_parsing_v2 import create_pydantic_parser_node
+from node.output_parsing_v2 import detect_output_parser_need
+from node.output_parsing_v2 import get_default_input_fields
+from node.output_parsing_v2 import get_default_output_fields
+from node.parser_node_config import ParserNodeConfig
+from node.parser_node_config_v2 import ParserNodeConfigV2
+from node.parser_node_config_v2 import model_post_init
+from node.placeholder_node import placeholder_node
+from node.practical_stateful_example import StatefulParserNodeV2
+from node.practical_stateful_example import StatefulSimpleAgent
+from node.practical_stateful_example import StatefulValidationNodeV2
+from node.practical_stateful_example import backward_compatibility_example
+from node.practical_stateful_example import build_graph
+from node.practical_stateful_example import create_runnable
+from node.practical_stateful_example import discover_agent_node
+from node.practical_stateful_example import discover_routing_destinations
+from node.practical_stateful_example import meta_state_integration_example
+from node.practical_stateful_example import practical_stateful_example
+from node.processors import AsyncInvokableNodeProcessor
+from node.processors import AsyncNodeProcessor
+from node.processors import CallableNodeProcessor
+from node.processors import GenericNodeProcessor
+from node.processors import InvokableNodeProcessor
+from node.processors import MappingNodeProcessor
+from node.processors import apply_config_overrides
+from node.processors import can_process
+from node.processors import create_error_result
+from node.processors import create_node_function
+from node.processors import ensure_engine_id_targeting
+from node.processors import extract_input
+from node.processors import handle_command_pattern
+from node.processors import merge_configs
+from node.processors import node_function
+from node.processors import process_output
+from node.processors import process_state
+from node.protocols import CommandHandler
+from node.protocols import InputProcessor
+from node.protocols import NodeProcessor
+from node.protocols import OutputProcessor
+from node.protocols import can_process
+from node.protocols import create_node_function
+from node.protocols import extract_input
+from node.protocols import process_output
+from node.protocols import process_result
+from node.registry import NodeRegistry
+from node.registry import clear
+from node.registry import find_by_id
+from node.registry import find_by_name
+from node.registry import get
+from node.registry import get_all
+from node.registry import get_instance
+from node.registry import list
+from node.registry import list_all_names
+from node.registry import register
+from node.registry import register_custom_node_type
+from node.routing_validation_node import RoutingValidationNode
+from node.routing_validation_node import create_routing_validation_node
+from node.state_updating_validation_node import StateUpdatingValidationNode
+from node.state_updating_validation_node import ValidationMode
+from node.state_updating_validation_node import create_node_function
+from node.state_updating_validation_node import create_router_function
+from node.state_updating_validation_node import create_state_updating_validation_node
+from node.state_updating_validation_node import validation_node
+from node.state_updating_validation_node import validation_router
+from node.stateful_integration_example import build_stateful_graph
+from node.stateful_integration_example import complete_integration_example
+from node.stateful_integration_example import create_llm_state_with_dynamic_nodes
+from node.stateful_integration_example import create_simple_agent_with_stateful_nodes
+from node.stateful_integration_example import demonstrate_dynamic_field_configuration
+from node.stateful_integration_example import demonstrate_meta_state_composition
+from node.stateful_integration_example import demonstrate_stateful_discovery
+from node.stateful_integration_example import show_integration_with_simple_agent
+from node.stateful_node_config import StatefulNodeConfig
+from node.stateful_node_config import StatefulParserNodeConfig
+from node.stateful_node_config import StatefulToolNodeConfig
+from node.stateful_node_config import StatefulValidationNodeConfig
+from node.stateful_node_config import discover_engine
+from node.stateful_node_config import discover_field_mapping
+from node.stateful_node_config import discover_routing_destination
+from node.stateful_node_config import execute_stateful_logic
+from node.stateful_validation_node import StatefulValidationNode
+from node.stateful_validation_node import ToolCallValidationResult
+from node.test import Plan
+from node.tool_node_config import ToolNodeConfig
+from node.tool_node_config import from_route_filter
+from node.tool_node_config_v2 import FunctionToolNode
+from node.tool_node_config_v2 import LangChainToolNode
+from node.tool_node_config_v2 import PydanticToolNode
+from node.tool_node_config_v2 import ToolNodeConfig
+from node.tool_node_config_v2 import create_function_tool_node
+from node.tool_node_config_v2 import create_langchain_tool_node
+from node.tool_node_config_v2 import create_pydantic_tool_node
+from node.tool_node_config_v2 import create_tool_node
+from node.tool_node_config_v2 import create_tool_node_from_route_filter
+from node.tool_node_config_v2 import get_default_input_fields
+from node.tool_node_config_v2 import get_default_output_fields
+from node.tool_node_config_v2 import validate_tool_source
+from node.types import AsyncNodeFunction
+from node.types import NodeFunction
+from node.types import NodeType
+from node.unified_validation_node import UnifiedValidationNodeConfig
+from node.unified_validation_node import create_unified_validation_node
+from node.unified_validation_node import validate_config
+from node.utils import create_branch_node
+from node.utils import create_node
+from node.utils import create_send_node
+from node.utils import create_validation_node
+from node.utils import extract_io_mapping_from_schema
+from node.validation_node_config import ValidationNodeConfig
+from node.validation_node_config import get_tool_args
+from node.validation_node_config import get_tool_id
+from node.validation_node_config import get_tool_name
+from node.validation_node_config import has_tool_error
+from node.validation_node_config import validate_node_exists
+from node.validation_node_config_v2 import ValidationNodeConfigV2
+from node.validation_node_v2 import ValidationNodeV2
+from node.validation_node_v2 import model_post_init
+from node.validation_node_with_routing import ValidationNodeWithRouting
+from node.validation_node_with_routing import create_node_function
+from node.validation_node_with_routing import create_validation_function_with_routing
+from node.validation_node_with_routing import validation_node_with_routing
+from node.validation_router_v2 import has_tool_error_v2
+from node.validation_router_v2 import validation_router_v2
 
-The system integrates with Haive's engine and schema systems to provide a
-consistent interface for building complex graphs with proper type safety
-and serialization support.
-"""
-
-from typing import Any, Callable, Dict, List, Optional, Type, Union
-
-from langgraph.graph import END
-from langgraph.prebuilt import ToolNode, ValidationNode
-
-# Import from LangGraph for convenience
-from langgraph.types import Command, RetryPolicy, Send
-from pydantic import BaseModel
-
-from haive.core.graph.node.agent_node_v3 import AgentNodeV3Config, create_agent_node_v3
-from haive.core.graph.node.config import NodeConfig
-
-# Decorators for easy node creation
-from haive.core.graph.node.decorators import (
-    branch_node,
-    register_node,
-    send_node,
-    tool_node,
-    validation_node,
-)
-from haive.core.graph.node.factory import NodeFactory
-from haive.core.graph.node.registry import NodeRegistry
-
-# Core types and classes
-from haive.core.graph.node.types import (
-    AsyncNodeFunction,
-    CommandGoto,
-    ConfigType,
-    NodeFunction,
-    NodeType,
-    StateInput,
-    StateOutput,
-)
-
-# Utility functions
-from haive.core.graph.node.utils import (  # derive_state_from_components,; create_multi_send_node,; create_command_with_send,; tools_should_validate
-    create_send_node,
-    extract_io_mapping_from_schema,
-)
-
-
-# Public API for creating nodes
-def create_node(
-    engine_or_callable: Any,
-    name: Optional[str] = None,
-    command_goto: Optional[CommandGoto] = None,
-    input_mapping: Optional[Dict[str, str]] = None,
-    output_mapping: Optional[Dict[str, str]] = None,
-    retry_policy: Optional[RetryPolicy] = None,
-    **kwargs
-) -> NodeFunction:
-    """
-    Create a node function from an engine or callable.
-
-    This is the main function for creating nodes in the Haive framework.
-    It handles various input types and creates the appropriate node function.
-
-    Args:
-        engine_or_callable: Engine or callable to use for the node
-        name: Optional name for the node
-        command_goto: Optional next node to go to
-        input_mapping: Optional mapping from state keys to engine input keys
-        output_mapping: Optional mapping from engine output keys to state keys
-        retry_policy: Optional retry policy for the node
-        **kwargs: Additional options for the node configuration
-
-    Returns:
-        Node function that can be added to a graph
-
-    Example:
-        # Create a node from an engine
-        retriever_node = create_node(
-            retriever_engine,
-            name="retrieve",
-            command_goto="generate"
-        )
-
-        # Add to graph
-        builder.add_node("retrieve", retriever_node)
-    """
-    # Create node config
-    node_config = NodeConfig(
-        name=name or getattr(engine_or_callable, "name", None) or "unnamed_node",
-        engine=engine_or_callable,
-        command_goto=command_goto,
-        input_mapping=input_mapping,
-        output_mapping=output_mapping,
-        retry_policy=retry_policy,
-        **kwargs
-    )
-
-    # Create and return node function
-    return NodeFactory.create_node_function(node_config)
-
-
-def create_engine_node(
-    engine: Any,
-    name: Optional[str] = None,
-    command_goto: Optional[CommandGoto] = None,
-    input_mapping: Optional[Dict[str, str]] = None,
-    output_mapping: Optional[Dict[str, str]] = None,
-    retry_policy: Optional[RetryPolicy] = None,
-) -> NodeFunction:
-    """
-    Create a node function specifically from an engine.
-
-    This is a specialized version of create_node for engines.
-
-    Args:
-        engine: Engine to use for the node
-        name: Optional name for the node
-        command_goto: Optional next node to go to
-        input_mapping: Optional mapping from state keys to engine input keys
-        output_mapping: Optional mapping from engine output keys to state keys
-        retry_policy: Optional retry policy for the node
-
-    Returns:
-        Node function that can be added to a graph
-    """
-    return create_node(
-        engine,
-        name=name,
-        node_type=NodeType.ENGINE,
-        command_goto=command_goto,
-        input_mapping=input_mapping,
-        output_mapping=output_mapping,
-        retry_policy=retry_policy,
-    )
-
-
-def create_validation_node(
-    schemas: List[Union[Type[BaseModel], Callable]],
-    name: Optional[str] = None,
-    command_goto: Optional[CommandGoto] = None,
-    messages_key: str = "messages",
-) -> NodeFunction:
-    """
-    Create a validation node.
-
-    This creates a node that uses LangGraph's ValidationNode to validate
-    inputs against a schema.
-
-    Args:
-        schemas: List of validation schemas
-        name: Optional name for the node
-        command_goto: Optional next node to go to
-        messages_key: Name of the messages key in the state
-
-    Returns:
-        Validation node function
-    """
-    return create_node(
-        None,
-        name=name or "validation",
-        node_type=NodeType.VALIDATION,
-        command_goto=command_goto,
-        input_mapping=(
-            {"messages": messages_key} if messages_key != "messages" else None
-        ),
-        validation_schemas=schemas,
-    )
-
-
-def create_tool_node(
-    tools: List[Any],
-    name: Optional[str] = None,
-    command_goto: Optional[CommandGoto] = None,
-    messages_key: str = "messages",
-    handle_tool_errors: Union[bool, str, Callable[..., str]] = True,
-) -> NodeFunction:
-    """
-    Create a tool node.
-
-    This creates a node that uses LangGraph's ToolNode to handle tool calls.
-
-    Args:
-        tools: List of tools for the node
-        name: Optional name for the node
-        command_goto: Optional next node to go to
-        messages_key: Name of the messages key in the state
-        handle_tool_errors: How to handle tool errors
-
-    Returns:
-        Tool node function
-    """
-    return create_node(
-        None,
-        name=name or "tools",
-        node_type=NodeType.TOOL,
-        command_goto=command_goto,
-        input_mapping=(
-            {"messages": messages_key} if messages_key != "messages" else None
-        ),
-        tools=tools,
-        handle_tool_errors=handle_tool_errors,
-    )
-
-
-def create_branch_node(
-    condition: Callable,
-    routes: Dict[Any, str],
-    name: Optional[str] = None,
-    input_mapping: Optional[Dict[str, str]] = None,
-) -> NodeFunction:
-    """
-    Create a branch node.
-
-    This creates a node that evaluates a condition on the state and routes
-    to different nodes based on the result.
-
-    Args:
-        condition: Function that evaluates the state and returns a key for routing
-        routes: Mapping from condition outputs to node names
-        name: Optional name for the node
-        input_mapping: Mapping from state keys to condition function input keys
-
-    Returns:
-        Branch node function
-    """
-    return create_node(
-        None,
-        name=name or "branch",
-        node_type=NodeType.BRANCH,
-        input_mapping=input_mapping,
-        condition=condition,
-        routes=routes,
-    )
-
-
-def create_send_node(
-    send_targets: List[str],
-    send_state_key: str,
-    name: Optional[str] = None,
-    input_mapping: Optional[Dict[str, str]] = None,
-) -> NodeFunction:
-    """
-    Create a send node.
-
-    This creates a node that generates Send objects to route to different
-    nodes with different states. It's useful for fan-out operations.
-
-    Args:
-        send_targets: List of target node names
-        send_state_key: Key in the state containing items to send
-        name: Optional name for the node
-        input_mapping: Mapping from state keys to state key with items
-
-    Returns:
-        Send node function
-    """
-    return create_node(
-        None,
-        name=name or "send",
-        node_type=NodeType.SEND,
-        input_mapping=input_mapping,
-        send_targets=send_targets,
-        send_state_key=send_state_key,
-    )
-
-
-def get_registry() -> NodeRegistry:
-    """Get the node registry instance."""
-    return NodeRegistry.get_instance()
-
-
-def register_custom_node_type(name: str, config_class: Type[NodeConfig]) -> None:
-    """Register a custom node type."""
-    NodeRegistry.get_instance().register_custom_node_type(name, config_class)
-
-
-# Import V3 agent node
-
-# Node factory singleton for convenience
-factory = NodeFactory()
+__all__ = ['AgentNodeConfig', 'AgentNodeV3Config', 'AsyncInvokableNodeProcessor', 'AsyncNodeFunction', 'AsyncNodeProcessor', 'BaseNodeConfig', 'CallableNodeConfig', 'CallableNodeProcessor', 'CommandHandler', 'CoordinatorNodeConfig', 'DirectInputProcessor', 'EngineNodeConfig', 'FunctionToolNode', 'GenericEngineNodeConfig', 'GenericNodeProcessor', 'InputProcessor', 'IntelligentMultiAgentNode', 'InvokableNodeProcessor', 'JsonParserNodeConfig', 'LLMNodeConfig', 'LangChainToolNode', 'ListParserNodeConfig', 'MappedInputProcessor', 'MappingNodeProcessor', 'MessageTransformationNodeConfig', 'MetaAgentNodeConfig', 'MultiAgentNode', 'NodeConfig', 'NodeFactory', 'NodeFunction', 'NodeProcessor', 'NodeRegistry', 'NodeType', 'OutputParserNodeConfig', 'OutputProcessor', 'ParserNodeConfig', 'ParserNodeConfigV2', 'Plan', 'PydanticParserNodeConfig', 'PydanticToolNode', 'RAGNodeConfig', 'RoutingValidationNode', 'StandardCommandHandler', 'StandardOutputProcessor', 'StateProjectionNode', 'StateUpdatingValidationNode', 'StatefulNodeConfig', 'StatefulParserNodeConfig', 'StatefulParserNodeV2', 'StatefulSimpleAgent', 'StatefulToolNodeConfig', 'StatefulValidationNode', 'StatefulValidationNodeConfig', 'StatefulValidationNodeV2', 'StructuredOutputProcessor', 'ToolCallValidationResult', 'ToolNodeConfig', 'TransformationType', 'UnifiedValidationNodeConfig', 'ValidationMode', 'ValidationNodeConfig', 'ValidationNodeConfigV2', 'ValidationNodeV2', 'ValidationNodeWithRouting', 'add_branch_condition', 'apply_config_overrides', 'as_node', 'backward_compatibility_example', 'branch_node', 'build_graph', 'build_stateful_graph', 'can_process', 'clear', 'complete_integration_example', 'create_agent_node', 'create_agent_node_v3', 'create_agent_to_agent_transformer', 'create_ai_to_human_transformer', 'create_branch_node', 'create_coordinator_node', 'create_custom_transformer', 'create_engine_id_transformer', 'create_engine_node', 'create_engine_node_config', 'create_error_result', 'create_first_human_extractor', 'create_function_tool_node', 'create_intelligent_multi_agent_node', 'create_json_output_parser_node', 'create_json_parser_node', 'create_langchain_tool_node', 'create_list_parser_node', 'create_llm_state_with_dynamic_nodes', 'create_message_filter', 'create_message_merger', 'create_multi_agent_node', 'create_node', 'create_node_for_engine', 'create_node_function', 'create_output_for_state', 'create_output_parser_node_for_agent', 'create_projection_node', 'create_pydantic_output_parser_node', 'create_pydantic_parser_node', 'create_pydantic_tool_node', 'create_reflection_transformer', 'create_router_function', 'create_routing_validation_node', 'create_runnable', 'create_send_node', 'create_simple_agent_with_stateful_nodes', 'create_state_updating_validation_node', 'create_string_output_parser_node', 'create_tool_node', 'create_tool_node_from_route_filter', 'create_unified_validation_node', 'create_validation_function_with_routing', 'create_validation_node', 'debug_node', 'decorator', 'demonstrate_dynamic_field_configuration', 'demonstrate_meta_state_composition', 'demonstrate_stateful_discovery', 'detect_output_parser_need', 'discover_agent_node', 'discover_engine', 'discover_field_mapping', 'discover_routing_destination', 'discover_routing_destinations', 'ensure_engine_id_targeting', 'execute_stateful_logic', 'extract_input', 'extract_input_from_state', 'extract_io_mapping_from_schema', 'find_by_id', 'find_by_name', 'fix_common_syntax_errors', 'from_route_filter', 'get', 'get_all', 'get_default_input_fields', 'get_default_output_fields', 'get_engine', 'get_input_fields_for_state', 'get_input_mapping', 'get_instance', 'get_output_fields_for_state', 'get_output_mapping', 'get_tool_args', 'get_tool_id', 'get_tool_name', 'handle_command_pattern', 'has_tool_error', 'has_tool_error_v2', 'list', 'list_all_names', 'llm_node', 'main', 'merge_configs', 'meta_state_integration_example', 'model_post_init', 'node_function', 'placeholder_node', 'practical_stateful_example', 'process_output', 'process_result', 'process_state', 'rag_node', 'register', 'register_custom_node_type', 'register_node', 'send_node', 'set_execution_sequence', 'show_integration_with_simple_agent', 'to_dict', 'tool_node', 'validate_agent_config', 'validate_agent_schema', 'validate_and_determine_node_type', 'validate_config', 'validate_node_exists', 'validate_tool_source', 'validate_transformation_config', 'validation_node', 'validation_node_with_routing', 'validation_router', 'validation_router_v2', 'wrap_callable', 'wrapper']

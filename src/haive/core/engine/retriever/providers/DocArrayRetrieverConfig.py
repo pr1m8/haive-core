@@ -1,5 +1,6 @@
 """DocArray Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the DocArray retriever,
 which uses DocArray's vector search capabilities for document retrieval.
 DocArray is a library for representing, sending, and searching multimodal
@@ -144,7 +145,7 @@ class DocArrayRetrieverConfig(BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a DocArray retriever from this configuration.
 
         Returns:

@@ -4,7 +4,7 @@ This module defines the protocol interfaces that extract and update functions
 must implement to be compatible with the NodeSchemaComposer system.
 """
 
-from typing import Any, Dict, Protocol, TypeVar
+from typing import Any, Protocol, TypeVar
 
 from pydantic import BaseModel
 
@@ -30,7 +30,7 @@ class ExtractFunction(Protocol[TState, TInput]):
             return projected_state
     """
 
-    def __call__(self, state: TState, config: Dict[str, Any]) -> TInput:
+    def __call__(self, state: TState, config: dict[str, Any]) -> TInput:
         """Extract input from state.
 
         Args:
@@ -61,8 +61,8 @@ class UpdateFunction(Protocol[TState, TOutput]):
     """
 
     def __call__(
-        self, result: TOutput, state: TState, config: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, result: TOutput, state: TState, config: dict[str, Any]
+    ) -> dict[str, Any]:
         """Create state update from result.
 
         Args:

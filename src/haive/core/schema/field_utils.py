@@ -1,5 +1,6 @@
 """Field utilities for the Haive Schema System.
 
+from typing import Any
 This module provides a comprehensive set of utilities for creating, extracting, and
 manipulating Pydantic fields within the Haive Schema System. It ensures consistent
 handling of field metadata, types, and defaults across the entire framework.
@@ -58,20 +59,8 @@ Example:
 import logging
 import operator
 import re
-from typing import (
-    Annotated,
-    Any,
-    Callable,
-    Dict,
-    ForwardRef,
-    List,
-    Optional,
-    Tuple,
-    Type,
-    TypeVar,
-    get_args,
-    get_origin,
-)
+from collections.abc import Callable
+from typing import Annotated, Any, ForwardRef, Optional, TypeVar, get_args, get_origin
 
 from pydantic import BaseModel, Field
 
@@ -108,7 +97,7 @@ def camel_to_snake_case(name: str) -> str:
 
 
 def create_field_name_from_model(
-    model_class: Type[BaseModel], remove_suffixes: bool = False
+    model_class: type[BaseModel], remove_suffixes: bool = False
 ) -> str:
     """Create a proper field name from a Pydantic model class.
 
@@ -146,7 +135,7 @@ def create_field_name_from_model(
     return field_name
 
 
-def get_field_info_from_model(model_class: Type[BaseModel]) -> Dict[str, Any]:
+def get_field_info_from_model(model_class: type[BaseModel]) -> dict[str, Any]:
     """Get field info from a model class, checking for annotations.
 
     This function looks for field integration annotations on the model class
@@ -202,7 +191,7 @@ def field_name(name: str):
         ...     pass
     """
 
-    def decorator(cls):
+    def decorator(cls) -> Any:
         cls.__field_name__ = name
         return cls
 
@@ -221,14 +210,14 @@ def field_description(description: str):
         ...     pass
     """
 
-    def decorator(cls):
+    def decorator(cls) -> Any:
         cls.__field_description__ = description
         return cls
 
     return decorator
 
 
-def field_config(**config):
+def field_config(**config) -> Any:
     """Decorator to set field configuration for schema integration.
 
     Args:
@@ -240,7 +229,7 @@ def field_config(**config):
         ...     pass
     """
 
-    def decorator(cls):
+    def decorator(cls) -> Any:
         cls.__field_config__ = config
         return cls
 
@@ -289,18 +278,17 @@ class FieldMetadata:
 
     def __init__(
         self,
-        description: Optional[str] = None,
+        description: str | None = None,
         shared: bool = False,
-        reducer: Optional[Callable] = None,
-        source: Optional[str] = None,
-        input_for: Optional[List[str]] = None,
-        output_from: Optional[List[str]] = None,
-        structured_model: Optional[str] = None,
-        title: Optional[str] = None,
+        reducer: Callable | None = None,
+        source: str | None = None,
+        input_for: list[str] | None = None,
+        output_from: list[str] | None = None,
+        structured_model: str | None = None,
+        title: str | None = None,
         **extra,
     ):
-        """
-        Initialize field metadata with comprehensive properties.
+        """Initialize field metadata with comprehensive properties.
 
         Args:
             description: Human-readable description of the field
@@ -323,9 +311,8 @@ class FieldMetadata:
         self.title = title
         self.extra = extra
 
-    def to_dict(self) -> Dict[str, Any]:
-        """
-        Convert metadata to dictionary for Field instantiation.
+    def to_dict(self) -> dict[str, Any]:
+        """Convert metadata to dictionary for Field instantiation.
 
         Returns:
             Dictionary of metadata suitable for pydantic.Field constructor
@@ -364,9 +351,8 @@ class FieldMetadata:
 
         return result
 
-    def to_annotation_metadata(self) -> List[Any]:
-        """
-        Convert to a list of metadata objects for Annotated types.
+    def to_annotation_metadata(self) -> list[Any]:
+        """Convert to a list of metadata objects for Annotated types.
 
         Returns:
             List of metadata objects for use in Annotated[Type, ...]
@@ -397,8 +383,7 @@ class FieldMetadata:
         return metadata
 
     def merge(self, other: "FieldMetadata") -> "FieldMetadata":
-        """
-        Merge with another FieldMetadata instance.
+        """Merge with another FieldMetadata instance.
 
         Args:
             other: FieldMetadata instance to merge with
@@ -429,9 +414,8 @@ class FieldMetadata:
 
         return result
 
-    def get_reducer_name(self) -> Optional[str]:
-        """
-        Get serializable name for the reducer function.
+    def get_reducer_name(self) -> str | None:
+        """Get serializable name for the reducer function.
 
         Returns:
             String name of the reducer function or None
@@ -464,9 +448,8 @@ class FieldMetadata:
         return str(self.reducer)
 
     @classmethod
-    def from_annotation(cls, annotation: Type) -> Optional["FieldMetadata"]:
-        """
-        Extract field metadata from an annotated type.
+    def from_annotation(cls, annotation: type) -> Optional["FieldMetadata"]:
+        """Extract field metadata from an annotated type.
 
         Args:
             annotation: Type annotation to extract metadata from
@@ -525,18 +508,17 @@ class FieldMetadata:
 
 
 def create_field(
-    field_type: Type[T],
+    field_type: type[T],
     default: Any = None,
-    default_factory: Optional[Callable[[], T]] = None,
-    metadata: Optional[FieldMetadata] = None,
-    description: Optional[str] = None,
+    default_factory: Callable[[], T] | None = None,
+    metadata: FieldMetadata | None = None,
+    description: str | None = None,
     shared: bool = False,
-    reducer: Optional[Callable] = None,
+    reducer: Callable | None = None,
     make_optional: bool = True,
     **kwargs,
-) -> Tuple[Type, Field]:
-    """
-    Create a standardized Pydantic field with consistent metadata handling.
+) -> tuple[type, Field]:
+    """Create a standardized Pydantic field with consistent metadata handling.
 
     Args:
         field_type: The type of the field
@@ -583,16 +565,16 @@ def create_field(
 
 
 def create_annotated_field(
-    field_type: Type[T],
+    field_type: type[T],
     default: Any = None,
-    default_factory: Optional[Callable[[], T]] = None,
-    metadata: Optional[FieldMetadata] = None,
-    description: Optional[str] = None,
+    default_factory: Callable[[], T] | None = None,
+    metadata: FieldMetadata | None = None,
+    description: str | None = None,
     shared: bool = False,
-    reducer: Optional[Callable] = None,
+    reducer: Callable | None = None,
     make_optional: bool = True,
     **kwargs,
-) -> Tuple[Type, Field]:
+) -> tuple[type, Field]:
     """Create a Pydantic field using Python's Annotated type for embedded metadata.
 
     This function creates a field for Pydantic models using the Annotated type to embed
@@ -727,9 +709,8 @@ def create_annotated_field(
 
 def extract_field_info(
     field_info: Field,
-) -> Tuple[Any, Optional[Callable], Dict[str, Any]]:
-    """
-    Extract useful information from a Pydantic Field object.
+) -> tuple[Any, Callable | None, dict[str, Any]]:
+    """Extract useful information from a Pydantic Field object.
 
     Args:
         field_info: Pydantic Field object
@@ -758,10 +739,9 @@ def extract_field_info(
 
 
 def extract_type_metadata(
-    type_annotation: Type,
-) -> Tuple[Type, Optional[FieldMetadata]]:
-    """
-    Extract base type and metadata from a type annotation.
+    type_annotation: type,
+) -> tuple[type, FieldMetadata | None]:
+    """Extract base type and metadata from a type annotation.
 
     Args:
         type_annotation: Type annotation to extract from
@@ -789,9 +769,8 @@ def extract_type_metadata(
     return type_annotation, None
 
 
-def format_type_annotation(type_annotation: Type) -> str:
-    """
-    Format a type annotation for display or documentation.
+def format_type_annotation(type_annotation: type) -> str:
+    """Format a type annotation for display or documentation.
 
     Args:
         type_annotation: Type annotation to format
@@ -808,9 +787,9 @@ def format_type_annotation(type_annotation: Type) -> str:
         return "float"
     if type_annotation is bool:
         return "bool"
-    if type_annotation is list or type_annotation is List:
+    if type_annotation is list or type_annotation is list:
         return "List"
-    if type_annotation is dict or type_annotation is Dict:
+    if type_annotation is dict or type_annotation is dict:
         return "Dict"
     if type_annotation is None or type_annotation is type(None):
         return "None"
@@ -844,29 +823,28 @@ def format_type_annotation(type_annotation: Type) -> str:
     if origin is OptionalType:
         inner_type = format_type_annotation(args[0])
         return f"Optional[{inner_type}]"
-    elif origin is Union:
+    if origin is Union:
         # Check if it's Optional (Union with None)
         if len(args) == 2 and (args[1] is None or args[1] is type(None)):
             inner_type = format_type_annotation(args[0])
             return f"Optional[{inner_type}]"
-        elif len(args) == 2 and (args[0] is None or args[0] is type(None)):
+        if len(args) == 2 and (args[0] is None or args[0] is type(None)):
             inner_type = format_type_annotation(args[1])
             return f"Optional[{inner_type}]"
-        else:
-            inner_types = [format_type_annotation(arg) for arg in args]
-            return f"Union[{', '.join(inner_types)}]"
-    elif origin is list or origin is List:
+        inner_types = [format_type_annotation(arg) for arg in args]
+        return f"Union[{', '.join(inner_types)}]"
+    if origin is list or origin is list:
         if args:
             inner_type = format_type_annotation(args[0])
             return f"List[{inner_type}]"
         return "List"
-    elif origin is dict or origin is Dict:
+    if origin is dict or origin is dict:
         if len(args) == 2:
             key_type = format_type_annotation(args[0])
             value_type = format_type_annotation(args[1])
             return f"Dict[{key_type}, {value_type}]"
         return "Dict"
-    elif origin is Annotated:
+    if origin is Annotated:
         # For Annotated types, format the base type but ignore metadata
         return format_type_annotation(args[0])
 
@@ -878,9 +856,8 @@ def format_type_annotation(type_annotation: Type) -> str:
     return origin_name
 
 
-def get_common_reducers() -> Dict[str, Callable]:
-    """
-    Get a registry of common reducer functions.
+def get_common_reducers() -> dict[str, Callable]:
+    """Get a registry of common reducer functions.
 
     Returns:
         Dictionary of reducer name -> reducer function
@@ -898,12 +875,12 @@ def get_common_reducers() -> Dict[str, Callable]:
                 )
 
     # Add common list operations
-    def add_lists(a, b):
+    def add_lists(a, b) -> Any:
         return (a or []) + (b or [])
 
     reducers["add_lists"] = add_lists
 
-    def concat_lists(a, b):
+    def concat_lists(a, b) -> Any:
         return (a or []) + (b or [])
 
     reducers["concat_lists"] = concat_lists
@@ -915,19 +892,19 @@ def get_common_reducers() -> Dict[str, Callable]:
         reducers["add_messages"] = add_messages
     except ImportError:
         # Fallback implementation
-        def add_messages(a, b):
+        def add_messages(a, b) -> Any:
             return (a or []) + (b or [])
 
         reducers["add_messages"] = add_messages
 
     # Add string operations
-    def concat_strings(a, b):
+    def concat_strings(a, b) -> Any:
         return (a or "") + (b or "")
 
     reducers["concat_strings"] = concat_strings
 
     # Add numeric operations
-    def sum_values(a, b):
+    def sum_values(a, b) -> Any:
         return (a or 0) + (b or 0)
 
     reducers["sum_values"] = sum_values
@@ -939,9 +916,8 @@ def get_common_reducers() -> Dict[str, Callable]:
     return reducers
 
 
-def resolve_reducer(reducer_name: str) -> Optional[Callable]:
-    """
-    Resolve a reducer function from its name.
+def resolve_reducer(reducer_name: str) -> Callable | None:
+    """Resolve a reducer function from its name.
 
     Args:
         reducer_name: Name of the reducer to resolve
@@ -968,16 +944,16 @@ def resolve_reducer(reducer_name: str) -> Optional[Callable]:
             return getattr(module, func_name)
         except (ImportError, AttributeError):
             logger.warning(f"Could not resolve reducer: {reducer_name}")
-            pass
 
     # Special case for lambda
     if reducer_name == "<lambda>":
 
-        def generic_lambda_reducer(a, b):
-            # Simple fallback that concatenates lists or dicts, otherwise takes b
-            if isinstance(a, (list, tuple)) and isinstance(b, (list, tuple)):
+        def generic_lambda_reducer(a, b) -> Any:
+            # Simple fallback that concatenates lists or dicts, otherwise takes
+            # b
+            if isinstance(a, list | tuple) and isinstance(b, list | tuple):
                 return a + b
-            elif isinstance(a, dict) and isinstance(b, dict):
+            if isinstance(a, dict) and isinstance(b, dict):
                 result = a.copy()
                 result.update(b)
                 return result
@@ -989,9 +965,8 @@ def resolve_reducer(reducer_name: str) -> Optional[Callable]:
     return None
 
 
-def infer_field_type(value: Any) -> Type:
-    """
-    Infer the field type from a value.
+def infer_field_type(value: Any) -> type:
+    """Infer the field type from a value.
 
     Args:
         value: Value to infer type from
@@ -1000,28 +975,28 @@ def infer_field_type(value: Any) -> Type:
         Inferred type
     """
     from typing import Any as AnyType
-    from typing import Dict, List, Optional
+    from typing import Optional
 
     if value is None:
         return Optional[AnyType]
-    elif isinstance(value, str):
+    if isinstance(value, str):
         return Optional[str]
-    elif isinstance(value, int):
+    if isinstance(value, int):
         return Optional[int]
-    elif isinstance(value, float):
+    if isinstance(value, float):
         return Optional[float]
-    elif isinstance(value, bool):
+    if isinstance(value, bool):
         return Optional[bool]
-    elif isinstance(value, list):
+    if isinstance(value, list):
         if value and all(isinstance(x, type(value[0])) for x in value):
             item_type = infer_field_type(value[0])
             # Strip Optional from item_type
             if get_origin(item_type) is Optional:
                 item_type = get_args(item_type)[0]
-            return Optional[List[item_type]]
-        return Optional[List[AnyType]]
-    elif isinstance(value, dict):
-        if value and all(isinstance(k, str) for k in value.keys()):
-            return Optional[Dict[str, AnyType]]
-        return Optional[Dict[AnyType, AnyType]]
+            return Optional[list[item_type]]
+        return Optional[list[AnyType]]
+    if isinstance(value, dict):
+        if value and all(isinstance(k, str) for k in value):
+            return Optional[dict[str, AnyType]]
+        return Optional[dict[AnyType, AnyType]]
     return Optional[AnyType]

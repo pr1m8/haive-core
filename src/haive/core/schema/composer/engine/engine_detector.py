@@ -15,7 +15,7 @@ class EngineDetectorMixin:
     - Which base class to use (StateSchema, MessagesState, ToolState)
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         """Initialize detection flags."""
         super().__init__(*args, **kwargs)
 
@@ -57,7 +57,11 @@ class EngineDetectorMixin:
 
                     if engine_type_str == "llm":
                         logger.debug(
-                            f"Found AugLLM engine: {getattr(component, 'name', 'unnamed')}"
+                            f"Found AugLLM engine: {
+                                getattr(
+                                    component,
+                                    'name',
+                                    'unnamed')}"
                         )
                         self.has_messages = True
 
@@ -71,7 +75,16 @@ class EngineDetectorMixin:
                     component, "__class__", None
                 ).__name__.lower().endswith("agent"):
                     logger.debug(
-                        f"Found agent component: {getattr(component, 'name', getattr(component, '__class__', {}).get('__name__', 'unnamed'))}"
+                        f"Found agent component: {
+                            getattr(
+                                component,
+                                'name',
+                                getattr(
+                                    component,
+                                    '__class__',
+                                    {}).get(
+                                    '__name__',
+                                    'unnamed'))}"
                     )
                     self.has_messages = True
 
@@ -130,7 +143,10 @@ class EngineDetectorMixin:
         # Extract fields from base class to avoid duplicates
         if hasattr(base_class, "model_fields"):
             self.base_class_fields = set(base_class.model_fields.keys())
-            logger.debug(f"Base class provides fields: {self.base_class_fields}")
+            logger.debug(
+                f"Base class provides fields: {
+                    self.base_class_fields}"
+            )
         else:
             self.base_class_fields = set()
 

@@ -1,5 +1,6 @@
 """LlamaIndex Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the LlamaIndex retriever,
 which integrates LlamaIndex's retrieval capabilities with LangChain.
 LlamaIndex provides a data framework for LLM applications with
@@ -153,7 +154,7 @@ class LlamaIndexRetrieverConfig(BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a LlamaIndex retriever from this configuration.
 
         Returns:

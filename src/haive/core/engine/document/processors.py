@@ -11,7 +11,7 @@ The processors handle:
 """
 
 import logging
-from typing import Any, Dict, List
+from typing import Any
 
 from langchain_core.documents import Document as LCDocument
 
@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 class DocumentProcessor:
     """Base class for document processing operations."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         """Initialize the processor."""
         self.config = kwargs
 
@@ -73,8 +73,8 @@ class ChunkingProcessor(DocumentProcessor):
         strategy: ChunkingStrategy,
         chunk_size: int,
         chunk_overlap: int,
-        metadata: Dict[str, Any],
-    ) -> List[DocumentChunk]:
+        metadata: dict[str, Any],
+    ) -> list[DocumentChunk]:
         """Chunk text according to the specified strategy.
 
         Args:
@@ -129,7 +129,7 @@ class ChunkingProcessor(DocumentProcessor):
 
         return doc_chunks
 
-    def _chunk_fixed_size(self, content: str, size: int, overlap: int) -> List[str]:
+    def _chunk_fixed_size(self, content: str, size: int, overlap: int) -> list[str]:
         """Chunk content into fixed-size pieces."""
         chunks = []
         start = 0
@@ -146,7 +146,7 @@ class ChunkingProcessor(DocumentProcessor):
 
         return chunks
 
-    def _chunk_by_paragraph(self, content: str, max_size: int) -> List[str]:
+    def _chunk_by_paragraph(self, content: str, max_size: int) -> list[str]:
         """Chunk content by paragraphs."""
         paragraphs = content.split("\n\n")
         chunks = []
@@ -167,7 +167,7 @@ class ChunkingProcessor(DocumentProcessor):
 
         return chunks
 
-    def _chunk_by_sentence(self, content: str, max_size: int) -> List[str]:
+    def _chunk_by_sentence(self, content: str, max_size: int) -> list[str]:
         """Chunk content by sentences."""
         # Simple sentence splitting
         import re
@@ -196,11 +196,11 @@ class ChunkingProcessor(DocumentProcessor):
 
         return chunks
 
-    def _chunk_recursive(self, content: str, size: int, overlap: int) -> List[str]:
+    def _chunk_recursive(self, content: str, size: int, overlap: int) -> list[str]:
         """Chunk content recursively using multiple separators."""
         separators = ["\n\n", "\n", " ", ""]
 
-        def split_recursive(text: str, separators: List[str]) -> List[str]:
+        def split_recursive(text: str, separators: list[str]) -> list[str]:
             if len(text) <= size:
                 return [text]
 
@@ -243,7 +243,7 @@ class ChunkingProcessor(DocumentProcessor):
 
         return split_recursive(content, separators)
 
-    def _chunk_semantic(self, content: str, size: int) -> List[str]:
+    def _chunk_semantic(self, content: str, size: int) -> list[str]:
         """Chunk content semantically (placeholder implementation)."""
         # This would require more sophisticated NLP
         # For now, fall back to paragraph chunking
@@ -309,7 +309,7 @@ class ContentNormalizer(DocumentProcessor):
 class FormatDetector(DocumentProcessor):
     """Processor for detecting document formats."""
 
-    def detect_format(self, content: str, metadata: Dict[str, Any]) -> DocumentFormat:
+    def detect_format(self, content: str, metadata: dict[str, Any]) -> DocumentFormat:
         """Detect document format from content and metadata.
 
         Args:
@@ -348,13 +348,11 @@ class FormatDetector(DocumentProcessor):
         # Content-based detection
         if content:
             content_lower = content.lower().strip()
-            if content_lower.startswith("<!doctype html") or content_lower.startswith(
-                "<html"
-            ):
+            if content_lower.startswith(("<!doctype html", "<html")):
                 return DocumentFormat.HTML
-            elif content_lower.startswith("{") and content_lower.endswith("}"):
+            if content_lower.startswith("{") and content_lower.endswith("}"):
                 return DocumentFormat.JSON
-            elif content_lower.startswith("<?xml"):
+            if content_lower.startswith("<?xml"):
                 return DocumentFormat.XML
 
         return DocumentFormat.UNKNOWN
@@ -364,8 +362,8 @@ class MetadataExtractor(DocumentProcessor):
     """Processor for extracting metadata from documents."""
 
     def extract_metadata(
-        self, content: str, existing_metadata: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, content: str, existing_metadata: dict[str, Any]
+    ) -> dict[str, Any]:
         """Extract additional metadata from document content.
 
         Args:
@@ -400,9 +398,9 @@ class MetadataExtractor(DocumentProcessor):
 
 # Export processing components
 __all__ = [
-    "DocumentProcessor",
     "ChunkingProcessor",
     "ContentNormalizer",
+    "DocumentProcessor",
     "FormatDetector",
     "MetadataExtractor",
 ]

@@ -1,13 +1,12 @@
 """Configuration for store tests."""
 
 import os
-from typing import Optional
 
 import pytest
 
 
 @pytest.fixture(scope="session")
-def postgres_connection_string() -> Optional[str]:
+def postgres_connection_string() -> str | None:
     """Get PostgreSQL connection string from environment.
 
     Returns:

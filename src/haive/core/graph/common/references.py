@@ -1,24 +1,12 @@
-"""
-Reference classes for serializing callables and types.
-"""
+"""Reference classes for serializing callables and types."""
 
 import importlib
 import inspect
 import logging
 import uuid
+from collections.abc import Callable
 from functools import partial
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Tuple,
-    Type,
-    TypeVar,
-    get_args,
-    get_origin,
-)
+from typing import Any, Optional, TypeVar, get_args, get_origin
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -28,8 +16,7 @@ T = TypeVar("T")
 
 
 class CallableReference(BaseModel):
-    """
-    Serializable reference to a callable.
+    """Serializable reference to a callable.
 
     This class can store and resolve references to:
     - Module-level functions
@@ -40,16 +27,16 @@ class CallableReference(BaseModel):
     """
 
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    module_path: Optional[str] = None
-    name: Optional[str] = None
+    module_path: str | None = None
+    name: str | None = None
     callable_type: str = "function"
-    source_code: Optional[str] = None
-    args: Optional[Tuple] = None
-    kwargs: Optional[Dict[str, Any]] = None
+    source_code: str | None = None
+    args: tuple | None = None
+    kwargs: dict[str, Any] | None = None
 
     # Store function object in a non-serialized field
     # Using proper naming that Pydantic allows
-    runtime_func: Optional[Callable] = Field(default=None, exclude=True)
+    runtime_func: Callable | None = Field(default=None, exclude=True)
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -76,10 +63,10 @@ class CallableReference(BaseModel):
                     # Clean source code to prevent tuple evaluation issues
                     source_code = source_code.rstrip(",;")
                     ref.source_code = source_code
-                except (IOError, TypeError):
-                    # If we can't get source, we'll rely on the direct reference
+                except (OSError, TypeError):
+                    # If we can't get source, we'll rely on the direct
+                    # reference
                     logger.debug(f"Could not get source for lambda: {callable_obj}")
-                    pass
         elif inspect.ismethod(callable_obj):
             ref.callable_type = "method"
             # Try to get instance info
@@ -99,9 +86,8 @@ class CallableReference(BaseModel):
 
         return ref
 
-    def resolve(self) -> Optional[Callable]:
-        """
-        Resolve reference to a callable.
+    def resolve(self) -> Callable | None:
+        """Resolve reference to a callable.
 
         Priority:
         1. Direct function reference if available
@@ -127,8 +113,10 @@ class CallableReference(BaseModel):
 
                 return func
             except Exception as e:
-                logger.error(
-                    f"Failed to resolve function {self.module_path}.{self.name}: {e}"
+                logger.exception(
+                    f"Failed to resolve function {
+                        self.module_path}.{
+                        self.name}: {e}"
                 )
 
         # Third priority: evaluate lambda source code
@@ -145,7 +133,7 @@ class CallableReference(BaseModel):
                 exec("func = " + source, globals(), local_vars)
                 return local_vars["func"]
             except Exception as e:
-                logger.error(f"Failed to resolve lambda from source: {e}")
+                logger.exception(f"Failed to resolve lambda from source: {e}")
 
         # Last resort: dynamic import for specific cases
         if self.callable_type == "function" and self.module_path and self.name:
@@ -159,12 +147,16 @@ class CallableReference(BaseModel):
                         return getattr(module, self.name)
             except Exception as e:
                 logger.debug(
-                    f"Failed dynamic import for {self.module_path}.{self.name}: {e}"
+                    f"Failed dynamic import for {
+                        self.module_path}.{
+                        self.name}: {e}"
                 )
 
         # Could not resolve
         logger.warning(
-            f"Could not resolve callable reference: {self.module_path}.{self.name}"
+            f"Could not resolve callable reference: {
+                self.module_path}.{
+                self.name}"
         )
         return None
 
@@ -172,16 +164,16 @@ class CallableReference(BaseModel):
 class TypeReference(BaseModel):
     """Reference to a type that can be serialized."""
 
-    module_path: Optional[str] = None
+    module_path: str | None = None
     name: str
     is_generic: bool = False
-    generic_args: Optional[List["TypeReference"]] = None
-    generic_origin: Optional[str] = None
+    generic_args: list["TypeReference"] | None = None
+    generic_origin: str | None = None
 
     model_config = ConfigDict(extra="allow", arbitrary_types_allowed=True)
 
     @classmethod
-    def from_type(cls, type_obj: Optional[Type]) -> Optional["TypeReference"]:
+    def from_type(cls, type_obj: type | None) -> Optional["TypeReference"]:
         """Create a TypeReference from a type object."""
         if type_obj is None:
             return None
@@ -205,7 +197,7 @@ class TypeReference(BaseModel):
 
         return ref
 
-    def resolve(self) -> Optional[Type]:
+    def resolve(self) -> type | None:
         """Resolve the reference back to a type."""
         if not self.module_path or not self.name:
             return None
@@ -235,12 +227,12 @@ class TypeReference(BaseModel):
                     # Create generic type
                     if len(args) == 1:
                         return origin[args[0]]
-                    elif len(args) > 1:
+                    if len(args) > 1:
                         return origin[tuple(args)]
 
             # Fallback to base type
             return base_type
 
         except (ImportError, AttributeError) as e:
-            logger.error(f"Error resolving type: {e}")
+            logger.exception(f"Error resolving type: {e}")
             return None

@@ -1,5 +1,6 @@
 """State schema base class for the Haive framework.
 
+from typing import Any
 This module provides the StateSchema base class that extends Pydantic's BaseModel
 with features specifically designed for AI agent state management and graph-based
 workflows. The StateSchema class adds powerful capabilities including field sharing
@@ -60,23 +61,13 @@ Example:
 
 from __future__ import annotations
 
+import builtins
 import copy
 import json
 import logging
 import uuid
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    Generic,
-    List,
-    Optional,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-)
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any, Generic, NotRequired, Self, TypeVar
 
 from langchain_core.messages import BaseMessage
 from langchain_core.runnables import RunnableConfig
@@ -85,12 +76,7 @@ from rich.panel import Panel
 from rich.syntax import Syntax
 from rich.table import Table
 from rich.tree import Tree
-from typing_extensions import (
-    NotRequired,
-    Self,
-    TypeAlias,
-    TypedDict,
-)
+from typing_extensions import TypedDict
 
 from haive.core.engine.base import Engine
 
@@ -111,18 +97,18 @@ if TYPE_CHECKING:
 # Type variables for generic state schema
 T = TypeVar("T", bound=BaseModel)
 TEngine = TypeVar("TEngine", bound=Engine)
-TEngines = TypeVar("TEngines", bound=Dict[str, Engine])
+TEngines = TypeVar("TEngines", bound=dict[str, Engine])
 TStateSchema = TypeVar("TStateSchema", bound="StateSchema")
 
 # Type aliases for better API clarity
-FieldName: TypeAlias = str
-FieldValue: TypeAlias = Any
-FieldMapping: TypeAlias = Dict[FieldName, FieldValue]
-ReducerFunction: TypeAlias = Callable[[Any, Any], Any]
-ValidatorFunction: TypeAlias = Callable[[Any], Any]
-EngineMapping: TypeAlias = Dict[str, Engine]
-FieldList: TypeAlias = List[FieldName]
-IOMapping: TypeAlias = Dict[str, Dict[str, FieldList]]
+type FieldName = str
+type FieldValue = Any
+type FieldMapping = dict[FieldName, FieldValue]
+type ReducerFunction = Callable[[Any, Any], Any]
+type ValidatorFunction = Callable[[Any], Any]
+type EngineMapping = dict[str, Engine]
+type FieldList = list[FieldName]
+type IOMapping = dict[str, dict[str, FieldList]]
 
 
 # Structured configuration types
@@ -137,9 +123,9 @@ class StateConfig(TypedDict, total=False):
     """Configuration for state schema metadata."""
 
     shared_fields: NotRequired[FieldList]
-    reducers: NotRequired[Dict[FieldName, str]]
-    engine_io: NotRequired[Dict[str, EngineIOConfig]]
-    structured_models: NotRequired[Dict[str, str]]
+    reducers: NotRequired[dict[FieldName, str]]
+    engine_io: NotRequired[dict[str, EngineIOConfig]]
+    structured_models: NotRequired[dict[str, str]]
 
 
 class StateSchema(BaseModel, Generic[TEngine, TEngines]):
@@ -210,29 +196,30 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
     # Class variables to track field sharing and reducers
     __shared_fields__: FieldList = []
-    __serializable_reducers__: Dict[FieldName, str] = {}
+    __serializable_reducers__: builtins.dict[FieldName, str] = {}
     __engine_io_mappings__: IOMapping = {}
-    __input_fields__: Dict[str, FieldList] = {}
-    __output_fields__: Dict[str, FieldList] = {}
-    __structured_models__: Dict[str, str] = {}
-    __structured_model_fields__: Dict[str, FieldList] = {}
+    __input_fields__: builtins.dict[str, FieldList] = {}
+    __output_fields__: builtins.dict[str, FieldList] = {}
+    __structured_models__: builtins.dict[str, str] = {}
+    __structured_model_fields__: builtins.dict[str, FieldList] = {}
 
-    # Note: __reducer_fields__ is created dynamically and not part of instance properties
+    # Note: __reducer_fields__ is created dynamically and not part of instance
+    # properties
 
     # Optional convenience fields for better engine management
     # Generic typing allows concrete engine types to be resolved
-    engine: Optional[TEngine] = Field(
+    engine: TEngine | None = Field(
         default=None, description="Optional main/primary engine for convenience"
     )
 
-    engines: Dict[str, Engine] = Field(
+    engines: builtins.dict[str, Engine] = Field(
         default_factory=dict,
         description="Engine registry for this state - supports easy addition",
     )
 
     @field_validator("engine", mode="before")
     @classmethod
-    def validate_engine(cls, v):
+    def validate_engine(cls, v) -> Any:
         """Handle both serialized dict and actual Engine instances.
 
         This validator allows the engine field to accept both:
@@ -252,7 +239,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
     @field_validator("engines", mode="before")
     @classmethod
-    def validate_engines(cls, v):
+    def validate_engines(cls, v) -> Any:
         """Handle both serialized dicts and actual Engine instances in engines dict.
 
         Similar to validate_engine but for the engines dictionary.
@@ -275,7 +262,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
     # Convenience properties for accessing engines
     @property
-    def llm(self) -> Optional[Engine]:
+    def llm(self) -> Engine | None:
         """Convenience property to access the LLM engine."""
         # First check the main engine field
         if self.engine and hasattr(self.engine, "engine_type"):
@@ -293,7 +280,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         return None
 
     @property
-    def main_engine(self) -> Optional[Engine]:
+    def main_engine(self) -> Engine | None:
         """Convenience property to access the main engine."""
         return self.engine or self.engines.get("main")
 
@@ -308,7 +295,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
             self.engines = {}
         self.engines[name] = engine
 
-    def get_engine(self, name: str) -> Optional[Engine]:
+    def get_engine(self, name: str) -> Engine | None:
         """Get an engine by name.
 
         Args:
@@ -346,7 +333,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
             return True
         return False
 
-    def list_engines(self) -> List[str]:
+    def list_engines(self) -> list[str]:
         """Get list of all engine names.
 
         Returns:
@@ -357,8 +344,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         return []
 
     def model_dump(self, **kwargs: Any) -> FieldMapping:
-        """
-        Override model_dump to exclude internal fields and handle special types.
+        """Override model_dump to exclude internal fields and handle special types.
 
         Args:
             **kwargs: Keyword arguments for model_dump
@@ -387,9 +373,11 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         return data
 
     @model_validator(mode="after")
-    def setup_engines_and_tools(self) -> Self:
-        """
-        Setup engines and sync their tools, structured output models, and add engine to state.
+
+
+    @classmethod
+    def setup_engines_and_tools(cls) -> Self:
+        """Setup engines and sync their tools, structured output models, and add engine to state.
 
         This validator runs after the model is created and:
         1. Finds all engine fields in the state
@@ -428,7 +416,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                 if hasattr(field_value, "tools") and hasattr(self, "tools"):
                     engine_tools = getattr(field_value, "tools", [])
                     logger.debug(
-                        f"Found engine '{engine_name}' with {len(engine_tools)} tools"
+                        f"Found engine '{engine_name}' with {
+                            len(engine_tools)} tools"
                     )
 
                     # Initialize tools list if None
@@ -448,15 +437,14 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                 if (
                     hasattr(field_value, "structured_output_model")
                     and field_value.structured_output_model
-                ):
-                    if hasattr(self, "structured_output_model"):
-                        if self.structured_output_model is None:
-                            self.structured_output_model = (
-                                field_value.structured_output_model
-                            )
-                            logger.debug(
-                                f"Synced structured output model from engine '{engine_name}'"
-                            )
+                ) and hasattr(self, "structured_output_model"):
+                    if self.structured_output_model is None:
+                        self.structured_output_model = (
+                            field_value.structured_output_model
+                        )
+                        logger.debug(
+                            f"Synced structured output model from engine '{engine_name}'"
+                        )
 
             # Check if field is another StateSchema for recursive handling
             elif isinstance(field_value, StateSchema):
@@ -470,14 +458,15 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
         if found_engines:
             logger.debug(
-                f"Found engines in {self.__class__.__name__}: {', '.join(found_engines)}"
+                f"Found engines in {
+                    self.__class__.__name__}: {
+                    ', '.join(found_engines)}"
             )
 
         return self
 
-    def _sync_shared_fields(self, child_schema: "StateSchema", field_name: str) -> None:
-        """
-        Sync shared fields between parent and child schemas.
+    def _sync_shared_fields(self, child_schema: StateSchema, field_name: str) -> None:
+        """Sync shared fields between parent and child schemas.
 
         Args:
             child_schema: Child StateSchema instance
@@ -516,14 +505,18 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                                 f"Error applying reducer for shared field '{shared_field}': {e}"
                             )
                     else:
-                        # Default to parent value for now (will be overridden by reducer later if needed)
+                        # Default to parent value for now (will be overridden
+                        # by reducer later if needed)
                         setattr(child_schema, shared_field, parent_value)
                         logger.debug(
                             f"Synced shared field '{shared_field}' from parent to '{field_name}'"
                         )
 
     @model_validator(mode="after")
-    def sync_engine_fields(self) -> "StateSchema":
+
+
+    @classmethod
+    def sync_engine_fields(cls) -> StateSchema:
         """Sync between engine and engines dict for backward compatibility.
 
         This validator ensures that:
@@ -602,12 +595,15 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                     first_engine = next(iter(self.engines.values()))
                     self.engine = first_engine
                     logger.debug(
-                        f"Set first available engine as main: {getattr(first_engine, 'name', 'unnamed')}"
+                        f"Set first available engine as main: {
+                            getattr(
+                                first_engine,
+                                'name',
+                                'unnamed')}"
                     )
 
-    def dict(self, **kwargs) -> Dict[str, Any]:
-        """
-        Backwards compatibility alias for model_dump.
+    def dict(self, **kwargs) -> builtins.dict[str, Any]:
+        """Backwards compatibility alias for model_dump.
 
         Args:
             **kwargs: Keyword arguments for model_dump
@@ -618,8 +614,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         return self.model_dump(**kwargs)
 
     def to_dict(self) -> FieldMapping:
-        """
-        Convert the state to a clean dictionary.
+        """Convert the state to a clean dictionary.
 
         Returns:
             Dictionary representation of the state
@@ -627,8 +622,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         return self.model_dump()
 
     def to_json(self) -> str:
-        """
-        Convert state to JSON string.
+        """Convert state to JSON string.
 
         Returns:
             JSON string representation of the state
@@ -636,9 +630,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> "StateSchema":
-        """
-        Create state from JSON string.
+    def from_json(cls, json_str: str) -> StateSchema:
+        """Create state from JSON string.
 
         Args:
             json_str: JSON string to parse
@@ -651,8 +644,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
     @classmethod
     def from_dict(cls, data: FieldMapping) -> Self:
-        """
-        Create a state from a dictionary.
+        """Create a state from a dictionary.
 
         Args:
             data: Dictionary with field values
@@ -677,9 +669,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         return cls.model_validate(clean_data)
 
     @classmethod
-    def from_partial_dict(cls, data: Dict[str, Any]) -> "StateSchema":
-        """
-        Create a state from a partial dictionary, filling in defaults.
+    def from_partial_dict(cls, data: builtins.dict[str, Any]) -> StateSchema:
+        """Create a state from a partial dictionary, filling in defaults.
 
         Args:
             data: Partial dictionary with field values
@@ -706,9 +697,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         # Create instance with Pydantic v2 method
         return cls.model_validate(full_data)
 
-    def get_engine(self, name: str) -> Optional[Any]:
-        """
-        Get an engine by name from any engine fields.
+    def get_engine(self, name: str) -> Any | None:
+        """Get an engine by name from any engine fields.
 
         Args:
             name: Name of the engine to retrieve
@@ -747,9 +737,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         logger.debug(f"Engine '{name}' not found")
         return None
 
-    def get_engines(self) -> Dict[str, Any]:
-        """
-        Get all engines in this state.
+    def get_engines(self) -> builtins.dict[str, Any]:
+        """Get all engines in this state.
 
         Returns:
             Dictionary mapping engine names to engine instances
@@ -774,8 +763,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         return engines
 
     def has_engine(self, name: str) -> bool:
-        """
-        Check if an engine exists in this state.
+        """Check if an engine exists in this state.
 
         Args:
             name: Name of the engine to check
@@ -786,9 +774,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         return self.get_engine(name) is not None
 
     @classmethod
-    def get_class_engine(cls, name: str) -> Optional[Any]:
-        """
-        Get a class-level engine by name.
+    def get_class_engine(cls, name: str) -> Any | None:
+        """Get a class-level engine by name.
 
         Args:
             name: Name of the engine to retrieve
@@ -801,9 +788,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         return None
 
     @classmethod
-    def get_all_class_engines(cls) -> Dict[str, Any]:
-        """
-        Get all class-level engines.
+    def get_all_class_engines(cls) -> builtins.dict[str, Any]:
+        """Get all class-level engines.
 
         Returns:
             Dictionary of all engines
@@ -812,9 +798,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
             return cls.engines
         return {}
 
-    def get_instance_engine(self, name: str) -> Optional[Any]:
-        """
-        Get an engine from instance or class level.
+    def get_instance_engine(self, name: str) -> Any | None:
+        """Get an engine from instance or class level.
 
         Args:
             name: Name of the engine to retrieve
@@ -843,9 +828,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
         return None
 
-    def get_all_instance_engines(self) -> Dict[str, Any]:
-        """
-        Get all engines from both instance and class level.
+    def get_all_instance_engines(self) -> builtins.dict[str, Any]:
+        """Get all engines from both instance and class level.
 
         Returns:
             Dictionary mapping engine names to engine instances
@@ -867,10 +851,9 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         return engines
 
     def get_state_values(
-        self, keys: Union[List[str], Dict[str, str], None] = None
-    ) -> Dict[str, Any]:
-        """
-        Extract specified state values into a dictionary.
+        self, keys: list[str] | builtins.dict[str, str] | None = None
+    ) -> builtins.dict[str, Any]:
+        """Extract specified state values into a dictionary.
 
         Args:
             keys: Can be:
@@ -895,7 +878,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
             return result
 
         # Handle list of keys case
-        elif isinstance(keys, list):
+        if isinstance(keys, list):
             for field_name in keys:
                 if hasattr(self, field_name):
                     result[field_name] = getattr(self, field_name)
@@ -916,11 +899,10 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
     @classmethod
     def extract_values(
         cls,
-        state: Union["StateSchema", Dict[str, Any]],
-        keys: Union[List[str], Dict[str, str], None] = None,
-    ) -> Dict[str, Any]:
-        """
-        Class method to extract values from a state object or dictionary.
+        state: StateSchema | builtins.dict[str, Any],
+        keys: list[str] | builtins.dict[str, str] | None = None,
+    ) -> builtins.dict[str, Any]:
+        """Class method to extract values from a state object or dictionary.
 
         Args:
             state: State object or dictionary to extract values from
@@ -934,9 +916,13 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         """
         # Log extraction request
         key_str = str(keys) if keys else "all fields"
-        logger.debug(f"Extracting values ({key_str}) from {type(state).__name__}")
+        logger.debug(
+            f"Extracting values ({key_str}) from {
+                type(state).__name__}"
+        )
 
-        # If state is already a StateSchema instance, use its get_state_values method
+        # If state is already a StateSchema instance, use its get_state_values
+        # method
         if isinstance(state, cls):
             return state.get_state_values(keys)
 
@@ -951,32 +937,30 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                 return result
 
             # Handle list of keys case
-            elif isinstance(keys, list):
+            if isinstance(keys, list):
                 for field_name in keys:
                     if field_name in state:
                         result[field_name] = state[field_name]
                 return result
 
             # Handle None case - return all fields
-            else:
-                # Make a copy to avoid modifying the original
-                result = state.copy()
+            # Make a copy to avoid modifying the original
+            result = state.copy()
 
-                # Filter out internal fields
-                excluded_fields = ["tool_types_dict"]
-                for field in list(result.keys()):
-                    if field.startswith("__") or field in excluded_fields:
-                        result.pop(field, None)
+            # Filter out internal fields
+            excluded_fields = ["tool_types_dict"]
+            for field in list(result.keys()):
+                if field.startswith("__") or field in excluded_fields:
+                    result.pop(field, None)
 
-                return result
+            return result
 
         # If state is neither a StateSchema nor a dict, return empty dict
         logger.warning(f"Cannot extract values from {type(state).__name__}")
         return {}
 
     def get(self, key: str, default: Any = None) -> Any:
-        """
-        Safely get a field value with a default.
+        """Safely get a field value with a default.
 
         Args:
             key: Field name to get
@@ -989,9 +973,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
             return getattr(self, key)
         return default
 
-    def update(self, other: Union[Dict[str, Any], "StateSchema"]) -> "StateSchema":
-        """
-        Update the state with values from another state or dictionary.
+    def update(self, other: builtins.dict[str, Any] | StateSchema) -> StateSchema:
+        """Update the state with values from another state or dictionary.
 
         This method performs a simple update without applying reducers.
 
@@ -1001,10 +984,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         Returns:
             Self for chaining
         """
-        if isinstance(other, StateSchema):
-            data = other.model_dump()
-        else:
-            data = other
+        data = other.model_dump() if isinstance(other, StateSchema) else other
 
         # Simple update without attempting to apply reducers
         for key, value in data.items():
@@ -1013,10 +993,9 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         return self
 
     def apply_reducers(
-        self, other: Union[Dict[str, Any], "StateSchema"]
-    ) -> "StateSchema":
-        """
-        Update state applying reducer functions where defined.
+        self, other: builtins.dict[str, Any] | StateSchema
+    ) -> StateSchema:
+        """Update state applying reducer functions where defined.
 
         This method processes updates with special handling for fields
         that have reducer functions defined.
@@ -1027,10 +1006,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         Returns:
             Self for chaining
         """
-        if isinstance(other, StateSchema):
-            data = other.model_dump()
-        else:
-            data = other
+        data = other.model_dump() if isinstance(other, StateSchema) else other
 
         # Get reducer functions
         reducer_fields = getattr(self.__class__, "__reducer_fields__", {})
@@ -1061,14 +1037,16 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                     )
                     # Fall through to special handling or simple assignment
 
-            # Special handling for list values - concat them when both are lists
+            # Special handling for list values - concat them when both are
+            # lists
             if isinstance(current_value, list) and isinstance(value, list):
                 merged_list = current_value + value
                 setattr(self, key, merged_list)
                 logger.debug(f"Merged lists for field '{key}'")
                 continue
 
-            # Special handling for dictionary values - merge them instead of replacing
+            # Special handling for dictionary values - merge them instead of
+            # replacing
             if isinstance(current_value, dict) and isinstance(value, dict):
                 merged_dict = current_value.copy()
                 merged_dict.update(value)
@@ -1082,9 +1060,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
         return self
 
-    def add_message(self, message: BaseMessage) -> "StateSchema":
-        """
-        Add a single message to the messages field.
+    def add_message(self, message: BaseMessage) -> StateSchema:
+        """Add a single message to the messages field.
 
         Args:
             message: BaseMessage to add
@@ -1102,18 +1079,16 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         if "messages" in reducer_fields:
             # Use the reducer with a single-item list
             self.messages = reducer_fields["messages"](self.messages, [message])
+        # Simple append
+        elif isinstance(self.messages, list):
+            self.messages.append(message)
         else:
-            # Simple append
-            if isinstance(self.messages, list):
-                self.messages.append(message)
-            else:
-                self.messages = [message]
+            self.messages = [message]
 
         return self
 
-    def add_messages(self, new_messages: List[BaseMessage]) -> "StateSchema":
-        """
-        Add multiple messages to the messages field.
+    def add_messages(self, new_messages: list[BaseMessage]) -> StateSchema:
+        """Add multiple messages to the messages field.
 
         Args:
             new_messages: List of messages to add
@@ -1131,18 +1106,16 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         if "messages" in reducer_fields:
             # Use the reducer
             self.messages = reducer_fields["messages"](self.messages, new_messages)
+        # Simple extend
+        elif isinstance(self.messages, list):
+            self.messages.extend(new_messages)
         else:
-            # Simple extend
-            if isinstance(self.messages, list):
-                self.messages.extend(new_messages)
-            else:
-                self.messages = list(new_messages)
+            self.messages = list(new_messages)
 
         return self
 
-    def merge_messages(self, new_messages: List[BaseMessage]) -> "StateSchema":
-        """
-        Merge new messages with existing messages using appropriate reducer.
+    def merge_messages(self, new_messages: list[BaseMessage]) -> StateSchema:
+        """Merge new messages with existing messages using appropriate reducer.
 
         Args:
             new_messages: New messages to add
@@ -1152,9 +1125,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         """
         return self.add_messages(new_messages)
 
-    def clear_messages(self) -> "StateSchema":
-        """
-        Clear all messages in the messages field.
+    def clear_messages(self) -> StateSchema:
+        """Clear all messages in the messages field.
 
         Returns:
             Self for chaining
@@ -1163,9 +1135,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
             self.messages = []
         return self
 
-    def get_last_message(self) -> Optional[BaseMessage]:
-        """
-        Get the last message in the messages field.
+    def get_last_message(self) -> BaseMessage | None:
+        """Get the last message in the messages field.
 
         Returns:
             Last message or None if no messages exist
@@ -1174,9 +1145,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
             return self.messages[-1]
         return None
 
-    def copy(self, **updates) -> "StateSchema":
-        """
-        Create a copy of this state, optionally with updates.
+    def copy(self, **updates) -> StateSchema:
+        """Create a copy of this state, optionally with updates.
 
         Args:
             **updates: Field values to update in the copy
@@ -1187,9 +1157,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         # Use Pydantic v2 model_copy
         return self.model_copy(update=updates)
 
-    def deep_copy(self) -> "StateSchema":
-        """
-        Create a deep copy of this state object.
+    def deep_copy(self) -> StateSchema:
+        """Create a deep copy of this state object.
 
         Returns:
             New StateSchema instance with deep-copied values
@@ -1197,9 +1166,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         return copy.deepcopy(self)
 
     @classmethod
-    def _get_reducer_registry(cls) -> Dict[str, Callable]:
-        """
-        Get a registry of reducer functions mapped to their names.
+    def _get_reducer_registry(cls) -> builtins.dict[str, Callable]:
+        """Get a registry of reducer functions mapped to their names.
 
         Returns:
             Dictionary mapping reducer names to functions
@@ -1213,18 +1181,18 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
             registry["add_messages"] = add_messages
         except ImportError:
             # Create a simple concat function as fallback
-            def concat_lists(a, b):
+            def concat_lists(a, b) -> Any:
                 return (a or []) + (b or [])
 
             registry["concat_lists"] = concat_lists
 
         # Add common reducer functions
-        def concat_strings(a, b):
+        def concat_strings(a, b) -> Any:
             return (a or "") + (b or "")
 
         registry["concat_strings"] = concat_strings
 
-        def sum_values(a, b):
+        def sum_values(a, b) -> Any:
             return (a or 0) + (b or 0)
 
         registry["sum_values"] = sum_values
@@ -1251,27 +1219,26 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
         # Handle lambda functions
         if "<lambda>" in cls.__serializable_reducers__.values():
-            # Can't restore lambdas from name, but we can provide a generic reducer
-            def generic_lambda_reducer(a, b):
+            # Can't restore lambdas from name, but we can provide a generic
+            # reducer
+            def generic_lambda_reducer(a, b) -> Any:
                 # Simple fallback implementation
-                if isinstance(a, (list, tuple)) and isinstance(b, (list, tuple)):
+                if isinstance(a, list | tuple) and isinstance(b, list | tuple):
                     return a + b
-                elif isinstance(a, dict) and isinstance(b, dict):
+                if isinstance(a, dict) and isinstance(b, dict):
                     result = a.copy()
                     result.update(b)
                     return result
-                else:
-                    # Default to returning the newer value
-                    return b
+                # Default to returning the newer value
+                return b
 
             registry["<lambda>"] = generic_lambda_reducer
 
         return registry
 
     @classmethod
-    def shared_fields(cls) -> List[str]:
-        """
-        Get the list of fields shared with parent graphs.
+    def shared_fields(cls) -> list[str]:
+        """Get the list of fields shared with parent graphs.
 
         Returns:
             List of shared field names
@@ -1280,8 +1247,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
     @classmethod
     def is_shared(cls, field_name: str) -> bool:
-        """
-        Check if a field is shared with parent graphs.
+        """Check if a field is shared with parent graphs.
 
         Args:
             field_name: Field name to check
@@ -1292,9 +1258,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         return field_name in cls.__shared_fields__
 
     @classmethod
-    def to_manager(cls, name: Optional[str] = None) -> "StateSchemaManager":
-        """
-        Convert schema class to a StateSchemaManager for further manipulation.
+    def to_manager(cls, name: str | None = None) -> StateSchemaManager:
+        """Convert schema class to a StateSchemaManager for further manipulation.
 
         Args:
             name: Optional name for the resulting manager
@@ -1307,9 +1272,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         return StateSchemaManager(cls, name=name or cls.__name__)
 
     @classmethod
-    def manager(cls) -> "StateSchemaManager":
-        """
-        Get a manager for this schema (shorthand for to_manager()).
+    def manager(cls) -> StateSchemaManager:
+        """Get a manager for this schema (shorthand for to_manager()).
 
         Returns:
             StateSchemaManager instance
@@ -1318,10 +1282,9 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
     @classmethod
     def derive_input_schema(
-        cls, engine_name: Optional[str] = None, name: Optional[str] = None
-    ) -> Type[BaseModel]:
-        """
-        Derive an input schema for the given engine from this state schema.
+        cls, engine_name: str | None = None, name: str | None = None
+    ) -> type[BaseModel]:
+        """Derive an input schema for the given engine from this state schema.
 
         This method intelligently selects the appropriate base class for the derived schema,
         using prebuilt states (MessagesState, ToolState) when appropriate instead of
@@ -1367,8 +1330,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         # Instead, we create minimal schemas with just the fields we need.
         base_class = None
         if has_messages:
-            # Create a minimal messages schema for input (no StateSchema inheritance)
-            from typing import List
+            # Create a minimal messages schema for input (no StateSchema
+            # inheritance)
 
             from langchain_core.messages import BaseMessage
             from pydantic import Field
@@ -1376,7 +1339,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
             MinimalMessagesSchema = create_model(
                 "_MinimalMessagesInputSchema",
                 messages=(
-                    List[BaseMessage],
+                    list[BaseMessage],
                     Field(default_factory=list, description="Conversation messages"),
                 ),
             )
@@ -1400,11 +1363,13 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                     and field_name in base_class.model_fields
                 ):
                     logger.debug(
-                        f"Skipping field '{field_name}' - already defined in {base_class.__name__}"
+                        f"Skipping field '{field_name}' - already defined in {
+                            base_class.__name__}"
                     )
                     continue
 
-                # Create a copy of the field_info to avoid modifying the original
+                # Create a copy of the field_info to avoid modifying the
+                # original
                 from pydantic import Field
 
                 # Extract the original field configuration
@@ -1437,15 +1402,13 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         schema_name = name or f"{cls.__name__}Input"
         if base_class == BaseModel:
             return create_model(schema_name, **fields)
-        else:
-            return create_model(schema_name, __base__=base_class, **fields)
+        return create_model(schema_name, __base__=base_class, **fields)
 
     @classmethod
     def derive_output_schema(
-        cls, engine_name: Optional[str] = None, name: Optional[str] = None
-    ) -> Type[BaseModel]:
-        """
-        Derive an output schema for the given engine from this state schema.
+        cls, engine_name: str | None = None, name: str | None = None
+    ) -> type[BaseModel]:
+        """Derive an output schema for the given engine from this state schema.
 
         This method intelligently selects the appropriate base class for the derived schema,
         using prebuilt states (MessagesState, ToolState) when appropriate instead of
@@ -1512,11 +1475,13 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                     and field_name in base_class.model_fields
                 ):
                     logger.debug(
-                        f"Skipping field '{field_name}' - already defined in {base_class.__name__}"
+                        f"Skipping field '{field_name}' - already defined in {
+                            base_class.__name__}"
                     )
                     continue
 
-                # Create a copy of the field_info to avoid modifying the original
+                # Create a copy of the field_info to avoid modifying the
+                # original
                 from pydantic import Field
 
                 # Extract the original field configuration
@@ -1549,13 +1514,11 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         schema_name = name or f"{cls.__name__}Output"
         if base_class == BaseModel:
             return create_model(schema_name, **fields)
-        else:
-            return create_model(schema_name, __base__=base_class, **fields)
+        return create_model(schema_name, __base__=base_class, **fields)
 
     @classmethod
-    def with_shared_fields(cls, fields: List[str]) -> Type[StateSchema]:
-        """
-        Create a copy of this schema with specified shared fields.
+    def with_shared_fields(cls, fields: list[str]) -> type[StateSchema]:
+        """Create a copy of this schema with specified shared fields.
 
         Args:
             fields: List of field names to be marked as shared
@@ -1572,10 +1535,9 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         return schema
 
     def patch(
-        self, update_data: Dict[str, Any], apply_reducers: bool = True
-    ) -> "StateSchema":
-        """
-        Update specific fields in the state.
+        self, update_data: builtins.dict[str, Any], apply_reducers: bool = True
+    ) -> StateSchema:
+        """Update specific fields in the state.
 
         Args:
             update_data: Dictionary of field updates
@@ -1586,14 +1548,10 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         """
         if apply_reducers:
             return self.apply_reducers(update_data)
-        else:
-            return self.update(update_data)
+        return self.update(update_data)
 
-    def combine_with(
-        self, other: Union["StateSchema", Dict[str, Any]]
-    ) -> "StateSchema":
-        """
-        Combine this state with another, applying reducers for shared fields.
+    def combine_with(self, other: StateSchema | builtins.dict[str, Any]) -> StateSchema:
+        """Combine this state with another, applying reducers for shared fields.
 
         This is more sophisticated than update() or apply_reducers() as it
         properly handles StateSchema-specific metadata and shared fields.
@@ -1605,10 +1563,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
             New combined state instance
         """
         # Convert to dict if StateSchema
-        if isinstance(other, StateSchema):
-            other_data = other.model_dump()
-        else:
-            other_data = other
+        other_data = other.model_dump() if isinstance(other, StateSchema) else other
 
         # Create a copy of self
         combined = self.model_copy()
@@ -1619,10 +1574,9 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         return combined
 
     def differences_from(
-        self, other: Union["StateSchema", Dict[str, Any]]
-    ) -> Dict[str, Tuple[Any, Any]]:
-        """
-        Compare this state with another and return differences.
+        self, other: StateSchema | builtins.dict[str, Any]
+    ) -> builtins.dict[str, tuple[Any, Any]]:
+        """Compare this state with another and return differences.
 
         Args:
             other: Other state to compare with
@@ -1631,10 +1585,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
             Dictionary mapping field names to (self_value, other_value) tuples
         """
         # Convert to dict if StateSchema
-        if isinstance(other, StateSchema):
-            other_data = other.model_dump()
-        else:
-            other_data = other
+        other_data = other.model_dump() if isinstance(other, StateSchema) else other
 
         # Get self data
         self_data = self.model_dump()
@@ -1661,11 +1612,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
     # LangGraph integration methods
 
-    def to_command(
-        self, goto: Optional[str] = None, graph: Optional[str] = None
-    ) -> Any:
-        """
-        Convert state to a Command object for LangGraph control flow.
+    def to_command(self, goto: str | None = None, graph: str | None = None) -> Any:
+        """Convert state to a Command object for LangGraph control flow.
 
         Args:
             goto: Optional next node to go to
@@ -1687,9 +1635,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
             return {"state": self.model_dump(), "goto": goto, "graph": graph}
 
     @classmethod
-    def from_snapshot(cls, snapshot: Any) -> "StateSchema":
-        """
-        Create a state from a LangGraph StateSnapshot.
+    def from_snapshot(cls, snapshot: Any) -> StateSchema:
+        """Create a state from a LangGraph StateSnapshot.
 
         Args:
             snapshot: StateSnapshot from LangGraph
@@ -1704,22 +1651,24 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         if hasattr(snapshot, "values"):
             # Standard StateSnapshot
             return cls.from_dict(snapshot.values)
-        elif hasattr(snapshot, "channel_values") and snapshot.channel_values:
+        if hasattr(snapshot, "channel_values") and snapshot.channel_values:
             # Alternative attribute name in some versions
             return cls.from_dict(snapshot.channel_values)
-        elif isinstance(snapshot, dict):
+        if isinstance(snapshot, dict):
             # Dictionary state
             return cls.from_dict(snapshot)
 
         # Last resort - empty state
-        logger.warning(f"Couldn't extract state from snapshot of type {type(snapshot)}")
+        logger.warning(
+            f"Couldn't extract state from snapshot of type {
+                type(snapshot)}"
+        )
         return cls()
 
     # Engine integration methods
 
-    def prepare_for_engine(self, engine_name: str) -> Dict[str, Any]:
-        """
-        Prepare state data for a specific engine.
+    def prepare_for_engine(self, engine_name: str) -> builtins.dict[str, Any]:
+        """Prepare state data for a specific engine.
 
         Extracts only fields that are inputs for the specified engine.
 
@@ -1741,7 +1690,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
             if engine_name in self.__class__.__input_fields__:
                 input_fields = self.__class__.__input_fields__[engine_name]
 
-        # If no input fields specified, try to use get_engine to find the engine
+        # If no input fields specified, try to use get_engine to find the
+        # engine
         if not input_fields:
             engine = self.get_engine(engine_name)
             if engine and hasattr(engine, "input_schema"):
@@ -1766,10 +1716,12 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         return result
 
     def merge_engine_output(
-        self, engine_name: str, output: Dict[str, Any], apply_reducers: bool = True
-    ) -> "StateSchema":
-        """
-        Merge output from an engine into this state.
+        self,
+        engine_name: str,
+        output: builtins.dict[str, Any],
+        apply_reducers: bool = True,
+    ) -> StateSchema:
+        """Merge output from an engine into this state.
 
         Args:
             engine_name: Name of the engine
@@ -1782,7 +1734,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         # Log the merge operation
         logger.debug(f"Merging output from engine '{engine_name}'")
 
-        # Filter output to include only fields that are outputs from this engine
+        # Filter output to include only fields that are outputs from this
+        # engine
         filtered_output = {}
 
         if hasattr(self.__class__, "__engine_io_mappings__"):
@@ -1806,7 +1759,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                             f"Including field '{field_name}' from engine output (from fields)"
                         )
 
-        # If no output fields specified, try to use get_engine to find the engine
+        # If no output fields specified, try to use get_engine to find the
+        # engine
         if not filtered_output:
             engine = self.get_engine(engine_name)
             if engine and hasattr(engine, "output_schema"):
@@ -1825,22 +1779,24 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         # Apply update with or without reducers
         if apply_reducers:
             logger.debug(
-                f"Applying reducers to engine output (fields: {list(filtered_output.keys())})"
+                f"Applying reducers to engine output (fields: {
+                    list(
+                        filtered_output.keys())})"
             )
             return self.apply_reducers(filtered_output)
-        else:
-            logger.debug(
-                f"Updating with engine output without reducers (fields: {list(filtered_output.keys())})"
-            )
-            return self.update(filtered_output)
+        logger.debug(
+            f"Updating with engine output without reducers (fields: {
+                list(
+                    filtered_output.keys())})"
+        )
+        return self.update(filtered_output)
 
     # Configuration integration
 
     def to_runnable_config(
-        self, thread_id: Optional[str] = None, **kwargs
+        self, thread_id: str | None = None, **kwargs
     ) -> RunnableConfig:
-        """
-        Convert state to a RunnableConfig.
+        """Convert state to a RunnableConfig.
 
         Args:
             thread_id: Optional thread ID for the configuration
@@ -1864,9 +1820,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         return config
 
     @classmethod
-    def from_runnable_config(cls, config: RunnableConfig) -> Optional["StateSchema"]:
-        """
-        Extract state from a RunnableConfig.
+    def from_runnable_config(cls, config: RunnableConfig) -> StateSchema | None:
+        """Extract state from a RunnableConfig.
 
         Args:
             config: RunnableConfig to extract from
@@ -1881,9 +1836,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
     # Visualization and pretty printing methods
 
-    def pretty_print(self, title: Optional[str] = None) -> None:
-        """
-        Print state with rich formatting for easy inspection.
+    def pretty_print(self, title: str | None = None) -> None:
+        """Print state with rich formatting for easy inspection.
 
         Args:
             title: Optional title for the display
@@ -1904,7 +1858,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                 field_style = "yellow"
             elif isinstance(field_value, dict):
                 field_style = "cyan"
-            elif isinstance(field_value, (int, float)):
+            elif isinstance(field_value, int | float):
                 field_style = "magenta"
 
             # Add to tree with styled field name
@@ -1920,8 +1874,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
     @staticmethod
     def _format_field_value(value: Any) -> str:
-        """
-        Format a field value for display.
+        """Format a field value for display.
 
         Args:
             value: Value to format
@@ -1931,32 +1884,33 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         """
         if value is None:
             return "[dim]None[/dim]"
-        elif isinstance(value, str):
+        if isinstance(value, str):
             if len(value) > 100:
                 return f'[green]"{value[:97]}..."[/green]'
             return f'[green]"{value}"[/green]'
-        elif isinstance(value, int):
+        if isinstance(value, int):
             return f"[magenta]{value}[/magenta]"
-        elif isinstance(value, float):
+        if isinstance(value, float):
             return f"[magenta]{value:.6g}[/magenta]"
-        elif isinstance(value, bool):
+        if isinstance(value, bool):
             return f"[cyan]{value}[/cyan]"
-        elif isinstance(value, list):
+        if isinstance(value, list):
             if not value:
                 return "[dim][]"
             if len(value) > 5:
                 items_str = ", ".join(str(v)[:20] for v in value[:3])
                 return f"[yellow][{items_str}, ... ({len(value)} items)][/yellow]"
             return f"[yellow][{', '.join(str(v)[:50] for v in value)}][/yellow]"
-        elif isinstance(value, dict):
+        if isinstance(value, dict):
             if not value:
                 return "[dim]{}"
             if len(value) > 3:
                 items = list(value.items())[:3]
                 items_str = ", ".join(f"{k}: {str(v)[:20]}" for k, v in items)
                 return f"[cyan]{{{items_str}, ... ({len(value)} items)}}[/cyan]"
-            return f"[cyan]{{{', '.join(f'{k}: {str(v)[:50]}' for k, v in value.items())}}}[/cyan]"
-        elif hasattr(value, "__class__"):
+            return f"[cyan]{{{', '.join(f'{k}: {str(v)[:50]}' for k,
+                                        v in value.items())}}}[/cyan]"
+        if hasattr(value, "__class__"):
             class_name = value.__class__.__name__
             if hasattr(value, "model_dump"):
                 return f"[blue]{class_name}(...)[/blue]"
@@ -1967,10 +1921,9 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
     @classmethod
     def create_input_schema(
-        cls, engine_name: Optional[str] = None, name: Optional[str] = None
-    ) -> Type[BaseModel]:
-        """
-        Alias for derive_input_schema for backward compatibility.
+        cls, engine_name: str | None = None, name: str | None = None
+    ) -> type[BaseModel]:
+        """Alias for derive_input_schema for backward compatibility.
 
         Args:
             engine_name: Optional name of the engine to target
@@ -1983,10 +1936,9 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
     @classmethod
     def create_output_schema(
-        cls, engine_name: Optional[str] = None, name: Optional[str] = None
-    ) -> Type[BaseModel]:
-        """
-        Alias for derive_output_schema for backward compatibility.
+        cls, engine_name: str | None = None, name: str | None = None
+    ) -> type[BaseModel]:
+        """Alias for derive_output_schema for backward compatibility.
 
         Args:
             engine_name: Optional name of the engine to target
@@ -1997,11 +1949,11 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         """
         return cls.derive_output_schema(engine_name, name)
 
-    # Enhance the display_schema method to better handle structured output models
+    # Enhance the display_schema method to better handle structured output
+    # models
     @classmethod
-    def display_schema(cls, title: Optional[str] = None) -> None:
-        """
-        Display schema information in a rich format.
+    def display_schema(cls, title: str | None = None) -> None:
+        """Display schema information in a rich format.
 
         Args:
             title: Optional title for the display
@@ -2011,7 +1963,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
         # Create main tree
         tree = Tree(
-            f"[bold blue]class {schema_name}([/bold blue][italic]{cls.__base__.__name__}[/italic][bold blue])[/bold blue]:"
+            f"[bold blue]class {schema_name}([/bold blue][italic]{
+                cls.__base__.__name__}[/italic][bold blue])[/bold blue]:"
         )
 
         # Add fields
@@ -2033,16 +1986,19 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                 default_str = f"default_factory={factory_name}"
             else:
                 default = field_info.default
-                if default is ...:
-                    default_str = "[red]required[/red]"
-                else:
-                    default_str = f"default={repr(default)}"
+                default_str = (
+                    "[red]required[/red]"
+                    if default is ...
+                    else f"default={
+                        default!r}"
+                )
 
             # Add description if available
-            if field_info.description:
-                desc_str = f" [dim]# {field_info.description}[/dim]"
-            else:
-                desc_str = ""
+            desc_str = (
+                f" [dim]# {field_info.description}[/dim]"
+                if field_info.description
+                else ""
+            )
 
             # Add to tree with proper styling
             fields_node.add(
@@ -2093,8 +2049,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
     @classmethod
     def to_python_code(cls) -> str:
-        """
-        Convert schema to Python code representation.
+        """Convert schema to Python code representation.
 
         Returns:
             String containing Python code representation
@@ -2123,10 +2078,12 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                 default_str = f"Field(default_factory={factory_name}"
             else:
                 default = field_info.default
-                if default is ...:
-                    default_str = "Field(..."
-                else:
-                    default_str = f"Field(default={repr(default)}"
+                default_str = (
+                    "Field(..."
+                    if default is ...
+                    else f"Field(default={
+                        default!r}"
+                )
 
             # Add description if available
             if field_info.description:
@@ -2146,30 +2103,37 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
         if cls.__serializable_reducers__:
             lines.append(
-                f"    __serializable_reducers__ = {cls.__serializable_reducers__}"
+                f"    __serializable_reducers__ = {
+                    cls.__serializable_reducers__}"
             )
 
         if cls.__engine_io_mappings__:
-            lines.append(f"    __engine_io_mappings__ = {cls.__engine_io_mappings__}")
+            lines.append(
+                f"    __engine_io_mappings__ = {
+                    cls.__engine_io_mappings__}"
+            )
 
         # Add structured models if available
         if hasattr(cls, "__structured_models__") and cls.__structured_models__:
-            lines.append(f"    __structured_models__ = {cls.__structured_models__}")
+            lines.append(
+                f"    __structured_models__ = {
+                    cls.__structured_models__}"
+            )
 
         if (
             hasattr(cls, "__structured_model_fields__")
             and cls.__structured_model_fields__
         ):
             lines.append(
-                f"    __structured_model_fields__ = {cls.__structured_model_fields__}"
+                f"    __structured_model_fields__ = {
+                    cls.__structured_model_fields__}"
             )
 
         return "\n".join(lines)
 
     @classmethod
-    def get_structured_model(cls, model_name: str) -> Optional[Type[BaseModel]]:
-        """
-        Get a structured output model class by name.
+    def get_structured_model(cls, model_name: str) -> type[BaseModel] | None:
+        """Get a structured output model class by name.
 
         Args:
             model_name: Name of the structured model
@@ -2196,9 +2160,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
             return None
 
     @classmethod
-    def list_structured_models(cls) -> List[str]:
-        """
-        List all structured output models in this schema.
+    def list_structured_models(cls) -> list[str]:
+        """List all structured output models in this schema.
 
         Returns:
             List of structured model names
@@ -2208,9 +2171,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         return []
 
     @classmethod
-    def display_code(cls, title: Optional[str] = None) -> None:
-        """
-        Display Python code representation of the schema.
+    def display_code(cls, title: str | None = None) -> None:
+        """Display Python code representation of the schema.
 
         Args:
             title: Optional title for the display
@@ -2221,14 +2183,17 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         syntax = Syntax(code, "python", theme="monokai", line_numbers=True)
 
         # Use logger to display
-        logger.info(str(syntax), title=title or f"{cls.__name__} Code", style="yellow")
+        logger.info(
+            str(syntax),
+            title=title
+            or f"{
+                cls.__name__} Code",
+            style="yellow",
+        )
 
     @classmethod
-    def compare_with(
-        cls, other: Type["StateSchema"], title: Optional[str] = None
-    ) -> None:
-        """
-        Compare this schema with another in a side-by-side display.
+    def compare_with(cls, other: type[StateSchema], title: str | None = None) -> None:
+        """Compare this schema with another in a side-by-side display.
 
         Args:
             other: Other schema to compare with
@@ -2305,8 +2270,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
     @staticmethod
     def _format_field_info(field_info: Any) -> str:
-        """
-        Format field info for display.
+        """Format field info for display.
 
         Args:
             field_info: Field info to format
@@ -2326,17 +2290,18 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
             default_str = f"default_factory={factory_name}"
         else:
             default = field_info.default
-            if default is ...:
-                default_str = "[red]required[/red]"
-            else:
-                default_str = f"default={repr(default)}"
+            default_str = (
+                "[red]required[/red]"
+                if default is ...
+                else f"default={
+                    default!r}"
+            )
 
         return f"[yellow]{type_str}[/yellow] ({default_str})"
 
     @classmethod
     def as_table(cls) -> Table:
-        """
-        Create a rich table representation of the schema.
+        """Create a rich table representation of the schema.
 
         Returns:
             Rich Table object
@@ -2368,10 +2333,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                 default_str = f"default_factory={factory_name}"
             else:
                 default = field_info.default
-                if default is ...:
-                    default_str = "required"
-                else:
-                    default_str = repr(default)
+                default_str = "required" if default is ... else repr(default)
 
             # Get description
             description = field_info.description or ""
@@ -2405,9 +2367,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
     @classmethod
     def display_table(cls) -> None:
-        """
-        Display schema as a table.
-        """
+        """Display schema as a table."""
         # Build table data
         table_data = {}
 
@@ -2428,10 +2388,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                 default_str = f"default_factory={factory_name}"
             else:
                 default = field_info.default
-                if default is ...:
-                    default_str = "required"
-                else:
-                    default_str = repr(default)
+                default_str = "required" if default is ... else repr(default)
 
             # Get description
             description = field_info.description or ""

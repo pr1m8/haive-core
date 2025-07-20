@@ -1,5 +1,6 @@
 """Serialization mixin for enhanced data conversion capabilities.
 
+from typing import Any
 This module provides a mixin for adding enhanced serialization and
 deserialization capabilities to Pydantic models. It offers methods for
 converting models to dictionaries and JSON strings, and for creating models

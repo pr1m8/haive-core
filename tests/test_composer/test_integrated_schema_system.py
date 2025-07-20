@@ -7,7 +7,7 @@ Tests the integration between:
 - Backwards compatibility
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import pytest
 from langgraph.types import Command
@@ -22,7 +22,6 @@ from haive.core.graph.node.composer import (
 from haive.core.graph.node.composer.integrated_node_composer import (
     IntegratedNodeComposer,
     SchemaAwareComposedNode,
-    StateSchemaAdapter,
     create_schema_aware_node,
     integrate_node_with_schema,
     with_state_schema,
@@ -36,8 +35,8 @@ class TestStateSchema(StateSchema):
     # Basic fields
     query: str
     count: int = Field(default=0)
-    items: List[str] = Field(default_factory=list)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    items: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
     # StateSchema features
     __shared_fields__ = ["query"]
@@ -63,7 +62,8 @@ class TestIntegratedNodeComposer:
     def simple_node(self):
         """Create simple test node."""
 
-        def process(state: Dict[str, Any], config: Dict[str, Any]) -> Dict[str, Any]:
+        def process(state: dict[str, Any],
+                    config: dict[str, Any]) -> dict[str, Any]:
             items = state.get("data", [])
             return {"results": [x.upper() for x in items], "count": len(items)}
 
@@ -108,7 +108,7 @@ class TestIntegratedNodeComposer:
     def test_from_callable_with_schema(self, composer):
         """Test creating node from callable with schema."""
 
-        def process_query(query: str) -> Dict[str, Any]:
+        def process_query(query: str) -> dict[str, Any]:
             return {"processed": f"Processed: {query}"}
 
         node = composer.from_callable_with_schema(
@@ -131,7 +131,8 @@ class TestIntegratedNodeComposer:
         """Test that schema generation preserves metadata."""
 
         # Create node with field definitions
-        def process(state: Dict[str, Any], config: Dict[str, Any]) -> Dict[str, Any]:
+        def process(state: dict[str, Any],
+                    config: dict[str, Any]) -> dict[str, Any]:
             return {"output": "processed"}
 
         node = CallableNodeConfig(name="test_node", callable_func=process)
@@ -180,7 +181,8 @@ class TestIntegratedNodeComposer:
     def test_reducer_integration(self, composer):
         """Test that reducers work with composed nodes."""
 
-        def add_items(state: Dict[str, Any], config: Dict[str, Any]) -> Dict[str, Any]:
+        def add_items(state: dict[str, Any],
+                      config: dict[str, Any]) -> dict[str, Any]:
             return {"items": ["new1", "new2"]}
 
         node = CallableNodeConfig(name="adder", callable_func=add_items)
@@ -209,7 +211,8 @@ class TestSchemaAwareComposedNode:
     def composed_node(self):
         """Create composed node for testing."""
 
-        def process(state: Dict[str, Any], config: Dict[str, Any]) -> Dict[str, Any]:
+        def process(state: dict[str, Any],
+                    config: dict[str, Any]) -> dict[str, Any]:
             data = state.get("data", [])
             return {"results": [x.upper() for x in data]}
 
@@ -254,7 +257,8 @@ class TestFactoryFunctions:
     def test_integrate_node_with_schema(self):
         """Test integrate_node_with_schema function."""
 
-        def process(state: Dict[str, Any], config: Dict[str, Any]) -> Dict[str, Any]:
+        def process(state: dict[str, Any],
+                    config: dict[str, Any]) -> dict[str, Any]:
             return {"result": len(state.get("items", []))}
 
         node = CallableNodeConfig(name="counter", callable_func=process)
@@ -277,7 +281,7 @@ class TestFactoryFunctions:
     def test_create_schema_aware_node(self):
         """Test create_schema_aware_node function."""
 
-        def process(state: TestStateSchema) -> Dict[str, Any]:
+        def process(state: TestStateSchema) -> dict[str, Any]:
             return {"processed": f"Processed {len(state.items)} items"}
 
         node = create_schema_aware_node(
@@ -298,9 +302,10 @@ class TestFactoryFunctions:
         """Test with_state_schema decorator."""
 
         @with_state_schema(
-            TestStateSchema, output_mappings=[FieldMapping("result", "processed")]
+            TestStateSchema, output_mappings=[
+                FieldMapping("result", "processed")]
         )
-        def process(state: TestStateSchema) -> Dict[str, Any]:
+        def process(state: TestStateSchema) -> dict[str, Any]:
             return {"result": f"Query: {state.query}"}
 
         assert isinstance(process, SchemaAwareComposedNode)
@@ -318,7 +323,8 @@ class TestBackwardsCompatibility:
     def test_basic_composer_still_works(self):
         """Test that basic NodeSchemaComposer still works."""
 
-        def process(state: Dict[str, Any], config: Dict[str, Any]) -> Dict[str, Any]:
+        def process(state: dict[str, Any],
+                    config: dict[str, Any]) -> dict[str, Any]:
             return {"result": "processed"}
 
         node = CallableNodeConfig(name="basic", callable_func=process)
@@ -335,7 +341,8 @@ class TestBackwardsCompatibility:
     def test_factory_functions_compatibility(self):
         """Test that factory functions work with any composer."""
 
-        def process(state: Dict[str, Any], config: Dict[str, Any]) -> Dict[str, Any]:
+        def process(state: dict[str, Any],
+                    config: dict[str, Any]) -> dict[str, Any]:
             return {"data": ["a", "b", "c"]}
 
         node = CallableNodeConfig(name="test", callable_func=process)
@@ -352,8 +359,8 @@ class TestBackwardsCompatibility:
 
         # Old style node
         def old_process(
-            state: Dict[str, Any], config: Dict[str, Any]
-        ) -> Dict[str, Any]:
+            state: dict[str, Any], config: dict[str, Any]
+        ) -> dict[str, Any]:
             return {"old_result": "old"}
 
         old_node = CallableNodeConfig(name="old", callable_func=old_process)
@@ -363,7 +370,10 @@ class TestBackwardsCompatibility:
         new_node = composer.compose_node_with_schema(
             base_node=old_node,
             state_schema=TestStateSchema,
-            output_mappings=[FieldMapping("old_result", "metadata.old_result")],
+            output_mappings=[
+                FieldMapping(
+                    "old_result",
+                    "metadata.old_result")],
         )
 
         # Should work together
@@ -382,7 +392,7 @@ class TestPerformanceCharacteristics:
         import time
 
         # Simple function
-        def process(data: List[str]) -> List[str]:
+        def process(data: list[str]) -> list[str]:
             return [x.upper() for x in data]
 
         data = ["test"] * 100
@@ -390,7 +400,7 @@ class TestPerformanceCharacteristics:
         # Direct call
         start = time.time()
         for _ in range(100):
-            result = process(data)
+            process(data)
         direct_time = time.time() - start
 
         # With schema integration
@@ -404,7 +414,7 @@ class TestPerformanceCharacteristics:
         start = time.time()
         for _ in range(100):
             state = TestStateSchema(query="test", items=data)
-            result = node(state)
+            node(state)
         integrated_time = time.time() - start
 
         # Should be reasonable overhead (less than 10x)
@@ -422,8 +432,8 @@ class TestPerformanceCharacteristics:
         for i in range(10):
 
             def process(
-                state: Dict[str, Any], config: Dict[str, Any]
-            ) -> Dict[str, Any]:
+                state: dict[str, Any], config: dict[str, Any]
+            ) -> dict[str, Any]:
                 return {"result": f"processed_{i}"}
 
             node = CallableNodeConfig(name=f"node_{i}", callable_func=process)
@@ -449,7 +459,8 @@ class TestErrorHandling:
         """Test handling of invalid field mappings."""
         composer = IntegratedNodeComposer()
 
-        def process(state: Dict[str, Any], config: Dict[str, Any]) -> Dict[str, Any]:
+        def process(state: dict[str, Any],
+                    config: dict[str, Any]) -> dict[str, Any]:
             return {"result": "test"}
 
         node = CallableNodeConfig(name="test", callable_func=process)
@@ -458,7 +469,11 @@ class TestErrorHandling:
         composed = composer.compose_node_with_schema(
             base_node=node,
             state_schema=TestStateSchema,
-            input_mappings=[FieldMapping("nonexistent", "data", default="default")],
+            input_mappings=[
+                FieldMapping(
+                    "nonexistent",
+                    "data",
+                    default="default")],
         )
 
         state = TestStateSchema(query="test")
@@ -471,7 +486,8 @@ class TestErrorHandling:
         """Test handling of type mismatches."""
         composer = IntegratedNodeComposer()
 
-        def process(state: Dict[str, Any], config: Dict[str, Any]) -> Dict[str, Any]:
+        def process(state: dict[str, Any],
+                    config: dict[str, Any]) -> dict[str, Any]:
             return {"result": "string_result"}
 
         node = CallableNodeConfig(name="test", callable_func=process)
@@ -480,7 +496,11 @@ class TestErrorHandling:
         composed = composer.compose_node_with_schema(
             base_node=node,
             state_schema=TestStateSchema,
-            output_mappings=[FieldMapping("result", "count")],  # String to int field
+            output_mappings=[
+                FieldMapping(
+                    "result",
+                    "count")],
+            # String to int field
         )
 
         state = TestStateSchema(query="test")

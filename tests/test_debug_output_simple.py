@@ -1,11 +1,10 @@
 """Test to reproduce the messy debug output issue without persistence."""
 
 import logging
-from typing import List
 
-from haive.agents.simple.agent_v2 import SimpleAgentV2
 from pydantic import BaseModel, Field
 
+from haive.agents.simple.agent_v2 import SimpleAgentV2
 from haive.core.engine.aug_llm import AugLLMConfig
 
 # Disable most logging to focus on the issue
@@ -20,7 +19,8 @@ class QueryRefinementSuggestion(BaseModel):
     rationale: str = Field(
         description="Explanation of why this refinement is beneficial"
     )
-    expected_benefit: str = Field(description="Expected benefit of this refinement")
+    expected_benefit: str = Field(
+        description="Expected benefit of this refinement")
 
 
 class QueryRefinementResponse(BaseModel):
@@ -32,21 +32,19 @@ class QueryRefinementResponse(BaseModel):
     )
     query_type: str = Field(description="Type of query")
     complexity_level: str = Field(description="Complexity level")
-    refinement_suggestions: List[QueryRefinementSuggestion] = Field(
+    refinement_suggestions: list[QueryRefinementSuggestion] = Field(
         description="List of refinement suggestions"
     )
     best_refined_query: str = Field(
         description="The best refined query from the suggestions"
     )
-    search_strategy_recommendations: List[str] = Field(
+    search_strategy_recommendations: list[str] = Field(
         description="Recommended search strategies"
     )
 
 
 def test_debug_output_simple():
     """Test the debug output issue with structured output."""
-    print("=== TESTING DEBUG OUTPUT ISSUE ===\n")
-
     # Create agent with structured output but no persistence
     engine = AugLLMConfig(
         temperature=0.3, structured_output_model=QueryRefinementResponse
@@ -62,7 +60,6 @@ def test_debug_output_simple():
     agent.checkpointer = None
     agent.store = None
 
-    print("Running agent with debug=True (no persistence)...")
     try:
         result = agent.run(
             "what is the tallest tower in north america",
@@ -70,17 +67,12 @@ def test_debug_output_simple():
             thread_id=None,  # No persistence
         )
 
-        print(f"\n=== RESULT TYPE: {type(result)} ===")
-        print(f"Result: {result}")
-
         # Check what we're getting
         if hasattr(result, "query_refinement_response"):
-            print(f"\n=== STRUCTURED OUTPUT FIELD ===")
-            print(f"Field value: {result.query_refinement_response}")
-            print(f"Field type: {type(result.query_refinement_response)}")
+            pass
 
-    except Exception as e:
-        print(f"Error: {e}")
+    except Exception:
+        pass
 
 
 if __name__ == "__main__":

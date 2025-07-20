@@ -7,6 +7,7 @@ packages like haive-core are in the packages/ directory.
 import logging
 import os
 from pathlib import Path
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -21,10 +22,14 @@ ROOT_DIR = PACKAGES_DIR.parent  # haive root (polyrepo root)
 
 # Check if paths look correct and log warnings if not
 if CORE_DIR.name != "core":
-    logger.warning(f"Unexpected CORE_DIR name: {CORE_DIR.name}, expected 'core'")
+    logger.warning(
+        f"Unexpected CORE_DIR name: {
+            CORE_DIR.name}, expected 'core'"
+    )
 if HAIVE_NAMESPACE_DIR.name != "haive":
     logger.warning(
-        f"Unexpected HAIVE_NAMESPACE_DIR name: {HAIVE_NAMESPACE_DIR.name}, expected 'haive'"
+        f"Unexpected HAIVE_NAMESPACE_DIR name: {
+            HAIVE_NAMESPACE_DIR.name}, expected 'haive'"
     )
 if SRC_DIR.name != "src":
     logger.warning(f"Unexpected SRC_DIR name: {SRC_DIR.name}, expected 'src'")
@@ -34,7 +39,8 @@ if "haive-core" not in str(HAIVE_CORE_PACKAGE_DIR):
     )
 if PACKAGES_DIR.name != "packages":
     logger.warning(
-        f"Unexpected PACKAGES_DIR name: {PACKAGES_DIR.name}, expected 'packages'"
+        f"Unexpected PACKAGES_DIR name: {
+            PACKAGES_DIR.name}, expected 'packages'"
     )
 
 # Get other package directories
@@ -72,7 +78,7 @@ DIRS_TO_CREATE = [
 ]
 
 
-def create_directories():
+def create_directories() -> Any:
     """Create the necessary directories if they don't exist."""
     for path in DIRS_TO_CREATE:
         try:

@@ -5,7 +5,7 @@ including GitHub, ArXiv, Wikipedia, and general web pages.
 """
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 from urllib.parse import urlparse
 
 from langchain_core.document_loaders.base import BaseLoader
@@ -24,7 +24,7 @@ class GitHubSource(WebUrlSource):
     def __init__(
         self,
         repo_url: str,
-        file_filter: Optional[List[str]] = None,
+        file_filter: list[str] | None = None,
         include_issues: bool = False,
         include_pull_requests: bool = False,
         **kwargs,
@@ -54,11 +54,11 @@ class GitHubSource(WebUrlSource):
         """GitHub may require authentication for private repos."""
         return True
 
-    def get_credential_requirements(self) -> List[CredentialType]:
+    def get_credential_requirements(self) -> list[CredentialType]:
         """GitHub needs API token."""
         return [CredentialType.ACCESS_TOKEN, CredentialType.API_KEY]
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a GitHub loader."""
         try:
             from langchain_community.document_loaders import (
@@ -90,19 +90,17 @@ class GitHubSource(WebUrlSource):
                         access_token=github_token,
                         include_prs=self.include_pull_requests,
                     )
-                else:
-                    # Use GitLoader for repository content
-                    return GitLoader(
-                        clone_url=self.repo_url,
-                        repo_path=f"/tmp/git_repos/{repo_owner}_{repo_name}",
-                        file_filter=lambda file_path: (
-                            any(pattern in file_path for pattern in self.file_filter)
-                            if self.file_filter
-                            else True
-                        ),
-                    )
-            else:
-                raise ValueError(f"Invalid GitHub URL format: {self.repo_url}")
+                # Use GitLoader for repository content
+                return GitLoader(
+                    clone_url=self.repo_url,
+                    repo_path=f"/tmp/git_repos/{repo_owner}_{repo_name}",
+                    file_filter=lambda file_path: (
+                        any(pattern in file_path for pattern in self.file_filter)
+                        if self.file_filter
+                        else True
+                    ),
+                )
+            raise ValueError(f"Invalid GitHub URL format: {self.repo_url}")
 
         except ImportError:
             logger.warning(
@@ -110,7 +108,7 @@ class GitHubSource(WebUrlSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create GitHub loader: {e}")
+            logger.exception(f"Failed to create GitHub loader: {e}")
             return None
 
 
@@ -119,8 +117,8 @@ class ArXivSource(WebUrlSource):
 
     def __init__(
         self,
-        query: Optional[str] = None,
-        paper_id: Optional[str] = None,
+        query: str | None = None,
+        paper_id: str | None = None,
         max_results: int = 10,
         **kwargs,
     ):
@@ -146,7 +144,7 @@ class ArXivSource(WebUrlSource):
             return 0.0
         return 0.9
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create an ArXiv loader."""
         try:
             from langchain_community.document_loaders import ArxivLoader
@@ -154,17 +152,16 @@ class ArXivSource(WebUrlSource):
             if self.paper_id:
                 # Load specific paper
                 return ArxivLoader(query=self.paper_id, load_max_docs=1)
-            elif self.query:
+            if self.query:
                 # Search for papers
                 return ArxivLoader(query=self.query, load_max_docs=self.max_results)
-            else:
-                raise ValueError("Either paper_id or query must be provided")
+            raise ValueError("Either paper_id or query must be provided")
 
         except ImportError:
             logger.warning("ArxivLoader not available. Install with: pip install arxiv")
             return None
         except Exception as e:
-            logger.error(f"Failed to create ArXiv loader: {e}")
+            logger.exception(f"Failed to create ArXiv loader: {e}")
             return None
 
 
@@ -173,8 +170,8 @@ class WikipediaSource(WebUrlSource):
 
     def __init__(
         self,
-        query: Optional[str] = None,
-        page_title: Optional[str] = None,
+        query: str | None = None,
+        page_title: str | None = None,
         lang: str = "en",
         load_max_docs: int = 1,
         **kwargs,
@@ -202,7 +199,7 @@ class WikipediaSource(WebUrlSource):
             return 0.0
         return 0.9
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a Wikipedia loader."""
         try:
             from langchain_community.document_loaders import WikipediaLoader
@@ -223,7 +220,7 @@ class WikipediaSource(WebUrlSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create Wikipedia loader: {e}")
+            logger.exception(f"Failed to create Wikipedia loader: {e}")
             return None
 
 
@@ -232,7 +229,7 @@ class PlaywrightWebSource(WebUrlSource):
 
     def __init__(
         self,
-        urls: List[str],
+        urls: list[str],
         wait_until: str = "networkidle",
         headless: bool = True,
         **kwargs,
@@ -256,7 +253,7 @@ class PlaywrightWebSource(WebUrlSource):
             return 0.0
         return 0.6  # Lower than basic web loader for auto-selection
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a Playwright web loader."""
         try:
             from langchain_community.document_loaders import PlaywrightURLLoader
@@ -274,7 +271,7 @@ class PlaywrightWebSource(WebUrlSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create Playwright loader: {e}")
+            logger.exception(f"Failed to create Playwright loader: {e}")
             return None
 
 
@@ -283,8 +280,8 @@ class BasicWebSource(WebUrlSource):
 
     def __init__(
         self,
-        web_paths: List[str],
-        requests_kwargs: Optional[Dict[str, Any]] = None,
+        web_paths: list[str],
+        requests_kwargs: dict[str, Any] | None = None,
         **kwargs,
     ):
         super().__init__(source_path=web_paths[0] if web_paths else "", **kwargs)
@@ -305,7 +302,7 @@ class BasicWebSource(WebUrlSource):
             return 0.0
         return 0.7
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a basic web loader."""
         try:
             from langchain_community.document_loaders import WebBaseLoader
@@ -319,15 +316,15 @@ class BasicWebSource(WebUrlSource):
             logger.warning("WebBaseLoader not available")
             return None
         except Exception as e:
-            logger.error(f"Failed to create web loader: {e}")
+            logger.exception(f"Failed to create web loader: {e}")
             return None
 
 
 # Export web sources
 __all__ = [
-    "GitHubSource",
     "ArXivSource",
-    "WikipediaSource",
-    "PlaywrightWebSource",
     "BasicWebSource",
+    "GitHubSource",
+    "PlaywrightWebSource",
+    "WikipediaSource",
 ]

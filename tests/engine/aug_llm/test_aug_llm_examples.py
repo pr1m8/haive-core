@@ -57,7 +57,7 @@ def summarization_prompt():
                 content="""
         You are a summarization expert. Provide a concise summary of the content below.
         Focus on the main points and key takeaways.
-        
+
         Your summary should:
         - Be about 3-5 sentences long
         - Highlight the most important information
@@ -80,7 +80,7 @@ def analysis_prompt():
             SystemMessage(
                 content="""
         You are an analytical assistant. Provide a detailed analysis of the content below.
-        
+
         Your analysis should:
         - Identify key themes and patterns
         - Evaluate the strengths and weaknesses
@@ -102,15 +102,15 @@ def extraction_prompt():
         [
             SystemMessage(
                 content="""
-        You are a data extraction specialist. Extract the following types of information 
+        You are a data extraction specialist. Extract the following types of information
         from the content below:
-        
+
         1. Names of people
         2. Organizations mentioned
         3. Locations
         4. Dates and times
         5. Key metrics or statistics
-        
+
         Format your response as a structured list with categories.
         """
             ),
@@ -128,10 +128,10 @@ def qa_prompt():
         [
             SystemMessage(
                 content="""
-        You are a question answering assistant. Answer the question based only on the 
-        provided content. If the content doesn't contain the answer, say 'I don't have 
+        You are a question answering assistant. Answer the question based only on the
+        provided content. If the content doesn't contain the answer, say 'I don't have
         enough information to answer this question.'
-        
+
         Keep your answers concise and to the point.
         """
             ),
@@ -139,7 +139,7 @@ def qa_prompt():
                 """
         Content:
         {content}
-        
+
         Question: {question}
         """
             ),
@@ -155,7 +155,7 @@ def comparison_prompt():
             SystemMessage(
                 content="""
         You are a comparison specialist. Compare and contrast the items provided.
-        
+
         Your response should:
         - Identify similarities and differences
         - Evaluate relative strengths and weaknesses
@@ -166,11 +166,11 @@ def comparison_prompt():
             HumanMessagePromptTemplate.from_template(
                 """
         Compare the following:
-        
+
         Item 1: {item1}
-        
+
         Item 2: {item2}
-        
+
         Comparison criteria: {criteria}
         """
             ),
@@ -185,16 +185,16 @@ def translation_prompt():
         [
             SystemMessage(
                 content="""
-        You are a translation assistant. Translate the provided text from the source 
+        You are a translation assistant. Translate the provided text from the source
         language to the target language.
-        
+
         Maintain the meaning, tone, and style of the original as much as possible.
         """
             ),
             HumanMessagePromptTemplate.from_template(
                 """
         Text to translate: {text}
-        
+
         Source language: {source_language}
         Target language: {target_language}
         """
@@ -211,7 +211,7 @@ def code_generation_prompt():
             SystemMessage(
                 content="""
         You are a coding assistant. Generate code based on the requirements provided.
-        
+
         Your code should be:
         - Well-structured and organized
         - Properly commented
@@ -222,9 +222,9 @@ def code_generation_prompt():
             HumanMessagePromptTemplate.from_template(
                 """
         Requirements: {requirements}
-        
+
         Programming language: {language}
-        
+
         Additional specifications: {specifications}
         """
             ),
@@ -239,10 +239,10 @@ def format_conversion_prompt():
         [
             SystemMessage(
                 content="""
-        You are a format conversion assistant. Convert the provided content from the 
+        You are a format conversion assistant. Convert the provided content from the
         source format to the target format.
-        
-        Maintain all the information from the original content while adapting to the 
+
+        Maintain all the information from the original content while adapting to the
         new format's conventions and requirements.
         """
             ),
@@ -250,7 +250,7 @@ def format_conversion_prompt():
                 """
         Content to convert:
         {content}
-        
+
         Source format: {source_format}
         Target format: {target_format}
         """
@@ -321,44 +321,44 @@ def sample_business_data():
     """Sample business data for extraction."""
     return """
     QUARTERLY BUSINESS REVIEW
-    
+
     Company: TechNova Solutions Inc.
     Date: October 15, 2023
     Prepared by: Jennifer Martinez, Chief Financial Officer
-    
+
     FINANCIAL HIGHLIGHTS:
-    
+
     - Q3 2023 revenue reached $24.5 million, a 18.3% increase compared to Q3 2022
     - Gross margin improved to 68.2% (up from 65.7% in previous quarter)
     - Operating expenses totaled $10.2 million, representing 41.6% of revenue
     - EBITDA of $6.5 million, with EBITDA margin of 26.5%
     - Cash reserves of $18.7 million as of September 30, 2023
-    
+
     KEY BUSINESS DEVELOPMENTS:
-    
+
     1. Product Development:
        - Successfully launched TechNova Analytics Platform 4.0 on August 12, 2023
        - Completed beta testing of mobile application with 200 users
        - R&D team expanded to 45 engineers with the addition of 8 new hires
-    
+
     2. Sales & Marketing:
        - Secured 3 new enterprise clients: Axis Global, MediaCorp, and Peterson Healthcare
        - Expanded partnership with Microsoft for cloud integration services
        - Attended 5 industry conferences, generating 180+ qualified leads
-    
+
     3. Operations:
        - Opened new office in Austin, TX on September 5, 2023
        - Implemented new CRM system across all departments
        - Reduced customer support response time by 35% through AI-assisted ticketing
-    
+
     CHALLENGES & RISKS:
-    
+
     - Increasing competition from Apex Technologies in the enterprise segment
     - Supply chain delays affecting hardware component availability
     - Talent acquisition challenges in the Seattle market
-    
+
     OUTLOOK & NEXT STEPS:
-    
+
     - Q4 revenue projected at $26.8-28.2 million
     - Planning Series C funding round for Q1 2024, targeting $50 million
     - International expansion priorities: Germany, Japan, and Australia
@@ -372,7 +372,7 @@ def sample_code_requirements():
     return {
         "requirements": """
         Create a Python function that processes a CSV file with the following specifications:
-        
+
         1. The function should accept a file path as input
         2. It should read the CSV file, which contains columns for Name, Email, Age, and Subscription Status
         3. The function should filter for active subscribers (Subscription Status = "Active") who are over 30 years old
@@ -399,7 +399,8 @@ def sample_code_requirements():
 
 
 @skip_if_no_api_keys
-def test_summarization_example(azure_llm_config, summarization_prompt, sample_article):
+def test_summarization_example(
+        azure_llm_config, summarization_prompt, sample_article):
     """Test AugLLMConfig for content summarization."""
     # Create AugLLM for summarization
     summarizer = AugLLMConfig(
@@ -411,9 +412,6 @@ def test_summarization_example(azure_llm_config, summarization_prompt, sample_ar
 
     # Test with sample article
     summary = summarizer.invoke({"content": sample_article})
-
-    print("\n" + "=" * 20 + " Article Summary " + "=" * 20)
-    print(summary)
 
     # Test with custom content
     custom_content = """
@@ -427,9 +425,6 @@ def test_summarization_example(azure_llm_config, summarization_prompt, sample_ar
     """
 
     custom_summary = summarizer.invoke({"content": custom_content})
-
-    print("\n" + "=" * 20 + " IoT Summary " + "=" * 20)
-    print(custom_summary)
 
     assert len(summary) > 0
     assert len(custom_summary) > 0
@@ -452,13 +447,11 @@ def test_qa_example(azure_llm_config, qa_prompt, sample_article):
         "What year is the article focusing on?",
     ]
 
-    print("\n" + "=" * 20 + " Q&A Examples " + "=" * 20)
-
     for question in questions:
-        answer = qa_system.invoke({"content": sample_article, "question": question})
+        answer = qa_system.invoke(
+            {"content": sample_article, "question": question})
 
         content = answer.content if hasattr(answer, "content") else answer
-        print(f"\nQ: {question}\nA: {content}\n")
 
         # Basic validation
         assert content is not None
@@ -480,12 +473,7 @@ def test_data_extraction_example(
     # Extract data from the business report
     extracted_data = extractor.invoke({"content": sample_business_data})
 
-    content = (
-        extracted_data.content if hasattr(extracted_data, "content") else extracted_data
-    )
-
-    print("\n" + "=" * 20 + " Extracted Business Data " + "=" * 20)
-    print(content)
+    (extracted_data.content if hasattr(extracted_data, "content") else extracted_data)
 
     # Define structured output model for extraction
     class BusinessDataExtraction(BaseModel):
@@ -504,14 +492,8 @@ def test_data_extraction_example(
     )
 
     # Extract structured data
-    structured_data = structured_extractor.invoke({"content": sample_business_data})
-
-    print("\n" + "=" * 20 + " Structured Business Data Extraction " + "=" * 20)
-    print(f"People: {structured_data.people}")
-    print(f"Organizations: {structured_data.organizations}")
-    print(f"Locations: {structured_data.locations}")
-    print(f"Dates: {structured_data.dates}")
-    print(f"Metrics: {structured_data.metrics}")
+    structured_data = structured_extractor.invoke(
+        {"content": sample_business_data})
 
     # Basic validation
     assert len(structured_data.people) > 0
@@ -534,10 +516,8 @@ def test_comparison_example(
     # Compare the products
     comparison = comparator.invoke(sample_product_comparison)
 
-    content = comparison.content if hasattr(comparison, "content") else comparison
-
-    print("\n" + "=" * 20 + " Product Comparison " + "=" * 20)
-    print(content)
+    content = comparison.content if hasattr(
+        comparison, "content") else comparison
 
     # Try another comparison
     custom_comparison = {
@@ -553,9 +533,6 @@ def test_comparison_example(
         if hasattr(lang_comparison, "content")
         else lang_comparison
     )
-
-    print("\n" + "=" * 20 + " Programming Language Comparison " + "=" * 20)
-    print(lang_content)
 
     # Basic validation
     assert content is not None
@@ -580,11 +557,9 @@ def test_code_generation_example(
     generated_code = code_generator.invoke(sample_code_requirements)
 
     content = (
-        generated_code.content if hasattr(generated_code, "content") else generated_code
+        generated_code.content if hasattr(
+            generated_code, "content") else generated_code
     )
-
-    print("\n" + "=" * 20 + " Generated Python Code " + "=" * 20)
-    print(content)
 
     # Try a simpler code generation task
     simple_task = {
@@ -598,9 +573,6 @@ def test_code_generation_example(
     simple_content = (
         simple_code.content if hasattr(simple_code, "content") else simple_code
     )
-
-    print("\n" + "=" * 20 + " Simple Function Generation " + "=" * 20)
-    print(simple_content)
 
     # Basic validation
     assert "def" in content
@@ -622,21 +594,21 @@ def test_format_conversion_example(azure_llm_config, format_conversion_prompt):
     # Convert markdown to HTML
     markdown_content = """
     # Project Status Report
-    
+
     ## Completed Tasks
-    
+
     - Implemented user authentication system
     - Designed database schema
     - Created initial API endpoints
-    
+
     ## Pending Tasks
-    
+
     1. Frontend UI development
     2. Integration testing
     3. Deployment pipeline setup
-    
+
     **Deadline**: November 30, 2023
-    
+
     Contact: [project-team@example.com](mailto:project-team@example.com)
     """
 
@@ -653,9 +625,6 @@ def test_format_conversion_example(azure_llm_config, format_conversion_prompt):
         if hasattr(html_conversion, "content")
         else html_conversion
     )
-
-    print("\n" + "=" * 20 + " Markdown to HTML Conversion " + "=" * 20)
-    print(html_content)
 
     # Convert JSON to YAML
     json_content = """
@@ -690,9 +659,6 @@ def test_format_conversion_example(azure_llm_config, format_conversion_prompt):
         else yaml_conversion
     )
 
-    print("\n" + "=" * 20 + " JSON to YAML Conversion " + "=" * 20)
-    print(yaml_content)
-
     # Basic validation
     assert "<h1>" in html_content
     assert "<ul>" in html_content
@@ -725,9 +691,6 @@ def test_translation_example(azure_llm_config, translation_prompt):
         else spanish_translation
     )
 
-    print("\n" + "=" * 20 + " English to Spanish Translation " + "=" * 20)
-    print(spanish_content)
-
     # Translate English to French
     french_translation = translator.invoke(
         {
@@ -742,9 +705,6 @@ def test_translation_example(azure_llm_config, translation_prompt):
         if hasattr(french_translation, "content")
         else french_translation
     )
-
-    print("\n" + "=" * 20 + " English to French Translation " + "=" * 20)
-    print(french_content)
 
     # Translate with tone guidance
     formal_translation = translator.invoke(
@@ -765,9 +725,6 @@ def test_translation_example(azure_llm_config, translation_prompt):
         if hasattr(formal_translation, "content")
         else formal_translation
     )
-
-    print("\n" + "=" * 20 + " English to Formal Japanese Translation " + "=" * 20)
-    print(formal_content)
 
     # Basic validation
     assert spanish_content is not None
@@ -791,24 +748,21 @@ def test_analysis_example(azure_llm_config, analysis_prompt, sample_article):
     # Analyze the article
     analysis = analyzer.invoke({"content": sample_article})
 
-    content = analysis.content if hasattr(analysis, "content") else analysis
-
-    print("\n" + "=" * 20 + " Article Analysis " + "=" * 20)
-    print(content)
+    analysis.content if hasattr(analysis, "content") else analysis
 
     # Create custom analysis prompt for SWOT analysis
     swot_prompt = ChatPromptTemplate.from_messages(
         [
             SystemMessage(
                 content="""
-        You are a business analyst specialized in SWOT analysis. Analyze the provided 
+        You are a business analyst specialized in SWOT analysis. Analyze the provided
         business information and create a complete SWOT analysis with the following sections:
-        
+
         1. Strengths: Internal positive factors
         2. Weaknesses: Internal negative factors
         3. Opportunities: External positive factors
         4. Threats: External negative factors
-        
+
         For each section, provide 3-5 bullet points with brief explanations.
         """
             ),
@@ -825,17 +779,17 @@ def test_analysis_example(azure_llm_config, analysis_prompt, sample_article):
 
     # Sample business info
     business_info = """
-    GreenTech Solutions is a 5-year-old renewable energy startup focusing on residential solar 
-    panel installation and maintenance. The company currently operates in three states with 
-    45 employees and annual revenue of $3.2 million. GreenTech has developed proprietary 
+    GreenTech Solutions is a 5-year-old renewable energy startup focusing on residential solar
+    panel installation and maintenance. The company currently operates in three states with
+    45 employees and annual revenue of $3.2 million. GreenTech has developed proprietary
     software for solar efficiency analysis that is 15% more accurate than industry standards.
-    
-    The company has strong customer satisfaction scores (4.8/5) but has struggled with 
-    installation delays due to supply chain issues. Competitors include both large national 
-    solar providers and local installation companies. The government recently announced 
+
+    The company has strong customer satisfaction scores (4.8/5) but has struggled with
+    installation delays due to supply chain issues. Competitors include both large national
+    solar providers and local installation companies. The government recently announced
     new tax incentives for renewable energy adoption.
-    
-    The company's founder has ambitions to expand to 10 states within the next three years 
+
+    The company's founder has ambitions to expand to 10 states within the next three years
     but is concerned about rising equipment costs and potential changes in regulations.
     """
 
@@ -843,11 +797,9 @@ def test_analysis_example(azure_llm_config, analysis_prompt, sample_article):
     swot_analysis = swot_analyzer.invoke({"business_info": business_info})
 
     swot_content = (
-        swot_analysis.content if hasattr(swot_analysis, "content") else swot_analysis
+        swot_analysis.content if hasattr(
+            swot_analysis, "content") else swot_analysis
     )
-
-    print("\n" + "=" * 20 + " SWOT Analysis " + "=" * 20)
-    print(swot_content)
 
     # Basic validation
     assert "Strengths" in swot_content

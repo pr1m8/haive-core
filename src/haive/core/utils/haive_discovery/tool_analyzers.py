@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 # Check for LangChain availability
 try:
     from langchain_core.tools import BaseTool, StructuredTool
-    from pydantic import BaseModel, Field, create_model
+    from pydantic import create_model
 
     LANGCHAIN_AVAILABLE = True
 except ImportError:
@@ -30,7 +30,7 @@ class ToolAnalyzer(ComponentAnalyzer):
             return False
         try:
             return isinstance(obj, BaseTool)
-        except:
+        except BaseException:
             return False
 
     def analyze(self, obj: Any, module_path: str) -> ComponentInfo:
@@ -89,7 +89,10 @@ class DocumentLoaderAnalyzer(ComponentAnalyzer):
                 module = importlib.import_module(component_info.module_path)
                 loader_class = getattr(module, component_info.class_name)
             except (ImportError, AttributeError, SystemExit) as e:
-                logger.debug(f"Could not import {component_info.class_name}: {e}")
+                logger.debug(
+                    f"Could not import {
+                        component_info.class_name}: {e}"
+                )
                 return None
 
             # Create args model
@@ -101,7 +104,7 @@ class DocumentLoaderAnalyzer(ComponentAnalyzer):
                 logger.debug(f"Could not create args model: {e}")
                 args_model = create_model(f"{component_info.class_name}Args")
 
-            def loader_function(**kwargs):
+            def loader_function(**kwargs) -> dict[str, Any]:
                 """Load documents using the loader."""
                 try:
                     # Filter kwargs for valid parameters
@@ -114,7 +117,7 @@ class DocumentLoaderAnalyzer(ComponentAnalyzer):
                             for k, v in kwargs.items():
                                 if k in valid_params and v is not None:
                                     filtered_kwargs[k] = v
-                        except:
+                        except BaseException:
                             pass
 
                     # Create instance
@@ -163,7 +166,10 @@ class DocumentLoaderAnalyzer(ComponentAnalyzer):
                     return {"error": f"Unexpected error: {e}", "success": False}
 
             # Create safe tool name
-            tool_name = f"load_documents_{component_info.name.lower().replace(' ', '_').replace('-', '_')}"
+            tool_name = f"load_documents_{
+                component_info.name.lower().replace(
+                    ' ', '_').replace(
+                    '-', '_')}"
             tool_name = "".join(
                 c if c.isalnum() or c == "_" else "_" for c in tool_name
             )
@@ -172,7 +178,10 @@ class DocumentLoaderAnalyzer(ComponentAnalyzer):
             return StructuredTool.from_function(
                 func=loader_function,
                 name=tool_name,
-                description=f"Load documents using {component_info.class_name}: {component_info.description[:100]}",
+                description=f"Load documents using {
+                    component_info.class_name}: {
+                    component_info.description[
+                        :100]}",
                 args_schema=args_model,
             )
 

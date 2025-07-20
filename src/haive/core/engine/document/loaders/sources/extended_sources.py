@@ -5,7 +5,6 @@ including specialized and niche loaders from langchain_community.
 """
 
 from datetime import datetime
-from typing import List, Optional
 
 from pydantic import Field
 
@@ -226,7 +225,7 @@ class PineconeSource(RemoteSource):
 
     source_type: str = "pinecone"
     index_name: str = Field(..., description="Pinecone index name")
-    namespace: Optional[str] = Field(None, description="Namespace")
+    namespace: str | None = Field(None, description="Namespace")
     top_k: int = Field(10, description="Number of results")
 
 
@@ -280,7 +279,7 @@ class ChromaSource(DatabaseSource):
 
     source_type: str = "chroma"
     collection_name: str = Field(..., description="Collection name")
-    persist_directory: Optional[str] = Field(None, description="Persist directory")
+    persist_directory: str | None = Field(None, description="Persist directory")
 
 
 # =============================================================================
@@ -374,7 +373,7 @@ class CrowdinSource(RemoteSource):
 
     source_type: str = "crowdin"
     project_id: int = Field(..., description="Crowdin project ID")
-    file_id: Optional[int] = Field(None, description="Specific file ID")
+    file_id: int | None = Field(None, description="Specific file ID")
 
 
 @register_source(
@@ -520,9 +519,9 @@ class LinearSource(RemoteSource):
     """Linear issue tracking source."""
 
     source_type: str = "linear"
-    team_id: Optional[str] = Field(None, description="Team ID")
-    project_id: Optional[str] = Field(None, description="Project ID")
-    state_filter: Optional[str] = Field(None, description="Issue state filter")
+    team_id: str | None = Field(None, description="Team ID")
+    project_id: str | None = Field(None, description="Project ID")
+    state_filter: str | None = Field(None, description="Issue state filter")
 
 
 @register_source(
@@ -549,7 +548,7 @@ class ShortcutSource(RemoteSource):
 
     source_type: str = "shortcut"
     workspace_name: str = Field(..., description="Workspace name")
-    project_id: Optional[int] = Field(None, description="Project ID")
+    project_id: int | None = Field(None, description="Project ID")
 
 
 # =============================================================================
@@ -608,7 +607,7 @@ class CernerFHIRSource(RemoteSource):
 
     source_type: str = "cerner_fhir"
     fhir_server_url: str = Field(..., description="FHIR server URL")
-    patient_id: Optional[str] = Field(None, description="Patient ID")
+    patient_id: str | None = Field(None, description="Patient ID")
 
 
 # =============================================================================
@@ -638,7 +637,7 @@ class HDF5Source(LocalFileSource):
     """HDF5 scientific data source."""
 
     source_type: str = "hdf5"
-    dataset_path: Optional[str] = Field(None, description="Dataset path within HDF5")
+    dataset_path: str | None = Field(None, description="Dataset path within HDF5")
 
 
 @register_source(
@@ -663,7 +662,7 @@ class NetCDFSource(LocalFileSource):
     """NetCDF scientific data source."""
 
     source_type: str = "netcdf"
-    variables: Optional[List[str]] = Field(None, description="Variables to extract")
+    variables: list[str] | None = Field(None, description="Variables to extract")
 
 
 # =============================================================================
@@ -805,7 +804,7 @@ class ShippoSource(RemoteSource):
 
     source_type: str = "shippo"
     object_type: str = Field("shipments", description="Object type to load")
-    status_filter: Optional[str] = Field(None, description="Status filter")
+    status_filter: str | None = Field(None, description="Status filter")
 
 
 # =============================================================================
@@ -928,9 +927,9 @@ class SpotifySource(RemoteSource):
     """Spotify music platform source."""
 
     source_type: str = "spotify"
-    playlist_id: Optional[str] = Field(None, description="Playlist ID")
-    artist_id: Optional[str] = Field(None, description="Artist ID")
-    album_id: Optional[str] = Field(None, description="Album ID")
+    playlist_id: str | None = Field(None, description="Playlist ID")
+    artist_id: str | None = Field(None, description="Artist ID")
+    album_id: str | None = Field(None, description="Album ID")
 
 
 @register_source(
@@ -954,8 +953,8 @@ class SoundCloudSource(RemoteSource):
     """SoundCloud audio platform source."""
 
     source_type: str = "soundcloud"
-    track_url: Optional[str] = Field(None, description="Track URL")
-    playlist_url: Optional[str] = Field(None, description="Playlist URL")
+    track_url: str | None = Field(None, description="Track URL")
+    playlist_url: str | None = Field(None, description="Playlist URL")
 
 
 # =============================================================================
@@ -987,8 +986,8 @@ class DiscourseSource(RemoteSource):
 
     source_type: str = "discourse"
     base_url: str = Field(..., description="Discourse forum URL")
-    category_id: Optional[int] = Field(None, description="Category ID")
-    tag: Optional[str] = Field(None, description="Tag filter")
+    category_id: int | None = Field(None, description="Category ID")
+    tag: str | None = Field(None, description="Tag filter")
 
 
 @register_source(
@@ -1013,7 +1012,7 @@ class phpBBSource(RemoteSource):
 
     source_type: str = "phpbb"
     forum_url: str = Field(..., description="Forum URL")
-    board_id: Optional[int] = Field(None, description="Board ID")
+    board_id: int | None = Field(None, description="Board ID")
 
 
 # =============================================================================
@@ -1049,58 +1048,58 @@ class ConsulSource(RemoteSource):
 
 # Auto-register all source classes
 __all__ = [
-    # Image processing
-    "PaddleOCRSource",
-    "AzureFormRecognizerSource",
-    # Monitoring
-    "DatadogSource",
-    "NewRelicSource",
-    # Cloud storage
-    "AlibabaOSSSource",
-    "TencentCOSSource",
-    # Vector databases
-    "PineconeSource",
-    "WeaviateSource",
-    "ChromaSource",
-    # E-learning
-    "CourseraSource",
-    "UdemySource",
-    # Translation
-    "CrowdinSource",
-    "TransifexSource",
-    # CMS
-    "WordPressSource",
-    "DrupalSource",
-    "GhostSource",
-    # Project management
-    "LinearSource",
-    "ShortcutSource",
-    # Healthcare
-    "EpicFHIRSource",
-    "CernerFHIRSource",
-    # Scientific
-    "HDF5Source",
-    "NetCDFSource",
-    # Configuration
-    "AnsibleSource",
-    "TerraformSource",
-    # Reviews
-    "TrustpilotSource",
-    "G2ReviewsSource",
-    # Logistics
-    "ShippoSource",
-    # Real estate
-    "ZillowSource",
-    # Jobs
-    "IndeedSource",
     # Travel
     "AirbnbSource",
-    # Music
-    "SpotifySource",
-    "SoundCloudSource",
-    # Forums
-    "DiscourseSource",
-    "phpBBSource",
+    # Cloud storage
+    "AlibabaOSSSource",
+    # Configuration
+    "AnsibleSource",
+    "AzureFormRecognizerSource",
+    "CernerFHIRSource",
+    "ChromaSource",
     # Others
     "ConsulSource",
+    # E-learning
+    "CourseraSource",
+    # Translation
+    "CrowdinSource",
+    # Monitoring
+    "DatadogSource",
+    # Forums
+    "DiscourseSource",
+    "DrupalSource",
+    # Healthcare
+    "EpicFHIRSource",
+    "G2ReviewsSource",
+    "GhostSource",
+    # Scientific
+    "HDF5Source",
+    # Jobs
+    "IndeedSource",
+    # Project management
+    "LinearSource",
+    "NetCDFSource",
+    "NewRelicSource",
+    # Image processing
+    "PaddleOCRSource",
+    # Vector databases
+    "PineconeSource",
+    # Logistics
+    "ShippoSource",
+    "ShortcutSource",
+    "SoundCloudSource",
+    # Music
+    "SpotifySource",
+    "TencentCOSSource",
+    "TerraformSource",
+    "TransifexSource",
+    # Reviews
+    "TrustpilotSource",
+    "UdemySource",
+    "WeaviateSource",
+    # CMS
+    "WordPressSource",
+    # Real estate
+    "ZillowSource",
+    "phpBBSource",
 ]

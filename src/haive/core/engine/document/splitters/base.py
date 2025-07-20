@@ -1,5 +1,3 @@
-from typing import List
-
 from langchain.document_loaders.base import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
@@ -34,33 +32,31 @@ from langchain_text_splitters.sentence_transformers import (
 from langchain_text_splitters.spacy import SpacyTextSplitter
 
 __all__ = [
-    "TokenTextSplitter",
-    "TextSplitter",
-    "Tokenizer",
-    "Language",
-    "RecursiveCharacterTextSplitter",
-    "RecursiveJsonSplitter",
-    "LatexTextSplitter",
-    "PythonCodeTextSplitter",
-    "KonlpyTextSplitter",
-    "SpacyTextSplitter",
-    "NLTKTextSplitter",
-    "split_text_on_tokens",
-    "SentenceTransformersTokenTextSplitter",
+    "CharacterTextSplitter",
     "ElementType",
-    "HeaderType",
-    "LineType",
     "HTMLHeaderTextSplitter",
+    "HeaderType",
+    "KonlpyTextSplitter",
+    "Language",
+    "LatexTextSplitter",
+    "LineType",
     "MarkdownHeaderTextSplitter",
     "MarkdownTextSplitter",
-    "CharacterTextSplitter",
+    "NLTKTextSplitter",
+    "PythonCodeTextSplitter",
+    "RecursiveCharacterTextSplitter",
+    "RecursiveJsonSplitter",
+    "SentenceTransformersTokenTextSplitter",
+    "SpacyTextSplitter",
+    "TextSplitter",
+    "TokenTextSplitter",
+    "Tokenizer",
+    "split_text_on_tokens",
 ]
 
 
-class BaseTextSplitter(InvokableEngine[List[Document], List[Document]]):
-    """
-    A base class for text splitters.
-    """
+class BaseTextSplitter(InvokableEngine[list[Document], list[Document]]):
+    """A base class for text splitters."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)

@@ -27,7 +27,9 @@ class NodeModel(SerializableModel, Generic[TSpec]):
     metadata: dict[str, Any] = Field(
         default_factory=dict, description="Additional metadata"
     )
-    tags: list[str] = Field(default_factory=list, description="Tags for categorization")
+    tags: list[str] = Field(
+        default_factory=list,
+        description="Tags for categorization")
 
     # Class variables
     RESERVED_NAMES: ClassVar[list[str]] = ["__start__", "__end__"]
@@ -50,7 +52,8 @@ class NodeModel(SerializableModel, Generic[TSpec]):
         return v
 
     @classmethod
-    def from_node_spec(cls, name: str, node_spec: Any) -> Optional["NodeModel"]:
+    def from_node_spec(cls, name: str,
+                       node_spec: Any) -> Optional["NodeModel"]:
         """Create a NodeModel from a node specification."""
         if node_spec is None:
             return None

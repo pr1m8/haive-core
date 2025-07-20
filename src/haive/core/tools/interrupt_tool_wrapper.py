@@ -1,4 +1,4 @@
-"""
+"""from typing import Any
 Human-in-the-Loop Tool Wrapper for LangGraph Agents.
 
 This module defines a utility function `add_human_in_the_loop` that allows
@@ -16,7 +16,7 @@ Typical usage:
     result = safe_tool.invoke({"query": "pydantic base models"})
 """
 
-from typing import Callable
+from collections.abc import Callable
 
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import BaseTool
@@ -30,8 +30,7 @@ def add_human_in_the_loop(
     *,
     interrupt_config: HumanInterruptConfig = None,
 ) -> BaseTool:
-    """
-    Wrap a LangChain tool with human-in-the-loop interrupt logic for approval, editing, or feedback.
+    """Wrap a LangChain tool with human-in-the-loop interrupt logic for approval, editing, or feedback.
 
     This function wraps an existing LangChain tool (or plain callable) with LangGraph's interrupt system,
     allowing a human to review each call before it is executed.
@@ -97,7 +96,10 @@ def add_human_in_the_loop(
             user_feedback = response["args"]
             tool_response = user_feedback
         else:
-            raise ValueError(f"Unsupported interrupt response type: {response['type']}")
+            raise ValueError(
+                f"Unsupported interrupt response type: {
+                    response['type']}"
+            )
 
         return tool_response
 

@@ -1,5 +1,4 @@
-"""
-Tests for the Haive schema system with real engines.
+"""Tests for the Haive schema system with real engines.
 
 These tests verify that the schema system correctly:
 1. Extracts fields from various engine types
@@ -12,7 +11,7 @@ import json
 import logging
 import operator
 from datetime import datetime
-from typing import Annotated, Any, Dict, List
+from typing import Annotated, Any
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from langgraph.graph import add_messages
@@ -61,7 +60,8 @@ def display_schema(schema, title="Schema"):
 
         # Get shared field info if available
         shared_info = ""
-        if issubclass(schema, StateSchema) and hasattr(schema, "__shared_fields__"):
+        if issubclass(schema, StateSchema) and hasattr(
+                schema, "__shared_fields__"):
             shared_info = "\n\nShared Fields:\n"
             for field in schema.__shared_fields__:
                 shared_info += f"  - {field}\n"
@@ -102,7 +102,7 @@ def display_schema(schema, title="Schema"):
                 )
             )
         except Exception as e:
-            logger.error(f"Error displaying schema instance: {e}")
+            logger.exception(f"Error displaying schema instance: {e}")
 
 
 # Create real engine instances for testing
@@ -177,7 +177,7 @@ def test_state_schema_with_reducers():
     # Create schema with operator.add reducer
     class CounterSchema(StateSchema):
         count: Annotated[int, operator.add] = 0
-        messages: List[BaseMessage] = Field(default_factory=list)
+        messages: list[BaseMessage] = Field(default_factory=list)
 
     # Create the __reducer_fields__ dict if not already present
     if not hasattr(CounterSchema, "__reducer_fields__"):
@@ -346,11 +346,10 @@ def test_schema_composer_create_model():
     composer.extract_fields_from_engine(retriever_engine)
 
     # Add items field with list type to test auto-reducer
-    from typing import List
 
     composer.add_field(
         "items",
-        List[str],
+        list[str],
         default_factory=list,
         description="List that should auto-concatenate",
     )
@@ -360,7 +359,7 @@ def test_schema_composer_create_model():
 
     composer.add_field(
         "messages",
-        List[BaseMessage],
+        list[BaseMessage],
         default_factory=list,
         description="Messages for agent conversation",
     )
@@ -406,7 +405,10 @@ def test_schema_composer_create_model():
 
     # Test with real messages
     logger.info("Testing with real messages")
-    test_messages = [HumanMessage(content="Hello"), AIMessage(content="Hi there")]
+    test_messages = [
+        HumanMessage(
+            content="Hello"), AIMessage(
+            content="Hi there")]
     instance1.messages = test_messages
 
     # Convert to dict and back
@@ -471,7 +473,7 @@ def test_state_schema_manager_with_engines():
     logger.info("Adding shared field")
     manager.add_field(
         "context",
-        List[str],
+        list[str],
         default_factory=list,
         shared=True,
         description="Shared context between graphs",
@@ -538,11 +540,11 @@ def test_combined_workflows():
 
     class InputSchema(StateSchema):
         query: str = ""
-        filters: Dict[str, Any] = Field(default_factory=dict)
+        filters: dict[str, Any] = Field(default_factory=dict)
 
     class OutputSchema(StateSchema):
-        results: List[Dict[str, Any]] = Field(default_factory=list)
-        metadata: Dict[str, Any] = Field(default_factory=dict)
+        results: list[dict[str, Any]] = Field(default_factory=list)
+        metadata: dict[str, Any] = Field(default_factory=dict)
 
     # Display original schemas
     display_schema(InputSchema, "Input Schema")
@@ -550,7 +552,10 @@ def test_combined_workflows():
 
     # Combine schemas
     logger.info("Combining schemas")
-    combined = StateSchema.combine(InputSchema, OutputSchema, name="CombinedWorkflow")
+    combined = StateSchema.combine(
+        InputSchema,
+        OutputSchema,
+        name="CombinedWorkflow")
 
     # Display combined schema
     display_schema(combined, "Combined Workflow Schema")
@@ -569,15 +574,19 @@ def test_combined_workflows():
 
     # Verify combined fields
     assert hasattr(state, "query"), "Query field missing from combined schema"
-    assert hasattr(state, "filters"), "Filters field missing from combined schema"
-    assert hasattr(state, "results"), "Results field missing from combined schema"
-    assert hasattr(state, "metadata"), "Metadata field missing from combined schema"
+    assert hasattr(
+        state, "filters"), "Filters field missing from combined schema"
+    assert hasattr(
+        state, "results"), "Results field missing from combined schema"
+    assert hasattr(
+        state, "metadata"), "Metadata field missing from combined schema"
 
     # Verify data
     assert (
         state.query == "test query"
     ), f"Expected query to be 'test query', got '{state.query}'"
-    assert len(state.results) == 1, f"Expected 1 result, got {len(state.results)}"
+    assert len(
+        state.results) == 1, f"Expected 1 result, got {len(state.results)}"
     assert (
         state.results[0]["id"] == 1
     ), f"Expected result ID to be 1, got {state.results[0]['id']}"
@@ -619,14 +628,14 @@ def test_complex_schema_with_multiple_reducers():
 
     manager.add_field(
         "trace_log",
-        List[str],
+        list[str],
         default_factory=list,
         reducer=lambda a, b: (a or []) + (b or []),
         description="Trace log entries",
     )
 
     manager.add_field(
-        "stats", Dict[str, int], default_factory=dict, description="Statistics"
+        "stats", dict[str, int], default_factory=dict, description="Statistics"
     )
 
     # Create enhanced schema
@@ -638,7 +647,11 @@ def test_complex_schema_with_multiple_reducers():
 
     # Create instances
     logger.info("Creating test instances")
-    state1 = complex_schema(token_count=10, trace_log=["start"], stats={"queries": 1})
+    state1 = complex_schema(
+        token_count=10,
+        trace_log=["start"],
+        stats={
+            "queries": 1})
 
     state2 = complex_schema(
         token_count=25, trace_log=["processing", "complete"], stats={"tokens": 100}
@@ -784,7 +797,8 @@ def test_schema_with_message_reducer():
     # Create message-focused schema
     logger.info("Creating message-focused schema")
     schema_cls = SchemaComposer.create_message_state(
-        additional_fields={"metadata": (Dict[str, Any], {}), "query": (str, "")},
+        additional_fields={"metadata": (
+            dict[str, Any], {}), "query": (str, "")},
         name="MessageState",
     )
 
@@ -820,7 +834,8 @@ def test_schema_with_message_reducer():
     display_schema(state, "State 1 (After Reducer)")
 
     # Verify message combining
-    assert len(state.messages) == 2, f"Expected 2 messages, got {len(state.messages)}"
+    assert len(
+        state.messages) == 2, f"Expected 2 messages, got {len(state.messages)}"
     assert (
         state.messages[0].content == "What is AI?"
     ), f"Expected first message to be 'What is AI?', got '{state.messages[0].content}'"
@@ -878,7 +893,7 @@ def test_node_function_creation():
     class NodeSchema(StateSchema):
         query: str = ""
         count: int = 0
-        results: List[str] = Field(default_factory=list)
+        results: list[str] = Field(default_factory=list)
 
     # Create manager
     logger.info("Creating schema manager")
@@ -893,7 +908,8 @@ def test_node_function_creation():
 
     # Create node function with validation
     logger.info("Creating node function with validation")
-    node_func = manager.create_node_function(process_query, command_goto="next_node")
+    node_func = manager.create_node_function(
+        process_query, command_goto="next_node")
 
     # Test the node function
     logger.info("Testing node function")
@@ -947,7 +963,7 @@ def test_schema_manager_field_operations():
     logger.info("Adding fields")
     manager.add_field("text", str, default="", description="Text field")
     manager.add_field("count", int, default=0, description="Count field")
-    manager.add_field("items", List[str], default_factory=list)
+    manager.add_field("items", list[str], default_factory=list)
 
     # Display initial fields
     logger.info(f"Initial fields: {list(manager.fields.keys())}")
@@ -999,13 +1015,15 @@ def test_schema_manager_field_operations():
     instance = schema_cls(text="Hello")
 
     # Test computed property
-    assert hasattr(instance, "text_length"), "Missing computed property 'text_length'"
+    assert hasattr(
+        instance, "text_length"), "Missing computed property 'text_length'"
     assert (
         instance.text_length == 5
     ), f"Expected text_length to be 5, got {instance.text_length}"
 
     # Test default value modification
-    assert instance.count == 10, f"Expected count to be 10, got {instance.count}"
+    assert instance.count == 10, f"Expected count to be 10, got {
+        instance.count}"
 
     logger.info("✅ Schema manager field operations test passed")
 
@@ -1019,9 +1037,9 @@ def test_schema_manager_engine_io_tracking():
 
     # Add fields
     manager.add_field("query", str, default="")
-    manager.add_field("context", List[str], default_factory=list)
+    manager.add_field("context", list[str], default_factory=list)
     manager.add_field("response", str, default="")
-    manager.add_field("embeddings", List[List[float]], default_factory=list)
+    manager.add_field("embeddings", list[list[float]], default_factory=list)
 
     # Mark fields for engines
     logger.info("Marking fields for engines")
@@ -1103,7 +1121,11 @@ def test_command_and_send_helpers():
     # Display Command
     console.print(
         Panel(
-            Syntax(f"Command(update={command.update}, goto={command.goto})", "python"),
+            Syntax(
+                f"Command(update={
+                    command.update}, goto={
+                    command.goto})",
+                "python"),
             title="[bold cyan]Created Command[/bold cyan]",
             border_style="cyan",
         )
@@ -1162,7 +1184,7 @@ def test_various_reducer_types():
     # Create schema with different reducer types
     logger.info("Creating schema with different reducer types")
     schema_cls = StateSchema.create(
-        text=(str, ""), count=(int, 0), items=(List[str], [])
+        text=(str, ""), count=(int, 0), items=(list[str], [])
     )
 
     # Add different reducer types
@@ -1183,7 +1205,9 @@ def test_various_reducer_types():
 
     # Display reducer info
     logger.info(f"Reducer functions: {schema_cls.__reducer_fields__}")
-    logger.info(f"Serializable reducers: {schema_cls.__serializable_reducers__}")
+    logger.info(
+        f"Serializable reducers: {
+            schema_cls.__serializable_reducers__}")
 
     # Test the reducers
     logger.info("Testing reducers")

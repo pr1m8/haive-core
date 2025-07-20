@@ -7,12 +7,8 @@ from typing import (
     Annotated,
     Any,
     ClassVar,
-    Dict,
     Generic,
-    List,
-    Optional,
     Protocol,
-    Type,
     TypeVar,
     runtime_checkable,
 )
@@ -32,23 +28,21 @@ class Buildable(Protocol[BuildT]):
 
 # ───────────────────────────── Registry Base  ───────────────────────────── #
 class Registered(BaseModel, Generic[BuildT], abc.ABC):
-    """
-    Registry-aware base class for pluggable, composable components.
-    """
+    """Registry-aware base class for pluggable, composable components."""
 
-    model_config = dict(
-        extra="forbid",
-        frozen=False,
-        validate_assignment=True,
-        arbitrary_types_allowed=True,
-    )
+    model_config = {
+        "extra": "forbid",
+        "frozen": False,
+        "validate_assignment": True,
+        "arbitrary_types_allowed": True,
+    }
 
     NAME: ClassVar[str]
-    VERSION: ClassVar[Optional[str]] = None
-    DESCRIPTION: ClassVar[Optional[str]] = None
+    VERSION: ClassVar[str | None] = None
+    DESCRIPTION: ClassVar[str | None] = None
     ALIASES: ClassVar[set[str]] = set()
 
-    _registry: ClassVar[Dict[str, Type[Registered]]] = {}
+    _registry: ClassVar[dict[str, type[Registered]]] = {}
     _EP_GROUP: ClassVar[str] = "haive.plugins"
 
     def __init_subclass__(cls, **kwargs):
@@ -63,9 +57,12 @@ class Registered(BaseModel, Generic[BuildT], abc.ABC):
             cls._register_key(alias, cls)
 
     @classmethod
-    def _register_key(cls, key: str, impl: Type[Registered]) -> None:
+    def _register_key(cls, key: str, impl: type[Registered]) -> None:
         if key in cls._registry and cls._registry[key] is not impl:
-            raise ValueError(f"Duplicate registry key '{key}' for {impl.__name__}")
+            raise ValueError(
+                f"Duplicate registry key '{key}' for {
+                    impl.__name__}"
+            )
         cls._registry[key] = impl
 
     @classmethod
@@ -73,7 +70,7 @@ class Registered(BaseModel, Generic[BuildT], abc.ABC):
         return cls.get_class(name)(**data)  # type: ignore
 
     @classmethod
-    def get_class(cls, name: str) -> Type[Registered]:
+    def get_class(cls, name: str) -> type[Registered]:
         if name not in cls._registry:
             raise KeyError(
                 f"Unknown component '{name}'. Choices: {cls.list_available()}"
@@ -81,7 +78,7 @@ class Registered(BaseModel, Generic[BuildT], abc.ABC):
         return cls._registry[name]
 
     @classmethod
-    def list_available(cls) -> List[str]:
+    def list_available(cls) -> list[str]:
         return sorted(cls._registry.keys())
 
     @classmethod
@@ -99,7 +96,7 @@ class Registered(BaseModel, Generic[BuildT], abc.ABC):
     def build(self) -> BuildT: ...
 
     @model_serializer(mode="plain")
-    def _serialize(self) -> Dict[str, Any]:
+    def _serialize(self) -> dict[str, Any]:
         # Use `__dict__` to avoid triggering serialization again
         data = dict(self.__dict__)
         data["type"] = self.__class__.NAME
@@ -116,24 +113,27 @@ TypeKey = Annotated[str, BeforeValidator(_type_validator)]  # type: ignore
 
 
 class ComponentSpec(BaseModel, Generic[C]):
-    """
-    Resolves either:
+    """Resolves either:
     (1) A registered component by type + params
-    (2) An inline instance (fully defined)
+    (2) An inline instance (fully defined).
     """
 
-    model_config = dict(extra="forbid")
+    model_config = {"extra": "forbid"}
 
-    type: Optional[TypeKey] = Field(
+    type: TypeKey | None = Field(
         default=None, description="Registry key / alias (exclusive with 'inline')"
     )
-    params: Dict[str, Any] = Field(default_factory=dict)
+    params: dict[str, Any] = Field(default_factory=dict)
 
-    # NOTE: inline must be a real BaseModel (e.g. Registered[C]) for schema support
-    inline: Optional[Registered[C]] = None
+    # NOTE: inline must be a real BaseModel (e.g. Registered[C]) for schema
+    # support
+    inline: Registered[C] | None = None
 
     @model_validator(mode="after")
-    def _exclusive(self) -> ComponentSpec:
+
+
+    @classmethod
+    def _exclusive(cls) -> ComponentSpec:
         if bool(self.type) == bool(self.inline):
             raise ValueError("Must provide exactly one of 'type' or 'inline'")
         return self
@@ -147,12 +147,12 @@ class ComponentSpec(BaseModel, Generic[C]):
 
 
 # ──────────────────────────── Example Components ─────────────────────────── #
-class Tokenizer(Registered[List[str]]):
+class Tokenizer(Registered[list[str]]):
     NAME = "whitespace-tokenizer"
     DESCRIPTION = "Splits input text by whitespace"
     text: str
 
-    def build(self) -> List[str]:
+    def build(self) -> list[str]:
         return self.text.split()
 
 
@@ -166,14 +166,14 @@ class Lowercaser(Registered[str]):
 
 
 # ───────────────────────────── Composite Pipeline ─────────────────────────── #
-class TextPipeline(Registered[List[str]]):
+class TextPipeline(Registered[list[str]]):
     NAME = "basic-text-pipeline"
     DESCRIPTION = "Applies tokenization and normalization"
 
-    tokenizer: ComponentSpec[List[str]]
+    tokenizer: ComponentSpec[list[str]]
     normaliser: ComponentSpec[str]
 
-    def build(self) -> List[str]:
+    def build(self) -> list[str]:
         tokens = self.tokenizer.build()
         norm = self.normaliser.build()
         return [t.lower() for t in tokens] + [norm]
@@ -181,14 +181,13 @@ class TextPipeline(Registered[List[str]]):
 
 # ───────────────────────────── Smoke Test Runner ─────────────────────────── #
 if __name__ == "__main__":
-    print("Registered:", Registered.list_available())
 
-    cfg = dict(
-        tokenizer=dict(type="whitespace-tokenizer", params={"text": "Hello WORLD"}),
-        normaliser=dict(type="lowercaser", params={"text": "MiXeD CaSe"}),
-    )
+    cfg = {
+        "tokenizer": {
+            "type": "whitespace-tokenizer",
+            "params": {"text": "Hello WORLD"},
+        },
+        "normaliser": {"type": "lowercaser", "params": {"text": "MiXeD CaSe"}},
+    }
 
     pipeline = TextPipeline(**cfg)
-
-    print("Summary:", pipeline.summary)
-    print("Output :", pipeline.build())

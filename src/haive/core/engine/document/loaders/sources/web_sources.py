@@ -5,7 +5,7 @@ with intelligent sitemap detection, recursive crawling, and browser automation.
 """
 
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 from urllib.parse import urljoin, urlparse
 
 import requests
@@ -41,11 +41,8 @@ class BrowserEngine(str, Enum):
 # =============================================================================
 
 
-def find_sitemap(
-    base_url: str, keep_path_segment: Optional[str] = None
-) -> Optional[str]:
-    """
-    Find sitemap URL for a given base URL by checking common paths.
+def find_sitemap(base_url: str, keep_path_segment: str | None = None) -> str | None:
+    """Find sitemap URL for a given base URL by checking common paths.
 
     Enhanced version of the legacy sitemap detection with better error handling.
     """
@@ -91,7 +88,7 @@ def find_sitemap(
 
 def extract_metadata_from_html(
     raw_html: str, url: str, response: Any
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Extract metadata from HTML using BeautifulSoup (from legacy system)."""
     content_type = getattr(response, "headers", {}).get("Content-Type", "")
     metadata = {"source": url, "content_type": content_type}
@@ -165,9 +162,9 @@ class WebBaseSource(RemoteSource):
 
     # Request configuration
     verify_ssl: bool = True
-    user_agent: Optional[str] = None
+    user_agent: str | None = None
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         # Add web-specific configuration
@@ -214,7 +211,7 @@ class AsyncHTMLSource(RemoteSource):
     ignore_load_errors: bool = False
     default_parser: str = "html.parser"
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -258,7 +255,7 @@ class PlaywrightWebSource(RemoteSource):
     # Browser configuration
     browser_engine: BrowserEngine = BrowserEngine.PLAYWRIGHT
     headless: bool = True
-    wait_for_selector: Optional[str] = None
+    wait_for_selector: str | None = None
 
     # JavaScript handling
     wait_for_js: bool = True
@@ -266,10 +263,10 @@ class PlaywrightWebSource(RemoteSource):
     scroll_to_bottom: bool = False
 
     # Page interaction
-    remove_selectors: List[str] = []
-    evaluate_script: Optional[str] = None
+    remove_selectors: list[str] = []
+    evaluate_script: str | None = None
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -311,10 +308,10 @@ class SeleniumWebSource(RemoteSource):
     headless: bool = True
 
     # Page interaction
-    wait_until: Optional[str] = None
+    wait_until: str | None = None
     page_load_strategy: str = "normal"
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -349,10 +346,10 @@ class ChromiumAsyncSource(RemoteSource):
 
     # Chromium configuration
     headless: bool = True
-    user_agent: Optional[str] = None
-    viewport: Dict[str, int] = {"width": 1280, "height": 720}
+    user_agent: str | None = None
+    viewport: dict[str, int] = {"width": 1280, "height": 720}
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -396,13 +393,13 @@ class RecursiveWebSource(RemoteSource):
 
     # Crawling configuration
     max_depth: int = 2
-    max_pages: Optional[int] = None
+    max_pages: int | None = None
     prevent_outside: bool = True
-    exclude_dirs: List[str] = []
+    exclude_dirs: list[str] = []
 
     # Content filtering
-    link_regex: Optional[str] = None
-    content_filter: Optional[str] = None
+    link_regex: str | None = None
+    content_filter: str | None = None
 
     # Processing options
     use_async: bool = True
@@ -410,10 +407,10 @@ class RecursiveWebSource(RemoteSource):
     check_response_status: bool = True
 
     # Advanced options
-    base_url: Optional[str] = None
+    base_url: str | None = None
     metadata_extractor: bool = True
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         # Build metadata extractor if enabled
@@ -463,19 +460,19 @@ class SitemapCrawlerSource(RemoteSource):
     """Sitemap-based crawling source with auto-detection."""
 
     # Sitemap configuration
-    sitemap_url: Optional[str] = None  # If None, will auto-detect
-    keep_path_segment: Optional[str] = None
+    sitemap_url: str | None = None  # If None, will auto-detect
+    keep_path_segment: str | None = None
 
     # Filtering options
-    filter_urls: List[str] = []
-    exclude_patterns: List[str] = []
+    filter_urls: list[str] = []
+    exclude_patterns: list[str] = []
 
     # Processing options
-    blocksize: Optional[int] = None
+    blocksize: int | None = None
     blocknum: int = 0
-    parsing_function: Optional[str] = None
+    parsing_function: str | None = None
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         # Auto-detect sitemap if not provided
@@ -532,9 +529,9 @@ class ReadTheDocsSource(RemoteSource):
     version: str = "latest"
 
     # Processing options
-    features: List[str] = ["toc"]
+    features: list[str] = ["toc"]
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         # Build RTD URL if not provided
@@ -573,9 +570,9 @@ class DocusaurusSource(RemoteSource):
 
     # Docusaurus configuration
     base_url: str
-    filter_directories: List[str] = []
+    filter_directories: list[str] = []
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {"url": self.base_url, "filter_directories": self.filter_directories}
@@ -614,9 +611,9 @@ class FireCrawlSource(RemoteSource):
 
     # FireCrawl configuration
     mode: str = "scrape"  # scrape, crawl, map
-    params: Dict[str, Any] = {}
+    params: dict[str, Any] = {}
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -633,7 +630,7 @@ class FireCrawlSource(RemoteSource):
 # =============================================================================
 
 
-def get_web_sources_statistics() -> Dict[str, Any]:
+def get_web_sources_statistics() -> dict[str, Any]:
     """Get statistics about web-based sources."""
     registry = enhanced_registry
 
@@ -651,7 +648,7 @@ def get_web_sources_statistics() -> Dict[str, Any]:
     browser_automation = len(
         [
             name
-            for name in registry._sources.keys()
+            for name in registry._sources
             if any(
                 keyword in name for keyword in ["playwright", "selenium", "chromium"]
             )
@@ -691,16 +688,10 @@ def validate_web_sources() -> bool:
         if source_name not in registry._sources:
             missing.append(source_name)
 
-    if missing:
-        print(f"Missing web sources: {missing}")
-        return False
-
-    print(f"✅ All {len(required_web_sources)} essential web sources registered!")
-    return True
+    return not missing
 
 
 # Auto-validate on import
 if __name__ == "__main__":
     validate_web_sources()
     stats = get_web_sources_statistics()
-    print(f"Web Sources Statistics: {stats}")

@@ -1,12 +1,14 @@
 """Callable Node - Wrap any callable as a graph node.
 
+from typing import Any
 This module provides a way to wrap any Python callable (function, method, lambda)
 as a proper graph node that returns Command or Send objects.
 """
 
 import inspect
 import logging
-from typing import Any, Callable, Dict, List, Optional, TypeVar
+from collections.abc import Callable
+from typing import Any, TypeVar
 
 from langgraph.types import Command
 from pydantic import BaseModel, Field, model_validator
@@ -62,27 +64,27 @@ class CallableNodeConfig(BaseNodeConfig):
     callable_func: Callable = Field(..., description="The function to wrap as a node")
 
     # How to handle the result
-    result_key: Optional[str] = Field(
+    result_key: str | None = Field(
         default=None,
         description="State key to store result in. If None, result is not stored.",
     )
 
     # Routing based on boolean results
-    goto_on_true: Optional[str] = Field(
+    goto_on_true: str | None = Field(
         default=None, description="Node to go to if callable returns True"
     )
 
-    goto_on_false: Optional[str] = Field(
+    goto_on_false: str | None = Field(
         default=None, description="Node to go to if callable returns False"
     )
 
     # For non-boolean results
-    goto_mapping: Optional[Dict[Any, str]] = Field(
+    goto_mapping: dict[Any, str] | None = Field(
         default=None, description="Map function results to node names"
     )
 
     # Default goto if no mapping matches
-    default_goto: Optional[str] = Field(
+    default_goto: str | None = Field(
         default=None, description="Default node if no mapping matches"
     )
 
@@ -91,13 +93,13 @@ class CallableNodeConfig(BaseNodeConfig):
         default=False, description="Pass the full state object as first parameter"
     )
 
-    parameter_mapping: Optional[Dict[str, str]] = Field(
+    parameter_mapping: dict[str, str] | None = Field(
         default=None,
         description="Map function parameters to state fields. {'param': 'state.field'}",
     )
 
     # For complex extraction
-    extraction_paths: Optional[Dict[str, str]] = Field(
+    extraction_paths: dict[str, str] | None = Field(
         default=None,
         description="Advanced extraction paths like 'param': 'state.nested.field[0].value'",
     )
@@ -108,12 +110,15 @@ class CallableNodeConfig(BaseNodeConfig):
         description="What to do on error: 'raise', 'return_none', 'goto_error'",
     )
 
-    error_goto: Optional[str] = Field(
+    error_goto: str | None = Field(
         default=None, description="Node to go to on error (if on_error='goto_error')"
     )
 
     @model_validator(mode="after")
-    def validate_config(self) -> "CallableNodeConfig":
+
+
+    @classmethod
+    def validate_config(cls) -> "CallableNodeConfig":
         """Validate the configuration."""
         # Check that we have some way to route
         if not any(
@@ -132,7 +137,7 @@ class CallableNodeConfig(BaseNodeConfig):
 
         return self
 
-    def get_default_input_fields(self) -> List[FieldDefinition]:
+    def get_default_input_fields(self) -> list[FieldDefinition]:
         """Get input fields based on callable signature."""
         if self.extract_full_state:
             # We need all fields if passing full state
@@ -162,15 +167,14 @@ class CallableNodeConfig(BaseNodeConfig):
                 name=field_name,
                 field_type=field_type,
                 required=(param.default == inspect.Parameter.empty),
-                description=f"Parameter {param_name} for {self.callable_func.__name__}",
+                description=f"Parameter {param_name} for {
+                    self.callable_func.__name__}",
             )
             fields.append(field)
 
         return fields
 
-    def __call__(
-        self, state: StateLike, config: Optional[ConfigLike] = None
-    ) -> Command:
+    def __call__(self, state: StateLike, config: ConfigLike | None = None) -> Command:
         """Execute the callable and return appropriate Command."""
         try:
             # Extract parameters
@@ -193,22 +197,22 @@ class CallableNodeConfig(BaseNodeConfig):
             return Command(update=update, goto=goto)
 
         except Exception as e:
-            logger.error(f"Error in callable node '{self.name}': {e}")
+            logger.exception(f"Error in callable node '{self.name}': {e}")
 
             if self.on_error == "raise":
                 raise
-            elif self.on_error == "return_none":
+            if self.on_error == "return_none":
                 return Command(
                     update={self.result_key: None} if self.result_key else {},
                     goto=self.default_goto or self.command_goto,
                 )
-            elif self.on_error == "goto_error":
+            if self.on_error == "goto_error":
                 return Command(
                     update={"error": str(e)},
                     goto=self.error_goto or self.default_goto or self.command_goto,
                 )
 
-    def _extract_parameters(self, state: StateLike) -> Dict[str, Any]:
+    def _extract_parameters(self, state: StateLike) -> dict[str, Any]:
         """Extract function parameters from state."""
         sig = inspect.signature(self.callable_func)
         kwargs = {}
@@ -268,20 +272,20 @@ class CallableNodeConfig(BaseNodeConfig):
         """Get value from state object."""
         if hasattr(obj, field):
             return getattr(obj, field)
-        elif hasattr(obj, "__getitem__"):
+        if hasattr(obj, "__getitem__"):
             try:
                 return obj[field]
             except (KeyError, TypeError):
                 pass
         return None
 
-    def _determine_goto(self, result: Any) -> Optional[str]:
+    def _determine_goto(self, result: Any) -> str | None:
         """Determine which node to go to based on result."""
         # Boolean routing
         if isinstance(result, bool):
             if result and self.goto_on_true:
                 return self.goto_on_true
-            elif not result and self.goto_on_false:
+            if not result and self.goto_on_false:
                 return self.goto_on_false
 
         # Mapped routing
@@ -293,7 +297,7 @@ class CallableNodeConfig(BaseNodeConfig):
 
 
 def wrap_callable(
-    func: Callable, name: Optional[str] = None, **kwargs
+    func: Callable, name: str | None = None, **kwargs
 ) -> CallableNodeConfig:
     """Convenience function to wrap a callable as a node.
 
@@ -319,7 +323,7 @@ def wrap_callable(
 
 
 # Decorator version
-def as_node(**kwargs):
+def as_node(**kwargs) -> Any:
     """Decorator to turn a function into a node.
 
     Example:

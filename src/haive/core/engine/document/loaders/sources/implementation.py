@@ -63,7 +63,7 @@ class Credential(BaseModel):
 class CredentialManager:
     """Manages credentials for various source types."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._credentials: dict[str, Credential] = {}
         self._env_prefix = "HAIVE_CRED_"
 
@@ -283,7 +283,7 @@ class TextInputSource(EnhancedSource):
 class SourceRegistry:
     """Registry for managing source types."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._sources: list[EnhancedSource] = []
         self._register_default_sources()
 

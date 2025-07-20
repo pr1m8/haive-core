@@ -1,5 +1,6 @@
 """Arxiv Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Arxiv retriever, which
 retrieves academic papers from the arXiv preprint repository.
 
@@ -86,7 +87,7 @@ class ArxivRetrieverConfig(BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create an Arxiv retriever from this configuration.
 
         Returns:

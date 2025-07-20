@@ -1,5 +1,6 @@
 """Arcee Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Arcee retriever,
 which provides AI/ML focused retrieval capabilities through the Arcee service
 for domain-specific artificial intelligence and machine learning content.
@@ -119,7 +120,7 @@ class ArceeRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create an Arcee retriever from this configuration.
 
         Returns:

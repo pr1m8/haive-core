@@ -25,7 +25,6 @@ def test_exact_reproduction():
     try:
         console.print("[bold blue]Step 1: Import modules[/bold blue]")
         from haive.agents.simple.agent_v2 import SimpleAgentV2
-
         from haive.core.engine.aug_llm import AugLLMConfig
 
         console.print("✅ Imports successful")
@@ -42,7 +41,8 @@ def test_exact_reproduction():
         console.print(
             "[bold blue]Step 4: Try to compile graph (LIKELY ERROR POINT)[/bold blue]"
         )
-        # This is where "Failed to convert BaseGraph to LangGraph" likely happens
+        # This is where "Failed to convert BaseGraph to LangGraph" likely
+        # happens
         graph.compile()
         console.print("✅ Graph compiled")
 

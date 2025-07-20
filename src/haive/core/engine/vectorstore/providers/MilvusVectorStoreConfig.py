@@ -1,5 +1,6 @@
 """Milvus Vector Store implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Milvus vector store,
 which is a cloud-native vector database built for scalable similarity search.
 
@@ -138,7 +139,7 @@ class MilvusVectorStoreConfig(BaseVectorStoreConfig):
     )
 
     @validator("consistency_level")
-    def validate_consistency_level(self, v):
+    def validate_consistency_level(self, v) -> Any:
         """Validate consistency level is supported."""
         valid_levels = ["Strong", "Session", "Bounded", "Eventually"]
         if v not in valid_levels:
@@ -148,12 +149,13 @@ class MilvusVectorStoreConfig(BaseVectorStoreConfig):
         return v
 
     @validator("connection_args")
-    def validate_connection_args(self, v):
+    def validate_connection_args(self, v) -> Any:
         """Validate connection arguments."""
         if not v:
             raise ValueError("connection_args must be provided")
 
-        # Check for cloud connection (uri + token) or local connection (host + port)
+        # Check for cloud connection (uri + token) or local connection (host +
+        # port)
         has_cloud = "uri" in v
         has_local = "host" in v and "port" in v
 
@@ -183,7 +185,7 @@ class MilvusVectorStoreConfig(BaseVectorStoreConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a Milvus vector store from this configuration.
 
         Returns:

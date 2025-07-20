@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 from enum import Enum
-from typing import Any, ClassVar, Iterable, TypeVar
+from typing import Any, ClassVar, TypeVar
 
 from pydantic.json_schema import JsonSchemaValue
 from pydantic_core import core_schema
@@ -68,7 +69,11 @@ class DynamicEnum(str, metaclass=_DynEnumMeta):
             if not isinstance(v, str):
                 raise TypeError("string required")
             if v not in cls._values:
-                raise ValueError(f"invalid enum value; allowed = {sorted(cls._values)}")
+                raise ValueError(
+                    f"invalid enum value; allowed = {
+                        sorted(
+                            cls._values)}"
+                )
             return v
 
         return core_schema.no_info_plain_validator_function(validate)

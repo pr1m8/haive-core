@@ -85,7 +85,10 @@ def create_postgres_checkpointer(config: PostgresCheckpointerConfig) -> Any:
                         if config.retry_jitter:
                             delay *= 0.5 + random.random()
                         logger.warning(
-                            f"Connection attempt {retry+1} failed: {e}. Retrying in {delay:.2f}s"
+                            f"Connection attempt {
+                                retry +
+                                1} failed: {e}. Retrying in {
+                                delay:.2f}s"
                         )
                         time.sleep(delay)
                     else:
@@ -189,7 +192,10 @@ async def acreate_postgres_checkpointer(config: PostgresCheckpointerConfig) -> A
                         if config.retry_jitter:
                             delay *= 0.5 + random.random()
                         logger.warning(
-                            f"Async connection attempt {retry+1} failed: {e}. Retrying in {delay:.2f}s"
+                            f"Async connection attempt {
+                                retry +
+                                1} failed: {e}. Retrying in {
+                                delay:.2f}s"
                         )
                         await asyncio.sleep(delay)
                     else:
@@ -343,7 +349,10 @@ def register_postgres_thread(
                     if config.retry_jitter:
                         delay *= 0.5 + random.random()
                     logger.warning(
-                        f"Thread registration attempt {retry+1} failed: {e}. Retrying in {delay:.2f}s"
+                        f"Thread registration attempt {
+                            retry +
+                            1} failed: {e}. Retrying in {
+                            delay:.2f}s"
                     )
                     time.sleep(delay)
                 else:
@@ -461,7 +470,10 @@ async def aregister_postgres_thread(
                     if config.retry_jitter:
                         delay *= 0.5 + random.random()
                     logger.warning(
-                        f"Async thread registration attempt {retry+1} failed: {e}. Retrying in {delay:.2f}s"
+                        f"Async thread registration attempt {
+                            retry +
+                            1} failed: {e}. Retrying in {
+                            delay:.2f}s"
                     )
                     await asyncio.sleep(delay)
                 else:
@@ -534,7 +546,10 @@ def put_postgres_checkpoint(
                 if config.retry_jitter:
                     delay *= 0.5 + random.random()
                 logger.warning(
-                    f"Checkpoint storage attempt {retry+1} failed: {e}. Retrying in {delay:.2f}s"
+                    f"Checkpoint storage attempt {
+                        retry +
+                        1} failed: {e}. Retrying in {
+                        delay:.2f}s"
                 )
                 time.sleep(delay)
             else:
@@ -576,7 +591,10 @@ async def aput_postgres_checkpoint(
 
     # Log complete config for debugging
     logger.debug(
-        f"Writing checkpoint with config: {json.dumps(config_dict, default=str)}"
+        f"Writing checkpoint with config: {
+            json.dumps(
+                config_dict,
+                default=str)}"
     )
     logger.debug(f"Data type: {type(data)}, Data preview: {str(data)[:100]}")
 
@@ -614,10 +632,17 @@ async def aput_postgres_checkpoint(
                 try:
                     # Log exactly what we're passing to aput
                     logger.debug(
-                        f"Calling aput with config: {json.dumps(config_dict, default=str)}"
+                        f"Calling aput with config: {
+                            json.dumps(
+                                config_dict,
+                                default=str)}"
                     )
                     logger.debug(
-                        f"Checkpoint data: {json.dumps(checkpoint_data, default=str)[:200]}"
+                        f"Checkpoint data: {
+                            json.dumps(
+                                checkpoint_data,
+                                default=str)[
+                                :200]}"
                     )
 
                     next_config = await checkpointer.aput(
@@ -629,12 +654,16 @@ async def aput_postgres_checkpoint(
 
                     # Log the returned config
                     logger.debug(
-                        f"aput returned config: {json.dumps(next_config, default=str)}"
+                        f"aput returned config: {
+                            json.dumps(
+                                next_config,
+                                default=str)}"
                     )
                     return next_config
                 except TypeError as te:
                     logger.exception(f"Type error in aput: {te}")
-                    # Try with simpler arguments if TypeError (could be API mismatch)
+                    # Try with simpler arguments if TypeError (could be API
+                    # mismatch)
                     logger.info("Trying simplified aput call")
                     next_config = await checkpointer.aput(
                         config_dict, {"channel_values": data}
@@ -650,11 +679,18 @@ async def aput_postgres_checkpoint(
                 if config.retry_jitter:
                     delay *= 0.5 + random.random()
                 logger.warning(
-                    f"Async checkpoint storage attempt {retry+1} failed: {e!s}. Retrying in {delay:.2f}s"
+                    f"Async checkpoint storage attempt {
+                        retry +
+                        1} failed: {
+                        e!s}. Retrying in {
+                        delay:.2f}s"
                 )
                 await asyncio.sleep(delay)
             else:
-                logger.exception(f"All async checkpoint storage attempts failed: {e!s}")
+                logger.exception(
+                    f"All async checkpoint storage attempts failed: {
+                        e!s}"
+                )
                 return config_dict
 
     # Should not reach here
@@ -702,7 +738,10 @@ def get_postgres_checkpoint(
                 if config.retry_jitter:
                     delay *= 0.5 + random.random()
                 logger.warning(
-                    f"Checkpoint retrieval attempt {retry+1} failed: {e}. Retrying in {delay:.2f}s"
+                    f"Checkpoint retrieval attempt {
+                        retry +
+                        1} failed: {e}. Retrying in {
+                        delay:.2f}s"
                 )
                 time.sleep(delay)
             else:
@@ -739,7 +778,10 @@ async def aget_postgres_checkpoint(
 
     # Log complete config for debugging
     logger.debug(
-        f"Reading checkpoint with config: {json.dumps(config_dict, default=str)}"
+        f"Reading checkpoint with config: {
+            json.dumps(
+                config_dict,
+                default=str)}"
     )
 
     # Skip for MemorySaver fallback
@@ -758,14 +800,20 @@ async def aget_postgres_checkpoint(
             # Get the checkpoint asynchronously
             if hasattr(checkpointer, "aget") and callable(checkpointer.aget):
                 logger.debug(
-                    f"Using async aget with config: {json.dumps(config_dict, default=str)}"
+                    f"Using async aget with config: {
+                        json.dumps(
+                            config_dict,
+                            default=str)}"
                 )
                 result = await checkpointer.aget(config_dict)
 
                 # Log the result structure
                 if result is not None:
                     logger.debug(
-                        f"aget result type: {type(result)}, keys: {result.keys() if isinstance(result, dict) else 'not a dict'}"
+                        f"aget result type: {
+                            type(result)}, keys: {
+                            result.keys() if isinstance(
+                                result, dict) else 'not a dict'}"
                     )
                 else:
                     logger.warning("aget returned None")
@@ -799,7 +847,11 @@ async def aget_postgres_checkpoint(
                 if config.retry_jitter:
                     delay *= 0.5 + random.random()
                 logger.warning(
-                    f"Async checkpoint retrieval attempt {retry+1} failed: {e!s}. Retrying in {delay:.2f}s"
+                    f"Async checkpoint retrieval attempt {
+                        retry +
+                        1} failed: {
+                        e!s}. Retrying in {
+                        delay:.2f}s"
                 )
                 await asyncio.sleep(delay)
             else:

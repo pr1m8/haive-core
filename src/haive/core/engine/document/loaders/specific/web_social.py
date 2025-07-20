@@ -4,7 +4,7 @@ This module contains loaders for social media platforms, forums, and community s
 """
 
 import logging
-from typing import List, Optional, Sequence
+from collections.abc import Sequence
 
 from langchain_core.document_loaders.base import BaseLoader
 
@@ -29,15 +29,17 @@ class RedditSource(WebSource):
         client_secret: str,
         user_agent: str,
         mode: str = "subreddit",
-        subreddit: Optional[str] = None,
-        username: Optional[str] = None,
-        post_id: Optional[str] = None,
-        search_query: Optional[str] = None,
-        categories: List[str] = ["hot", "new", "top"],
+        subreddit: str | None = None,
+        username: str | None = None,
+        post_id: str | None = None,
+        search_query: str | None = None,
+        categories: list[str] | None = None,
         number_posts: int = 10,
         include_comments: bool = True,
         **kwargs,
     ):
+        if categories is None:
+            categories = ["hot", "new", "top"]
         super().__init__(source_path=f"reddit://{mode}", requires_auth=True, **kwargs)
         self.client_id = client_id
         self.client_secret = client_secret
@@ -51,7 +53,7 @@ class RedditSource(WebSource):
         self.number_posts = number_posts
         self.include_comments = include_comments
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a Reddit loader."""
         try:
             from langchain_community.document_loaders import RedditPostsLoader
@@ -81,7 +83,7 @@ class RedditSource(WebSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create Reddit loader: {e}")
+            logger.exception(f"Failed to create Reddit loader: {e}")
             return None
 
 
@@ -100,7 +102,7 @@ class HackerNewsSource(WebSource):
         self.limit = limit
         self.include_comments = include_comments
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a Hacker News loader."""
         try:
             from langchain_community.document_loaders import HNLoader
@@ -119,7 +121,7 @@ class HackerNewsSource(WebSource):
             logger.warning("HNLoader not available")
             return None
         except Exception as e:
-            logger.error(f"Failed to create HackerNews loader: {e}")
+            logger.exception(f"Failed to create HackerNews loader: {e}")
             return None
 
 
@@ -130,10 +132,10 @@ class TwitterSource(WebSource):
         self,
         bearer_token: str,
         mode: str = "user_timeline",  # user_timeline, search, tweet
-        username: Optional[str] = None,
-        user_id: Optional[str] = None,
-        tweet_id: Optional[str] = None,
-        query: Optional[str] = None,
+        username: str | None = None,
+        user_id: str | None = None,
+        tweet_id: str | None = None,
+        query: str | None = None,
         max_tweets: int = 100,
         include_replies: bool = False,
         include_retweets: bool = True,
@@ -150,7 +152,7 @@ class TwitterSource(WebSource):
         self.include_replies = include_replies
         self.include_retweets = include_retweets
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a Twitter loader."""
         try:
             from langchain_community.document_loaders import TwitterTweetLoader
@@ -165,7 +167,7 @@ class TwitterSource(WebSource):
                     return TwitterTweetLoader.from_username(
                         username=self.username, **loader_kwargs
                     )
-                elif self.user_id:
+                if self.user_id:
                     loader_kwargs["twitter_users"] = [self.user_id]
                     return TwitterTweetLoader(**loader_kwargs)
 
@@ -186,7 +188,7 @@ class TwitterSource(WebSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create Twitter loader: {e}")
+            logger.exception(f"Failed to create Twitter loader: {e}")
             return None
 
 
@@ -196,9 +198,9 @@ class DiscordSource(WebSource):
     def __init__(
         self,
         channel_id: str,
-        token: Optional[str] = None,
-        bot_token: Optional[bool] = False,
-        limit: Optional[int] = None,
+        token: str | None = None,
+        bot_token: bool | None = False,
+        limit: int | None = None,
         oldest_first: bool = True,
         **kwargs,
     ):
@@ -213,7 +215,7 @@ class DiscordSource(WebSource):
         self.limit = limit
         self.oldest_first = oldest_first
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a Discord loader."""
         try:
             from langchain_community.document_loaders import DiscordChatLoader
@@ -232,7 +234,7 @@ class DiscordSource(WebSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create Discord loader: {e}")
+            logger.exception(f"Failed to create Discord loader: {e}")
             return None
 
 
@@ -243,7 +245,7 @@ class MastodonSource(WebSource):
         self,
         mastodon_accounts: Sequence[str],
         api_base_url: str = "https://mastodon.social",
-        access_token: Optional[str] = None,
+        access_token: str | None = None,
         number_toots: int = 100,
         exclude_replies: bool = True,
         exclude_reblogs: bool = True,
@@ -259,7 +261,7 @@ class MastodonSource(WebSource):
         self.exclude_replies = exclude_replies
         self.exclude_reblogs = exclude_reblogs
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a Mastodon loader."""
         try:
             from langchain_community.document_loaders import MastodonTootsLoader
@@ -279,7 +281,7 @@ class MastodonSource(WebSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create Mastodon loader: {e}")
+            logger.exception(f"Failed to create Mastodon loader: {e}")
             return None
 
 
@@ -290,7 +292,7 @@ class WhatsAppSource(WebSource):
         super().__init__(source_path=f"file://{chat_file_path}", **kwargs)
         self.chat_file_path = chat_file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a WhatsApp loader."""
         try:
             from langchain_community.document_loaders import WhatsAppChatLoader
@@ -301,7 +303,7 @@ class WhatsAppSource(WebSource):
             logger.warning("WhatsAppChatLoader not available")
             return None
         except Exception as e:
-            logger.error(f"Failed to create WhatsApp loader: {e}")
+            logger.exception(f"Failed to create WhatsApp loader: {e}")
             return None
 
 
@@ -312,7 +314,7 @@ class FacebookChatSource(WebSource):
         super().__init__(source_path=f"file://{chat_file_path}", **kwargs)
         self.chat_file_path = chat_file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a Facebook chat loader."""
         try:
             from langchain_community.document_loaders import FacebookChatLoader
@@ -323,7 +325,7 @@ class FacebookChatSource(WebSource):
             logger.warning("FacebookChatLoader not available")
             return None
         except Exception as e:
-            logger.error(f"Failed to create Facebook chat loader: {e}")
+            logger.exception(f"Failed to create Facebook chat loader: {e}")
             return None
 
 
@@ -340,7 +342,7 @@ class IFixitSource(WebSource):
         self.web_path = web_path
         self.mode = mode
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create an iFixit loader."""
         try:
             from langchain_community.document_loaders import IFixitLoader
@@ -354,7 +356,7 @@ class IFixitSource(WebSource):
             logger.warning("IFixitLoader not available")
             return None
         except Exception as e:
-            logger.error(f"Failed to create iFixit loader: {e}")
+            logger.exception(f"Failed to create iFixit loader: {e}")
             return None
 
 
@@ -365,7 +367,7 @@ class IMSDbSource(WebSource):
         super().__init__(source_path=web_path, **kwargs)
         self.web_path = web_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create an IMSDb loader."""
         try:
             from langchain_community.document_loaders import IMSDbLoader
@@ -376,7 +378,7 @@ class IMSDbSource(WebSource):
             logger.warning("IMSDbLoader not available")
             return None
         except Exception as e:
-            logger.error(f"Failed to create IMSDb loader: {e}")
+            logger.exception(f"Failed to create IMSDb loader: {e}")
             return None
 
 
@@ -385,10 +387,10 @@ class BiliBiliSource(WebSource):
 
     def __init__(
         self,
-        video_urls: List[str],
-        sessdata: Optional[str] = None,
-        bili_jct: Optional[str] = None,
-        buvid3: Optional[str] = None,
+        video_urls: list[str],
+        sessdata: str | None = None,
+        bili_jct: str | None = None,
+        buvid3: str | None = None,
         **kwargs,
     ):
         super().__init__(source_path="https://www.bilibili.com", **kwargs)
@@ -397,7 +399,7 @@ class BiliBiliSource(WebSource):
         self.bili_jct = bili_jct
         self.buvid3 = buvid3
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a BiliBili loader."""
         try:
             from langchain_community.document_loaders import BiliBiliLoader
@@ -422,20 +424,20 @@ class BiliBiliSource(WebSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create BiliBili loader: {e}")
+            logger.exception(f"Failed to create BiliBili loader: {e}")
             return None
 
 
 # Export social media sources
 __all__ = [
-    "RedditSource",
-    "HackerNewsSource",
-    "TwitterSource",
+    "BiliBiliSource",
     "DiscordSource",
-    "MastodonSource",
-    "WhatsAppSource",
     "FacebookChatSource",
+    "HackerNewsSource",
     "IFixitSource",
     "IMSDbSource",
-    "BiliBiliSource",
+    "MastodonSource",
+    "RedditSource",
+    "TwitterSource",
+    "WhatsAppSource",
 ]

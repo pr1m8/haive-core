@@ -1,5 +1,6 @@
 """PromptTemplateMixin: Advanced prompt template integration for engine classes.
 
+from typing import Any
 This module provides the PromptTemplateMixin class, which adds sophisticated
 prompt template management capabilities to any engine class. The mixin enables
 automatic input schema derivation, prompt template validation, and seamless
@@ -80,6 +81,7 @@ See Also:
     - haive.core.schema.schema_composer.SchemaComposer: Schema composition utilities
 """
 
+import contextlib
 from typing import TYPE_CHECKING, Any, Optional
 
 from langchain_core.messages import AnyMessage
@@ -206,10 +208,8 @@ class PromptTemplateMixin:
         # First try the parent class implementation
         parent_schema = None
         if hasattr(super(), "derive_input_schema"):
-            try:
+            with contextlib.suppress(Exception):
                 parent_schema = super().derive_input_schema()
-            except:
-                pass
 
         # Check if we should use prompt for schema derivation
         if not getattr(self, "_use_prompt_for_input_schema", True):
@@ -226,7 +226,7 @@ class PromptTemplateMixin:
             if parent_schema:
                 try:
                     return self.compose_with_prompt_schema(parent_schema)
-                except:
+                except BaseException:
                     # If composition fails, use prompt schema
                     return prompt_schema
             else:
@@ -237,7 +237,7 @@ class PromptTemplateMixin:
 
     @field_validator("prompt_template", mode="before")
     @classmethod
-    def validate_prompt_template(cls, v):
+    def validate_prompt_template(cls, v) -> Any:
         """Validate and potentially transform prompt template before assignment."""
         if v is None:
             return v
@@ -251,7 +251,7 @@ class PromptTemplateMixin:
                 if hasattr(v, "template") and hasattr(v, "_get_template_variables"):
                     try:
                         v.input_variables = v._get_template_variables()
-                    except:
+                    except BaseException:
                         v.input_variables = []
 
         return v
@@ -452,10 +452,8 @@ class PromptTemplateMixin:
         # Start with base fields if available
         base_fields = {}
         if hasattr(self, "get_input_fields"):
-            try:
+            with contextlib.suppress(Exception):
                 base_fields = self.get_input_fields()
-            except:
-                pass
 
         # Add prompt template fields
         if self.prompt_template:

@@ -5,7 +5,7 @@ BibTeX, ReStructuredText, TSV, Org Mode, MHTML, Visio, and subtitle files.
 """
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 from langchain_core.document_loaders.base import BaseLoader
 
@@ -17,14 +17,14 @@ logger = logging.getLogger(__name__)
 class BibtexSource(LocalFileSource):
     """BibTeX bibliography file source."""
 
-    def __init__(self, file_path: str, max_docs: Optional[int] = None, **kwargs):
+    def __init__(self, file_path: str, max_docs: int | None = None, **kwargs):
         super().__init__(
             source_path=file_path, file_extensions=[".bib", ".bibtex"], **kwargs
         )
         self.file_path = file_path
         self.max_docs = max_docs
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a BibTeX loader."""
         try:
             from langchain_community.document_loaders import BibtexLoader
@@ -40,7 +40,7 @@ class BibtexSource(LocalFileSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create BibTeX loader: {e}")
+            logger.exception(f"Failed to create BibTeX loader: {e}")
             return None
 
 
@@ -53,7 +53,7 @@ class ReStructuredTextSource(LocalFileSource):
         )
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a ReStructuredText loader."""
         try:
             from langchain_community.document_loaders import UnstructuredRSTLoader
@@ -66,7 +66,7 @@ class ReStructuredTextSource(LocalFileSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create RST loader: {e}")
+            logger.exception(f"Failed to create RST loader: {e}")
             return None
 
 
@@ -74,7 +74,7 @@ class TSVSource(LocalFileSource):
     """Tab-separated values (TSV) file source."""
 
     def __init__(
-        self, file_path: str, csv_args: Optional[Dict[str, Any]] = None, **kwargs
+        self, file_path: str, csv_args: dict[str, Any] | None = None, **kwargs
     ):
         super().__init__(
             source_path=file_path, file_extensions=[".tsv", ".tab"], **kwargs
@@ -84,7 +84,7 @@ class TSVSource(LocalFileSource):
         # Ensure tab delimiter for TSV
         self.csv_args["delimiter"] = "\t"
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a TSV loader."""
         try:
             from langchain_community.document_loaders import CSVLoader
@@ -95,7 +95,7 @@ class TSVSource(LocalFileSource):
             )
 
         except Exception as e:
-            logger.error(f"Failed to create TSV loader: {e}")
+            logger.exception(f"Failed to create TSV loader: {e}")
             return None
 
 
@@ -106,7 +106,7 @@ class OrgModeSource(LocalFileSource):
         super().__init__(source_path=file_path, file_extensions=[".org"], **kwargs)
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create an Org Mode loader."""
         try:
             from langchain_community.document_loaders import UnstructuredOrgModeLoader
@@ -119,7 +119,7 @@ class OrgModeSource(LocalFileSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create Org Mode loader: {e}")
+            logger.exception(f"Failed to create Org Mode loader: {e}")
             return None
 
 
@@ -132,7 +132,7 @@ class MHTMLSource(LocalFileSource):
         )
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create an MHTML loader."""
         try:
             from langchain_community.document_loaders import MHTMLLoader
@@ -150,7 +150,7 @@ class MHTMLSource(LocalFileSource):
                 logger.warning("UnstructuredHTMLLoader not available")
                 return None
         except Exception as e:
-            logger.error(f"Failed to create MHTML loader: {e}")
+            logger.exception(f"Failed to create MHTML loader: {e}")
             return None
 
 
@@ -163,7 +163,7 @@ class VisioSource(LocalFileSource):
         )
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a Visio loader."""
         try:
             # Try UnstructuredFileLoader as a general fallback
@@ -180,7 +180,7 @@ class VisioSource(LocalFileSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create Visio loader: {e}")
+            logger.exception(f"Failed to create Visio loader: {e}")
             return None
 
 
@@ -195,7 +195,7 @@ class SubtitleSource(LocalFileSource):
         )
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a subtitle loader."""
         try:
             from langchain_community.document_loaders import SRTLoader
@@ -212,7 +212,7 @@ class SubtitleSource(LocalFileSource):
             except Exception:
                 return None
         except Exception as e:
-            logger.error(f"Failed to create subtitle loader: {e}")
+            logger.exception(f"Failed to create subtitle loader: {e}")
             return None
 
 
@@ -223,7 +223,7 @@ class JupyterNotebookSource(LocalFileSource):
         self,
         file_path: str,
         include_outputs: bool = False,
-        max_output_length: Optional[int] = None,
+        max_output_length: int | None = None,
         **kwargs,
     ):
         super().__init__(source_path=file_path, file_extensions=[".ipynb"], **kwargs)
@@ -231,7 +231,7 @@ class JupyterNotebookSource(LocalFileSource):
         self.include_outputs = include_outputs
         self.max_output_length = max_output_length
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a Jupyter Notebook loader."""
         try:
             from langchain_community.document_loaders import NotebookLoader
@@ -248,7 +248,7 @@ class JupyterNotebookSource(LocalFileSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create notebook loader: {e}")
+            logger.exception(f"Failed to create notebook loader: {e}")
             return None
 
 
@@ -261,7 +261,7 @@ class PythonCodeSource(LocalFileSource):
         )
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a Python code loader."""
         try:
             from langchain_community.document_loaders import PythonLoader
@@ -278,19 +278,19 @@ class PythonCodeSource(LocalFileSource):
             except Exception:
                 return None
         except Exception as e:
-            logger.error(f"Failed to create Python loader: {e}")
+            logger.exception(f"Failed to create Python loader: {e}")
             return None
 
 
 # Export advanced file sources
 __all__ = [
     "BibtexSource",
-    "ReStructuredTextSource",
-    "TSVSource",
-    "OrgModeSource",
-    "MHTMLSource",
-    "VisioSource",
-    "SubtitleSource",
     "JupyterNotebookSource",
+    "MHTMLSource",
+    "OrgModeSource",
     "PythonCodeSource",
+    "ReStructuredTextSource",
+    "SubtitleSource",
+    "TSVSource",
+    "VisioSource",
 ]

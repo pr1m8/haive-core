@@ -9,7 +9,7 @@ Based on the Dynamic Activation Pattern:
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional, TypeVar
+from typing import Any, TypeVar
 
 from pydantic import Field, field_validator, model_validator
 
@@ -110,34 +110,34 @@ class DynamicActivationState(StateSchema):
     )
 
     # MetaStateSchema instances for active components
-    active_meta_states: Dict[str, MetaStateSchema] = Field(
+    active_meta_states: dict[str, MetaStateSchema] = Field(
         default_factory=dict,
         description="MetaStateSchema instances for active components",
     )
 
     # Discovery configuration
-    discovery_config: Dict[str, Any] = Field(
+    discovery_config: dict[str, Any] = Field(
         default_factory=dict, description="Configuration for component discovery"
     )
 
     # Activation history tracking
-    activation_history: List[Dict[str, Any]] = Field(
+    activation_history: list[dict[str, Any]] = Field(
         default_factory=list, description="History of activation/deactivation events"
     )
 
     # Task and capability tracking
     current_task: str = Field(default="", description="Current task being processed")
 
-    required_capabilities: List[str] = Field(
+    required_capabilities: list[str] = Field(
         default_factory=list, description="Capabilities needed for current task"
     )
 
-    missing_capabilities: List[str] = Field(
+    missing_capabilities: list[str] = Field(
         default_factory=list, description="Capabilities currently missing"
     )
 
     # Execution context
-    execution_context: Dict[str, Any] = Field(
+    execution_context: dict[str, Any] = Field(
         default_factory=dict, description="Current execution context and metadata"
     )
 
@@ -163,18 +163,21 @@ class DynamicActivationState(StateSchema):
 
     @field_validator("required_capabilities")
     @classmethod
-    def validate_required_capabilities(cls, v: List[str]) -> List[str]:
+    def validate_required_capabilities(cls, v: list[str]) -> list[str]:
         """Validate required capabilities list."""
         return [cap.strip().lower() for cap in v if cap.strip()]
 
     @field_validator("missing_capabilities")
     @classmethod
-    def validate_missing_capabilities(cls, v: List[str]) -> List[str]:
+    def validate_missing_capabilities(cls, v: list[str]) -> list[str]:
         """Validate missing capabilities list."""
         return [cap.strip().lower() for cap in v if cap.strip()]
 
     @model_validator(mode="after")
-    def setup_dynamic_activation(self) -> "DynamicActivationState":
+
+
+    @classmethod
+    def setup_dynamic_activation(cls) -> "DynamicActivationState":
         """Setup dynamic activation state after model creation.
 
         This validator:
@@ -215,7 +218,7 @@ class DynamicActivationState(StateSchema):
 
         return self
 
-    def activate_component(self, component_id: str) -> Optional[MetaStateSchema]:
+    def activate_component(self, component_id: str) -> MetaStateSchema | None:
         """Activate a component and wrap in MetaStateSchema.
 
         Args:
@@ -341,7 +344,7 @@ class DynamicActivationState(StateSchema):
 
         return False
 
-    def get_active_components(self) -> List[Any]:
+    def get_active_components(self) -> list[Any]:
         """Get all active component instances.
 
         Returns:
@@ -365,7 +368,7 @@ class DynamicActivationState(StateSchema):
         """
         return self.registry.get_active_components()
 
-    def get_meta_state(self, component_id: str) -> Optional[MetaStateSchema]:
+    def get_meta_state(self, component_id: str) -> MetaStateSchema | None:
         """Get MetaStateSchema for a specific component.
 
         Args:
@@ -387,7 +390,7 @@ class DynamicActivationState(StateSchema):
         return self.active_meta_states.get(component_id)
 
     def update_capabilities(
-        self, required: List[str], missing: List[str] = None
+        self, required: list[str], missing: list[str] | None = None
     ) -> None:
         """Update required and missing capabilities.
 
@@ -471,7 +474,7 @@ class DynamicActivationState(StateSchema):
 
         return False
 
-    def get_activation_stats(self) -> Dict[str, Any]:
+    def get_activation_stats(self) -> dict[str, Any]:
         """Get statistics about component activation.
 
         Returns:
@@ -539,7 +542,7 @@ class DynamicActivationState(StateSchema):
             and capability not in self.missing_capabilities
         )
 
-    def get_unsatisfied_capabilities(self) -> List[str]:
+    def get_unsatisfied_capabilities(self) -> list[str]:
         """Get list of capabilities that are still unsatisfied.
 
         Returns:

@@ -1,7 +1,7 @@
 # src/haive/core/graph/node/handlers.py
 
 import logging
-from typing import Any, Dict
+from typing import Any
 
 from langchain_core.messages import BaseMessage
 from langgraph.types import Command, Send
@@ -21,7 +21,7 @@ class StandardCommandHandler:
     """Standard handler for Command/Send pattern."""
 
     def process_result(
-        self, result: Any, config: Any, original_state: Dict[str, Any]
+        self, result: Any, config: Any, original_state: dict[str, Any]
     ) -> Any:
         """Process result to handle Command/Send pattern."""
         logger.debug(f"Processing result type: {type(result)}")
@@ -35,7 +35,8 @@ class StandardCommandHandler:
             and config.command_goto is not None
         ):
             logger.debug(
-                f"Wrapping preserved BaseModel in Command: {result.__class__.__name__}"
+                f"Wrapping preserved BaseModel in Command: {
+                    result.__class__.__name__}"
             )
             return Command(update=result, goto=config.command_goto)
 
@@ -45,7 +46,10 @@ class StandardCommandHandler:
 
             # Only modify if it has no goto but config does
             if result.goto is None and config.command_goto is not None:
-                logger.debug(f"Modifying Command to add goto: {config.command_goto}")
+                logger.debug(
+                    f"Modifying Command to add goto: {
+                        config.command_goto}"
+                )
 
                 # Handle the update attribute carefully
                 if hasattr(result, "update") and not callable(result.update):
@@ -67,19 +71,20 @@ class StandardCommandHandler:
                 return new_command
             return result
 
-        elif isinstance(result, Send):
+        if isinstance(result, Send):
             logger.debug(f"Send object detected: {result}")
             return result
 
-        elif isinstance(result, list) and all(
-            isinstance(item, Send) for item in result
-        ):
+        if isinstance(result, list) and all(isinstance(item, Send) for item in result):
             logger.debug(f"List of Send objects detected: {result}")
             return result
 
         # Not Command/Send - apply command_goto if specified
         if config.command_goto is not None:
-            logger.debug(f"Creating new Command with goto: {config.command_goto}")
+            logger.debug(
+                f"Creating new Command with goto: {
+                    config.command_goto}"
+            )
 
             new_command = Command(update=result, goto=config.command_goto)
             logger.debug(f"Created new Command: {new_command}")
@@ -95,14 +100,15 @@ class StandardCommandHandler:
 class DirectInputProcessor:
     """Processor for direct input (no mapping)."""
 
-    def extract_input(self, state: Dict[str, Any], config: Any) -> Any:
+    def extract_input(self, state: dict[str, Any], config: Any) -> Any:
         """Extract input without mapping."""
         logger.debug(f"Direct input processor for {config.name}")
 
         # Preserve BaseModel state directly
         if isinstance(state, BaseModel) and getattr(config, "preserve_model", True):
             logger.debug(
-                f"Preserving BaseModel state directly: {state.__class__.__name__}"
+                f"Preserving BaseModel state directly: {
+                    state.__class__.__name__}"
             )
             return state
 
@@ -114,14 +120,15 @@ class DirectInputProcessor:
         ):
             logger.debug(f"Using direct messages: {len(state['messages'])} messages")
             return state["messages"]
-        elif (
+        if (
             config.use_direct_messages
             and isinstance(state, BaseModel)
             and hasattr(state, "messages")
         ):
             messages = state.messages
             logger.debug(
-                f"Using direct messages from BaseModel: {len(messages) if messages else 0}"
+                f"Using direct messages from BaseModel: {
+                    len(messages) if messages else 0}"
             )
             return messages
 
@@ -134,7 +141,7 @@ class DirectInputProcessor:
 class MappedInputProcessor:
     """Processor for mapped input."""
 
-    def extract_input(self, state: Dict[str, Any], config: Any) -> Any:
+    def extract_input(self, state: dict[str, Any], config: Any) -> Any:
         """Extract input using mapping."""
         logger.debug(f"Mapped input processor for {config.name}")
 
@@ -146,7 +153,10 @@ class MappedInputProcessor:
         # Apply mapping - handle BaseModel state specially
         mapped_input = {}
         if isinstance(state, BaseModel):
-            logger.debug(f"Mapping from BaseModel state: {state.__class__.__name__}")
+            logger.debug(
+                f"Mapping from BaseModel state: {
+                    state.__class__.__name__}"
+            )
             for state_key, input_key in config.input_mapping.items():
                 if hasattr(state, state_key):
                     mapped_input[input_key] = getattr(state, state_key)
@@ -158,13 +168,21 @@ class MappedInputProcessor:
                     mapped_input[input_key] = state[state_key]
                     logger.debug(f"Mapped {state_key} → {input_key}")
 
-        # If only one field was mapped and we have that value, return it directly
+        # If only one field was mapped and we have that value, return it
+        # directly
         if len(config.input_mapping) == 1 and len(mapped_input) == 1:
-            result = list(mapped_input.values())[0]
-            logger.debug(f"Returning single mapped value: {type(result).__name__}")
+            result = next(iter(mapped_input.values()))
+            logger.debug(
+                f"Returning single mapped value: {
+                    type(result).__name__}"
+            )
             return result
 
-        logger.debug(f"Returning mapped input with keys: {list(mapped_input.keys())}")
+        logger.debug(
+            f"Returning mapped input with keys: {
+                list(
+                    mapped_input.keys())}"
+        )
         return mapped_input
 
 
@@ -173,8 +191,8 @@ class StandardOutputProcessor:
     """Standard processor for output."""
 
     def process_output(
-        self, result: Any, config: Any, original_state: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, result: Any, config: Any, original_state: dict[str, Any]
+    ) -> dict[str, Any]:
         """Process standard output."""
         logger.debug(f"Processing output for {config.name}")
         logger.debug(f"Result type: {type(result).__name__}")
@@ -187,7 +205,10 @@ class StandardOutputProcessor:
             and preserve_model
             and not config.output_mapping
         ):
-            logger.debug(f"Returning BaseModel directly: {result.__class__.__name__}")
+            logger.debug(
+                f"Returning BaseModel directly: {
+                    result.__class__.__name__}"
+            )
             return result
 
         # If original state is a BaseModel and we want to preserve, make a copy
@@ -196,19 +217,22 @@ class StandardOutputProcessor:
                 # Pydantic v2
                 updates = original_state.model_copy(deep=True)
                 logger.debug(
-                    f"Created deep copy of original BaseModel: {updates.__class__.__name__}"
+                    f"Created deep copy of original BaseModel: {
+                        updates.__class__.__name__}"
                 )
             else:
                 # Pydantic v1
                 updates = original_state.copy(deep=True)
                 logger.debug(
-                    f"Created deep copy of original BaseModel: {updates.__class__.__name__}"
+                    f"Created deep copy of original BaseModel: {
+                        updates.__class__.__name__}"
                 )
 
             # Handle string result with output mapping
             if isinstance(result, str) and config.output_mapping:
                 logger.debug(
-                    f"Processing string result with output mapping: {config.output_mapping}"
+                    f"Processing string result with output mapping: {
+                        config.output_mapping}"
                 )
                 for output_key, state_key in config.output_mapping.items():
                     if output_key == "output":
@@ -223,11 +247,18 @@ class StandardOutputProcessor:
 
             # Handle different result types
             if isinstance(result, dict):
-                logger.debug(f"Processing dict result with keys: {list(result.keys())}")
+                logger.debug(
+                    f"Processing dict result with keys: {
+                        list(
+                            result.keys())}"
+                )
 
                 # Apply output mapping if exists
                 if config.output_mapping:
-                    logger.debug(f"Applying output mapping: {config.output_mapping}")
+                    logger.debug(
+                        f"Applying output mapping: {
+                            config.output_mapping}"
+                    )
                     for output_key, state_key in config.output_mapping.items():
                         if output_key in result:
                             try:
@@ -275,7 +306,10 @@ class StandardOutputProcessor:
 
                 # Apply output mapping if exists
                 if config.output_mapping:
-                    logger.debug(f"Applying output mapping: {config.output_mapping}")
+                    logger.debug(
+                        f"Applying output mapping: {
+                            config.output_mapping}"
+                    )
                     for output_key, state_key in config.output_mapping.items():
                         if hasattr(result, output_key):
                             try:
@@ -310,7 +344,7 @@ class StandardOutputProcessor:
                         # Try to copy all attributes from result to updates
                         if hasattr(result, "model_fields"):
                             # Pydantic v2
-                            for key in result.model_fields.keys():
+                            for key in result.model_fields:
                                 if hasattr(result, key):
                                     # Check if target model has this field
                                     has_key = False
@@ -354,7 +388,8 @@ class StandardOutputProcessor:
                                             )
             elif isinstance(result, BaseMessage):
                 logger.debug(
-                    f"Processing direct BaseMessage: {result.__class__.__name__}"
+                    f"Processing direct BaseMessage: {
+                        result.__class__.__name__}"
                 )
 
                 # Add to messages list if it exists
@@ -430,13 +465,18 @@ class StandardOutputProcessor:
 
         # Handle BaseMessage result
         if isinstance(result, BaseMessage):
-            logger.debug(f"Processing BaseMessage result: {type(result).__name__}")
+            logger.debug(
+                f"Processing BaseMessage result: {
+                    type(result).__name__}"
+            )
 
             # Add message to existing messages if present
             if "messages" in updates and isinstance(updates["messages"], list):
                 updates["messages"].append(result)
                 logger.debug(
-                    f"Added message to existing messages list (now {len(updates['messages'])})"
+                    f"Added message to existing messages list (now {
+                        len(
+                            updates['messages'])})"
                 )
             else:
                 updates["messages"] = [result]
@@ -456,11 +496,18 @@ class StandardOutputProcessor:
 
         # Handle dictionary result
         if isinstance(result, dict):
-            logger.debug(f"Processing dict result with keys: {list(result.keys())}")
+            logger.debug(
+                f"Processing dict result with keys: {
+                    list(
+                        result.keys())}"
+            )
 
             # Apply output mapping if exists
             if config.output_mapping:
-                logger.debug(f"Applying output mapping: {config.output_mapping}")
+                logger.debug(
+                    f"Applying output mapping: {
+                        config.output_mapping}"
+                )
                 # src/haive/core/graph/node/handlers.py (continued)
 
                 for output_key, state_key in config.output_mapping.items():
@@ -516,7 +563,8 @@ class StandardOutputProcessor:
                     logger.debug(f"Mapped string result to {state_key}")
                     return updates
 
-        # Fallback - store as a field based on output mapping or common field names
+        # Fallback - store as a field based on output mapping or common field
+        # names
         if config.output_mapping:
             # Try to use the first state_key in output mapping
             state_key = next(iter(config.output_mapping.values()), "output")
@@ -544,7 +592,7 @@ class StructuredOutputProcessor:
     """Processor for structured output models."""
 
     def process_output(
-        self, result: Any, config: Any, original_state: Dict[str, Any]
+        self, result: Any, config: Any, original_state: dict[str, Any]
     ) -> Any:
         """Process output from structured output models."""
         logger.debug(f"Processing structured output for {config.name}")
@@ -556,7 +604,8 @@ class StructuredOutputProcessor:
         # Special handling for string results when output mapping is provided
         if isinstance(result, str) and config.output_mapping:
             logger.debug(
-                f"Processing string result with output mapping: {config.output_mapping}"
+                f"Processing string result with output mapping: {
+                    config.output_mapping}"
             )
 
             # Handle BaseModel original state specially
@@ -569,7 +618,8 @@ class StructuredOutputProcessor:
 
                 # Apply output mapping directly for string result
                 for output_key, state_key in config.output_mapping.items():
-                    # For simple strings, we can assume the "output" key maps to the string content
+                    # For simple strings, we can assume the "output" key maps
+                    # to the string content
                     if output_key == "output":
                         try:
                             setattr(updates, state_key, result)
@@ -598,7 +648,8 @@ class StructuredOutputProcessor:
         # Special handling for BaseMessages (like AIMessage)
         if isinstance(result, BaseMessage):
             logger.debug(
-                f"Processing BaseMessage (structured): {result.__class__.__name__}"
+                f"Processing BaseMessage (structured): {
+                    result.__class__.__name__}"
             )
 
             # Handle BaseModel original state specially
@@ -635,7 +686,10 @@ class StructuredOutputProcessor:
 
                 # Apply output mapping if exists
                 if config.output_mapping:
-                    logger.debug(f"Applying output mapping: {config.output_mapping}")
+                    logger.debug(
+                        f"Applying output mapping: {
+                            config.output_mapping}"
+                    )
                     for output_key, state_key in config.output_mapping.items():
                         if output_key == "output" and hasattr(result, "content"):
                             try:
@@ -670,13 +724,17 @@ class StructuredOutputProcessor:
 
             # Apply output mapping if exists
             if config.output_mapping:
-                logger.debug(f"Applying output mapping: {config.output_mapping}")
+                logger.debug(
+                    f"Applying output mapping: {
+                        config.output_mapping}"
+                )
                 for output_key, state_key in config.output_mapping.items():
                     if output_key == "output" and hasattr(result, "content"):
                         updates[state_key] = result.content
                         logger.debug(f"Mapped message content to {state_key}")
 
-            # Save as message type if we know it's safe (i.e., not trying with original BaseModel)
+            # Save as message type if we know it's safe (i.e., not trying with
+            # original BaseModel)
             message_type = result.__class__.__name__.lower()
             updates[message_type] = result
             logger.debug(f"Added message as {message_type}")
@@ -690,7 +748,8 @@ class StructuredOutputProcessor:
             and not config.output_mapping
         ):
             logger.debug(
-                f"Returning BaseModel result directly: {result.__class__.__name__}"
+                f"Returning BaseModel result directly: {
+                    result.__class__.__name__}"
             )
             return result
 
@@ -701,13 +760,15 @@ class StructuredOutputProcessor:
                 # Pydantic v2
                 updates = original_state.model_copy(deep=True)
                 logger.debug(
-                    f"Created deep copy of original BaseModel: {updates.__class__.__name__}"
+                    f"Created deep copy of original BaseModel: {
+                        updates.__class__.__name__}"
                 )
             else:
                 # Pydantic v1
                 updates = original_state.copy(deep=True)
                 logger.debug(
-                    f"Created deep copy of original BaseModel: {updates.__class__.__name__}"
+                    f"Created deep copy of original BaseModel: {
+                        updates.__class__.__name__}"
                 )
 
             # Handle BaseModel result
@@ -722,7 +783,8 @@ class StructuredOutputProcessor:
                 elif hasattr(updates, "__fields__"):
                     has_field = model_name in updates.__fields__
 
-                # Try to set the entire model as an attribute ONLY if the field exists
+                # Try to set the entire model as an attribute ONLY if the field
+                # exists
                 if has_field:
                     try:
                         setattr(updates, model_name, result)
@@ -747,52 +809,52 @@ class StructuredOutputProcessor:
                                 logger.warning(
                                     f"Cannot set attribute {state_key} on BaseModel"
                                 )
-                else:
-                    # No mapping - copy all attributes if they exist on the target model
-                    if hasattr(result, "model_fields"):
-                        # Pydantic v2
-                        for key in result.model_fields.keys():
-                            if hasattr(result, key):
-                                # Check if target model has this field
-                                has_key = False
-                                if hasattr(updates, "model_fields"):
-                                    has_key = key in updates.model_fields
-                                elif hasattr(updates, "__fields__"):
-                                    has_key = key in updates.__fields__
+                # No mapping - copy all attributes if they exist on the target
+                # model
+                elif hasattr(result, "model_fields"):
+                    # Pydantic v2
+                    for key in result.model_fields:
+                        if hasattr(result, key):
+                            # Check if target model has this field
+                            has_key = False
+                            if hasattr(updates, "model_fields"):
+                                has_key = key in updates.model_fields
+                            elif hasattr(updates, "__fields__"):
+                                has_key = key in updates.__fields__
 
-                                if has_key:
-                                    try:
-                                        value = getattr(result, key)
-                                        setattr(updates, key, value)
-                                        logger.debug(
-                                            f"Copied attribute {key} from result model"
-                                        )
-                                    except AttributeError:
-                                        logger.warning(
-                                            f"Cannot set attribute {key} on BaseModel"
-                                        )
-                    elif hasattr(result, "__fields__"):
-                        # Pydantic v1
-                        for key in result.__fields__:
-                            if hasattr(result, key):
-                                # Check if target model has this field
-                                has_key = False
-                                if hasattr(updates, "model_fields"):
-                                    has_key = key in updates.model_fields
-                                elif hasattr(updates, "__fields__"):
-                                    has_key = key in updates.__fields__
+                            if has_key:
+                                try:
+                                    value = getattr(result, key)
+                                    setattr(updates, key, value)
+                                    logger.debug(
+                                        f"Copied attribute {key} from result model"
+                                    )
+                                except AttributeError:
+                                    logger.warning(
+                                        f"Cannot set attribute {key} on BaseModel"
+                                    )
+                elif hasattr(result, "__fields__"):
+                    # Pydantic v1
+                    for key in result.__fields__:
+                        if hasattr(result, key):
+                            # Check if target model has this field
+                            has_key = False
+                            if hasattr(updates, "model_fields"):
+                                has_key = key in updates.model_fields
+                            elif hasattr(updates, "__fields__"):
+                                has_key = key in updates.__fields__
 
-                                if has_key:
-                                    try:
-                                        value = getattr(result, key)
-                                        setattr(updates, key, value)
-                                        logger.debug(
-                                            f"Copied attribute {key} from result model"
-                                        )
-                                    except AttributeError:
-                                        logger.warning(
-                                            f"Cannot set attribute {key} on BaseModel"
-                                        )
+                            if has_key:
+                                try:
+                                    value = getattr(result, key)
+                                    setattr(updates, key, value)
+                                    logger.debug(
+                                        f"Copied attribute {key} from result model"
+                                    )
+                                except AttributeError:
+                                    logger.warning(
+                                        f"Cannot set attribute {key} on BaseModel"
+                                    )
 
                 return updates
 
@@ -800,7 +862,8 @@ class StructuredOutputProcessor:
             # For string results, map them according to output_mapping
             if isinstance(result, str) and config.output_mapping:
                 logger.debug(
-                    f"Processing string result with output mapping: {config.output_mapping}"
+                    f"Processing string result with output mapping: {
+                        config.output_mapping}"
                 )
                 for output_key, state_key in config.output_mapping.items():
                     if output_key == "output" and hasattr(updates, state_key):
@@ -873,10 +936,9 @@ class StructuredOutputProcessor:
             logger.debug(f"Added model as {model_name}")
 
             # Convert to dict if needed for additional processing
-            if hasattr(result, "model_dump"):
-                result_dict = result.model_dump()
-            else:
-                result_dict = result.dict()
+            result_dict = (
+                result.model_dump() if hasattr(result, "model_dump") else result.dict()
+            )
 
             # Handle specific case for BaseMessage subtypes
             if isinstance(result, BaseMessage):
@@ -884,7 +946,9 @@ class StructuredOutputProcessor:
                 if "messages" in updates and isinstance(updates["messages"], list):
                     updates["messages"].append(result)
                     logger.debug(
-                        f"Added message to existing messages list (now {len(updates['messages'])})"
+                        f"Added message to existing messages list (now {
+                            len(
+                                updates['messages'])})"
                     )
                 else:
                     # Create a new messages list
@@ -898,7 +962,10 @@ class StructuredOutputProcessor:
 
             # Extract fields if output mapping exists
             if config.output_mapping:
-                logger.debug(f"Applying output mapping: {config.output_mapping}")
+                logger.debug(
+                    f"Applying output mapping: {
+                        config.output_mapping}"
+                )
                 for output_key, state_key in config.output_mapping.items():
                     if hasattr(result, output_key):
                         updates[state_key] = getattr(result, output_key)
@@ -913,7 +980,8 @@ class StructuredOutputProcessor:
         # Handle string results with output mapping
         if isinstance(result, str) and config.output_mapping:
             logger.debug(
-                f"Processing string result with output mapping: {config.output_mapping}"
+                f"Processing string result with output mapping: {
+                    config.output_mapping}"
             )
             for output_key, state_key in config.output_mapping.items():
                 if output_key == "output":
@@ -921,7 +989,8 @@ class StructuredOutputProcessor:
                     logger.debug(f"Mapped string result to {state_key}")
                     return updates
 
-        # Fallback - here we map to output instead of result if output exists in mapping
+        # Fallback - here we map to output instead of result if output exists
+        # in mapping
         if isinstance(result, str) and config.output_mapping:
             for output_key, state_key in config.output_mapping.items():
                 updates[state_key] = result

@@ -1,5 +1,6 @@
 """Zep Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Zep retriever,
 which retrieves conversation history and memory from Zep's long-term memory store.
 Zep is designed for storing, searching, and enriching conversational AI chat histories
@@ -138,7 +139,7 @@ class ZepRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a Zep retriever from this configuration.
 
         Returns:

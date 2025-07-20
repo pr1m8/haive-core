@@ -4,38 +4,35 @@ import asyncio
 import logging
 import sys
 
+from langchain_core.messages import HumanMessage
+
 from haive.agents.reasoning_and_critique.self_discover.v2.agent import (
     DEFAULT_REASONING_MODULES,
     self_discovery,
 )
-from langchain_core.messages import HumanMessage
 
 # Suppress all logging except errors
 logging.getLogger().setLevel(logging.ERROR)
 
 # Add direct paths to avoid import issues
-sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-agents/src")
-sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
+sys.path.insert(
+    0, "/home/will/Projects/haive/backend/haive/packages/haive-agents/src")
+sys.path.insert(
+    0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
 
 
 async def simple_test():
     """Simple test with minimal output."""
-    print("🧠 Testing Self-Discovery Agent...")
-
     test_input = {
         "messages": [HumanMessage(content="What is 2+2?")],
         "reasoning_modules": DEFAULT_REASONING_MODULES[:3],
         "task_description": "What is 2+2?",
     }
 
-    print("🚀 Starting execution...")
-
     try:
         result = await self_discovery.ainvoke(test_input)
-        print("✅ Execution completed!")
         return result
-    except Exception as e:
-        print(f"❌ Failed: {e}")
+    except Exception:
         return None
 
 

@@ -44,7 +44,7 @@ class ValidationNodeV2(NodeConfig, ToolRouteMixin):
     name: str = Field(default="validation_v2", description="Node name")
     messages_key: str = Field(default="messages", description="Messages field in state")
 
-    def model_post_init(self, __context):
+    def model_post_init(self, __context) -> None:
         """Setup default field definitions for validation node."""
         if not self.input_field_defs:
             from haive.core.schema.field_registry import StandardFields
@@ -83,13 +83,19 @@ class ValidationNodeV2(NodeConfig, ToolRouteMixin):
         if hasattr(state, "engines") and isinstance(state.engines, dict):
             engine = state.engines.get(self.engine_name)
             if engine:
-                logger.info(f"Found engine in state.engines: {self.engine_name}")
+                logger.info(
+                    f"Found engine in state.engines: {
+                        self.engine_name}"
+                )
                 return engine
 
             # Try by engine.name attribute
             for _key, eng in state.engines.items():
                 if hasattr(eng, "name") and eng.name == self.engine_name:
-                    logger.info(f"Found engine by name attribute: {self.engine_name}")
+                    logger.info(
+                        f"Found engine by name attribute: {
+                            self.engine_name}"
+                    )
                     return eng
 
         # Try state attribute
@@ -257,10 +263,12 @@ class ValidationNodeV2(NodeConfig, ToolRouteMixin):
                 logger.info(
                     f"Found engine attribution in AI message: {engine_name_from_message}"
                 )
-                # Override the validation node's engine_name with the one from the message
+                # Override the validation node's engine_name with the one from
+                # the message
                 self.engine_name = engine_name_from_message
                 logger.debug(
-                    f"Updated validation node engine_name to: {self.engine_name}"
+                    f"Updated validation node engine_name to: {
+                        self.engine_name}"
                 )
             else:
                 logger.debug(
@@ -335,7 +343,8 @@ class ValidationNodeV2(NodeConfig, ToolRouteMixin):
                     logger.warning(f"Unknown Pydantic model: {tool_name}")
 
             elif route in ["langchain_tool", "function", "tool_node"]:
-                # Regular tools - don't create ToolMessages here, let tool_node handle it
+                # Regular tools - don't create ToolMessages here, let tool_node
+                # handle it
                 logger.debug(f"Regular tool {tool_name} will be handled by tool_node")
 
             else:
@@ -352,7 +361,10 @@ class ValidationNodeV2(NodeConfig, ToolRouteMixin):
         if new_tool_messages:
             updated_messages = list(messages) + new_tool_messages
             update_dict[self.messages_key] = updated_messages
-            logger.info(f"Added {len(new_tool_messages)} ToolMessages to state")
+            logger.info(
+                f"Added {
+                    len(new_tool_messages)} ToolMessages to state"
+            )
 
             # Log the ToolMessages for debugging
             for i, tm in enumerate(new_tool_messages):

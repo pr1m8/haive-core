@@ -5,7 +5,7 @@ specialized database sources.
 """
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 from urllib.parse import urlparse
 
 from langchain_core.document_loaders.base import BaseLoader
@@ -24,11 +24,11 @@ class BigQuerySource(DatabaseSource):
     def __init__(
         self,
         project_id: str,
-        dataset_id: Optional[str] = None,
-        table_id: Optional[str] = None,
-        query: Optional[str] = None,
-        page_content_columns: Optional[List[str]] = None,
-        metadata_columns: Optional[List[str]] = None,
+        dataset_id: str | None = None,
+        table_id: str | None = None,
+        query: str | None = None,
+        page_content_columns: list[str] | None = None,
+        metadata_columns: list[str] | None = None,
         **kwargs,
     ):
         bq_uri = f"bigquery://{project_id}"
@@ -63,11 +63,11 @@ class BigQuerySource(DatabaseSource):
         """BigQuery requires authentication."""
         return True
 
-    def get_credential_requirements(self) -> List[CredentialType]:
+    def get_credential_requirements(self) -> list[CredentialType]:
         """BigQuery needs service account credentials."""
         return [CredentialType.SERVICE_ACCOUNT]
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a BigQuery loader."""
         try:
             from langchain_community.document_loaders import BigQueryLoader
@@ -82,7 +82,10 @@ class BigQuerySource(DatabaseSource):
             # Build query if not provided
             if not self.query:
                 if self.table_id and self.dataset_id:
-                    self.query = f"SELECT * FROM `{self.project_id}.{self.dataset_id}.{self.table_id}`"
+                    self.query = f"SELECT * FROM `{
+                        self.project_id}.{
+                        self.dataset_id}.{
+                        self.table_id}`"
                 else:
                     raise ValueError("Either query or table_id must be provided")
 
@@ -100,10 +103,10 @@ class BigQuerySource(DatabaseSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create BigQuery loader: {e}")
+            logger.exception(f"Failed to create BigQuery loader: {e}")
             return None
 
-    def analyze_schema(self) -> Optional[Dict[str, Any]]:
+    def analyze_schema(self) -> dict[str, Any] | None:
         """Analyze BigQuery table schema."""
         try:
             from google.cloud import bigquery
@@ -148,7 +151,7 @@ class BigQuerySource(DatabaseSource):
 
                 return schema_info
 
-            elif self.dataset_id:
+            if self.dataset_id:
                 # Get dataset info
                 dataset = client.get_dataset(self.dataset_id)
                 tables = list(client.list_tables(dataset))
@@ -161,16 +164,15 @@ class BigQuerySource(DatabaseSource):
                     "tables": [table.table_id for table in tables],
                 }
 
-            else:
-                # Get project datasets
-                datasets = list(client.list_datasets())
-                return {
-                    "project_id": self.project_id,
-                    "datasets": [dataset.dataset_id for dataset in datasets],
-                }
+            # Get project datasets
+            datasets = list(client.list_datasets())
+            return {
+                "project_id": self.project_id,
+                "datasets": [dataset.dataset_id for dataset in datasets],
+            }
 
         except Exception as e:
-            logger.error(f"Failed to analyze BigQuery schema: {e}")
+            logger.exception(f"Failed to analyze BigQuery schema: {e}")
             return None
 
 
@@ -180,8 +182,8 @@ class SQLiteSource(DatabaseSource):
     def __init__(
         self,
         database_path: str,
-        query: Optional[str] = None,
-        table_name: Optional[str] = None,
+        query: str | None = None,
+        table_name: str | None = None,
         **kwargs,
     ):
         super().__init__(source_path=f"sqlite:///{database_path}", **kwargs)
@@ -193,11 +195,7 @@ class SQLiteSource(DatabaseSource):
         """Check if this is a SQLite database."""
         try:
             parsed = urlparse(path)
-            return (
-                parsed.scheme == "sqlite"
-                or path.endswith(".db")
-                or path.endswith(".sqlite")
-            )
+            return parsed.scheme == "sqlite" or path.endswith((".db", ".sqlite"))
         except Exception:
             return False
 
@@ -207,7 +205,7 @@ class SQLiteSource(DatabaseSource):
             return 0.0
         return 0.9
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a SQLite loader."""
         try:
             from langchain_community.document_loaders.sql_database import (
@@ -237,7 +235,7 @@ class SQLiteSource(DatabaseSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create SQLite loader: {e}")
+            logger.exception(f"Failed to create SQLite loader: {e}")
             return None
 
 
@@ -249,8 +247,8 @@ class MySQLSource(DatabaseSource):
         host: str,
         database: str,
         port: int = 3306,
-        query: Optional[str] = None,
-        table_name: Optional[str] = None,
+        query: str | None = None,
+        table_name: str | None = None,
         **kwargs,
     ):
         mysql_uri = f"mysql://{host}:{port}/{database}"
@@ -279,11 +277,11 @@ class MySQLSource(DatabaseSource):
         """MySQL requires authentication."""
         return True
 
-    def get_credential_requirements(self) -> List[CredentialType]:
+    def get_credential_requirements(self) -> list[CredentialType]:
         """MySQL needs username/password."""
         return [CredentialType.USERNAME_PASSWORD]
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a MySQL loader."""
         try:
             from langchain_community.document_loaders.sql_database import (
@@ -303,7 +301,10 @@ class MySQLSource(DatabaseSource):
 
             # Build connection URL
             if username and password:
-                connection_url = f"mysql+pymysql://{username}:{password}@{self.host}:{self.port}/{self.database}"
+                connection_url = f"mysql+pymysql://{username}:{password}@{
+                    self.host}:{
+                    self.port}/{
+                    self.database}"
             else:
                 connection_url = (
                     f"mysql+pymysql://{self.host}:{self.port}/{self.database}"
@@ -331,13 +332,13 @@ class MySQLSource(DatabaseSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create MySQL loader: {e}")
+            logger.exception(f"Failed to create MySQL loader: {e}")
             return None
 
 
 # Export advanced database sources
 __all__ = [
     "BigQuerySource",
-    "SQLiteSource",
     "MySQLSource",
+    "SQLiteSource",
 ]

@@ -20,21 +20,14 @@ from haive.core.schema.schema_composer import SchemaComposer
 
 def test_inheritance_hierarchy():
     """Test that the inheritance hierarchy is correct."""
-    print("🧪 Testing inheritance hierarchy...")
-
     # Test inheritance chain
     assert issubclass(MessagesStateWithTokenUsage, MessagesState)
     assert issubclass(ToolState, MessagesStateWithTokenUsage)
     assert issubclass(LLMState, ToolState)
 
-    print("✅ Inheritance hierarchy correct:")
-    print("   MessagesState → MessagesStateWithTokenUsage → ToolState → LLMState")
-
 
 def test_field_inheritance():
     """Test that fields are properly inherited through the chain."""
-    print("\n🧪 Testing field inheritance...")
-
     # Create LLMState instance
     engine = AugLLMConfig(name="test_engine")
     llm_state = LLMState(engine=engine)
@@ -48,20 +41,15 @@ def test_field_inheritance():
     assert hasattr(llm_state, "engine")  # From LLMState
     assert hasattr(llm_state, "warning_threshold")  # From LLMState
 
-    print("✅ All fields inherited correctly")
-
 
 def test_schema_composer_detection():
     """Test that SchemaComposer detects the right base classes."""
-    print("\n🧪 Testing SchemaComposer base class detection...")
-
     # Test 1: Just messages → MessagesStateWithTokenUsage
     composer1 = SchemaComposer(name="MessageOnlyState")
     composer1.add_field("messages", list, default_factory=list)
     composer1._detect_base_class_requirements()
 
     expected_base = composer1.detected_base_class
-    print(f"   Messages only → {expected_base.__name__}")
     assert expected_base.__name__ == "MessagesStateWithTokenUsage"
 
     # Test 2: Tools (without LLM) → ToolState
@@ -76,7 +64,6 @@ def test_schema_composer_detection():
     composer2._detect_base_class_requirements()
 
     expected_base = composer2.detected_base_class
-    print(f"   Tools only → {expected_base.__name__}")
     assert expected_base.__name__ == "ToolState"
 
     # Test 3: Tools + Single LLM Engine → LLMState
@@ -87,15 +74,11 @@ def test_schema_composer_detection():
     composer3._detect_base_class_requirements()
 
     expected_base = composer3.detected_base_class
-    print(f"   Tools + Single LLM → {expected_base.__name__}")
     assert expected_base.__name__ == "LLMState"
-
-    print("✅ SchemaComposer detection working correctly")
 
 
 def test_tool_syncing():
     """Test that tools sync properly through the inheritance chain."""
-    print("\n🧪 Testing tool syncing...")
 
     @tool
     def calculator(expression: str) -> str:
@@ -116,13 +99,9 @@ def test_tool_syncing():
     assert "llm" in llm_state.engines
     assert llm_state.engines["main"] == engine
 
-    print("✅ Tool syncing working correctly")
-
 
 def test_token_tracking():
     """Test that token tracking works through inheritance."""
-    print("\n🧪 Testing token tracking inheritance...")
-
     from langchain_core.messages import AIMessage
 
     # Create LLMState
@@ -142,15 +121,11 @@ def test_token_tracking():
         extract_token_usage_from_message,
     )
 
-    extracted_usage = extract_token_usage_from_message(ai_message)
-    print(f"   Extracted usage: {extracted_usage}")
+    extract_token_usage_from_message(ai_message)
 
     llm_state.add_message(ai_message)
 
     # Debug: Check what happened
-    print(f"   Messages: {len(llm_state.messages)}")
-    print(f"   Token usage: {llm_state.token_usage}")
-    print(f"   Token usage history: {llm_state.token_usage_history}")
 
     # Verify token tracking works
     assert (
@@ -163,13 +138,9 @@ def test_token_tracking():
     assert hasattr(llm_state, "context_length")
     assert hasattr(llm_state, "is_approaching_token_limit")
 
-    print("✅ Token tracking inheritance working correctly")
-
 
 def main():
     """Run all tests."""
-    print("🚀 Testing Updated Schema Inheritance Hierarchy\n")
-
     try:
         test_inheritance_hierarchy()
         test_field_inheritance()
@@ -177,16 +148,7 @@ def main():
         test_tool_syncing()
         test_token_tracking()
 
-        print("\n🎉 All tests passed! The inheritance hierarchy is working correctly.")
-        print("\nSummary:")
-        print("✅ MessagesState → MessagesStateWithTokenUsage → ToolState → LLMState")
-        print("✅ SchemaComposer detects appropriate base classes")
-        print("✅ Field inheritance works across the chain")
-        print("✅ Tool syncing works properly")
-        print("✅ Token tracking inherited correctly")
-
-    except Exception as e:
-        print(f"\n❌ Test failed: {e}")
+    except Exception:
         import traceback
 
         traceback.print_exc()

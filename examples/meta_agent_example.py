@@ -12,15 +12,19 @@ The example shows:
 5. Advanced patterns like agent swapping and conditional execution
 """
 
-from typing import Any, Dict, List
+"""
+"""
+
+import contextlib
+from typing import Any
 
 from langchain_core.messages import AIMessage, HumanMessage
 from langgraph.graph import END, START, StateGraph
 
 from haive.core.graph.node.meta_agent_node import MetaAgentNodeConfig
+from haive.core.schema.prebuilt.meta_state import MetaStateSchema
 
 # Import the meta state and meta agent node
-from haive.core.schema.prebuilt.meta_state import MetaStateSchema
 
 
 # Example agent classes (simplified for demonstration)
@@ -37,15 +41,17 @@ class ExampleAgent:
 
         # Simple response based on behavior
         if self.behavior == "helpful":
-            response_content = f"Hello! I'm {self.name}, a helpful assistant. How can I help you today?"
+            response_content = f"Hello! I'm {
+                self.name}, a helpful assistant. How can I help you today?"
         elif self.behavior == "creative":
-            response_content = f"Greetings! I'm {self.name}, your creative companion. Let's explore ideas together!"
+            response_content = f"Greetings! I'm {
+                self.name}, your creative companion. Let's explore ideas together!"
         elif self.behavior == "analytical":
-            response_content = (
-                f"Hello, I'm {self.name}. I'll analyze your request systematically."
-            )
+            response_content = f"Hello, I'm {
+                    self.name}. I'll analyze your request systematically."
         else:
-            response_content = f"Hi, I'm {self.name}. What would you like to discuss?"
+            response_content = f"Hi, I'm {
+                self.name}. What would you like to discuss?"
 
         # Create response message
         response_message = AIMessage(content=response_content)
@@ -60,15 +66,13 @@ class ExampleAgent:
 
 def create_basic_meta_agent_example():
     """Create a basic example of meta agent usage."""
-
     # 1. Create a simple agent to embed
     helpful_agent = ExampleAgent(name="HelperBot", behavior="helpful")
 
     # 2. Create meta state with the embedded agent
     meta_state = MetaStateSchema(
         agent=helpful_agent,
-        agent_input={"messages": [HumanMessage(
-            content="Hello, I need some help!")]},
+        agent_input={"messages": [HumanMessage(content="Hello, I need some help!")]},
         meta_context={"purpose": "customer_support", "priority": "high"},
     )
 
@@ -80,7 +84,6 @@ def create_basic_meta_agent_example():
 
 def create_meta_agent_graph_example():
     """Create a graph that uses meta agent nodes."""
-
     # Create a meta agent node configuration
     meta_node = MetaAgentNodeConfig(
         name="execute_embedded_agent",
@@ -94,7 +97,6 @@ def create_meta_agent_graph_example():
     # Create a preparation node
     def prepare_meta_state(state: dict[str, Any]) -> dict[str, Any]:
         """Prepare meta state for execution."""
-
         # Create different agents based on request type
         user_input = state.get("user_input", "")
 
@@ -122,15 +124,18 @@ def create_meta_agent_graph_example():
     # Create a finalization node
     def finalize_response(state: dict[str, Any]) -> dict[str, Any]:
         """Finalize the response from meta agent execution."""
-
         execution_status = state.get("execution_status", "unknown")
         agent_output = state.get("agent_output", {})
 
         if execution_status == "completed":
-            final_response = f"Task completed successfully by {agent_output.get('agent_name', 'agent')}"
+            final_response = f"Task completed successfully by {
+                agent_output.get(
+                    'agent_name', 'agent')}"
         elif execution_status == "error":
             error_info = state.get("error_info", {})
-            final_response = f"Task failed: {error_info.get('error', 'Unknown error')}"
+            final_response = f"Task failed: {
+                error_info.get(
+                    'error', 'Unknown error')}"
         else:
             final_response = f"Task status: {execution_status}"
 
@@ -162,17 +167,14 @@ def create_meta_agent_graph_example():
 
     for user_input in test_inputs:
 
-        try:
-            result = compiled_graph.invoke({"user_input": user_input})
-        except Exception as e:
-            pass
+        with contextlib.suppress(Exception):
+            compiled_graph.invoke({"user_input": user_input})
 
     return compiled_graph
 
 
 def create_advanced_meta_agent_example():
     """Create an advanced example with multiple embedded agents."""
-
     # Create multiple agents
     agents = {
         "researcher": ExampleAgent(name="ResearchBot", behavior="analytical"),
@@ -214,20 +216,17 @@ def create_advanced_meta_agent_example():
         }
 
         # Execute agent
-        try:
+        with contextlib.suppress(Exception):
             meta_state.execute_agent()
-        except Exception as e:
-            pass")
 
     # Display execution summary
-    summary = meta_state.get_execution_summary()
+    meta_state.get_execution_summary()
 
     return meta_state
 
 
 def demonstrate_meta_state_features():
     """Demonstrate various MetaStateSchema features."""
-
     # Create agent
     agent = ExampleAgent(name="DemoBot", behavior="helpful")
 
@@ -238,16 +237,13 @@ def demonstrate_meta_state_features():
         meta_context={"demo": True},
     )
 
-
-
     # Execute agent
     meta_state.execute_agent()
 
-
     new_agent = ExampleAgent(name="CloneBot", behavior="creative")
-    cloned_state = meta_state.clone_with_agent(new_agent, reset_history=True)
+    meta_state.clone_with_agent(new_agent, reset_history=True)
 
-    prepared_input = meta_state.prepare_agent_input(
+    meta_state.prepare_agent_input(
         additional_input={"custom_field": "test"},
         include_messages=True,
         include_context=True,
@@ -272,8 +268,7 @@ if __name__ == "__main__":
         # Demonstrate features
         demo_meta_state = demonstrate_meta_state_features()
 
-
-    except Exception as e:
+    except Exception:
         import traceback
 
         traceback.print_exc()

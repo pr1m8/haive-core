@@ -15,14 +15,11 @@ logger = logging.getLogger(__name__)
 
 def test_store_system():
     """Test the basic store system functionality."""
-
-    print("=== Store System Test ===\n")
-
     # Create store manager with memory store
     store = create_store(store_type=StoreType.MEMORY)
-    store_manager = StoreManager(store=store, default_namespace=("test", "demo"))
-
-    print(f"Created store manager with: {type(store).__name__}")
+    store_manager = StoreManager(
+        store=store, default_namespace=(
+            "test", "demo"))
 
     # Store some memories
     memory_id1 = store_manager.store_memory(
@@ -41,26 +38,15 @@ def test_store_system():
         metadata={"source": "conversation"},
     )
 
-    print(f"Stored memory 1: {memory_id1}")
-    print(f"Stored memory 2: {memory_id2}")
-
     # Retrieve memories
-    memory1 = store_manager.retrieve_memory(memory_id1)
-    memory2 = store_manager.retrieve_memory(memory_id2)
-
-    print(f"\nRetrieved memory 1: {memory1.content}")
-    print(f"Category: {memory1.category}, Importance: {memory1.importance}")
-
-    print(f"\nRetrieved memory 2: {memory2.content}")
-    print(f"Category: {memory2.category}, Tags: {memory2.tags}")
+    store_manager.retrieve_memory(memory_id1)
+    store_manager.retrieve_memory(memory_id2)
 
     # Test tools
-    print("\n=== Testing Tools ===")
 
     tools = create_memory_tools_suite(store_manager)
-    print(f"Created {len(tools)} tools:")
-    for tool in tools:
-        print(f"  - {tool.name}: {tool.description[:50]}...")
+    for _tool in tools:
+        pass
 
     # Test store tool
     store_tool = tools[0]  # store_memory tool
@@ -74,27 +60,17 @@ def test_store_system():
     import json
 
     result_data = json.loads(result)
-    print(f"\nStore tool result: {result_data}")
 
     # Test retrieve tool
     retrieve_tool = tools[2]  # retrieve_memory tool
     retrieve_result = retrieve_tool.func(memory_id=result_data["memory_id"])
-    retrieve_data = json.loads(retrieve_result)
-
-    print(f"Retrieve tool result: {retrieve_data['memory']['content']}")
+    json.loads(retrieve_result)
 
     # Test namespace creation
-    print("\n=== Testing Namespaces ===")
 
-    user_ns = store_manager.create_user_namespace("user123")
-    agent_ns = store_manager.create_agent_namespace("agent1", "user123")
-    session_ns = store_manager.create_session_namespace("session1", "agent1", "user123")
-
-    print(f"User namespace: {user_ns}")
-    print(f"Agent namespace: {agent_ns}")
-    print(f"Session namespace: {session_ns}")
-
-    print("\n✅ Store system test completed successfully!")
+    store_manager.create_user_namespace("user123")
+    store_manager.create_agent_namespace("agent1", "user123")
+    store_manager.create_session_namespace("session1", "agent1", "user123")
 
 
 if __name__ == "__main__":

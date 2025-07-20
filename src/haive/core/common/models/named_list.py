@@ -3,10 +3,7 @@
 # ============================================================================
 
 from collections.abc import Iterator, Sequence
-from typing import (
-    Generic,
-    TypeVar,
-)
+from typing import Any, Generic, TypeVar
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
@@ -25,7 +22,9 @@ class NamedList(BaseModel, Generic[T]):
     Automatically resolves string references to actual instances.
     """
 
-    items: Sequence[T] = Field(default_factory=list, description="The resolved items")
+    items: Sequence[T] = Field(
+        default_factory=list,
+        description="The resolved items")
     names: list[str] = Field(
         default_factory=list, description="Names of items (in order)"
     )
@@ -47,7 +46,7 @@ class NamedList(BaseModel, Generic[T]):
 
     @field_validator("items", mode="before")
     @classmethod
-    def validate_items(cls, v, info):
+    def validate_items(cls, v, info) -> Any:
         """Handle various input formats and normalize to instances."""
         if v is None:
             return []
@@ -56,7 +55,10 @@ class NamedList(BaseModel, Generic[T]):
         return v
 
     @model_validator(mode="after")
-    def process_input(self):
+
+
+    @classmethod
+    def process_input(cls) -> Any:
         """Process the input and resolve references."""
         if not self.items:
             return self
@@ -148,7 +150,8 @@ class NamedList(BaseModel, Generic[T]):
         if not self.unresolved_refs or not self.registry:
             if self.unresolved_refs and not self.allow_unresolved:
                 raise ValueError(
-                    f"Unresolved references: {self.unresolved_refs} (no registry provided)"
+                    f"Unresolved references: {
+                        self.unresolved_refs} (no registry provided)"
                 )
             return
 
@@ -166,7 +169,8 @@ class NamedList(BaseModel, Generic[T]):
                     self.items[i] = resolved_item
                     self.name_map[self.names[i]] = resolved_item
                 elif not self.allow_unresolved:
-                    raise ValueError(f"Could not resolve reference: '{ref_name}'")
+                    raise ValueError(
+                        f"Could not resolve reference: '{ref_name}'")
 
         # Clear unresolved refs for successfully resolved items
         self.unresolved_refs = [
@@ -217,7 +221,9 @@ class NamedList(BaseModel, Generic[T]):
                 self.append(value, name=key)
         else:
             # Set by index
-            valid_indices = [i for i, item in enumerate(self.items) if item is not None]
+            valid_indices = [
+                i for i, item in enumerate(
+                    self.items) if item is not None]
             if 0 <= key < len(valid_indices):
                 actual_index = valid_indices[key]
                 self.items[actual_index] = value
@@ -262,7 +268,8 @@ class NamedList(BaseModel, Generic[T]):
 
     def keys(self) -> list[str]:
         """Get all names."""
-        return [name for i, name in enumerate(self.names) if self.items[i] is not None]
+        return [name for i, name in enumerate(
+            self.names) if self.items[i] is not None]
 
     def values(self) -> list[T]:
         """Get all instances."""
@@ -270,7 +277,8 @@ class NamedList(BaseModel, Generic[T]):
 
     def to_dict(self) -> dict[str, T]:
         """Convert to dictionary mapping names to instances."""
-        return {name: item for name, item in self.name_map.items() if item is not None}
+        return {name: item for name, item in self.name_map.items()
+                if item is not None}
 
     def to_list(self) -> list[T]:
         """Convert to simple list of instances."""
@@ -278,7 +286,8 @@ class NamedList(BaseModel, Generic[T]):
 
     def has_unresolved_references(self) -> bool:
         """Check if there are unresolved references."""
-        return len(self.unresolved_refs) > 0 or any(item is None for item in self.items)
+        return len(self.unresolved_refs) > 0 or any(
+            item is None for item in self.items)
 
     def get_unresolved_references(self) -> list[str]:
         """Get list of unresolved references."""
@@ -299,7 +308,7 @@ class NamedList(BaseModel, Generic[T]):
         )
 
     @classmethod
-    def validate_input(cls, v):
+    def validate_input(cls, v) -> Any:
         """Validate input for Pydantic."""
         if isinstance(v, cls):
             return v
@@ -331,7 +340,8 @@ def create_named_list(
     allow_unresolved: bool = False,
 ) -> NamedList[T]:
     """Convenience function to create a NamedList."""
-    return NamedList(items=items, registry=registry, allow_unresolved=allow_unresolved)
+    return NamedList(items=items, registry=registry,
+                     allow_unresolved=allow_unresolved)
 
 
 # ========================================================================

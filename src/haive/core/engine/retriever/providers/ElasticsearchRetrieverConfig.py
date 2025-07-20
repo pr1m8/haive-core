@@ -1,5 +1,6 @@
 """Elasticsearch Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Elasticsearch retriever,
 which performs full-text search and retrieval using Elasticsearch. Elasticsearch
 is a distributed, RESTful search and analytics engine capable of solving complex
@@ -155,7 +156,7 @@ class ElasticsearchRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create an Elasticsearch retriever from this configuration.
 
         Returns:

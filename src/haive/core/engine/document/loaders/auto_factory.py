@@ -6,7 +6,7 @@ detection, and loader creation.
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from langchain_core.document_loaders import BaseLoader
 
@@ -26,17 +26,17 @@ logger = logging.getLogger(__name__)
 class DocumentLoaderFactory:
     """Factory for creating document loaders automatically."""
 
-    def __init__(self):
-        self._loader_cache: Dict[str, BaseLoader] = {}
+    def __init__(self) -> None:
+        self._loader_cache: dict[str, BaseLoader] = {}
 
     def create_loader_from_path(
         self,
         path: str,
-        source_type: Optional[str] = None,
-        loader_name: Optional[str] = None,
+        source_type: str | None = None,
+        loader_name: str | None = None,
         preference: LoaderPreference = LoaderPreference.BALANCED,
         **kwargs,
-    ) -> Optional[BaseLoader]:
+    ) -> BaseLoader | None:
         """Create a document loader from a path.
 
         Args:
@@ -59,8 +59,8 @@ class DocumentLoaderFactory:
         return self.create_loader_from_source(source, loader_name, preference)
 
     def create_source(
-        self, path: str, source_type: Optional[str] = None, **kwargs
-    ) -> Optional[BaseSource]:
+        self, path: str, source_type: str | None = None, **kwargs
+    ) -> BaseSource | None:
         """Create a source instance from a path.
 
         Args:
@@ -76,9 +76,9 @@ class DocumentLoaderFactory:
     def create_loader_from_source(
         self,
         source: BaseSource,
-        loader_name: Optional[str] = None,
+        loader_name: str | None = None,
         preference: LoaderPreference = LoaderPreference.BALANCED,
-    ) -> Optional[BaseLoader]:
+    ) -> BaseLoader | None:
         """Create a loader instance from a source.
 
         Args:
@@ -99,7 +99,10 @@ class DocumentLoaderFactory:
         )
 
         if not loader_mapping:
-            logger.error(f"No loader found for source type: {source.source_type}")
+            logger.error(
+                f"No loader found for source type: {
+                    source.source_type}"
+            )
             return None
 
         # Create loader
@@ -116,18 +119,21 @@ class DocumentLoaderFactory:
 
         except ImportError as e:
             packages = ", ".join(loader_mapping.requires_packages)
-            logger.error(
+            logger.exception(
                 f"Failed to import {loader_mapping.name}: {e}\n"
                 f"Required packages: {packages}"
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create loader {loader_mapping.name}: {e}")
+            logger.exception(
+                f"Failed to create loader {
+                    loader_mapping.name}: {e}"
+            )
             return None
 
     def load_documents(
         self,
-        input_data: Union[str, BaseSource, DocumentInput],
+        input_data: str | BaseSource | DocumentInput,
         preference: LoaderPreference = LoaderPreference.BALANCED,
     ) -> DocumentOutput:
         """Load documents from various input types.
@@ -208,7 +214,7 @@ class DocumentLoaderFactory:
             )
 
         except Exception as e:
-            logger.error(f"Failed to load documents: {e}")
+            logger.exception(f"Failed to load documents: {e}")
             return DocumentOutput(
                 documents=[],
                 original_source=source.source_id or path,
@@ -217,7 +223,7 @@ class DocumentLoaderFactory:
                 errors=[{"error": str(e)}],
             )
 
-    def find_available_loaders(self, path: str) -> List[str]:
+    def find_available_loaders(self, path: str) -> list[str]:
         """Find all available loaders for a path.
 
         Args:
@@ -233,7 +239,7 @@ class DocumentLoaderFactory:
 
         return list(source_reg.loaders.keys())
 
-    def analyze_path_with_sources(self, path: str) -> Dict[str, Any]:
+    def analyze_path_with_sources(self, path: str) -> dict[str, Any]:
         """Analyze a path and return detailed information.
 
         Args:
@@ -290,11 +296,11 @@ document_loader_factory = DocumentLoaderFactory()
 # Convenience functions
 def create_loader(
     path: str,
-    source_type: Optional[str] = None,
-    loader_name: Optional[str] = None,
+    source_type: str | None = None,
+    loader_name: str | None = None,
     preference: LoaderPreference = LoaderPreference.BALANCED,
     **kwargs,
-) -> Optional[BaseLoader]:
+) -> BaseLoader | None:
     """Create a document loader from a path."""
     return document_loader_factory.create_loader_from_path(
         path, source_type, loader_name, preference, **kwargs
@@ -302,22 +308,22 @@ def create_loader(
 
 
 def load_documents(
-    input_data: Union[str, BaseSource, DocumentInput],
+    input_data: str | BaseSource | DocumentInput,
     preference: LoaderPreference = LoaderPreference.BALANCED,
 ) -> DocumentOutput:
     """Load documents from various input types."""
     return document_loader_factory.load_documents(input_data, preference)
 
 
-def analyze_document_source(path: str) -> Dict[str, Any]:
+def analyze_document_source(path: str) -> dict[str, Any]:
     """Analyze a path and return source/loader information."""
     return document_loader_factory.analyze_path_with_sources(path)
 
 
 __all__ = [
     "DocumentLoaderFactory",
-    "document_loader_factory",
-    "create_loader",
-    "load_documents",
     "analyze_document_source",
+    "create_loader",
+    "document_loader_factory",
+    "load_documents",
 ]

@@ -1,5 +1,6 @@
 """Vespa Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Vespa retriever,
 which uses Vespa search engine for advanced search and retrieval capabilities.
 Vespa is a fully featured search engine and vector database which supports
@@ -136,7 +137,7 @@ class VespaRetrieverConfig(BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a Vespa retriever from this configuration.
 
         Returns:

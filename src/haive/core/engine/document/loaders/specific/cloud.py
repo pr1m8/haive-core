@@ -5,7 +5,6 @@ Azure Blob Storage, and other cloud providers.
 """
 
 import logging
-from typing import List, Optional
 from urllib.parse import urlparse
 
 from langchain_core.document_loaders.base import BaseLoader
@@ -24,9 +23,9 @@ class S3Source(CloudStorageSource):
     def __init__(
         self,
         bucket_name: str,
-        object_key: Optional[str] = None,
-        prefix: Optional[str] = None,
-        region: Optional[str] = None,
+        object_key: str | None = None,
+        prefix: str | None = None,
+        region: str | None = None,
         **kwargs,
     ):
         s3_path = f"s3://{bucket_name}/{object_key or prefix or ''}"
@@ -54,11 +53,11 @@ class S3Source(CloudStorageSource):
         """S3 typically requires authentication."""
         return True
 
-    def get_credential_requirements(self) -> List[CredentialType]:
+    def get_credential_requirements(self) -> list[CredentialType]:
         """S3 needs AWS credentials."""
         return [CredentialType.API_KEY, CredentialType.SERVICE_ACCOUNT]
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create an S3 loader."""
         try:
             from langchain_community.document_loaders import (
@@ -87,22 +86,21 @@ class S3Source(CloudStorageSource):
                     aws_access_key_id=aws_access_key,
                     aws_secret_access_key=aws_secret_key,
                 )
-            else:
-                # Directory or prefix
-                prefix = self.prefix or self.object_key or ""
-                return S3DirectoryLoader(
-                    bucket=self.bucket_name,
-                    prefix=prefix,
-                    region_name=self.region,
-                    aws_access_key_id=aws_access_key,
-                    aws_secret_access_key=aws_secret_key,
-                )
+            # Directory or prefix
+            prefix = self.prefix or self.object_key or ""
+            return S3DirectoryLoader(
+                bucket=self.bucket_name,
+                prefix=prefix,
+                region_name=self.region,
+                aws_access_key_id=aws_access_key,
+                aws_secret_access_key=aws_secret_key,
+            )
 
         except ImportError:
             logger.warning("S3 loaders not available. Install with: pip install boto3")
             return None
         except Exception as e:
-            logger.error(f"Failed to create S3 loader: {e}")
+            logger.exception(f"Failed to create S3 loader: {e}")
             return None
 
 
@@ -112,9 +110,9 @@ class GCSSource(CloudStorageSource):
     def __init__(
         self,
         bucket_name: str,
-        object_name: Optional[str] = None,
-        prefix: Optional[str] = None,
-        project_id: Optional[str] = None,
+        object_name: str | None = None,
+        prefix: str | None = None,
+        project_id: str | None = None,
         **kwargs,
     ):
         gcs_path = f"gs://{bucket_name}/{object_name or prefix or ''}"
@@ -142,11 +140,11 @@ class GCSSource(CloudStorageSource):
         """GCS typically requires authentication."""
         return True
 
-    def get_credential_requirements(self) -> List[CredentialType]:
+    def get_credential_requirements(self) -> list[CredentialType]:
         """GCS needs Google Cloud credentials."""
         return [CredentialType.SERVICE_ACCOUNT, CredentialType.API_KEY]
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a GCS loader."""
         try:
             from langchain_community.document_loaders import (
@@ -172,15 +170,14 @@ class GCSSource(CloudStorageSource):
                     blob=self.object_name,
                     credentials_path=credentials_path,
                 )
-            else:
-                # Directory or prefix
-                prefix = self.prefix or self.object_name or ""
-                return GCSDirectoryLoader(
-                    project_name=self.project_id,
-                    bucket=self.bucket_name,
-                    prefix=prefix,
-                    credentials_path=credentials_path,
-                )
+            # Directory or prefix
+            prefix = self.prefix or self.object_name or ""
+            return GCSDirectoryLoader(
+                project_name=self.project_id,
+                bucket=self.bucket_name,
+                prefix=prefix,
+                credentials_path=credentials_path,
+            )
 
         except ImportError:
             logger.warning(
@@ -188,7 +185,7 @@ class GCSSource(CloudStorageSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create GCS loader: {e}")
+            logger.exception(f"Failed to create GCS loader: {e}")
             return None
 
 
@@ -199,8 +196,8 @@ class AzureBlobSource(CloudStorageSource):
         self,
         account_name: str,
         container_name: str,
-        blob_name: Optional[str] = None,
-        prefix: Optional[str] = None,
+        blob_name: str | None = None,
+        prefix: str | None = None,
         **kwargs,
     ):
         azure_path = (
@@ -230,11 +227,11 @@ class AzureBlobSource(CloudStorageSource):
         """Azure Blob typically requires authentication."""
         return True
 
-    def get_credential_requirements(self) -> List[CredentialType]:
+    def get_credential_requirements(self) -> list[CredentialType]:
         """Azure Blob needs Azure credentials."""
         return [CredentialType.CONNECTION_STRING, CredentialType.API_KEY]
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create an Azure Blob loader."""
         try:
             from langchain_community.document_loaders import (
@@ -264,15 +261,14 @@ class AzureBlobSource(CloudStorageSource):
                     connection_string=connection_string,
                     account_key=account_key,
                 )
-            else:
-                # Container or prefix
-                return AzureBlobStorageContainerLoader(
-                    account_name=self.account_name,
-                    container=self.container_name,
-                    prefix=self.prefix,
-                    connection_string=connection_string,
-                    account_key=account_key,
-                )
+            # Container or prefix
+            return AzureBlobStorageContainerLoader(
+                account_name=self.account_name,
+                container=self.container_name,
+                prefix=self.prefix,
+                connection_string=connection_string,
+                account_key=account_key,
+            )
 
         except ImportError:
             logger.warning(
@@ -280,13 +276,13 @@ class AzureBlobSource(CloudStorageSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create Azure Blob loader: {e}")
+            logger.exception(f"Failed to create Azure Blob loader: {e}")
             return None
 
 
 # Export cloud sources
 __all__ = [
-    "S3Source",
-    "GCSSource",
     "AzureBlobSource",
+    "GCSSource",
+    "S3Source",
 ]

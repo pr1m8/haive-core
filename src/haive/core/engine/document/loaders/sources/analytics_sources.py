@@ -10,7 +10,7 @@ This module implements data processing, analytics, and ETL platform loaders incl
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from pydantic import Field
 
@@ -125,30 +125,30 @@ class SnowflakeSource(RemoteSource):
 
     # Snowflake configuration
     account: str = Field(..., description="Snowflake account identifier")
-    username: Optional[str] = Field(None, description="Username")
-    password: Optional[str] = Field(None, description="Password")
+    username: str | None = Field(None, description="Username")
+    password: str | None = Field(None, description="Password")
 
     # Database options
     database: str = Field(..., description="Database name")
     schema: str = Field("PUBLIC", description="Schema name")
     warehouse: str = Field(..., description="Warehouse name")
-    role: Optional[str] = Field(None, description="Role to use")
+    role: str | None = Field(None, description="Role to use")
 
     # Query options
-    query: Optional[str] = Field(None, description="SQL query")
-    table: Optional[str] = Field(None, description="Table name")
+    query: str | None = Field(None, description="SQL query")
+    table: str | None = Field(None, description="Table name")
 
     # Time travel
-    at_timestamp: Optional[datetime] = Field(None, description="Query at timestamp")
-    before_timestamp: Optional[datetime] = Field(
+    at_timestamp: datetime | None = Field(None, description="Query at timestamp")
+    before_timestamp: datetime | None = Field(
         None, description="Query before timestamp"
     )
 
     # Export options
     export_format: DataFormat = Field(DataFormat.JSON, description="Export format")
-    limit: Optional[int] = Field(None, description="Row limit")
+    limit: int | None = Field(None, description="Row limit")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -215,19 +215,19 @@ class DatabricksSource(RemoteSource):
     # Databricks configuration
     server_hostname: str = Field(..., description="Server hostname")
     http_path: str = Field(..., description="HTTP path to SQL warehouse")
-    access_token: Optional[str] = Field(None, description="Personal access token")
+    access_token: str | None = Field(None, description="Personal access token")
 
     # Query options
     catalog: str = Field("hive_metastore", description="Catalog name")
     schema: str = Field("default", description="Schema name")
-    query: Optional[str] = Field(None, description="SQL query")
-    table: Optional[str] = Field(None, description="Table name")
+    query: str | None = Field(None, description="SQL query")
+    table: str | None = Field(None, description="Table name")
 
     # Processing options
     fetch_size: int = Field(10000, description="Fetch size for results")
-    max_rows: Optional[int] = Field(None, description="Maximum rows to fetch")
+    max_rows: int | None = Field(None, description="Maximum rows to fetch")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -291,26 +291,22 @@ class BigQuerySource(RemoteSource):
     # BigQuery configuration
     project_id: str = Field(..., description="GCP project ID")
     dataset_id: str = Field(..., description="Dataset ID")
-    credentials_path: Optional[str] = Field(
-        None, description="Service account JSON path"
-    )
+    credentials_path: str | None = Field(None, description="Service account JSON path")
 
     # Query options
-    query: Optional[str] = Field(None, description="SQL query")
-    table_id: Optional[str] = Field(None, description="Table ID")
+    query: str | None = Field(None, description="SQL query")
+    table_id: str | None = Field(None, description="Table ID")
 
     # Partition options
-    partition_field: Optional[str] = Field(None, description="Partition field")
-    start_date: Optional[datetime] = Field(
-        None, description="Start date for partitions"
-    )
-    end_date: Optional[datetime] = Field(None, description="End date for partitions")
+    partition_field: str | None = Field(None, description="Partition field")
+    start_date: datetime | None = Field(None, description="Start date for partitions")
+    end_date: datetime | None = Field(None, description="End date for partitions")
 
     # Export options
     page_size: int = Field(10000, description="Page size for results")
-    max_results: Optional[int] = Field(None, description="Maximum results")
+    max_results: int | None = Field(None, description="Maximum results")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -334,7 +330,7 @@ class BigQuerySource(RemoteSource):
 
         return kwargs
 
-    def scrape_all(self) -> Dict[str, Any]:
+    def scrape_all(self) -> dict[str, Any]:
         """Scrape entire dataset or table."""
         return {
             "dataset_id": self.dataset_id,
@@ -382,10 +378,10 @@ class TableauSource(RemoteSource):
     # Tableau configuration
     server_url: str = Field(..., description="Tableau Server URL")
     site_id: str = Field("", description="Site ID (empty for default)")
-    username: Optional[str] = Field(None, description="Username")
-    password: Optional[str] = Field(None, description="Password")
-    token_name: Optional[str] = Field(None, description="Personal access token name")
-    token_value: Optional[str] = Field(None, description="Personal access token value")
+    username: str | None = Field(None, description="Username")
+    password: str | None = Field(None, description="Password")
+    token_name: str | None = Field(None, description="Personal access token name")
+    token_value: str | None = Field(None, description="Personal access token value")
 
     # Content options
     include_workbooks: bool = Field(True, description="Include workbooks")
@@ -393,10 +389,10 @@ class TableauSource(RemoteSource):
     include_views: bool = Field(True, description="Include views")
 
     # Filtering
-    project_name: Optional[str] = Field(None, description="Filter by project")
-    tags: Optional[List[str]] = Field(None, description="Filter by tags")
+    project_name: str | None = Field(None, description="Filter by project")
+    tags: list[str] | None = Field(None, description="Filter by tags")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update({"server": self.server_url, "site_id": self.site_id})
@@ -458,19 +454,19 @@ class PowerBISource(RemoteSource):
     # Power BI configuration
     tenant_id: str = Field(..., description="Azure AD tenant ID")
     client_id: str = Field(..., description="Application client ID")
-    client_secret: Optional[str] = Field(None, description="Client secret")
+    client_secret: str | None = Field(None, description="Client secret")
 
     # Content selection
-    workspace_id: Optional[str] = Field(None, description="Workspace ID")
-    dataset_id: Optional[str] = Field(None, description="Dataset ID")
-    report_id: Optional[str] = Field(None, description="Report ID")
+    workspace_id: str | None = Field(None, description="Workspace ID")
+    dataset_id: str | None = Field(None, description="Dataset ID")
+    report_id: str | None = Field(None, description="Report ID")
 
     # Options
     include_datasets: bool = Field(True, description="Include datasets")
     include_reports: bool = Field(True, description="Include reports")
     include_dashboards: bool = Field(True, description="Include dashboards")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -537,23 +533,23 @@ class InfluxDBSource(RemoteSource):
 
     # InfluxDB configuration
     url: str = Field(..., description="InfluxDB URL")
-    token: Optional[str] = Field(None, description="API token")
+    token: str | None = Field(None, description="API token")
     org: str = Field(..., description="Organization")
 
     # Query options
     bucket: str = Field(..., description="Bucket name")
-    measurement: Optional[str] = Field(None, description="Measurement name")
-    flux_query: Optional[str] = Field(None, description="Flux query")
+    measurement: str | None = Field(None, description="Measurement name")
+    flux_query: str | None = Field(None, description="Flux query")
 
     # Time range
-    start_time: Union[str, datetime] = Field("-1h", description="Start time")
-    stop_time: Union[str, datetime] = Field("now()", description="Stop time")
+    start_time: str | datetime = Field("-1h", description="Start time")
+    stop_time: str | datetime = Field("now()", description="Stop time")
 
     # Aggregation
-    window_period: Optional[str] = Field(None, description="Window period (e.g., 5m)")
-    aggregation_method: Optional[str] = Field(None, description="Aggregation method")
+    window_period: str | None = Field(None, description="Window period (e.g., 5m)")
+    aggregation_method: str | None = Field(None, description="Aggregation method")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -580,12 +576,15 @@ class InfluxDBSource(RemoteSource):
 
             if self.measurement:
                 query_parts.append(
-                    f'|> filter(fn: (r) => r["_measurement"] == "{self.measurement}")'
+                    f'|> filter(fn: (r) => r["_measurement"] == "{
+                        self.measurement}")'
                 )
 
             if self.window_period and self.aggregation_method:
                 query_parts.append(
-                    f"|> aggregateWindow(every: {self.window_period}, fn: {self.aggregation_method})"
+                    f"|> aggregateWindow(every: {
+                        self.window_period}, fn: {
+                        self.aggregation_method})"
                 )
 
             kwargs["query"] = "\n".join(query_parts)
@@ -635,7 +634,7 @@ class PrometheusSource(RemoteSource):
     # Additional options
     timeout: int = Field(30, description="Query timeout in seconds")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -691,24 +690,24 @@ class ElasticsearchSource(RemoteSource):
 
     # Elasticsearch configuration
     url: str = Field(..., description="Elasticsearch URL")
-    cloud_id: Optional[str] = Field(None, description="Elastic Cloud ID")
-    api_key: Optional[str] = Field(None, description="API key")
-    username: Optional[str] = Field(None, description="Username")
-    password: Optional[str] = Field(None, description="Password")
+    cloud_id: str | None = Field(None, description="Elastic Cloud ID")
+    api_key: str | None = Field(None, description="API key")
+    username: str | None = Field(None, description="Username")
+    password: str | None = Field(None, description="Password")
 
     # Query options
     index: str = Field(..., description="Index pattern")
-    query: Optional[Dict[str, Any]] = Field(None, description="Elasticsearch query DSL")
+    query: dict[str, Any] | None = Field(None, description="Elasticsearch query DSL")
 
     # Time range
-    start_time: Optional[datetime] = Field(None, description="Start time")
-    end_time: Optional[datetime] = Field(None, description="End time")
+    start_time: datetime | None = Field(None, description="Start time")
+    end_time: datetime | None = Field(None, description="End time")
 
     # Pagination
     size: int = Field(100, description="Number of results per page")
     scroll_time: str = Field("5m", description="Scroll timeout")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -741,7 +740,7 @@ class ElasticsearchSource(RemoteSource):
 
         return kwargs
 
-    def scrape_all(self) -> Dict[str, Any]:
+    def scrape_all(self) -> dict[str, Any]:
         """Scrape entire index."""
         return {
             "index": self.index,
@@ -785,9 +784,9 @@ class SplunkSource(RemoteSource):
     # Splunk configuration
     host: str = Field(..., description="Splunk host")
     port: int = Field(8089, description="Management port")
-    username: Optional[str] = Field(None, description="Username")
-    password: Optional[str] = Field(None, description="Password")
-    token: Optional[str] = Field(None, description="Authentication token")
+    username: str | None = Field(None, description="Username")
+    password: str | None = Field(None, description="Password")
+    token: str | None = Field(None, description="Authentication token")
 
     # Search options
     search_query: str = Field(..., description="SPL search query")
@@ -798,7 +797,7 @@ class SplunkSource(RemoteSource):
     output_mode: str = Field("json", description="Output mode")
     max_count: int = Field(1000, description="Maximum results")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -857,8 +856,8 @@ class KafkaSource(RemoteSource):
     platform: AnalyticsPlatform = AnalyticsPlatform.KAFKA
 
     # Kafka configuration
-    bootstrap_servers: List[str] = Field(..., description="Kafka broker addresses")
-    topics: List[str] = Field(..., description="Topics to consume")
+    bootstrap_servers: list[str] = Field(..., description="Kafka broker addresses")
+    topics: list[str] = Field(..., description="Topics to consume")
     group_id: str = Field(..., description="Consumer group ID")
 
     # Consumer options
@@ -870,7 +869,7 @@ class KafkaSource(RemoteSource):
     value_deserializer: str = Field("json", description="Value deserializer type")
     key_deserializer: str = Field("string", description="Key deserializer type")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -926,8 +925,8 @@ class AirflowSource(RemoteSource):
 
     # Airflow configuration
     base_url: str = Field(..., description="Airflow webserver URL")
-    username: Optional[str] = Field(None, description="Username")
-    password: Optional[str] = Field(None, description="Password")
+    username: str | None = Field(None, description="Username")
+    password: str | None = Field(None, description="Password")
 
     # Content options
     include_dags: bool = Field(True, description="Include DAG definitions")
@@ -936,10 +935,10 @@ class AirflowSource(RemoteSource):
     include_logs: bool = Field(False, description="Include task logs")
 
     # Filtering
-    dag_id_pattern: Optional[str] = Field(None, description="DAG ID pattern filter")
-    start_date: Optional[datetime] = Field(None, description="Filter by start date")
+    dag_id_pattern: str | None = Field(None, description="DAG ID pattern filter")
+    start_date: datetime | None = Field(None, description="Filter by start date")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -967,7 +966,7 @@ class AirflowSource(RemoteSource):
 # =============================================================================
 
 
-def get_analytics_sources_statistics() -> Dict[str, Any]:
+def get_analytics_sources_statistics() -> dict[str, Any]:
     """Get statistics about analytics sources."""
     registry = enhanced_registry
 
@@ -1038,15 +1037,10 @@ def validate_analytics_sources() -> bool:
         if source_name not in registry._sources:
             missing.append(source_name)
 
-    if missing:
-        print(f"Missing analytics sources: {missing}")
-        return False
-
-    print("✅ All essential analytics sources registered!")
-    return True
+    return not missing
 
 
-def detect_analytics_platform(url_or_identifier: str) -> Optional[AnalyticsPlatform]:
+def detect_analytics_platform(url_or_identifier: str) -> AnalyticsPlatform | None:
     """Auto-detect analytics platform from URL or identifier."""
     lower = url_or_identifier.lower()
 
@@ -1072,4 +1066,3 @@ def detect_analytics_platform(url_or_identifier: str) -> Optional[AnalyticsPlatf
 if __name__ == "__main__":
     validate_analytics_sources()
     stats = get_analytics_sources_statistics()
-    print(f"Analytics Sources Statistics: {stats}")

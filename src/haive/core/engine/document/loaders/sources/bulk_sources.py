@@ -6,7 +6,7 @@ and filtering capabilities.
 """
 
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
 from .enhanced_registry import enhanced_registry, register_bulk_source
 from .source_types import (
@@ -74,19 +74,19 @@ class RecursiveDirectorySource(DirectorySource):
     batch_size: int = 20
 
     # Filtering options
-    file_extensions: Set[str] = set()
-    exclude_patterns: List[str] = []
-    include_patterns: List[str] = []
+    file_extensions: set[str] = set()
+    exclude_patterns: list[str] = []
+    include_patterns: list[str] = []
     min_file_size: int = 0
-    max_file_size: Optional[int] = None
+    max_file_size: int | None = None
 
     # Advanced options
     follow_symlinks: bool = False
     ignore_hidden: bool = True
     fail_fast: bool = False
-    progress_callback: Optional[str] = None
+    progress_callback: str | None = None
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         # Build file filter
@@ -129,20 +129,20 @@ class FilteredDirectorySource(DirectorySource):
 
     # Filter configuration
     filter_strategy: FilterStrategy = FilterStrategy.COMBINED
-    content_filters: List[str] = []  # Regex patterns for content
-    date_range_start: Optional[str] = None
-    date_range_end: Optional[str] = None
+    content_filters: list[str] = []  # Regex patterns for content
+    date_range_start: str | None = None
+    date_range_end: str | None = None
 
     # Size filters
     min_file_size_mb: float = 0.0
-    max_file_size_mb: Optional[float] = None
+    max_file_size_mb: float | None = None
 
     # Content analysis
     analyze_content: bool = False
     language_detection: bool = False
     duplicate_detection: bool = False
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         # Add filtering logic
@@ -191,9 +191,9 @@ class S3BucketSource(CloudStorageSource):
     # Processing options
     parallel_downloads: bool = True
     stream_large_files: bool = True
-    max_objects: Optional[int] = None
+    max_objects: int | None = None
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -230,9 +230,9 @@ class GCSBucketSource(CloudStorageSource):
     """Google Cloud Storage bucket source."""
 
     prefix: str = ""
-    project_id: Optional[str] = None
+    project_id: str | None = None
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -268,9 +268,9 @@ class AzureContainerSource(CloudStorageSource):
 
     container_name: str
     prefix: str = ""
-    connection_string: Optional[str] = None
+    connection_string: str | None = None
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -307,15 +307,15 @@ class MergedDataSource(DirectorySource):
     """Multi-source data merger for combining different data sources."""
 
     # Data sources to merge
-    source_paths: List[str] = []
-    source_types: List[str] = []
+    source_paths: list[str] = []
+    source_types: list[str] = []
 
     # Merging configuration
     deduplicate: bool = True
     merge_strategy: str = "append"  # append, interleave, priority
     conflict_resolution: str = "first"  # first, last, merge
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -361,7 +361,7 @@ class FileSystemBlobSource(DirectorySource):
     stream_threshold_mb: float = 10.0
     buffer_size: int = 8192
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -403,9 +403,9 @@ class CloudBlobSource(CloudStorageSource):
     path: str
 
     # Blob processing
-    parser_config: Dict[str, Any] = {}
+    parser_config: dict[str, Any] = {}
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {"path": f"{self.scheme}{self.path}", "parser": self.parser_config}
@@ -447,7 +447,7 @@ class StreamingDirectorySource(DirectorySource):
     detect_additions: bool = True
     detect_deletions: bool = False
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -464,7 +464,7 @@ class StreamingDirectorySource(DirectorySource):
 # =============================================================================
 
 
-def get_bulk_sources_statistics() -> Dict[str, Any]:
+def get_bulk_sources_statistics() -> dict[str, Any]:
     """Get statistics about bulk loading sources."""
     registry = enhanced_registry
 
@@ -508,7 +508,7 @@ def get_bulk_sources_statistics() -> Dict[str, Any]:
     }
 
 
-def get_scrape_all_sources() -> List[str]:
+def get_scrape_all_sources() -> list[str]:
     """Get list of all sources with 'scrape all' capabilities."""
     registry = enhanced_registry
 
@@ -545,12 +545,9 @@ def validate_bulk_sources() -> bool:
             missing.append(source_name)
 
     if missing:
-        print(f"Missing bulk sources: {missing}")
         return False
 
-    scrape_all = get_scrape_all_sources()
-    print(f"✅ All {len(required_bulk_sources)} bulk sources registered!")
-    print(f"🔄 {len(scrape_all)} sources with 'scrape all' capability: {scrape_all}")
+    get_scrape_all_sources()
     return True
 
 
@@ -558,4 +555,3 @@ def validate_bulk_sources() -> bool:
 if __name__ == "__main__":
     validate_bulk_sources()
     stats = get_bulk_sources_statistics()
-    print(f"Bulk Sources Statistics: {stats}")

@@ -18,7 +18,8 @@ class GraphPattern(BaseGraph, ABC):
     with automatic inheritance of nodes, edges, and conditional branches.
     """
 
-    # Pattern structure to be defined in subclasses - renamed to avoid conflicts
+    # Pattern structure to be defined in subclasses - renamed to avoid
+    # conflicts
     pattern_nodes: ClassVar[dict[str, NodeLike | None]] = {}
     pattern_edges: ClassVar[list[tuple[str, str]]] = []
     pattern_conditionals: ClassVar[list[dict[str, Any]]] = []
@@ -29,7 +30,7 @@ class GraphPattern(BaseGraph, ABC):
     # Add implementations field as a proper Pydantic field
     implementations: dict[str, Any] = Field(default_factory=dict)
 
-    def __init__(self, name=None, description=None, **kwargs):
+    def __init__(self, name: str | None = None, description=None, **kwargs):
         """Initialize the pattern with default name and description.
 
         Args:
@@ -39,7 +40,11 @@ class GraphPattern(BaseGraph, ABC):
         """
         # Use class name as default
         pattern_name = name or self.__class__.__name__.lower().replace("pattern", "")
-        pattern_desc = description or f"{self.__class__.__name__} graph pattern"
+        pattern_desc = (
+            description
+            or f"{
+            self.__class__.__name__} graph pattern"
+        )
 
         # Initialize the base graph
         super().__init__(name=pattern_name, description=pattern_desc, **kwargs)
@@ -57,7 +62,7 @@ class GraphPattern(BaseGraph, ABC):
         self.implementations[node_name] = implementation
         return self
 
-    def build(self):
+    def build(self) -> Any:
         """Build the pattern with structure from class hierarchy.
 
         This automatically:
@@ -119,7 +124,8 @@ class GraphPattern(BaseGraph, ABC):
             # Check if we already have this node
             if name not in self.nodes:
                 try:
-                    # Use instance-specific implementation if available, otherwise use default
+                    # Use instance-specific implementation if available,
+                    # otherwise use default
                     implementation = self.implementations.get(name, default_impl)
                     self.add_node(name, implementation)
                 except Exception as e:
@@ -138,7 +144,8 @@ class GraphPattern(BaseGraph, ABC):
 
     def _add_class_conditionals(self, cls):
         """Add conditional branches from a class to this graph instance."""
-        # Look for pattern_conditionals in the class (renamed from conditionals)
+        # Look for pattern_conditionals in the class (renamed from
+        # conditionals)
         for branch_def in getattr(cls, "pattern_conditionals", []):
             try:
                 source = branch_def.get("source")
@@ -150,7 +157,8 @@ class GraphPattern(BaseGraph, ABC):
                     # Check if we already have a conditional from this source
                     existing_branches = self.get_branches_for_node(source)
 
-                    # Only add if we don't already have a branch with the same condition function
+                    # Only add if we don't already have a branch with the same
+                    # condition function
                     if not any(
                         getattr(branch, "function", None) is condition
                         for branch in existing_branches
@@ -161,7 +169,7 @@ class GraphPattern(BaseGraph, ABC):
             except Exception as e:
                 logger.warning(f"Error adding conditional branch: {e}")
 
-    def get_source_nodes(self):
+    def get_source_nodes(self) -> Any | None:
         """Get nodes that have no incoming edges from regular nodes (excluding START).
 
         Returns:
@@ -199,7 +207,7 @@ class GraphPattern(BaseGraph, ABC):
             Decorator function
         """
 
-        def decorator(pattern_class):
+        def decorator(pattern_class) -> Any:
             name = pattern_name or pattern_class.__name__
             cls._registry[name] = pattern_class
             logger.info(f"Registered pattern: {name}")

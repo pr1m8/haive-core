@@ -25,7 +25,7 @@ class RegistryManager:
             cls._instance = cls()
         return cls._instance
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the registry manager."""
         # Default to memory registry
         self._registry = MemoryRegistry()

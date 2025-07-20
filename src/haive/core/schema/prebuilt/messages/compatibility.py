@@ -1,18 +1,11 @@
-"""
-Compatibility layer for MessagesState implementations.
+"""Compatibility layer for MessagesState implementations.
 
 This module provides adapter classes and utilities that enable backward
 compatibility while adding new features from the enhanced MessagesState
 implementation. It serves as a bridge between the old and new architectures.
 """
 
-from typing import List, Optional, Union
-
-from langchain_core.messages import (
-    AIMessage,
-    HumanMessage,
-    ToolMessage,
-)
+from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 from langgraph.graph import END
 from langgraph.types import Send
 
@@ -27,8 +20,7 @@ from haive.core.schema.prebuilt.messages.utils import (
 
 
 class MessagesStateAdapter:
-    """
-    Adapter that enables old MessagesState instances to use new features
+    """Adapter that enables old MessagesState instances to use new features
     with minimal changes to their API.
 
     This adapter wraps an existing MessagesState instance and provides
@@ -36,18 +28,16 @@ class MessagesStateAdapter:
     MessagesState architecture.
     """
 
-    def __init__(self, messages_state):
-        """
-        Initialize the adapter with an existing MessagesState instance.
+    def __init__(self, messages_state) -> None:
+        """Initialize the adapter with an existing MessagesState instance.
 
         Args:
             messages_state: The MessagesState instance to adapt
         """
         self.state = messages_state
 
-    def get_conversation_rounds(self) -> List[MessageRound]:
-        """
-        Get detailed information about each conversation round.
+    def get_conversation_rounds(self) -> list[MessageRound]:
+        """Get detailed information about each conversation round.
 
         A conversation round typically consists of a human message,
         followed by one or more AI responses and possibly tool calls/responses.
@@ -95,8 +85,7 @@ class MessagesStateAdapter:
         return rounds
 
     def _is_round_complete(self, round_info: MessageRound) -> bool:
-        """
-        Check if a conversation round is complete.
+        """Check if a conversation round is complete.
 
         A round is considered complete if:
         1. There's at least one AI response
@@ -127,8 +116,7 @@ class MessagesStateAdapter:
         return tool_call_ids.issubset(tool_response_ids)
 
     def deduplicate_tool_calls(self) -> int:
-        """
-        Remove duplicate tool calls based on tool call ID.
+        """Remove duplicate tool calls based on tool call ID.
 
         This is useful when the same API call might be made multiple times
         due to agent or LLM quirks.
@@ -175,9 +163,8 @@ class MessagesStateAdapter:
 
         return duplicates_removed
 
-    def get_completed_tool_calls(self) -> List[ToolCallInfo]:
-        """
-        Get all completed tool calls with their responses.
+    def get_completed_tool_calls(self) -> list[ToolCallInfo]:
+        """Get all completed tool calls with their responses.
 
         This method matches tool calls in AI messages with their
         corresponding tool responses.
@@ -226,9 +213,8 @@ class MessagesStateAdapter:
 
         return completed
 
-    def send_tool_calls(self, node_name: str = "tools") -> Union[str, List[Send]]:
-        """
-        Convert tool calls from the last AI message into Send objects for LangGraph routing.
+    def send_tool_calls(self, node_name: str = "tools") -> str | list[Send]:
+        """Convert tool calls from the last AI message into Send objects for LangGraph routing.
 
         Args:
             node_name: The name of the node to send tool calls to
@@ -263,11 +249,10 @@ class MessagesStateAdapter:
     def transform_ai_to_human(
         self,
         preserve_metadata: bool = True,
-        engine_id: Optional[str] = None,
-        engine_name: Optional[str] = None,
+        engine_id: str | None = None,
+        engine_name: str | None = None,
     ) -> None:
-        """
-        Transform AI messages to Human messages in place.
+        """Transform AI messages to Human messages in place.
 
         This is useful for agent-to-agent communication or for
         creating synthetic conversations.

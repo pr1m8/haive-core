@@ -1,5 +1,6 @@
 """Multi-Query Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Multi-Query retriever,
 which generates multiple query variations to improve retrieval coverage
 and find more relevant documents for complex or ambiguous queries.
@@ -95,7 +96,7 @@ class MultiQueryRetrieverConfig(BaseRetrieverConfig):
     )
 
     @validator("num_queries")
-    def validate_num_queries(self, v):
+    def validate_num_queries(self, v) -> Any:
         """Ensure reasonable number of queries."""
         if v < 1:
             raise ValueError("num_queries must be at least 1")
@@ -124,7 +125,7 @@ class MultiQueryRetrieverConfig(BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a Multi-Query retriever from this configuration.
 
         Returns:

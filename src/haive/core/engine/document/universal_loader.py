@@ -7,7 +7,7 @@ handle preferences for optimal loader selection.
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 from urllib.parse import urlparse
 
 from langchain_core.document_loaders.base import BaseLoader
@@ -125,16 +125,15 @@ logger = logging.getLogger(__name__)
 class SmartSourceRegistry:
     """Enhanced source registry with intelligent matching."""
 
-    def __init__(self):
-        self._sources: List[Tuple[type, float, List[str]]] = []
-        self._domain_patterns: Dict[str, List[Tuple[type, float]]] = {}
-        self._extension_patterns: Dict[str, List[Tuple[type, float]]] = {}
-        self._url_patterns: Dict[str, List[Tuple[type, float]]] = {}
+    def __init__(self) -> None:
+        self._sources: list[tuple[type, float, list[str]]] = []
+        self._domain_patterns: dict[str, list[tuple[type, float]]] = {}
+        self._extension_patterns: dict[str, list[tuple[type, float]]] = {}
+        self._url_patterns: dict[str, list[tuple[type, float]]] = {}
         self._register_all_sources()
 
     def _register_all_sources(self):
         """Register all available source types with their patterns and priorities."""
-
         # Web sources with domain-specific matching
         web_sources = [
             # GitHub ecosystem
@@ -273,7 +272,7 @@ class SmartSourceRegistry:
                         self._domain_patterns[pattern] = []
                     self._domain_patterns[pattern].append((source_type, priority))
 
-    def find_best_sources(self, path: str, limit: int = 3) -> List[Tuple[type, float]]:
+    def find_best_sources(self, path: str, limit: int = 3) -> list[tuple[type, float]]:
         """Find the best source types for a given path."""
         candidates = []
 
@@ -325,7 +324,7 @@ class SmartSourceRegistry:
 
         return unique_candidates[:limit]
 
-    def _check_special_cases(self, path: str) -> List[Tuple[type, float]]:
+    def _check_special_cases(self, path: str) -> list[tuple[type, float]]:
         """Check for special case patterns that need custom logic."""
         candidates = []
 
@@ -359,7 +358,7 @@ class SmartSourceRegistry:
 class UniversalDocumentLoader:
     """Universal document loader with intelligent source detection."""
 
-    def __init__(self, credential_manager: Optional[CredentialManager] = None):
+    def __init__(self, credential_manager: CredentialManager | None = None):
         """Initialize the universal loader.
 
         Args:
@@ -372,11 +371,11 @@ class UniversalDocumentLoader:
     def load(
         self,
         path: str,
-        preferences: Optional[Dict[str, Any]] = None,
-        options: Optional[Dict[str, Any]] = None,
-        strategy: Optional[str] = None,
+        preferences: dict[str, Any] | None = None,
+        options: dict[str, Any] | None = None,
+        strategy: str | None = None,
         fallback: bool = True,
-    ) -> Optional[BaseLoader]:
+    ) -> BaseLoader | None:
         """Load documents from any source with intelligent detection.
 
         Args:
@@ -425,7 +424,9 @@ class UniversalDocumentLoader:
         for source_type, confidence in source_candidates:
             try:
                 logger.info(
-                    f"Trying {source_type.__name__} (confidence: {confidence:.2f})"
+                    f"Trying {
+                        source_type.__name__} (confidence: {
+                        confidence:.2f})"
                 )
 
                 # Create source instance
@@ -438,15 +439,16 @@ class UniversalDocumentLoader:
                     loader = source_instance.create_loader()
                     if loader:
                         logger.info(
-                            f"Successfully created loader using {source_type.__name__}"
+                            f"Successfully created loader using {
+                                source_type.__name__}"
                         )
                         return loader
-                    else:
-                        logger.warning(
-                            f"{source_type.__name__} could not create loader"
-                        )
+                    logger.warning(f"{source_type.__name__} could not create loader")
                 else:
-                    logger.warning(f"Could not create {source_type.__name__} instance")
+                    logger.warning(
+                        f"Could not create {
+                            source_type.__name__} instance"
+                    )
 
             except Exception as e:
                 logger.warning(
@@ -466,9 +468,9 @@ class UniversalDocumentLoader:
         self,
         source_type: type,
         path: str,
-        options: Dict[str, Any],
-        preferences: Dict[str, Any],
-    ) -> Optional[Any]:
+        options: dict[str, Any],
+        preferences: dict[str, Any],
+    ) -> Any | None:
         """Create an instance of a specific source type."""
         try:
             # Extract relevant parameters for the source
@@ -483,16 +485,19 @@ class UniversalDocumentLoader:
             return source_type(**source_kwargs)
 
         except Exception as e:
-            logger.error(f"Failed to create {source_type.__name__} instance: {e}")
+            logger.exception(
+                f"Failed to create {
+                    source_type.__name__} instance: {e}"
+            )
             return None
 
     def _extract_source_kwargs(
         self,
         source_type: type,
         path: str,
-        options: Dict[str, Any],
-        preferences: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        options: dict[str, Any],
+        preferences: dict[str, Any],
+    ) -> dict[str, Any]:
         """Extract appropriate kwargs for a source type."""
         kwargs = {"source_path": path}
 
@@ -537,7 +542,7 @@ class UniversalDocumentLoader:
 
         return kwargs
 
-    def analyze_source(self, path: str) -> Dict[str, Any]:
+    def analyze_source(self, path: str) -> dict[str, Any]:
         """Analyze a source and return information about available loaders."""
         source_candidates = self.source_registry.find_best_sources(path, limit=10)
 
@@ -566,7 +571,7 @@ class UniversalDocumentLoader:
                     if candidate_info["requires_auth"]:
                         analysis["supports_auth"] = True
                         analysis["estimated_difficulty"] = "medium"
-            except:
+            except BaseException:
                 candidate_info["requires_auth"] = False
 
             analysis["candidates"].append(candidate_info)
@@ -576,7 +581,7 @@ class UniversalDocumentLoader:
 
         return analysis
 
-    def get_supported_sources(self) -> List[str]:
+    def get_supported_sources(self) -> list[str]:
         """Get list of all supported source types."""
         return [
             source_type.__name__ for source_type, _, _ in self.source_registry._sources
@@ -586,11 +591,11 @@ class UniversalDocumentLoader:
 # Convenience functions
 def load_document(
     path: str,
-    credential_manager: Optional[CredentialManager] = None,
-    preferences: Optional[Dict[str, Any]] = None,
-    options: Optional[Dict[str, Any]] = None,
-    strategy: Optional[str] = None,
-) -> Optional[BaseLoader]:
+    credential_manager: CredentialManager | None = None,
+    preferences: dict[str, Any] | None = None,
+    options: dict[str, Any] | None = None,
+    strategy: str | None = None,
+) -> BaseLoader | None:
     """Convenience function to load a document from any source.
 
     Args:
@@ -607,7 +612,7 @@ def load_document(
     return loader.load(path, preferences, options, strategy)
 
 
-def analyze_document_source(path: str) -> Dict[str, Any]:
+def analyze_document_source(path: str) -> dict[str, Any]:
     """Analyze a document source and return information about available loaders.
 
     Args:
@@ -622,8 +627,8 @@ def analyze_document_source(path: str) -> Dict[str, Any]:
 
 # Export main components
 __all__ = [
-    "UniversalDocumentLoader",
     "SmartSourceRegistry",
-    "load_document",
+    "UniversalDocumentLoader",
     "analyze_document_source",
+    "load_document",
 ]

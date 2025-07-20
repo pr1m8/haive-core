@@ -32,7 +32,8 @@ Usage:
 """
 
 import inspect
-from typing import Any, Callable, Sequence
+from collections.abc import Callable, Sequence
+from typing import Any
 
 from langchain_core.tools import BaseTool, BaseToolkit, StructuredTool
 from pydantic import BaseModel, Field, model_validator
@@ -111,7 +112,8 @@ class ToolList(NamedDict):
         Returns:
             Processed data with expanded tools.
         """
-        # If this is a sequence without proper names, convert to dictionary form
+        # If this is a sequence without proper names, convert to dictionary
+        # form
         if isinstance(data, list | tuple):
             # Expand toolkits and extract tools
             expanded_tools = []
@@ -127,7 +129,8 @@ class ToolList(NamedDict):
                 else:
                     expanded_tools.append(tool)
 
-            # Now let NamedDict's validator build the dictionary from the expanded tools
+            # Now let NamedDict's validator build the dictionary from the
+            # expanded tools
             return expanded_tools
 
         # If we have a dictionary with 'tools' key
@@ -186,7 +189,8 @@ class ToolList(NamedDict):
         # Set tools field to match values for proper typing
         self.tools = list(self.values.values())
 
-        # Process tool-specific operations (expand toolkits but keep model classes as classes)
+        # Process tool-specific operations (expand toolkits but keep model
+        # classes as classes)
         self._process_tool_types()
 
     @classmethod

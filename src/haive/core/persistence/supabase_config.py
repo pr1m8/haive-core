@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 
 # Check if Supabase dependencies are available
 try:
-    from supabase import Client, create_client
+    from supabase import create_client
 
     SUPABASE_AVAILABLE = True
 except ImportError:
@@ -46,7 +46,7 @@ except ImportError:
 DATAFLOW_AVAILABLE = False
 
 
-def get_supabase_client():
+def get_supabase_client() -> Any | None:
     """Lazy import of supabase client to avoid heavy initialization."""
     # Only import when actually needed
     if os.getenv("HAIVE_ENABLE_DATAFLOW") == "1":
@@ -156,7 +156,7 @@ class SupabaseSaver:
         if initialize_schema:
             self.setup()
 
-    def setup(self):
+    def setup(self) -> None:
         """Set up the Supabase database schema.
 
         Creates necessary tables, foreign key relationships, indexes,
@@ -187,9 +187,10 @@ class SupabaseSaver:
             result = self.client.rpc(
                 "execute_sql", {"sql": tables_query.strip()}
             ).execute()
-            existing_tables = set(row.get("table_name") for row in result.data)
+            existing_tables = {row.get("table_name") for row in result.data}
 
-            # Create tables with prefixes to avoid conflicts with existing tables
+            # Create tables with prefixes to avoid conflicts with existing
+            # tables
             if "agent_users" not in existing_tables:
                 # Create users table
                 execute_sql(
@@ -412,7 +413,8 @@ class SupabaseSaver:
                 )
 
             if "agent_checkpoint_data" not in existing_tables:
-                # Create checkpoint_data table for storing the actual checkpoint data
+                # Create checkpoint_data table for storing the actual
+                # checkpoint data
                 execute_sql(
                     """
                 CREATE TABLE IF NOT EXISTS public.agent_checkpoint_data (
@@ -757,7 +759,8 @@ class SupabaseSaver:
             # Ensure thread exists and get internal ID
             internal_thread_id = self.register_thread(thread_id, user_id)
 
-            # Check if parent checkpoint ID needs to be converted to internal ID
+            # Check if parent checkpoint ID needs to be converted to internal
+            # ID
             internal_parent_id = None
             if parent_checkpoint_id:
                 # Look up the parent checkpoint to get its internal ID
@@ -974,7 +977,8 @@ class SupabaseSaver:
                 logger.warning(f"Thread {thread_id} not found")
                 return False
 
-            # Delete thread (cascade will delete checkpoints and checkpoint_data)
+            # Delete thread (cascade will delete checkpoints and
+            # checkpoint_data)
             self.client.table("agent_threads").delete().eq(
                 "id", internal_thread_id
             ).execute()
@@ -1065,7 +1069,10 @@ class SupabaseCheckpointerConfig(CheckpointerConfig):
     checkpointer: Any | None = Field(default=None, exclude=True)
 
     @model_validator(mode="after")
-    def validate_supabase_available(self):
+
+
+    @classmethod
+    def validate_supabase_available(cls) -> Any:
         """Validate that Supabase dependencies are available."""
         if not SUPABASE_AVAILABLE:
             raise ImportError(
@@ -1117,7 +1124,8 @@ class SupabaseCheckpointerConfig(CheckpointerConfig):
         """
         if self.checkpointer is None:
             try:
-                # Create client if needed (optional if using dataflow utilities)
+                # Create client if needed (optional if using dataflow
+                # utilities)
                 client = None
                 if DATAFLOW_AVAILABLE:
                     try:
@@ -1170,7 +1178,8 @@ class SupabaseCheckpointerConfig(CheckpointerConfig):
         if isinstance(checkpointer, SupabaseSaver):
             checkpointer.register_thread(thread_id, self.user_id, name, metadata)
         elif hasattr(checkpointer, "register_thread"):
-            # Fall back to any other implementation that supports register_thread
+            # Fall back to any other implementation that supports
+            # register_thread
             checkpointer.register_thread(thread_id, name, metadata)
 
     def put_checkpoint(

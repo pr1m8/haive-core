@@ -14,7 +14,7 @@ synchronous and asynchronous operation modes.
 """
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any
 
 from langgraph.graph import END, START
 from pydantic import Field
@@ -31,8 +31,6 @@ else:
 
         class Agent(BaseModel):
             """Placeholder Agent class when haive-agents package not available."""
-
-            pass
 
 
 from haive.core.engine.document.config import DocumentOutput
@@ -84,7 +82,7 @@ class DocumentAgent(Agent):
         default=True, description="Whether to include document metadata in the output"
     )
 
-    max_documents: Optional[int] = Field(
+    max_documents: int | None = Field(
         default=None,
         description="Maximum number of documents to load (None for unlimited)",
     )
@@ -129,7 +127,7 @@ class DocumentAgent(Agent):
 
         return graph
 
-    def process_output(self, output: DocumentOutput) -> Dict[str, Any]:
+    def process_output(self, output: DocumentOutput) -> dict[str, Any]:
         """Process the output from the document engine.
 
         This method filters and formats the output based on the agent's configuration.
@@ -223,7 +221,7 @@ class FileDocumentAgent(DocumentAgent):
     name: str = "File Document Agent"
 
     # File-specific options
-    file_path: Optional[Union[str, Path]] = Field(
+    file_path: str | Path | None = Field(
         default=None, description="Path to the file to load"
     )
 
@@ -258,7 +256,7 @@ class WebDocumentAgent(DocumentAgent):
     name: str = "Web Document Agent"
 
     # Web-specific options
-    url: Optional[str] = Field(default=None, description="URL to load")
+    url: str | None = Field(default=None, description="URL to load")
 
     def setup_agent(self) -> None:
         """Set up the agent with a web document engine."""
@@ -290,7 +288,7 @@ class DirectoryDocumentAgent(DocumentAgent):
     name: str = "Directory Document Agent"
 
     # Directory-specific options
-    directory_path: Optional[Union[str, Path]] = Field(
+    directory_path: str | Path | None = Field(
         default=None, description="Path to the directory to load"
     )
 
@@ -298,11 +296,11 @@ class DirectoryDocumentAgent(DocumentAgent):
         default=True, description="Whether to recursively load files"
     )
 
-    include_patterns: Optional[List[str]] = Field(
+    include_patterns: list[str] | None = Field(
         default=None, description="List of file patterns to include"
     )
 
-    exclude_patterns: Optional[List[str]] = Field(
+    exclude_patterns: list[str] | None = Field(
         default=None, description="List of file patterns to exclude"
     )
 
@@ -326,8 +324,8 @@ class DirectoryDocumentAgent(DocumentAgent):
 
 # Export agent classes
 __all__ = [
+    "DirectoryDocumentAgent",
     "DocumentAgent",
     "FileDocumentAgent",
     "WebDocumentAgent",
-    "DirectoryDocumentAgent",
 ]

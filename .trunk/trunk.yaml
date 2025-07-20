@@ -22,16 +22,16 @@ lint:
     - shfmt@3.6.0
     - bandit@1.8.6
     - black@25.1.0
-    - checkov@3.2.450
+    - checkov@3.2.451
     - git-diff-check
     - isort@6.0.1
     - markdownlint@0.45.0
     - osv-scanner@2.0.3
     - oxipng@9.1.5
     - prettier@3.6.2
-    - ruff@0.12.3
+    - ruff@0.12.4
     - taplo@0.9.3
-    - trufflehog@3.89.2
+    - trufflehog@3.90.0
     - yamllint@1.37.1
 actions:
   enabled:

@@ -1,5 +1,6 @@
 """Metal Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Metal retriever,
 which uses Metal's vector search infrastructure for high-performance
 similarity search. Metal provides a managed vector database service
@@ -139,7 +140,7 @@ class MetalRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a Metal retriever from this configuration.
 
         Returns:

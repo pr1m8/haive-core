@@ -5,7 +5,7 @@ ensuring they work with real Haive components.
 """
 
 import json
-from typing import Any, Dict, List
+from typing import Any
 
 import pytest
 from langchain_core.messages import AIMessage, HumanMessage
@@ -37,17 +37,17 @@ class AgentConfig(BaseModel):
 class ComplexState(BaseModel):
     """Complex state for testing various update patterns."""
 
-    messages: List[str] = Field(default_factory=list)
+    messages: list[str] = Field(default_factory=list)
     config: AgentConfig = Field(default_factory=AgentConfig)
-    current_agent: Dict[str, Any] = Field(default_factory=dict)
+    current_agent: dict[str, Any] = Field(default_factory=dict)
     ai_response: str = Field(default="")
     response_confidence: float = Field(default=0.0)
     token_usage: int = Field(default=0)
     iteration_count: int = Field(default=0)
-    conversation_history: List[str] = Field(default_factory=list)
+    conversation_history: list[str] = Field(default_factory=list)
     current_response: str = Field(default="")
     title: str = Field(default="")
-    data: Dict[str, Any] = Field(default_factory=dict)
+    data: dict[str, Any] = Field(default_factory=dict)
 
 
 class TestUpdateFunctions:
@@ -63,7 +63,10 @@ class TestUpdateFunctions:
         """Create complex test state."""
         return ComplexState(
             messages=["Hello", "How are you?"],
-            config=AgentConfig(name="test", temperature=0.8, save_history=True),
+            config=AgentConfig(
+                name="test",
+                temperature=0.8,
+                save_history=True),
             current_agent={"status": "idle", "last_action": "wait"},
             ai_response="Previous response",
             iteration_count=3,
@@ -73,7 +76,10 @@ class TestUpdateFunctions:
     def real_messages_state(self):
         """Create real MessagesState with LangChain messages."""
         return MessagesState(
-            messages=[HumanMessage(content="Hello"), AIMessage(content="Hi there!")]
+            messages=[
+                HumanMessage(
+                    content="Hello"), AIMessage(
+                    content="Hi there!")]
         )
 
     def test_update_simple_field_replace(self, update_lib, complex_state):
@@ -140,7 +146,8 @@ class TestUpdateFunctions:
         expected = {"config": {"temperature": 0.9}}
         assert updates == expected
 
-    def test_update_messages_append_real_state(self, update_lib, real_messages_state):
+    def test_update_messages_append_real_state(
+            self, update_lib, real_messages_state):
         """Test message append with real MessagesState."""
         # Create new message
         new_message = HumanMessage(content="How are you?")
@@ -157,10 +164,12 @@ class TestUpdateFunctions:
         assert updated_messages[1].content == "Hi there!"
         assert updated_messages[2].content == "How are you?"
 
-    def test_update_messages_append_custom_field(self, update_lib, complex_state):
+    def test_update_messages_append_custom_field(
+            self, update_lib, complex_state):
         """Test message append with custom field name."""
         # Update conversation history instead of messages
-        update_history = update_lib.update_messages_append("conversation_history")
+        update_history = update_lib.update_messages_append(
+            "conversation_history")
         updates = update_history("New entry", complex_state, {})
 
         assert updates == {"conversation_history": ["New entry"]}
@@ -231,7 +240,8 @@ class TestUpdateFunctions:
         }
         assert updates == expected
 
-    def test_update_multi_field_partial_result(self, update_lib, complex_state):
+    def test_update_multi_field_partial_result(
+            self, update_lib, complex_state):
         """Test multi-field update with partial result."""
         update_multi = update_lib.update_multi_field(
             {
@@ -290,10 +300,12 @@ class TestUpdateFunctions:
         }
         assert updates == expected
 
-    def test_update_hierarchical_with_projection(self, update_lib, complex_state):
+    def test_update_hierarchical_with_projection(
+            self, update_lib, complex_state):
         """Test hierarchical update with field projection."""
         # Update only specific fields
-        update_agent = update_lib.update_hierarchical("current_agent", ["status"])
+        update_agent = update_lib.update_hierarchical(
+            "current_agent", ["status"])
 
         new_data = {
             "status": "active",
@@ -317,20 +329,25 @@ class TestUpdateFunctions:
         updates = update_agent("simple string", complex_state, {})
         assert updates == {"current_agent": "simple string"}
 
-    def test_all_module_functions_work(self, complex_state, real_messages_state):
+    def test_all_module_functions_work(
+            self, complex_state, real_messages_state):
         """Test that all module-level functions work correctly."""
         # Test all module functions
-        updates1 = update_simple_field("ai_response")("Module test", complex_state, {})
+        updates1 = update_simple_field("ai_response")(
+            "Module test", complex_state, {})
         assert updates1 == {"ai_response": "Module test"}
 
-        updates2 = update_with_path("config.temperature")(0.95, complex_state, {})
+        updates2 = update_with_path(
+            "config.temperature")(0.95, complex_state, {})
         assert updates2 == {"config": {"temperature": 0.95}}
 
         new_msg = HumanMessage(content="Test message")
         updates3 = update_messages_append()(new_msg, real_messages_state, {})
         assert len(updates3["messages"]) == 3
 
-        updates4 = update_type_aware("iteration_count", int)("25", complex_state, {})
+        updates4 = update_type_aware(
+            "iteration_count", int)(
+            "25", complex_state, {})
         assert updates4 == {"iteration_count": 25}
 
         updates5 = update_conditional("config.save_history", "hist", "curr")(
@@ -344,11 +361,14 @@ class TestUpdateFunctions:
         )
         assert updates6 == {"field_a": 1, "field_b": 2}
 
-        updates7 = update_with_transform("title", str.lower)("UPPER", complex_state, {})
+        updates7 = update_with_transform(
+            "title", str.lower)(
+            "UPPER", complex_state, {})
         assert updates7 == {"title": "upper"}
 
         agent_data = {"status": "new"}
-        updates8 = update_hierarchical("current_agent")(agent_data, complex_state, {})
+        updates8 = update_hierarchical("current_agent")(
+            agent_data, complex_state, {})
         expected_agent = {"status": "new", "last_action": "wait"}
         assert updates8 == {"current_agent": expected_agent}
 
@@ -373,14 +393,19 @@ class TestUpdateFunctions:
         assert isinstance(updated_messages[2], AIMessage)
 
         # Test multi-field update with real message data
-        message_result = {"content": "How can I help you?", "type": "ai", "tokens": 6}
+        message_result = {
+            "content": "How can I help you?",
+            "type": "ai",
+            "tokens": 6}
 
         update_multi = update_multi_field(
             {"content": "last_response", "tokens": "response_tokens"}
         )
 
         updates = update_multi(message_result, real_messages_state, {})
-        assert updates == {"last_response": "How can I help you?", "response_tokens": 6}
+        assert updates == {
+            "last_response": "How can I help you?",
+            "response_tokens": 6}
 
     def test_update_functions_error_handling(self, complex_state):
         """Test error handling in update functions."""

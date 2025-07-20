@@ -1,5 +1,6 @@
 """Self-Query Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Self-Query retriever,
 which enables natural language queries to be converted into structured queries
 that can filter on document metadata and perform semantic similarity search.
@@ -109,7 +110,7 @@ class SelfQueryRetrieverConfig(BaseRetrieverConfig):
     k: int = Field(default=4, ge=1, le=100, description="Number of documents to return")
 
     @validator("metadata_field_info", each_item=True)
-    def validate_metadata_field_info(self, v):
+    def validate_metadata_field_info(self, v) -> Any:
         """Validate metadata field info structure."""
         required_keys = {"name", "description", "type"}
         if not isinstance(v, dict):
@@ -124,7 +125,8 @@ class SelfQueryRetrieverConfig(BaseRetrieverConfig):
         valid_types = {"string", "integer", "float", "boolean"}
         if v["type"] not in valid_types:
             raise ValueError(
-                f"Metadata field type must be one of {valid_types}, got {v['type']}"
+                f"Metadata field type must be one of {valid_types}, got {
+                    v['type']}"
             )
 
         return v
@@ -152,7 +154,7 @@ class SelfQueryRetrieverConfig(BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a Self-Query retriever from this configuration.
 
         Returns:

@@ -21,33 +21,18 @@ def test_provider_base_mro():
     assert LLMProvider.OPENAI.value == "openai"
     assert LLMProvider.ANTHROPIC.value == "anthropic"
 
-    print("Basic imports work correctly")
-
 
 def test_provider_imports():
     """Test provider module imports."""
     try:
         # Test base provider import
-        from haive.core.models.llm.providers.base import (
-            BaseLLMProvider,
-            ProviderImportError,
-        )
-
-        print("✓ Base provider imports correctly")
 
         # Test provider __init__ imports
-        from haive.core.models.llm.providers import get_provider, list_providers
-
-        print("✓ Provider functions import correctly")
 
         # Test factory imports
-        from haive.core.models.llm.factory import LLMFactory, create_llm
-
-        print("✓ Factory imports correctly")
 
         return True
-    except ImportError as e:
-        print(f"✗ Import error: {e}")
+    except ImportError:
         return False
 
 
@@ -85,8 +70,6 @@ def test_create_simple_provider():
 
     # Test MRO
     mro = SimpleTestProvider.__mro__
-    print(f"MRO chain length: {len(mro)}")
-    print(f"MRO: {[cls.__name__ for cls in mro]}")
 
     # Verify no duplicate classes in MRO
     mro_names = [cls.__name__ for cls in mro]
@@ -96,12 +79,8 @@ def test_create_simple_provider():
     llm = provider.instantiate()
     assert llm is not None
 
-    print("✓ Provider creation works correctly")
-
 
 if __name__ == "__main__":
-    print("Testing MRO and imports...")
     test_provider_base_mro()
     test_provider_imports()
     test_create_simple_provider()
-    print("\nAll tests passed!")

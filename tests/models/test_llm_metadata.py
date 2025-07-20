@@ -3,7 +3,8 @@
 import json
 import logging
 import os
-from typing import Any, Dict, List
+import sys
+from typing import Any
 
 import pytest
 from rich.console import Console
@@ -121,15 +122,14 @@ def format_pricing(price: float) -> str:
     """Format price as a string."""
     if price == 0:
         return "$0"
-    elif price < 0.0001:
+    if price < 0.0001:
         return f"${price:.8f}"
-    elif price < 0.01:
+    if price < 0.01:
         return f"${price:.6f}"
-    else:
-        return f"${price:.4f}"
+    return f"${price:.4f}"
 
 
-def display_model_metadata_table(models_data: List[Dict[str, Any]]) -> None:
+def display_model_metadata_table(models_data: list[dict[str, Any]]) -> None:
     """Display a rich table with model metadata."""
     table = Table(title="LLM Model Metadata Comparison")
 
@@ -157,7 +157,7 @@ def display_model_metadata_table(models_data: List[Dict[str, Any]]) -> None:
     console.print(table)
 
 
-def display_model_capabilities(models_data: List[Dict[str, Any]]) -> None:
+def display_model_capabilities(models_data: list[dict[str, Any]]) -> None:
     """Display a table of model capabilities."""
     capabilities = [
         "vision",
@@ -180,7 +180,11 @@ def display_model_capabilities(models_data: List[Dict[str, Any]]) -> None:
     # Add columns
     table.add_column("Model", style="cyan")
     for capability in capabilities:
-        table.add_column(capability.replace("_", " ").title(), justify="center")
+        table.add_column(
+            capability.replace(
+                "_",
+                " ").title(),
+            justify="center")
 
     # Add rows
     for data in models_data:
@@ -193,7 +197,7 @@ def display_model_capabilities(models_data: List[Dict[str, Any]]) -> None:
     console.print(table)
 
 
-def display_metadata_tree(model_name: str, metadata: Dict[str, Any]) -> None:
+def display_metadata_tree(model_name: str, metadata: dict[str, Any]) -> None:
     """Display the raw metadata as a tree."""
     tree = Tree(f"[bold cyan]{model_name} Raw Metadata[/bold cyan]")
 
@@ -208,7 +212,7 @@ def display_metadata_tree(model_name: str, metadata: Dict[str, Any]) -> None:
                         f"[yellow]{key}[/yellow] (list, {len(value)} items)"
                     )
                     for i, item in enumerate(value):
-                        if isinstance(item, (dict, list)):
+                        if isinstance(item, dict | list):
                             sub_branch = branch.add(f"[blue]Item {i}[/blue]")
                             _add_dict_to_tree(sub_branch, item)
                         else:
@@ -230,7 +234,8 @@ def available_models():
         if check_env_var(config["env_var"]):
             available.append(config)
         else:
-            logger.warning(f"Skipping {config['name']} - {config['env_var']} not set")
+            logger.warning(
+                f"Skipping {config['name']} - {config['env_var']} not set")
 
     return available
 
@@ -276,7 +281,10 @@ def test_model_metadata_access(model_config):
     display_metadata_tree(model_config["name"], raw_metadata)
 
     # Assert basic data is present
-    console.print(Panel(f"[bold]Basic Metadata for {model_config['name']}[/bold]"))
+    console.print(
+        Panel(
+            f"[bold]Basic Metadata for {
+                model_config['name']}[/bold]"))
 
     context_window = config.get_context_window()
     console.print(f"Context Window: [cyan]{context_window}[/cyan] tokens")
@@ -292,7 +300,9 @@ def test_model_metadata_access(model_config):
 
     # Check pricing
     input_cost, output_cost = config.get_token_pricing()
-    console.print(f"Input cost per token: [green]{format_pricing(input_cost)}[/green]")
+    console.print(
+        f"Input cost per token: [green]{
+            format_pricing(input_cost)}[/green]")
     console.print(
         f"Output cost per token: [green]{format_pricing(output_cost)}[/green]"
     )
@@ -319,7 +329,9 @@ def test_model_metadata_access(model_config):
         icon = "✓" if supported else "✗"
         color = "green" if supported else "red"
         console.print(
-            f"  {icon} [bold {color}]{capability.replace('_', ' ').title()}[/bold {color}]"
+            f"  {icon} [bold {color}]{
+                capability.replace(
+                    '_', ' ').title()}[/bold {color}]"
         )
 
     # Check for deprecation
@@ -335,9 +347,12 @@ def test_model_metadata_access(model_config):
         if search_costs:
             console.print("\n[bold]Web Search Context Costs:[/bold]")
             for size, cost in search_costs.items():
-                console.print(f"  {size}: [yellow]{format_pricing(cost)}[/yellow]")
+                console.print(
+                    f"  {size}: [yellow]{
+                        format_pricing(cost)}[/yellow]")
 
-    # Instead of returning, collect data for the comparison and assert it's valid
+    # Instead of returning, collect data for the comparison and assert it's
+    # valid
     metadata = config.format_metadata_for_display()
 
     # Assert key metadata properties
@@ -386,14 +401,21 @@ def test_compare_models(available_models):
 
     # Display comparison tables
     console.print(
-        Panel(Text("Model Metadata Comparison", style="bold cyan", justify="center"))
+        Panel(
+            Text(
+                "Model Metadata Comparison",
+                style="bold cyan",
+                justify="center"))
     )
     display_model_metadata_table(models_data)
 
     console.print("\n")
     console.print(
         Panel(
-            Text("Model Capabilities Comparison", style="bold cyan", justify="center")
+            Text(
+                "Model Capabilities Comparison",
+                style="bold cyan",
+                justify="center")
         )
     )
     display_model_capabilities(models_data)
@@ -417,7 +439,11 @@ def test_compare_models(available_models):
 if __name__ == "__main__":
     # When run directly, execute specific tests
     console.print(
-        Panel(Text("LLM Metadata Test Suite", style="bold cyan", justify="center"))
+        Panel(
+            Text(
+                "LLM Metadata Test Suite",
+                style="bold cyan",
+                justify="center"))
     )
 
     # Get available models
@@ -427,14 +453,16 @@ if __name__ == "__main__":
             available.append(config)
         else:
             console.print(
-                f"[yellow]Skipping {config['name']} - {config['env_var']} not set[/yellow]"
+                f"[yellow]Skipping {
+                    config['name']} - {
+                    config['env_var']} not set[/yellow]"
             )
 
     if not available:
         console.print(
             "[bold red]No API keys found! Set at least one of AZURE_OPENAI_API_KEY, ANTHROPIC_API_KEY, or MISTRAL_API_KEY[/bold red]"
         )
-        exit(1)
+        sys.exit(1)
 
     # Run individual tests
     model_data = []
@@ -443,7 +471,9 @@ if __name__ == "__main__":
             test_model_metadata_access(model)  # Just call, don't store result
             console.print("\n" + "-" * 80 + "\n")
         except Exception as e:
-            console.print(f"[bold red]Error testing {model['name']}: {e}[/bold red]")
+            console.print(
+                f"[bold red]Error testing {
+                    model['name']}: {e}[/bold red]")
 
     # Run comparison if we have multiple models
     if len(available) >= 2:

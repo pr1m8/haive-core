@@ -142,7 +142,8 @@ Bob Johnson,35,Chicago"""
 
         assert source_info is not None
         assert source_info.source_type in ["web", "url", "website"]
-        assert source_info.category in [SourceCategory.WEB, SourceCategory.WEB_SCRAPING]
+        assert source_info.category in [
+            SourceCategory.WEB, SourceCategory.WEB_SCRAPING]
         assert source_info.confidence > 0.7
 
     @pytest.mark.skip(reason="Requires actual loader implementation")
@@ -253,7 +254,10 @@ class TestDocumentLoadingWithMocks:
 
         # Mock the actual loading
         mock_documents = [Document(page_content="Cached content", metadata={})]
-        mocker.patch.object(loader, "_load_with_retry", return_value=mock_documents)
+        mocker.patch.object(
+            loader,
+            "_load_with_retry",
+            return_value=mock_documents)
 
         # First load
         docs1 = loader.load(str(temp_text_file))
@@ -276,7 +280,10 @@ class TestDocumentLoadingWithMocks:
             from haive.core.engine.document.loaders.path_analyzer import SourceInfo
 
             return LoadingResult(
-                documents=[Document(page_content=f"Content from {path}", metadata={})],
+                documents=[
+                    Document(
+                        page_content=f"Content from {path}",
+                        metadata={})],
                 source_info=SourceInfo(
                     source_type="mock",
                     category=SourceCategory.LOCAL_FILE,
@@ -290,7 +297,10 @@ class TestDocumentLoadingWithMocks:
                 errors=[],
             )
 
-        mocker.patch.object(loader, "load_detailed", side_effect=mock_load_detailed)
+        mocker.patch.object(
+            loader,
+            "load_detailed",
+            side_effect=mock_load_detailed)
 
         sources = ["file1.txt", "file2.txt", "file3.txt"]
         result = loader.load_bulk(sources)

@@ -1,6 +1,6 @@
 """Tests for PathResolver - using real components only."""
 
-from typing import Any, Dict, List
+from typing import Any
 
 import pytest
 from langchain_core.messages import AIMessage, HumanMessage
@@ -21,9 +21,9 @@ class SampleConfig(BaseModel):
 class SampleState(BaseModel):
     """Sample state model with nested structure for testing."""
 
-    messages: List[str] = Field(default_factory=list)
+    messages: list[str] = Field(default_factory=list)
     config: SampleConfig = Field(default_factory=SampleConfig)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class TestPathResolver:
@@ -56,7 +56,10 @@ class TestPathResolver:
     def real_messages_state(self):
         """Create real MessagesState with LangChain messages."""
         return MessagesState(
-            messages=[HumanMessage(content="Hello"), AIMessage(content="Hi there!")]
+            messages=[
+                HumanMessage(
+                    content="Hello"), AIMessage(
+                    content="Hi there!")]
         )
 
     def test_simple_field_from_dict(self, resolver, dict_state):
@@ -70,7 +73,8 @@ class TestPathResolver:
         assert temp == 0.7
 
         # Missing field with default
-        missing = resolver.extract_value(dict_state, "missing", default="default_value")
+        missing = resolver.extract_value(
+            dict_state, "missing", default="default_value")
         assert missing == "default_value"
 
         # Missing field without default
@@ -94,7 +98,8 @@ class TestPathResolver:
         assert metadata == {"session": "test123"}
 
         # Missing field
-        missing = resolver.extract_value(pydantic_state, "nonexistent", default=[])
+        missing = resolver.extract_value(
+            pydantic_state, "nonexistent", default=[])
         assert missing == []
 
     def test_real_messages_state(self, resolver, real_messages_state):
@@ -108,7 +113,8 @@ class TestPathResolver:
         assert messages[1].content == "Hi there!"
 
         # Try to extract non-existent field
-        missing = resolver.extract_value(real_messages_state, "agents", default=[])
+        missing = resolver.extract_value(
+            real_messages_state, "agents", default=[])
         assert missing == []
 
     def test_none_and_empty_handling(self, resolver):
@@ -122,11 +128,13 @@ class TestPathResolver:
         assert result == "default"
 
         # Empty path
-        result = resolver.extract_value({"field": "value"}, "", default="default")
+        result = resolver.extract_value(
+            {"field": "value"}, "", default="default")
         assert result == "default"
 
         # None path
-        result = resolver.extract_value({"field": "value"}, None, default="default")
+        result = resolver.extract_value(
+            {"field": "value"}, None, default="default")
         assert result == "default"
 
     def test_different_object_types(self, resolver):
@@ -150,7 +158,8 @@ class TestPathResolver:
 
         # String (immutable)
         s = "hello"
-        assert resolver.extract_value(s, "field", default="default") == "default"
+        assert resolver.extract_value(
+            s, "field", default="default") == "default"
 
     def test_error_handling(self, resolver):
         """Test error handling in extraction."""
@@ -179,19 +188,18 @@ class TestPathResolver:
     def test_complex_state_extraction(self, resolver):
         """Test extraction from complex nested state."""
         # Create a complex state similar to what nodes use
-        from typing import Optional
 
         from pydantic import BaseModel, Field
 
         class AgentState(BaseModel):
             agent_id: str
-            local_data: Dict[str, Any] = Field(default_factory=dict)
+            local_data: dict[str, Any] = Field(default_factory=dict)
             status: str = "active"
 
         class MultiAgentState(BaseModel):
-            messages: List[str] = Field(default_factory=list)
-            agent_states: Dict[str, AgentState] = Field(default_factory=dict)
-            active_agent: Optional[str] = None
+            messages: list[str] = Field(default_factory=list)
+            agent_states: dict[str, AgentState] = Field(default_factory=dict)
+            active_agent: str | None = None
             global_config: SampleConfig = Field(default_factory=SampleConfig)
 
         state = MultiAgentState(

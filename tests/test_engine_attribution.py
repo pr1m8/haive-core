@@ -125,7 +125,8 @@ class TestEngineAttribution:
         ), f"Expected engine_name to be '{engine_name}', got '{last_message.additional_kwargs['engine_name']}'"
 
         print(
-            f"\n✅ SUCCESS: AIMessage has engine_name = '{last_message.additional_kwargs['engine_name']}'"
+            f"\n✅ SUCCESS: AIMessage has engine_name = '{
+    last_message.additional_kwargs['engine_name']}'"
         )
         print(f"   Message content: {last_message.content[:100]}...")
         print(f"   Additional kwargs: {last_message.additional_kwargs}")
@@ -151,7 +152,8 @@ class TestEngineAttribution:
         )
 
         print(
-            f"\n1. Initial AI message has engine_name: '{ai_message.additional_kwargs.get('engine_name')}'"
+            f"\n1. Initial AI message has engine_name: '{
+    ai_message.additional_kwargs.get('engine_name')}'"
         )
         print(f"2. Initial additional_kwargs: {ai_message.additional_kwargs}")
 

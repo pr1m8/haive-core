@@ -1,5 +1,6 @@
 """Neo4j Vector Store implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Neo4j vector store,
 which combines graph database capabilities with vector similarity search.
 
@@ -122,7 +123,7 @@ class Neo4jVectorStoreConfig(BaseVectorStoreConfig):
     )
 
     @validator("url")
-    def validate_url(self, v):
+    def validate_url(self, v) -> Any:
         """Validate Neo4j URL format."""
         valid_schemes = ["bolt://", "neo4j://", "bolt+s://", "neo4j+s://"]
         if not any(v.startswith(scheme) for scheme in valid_schemes):
@@ -130,7 +131,7 @@ class Neo4jVectorStoreConfig(BaseVectorStoreConfig):
         return v
 
     @validator("search_type")
-    def validate_search_type(self, v):
+    def validate_search_type(self, v) -> Any:
         """Validate search type is supported."""
         valid_types = ["vector", "hybrid"]
         if v not in valid_types:
@@ -138,7 +139,7 @@ class Neo4jVectorStoreConfig(BaseVectorStoreConfig):
         return v
 
     @validator("distance_strategy")
-    def validate_distance_strategy(self, v):
+    def validate_distance_strategy(self, v) -> Any:
         """Validate distance strategy is supported."""
         valid_strategies = ["cosine", "euclidean"]
         if v not in valid_strategies:
@@ -165,7 +166,7 @@ class Neo4jVectorStoreConfig(BaseVectorStoreConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a Neo4j vector store from this configuration.
 
         Returns:

@@ -1,36 +1,33 @@
-"""
-Collection utilities for Haive Core - GetterMixin.
+"""Collection utilities for Haive Core - GetterMixin.
 
 This module includes powerful retrieval and filtering utilities
 for collection classes.
 """
 
-from typing import Any, Callable, Generic, List, Optional, Type, TypeVar
+from collections.abc import Callable
+from typing import Any, Generic, TypeVar
 
 T = TypeVar("T")
 
 
 class GetterMixin(Generic[T]):
-    """
-    A mixin providing rich lookup and filtering capabilities for collections.
+    """A mixin providing rich lookup and filtering capabilities for collections.
 
     This mixin can be added to any collection class that implements
     _get_items() to provide powerful querying capabilities.
     """
 
-    def _get_items(self) -> List[T]:
-        """
-        Get all items from the collection.
+    def _get_items(self) -> list[T]:
+        """Get all items from the collection.
 
         Must be implemented by subclasses.
         """
         raise NotImplementedError("Subclasses must implement _get_items()")
 
     def get_by_attr(
-        self, attr_name: str, value: Any, default: Optional[T] = None
-    ) -> Optional[T]:
-        """
-        Get first item where attribute equals value.
+        self, attr_name: str, value: Any, default: T | None = None
+    ) -> T | None:
+        """Get first item where attribute equals value.
 
         Args:
             attr_name: Attribute name to check
@@ -45,9 +42,8 @@ class GetterMixin(Generic[T]):
                 return item
         return default
 
-    def get_all_by_attr(self, attr_name: str, value: Any) -> List[T]:
-        """
-        Get all items where attribute equals value.
+    def get_all_by_attr(self, attr_name: str, value: Any) -> list[T]:
+        """Get all items where attribute equals value.
 
         Args:
             attr_name: Attribute name to check
@@ -62,9 +58,8 @@ class GetterMixin(Generic[T]):
             if self._has_attr_value(item, attr_name, value)
         ]
 
-    def filter(self, **kwargs) -> List[T]:
-        """
-        Filter items by multiple attribute criteria.
+    def filter(self, **kwargs) -> list[T]:
+        """Filter items by multiple attribute criteria.
 
         Args:
             **kwargs: Field name and value pairs to match
@@ -83,9 +78,8 @@ class GetterMixin(Generic[T]):
                 results.append(item)
         return results
 
-    def find(self, predicate: Callable[[T], bool]) -> Optional[T]:
-        """
-        Find first item matching a custom predicate function.
+    def find(self, predicate: Callable[[T], bool]) -> T | None:
+        """Find first item matching a custom predicate function.
 
         Args:
             predicate: Function that takes item and returns boolean
@@ -98,9 +92,8 @@ class GetterMixin(Generic[T]):
                 return item
         return None
 
-    def find_all(self, predicate: Callable[[T], bool]) -> List[T]:
-        """
-        Find all items matching a custom predicate function.
+    def find_all(self, predicate: Callable[[T], bool]) -> list[T]:
+        """Find all items matching a custom predicate function.
 
         Args:
             predicate: Function that takes item and returns boolean
@@ -110,9 +103,8 @@ class GetterMixin(Generic[T]):
         """
         return [item for item in self._get_items() if predicate(item)]
 
-    def get_by_type(self, type_cls: Type) -> List[T]:
-        """
-        Get all items of specified type.
+    def get_by_type(self, type_cls: type) -> list[T]:
+        """Get all items of specified type.
 
         Args:
             type_cls: Type to match
@@ -122,9 +114,8 @@ class GetterMixin(Generic[T]):
         """
         return [item for item in self._get_items() if isinstance(item, type_cls)]
 
-    def field_values(self, field_name: str) -> List[Any]:
-        """
-        Get all values for a specific field across items.
+    def field_values(self, field_name: str) -> list[Any]:
+        """Get all values for a specific field across items.
 
         Args:
             field_name: Field name to collect
@@ -143,9 +134,8 @@ class GetterMixin(Generic[T]):
                 results.append(None)
         return results
 
-    def first(self, **kwargs) -> Optional[T]:
-        """
-        Get first item matching criteria.
+    def first(self, **kwargs) -> T | None:
+        """Get first item matching criteria.
 
         Args:
             **kwargs: Field name and value pairs to match
@@ -157,8 +147,7 @@ class GetterMixin(Generic[T]):
         return results[0] if results else None
 
     def _has_attr_value(self, item: Any, attr: str, value: Any) -> bool:
-        """
-        Check if item has attribute with specified value.
+        """Check if item has attribute with specified value.
 
         Args:
             item: Item to check

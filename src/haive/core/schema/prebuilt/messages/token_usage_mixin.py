@@ -4,7 +4,7 @@ This module provides a mixin class that adds token usage tracking capabilities
 to MessagesState or any other schema that manages messages.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from langchain_core.messages import AnyMessage
 from pydantic import BaseModel, Field
@@ -37,15 +37,15 @@ class TokenUsageMixin(BaseModel):
     """
 
     # Token usage tracking fields
-    token_usage: Optional[TokenUsage] = Field(
+    token_usage: TokenUsage | None = Field(
         default=None, description="Aggregated token usage for all messages"
     )
 
-    token_usage_history: List[TokenUsage] = Field(
+    token_usage_history: list[TokenUsage] = Field(
         default_factory=list, description="History of token usage per message round"
     )
 
-    def track_message_tokens(self, message: AnyMessage) -> Optional[TokenUsage]:
+    def track_message_tokens(self, message: AnyMessage) -> TokenUsage | None:
         """Extract and track token usage from a message.
 
         Args:
@@ -67,7 +67,7 @@ class TokenUsageMixin(BaseModel):
 
         return usage
 
-    def get_token_usage(self) -> Optional[TokenUsage]:
+    def get_token_usage(self) -> TokenUsage | None:
         """Get the current aggregated token usage."""
         return self.token_usage
 
@@ -87,7 +87,7 @@ class TokenUsageMixin(BaseModel):
         self.token_usage = aggregate_token_usage(self.messages)
         return self.token_usage
 
-    def get_last_token_usage(self) -> Optional[TokenUsage]:
+    def get_last_token_usage(self) -> TokenUsage | None:
         """Get token usage from the last AI message.
 
         This method requires the implementing class to have a 'get_last_ai_message' method.
@@ -113,8 +113,8 @@ class TokenUsageMixin(BaseModel):
         self,
         input_cost_per_1k: float,
         output_cost_per_1k: float,
-        cached_input_cost_per_1k: Optional[float] = None,
-    ) -> Optional[TokenUsage]:
+        cached_input_cost_per_1k: float | None = None,
+    ) -> TokenUsage | None:
         """Calculate costs for current token usage.
 
         Args:
@@ -136,7 +136,7 @@ class TokenUsageMixin(BaseModel):
         )
         return self.token_usage
 
-    def get_token_usage_summary(self) -> Dict[str, Any]:
+    def get_token_usage_summary(self) -> dict[str, Any]:
         """Get a summary of token usage statistics.
 
         Returns:
@@ -186,9 +186,8 @@ class TokenUsageMixin(BaseModel):
         percentage = self.token_usage.capacity_percentage
         if percentage >= 90:
             return "Critical (≥90%)"
-        elif percentage >= 75:
+        if percentage >= 75:
             return "High (≥75%)"
-        elif percentage >= 50:
+        if percentage >= 50:
             return "Moderate (≥50%)"
-        else:
-            return "Low (<50%)"
+        return "Low (<50%)"

@@ -4,7 +4,7 @@ This module provides flexible state schemas for multi-agent systems without
 forcing specific fields like messages or tools.
 """
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional
 
 from pydantic import Field, field_validator, model_validator
 from typing_extensions import TypedDict
@@ -18,10 +18,10 @@ if TYPE_CHECKING:
 class MinimalMultiAgentState(TypedDict):
     """Minimal state for multi-agent coordination - no forced fields."""
 
-    current_agent: Optional[str]
-    completed_agents: List[str]
-    final_result: Optional[Any]
-    error: Optional[str]
+    current_agent: str | None
+    completed_agents: list[str]
+    final_result: Any | None
+    error: str | None
 
 
 class FlexibleMultiAgentState(StateSchema):
@@ -53,11 +53,11 @@ class FlexibleMultiAgentState(StateSchema):
     # AGENT MANAGEMENT - Core fields
     # ========================================================================
 
-    agents: Union[List["Agent"], Dict[str, "Agent"]] = Field(
+    agents: list["Agent"] | dict[str, "Agent"] = Field(
         default_factory=dict, description="Agent instances - can be list or dict"
     )
 
-    agent_states: Dict[str, Dict[str, Any]] = Field(
+    agent_states: dict[str, dict[str, Any]] = Field(
         default_factory=dict, description="Isolated state for each agent"
     )
 
@@ -65,15 +65,15 @@ class FlexibleMultiAgentState(StateSchema):
     # COORDINATION FIELDS - Optional
     # ========================================================================
 
-    current_agent: Optional[str] = Field(
+    current_agent: str | None = Field(
         default=None, description="Currently executing agent"
     )
 
-    completed_agents: List[str] = Field(
+    completed_agents: list[str] = Field(
         default_factory=list, description="Agents that have completed execution"
     )
 
-    agent_outputs: Dict[str, Any] = Field(
+    agent_outputs: dict[str, Any] = Field(
         default_factory=dict, description="Outputs from each agent"
     )
 
@@ -81,16 +81,16 @@ class FlexibleMultiAgentState(StateSchema):
     # FLEXIBLE SHARED CONTEXT - Optional
     # ========================================================================
 
-    shared_context: Dict[str, Any] = Field(
+    shared_context: dict[str, Any] = Field(
         default_factory=dict,
         description="Shared context between agents - completely flexible",
     )
 
     # Optional error tracking
-    error: Optional[str] = Field(default=None, description="Error message if any")
+    error: str | None = Field(default=None, description="Error message if any")
 
     # Optional final result
-    final_result: Optional[Any] = Field(
+    final_result: Any | None = Field(
         default=None, description="Final result from multi-agent execution"
     )
 
@@ -98,7 +98,7 @@ class FlexibleMultiAgentState(StateSchema):
     # STATE TRANSFER CONFIGURATION
     # ========================================================================
 
-    state_transfers: Dict[str, Dict[str, str]] = Field(
+    state_transfers: dict[str, dict[str, str]] = Field(
         default_factory=dict,
         description="Configuration for state transfers between agents",
     )
@@ -110,8 +110,8 @@ class FlexibleMultiAgentState(StateSchema):
     @field_validator("agents", mode="before")
     @classmethod
     def normalize_agents(
-        cls, v: Union[List["Agent"], Dict[str, "Agent"]]
-    ) -> Dict[str, "Agent"]:
+        cls, v: list["Agent"] | dict[str, "Agent"]
+    ) -> dict[str, "Agent"]:
         """Convert list to dict for consistent access."""
         if isinstance(v, list):
             agent_dict = {}
@@ -123,7 +123,10 @@ class FlexibleMultiAgentState(StateSchema):
         return v
 
     @model_validator(mode="after")
-    def initialize_agent_states(self) -> "FlexibleMultiAgentState":
+
+
+    @classmethod
+    def initialize_agent_states(cls) -> "FlexibleMultiAgentState":
         """Initialize empty states for each agent."""
         if isinstance(self.agents, dict):
             for agent_name in self.agents:
@@ -135,11 +138,11 @@ class FlexibleMultiAgentState(StateSchema):
     # STATE MANAGEMENT METHODS
     # ========================================================================
 
-    def get_agent_state(self, agent_name: str) -> Dict[str, Any]:
+    def get_agent_state(self, agent_name: str) -> dict[str, Any]:
         """Get state for specific agent."""
         return self.agent_states.get(agent_name, {})
 
-    def update_agent_state(self, agent_name: str, updates: Dict[str, Any]) -> None:
+    def update_agent_state(self, agent_name: str, updates: dict[str, Any]) -> None:
         """Update state for specific agent."""
         if agent_name not in self.agent_states:
             self.agent_states[agent_name] = {}
@@ -186,11 +189,11 @@ class ContainerMultiAgentState(FlexibleMultiAgentState):
     - Recompilation support
     """
 
-    agent_execution_order: List[str] = Field(
+    agent_execution_order: list[str] = Field(
         default_factory=list, description="Order of agent execution"
     )
 
-    agent_metadata: Dict[str, Dict[str, Any]] = Field(
+    agent_metadata: dict[str, dict[str, Any]] = Field(
         default_factory=dict, description="Metadata about each agent"
     )
 
@@ -199,7 +202,10 @@ class ContainerMultiAgentState(FlexibleMultiAgentState):
     )
 
     @model_validator(mode="after")
-    def setup_execution_order(self) -> "ContainerMultiAgentState":
+
+
+    @classmethod
+    def setup_execution_order(cls) -> "ContainerMultiAgentState":
         """Set default execution order if not provided."""
         if not self.agent_execution_order and isinstance(self.agents, dict):
             self.agent_execution_order = list(self.agents.keys())

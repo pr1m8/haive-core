@@ -1,5 +1,4 @@
-"""
-Validation-Aware Tool State - Enhanced ToolState with validation tracking.
+"""Validation-Aware Tool State - Enhanced ToolState with validation tracking.
 
 This state schema extends ToolState to include validation result tracking
 and computed fields for intelligent routing decisions based on validation
@@ -8,7 +7,7 @@ patterns and history.
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
 from pydantic import Field, computed_field, model_validator
 
@@ -19,8 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class ValidationAwareToolState(ToolState):
-    """
-    Enhanced ToolState with validation result tracking and computed fields.
+    """Enhanced ToolState with validation result tracking and computed fields.
 
     This state schema extends ToolState to include:
     - Validation result tracking from stateful validation nodes
@@ -37,13 +35,13 @@ class ValidationAwareToolState(ToolState):
     """
 
     # Validation tracking fields
-    validation_results: List[ToolCallValidationResult] = Field(
+    validation_results: list[ToolCallValidationResult] = Field(
         default_factory=list, description="Current validation results from tool calls"
     )
-    validation_history: List[ToolCallValidationResult] = Field(
+    validation_history: list[ToolCallValidationResult] = Field(
         default_factory=list, description="Historical validation results"
     )
-    validation_stats: Dict[str, Any] = Field(
+    validation_stats: dict[str, Any] = Field(
         default_factory=dict, description="Computed validation statistics"
     )
 
@@ -77,7 +75,7 @@ class ValidationAwareToolState(ToolState):
 
     @computed_field
     @property
-    def validation_success_by_tool(self) -> Dict[str, float]:
+    def validation_success_by_tool(self) -> dict[str, float]:
         """Validation success rate by tool name."""
         if not self.validation_history:
             return {}
@@ -99,7 +97,7 @@ class ValidationAwareToolState(ToolState):
 
     @computed_field
     @property
-    def validation_success_by_type(self) -> Dict[str, float]:
+    def validation_success_by_type(self) -> dict[str, float]:
         """Validation success rate by validation type."""
         if not self.validation_history:
             return {}
@@ -121,13 +119,13 @@ class ValidationAwareToolState(ToolState):
 
     @computed_field
     @property
-    def recent_validation_failures(self) -> List[ToolCallValidationResult]:
+    def recent_validation_failures(self) -> list[ToolCallValidationResult]:
         """Recent validation failures for analysis."""
         return [result for result in self.validation_results if not result.is_valid]
 
     @computed_field
     @property
-    def problematic_tools(self) -> List[str]:
+    def problematic_tools(self) -> list[str]:
         """Tools with success rates below threshold."""
         return [
             tool_name
@@ -147,10 +145,9 @@ class ValidationAwareToolState(ToolState):
 
         if current_rate < 0.5:
             return "conservative"  # Route to safer options
-        elif current_rate > 0.9 and overall_rate > 0.8:
+        if current_rate > 0.9 and overall_rate > 0.8:
             return "aggressive"  # Route to more complex tools
-        else:
-            return "balanced"  # Standard routing
+        return "balanced"  # Standard routing
 
     @computed_field
     @property
@@ -175,13 +172,15 @@ class ValidationAwareToolState(ToolState):
 
         if recent_rate > older_rate + 0.1:
             return "improving"
-        elif recent_rate < older_rate - 0.1:
+        if recent_rate < older_rate - 0.1:
             return "declining"
-        else:
-            return "stable"
+        return "stable"
 
     @model_validator(mode="after")
-    def update_validation_stats(self) -> "ValidationAwareToolState":
+
+
+    @classmethod
+    def update_validation_stats(cls) -> "ValidationAwareToolState":
         """Update validation statistics after model creation."""
         # Call parent validator
         super().sync_tools_and_update_routes()
@@ -255,7 +254,9 @@ class ValidationAwareToolState(ToolState):
         self._update_validation_statistics()
 
         logger.debug(
-            f"Added validation result for {result.tool_name}: {result.is_valid}"
+            f"Added validation result for {
+                result.tool_name}: {
+                result.is_valid}"
         )
 
     def clear_current_validation_results(self) -> None:
@@ -263,7 +264,7 @@ class ValidationAwareToolState(ToolState):
         self.validation_results = []
         logger.debug("Cleared current validation results")
 
-    def get_validation_summary(self) -> Dict[str, Any]:
+    def get_validation_summary(self) -> dict[str, Any]:
         """Get a summary of validation performance."""
         return {
             "current_success_rate": self.current_validation_success_rate,
@@ -285,7 +286,7 @@ class ValidationAwareToolState(ToolState):
         success_rate = self.validation_success_by_tool[tool_name]
         return success_rate >= self.validation_success_threshold
 
-    def get_preferred_tools(self) -> List[str]:
+    def get_preferred_tools(self) -> list[str]:
         """Get tools with good validation success rates."""
         return [
             tool_name
@@ -293,7 +294,7 @@ class ValidationAwareToolState(ToolState):
             if success_rate >= self.validation_success_threshold
         ]
 
-    def get_routing_recommendation(self, available_destinations: List[str]) -> str:
+    def get_routing_recommendation(self, available_destinations: list[str]) -> str:
         """Get routing recommendation based on validation patterns."""
         strategy = self.recommended_routing_strategy
 
@@ -301,7 +302,7 @@ class ValidationAwareToolState(ToolState):
             # Prefer parser over tool execution
             if "parse_output" in available_destinations:
                 return "parse_output"
-            elif "END" in available_destinations:
+            if "END" in available_destinations:
                 return "END"
         elif strategy == "aggressive":
             # Prefer tool execution over parsing

@@ -1,11 +1,12 @@
 """Graph pattern decorator for registering state graph patterns.
 
+from typing import Any
 This module provides decorators for registering functions as graph patterns
 in the Haive state graph system.
 """
 
 import functools
-from typing import Callable
+from collections.abc import Callable
 
 from haive.core.graph.models.function_ref import FunctionReference
 from haive.core.graph.state_graph.pattern_registry import (
@@ -47,7 +48,7 @@ def register_pattern(name: str, pattern_type: str, **parameters):
         registry.register(pattern)
 
         @functools.wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args, **kwargs) -> Any:
             return func(*args, **kwargs)
 
         return wrapper

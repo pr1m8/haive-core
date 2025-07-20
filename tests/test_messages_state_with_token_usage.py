@@ -10,9 +10,9 @@ and actual LLM interactions (no mocks). Tests cover:
 """
 
 import pytest
-from haive.agents.simple.agent import SimpleAgent
 from langchain_core.messages import AIMessage
 
+from haive.agents.simple.agent import SimpleAgent
 from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.schema.prebuilt.messages.messages_with_token_usage import (
     MessagesStateWithTokenUsage,
@@ -37,7 +37,8 @@ class TestMessagesStateWithTokenUsage:
         """Create a MessagesStateWithTokenUsage instance for testing."""
         return MessagesStateWithTokenUsage()
 
-    def test_basic_token_state_creation(self, token_state: MessagesStateWithTokenUsage):
+    def test_basic_token_state_creation(
+            self, token_state: MessagesStateWithTokenUsage):
         """Test basic creation and initial state of MessagesStateWithTokenUsage."""
         assert token_state.messages == []
         assert token_state.token_usage is None
@@ -121,7 +122,7 @@ class TestMessagesStateWithTokenUsage:
 
         for i, token_data in enumerate(messages_data):
             ai_message = AIMessage(
-                content=f"Response {i+1}", response_metadata={"token_usage": token_data}
+                content=f"Response {i + 1}", response_metadata={"token_usage": token_data}
             )
             token_state.add_message(ai_message)
 
@@ -158,17 +159,19 @@ class TestMessagesStateWithTokenUsage:
 
         summary = token_state.get_token_usage_summary()
 
-        # Expected cost: (1000/1000 * 0.03) + (500/1000 * 0.06) = 0.03 + 0.03 = 0.06
+        # Expected cost: (1000/1000 * 0.03) + (500/1000 * 0.06) = 0.03 + 0.03 =
+        # 0.06
         assert (
             abs(summary["total_cost"] - 0.06) < 0.001
         )  # Allow for floating point precision
 
-    def test_conversation_cost_analysis(self, token_state: MessagesStateWithTokenUsage):
+    def test_conversation_cost_analysis(
+            self, token_state: MessagesStateWithTokenUsage):
         """Test the comprehensive conversation cost analysis."""
         # Add messages to simulate a conversation
         for i in range(3):
             ai_message = AIMessage(
-                content=f"Response {i+1}",
+                content=f"Response {i + 1}",
                 response_metadata={
                     "token_usage": {
                         "prompt_tokens": 100 + (i * 10),
@@ -180,7 +183,9 @@ class TestMessagesStateWithTokenUsage:
             token_state.add_message(ai_message)
 
         # Set some costs
-        token_state.calculate_costs(input_cost_per_1k=0.001, output_cost_per_1k=0.002)
+        token_state.calculate_costs(
+            input_cost_per_1k=0.001,
+            output_cost_per_1k=0.002)
 
         # Get cost analysis
         analysis = token_state.get_conversation_cost_analysis()
@@ -217,7 +222,8 @@ class TestMessagesStateWithTokenUsage:
                 assert state.token_usage is not None or len(state.messages) > 0
 
         # Alternative: Check if agent has conversation memory/state persistence
-        if hasattr(simple_agent, "get_state") or hasattr(simple_agent, "memory"):
+        if hasattr(simple_agent, "get_state") or hasattr(
+                simple_agent, "memory"):
             # Test agent state retrieval methods if they exist
             pass
 
@@ -245,7 +251,8 @@ class TestMessagesStateWithTokenUsage:
         assert token_state.get_system_message() is not None
         assert token_state.token_usage.total_tokens == 33
 
-    def test_empty_state_summary(self, token_state: MessagesStateWithTokenUsage):
+    def test_empty_state_summary(
+            self, token_state: MessagesStateWithTokenUsage):
         """Test token usage summary for empty state."""
         summary = token_state.get_token_usage_summary()
 
@@ -273,10 +280,10 @@ class TestMessagesStateWithTokenUsage:
         response2 = await agent2.arun(query)
 
         # Verify both responded
-        assert response1 is not None and len(response1) > 0
-        assert response2 is not None and len(response2) > 0
+        assert response1 is not None
+        assert len(response1) > 0
+        assert response2 is not None
+        assert len(response2) > 0
 
         # Verbose agent should generally produce longer responses
         # (though this isn't guaranteed due to LLM variability)
-        print(f"Verbose agent response length: {len(response1)}")
-        print(f"Concise agent response length: {len(response2)}")

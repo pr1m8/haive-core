@@ -8,13 +8,12 @@ PostgreSQL store infrastructure.
 import logging
 import uuid
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
+from core.persistence.store.base import SerializableStoreWrapper
+from core.persistence.store.factory import create_store
+from core.persistence.store.types import StoreType
 from pydantic import BaseModel, Field
-
-from ..persistence.store.base import SerializableStoreWrapper
-from ..persistence.store.factory import create_store
-from ..persistence.store.types import StoreType
 
 logger = logging.getLogger(__name__)
 
@@ -28,14 +27,14 @@ class MemoryEntry(BaseModel):
     importance: float = Field(
         default=0.5, ge=0.0, le=1.0, description="Importance score 0-1"
     )
-    tags: List[str] = Field(default_factory=list, description="Memory tags")
-    metadata: Dict[str, Any] = Field(
+    tags: list[str] = Field(default_factory=list, description="Memory tags")
+    metadata: dict[str, Any] = Field(
         default_factory=dict, description="Additional metadata"
     )
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
-    def to_store_value(self) -> Dict[str, Any]:
+    def to_store_value(self) -> dict[str, Any]:
         """Convert to store-compatible dictionary."""
         return {
             "id": self.id,
@@ -49,7 +48,7 @@ class MemoryEntry(BaseModel):
         }
 
     @classmethod
-    def from_store_value(cls, value: Dict[str, Any]) -> "MemoryEntry":
+    def from_store_value(cls, value: dict[str, Any]) -> "MemoryEntry":
         """Create from store dictionary."""
         if "created_at" in value and isinstance(value["created_at"], str):
             value["created_at"] = datetime.fromisoformat(value["created_at"])
@@ -75,9 +74,9 @@ class StoreManager:
 
     def __init__(
         self,
-        store: Optional[SerializableStoreWrapper] = None,
-        default_namespace: Optional[Tuple[str, ...]] = None,
-        store_config: Optional[Dict[str, Any]] = None,
+        store: SerializableStoreWrapper | None = None,
+        default_namespace: tuple[str, ...] | None = None,
+        store_config: dict[str, Any] | None = None,
     ):
         """Initialize the store manager.
 
@@ -95,11 +94,15 @@ class StoreManager:
             self.store = create_store(store_type=StoreType.MEMORY)
 
         self.default_namespace = default_namespace or ("haive", "memories")
-        logger.info(f"StoreManager initialized with store: {type(self.store).__name__}")
+        logger.info(
+            f"StoreManager initialized with store: {
+                type(
+                    self.store).__name__}"
+        )
 
     def _get_namespace(
-        self, namespace: Optional[Tuple[str, ...]] = None
-    ) -> Tuple[str, ...]:
+        self, namespace: tuple[str, ...] | None = None
+    ) -> tuple[str, ...]:
         """Get the namespace to use for operations."""
         return namespace or self.default_namespace
 
@@ -108,10 +111,10 @@ class StoreManager:
         content: str,
         category: str = "general",
         importance: float = 0.5,
-        tags: Optional[List[str]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
-        namespace: Optional[Tuple[str, ...]] = None,
-        memory_id: Optional[str] = None,
+        tags: list[str] | None = None,
+        metadata: dict[str, Any] | None = None,
+        namespace: tuple[str, ...] | None = None,
+        memory_id: str | None = None,
     ) -> str:
         """Store a new memory.
 
@@ -143,8 +146,8 @@ class StoreManager:
         return memory.id
 
     def retrieve_memory(
-        self, memory_id: str, namespace: Optional[Tuple[str, ...]] = None
-    ) -> Optional[MemoryEntry]:
+        self, memory_id: str, namespace: tuple[str, ...] | None = None
+    ) -> MemoryEntry | None:
         """Retrieve a specific memory by ID.
 
         Args:
@@ -165,12 +168,12 @@ class StoreManager:
     def update_memory(
         self,
         memory_id: str,
-        content: Optional[str] = None,
-        category: Optional[str] = None,
-        importance: Optional[float] = None,
-        tags: Optional[List[str]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
-        namespace: Optional[Tuple[str, ...]] = None,
+        content: str | None = None,
+        category: str | None = None,
+        importance: float | None = None,
+        tags: list[str] | None = None,
+        metadata: dict[str, Any] | None = None,
+        namespace: tuple[str, ...] | None = None,
     ) -> bool:
         """Update an existing memory.
 
@@ -211,7 +214,7 @@ class StoreManager:
         return True
 
     def delete_memory(
-        self, memory_id: str, namespace: Optional[Tuple[str, ...]] = None
+        self, memory_id: str, namespace: tuple[str, ...] | None = None
     ) -> bool:
         """Delete a memory.
 
@@ -235,12 +238,12 @@ class StoreManager:
     def search_memories(
         self,
         query: str,
-        category: Optional[str] = None,
-        min_importance: Optional[float] = None,
-        tags: Optional[List[str]] = None,
+        category: str | None = None,
+        min_importance: float | None = None,
+        tags: list[str] | None = None,
         limit: int = 10,
-        namespace: Optional[Tuple[str, ...]] = None,
-    ) -> List[MemoryEntry]:
+        namespace: tuple[str, ...] | None = None,
+    ) -> list[MemoryEntry]:
         """Search memories using semantic search.
 
         Args:
@@ -296,9 +299,9 @@ class StoreManager:
     def list_memories_by_category(
         self,
         category: str,
-        namespace: Optional[Tuple[str, ...]] = None,
+        namespace: tuple[str, ...] | None = None,
         limit: int = 50,
-    ) -> List[MemoryEntry]:
+    ) -> list[MemoryEntry]:
         """List memories by category.
 
         Args:
@@ -317,8 +320,8 @@ class StoreManager:
         )
 
     def get_memory_stats(
-        self, namespace: Optional[Tuple[str, ...]] = None
-    ) -> Dict[str, Any]:
+        self, namespace: tuple[str, ...] | None = None
+    ) -> dict[str, Any]:
         """Get statistics about stored memories.
 
         Args:
@@ -335,7 +338,7 @@ class StoreManager:
             "last_updated": datetime.utcnow().isoformat(),
         }
 
-    def create_user_namespace(self, user_id: str) -> Tuple[str, ...]:
+    def create_user_namespace(self, user_id: str) -> tuple[str, ...]:
         """Create a user-specific namespace.
 
         Args:
@@ -347,8 +350,8 @@ class StoreManager:
         return ("haive", "users", user_id, "memories")
 
     def create_agent_namespace(
-        self, agent_id: str, user_id: Optional[str] = None
-    ) -> Tuple[str, ...]:
+        self, agent_id: str, user_id: str | None = None
+    ) -> tuple[str, ...]:
         """Create an agent-specific namespace.
 
         Args:
@@ -365,9 +368,9 @@ class StoreManager:
     def create_session_namespace(
         self,
         session_id: str,
-        agent_id: Optional[str] = None,
-        user_id: Optional[str] = None,
-    ) -> Tuple[str, ...]:
+        agent_id: str | None = None,
+        user_id: str | None = None,
+    ) -> tuple[str, ...]:
         """Create a session-specific namespace.
 
         Args:
@@ -388,6 +391,6 @@ class StoreManager:
                 "sessions",
                 session_id,
             )
-        elif agent_id:
+        if agent_id:
             return ("haive", "agents", agent_id, "sessions", session_id)
         return ("haive", "sessions", session_id, "memories")

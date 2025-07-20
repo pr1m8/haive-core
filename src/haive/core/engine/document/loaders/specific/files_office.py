@@ -5,7 +5,6 @@ and their open-source equivalents.
 """
 
 import logging
-from typing import Optional
 
 from langchain_core.document_loaders.base import BaseLoader
 
@@ -26,7 +25,7 @@ class WordDocumentSource(LocalFileSource):
         self.file_path = file_path
         self.strategy = strategy
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a Word document loader."""
         try:
             if self.strategy == "docx2txt":
@@ -34,31 +33,30 @@ class WordDocumentSource(LocalFileSource):
 
                 return Docx2txtLoader(file_path=self.file_path)
 
-            elif self.strategy == "unstructured":
+            if self.strategy == "unstructured":
                 from langchain_community.document_loaders import (
                     UnstructuredWordDocumentLoader,
                 )
 
                 return UnstructuredWordDocumentLoader(file_path=self.file_path)
 
-            else:
-                # Default to docx2txt
-                from langchain_community.document_loaders import Docx2txtLoader
+            # Default to docx2txt
+            from langchain_community.document_loaders import Docx2txtLoader
 
-                return Docx2txtLoader(file_path=self.file_path)
+            return Docx2txtLoader(file_path=self.file_path)
 
         except ImportError as e:
             logger.warning(f"Word document loader dependency not available: {e}")
             return None
         except Exception as e:
-            logger.error(f"Failed to create Word document loader: {e}")
+            logger.exception(f"Failed to create Word document loader: {e}")
             return None
 
 
 class ExcelSource(LocalFileSource):
     """Microsoft Excel document source."""
 
-    def __init__(self, file_path: str, sheet_name: Optional[str] = None, **kwargs):
+    def __init__(self, file_path: str, sheet_name: str | None = None, **kwargs):
         super().__init__(
             source_path=file_path,
             file_extensions=[".xlsx", ".xls", ".xlsm", ".xlt", ".xltx"],
@@ -67,7 +65,7 @@ class ExcelSource(LocalFileSource):
         self.file_path = file_path
         self.sheet_name = sheet_name
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create an Excel loader."""
         try:
             from langchain_community.document_loaders import UnstructuredExcelLoader
@@ -80,7 +78,7 @@ class ExcelSource(LocalFileSource):
             logger.warning(f"Excel loader dependency not available: {e}")
             return None
         except Exception as e:
-            logger.error(f"Failed to create Excel loader: {e}")
+            logger.exception(f"Failed to create Excel loader: {e}")
             return None
 
 
@@ -95,7 +93,7 @@ class PowerPointSource(LocalFileSource):
         )
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a PowerPoint loader."""
         try:
             from langchain_community.document_loaders import (
@@ -108,7 +106,7 @@ class PowerPointSource(LocalFileSource):
             logger.warning(f"PowerPoint loader dependency not available: {e}")
             return None
         except Exception as e:
-            logger.error(f"Failed to create PowerPoint loader: {e}")
+            logger.exception(f"Failed to create PowerPoint loader: {e}")
             return None
 
 
@@ -121,7 +119,7 @@ class OpenDocumentTextSource(LocalFileSource):
         )
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create an ODT loader."""
         try:
             from langchain_community.document_loaders import UnstructuredODTLoader
@@ -134,7 +132,7 @@ class OpenDocumentTextSource(LocalFileSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create ODT loader: {e}")
+            logger.exception(f"Failed to create ODT loader: {e}")
             return None
 
 
@@ -147,7 +145,7 @@ class VisioSource(LocalFileSource):
         )
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a Visio loader."""
         try:
             # Try UnstructuredFileLoader as a general fallback
@@ -164,7 +162,7 @@ class VisioSource(LocalFileSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create Visio loader: {e}")
+            logger.exception(f"Failed to create Visio loader: {e}")
             return None
 
 
@@ -175,7 +173,7 @@ class RTFSource(LocalFileSource):
         super().__init__(source_path=file_path, file_extensions=[".rtf"], **kwargs)
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create an RTF loader."""
         try:
             from langchain_community.document_loaders import UnstructuredRTFLoader
@@ -188,16 +186,16 @@ class RTFSource(LocalFileSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create RTF loader: {e}")
+            logger.exception(f"Failed to create RTF loader: {e}")
             return None
 
 
 # Export office file sources
 __all__ = [
-    "WordDocumentSource",
     "ExcelSource",
-    "PowerPointSource",
     "OpenDocumentTextSource",
-    "VisioSource",
+    "PowerPointSource",
     "RTFSource",
+    "VisioSource",
+    "WordDocumentSource",
 ]

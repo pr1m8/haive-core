@@ -5,7 +5,6 @@ and other specialized web sources.
 """
 
 import logging
-from typing import List, Optional
 from urllib.parse import urlparse
 
 from langchain_core.document_loaders.base import BaseLoader
@@ -25,8 +24,8 @@ class HuggingFaceSource(WebUrlSource):
         self,
         repo_id: str,
         repo_type: str = "dataset",  # "dataset", "model", or "space"
-        revision: Optional[str] = None,
-        use_auth_token: Optional[bool] = None,
+        revision: str | None = None,
+        use_auth_token: bool | None = None,
         **kwargs,
     ):
         hf_url = f"https://huggingface.co/{repo_type}s/{repo_id}"
@@ -55,11 +54,11 @@ class HuggingFaceSource(WebUrlSource):
         """HuggingFace may require authentication for private repos."""
         return self.use_auth_token is not None
 
-    def get_credential_requirements(self) -> List[CredentialType]:
+    def get_credential_requirements(self) -> list[CredentialType]:
         """HuggingFace needs API token."""
         return [CredentialType.ACCESS_TOKEN]
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a HuggingFace loader."""
         try:
             if self.repo_type == "dataset":
@@ -80,7 +79,7 @@ class HuggingFaceSource(WebUrlSource):
                     use_auth_token=auth_token if auth_token else self.use_auth_token,
                 )
 
-            elif self.repo_type == "model":
+            if self.repo_type == "model":
                 # For model repos, we might want to load the model card
                 from langchain_community.document_loaders import TextLoader
 
@@ -89,11 +88,10 @@ class HuggingFaceSource(WebUrlSource):
                 )
                 return TextLoader(model_card_url)
 
-            else:
-                # For spaces, load the space description
-                from langchain_community.document_loaders import WebBaseLoader
+            # For spaces, load the space description
+            from langchain_community.document_loaders import WebBaseLoader
 
-                return WebBaseLoader([self.source_path])
+            return WebBaseLoader([self.source_path])
 
         except ImportError:
             logger.warning(
@@ -101,7 +99,7 @@ class HuggingFaceSource(WebUrlSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create HuggingFace loader: {e}")
+            logger.exception(f"Failed to create HuggingFace loader: {e}")
             return None
 
 
@@ -130,7 +128,7 @@ class PubMedSource(WebUrlSource):
             return 0.0
         return 0.9
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a PubMed loader."""
         try:
             from langchain_community.document_loaders import PubMedLoader
@@ -146,14 +144,14 @@ class PubMedSource(WebUrlSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create PubMed loader: {e}")
+            logger.exception(f"Failed to create PubMed loader: {e}")
             return None
 
 
 class RSSFeedSource(WebUrlSource):
     """RSS/Atom feed source."""
 
-    def __init__(self, feed_urls: List[str], max_items: Optional[int] = None, **kwargs):
+    def __init__(self, feed_urls: list[str], max_items: int | None = None, **kwargs):
         super().__init__(source_path=feed_urls[0] if feed_urls else "", **kwargs)
         self.feed_urls = feed_urls
         self.max_items = max_items
@@ -175,7 +173,7 @@ class RSSFeedSource(WebUrlSource):
             return 0.0
         return 0.8
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create an RSS feed loader."""
         try:
             from langchain_community.document_loaders import RSSFeedLoader
@@ -191,14 +189,14 @@ class RSSFeedSource(WebUrlSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create RSS feed loader: {e}")
+            logger.exception(f"Failed to create RSS feed loader: {e}")
             return None
 
 
 class NewsURLSource(WebUrlSource):
     """News article source with specialized extraction."""
 
-    def __init__(self, urls: List[str], **kwargs):
+    def __init__(self, urls: list[str], **kwargs):
         super().__init__(source_path=urls[0] if urls else "", **kwargs)
         self.urls = urls
 
@@ -226,7 +224,7 @@ class NewsURLSource(WebUrlSource):
             return 0.0
         return 0.85
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a news URL loader."""
         try:
             from langchain_community.document_loaders import NewsURLLoader
@@ -239,7 +237,7 @@ class NewsURLSource(WebUrlSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create news URL loader: {e}")
+            logger.exception(f"Failed to create news URL loader: {e}")
             return None
 
 
@@ -266,7 +264,7 @@ class SeleniumWebSource(WebUrlSource):
             return 0.0
         return 0.5  # Lower than other web loaders
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a Selenium web loader."""
         try:
             from langchain_community.document_loaders import SeleniumURLLoader
@@ -282,7 +280,7 @@ class SeleniumWebSource(WebUrlSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create Selenium loader: {e}")
+            logger.exception(f"Failed to create Selenium loader: {e}")
             return None
 
 
@@ -293,7 +291,7 @@ class RecursiveURLSource(WebUrlSource):
         self,
         url: str,
         max_depth: int = 2,
-        exclude_patterns: Optional[List[str]] = None,
+        exclude_patterns: list[str] | None = None,
         **kwargs,
     ):
         super().__init__(source_path=url, **kwargs)
@@ -315,7 +313,7 @@ class RecursiveURLSource(WebUrlSource):
             return 0.0
         return 0.4  # Lower than single-page loaders
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a recursive URL loader."""
         try:
             from langchain_community.document_loaders import RecursiveUrlLoader
@@ -330,7 +328,7 @@ class RecursiveURLSource(WebUrlSource):
             logger.warning("RecursiveUrlLoader not available")
             return None
         except Exception as e:
-            logger.error(f"Failed to create recursive URL loader: {e}")
+            logger.exception(f"Failed to create recursive URL loader: {e}")
             return None
 
 
@@ -338,7 +336,7 @@ class SitemapSource(WebUrlSource):
     """Sitemap-based web crawler source."""
 
     def __init__(
-        self, sitemap_url: str, filter_urls: Optional[List[str]] = None, **kwargs
+        self, sitemap_url: str, filter_urls: list[str] | None = None, **kwargs
     ):
         super().__init__(source_path=sitemap_url, **kwargs)
         self.sitemap_url = sitemap_url
@@ -357,7 +355,7 @@ class SitemapSource(WebUrlSource):
             return 0.0
         return 0.9 if "sitemap" in path.lower() else 0.7
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a sitemap loader."""
         try:
             from langchain_community.document_loaders import SitemapLoader
@@ -371,17 +369,17 @@ class SitemapSource(WebUrlSource):
             logger.warning("SitemapLoader not available")
             return None
         except Exception as e:
-            logger.error(f"Failed to create sitemap loader: {e}")
+            logger.exception(f"Failed to create sitemap loader: {e}")
             return None
 
 
 # Export advanced web sources
 __all__ = [
     "HuggingFaceSource",
+    "NewsURLSource",
     "PubMedSource",
     "RSSFeedSource",
-    "NewsURLSource",
-    "SeleniumWebSource",
     "RecursiveURLSource",
+    "SeleniumWebSource",
     "SitemapSource",
 ]

@@ -91,7 +91,7 @@ class AzureOpenAIEmbeddingConfig(BaseEmbeddingConfig):
 
     @validator("azure_endpoint")
     @classmethod
-    def validate_azure_endpoint(cls, v):
+    def validate_azure_endpoint(cls, v) -> Any:
         """Validate Azure OpenAI endpoint format."""
         if not v:
             raise ValueError(
@@ -109,7 +109,7 @@ class AzureOpenAIEmbeddingConfig(BaseEmbeddingConfig):
 
     @validator("deployment_name")
     @classmethod
-    def validate_deployment_name(cls, v):
+    def validate_deployment_name(cls, v) -> Any:
         """Validate deployment name."""
         if not v or not v.strip():
             raise ValueError("Deployment name is required and cannot be empty")
@@ -117,7 +117,7 @@ class AzureOpenAIEmbeddingConfig(BaseEmbeddingConfig):
 
     @validator("api_version")
     @classmethod
-    def validate_api_version(cls, v):
+    def validate_api_version(cls, v) -> Any:
         """Validate API version format."""
         if not v:
             raise ValueError("API version is required")

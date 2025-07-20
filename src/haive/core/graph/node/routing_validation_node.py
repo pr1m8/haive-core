@@ -1,7 +1,7 @@
 """Validation node that returns Send objects for routing based on validation results."""
 
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from langchain_core.messages import AIMessage
 from langgraph.types import END, Send
@@ -28,12 +28,12 @@ class RoutingValidationNode(BaseModel):
 
     # Node configuration
     name: str = Field(default="routing_validation", description="Node name")
-    engine_name: Optional[str] = Field(
+    engine_name: str | None = Field(
         default=None, description="Name of engine to get tools/schemas from"
     )
 
     # Route mappings from tool routes to node names
-    route_to_node_mapping: Dict[str, str] = Field(
+    route_to_node_mapping: dict[str, str] = Field(
         default_factory=lambda: {
             "langchain_tool": "langchain_tools",
             "function": "langchain_tools",
@@ -58,8 +58,8 @@ class RoutingValidationNode(BaseModel):
     )
 
     def __call__(
-        self, state: Any, config: Optional[Dict[str, Any]] = None
-    ) -> Union[List[Send], str]:
+        self, state: Any, config: dict[str, Any] | None = None
+    ) -> list[Send] | str:
         """Validate tool calls and return Send objects for routing.
 
         Args:
@@ -143,7 +143,7 @@ class RoutingValidationNode(BaseModel):
         # Create routing decision based on validation results
         return self._create_routing_decision(validation_state, tool_calls)
 
-    def _get_tool_calls_from_state(self, state: Any) -> List[Dict[str, Any]]:
+    def _get_tool_calls_from_state(self, state: Any) -> list[dict[str, Any]]:
         """Extract tool calls from state's last AI message."""
         # Use state's method if available
         if hasattr(state, "get_tool_calls"):
@@ -161,14 +161,14 @@ class RoutingValidationNode(BaseModel):
         # Get tool calls from message
         if hasattr(last_message, "tool_calls") and last_message.tool_calls:
             return last_message.tool_calls
-        elif hasattr(last_message, "additional_kwargs"):
+        if hasattr(last_message, "additional_kwargs"):
             return last_message.additional_kwargs.get("tool_calls", [])
 
         return []
 
     def _get_tools_and_routes(
         self, state: Any
-    ) -> tuple[Dict[str, Any], Dict[str, str]]:
+    ) -> tuple[dict[str, Any], dict[str, str]]:
         """Get available tools and their routes from state/engine."""
         available_tools = {}
         tool_routes = {}
@@ -200,7 +200,7 @@ class RoutingValidationNode(BaseModel):
 
         return available_tools, tool_routes
 
-    def _validate_tool_arguments(self, tool: Any, args: Dict[str, Any]) -> List[str]:
+    def _validate_tool_arguments(self, tool: Any, args: dict[str, Any]) -> list[str]:
         """Validate tool arguments and return list of errors."""
         errors = []
 
@@ -210,7 +210,7 @@ class RoutingValidationNode(BaseModel):
                 # Validate with Pydantic schema
                 tool.args_schema.model_validate(args)
             except Exception as e:
-                errors.append(f"Argument validation failed: {str(e)}")
+                errors.append(f"Argument validation failed: {e!s}")
 
         return errors
 
@@ -219,8 +219,8 @@ class RoutingValidationNode(BaseModel):
         return self.route_to_node_mapping.get(route, "langchain_tools")
 
     def _create_routing_decision(
-        self, validation_state: Any, original_tool_calls: List[Dict[str, Any]]
-    ) -> Union[List[Send], str]:
+        self, validation_state: Any, original_tool_calls: list[dict[str, Any]]
+    ) -> list[Send] | str:
         """Create routing decision based on validation results."""
         # Get valid tool calls
         valid_results = validation_state.get_valid_tool_calls()
@@ -255,10 +255,9 @@ class RoutingValidationNode(BaseModel):
         # Return Send objects or agent if none
         if sends:
             return sends
-        elif self.return_to_agent_on_all_failures:
+        if self.return_to_agent_on_all_failures:
             return self.agent_node_name
-        else:
-            return END
+        return END
 
 
 def create_routing_validation_node(**kwargs) -> RoutingValidationNode:

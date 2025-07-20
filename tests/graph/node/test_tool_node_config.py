@@ -1,4 +1,4 @@
-from typing import Annotated, List
+from typing import Annotated
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, ToolMessage
 from langchain_core.tools import StructuredTool
@@ -13,7 +13,8 @@ from haive.core.schema.state_schema import StateSchema
 class CalculatorState(StateSchema):
     """Simple state schema for testing the tool node."""
 
-    messages: List[Annotated[BaseMessage, add_messages]] = Field(default_factory=list)
+    messages: list[Annotated[BaseMessage, add_messages]
+                   ] = Field(default_factory=list)
     result: str = Field(default="")
 
 
@@ -25,16 +26,15 @@ def test_tool_node_config():
         """Perform a simple calculation."""
         if operation == "add":
             return f"The result of {a} + {b} = {a + b}"
-        elif operation == "subtract":
+        if operation == "subtract":
             return f"The result of {a} - {b} = {a - b}"
-        elif operation == "multiply":
+        if operation == "multiply":
             return f"The result of {a} * {b} = {a * b}"
-        elif operation == "divide":
+        if operation == "divide":
             if b == 0:
                 raise ValueError("Cannot divide by zero")
             return f"The result of {a} / {b} = {a / b}"
-        else:
-            raise ValueError(f"Unknown operation: {operation}")
+        raise ValueError(f"Unknown operation: {operation}")
 
     calculator_tool = StructuredTool.from_function(
         func=calculator,
@@ -71,7 +71,6 @@ def test_tool_node_config():
 
     # Execute the tool node
     result = tool_node_config(initial_state)
-    print(result)
     # Check that the result is a Command
     assert isinstance(result, Command)
 
@@ -86,7 +85,9 @@ def test_tool_node_config():
     assert any(isinstance(msg, ToolMessage) for msg in updated_messages)
 
     # Find the tool message and check its content
-    tool_messages = [msg for msg in updated_messages if isinstance(msg, ToolMessage)]
+    tool_messages = [
+        msg for msg in updated_messages if isinstance(
+            msg, ToolMessage)]
     assert len(tool_messages) > 0
     assert "The result of 5 + 3 = 8" in tool_messages[0].content
 

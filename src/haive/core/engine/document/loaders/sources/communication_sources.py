@@ -12,7 +12,7 @@ and productivity platform loaders including:
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import Field
 
@@ -140,13 +140,13 @@ class MatrixSource(RemoteSource):
 
     # Matrix configuration
     homeserver_url: str = Field(..., description="Matrix homeserver URL")
-    access_token: Optional[str] = Field(None, description="Access token")
-    username: Optional[str] = Field(None, description="Username")
-    password: Optional[str] = Field(None, description="Password")
+    access_token: str | None = Field(None, description="Access token")
+    username: str | None = Field(None, description="Username")
+    password: str | None = Field(None, description="Password")
 
     # Room selection
-    room_ids: Optional[List[str]] = Field(None, description="Specific room IDs")
-    room_aliases: Optional[List[str]] = Field(None, description="Room aliases")
+    room_ids: list[str] | None = Field(None, description="Specific room IDs")
+    room_aliases: list[str] | None = Field(None, description="Room aliases")
 
     # Content options
     include_media: bool = Field(True, description="Include media files")
@@ -154,10 +154,10 @@ class MatrixSource(RemoteSource):
     decrypt_events: bool = Field(True, description="Decrypt encrypted events")
 
     # Time range
-    start_date: Optional[datetime] = Field(None, description="Start date")
-    end_date: Optional[datetime] = Field(None, description="End date")
+    start_date: datetime | None = Field(None, description="Start date")
+    end_date: datetime | None = Field(None, description="End date")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -190,7 +190,7 @@ class MatrixSource(RemoteSource):
 
         return kwargs
 
-    def scrape_all(self) -> Dict[str, Any]:
+    def scrape_all(self) -> dict[str, Any]:
         """Scrape all accessible rooms."""
         return {
             "include_joined_rooms": True,
@@ -232,14 +232,14 @@ class RocketChatSource(RemoteSource):
 
     # RocketChat configuration
     server_url: str = Field(..., description="Rocket.Chat server URL")
-    username: Optional[str] = Field(None, description="Username")
-    password: Optional[str] = Field(None, description="Password")
-    user_id: Optional[str] = Field(None, description="User ID")
-    auth_token: Optional[str] = Field(None, description="Auth token")
+    username: str | None = Field(None, description="Username")
+    password: str | None = Field(None, description="Password")
+    user_id: str | None = Field(None, description="User ID")
+    auth_token: str | None = Field(None, description="Auth token")
 
     # Channel/Room selection
-    channels: Optional[List[str]] = Field(None, description="Channel names")
-    private_groups: Optional[List[str]] = Field(None, description="Private group names")
+    channels: list[str] | None = Field(None, description="Channel names")
+    private_groups: list[str] | None = Field(None, description="Private group names")
     direct_messages: bool = Field(False, description="Include direct messages")
 
     # Content options
@@ -247,7 +247,7 @@ class RocketChatSource(RemoteSource):
     include_threads: bool = Field(True, description="Include message threads")
     include_reactions: bool = Field(True, description="Include reactions")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -309,13 +309,13 @@ class MattermostSource(RemoteSource):
 
     # Mattermost configuration
     url: str = Field(..., description="Mattermost server URL")
-    token: Optional[str] = Field(None, description="Personal access token")
-    login_id: Optional[str] = Field(None, description="Login ID")
-    password: Optional[str] = Field(None, description="Password")
+    token: str | None = Field(None, description="Personal access token")
+    login_id: str | None = Field(None, description="Login ID")
+    password: str | None = Field(None, description="Password")
 
     # Team and channel selection
     team_name: str = Field(..., description="Team name")
-    channel_names: Optional[List[str]] = Field(None, description="Specific channels")
+    channel_names: list[str] | None = Field(None, description="Specific channels")
     include_direct_messages: bool = Field(False, description="Include DMs")
     include_group_messages: bool = Field(False, description="Include group messages")
 
@@ -323,7 +323,7 @@ class MattermostSource(RemoteSource):
     include_files: bool = Field(True, description="Include file attachments")
     include_deleted: bool = Field(False, description="Include deleted messages")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -391,14 +391,14 @@ class WeChatSource(RemoteSource):
 
     # Media options
     download_media: bool = Field(False, description="Download media files")
-    media_types: List[str] = Field(
+    media_types: list[str] = Field(
         default=["image", "video", "file"], description="Media types to include"
     )
 
     # Time range
     days_back: int = Field(30, description="Number of days to go back")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -446,10 +446,8 @@ class LineSource(RemoteSource):
     platform: CommunicationPlatform = CommunicationPlatform.LINE
 
     # LINE configuration
-    channel_access_token: Optional[str] = Field(
-        None, description="Channel access token"
-    )
-    channel_secret: Optional[str] = Field(None, description="Channel secret")
+    channel_access_token: str | None = Field(None, description="Channel access token")
+    channel_secret: str | None = Field(None, description="Channel secret")
 
     # Content options
     include_text_messages: bool = Field(True, description="Include text messages")
@@ -458,7 +456,7 @@ class LineSource(RemoteSource):
     include_videos: bool = Field(False, description="Include video messages")
     include_audio: bool = Field(False, description="Include audio messages")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -517,9 +515,9 @@ class ZoomSource(RemoteSource):
     platform: CommunicationPlatform = CommunicationPlatform.ZOOM
 
     # Zoom configuration
-    api_key: Optional[str] = Field(None, description="JWT API key")
-    api_secret: Optional[str] = Field(None, description="JWT API secret")
-    jwt_token: Optional[str] = Field(None, description="JWT token")
+    api_key: str | None = Field(None, description="JWT API key")
+    api_secret: str | None = Field(None, description="JWT API secret")
+    jwt_token: str | None = Field(None, description="JWT token")
 
     # Content selection
     include_meetings: bool = Field(True, description="Include meeting metadata")
@@ -530,12 +528,12 @@ class ZoomSource(RemoteSource):
     include_participants: bool = Field(True, description="Include participant data")
 
     # Filtering
-    user_id: Optional[str] = Field(None, description="Specific user ID")
-    start_date: Optional[datetime] = Field(None, description="Start date filter")
-    end_date: Optional[datetime] = Field(None, description="End date filter")
+    user_id: str | None = Field(None, description="Specific user ID")
+    start_date: datetime | None = Field(None, description="Start date filter")
+    end_date: datetime | None = Field(None, description="End date filter")
     meeting_type: str = Field("all", description="Meeting type filter")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -601,11 +599,11 @@ class TeamsSource(RemoteSource):
     # Teams configuration
     tenant_id: str = Field(..., description="Azure AD tenant ID")
     client_id: str = Field(..., description="Application client ID")
-    client_secret: Optional[str] = Field(None, description="Client secret")
+    client_secret: str | None = Field(None, description="Client secret")
 
     # Team and channel selection
-    team_id: Optional[str] = Field(None, description="Specific team ID")
-    channel_ids: Optional[List[str]] = Field(None, description="Specific channel IDs")
+    team_id: str | None = Field(None, description="Specific team ID")
+    channel_ids: list[str] | None = Field(None, description="Specific channel IDs")
 
     # Content options
     include_messages: bool = Field(True, description="Include channel messages")
@@ -615,10 +613,10 @@ class TeamsSource(RemoteSource):
     include_apps: bool = Field(False, description="Include app interactions")
 
     # Time range
-    start_date: Optional[datetime] = Field(None, description="Start date")
-    end_date: Optional[datetime] = Field(None, description="End date")
+    start_date: datetime | None = Field(None, description="Start date")
+    end_date: datetime | None = Field(None, description="End date")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -684,12 +682,12 @@ class FigmaSource(RemoteSource):
     platform: CommunicationPlatform = CommunicationPlatform.FIGMA
 
     # Figma configuration
-    access_token: Optional[str] = Field(None, description="Personal access token")
+    access_token: str | None = Field(None, description="Personal access token")
 
     # File selection
-    file_keys: Optional[List[str]] = Field(None, description="Specific file keys")
-    team_id: Optional[str] = Field(None, description="Team ID for files")
-    project_id: Optional[str] = Field(None, description="Project ID for files")
+    file_keys: list[str] | None = Field(None, description="Specific file keys")
+    team_id: str | None = Field(None, description="Team ID for files")
+    project_id: str | None = Field(None, description="Project ID for files")
 
     # Content options
     include_comments: bool = Field(True, description="Include file comments")
@@ -701,7 +699,7 @@ class FigmaSource(RemoteSource):
     image_format: str = Field("png", description="Image export format")
     image_scale: float = Field(1.0, description="Image scale factor")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -763,11 +761,11 @@ class MiroSource(RemoteSource):
     platform: CommunicationPlatform = CommunicationPlatform.MIRO
 
     # Miro configuration
-    access_token: Optional[str] = Field(None, description="OAuth access token")
+    access_token: str | None = Field(None, description="OAuth access token")
 
     # Board selection
-    board_ids: Optional[List[str]] = Field(None, description="Specific board IDs")
-    team_id: Optional[str] = Field(None, description="Team ID for boards")
+    board_ids: list[str] | None = Field(None, description="Specific board IDs")
+    team_id: str | None = Field(None, description="Team ID for boards")
 
     # Content options
     include_widgets: bool = Field(True, description="Include board widgets")
@@ -775,7 +773,7 @@ class MiroSource(RemoteSource):
     include_metadata: bool = Field(True, description="Include board metadata")
     export_format: ExportFormat = Field(ExportFormat.JSON, description="Export format")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -836,14 +834,12 @@ class OutlineSource(RemoteSource):
     platform: CommunicationPlatform = CommunicationPlatform.OUTLINE
 
     # Outline configuration
-    api_token: Optional[str] = Field(None, description="API token")
+    api_token: str | None = Field(None, description="API token")
     base_url: str = Field(..., description="Outline instance URL")
 
     # Content selection
-    collection_ids: Optional[List[str]] = Field(
-        None, description="Specific collections"
-    )
-    document_ids: Optional[List[str]] = Field(None, description="Specific documents")
+    collection_ids: list[str] | None = Field(None, description="Specific collections")
+    document_ids: list[str] | None = Field(None, description="Specific documents")
 
     # Options
     include_archived: bool = Field(False, description="Include archived documents")
@@ -852,7 +848,7 @@ class OutlineSource(RemoteSource):
         ExportFormat.MARKDOWN, description="Export format"
     )
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -909,21 +905,21 @@ class BookStackSource(RemoteSource):
 
     # BookStack configuration
     base_url: str = Field(..., description="BookStack instance URL")
-    token_id: Optional[str] = Field(None, description="API token ID")
-    token_secret: Optional[str] = Field(None, description="API token secret")
+    token_id: str | None = Field(None, description="API token ID")
+    token_secret: str | None = Field(None, description="API token secret")
 
     # Content selection
-    shelf_ids: Optional[List[int]] = Field(None, description="Specific shelf IDs")
-    book_ids: Optional[List[int]] = Field(None, description="Specific book IDs")
-    chapter_ids: Optional[List[int]] = Field(None, description="Specific chapter IDs")
-    page_ids: Optional[List[int]] = Field(None, description="Specific page IDs")
+    shelf_ids: list[int] | None = Field(None, description="Specific shelf IDs")
+    book_ids: list[int] | None = Field(None, description="Specific book IDs")
+    chapter_ids: list[int] | None = Field(None, description="Specific chapter IDs")
+    page_ids: list[int] | None = Field(None, description="Specific page IDs")
 
     # Options
     include_attachments: bool = Field(True, description="Include attachments")
     include_images: bool = Field(True, description="Include images")
     export_format: ExportFormat = Field(ExportFormat.HTML, description="Export format")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -989,7 +985,7 @@ class IntercomSource(RemoteSource):
     platform: CommunicationPlatform = CommunicationPlatform.INTERCOM
 
     # Intercom configuration
-    access_token: Optional[str] = Field(None, description="Access token")
+    access_token: str | None = Field(None, description="Access token")
 
     # Data selection
     include_conversations: bool = Field(True, description="Include conversations")
@@ -1000,9 +996,9 @@ class IntercomSource(RemoteSource):
 
     # Filtering
     conversation_state: str = Field("all", description="Conversation state filter")
-    date_range: Optional[int] = Field(30, description="Days to look back")
+    date_range: int | None = Field(30, description="Days to look back")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -1030,7 +1026,7 @@ class IntercomSource(RemoteSource):
 # =============================================================================
 
 
-def get_communication_sources_statistics() -> Dict[str, Any]:
+def get_communication_sources_statistics() -> dict[str, Any]:
     """Get statistics about communication sources."""
     registry = enhanced_registry
 
@@ -1100,17 +1096,12 @@ def validate_communication_sources() -> bool:
         if source_name not in registry._sources:
             missing.append(source_name)
 
-    if missing:
-        print(f"Missing communication sources: {missing}")
-        return False
-
-    print("✅ All essential communication sources registered!")
-    return True
+    return not missing
 
 
 def detect_communication_platform(
     url_or_identifier: str,
-) -> Optional[CommunicationPlatform]:
+) -> CommunicationPlatform | None:
     """Auto-detect communication platform from URL or identifier."""
     lower = url_or_identifier.lower()
 
@@ -1136,4 +1127,3 @@ def detect_communication_platform(
 if __name__ == "__main__":
     validate_communication_sources()
     stats = get_communication_sources_statistics()
-    print(f"Communication Sources Statistics: {stats}")

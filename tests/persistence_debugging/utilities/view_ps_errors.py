@@ -47,7 +47,8 @@ def view_ps_errors():
 
                         # Extract prepared statement errors
                         if "writes" in meta_dict:
-                            for node_name, node_data in meta_dict["writes"].items():
+                            for node_name, node_data in meta_dict["writes"].items(
+                            ):
                                 if isinstance(node_data, dict):
                                     # Check process_response
                                     if "process_response" in node_data:

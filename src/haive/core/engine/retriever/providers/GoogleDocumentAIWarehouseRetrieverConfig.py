@@ -1,4 +1,4 @@
-"""
+"""from typing import Any
 Google Document AI Warehouse Retriever implementation for the Haive framework.
 
 This module provides a configuration class for the Google Document AI Warehouse retriever,
@@ -23,7 +23,7 @@ The implementation integrates with LangChain's GoogleDocumentAIWarehouseRetrieve
 providing a consistent Haive configuration interface with secure GCP credential management.
 """
 
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any
 
 from langchain_core.documents import Document
 from pydantic import Field, SecretStr
@@ -35,8 +35,7 @@ from haive.core.engine.retriever.types import RetrieverType
 
 @BaseRetrieverConfig.register(RetrieverType.GOOGLE_DOCUMENT_AI_WAREHOUSE)
 class GoogleDocumentAIWarehouseRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
-    """
-    Configuration for Google Document AI Warehouse retriever in the Haive framework.
+    """Configuration for Google Document AI Warehouse retriever in the Haive framework.
 
     This retriever uses Google Cloud Document AI Warehouse to provide intelligent
     document processing and retrieval with ML-powered understanding.
@@ -94,7 +93,7 @@ class GoogleDocumentAIWarehouseRetrieverConfig(SecureConfigMixin, BaseRetrieverC
     )
 
     # API configuration with SecureConfigMixin
-    api_key: Optional[SecretStr] = Field(
+    api_key: SecretStr | None = Field(
         default=None,
         description="Service account key path (auto-resolved from GOOGLE_APPLICATION_CREDENTIALS)",
     )
@@ -110,7 +109,7 @@ class GoogleDocumentAIWarehouseRetrieverConfig(SecureConfigMixin, BaseRetrieverC
     )
 
     # Document filtering
-    document_query: Optional[str] = Field(
+    document_query: str | None = Field(
         default=None, description="Structured query for document filtering"
     )
 
@@ -119,26 +118,26 @@ class GoogleDocumentAIWarehouseRetrieverConfig(SecureConfigMixin, BaseRetrieverC
         default=False, description="Whether to require all search terms to match"
     )
 
-    folder_id: Optional[str] = Field(
+    folder_id: str | None = Field(
         default=None, description="Specific folder ID to search within"
     )
 
     # Request metadata
-    request_metadata: Optional[Dict[str, Any]] = Field(
+    request_metadata: dict[str, Any] | None = Field(
         default=None, description="Additional metadata for the search request"
     )
 
-    def get_input_fields(self) -> Dict[str, Tuple[Type, Any]]:
+    def get_input_fields(self) -> dict[str, tuple[type, Any]]:
         """Return input field definitions for Google Document AI Warehouse retriever."""
         return {
             "query": (str, Field(description="Document search query for AI Warehouse")),
         }
 
-    def get_output_fields(self) -> Dict[str, Tuple[Type, Any]]:
+    def get_output_fields(self) -> dict[str, tuple[type, Any]]:
         """Return output field definitions for Google Document AI Warehouse retriever."""
         return {
             "documents": (
-                List[Document],
+                list[Document],
                 Field(
                     default_factory=list,
                     description="Documents from Document AI Warehouse",
@@ -146,9 +145,8 @@ class GoogleDocumentAIWarehouseRetrieverConfig(SecureConfigMixin, BaseRetrieverC
             ),
         }
 
-    def instantiate(self):
-        """
-        Create a Google Document AI Warehouse retriever from this configuration.
+    def instantiate(self) -> Any:
+        """Create a Google Document AI Warehouse retriever from this configuration.
 
         Returns:
             GoogleDocumentAIWarehouseRetriever: Instantiated retriever ready for document search.

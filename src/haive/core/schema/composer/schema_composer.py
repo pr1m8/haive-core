@@ -1,7 +1,7 @@
 """Simplified SchemaComposer using modular mixins."""
 
 import logging
-from typing import Any, List, Type
+from typing import Any
 
 from haive.core.schema.composer.engine.engine_detector import EngineDetectorMixin
 from haive.core.schema.composer.engine.engine_manager import EngineComposerMixin
@@ -34,14 +34,14 @@ class SchemaComposer(EngineComposerMixin, EngineDetectorMixin, FieldManagerMixin
             name: Name for the generated schema class
         """
         self.name = name
-        self.processing_history: List[dict] = []
+        self.processing_history: list[dict] = []
 
         # Initialize all mixins
         super().__init__()
 
         logger.debug(f"SchemaComposer: {name}")
 
-    def add_fields_from_components(self, components: List[Any]) -> "SchemaComposer":
+    def add_fields_from_components(self, components: list[Any]) -> "SchemaComposer":
         """Add fields from a list of components.
 
         Args:
@@ -107,20 +107,29 @@ class SchemaComposer(EngineComposerMixin, EngineDetectorMixin, FieldManagerMixin
         # This will be implemented by extracting from the original SchemaComposer
         # For now, just track that we processed it
         logger.debug(
-            f"Would extract fields from engine: {getattr(engine, 'name', 'unnamed')}"
+            f"Would extract fields from engine: {
+                getattr(
+                    engine,
+                    'name',
+                    'unnamed')}"
         )
         return self
 
-    def add_fields_from_model(self, model: Type) -> "SchemaComposer":
+    def add_fields_from_model(self, model: type) -> "SchemaComposer":
         """Extract fields from a Pydantic model."""
-        # This will be implemented by extracting from the original SchemaComposer
+        # This will be implemented by extracting from the original
+        # SchemaComposer
         logger.debug(f"Would extract fields from model: {model.__name__}")
         return self
 
     def add_fields_from_dict(self, fields_dict: dict) -> "SchemaComposer":
         """Add fields from a dictionary definition."""
-        # This will be implemented by extracting from the original SchemaComposer
-        logger.debug(f"Would add fields from dict with {len(fields_dict)} entries")
+        # This will be implemented by extracting from the original
+        # SchemaComposer
+        logger.debug(
+            f"Would add fields from dict with {
+                len(fields_dict)} entries"
+        )
         return self
 
     def _ensure_standard_fields(self) -> None:
@@ -131,18 +140,18 @@ class SchemaComposer(EngineComposerMixin, EngineDetectorMixin, FieldManagerMixin
             and "runnable_config" not in self.fields
             and "runnable_config" not in self.base_class_fields
         ):
-            from typing import Dict, Optional
+            from typing import Optional
 
             self.add_field(
                 name="runnable_config",
-                field_type=Optional[Dict[str, Any]],
+                field_type=Optional[dict[str, Any]],
                 default=None,
                 description="Runtime configuration for engines",
                 source="auto_added",
             )
             logger.debug("Added standard field 'runnable_config'")
 
-    def build(self) -> Type[StateSchema]:
+    def build(self) -> type[StateSchema]:
         """Build and return the final schema class.
 
         Returns:
@@ -154,7 +163,8 @@ class SchemaComposer(EngineComposerMixin, EngineDetectorMixin, FieldManagerMixin
 
         base_class = self.detected_base_class
 
-        # Auto-add engine management if we have engines and using StateSchema base
+        # Auto-add engine management if we have engines and using StateSchema
+        # base
         if self.engines and issubclass(base_class, StateSchema):
             self.add_engine_management()
             logger.debug(
@@ -163,7 +173,11 @@ class SchemaComposer(EngineComposerMixin, EngineDetectorMixin, FieldManagerMixin
 
         # Show what we're building
         logger.debug(
-            f"Building {self.name} with {len(self.fields)} fields using base class {base_class.__name__}"
+            f"Building {
+                self.name} with {
+                len(
+                    self.fields)} fields using base class {
+                base_class.__name__}"
         )
 
         # Create field definitions for the model
@@ -204,8 +218,8 @@ class SchemaComposer(EngineComposerMixin, EngineDetectorMixin, FieldManagerMixin
 
     @classmethod
     def from_components(
-        cls, components: List[Any], name: str = "ComposedState"
-    ) -> Type[StateSchema]:
+        cls, components: list[Any], name: str = "ComposedState"
+    ) -> type[StateSchema]:
         """Create a schema from components using the class method interface.
 
         This maintains backward compatibility with the original API.

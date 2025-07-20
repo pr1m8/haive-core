@@ -7,10 +7,10 @@ handle state projection between the container state and individual agent states.
 import logging
 from typing import Any, TypeVar
 
-from haive.agents.base.agent import Agent
 from langgraph.types import Command
 from pydantic import BaseModel, Field, model_validator
 
+from haive.agents.base.agent import Agent
 from haive.core.graph.common.types import ConfigLike, NodeType, StateLike
 from haive.core.graph.node.base_node_config import BaseNodeConfig
 from haive.core.schema.prebuilt.multi_agent_state import MultiAgentState
@@ -66,7 +66,10 @@ class MultiAgentNode(BaseNodeConfig[MultiAgentState, MultiAgentState]):
     )
 
     @model_validator(mode="after")
-    def validate_config(self) -> "MultiAgentNode":
+
+
+    @classmethod
+    def validate_config(cls) -> "MultiAgentNode":
         """Validate node configuration."""
         if not self.agent_name:
             raise ValueError("agent_name is required")
@@ -76,16 +79,19 @@ class MultiAgentNode(BaseNodeConfig[MultiAgentState, MultiAgentState]):
         self, state: MultiAgentState, config: ConfigLike | None = None
     ) -> Command:
         """Execute agent with state projection."""
-        logger.info(f"{'='*60}")
+        logger.info(f"{'=' * 60}")
         logger.info(f"MULTI-AGENT NODE: {self.name}")
         logger.info(f"Agent: {self.agent_name}")
-        logger.info(f"{'='*60}")
+        logger.info(f"{'=' * 60}")
 
         try:
             # Get agent from state
             agent = self._get_agent(state)
             if not agent:
-                raise ValueError(f"Agent '{self.agent_name}' not found in state")
+                raise ValueError(
+                    f"Agent '{
+                        self.agent_name}' not found in state"
+                )
 
             # Set as active agent
             state.set_active_agent(self.agent_name)
@@ -274,7 +280,9 @@ class StateProjectionNode(BaseNodeConfig[TInput, TOutput]):
     def __call__(self, state: StateLike, config: ConfigLike | None = None) -> Command:
         """Project state from input to output schema."""
         logger.info(
-            f"Projecting state: {self.input_schema.__name__} → {self.output_schema.__name__}"
+            f"Projecting state: {
+                self.input_schema.__name__} → {
+                self.output_schema.__name__}"
         )
 
         # Extract input data

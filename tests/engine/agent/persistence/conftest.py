@@ -14,8 +14,6 @@ logger = logging.getLogger("pytest_conf")
 
 # Check for PostgreSQL dependencies
 try:
-    from langgraph.checkpoint.postgres import PostgresSaver
-    from psycopg_pool import ConnectionPool
 
     POSTGRES_AVAILABLE = True
 except ImportError:
@@ -24,7 +22,6 @@ except ImportError:
 
 # Check for pytest-asyncio
 try:
-    import pytest_asyncio
 
     ASYNCIO_AVAILABLE = True
 except ImportError:
@@ -88,7 +85,12 @@ def check_postgres_connection(pg_params):
         from psycopg_pool import ConnectionPool
 
         # Create connection string
-        db_uri = f"postgresql://{pg_params['db_user']}:{pg_params['db_pass']}@{pg_params['db_host']}:{pg_params['db_port']}/{pg_params['db_name']}"
+        db_uri = f"postgresql://{
+            pg_params['db_user']}:{
+            pg_params['db_pass']}@{
+            pg_params['db_host']}:{
+                pg_params['db_port']}/{
+                    pg_params['db_name']}"
         if pg_params["ssl_mode"]:
             db_uri += f"?sslmode={pg_params['ssl_mode']}"
 

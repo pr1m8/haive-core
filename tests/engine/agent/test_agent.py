@@ -118,7 +118,8 @@ def mock_derive_schema():
         yield mock
 
 
-# We need to create a proper mock for DynamicGraph to handle START/END constants
+# We need to create a proper mock for DynamicGraph to handle START/END
+# constants
 @pytest.fixture
 def mock_dynamic_graph():
     """Create a comprehensive mock for DynamicGraph class."""
@@ -194,7 +195,8 @@ class TestAgentClass:
                 AgentForTests(agent_config)
 
                 # Should create output directory
-                mock_makedirs.assert_any_call(agent_config.output_dir, exist_ok=True)
+                mock_makedirs.assert_any_call(
+                    agent_config.output_dir, exist_ok=True)
 
                 # Should create state history directory
                 state_history_dir = os.path.join(
@@ -222,7 +224,8 @@ class TestAgentClass:
                 mock_registry.get_instance.return_value = registry_instance
 
                 # Mock get method to return a test engine for "string_engine"
-                string_engine = AugLLMConfig(name="string_engine", model="gpt-4")
+                string_engine = AugLLMConfig(
+                    name="string_engine", model="gpt-4")
 
                 def mock_get(engine_type, name):
                     if name == "string_engine":
@@ -241,7 +244,8 @@ class TestAgentClass:
 
                 agent = AgentForTests(string_config)
 
-                # Should have resolved the string reference to a config (not instantiated)
+                # Should have resolved the string reference to a config (not
+                # instantiated)
                 assert agent.engine_config is not None
                 assert agent.engine_config is string_engine
 
@@ -286,7 +290,8 @@ class TestAgentClass:
             agent_config.node_configs = {"custom_node": node_config}
 
         with patch("haive.core.engine.agent.agent.DynamicGraph", mock_dynamic_graph):
-            # Instead of patching the method at module level, we'll patch the method on the Agent class
+            # Instead of patching the method at module level, we'll patch the
+            # method on the Agent class
             with patch.object(
                 AgentForTests, "_apply_node_configs", MagicMock()
             ) as mock_apply:
@@ -352,7 +357,8 @@ class TestAgentClass:
         mock_app.get_state.return_value = {"state": "test"}
 
         with patch("haive.core.engine.agent.agent.DynamicGraph", mock_dynamic_graph):
-            # Need to patch the ensure_json_serializable function which might be in a different module
+            # Need to patch the ensure_json_serializable function which might
+            # be in a different module
             with patch(
                 "haive.core.utils.pydantic_utils.ensure_json_serializable",
                 return_value={"state": "test"},

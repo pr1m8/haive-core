@@ -8,16 +8,13 @@ from haive.core.engine.document.loaders.sources.remote.base import URLSource
 
 
 class ArxivSource(URLSource):
-    """
-    A source that is an Arxiv source.
-    """
+    """A source that is an Arxiv source."""
 
     source_type: SourceType = Field(default=SourceType.ARXIV)
     url_prefix: str = Field(default="https://arxiv.org/")
 
     def load(self, input: DocumentEngineInputSchema) -> DocumentEngineOutputSchema:
-        """
-                Initialize with search query to find documents in the Arxiv. Supports all arguments of ArxivAPIWrapper.
+        """Initialize with search query to find documents in the Arxiv. Supports all arguments of ArxivAPIWrapper.
 
         Parameters
         :
@@ -27,8 +24,7 @@ class ArxivSource(URLSource):
 
         kwargs (Any)
 
-        Methods
-
+        Methods:
         __init__(query[, doc_content_chars_max])
 
         Initialize with search query to find documents in the Arxiv.
@@ -118,7 +114,7 @@ class ArxivSource(URLSource):
         :
         text_splitter (Optional[TextSplitter]) – TextSplitter instance to use for splitting documents. Defaults to RecursiveCharacterTextSplitter.
 
-        Returns
+        Returns:
         :
         List of Documents.
 

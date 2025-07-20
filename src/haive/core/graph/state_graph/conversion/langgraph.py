@@ -1,5 +1,6 @@
 """LangGraph conversion utilities for Haive graphs.
 
+from typing import Any, Dict
 This module provides functions to convert Haive graphs to and from LangGraph objects.
 """
 
@@ -44,7 +45,9 @@ def convert_to_langgraph(
         schema = dict
 
     console.print(
-        f"Schema: [yellow]{schema.__name__ if hasattr(schema, '__name__') else schema}[/yellow]"
+        f"Schema: [yellow]{
+            schema.__name__ if hasattr(
+                schema, '__name__') else schema}[/yellow]"
     )
 
     # Create StateGraph with schema
@@ -78,7 +81,9 @@ def convert_to_langgraph(
             destinations[key] = value
 
         console.print(
-            f"Branch from [yellow]{source}[/yellow] with conditions: {list(destinations.keys())}"
+            f"Branch from [yellow]{source}[/yellow] with conditions: {
+                list(
+                    destinations.keys())}"
         )
 
         # Add conditional edges based on branch type
@@ -129,7 +134,7 @@ def extract_callable(node: Any, node_name: str) -> Any:
             f"Node [yellow]{node_name}[/yellow]: No callable found, using pass-through"
         )
 
-        def action(state, config=None):
+        def action(state: Dict[str, Any], config: Dict[str, Any] = None):
             return state
 
     # Create parameter-aware wrapper
@@ -149,7 +154,7 @@ def create_parameter_aware_wrapper(func: Any) -> Any:
     sig = inspect.signature(func)
     param_count = len(sig.parameters)
 
-    def wrapper(state, config=None):
+    def wrapper(state: Dict[str, Any], config: Dict[str, Any] = None):
         try:
             # Call with appropriate number of parameters
             result = func(state) if param_count == 1 else func(state, config)

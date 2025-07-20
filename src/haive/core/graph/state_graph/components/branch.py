@@ -30,7 +30,8 @@ Typical usage:
 
 import logging
 import uuid
-from typing import Any, Callable, Dict, Generic, Optional, TypeVar, Union
+from collections.abc import Callable
+from typing import Any, Generic, TypeVar
 
 from langgraph.graph import END
 from langgraph.types import Command, Send
@@ -107,26 +108,29 @@ class Branch(BaseModel, Generic[T, C, O]):
     name: str = Field(default_factory=lambda: f"branch_{uuid.uuid4().hex[:8]}")
 
     # Connection information
-    source_node: Optional[str] = Field(default=None)
-    destinations: Dict[Union[bool, str], str] = Field(
+    source_node: str | None = Field(default=None)
+    destinations: dict[bool | str, str] = Field(
         default_factory=lambda: {True: "continue", False: END}
     )
-    default: Optional[str] = None
+    default: str | None = None
 
     # Evaluation properties
     mode: BranchMode = BranchMode.DIRECT
-    key: Optional[str] = None
+    key: str | None = None
     value: Any = None
-    comparison: Union[ComparisonType, str] = ComparisonType.EQUALS
-    function: Optional[Callable] = None
-    function_ref: Optional[CallableReference] = None
+    comparison: ComparisonType | str = ComparisonType.EQUALS
+    function: Callable | None = None
+    function_ref: CallableReference | None = None
     allow_none: bool = False
     message_key: str = "messages"
 
     model_config = {"arbitrary_types_allowed": True}
 
     @model_validator(mode="after")
-    def setup_function_and_mappings(self) -> "Branch":
+
+
+    @classmethod
+    def setup_function_and_mappings(cls) -> "Branch":
         """Set up function and mappings after initialization.
 
         Resolves function references and ensures proper function setup.
@@ -147,7 +151,10 @@ class Branch(BaseModel, Generic[T, C, O]):
         return self
 
     @model_validator(mode="after")
-    def validate_destinations_and_default(self) -> "Branch":
+
+
+    @classmethod
+    def validate_destinations_and_default(cls) -> "Branch":
         """Validate destinations and set default if needed.
 
         Ensures proper destination mappings and sets reasonable defaults.
@@ -158,7 +165,8 @@ class Branch(BaseModel, Generic[T, C, O]):
         if not self.destinations:
             self.destinations = {True: "continue", False: END}
         elif len(self.destinations) == 1:
-            # If only one destination is provided, map it to True and END to False
+            # If only one destination is provided, map it to True and END to
+            # False
             true_dest = next(iter(self.destinations.values()))
             self.destinations = {True: true_dest, False: END}
         # Only set default if we have multiple destinations and no default is set
@@ -166,12 +174,12 @@ class Branch(BaseModel, Generic[T, C, O]):
         elif (
             len(self.destinations) > 1
             and self.default is None
-            and not all(isinstance(k, bool) for k in self.destinations.keys())
+            and not all(isinstance(k, bool) for k in self.destinations)
         ):
             self.default = END
         return self
 
-    def __call__(self, state: T, config: Optional[C] = None) -> O:
+    def __call__(self, state: T, config: C | None = None) -> O:
         """Make Branch directly callable for use in conditional edges.
 
         This method allows the branch to be used directly as a routing function
@@ -204,7 +212,7 @@ class Branch(BaseModel, Generic[T, C, O]):
             return result
 
         except Exception as e:
-            logger.error(f"Error in branch evaluation: {e}")
+            logger.exception(f"Error in branch evaluation: {e}")
             # Same fallback logic as None
             if self.default is not None:
                 return self.default
@@ -240,27 +248,27 @@ class Branch(BaseModel, Generic[T, C, O]):
                 return self._get_destination(result)
 
             # Handle special message comparisons
-            elif self.comparison == ComparisonType.MESSAGE_CONTAINS:
+            if self.comparison == ComparisonType.MESSAGE_CONTAINS:
                 result = self._check_message_contains(state)
                 return self._get_destination(result)
 
             # Regular field comparison
-            else:
-                field_value = extract_field(state, self.key)
+            field_value = extract_field(state, self.key)
 
-                # Handle None values
-                if field_value is None and not self.allow_none:
-                    logger.warning(
-                        f"Field '{self.key}' is None and allow_none is False"
-                    )
-                    return self.default
+            # Handle None values
+            if field_value is None and not self.allow_none:
+                logger.warning(
+                    f"Field '{
+                        self.key}' is None and allow_none is False"
+                )
+                return self.default
 
-                # Perform comparison
-                result = self._compare(field_value)
-                return self._get_destination(result)
+            # Perform comparison
+            result = self._compare(field_value)
+            return self._get_destination(result)
 
         except Exception as e:
-            logger.error(f"Error evaluating branch: {e}")
+            logger.exception(f"Error evaluating branch: {e}")
             return self.default
 
     def _process_result(self, result: Any, state: T) -> O:
@@ -288,13 +296,13 @@ class Branch(BaseModel, Generic[T, C, O]):
             return BranchResult(command_object=result)
 
         # Handle regular destination lookup
-        if isinstance(result, (bool, str)):
+        if isinstance(result, bool | str):
             return self._get_destination(result)
 
         # Fallback
         return self.default
 
-    def _get_destination(self, result: Union[bool, str]) -> str:
+    def _get_destination(self, result: bool | str) -> str:
         """Get destination from result.
 
         Maps the evaluation result to a destination node name.
@@ -332,37 +340,37 @@ class Branch(BaseModel, Generic[T, C, O]):
         # Perform comparison
         if comparison == ComparisonType.EQUALS:
             return value == target
-        elif comparison == ComparisonType.NOT_EQUALS:
+        if comparison == ComparisonType.NOT_EQUALS:
             return value != target
-        elif comparison == ComparisonType.GREATER_THAN:
+        if comparison == ComparisonType.GREATER_THAN:
             return value > target
-        elif comparison == ComparisonType.LESS_THAN:
+        if comparison == ComparisonType.LESS_THAN:
             return value < target
-        elif comparison == ComparisonType.GREATER_EQUALS:
+        if comparison == ComparisonType.GREATER_EQUALS:
             return value >= target
-        elif comparison == ComparisonType.LESS_EQUALS:
+        if comparison == ComparisonType.LESS_EQUALS:
             return value <= target
-        elif comparison == ComparisonType.IN:
-            return value in target if isinstance(target, (list, tuple, set)) else False
-        elif comparison == ComparisonType.CONTAINS:
+        if comparison == ComparisonType.IN:
+            return value in target if isinstance(target, list | tuple | set) else False
+        if comparison == ComparisonType.CONTAINS:
             if isinstance(value, str):
                 return target in value
-            if isinstance(value, (list, tuple, set, dict)):
+            if isinstance(value, list | tuple | set | dict):
                 return target in value
             return False
-        elif comparison == ComparisonType.IS:
+        if comparison == ComparisonType.IS:
             return value is target
-        elif comparison == ComparisonType.IS_NOT:
+        if comparison == ComparisonType.IS_NOT:
             return value is not target
-        elif comparison == ComparisonType.MATCHES:
+        if comparison == ComparisonType.MATCHES:
             import re
 
             if isinstance(value, str) and isinstance(target, str):
                 return bool(re.match(target, value))
             return False
-        elif comparison == ComparisonType.STARTS_WITH:
+        if comparison == ComparisonType.STARTS_WITH:
             return value.startswith(target) if isinstance(value, str) else False
-        elif comparison == ComparisonType.ENDS_WITH:
+        if comparison == ComparisonType.ENDS_WITH:
             return value.endswith(target) if isinstance(value, str) else False
 
         logger.warning(f"Unknown comparison type: {comparison}")

@@ -1,5 +1,6 @@
 """Amazon Bedrock Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Amazon Bedrock retriever,
 which uses AWS Bedrock's foundation models for retrieval tasks. Bedrock provides
 access to foundation models from various providers (Anthropic, AI21, etc.) and
@@ -149,7 +150,7 @@ class BedrockRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create an Amazon Bedrock retriever from this configuration.
 
         Returns:

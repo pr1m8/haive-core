@@ -236,7 +236,7 @@ class EnhancedNodeFactory:
     - Lifecycle hooks
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the node factory."""
         # Initialize internal tracking
         self._node_configs: dict[str, NodeConfig] = {}
@@ -281,7 +281,8 @@ class EnhancedNodeFactory:
             node_func = self._custom_node_types[config.node_type](config)
         else:
             logger.warning(
-                f"Unknown node type: {config.node_type}. Using processing node."
+                f"Unknown node type: {
+                    config.node_type}. Using processing node."
             )
             node_func = self._create_processing_node(config)
 
@@ -342,8 +343,9 @@ class EnhancedNodeFactory:
                     try:
                         state = config.hooks.before_execution(state) or state
                     except Exception as e:
-                        logger.error(
-                            f"Error in before_execution hook for node {config.name}: {e}"
+                        logger.exception(
+                            f"Error in before_execution hook for node {
+                                config.name}: {e}"
                         )
 
                 # Process inputs
@@ -363,8 +365,9 @@ class EnhancedNodeFactory:
                     # No condition function, just call the node function
                     result = config.function(inputs if inputs else state)
 
-                    # If result is already a routing command, return it directly
-                    if isinstance(result, (str, Send, Command)):
+                    # If result is already a routing command, return it
+                    # directly
+                    if isinstance(result, str | Send | Command):
                         return result
 
                     # Otherwise, look up in condition map or use default
@@ -379,7 +382,8 @@ class EnhancedNodeFactory:
                     and destination not in config.routing.allowed_destinations
                 ):
                     logger.warning(
-                        f"Router {config.name} routed to invalid destination: {destination}. "
+                        f"Router {
+                            config.name} routed to invalid destination: {destination}. "
                         f"Using default: {config.routing.default_destination}"
                     )
                     destination = config.routing.default_destination
@@ -392,15 +396,16 @@ class EnhancedNodeFactory:
                             # Return Command with updated state and destination
                             return Command(update=hook_result, goto=destination)
                     except Exception as e:
-                        logger.error(
-                            f"Error in after_execution hook for node {config.name}: {e}"
+                        logger.exception(
+                            f"Error in after_execution hook for node {
+                                config.name}: {e}"
                         )
 
                 # Return the destination
                 return destination
 
             except Exception as e:
-                logger.error(f"Error in router node {config.name}: {e}")
+                logger.exception(f"Error in router node {config.name}: {e}")
 
                 # Apply error hook if present
                 if config.hooks and config.hooks.on_error:
@@ -412,8 +417,9 @@ class EnhancedNodeFactory:
                                 goto=config.routing.default_destination,
                             )
                     except Exception as hook_error:
-                        logger.error(
-                            f"Error in on_error hook for node {config.name}: {hook_error}"
+                        logger.exception(
+                            f"Error in on_error hook for node {
+                                config.name}: {hook_error}"
                         )
 
                 # Return default destination
@@ -435,7 +441,10 @@ class EnhancedNodeFactory:
         # This is a placeholder for future implementation
         # A composite node would execute a subgraph and return the result
 
-        logger.warning(f"Composite nodes not fully implemented yet: {config.name}")
+        logger.warning(
+            f"Composite nodes not fully implemented yet: {
+                config.name}"
+        )
 
         # For now, just use a processing node
         return self._create_processing_node(config)
@@ -459,8 +468,9 @@ class EnhancedNodeFactory:
                     if modified_state:
                         state = modified_state
                 except Exception as e:
-                    logger.error(
-                        f"Error in before_execution hook for node {config.name}: {e}"
+                    logger.exception(
+                        f"Error in before_execution hook for node {
+                            config.name}: {e}"
                     )
 
             # Process inputs
@@ -515,7 +525,8 @@ class EnhancedNodeFactory:
 
                         if not should_retry:
                             logger.info(
-                                f"Not retrying node {config.name}: condition not met"
+                                f"Not retrying node {
+                                    config.name}: condition not met"
                             )
                             break
 
@@ -529,7 +540,7 @@ class EnhancedNodeFactory:
                             time.sleep(retry_delay)
                     else:
                         # Last attempt failed or no retry policy
-                        logger.error(
+                        logger.exception(
                             f"Node {config.name} execution failed "
                             f"after {retries} retries: {error}"
                         )
@@ -548,8 +559,9 @@ class EnhancedNodeFactory:
                         if hook_result:
                             updated_state = hook_result
                     except Exception as e:
-                        logger.error(
-                            f"Error in after_execution hook for node {config.name}: {e}"
+                        logger.exception(
+                            f"Error in after_execution hook for node {
+                                config.name}: {e}"
                         )
 
                 # Determine next node
@@ -568,8 +580,9 @@ class EnhancedNodeFactory:
                     if hook_result:
                         error_state = hook_result
                 except Exception as hook_error:
-                    logger.error(
-                        f"Error in on_error hook for node {config.name}: {hook_error}"
+                    logger.exception(
+                        f"Error in on_error hook for node {
+                            config.name}: {hook_error}"
                     )
 
             # Determine error routing
@@ -582,7 +595,10 @@ class EnhancedNodeFactory:
 
         except Exception as e:
             # Unexpected error in node execution wrapper
-            logger.error(f"Unexpected error in node {config.name} execution: {e}")
+            logger.exception(
+                f"Unexpected error in node {
+                    config.name} execution: {e}"
+            )
 
             # Return error state
             error_state = dict(state)
@@ -624,8 +640,9 @@ class EnhancedNodeFactory:
                     if modified_state:
                         state = modified_state
                 except Exception as e:
-                    logger.error(
-                        f"Error in before_execution hook for node {config.name}: {e}"
+                    logger.exception(
+                        f"Error in before_execution hook for node {
+                            config.name}: {e}"
                     )
 
             # Process inputs
@@ -680,7 +697,8 @@ class EnhancedNodeFactory:
 
                         if not should_retry:
                             logger.info(
-                                f"Not retrying node {config.name}: condition not met"
+                                f"Not retrying node {
+                                    config.name}: condition not met"
                             )
                             break
 
@@ -694,7 +712,7 @@ class EnhancedNodeFactory:
                             await asyncio.sleep(retry_delay)
                     else:
                         # Last attempt failed or no retry policy
-                        logger.error(
+                        logger.exception(
                             f"Node {config.name} execution failed "
                             f"after {retries} retries: {error}"
                         )
@@ -713,8 +731,9 @@ class EnhancedNodeFactory:
                         if hook_result:
                             updated_state = hook_result
                     except Exception as e:
-                        logger.error(
-                            f"Error in after_execution hook for node {config.name}: {e}"
+                        logger.exception(
+                            f"Error in after_execution hook for node {
+                                config.name}: {e}"
                         )
 
                 # Determine next node
@@ -733,8 +752,9 @@ class EnhancedNodeFactory:
                     if hook_result:
                         error_state = hook_result
                 except Exception as hook_error:
-                    logger.error(
-                        f"Error in on_error hook for node {config.name}: {hook_error}"
+                    logger.exception(
+                        f"Error in on_error hook for node {
+                            config.name}: {hook_error}"
                     )
 
             # Determine error routing
@@ -747,7 +767,10 @@ class EnhancedNodeFactory:
 
         except Exception as e:
             # Unexpected error in node execution wrapper
-            logger.error(f"Unexpected error in node {config.name} execution: {e}")
+            logger.exception(
+                f"Unexpected error in node {
+                    config.name} execution: {e}"
+            )
 
             # Return error state
             error_state = dict(state)
@@ -786,8 +809,9 @@ class EnhancedNodeFactory:
                     if modified_state:
                         state = modified_state
                 except Exception as e:
-                    logger.error(
-                        f"Error in before_execution hook for node {config.name}: {e}"
+                    logger.exception(
+                        f"Error in before_execution hook for node {
+                            config.name}: {e}"
                     )
 
             # Get tools to inject
@@ -846,8 +870,9 @@ class EnhancedNodeFactory:
                     if hook_result:
                         updated_state = hook_result
                 except Exception as e:
-                    logger.error(
-                        f"Error in after_execution hook for node {config.name}: {e}"
+                    logger.exception(
+                        f"Error in after_execution hook for node {
+                            config.name}: {e}"
                     )
 
             # Determine next node
@@ -858,7 +883,7 @@ class EnhancedNodeFactory:
 
         except Exception as e:
             # Error in tool node execution
-            logger.error(f"Error in tool node {config.name}: {e}")
+            logger.exception(f"Error in tool node {config.name}: {e}")
 
             # Apply error hook if present
             error_state = dict(state)
@@ -870,8 +895,9 @@ class EnhancedNodeFactory:
                     if hook_result:
                         error_state = hook_result
                 except Exception as hook_error:
-                    logger.error(
-                        f"Error in on_error hook for node {config.name}: {hook_error}"
+                    logger.exception(
+                        f"Error in on_error hook for node {
+                            config.name}: {hook_error}"
                     )
 
             # Determine error routing
@@ -899,8 +925,9 @@ class EnhancedNodeFactory:
                     if modified_state:
                         state = modified_state
                 except Exception as e:
-                    logger.error(
-                        f"Error in before_execution hook for node {config.name}: {e}"
+                    logger.exception(
+                        f"Error in before_execution hook for node {
+                            config.name}: {e}"
                     )
 
             # Get tools to inject
@@ -957,8 +984,9 @@ class EnhancedNodeFactory:
                     if hook_result:
                         updated_state = hook_result
                 except Exception as e:
-                    logger.error(
-                        f"Error in after_execution hook for node {config.name}: {e}"
+                    logger.exception(
+                        f"Error in after_execution hook for node {
+                            config.name}: {e}"
                     )
 
             # Determine next node
@@ -969,7 +997,7 @@ class EnhancedNodeFactory:
 
         except Exception as e:
             # Error in tool node execution
-            logger.error(f"Error in async tool node {config.name}: {e}")
+            logger.exception(f"Error in async tool node {config.name}: {e}")
 
             # Apply error hook if present
             error_state = dict(state)
@@ -981,8 +1009,9 @@ class EnhancedNodeFactory:
                     if hook_result:
                         error_state = hook_result
                 except Exception as hook_error:
-                    logger.error(
-                        f"Error in on_error hook for node {config.name}: {hook_error}"
+                    logger.exception(
+                        f"Error in on_error hook for node {
+                            config.name}: {hook_error}"
                     )
 
             # Determine error routing
@@ -1023,8 +1052,9 @@ class EnhancedNodeFactory:
                     try:
                         value = mapping.transform_function(value)
                     except Exception as e:
-                        logger.error(
-                            f"Error in input transform for {mapping.source_key}: {e}"
+                        logger.exception(
+                            f"Error in input transform for {
+                                mapping.source_key}: {e}"
                         )
 
                 # Add to inputs
@@ -1122,8 +1152,9 @@ class EnhancedNodeFactory:
                 try:
                     value = mapping.transform_function(value)
                 except Exception as e:
-                    logger.error(
-                        f"Error in output transform for {mapping.source_key}: {e}"
+                    logger.exception(
+                        f"Error in output transform for {
+                            mapping.source_key}: {e}"
                     )
                     continue
 
@@ -1184,7 +1215,10 @@ class EnhancedNodeFactory:
                 if filtered_tools:
                     tool_names = filtered_tools
             except Exception as e:
-                logger.error(f"Error in tool filter for node {config.name}: {e}")
+                logger.exception(
+                    f"Error in tool filter for node {
+                        config.name}: {e}"
+                )
 
         return tool_names
 
@@ -1208,7 +1242,7 @@ class EnhancedNodeFactory:
             schema.model_validate(state)
         except ValidationError as e:
             if validation_mode == ValidationMode.STRICT:
-                raise e
+                raise
             if validation_mode == ValidationMode.WARN:
                 logger.warning(f"State validation warning: {e}")
 
@@ -1354,7 +1388,8 @@ class EnhancedNodeFactory:
             condition_function=condition_function,
         )
 
-        # For conditional routers, the function is simple - it just returns the condition result
+        # For conditional routers, the function is simple - it just returns the
+        # condition result
         def router_func(state: dict[str, Any]) -> Any:
             return condition_function(state)
 

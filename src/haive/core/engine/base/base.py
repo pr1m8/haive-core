@@ -15,7 +15,7 @@ import json
 import logging
 import uuid
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Generic, List, Optional, Tuple, Type, TypeVar
+from typing import Any, Generic, TypeVar
 
 from langchain_core.runnables import RunnableConfig
 from pydantic import BaseModel, ConfigDict, Field, create_model, field_serializer
@@ -27,8 +27,8 @@ from haive.core.engine.base.types import EngineType
 logger = logging.getLogger(__name__)
 
 # Type variables with constraints for input/output types
-TIn = TypeVar("TIn", str, Dict[str, Any], BaseModel)
-TOut = TypeVar("TOut", str, Dict[str, Any], BaseModel, List[Any])
+TIn = TypeVar("TIn", str, dict[str, Any], BaseModel)
+TOut = TypeVar("TOut", str, dict[str, Any], BaseModel, list[Any])
 
 
 class Engine(ABC, BaseModel, Generic[TIn, TOut]):
@@ -53,15 +53,15 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
         description="Name of this engine instance",
     )
     engine_type: EngineType = Field(description="Type of engine")
-    description: Optional[str] = Field(
+    description: str | None = Field(
         default=None, description="Optional description of this engine"
     )
 
     # Schema definitions - used only if explicitly provided
-    input_schema: Optional[Type[BaseModel]] = Field(
+    input_schema: type[BaseModel] | None = Field(
         default=None, description="Input schema for this engine", exclude=True
     )
-    output_schema: Optional[Type[BaseModel]] = Field(
+    output_schema: type[BaseModel] | None = Field(
         default=None, description="Output schema for this engine", exclude=True
     )
 
@@ -69,7 +69,7 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
     version: str = Field(
         default="1.0.0", description="Version of this engine configuration"
     )
-    metadata: Dict[str, Any] = Field(
+    metadata: dict[str, Any] = Field(
         default_factory=dict, description="Additional metadata for this engine"
     )
 
@@ -82,9 +82,8 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
         return engine_type.value
 
     @abstractmethod
-    def get_input_fields(self) -> Dict[str, Tuple[Type, Any]]:
-        """
-        Return input field definitions as field_name -> (type, default) pairs.
+    def get_input_fields(self) -> dict[str, tuple[type, Any]]:
+        """Return input field definitions as field_name -> (type, default) pairs.
         Must be implemented by all engine subclasses.
 
         This can represent BaseModel fields, dictionary keys, or primitive inputs.
@@ -92,12 +91,10 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
         Returns:
             Dictionary mapping field names to (type, default) tuples
         """
-        pass
 
     @abstractmethod
-    def get_output_fields(self) -> Dict[str, Tuple[Type, Any]]:
-        """
-        Return output field definitions as field_name -> (type, default) pairs.
+    def get_output_fields(self) -> dict[str, tuple[type, Any]]:
+        """Return output field definitions as field_name -> (type, default) pairs.
         Must be implemented by all engine subclasses.
 
         This can represent BaseModel fields, dictionary keys, or primitive outputs.
@@ -105,12 +102,10 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
         Returns:
             Dictionary mapping field names to (type, default) tuples
         """
-        pass
 
     @abstractmethod
-    def create_runnable(self, runnable_config: Optional[RunnableConfig] = None) -> Any:
-        """
-        Create a runtime object from this engine config.
+    def create_runnable(self, runnable_config: RunnableConfig | None = None) -> Any:
+        """Create a runtime object from this engine config.
 
         The returned object may implement Invokable/AsyncInvokable,
         but the Engine itself is just a factory/configuration class.
@@ -121,11 +116,9 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
         Returns:
             A runtime object (e.g., LLM, Retriever, etc.)
         """
-        pass
 
-    def get_schema_fields(self) -> Dict[str, Tuple[Type, Any]]:
-        """
-        Get combined schema fields for this engine.
+    def get_schema_fields(self) -> dict[str, tuple[type, Any]]:
+        """Get combined schema fields for this engine.
 
         Combines the input and output fields from get_input_fields() and
         get_output_fields() into a single dictionary. This is useful for
@@ -147,9 +140,8 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
         fields.update(self.get_output_fields())
         return fields
 
-    def derive_input_schema(self) -> Type[BaseModel]:
-        """
-        Derive input schema for this engine as a Pydantic model.
+    def derive_input_schema(self) -> type[BaseModel]:
+        """Derive input schema for this engine as a Pydantic model.
 
         Generates a Pydantic model representing the input schema for this
         engine, based on the fields returned by get_input_fields() or
@@ -175,9 +167,8 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
         # Create and return input schema model
         return create_model(f"{self.__class__.__name__}Input", **fields)
 
-    def derive_output_schema(self) -> Type[BaseModel]:
-        """
-        Derive output schema for this engine as a Pydantic model.
+    def derive_output_schema(self) -> type[BaseModel]:
+        """Derive output schema for this engine as a Pydantic model.
 
         Generates a Pydantic model representing the output schema for this
         engine, based on the fields returned by get_output_fields() or
@@ -203,9 +194,8 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
         # Create and return output schema model
         return create_model(f"{self.__class__.__name__}Output", **fields)
 
-    def instantiate(self, runnable_config: Optional[RunnableConfig] = None) -> Any:
-        """
-        Instantiate the engine (alias for create_runnable).
+    def instantiate(self, runnable_config: RunnableConfig | None = None) -> Any:
+        """Instantiate the engine (alias for create_runnable).
 
         This is a convenience method that provides a more intuitive name for
         the create_runnable method, particularly in contexts where "instantiate"
@@ -226,8 +216,7 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
         return self.create_runnable(runnable_config)
 
     def register(self) -> Engine:
-        """
-        Register this engine in the global registry.
+        """Register this engine in the global registry.
 
         Adds this engine instance to the global EngineRegistry, making it
         available for lookup by name, ID, or type. This method is typically
@@ -254,10 +243,9 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
         return EngineRegistry.get_instance().register(self)
 
     def apply_runnable_config(
-        self, runnable_config: Optional[RunnableConfig] = None
-    ) -> Dict[str, Any]:
-        """
-        Extract parameters from runnable_config relevant to this engine.
+        self, runnable_config: RunnableConfig | None = None
+    ) -> dict[str, Any]:
+        """Extract parameters from runnable_config relevant to this engine.
 
         Processes the provided runtime configuration to extract parameters
         that apply to this specific engine. The method implements a hierarchical
@@ -323,9 +311,8 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
 
         return params
 
-    def extract_params(self) -> Dict[str, Any]:
-        """
-        Extract parameters from this engine for serialization.
+    def extract_params(self) -> dict[str, Any]:
+        """Extract parameters from this engine for serialization.
 
         Collects all relevant parameters from this engine instance that should
         be included in serialization or when copying the engine configuration.
@@ -377,9 +364,8 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
 
         return params
 
-    def to_dict(self) -> Dict[str, Any]:
-        """
-        Convert engine to a dictionary suitable for serialization.
+    def to_dict(self) -> dict[str, Any]:
+        """Convert engine to a dictionary suitable for serialization.
 
         Creates a complete dictionary representation of this engine that can be
         used for serialization, persistence, or reconstruction. Includes class
@@ -410,14 +396,17 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
             data["output_schema_name"] = self.output_schema.__name__
 
         # Add class information for type reconstruction
-        data["engine_class"] = f"{self.__class__.__module__}.{self.__class__.__name__}"
+        data["engine_class"] = (
+            f"{
+            self.__class__.__module__}.{
+            self.__class__.__name__}"
+        )
 
         return data
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> Engine:
-        """
-        Create an engine from a dictionary representation.
+    def from_dict(cls, data: dict[str, Any]) -> Engine:
+        """Create an engine from a dictionary representation.
 
         Reconstructs an engine instance from its dictionary representation,
         attempting to use the original engine class if available, or falling back
@@ -471,8 +460,7 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
         return cls(**data)
 
     def to_json(self) -> str:
-        """
-        Convert engine to a JSON string representation.
+        """Convert engine to a JSON string representation.
 
         Serializes this engine to a JSON string that can be stored, transmitted,
         or persisted. The serialization process ensures that all values are
@@ -496,8 +484,7 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
 
     @classmethod
     def from_json(cls, json_str: str) -> Engine:
-        """
-        Create an engine from a JSON string representation.
+        """Create an engine from a JSON string representation.
 
         Deserializes an engine from its JSON string representation, reconstructing
         the original engine instance or a compatible instance if the exact class
@@ -524,9 +511,8 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
         data = json.loads(json_str)
         return cls.from_dict(data)
 
-    def with_config_overrides(self, overrides: Dict[str, Any]) -> "Engine":
-        """
-        Create a new engine with configuration overrides applied.
+    def with_config_overrides(self, overrides: dict[str, Any]) -> Engine:
+        """Create a new engine with configuration overrides applied.
 
         Creates a new instance of this engine with the specified configuration
         overrides applied. This is useful for creating variations of an engine
@@ -570,8 +556,7 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
 
 
 class InvokableEngine(Engine[TIn, TOut]):
-    """
-    Base class for engines that create invokable runtime objects.
+    """Base class for engines that create invokable runtime objects.
 
     This class extends the base Engine with convenience methods for directly
     invoking the runnable objects created by the engine. While the engine itself
@@ -598,10 +583,9 @@ class InvokableEngine(Engine[TIn, TOut]):
     """
 
     def invoke(
-        self, input_data: TIn, runnable_config: Optional[RunnableConfig] = None
+        self, input_data: TIn, runnable_config: RunnableConfig | None = None
     ) -> TOut:
-        """
-        Convenience method to create and invoke the runnable with input data.
+        """Convenience method to create and invoke the runnable with input data.
 
         Creates a runnable instance using create_runnable() and immediately invokes
         it with the provided input data. This is a shortcut that combines creation
@@ -644,18 +628,18 @@ class InvokableEngine(Engine[TIn, TOut]):
                     return runnable(input_data, config=runnable_config)
                 return runnable(input_data)
             except Exception as e:
-                logger.error(f"Error invoking runnable: {e}")
+                logger.exception(f"Error invoking runnable: {e}")
                 raise
 
         raise NotImplementedError(
-            f"Engine {self.name} creates a runnable that does not support invoke"
+            f"Engine {
+                self.name} creates a runnable that does not support invoke"
         )
 
     async def ainvoke(
-        self, input_data: TIn, runnable_config: Optional[RunnableConfig] = None
+        self, input_data: TIn, runnable_config: RunnableConfig | None = None
     ) -> TOut:
-        """
-        Convenience method to create and asynchronously invoke the runnable.
+        """Convenience method to create and asynchronously invoke the runnable.
 
         Creates a runnable instance using create_runnable() and immediately invokes
         it asynchronously with the provided input data. If the runnable doesn't
@@ -703,17 +687,17 @@ class InvokableEngine(Engine[TIn, TOut]):
                     )
                 return await asyncio.to_thread(runnable, input_data)
             except Exception as e:
-                logger.error(f"Error invoking runnable asynchronously: {e}")
+                logger.exception(f"Error invoking runnable asynchronously: {e}")
                 raise
 
         raise NotImplementedError(
-            f"Engine {self.name} creates a runnable that does not support ainvoke"
+            f"Engine {
+                self.name} creates a runnable that does not support ainvoke"
         )
 
 
 class NonInvokableEngine(Engine[TIn, TOut]):
-    """
-    Base class for engines that create non-invokable utility objects.
+    """Base class for engines that create non-invokable utility objects.
 
     This class is used for engines that create utility objects which don't
     follow the standard input-to-output invocation pattern. These engines
@@ -740,5 +724,3 @@ class NonInvokableEngine(Engine[TIn, TOut]):
         >>> # Use the embeddings object directly with its specific methods
         >>> vectors = embeddings.embed_documents(["Hello, world!"])
     """
-
-    pass

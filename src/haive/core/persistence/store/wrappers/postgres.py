@@ -3,14 +3,13 @@
 
 import logging
 
+from core.persistence.store.base import SerializableStoreWrapper
+from core.persistence.store.connection import ConnectionManager
+from core.persistence.store.embeddings import EmbeddingAdapter
+from core.persistence.store.types import StoreType
 from langgraph.store.base import BaseStore
 from langgraph.store.postgres import PostgresStore
 from langgraph.store.postgres.aio import AsyncPostgresStore
-
-from ..base import SerializableStoreWrapper
-from ..connection import ConnectionManager
-from ..embeddings import EmbeddingAdapter
-from ..types import StoreType
 
 logger = logging.getLogger(__name__)
 
@@ -51,12 +50,14 @@ class PostgresStoreWrapper(SerializableStoreWrapper):
         # Create store
         if index_config:
             logger.info(
-                f"Creating PostgresStore with semantic search for {self.config.connection_id}"
+                f"Creating PostgresStore with semantic search for {
+                    self.config.connection_id}"
             )
             store = PostgresStore(pool, index=index_config)
         else:
             logger.info(
-                f"Creating PostgresStore without semantic search for {self.config.connection_id}"
+                f"Creating PostgresStore without semantic search for {
+                    self.config.connection_id}"
             )
             store = PostgresStore(pool)
 
@@ -125,12 +126,14 @@ class AsyncPostgresStoreWrapper(SerializableStoreWrapper):
         # Create store
         if index_config:
             logger.info(
-                f"Creating AsyncPostgresStore with semantic search for {self.config.connection_id}"
+                f"Creating AsyncPostgresStore with semantic search for {
+                    self.config.connection_id}"
             )
             store = AsyncPostgresStore(pool, index=index_config)
         else:
             logger.info(
-                f"Creating AsyncPostgresStore without semantic search for {self.config.connection_id}"
+                f"Creating AsyncPostgresStore without semantic search for {
+                    self.config.connection_id}"
             )
             store = AsyncPostgresStore(pool)
 

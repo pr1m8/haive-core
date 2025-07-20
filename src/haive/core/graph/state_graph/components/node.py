@@ -27,7 +27,7 @@ Typical usage:
 
 import uuid
 from datetime import datetime
-from typing import Any, Dict, Generic, List, Optional, TypeVar, Union
+from typing import Any, Generic, TypeVar
 
 from langgraph.types import RetryPolicy
 from pydantic import BaseModel, Field
@@ -75,19 +75,19 @@ class Node(BaseModel, Generic[T, C, O]):
     node_type: NodeType
 
     # Configuration
-    input_mapping: Optional[Dict[str, str]] = None
-    output_mapping: Optional[Dict[str, str]] = None
-    command_goto: Optional[Union[str, List[str]]] = None
-    retry_policy: Optional[RetryPolicy] = None
+    input_mapping: dict[str, str] | None = None
+    output_mapping: dict[str, str] | None = None
+    command_goto: str | list[str] | None = None
+    retry_policy: RetryPolicy | None = None
 
     # Metadata
-    description: Optional[str] = None
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    description: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
     created_at: datetime = Field(default_factory=datetime.now)
 
     model_config = {"arbitrary_types_allowed": True}
 
-    def process(self, state: T, config: Optional[C] = None) -> O:
+    def process(self, state: T, config: C | None = None) -> O:
         """Process state and return output.
 
         This method processes the input state according to the node's configuration
@@ -115,7 +115,7 @@ class Node(BaseModel, Generic[T, C, O]):
         """
         return self.name
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to serializable dictionary.
 
         Creates a dictionary representation of the node suitable for serialization.

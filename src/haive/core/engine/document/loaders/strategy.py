@@ -7,7 +7,7 @@ based on source type, performance requirements, and capabilities.
 import importlib
 import logging
 from enum import Enum
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Literal
 
 from langchain_core.document_loaders.base import BaseLoader
 from pydantic import BaseModel, Field
@@ -79,18 +79,18 @@ class LoaderStrategy(BaseModel):
         default=False, description="Whether the loader supports batch loading"
     )
 
-    capabilities: List[LoaderCapability] = Field(
+    capabilities: list[LoaderCapability] = Field(
         default_factory=list, description="Special capabilities of this loader"
     )
 
     # Suitability indicators
-    best_for: List[str] = Field(
+    best_for: list[str] = Field(
         default_factory=list,
         description="Types of content this loader is best suited for",
     )
 
     # Requirements
-    requires_dependencies: List[str] = Field(
+    requires_dependencies: list[str] = Field(
         default_factory=list,
         description="Additional dependencies required for this loader",
     )
@@ -107,8 +107,8 @@ class LoaderStrategy(BaseModel):
     )
 
     def create_loader(
-        self, source: EnhancedSource, options: Dict[str, Any]
-    ) -> Optional[BaseLoader]:
+        self, source: EnhancedSource, options: dict[str, Any]
+    ) -> BaseLoader | None:
         """Create a loader instance for the given source."""
         try:
             # Import the loader class
@@ -118,11 +118,13 @@ class LoaderStrategy(BaseModel):
             # Create loader with appropriate arguments
             if hasattr(source, "source_path"):
                 return loader_cls(source.source_path, **options)
-            else:
-                return loader_cls(**options)
+            return loader_cls(**options)
 
         except Exception as e:
-            logger.error(f"Failed to create loader {self.loader_class}: {e}")
+            logger.exception(
+                f"Failed to create loader {
+                    self.loader_class}: {e}"
+            )
             return None
 
     def check_availability(self) -> bool:
@@ -138,7 +140,8 @@ class LoaderStrategy(BaseModel):
                     importlib.import_module(dep)
                 except ImportError:
                     logger.warning(
-                        f"Dependency {dep} not available for {self.strategy_name}"
+                        f"Dependency {dep} not available for {
+                            self.strategy_name}"
                     )
                     return False
 
@@ -152,13 +155,12 @@ class LoaderStrategy(BaseModel):
 class LoaderStrategyRegistry:
     """Registry for managing loader strategies."""
 
-    def __init__(self):
-        self._strategies: Dict[str, LoaderStrategy] = {}
+    def __init__(self) -> None:
+        self._strategies: dict[str, LoaderStrategy] = {}
         self._register_default_strategies()
 
     def _register_default_strategies(self):
         """Register default loader strategies."""
-
         # PDF loaders
         self.register(
             LoaderStrategy(
@@ -1862,11 +1864,11 @@ class LoaderStrategyRegistry:
             f"(available: {strategy.is_available})"
         )
 
-    def get_strategy(self, name: str) -> Optional[LoaderStrategy]:
+    def get_strategy(self, name: str) -> LoaderStrategy | None:
         """Get a strategy by name."""
         return self._strategies.get(name)
 
-    def list_strategies(self, available_only: bool = True) -> List[LoaderStrategy]:
+    def list_strategies(self, available_only: bool = True) -> list[LoaderStrategy]:
         """List all strategies."""
         strategies = list(self._strategies.values())
         if available_only:
@@ -1874,8 +1876,8 @@ class LoaderStrategyRegistry:
         return strategies
 
     def find_strategies_for_source(
-        self, source: EnhancedSource, preferences: Optional[Dict[str, Any]] = None
-    ) -> List[LoaderStrategy]:
+        self, source: EnhancedSource, preferences: dict[str, Any] | None = None
+    ) -> list[LoaderStrategy]:
         """Find suitable strategies for a source."""
         if preferences is None:
             preferences = {}
@@ -1929,8 +1931,8 @@ class LoaderStrategyRegistry:
         return suitable_strategies
 
     def select_best_strategy(
-        self, source: EnhancedSource, preferences: Optional[Dict[str, Any]] = None
-    ) -> Optional[LoaderStrategy]:
+        self, source: EnhancedSource, preferences: dict[str, Any] | None = None
+    ) -> LoaderStrategy | None:
         """Select the best strategy for a source."""
         strategies = self.find_strategies_for_source(source, preferences)
         return strategies[0] if strategies else None
@@ -1942,10 +1944,10 @@ strategy_registry = LoaderStrategyRegistry()
 
 def create_loader(
     source: EnhancedSource,
-    strategy_name: Optional[str] = None,
-    options: Optional[Dict[str, Any]] = None,
-    preferences: Optional[Dict[str, Any]] = None,
-) -> Optional[BaseLoader]:
+    strategy_name: str | None = None,
+    options: dict[str, Any] | None = None,
+    preferences: dict[str, Any] | None = None,
+) -> BaseLoader | None:
     """Create a loader for the given source."""
     if options is None:
         options = {}
@@ -1964,7 +1966,8 @@ def create_loader(
         strategy = strategy_registry.select_best_strategy(source, preferences)
         if not strategy:
             logger.error(
-                f"No suitable strategy found for source type {source.source_type}"
+                f"No suitable strategy found for source type {
+                    source.source_type}"
             )
             return None
 
@@ -1973,10 +1976,10 @@ def create_loader(
 
 # Export key components
 __all__ = [
-    "LoaderPriority",
     "LoaderCapability",
+    "LoaderPriority",
     "LoaderStrategy",
     "LoaderStrategyRegistry",
-    "strategy_registry",
     "create_loader",
+    "strategy_registry",
 ]

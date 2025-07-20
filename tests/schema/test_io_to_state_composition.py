@@ -22,7 +22,8 @@ def test_schema_composer_diagnostics():
     )
 
     # Step 1: Check engine field definitions
-    console.print("\n[bold yellow]Step 1: Engine Field Definitions[/bold yellow]")
+    console.print(
+        "\n[bold yellow]Step 1: Engine Field Definitions[/bold yellow]")
 
     # Check LLM engine
     console.print("\n[green]LLM Engine:[/green]")
@@ -85,14 +86,19 @@ def test_schema_composer_diagnostics():
             console.print(f"    Required: {field_info.is_required()}")
 
     # Step 4: Test instance creation with different data
-    console.print("\n[bold yellow]Step 4: Test Instance Creation[/bold yellow]")
+    console.print(
+        "\n[bold yellow]Step 4: Test Instance Creation[/bold yellow]")
 
     # Try minimal instance creation
     try:
         minimal_instance = schema(messages=[HumanMessage(content="Test")])
         console.print("[green]✓ Minimal instance created![/green]")
         console.print(f"  Has 'query': {hasattr(minimal_instance, 'query')}")
-        console.print(f"  Has 'content': {hasattr(minimal_instance, 'content')}")
+        console.print(
+            f"  Has 'content': {
+                hasattr(
+                    minimal_instance,
+                    'content')}")
     except Exception as e:
         console.print(f"[red]✗ Minimal instance failed: {e}[/red]")
 
@@ -103,7 +109,12 @@ def test_schema_composer_diagnostics():
         )
         console.print("[green]✓ Full instance created![/green]")
         console.print(f"  Has 'query': {hasattr(full_instance, 'query')}")
-        console.print(f"  Query value: {getattr(full_instance, 'query', 'N/A')}")
+        console.print(
+            f"  Query value: {
+                getattr(
+                    full_instance,
+                    'query',
+                    'N/A')}")
         console.print(f"  Has 'content': {hasattr(full_instance, 'content')}")
     except Exception as e:
         console.print(f"[red]✗ Full instance failed: {e}[/red]")

@@ -42,10 +42,8 @@ def test_sync_postgres_store():
         logger.info(f"Retrieved value: {retrieved}")
 
         # Extract value from Item object if needed
-        if hasattr(retrieved, "value"):
-            retrieved_value = retrieved.value
-        else:
-            retrieved_value = retrieved
+        retrieved_value = retrieved.value if hasattr(
+            retrieved, "value") else retrieved
 
         assert (
             retrieved_value == value
@@ -61,7 +59,7 @@ def test_sync_postgres_store():
         logger.info("✅ Synchronous PostgreSQL store test passed!")
 
     except Exception as e:
-        logger.error(f"❌ Synchronous PostgreSQL store test failed: {e}")
+        logger.exception(f"❌ Synchronous PostgreSQL store test failed: {e}")
         raise
 
 
@@ -87,7 +85,9 @@ async def test_async_postgres_store():
         # Test basic operations
         namespace = ("test", "async", "namespace")
         key = "test_async_key"
-        value = {"message": "Hello from async PostgreSQL store!", "async": True}
+        value = {
+            "message": "Hello from async PostgreSQL store!",
+            "async": True}
 
         logger.info("Testing async put operation...")
         await store.aput(namespace, key, value)
@@ -97,10 +97,8 @@ async def test_async_postgres_store():
         logger.info(f"Retrieved value: {retrieved}")
 
         # Extract value from Item object if needed
-        if hasattr(retrieved, "value"):
-            retrieved_value = retrieved.value
-        else:
-            retrieved_value = retrieved
+        retrieved_value = retrieved.value if hasattr(
+            retrieved, "value") else retrieved
 
         assert (
             retrieved_value == value
@@ -116,7 +114,7 @@ async def test_async_postgres_store():
         logger.info("✅ Asynchronous PostgreSQL store test passed!")
 
     except Exception as e:
-        logger.error(f"❌ Asynchronous PostgreSQL store test failed: {e}")
+        logger.exception(f"❌ Asynchronous PostgreSQL store test failed: {e}")
         raise
 
 
@@ -143,7 +141,7 @@ def test_memory_store_fallback():
         logger.info("✅ Memory store fallback test passed!")
 
     except Exception as e:
-        logger.error(f"❌ Memory store fallback test failed: {e}")
+        logger.exception(f"❌ Memory store fallback test failed: {e}")
         raise
 
 

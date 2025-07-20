@@ -7,7 +7,7 @@ Supports both basic secure serialization and production-grade encryption.
 
 import logging
 import os
-from typing import Any, Dict, Optional
+from typing import Any
 
 from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
 from pydantic import SecretBytes, SecretStr
@@ -31,9 +31,8 @@ class SecureSecretStrSerializer(JsonPlusSerializer):
         method=None,
         args=None,
         kwargs=None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Override to handle SecretStr objects."""
-
         # Process args for SecretStr if provided
         processed_args = None
         if args is not None:
@@ -65,10 +64,10 @@ class SecureSecretStrSerializer(JsonPlusSerializer):
             # Convert to masked string - this preserves the SecretStr interface
             # while making it serializable
             return "**SECRET_MASKED**"
-        elif isinstance(value, SecretBytes):
+        if isinstance(value, SecretBytes):
             # Convert to masked bytes
             return b"**SECRET_MASKED**"
-        elif (
+        if (
             isinstance(value, type)
             and hasattr(value, "__module__")
             and hasattr(value, "__name__")
@@ -76,7 +75,7 @@ class SecureSecretStrSerializer(JsonPlusSerializer):
             # Handle Pydantic model classes and other type references
             # Store as a string reference that can be reimported later
             return f"__type__:{value.__module__}.{value.__name__}"
-        elif hasattr(value, "__class__") and hasattr(value.__class__, "__mro__"):
+        if hasattr(value, "__class__") and hasattr(value.__class__, "__mro__"):
             # Check if this is a LangChain Serializable object
             # Let LangChain handle its own serialization
             for cls in value.__class__.__mro__:
@@ -84,11 +83,13 @@ class SecureSecretStrSerializer(JsonPlusSerializer):
                     cls, "__module__", ""
                 ):
                     logger.debug(
-                        f"Allowing LangChain Serializable object to handle its own serialization: {type(value)}"
+                        f"Allowing LangChain Serializable object to handle its own serialization: {
+                            type(value)}"
                     )
                     return value
 
-            # Also check for specific LangChain prompt types that should not be model_dump'd
+            # Also check for specific LangChain prompt types that should not be
+            # model_dump'd
             if any(
                 cls.__name__
                 in ["BasePromptTemplate", "ChatPromptTemplate", "PromptTemplate"]
@@ -96,24 +97,25 @@ class SecureSecretStrSerializer(JsonPlusSerializer):
                 for cls in value.__class__.__mro__
             ):
                 logger.debug(
-                    f"Preserving LangChain prompt template object: {type(value)}"
+                    f"Preserving LangChain prompt template object: {
+                        type(value)}"
                 )
                 return value
-        elif isinstance(value, dict):
+            return None
+        if isinstance(value, dict):
             # Recursively handle dictionaries
             return {k: self._handle_secret_types(v) for k, v in value.items()}
-        elif isinstance(value, (list, tuple)):
+        if isinstance(value, list | tuple):
             # Recursively handle sequences
             processed = [self._handle_secret_types(item) for item in value]
             return type(value)(processed)
-        elif value is PydanticUndefined:
+        if value is PydanticUndefined:
             # Handle PydanticUndefined by converting to None
             logger.warning(
                 "Found PydanticUndefined during serialization, converting to None"
             )
             return None
-        else:
-            return value
+        return value
 
     def loads_typed(self, data: tuple[str, bytes]) -> Any:
         """Override to handle loading of masked secrets."""
@@ -130,18 +132,18 @@ class SecureSecretStrSerializer(JsonPlusSerializer):
 
             return result
         except Exception as e:
-            logger.error(f"Failed to deserialize data: {e}")
+            logger.exception(f"Failed to deserialize data: {e}")
             raise
 
     def _contains_masked_secrets(self, obj: Any) -> bool:
         """Check if object contains masked secret placeholders."""
-        if isinstance(obj, str) and obj == "**SECRET_MASKED**":
+        if (isinstance(obj, str) and obj == "**SECRET_MASKED**") or (
+            isinstance(obj, bytes) and obj == b"**SECRET_MASKED**"
+        ):
             return True
-        elif isinstance(obj, bytes) and obj == b"**SECRET_MASKED**":
-            return True
-        elif isinstance(obj, dict):
+        if isinstance(obj, dict):
             return any(self._contains_masked_secrets(v) for v in obj.values())
-        elif isinstance(obj, (list, tuple)):
+        if isinstance(obj, list | tuple):
             return any(self._contains_masked_secrets(item) for item in obj)
         return False
 
@@ -158,10 +160,9 @@ class SecretStrSerializer(JsonPlusSerializer):
         constructor: str,
         method: str,
         args: tuple,
-        kwargs: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        kwargs: dict[str, Any],
+    ) -> dict[str, Any]:
         """Override to handle SecretStr by exposing values with serialize_as_any."""
-
         # Process args for SecretStr
         processed_args = []
         for arg in args:
@@ -178,13 +179,10 @@ class SecretStrSerializer(JsonPlusSerializer):
 
     def _expose_secrets(self, value: Any) -> Any:
         """Convert SecretStr to actual string values (INSECURE - requires encryption)."""
-        if isinstance(value, SecretStr):
+        if isinstance(value, SecretStr | SecretBytes):
             # WARNING: This exposes the actual secret!
             return value.get_secret_value()
-        elif isinstance(value, SecretBytes):
-            # WARNING: This exposes the actual secret!
-            return value.get_secret_value()
-        elif hasattr(value, "model_dump") and hasattr(value, "__class__"):
+        if hasattr(value, "model_dump") and hasattr(value, "__class__"):
             # Handle Pydantic models with SecretStr fields
             try:
                 return value.model_dump(serialize_as_any=True)
@@ -192,7 +190,7 @@ class SecretStrSerializer(JsonPlusSerializer):
                 return value
         elif isinstance(value, dict):
             return {k: self._expose_secrets(v) for k, v in value.items()}
-        elif isinstance(value, (list, tuple)):
+        elif isinstance(value, list | tuple):
             processed = [self._expose_secrets(item) for item in value]
             return type(value)(processed)
         elif value is PydanticUndefined:
@@ -202,7 +200,7 @@ class SecretStrSerializer(JsonPlusSerializer):
 
 
 def create_production_serializer(
-    encryption_key: Optional[str] = None,
+    encryption_key: str | None = None,
 ) -> JsonPlusSerializer:
     """Create a production-ready serializer with optional encryption.
 
@@ -231,7 +229,6 @@ def create_production_serializer(
 
             serializer = create_production_serializer(encryption_key=None)
     """
-
     # Try to get encryption key from parameter or environment
     if encryption_key is None:
         encryption_key = os.getenv("LANGGRAPH_AES_KEY")
@@ -263,7 +260,7 @@ def create_production_serializer(
                 f"Falling back to SecureSecretStrSerializer (unencrypted)."
             )
         except Exception as e:
-            logger.error(f"Failed to create EncryptedSerializer: {e}")
+            logger.exception(f"Failed to create EncryptedSerializer: {e}")
 
     # Fallback to our secure serializer (unencrypted but SecretStr-safe)
     logger.info("Using SecureSecretStrSerializer (unencrypted) for SecretStr support")
@@ -271,7 +268,7 @@ def create_production_serializer(
 
 
 def create_encrypted_serializer_for_postgres(
-    connection_string: str, encryption_key: Optional[str] = None
+    connection_string: str, encryption_key: str | None = None
 ) -> JsonPlusSerializer:
     """Create an encrypted serializer specifically optimized for PostgreSQL.
 
@@ -298,7 +295,6 @@ def create_encrypted_serializer_for_postgres(
                 encryption_key=os.getenv("LANGGRAPH_AES_KEY")
             )
     """
-
     # Try to get encryption key
     if encryption_key is None:
         encryption_key = os.getenv("LANGGRAPH_AES_KEY")
@@ -335,7 +331,7 @@ def create_encrypted_serializer_for_postgres(
             return encrypted_serializer
 
         except ImportError as e:
-            logger.error(
+            logger.exception(
                 f"EncryptedSerializer not available for PostgreSQL: {e}. "
                 f"Install with: pip install 'langgraph[encryption]'"
             )
@@ -345,7 +341,7 @@ def create_encrypted_serializer_for_postgres(
                     "Install with: pip install 'langgraph[encryption]'"
                 )
         except Exception as e:
-            logger.error(f"Failed to create encrypted PostgreSQL serializer: {e}")
+            logger.exception(f"Failed to create encrypted PostgreSQL serializer: {e}")
             if is_production:
                 raise
 

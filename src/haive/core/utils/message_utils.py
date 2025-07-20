@@ -13,10 +13,9 @@ from langchain_core.messages import (
 from langchain_core.tools import BaseTool, StructuredTool, Tool
 
 
-def has_tool_calls(state) -> bool:
+def has_tool_calls(state: Dict[str, Any]) -> bool:
     """Check if the last AI message has tool calls."""
     # Get last AI message, return False if none exists
-    print(state)
 
     # Check if state has messages attribute
     if not hasattr(state, "messages") or not state.messages:
@@ -36,8 +35,7 @@ def has_tool_calls(state) -> bool:
 
 
 def has_tool_call(message: AIMessage):
-    """
-    Check if an AI message contains any tool calls.
+    """Check if an AI message contains any tool calls.
 
     Args:
         message (AIMessage): The AI message object to check
@@ -49,8 +47,7 @@ def has_tool_call(message: AIMessage):
 
 
 def has_tool_error(tool_message: ToolMessage):
-    """
-    Check if a tool message contains an error.
+    """Check if a tool message contains an error.
 
     Args:
         tool_message (ToolMessage): The tool message object to check
@@ -66,7 +63,7 @@ def has_tool_error(tool_message: ToolMessage):
     return False
 
 
-def add_messages(left, right):
+def add_messages(left, right) -> Any:
     """Add two lists of messages together."""
     if not isinstance(left, list):
         left = [left]
@@ -81,7 +78,7 @@ def tag_with_name(ai_message: AIMessage, name: str):
     return ai_message
 
 
-def tag_ai_messages_transform(message, kwargs):
+def tag_ai_messages_transform(message: str, kwargs: Any):
     """Adds a tag to AI messages."""
     tag = kwargs.get("tag", "[AI]")  # Default tag if not provided
 
@@ -110,7 +107,7 @@ def transform_messages(
     }
 
 
-def swap_roles_transform(message, kwargs):
+def swap_roles_transform(message: str, kwargs: Any):
     """Specific transformation function for swapping AI/Human roles."""
     name = kwargs.get("name")  # Get the "name" argument
 
@@ -334,10 +331,7 @@ class MessageNormalizingToolNode:
             Updated state
         """
         # Convert state to dict if it's a BaseModel
-        if hasattr(state, "model_dump"):
-            state_dict = state.model_dump()
-        else:
-            state_dict = dict(state)
+        state_dict = state.model_dump() if hasattr(state, "model_dump") else dict(state)
 
         # Normalize messages
         if "messages" in state_dict:

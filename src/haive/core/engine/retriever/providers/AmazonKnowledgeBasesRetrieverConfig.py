@@ -1,5 +1,6 @@
 """Amazon Knowledge Bases Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Amazon Knowledge Bases retriever,
 which uses AWS Bedrock Knowledge Bases for retrieval-augmented generation (RAG).
 Knowledge Bases provides a fully managed service that enables RAG workflows
@@ -136,7 +137,7 @@ class AmazonKnowledgeBasesRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create an Amazon Knowledge Bases retriever from this configuration.
 
         Returns:

@@ -1,7 +1,7 @@
 # haive/core/graph/graph.py
 
 import logging
-from typing import Optional
+from typing import Any, Optional
 
 from langgraph.graph import StateGraph
 from pydantic import ConfigDict
@@ -17,8 +17,7 @@ console = Console()
 
 
 class SchemaGraph(BaseGraph, GraphSchemaMixin[StateLike, Optional[ConfigLike]]):
-    """
-    Graph implementation with schema management capabilities.
+    """Graph implementation with schema management capabilities.
 
     SchemaGraph extends BaseGraph with state schema management, enabling
     seamless integration with LangGraph and providing type validation.
@@ -27,8 +26,7 @@ class SchemaGraph(BaseGraph, GraphSchemaMixin[StateLike, Optional[ConfigLike]]):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def to_langgraph(self) -> StateGraph:
-        """
-        Convert to a LangGraph StateGraph with schema information.
+        """Convert to a LangGraph StateGraph with schema information.
 
         Returns:
             LangGraph StateGraph instance
@@ -45,8 +43,7 @@ class SchemaGraph(BaseGraph, GraphSchemaMixin[StateLike, Optional[ConfigLike]]):
         return langgraph
 
     def compile(self, **kwargs) -> StateGraph:
-        """
-        Validate and compile the graph to a runnable StateGraph.
+        """Validate and compile the graph to a runnable StateGraph.
 
         Args:
             **kwargs: Additional compilation arguments (checkpointer, interrupt_before, etc.)
@@ -75,50 +72,33 @@ class SchemaGraph(BaseGraph, GraphSchemaMixin[StateLike, Optional[ConfigLike]]):
         # Convert to LangGraph and compile
         return self.to_langgraph().compile(**kwargs)
 
-    def display(self):
-        """
-        Display a visual representation of the graph structure.
+    def display(self) -> Any:
+        """Display a visual representation of the graph structure.
 
         Outputs information about nodes, edges, and branches,
         and generates a Mermaid diagram for visualization.
         """
-        print("\n" + "=" * 50)
-        print(f"GRAPH: {self.name}")
-        print("=" * 50)
-
         # Display basic graph info
-        print(f"\nNodes ({len(self.nodes)}):")
         for name, _node in self.nodes.items():
-            node_type = self.node_types.get(name, "unknown")
-            print(f"  - {name} ({node_type})")
+            self.node_types.get(name, "unknown")
 
-        print(f"\nEdges ({len(self.edges)}):")
-        for src, dst in self.edges:
-            print(f"  - {src} → {dst}")
+        for _src, _dst in self.edges:
+            pass
 
-        print(f"\nBranches ({len(self.branches)}):")
         for _branch_id, branch in self.branches.items():
-            print(f"  - {branch.name} (from {branch.source_node}):")
-            for cond, dest in branch.destinations.items():
-                print(f"    - {cond} → {dest}")
+            for _cond, _dest in branch.destinations.items():
+                pass
             if branch.default:
-                print(f"    - default → {branch.default}")
+                pass
 
         # Generate and print Mermaid diagram
-        print("\nMermaid Diagram:")
-        print("```mermaid")
-        print(self.to_mermaid())
-        print("```")
 
         # Display validation issues if any
         issues = self.check_graph_validity()
         if issues:
-            print("\nWARNING: Graph Validation Issues:")
-            for issue in issues:
-                print(f"  - {issue}")
+            for _issue in issues:
+                pass
         else:
-            print("\nGraph validation: OK")
-
-        print("\n" + "=" * 50 + "\n")
+            pass
 
         return self

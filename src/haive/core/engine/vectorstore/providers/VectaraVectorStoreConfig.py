@@ -1,4 +1,4 @@
-"""
+"""from typing import Any
 Vectara Vector Store implementation for the Haive framework.
 
 This module provides a configuration class for the Vectara vector store,
@@ -25,7 +25,7 @@ The implementation integrates with LangChain's Vectara while providing
 a consistent Haive configuration interface.
 """
 
-from typing import Any, Dict, List, Tuple, Type
+from typing import Any
 
 from langchain_core.documents import Document
 from pydantic import Field, validator
@@ -36,8 +36,7 @@ from haive.core.engine.vectorstore.types import VectorStoreType
 
 @BaseVectorStoreConfig.register(VectorStoreType.VECTARA)
 class VectaraVectorStoreConfig(BaseVectorStoreConfig, SecureConfigMixin):
-    """
-    Configuration for Vectara vector store in the Haive framework.
+    """Configuration for Vectara vector store in the Haive framework.
 
     This vector store uses Vectara's managed platform for advanced semantic search
     with built-in NLP capabilities and document processing.
@@ -110,7 +109,7 @@ class VectaraVectorStoreConfig(BaseVectorStoreConfig, SecureConfigMixin):
     # is optional and not used, but kept for interface compatibility
 
     @validator("vectara_customer_id", pre=True, always=True)
-    def resolve_customer_id(cls, v):
+    def resolve_customer_id(self, v) -> Any:
         """Resolve customer ID from value or environment."""
         if not v:
             import os
@@ -124,7 +123,7 @@ class VectaraVectorStoreConfig(BaseVectorStoreConfig, SecureConfigMixin):
         return v
 
     @validator("vectara_corpus_id", pre=True, always=True)
-    def resolve_corpus_id(cls, v):
+    def resolve_corpus_id(self, v) -> Any:
         """Resolve corpus ID from value or environment."""
         if not v:
             import os
@@ -138,7 +137,7 @@ class VectaraVectorStoreConfig(BaseVectorStoreConfig, SecureConfigMixin):
         return v
 
     @validator("api_key", pre=True, always=True)
-    def resolve_api_key(cls, v):
+    def resolve_api_key(self, v) -> Any:
         """Resolve API key from value or environment."""
         if not v:
             import os
@@ -151,34 +150,31 @@ class VectaraVectorStoreConfig(BaseVectorStoreConfig, SecureConfigMixin):
                 )
         return v
 
-    def validate_embedding(self):
-        """
-        Override to make embedding optional for Vectara.
+    def validate_embedding(self) -> None:
+        """Override to make embedding optional for Vectara.
 
         Vectara manages its own embeddings internally, so we don't require
         an embedding configuration.
         """
         # Vectara doesn't need external embeddings
-        pass
 
-    def get_input_fields(self) -> Dict[str, Tuple[Type, Any]]:
+    def get_input_fields(self) -> dict[str, tuple[type, Any]]:
         """Return input field definitions for Vectara vector store."""
         return {
             "documents": (
-                List[Document],
+                list[Document],
                 Field(description="Documents to add to Vectara"),
             ),
         }
 
-    def get_output_fields(self) -> Dict[str, Tuple[Type, Any]]:
+    def get_output_fields(self) -> dict[str, tuple[type, Any]]:
         """Return output field definitions for Vectara vector store."""
         return {
-            "ids": (List[str], Field(description="Document IDs in Vectara")),
+            "ids": (list[str], Field(description="Document IDs in Vectara")),
         }
 
-    def instantiate(self):
-        """
-        Create a Vectara vector store from this configuration.
+    def instantiate(self) -> Any:
+        """Create a Vectara vector store from this configuration.
 
         Returns:
             Vectara: Instantiated Vectara vector store.

@@ -1,10 +1,11 @@
 """Minimal test to reproduce the engine validation error."""
 
 import asyncio
+import contextlib
 
-from haive.agents.simple.agent_v2 import SimpleAgentV2
 from langchain_core.prompts import ChatPromptTemplate
 
+from haive.agents.simple.agent_v2 import SimpleAgentV2
 from haive.core.engine.aug_llm import AugLLMConfig
 
 
@@ -23,13 +24,11 @@ async def test_simple_agent_v2():
     agent = SimpleAgentV2(name="test_agent", engine=engine)
 
     # This should work
-    input_instance = agent.input_schema(query="hello")
+    agent.input_schema(query="hello")
 
     # This is where the error occurs
-    try:
-        result = await agent.arun("hello")
-    except Exception as e:
-        pass
+    with contextlib.suppress(Exception):
+        await agent.arun("hello")
 
 
 if __name__ == "__main__":

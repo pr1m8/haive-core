@@ -1,4 +1,4 @@
-"""
+"""from typing import Any
 Typed State Schema with Generic Engine Support.
 
 This module provides enhanced state schema classes that use generics for proper
@@ -7,17 +7,7 @@ engine typing while maintaining backward compatibility with existing code.
 
 from __future__ import annotations
 
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    Generic,
-    List,
-    Optional,
-    Type,
-    TypeVar,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 from pydantic import BaseModel, Field, PrivateAttr, field_validator
 
@@ -28,12 +18,11 @@ if TYPE_CHECKING:
 
 # Type variables for engines
 TEngine = TypeVar("TEngine", bound="Engine")
-TEngines = TypeVar("TEngines", bound=Dict[str, "Engine"])
+TEngines = TypeVar("TEngines", bound=dict[str, "Engine"])
 
 
 class TypedStateSchema(StateSchema, Generic[TEngine]):
-    """
-    State schema with optional engine typing for better type safety.
+    """State schema with optional engine typing for better type safety.
 
     This class extends StateSchema with generic type support for engines,
     allowing for better type checking while maintaining backward compatibility.
@@ -60,16 +49,15 @@ class TypedStateSchema(StateSchema, Generic[TEngine]):
     """
 
     # Override engine field with generic type
-    engine: Optional[Union[TEngine, Dict[str, Any]]] = Field(
+    engine: TEngine | dict[str, Any] | None = Field(
         default=None, description="Optional main/primary engine (typed)"
     )
 
     # Private attribute to store the actual engine type
-    _engine_type: Optional[Type[TEngine]] = PrivateAttr(default=None)
+    _engine_type: type[TEngine] | None = PrivateAttr(default=None)
 
-    def __class_getitem__(cls, engine_type: Type[TEngine]) -> Type["TypedStateSchema"]:
-        """
-        Create a typed version of this schema with specific engine type.
+    def __class_getitem__(cls, engine_type: type[TEngine]) -> type[TypedStateSchema]:
+        """Create a typed version of this schema with specific engine type.
 
         This allows for syntax like TypedStateSchema[LLMEngine].
         """
@@ -79,7 +67,7 @@ class TypedStateSchema(StateSchema, Generic[TEngine]):
             _engine_type = engine_type
 
             # Override the engine field with the specific type
-            engine: Optional[Union[engine_type, Dict[str, Any]]] = Field(
+            engine: engine_type | dict[str, Any] | None = Field(
                 default=None, description=f"Optional {engine_type.__name__} engine"
             )
 
@@ -91,9 +79,8 @@ class TypedStateSchema(StateSchema, Generic[TEngine]):
 
     @field_validator("engine", mode="before")
     @classmethod
-    def validate_typed_engine(cls, v):
-        """
-        Enhanced engine validation that checks type if specified.
+    def validate_typed_engine(cls, v) -> Any:
+        """Enhanced engine validation that checks type if specified.
 
         Maintains backward compatibility while adding type checking.
         """
@@ -113,7 +100,8 @@ class TypedStateSchema(StateSchema, Generic[TEngine]):
 
                 logger = logging.getLogger(__name__)
                 logger.warning(
-                    f"Engine type mismatch: expected {cls._engine_type.__name__}, "
+                    f"Engine type mismatch: expected {
+                        cls._engine_type.__name__}, "
                     f"got {type(v).__name__}"
                 )
 
@@ -121,8 +109,7 @@ class TypedStateSchema(StateSchema, Generic[TEngine]):
 
 
 class MultiEngineStateSchema(StateSchema):
-    """
-    State schema optimized for multiple engines with clear typing.
+    """State schema optimized for multiple engines with clear typing.
 
     This schema provides better support for agents with multiple engines,
     with clear field naming and type safety.
@@ -141,18 +128,17 @@ class MultiEngineStateSchema(StateSchema):
     """
 
     # Override engines with better typing
-    engines: Dict[str, Union["Engine", Dict[str, Any]]] = Field(
+    engines: dict[str, Engine | dict[str, Any]] = Field(
         default_factory=dict, description="Registry of named engines with proper typing"
     )
 
     # Track engine types for validation
-    _engine_types: Dict[str, Type["Engine"]] = PrivateAttr(default_factory=dict)
+    _engine_types: dict[str, type[Engine]] = PrivateAttr(default_factory=dict)
 
     def register_engine(
-        self, name: str, engine: "Engine", engine_type: Optional[Type["Engine"]] = None
+        self, name: str, engine: Engine, engine_type: type[Engine] | None = None
     ) -> None:
-        """
-        Register an engine with optional type tracking.
+        """Register an engine with optional type tracking.
 
         Args:
             name: Name to register engine under
@@ -169,11 +155,8 @@ class MultiEngineStateSchema(StateSchema):
         if engine_type:
             self._engine_types[name] = engine_type
 
-    def get_typed_engine(
-        self, name: str, engine_type: Type[TEngine]
-    ) -> Optional[TEngine]:
-        """
-        Get an engine with type checking.
+    def get_typed_engine(self, name: str, engine_type: type[TEngine]) -> TEngine | None:
+        """Get an engine with type checking.
 
         Args:
             name: Name of engine to retrieve
@@ -205,7 +188,7 @@ class MultiEngineStateSchema(StateSchema):
         return engine
 
     @property
-    def llm_engine(self) -> Optional["Engine"]:
+    def llm_engine(self) -> Engine | None:
         """Typed accessor for LLM engine."""
         # Try standard names first
         for name in ["llm", "llm_engine", "main"]:
@@ -223,7 +206,7 @@ class MultiEngineStateSchema(StateSchema):
         return None
 
     @property
-    def retriever_engine(self) -> Optional["Engine"]:
+    def retriever_engine(self) -> Engine | None:
         """Typed accessor for retriever engine."""
         # Try standard names first
         for name in ["retriever", "retriever_engine", "rag"]:
@@ -242,8 +225,7 @@ class MultiEngineStateSchema(StateSchema):
 
 
 class HierarchicalStateSchema(BaseModel):
-    """
-    Hierarchical state schema for proper multi-agent isolation.
+    """Hierarchical state schema for proper multi-agent isolation.
 
     This schema provides a hierarchical structure that prevents field
     conflicts and enables proper agent isolation.
@@ -265,37 +247,36 @@ class HierarchicalStateSchema(BaseModel):
     class SharedState(BaseModel):
         """State shared across all agents."""
 
-        messages: List[Any] = Field(default_factory=list, description="Shared messages")
-        context: Dict[str, Any] = Field(
+        messages: list[Any] = Field(default_factory=list, description="Shared messages")
+        context: dict[str, Any] = Field(
             default_factory=dict, description="Shared context"
         )
 
     class AgentState(BaseModel):
         """Isolated state for individual agent."""
 
-        working_memory: Dict[str, Any] = Field(default_factory=dict)
-        local_tools: List[Any] = Field(default_factory=list)
-        engine: Optional[Dict[str, Any]] = None
+        working_memory: dict[str, Any] = Field(default_factory=dict)
+        local_tools: list[Any] = Field(default_factory=list)
+        engine: dict[str, Any] | None = None
 
     class RoutingState(BaseModel):
         """Routing control state."""
 
-        current_agent: Optional[str] = None
-        next_agent: Optional[str] = None
-        execution_history: List[str] = Field(default_factory=list)
+        current_agent: str | None = None
+        next_agent: str | None = None
+        execution_history: list[str] = Field(default_factory=list)
 
     # Main fields
     shared: SharedState = Field(default_factory=SharedState, description="Shared state")
-    agents: Dict[str, AgentState] = Field(
+    agents: dict[str, AgentState] = Field(
         default_factory=dict, description="Per-agent state"
     )
     routing: RoutingState = Field(
         default_factory=RoutingState, description="Routing state"
     )
 
-    def get_agent_view(self, agent_name: str) -> "AgentView":
-        """
-        Get an isolated view for a specific agent.
+    def get_agent_view(self, agent_name: str) -> AgentView:
+        """Get an isolated view for a specific agent.
 
         Args:
             agent_name: Name of agent to create view for
@@ -316,9 +297,8 @@ class HierarchicalStateSchema(BaseModel):
             parent_state=self,
         )
 
-    def merge_agent_results(self, agent_name: str, results: Dict[str, Any]) -> None:
-        """
-        Merge results from an agent back into the state.
+    def merge_agent_results(self, agent_name: str, results: dict[str, Any]) -> None:
+        """Merge results from an agent back into the state.
 
         Args:
             agent_name: Name of agent that produced results
@@ -335,10 +315,9 @@ class HierarchicalStateSchema(BaseModel):
 
 # Backward compatibility helpers
 def create_typed_state_schema(
-    base_schema: Type[StateSchema], engine_type: Optional[Type[TEngine]] = None
-) -> Type[StateSchema]:
-    """
-    Create a typed version of an existing state schema.
+    base_schema: type[StateSchema], engine_type: type[TEngine] | None = None
+) -> type[StateSchema]:
+    """Create a typed version of an existing state schema.
 
     Args:
         base_schema: Base schema class to extend
@@ -361,8 +340,6 @@ def create_typed_state_schema(
 
     class _TypedSchema(TypedStateSchema[engine_type], base_schema):
         """Typed version of the schema."""
-
-        pass
 
     # Set proper name
     _TypedSchema.__name__ = f"Typed{base_schema.__name__}"

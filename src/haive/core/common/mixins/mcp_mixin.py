@@ -235,7 +235,10 @@ class MCPMixin(BaseModel):
                             },
                         )
 
-                logger.info(f"Discovered {len(tools)} tools from {server_name}")
+                logger.info(
+                    f"Discovered {
+                        len(tools)} tools from {server_name}"
+                )
 
             except Exception as e:
                 logger.exception(f"Error discovering tools from {server_name}: {e}")
@@ -261,7 +264,10 @@ class MCPMixin(BaseModel):
                     )
                     self.mcp_resources.append(mcp_resource)
 
-                logger.info(f"Loaded {len(resources)} resources from {server_name}")
+                logger.info(
+                    f"Loaded {
+                        len(resources)} resources from {server_name}"
+                )
 
             except Exception as e:
                 logger.exception(f"Error loading resources from {server_name}: {e}")
@@ -287,7 +293,10 @@ class MCPMixin(BaseModel):
                     )
                     self.mcp_prompts[f"{server_name}_{prompt['name']}"] = template
 
-                logger.info(f"Loaded {len(prompts)} prompts from {server_name}")
+                logger.info(
+                    f"Loaded {
+                        len(prompts)} prompts from {server_name}"
+                )
 
             except Exception as e:
                 logger.exception(f"Error loading prompts from {server_name}: {e}")
@@ -337,9 +346,10 @@ class MCPMixin(BaseModel):
         if self.mcp_resources:
             resource_section = "\n## Available MCP Resources:\n"
             for resource in self.mcp_resources:
-                resource_section += (
-                    f"- {resource.name}: {resource.description} ({resource.uri})\n"
-                )
+                resource_section += f"- {
+                        resource.name}: {
+                        resource.description} ({
+                        resource.uri})\n"
             enhancements.append(resource_section)
 
         # Add MCP prompt information

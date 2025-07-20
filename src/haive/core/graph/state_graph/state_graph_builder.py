@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Tuple, Type, Union
+from typing import Any
 
 from haive.core.graph.models.graph_model import GraphModel
 from haive.core.graph.models.type_ref import TypeReference
@@ -8,9 +8,8 @@ from haive.core.graph.state_graph.pattern_registry import PatternRegistry
 class GraphBuilder:
     """Builder for constructing graph models."""
 
-    def __init__(self, name: str, state_schema: Optional[Type] = None):
-        """
-        Initialize a new graph builder.
+    def __init__(self, name: str, state_schema: type | None = None):
+        """Initialize a new graph builder.
 
         Args:
             name: Name of the graph
@@ -22,8 +21,7 @@ class GraphBuilder:
             self.graph.schema = TypeReference.from_type(state_schema)
 
     def add_node(self, name: str, node_spec: Any) -> "GraphBuilder":
-        """
-        Add a node to the graph.
+        """Add a node to the graph.
 
         Args:
             name: Node name
@@ -36,8 +34,7 @@ class GraphBuilder:
         return self
 
     def add_edge(self, source: str, target: str) -> "GraphBuilder":
-        """
-        Add an edge to the graph.
+        """Add an edge to the graph.
 
         Args:
             source: Source node name
@@ -49,9 +46,8 @@ class GraphBuilder:
         self.graph.add_edge(source, target)
         return self
 
-    def add_waiting_edge(self, sources: List[str], target: str) -> "GraphBuilder":
-        """
-        Add a waiting edge to the graph.
+    def add_waiting_edge(self, sources: list[str], target: str) -> "GraphBuilder":
+        """Add a waiting edge to the graph.
 
         Args:
             sources: Source node names
@@ -63,9 +59,8 @@ class GraphBuilder:
         self.graph.add_waiting_edge(sources, target)
         return self
 
-    def add_sequence(self, nodes: List[Union[str, Tuple[str, Any]]]) -> "GraphBuilder":
-        """
-        Add a sequence of nodes.
+    def add_sequence(self, nodes: list[str | tuple[str, Any]]) -> "GraphBuilder":
+        """Add a sequence of nodes.
 
         Args:
             nodes: List of node names or (name, spec) tuples
@@ -77,8 +72,7 @@ class GraphBuilder:
         return self
 
     def set_entry_point(self, node: str) -> "GraphBuilder":
-        """
-        Set the entry point for the graph.
+        """Set the entry point for the graph.
 
         Args:
             node: Entry point node name
@@ -94,8 +88,7 @@ class GraphBuilder:
         return self
 
     def set_finish_point(self, node: str) -> "GraphBuilder":
-        """
-        Set the finish point for the graph.
+        """Set the finish point for the graph.
 
         Args:
             node: Finish point node name
@@ -111,8 +104,7 @@ class GraphBuilder:
         return self
 
     def apply_pattern(self, pattern_name: str, **kwargs) -> "GraphBuilder":
-        """
-        Apply a pattern to the graph.
+        """Apply a pattern to the graph.
 
         Args:
             pattern_name: Name of the pattern to apply
@@ -145,8 +137,7 @@ class GraphBuilder:
         return self
 
     def build(self) -> GraphModel:
-        """
-        Build and validate the graph.
+        """Build and validate the graph.
 
         Returns:
             The built graph model
@@ -155,8 +146,7 @@ class GraphBuilder:
         return self.graph
 
     def register(self) -> GraphModel:
-        """
-        Build the graph and register it in the registry.
+        """Build the graph and register it in the registry.
 
         Returns:
             The registered graph model

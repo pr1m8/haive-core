@@ -1,171 +1,164 @@
-"""Specific Loader Implementations.
+"""Module exports."""
 
-This module contains specialized loader implementations for different source types.
-"""
+from specific.cloud import AzureBlobSource
+from specific.cloud import GCSSource
+from specific.cloud import S3Source
+from specific.cloud import can_handle
+from specific.cloud import create_loader
+from specific.cloud import get_confidence_score
+from specific.cloud import get_credential_requirements
+from specific.cloud import requires_authentication
+from specific.database import MongoDBSource
+from specific.database import PostgreSQLSource
+from specific.database import can_handle
+from specific.database import create_loader
+from specific.database import get_confidence_score
+from specific.database import get_credential_requirements
+from specific.database import requires_authentication
+from specific.database_advanced import BigQuerySource
+from specific.database_advanced import MySQLSource
+from specific.database_advanced import SQLiteSource
+from specific.database_advanced import analyze_schema
+from specific.database_advanced import can_handle
+from specific.database_advanced import create_loader
+from specific.database_advanced import get_confidence_score
+from specific.database_advanced import get_credential_requirements
+from specific.database_advanced import requires_authentication
+from specific.file_advanced import BibtexSource
+from specific.file_advanced import JupyterNotebookSource
+from specific.file_advanced import MHTMLSource
+from specific.file_advanced import OrgModeSource
+from specific.file_advanced import PythonCodeSource
+from specific.file_advanced import ReStructuredTextSource
+from specific.file_advanced import SubtitleSource
+from specific.file_advanced import TSVSource
+from specific.file_advanced import VisioSource
+from specific.file_advanced import create_loader
+from specific.files_code import CppSource
+from specific.files_code import GoSource
+from specific.files_code import JavaScriptSource
+from specific.files_code import JavaSource
+from specific.files_code import JupyterNotebookSource
+from specific.files_code import PythonCodeSource
+from specific.files_code import RubySource
+from specific.files_code import RustSource
+from specific.files_code import ShellScriptSource
+from specific.files_code import create_loader
+from specific.files_data import CSVSource
+from specific.files_data import JSONSource
+from specific.files_data import TOMLSource
+from specific.files_data import TSVSource
+from specific.files_data import XMLSource
+from specific.files_data import YAMLSource
+from specific.files_data import create_loader
+from specific.files_media import CHMSource
+from specific.files_media import EPubSource
+from specific.files_media import HTMLSource
+from specific.files_media import ImageSource
+from specific.files_media import MHTMLSource
+from specific.files_media import PDFSource
+from specific.files_media import SubtitleSource
+from specific.files_media import create_loader
+from specific.files_office import ExcelSource
+from specific.files_office import OpenDocumentTextSource
+from specific.files_office import PowerPointSource
+from specific.files_office import RTFSource
+from specific.files_office import VisioSource
+from specific.files_office import WordDocumentSource
+from specific.files_office import create_loader
+from specific.files_scientific import BibtexSource
+from specific.files_scientific import CONLLUSource
+from specific.files_scientific import FortranSource
+from specific.files_scientific import MathMLSource
+from specific.files_scientific import MatlabSource
+from specific.files_scientific import RSource
+from specific.files_scientific import create_loader
+from specific.files_text import AsciiDocSource
+from specific.files_text import LaTeXSource
+from specific.files_text import MarkdownSource
+from specific.files_text import OrgModeSource
+from specific.files_text import ReStructuredTextSource
+from specific.files_text import TextFileSource
+from specific.files_text import create_loader
+from specific.services import ConfluenceSource
+from specific.services import GutenbergSource
+from specific.services import NotionSource
+from specific.services import ObsidianSource
+from specific.services import ReadTheDocsSource
+from specific.services import SlackSource
+from specific.services import can_handle
+from specific.services import create_loader
+from specific.services import get_confidence_score
+from specific.services import get_credential_requirements
+from specific.services import requires_authentication
+from specific.web import ArXivSource
+from specific.web import BasicWebSource
+from specific.web import GitHubSource
+from specific.web import PlaywrightWebSource
+from specific.web import WikipediaSource
+from specific.web import can_handle
+from specific.web import create_loader
+from specific.web import get_confidence_score
+from specific.web import get_credential_requirements
+from specific.web import requires_authentication
+from specific.web_advanced import HuggingFaceSource
+from specific.web_advanced import NewsURLSource
+from specific.web_advanced import PubMedSource
+from specific.web_advanced import RSSFeedSource
+from specific.web_advanced import RecursiveURLSource
+from specific.web_advanced import SeleniumWebSource
+from specific.web_advanced import SitemapSource
+from specific.web_advanced import can_handle
+from specific.web_advanced import create_loader
+from specific.web_advanced import get_confidence_score
+from specific.web_advanced import get_credential_requirements
+from specific.web_advanced import requires_authentication
+from specific.web_api import ApifyDatasetSource
+from specific.web_api import AssemblyAITranscriptSource
+from specific.web_api import BraveSearchSource
+from specific.web_api import DiffbotSource
+from specific.web_api import EtherscanSource
+from specific.web_api import GoogleSearchSource
+from specific.web_api import NewsAPISource
+from specific.web_api import ScrapflySource
+from specific.web_api import ScrapingBeeLoader
+from specific.web_api import ScrapingBeeSource
+from specific.web_api import create_loader
+from specific.web_api import load
+from specific.web_github_enhanced import GitHubActionsLoader
+from specific.web_github_enhanced import GitHubActionsSource
+from specific.web_github_enhanced import GitHubDiscussionsLoader
+from specific.web_github_enhanced import GitHubDiscussionsSource
+from specific.web_github_enhanced import GitHubGistsLoader
+from specific.web_github_enhanced import GitHubGistsSource
+from specific.web_github_enhanced import GitHubReleasesLoader
+from specific.web_github_enhanced import GitHubReleasesSource
+from specific.web_github_enhanced import GitHubWikiLoader
+from specific.web_github_enhanced import GitHubWikiSource
+from specific.web_github_enhanced import create_loader
+from specific.web_github_enhanced import load
+from specific.web_huggingface_enhanced import ExtendedHuggingFaceDatasetLoader
+from specific.web_huggingface_enhanced import HuggingFaceCollectionsLoader
+from specific.web_huggingface_enhanced import HuggingFaceCollectionsSource
+from specific.web_huggingface_enhanced import HuggingFaceExtendedDatasetSource
+from specific.web_huggingface_enhanced import HuggingFaceModelCardLoader
+from specific.web_huggingface_enhanced import HuggingFaceModelCardSource
+from specific.web_huggingface_enhanced import HuggingFaceOrganizationsLoader
+from specific.web_huggingface_enhanced import HuggingFaceOrganizationsSource
+from specific.web_huggingface_enhanced import HuggingFacePapersLoader
+from specific.web_huggingface_enhanced import HuggingFacePapersSource
+from specific.web_huggingface_enhanced import create_loader
+from specific.web_huggingface_enhanced import load
+from specific.web_social import BiliBiliSource
+from specific.web_social import DiscordSource
+from specific.web_social import FacebookChatSource
+from specific.web_social import HackerNewsSource
+from specific.web_social import IFixitSource
+from specific.web_social import IMSDbSource
+from specific.web_social import MastodonSource
+from specific.web_social import RedditSource
+from specific.web_social import TwitterSource
+from specific.web_social import WhatsAppSource
+from specific.web_social import create_loader
 
-# Database sources - only import what exists
-from haive.core.engine.document.loaders.specific.database import (
-    MongoDBSource,
-    PostgreSQLSource,
-)
-
-# Cloud sources - temporarily commented out until implemented
-# from .cloud import (
-#     S3Source,
-#     GCSSource,
-#     AzureBlobSource,
-#     GoogleDriveSource,
-#     OneDriveSource,
-#     DropboxSource,
-#     SharePointSource,
-# )
-
-# Web sources - temporarily commented out until verified
-# from .web import (
-#     GitHubSource,
-#     ArXivSource,
-#     WikipediaSource,
-#     PlaywrightWebSource,
-#     BasicWebSource,
-#     SitemapSource,
-#     SlackSource,
-#     TelegramSource,
-#     TwitterSource,
-#     JiraSource,
-#     ConfluenceSource,
-#     NewsAPISource,
-#     RSSFeedSource,
-#     HuggingFaceDatasetSource,
-#     PubMedSource,
-#     FireCrawlSource,
-#     CrawlerSource,
-# )
-
-# # Social media and community sources
-# from .web_social import (
-#     RedditSource,
-#     HackerNewsSource,
-#     TwitterSource as TwitterSocialSource,
-#     DiscordSource,
-#     MastodonSource,
-#     WhatsAppSource,
-#     FacebookChatSource,
-#     IFixitSource,
-#     IMSDbSource,
-#     BiliBiliSource,
-# )
-
-# # Enhanced GitHub sources
-# from .web_github_enhanced import (
-#     GitHubDiscussionsSource,
-#     GitHubGistsSource,
-#     GitHubReleasesSource,
-#     GitHubActionsSource,
-#     GitHubWikiSource,
-# )
-
-# # Enhanced HuggingFace sources
-# from .web_huggingface_enhanced import (
-#     HuggingFacePapersSource,
-#     HuggingFaceCollectionsSource,
-#     HuggingFaceOrganizationsSource,
-#     HuggingFaceExtendedDatasetSource,
-#     HuggingFaceModelCardSource,
-# )
-
-# # API-based web sources
-# from .web_api import (
-#     BraveSearchSource,
-#     GoogleSearchSource,
-#     ApifyDatasetSource,
-#     DiffbotSource,
-#     ScrapingBeeSource,
-#     ScrapflySource,
-#     NewsAPISource as NewsAPISourceEnhanced,
-#     AssemblyAITranscriptSource,
-#     EtherscanSource,
-# )
-
-# # Service sources
-# from .services import (
-#     NotionDBSource,
-#     ObsidianSource,
-#     EvernoteSource,
-#     OneNoteSource,
-#     RoamSource,
-#     TrelloSource,
-#     AsanaSource,
-#     AirtableSource,
-# )
-
-# # Office file sources
-# from .files_office import (
-#     WordDocumentSource,
-#     ExcelSource,
-#     PowerPointSource,
-#     ODTSource,
-#     ODSSource,
-#     ODPSource,
-#     RTFSource,
-# )
-
-# # Data file sources
-# from .files_data import (
-#     CSVSource,
-#     TSVSource,
-#     JSONSource,
-#     XMLSource,
-#     YAMLSource,
-#     TOMLSource,
-# )
-
-# # Code file sources
-# from .files_code import (
-#     PythonCodeSource,
-#     JupyterNotebookSource,
-#     JavaScriptSource,
-#     CppSource,
-#     JavaSource,
-#     GoSource,
-#     RustSource,
-#     RubySource,
-#     ShellScriptSource,
-# )
-
-# # Text file sources
-# from .files_text import (
-#     TextFileSource,
-#     MarkdownSource,
-#     ReStructuredTextSource,
-#     LaTeXSource,
-#     OrgModeSource,
-#     AsciiDocSource,
-# )
-
-# # Media file sources
-# from .files_media import (
-#     PDFSource,
-#     ImageSource,
-#     SubtitleSource,
-#     EPubSource,
-#     MHTMLSource,
-#     HTMLSource,
-#     CHMSource,
-# )
-
-# # Scientific file sources
-# from .files_scientific import (
-#     BibtexSource,
-#     CONLLUSource,
-#     MathMLSource,
-#     FortranSource,
-#     MatlabSource,
-#     RSource,
-# )
-
-# Export only the sources that are actually implemented
-__all__ = [
-    # Database sources
-    "MongoDBSource",
-    "PostgreSQLSource",
-]
+__all__ = ['ApifyDatasetSource', 'ArXivSource', 'AsciiDocSource', 'AssemblyAITranscriptSource', 'AzureBlobSource', 'BasicWebSource', 'BibtexSource', 'BigQuerySource', 'BiliBiliSource', 'BraveSearchSource', 'CHMSource', 'CONLLUSource', 'CSVSource', 'ConfluenceSource', 'CppSource', 'DiffbotSource', 'DiscordSource', 'EPubSource', 'EtherscanSource', 'ExcelSource', 'ExtendedHuggingFaceDatasetLoader', 'FacebookChatSource', 'FortranSource', 'GCSSource', 'GitHubActionsLoader', 'GitHubActionsSource', 'GitHubDiscussionsLoader', 'GitHubDiscussionsSource', 'GitHubGistsLoader', 'GitHubGistsSource', 'GitHubReleasesLoader', 'GitHubReleasesSource', 'GitHubSource', 'GitHubWikiLoader', 'GitHubWikiSource', 'GoSource', 'GoogleSearchSource', 'GutenbergSource', 'HTMLSource', 'HackerNewsSource', 'HuggingFaceCollectionsLoader', 'HuggingFaceCollectionsSource', 'HuggingFaceExtendedDatasetSource', 'HuggingFaceModelCardLoader', 'HuggingFaceModelCardSource', 'HuggingFaceOrganizationsLoader', 'HuggingFaceOrganizationsSource', 'HuggingFacePapersLoader', 'HuggingFacePapersSource', 'HuggingFaceSource', 'IFixitSource', 'IMSDbSource', 'ImageSource', 'JSONSource', 'JavaScriptSource', 'JavaSource', 'JupyterNotebookSource', 'LaTeXSource', 'MHTMLSource', 'MarkdownSource', 'MastodonSource', 'MathMLSource', 'MatlabSource', 'MongoDBSource', 'MySQLSource', 'NewsAPISource', 'NewsURLSource', 'NotionSource', 'ObsidianSource', 'OpenDocumentTextSource', 'OrgModeSource', 'PDFSource', 'PlaywrightWebSource', 'PostgreSQLSource', 'PowerPointSource', 'PubMedSource', 'PythonCodeSource', 'RSSFeedSource', 'RSource', 'RTFSource', 'ReStructuredTextSource', 'ReadTheDocsSource', 'RecursiveURLSource', 'RedditSource', 'RubySource', 'RustSource', 'S3Source', 'SQLiteSource', 'ScrapflySource', 'ScrapingBeeLoader', 'ScrapingBeeSource', 'SeleniumWebSource', 'ShellScriptSource', 'SitemapSource', 'SlackSource', 'SubtitleSource', 'TOMLSource', 'TSVSource', 'TextFileSource', 'TwitterSource', 'VisioSource', 'WhatsAppSource', 'WikipediaSource', 'WordDocumentSource', 'XMLSource', 'YAMLSource', 'analyze_schema', 'can_handle', 'create_loader', 'get_confidence_score', 'get_credential_requirements', 'load', 'requires_authentication']

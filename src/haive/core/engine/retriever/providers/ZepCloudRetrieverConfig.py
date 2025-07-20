@@ -1,5 +1,6 @@
 """Zep Cloud Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Zep Cloud retriever,
 which retrieves conversation history and memory from Zep's cloud-hosted
 memory service. Zep Cloud provides managed long-term memory storage
@@ -147,7 +148,7 @@ class ZepCloudRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a Zep Cloud retriever from this configuration.
 
         Returns:

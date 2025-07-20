@@ -1,12 +1,104 @@
 """Multi-agent state with hierarchical agent management and recompilation support.
 
-This module provides a state schema for managing multiple agents without schema
-flattening, maintaining hierarchical access with proper typing for the graph API.
+This module provides a comprehensive state schema for managing multiple agents in
+sophisticated multi-agent workflows without schema flattening, maintaining
+hierarchical access patterns with proper typing for the graph API.
+
+Key Features:
+    - **Hierarchical Agent Management**: Agents stored as first-class fields with isolated states
+    - **No Schema Flattening**: Each agent maintains its own schema independently
+    - **Direct Field Updates**: Agents with output_schema update container fields directly
+    - **Recompilation Tracking**: Dynamic agent updates with graph recompilation support
+    - **Execution Orchestration**: Sequential and parallel execution coordination
+    - **Tool Integration**: Inherits comprehensive tool management from ToolState
+    - **Token Tracking**: Built-in token usage monitoring for cost management
+
+Architecture:
+    The MultiAgentState follows a container-based approach where:
+
+    1. **Agent Storage**: Agents are stored in the state as first-class objects
+    2. **State Isolation**: Each agent has isolated state in agent_states dict
+    3. **Shared Resources**: Common fields (messages, tools, engines) are shared
+    4. **Direct Updates**: Structured output agents update container fields directly
+    5. **Execution Tracking**: Complete execution history and coordination metadata
+
+Usage Patterns:
+    - **Self-Discover Workflows**: Sequential agents building on each other's outputs
+    - **Parallel Processing**: Multiple agents working on different aspects
+    - **Hierarchical Systems**: Nested agent structures with coordinator agents
+    - **Dynamic Workflows**: Runtime agent composition and recompilation
+
+Examples:
+    Basic multi-agent setup::
+
+        from haive.core.schema.prebuilt.multi_agent_state import MultiAgentState
+        from haive.agents.simple import SimpleAgent
+        from haive.core.engine.aug_llm import AugLLMConfig
+
+        # Create agents with structured output
+        planner = SimpleAgent(
+            name="planner",
+            engine=AugLLMConfig(),
+            structured_output_model=PlanningResult
+        )
+
+        executor = SimpleAgent(
+            name="executor",
+            engine=AugLLMConfig(),
+            structured_output_model=ExecutionResult
+        )
+
+        # Initialize state
+        state = MultiAgentState(agents=[planner, executor])
+
+    Self-Discover workflow::
+
+        # Sequential execution where agents read each other's outputs
+        from haive.core.graph.node.agent_node_v3 import create_agent_node_v3
+
+        # Create nodes
+        plan_node = create_agent_node_v3("planner")
+        exec_node = create_agent_node_v3("executor")
+
+        # Execute sequence
+        result1 = plan_node(state, config)  # Updates planning_result field
+
+        # Apply updates
+        for key, value in result1.update.items():
+            if hasattr(state, key):
+                setattr(state, key, value)
+
+        # Executor reads planning_result directly from state
+        result2 = exec_node(state, config)  # Reads planning_result, outputs execution_result
+
+    LangGraph integration::
+
+        from langgraph.graph import StateGraph
+
+        # Build graph with multi-agent state
+        graph = StateGraph(MultiAgentState)
+        graph.add_node("plan", create_agent_node_v3("planner"))
+        graph.add_node("execute", create_agent_node_v3("executor"))
+        graph.add_node("review", create_agent_node_v3("reviewer"))
+
+        # Define execution flow
+        graph.add_edge("plan", "execute")
+        graph.add_edge("execute", "review")
+
+        # Compile and run
+        app = graph.compile()
+        final_state = app.invoke(state)
+
+See Also:
+    - :class:`haive.core.schema.prebuilt.tool_state.ToolState`: Base state with tool management
+    - :class:`haive.core.graph.node.agent_node_v3.AgentNodeV3Config`: Agent execution nodes
+    - :class:`haive.agents.base.agent.Agent`: Base agent class
+    - :mod:`langgraph.graph`: LangGraph integration
 """
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from pydantic import Field, computed_field, field_validator, model_validator
 from rich.console import Console
@@ -16,7 +108,14 @@ from rich.tree import Tree
 
 from haive.core.schema.prebuilt.tool_state import ToolState
 
-if TYPE_CHECKING:
+# Import Agent to be available for type resolution
+try:
+    from haive.agents.base import Agent
+except ImportError:
+    # Handle circular import - Agent will be available when needed
+    Agent = None
+
+if TYPE_CHECKING and Agent is None:
     from haive.agents.base import Agent
 
 # Rich console for debug visualization
@@ -26,47 +125,160 @@ console = Console()
 class MultiAgentState(ToolState):
     """State schema for multi-agent systems with hierarchical management.
 
-    This schema extends ToolState to provide multi-agent coordination while
-    maintaining type safety and hierarchical access patterns. Unlike traditional
+    This schema extends ToolState to provide sophisticated multi-agent coordination
+    while maintaining type safety and hierarchical access patterns. Unlike traditional
     approaches that flatten agent schemas, this maintains each agent's schema
-    independently while providing coordinated execution.
+    independently while providing coordinated execution and direct field updates.
 
-    Key features:
-    - Agents stored as first-class fields (agents IN the state)
-    - No schema flattening - each agent maintains its own schema
-    - Hierarchical state management with isolated agent states
-    - Recompilation tracking for dynamic agent updates
-    - Tool routing inherited from ToolState
-    - Token usage tracking inherited from MessagesStateWithTokenUsage
+    The MultiAgentState is designed to work seamlessly with AgentNodeV3 to enable
+    advanced multi-agent workflows like Self-Discover, where agents can read each
+    other's outputs directly from state fields rather than navigating complex
+    nested structures.
 
-    The schema supports both list and dict initialization of agents, automatically
-    converting lists to dicts keyed by agent name for consistent access.
+    Key Features:
+        - **Hierarchical Agent Storage**: Agents stored as first-class fields in the state
+        - **No Schema Flattening**: Each agent maintains its own schema independently
+        - **Direct Field Updates**: Agents with output_schema update container fields directly
+        - **State Isolation**: Each agent has isolated state in agent_states dict
+        - **Recompilation Tracking**: Dynamic agent updates with graph recompilation support
+        - **Execution Orchestration**: Sequential and parallel execution coordination
+        - **Tool Integration**: Inherits comprehensive tool management from ToolState
+        - **Token Tracking**: Built-in token usage monitoring inherited from MessagesStateWithTokenUsage
 
-    Example:
-        ```python
-        from haive.core.schema.prebuilt import MultiAgentState
-        from haive.agents.simple import SimpleAgent
+    Architecture:
+        The state follows a container-based approach where agents are stored as
+        first-class objects with isolated states, while shared resources like
+        messages, tools, and engines are available to all agents.
 
-        # Create agents
-        planner = SimpleAgent(name="planner")
-        executor = SimpleAgent(name="executor")
+    Initialization:
+        The schema supports both list and dict initialization of agents, automatically
+        converting lists to dicts keyed by agent name for consistent access.
 
-        # Initialize with list (converted to dict)
-        state = MultiAgentState(agents=[planner, executor])
+    Attributes:
+        agents (Union[List[Agent], Dict[str, Agent]]): Agent instances contained in state.
+            Can be initialized as list (converted to dict) or dict directly.
+        agent_states (Dict[str, Dict[str, Any]]): Isolated state for each agent,
+            preserving their schemas without flattening.
+        active_agent (Optional[str]): Currently executing agent name for tracking.
+        agent_outputs (Dict[str, Any]): Outputs from each agent execution (legacy support).
+        agent_execution_order (List[str]): Order of agent execution for coordination.
+        agents_needing_recompile (Set[str]): Agent names requiring graph recompilation.
+        recompile_count (int): Total number of recompilations performed.
+        recompile_history (List[Dict[str, Any]]): History of recompilation events.
 
-        # Or initialize with dict
-        state = MultiAgentState(agents={
-            "plan": planner,
-            "exec": executor
-        })
+    Examples:
+        Basic initialization::
 
-        # Access agents hierarchically
-        planner_state = state.get_agent_state("plan")
-        state.update_agent_state("plan", {"current_plan": "..."})
+            from haive.core.schema.prebuilt.multi_agent_state import MultiAgentState
+            from haive.agents.simple import SimpleAgent
+            from haive.core.engine.aug_llm import AugLLMConfig
 
-        # Mark for recompilation
-        state.mark_agent_for_recompile("plan")
-        ```
+            # Create agents with structured output
+            planner = SimpleAgent(
+                name="planner",
+                engine=AugLLMConfig(),
+                structured_output_model=PlanningResult
+            )
+
+            executor = SimpleAgent(
+                name="executor",
+                engine=AugLLMConfig(),
+                structured_output_model=ExecutionResult
+            )
+
+            # Initialize with list (converted to dict)
+            state = MultiAgentState(agents=[planner, executor])
+
+            # Or initialize with dict directly
+            state = MultiAgentState(agents={
+                "plan": planner,
+                "exec": executor
+            })
+
+        State management::
+
+            # Access agent state
+            planner_state = state.get_agent_state("planner")
+            print(planner_state)  # {"current_plan": "...", "confidence": 0.9}
+
+            # Update agent state
+            state.update_agent_state("planner", {
+                "current_plan": "Market analysis and strategy",
+                "confidence": 0.95
+            })
+
+            # Check execution status
+            if state.has_active_agent():
+                print(f"Currently executing: {state.active_agent}")
+
+        Recompilation management::
+
+            # Mark agent for recompilation
+            state.mark_agent_for_recompile("planner", "Updated model parameters")
+
+            # Check recompilation needs
+            if state.needs_any_recompile():
+                agents_to_recompile = state.get_agents_needing_recompile()
+                print(f"Agents needing recompilation: {agents_to_recompile}")
+
+            # Resolve recompilation
+            state.resolve_agent_recompile("planner", success=True)
+
+        Self-Discover workflow::
+
+            # Sequential agents with direct field access
+            from haive.core.graph.node.agent_node_v3 import create_agent_node_v3
+
+            # Setup state with structured output agents
+            state = MultiAgentState(agents={
+                "selector": module_selector_agent,
+                "adapter": module_adapter_agent,
+                "reasoner": reasoning_agent
+            })
+
+            # Create nodes
+            select_node = create_agent_node_v3("selector")
+            adapt_node = create_agent_node_v3("adapter")
+            reason_node = create_agent_node_v3("reasoner")
+
+            # Execute sequence - each agent reads previous outputs directly
+            result1 = select_node(state, config)     # Updates: selected_modules, confidence
+            result2 = adapt_node(state, config)      # Reads: selected_modules, Updates: adapted_modules
+            result3 = reason_node(state, config)     # Reads: adapted_modules, Updates: final_reasoning
+
+        LangGraph integration::
+
+            from langgraph.graph import StateGraph
+
+            # Build graph with multi-agent state
+            graph = StateGraph(MultiAgentState)
+
+            # Add agent nodes
+            graph.add_node("analyze", create_agent_node_v3("analyzer"))
+            graph.add_node("plan", create_agent_node_v3("planner"))
+            graph.add_node("execute", create_agent_node_v3("executor"))
+            graph.add_node("review", create_agent_node_v3("reviewer"))
+
+            # Define execution flow
+            graph.add_edge("analyze", "plan")
+            graph.add_edge("plan", "execute")
+            graph.add_edge("execute", "review")
+
+            # Compile and execute
+            app = graph.compile()
+            final_state = app.invoke(state)
+
+    Note:
+        When using agents with structured output schemas, their outputs will be
+        used to update state fields directly (like engine nodes), enabling clean
+        cross-agent communication. Message-based agents continue to use the
+        traditional agent_outputs pattern for backward compatibility.
+
+    See Also:
+        - :class:`haive.core.schema.prebuilt.tool_state.ToolState`: Base state class
+        - :class:`haive.core.graph.node.agent_node_v3.AgentNodeV3Config`: Agent execution nodes
+        - :class:`haive.agents.base.agent.Agent`: Base agent class
+        - :mod:`langgraph.graph`: LangGraph integration
     """
 
     # ========================================================================
@@ -74,7 +286,7 @@ class MultiAgentState(ToolState):
     # ========================================================================
 
     # Agents can be passed as list or dict
-    agents: list["Agent"] | dict[str, "Agent"] = Field(
+    agents: list[Agent] | dict[str, Agent] = Field(
         default_factory=dict,
         description="Agent instances contained in this state (not flattened)",
     )
@@ -125,8 +337,8 @@ class MultiAgentState(ToolState):
     @field_validator("agents", mode="before")
     @classmethod
     def convert_agents_to_dict(
-        cls, v: list["Agent"] | dict[str, "Agent"]
-    ) -> dict[str, "Agent"]:
+        cls, v: list[Agent] | dict[str, Agent]
+    ) -> dict[str, Agent]:
         """Convert list of agents to dict keyed by agent name.
 
         This allows flexible initialization while maintaining consistent
@@ -143,7 +355,10 @@ class MultiAgentState(ToolState):
         return v
 
     @model_validator(mode="after")
-    def setup_agent_hierarchy(self) -> "MultiAgentState":
+
+
+    @classmethod
+    def setup_agent_hierarchy(cls) -> MultiAgentState:
         """Initialize agent hierarchy and sync engines.
 
         This validator:
@@ -292,7 +507,7 @@ class MultiAgentState(ToolState):
     # UTILITY METHODS
     # ========================================================================
 
-    def get_agent(self, agent_name: str) -> Optional["Agent"]:
+    def get_agent(self, agent_name: str) -> Agent | None:
         """Get an agent by name.
 
         Args:
@@ -441,7 +656,7 @@ class MultiAgentState(ToolState):
                 status = (
                     "✅ Completed" if agent_name in self.agent_outputs else "⏳ Pending"
                 )
-                order_branch.add(f"{i+1}. {agent_name} - {status}")
+                order_branch.add(f"{i + 1}. {agent_name} - {status}")
 
         # Agent outputs
         if self.agent_outputs:
@@ -481,7 +696,10 @@ class MultiAgentState(ToolState):
             if agent_engines:
                 agent_eng_branch = engines_branch.add("🤖 Agent Engines")
                 for agent_name, engine_names in agent_engines.items():
-                    agent_eng_branch.add(f"{agent_name}: {len(engine_names)} engines")
+                    agent_eng_branch.add(
+                        f"{agent_name}: {
+                            len(engine_names)} engines"
+                    )
 
             # Show global engines
             if global_engines:

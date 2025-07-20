@@ -1,12 +1,11 @@
-"""
-Utility and factory functions for easy component discovery.
-"""
+"""Utility and factory functions for easy component discovery."""
 
 import json
 import logging
 from collections import defaultdict
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from typing import Any
 
 from haive.core.utils.haive_discovery.base_analyzer import ComponentAnalyzer
 from haive.core.utils.haive_discovery.component_info import ComponentInfo
@@ -22,12 +21,11 @@ logger = logging.getLogger(__name__)
 
 
 def quick_discover(
-    project_root: Optional[str] = None,
-    component_type: Optional[str] = None,
+    project_root: str | None = None,
+    component_type: str | None = None,
     create_tools: bool = True,
-) -> List[ComponentInfo]:
-    """
-    Quick discovery of components with minimal configuration.
+) -> list[ComponentInfo]:
+    """Quick discovery of components with minimal configuration.
 
     Args:
         project_root: Root directory of the Haive project (auto-detected if None)
@@ -60,12 +58,11 @@ def quick_discover(
 
     if component_type in type_map:
         return type_map[component_type](create_tools)
-    else:
-        logger.warning(f"Unknown component type: {component_type}")
-        return []
+    logger.warning(f"Unknown component type: {component_type}")
+    return []
 
 
-def discover_tools(project_root: Optional[str] = None) -> List[ComponentInfo]:
+def discover_tools(project_root: str | None = None) -> list[ComponentInfo]:
     """Discover all tools (individual tools and toolkits)."""
     if project_root is None:
         project_root = _find_haive_root()
@@ -76,7 +73,7 @@ def discover_tools(project_root: Optional[str] = None) -> List[ComponentInfo]:
     return tools + toolkits
 
 
-def discover_retrievers(project_root: Optional[str] = None) -> List[ComponentInfo]:
+def discover_retrievers(project_root: str | None = None) -> list[ComponentInfo]:
     """Discover all retrievers."""
     if project_root is None:
         project_root = _find_haive_root()
@@ -85,7 +82,7 @@ def discover_retrievers(project_root: Optional[str] = None) -> List[ComponentInf
     return discovery.discover_retrievers(create_tools=True)
 
 
-def discover_vector_stores(project_root: Optional[str] = None) -> List[ComponentInfo]:
+def discover_vector_stores(project_root: str | None = None) -> list[ComponentInfo]:
     """Discover all vector stores."""
     if project_root is None:
         project_root = _find_haive_root()
@@ -94,7 +91,7 @@ def discover_vector_stores(project_root: Optional[str] = None) -> List[Component
     return discovery.discover_vector_stores(create_tools=True)
 
 
-def discover_loaders(project_root: Optional[str] = None) -> List[ComponentInfo]:
+def discover_loaders(project_root: str | None = None) -> list[ComponentInfo]:
     """Discover all document loaders."""
     if project_root is None:
         project_root = _find_haive_root()
@@ -103,7 +100,7 @@ def discover_loaders(project_root: Optional[str] = None) -> List[ComponentInfo]:
     return discovery.discover_document_loaders(create_tools=True)
 
 
-def discover_engines(project_root: Optional[str] = None) -> List[ComponentInfo]:
+def discover_engines(project_root: str | None = None) -> list[ComponentInfo]:
     """Discover all engines."""
     if project_root is None:
         project_root = _find_haive_root()
@@ -113,10 +110,9 @@ def discover_engines(project_root: Optional[str] = None) -> List[ComponentInfo]:
 
 
 def discover_all(
-    project_root: Optional[str] = None, create_tools: bool = True
-) -> List[ComponentInfo]:
-    """
-    Discover all components across all categories.
+    project_root: str | None = None, create_tools: bool = True
+) -> list[ComponentInfo]:
+    """Discover all components across all categories.
 
     Args:
         project_root: Root directory of the Haive project
@@ -143,9 +139,8 @@ def discover_all(
 # ============================================================================
 
 
-def get_all_tools(components: List[ComponentInfo]) -> List[Any]:
-    """
-    Extract all tool instances from components.
+def get_all_tools(components: list[ComponentInfo]) -> list[Any]:
+    """Extract all tool instances from components.
 
     Args:
         components: List of component info objects
@@ -166,10 +161,9 @@ def get_all_tools(components: List[ComponentInfo]) -> List[Any]:
 
 
 def get_tools_by_type(
-    components: List[ComponentInfo], component_type: str
-) -> List[Any]:
-    """
-    Get tools created from a specific component type.
+    components: list[ComponentInfo], component_type: str
+) -> list[Any]:
+    """Get tools created from a specific component type.
 
     Args:
         components: List of component info objects
@@ -187,9 +181,8 @@ def get_tools_by_type(
 
 def create_tool_from_component(
     component: ComponentInfo, force: bool = False
-) -> Optional[Any]:
-    """
-    Create a tool from a component if possible.
+) -> Any | None:
+    """Create a tool from a component if possible.
 
     Args:
         component: Component info object
@@ -225,7 +218,10 @@ def create_tool_from_component(
             component.tool_instance = tool
             return tool
         except Exception as e:
-            logger.error(f"Failed to create tool from {component.name}: {e}")
+            logger.exception(
+                f"Failed to create tool from {
+                    component.name}: {e}"
+            )
 
     return None
 
@@ -235,7 +231,7 @@ def create_tool_from_component(
 # ============================================================================
 
 
-def get_all_engine_configs(components: List[ComponentInfo]) -> List[Dict[str, Any]]:
+def get_all_engine_configs(components: list[ComponentInfo]) -> list[dict[str, Any]]:
     """Extract all engine configurations from components."""
     configs = []
     for comp in components:
@@ -245,8 +241,8 @@ def get_all_engine_configs(components: List[ComponentInfo]) -> List[Dict[str, An
 
 
 def get_engines_by_type(
-    components: List[ComponentInfo], engine_type: str
-) -> List[Dict[str, Any]]:
+    components: list[ComponentInfo], engine_type: str
+) -> list[dict[str, Any]]:
     """Get engine configs of a specific type."""
     configs = []
     for comp in components:
@@ -264,12 +260,11 @@ def get_engines_by_type(
 
 
 def save_discovery_report(
-    components: List[ComponentInfo],
-    output_dir: Optional[str] = None,
+    components: list[ComponentInfo],
+    output_dir: str | None = None,
     format: str = "all",
-) -> Dict[str, str]:
-    """
-    Save a comprehensive discovery report.
+) -> dict[str, str]:
+    """Save a comprehensive discovery report.
 
     Args:
         components: List of discovered components
@@ -279,10 +274,9 @@ def save_discovery_report(
     Returns:
         Dictionary of created file paths
     """
-    if output_dir is None:
-        output_dir_path = Path.cwd() / "discovery_reports"
-    else:
-        output_dir_path = Path(output_dir)
+    output_dir_path = (
+        Path.cwd() / "discovery_reports" if output_dir is None else Path(output_dir)
+    )
 
     output_dir_path.mkdir(parents=True, exist_ok=True)
 
@@ -309,7 +303,7 @@ def save_discovery_report(
 
 
 def generate_markdown_report(
-    components: List[ComponentInfo], output_dir: Union[str, Path]
+    components: list[ComponentInfo], output_dir: str | Path
 ) -> str:
     """Generate a markdown report of discovered components."""
     output_dir = Path(output_dir)
@@ -327,7 +321,8 @@ def generate_markdown_report(
         f.write(f"- **Components with Tools**: {stats['with_tools']}\n")
         f.write(f"- **Components with Engine Configs**: {stats['with_engines']}\n")
         f.write(
-            f"- **Components with Environment Variables**: {stats['with_env_vars']}\n\n"
+            f"- **Components with Environment Variables**: {
+                stats['with_env_vars']}\n\n"
         )
 
         # By type
@@ -346,7 +341,7 @@ def generate_markdown_report(
 
 
 def generate_json_catalog(
-    components: List[ComponentInfo], output_dir: Union[str, Path]
+    components: list[ComponentInfo], output_dir: str | Path
 ) -> str:
     """Generate a JSON catalog of discovered components."""
     output_dir = Path(output_dir)
@@ -372,9 +367,8 @@ def generate_json_catalog(
 # ============================================================================
 
 
-def analyze_failed_imports(discovery: HaiveComponentDiscovery) -> Dict[str, List[str]]:
-    """
-    Analyze failed module imports from a discovery run.
+def analyze_failed_imports(discovery: HaiveComponentDiscovery) -> dict[str, list[str]]:
+    """Analyze failed module imports from a discovery run.
 
     Args:
         discovery: Discovery instance that has been run
@@ -405,9 +399,8 @@ def analyze_failed_imports(discovery: HaiveComponentDiscovery) -> Dict[str, List
     return dict(analysis)
 
 
-def get_discovery_stats(components: List[ComponentInfo]) -> Dict[str, Any]:
-    """
-    Get statistics about discovered components.
+def get_discovery_stats(components: list[ComponentInfo]) -> dict[str, Any]:
+    """Get statistics about discovered components.
 
     Args:
         components: List of component info objects
@@ -436,10 +429,9 @@ def get_discovery_stats(components: List[ComponentInfo]) -> Dict[str, Any]:
 
 
 def find_components_by_name(
-    components: List[ComponentInfo], pattern: str, case_sensitive: bool = False
-) -> List[ComponentInfo]:
-    """
-    Find components matching a name pattern.
+    components: list[ComponentInfo], pattern: str, case_sensitive: bool = False
+) -> list[ComponentInfo]:
+    """Find components matching a name pattern.
 
     Args:
         components: List of component info objects
@@ -464,10 +456,9 @@ def find_components_by_name(
 
 
 def find_components_with_env_vars(
-    components: List[ComponentInfo], env_var: Optional[str] = None
-) -> List[ComponentInfo]:
-    """
-    Find components that use environment variables.
+    components: list[ComponentInfo], env_var: str | None = None
+) -> list[ComponentInfo]:
+    """Find components that use environment variables.
 
     Args:
         components: List of component info objects
@@ -479,11 +470,8 @@ def find_components_with_env_vars(
     matching = []
 
     for comp in components:
-        if comp.env_vars:
-            if env_var is None:
-                matching.append(comp)
-            elif env_var in comp.env_vars:
-                matching.append(comp)
+        if comp.env_vars and (env_var is None or env_var in comp.env_vars):
+            matching.append(comp)
 
     return matching
 
@@ -494,11 +482,10 @@ def find_components_with_env_vars(
 
 
 def create_discovery(
-    project_root: Optional[str] = None,
-    custom_analyzers: Optional[List[ComponentAnalyzer]] = None,
+    project_root: str | None = None,
+    custom_analyzers: list[ComponentAnalyzer] | None = None,
 ) -> HaiveComponentDiscovery:
-    """
-    Create a configured discovery instance.
+    """Create a configured discovery instance.
 
     Args:
         project_root: Root directory of the Haive project
@@ -527,11 +514,10 @@ def create_custom_analyzer(
     name: str,
     can_analyze_func: Callable[[Any], bool],
     analyze_func: Callable[[Any, str], Any],
-    create_tool_func: Optional[Callable[[Any], Any]] = None,
-    create_engine_func: Optional[Callable[[Any], Any]] = None,
-) -> Type[ComponentAnalyzer]:
-    """
-    Create a custom analyzer class dynamically.
+    create_tool_func: Callable[[Any], Any] | None = None,
+    create_engine_func: Callable[[Any], Any] | None = None,
+) -> type[ComponentAnalyzer]:
+    """Create a custom analyzer class dynamically.
 
     Args:
         name: Name for the analyzer class

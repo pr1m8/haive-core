@@ -62,7 +62,10 @@ class UnifiedValidationNodeConfig(BaseNodeConfig):
     )
 
     @model_validator(mode="after")
-    def validate_config(self) -> "UnifiedValidationNodeConfig":
+
+
+    @classmethod
+    def validate_config(cls) -> "UnifiedValidationNodeConfig":
         """Validate node configuration."""
         # Ensure we have at least one destination node
         if not any([self.tool_node, self.parse_output_node, self.agent_node]):
@@ -76,7 +79,10 @@ class UnifiedValidationNodeConfig(BaseNodeConfig):
 
         This is the main entry point that processes tool calls and routes them.
         """
-        logger.info(f"Unified validation processing for engine: {self.engine_name}")
+        logger.info(
+            f"Unified validation processing for engine: {
+                self.engine_name}"
+        )
 
         # Get messages and engine
         messages = state.get("messages", [])
@@ -133,7 +139,8 @@ class UnifiedValidationNodeConfig(BaseNodeConfig):
             ]
             set(destinations)
 
-            # Use Send objects if we have multiple decisions, even if same destination
+            # Use Send objects if we have multiple decisions, even if same
+            # destination
             sends = self._create_send_objects(routing_decisions)
             if sends:
                 return Command(update=update_dict, goto=sends)

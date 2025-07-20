@@ -7,8 +7,9 @@ if a function or callable object may yield control for human input.
 import ast
 import inspect
 import textwrap
+from collections.abc import Callable
 from functools import lru_cache
-from typing import Any, Callable, TypeVar
+from typing import Any, TypeVar
 
 from langgraph.types import interrupt
 

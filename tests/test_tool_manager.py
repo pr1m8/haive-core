@@ -27,8 +27,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 # Test basic tool registration and execution
 def test_basic_tool_registration():
     """Test basic tool registration and execution."""
-    print("\n=== Testing Basic Tool Registration ===")
-
     # Create a test manager
     manager = ToolManager()
 
@@ -38,7 +36,7 @@ def test_basic_tool_registration():
         return eval(expression)
 
     # Register as a tool
-    tool_obj = manager.create_and_register_tool(
+    manager.create_and_register_tool(
         calculator,
         name="calculator",
         description="Calculate mathematical expressions",
@@ -46,16 +44,13 @@ def test_basic_tool_registration():
     )
 
     # Verify registration
-    print(f"Registered tool: {tool_obj.name}")
-    print(f"Tool description: {tool_obj.description}")
 
     # Execute the tool
-    result = manager.execute_tool("calculator", kwargs={"expression": "2 + 3 * 4"})
+    result = manager.execute_tool(
+        "calculator", kwargs={
+            "expression": "2 + 3 * 4"})
 
     # Check result
-    print(f"Tool result: {result.result}")
-    print(f"Success: {result.success}")
-    print(f"Execution time: {result.execution_time:.4f} seconds")
 
     assert result.success
     assert result.result == 14
@@ -67,8 +62,6 @@ def test_basic_tool_registration():
 # Test tool with configuration
 def test_tool_with_config():
     """Test a tool with custom configuration."""
-    print("\n=== Testing Tool with Configuration ===")
-
     # Create a tool manager
     manager = ToolManager()
 
@@ -94,17 +87,12 @@ def test_tool_with_config():
     manager.create_and_register_tool(unreliable_function, config=config)
 
     # Execute with very low success rate
-    result = manager.execute_tool("unreliable_tool", kwargs={"success_rate": 0.1})
+    manager.execute_tool("unreliable_tool", kwargs={"success_rate": 0.1})
 
     # Print result
-    print(f"Tool result: {result.result}")
-    print(f"Success: {result.success}")
-    print(f"Error: {result.error}")
-    print(f"Retries: {result.retries}")
 
     # Check execution history
     history = manager.get_execution_history()
-    print(f"Execution history count: {len(history)}")
 
     # Even with retries, it might still fail, so we don't assert success
     # Instead, verify that retries were attempted
@@ -116,8 +104,6 @@ def test_tool_with_config():
 # Test state injection
 def test_state_injection():
     """Test tool with state injection."""
-    print("\n=== Testing State Injection ===")
-
     # Create a tool manager
     manager = ToolManager()
 
@@ -154,13 +140,10 @@ def test_state_injection():
         "extract_last_message", kwargs={"state": mock_state}
     )
 
-    print(f"Result: {result}")
-
     assert result == "This is the last message"
 
     # Verify tool was registered with correct config
     config = manager._get_tool_config("extract_last_message")
-    print(f"Tool config requires_state: {config.requires_state}")
 
     assert config.requires_state
 
@@ -170,8 +153,6 @@ def test_state_injection():
 # Test async tools
 async def test_async_tools():
     """Test async tool execution."""
-    print("\n=== Testing Async Tools ===")
-
     # Create a tool manager
     manager = ToolManager()
 
@@ -203,9 +184,6 @@ async def test_async_tools():
     )
 
     # Check result
-    print(f"Async tool result: {result.result}")
-    print(f"Success: {result.success}")
-    print(f"Execution time: {result.execution_time:.4f} seconds")
 
     assert result.success
     assert "http://example.com" in result.result
@@ -219,8 +197,6 @@ async def test_async_tools():
     )
 
     # Should fail with timeout
-    print(f"Timeout test success: {result.success}")
-    print(f"Timeout error: {result.error}")
 
     assert not result.success
     assert "timeout" in result.error.lower()
@@ -231,8 +207,6 @@ async def test_async_tools():
 # Test tool filtering
 def test_tool_filtering():
     """Test tool filtering by state and tags."""
-    print("\n=== Testing Tool Filtering ===")
-
     # Create a tool manager
     manager = ToolManager()
 
@@ -273,40 +247,33 @@ def test_tool_filtering():
 
     # Get tools by tag
     math_tools = manager.get_allowed_tools(tags=["math"])
-    print(f"Math tools: {list(math_tools.keys())}")
     assert len(math_tools) == 3
 
     basic_tools = manager.get_allowed_tools(tags=["basic"])
-    print(f"Basic tools: {list(basic_tools.keys())}")
     assert len(basic_tools) == 2
 
     # Get tools requiring all tags
     advanced_math = manager.get_allowed_tools(
         tags=["math", "advanced"], require_all_tags=True
     )
-    print(f"Advanced math tools: {list(advanced_math.keys())}")
     assert len(advanced_math) == 1
     assert "multiply" in advanced_math
 
     # Get tools by state
     calculating_tools = manager.get_allowed_tools(current_state="calculating")
-    print(f"Tools allowed in 'calculating' state: {list(calculating_tools.keys())}")
     assert "increment" in calculating_tools
     assert "multiply" in calculating_tools
 
     # Test single-use restriction
     # First, use the greet tool
-    result = manager.execute_tool("greet", kwargs={"msg": "world"})
-    print(f"Greet result: {result.result}")
+    manager.execute_tool("greet", kwargs={"msg": "world"})
 
     # Now, try to get it again - should be filtered out
     tools_after_use = manager.get_allowed_tools()
-    print(f"Available tools after use: {list(tools_after_use.keys())}")
     assert "greet" not in tools_after_use
 
     # Get tool descriptions
-    descriptions = manager.get_tool_descriptions()
-    print(f"Tool descriptions: {descriptions}")
+    manager.get_tool_descriptions()
 
     return manager
 
@@ -314,8 +281,6 @@ def test_tool_filtering():
 # Run all tests
 def run_tests():
     """Run all tests."""
-    print("=== Running ToolManager Tests ===")
-
     # Run synchronous tests
     test_basic_tool_registration()
     test_tool_with_config()
@@ -324,8 +289,6 @@ def run_tests():
 
     # Run async test
     asyncio.run(test_async_tools())
-
-    print("\n=== All tool manager tests completed successfully ===")
 
 
 if __name__ == "__main__":

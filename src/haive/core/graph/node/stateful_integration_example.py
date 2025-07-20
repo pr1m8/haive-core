@@ -1,13 +1,13 @@
-"""
-Stateful Node Integration Example - How it works with SimpleAgent and LLMState
+"""from typing import Any, Dict
+Stateful Node Integration Example - How it works with SimpleAgent and LLMState.
 
 This example shows how the stateful node architecture integrates with the existing
 SimpleAgent, LLMState, and MetaStateSchema to provide truly dynamic discovery.
 """
 
-from haive.agents.simple.agent import SimpleAgent
 from langchain_core.messages import AIMessage, HumanMessage
 
+from haive.agents.simple.agent import SimpleAgent
 from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.graph.node.stateful_node_config import (
     StatefulParserNodeConfig,
@@ -21,9 +21,8 @@ from haive.core.schema.prebuilt.meta_state import MetaStateSchema
 # =============================================================================
 
 
-def create_simple_agent_with_stateful_nodes():
+def create_simple_agent_with_stateful_nodes() -> Any:
     """Create a SimpleAgent that uses stateful nodes for dynamic discovery."""
-
     # Create engine
     engine = AugLLMConfig(
         name="main_engine",
@@ -48,9 +47,8 @@ def create_simple_agent_with_stateful_nodes():
 # =============================================================================
 
 
-def create_llm_state_with_dynamic_nodes():
+def create_llm_state_with_dynamic_nodes() -> Any:
     """Create LLMState that works with stateful nodes."""
-
     # Create engine
     engine = AugLLMConfig(name="llm_engine", model="gpt-4-turbo", temperature=0.3)
 
@@ -85,9 +83,8 @@ def create_llm_state_with_dynamic_nodes():
 # =============================================================================
 
 
-def demonstrate_stateful_discovery():
+def demonstrate_stateful_discovery() -> Any:
     """Show how stateful nodes discover resources from state."""
-
     # Create state with engine and routing configuration
     state = LLMState(
         engine=AugLLMConfig(name="discovery_engine", model="gpt-4"),
@@ -138,7 +135,6 @@ def demonstrate_stateful_discovery():
     # 3. parser_node from state.routing_config["parser_node"]
     result = validation_node(state)
 
-    print(f"Validation result: {result}")
     return result
 
 
@@ -147,9 +143,8 @@ def demonstrate_stateful_discovery():
 # =============================================================================
 
 
-def demonstrate_meta_state_composition():
+def demonstrate_meta_state_composition() -> Any:
     """Show how MetaStateSchema works with stateful nodes."""
-
     # Create inner agent with stateful nodes
     inner_agent = SimpleAgent(
         name="inner_agent",
@@ -166,11 +161,10 @@ def demonstrate_meta_state_composition():
 
     # The meta state can execute the inner agent
     # The inner agent's nodes will discover engines from the meta state
-    result = meta_state.execute_agent(
+    meta_state.execute_agent(
         input_data={"messages": [HumanMessage(content="Hello from meta state")]}
     )
 
-    print(f"Meta execution result: {result}")
     return meta_state
 
 
@@ -179,9 +173,8 @@ def demonstrate_meta_state_composition():
 # =============================================================================
 
 
-def demonstrate_dynamic_field_configuration():
+def demonstrate_dynamic_field_configuration() -> Any:
     """Show how nodes discover field configurations dynamically."""
-
     # Create state with custom field mapping
     state = LLMState(engine=AugLLMConfig(name="field_engine", model="gpt-4"))
 
@@ -221,9 +214,8 @@ def demonstrate_dynamic_field_configuration():
 # =============================================================================
 
 
-def show_integration_with_simple_agent():
+def show_integration_with_simple_agent() -> Any:
     """Show how stateful nodes integrate with existing SimpleAgent graph building."""
-
     # Create SimpleAgent as usual
     agent = SimpleAgent(
         name="integrated_agent",
@@ -232,7 +224,7 @@ def show_integration_with_simple_agent():
     )
 
     # Override build_graph to use stateful nodes
-    def build_stateful_graph(agent_instance):
+    def build_stateful_graph(agent_instance: Any):
         from langgraph.graph import END, START
 
         from haive.core.graph.node.engine_node import EngineNodeConfig
@@ -245,7 +237,8 @@ def show_integration_with_simple_agent():
         graph.add_node("agent_node", engine_node)
         graph.add_edge(START, "agent_node")
 
-        # Add stateful validation node instead of regular ValidationNodeConfigV2
+        # Add stateful validation node instead of regular
+        # ValidationNodeConfigV2
         validation_node = StatefulValidationNodeConfig(
             name="stateful_validation",
             engine_name=agent_instance.engine.name,
@@ -293,9 +286,8 @@ def show_integration_with_simple_agent():
 # =============================================================================
 
 
-def complete_integration_example():
+def complete_integration_example() -> Dict[str, Any]:
     """Complete example showing all components working together."""
-
     # 1. Create base components
     engine = AugLLMConfig(
         name="complete_engine",
@@ -339,12 +331,6 @@ def complete_integration_example():
         }
     )
 
-    print("=== Complete Integration Result ===")
-    print(f"Execution status: {meta_state.execution_status}")
-    print(f"Result: {result}")
-    print(f"Agent engines: {list(agent.engines.keys())}")
-    print(f"State engines: {list(state.engines.keys())}")
-
     return {"agent": agent, "state": state, "meta_state": meta_state, "result": result}
 
 
@@ -355,7 +341,7 @@ def complete_integration_example():
 """
 KEY INSIGHTS:
 
-1. **SimpleAgent Already Does Discovery**: 
+1. **SimpleAgent Already Does Discovery**:
    - Registers engine in engines dict
    - Creates tool routes
    - Passes engine_name to nodes
@@ -388,22 +374,14 @@ KEY INSIGHTS:
 """
 
 if __name__ == "__main__":
-    print("=== Stateful Node Integration Examples ===")
 
     # Run examples
-    print("\n1. SimpleAgent with Stateful Nodes:")
     agent = create_simple_agent_with_stateful_nodes()
-    print(f"Created agent: {agent}")
 
-    print("\n2. LLMState with Dynamic Discovery:")
     state = create_llm_state_with_dynamic_nodes()
-    print(f"Created state: {state}")
 
-    print("\n3. Stateful Discovery Demo:")
     demonstrate_stateful_discovery()
 
-    print("\n4. Meta State Composition:")
     demonstrate_meta_state_composition()
 
-    print("\n5. Complete Integration:")
     complete_integration_example()

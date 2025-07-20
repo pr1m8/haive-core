@@ -1,13 +1,11 @@
-"""
-Main discovery engine for finding and analyzing components.
-"""
+"""Main discovery engine for finding and analyzing components."""
 
 import importlib
 import inspect
 import logging
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from haive.core.utils.haive_discovery.base_analyzer import ComponentAnalyzer
 from haive.core.utils.haive_discovery.component_info import ComponentInfo
@@ -45,12 +43,12 @@ class EnhancedComponentDiscovery:
 
     def discover_from_directory(
         self,
-        directory: Union[str, Path],
+        directory: str | Path,
         module_prefix: str,
         recursive: bool = True,
         create_tools: bool = True,
         ignore_errors: bool = True,
-    ) -> List[ComponentInfo]:
+    ) -> list[ComponentInfo]:
         """Discover components from a directory."""
         directory = Path(directory)
         components = []
@@ -76,7 +74,8 @@ class EnhancedComponentDiscovery:
 
                 if new_components:
                     logger.debug(
-                        f"Found {len(new_components)} components in {module_path}"
+                        f"Found {
+                            len(new_components)} components in {module_path}"
                     )
                     components.extend(new_components)
 
@@ -92,7 +91,7 @@ class EnhancedComponentDiscovery:
     def _file_to_module_path(self, file_path: Path, module_prefix: str) -> str:
         """Convert file path to module path."""
         relative_path = file_path.relative_to(self.base_path)
-        parts = list(relative_path.parts[:-1]) + [relative_path.stem]
+        parts = [*list(relative_path.parts[:-1]), relative_path.stem]
 
         if parts[0] == "src":
             parts = parts[1:]
@@ -101,7 +100,7 @@ class EnhancedComponentDiscovery:
 
     def _discover_from_module(
         self, module_path: str, create_tools: bool = True
-    ) -> List[ComponentInfo]:
+    ) -> list[ComponentInfo]:
         """Discover components from a single module."""
         components = []
 
@@ -171,12 +170,12 @@ class EnhancedComponentDiscovery:
 
         except Exception as e:
             logger.warning(f"Unexpected error importing {module_path}: {e}")
-            self.failed_modules.append((module_path, f"Unexpected error: {str(e)}"))
+            self.failed_modules.append((module_path, f"Unexpected error: {e!s}"))
             return None
 
     def _analyze_object(
         self, obj: Any, module_path: str, create_tools: bool = True
-    ) -> Optional[ComponentInfo]:
+    ) -> ComponentInfo | None:
         """Analyze an object using available analyzers."""
         for analyzer in self.analyzers:
             try:
@@ -215,7 +214,7 @@ class EnhancedComponentDiscovery:
 
         return None
 
-    def get_tools(self, components: List[ComponentInfo]) -> List[Any]:
+    def get_tools(self, components: list[ComponentInfo]) -> list[Any]:
         """Extract all created tools from components."""
         tools = []
         for comp in components:
@@ -224,8 +223,8 @@ class EnhancedComponentDiscovery:
         return tools
 
     def get_engine_configs(
-        self, components: List[ComponentInfo]
-    ) -> List[Dict[str, Any]]:
+        self, components: list[ComponentInfo]
+    ) -> list[dict[str, Any]]:
         """Extract all engine configs from components."""
         configs = []
         for comp in components:

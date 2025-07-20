@@ -13,7 +13,7 @@ import logging
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
 from langchain_core.documents import Document
 from langchain_core.runnables import RunnableConfig
@@ -45,7 +45,7 @@ logger = logging.getLogger(__name__)
 
 class DocumentEngine(
     ToolRouteMixin,
-    InvokableEngine[Union[DocumentInput, str, Path, Dict[str, Any]], DocumentOutput],
+    InvokableEngine[Union[DocumentInput, str, Path, dict[str, Any]], DocumentOutput],
 ):
     """Enhanced Document Engine for comprehensive document processing.
 
@@ -71,16 +71,16 @@ class DocumentEngine(
     )
 
     # Registries
-    loader_registry: Optional[DocumentLoaderRegistry] = Field(
+    loader_registry: DocumentLoaderRegistry | None = Field(
         default=None, description="Document loader registry", exclude=True
     )
 
     # Processing state
-    processing_stats: Dict[str, Any] = Field(
+    processing_stats: dict[str, Any] = Field(
         default_factory=dict, description="Processing statistics", exclude=True
     )
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         """Initialize the document engine."""
         super().__init__(**kwargs)
 
@@ -99,7 +99,10 @@ class DocumentEngine(
         logger.debug(f"Initialized DocumentEngine: {self.config.name}")
 
     @model_validator(mode="after")
-    def validate_config(self) -> "DocumentEngine":
+
+
+    @classmethod
+    def validate_config(cls) -> "DocumentEngine":
         """Validate engine configuration."""
         # Ensure chunk overlap is less than chunk size
         if self.config.chunk_overlap >= self.config.chunk_size:
@@ -111,34 +114,34 @@ class DocumentEngine(
 
         return self
 
-    def get_input_fields(self) -> Dict[str, Any]:
+    def get_input_fields(self) -> dict[str, Any]:
         """Get input field definitions for the engine."""
         return {
-            "source": (Union[str, Path, Dict[str, Any]], ...),
+            "source": (Union[str, Path, dict[str, Any]], ...),
             "source_type": (Optional[str], None),
             "loader_name": (Optional[str], None),
-            "loader_options": (Dict[str, Any], {}),
+            "loader_options": (dict[str, Any], {}),
             "chunking_strategy": (Optional[str], None),
             "chunk_size": (Optional[int], None),
             "chunk_overlap": (Optional[int], None),
         }
 
-    def get_output_fields(self) -> Dict[str, Any]:
+    def get_output_fields(self) -> dict[str, Any]:
         """Get output field definitions for the engine."""
         return {
-            "documents": (List[Dict[str, Any]], []),
+            "documents": (list[dict[str, Any]], []),
             "total_documents": (int, 0),
             "operation_time": (float, 0.0),
             "source_type": (str, ""),
-            "loader_names": (List[str], []),
+            "loader_names": (list[str], []),
             "original_source": (str, ""),
             "processing_strategy": (str, ""),
-            "errors": (List[Dict[str, Any]], []),
+            "errors": (list[dict[str, Any]], []),
             "has_errors": (bool, False),
         }
 
     def create_runnable(
-        self, runnable_config: Optional[Dict[str, Any]] = None
+        self, runnable_config: dict[str, Any] | None = None
     ) -> "DocumentEngine":
         """Create a runnable instance from this engine configuration."""
         if runnable_config:
@@ -154,8 +157,8 @@ class DocumentEngine(
 
     def invoke(
         self,
-        input_data: Union[DocumentInput, str, Path, Dict[str, Any]],
-        config: Optional[RunnableConfig] = None,
+        input_data: DocumentInput | str | Path | dict[str, Any],
+        config: RunnableConfig | None = None,
     ) -> DocumentOutput:
         """Process documents synchronously.
 
@@ -192,7 +195,7 @@ class DocumentEngine(
             return output
 
         except Exception as e:
-            logger.error(f"Document processing failed: {e}")
+            logger.exception(f"Document processing failed: {e}")
 
             # Create error output
             return DocumentOutput(
@@ -214,8 +217,8 @@ class DocumentEngine(
 
     async def ainvoke(
         self,
-        input_data: Union[DocumentInput, str, Path, Dict[str, Any]],
-        config: Optional[RunnableConfig] = None,
+        input_data: DocumentInput | str | Path | dict[str, Any],
+        config: RunnableConfig | None = None,
     ) -> DocumentOutput:
         """Process documents asynchronously.
 
@@ -232,24 +235,22 @@ class DocumentEngine(
         return await loop.run_in_executor(None, self.invoke, input_data, config)
 
     def _normalize_input(
-        self, input_data: Union[DocumentInput, str, Path, Dict[str, Any]]
+        self, input_data: DocumentInput | str | Path | dict[str, Any]
     ) -> DocumentInput:
         """Normalize input to DocumentInput object."""
         if isinstance(input_data, DocumentInput):
             return input_data
-        elif isinstance(input_data, (str, Path)):
+        if isinstance(input_data, str | Path):
             return DocumentInput(source=str(input_data))
-        elif isinstance(input_data, dict):
+        if isinstance(input_data, dict):
             if "source" in input_data:
                 return DocumentInput(**input_data)
-            else:
-                # Assume the dict itself is the source
-                return DocumentInput(source=input_data)
-        else:
-            raise ValueError(f"Invalid input type: {type(input_data)}")
+            # Assume the dict itself is the source
+            return DocumentInput(source=input_data)
+        raise ValueError(f"Invalid input type: {type(input_data)}")
 
     def _analyze_source(
-        self, source: Union[str, Path, Dict[str, Any]]
+        self, source: str | Path | dict[str, Any]
     ) -> PathAnalysisResult:
         """Analyze the source to determine its properties."""
         if isinstance(source, dict):
@@ -265,7 +266,7 @@ class DocumentEngine(
 
     def _load_documents(
         self, doc_input: DocumentInput, analysis: PathAnalysisResult
-    ) -> List[Document]:
+    ) -> list[Document]:
         """Load documents from the source."""
         # Determine source type
         if doc_input.source_type:
@@ -285,11 +286,15 @@ class DocumentEngine(
             else:
                 raise ValueError(f"Loader {type(loader)} has no load method")
 
-            logger.info(f"Loaded {len(documents)} documents from {doc_input.source}")
+            logger.info(
+                f"Loaded {
+                    len(documents)} documents from {
+                    doc_input.source}"
+            )
             return documents
 
         except Exception as e:
-            logger.error(f"Failed to load documents: {e}")
+            logger.exception(f"Failed to load documents: {e}")
             if self.config.raise_on_error:
                 raise
             return []
@@ -328,8 +333,8 @@ class DocumentEngine(
         )
 
     def _process_documents(
-        self, documents: List[Document], doc_input: DocumentInput
-    ) -> List[ProcessedDocument]:
+        self, documents: list[Document], doc_input: DocumentInput
+    ) -> list[ProcessedDocument]:
         """Process loaded documents according to configuration."""
         if not documents:
             return []
@@ -341,12 +346,11 @@ class DocumentEngine(
             and len(documents) > 1
         ):
             return self._process_documents_parallel(documents, doc_input)
-        else:
-            return self._process_documents_sequential(documents, doc_input)
+        return self._process_documents_sequential(documents, doc_input)
 
     def _process_documents_sequential(
-        self, documents: List[Document], doc_input: DocumentInput
-    ) -> List[ProcessedDocument]:
+        self, documents: list[Document], doc_input: DocumentInput
+    ) -> list[ProcessedDocument]:
         """Process documents sequentially."""
         processed = []
 
@@ -358,15 +362,15 @@ class DocumentEngine(
                 processed.append(processed_doc)
 
             except Exception as e:
-                logger.error(f"Failed to process document {i}: {e}")
+                logger.exception(f"Failed to process document {i}: {e}")
                 if not self.config.skip_invalid:
                     raise
 
         return processed
 
     def _process_documents_parallel(
-        self, documents: List[Document], doc_input: DocumentInput
-    ) -> List[ProcessedDocument]:
+        self, documents: list[Document], doc_input: DocumentInput
+    ) -> list[ProcessedDocument]:
         """Process documents in parallel."""
         processed = []
 
@@ -387,7 +391,7 @@ class DocumentEngine(
                     if processed_doc:
                         processed.append(processed_doc)
                 except Exception as e:
-                    logger.error(f"Failed to process document {doc_index}: {e}")
+                    logger.exception(f"Failed to process document {doc_index}: {e}")
                     if not self.config.skip_invalid:
                         raise
 
@@ -397,7 +401,7 @@ class DocumentEngine(
 
     def _process_single_document_safe(
         self, document: Document, doc_input: DocumentInput, index: int
-    ) -> Optional[ProcessedDocument]:
+    ) -> ProcessedDocument | None:
         """Safely process a single document with error handling."""
         try:
             start_time = time.time()
@@ -405,7 +409,7 @@ class DocumentEngine(
             processed_doc.processing_time = time.time() - start_time
             return processed_doc
         except Exception as e:
-            logger.error(f"Failed to process document {index}: {e}")
+            logger.exception(f"Failed to process document {index}: {e}")
             if self.config.skip_invalid:
                 return None
             raise
@@ -471,7 +475,7 @@ class DocumentEngine(
         return content
 
     def _detect_document_format(
-        self, metadata: Dict[str, Any], content: str
+        self, metadata: dict[str, Any], content: str
     ) -> DocumentFormat:
         """Detect document format from metadata and content."""
         # Check metadata first
@@ -501,29 +505,26 @@ class DocumentEngine(
         # Content-based detection
         if content:
             content_lower = content.lower().strip()
-            if content_lower.startswith("<!doctype html") or content_lower.startswith(
-                "<html"
-            ):
+            if content_lower.startswith(("<!doctype html", "<html")):
                 return DocumentFormat.HTML
-            elif content_lower.startswith("{") and content_lower.endswith("}"):
+            if content_lower.startswith("{") and content_lower.endswith("}"):
                 return DocumentFormat.JSON
-            elif content_lower.startswith("<?xml"):
+            if content_lower.startswith("<?xml"):
                 return DocumentFormat.XML
 
         return DocumentFormat.UNKNOWN
 
-    def _determine_source_type(self, metadata: Dict[str, Any]) -> DocumentSourceType:
+    def _determine_source_type(self, metadata: dict[str, Any]) -> DocumentSourceType:
         """Determine source type from metadata."""
         source = metadata.get("source", "")
 
         if source.startswith(("http://", "https://")):
             return DocumentSourceType.URL
-        elif source.startswith(("s3://", "gs://", "azure://")):
+        if source.startswith(("s3://", "gs://", "azure://")):
             return DocumentSourceType.CLOUD
-        elif "://" in source:
+        if "://" in source:
             return DocumentSourceType.DATABASE
-        else:
-            return DocumentSourceType.FILE
+        return DocumentSourceType.FILE
 
     def _create_chunks(
         self,
@@ -531,8 +532,8 @@ class DocumentEngine(
         strategy: ChunkingStrategy,
         chunk_size: int,
         chunk_overlap: int,
-        metadata: Dict[str, Any],
-    ) -> List[DocumentChunk]:
+        metadata: dict[str, Any],
+    ) -> list[DocumentChunk]:
         """Create document chunks based on the specified strategy."""
         if not content or strategy == ChunkingStrategy.NONE:
             return []
@@ -576,7 +577,7 @@ class DocumentEngine(
 
         return doc_chunks
 
-    def _chunk_fixed_size(self, content: str, size: int, overlap: int) -> List[str]:
+    def _chunk_fixed_size(self, content: str, size: int, overlap: int) -> list[str]:
         """Chunk content into fixed-size pieces."""
         chunks = []
         start = 0
@@ -593,7 +594,7 @@ class DocumentEngine(
 
         return chunks
 
-    def _chunk_by_paragraph(self, content: str, max_size: int) -> List[str]:
+    def _chunk_by_paragraph(self, content: str, max_size: int) -> list[str]:
         """Chunk content by paragraphs."""
         paragraphs = content.split("\n\n")
         chunks = []
@@ -614,7 +615,7 @@ class DocumentEngine(
 
         return chunks
 
-    def _chunk_by_sentence(self, content: str, max_size: int) -> List[str]:
+    def _chunk_by_sentence(self, content: str, max_size: int) -> list[str]:
         """Chunk content by sentences."""
         # Simple sentence splitting
         import re
@@ -643,11 +644,11 @@ class DocumentEngine(
 
         return chunks
 
-    def _chunk_recursive(self, content: str, size: int, overlap: int) -> List[str]:
+    def _chunk_recursive(self, content: str, size: int, overlap: int) -> list[str]:
         """Chunk content recursively using multiple separators."""
         separators = ["\n\n", "\n", " ", ""]
 
-        def split_recursive(text: str, separators: List[str]) -> List[str]:
+        def split_recursive(text: str, separators: list[str]) -> list[str]:
             if len(text) <= size:
                 return [text]
 
@@ -690,7 +691,7 @@ class DocumentEngine(
 
         return split_recursive(content, separators)
 
-    def _chunk_semantic(self, content: str, size: int) -> List[str]:
+    def _chunk_semantic(self, content: str, size: int) -> list[str]:
         """Chunk content semantically (placeholder implementation)."""
         # This would require more sophisticated NLP
         # For now, fall back to paragraph chunking
@@ -713,7 +714,7 @@ class DocumentEngine(
 
     def _create_output(
         self,
-        processed_docs: List[ProcessedDocument],
+        processed_docs: list[ProcessedDocument],
         doc_input: DocumentInput,
         analysis: PathAnalysisResult,
         operation_time: float,
@@ -726,7 +727,7 @@ class DocumentEngine(
             original_source=str(doc_input.source),
             source_type=self._map_path_type_to_source_type(analysis.path_type),
             processing_strategy=self.config.processing_strategy,
-            loader_names=list(set(doc.loader_name for doc in processed_docs)),
+            loader_names=list({doc.loader_name for doc in processed_docs}),
         )
 
     def _update_stats(self, output: DocumentOutput):
@@ -741,7 +742,7 @@ class DocumentEngine(
 
 
 def create_file_document_engine(
-    file_path: Union[str, Path],
+    file_path: str | Path,
     chunking_strategy: ChunkingStrategy = ChunkingStrategy.RECURSIVE,
     chunk_size: int = 1000,
     chunk_overlap: int = 200,
@@ -781,10 +782,10 @@ def create_web_document_engine(
 
 
 def create_directory_document_engine(
-    directory_path: Union[str, Path],
+    directory_path: str | Path,
     recursive: bool = True,
-    include_patterns: Optional[List[str]] = None,
-    exclude_patterns: Optional[List[str]] = None,
+    include_patterns: list[str] | None = None,
+    exclude_patterns: list[str] | None = None,
     **kwargs,
 ) -> DocumentEngine:
     """Create a document engine configured for directory processing."""
@@ -805,7 +806,7 @@ def create_directory_document_engine(
 # Export key components
 __all__ = [
     "DocumentEngine",
+    "create_directory_document_engine",
     "create_file_document_engine",
     "create_web_document_engine",
-    "create_directory_document_engine",
 ]

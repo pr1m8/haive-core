@@ -8,6 +8,7 @@ class NodeProcessor(Protocol):
     """Protocol for node processors that handle specific node types."""
 
     def can_process(self, engine: Any) -> bool: ...
+
     def create_node_function(self, engine: Any, node_config: Any) -> callable: ...
 
 

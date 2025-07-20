@@ -62,7 +62,8 @@ def test_engine_attribution_mechanism():
         ai_message)
 
     print(
-        f"   After attribution additional_kwargs: {attributed_message.additional_kwargs}"
+        f"   After attribution additional_kwargs: {
+    attributed_message.additional_kwargs}"
     )
 
     # Verify attribution was added

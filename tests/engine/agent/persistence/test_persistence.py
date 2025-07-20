@@ -1,5 +1,3 @@
-from typing import List
-
 from langchain_core.messages import BaseMessage
 from langgraph.graph import add_messages
 from pydantic import Field
@@ -15,7 +13,7 @@ from haive.core.schema.state_schema import StateSchema
 
 # Create a proper state schema with serializable reducers
 class PersistentAgentState(StateSchema):
-    messages: List[BaseMessage] = Field(default_factory=list)
+    messages: list[BaseMessage] = Field(default_factory=list)
 
     # Set up serializable reducers correctly
     # __serializable_reducers__ = {"messages": "add_messages"}
@@ -87,9 +85,8 @@ thread_id = "conversation-123"
 
 # Run the agent
 result1 = agent.run("Hello, I'm new here!", thread_id=thread_id)
-print(f"First interaction - message count: {len(result1['messages'])}")
 
 # Run again to test persistence
-result2 = agent.run("Do you remember our previous conversation?", thread_id=thread_id)
-print(f"Second interaction - message count: {len(result2['messages'])}")
-print(f"Result2: {result2}")
+result2 = agent.run(
+    "Do you remember our previous conversation?",
+    thread_id=thread_id)

@@ -1,5 +1,6 @@
 """Base Embedding Models Module.
 
+from typing import Any
 This module provides the foundational abstractions for embedding models in the Haive framework.
 It includes base classes and implementations for different embedding providers that transform
 text into high-dimensional vector representations for use in semantic search, clustering,
@@ -64,7 +65,7 @@ class SecureConfigMixin:
 
     @field_validator("api_key", mode="after")
     @classmethod
-    def resolve_api_key(cls, v, values):
+    def resolve_api_key(cls, v, values) -> Any:
         """Resolve API key from provided value or environment variables.
 
         Args:
@@ -405,7 +406,9 @@ class OllamaEmbeddingConfig(BaseEmbeddingConfig):
     """
 
     provider: EmbeddingProvider = EmbeddingProvider.OLLAMA
-    model: str = Field(default="nomic-embed-text", description="Ollama model name")
+    model: str = Field(
+        default="nomic-embed-text",
+        description="Ollama model name")
     base_url: str = Field(
         default="http://localhost:11434", description="Base URL for the Ollama server"
     )
@@ -580,7 +583,9 @@ class VertexAIEmbeddingConfig(BaseEmbeddingConfig):
         default_factory=lambda: os.getenv("GOOGLE_CLOUD_PROJECT", ""),
         description="Google Cloud project ID",
     )
-    location: str = Field(default="us-central1", description="Google Cloud region")
+    location: str = Field(
+        default="us-central1",
+        description="Google Cloud region")
 
     def instantiate(self, **kwargs) -> VertexAIEmbeddings:
         """Instantiate a Google Vertex AI embedding model.
@@ -776,7 +781,9 @@ class AnyscaleEmbeddingConfig(BaseEmbeddingConfig):
     """
 
     provider: EmbeddingProvider = EmbeddingProvider.ANYSCALE
-    model: str = Field(default="thenlper/gte-large", description="Anyscale model name")
+    model: str = Field(
+        default="thenlper/gte-large",
+        description="Anyscale model name")
     base_url: str | None = Field(
         default=None, description="Base URL for the Anyscale API"
     )

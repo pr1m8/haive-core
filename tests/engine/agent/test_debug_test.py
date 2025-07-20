@@ -4,9 +4,9 @@ import logging
 import uuid
 from typing import Any
 
-from haive.agents.simple.config import SimpleAgentConfig
 from langchain_core.messages import HumanMessage
 
+from haive.agents.simple.config import SimpleAgentConfig
 from haive.core.engine.aug_llm import AugLLMConfig
 
 logger = logging.getLogger(__name__)
@@ -47,7 +47,8 @@ def debug_state_inspection():
 
     # Second run
     logger.info("Second run - getting state")
-    input_message2 = HumanMessage(content="What number did I tell you to remember?")
+    input_message2 = HumanMessage(
+        content="What number did I tell you to remember?")
 
     # Run the agent again with the same thread ID
     result2 = agent.run({"messages": [input_message2]}, config=config)
@@ -121,7 +122,9 @@ def print_state_deeply(state: Any, level: int = 0):
             print_state_deeply(state.values, level + 2)
         elif hasattr(state, "channel_values") and state.channel_values:
             logger.info(
-                f"{indent}  .channel_values ({type(state.channel_values).__name__}):"
+                f"{indent}  .channel_values ({
+                    type(
+                        state.channel_values).__name__}):"
             )
             print_state_deeply(state.channel_values, level + 2)
         elif hasattr(state, "state") and state.state:

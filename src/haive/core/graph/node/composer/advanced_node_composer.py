@@ -1,5 +1,6 @@
 """Advanced NodeSchemaComposer - Extended node logic and callable patterns.
 
+from typing import Any
 This module extends NodeSchemaComposer with advanced patterns for:
 1. Different callable signatures (state, config variations)
 2. Extended extraction/update logic
@@ -10,21 +11,11 @@ This module extends NodeSchemaComposer with advanced patterns for:
 
 import inspect
 import logging
+from collections.abc import Callable
 from functools import wraps
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Type,
-    TypeVar,
-    Union,
-    get_type_hints,
-)
+from typing import Any, TypeVar, get_type_hints
 
 from langgraph.types import Command, Send
-from pydantic import BaseModel
 
 from haive.core.graph.node.composer.field_mapping import FieldMapping
 from haive.core.graph.node.composer.node_schema_composer import (
@@ -54,11 +45,11 @@ class AdvancedNodeComposer(NodeSchemaComposer):
     def from_callable_advanced(
         self,
         func: Callable,
-        input_mappings: Optional[List[FieldMapping]] = None,
-        output_mappings: Optional[List[FieldMapping]] = None,
-        extract_logic: Optional[ExtractFunction] = None,
-        update_logic: Optional[UpdateFunction] = None,
-        name: Optional[str] = None,
+        input_mappings: list[FieldMapping] | None = None,
+        output_mappings: list[FieldMapping] | None = None,
+        extract_logic: ExtractFunction | None = None,
+        update_logic: UpdateFunction | None = None,
+        name: str | None = None,
         auto_detect_signature: bool = True,
         handle_command: bool = True,
         **callable_kwargs,
@@ -121,7 +112,7 @@ class AdvancedNodeComposer(NodeSchemaComposer):
             signature_info=sig_info,
         )
 
-    def _analyze_callable_signature(self, func: Callable) -> Dict[str, Any]:
+    def _analyze_callable_signature(self, func: Callable) -> dict[str, Any]:
         """Analyze callable signature for parameter info.
 
         Returns dict with:
@@ -163,7 +154,7 @@ class AdvancedNodeComposer(NodeSchemaComposer):
         return info
 
     def _create_normalized_callable(
-        self, func: Callable, sig_info: Dict[str, Any], handle_command: bool
+        self, func: Callable, sig_info: dict[str, Any], handle_command: bool
     ) -> Callable:
         """Create normalized callable that handles different signatures.
 
@@ -171,9 +162,7 @@ class AdvancedNodeComposer(NodeSchemaComposer):
         """
 
         @wraps(func)
-        def normalized_wrapper(
-            state: Any, config: Optional[Dict[str, Any]] = None
-        ) -> Any:
+        def normalized_wrapper(state: Any, config: dict[str, Any] | None = None) -> Any:
             config = config or {}
 
             # Build kwargs based on signature
@@ -199,13 +188,12 @@ class AdvancedNodeComposer(NodeSchemaComposer):
                 result = func(**kwargs)
 
             # Handle Command wrapping if needed
-            if handle_command and not isinstance(result, (Command, Send)):
+            if handle_command and not isinstance(result, Command | Send):
                 # Auto-wrap in Command if it's a dict update
                 if isinstance(result, dict):
                     return Command(update=result)
-                else:
-                    # Wrap other values as single field update
-                    return Command(update={"result": result})
+                # Wrap other values as single field update
+                return Command(update={"result": result})
 
             return result
 
@@ -214,11 +202,11 @@ class AdvancedNodeComposer(NodeSchemaComposer):
     def create_typed_callable_node(
         self,
         func: Callable[[TState, TConfig], TResult],
-        state_type: Type[TState],
-        config_type: Type[TConfig] = Dict[str, Any],
-        result_type: Optional[Type[TResult]] = None,
-        input_mappings: Optional[List[FieldMapping]] = None,
-        output_mappings: Optional[List[FieldMapping]] = None,
+        state_type: type[TState],
+        config_type: type[TConfig] = dict[str, Any],
+        result_type: type[TResult] | None = None,
+        input_mappings: list[FieldMapping] | None = None,
+        output_mappings: list[FieldMapping] | None = None,
         validate_types: bool = True,
         **kwargs,
     ) -> "TypedCallableNode":
@@ -244,11 +232,13 @@ class AdvancedNodeComposer(NodeSchemaComposer):
             if validate_types:
                 if not isinstance(state, state_type):
                     logger.warning(
-                        f"State type mismatch: expected {state_type}, got {type(state)}"
+                        f"State type mismatch: expected {state_type}, got {
+                            type(state)}"
                     )
                 if not isinstance(config, config_type):
                     logger.warning(
-                        f"Config type mismatch: expected {config_type}, got {type(config)}"
+                        f"Config type mismatch: expected {config_type}, got {
+                            type(config)}"
                     )
 
             result = func(state, config)
@@ -256,7 +246,8 @@ class AdvancedNodeComposer(NodeSchemaComposer):
             # Validate output type if specified
             if validate_types and result_type and not isinstance(result, result_type):
                 logger.warning(
-                    f"Result type mismatch: expected {result_type}, got {type(result)}"
+                    f"Result type mismatch: expected {result_type}, got {
+                        type(result)}"
                 )
 
             return result
@@ -318,7 +309,7 @@ class AdvancedNodeComposer(NodeSchemaComposer):
 
         # Create a callable that uses the pipeline
         def pipeline_callable(
-            state: Any, config: Optional[Dict[str, Any]] = None
+            state: Any, config: dict[str, Any] | None = None
         ) -> Command:
             config = config or {}
 
@@ -353,14 +344,14 @@ class AdvancedComposedNode(ComposedNode):
     def __init__(
         self,
         base_node: Any,
-        input_mappings: List[FieldMapping],
-        output_mappings: List[FieldMapping],
-        extract_logic: Optional[ExtractFunction],
-        update_logic: Optional[UpdateFunction],
+        input_mappings: list[FieldMapping],
+        output_mappings: list[FieldMapping],
+        extract_logic: ExtractFunction | None,
+        update_logic: UpdateFunction | None,
         name: str,
         composer: NodeSchemaComposer,
-        original_func: Optional[Callable] = None,
-        signature_info: Optional[Dict[str, Any]] = None,
+        original_func: Callable | None = None,
+        signature_info: dict[str, Any] | None = None,
     ):
         super().__init__(base_node, input_mappings, output_mappings, name, composer)
         self.extract_logic = extract_logic
@@ -368,7 +359,7 @@ class AdvancedComposedNode(ComposedNode):
         self.original_func = original_func
         self.signature_info = signature_info
 
-    def __call__(self, state: Any, config: Optional[Dict[str, Any]] = None) -> Any:
+    def __call__(self, state: Any, config: dict[str, Any] | None = None) -> Any:
         """Execute with extended logic."""
         config = config or {}
 
@@ -408,11 +399,9 @@ class AdvancedComposedNode(ComposedNode):
             # Return command with updates
             if hasattr(result, "update"):
                 return result.model_copy(update={"update": updates})
-            else:
-                return Command(update=updates)
-        else:
-            # Use standard update logic
-            return super().__call__(state, config)
+            return Command(update=updates)
+        # Use standard update logic
+        return super().__call__(state, config)
 
 
 class TypedCallableNode:
@@ -422,11 +411,11 @@ class TypedCallableNode:
         self,
         base_func: Callable,
         typed_func: Callable,
-        state_type: Type,
-        config_type: Type,
-        result_type: Optional[Type],
-        input_mappings: List[FieldMapping],
-        output_mappings: List[FieldMapping],
+        state_type: type,
+        config_type: type,
+        result_type: type | None,
+        input_mappings: list[FieldMapping],
+        output_mappings: list[FieldMapping],
         composer: NodeSchemaComposer,
         **kwargs,
     ):
@@ -448,14 +437,14 @@ class TypedCallableNode:
             **kwargs,
         )
 
-    def __call__(self, state: Any, config: Optional[Dict[str, Any]] = None) -> Any:
+    def __call__(self, state: Any, config: dict[str, Any] | None = None) -> Any:
         """Execute typed node."""
         return self.node(state, config)
 
 
 # Factory functions for common patterns
 def callable_to_node(
-    func: Callable, composer: Optional[AdvancedNodeComposer] = None, **kwargs
+    func: Callable, composer: AdvancedNodeComposer | None = None, **kwargs
 ) -> AdvancedComposedNode:
     """Quick conversion of any callable to node.
 
@@ -485,7 +474,7 @@ def node_with_custom_logic(
     extract: ExtractFunction,
     process: Callable[[Any], Any],
     update: UpdateFunction,
-    composer: Optional[AdvancedNodeComposer] = None,
+    composer: AdvancedNodeComposer | None = None,
 ) -> ComposedNode:
     """Create node with custom extract/process/update pipeline."""
     if composer is None:
@@ -496,8 +485,8 @@ def node_with_custom_logic(
 
 # Decorator for creating nodes
 def as_node(
-    input_mappings: Optional[List[FieldMapping]] = None,
-    output_mappings: Optional[List[FieldMapping]] = None,
+    input_mappings: list[FieldMapping] | None = None,
+    output_mappings: list[FieldMapping] | None = None,
     **kwargs,
 ):
     """Decorator to convert function to node.

@@ -12,7 +12,7 @@ Key benefits:
 - Backwards compatibility
 """
 
-from typing import Dict, List, Optional, Type, TypeVar
+from typing import Any, Optional, TypeVar
 
 from pydantic import BaseModel
 
@@ -47,7 +47,8 @@ class StandardFields:
         if use_enhanced:
             from haive.core.schema.prebuilt.messages.messages_state import MessageList
 
-            # Use the enhanced MessageList with all the token counting and metadata features
+            # Use the enhanced MessageList with all the token counting and
+            # metadata features
             field_type = MessageList
             metadata = {
                 "token_counting": True,
@@ -60,7 +61,7 @@ class StandardFields:
             # Basic message list for backwards compatibility - use AnyMessage
             from langchain_core.messages import AnyMessage
 
-            field_type = List[AnyMessage]
+            field_type = list[AnyMessage]
             metadata = {"reducer": "add_messages", "shared": True}
             default_factory = list
 
@@ -109,7 +110,7 @@ class StandardFields:
         """Retrieved context documents."""
         return FieldDefinition(
             name="context",
-            field_type=List[str],
+            field_type=list[str],
             default_factory=list,
             description="Retrieved document contexts",
             reducer_name="extend",
@@ -132,7 +133,7 @@ class StandardFields:
 
         return FieldDefinition(
             name="documents",
-            field_type=List[Document],
+            field_type=list[Document],
             default_factory=list,
             description="Retrieved documents with metadata",
             reducer_name="extend",
@@ -147,7 +148,7 @@ class StandardFields:
         """Generated plan steps."""
         return FieldDefinition(
             name="plan_steps",
-            field_type=List[str],
+            field_type=list[str],
             default_factory=list,
             description="Generated planning steps",
             reducer_name="extend",
@@ -168,7 +169,7 @@ class StandardFields:
         """Agent observations from tools/environment."""
         return FieldDefinition(
             name="observations",
-            field_type=List[str],
+            field_type=list[str],
             default_factory=list,
             description="Observations from tool executions",
             reducer_name="extend",
@@ -193,7 +194,7 @@ class StandardFields:
         """Tool routing configuration."""
         return FieldDefinition(
             name="tool_routes",
-            field_type=Dict[str, str],
+            field_type=dict[str, str],
             default_factory=dict,
             description="Tool name to route mapping",
         )
@@ -203,7 +204,7 @@ class StandardFields:
         """Available graph nodes."""
         return FieldDefinition(
             name="available_nodes",
-            field_type=List[str],
+            field_type=list[str],
             default_factory=list,
             description="List of available graph nodes",
         )
@@ -214,7 +215,7 @@ class StandardFields:
 
     @classmethod
     def structured_output(
-        cls, model_class: Type[BaseModel], field_name: Optional[str] = None
+        cls, model_class: type[BaseModel], field_name: str | None = None
     ) -> FieldDefinition:
         """Create a structured output field for a Pydantic model.
 
@@ -243,7 +244,7 @@ class FieldRegistry:
     field definitions at runtime.
     """
 
-    _registry: Dict[str, FieldDefinition] = {}
+    _registry: dict[str, FieldDefinition] = {}
 
     @classmethod
     def register(cls, field_def: FieldDefinition) -> None:
@@ -251,12 +252,12 @@ class FieldRegistry:
         cls._registry[field_def.name] = field_def
 
     @classmethod
-    def get(cls, name: str) -> Optional[FieldDefinition]:
+    def get(cls, name: str) -> FieldDefinition | None:
         """Get a registered field definition."""
         return cls._registry.get(name)
 
     @classmethod
-    def list_fields(cls) -> List[str]:
+    def list_fields(cls) -> list[str]:
         """List all registered field names."""
         return list(cls._registry.keys())
 
@@ -267,7 +268,7 @@ class FieldRegistry:
 
 
 # Convenience function for getting standard fields
-def get_standard_field(name: str, **kwargs) -> Optional[FieldDefinition]:
+def get_standard_field(name: str, **kwargs) -> FieldDefinition | None:
     """Get a standard field definition by name.
 
     Args:
@@ -317,7 +318,7 @@ class PrebuiltStates:
     """
 
     @classmethod
-    def messages_with_tokens(cls):
+    def messages_with_tokens(cls) -> Any:
         """Get MessagesStateWithTokenUsage for token-aware conversations."""
         from haive.core.schema.prebuilt.messages.messages_with_token_usage import (
             MessagesStateWithTokenUsage,
@@ -326,21 +327,21 @@ class PrebuiltStates:
         return MessagesStateWithTokenUsage
 
     @classmethod
-    def llm_state(cls):
+    def llm_state(cls) -> Any:
         """Get LLMState for single-engine LLM agents with token tracking and model awareness."""
         from haive.core.schema.prebuilt.llm_state import LLMState
 
         return LLMState
 
     @classmethod
-    def tool_state(cls):
+    def tool_state(cls) -> Any:
         """Get ToolState for tool-using agents with LLM features, tools, and token tracking."""
         from haive.core.schema.prebuilt.tool_state import ToolState
 
         return ToolState
 
     @classmethod
-    def base_messages_state(cls):
+    def base_messages_state(cls) -> Any:
         """Get basic MessagesState without token tracking."""
         from haive.core.schema.prebuilt.messages_state import MessagesState
 

@@ -22,9 +22,9 @@ def run_react_agent_with_debug():
 
     try:
         # Import and run the exact same test
-        from haive.agents.react.agent import ReactAgent
         from langchain_core.tools import tool
 
+        from haive.agents.react.agent import ReactAgent
         from haive.core.engine.aug_llm import AugLLMConfig
 
         # Create the tool

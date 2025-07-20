@@ -10,6 +10,7 @@ to configure the connection pool with the configure parameter.
 """
 
 import json
+from typing import Any
 
 import psycopg
 from langgraph.checkpoint.postgres import PostgresSaver as BasePostgresSaver
@@ -20,7 +21,7 @@ from psycopg.rows import dict_row
 from pydantic import BaseModel
 
 
-def pydantic_aware_json_dumps(obj):
+def pydantic_aware_json_dumps(obj) -> Any:
     """JSON encoder that handles Pydantic models.
 
     This encoder ensures that Pydantic models are properly serialized
@@ -28,7 +29,7 @@ def pydantic_aware_json_dumps(obj):
     """
 
     class PydanticEncoder(json.JSONEncoder):
-        def default(self, o):
+        def default(self, o) -> Any:
             if isinstance(o, BaseModel):
                 return o.model_dump()
             return super().default(o)
@@ -36,7 +37,7 @@ def pydantic_aware_json_dumps(obj):
     return json.dumps(obj, cls=PydanticEncoder)
 
 
-def configure_postgres_json(connection):
+def configure_postgres_json(connection) -> None:
     """Configure a PostgreSQL connection to handle Pydantic JSON serialization.
 
     Args:
@@ -47,7 +48,8 @@ def configure_postgres_json(connection):
     set_json_dumps(pydantic_aware_json_dumps, context=connection)
 
 
-# Override classes for backward compatibility and direct connection string usage
+# Override classes for backward compatibility and direct connection string
+# usage
 
 
 class PostgresSaverNoPreparedStatements(BasePostgresSaver):

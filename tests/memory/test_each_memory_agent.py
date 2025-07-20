@@ -5,9 +5,11 @@ ensuring they all work correctly with real LLM calls.
 """
 
 import asyncio
+import contextlib
 import logging
-from datetime import datetime
-from typing import Any, Dict, List
+import sys
+
+from haive.core.persistence.store.types import StoreType
 
 # Configure logging
 logging.basicConfig(
@@ -16,22 +18,16 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Import StoreType at module level to avoid repeated imports
-from haive.core.persistence.store.types import StoreType
 
 
 def print_section(title: str):
     """Print a formatted section header."""
-    print(f"\n{'=' * 60}")
-    print(f"🧪 {title}")
-    print(f"{'=' * 60}")
 
 
 def print_result(test_name: str, success: bool, details: str = ""):
     """Print test result."""
-    status = "✅ PASS" if success else "❌ FAIL"
-    print(f"{status} - {test_name}")
     if details:
-        print(f"   Details: {details}")
+        pass
 
 
 async def test_memory_classifier():
@@ -43,7 +39,6 @@ async def test_memory_classifier():
             MemoryClassifier,
             MemoryClassifierConfig,
         )
-
         from haive.core.engine.aug_llm import AugLLMConfig
 
         # Create classifier with real LLM
@@ -67,7 +62,10 @@ async def test_memory_classifier():
             print_result(
                 f"Classify: '{memory[:40]}...'",
                 True,
-                f"Types: {[str(mt) for mt in result.memory_types]}, Importance: {result.importance_score:.2f}",
+                f"Types: {
+                    [
+                        str(mt) for mt in result.memory_types]}, Importance: {
+                    result.importance_score:.2f}",
             )
 
         # Test 2: Query intent classification
@@ -83,14 +81,17 @@ async def test_memory_classifier():
             print_result(
                 f"Query intent: '{query[:40]}...'",
                 True,
-                f"Types: {[str(mt) for mt in intent.memory_types]}, Strategy: {intent.preferred_retrieval_strategy}",
+                f"Types: {
+                    [
+                        str(mt) for mt in intent.memory_types]}, Strategy: {
+                    intent.preferred_retrieval_strategy}",
             )
 
         return True
 
     except Exception as e:
         print_result("Memory Classifier", False, str(e))
-        logger.error(f"Memory classifier test failed: {e}")
+        logger.exception(f"Memory classifier test failed: {e}")
         return False
 
 
@@ -103,7 +104,6 @@ async def test_memory_store_manager():
             MemoryStoreConfig,
             MemoryStoreManager,
         )
-
         from haive.core.tools.store_manager import StoreManager
 
         # Create store manager with correct API
@@ -130,16 +130,20 @@ async def test_memory_store_manager():
         # Test 2: Retrieve memory by ID
         memory = await memory_store.get_memory_by_id(memory_id)
         print_result(
-            "Retrieve by ID", memory is not None, f"Found: {memory is not None}"
+            "Retrieve by ID", memory is not None, f"Found: {
+                memory is not None}"
         )
 
         # Test 3: Search memories
         memories = await memory_store.retrieve_memories(
             query="Alice engineer", namespace=("test", "facts"), limit=5
         )
-        print_result("Search memories", True, f"Found {len(memories)} memories")
+        print_result(
+            "Search memories", True, f"Found {
+                len(memories)} memories")
 
-        # Test 4: Update memory (access is updated automatically in get_memory_by_id)
+        # Test 4: Update memory (access is updated automatically in
+        # get_memory_by_id)
         success = await memory_store.update_memory(
             memory_id=memory_id, additional_metadata={"test_update": True}
         )
@@ -148,14 +152,16 @@ async def test_memory_store_manager():
         # Test 5: Get memory statistics
         stats = await memory_store.get_memory_statistics(("test", "facts"))
         print_result(
-            "Get statistics", True, f"Total memories: {stats.get('total_memories', 0)}"
+            "Get statistics", True, f"Total memories: {
+                stats.get(
+                    'total_memories', 0)}"
         )
 
         return True
 
     except Exception as e:
         print_result("Memory Store Manager", False, str(e))
-        logger.error(f"Memory store manager test failed: {e}")
+        logger.exception(f"Memory store manager test failed: {e}")
         return False
 
 
@@ -176,7 +182,6 @@ async def test_kg_generator_agent():
             KGGeneratorAgent,
             KGGeneratorAgentConfig,
         )
-
         from haive.core.engine.aug_llm import AugLLMConfig
         from haive.core.tools.store_manager import StoreManager
 
@@ -213,7 +218,8 @@ async def test_kg_generator_agent():
         # Test 1: Extract entities from memories
         entities = await kg_agent.extract_entities_from_memories(limit=5)
         print_result(
-            "Extract entities", len(entities) > 0, f"Found {len(entities)} entities"
+            "Extract entities", len(
+                entities) > 0, f"Found {len(entities)} entities"
         )
 
         # Test 2: Extract relationships
@@ -242,13 +248,17 @@ async def test_kg_generator_agent():
 
         # Test 5: Run agent
         result = await kg_agent.run("Extract knowledge from the stored memories")
-        print_result("Run KG agent", len(result) > 0, f"Response length: {len(result)}")
+        print_result(
+            "Run KG agent",
+            len(result) > 0,
+            f"Response length: {
+                len(result)}")
 
         return True
 
     except Exception as e:
         print_result("KG Generator Agent", False, str(e))
-        logger.error(f"KG generator agent test failed: {e}")
+        logger.exception(f"KG generator agent test failed: {e}")
         return False
 
 
@@ -273,7 +283,6 @@ async def test_graph_rag_retriever():
             KGGeneratorAgent,
             KGGeneratorAgentConfig,
         )
-
         from haive.core.engine.aug_llm import AugLLMConfig
         from haive.core.tools.store_manager import StoreManager
 
@@ -353,7 +362,7 @@ async def test_graph_rag_retriever():
 
     except Exception as e:
         print_result("Graph RAG Retriever", False, str(e))
-        logger.error(f"Graph RAG retriever test failed: {e}")
+        logger.exception(f"Graph RAG retriever test failed: {e}")
         return False
 
 
@@ -378,7 +387,6 @@ async def test_agentic_rag_coordinator():
             KGGeneratorAgent,
             KGGeneratorAgentConfig,
         )
-
         from haive.core.engine.aug_llm import AugLLMConfig
         from haive.core.tools.store_manager import StoreManager
 
@@ -430,7 +438,10 @@ async def test_agentic_rag_coordinator():
         print_result(
             "Simple retrieval",
             len(result.final_memories) > 0,
-            f"Strategies: {result.selected_strategies}, Memories: {len(result.final_memories)}",
+            f"Strategies: {
+                result.selected_strategies}, Memories: {
+                len(
+                    result.final_memories)}",
         )
 
         # Test 2: Procedural query
@@ -460,20 +471,24 @@ async def test_agentic_rag_coordinator():
         print_result(
             "Multi-strategy",
             len(result.selected_strategies) > 1,
-            f"Strategies: {len(result.selected_strategies)}, Diversity: {result.diversity_score:.2f}",
+            f"Strategies: {
+                len(
+                    result.selected_strategies)}, Diversity: {
+                result.diversity_score:.2f}",
         )
 
         # Test 5: Run agent
         response = await rag_coordinator.run("What have I learned recently?")
         print_result(
-            "Run RAG agent", len(response) > 0, f"Response length: {len(response)}"
+            "Run RAG agent", len(
+                response) > 0, f"Response length: {len(response)}"
         )
 
         return True
 
     except Exception as e:
         print_result("Agentic RAG Coordinator", False, str(e))
-        logger.error(f"Agentic RAG coordinator test failed: {e}")
+        logger.exception(f"Agentic RAG coordinator test failed: {e}")
         return False
 
 
@@ -499,7 +514,6 @@ async def test_multi_agent_coordinator():
             MultiAgentCoordinatorConfig,
             MultiAgentMemoryCoordinator,
         )
-
         from haive.core.engine.aug_llm import AugLLMConfig
         from haive.core.tools.store_manager import StoreManager
 
@@ -544,7 +558,8 @@ async def test_multi_agent_coordinator():
 
         # Test 1: Store memory through coordinator
         result = await coordinator.store_memory("Multi-agent test memory")
-        print_result("Store via coordinator", "success" in result.lower(), result[:50])
+        print_result("Store via coordinator",
+                     "success" in result.lower(), result[:50])
 
         # Test 2: Retrieve memories
         memories = await coordinator.retrieve_memories(query="test memory", limit=5)
@@ -556,11 +571,17 @@ async def test_multi_agent_coordinator():
 
         # Test 3: Analyze memory
         analysis = await coordinator.analyze_memory("Analyze this test content")
-        print_result("Analyze memory", analysis["success"], "Analysis completed")
+        print_result(
+            "Analyze memory",
+            analysis["success"],
+            "Analysis completed")
 
         # Test 4: Generate knowledge graph
         kg_result = await coordinator.generate_knowledge_graph()
-        print_result("Generate KG", kg_result["success"], "Knowledge graph generated")
+        print_result(
+            "Generate KG",
+            kg_result["success"],
+            "Knowledge graph generated")
 
         # Test 5: Execute custom task
         task = MemoryTask(
@@ -574,7 +595,9 @@ async def test_multi_agent_coordinator():
         print_result(
             "Execute task",
             executed_task.status == "completed",
-            f"Status: {executed_task.status}, Agent: {executed_task.assigned_agent}",
+            f"Status: {
+                executed_task.status}, Agent: {
+                executed_task.assigned_agent}",
         )
 
         # Test 6: Get system status
@@ -597,7 +620,7 @@ async def test_multi_agent_coordinator():
 
     except Exception as e:
         print_result("Multi-Agent Coordinator", False, str(e))
-        logger.error(f"Multi-agent coordinator test failed: {e}")
+        logger.exception(f"Multi-agent coordinator test failed: {e}")
         return False
 
 
@@ -631,7 +654,8 @@ async def test_unified_memory_system():
             content="Unified system test memory", metadata={"test": True}
         )
         print_result(
-            "Store memory", result.success, f"Time: {result.execution_time_ms:.1f}ms"
+            "Store memory", result.success, f"Time: {
+                result.execution_time_ms:.1f}ms"
         )
 
         # Test 2: Retrieve memories
@@ -657,12 +681,16 @@ async def test_unified_memory_system():
         # Test 4: Generate knowledge graph
         result = await memory_system.generate_knowledge_graph()
         print_result(
-            "Generate KG", result.success, f"Time: {result.execution_time_ms:.1f}ms"
+            "Generate KG", result.success, f"Time: {
+                result.execution_time_ms:.1f}ms"
         )
 
         # Test 5: Consolidate memories
         result = await memory_system.consolidate_memories(dry_run=True)
-        print_result("Consolidate memories", result.success, "Dry run completed")
+        print_result(
+            "Consolidate memories",
+            result.success,
+            "Dry run completed")
 
         # Test 6: Get statistics
         result = await memory_system.get_memory_statistics()
@@ -671,7 +699,8 @@ async def test_unified_memory_system():
         # Test 7: Search entities
         result = await memory_system.search_entities(entity_name="test")
         print_result(
-            "Search entities", result.success, f"Time: {result.execution_time_ms:.1f}ms"
+            "Search entities", result.success, f"Time: {
+                result.execution_time_ms:.1f}ms"
         )
 
         # Test 8: Run diagnostic
@@ -687,7 +716,9 @@ async def test_unified_memory_system():
         print_result(
             "System info",
             info["initialized"],
-            f"Version: {info['system_version']}, Stats: {info['statistics']['total_operations']} ops",
+            f"Version: {
+                info['system_version']}, Stats: {
+                info['statistics']['total_operations']} ops",
         )
 
         # Test 10: Create with factory function
@@ -702,17 +733,12 @@ async def test_unified_memory_system():
 
     except Exception as e:
         print_result("Unified Memory System", False, str(e))
-        logger.error(f"Unified memory system test failed: {e}")
+        logger.exception(f"Unified memory system test failed: {e}")
         return False
 
 
 async def main():
     """Run all agent tests."""
-    print("=" * 60)
-    print("🧠 HAIVE MEMORY AGENTS - INDIVIDUAL TESTING")
-    print("=" * 60)
-    print(f"Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-
     # Track results
     results = {}
 
@@ -732,7 +758,7 @@ async def main():
             success = await test_func()
             results[name] = success
         except Exception as e:
-            logger.error(f"Failed to run {name} test: {e}")
+            logger.exception(f"Failed to run {name} test: {e}")
             results[name] = False
 
     # Print summary
@@ -742,36 +768,23 @@ async def main():
     passed_tests = sum(1 for success in results.values() if success)
     failed_tests = total_tests - passed_tests
 
-    print(f"\nTotal Tests: {total_tests}")
-    print(f"✅ Passed: {passed_tests}")
-    print(f"❌ Failed: {failed_tests}")
-    print(f"Success Rate: {(passed_tests/total_tests)*100:.1f}%")
-
-    print("\nDetailed Results:")
     for name, success in results.items():
-        status = "✅ PASS" if success else "❌ FAIL"
-        print(f"  {status} - {name}")
+        pass
 
     # Overall status
-    print("\n" + "=" * 60)
     if failed_tests == 0:
-        print("🎉 ALL TESTS PASSED! Memory system agents are working correctly!")
+        pass
     else:
-        print(f"⚠️  {failed_tests} tests failed. Please review the errors above.")
-    print("=" * 60)
+        pass
 
     return passed_tests == total_tests
 
 
 if __name__ == "__main__":
     # Check if we have required imports
-    try:
+    with contextlib.suppress(ImportError):
         from haive.core.engine.aug_llm import AugLLMConfig
-
-        print("✅ Core imports available - using real LLM config")
-    except ImportError:
-        print("⚠️  Core imports not available - tests may use mocks")
 
     # Run tests
     success = asyncio.run(main())
-    exit(0 if success else 1)
+    sys.exit(0 if success else 1)

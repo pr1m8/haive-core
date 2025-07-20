@@ -1,12 +1,10 @@
-"""
-LangChain-specific type converters for documents, messages, and prompts.
-"""
+"""LangChain-specific type converters for documents, messages, and prompts."""
 
 from __future__ import annotations
 
 import hashlib
 import json
-from typing import Any, Optional
+from typing import Any
 
 from langchain_core.documents import Document
 from langchain_core.messages import (
@@ -73,12 +71,11 @@ class MessageConverter(TypeConverter):
 
         if source_level == target_level:
             return ConversionQuality.SAFE
-        elif source_level < target_level:
+        if source_level < target_level:
             # Converting from general to specific
             return ConversionQuality.UNSAFE
-        else:
-            # Converting from specific to general
-            return ConversionQuality.LOSSY
+        # Converting from specific to general
+        return ConversionQuality.LOSSY
 
     def convert(self, value: BaseMessage, context: ConversionContext) -> BaseMessage:
         """Convert between message types."""
@@ -86,7 +83,7 @@ class MessageConverter(TypeConverter):
         target_type = self._get_message_type(target_type_name)
 
         # Same type - no conversion
-        if type(value) == target_type:
+        if isinstance(value, target_type):
             return value
 
         # Extract core data
@@ -96,12 +93,9 @@ class MessageConverter(TypeConverter):
         # Special conversions
         if isinstance(value, AIMessage) and target_type == ToolMessage:
             return self._ai_to_tool(value, context)
-        elif isinstance(value, ToolMessage) and target_type == AIMessage:
+        if isinstance(value, ToolMessage) and target_type == AIMessage:
             return self._tool_to_ai(value, context)
-        elif (
-            isinstance(value, (HumanMessage, AIMessage))
-            and target_type == SystemMessage
-        ):
+        if isinstance(value, HumanMessage | AIMessage) and target_type == SystemMessage:
             context.add_warning("Converting user/assistant message to system message")
             return SystemMessage(content=content, additional_kwargs=additional_kwargs)
 
@@ -111,21 +105,20 @@ class MessageConverter(TypeConverter):
                 return HumanMessage(
                     content=content, additional_kwargs=additional_kwargs
                 )
-            elif target_type == AIMessage:
+            if target_type == AIMessage:
                 return AIMessage(content=content, additional_kwargs=additional_kwargs)
-            elif target_type == SystemMessage:
+            if target_type == SystemMessage:
                 return SystemMessage(
                     content=content, additional_kwargs=additional_kwargs
                 )
-            elif target_type == BaseMessage:
+            if target_type == BaseMessage:
                 # Keep original type but track as "converted"
                 context.add_warning(f"Keeping as {type(value).__name__}")
                 return value
-            else:
-                # Try direct instantiation
-                return target_type(content=content, **additional_kwargs)
+            # Try direct instantiation
+            return target_type(content=content, **additional_kwargs)
         except Exception as e:
-            context.add_error(f"Conversion failed: {str(e)}")
+            context.add_error(f"Conversion failed: {e!s}")
             return value
 
     def _ai_to_tool(self, ai_msg: AIMessage, context: ConversionContext) -> ToolMessage:
@@ -140,27 +133,28 @@ class MessageConverter(TypeConverter):
                 tool_call_id=tool_call.get("id", self._generate_id(ai_msg.content)),
                 additional_kwargs=ai_msg.additional_kwargs,
             )
-        else:
-            # No tool calls - generate synthetic tool message
-            context.add_warning(
-                "No tool calls in AIMessage, creating synthetic ToolMessage"
-            )
-            return ToolMessage(
-                content=ai_msg.content,
-                tool_call_id=self._generate_id(ai_msg.content),
-                additional_kwargs={
-                    **ai_msg.additional_kwargs,
-                    "synthetic": True,
-                    "original_type": "AIMessage",
-                },
-            )
+        # No tool calls - generate synthetic tool message
+        context.add_warning(
+            "No tool calls in AIMessage, creating synthetic ToolMessage"
+        )
+        return ToolMessage(
+            content=ai_msg.content,
+            tool_call_id=self._generate_id(ai_msg.content),
+            additional_kwargs={
+                **ai_msg.additional_kwargs,
+                "synthetic": True,
+                "original_type": "AIMessage",
+            },
+        )
 
     def _tool_to_ai(
         self, tool_msg: ToolMessage, context: ConversionContext
     ) -> AIMessage:
         """Convert ToolMessage to AIMessage."""
         return AIMessage(
-            content=f"Tool Response [{tool_msg.tool_call_id}]: {tool_msg.content}",
+            content=f"Tool Response [{
+                tool_msg.tool_call_id}]: {
+                tool_msg.content}",
             additional_kwargs={
                 **tool_msg.additional_kwargs,
                 "was_tool_message": True,
@@ -211,19 +205,13 @@ class DocumentConverter(TypeConverter):
             return True
 
         # dict/str to Document
-        if source_type in [dict, str] and target_type == Document:
-            return True
-
-        return False
+        return bool(source_type in [dict, str] and target_type == Document)
 
     def get_quality(self, source_type: type, target_type: type) -> ConversionQuality:
         """Determine conversion quality."""
         # Document <-> Message is lossy (metadata handling)
-        if (
-            source_type == Document
-            and issubclass(target_type, BaseMessage)
-            or issubclass(source_type, BaseMessage)
-            and target_type == Document
+        if (source_type == Document and issubclass(target_type, BaseMessage)) or (
+            issubclass(source_type, BaseMessage) and target_type == Document
         ):
             return ConversionQuality.LOSSY
 
@@ -246,11 +234,11 @@ class DocumentConverter(TypeConverter):
         if isinstance(value, Document):
             if target_type_name in ["HumanMessage", "BaseMessage"]:
                 return self._doc_to_human_message(value, context)
-            elif target_type_name == "AIMessage":
+            if target_type_name == "AIMessage":
                 return self._doc_to_ai_message(value, context)
-            elif target_type_name == "dict":
+            if target_type_name == "dict":
                 return self._doc_to_dict(value, context)
-            elif target_type_name == "str":
+            if target_type_name == "str":
                 return self._doc_to_str(value, context)
 
         # Message to Document
@@ -274,7 +262,9 @@ class DocumentConverter(TypeConverter):
         # Include metadata in message
         metadata_str = ""
         if doc.metadata:
-            metadata_str = f"\n[Source: {doc.metadata.get('source', 'unknown')}]"
+            metadata_str = f"\n[Source: {
+                doc.metadata.get(
+                    'source', 'unknown')}]"
             context.track_lost_field("full_metadata", doc.metadata)
 
         return HumanMessage(
@@ -332,17 +322,16 @@ class DocumentConverter(TypeConverter):
                 page_content=data["page_content"],
                 metadata=data.get("metadata", {}),
             )
-        elif "content" in data:
+        if "content" in data:
             return Document(
                 page_content=data["content"],
                 metadata={k: v for k, v in data.items() if k != "content"},
             )
-        else:
-            # Treat entire dict as metadata
-            return Document(
-                page_content=str(data),
-                metadata=data,
-            )
+        # Treat entire dict as metadata
+        return Document(
+            page_content=str(data),
+            metadata=data,
+        )
 
     def _str_to_doc(self, text: str, context: ConversionContext) -> Document:
         """Convert string to Document."""
@@ -380,10 +369,7 @@ class PromptConverter(TypeConverter):
             return True
 
         # Messages to ChatPrompt
-        if source_type == list and target_type == ChatPromptTemplate:
-            return True
-
-        return False
+        return bool(source_type == list and target_type == ChatPromptTemplate)
 
     def get_quality(self, source_type: type, target_type: type) -> ConversionQuality:
         """Determine conversion quality."""
@@ -392,15 +378,12 @@ class PromptConverter(TypeConverter):
             return ConversionQuality.LOSSLESS
 
         # String conversions are lossy (lose template info)
-        if source_type == str or target_type == str:
+        if str in (source_type, target_type):
             return ConversionQuality.LOSSY
 
         # PromptTemplate <-> ChatPromptTemplate
-        if (
-            source_type == PromptTemplate
-            and target_type == ChatPromptTemplate
-            or source_type == ChatPromptTemplate
-            and target_type == PromptTemplate
+        if (source_type == PromptTemplate and target_type == ChatPromptTemplate) or (
+            source_type == ChatPromptTemplate and target_type == PromptTemplate
         ):
             return ConversionQuality.SAFE
 
@@ -414,7 +397,7 @@ class PromptConverter(TypeConverter):
         if isinstance(value, str):
             if target_type_name == "PromptTemplate":
                 return PromptTemplate.from_template(value)
-            elif target_type_name == "ChatPromptTemplate":
+            if target_type_name == "ChatPromptTemplate":
                 return ChatPromptTemplate.from_template(value)
 
         # Prompt to String
@@ -423,11 +406,8 @@ class PromptConverter(TypeConverter):
                 # Try to get template string
                 if hasattr(value, "template"):
                     return value.template
-                else:
-                    context.add_warning(
-                        "Complex prompt converted to string representation"
-                    )
-                    return str(value)
+                context.add_warning("Complex prompt converted to string representation")
+                return str(value)
 
         # PromptTemplate to ChatPromptTemplate
         elif isinstance(value, PromptTemplate):
@@ -458,7 +438,7 @@ class PromptConverter(TypeConverter):
         return value
 
 
-def register_langchain_converters(registry: Optional[Any] = None) -> None:
+def register_langchain_converters(registry: Any | None = None) -> None:
     """Register all LangChain converters with the global registry."""
     # Import here to avoid circular imports
     from haive.core.schema.compatibility.converters import register_converter

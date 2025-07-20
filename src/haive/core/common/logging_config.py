@@ -39,9 +39,7 @@ from typing import Any
 try:
     from rich.console import Console
     from rich.logging import RichHandler
-    from rich.panel import Panel
     from rich.table import Table
-    from rich.text import Text
 
     RICH_AVAILABLE = True
     console = Console()
@@ -135,7 +133,9 @@ class GameLogger:
         self.format = format
         self.enable_file_logging = enable_file_logging
         self.log_file = (
-            log_file or f"game_{name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+            log_file
+            or f"game_{name}_{
+                datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
         )
 
         # Performance tracking
@@ -441,7 +441,10 @@ class GameLogger:
 
             if self.logger.level <= logging.DEBUG:
                 if RICH_AVAILABLE and self.format == LogFormat.RICH:
-                    console.print(f"  ⏱️  [dim]{operation} took {duration:.3f}s[/dim]")
+                    console.print(
+                        f"  ⏱️  [dim]{operation} took {
+                            duration:.3f}s[/dim]"
+                    )
                 else:
                     self.logger.debug(f"{operation} took {duration:.3f}s")
 

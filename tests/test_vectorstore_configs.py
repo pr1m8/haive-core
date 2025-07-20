@@ -11,7 +11,8 @@ from haive.core.models.embeddings.base import HuggingFaceEmbeddingConfig
 @pytest.fixture
 def sample_embedding_config():
     """Create a sample embedding configuration."""
-    return HuggingFaceEmbeddingConfig(model="sentence-transformers/all-MiniLM-L6-v2")
+    return HuggingFaceEmbeddingConfig(
+        model="sentence-transformers/all-MiniLM-L6-v2")
 
 
 @pytest.fixture
@@ -169,29 +170,20 @@ def test_invalid_distance_metrics():
 
 if __name__ == "__main__":
     # Run basic tests
-    print("Testing vector store configurations...")
 
     embedding_config = HuggingFaceEmbeddingConfig(
         model="sentence-transformers/all-MiniLM-L6-v2"
     )
 
     # Test each vector store config
-    print("✓ Testing Chroma configuration...")
     test_chroma_config(embedding_config)
 
-    print("✓ Testing FAISS configuration...")
     test_faiss_config(embedding_config)
 
-    print("✓ Testing Qdrant configuration...")
     test_qdrant_config(embedding_config)
 
-    print("✓ Testing Weaviate configuration...")
     test_weaviate_config(embedding_config)
 
-    print("✓ Testing Milvus configuration...")
     test_milvus_config(embedding_config)
 
-    print("✓ Testing registration...")
     test_vector_store_registration()
-
-    print("\nAll tests passed! ✅")

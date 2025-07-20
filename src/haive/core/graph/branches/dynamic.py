@@ -1,9 +1,7 @@
-"""
-Dynamic output mapping based on state.
-"""
+"""Dynamic output mapping based on state."""
 
 import logging
-from typing import Any, Dict, Optional, Tuple
+from typing import Any
 
 from langgraph.graph import END
 from pydantic import BaseModel, Field, model_validator
@@ -21,8 +19,8 @@ logger = logging.getLogger(__name__)
 class OutputMapping(BaseModel):
     """Output mapping configuration."""
 
-    field_mappings: Dict[str, str] = Field(default_factory=dict)
-    condition: Optional[str] = None
+    field_mappings: dict[str, str] = Field(default_factory=dict)
+    condition: str | None = None
 
     model_config = {"arbitrary_types_allowed": True}
 
@@ -30,26 +28,28 @@ class OutputMapping(BaseModel):
 class DynamicMapping(BaseModel):
     """Configuration for dynamic output mapping."""
 
-    mappings: Dict[str, Dict[str, str]] = Field(default_factory=dict)
-    function_ref: Optional[CallableReference] = None
-    key: Optional[str] = None
-    value: Optional[Any] = None
+    mappings: dict[str, dict[str, str]] = Field(default_factory=dict)
+    function_ref: CallableReference | None = None
+    key: str | None = None
+    value: Any | None = None
     comparison: ComparisonType = ComparisonType.EQUALS
     default_node: str = END
 
     model_config = {"arbitrary_types_allowed": True}
 
     @model_validator(mode="after")
-    def validate_mappings(self):
+
+
+    @classmethod
+    def validate_mappings(cls) -> Any:
         for _key, mapping_data in self.mappings.items():
             if "mapping" in mapping_data and isinstance(mapping_data["mapping"], dict):
                 # No conversion needed now - we accept dict directly
                 pass
         return self
 
-    def get_mapping(self, state: StateLike) -> Tuple[str, Optional[Dict[str, str]]]:
-        """
-        Determine which mapping to use based on state.
+    def get_mapping(self, state: StateLike) -> tuple[str, dict[str, str] | None]:
+        """Determine which mapping to use based on state.
 
         Args:
             state: State object
@@ -69,7 +69,7 @@ class DynamicMapping(BaseModel):
                     if isinstance(result, str):
                         next_node = result
                 except Exception as e:
-                    logger.error(f"Error in dynamic mapping function: {e}")
+                    logger.exception(f"Error in dynamic mapping function: {e}")
 
         # Otherwise use key/value comparison
         elif self.key:
@@ -93,13 +93,14 @@ class DynamicMapping(BaseModel):
 
                 # If comparison is true, find a route other than the default
                 if comparison_result:
-                    # Find high_score_route for the test, or any non-default route
+                    # Find high_score_route for the test, or any non-default
+                    # route
                     if "high_score_route" in self.mappings:
                         next_node = "high_score_route"
                     else:
                         # Get any non-default route
                         non_default_routes = [
-                            k for k in self.mappings.keys() if k != self.default_node
+                            k for k in self.mappings if k != self.default_node
                         ]
                         if non_default_routes:
                             next_node = non_default_routes[0]

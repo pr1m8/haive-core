@@ -1,5 +1,6 @@
 """Wikipedia Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Wikipedia retriever, which
 retrieves articles from Wikipedia based on search queries.
 
@@ -94,7 +95,7 @@ class WikipediaRetrieverConfig(BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a Wikipedia retriever from this configuration.
 
         Returns:

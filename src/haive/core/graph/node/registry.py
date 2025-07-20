@@ -5,8 +5,8 @@ This module provides a registry for node configurations, allowing nodes to be
 registered, looked up, and managed throughout the application.
 """
 
+import builtins
 import logging
-from typing import List
 
 from haive.core.graph.node.config import NodeConfig
 from haive.core.graph.node.types import NodeType
@@ -37,7 +37,7 @@ class NodeRegistry(AbstractRegistry[NodeConfig]):
             cls._instance = cls()
         return cls._instance
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the registry with empty storage."""
         self.nodes_by_id: dict[str, NodeConfig] = {}
         self.nodes_by_type: dict[NodeType, dict[str, NodeConfig]] = {
@@ -118,7 +118,7 @@ class NodeRegistry(AbstractRegistry[NodeConfig]):
         """
         return self.nodes_by_type[item_type]
 
-    def list_all_names(self) -> List[str]:
+    def list_all_names(self) -> builtins.list[str]:
         """List all registered node names across all types.
 
         Returns:

@@ -18,12 +18,8 @@ from haive.core.engine.document import (
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent.parent))
 
 
-def demo_universal_loader():
+def demo_universal_loader() -> None:
     """Demonstrate the universal loader capabilities."""
-
-    print("🚀 Universal Document Loader Demo")
-    print("=" * 50)
-
     # Create a universal loader
     credential_manager = CredentialManager()
 
@@ -63,29 +59,20 @@ def demo_universal_loader():
         "gs://my-bucket/data.csv",
     ]
 
-    print("\\n📋 Analyzing various document sources...")
-    print("-" * 50)
-
     for path in test_paths:
-        print(f"\\n🔍 Analyzing: {path}")
 
         # Analyze the source
         analysis = loader.analyze_source(path)
 
-        print(f"   📊 Found {len(analysis['candidates'])} potential loaders")
         if analysis["recommended"]:
-            print(f"   ⭐ Recommended: {analysis['recommended']}")
+            pass
         if analysis["supports_auth"]:
-            print("   🔐 Requires authentication")
+            pass
 
         # Show top 3 candidates
-        for i, candidate in enumerate(analysis["candidates"][:3]):
-            confidence = candidate["confidence"]
-            source_type = candidate["source_type"]
-            print(f"      {i+1}. {source_type} (confidence: {confidence:.2f})")
-
-    print("\\n\\n🎯 Testing actual loader creation...")
-    print("-" * 50)
+        for _i, candidate in enumerate(analysis["candidates"][:3]):
+            candidate["confidence"]
+            candidate["source_type"]
 
     # Test actual loader creation for a few examples
     test_loads = [
@@ -95,18 +82,14 @@ def demo_universal_loader():
     ]
 
     for path, preferences in test_loads:
-        print(f"\\n📄 Creating loader for: {path}")
         try:
             doc_loader = loader.load(path, preferences=preferences)
             if doc_loader:
-                print(f"   ✅ Successfully created: {type(doc_loader).__name__}")
+                pass
             else:
-                print("   ❌ Failed to create loader")
-        except Exception as e:
-            print(f"   ⚠️ Error: {e}")
-
-    print("\\n\\n📚 Using convenience functions...")
-    print("-" * 50)
+                pass
+        except Exception:
+            pass
 
     # Demonstrate convenience functions
     test_convenience = [
@@ -115,39 +98,23 @@ def demo_universal_loader():
     ]
 
     for path in test_convenience:
-        print(f"\\n📖 Loading with convenience function: {path}")
         try:
             # Use the convenience function
             doc_loader = load_document(path)
             if doc_loader:
-                print(f"   ✅ Created: {type(doc_loader).__name__}")
+                pass
             else:
-                print("   ❌ Failed to create loader")
+                pass
 
             # Analyze with convenience function
             analysis = analyze_document_source(path)
-            print(f"   📊 Analysis: {analysis['recommended']} recommended")
 
-        except Exception as e:
-            print(f"   ⚠️ Error: {e}")
-
-    print("\\n\\n🏁 Demo completed!")
-    print("\\nKey Features Demonstrated:")
-    print("• ✨ Automatic source detection")
-    print("• 🎯 Intelligent loader selection")
-    print("• 📊 Confidence scoring")
-    print("• 🔐 Authentication support")
-    print("• 🛠️ Preference-based selection")
-    print("• 🔄 Fallback mechanisms")
-    print("• 🎮 Easy-to-use convenience functions")
+        except Exception:
+            pass
 
 
-def show_supported_sources():
+def show_supported_sources() -> None:
     """Show all supported source types."""
-
-    print("\\n📋 Supported Source Types")
-    print("=" * 30)
-
     loader = UniversalDocumentLoader()
     sources = loader.get_supported_sources()
 
@@ -207,13 +174,10 @@ def show_supported_sources():
 
     categories["Other"] = [s for s in sources if s not in categorized]
 
-    for category, cat_sources in categories.items():
+    for _category, cat_sources in categories.items():
         if cat_sources:
-            print(f"\\n{category}:")
-            for source in sorted(cat_sources):
-                print(f"  • {source}")
-
-    print(f"\\n📊 Total: {len(sources)} source types supported")
+            for _source in sorted(cat_sources):
+                pass
 
 
 if __name__ == "__main__":

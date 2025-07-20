@@ -7,7 +7,7 @@ Based on analysis of 6 node types, these functions handle the most common
 state update patterns found in actual Haive nodes.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from haive.core.graph.node.composer.path_resolver import PathResolver
 from haive.core.graph.node.composer.protocols import UpdateFunction
@@ -16,7 +16,7 @@ from haive.core.graph.node.composer.protocols import UpdateFunction
 class UpdateFunctions:
     """Library of common update functions for node I/O composition."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize with shared PathResolver instance."""
         self._path_resolver = PathResolver()
 
@@ -45,14 +45,14 @@ class UpdateFunctions:
             updates = update_messages("new message", state, {})
         """
 
-        def _update(result: Any, state: Any, config: Dict[str, Any]) -> Dict[str, Any]:
+        def _update(result: Any, state: Any, config: dict[str, Any]) -> dict[str, Any]:
             """Update simple field in state."""
             if merge_mode == "append":
                 # Append to existing list
                 current = self._path_resolver.extract_value(state, field_name, [])
                 if not isinstance(current, list):
                     current = [current] if current is not None else []
-                updated_value = current + [result]
+                updated_value = [*current, result]
             elif merge_mode == "merge" and isinstance(result, dict):
                 # Merge dictionaries
                 current = self._path_resolver.extract_value(state, field_name, {})
@@ -92,7 +92,7 @@ class UpdateFunctions:
             updates = update_msgs("new message", state, {})
         """
 
-        def _update(result: Any, state: Any, config: Dict[str, Any]) -> Dict[str, Any]:
+        def _update(result: Any, state: Any, config: dict[str, Any]) -> dict[str, Any]:
             """Update value using complex path."""
             # For complex paths, we need to build the update structure
             path_parts = target_path.split(".")
@@ -123,7 +123,7 @@ class UpdateFunctions:
                 current = self._path_resolver.extract_value(state, target_path, [])
                 if not isinstance(current, list):
                     current = [current] if current is not None else []
-                current_dict[final_key] = current + [result]
+                current_dict[final_key] = [*current, result]
             elif merge_mode == "merge" and isinstance(result, dict):
                 current = self._path_resolver.extract_value(state, target_path, {})
                 if not isinstance(current, dict):
@@ -156,7 +156,7 @@ class UpdateFunctions:
             updates = update_msgs(ai_message, state, {})
         """
 
-        def _update(result: Any, state: Any, config: Dict[str, Any]) -> Dict[str, Any]:
+        def _update(result: Any, state: Any, config: dict[str, Any]) -> dict[str, Any]:
             """Append message to messages list."""
             current_messages = self._path_resolver.extract_value(
                 state, messages_field, []
@@ -167,7 +167,7 @@ class UpdateFunctions:
                 current_messages = []
 
             # Append new message
-            updated_messages = list(current_messages) + [result]
+            updated_messages = [*list(current_messages), result]
 
             return {messages_field: updated_messages}
 
@@ -192,7 +192,7 @@ class UpdateFunctions:
             updates = update_count(5, state, {})
         """
 
-        def _update(result: Any, state: Any, config: Dict[str, Any]) -> Dict[str, Any]:
+        def _update(result: Any, state: Any, config: dict[str, Any]) -> dict[str, Any]:
             """Update with type validation."""
             # Validate type
             if not isinstance(result, expected_type):
@@ -243,18 +243,17 @@ class UpdateFunctions:
             updates = update_output(result, state, {})
         """
 
-        def _update(result: Any, state: Any, config: Dict[str, Any]) -> Dict[str, Any]:
+        def _update(result: Any, state: Any, config: dict[str, Any]) -> dict[str, Any]:
             """Update conditionally based on state."""
             condition = self._path_resolver.extract_value(state, condition_path, False)
 
             if condition:
                 return {true_field: result}
-            else:
-                return {false_field: result}
+            return {false_field: result}
 
         return _update
 
-    def update_multi_field(self, field_mappings: Dict[str, str]) -> UpdateFunction:
+    def update_multi_field(self, field_mappings: dict[str, str]) -> UpdateFunction:
         """Create update function for multiple field updates.
 
         Pattern from: OutputParserNode, AgentNodeV3 complex outputs
@@ -278,7 +277,7 @@ class UpdateFunctions:
             updates = update_multi(result, state, {})
         """
 
-        def _update(result: Any, state: Any, config: Dict[str, Any]) -> Dict[str, Any]:
+        def _update(result: Any, state: Any, config: dict[str, Any]) -> dict[str, Any]:
             """Update multiple fields from result."""
             updates = {}
 
@@ -320,7 +319,7 @@ class UpdateFunctions:
             updates = update_parsed('{"key": "value"}', state, {})
         """
 
-        def _update(result: Any, state: Any, config: Dict[str, Any]) -> Dict[str, Any]:
+        def _update(result: Any, state: Any, config: dict[str, Any]) -> dict[str, Any]:
             """Update with transformation."""
             try:
                 transformed_result = transform_func(result)
@@ -332,7 +331,7 @@ class UpdateFunctions:
         return _update
 
     def update_hierarchical(
-        self, base_field: str, projection_fields: Optional[List[str]] = None
+        self, base_field: str, projection_fields: list[str] | None = None
     ) -> UpdateFunction:
         """Create update function for hierarchical state updates.
 
@@ -353,7 +352,7 @@ class UpdateFunctions:
             updates = update_agent(agent_update, state, {})
         """
 
-        def _update(result: Any, state: Any, config: Dict[str, Any]) -> Dict[str, Any]:
+        def _update(result: Any, state: Any, config: dict[str, Any]) -> dict[str, Any]:
             """Update hierarchical structure."""
             if not isinstance(result, dict):
                 return {base_field: result}
@@ -394,13 +393,13 @@ update_hierarchical = update_functions.update_hierarchical
 
 __all__ = [
     "UpdateFunctions",
-    "update_functions",
-    "update_simple_field",
-    "update_with_path",
-    "update_messages_append",
-    "update_type_aware",
     "update_conditional",
-    "update_multi_field",
-    "update_with_transform",
+    "update_functions",
     "update_hierarchical",
+    "update_messages_append",
+    "update_multi_field",
+    "update_simple_field",
+    "update_type_aware",
+    "update_with_path",
+    "update_with_transform",
 ]

@@ -1,5 +1,6 @@
 """Rephrase Query Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Rephrase Query retriever,
 which reformulates user queries using an LLM to improve retrieval performance
 by creating more effective search queries.
@@ -103,7 +104,7 @@ class RePhraseQueryRetrieverConfig(BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a Rephrase Query retriever from this configuration.
 
         Returns:

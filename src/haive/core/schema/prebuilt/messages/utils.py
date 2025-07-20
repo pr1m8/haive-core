@@ -1,5 +1,4 @@
-"""
-Utility classes and functions for message processing in Haive.
+"""Utility classes and functions for message processing in Haive.
 
 This module provides common utilities used by various implementations
 of MessagesState, enabling advanced message analysis, transformation,
@@ -7,7 +6,7 @@ and tracking features.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, ToolMessage
 from pydantic import BaseModel, Field
@@ -17,7 +16,7 @@ class ToolCallInfo(BaseModel):
     """Information about a completed tool call."""
 
     tool_call_id: str = Field(description="ID of the tool call")
-    tool_call: Dict[str, Any] = Field(description="Original tool call object")
+    tool_call: dict[str, Any] = Field(description="Original tool call object")
     tool_message: ToolMessage = Field(description="Corresponding tool message")
     ai_message: AIMessage = Field(description="AI message that made the tool call")
     is_successful: bool = Field(description="Whether the tool call was successful")
@@ -31,13 +30,13 @@ class MessageRound(BaseModel):
     human_message: HumanMessage = Field(
         description="The human message that started this round"
     )
-    ai_responses: List[AIMessage] = Field(
+    ai_responses: list[AIMessage] = Field(
         default_factory=list, description="AI responses in this round"
     )
-    tool_calls: List[Dict[str, Any]] = Field(
+    tool_calls: list[dict[str, Any]] = Field(
         default_factory=list, description="Tool calls made in this round"
     )
-    tool_responses: List[ToolMessage] = Field(
+    tool_responses: list[ToolMessage] = Field(
         default_factory=list, description="Tool responses in this round"
     )
     is_complete: bool = Field(
@@ -49,8 +48,7 @@ class MessageRound(BaseModel):
 
 
 def is_real_human_message(msg: HumanMessage) -> bool:
-    """
-    Check if a human message is real (not transformed).
+    """Check if a human message is real (not transformed).
 
     Args:
         msg: The message to check
@@ -65,8 +63,7 @@ def is_real_human_message(msg: HumanMessage) -> bool:
 
 
 def has_engine_metadata_attribute(msg: BaseMessage) -> bool:
-    """
-    Check if message has engine-related metadata.
+    """Check if message has engine-related metadata.
 
     Args:
         msg: The message to check
@@ -82,8 +79,7 @@ def has_engine_metadata_attribute(msg: BaseMessage) -> bool:
 
 
 def has_agent_metadata_attribute(msg: BaseMessage) -> bool:
-    """
-    Check if message has agent-related metadata.
+    """Check if message has agent-related metadata.
 
     Args:
         msg: The message to check
@@ -97,8 +93,7 @@ def has_agent_metadata_attribute(msg: BaseMessage) -> bool:
 
 
 def is_tool_error(msg: ToolMessage) -> bool:
-    """
-    Check if a tool message represents an error.
+    """Check if a tool message represents an error.
 
     Args:
         msg: The tool message to check
@@ -111,9 +106,8 @@ def is_tool_error(msg: ToolMessage) -> bool:
     return False
 
 
-def extract_tool_calls(message: AIMessage) -> List[Dict[str, Any]]:
-    """
-    Extract tool calls from an AI message.
+def extract_tool_calls(message: AIMessage) -> list[dict[str, Any]]:
+    """Extract tool calls from an AI message.
 
     Args:
         message: The AI message to extract tool calls from
@@ -138,10 +132,9 @@ def extract_tool_calls(message: AIMessage) -> List[Dict[str, Any]]:
 
 
 def inject_state_into_tool_calls(
-    tool_calls: List[Dict], state_data: Optional[Dict[str, Any]] = None
-) -> List[Dict]:
-    """
-    Inject state data into tool call arguments.
+    tool_calls: list[dict], state_data: dict[str, Any] | None = None
+) -> list[dict]:
+    """Inject state data into tool call arguments.
 
     Args:
         tool_calls: List of tool call dictionaries

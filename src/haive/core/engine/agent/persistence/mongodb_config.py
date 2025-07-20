@@ -1,6 +1,6 @@
 # src/haive/core/engine/agent/persistence/mongodb_config.py
 import logging
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import Field
 
@@ -31,7 +31,7 @@ class MongoDBCheckpointerConfig(CheckpointerConfig):
     collection: str = Field(default="checkpoints")
     use_async: bool = Field(default=False, description="Use async connections")
 
-    def create_checkpointer(self):
+    def create_checkpointer(self) -> Any:
         """Create a MongoDB checkpointer.
 
         Returns:

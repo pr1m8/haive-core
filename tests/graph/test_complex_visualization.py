@@ -87,7 +87,9 @@ def hierarchical_graph(mock_engines, validation_tools):
     validation nodes, and engine nodes.
     """
     # Create main graph
-    main_graph = StateGraph(name="MainWorkflow", state_schema=ComplexWorkflowState)
+    main_graph = StateGraph(
+        name="MainWorkflow",
+        state_schema=ComplexWorkflowState)
 
     # Create preprocessing subgraph
     preprocessing = StateGraph(name="Preprocessing")
@@ -202,7 +204,8 @@ def hierarchical_graph(mock_engines, validation_tools):
                 type(
                     "ResponseSchema",
                     (BaseModel,),
-                    {"text": (str, ...), "confidence": (float, Field(gt=0, lt=1))},
+                    {"text": (str, ...), "confidence": (
+                        float, Field(gt=0, lt=1))},
                 )
             ],
             messages_field="generated_text",
@@ -253,7 +256,9 @@ def complex_branching_graph(mock_engines, validation_tools):
     validation results and engine outputs.
     """
     # Create main graph
-    graph = StateGraph(name="BranchingWorkflow", state_schema=ComplexWorkflowState)
+    graph = StateGraph(
+        name="BranchingWorkflow",
+        state_schema=ComplexWorkflowState)
 
     # Input validation node
     input_validator = ValidationNodeConfig(
@@ -634,7 +639,8 @@ def test_deep_nesting_visualization(hierarchical_graph, mock_engines):
         # Nodes beyond max_depth should not be rendered in detail
         if depth < 5:
             for i in range(depth, 5):
-                # We might see the node name as an opaque node, but not its internal structure
+                # We might see the node name as an opaque node, but not its
+                # internal structure
                 assert f"node_{i}" not in diagram
 
 

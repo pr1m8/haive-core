@@ -81,7 +81,11 @@ def setup_checkpointer(config: Any) -> Any:
     # Default to memory checkpointer
     if not hasattr(config, "persistence") or config.persistence is None:
         logger.info(
-            f"No persistence config for {getattr(config, 'name', 'unnamed')}. Using memory checkpointer."
+            f"No persistence config for {
+                getattr(
+                    config,
+                    'name',
+                    'unnamed')}. Using memory checkpointer."
         )
         memory_config = MemoryCheckpointerConfig()
         return memory_config.create_checkpointer()
@@ -94,7 +98,11 @@ def setup_checkpointer(config: Any) -> Any:
         except Exception as e:
             logger.exception(f"Failed to create checkpointer: {e}")
             logger.warning(
-                f"Falling back to memory checkpointer for {getattr(config, 'name', 'unnamed')}"
+                f"Falling back to memory checkpointer for {
+                    getattr(
+                        config,
+                        'name',
+                        'unnamed')}"
             )
             memory_config = MemoryCheckpointerConfig()
             return memory_config.create_checkpointer()
@@ -145,14 +153,22 @@ def setup_checkpointer(config: Any) -> Any:
             except Exception as e:
                 logger.exception(f"Failed to create PostgreSQL checkpointer: {e}")
                 logger.warning(
-                    f"Falling back to memory checkpointer for {getattr(config, 'name', 'unnamed')}"
+                    f"Falling back to memory checkpointer for {
+                        getattr(
+                            config,
+                            'name',
+                            'unnamed')}"
                 )
                 memory_config = MemoryCheckpointerConfig()
                 return memory_config.create_checkpointer()
 
     # Default to memory checkpointer for any other case
     logger.info(
-        f"Using memory checkpointer (default) for {getattr(config, 'name', 'unnamed')}"
+        f"Using memory checkpointer (default) for {
+            getattr(
+                config,
+                'name',
+                'unnamed')}"
     )
     memory_config = MemoryCheckpointerConfig()
     return memory_config.create_checkpointer()
@@ -178,7 +194,11 @@ async def setup_async_checkpointer(config: Any) -> Any:
     # Default to memory checkpointer
     if not hasattr(config, "persistence") or config.persistence is None:
         logger.info(
-            f"No persistence config for {getattr(config, 'name', 'unnamed')}. Using memory checkpointer."
+            f"No persistence config for {
+                getattr(
+                    config,
+                    'name',
+                    'unnamed')}. Using memory checkpointer."
         )
         from haive.core.persistence.memory import MemoryCheckpointerConfig
 
@@ -194,7 +214,11 @@ async def setup_async_checkpointer(config: Any) -> Any:
         except Exception as e:
             logger.exception(f"Failed to create async checkpointer: {e}")
             logger.warning(
-                f"Falling back to memory checkpointer for {getattr(config, 'name', 'unnamed')}"
+                f"Falling back to memory checkpointer for {
+                    getattr(
+                        config,
+                        'name',
+                        'unnamed')}"
             )
             from haive.core.persistence.memory import MemoryCheckpointerConfig
 
@@ -257,7 +281,11 @@ async def setup_async_checkpointer(config: Any) -> Any:
             except Exception as e:
                 logger.exception(f"Failed to create async PostgreSQL checkpointer: {e}")
                 logger.warning(
-                    f"Falling back to memory checkpointer for {getattr(config, 'name', 'unnamed')}"
+                    f"Falling back to memory checkpointer for {
+                        getattr(
+                            config,
+                            'name',
+                            'unnamed')}"
                 )
                 from haive.core.persistence.memory import MemoryCheckpointerConfig
 
@@ -266,7 +294,11 @@ async def setup_async_checkpointer(config: Any) -> Any:
 
     # Default to memory checkpointer for any other case
     logger.info(
-        f"Using memory checkpointer (default) for {getattr(config, 'name', 'unnamed')}"
+        f"Using memory checkpointer (default) for {
+            getattr(
+                config,
+                'name',
+                'unnamed')}"
     )
     from haive.core.persistence.memory import MemoryCheckpointerConfig
 
@@ -315,7 +347,8 @@ def ensure_pool_open(checkpointer: Any) -> Any | None:
                             except Exception as e:
                                 logger.exception(f"Error opening pool: {e}")
 
-                                # Try a different approach with direct pool access
+                                # Try a different approach with direct pool
+                                # access
                                 if hasattr(conn, "_pool"):
                                     logger.info(
                                         "Trying alternative pool opening method"
@@ -410,7 +443,8 @@ async def ensure_async_pool_open(checkpointer: Any) -> Any | None:
                             except Exception as e:
                                 logger.exception(f"Error opening async pool: {e}")
 
-                                # Try a different approach with direct pool access
+                                # Try a different approach with direct pool
+                                # access
                                 if hasattr(conn, "_pool"):
                                     logger.info(
                                         "Trying alternative pool opening method"
@@ -724,7 +758,8 @@ def register_thread_if_needed(
 
                     logger.info(f"Thread {thread_id} registered/updated in PostgreSQL")
 
-                    # Initialize checkpoint metadata for new threads to prevent None errors
+                    # Initialize checkpoint metadata for new threads to prevent
+                    # None errors
                     try:
                         # Check if this thread has any checkpoints
                         cursor.execute(
@@ -738,13 +773,15 @@ def register_thread_if_needed(
                                 f"Initializing checkpoint metadata for new thread {thread_id}"
                             )
                             # We don't need to insert a checkpoint here - LangGraph will handle that
-                            # Just ensuring the threads table is properly set up
+                            # Just ensuring the threads table is properly set
+                            # up
 
                     except Exception as init_error:
                         logger.debug(
                             f"Could not check/initialize checkpoint metadata: {init_error}"
                         )
-                        # This is not critical - LangGraph should handle initial checkpoint creation
+                        # This is not critical - LangGraph should handle
+                        # initial checkpoint creation
         except Exception as e:
             logger.warning(f"Error registering thread: {e}")
 

@@ -1,8 +1,9 @@
 """Validation node that updates state AND provides dynamic routing."""
 
 import logging
+from collections.abc import Callable
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any
 
 from langchain_core.messages import AIMessage, ToolMessage
 from langgraph.types import END, Send
@@ -37,7 +38,7 @@ class StateUpdatingValidationNode(BaseModel):
 
     # Node configuration
     name: str = Field(default="state_validation", description="Node name")
-    engine_name: Optional[str] = Field(
+    engine_name: str | None = Field(
         default=None, description="Name of engine to get tools/schemas from"
     )
 
@@ -69,7 +70,7 @@ class StateUpdatingValidationNode(BaseModel):
     )
 
     # Route mappings
-    route_to_node_mapping: Dict[str, str] = Field(
+    route_to_node_mapping: dict[str, str] = Field(
         default_factory=lambda: {
             "langchain_tool": "tool_node",
             "function": "tool_node",
@@ -87,7 +88,7 @@ class StateUpdatingValidationNode(BaseModel):
             Callable that updates state with validation results
         """
 
-        def validation_node(state: Any, config: Optional[Dict[str, Any]] = None) -> Any:
+        def validation_node(state: Any, config: dict[str, Any] | None = None) -> Any:
             """Update state with validation results."""
             logger.info(f"[{self.name}] Starting state-updating validation")
 
@@ -133,7 +134,7 @@ class StateUpdatingValidationNode(BaseModel):
             Router function that returns Send objects or node names
         """
 
-        def validation_router(state: Any) -> Union[List[Send], str]:
+        def validation_router(state: Any) -> list[Send] | str:
             """Route based on validation results in state."""
             logger.info(f"[{self.name}] Routing based on validation state")
 
@@ -177,12 +178,11 @@ class StateUpdatingValidationNode(BaseModel):
             if sends:
                 logger.info(f"[{self.name}] Created {len(sends)} Send branches")
                 return sends
-            else:
-                return self.agent_node
+            return self.agent_node
 
         return validation_router
 
-    def _extract_tool_calls(self, state: Any) -> List[Dict[str, Any]]:
+    def _extract_tool_calls(self, state: Any) -> list[dict[str, Any]]:
         """Extract tool calls from state."""
         # Use state method if available
         if hasattr(state, "get_tool_calls"):
@@ -197,14 +197,14 @@ class StateUpdatingValidationNode(BaseModel):
         if isinstance(last_msg, AIMessage):
             if hasattr(last_msg, "tool_calls") and last_msg.tool_calls:
                 return last_msg.tool_calls
-            elif hasattr(last_msg, "additional_kwargs"):
+            if hasattr(last_msg, "additional_kwargs"):
                 return last_msg.additional_kwargs.get("tool_calls", [])
 
         return []
 
     def _get_tools_and_routes(
         self, state: Any
-    ) -> tuple[Dict[str, Any], Dict[str, str]]:
+    ) -> tuple[dict[str, Any], dict[str, str]]:
         """Get available tools and routes from state/engine."""
         available_tools = {}
         tool_routes = {}
@@ -238,9 +238,9 @@ class StateUpdatingValidationNode(BaseModel):
 
     def _validate_tool_call(
         self,
-        tool_call: Dict[str, Any],
-        available_tools: Dict[str, Any],
-        tool_routes: Dict[str, str],
+        tool_call: dict[str, Any],
+        available_tools: dict[str, Any],
+        tool_routes: dict[str, str],
     ) -> Any:
         """Validate a single tool call."""
         tool_name = tool_call.get("name", "unknown")
@@ -286,7 +286,7 @@ class StateUpdatingValidationNode(BaseModel):
             metadata={"route": route},
         )
 
-    def _validate_arguments(self, tool: Any, args: Dict[str, Any]) -> List[str]:
+    def _validate_arguments(self, tool: Any, args: dict[str, Any]) -> list[str]:
         """Validate tool arguments."""
         errors = []
 
@@ -302,19 +302,17 @@ class StateUpdatingValidationNode(BaseModel):
         self,
         state: Any,
         routing_state: ValidationRoutingState,
-        original_tool_calls: List[Dict[str, Any]],
+        original_tool_calls: list[dict[str, Any]],
     ) -> Any:
         """Apply validation results to state."""
-
         # Apply to state if it has the method
         if hasattr(state, "apply_validation_results"):
             state.apply_validation_results(routing_state)
+        # Manual updates
+        elif not hasattr(state, "validation_state"):
+            state.validation_state = routing_state
         else:
-            # Manual updates
-            if not hasattr(state, "validation_state"):
-                state.validation_state = routing_state
-            else:
-                state.validation_state = routing_state
+            state.validation_state = routing_state
 
         # Track error tools if configured
         if self.track_error_tools and hasattr(state, "error_tool_calls"):
@@ -371,7 +369,7 @@ class StateUpdatingValidationNode(BaseModel):
         self,
         state: Any,
         routing_state: ValidationRoutingState,
-        original_tool_calls: List[Dict[str, Any]],
+        original_tool_calls: list[dict[str, Any]],
     ):
         """Add validation metadata to tool calls in state."""
         if not hasattr(state, "messages") or not state.messages:
@@ -397,13 +395,13 @@ class StateUpdatingValidationNode(BaseModel):
                 if result.errors:
                     tool_call["metadata"]["validation_errors"] = result.errors
 
-    def _get_validation_state(self, state: Any) -> Optional[ValidationRoutingState]:
+    def _get_validation_state(self, state: Any) -> ValidationRoutingState | None:
         """Get validation state from state object."""
         if hasattr(state, "validation_state"):
             return state.validation_state
         return None
 
-    def _create_send_branches(self, state: Any, valid_results: List[Any]) -> List[Send]:
+    def _create_send_branches(self, state: Any, valid_results: list[Any]) -> list[Send]:
         """Create Send branches for valid tool calls."""
         sends = []
 

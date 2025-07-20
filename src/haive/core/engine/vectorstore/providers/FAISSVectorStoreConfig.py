@@ -1,5 +1,6 @@
 """FAISS Vector Store implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the FAISS (Facebook AI Similarity Search)
 vector store, which is a library for efficient similarity search and clustering of dense vectors.
 
@@ -117,7 +118,7 @@ class FAISSVectorStoreConfig(BaseVectorStoreConfig):
     )
 
     @validator("index_type")
-    def validate_index_type(self, v):
+    def validate_index_type(self, v) -> Any:
         """Validate index type is supported."""
         valid_types = ["Flat", "IVFFlat", "HNSW", "LSH"]
         if v not in valid_types:
@@ -125,7 +126,7 @@ class FAISSVectorStoreConfig(BaseVectorStoreConfig):
         return v
 
     @validator("distance_metric")
-    def validate_distance_metric(self, v):
+    def validate_distance_metric(self, v) -> Any:
         """Validate distance metric is supported."""
         valid_metrics = ["l2", "cosine", "inner_product"]
         if v not in valid_metrics:
@@ -147,7 +148,7 @@ class FAISSVectorStoreConfig(BaseVectorStoreConfig):
             "ids": (list[str], Field(description="IDs of the added documents")),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a FAISS vector store from this configuration.
 
         Returns:
@@ -214,7 +215,7 @@ class FAISSVectorStoreConfig(BaseVectorStoreConfig):
         # Handle GPU configuration
         if self.use_gpu:
             try:
-                import faiss
+                pass
 
                 # This would require additional GPU setup logic
                 # For now, we'll use the default CPU implementation

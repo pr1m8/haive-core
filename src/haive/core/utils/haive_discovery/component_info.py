@@ -67,7 +67,10 @@ class ComponentInfo:
             try:
                 data["engine_config"] = self._make_json_serializable(self.engine_config)
             except Exception as e:
-                logger.debug(f"Could not serialize engine config for {self.name}: {e}")
+                logger.debug(
+                    f"Could not serialize engine config for {
+                        self.name}: {e}"
+                )
                 data["engine_config"] = {
                     "error": f"Engine config not serializable: {e!s}"
                 }
@@ -159,7 +162,7 @@ class ComponentInfo:
             content.append("```json")
             try:
                 content.append(json.dumps(self.schema, indent=2))
-            except:
+            except BaseException:
                 content.append(str(self.schema))
             content.append("```")
             content.append("")
@@ -167,10 +170,18 @@ class ComponentInfo:
         if self.tool_instance:
             content.append("## Usage as Tool")
             content.append(
-                f"**Tool Name:** `{getattr(self.tool_instance, 'name', 'unknown')}`"
+                f"**Tool Name:** `{
+                    getattr(
+                        self.tool_instance,
+                        'name',
+                        'unknown')}`"
             )
             content.append(
-                f"**Description:** {getattr(self.tool_instance, 'description', '')}"
+                f"**Description:** {
+                    getattr(
+                        self.tool_instance,
+                        'description',
+                        '')}"
             )
             content.append("")
 
@@ -179,7 +190,11 @@ class ComponentInfo:
             content.append("This component can be used as a Haive engine:")
             content.append("```python")
             content.append("# Example engine usage")
-            content.append(f"engine = {self.class_name}Engine(name='{self.name}')")
+            content.append(
+                f"engine = {
+                    self.class_name}Engine(name='{
+                    self.name}')"
+            )
             content.append("```")
             content.append("")
 
@@ -190,7 +205,7 @@ class ComponentInfo:
             content.append("```json")
             try:
                 content.append(json.dumps(self.metadata, indent=2))
-            except:
+            except BaseException:
                 content.append(str(self.metadata))
             content.append("```")
             content.append("")

@@ -8,7 +8,7 @@ Based on the Dynamic Activation Pattern:
 """
 
 from datetime import datetime
-from typing import Any, Dict, Generic, List, Optional, Set, TypeVar
+from typing import Any, Generic, TypeVar
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
@@ -86,13 +86,13 @@ class RegistryItem(BaseModel, Generic[T]):
     is_active: bool = Field(
         default=False, description="Whether the component is currently active"
     )
-    metadata: Dict[str, Any] = Field(
+    metadata: dict[str, Any] = Field(
         default_factory=dict, description="Additional metadata for the component"
     )
     activation_count: int = Field(
         default=0, ge=0, description="Number of times component has been activated"
     )
-    last_activated: Optional[datetime] = Field(
+    last_activated: datetime | None = Field(
         default=None, description="Timestamp of last activation"
     )
 
@@ -171,31 +171,34 @@ class DynamicRegistry(BaseModel, Generic[T]):
                 print(f"Agent {i} activated: {success}")
     """
 
-    items: Dict[str, RegistryItem[T]] = Field(
+    items: dict[str, RegistryItem[T]] = Field(
         default_factory=dict, description="Dictionary of component ID to RegistryItem"
     )
-    active_items: Set[str] = Field(
+    active_items: set[str] = Field(
         default_factory=set, description="Set of currently active component IDs"
     )
-    max_active: Optional[int] = Field(
+    max_active: int | None = Field(
         default=None,
         ge=1,
         description="Maximum number of components that can be active simultaneously",
     )
-    activation_history: List[Dict[str, Any]] = Field(
+    activation_history: list[dict[str, Any]] = Field(
         default_factory=list, description="List of activation/deactivation events"
     )
 
     @field_validator("max_active")
     @classmethod
-    def validate_max_active(cls, v: Optional[int]) -> Optional[int]:
+    def validate_max_active(cls, v: int | None) -> int | None:
         """Validate max_active is positive if provided."""
         if v is not None and v <= 0:
             raise ValueError("max_active must be positive")
         return v
 
     @model_validator(mode="after")
-    def validate_active_items(self) -> "DynamicRegistry[T]":
+
+
+    @classmethod
+    def validate_active_items(cls) -> "DynamicRegistry[T]":
         """Validate that active_items are consistent with items."""
         # Remove any active items that don't exist in items
         valid_active = {
@@ -366,7 +369,7 @@ class DynamicRegistry(BaseModel, Generic[T]):
 
         return True
 
-    def get_active_components(self) -> List[T]:
+    def get_active_components(self) -> list[T]:
         """Get all active component instances.
 
         Returns:
@@ -388,7 +391,7 @@ class DynamicRegistry(BaseModel, Generic[T]):
         """
         return [self.items[item_id].component for item_id in self.active_items]
 
-    def get_active_items(self) -> List[RegistryItem[T]]:
+    def get_active_items(self) -> list[RegistryItem[T]]:
         """Get all active registry items.
 
         Returns:
@@ -406,7 +409,7 @@ class DynamicRegistry(BaseModel, Generic[T]):
         """
         return [self.items[item_id] for item_id in self.active_items]
 
-    def get_inactive_items(self) -> List[RegistryItem[T]]:
+    def get_inactive_items(self) -> list[RegistryItem[T]]:
         """Get all inactive registry items.
 
         Returns:
@@ -445,7 +448,7 @@ class DynamicRegistry(BaseModel, Generic[T]):
         """
         return item_id in self.active_items
 
-    def get_item(self, item_id: str) -> Optional[RegistryItem[T]]:
+    def get_item(self, item_id: str) -> RegistryItem[T] | None:
         """Get a registry item by ID.
 
         Args:
@@ -466,7 +469,7 @@ class DynamicRegistry(BaseModel, Generic[T]):
         """
         return self.items.get(item_id)
 
-    def get_component(self, item_id: str) -> Optional[T]:
+    def get_component(self, item_id: str) -> T | None:
         """Get a component instance by ID.
 
         Args:
@@ -486,7 +489,7 @@ class DynamicRegistry(BaseModel, Generic[T]):
         item = self.get_item(item_id)
         return item.component if item else None
 
-    def list_components(self) -> List[str]:
+    def list_components(self) -> list[str]:
         """List all registered component IDs.
 
         Returns:
@@ -554,7 +557,7 @@ class DynamicRegistry(BaseModel, Generic[T]):
 
         return removed_count
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get registry statistics.
 
         Returns:

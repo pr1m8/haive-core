@@ -1,5 +1,6 @@
 """USearch Vector Store implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the USearch vector store,
 which offers high-performance universal similarity search.
 
@@ -79,7 +80,7 @@ class USearchVectorStoreConfig(BaseVectorStoreConfig):
     )
 
     @validator("metric")
-    def validate_metric(self, v):
+    def validate_metric(self, v) -> Any:
         """Validate distance metric is supported by USearch."""
         valid_metrics = ["cos", "l2sq", "ip"]
         if v not in valid_metrics:
@@ -87,7 +88,7 @@ class USearchVectorStoreConfig(BaseVectorStoreConfig):
         return v
 
     @validator("ndim")
-    def validate_ndim(self, v):
+    def validate_ndim(self, v) -> Any:
         """Validate ndim is positive if specified."""
         if v is not None and v <= 0:
             raise ValueError("ndim must be a positive integer")
@@ -111,7 +112,7 @@ class USearchVectorStoreConfig(BaseVectorStoreConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a USearch vector store from this configuration.
 
         Returns:

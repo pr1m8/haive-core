@@ -1,15 +1,9 @@
 # src/haive/core/registry/decorators.py
 
 import logging
+from collections.abc import Callable
 from functools import wraps
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    List,
-    TypeVar,
-)
+from typing import TYPE_CHECKING, Any, TypeVar
 
 logger = logging.getLogger(__name__)
 
@@ -19,11 +13,11 @@ if TYPE_CHECKING:
 
 
 def register_component(
-    registry_getter: str | Callable[[], "AbstractRegistry"] = None,
+    registry_getter: str | Callable[[], "AbstractRegistry"] | None = None,
     component_type: Any = None,
     auto_register: bool = True,
-    metadata: Dict[str, Any] | None = None,
-    extract_fields: List[str] | None = None,
+    metadata: dict[str, Any] | None = None,
+    extract_fields: list[str] | None = None,
     transform: Callable[[Any], Any] | None = None,
     registry_method: str = "register",
 ):
@@ -47,7 +41,7 @@ def register_component(
         original_init = cls.__init__
 
         @wraps(cls.__init__)
-        def new_init(self, *args, **kwargs):
+        def new_init(self, *args, **kwargs) -> None:
             # Call original init
             original_init(self, *args, **kwargs)
 
@@ -67,7 +61,9 @@ def register_component(
                     register_fn(reg_item)
 
                     logger.debug(
-                        f"Auto-registered {cls.__name__} with {registry.__class__.__name__}"
+                        f"Auto-registered {
+                            cls.__name__} with {
+                            registry.__class__.__name__}"
                     )
                 except Exception as e:
                     logger.warning(f"Failed to auto-register {cls.__name__}: {e}")
@@ -79,7 +75,7 @@ def register_component(
 
         # Add class method for explicit registration
         @classmethod
-        def register_instance(cls, instance, custom_registry=None, **kwargs):
+        def register_instance(cls, instance, custom_registry=None, **kwargs) -> Any:
             """Register an instance with the appropriate registry."""
             registry = custom_registry or _get_registry(registry_getter)
 

@@ -1,5 +1,6 @@
 """ID mixin for basic identification capabilities.
 
+from typing import Any
 This module provides a simple mixin for adding UUID-based identification
 to Pydantic models. It's a lightweight alternative to the more comprehensive
 IdentifierMixin when only basic ID capabilities are needed.

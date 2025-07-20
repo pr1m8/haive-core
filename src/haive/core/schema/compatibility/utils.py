@@ -1,4 +1,4 @@
-"""
+"""from typing import Any
 Utility functions for the schema compatibility module.
 """
 
@@ -8,8 +8,9 @@ import difflib
 import hashlib
 import inspect
 import json
+from collections.abc import Callable
 from functools import wraps
-from typing import Any, Callable, Dict, List, Set, Tuple, Type, TypeVar, Union
+from typing import Any, TypeVar, Union
 
 from pydantic import BaseModel
 
@@ -19,8 +20,7 @@ T = TypeVar("T")
 
 
 def calculate_similarity(str1: str, str2: str) -> float:
-    """
-    Calculate similarity between two strings (0-1).
+    """Calculate similarity between two strings (0-1).
 
     Uses sequence matcher for basic similarity.
     """
@@ -29,11 +29,10 @@ def calculate_similarity(str1: str, str2: str) -> float:
 
 def find_similar_fields(
     target_field: str,
-    source_fields: List[str],
+    source_fields: list[str],
     threshold: float = 0.6,
-) -> List[Tuple[str, float]]:
-    """
-    Find similar field names with scores.
+) -> list[tuple[str, float]]:
+    """Find similar field names with scores.
 
     Returns list of (field_name, similarity_score) tuples.
     """
@@ -49,7 +48,7 @@ def find_similar_fields(
     return similarities
 
 
-def extract_type_name(type_hint: Type) -> str:
+def extract_type_name(type_hint: type) -> str:
     """Extract a readable name from a type hint."""
     if hasattr(type_hint, "__name__"):
         return type_hint.__name__
@@ -69,7 +68,7 @@ def extract_type_name(type_hint: Type) -> str:
     return str(type_hint).replace("typing.", "")
 
 
-def generate_schema_hash(schema: Union[Type[BaseModel], SchemaInfo]) -> str:
+def generate_schema_hash(schema: type[BaseModel] | SchemaInfo) -> str:
     """Generate a hash for schema comparison."""
     if isinstance(schema, type) and issubclass(schema, BaseModel):
         # Hash based on fields
@@ -100,12 +99,11 @@ def generate_schema_hash(schema: Union[Type[BaseModel], SchemaInfo]) -> str:
 
 
 def flatten_nested_dict(
-    data: Dict[str, Any],
+    data: dict[str, Any],
     parent_key: str = "",
     separator: str = ".",
-) -> Dict[str, Any]:
-    """
-    Flatten nested dictionary.
+) -> dict[str, Any]:
+    """Flatten nested dictionary.
 
     Example:
         {"user": {"name": "John", "age": 30}}
@@ -126,11 +124,10 @@ def flatten_nested_dict(
 
 
 def unflatten_dict(
-    data: Dict[str, Any],
+    data: dict[str, Any],
     separator: str = ".",
-) -> Dict[str, Any]:
-    """
-    Unflatten a dictionary.
+) -> dict[str, Any]:
+    """Unflatten a dictionary.
 
     Example:
         {"user.name": "John", "user.age": 30}
@@ -154,13 +151,12 @@ def unflatten_dict(
 
 
 def extract_path_value(
-    data: Dict[str, Any],
+    data: dict[str, Any],
     path: str,
     separator: str = ".",
     default: Any = None,
 ) -> Any:
-    """
-    Extract value from nested dict using path.
+    """Extract value from nested dict using path.
 
     Supports:
     - Dot notation: "user.profile.name"
@@ -199,35 +195,32 @@ def extract_path_value(
                             )
                             for item in array
                         ]
+                    idx = int(index)
+                    if 0 <= idx < len(array):
+                        current = array[idx]
                     else:
-                        idx = int(index)
-                        if 0 <= idx < len(array):
-                            current = array[idx]
-                        else:
-                            return default
+                        return default
                 else:
                     return default
             else:
                 return default
+        # Normal field access
+        elif isinstance(current, dict):
+            current = current.get(part, default)
+        elif hasattr(current, part):
+            current = getattr(current, part, default)
         else:
-            # Normal field access
-            if isinstance(current, dict):
-                current = current.get(part, default)
-            elif hasattr(current, part):
-                current = getattr(current, part, default)
-            else:
-                return default
+            return default
 
     return current
 
 
 def merge_dicts(
-    *dicts: Dict[str, Any],
+    *dicts: dict[str, Any],
     deep: bool = True,
     list_strategy: str = "extend",
-) -> Dict[str, Any]:
-    """
-    Merge multiple dictionaries.
+) -> dict[str, Any]:
+    """Merge multiple dictionaries.
 
     Args:
         *dicts: Dictionaries to merge
@@ -260,9 +253,8 @@ def merge_dicts(
 def create_schema_diff(
     schema1: SchemaInfo,
     schema2: SchemaInfo,
-) -> Dict[str, Any]:
-    """
-    Create a diff between two schemas.
+) -> dict[str, Any]:
+    """Create a diff between two schemas.
 
     Returns dict with:
     - added_fields: Fields in schema2 but not schema1
@@ -335,7 +327,7 @@ def memoize(func: Callable[..., T]) -> Callable[..., T]:
     cache = {}
 
     @wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args, **kwargs) -> Any:
         # Create cache key
         key = (args, tuple(sorted(kwargs.items())))
 
@@ -350,7 +342,7 @@ def memoize(func: Callable[..., T]) -> Callable[..., T]:
     return wrapper
 
 
-def get_all_subclasses(cls: Type) -> Set[Type]:
+def get_all_subclasses(cls: type) -> set[type]:
     """Get all subclasses of a class recursively."""
     subclasses = set()
 
@@ -361,7 +353,7 @@ def get_all_subclasses(cls: Type) -> Set[Type]:
     return subclasses
 
 
-def format_type_path(types: List[Type]) -> str:
+def format_type_path(types: list[type]) -> str:
     """Format a type conversion path for display."""
     names = [extract_type_name(t) for t in types]
     return " → ".join(names)
@@ -397,39 +389,38 @@ def suggest_field_name(invalid_name: str) -> str:
     return suggested
 
 
-def create_example_value(type_hint: Type) -> Any:
+def create_example_value(type_hint: type) -> Any:
     """Create an example value for a type hint."""
     # Handle common types
     if type_hint == str:
         return "example"
-    elif type_hint == int:
+    if type_hint == int:
         return 42
-    elif type_hint == float:
+    if type_hint == float:
         return 3.14
-    elif type_hint == bool:
+    if type_hint == bool:
         return True
-    elif type_hint == list or getattr(type_hint, "__origin__", None) == list:
+    if type_hint == list or getattr(type_hint, "__origin__", None) == list:
         return []
-    elif type_hint == dict or getattr(type_hint, "__origin__", None) == dict:
+    if type_hint == dict or getattr(type_hint, "__origin__", None) == dict:
         return {}
-    elif type_hint == set or getattr(type_hint, "__origin__", None) == set:
+    if type_hint == set or getattr(type_hint, "__origin__", None) == set:
         return set()
-    elif hasattr(type_hint, "__origin__") and type_hint.__origin__ == Union:
+    if hasattr(type_hint, "__origin__") and type_hint.__origin__ == Union:
         # For Optional, return None
         args = type_hint.__args__
         if type(None) in args:
             return None
         # Otherwise return example of first type
         return create_example_value(args[0])
-    else:
-        # For classes, try to instantiate
-        try:
-            if inspect.isclass(type_hint):
-                return type_hint()
-        except:
-            pass
+    # For classes, try to instantiate
+    try:
+        if inspect.isclass(type_hint):
+            return type_hint()
+    except BaseException:
+        pass
 
-        return None
+    return None
 
 
 def estimate_memory_usage(schema: SchemaInfo) -> int:

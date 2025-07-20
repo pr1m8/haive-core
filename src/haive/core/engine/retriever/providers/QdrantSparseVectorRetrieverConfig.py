@@ -1,5 +1,6 @@
 """Qdrant Sparse Vector Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Qdrant Sparse Vector retriever,
 which uses Qdrant's sparse vector capabilities for keyword-based and hybrid search.
 Qdrant supports both dense and sparse vectors, enabling efficient text search
@@ -160,7 +161,7 @@ class QdrantSparseVectorRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a Qdrant Sparse Vector retriever from this configuration.
 
         Returns:

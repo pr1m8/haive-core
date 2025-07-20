@@ -1,7 +1,8 @@
+import builtins
 import inspect
 import logging
 from collections.abc import Callable
-from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
+from typing import Any, TypeVar
 
 from haive.core.graph.patterns.base import (
     BranchDefinition,
@@ -12,7 +13,7 @@ from haive.core.graph.patterns.base import (
 from haive.core.registry.base import AbstractRegistry
 
 # Define pattern type
-P = TypeVar("P", bound=Union[GraphPattern, BranchDefinition])
+P = TypeVar("P", bound=GraphPattern | BranchDefinition)
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +30,7 @@ class GraphPatternRegistry(AbstractRegistry[P]):
             cls._instance = cls()
         return cls._instance
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the pattern registry."""
         self.patterns = {}  # name -> GraphPattern
         self.branches = {}  # name -> BranchDefinition
@@ -65,15 +66,15 @@ class GraphPatternRegistry(AbstractRegistry[P]):
 
         return item
 
-    def get(self, item_type: Any, name: str) -> Optional[P]:
+    def get(self, item_type: Any, name: str) -> P | None:
         """Get a pattern or branch by type and name."""
         if item_type == "pattern":
             return self.patterns.get(name)
-        elif item_type == "branch":
+        if item_type == "branch":
             return self.branches.get(name)
         return None
 
-    def find_by_id(self, id: str) -> Optional[P]:
+    def find_by_id(self, id: str) -> P | None:
         """Find a pattern or branch by ID (name)."""
         # Try patterns first
         if id in self.patterns:
@@ -83,23 +84,23 @@ class GraphPatternRegistry(AbstractRegistry[P]):
             return self.branches[id]
         return None
 
-    def list(self, item_type: Any) -> List[str]:
+    def list(self, item_type: Any) -> list[str]:
         """List all patterns or branches of a type."""
         if item_type == "pattern":
             return list(self.patterns.keys())
-        elif item_type == "branch":
+        if item_type == "branch":
             return list(self.branches.keys())
-        elif item_type in self.pattern_categories:
+        if item_type in self.pattern_categories:
             return self.pattern_categories[item_type]
-        elif item_type in self.branch_categories:
+        if item_type in self.branch_categories:
             return self.branch_categories[item_type]
         return []
 
-    def get_all(self, item_type: Any) -> Dict[str, P]:
+    def get_all(self, item_type: Any) -> dict[str, P]:
         """Get all patterns or branches of a type."""
         if item_type == "pattern":
             return self.patterns
-        elif item_type == "branch":
+        if item_type == "branch":
             return self.branches
         # For category types, create a filtered dict
         result = {}
@@ -119,21 +120,21 @@ class GraphPatternRegistry(AbstractRegistry[P]):
         self.branch_categories = {}
 
     # Helper methods to maintain compatibility
-    def get_pattern(self, name: str) -> Optional[GraphPattern]:
+    def get_pattern(self, name: str) -> GraphPattern | None:
         """Get a pattern by name."""
         return self.patterns.get(name)
 
-    def get_branch(self, name: str) -> Optional[BranchDefinition]:
+    def get_branch(self, name: str) -> BranchDefinition | None:
         """Get a branch by name."""
         return self.branches.get(name)
 
-    def list_patterns(self, pattern_type: Optional[str] = None) -> List[str]:
+    def list_patterns(self, pattern_type: str | None = None) -> builtins.list[str]:
         """List pattern names, optionally filtered by type."""
         if pattern_type:
             return self.pattern_categories.get(pattern_type, [])
         return list(self.patterns.keys())
 
-    def list_branches(self, condition_type: Optional[str] = None) -> List[str]:
+    def list_branches(self, condition_type: str | None = None) -> builtins.list[str]:
         """List branch names, optionally filtered by type."""
         if condition_type:
             return self.branch_categories.get(condition_type, [])
@@ -142,11 +143,11 @@ class GraphPatternRegistry(AbstractRegistry[P]):
     # Register pattern methods with compatibility for different input types
     def register_pattern(
         self,
-        pattern: Union[GraphPattern, Dict[str, Any], Callable],
-        name: str = None,
-        pattern_type: str = None,
-        description: str = None,
-        metadata: Dict[str, Any] = None,
+        pattern: GraphPattern | dict[str, Any] | Callable,
+        name: str | None = None,
+        pattern_type: str | None = None,
+        description: str | None = None,
+        metadata: dict[str, Any] | None = None,
         **pattern_params,
     ) -> GraphPattern:
         """Register a pattern directly without requiring decorator usage."""
@@ -236,7 +237,7 @@ class GraphPatternRegistry(AbstractRegistry[P]):
             # Extract parameter info from function signature
             sig = inspect.signature(pattern)
             for param_name, param in sig.parameters.items():
-                if param_name == "graph" or param_name == "self":
+                if param_name in {"graph", "self"}:
                     continue
 
                 param_type = "Any"
@@ -281,12 +282,12 @@ class GraphPatternRegistry(AbstractRegistry[P]):
 
     def register_branch(
         self,
-        branch: Union[BranchDefinition, Dict[str, Any], Callable],
-        name: str = None,
-        condition_type: str = None,
-        description: str = None,
-        routes: Dict[str, str] = None,
-        default_route: str = None,
+        branch: BranchDefinition | dict[str, Any] | Callable,
+        name: str | None = None,
+        condition_type: str | None = None,
+        description: str | None = None,
+        routes: dict[str, str] | None = None,
+        default_route: str | None = None,
         **branch_params,
     ) -> BranchDefinition:
         """Register a branch definition directly."""
@@ -373,7 +374,7 @@ class GraphPatternRegistry(AbstractRegistry[P]):
             parameters = {}
 
             for param_name, param in sig.parameters.items():
-                if param_name == "state" or param_name == "self":
+                if param_name in {"state", "self"}:
                     continue
 
                 param_type = "Any"

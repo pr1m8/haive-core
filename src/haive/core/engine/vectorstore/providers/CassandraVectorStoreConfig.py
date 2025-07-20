@@ -1,5 +1,6 @@
 """Cassandra Vector Store implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Cassandra vector store,
 which provides distributed vector storage with Apache Cassandra.
 
@@ -126,14 +127,14 @@ class CassandraVectorStoreConfig(BaseVectorStoreConfig):
     )
 
     @validator("hosts")
-    def validate_hosts(self, v):
+    def validate_hosts(self, v) -> Any:
         """Validate hosts list is not empty."""
         if not v or len(v) == 0:
             raise ValueError("hosts list cannot be empty")
         return v
 
     @validator("setup_mode")
-    def validate_setup_mode(self, v):
+    def validate_setup_mode(self, v) -> Any:
         """Validate setup mode is supported."""
         valid_modes = ["SYNC", "ASYNC", "OFF"]
         if v not in valid_modes:
@@ -141,7 +142,7 @@ class CassandraVectorStoreConfig(BaseVectorStoreConfig):
         return v
 
     @validator("metadata_indexing")
-    def validate_metadata_indexing(self, v):
+    def validate_metadata_indexing(self, v) -> Any:
         """Validate metadata indexing policy."""
         valid_policies = ["all", "none"]
         if v not in valid_policies:
@@ -155,7 +156,7 @@ class CassandraVectorStoreConfig(BaseVectorStoreConfig):
         return v
 
     @validator("keyspace")
-    def validate_keyspace(self, v):
+    def validate_keyspace(self, v) -> Any:
         """Validate keyspace name format."""
         if not v or len(v.strip()) == 0:
             raise ValueError("keyspace cannot be empty")
@@ -186,7 +187,7 @@ class CassandraVectorStoreConfig(BaseVectorStoreConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a Cassandra vector store from this configuration.
 
         Returns:

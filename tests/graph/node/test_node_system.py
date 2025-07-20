@@ -4,7 +4,6 @@ import asyncio
 import logging
 import os
 import tempfile
-from typing import List
 
 import pytest
 from langchain_core.documents import Document
@@ -38,7 +37,7 @@ logger = logging.getLogger("node_system_tests")
 class SummaryResult(BaseModel):
     """Summary result model."""
 
-    topics: List[str] = Field(description="Main topics")
+    topics: list[str] = Field(description="Main topics")
     summary: str = Field(description="Concise summary")
     source_count: int = Field(description="Number of sources used")
 
@@ -53,10 +52,11 @@ class QA(BaseModel):
 class AnalysisResult(BaseModel):
     """Analysis result with multiple sections."""
 
-    main_points: List[str] = Field(description="Main points extracted")
-    entities: List[str] = Field(description="Named entities")
+    main_points: list[str] = Field(description="Main points extracted")
+    entities: list[str] = Field(description="Named entities")
     sentiment: str = Field(description="Overall sentiment")
-    recommendations: List[str] = Field(description="Recommendations based on analysis")
+    recommendations: list[str] = Field(
+        description="Recommendations based on analysis")
 
 
 # Test fixtures
@@ -95,7 +95,8 @@ def sample_documents():
 @pytest.fixture
 def embedding_model():
     """Create a real embedding model."""
-    return HuggingFaceEmbeddingConfig(model="sentence-transformers/all-MiniLM-L6-v2")
+    return HuggingFaceEmbeddingConfig(
+        model="sentence-transformers/all-MiniLM-L6-v2")
 
 
 @pytest.fixture
@@ -314,7 +315,8 @@ def test_mapping_node(node_registry):
     assert len(result) == 3
     assert all(isinstance(item, Send) for item in result)
     assert all(item.node == "process_item" for item in result)
-    assert [item.arg["item"] for item in result] == ["apple", "banana", "cherry"]
+    assert [item.arg["item"]
+            for item in result] == ["apple", "banana", "cherry"]
 
     logger.info(f"Mapping Node Result: {[item.arg for item in result]}")
 
@@ -341,7 +343,8 @@ def test_factory_mapping_node_creation(node_registry):
     assert all(item.node == "process_document" for item in result)
     assert [item.arg["document"] for item in result] == documents
 
-    logger.info(f"Factory-Created Mapping Node Result: {[item.arg for item in result]}")
+    logger.info(
+        f"Factory-Created Mapping Node Result: {[item.arg for item in result]}")
 
 
 def test_factory_conditional_node_creation(node_registry):
@@ -352,10 +355,9 @@ def test_factory_conditional_node_creation(node_registry):
         score = state.get("score", 0)
         if score >= 80:
             return "high"
-        elif score >= 50:
+        if score >= 50:
             return "medium"
-        else:
-            return "low"
+        return "low"
 
     # Create conditional node
     NodeFactory.set_registry(node_registry)
@@ -386,7 +388,10 @@ def test_factory_conditional_node_creation(node_registry):
     assert low_result.goto == "low_priority"
 
     logger.info(
-        f"Conditional Node Results - High: {high_result.goto}, Medium: {medium_result.goto}, Low: {low_result.goto}"
+        f"Conditional Node Results - High: {
+            high_result.goto}, Medium: {
+            medium_result.goto}, Low: {
+            low_result.goto}"
     )
 
 
@@ -505,10 +510,10 @@ def test_structured_output_model(azure_llm_config, node_registry):
 
     # Test with text content
     sample_text = """
-    The new AI system demonstrated remarkable capabilities in problem-solving 
-    and natural language understanding. However, critics raised concerns about 
-    potential biases in the training data and privacy implications. The company 
-    promised to address these issues in future updates and established an ethics 
+    The new AI system demonstrated remarkable capabilities in problem-solving
+    and natural language understanding. However, critics raised concerns about
+    potential biases in the training data and privacy implications. The company
+    promised to address these issues in future updates and established an ethics
     committee to oversee development.
     """
 
@@ -524,10 +529,12 @@ def test_structured_output_model(azure_llm_config, node_registry):
     assert hasattr(result.update["analysisresult"], "recommendations")
 
     logger.info(
-        f"Structured Output Node Result - Sentiment: {result.update['overall_sentiment']}"
+        f"Structured Output Node Result - Sentiment: {
+            result.update['overall_sentiment']}"
     )
     logger.info(
-        f"Structured Output Node Result - Key Points: {result.update['key_points']}"
+        f"Structured Output Node Result - Key Points: {
+            result.update['key_points']}"
     )
 
 
@@ -601,10 +608,10 @@ def test_complex_node_chain(azure_llm_config, retriever, node_registry):
                 "human",
                 """
         Question: {question}
-        
+
         Context:
         {context}
-        
+
         Answer:
         """,
             ),
@@ -642,7 +649,9 @@ def test_complex_node_chain(azure_llm_config, retriever, node_registry):
         NodeConfig(
             name="generate",
             engine=answer_llm,
-            input_mapping={"processed_query": "question", "context": "context"},
+            input_mapping={
+                "processed_query": "question",
+                "context": "context"},
             command_goto=END,
             debug=True,
         )
@@ -667,7 +676,8 @@ def test_complex_node_chain(azure_llm_config, retriever, node_registry):
     )
 
 
-def test_integration_with_dynamic_graph(azure_llm_config, retriever, node_registry):
+def test_integration_with_dynamic_graph(
+        azure_llm_config, retriever, node_registry):
     """Test integration with DynamicGraph."""
     # Create AugLLM for answer generation
     answer_prompt = ChatPromptTemplate.from_messages(
@@ -677,10 +687,10 @@ def test_integration_with_dynamic_graph(azure_llm_config, retriever, node_regist
                 "human",
                 """
         Question: {query}
-        
+
         Context:
         {context}
-        
+
         Answer:
         """,
             ),
@@ -694,7 +704,11 @@ def test_integration_with_dynamic_graph(azure_llm_config, retriever, node_regist
     )
 
     # Create graph
-    graph = DynamicGraph(name="rag_workflow", components=[retriever, answer_llm])
+    graph = DynamicGraph(
+        name="rag_workflow",
+        components=[
+            retriever,
+            answer_llm])
 
     # Add nodes with proper input/output mappings
     graph.add_node(
@@ -715,8 +729,10 @@ def test_integration_with_dynamic_graph(azure_llm_config, retriever, node_regist
 
     # Test with query using a proper state schema
     try:
-        # Try streaming instead of invoking - this often works when direct invoke fails
-        for chunk in compiled_graph.stream({"query": "What is deep learning?"}):
+        # Try streaming instead of invoking - this often works when direct
+        # invoke fails
+        for chunk in compiled_graph.stream(
+                {"query": "What is deep learning?"}):
             # We got something from streaming, so test passes
             logger.info(f"Streaming chunk: {chunk}")
             # Any non-None output is success
@@ -728,7 +744,8 @@ def test_integration_with_dynamic_graph(azure_llm_config, retriever, node_regist
             raise ValueError("No chunks returned")
 
     except Exception as e:
-        # If streaming fails, fall back to manual node execution to demonstrate the test concept
+        # If streaming fails, fall back to manual node execution to demonstrate
+        # the test concept
         logger.warning(f"Streaming failed: {e}")
 
         # Create a proper state schema class first
@@ -748,7 +765,11 @@ def test_integration_with_dynamic_graph(azure_llm_config, retriever, node_regist
         assert graph.edges
 
         logger.info(
-            f"Graph structure verified with {len(graph.nodes)} nodes and {len(graph.edges)} edges"
+            f"Graph structure verified with {
+                len(
+                    graph.nodes)} nodes and {
+                len(
+                    graph.edges)} edges"
         )
 
 
@@ -775,7 +796,8 @@ def test_node_config_serialization(node_registry):
     assert config_dict["command_goto"] == "END"
 
     # Deserialize
-    deserialized_config = NodeConfig.from_dict(config_dict, registry=node_registry)
+    deserialized_config = NodeConfig.from_dict(
+        config_dict, registry=node_registry)
 
     # Verify deserialization
     assert deserialized_config.name == original_config.name
@@ -793,37 +815,37 @@ def test_node_config_serialization(node_registry):
 def test_command_send_helper_methods(node_registry):
     Test Command/Send helper methods.
     NodeFactory.set_registry(node_registry)
-    
+
     # Create a NodeFactory instance
     factory = NodeFactory()
-    
+
     # Test create_command (as an instance method)
     command = factory.create_command(
         update={"result": "test"},
         goto="next_node"
     )
-    
+
     assert isinstance(command, Command)
     assert command.update == {"result": "test"}
     assert command.goto == "next_node"
-    
+
     # Test create_send (as an instance method)
     send = factory.create_send("process_item", {"data": "test"})
-    
+
     assert isinstance(send, Send)
     assert send.node == "process_item"
     assert send.arg == {"data": "test"}
-    
+
     # Test create_send_list (as an instance method)
     items = ["apple", "banana", "cherry"]
     send_list = factory.create_send_list(items, "process_fruit", "fruit")
-    
+
     assert isinstance(send_list, list)
     assert len(send_list) == 3
     assert all(isinstance(item, Send) for item in send_list)
     assert all(item.node == "process_fruit" for item in send_list)
     assert [item.arg["fruit"] for item in send_list] == items
-    
+
     logger.info(f"Helper Methods Test - Command: {command}")
     logger.info(f"Helper Methods Test - Send: {send}")
     logger.info(f"Helper Methods Test - Send List: {send_list}")
@@ -853,10 +875,10 @@ def test_complex_node_chain(azure_llm_config, retriever, node_registry):
                 "human",
                 """
         Question: {question}
-        
+
         Context:
         {context}
-        
+
         Answer:
         """,
             ),
@@ -894,7 +916,9 @@ def test_complex_node_chain(azure_llm_config, retriever, node_registry):
         NodeConfig(
             name="generate",
             engine=answer_llm,
-            input_mapping={"processed_query": "question", "context": "context"},
+            input_mapping={
+                "processed_query": "question",
+                "context": "context"},
             command_goto=END,
             debug=True,
         )

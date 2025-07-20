@@ -4,7 +4,7 @@ This module implements the last 17 loaders to complete our comprehensive
 document loader system.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import Field
 
@@ -75,7 +75,7 @@ class PerforceSource(RemoteSource):
     source_type: str = "perforce"
     p4port: str = Field(..., description="Perforce server")
     depot_path: str = Field(..., description="Depot path")
-    changelist: Optional[int] = Field(None, description="Specific changelist")
+    changelist: int | None = Field(None, description="Specific changelist")
 
 
 # =============================================================================
@@ -110,8 +110,8 @@ class JupyterHubSource(RemoteSource):
 
     source_type: str = "jupyter_hub"
     hub_url: str = Field(..., description="JupyterHub URL")
-    user: Optional[str] = Field(None, description="Specific user")
-    notebook_path: Optional[str] = Field(None, description="Notebook path")
+    user: str | None = Field(None, description="Specific user")
+    notebook_path: str | None = Field(None, description="Notebook path")
 
 
 @register_source(
@@ -168,7 +168,7 @@ class OPCUASource(RemoteSource):
 
     source_type: str = "opcua"
     server_url: str = Field(..., description="OPC UA server URL")
-    node_ids: List[str] = Field(..., description="Node IDs to monitor")
+    node_ids: list[str] = Field(..., description="Node IDs to monitor")
     subscription_interval: int = Field(1000, description="Update interval in ms")
 
 
@@ -196,7 +196,7 @@ class ModbusSource(RemoteSource):
     host: str = Field(..., description="Modbus host")
     port: int = Field(502, description="Modbus port")
     unit_id: int = Field(1, description="Unit ID")
-    register_addresses: List[int] = Field(..., description="Register addresses")
+    register_addresses: list[int] = Field(..., description="Register addresses")
 
 
 # =============================================================================
@@ -226,8 +226,8 @@ class ParquetSource(LocalFileSource):
     """Apache Parquet file source."""
 
     source_type: str = "parquet"
-    columns: Optional[List[str]] = Field(None, description="Columns to load")
-    filters: Optional[List[tuple]] = Field(None, description="PyArrow filters")
+    columns: list[str] | None = Field(None, description="Columns to load")
+    filters: list[tuple] | None = Field(None, description="PyArrow filters")
 
 
 @register_source(
@@ -252,7 +252,7 @@ class AvroSource(LocalFileSource):
     """Apache Avro file source."""
 
     source_type: str = "avro"
-    schema: Optional[Dict[str, Any]] = Field(None, description="Avro schema")
+    schema: dict[str, Any] | None = Field(None, description="Avro schema")
 
 
 @register_source(
@@ -277,7 +277,7 @@ class FeatherSource(LocalFileSource):
     """Feather file format source."""
 
     source_type: str = "feather"
-    columns: Optional[List[str]] = Field(None, description="Columns to load")
+    columns: list[str] | None = Field(None, description="Columns to load")
 
 
 # =============================================================================
@@ -366,9 +366,9 @@ class DataGovSource(RemoteSource):
     """Data.gov open data source."""
 
     source_type: str = "data_gov"
-    dataset_id: Optional[str] = Field(None, description="Specific dataset ID")
-    organization: Optional[str] = Field(None, description="Organization filter")
-    tags: Optional[List[str]] = Field(None, description="Tag filters")
+    dataset_id: str | None = Field(None, description="Specific dataset ID")
+    organization: str | None = Field(None, description="Organization filter")
+    tags: list[str] | None = Field(None, description="Tag filters")
 
 
 @register_source(
@@ -396,7 +396,7 @@ class CensusSource(RemoteSource):
     source_type: str = "census"
     dataset: str = Field(..., description="Census dataset name")
     year: int = Field(..., description="Census year")
-    variables: List[str] = Field(..., description="Variables to retrieve")
+    variables: list[str] = Field(..., description="Variables to retrieve")
 
 
 # =============================================================================
@@ -426,7 +426,7 @@ class MatlabSource(LocalFileSource):
     """MATLAB file source."""
 
     source_type: str = "matlab"
-    variable_names: Optional[List[str]] = Field(None, description="Variables to load")
+    variable_names: list[str] | None = Field(None, description="Variables to load")
 
 
 @register_source(
@@ -479,32 +479,32 @@ class RDataSource(LocalFileSource):
     """R data file source."""
 
     source_type: str = "rdata"
-    objects: Optional[List[str]] = Field(None, description="R objects to load")
+    objects: list[str] | None = Field(None, description="R objects to load")
 
 
 # Auto-register all sources
 __all__ = [
+    "AvroSource",
     # VCS
     "BitbucketSource",
-    "PerforceSource",
-    # Research
-    "JupyterHubSource",
-    "OverleafSource",
-    # Industrial
-    "OPCUASource",
-    "ModbusSource",
-    # File formats
-    "ParquetSource",
-    "AvroSource",
-    "FeatherSource",
-    # E-commerce
-    "WooCommerceSource",
-    "MagentoSource",
+    "CensusSource",
     # Government
     "DataGovSource",
-    "CensusSource",
+    "FeatherSource",
+    # Research
+    "JupyterHubSource",
+    "MagentoSource",
     # Specialty
     "MatlabSource",
-    "SPSSSource",
+    "ModbusSource",
+    # Industrial
+    "OPCUASource",
+    "OverleafSource",
+    # File formats
+    "ParquetSource",
+    "PerforceSource",
     "RDataSource",
+    "SPSSSource",
+    # E-commerce
+    "WooCommerceSource",
 ]

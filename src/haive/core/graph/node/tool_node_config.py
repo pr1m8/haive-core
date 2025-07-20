@@ -1,7 +1,8 @@
 # src/haive/core/graph/node/tool_node_config.py
 
 import logging
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
+from collections.abc import Callable
+from typing import Any
 
 from langchain_core.messages import AIMessage, ToolMessage
 from langgraph.prebuilt import ToolNode
@@ -16,8 +17,7 @@ logger.setLevel(logging.DEBUG)
 
 
 class ToolNodeConfig(NodeConfig):
-    """
-    Configuration for a tool node in a graph.
+    """Configuration for a tool node in a graph.
 
     Tool nodes execute LangChain tools and handle tool calls from LLM messages.
     Uses tools directly from the associated engine in state.
@@ -27,28 +27,28 @@ class ToolNodeConfig(NodeConfig):
     node_type: NodeType = Field(default=NodeType.TOOL, description="The type of node")
 
     # Tool-specific fields
-    tags: Optional[List[str]] = Field(
+    tags: list[str] | None = Field(
         default=None, description="Optional tags for the tool node"
     )
-    handle_tool_errors: Union[
-        bool, str, Callable[..., str], Tuple[Type[Exception], ...]
-    ] = Field(default=True, description="How to handle tool errors")
+    handle_tool_errors: (
+        bool | str | Callable[..., str] | tuple[type[Exception], ...]
+    ) = Field(default=True, description="How to handle tool errors")
     messages_key: str = Field(
         default="messages", description="The key to use for the messages field"
     )
 
     # Engine reference for getting tools from state
-    engine_name: Optional[str] = Field(
+    engine_name: str | None = Field(
         default=None, description="Name of engine in state.engines dict"
     )
 
     # Tool filtering - which routes should this node handle
-    allowed_routes: List[str] = Field(
+    allowed_routes: list[str] = Field(
         default_factory=lambda: ["langchain_tool", "function", "tool_node"],
         description="Tool routes this node should handle",
     )
 
-    def _get_engine_from_state(self, state: Dict[str, Any]) -> Optional[Any]:
+    def _get_engine_from_state(self, state: dict[str, Any]) -> Any | None:
         """Get engine from state.engines dict."""
         logger.debug(f"Looking for engine '{self.engine_name}' in state")
 
@@ -67,26 +67,37 @@ class ToolNodeConfig(NodeConfig):
             logger.error(f"state.engines is not a dict: {type(engines_dict)}")
             return None
 
-        logger.debug(f"Available engines in state: {list(engines_dict.keys())}")
+        logger.debug(
+            f"Available engines in state: {
+                list(
+                    engines_dict.keys())}"
+        )
 
         if self.engine_name in engines_dict:
             engine = engines_dict[self.engine_name]
             if engine:
-                logger.info(f"✅ Found engine '{self.engine_name}' in state.engines")
+                logger.info(
+                    f"✅ Found engine '{
+                        self.engine_name}' in state.engines"
+                )
                 return engine
-            else:
-                logger.error(f"Engine '{self.engine_name}' exists in state but is None")
+            logger.error(
+                f"Engine '{
+                    self.engine_name}' exists in state but is None"
+            )
         else:
-            logger.error(f"Engine '{self.engine_name}' not found in state.engines")
+            logger.error(
+                f"Engine '{
+                    self.engine_name}' not found in state.engines"
+            )
             logger.error(f"Available engines: {list(engines_dict.keys())}")
 
         return None
 
     def __call__(
-        self, state: Dict[str, Any], config: Optional[Dict[str, Any]] = None
+        self, state: dict[str, Any], config: dict[str, Any] | None = None
     ) -> Command:
-        """
-        Execute the tool node with the given state and configuration.
+        """Execute the tool node with the given state and configuration.
 
         Gets tools from engine in state.engines dict.
 
@@ -124,7 +135,10 @@ class ToolNodeConfig(NodeConfig):
         # Get engine from state
         engine = self._get_engine_from_state(state)
         if not engine:
-            logger.error(f"Could not get engine '{self.engine_name}' from state")
+            logger.error(
+                f"Could not get engine '{
+                    self.engine_name}' from state"
+            )
             return Command(update={}, goto=self.command_goto)
 
         # Get tools from engine
@@ -172,7 +186,8 @@ class ToolNodeConfig(NodeConfig):
                 logger.info(f"✅ Including tool '{tool_name}' (route: {route})")
             else:
                 logger.debug(
-                    f"❌ Excluding tool '{tool_name}' (route: {route} not in allowed routes: {self.allowed_routes})"
+                    f"❌ Excluding tool '{tool_name}' (route: {route} not in allowed routes: {
+                        self.allowed_routes})"
                 )
 
         if not filtered_tools:
@@ -182,7 +197,9 @@ class ToolNodeConfig(NodeConfig):
             return Command(update={}, goto=self.command_goto)
 
         logger.info(
-            f"Tool node using {len(filtered_tools)} tools from engine '{self.engine_name}'"
+            f"Tool node using {
+                len(filtered_tools)} tools from engine '{
+                self.engine_name}'"
         )
 
         # Log tool names
@@ -203,7 +220,8 @@ class ToolNodeConfig(NodeConfig):
         # Execute the tool node
         logger.info("Executing tool node...")
         try:
-            # ToolNode.invoke returns a dict with messages that include ToolMessages
+            # ToolNode.invoke returns a dict with messages that include
+            # ToolMessages
             result = tool_node.invoke(state, config)
             logger.info("✅ Tool node execution completed")
 
@@ -211,7 +229,9 @@ class ToolNodeConfig(NodeConfig):
             if isinstance(result, dict) and self.messages_key in result:
                 updated_messages = result[self.messages_key]
                 logger.info(
-                    f"Tool node added {len(updated_messages) - len(messages)} ToolMessages"
+                    f"Tool node added {
+                        len(updated_messages) -
+                        len(messages)} ToolMessages"
                 )
 
                 # Count ToolMessages added
@@ -227,42 +247,42 @@ class ToolNodeConfig(NodeConfig):
 
                 # Return the full result which includes the updated messages
                 return Command(update=result, goto=self.command_goto)
-            else:
-                logger.error(f"Unexpected result format from ToolNode: {type(result)}")
-                logger.error(f"Result: {result}")
+            logger.error(
+                f"Unexpected result format from ToolNode: {
+                    type(result)}"
+            )
+            logger.error(f"Result: {result}")
 
-                # Manually create ToolMessages if needed
-                logger.warning("Creating ToolMessages manually...")
-                new_messages = list(messages)
+            # Manually create ToolMessages if needed
+            logger.warning("Creating ToolMessages manually...")
+            new_messages = list(messages)
 
-                for tool_call in last_message.tool_calls:
-                    # Find the tool
-                    tool_name = (
-                        tool_call["name"]
-                        if isinstance(tool_call, dict)
-                        else tool_call.name
-                    )
-                    tool_id = (
-                        tool_call.get("id", f"call_{tool_name}")
-                        if isinstance(tool_call, dict)
-                        else tool_call.id
-                    )
-
-                    # Create error message since ToolNode didn't work properly
-                    tool_msg = ToolMessage(
-                        content="Tool execution failed - unexpected result format",
-                        name=tool_name,
-                        tool_call_id=tool_id,
-                    )
-                    new_messages.append(tool_msg)
-                    logger.debug(f"Added error ToolMessage for {tool_name}")
-
-                return Command(
-                    update={self.messages_key: new_messages}, goto=self.command_goto
+            for tool_call in last_message.tool_calls:
+                # Find the tool
+                tool_name = (
+                    tool_call["name"] if isinstance(tool_call, dict) else tool_call.name
+                )
+                tool_id = (
+                    tool_call.get("id", f"call_{tool_name}")
+                    if isinstance(tool_call, dict)
+                    else tool_call.id
                 )
 
+                # Create error message since ToolNode didn't work properly
+                tool_msg = ToolMessage(
+                    content="Tool execution failed - unexpected result format",
+                    name=tool_name,
+                    tool_call_id=tool_id,
+                )
+                new_messages.append(tool_msg)
+                logger.debug(f"Added error ToolMessage for {tool_name}")
+
+            return Command(
+                update={self.messages_key: new_messages}, goto=self.command_goto
+            )
+
         except Exception as e:
-            logger.error(f"Error executing tool node: {e}")
+            logger.exception(f"Error executing tool node: {e}")
             logger.exception(e)
 
             # Create error ToolMessages for each tool call
@@ -279,7 +299,7 @@ class ToolNodeConfig(NodeConfig):
                 )
 
                 tool_msg = ToolMessage(
-                    content=f"Tool execution error: {str(e)}",
+                    content=f"Tool execution error: {e!s}",
                     name=tool_name,
                     tool_call_id=tool_id,
                 )
@@ -291,9 +311,8 @@ class ToolNodeConfig(NodeConfig):
             )
 
     @classmethod
-    def from_route_filter(cls, allowed_routes: List[str], engine_name: str, **kwargs):
-        """
-        Create a tool node configuration for specific routes.
+    def from_route_filter(cls, allowed_routes: list[str], engine_name: str, **kwargs):
+        """Create a tool node configuration for specific routes.
 
         Args:
             allowed_routes: List of tool routes this node should handle

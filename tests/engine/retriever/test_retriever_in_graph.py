@@ -1,7 +1,6 @@
 # tests/core/engine/retriever/test_retriever_in_graph.py
 
 import logging
-from typing import List, Optional
 
 # Import Document at the top level
 from langchain_core.documents import Document
@@ -23,7 +22,6 @@ def make_retriever_config(docs=None) -> VectorStoreRetrieverConfig:
     logger.info(f"[make_retriever_config] Using {len(docs)} document(s)")
     for i, doc in enumerate(docs):
         logger.info(f" - Doc {i}: {doc.page_content}")
-        print(f"📄 Doc {i}: {doc.page_content}")
 
     vectorstore = VectorStoreConfig(
         name="vs_test",
@@ -42,13 +40,13 @@ def make_retriever_config(docs=None) -> VectorStoreRetrieverConfig:
 # Define state classes at the top level
 class RetrievalState(BaseModel):
     search_text: str = Field(default="")
-    query: Optional[str] = Field(default=None)
-    documents: Optional[List[Document]] = Field(default=None)
+    query: str | None = Field(default=None)
+    documents: list[Document] | None = Field(default=None)
 
 
 class QueryState(BaseModel):
     query: str = Field(default="")
-    documents: Optional[List[Document]] = Field(default=None)
+    documents: list[Document] | None = Field(default=None)
 
 
 # Add this test to verify the retriever works in isolation
@@ -61,7 +59,6 @@ def test_retriever_works_directly():
     results = retriever_config.invoke("Eiffel Tower")
 
     # Print results for debugging
-    print(f"Direct retriever results: {results}")
     logger.info(f"Direct retriever results: {results}")
 
     # Verify results
@@ -77,14 +74,13 @@ def test_retriever_with_different_input_mappings():
     retriever_config = make_retriever_config(docs)
 
     # Create graph with state schema
-    from typing import List, Optional
 
     from pydantic import BaseModel, Field
 
     class RetrievalState(BaseModel):
         search_text: str = Field(default="")
-        query: Optional[str] = Field(default=None)
-        documents: Optional[List[Document]] = Field(default=None)
+        query: str | None = Field(default=None)
+        documents: list[Document] | None = Field(default=None)
 
     # Create graph with explicit state schema
     graph = DynamicGraph(
@@ -95,19 +91,16 @@ def test_retriever_with_different_input_mappings():
 
     # Add preprocessing node that explicitly sets the query
     def log_input(state):
-        print(f"🔍 Input state: {state}")
 
         # Access state fields correctly based on type
         if isinstance(state, dict):
             search_text = state.get("search_text", "")
             return {"query": search_text}  # Set query to search_text
-        else:
-            search_text = getattr(state, "search_text", "")
-            return {"query": search_text}  # Set query to search_text
+        search_text = getattr(state, "search_text", "")
+        return {"query": search_text}  # Set query to search_text
 
     # Add post-processing node to handle documents
     def process_results(state):
-        print(f"📝 Processing state: {state}")
 
         # Create a Command to handle the response
         from langgraph.types import Command
@@ -141,7 +134,6 @@ def test_retriever_with_different_input_mappings():
 
     # Validate the results
     logger.info(f"✅ Graph with custom mapping result: {result}")
-    print(f"✅ Graph with custom mapping result: {result}")
 
     # Basic validation
     assert result is not None
@@ -167,7 +159,8 @@ def test_retriever_with_runtime_config():
     graph.add_edge(START, "retrieve")
 
     # Set default runtime config
-    graph.set_default_runnable_config({"configurable": {"k": 1}})  # Only get 1 result
+    graph.set_default_runnable_config(
+        {"configurable": {"k": 1}})  # Only get 1 result
 
     # Compile the graph
     app = graph.compile()
@@ -177,7 +170,6 @@ def test_retriever_with_runtime_config():
 
     # Validate the results
     logger.info(f"✅ Graph with runtime config result: {result}")
-    print(f"✅ Graph with runtime config result: {result}")
 
     assert isinstance(result, dict)
     assert "documents" in result or "result" in result
@@ -200,8 +192,8 @@ def test_retriever_in_dynamic_graph():
     # Create a state schema explicitly
     class SimpleQueryState(BaseModel):
         query: str = Field(default="")
-        documents: Optional[List[Document]] = Field(default=None)
-        text_contents: Optional[List[str]] = Field(default=None)
+        documents: list[Document] | None = Field(default=None)
+        text_contents: list[str] | None = Field(default=None)
 
     # Create a simple graph with just the retriever
     graph = DynamicGraph(
@@ -223,7 +215,8 @@ def test_retriever_in_dynamic_graph():
         texts = [doc.page_content for doc in docs]
 
         # Return with Command
-        return Command(update={"documents": docs, "text_contents": texts}, goto=END)
+        return Command(update={"documents": docs,
+                       "text_contents": texts}, goto=END)
 
     # Add nodes to the graph
     graph.add_node("retrieve", retriever_config)
@@ -244,7 +237,6 @@ def test_retriever_in_dynamic_graph():
 
     # Validate the results
     logger.info(f"✅ Graph result: {result}")
-    print(f"✅ Graph result: {result}")
 
     # Check if documents were returned correctly
     assert "documents" in result
@@ -260,9 +252,6 @@ def test_retriever_in_dynamic_graph():
 
 if __name__ == "__main__":
     # Run all tests
-    print("\n📊 Testing retriever in dynamic graph")
     test_retriever_in_dynamic_graph()
     test_retriever_with_different_input_mappings()
     test_retriever_with_runtime_config()
-
-    print("\n✅ All tests passed!")

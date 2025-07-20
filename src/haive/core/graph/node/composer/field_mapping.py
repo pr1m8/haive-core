@@ -5,7 +5,7 @@ source and target paths with optional transformations.
 """
 
 from dataclasses import dataclass
-from typing import Any, List, Optional
+from typing import Any
 
 
 @dataclass
@@ -35,6 +35,6 @@ class FieldMapping:
 
     source_path: str
     target_path: str
-    transform: Optional[List[str]] = None
+    transform: list[str] | None = None
     default: Any = None
     required: bool = False

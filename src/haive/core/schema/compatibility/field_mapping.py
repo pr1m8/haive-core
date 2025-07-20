@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable
+from typing import Any
 
 from haive.core.schema.compatibility.types import ConversionContext
 
@@ -152,7 +153,7 @@ class FieldMapping:
 class FieldMapper:
     """Manages field mappings between schemas."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.mappings: dict[str, FieldMapping] = {}
         self._source_index: dict[str, set[str]] = {}  # source -> targets
 

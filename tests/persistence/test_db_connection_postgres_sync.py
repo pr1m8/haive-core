@@ -10,7 +10,8 @@ logging.basicConfig(
     stream=sys.stdout,
 )
 
-# Database connection parameters (use environment variables or hardcode for testing)
+# Database connection parameters (use environment variables or hardcode
+# for testing)
 DB_HOST = "localhost"  # e.g., "localhost" or "192.168.1.100"
 DB_PORT = 5432
 DB_NAME = "postgres"
@@ -52,7 +53,8 @@ try:
 
     retrieved_data = postgres_config.get_checkpoint(updated_config)
 
-    if retrieved_data and retrieved_data.get("test_key") == test_data["test_key"]:
+    if retrieved_data and retrieved_data.get(
+        "test_key") == test_data["test_key"]:
         pass")
     else:
         pass")

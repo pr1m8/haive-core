@@ -20,7 +20,8 @@ logger = logging.getLogger(__name__)
 @pytest.fixture
 def simple_messages():
     """Return a list of sample messages."""
-    return [HumanMessage(content="Hello, world!"), AIMessage(content="Hi there!")]
+    return [HumanMessage(content="Hello, world!"),
+            AIMessage(content="Hi there!")]
 
 
 @pytest.fixture
@@ -39,7 +40,8 @@ def test_state_schema_cls():
 
         def copy(self):
             """Create a copy of the instance."""
-            return TestState(message=self.message, count=self.count, flag=self.flag)
+            return TestState(message=self.message,
+                             count=self.count, flag=self.flag)
 
         @classmethod
         def from_dict(cls, data):
@@ -91,7 +93,9 @@ def test_state_with_reducers():
         "messages": "add_messages",
     }
 
-    CountState.__reducer_fields__ = {"count": add_counts, "messages": add_messages}
+    CountState.__reducer_fields__ = {
+        "count": add_counts,
+        "messages": add_messages}
 
     return CountState
 
@@ -137,7 +141,8 @@ class TestStateSchemaCreation:
         # The current implementation uses __serializable_reducers__ which stores function names
         # rather than function objects
         logger.debug(
-            f"Created schema with reducer for 'text': {schema_cls.__serializable_reducers__}"
+            f"Created schema with reducer for 'text': {
+                schema_cls.__serializable_reducers__}"
         )
         assert "text" in schema_cls.__serializable_reducers__
         assert schema_cls.__serializable_reducers__["text"] == "concat_strings"
@@ -148,7 +153,8 @@ class TestStateSchemaCreation:
 
         schema_cls = StateSchema.with_messages()
         logger.debug(
-            f"Created schema with messages field and reducer: {schema_cls.__serializable_reducers__}"
+            f"Created schema with messages field and reducer: {
+                schema_cls.__serializable_reducers__}"
         )
 
         # Check that the reducer is registered by name in serializable_reducers
@@ -205,7 +211,8 @@ class TestStateSchemaOperations:
 
         try:
             # Create instance with values
-            instance = test_state_schema_cls(message="test", count=5, flag=True)
+            instance = test_state_schema_cls(
+                message="test", count=5, flag=True)
 
             # If to_dict is implemented, use it
             if hasattr(instance, "to_dict"):
@@ -262,7 +269,8 @@ class TestStateSchemaOperations:
         assert instance.flag is True
 
         # Test manually that the reducer would work if implemented
-        # This is a workaround for the test since we don't want to modify StateSchema
+        # This is a workaround for the test since we don't want to modify
+        # StateSchema
         def add_counts(a: int, b: int) -> int:
             return a + b
 
@@ -288,7 +296,8 @@ class TestStateSchemaOperations:
 
         # Merge messages
         instance.merge_messages(simple_messages)
-        logger.debug(f"After merging messages: {len(instance.messages)} messages")
+        logger.debug(
+            f"After merging messages: {len(instance.messages)} messages")
         assert len(instance.messages) == 2
 
         # Merge more messages
@@ -304,7 +313,10 @@ class TestStateSchemaOperations:
         # Create instances for testing
         instance = test_state_with_reducers(count=5)
         logger.debug(
-            f"Initial state: count={instance.count}, messages={len(instance.messages)}"
+            f"Initial state: count={
+                instance.count}, messages={
+                len(
+                    instance.messages)}"
         )
 
         # Store original values
@@ -320,7 +332,10 @@ class TestStateSchemaOperations:
         # Apply update
         instance.update(update_data)
         logger.debug(
-            f"After update: count={instance.count}, messages={len(instance.messages)}"
+            f"After update: count={
+                instance.count}, messages={
+                len(
+                    instance.messages)}"
         )
 
         # Check if reducers are automatically applied (they likely aren't)
@@ -335,7 +350,8 @@ class TestStateSchemaOperations:
         assert manual_count == 8  # 5 + 3 = 8
 
         # This tests if with_reducers actually set up the state class to use reducers
-        # in its update method, but the current implementation may not support this
+        # in its update method, but the current implementation may not support
+        # this
 
         # At minimum, we expect the values were updated
         assert instance.count == 3  # Direct assignment
@@ -355,7 +371,9 @@ class TestStateSchemaClassOps:
             logger.debug("Implementing add_field directly")
 
             # Start with a base schema
-            base_cls = StateSchema.create(__name__="BaseState", text=(str, "default"))
+            base_cls = StateSchema.create(
+                __name__="BaseState", text=(
+                    str, "default"))
             logger.debug(
                 f"Base schema has fields: {list(base_cls.model_fields.keys())}"
             )
@@ -370,7 +388,10 @@ class TestStateSchemaClassOps:
             # Use this as our new class
             new_cls = NewSchema
 
-            logger.debug(f"New schema has fields: {list(new_cls.model_fields.keys())}")
+            logger.debug(
+                f"New schema has fields: {
+                    list(
+                        new_cls.model_fields.keys())}")
             assert "count" in new_cls.model_fields
             assert "count" in new_cls.__shared_fields__
 
@@ -385,7 +406,9 @@ class TestStateSchemaClassOps:
             list_cls = ListSchema
 
             instance = list_cls()
-            logger.debug(f"Instance with default_factory field: {vars(instance)}")
+            logger.debug(
+                f"Instance with default_factory field: {
+                    vars(instance)}")
             assert instance.items == []
 
             # Test with reducer function
@@ -404,7 +427,8 @@ class TestStateSchemaClassOps:
 
             # Check if the reducer was registered correctly
             logger.debug(
-                f"Reducer class has serializable reducers: {reducer_cls.__serializable_reducers__}"
+                f"Reducer class has serializable reducers: {
+                    reducer_cls.__serializable_reducers__}"
             )
             assert "value" in reducer_cls.__serializable_reducers__
             assert reducer_cls.__serializable_reducers__["value"] == "add_nums"
@@ -413,8 +437,13 @@ class TestStateSchemaClassOps:
 
         # Original implementation if method exists
         # Start with a base schema
-        base_cls = StateSchema.create(__name__="BaseState", text=(str, "default"))
-        logger.debug(f"Base schema has fields: {list(base_cls.model_fields.keys())}")
+        base_cls = StateSchema.create(
+            __name__="BaseState", text=(
+                str, "default"))
+        logger.debug(
+            f"Base schema has fields: {
+                list(
+                    base_cls.model_fields.keys())}")
 
         # Add a new field
         new_cls = base_cls.add_field(
@@ -425,7 +454,10 @@ class TestStateSchemaClassOps:
             shared=True,
         )
 
-        logger.debug(f"New schema has fields: {list(new_cls.model_fields.keys())}")
+        logger.debug(
+            f"New schema has fields: {
+                list(
+                    new_cls.model_fields.keys())}")
         assert "count" in new_cls.model_fields
         assert "count" in new_cls.__shared_fields__
 
@@ -450,17 +482,20 @@ class TestStateSchemaClassOps:
             name="value", field_type=int, default=0, reducer=add_nums
         )
 
-        # Check if the class has __reducer_fields__ attribute for backwards compatibility
+        # Check if the class has __reducer_fields__ attribute for backwards
+        # compatibility
         if hasattr(reducer_cls, "__reducer_fields__"):
             logger.debug(
-                f"Reducer class has function reducers: {reducer_cls.__reducer_fields__}"
+                f"Reducer class has function reducers: {
+                    reducer_cls.__reducer_fields__}"
             )
             assert "value" in reducer_cls.__reducer_fields__
             assert reducer_cls.__reducer_fields__["value"] == add_nums
 
         # Check the serializable reducers which is the new implementation
         logger.debug(
-            f"Reducer class has serializable reducers: {reducer_cls.__serializable_reducers__}"
+            f"Reducer class has serializable reducers: {
+                reducer_cls.__serializable_reducers__}"
         )
         assert "value" in reducer_cls.__serializable_reducers__
         assert reducer_cls.__serializable_reducers__["value"] == "add_nums"
@@ -485,8 +520,10 @@ class TestStateSchemaClassOps:
         if not hasattr(test_state_with_reducers, "as_reducer"):
             logger.debug("Implementing as_reducer directly")
 
-            # Get the reducer function directly from the __reducer_fields__ dict
-            count_reducer = test_state_with_reducers.__reducer_fields__["count"]
+            # Get the reducer function directly from the __reducer_fields__
+            # dict
+            count_reducer = test_state_with_reducers.__reducer_fields__[
+                "count"]
         else:
             # Use the actual method
             count_reducer = test_state_with_reducers.as_reducer("count")
@@ -527,7 +564,8 @@ class TestStateSchemaClassOps:
         logger.info("Testing from_partial_dict")
 
         # Create with partial data
-        instance = test_state_schema_cls.from_partial_dict({"message": "partial"})
+        instance = test_state_schema_cls.from_partial_dict(
+            {"message": "partial"})
         logger.debug(f"Instance from partial dict: {instance.model_dump()}")
 
         assert instance.message == "partial"
@@ -559,22 +597,26 @@ class TestModernFeatures:
             or not AnnotatedSchema.__serializable_reducers__
         ):
             # Set it manually for testing
-            AnnotatedSchema.__serializable_reducers__ = {"text": "join_strings"}
+            AnnotatedSchema.__serializable_reducers__ = {
+                "text": "join_strings"}
             AnnotatedSchema.__reducer_fields__ = {"text": join_strings}
 
         logger.debug(
-            f"Serializable reducers: {AnnotatedSchema.__serializable_reducers__}"
+            f"Serializable reducers: {
+                AnnotatedSchema.__serializable_reducers__}"
         )
 
         # Now the reducer should be registered
         assert "text" in AnnotatedSchema.__serializable_reducers__
-        assert AnnotatedSchema.__serializable_reducers__["text"] == "join_strings"
+        assert AnnotatedSchema.__serializable_reducers__[
+            "text"] == "join_strings"
 
         # Manually implement reducer behavior for testing
         instance1 = AnnotatedSchema(text="hello")
         instance2 = AnnotatedSchema(text="world")
 
-        # Manual reducer application (since update in StateSchema doesn't apply reducers)
+        # Manual reducer application (since update in StateSchema doesn't apply
+        # reducers)
         result = join_strings(instance1.text, instance2.text)
         assert result == "hello|world"
 
@@ -653,7 +695,8 @@ class TestModernFeatures:
         logger.info("Testing copy method")
 
         # Create an instance with values
-        instance = test_state_schema_cls(message="original", count=5, flag=True)
+        instance = test_state_schema_cls(
+            message="original", count=5, flag=True)
 
         # Create a copy
         copy = instance.copy()

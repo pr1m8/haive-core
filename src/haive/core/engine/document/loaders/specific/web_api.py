@@ -4,7 +4,6 @@ This module contains loaders for various web APIs and scraping services.
 """
 
 import logging
-from typing import List, Optional
 
 from langchain_core.document_loaders.base import BaseLoader
 from langchain_core.documents import Document
@@ -37,7 +36,7 @@ class BraveSearchSource(WebSource):
         self.country = country
         self.include_snippets = include_snippets
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a Brave Search loader."""
         try:
             from langchain_community.document_loaders import BraveSearchLoader
@@ -58,7 +57,7 @@ class BraveSearchSource(WebSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create Brave Search loader: {e}")
+            logger.exception(f"Failed to create Brave Search loader: {e}")
             return None
 
 
@@ -78,7 +77,7 @@ class GoogleSearchSource(WebSource):
         self.cse_id = cse_id
         self.num_results = num_results
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a Google Search loader."""
         try:
             from langchain_community.document_loaders import GoogleSearchAPILoader
@@ -94,7 +93,7 @@ class GoogleSearchSource(WebSource):
             logger.warning("GoogleSearchAPILoader not available")
             return None
         except Exception as e:
-            logger.error(f"Failed to create Google Search loader: {e}")
+            logger.exception(f"Failed to create Google Search loader: {e}")
             return None
 
 
@@ -104,8 +103,8 @@ class ApifyDatasetSource(WebSource):
     def __init__(
         self,
         dataset_id: str,
-        api_token: Optional[str] = None,
-        dataset_mapping_function: Optional[callable] = None,
+        api_token: str | None = None,
+        dataset_mapping_function: callable | None = None,
         **kwargs,
     ):
         super().__init__(
@@ -117,7 +116,7 @@ class ApifyDatasetSource(WebSource):
         self.api_token = api_token
         self.dataset_mapping_function = dataset_mapping_function
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create an Apify dataset loader."""
         try:
             from langchain_community.document_loaders import ApifyDatasetLoader
@@ -134,7 +133,7 @@ class ApifyDatasetSource(WebSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create Apify dataset loader: {e}")
+            logger.exception(f"Failed to create Apify dataset loader: {e}")
             return None
 
 
@@ -143,7 +142,7 @@ class DiffbotSource(WebSource):
 
     def __init__(
         self,
-        urls: List[str],
+        urls: list[str],
         api_token: str,
         api_type: str = "article",  # article, product, image, video, discussion
         **kwargs,
@@ -155,7 +154,7 @@ class DiffbotSource(WebSource):
         self.api_token = api_token
         self.api_type = api_type
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a Diffbot loader."""
         try:
             from langchain_community.document_loaders import DiffbotLoader
@@ -170,7 +169,7 @@ class DiffbotSource(WebSource):
             logger.warning("DiffbotLoader not available")
             return None
         except Exception as e:
-            logger.error(f"Failed to create Diffbot loader: {e}")
+            logger.exception(f"Failed to create Diffbot loader: {e}")
             return None
 
 
@@ -179,12 +178,12 @@ class ScrapingBeeSource(WebSource):
 
     def __init__(
         self,
-        urls: List[str],
+        urls: list[str],
         api_key: str,
         render_js: bool = True,
         premium_proxy: bool = False,
-        country_code: Optional[str] = None,
-        wait_for_selector: Optional[str] = None,
+        country_code: str | None = None,
+        wait_for_selector: str | None = None,
         **kwargs,
     ):
         super().__init__(
@@ -199,7 +198,7 @@ class ScrapingBeeSource(WebSource):
         self.country_code = country_code
         self.wait_for_selector = wait_for_selector
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a ScrapingBee loader."""
         try:
             # Custom implementation as LangChain doesn't have native support
@@ -213,7 +212,7 @@ class ScrapingBeeSource(WebSource):
             )
 
         except Exception as e:
-            logger.error(f"Failed to create ScrapingBee loader: {e}")
+            logger.exception(f"Failed to create ScrapingBee loader: {e}")
             return None
 
 
@@ -222,12 +221,12 @@ class ScrapflySource(WebSource):
 
     def __init__(
         self,
-        urls: List[str],
+        urls: list[str],
         api_key: str,
         format: str = "markdown",
         asp: bool = True,  # Anti-Scraping Protection
         render_js: bool = True,
-        country: Optional[str] = None,
+        country: str | None = None,
         **kwargs,
     ):
         super().__init__(
@@ -240,7 +239,7 @@ class ScrapflySource(WebSource):
         self.render_js = render_js
         self.country = country
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a Scrapfly loader."""
         try:
             from langchain_community.document_loaders import ScrapflyLoader
@@ -262,7 +261,7 @@ class ScrapflySource(WebSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create Scrapfly loader: {e}")
+            logger.exception(f"Failed to create Scrapfly loader: {e}")
             return None
 
 
@@ -272,11 +271,11 @@ class NewsAPISource(WebSource):
     def __init__(
         self,
         api_key: str,
-        query: Optional[str] = None,
-        sources: Optional[List[str]] = None,
-        domains: Optional[List[str]] = None,
-        from_date: Optional[str] = None,
-        to_date: Optional[str] = None,
+        query: str | None = None,
+        sources: list[str] | None = None,
+        domains: list[str] | None = None,
+        from_date: str | None = None,
+        to_date: str | None = None,
         language: str = "en",
         sort_by: str = "popularity",  # relevancy, popularity, publishedAt
         page_size: int = 100,
@@ -295,7 +294,7 @@ class NewsAPISource(WebSource):
         self.sort_by = sort_by
         self.page_size = page_size
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a NewsAPI loader."""
         try:
             from langchain_community.document_loaders import NewsAPILoader
@@ -316,7 +315,7 @@ class NewsAPISource(WebSource):
             logger.warning("NewsAPILoader not available")
             return None
         except Exception as e:
-            logger.error(f"Failed to create NewsAPI loader: {e}")
+            logger.exception(f"Failed to create NewsAPI loader: {e}")
             return None
 
 
@@ -325,9 +324,9 @@ class AssemblyAITranscriptSource(WebSource):
 
     def __init__(
         self,
-        file_path: Optional[str] = None,
-        transcript_id: Optional[str] = None,
-        api_key: str = None,
+        file_path: str | None = None,
+        transcript_id: str | None = None,
+        api_key: str | None = None,
         speaker_labels: bool = True,
         auto_chapters: bool = False,
         entity_detection: bool = False,
@@ -343,7 +342,7 @@ class AssemblyAITranscriptSource(WebSource):
         self.auto_chapters = auto_chapters
         self.entity_detection = entity_detection
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create an AssemblyAI loader."""
         try:
             if self.transcript_id:
@@ -355,7 +354,7 @@ class AssemblyAITranscriptSource(WebSource):
                     transcript_id=self.transcript_id,
                     api_key=self.api_key,
                 )
-            elif self.file_path:
+            if self.file_path:
                 from langchain_community.document_loaders import (
                     AssemblyAIAudioTranscriptLoader,
                 )
@@ -367,8 +366,7 @@ class AssemblyAITranscriptSource(WebSource):
                     auto_chapters=self.auto_chapters,
                     entity_detection=self.entity_detection,
                 )
-            else:
-                raise ValueError("Either file_path or transcript_id must be provided")
+            raise ValueError("Either file_path or transcript_id must be provided")
 
         except ImportError:
             logger.warning(
@@ -376,7 +374,7 @@ class AssemblyAITranscriptSource(WebSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create AssemblyAI loader: {e}")
+            logger.exception(f"Failed to create AssemblyAI loader: {e}")
             return None
 
 
@@ -385,9 +383,9 @@ class EtherscanSource(WebSource):
 
     def __init__(
         self,
-        account: Optional[str] = None,
-        contract_address: Optional[str] = None,
-        api_key: str = None,
+        account: str | None = None,
+        contract_address: str | None = None,
+        api_key: str | None = None,
         start_block: int = 0,
         end_block: int = 99999999,
         sort: str = "asc",
@@ -403,7 +401,7 @@ class EtherscanSource(WebSource):
         self.end_block = end_block
         self.sort = sort
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create an Etherscan loader."""
         try:
             from langchain_community.document_loaders import EtherscanLoader
@@ -430,7 +428,7 @@ class EtherscanSource(WebSource):
             logger.warning("EtherscanLoader not available")
             return None
         except Exception as e:
-            logger.error(f"Failed to create Etherscan loader: {e}")
+            logger.exception(f"Failed to create Etherscan loader: {e}")
             return None
 
 
@@ -442,12 +440,12 @@ class ScrapingBeeLoader(BaseLoader):
 
     def __init__(
         self,
-        urls: List[str],
+        urls: list[str],
         api_key: str,
         render_js: bool = True,
         premium_proxy: bool = False,
-        country_code: Optional[str] = None,
-        wait_for_selector: Optional[str] = None,
+        country_code: str | None = None,
+        wait_for_selector: str | None = None,
     ):
         self.urls = urls
         self.api_key = api_key
@@ -456,7 +454,7 @@ class ScrapingBeeLoader(BaseLoader):
         self.country_code = country_code
         self.wait_for_selector = wait_for_selector
 
-    def load(self) -> List[Document]:
+    def load(self) -> list[Document]:
         """Load pages using ScrapingBee API."""
         try:
             import requests
@@ -492,25 +490,28 @@ class ScrapingBeeLoader(BaseLoader):
 
                     documents.append(Document(page_content=content, metadata=metadata))
                 else:
-                    logger.error(f"Failed to scrape {url}: {response.status_code}")
+                    logger.error(
+                        f"Failed to scrape {url}: {
+                            response.status_code}"
+                    )
 
             return documents
 
         except Exception as e:
-            logger.error(f"Failed to load with ScrapingBee: {e}")
+            logger.exception(f"Failed to load with ScrapingBee: {e}")
             return []
 
 
 # Export API sources
 __all__ = [
-    "BraveSearchSource",
-    "GoogleSearchSource",
     "ApifyDatasetSource",
-    "DiffbotSource",
-    "ScrapingBeeSource",
-    "ScrapflySource",
-    "NewsAPISource",
     "AssemblyAITranscriptSource",
+    "BraveSearchSource",
+    "DiffbotSource",
     "EtherscanSource",
+    "GoogleSearchSource",
+    "NewsAPISource",
+    "ScrapflySource",
     "ScrapingBeeLoader",
+    "ScrapingBeeSource",
 ]

@@ -1,4 +1,4 @@
-"""
+"""from typing import Any
 Pinecone Hybrid Search Retriever implementation for the Haive framework.
 
 This module provides a configuration class for the Pinecone Hybrid Search retriever,
@@ -20,7 +20,7 @@ The implementation integrates with LangChain's PineconeHybridSearchRetriever whi
 providing a consistent Haive configuration interface with secure API key management.
 """
 
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any
 
 from langchain_core.documents import Document
 from pydantic import Field, SecretStr
@@ -32,8 +32,7 @@ from haive.core.engine.retriever.types import RetrieverType
 
 @BaseRetrieverConfig.register(RetrieverType.PINECONE)
 class PineconeHybridSearchRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
-    """
-    Configuration for Pinecone Hybrid Search retriever in the Haive framework.
+    """Configuration for Pinecone Hybrid Search retriever in the Haive framework.
 
     This retriever uses Pinecone's hybrid search capabilities to combine vector
     similarity search with keyword search for better retrieval performance.
@@ -68,7 +67,7 @@ class PineconeHybridSearchRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig
     )
 
     # API configuration with SecureConfigMixin
-    api_key: Optional[SecretStr] = Field(
+    api_key: SecretStr | None = Field(
         default=None,
         description="Pinecone API key (auto-resolved from PINECONE_API_KEY)",
     )
@@ -96,17 +95,17 @@ class PineconeHybridSearchRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig
         description="Weight for vector vs sparse search (0.0 = sparse only, 1.0 = vector only)",
     )
 
-    def get_input_fields(self) -> Dict[str, Tuple[Type, Any]]:
+    def get_input_fields(self) -> dict[str, tuple[type, Any]]:
         """Return input field definitions for Pinecone Hybrid Search retriever."""
         return {
             "query": (str, Field(description="Hybrid search query for Pinecone")),
         }
 
-    def get_output_fields(self) -> Dict[str, Tuple[Type, Any]]:
+    def get_output_fields(self) -> dict[str, tuple[type, Any]]:
         """Return output field definitions for Pinecone Hybrid Search retriever."""
         return {
             "documents": (
-                List[Document],
+                list[Document],
                 Field(
                     default_factory=list,
                     description="Documents from Pinecone hybrid search",
@@ -114,9 +113,8 @@ class PineconeHybridSearchRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig
             ),
         }
 
-    def instantiate(self):
-        """
-        Create a Pinecone Hybrid Search retriever from this configuration.
+    def instantiate(self) -> Any:
+        """Create a Pinecone Hybrid Search retriever from this configuration.
 
         Returns:
             PineconeHybridSearchRetriever: Instantiated retriever ready for hybrid search.

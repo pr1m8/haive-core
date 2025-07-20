@@ -1,5 +1,6 @@
 """You.com Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the You.com retriever,
 which retrieves web search results using You.com's search API. You.com
 provides AI-powered search capabilities with real-time web results
@@ -131,7 +132,7 @@ class YouRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a You.com retriever from this configuration.
 
         Returns:

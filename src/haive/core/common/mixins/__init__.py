@@ -1,67 +1,147 @@
-"""Mixins package providing reusable functionality for Haive components.
+"""Module exports."""
 
-This package contains a collection of mixins that provide common functionality
-that can be composed into classes through multiple inheritance. Mixins help
-avoid code duplication and promote consistent behavior across the codebase.
+from mixins.checkpointer_mixin import CheckpointerMixin
+from mixins.checkpointer_mixin import get_checkpointer
+from mixins.checkpointer_mixin import run
+from mixins.checkpointer_mixin import stream
+from mixins.dynamic_tool_route_mixin import DynamicToolRouteMixin
+from mixins.dynamic_tool_route_mixin import add_tool
+from mixins.dynamic_tool_route_mixin import batch_update_tools
+from mixins.dynamic_tool_route_mixin import clear_pending_changes
+from mixins.dynamic_tool_route_mixin import get_pending_changes
+from mixins.dynamic_tool_route_mixin import has_pending_changes
+from mixins.dynamic_tool_route_mixin import register_route_change_callback
+from mixins.dynamic_tool_route_mixin import remove_tool
+from mixins.dynamic_tool_route_mixin import unregister_route_change_callback
+from mixins.dynamic_tool_route_mixin import update_tool_route
+from mixins.engine_mixin import EngineStateMixin
+from mixins.engine_mixin import add_engine
+from mixins.engine_mixin import change_provider
+from mixins.engine_mixin import debug_engine_access
+from mixins.engine_mixin import display_engine_details
+from mixins.engine_mixin import display_engines
+from mixins.engine_mixin import get_agents
+from mixins.engine_mixin import get_all_engines
+from mixins.engine_mixin import get_embeddings
+from mixins.engine_mixin import get_engine
+from mixins.engine_mixin import get_engine_routes
+from mixins.engine_mixin import get_engine_summary
+from mixins.engine_mixin import get_engine_tools
+from mixins.engine_mixin import get_engines_by_type
+from mixins.engine_mixin import get_llms
+from mixins.engine_mixin import get_retrievers
+from mixins.engine_mixin import get_tools
+from mixins.engine_mixin import get_vector_stores
+from mixins.engine_mixin import remove_engine
+from mixins.engine_mixin import update_engine
+from mixins.engine_mixin import validate_and_organize_engines
+from mixins.getter_mixin import GetterMixin
+from mixins.getter_mixin import field_values
+from mixins.getter_mixin import filter
+from mixins.getter_mixin import find
+from mixins.getter_mixin import find_all
+from mixins.getter_mixin import first
+from mixins.getter_mixin import get_all_by_attr
+from mixins.getter_mixin import get_by_attr
+from mixins.getter_mixin import get_by_type
+from mixins.identifier import IdentifierMixin
+from mixins.identifier import clear_name
+from mixins.identifier import display_name
+from mixins.identifier import has_custom_name
+from mixins.identifier import identifier_info
+from mixins.identifier import initialize_uuid_obj
+from mixins.identifier import matches_id
+from mixins.identifier import regenerate_id
+from mixins.identifier import set_name
+from mixins.identifier import short_id
+from mixins.identifier import uuid_obj
+from mixins.identifier import validate_id
+from mixins.identifier import validate_name
+from mixins.mcp_mixin import MCPMixin
+from mixins.mcp_mixin import MCPPromptTemplate
+from mixins.mcp_mixin import MCPResource
+from mixins.mcp_mixin import MCPToolWrapper
+from mixins.mcp_mixin import cleanup_mcp
+from mixins.mcp_mixin import enhance_system_prompt_with_mcp
+from mixins.mcp_mixin import get_mcp_prompts
+from mixins.mcp_mixin import get_mcp_resources
+from mixins.mcp_mixin import get_mcp_tools
+from mixins.prompt_template_mixin import PromptTemplateMixin
+from mixins.prompt_template_mixin import compose_with_prompt_schema
+from mixins.prompt_template_mixin import derive_input_schema
+from mixins.prompt_template_mixin import derive_prompt_input_schema
+from mixins.prompt_template_mixin import derive_prompt_output_schema
+from mixins.prompt_template_mixin import enable_prompt_schema_derivation
+from mixins.prompt_template_mixin import format_prompt
+from mixins.prompt_template_mixin import get_effective_input_schema
+from mixins.prompt_template_mixin import get_missing_prompt_vars
+from mixins.prompt_template_mixin import get_prompt_aware_input_fields
+from mixins.prompt_template_mixin import get_prompt_engine
+from mixins.prompt_template_mixin import get_prompt_variables
+from mixins.prompt_template_mixin import set_base_input_schema
+from mixins.prompt_template_mixin import update_prompt_partials
+from mixins.prompt_template_mixin import validate_prompt_inputs
+from mixins.prompt_template_mixin import validate_prompt_template
+from mixins.prompt_template_mixin import validate_with_prompt_schema
+from mixins.recompile_mixin import RecompileMixin
+from mixins.recompile_mixin import add_recompile_trigger
+from mixins.recompile_mixin import check_recompile_conditions
+from mixins.recompile_mixin import clear_recompile_history
+from mixins.recompile_mixin import force_recompile
+from mixins.recompile_mixin import get_recompile_status
+from mixins.recompile_mixin import mark_for_recompile
+from mixins.recompile_mixin import resolve_recompile
+from mixins.rich_logger_mixin import RichLoggerMixin
+from mixins.rich_logger_mixin import logger
+from mixins.secure_config import SecureConfigMixin
+from mixins.secure_config import get_api_key
+from mixins.state_interface_mixin import StateInterfaceMixin
+from mixins.structured_output_mixin import StructuredOutputMixin
+from mixins.structured_output_mixin import with_structured_output
+from mixins.timestamp_mixin import AccessTimestampsMixin
+from mixins.timestamp_mixin import CreatedTimestampMixin
+from mixins.timestamp_mixin import age
+from mixins.timestamp_mixin import age_human
+from mixins.timestamp_mixin import age_seconds
+from mixins.timestamp_mixin import created_at_iso
+from mixins.timestamp_mixin import to_int_timestamp
+from mixins.timestamp_mixin import utcnow
+from mixins.tool_list_mixin import ToolList
+from mixins.tool_list_mixin import ToolListMixin
+from mixins.tool_list_mixin import add
+from mixins.tool_list_mixin import get_by_tool_type
+from mixins.tool_list_mixin import get_model_classes
+from mixins.tool_list_mixin import get_model_instances
+from mixins.tool_list_mixin import get_tool
+from mixins.tool_list_mixin import get_tool_info
+from mixins.tool_list_mixin import get_tool_type
+from mixins.tool_list_mixin import get_tool_type_mapping
+from mixins.tool_list_mixin import get_tools_by_category
+from mixins.tool_list_mixin import model_post_init
+from mixins.tool_list_mixin import process_tools
+from mixins.tool_list_mixin import to_list
+from mixins.tool_list_mixin import update
+from mixins.tool_route_mixin import ToolRouteMixin
+from mixins.tool_route_mixin import add_routed_tool
+from mixins.tool_route_mixin import add_tool
+from mixins.tool_route_mixin import add_tools_from_list
+from mixins.tool_route_mixin import add_tools_to_category
+from mixins.tool_route_mixin import clear_tool_routes
+from mixins.tool_route_mixin import clear_tools
+from mixins.tool_route_mixin import debug_tool_routes
+from mixins.tool_route_mixin import get_all_tools_flat
+from mixins.tool_route_mixin import get_tool
+from mixins.tool_route_mixin import get_tool_metadata
+from mixins.tool_route_mixin import get_tool_route
+from mixins.tool_route_mixin import get_tools_by_category
+from mixins.tool_route_mixin import get_tools_by_route
+from mixins.tool_route_mixin import list_tools_by_route
+from mixins.tool_route_mixin import remove_tool_route
+from mixins.tool_route_mixin import set_tool_route
+from mixins.tool_route_mixin import set_tool_route_for_existing
+from mixins.tool_route_mixin import sync_tool_routes_from_tools
+from mixins.tool_route_mixin import to_tool
+from mixins.tool_route_mixin import update_tool_route
+from mixins.tool_route_mixin import update_tool_routes
 
-The mixins are organized into several categories:
-- General purpose mixins (ID, state, versioning, etc.)
-- Engine integration mixins
-- Tool management mixins
-- Configuration mixins
-- State management mixins
-
-Usage:
-    ```python
-    from haive.core.common.mixins import IdentifierMixin, StateMixin
-
-    class MyComponent(IdentifierMixin, StateMixin):
-        def __init__(self, id: str = None):
-            super().__init__(id=id)
-            # Now the class has ID management and state management capabilities
-    ```
-"""
-
-from haive.core.common.mixins.checkpointer_mixin import CheckpointerMixin
-from haive.core.common.mixins.engine_mixin import EngineStateMixin as EngineMixin
-
-# Import general mixins
-from haive.core.common.mixins.general import (
-    IdMixin,
-    MetadataMixin,
-    SerializationMixin,
-    StateMixin,
-    TimestampMixin,
-    VersionMixin,
-)
-from haive.core.common.mixins.getter_mixin import GetterMixin
-from haive.core.common.mixins.identifier import IdentifierMixin
-from haive.core.common.mixins.mcp_mixin import MCPMixin
-from haive.core.common.mixins.rich_logger_mixin import RichLoggerMixin
-from haive.core.common.mixins.secure_config import SecureConfigMixin
-from haive.core.common.mixins.state_interface_mixin import StateInterfaceMixin
-from haive.core.common.mixins.structured_output_mixin import StructuredOutputMixin
-from haive.core.common.mixins.tool_list_mixin import ToolListMixin
-from haive.core.common.mixins.tool_route_mixin import ToolRouteMixin
-
-__all__ = [
-    # Main mixins
-    "CheckpointerMixin",
-    "EngineMixin",
-    "GetterMixin",
-    # General mixins
-    "IdMixin",
-    "IdentifierMixin",
-    "MCPMixin",
-    "MetadataMixin",
-    "RichLoggerMixin",
-    "SecureConfigMixin",
-    "SerializationMixin",
-    "StateInterfaceMixin",
-    "StateMixin",
-    "StructuredOutputMixin",
-    "TimestampMixin",
-    "ToolListMixin",
-    "ToolRouteMixin",
-    "VersionMixin",
-]
+__all__ = ['AccessTimestampsMixin', 'CheckpointerMixin', 'CreatedTimestampMixin', 'DynamicToolRouteMixin', 'EngineStateMixin', 'GetterMixin', 'IdentifierMixin', 'MCPMixin', 'MCPPromptTemplate', 'MCPResource', 'MCPToolWrapper', 'PromptTemplateMixin', 'RecompileMixin', 'RichLoggerMixin', 'SecureConfigMixin', 'StateInterfaceMixin', 'StructuredOutputMixin', 'ToolList', 'ToolListMixin', 'ToolRouteMixin', 'add', 'add_engine', 'add_recompile_trigger', 'add_routed_tool', 'add_tool', 'add_tools_from_list', 'add_tools_to_category', 'age', 'age_human', 'age_seconds', 'batch_update_tools', 'change_provider', 'check_recompile_conditions', 'cleanup_mcp', 'clear_name', 'clear_pending_changes', 'clear_recompile_history', 'clear_tool_routes', 'clear_tools', 'compose_with_prompt_schema', 'created_at_iso', 'debug_engine_access', 'debug_tool_routes', 'derive_input_schema', 'derive_prompt_input_schema', 'derive_prompt_output_schema', 'display_engine_details', 'display_engines', 'display_name', 'enable_prompt_schema_derivation', 'enhance_system_prompt_with_mcp', 'field_values', 'filter', 'find', 'find_all', 'first', 'force_recompile', 'format_prompt', 'get_agents', 'get_all_by_attr', 'get_all_engines', 'get_all_tools_flat', 'get_api_key', 'get_by_attr', 'get_by_tool_type', 'get_by_type', 'get_checkpointer', 'get_effective_input_schema', 'get_embeddings', 'get_engine', 'get_engine_routes', 'get_engine_summary', 'get_engine_tools', 'get_engines_by_type', 'get_llms', 'get_mcp_prompts', 'get_mcp_resources', 'get_mcp_tools', 'get_missing_prompt_vars', 'get_model_classes', 'get_model_instances', 'get_pending_changes', 'get_prompt_aware_input_fields', 'get_prompt_engine', 'get_prompt_variables', 'get_recompile_status', 'get_retrievers', 'get_tool', 'get_tool_info', 'get_tool_metadata', 'get_tool_route', 'get_tool_type', 'get_tool_type_mapping', 'get_tools', 'get_tools_by_category', 'get_tools_by_route', 'get_vector_stores', 'has_custom_name', 'has_pending_changes', 'identifier_info', 'initialize_uuid_obj', 'list_tools_by_route', 'logger', 'mark_for_recompile', 'matches_id', 'model_post_init', 'process_tools', 'regenerate_id', 'register_route_change_callback', 'remove_engine', 'remove_tool', 'remove_tool_route', 'resolve_recompile', 'run', 'set_base_input_schema', 'set_name', 'set_tool_route', 'set_tool_route_for_existing', 'short_id', 'stream', 'sync_tool_routes_from_tools', 'to_int_timestamp', 'to_list', 'to_tool', 'unregister_route_change_callback', 'update', 'update_engine', 'update_prompt_partials', 'update_tool_route', 'update_tool_routes', 'utcnow', 'uuid_obj', 'validate_and_organize_engines', 'validate_id', 'validate_name', 'validate_prompt_inputs', 'validate_prompt_template', 'validate_with_prompt_schema', 'with_structured_output']

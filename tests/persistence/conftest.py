@@ -15,25 +15,29 @@ def db_params():
     """Get database parameters for testing."""
     params = get_db_params()
     logger.info(
-        f"Using DB params: host={params['db_host']}, port={params['db_port']}, db={params['db_name']}"
+        f"Using DB params: host={
+            params['db_host']}, port={
+            params['db_port']}, db={
+            params['db_name']}"
     )
     return params
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def thread_ids():
     """Generate thread IDs for testing."""
     return []
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def sync_postgres_config(db_params):
     """Create a synchronous PostgreSQL config."""
     config = PostgresCheckpointerConfig(
         **db_params, mode=CheckpointerMode.SYNC, storage_mode=CheckpointStorageMode.FULL
     )
     logger.info(
-        f"Created sync PostgreSQL config with URI: {config.get_connection_uri()}"
+        f"Created sync PostgreSQL config with URI: {
+            config.get_connection_uri()}"
     )
     return config
 
@@ -41,7 +45,7 @@ def sync_postgres_config(db_params):
 # ... rest of the file remains the same ...
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def async_postgres_config(db_params):
     """Create an asynchronous PostgreSQL config."""
     config = PostgresCheckpointerConfig(
@@ -50,12 +54,13 @@ def async_postgres_config(db_params):
         storage_mode=CheckpointStorageMode.FULL,
     )
     logger.info(
-        f"Created async PostgreSQL config with URI: {config.get_connection_uri()}"
+        f"Created async PostgreSQL config with URI: {
+            config.get_connection_uri()}"
     )
     return config
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def shallow_postgres_config(db_params):
     """Create a shallow PostgreSQL config."""
     config = PostgresCheckpointerConfig(
@@ -64,12 +69,13 @@ def shallow_postgres_config(db_params):
         storage_mode=CheckpointStorageMode.SHALLOW,
     )
     logger.info(
-        f"Created shallow PostgreSQL config with URI: {config.get_connection_uri()}"
+        f"Created shallow PostgreSQL config with URI: {
+            config.get_connection_uri()}"
     )
     return config
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def sync_checkpointer(sync_postgres_config):
     """Create a synchronous PostgreSQL checkpointer."""
     checkpointer = sync_postgres_config.create_checkpointer()
@@ -77,7 +83,7 @@ def sync_checkpointer(sync_postgres_config):
     return checkpointer
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 async def async_checkpointer():
     """Create an asynchronous PostgreSQL checkpointer with proper cleanup."""
     config = PostgresCheckpointerConfig(
@@ -95,7 +101,7 @@ async def async_checkpointer():
     # Async context manager handles cleanup automatically
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def shallow_checkpointer(shallow_postgres_config):
     """Create a shallow PostgreSQL checkpointer."""
     checkpointer = shallow_postgres_config.create_checkpointer()

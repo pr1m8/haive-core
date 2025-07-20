@@ -1,5 +1,6 @@
 """Qdrant Vector Store implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Qdrant vector store,
 which is a vector similarity search engine with extended filtering support.
 
@@ -145,7 +146,7 @@ class QdrantVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
     )
 
     @validator("distance_metric")
-    def validate_distance_metric(self, v):
+    def validate_distance_metric(self, v) -> Any:
         """Validate distance metric is supported."""
         valid_metrics = ["cosine", "euclidean", "dot", "manhattan"]
         if v not in valid_metrics:
@@ -153,7 +154,7 @@ class QdrantVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
         return v
 
     @validator("url", "host")
-    def validate_connection(self, v, values):
+    def validate_connection(self, v, values) -> Any:
         """Validate that either url or host is provided."""
         if not v and not values.get("url") and not values.get("host"):
             raise ValueError("Either 'url' or 'host' must be provided")
@@ -174,7 +175,7 @@ class QdrantVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
             "ids": (list[str], Field(description="IDs of the added documents")),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a Qdrant vector store from this configuration.
 
         Returns:

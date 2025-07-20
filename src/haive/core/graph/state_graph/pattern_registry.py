@@ -15,7 +15,7 @@ class PatternRegistry(AbstractRegistry[PatternDefinition]):
             cls._instance = cls()
         return cls._instance
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the registry."""
         self.patterns: dict[str, PatternDefinition] = {}
         self.pattern_ids: dict[str, PatternDefinition] = {}

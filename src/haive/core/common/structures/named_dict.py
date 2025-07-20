@@ -164,7 +164,7 @@ class NamedDict(BaseModel, Generic[T], GetterMixin[T]):
         """Get all keys."""
         return list(self.values.keys())
 
-    def items(self):
+    def items(self) -> Any:
         """Get all key-value pairs."""
         return self.values.items()
 
@@ -193,7 +193,7 @@ class NamedDict(BaseModel, Generic[T], GetterMixin[T]):
         if name.startswith("get_by_"):
             attr_name = name[7:]  # Remove "get_by_"
 
-            def getter_method(value, default=None):
+            def getter_method(value: str, default=None):
                 return self.get_by_attr(attr_name, value, default)
 
             return getter_method

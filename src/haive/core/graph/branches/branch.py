@@ -1,5 +1,4 @@
-"""
-Core Branch implementation for dynamic routing.
+"""Core Branch implementation for dynamic routing.
 
 This module provides a unified Branch class that replaces the need for
 separate ConditionalEdge objects, consolidating all routing logic.
@@ -7,7 +6,8 @@ separate ConditionalEdge objects, consolidating all routing logic.
 
 import logging
 import uuid
-from typing import Any, Callable, Dict, List, Optional, Set, Union
+from collections.abc import Callable
+from typing import Any, Union
 
 from langgraph.graph import END
 from langgraph.types import Command
@@ -32,8 +32,7 @@ logger = logging.getLogger(__name__)
 
 
 class Branch(BaseModel):
-    """
-    Unified branch for dynamic routing based on state values.
+    """Unified branch for dynamic routing based on state values.
 
     This class combines the functionality of branch routing and conditional edges,
     providing a single unified interface for graph routing.
@@ -44,38 +43,41 @@ class Branch(BaseModel):
     name: str = Field(default_factory=lambda: f"branch_{uuid.uuid4().hex[:8]}")
 
     # Connection information (replaces ConditionalEdge)
-    source_node: Optional[str] = Field(default=None)
-    destinations: Dict[Union[bool, str], str] = Field(
+    source_node: str | None = Field(default=None)
+    destinations: dict[bool | str, str] = Field(
         default_factory=lambda: {True: "continue", False: END}
     )
-    default: Optional[str] = None
+    default: str | None = None
 
     # Evaluation properties
     mode: BranchMode = BranchMode.DIRECT
-    key: Optional[str] = None
+    key: str | None = None
     value: Any = None
-    comparison: Union[ComparisonType, str] = ComparisonType.EQUALS
-    function: Optional[Callable] = None
-    function_ref: Optional[CallableReference] = None
+    comparison: ComparisonType | str = ComparisonType.EQUALS
+    function: Callable | None = None
+    function_ref: CallableReference | None = None
     allow_none: bool = False
     message_key: str = "messages"
 
     # Advanced features
-    send_mappings: List[SendMapping] = Field(default_factory=list)
-    send_generators: List[SendGenerator] = Field(default_factory=list)
-    dynamic_mapping: Optional[DynamicMapping] = None
-    chain_branches: List["Branch"] = Field(default_factory=list)
-    condition_ref: Optional[CallableReference] = None
-    true_branch: Optional[Union[str, "Branch"]] = None
-    false_branch: Optional[Union[str, "Branch"]] = None
+    send_mappings: list[SendMapping] = Field(default_factory=list)
+    send_generators: list[SendGenerator] = Field(default_factory=list)
+    dynamic_mapping: DynamicMapping | None = None
+    chain_branches: list["Branch"] = Field(default_factory=list)
+    condition_ref: CallableReference | None = None
+    true_branch: Union[str, "Branch"] | None = None
+    false_branch: Union[str, "Branch"] | None = None
 
     # Implementation details
-    send_mapping_list: Optional[SendMappingList] = None
+    send_mapping_list: SendMappingList | None = None
 
     model_config = {"arbitrary_types_allowed": True}
 
     @model_validator(mode="after")
-    def setup_function_and_mappings(self) -> "Branch":
+
+
+    @classmethod
+    def setup_function_and_mappings(cls) -> "Branch":
         """Set up function and mappings after initialization."""
         # Resolve function from reference
         if self.function_ref and not self.function:
@@ -96,7 +98,10 @@ class Branch(BaseModel):
         return self
 
     @model_validator(mode="after")
-    def validate_destinations_and_default(self) -> "Branch":
+
+
+    @classmethod
+    def validate_destinations_and_default(cls) -> "Branch":
         """Validate destinations and set default if needed."""
         if not self.destinations:
             self.destinations = {True: "continue", False: END}
@@ -105,7 +110,8 @@ class Branch(BaseModel):
             # or if the key is a generic string like "continue"
             single_key = next(iter(self.destinations.keys()))
             if isinstance(single_key, bool) or single_key in ["continue", "default"]:
-                # If only one destination is provided with a boolean/generic key, map it to True and END to False
+                # If only one destination is provided with a boolean/generic
+                # key, map it to True and END to False
                 true_dest = next(iter(self.destinations.values()))
                 self.destinations = {True: true_dest, False: END}
             # Otherwise, preserve the original string key and don't add boolean fallbacks
@@ -114,13 +120,13 @@ class Branch(BaseModel):
         elif (
             len(self.destinations) > 1
             and self.default is None
-            and not all(isinstance(k, bool) for k in self.destinations.keys())
+            and not all(isinstance(k, bool) for k in self.destinations)
         ):
             self.default = END
         return self
 
     def __call__(
-        self, state: StateLike, config: Optional[ConfigLike] = None
+        self, state: StateLike, config: ConfigLike | None = None
     ) -> NodeOutput:
         """Make Branch directly callable for use in conditional edges."""
         try:
@@ -161,7 +167,7 @@ class Branch(BaseModel):
 
             # Only log for non-model errors (suppress expected errors)
             if "model" not in error_msg:
-                logger.error(f"NameError in branch evaluation: {ne}")
+                logger.exception(f"NameError in branch evaluation: {ne}")
 
             # Same fallback logic as other exceptions
             if self.default is not None:
@@ -172,7 +178,7 @@ class Branch(BaseModel):
                 return next(iter(self.destinations.values()))
             return END
         except Exception as e:
-            logger.error(f"Error in branch evaluation: {e}")
+            logger.exception(f"Error in branch evaluation: {e}")
             # Same fallback logic as None
             if self.default is not None:
                 return self.default
@@ -182,9 +188,8 @@ class Branch(BaseModel):
                 return next(iter(self.destinations.values()))
             return END
 
-    def evaluator(self, state: Dict[str, Any]) -> str:
-        """
-        Evaluate the branch condition and return the next node.
+    def evaluator(self, state: dict[str, Any]) -> str:
+        """Evaluate the branch condition and return the next node.
 
         Args:
             state: Current graph state
@@ -218,12 +223,11 @@ class Branch(BaseModel):
 
             if "model" not in error_msg:
                 # Log non-model errors
-                print(f"Error evaluating branch: {ne}")
+                pass
 
             return self.default if self.default else ""
-        except Exception as e:
+        except Exception:
             # Log and return default or fallback
-            print(f"Error evaluating branch: {e}")
             return self.default if self.default else ""
 
     def evaluate(self, state: StateLike) -> NodeOutput:
@@ -235,16 +239,16 @@ class Branch(BaseModel):
             if self.mode == BranchMode.FUNCTION and self.function:
                 return self._process_result(self.function(state), state)
 
-            elif self.mode == BranchMode.CHAIN and self.chain_branches:
+            if self.mode == BranchMode.CHAIN and self.chain_branches:
                 return self._evaluate_chain(state)
 
-            elif self.mode == BranchMode.CONDITION and self.condition_ref:
+            if self.mode == BranchMode.CONDITION and self.condition_ref:
                 return self._evaluate_condition(state)
 
-            elif self.mode == BranchMode.SEND_MAPPER:
+            if self.mode == BranchMode.SEND_MAPPER:
                 return self._evaluate_send_mapper(state)
 
-            elif self.mode == BranchMode.DYNAMIC and self.dynamic_mapping:
+            if self.mode == BranchMode.DYNAMIC and self.dynamic_mapping:
                 return self._evaluate_dynamic(state)
 
             # Default direct mode
@@ -256,24 +260,24 @@ class Branch(BaseModel):
                 return self._get_destination(result)
 
             # Handle special message comparisons
-            elif self.comparison == ComparisonType.MESSAGE_CONTAINS:
+            if self.comparison == ComparisonType.MESSAGE_CONTAINS:
                 result = self._check_message_contains(state)
                 return self._get_destination(result)
 
             # Regular field comparison
-            else:
-                field_value = extract_field(state, self.key)
+            field_value = extract_field(state, self.key)
 
-                # Handle None values
-                if field_value is None and not self.allow_none:
-                    logger.warning(
-                        f"Field '{self.key}' is None and allow_none is False"
-                    )
-                    return self.default
+            # Handle None values
+            if field_value is None and not self.allow_none:
+                logger.warning(
+                    f"Field '{
+                        self.key}' is None and allow_none is False"
+                )
+                return self.default
 
-                # Perform comparison
-                result = self._compare(field_value)
-                return self._get_destination(result)
+            # Perform comparison
+            result = self._compare(field_value)
+            return self._get_destination(result)
 
         except NameError as ne:
             # Handle specific NameError cases (like 'model' not defined)
@@ -281,11 +285,11 @@ class Branch(BaseModel):
 
             # Only log for non-model errors (suppress expected errors)
             if "model" not in error_msg:
-                logger.error(f"NameError in branch evaluation: {ne}")
+                logger.exception(f"NameError in branch evaluation: {ne}")
 
             return self.default
         except Exception as e:
-            logger.error(f"Error evaluating branch: {e}")
+            logger.exception(f"Error evaluating branch: {e}")
             return self.default
 
     def _process_result(self, result: Any, state: StateLike) -> NodeOutput:
@@ -321,13 +325,13 @@ class Branch(BaseModel):
                     return BranchResult(send_objects=send_objects)
 
         # Handle regular destination lookup
-        if isinstance(result, (bool, str)):
+        if isinstance(result, bool | str):
             return self._get_destination(result)
 
         # Fallback
         return self.default
 
-    def _get_destination(self, result: Union[bool, str]) -> str:
+    def _get_destination(self, result: bool | str) -> str:
         """Get destination from result."""
         return self.destinations.get(result, self.default)
 
@@ -347,39 +351,39 @@ class Branch(BaseModel):
         # Perform comparison
         if comparison == ComparisonType.EQUALS:
             return value == target
-        elif comparison == ComparisonType.NOT_EQUALS:
+        if comparison == ComparisonType.NOT_EQUALS:
             return value != target
-        elif comparison == ComparisonType.GREATER_THAN:
+        if comparison == ComparisonType.GREATER_THAN:
             return value > target
-        elif comparison == ComparisonType.LESS_THAN:
+        if comparison == ComparisonType.LESS_THAN:
             return value < target
-        elif comparison == ComparisonType.GREATER_EQUALS:
+        if comparison == ComparisonType.GREATER_EQUALS:
             return value >= target
-        elif comparison == ComparisonType.LESS_EQUALS:
+        if comparison == ComparisonType.LESS_EQUALS:
             return value <= target
-        elif comparison == ComparisonType.IN:
-            return value in target if isinstance(target, (list, tuple, set)) else False
-        elif comparison == ComparisonType.CONTAINS:
+        if comparison == ComparisonType.IN:
+            return value in target if isinstance(target, list | tuple | set) else False
+        if comparison == ComparisonType.CONTAINS:
             if isinstance(value, str):
                 return target in value
-            if isinstance(value, (list, tuple, set, dict)):
+            if isinstance(value, list | tuple | set | dict):
                 return target in value
             return False
-        elif comparison == ComparisonType.IS:
+        if comparison == ComparisonType.IS:
             return value is target
-        elif comparison == ComparisonType.IS_NOT:
+        if comparison == ComparisonType.IS_NOT:
             return value is not target
-        elif comparison == ComparisonType.MATCHES:
+        if comparison == ComparisonType.MATCHES:
             import re
 
             if isinstance(value, str) and isinstance(target, str):
                 return bool(re.match(target, value))
             return False
-        elif comparison == ComparisonType.STARTS_WITH:
+        if comparison == ComparisonType.STARTS_WITH:
             return value.startswith(target) if isinstance(value, str) else False
-        elif comparison == ComparisonType.ENDS_WITH:
+        if comparison == ComparisonType.ENDS_WITH:
             return value.endswith(target) if isinstance(value, str) else False
-        elif comparison == ComparisonType.HAS_LENGTH:
+        if comparison == ComparisonType.HAS_LENGTH:
             try:
                 return len(value) == target
             except (TypeError, AttributeError):
@@ -439,13 +443,12 @@ class Branch(BaseModel):
                 if isinstance(self.true_branch, Branch):
                     return self.true_branch.evaluate(state)
                 return self.true_branch or self.default
-            else:
-                if isinstance(self.false_branch, Branch):
-                    return self.false_branch.evaluate(state)
-                return self.false_branch or self.default
+            if isinstance(self.false_branch, Branch):
+                return self.false_branch.evaluate(state)
+            return self.false_branch or self.default
 
         except Exception as e:
-            logger.error(f"Error in condition evaluation: {e}")
+            logger.exception(f"Error in condition evaluation: {e}")
             return self.default
 
     def _evaluate_send_mapper(self, state: StateLike) -> BranchResult:
@@ -472,7 +475,7 @@ class Branch(BaseModel):
                     sends.append(result)
 
             except Exception as e:
-                logger.error(f"Error in mapper function: {e}")
+                logger.exception(f"Error in mapper function: {e}")
 
         return BranchResult(send_objects=sends)
 
@@ -492,7 +495,7 @@ class Branch(BaseModel):
             update={"output_mapping": output_mapping} if output_mapping else {},
         )
 
-    def extract_field_references(self) -> Set[str]:
+    def extract_field_references(self) -> set[str]:
         """Extract field references used by this branch."""
         fields = set()
 

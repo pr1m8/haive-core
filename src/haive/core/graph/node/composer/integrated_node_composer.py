@@ -1,14 +1,14 @@
 """Integrated NodeSchemaComposer - Unified with core schema system.
 
+from typing import Any
 This module integrates NodeSchemaComposer with the core schema system,
 providing consistent patterns for node I/O configuration that work with
 StateSchema, SchemaComposer, and the broader Haive architecture.
 """
 
 import logging
-from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
-
-from pydantic import BaseModel
+from collections.abc import Callable
+from typing import Any, TypeVar
 
 from haive.core.common.schema.field_definition import FieldDefinition
 from haive.core.graph.node.base_config import NodeConfig
@@ -39,20 +39,20 @@ class IntegratedNodeComposer(NodeSchemaComposer):
     - Support for shared fields and reducers
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize with schema composer integration."""
         super().__init__()
         self.schema_composer = SchemaComposer()
-        self._composed_schemas: Dict[str, Type[StateSchema]] = {}
+        self._composed_schemas: dict[str, type[StateSchema]] = {}
 
     def compose_node_with_schema(
         self,
         base_node: TNode,
-        input_mappings: Optional[List[FieldMapping]] = None,
-        output_mappings: Optional[List[FieldMapping]] = None,
-        state_schema: Optional[Type[StateSchema]] = None,
+        input_mappings: list[FieldMapping] | None = None,
+        output_mappings: list[FieldMapping] | None = None,
+        state_schema: type[StateSchema] | None = None,
         preserve_field_metadata: bool = True,
-        name: Optional[str] = None,
+        name: str | None = None,
     ) -> "SchemaAwareComposedNode":
         """Compose node with automatic schema generation.
 
@@ -91,10 +91,10 @@ class IntegratedNodeComposer(NodeSchemaComposer):
     def _generate_state_schema(
         self,
         base_node: TNode,
-        input_mappings: Optional[List[FieldMapping]],
-        output_mappings: Optional[List[FieldMapping]],
+        input_mappings: list[FieldMapping] | None,
+        output_mappings: list[FieldMapping] | None,
         preserve_metadata: bool,
-    ) -> Type[StateSchema]:
+    ) -> type[StateSchema]:
         """Generate StateSchema for composed node.
 
         This creates a dynamic StateSchema that includes:
@@ -169,29 +169,30 @@ class IntegratedNodeComposer(NodeSchemaComposer):
             return FieldDefinition(
                 name=mapping.target_path,
                 type_=original_def.type_,
-                description=f"Mapped from {mapping.source_path}: {original_def.description}",
+                description=f"Mapped from {
+                    mapping.source_path}: {
+                    original_def.description}",
                 owner=base_node.name,
                 sharing_strategy=original_def.sharing_strategy,
                 persistence_strategy=original_def.persistence_strategy,
                 is_private=original_def.is_private,
             )
-        else:
-            # Create basic definition
-            return FieldDefinition(
-                name=mapping.target_path,
-                type_=Any,
-                description=f"Mapped from {mapping.source_path}",
-                owner=base_node.name,
-            )
+        # Create basic definition
+        return FieldDefinition(
+            name=mapping.target_path,
+            type_=Any,
+            description=f"Mapped from {mapping.source_path}",
+            owner=base_node.name,
+        )
 
     def create_schema_adapter(
         self,
-        source_schema: Type[StateSchema],
-        target_schema: Type[StateSchema],
-        field_mappings: List[FieldMapping],
+        source_schema: type[StateSchema],
+        target_schema: type[StateSchema],
+        field_mappings: list[FieldMapping],
         preserve_reducers: bool = True,
         preserve_sharing: bool = True,
-        name: Optional[str] = None,
+        name: str | None = None,
     ) -> "StateSchemaAdapter":
         """Create adapter between StateSchema types.
 
@@ -220,10 +221,10 @@ class IntegratedNodeComposer(NodeSchemaComposer):
     def from_callable_with_schema(
         self,
         func: Callable,
-        input_schema: Optional[Type[StateSchema]] = None,
-        output_schema: Optional[Type[StateSchema]] = None,
-        input_mappings: Optional[List[FieldMapping]] = None,
-        output_mappings: Optional[List[FieldMapping]] = None,
+        input_schema: type[StateSchema] | None = None,
+        output_schema: type[StateSchema] | None = None,
+        input_mappings: list[FieldMapping] | None = None,
+        output_mappings: list[FieldMapping] | None = None,
         generate_schema: bool = True,
         **kwargs,
     ) -> "SchemaAwareComposedNode":
@@ -281,9 +282,9 @@ class SchemaAwareComposedNode:
     def __init__(
         self,
         base_node: NodeConfig,
-        input_mappings: List[FieldMapping],
-        output_mappings: List[FieldMapping],
-        state_schema: Type[StateSchema],
+        input_mappings: list[FieldMapping],
+        output_mappings: list[FieldMapping],
+        state_schema: type[StateSchema],
         name: str,
         composer: IntegratedNodeComposer,
     ):
@@ -306,8 +307,8 @@ class SchemaAwareComposedNode:
 
     def __call__(
         self,
-        state: Union[StateSchema, Dict[str, Any]],
-        config: Optional[Dict[str, Any]] = None,
+        state: StateSchema | dict[str, Any],
+        config: dict[str, Any] | None = None,
     ) -> Any:
         """Execute with StateSchema support."""
         config = config or {}
@@ -369,23 +370,19 @@ class SchemaAwareComposedNode:
                 final_updates = {**result.update, **mapped_updates}
                 if hasattr(result, "model_copy"):
                     return result.model_copy(update={"update": final_updates})
-                else:
-                    result.update = final_updates
-                    return result
-            else:
-                return Command(
-                    update=mapped_updates, goto=getattr(result, "goto", None)
-                )
+                result.update = final_updates
+                return result
+            return Command(update=mapped_updates, goto=getattr(result, "goto", None))
 
         return result
 
     @property
-    def input_schema(self) -> Optional[Type[StateSchema]]:
+    def input_schema(self) -> type[StateSchema] | None:
         """Get input schema for this node."""
         return self.state_schema
 
     @property
-    def output_schema(self) -> Optional[Type[StateSchema]]:
+    def output_schema(self) -> type[StateSchema] | None:
         """Get output schema for this node."""
         return self.state_schema
 
@@ -402,9 +399,9 @@ class StateSchemaAdapter:
 
     def __init__(
         self,
-        source_schema: Type[StateSchema],
-        target_schema: Type[StateSchema],
-        field_mappings: List[FieldMapping],
+        source_schema: type[StateSchema],
+        target_schema: type[StateSchema],
+        field_mappings: list[FieldMapping],
         preserve_reducers: bool,
         preserve_sharing: bool,
         name: str,
@@ -439,13 +436,14 @@ class StateSchemaAdapter:
             transformed = self.composer._apply_transforms(value, mapping.transform)
 
             # Handle reducer if preserving
-            if self.preserve_reducers and hasattr(
-                self.target_schema, "__reducer_fields__"
+            if (
+                self.preserve_reducers
+                and hasattr(self.target_schema, "__reducer_fields__")
+                and mapping.target_path in self.target_schema.__reducer_fields__
             ):
-                if mapping.target_path in self.target_schema.__reducer_fields__:
-                    reducer = self.target_schema.__reducer_fields__[mapping.target_path]
-                    current = getattr(self.target_schema, mapping.target_path, None)
-                    transformed = reducer(current, transformed)
+                reducer = self.target_schema.__reducer_fields__[mapping.target_path]
+                current = getattr(self.target_schema, mapping.target_path, None)
+                transformed = reducer(current, transformed)
 
             mapped_data[mapping.target_path] = transformed
 
@@ -456,9 +454,9 @@ class StateSchemaAdapter:
 # Factory functions for common patterns
 def integrate_node_with_schema(
     node: NodeConfig,
-    schema: Type[StateSchema],
-    input_mappings: Optional[List[FieldMapping]] = None,
-    output_mappings: Optional[List[FieldMapping]] = None,
+    schema: type[StateSchema],
+    input_mappings: list[FieldMapping] | None = None,
+    output_mappings: list[FieldMapping] | None = None,
 ) -> SchemaAwareComposedNode:
     """Quick function to integrate node with StateSchema.
 
@@ -481,7 +479,7 @@ def integrate_node_with_schema(
 
 
 def create_schema_aware_node(
-    func: Callable, schema: Type[StateSchema], **kwargs
+    func: Callable, schema: type[StateSchema], **kwargs
 ) -> SchemaAwareComposedNode:
     """Create node from callable with StateSchema.
 
@@ -501,9 +499,9 @@ def create_schema_aware_node(
 
 # Decorator for schema-aware nodes
 def with_state_schema(
-    schema: Type[StateSchema],
-    input_mappings: Optional[List[FieldMapping]] = None,
-    output_mappings: Optional[List[FieldMapping]] = None,
+    schema: type[StateSchema],
+    input_mappings: list[FieldMapping] | None = None,
+    output_mappings: list[FieldMapping] | None = None,
     **kwargs,
 ):
     """Decorator to create schema-aware nodes.

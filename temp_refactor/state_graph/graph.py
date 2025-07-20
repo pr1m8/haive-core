@@ -1,12 +1,12 @@
-"""
-Main graph implementation for the Haive framework.
+"""Main graph implementation for the Haive framework.
 
 This module provides the StateGraph class, which combines all
 the components into a complete graph implementation.
 """
 
 import logging
-from typing import Any, Callable, Dict, List, Optional
+from collections.abc import Callable
+from typing import Any
 
 from pydantic import Field
 
@@ -21,8 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class StateGraph(GraphBase, ValidationMixin, CompilationMixin, SchemaMixin):
-    """
-    Main graph implementation for the Haive framework.
+    """Main graph implementation for the Haive framework.
 
     This class combines the base graph functionality with validation,
     compilation tracking, and schema management to provide a complete
@@ -38,8 +37,7 @@ class StateGraph(GraphBase, ValidationMixin, CompilationMixin, SchemaMixin):
     )
 
     def __init__(self, **data):
-        """
-        Initialize a StateGraph.
+        """Initialize a StateGraph.
 
         Args:
             **data: Keyword arguments for graph initialization
@@ -50,8 +48,7 @@ class StateGraph(GraphBase, ValidationMixin, CompilationMixin, SchemaMixin):
         self._compiled_graph = None
 
     def add_node(self, node_name: str, function: Callable, **kwargs) -> "StateGraph":
-        """
-        Add a node to the graph with function.
+        """Add a node to the graph with function.
 
         Args:
             node_name: Name for the node
@@ -76,8 +73,7 @@ class StateGraph(GraphBase, ValidationMixin, CompilationMixin, SchemaMixin):
         return self
 
     def remove_node(self, node_name: str) -> "StateGraph":
-        """
-        Remove a node from the graph.
+        """Remove a node from the graph.
 
         Args:
             node_name: Name of the node to remove
@@ -131,8 +127,7 @@ class StateGraph(GraphBase, ValidationMixin, CompilationMixin, SchemaMixin):
         return self
 
     def add_edge(self, source: str, target: str) -> "StateGraph":
-        """
-        Add a direct edge to the graph.
+        """Add a direct edge to the graph.
 
         Args:
             source: Source node name
@@ -163,9 +158,8 @@ class StateGraph(GraphBase, ValidationMixin, CompilationMixin, SchemaMixin):
 
         return self
 
-    def remove_edge(self, source: str, target: Optional[str] = None) -> "StateGraph":
-        """
-        Remove an edge from the graph.
+    def remove_edge(self, source: str, target: str | None = None) -> "StateGraph":
+        """Remove an edge from the graph.
 
         Args:
             source: Source node name
@@ -206,11 +200,10 @@ class StateGraph(GraphBase, ValidationMixin, CompilationMixin, SchemaMixin):
         self,
         source: str,
         condition: Callable,
-        destinations: Dict[Any, str],
+        destinations: dict[Any, str],
         default: str = "END",
     ) -> "StateGraph":
-        """
-        Add conditional edges from a source node.
+        """Add conditional edges from a source node.
 
         Args:
             source: Source node name
@@ -255,8 +248,7 @@ class StateGraph(GraphBase, ValidationMixin, CompilationMixin, SchemaMixin):
         return self
 
     def set_entry_point(self, node_name: str) -> "StateGraph":
-        """
-        Set an entry point of the graph.
+        """Set an entry point of the graph.
 
         Args:
             node_name: Name of the node to set as an entry point
@@ -283,8 +275,7 @@ class StateGraph(GraphBase, ValidationMixin, CompilationMixin, SchemaMixin):
         return self
 
     def set_finish_point(self, node_name: str) -> "StateGraph":
-        """
-        Set a finish point of the graph.
+        """Set a finish point of the graph.
 
         Args:
             node_name: Name of the node to set as a finish point
@@ -311,8 +302,7 @@ class StateGraph(GraphBase, ValidationMixin, CompilationMixin, SchemaMixin):
         return self
 
     def to_langgraph(self) -> Any:
-        """
-        Convert to a LangGraph StateGraph.
+        """Convert to a LangGraph StateGraph.
 
         Returns:
             LangGraph StateGraph
@@ -364,17 +354,16 @@ class StateGraph(GraphBase, ValidationMixin, CompilationMixin, SchemaMixin):
     def visualize(
         self,
         include_subgraphs: bool = True,
-        highlight_nodes: Optional[List[str]] = None,
-        highlight_paths: Optional[List[List[str]]] = None,
+        highlight_nodes: list[str] | None = None,
+        highlight_paths: list[list[str]] | None = None,
         max_depth: int = 3,
         show_node_type: bool = True,
         theme: str = "default",
-        output_path: Optional[str] = None,
+        output_path: str | None = None,
         save_png: bool = False,
         width: str = "100%",
     ) -> str:
-        """
-        Generate and display a visualization of the graph.
+        """Generate and display a visualization of the graph.
 
         Args:
             include_subgraphs: Whether to include subgraphs

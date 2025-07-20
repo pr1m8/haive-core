@@ -1,5 +1,6 @@
 """Merger Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Merger retriever,
 which combines and merges results from multiple retrievers to provide
 comprehensive and deduplicated search results.
@@ -101,7 +102,7 @@ class MergerRetrieverConfig(BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a Merger retriever from this configuration.
 
         Returns:
@@ -127,13 +128,15 @@ class MergerRetrieverConfig(BaseRetrieverConfig):
                 instantiated_retrievers.append(retriever)
             except Exception as e:
                 raise ValueError(
-                    f"Failed to instantiate retriever {retriever_config.name}: {e}"
+                    f"Failed to instantiate retriever {
+                        retriever_config.name}: {e}"
                 )
 
         # Validate we have the right number of retrievers
         if len(instantiated_retrievers) < 2:
             raise ValueError(
-                f"MergerRetriever requires at least 2 retrievers, got {len(instantiated_retrievers)}"
+                f"MergerRetriever requires at least 2 retrievers, got {
+                    len(instantiated_retrievers)}"
             )
 
         return MergerRetriever(

@@ -41,7 +41,7 @@ class StateSchema:
         model._config_aware_fields = self.config_aware_fields
 
         # Add config application method
-        def apply_config(instance, config):
+        def apply_config(instance, config: dict[str, Any]):
             """Apply configuration values to config-aware fields."""
             if not hasattr(instance, "_config_aware_fields"):
                 return instance
@@ -96,7 +96,9 @@ class StateSchema:
         return schema
 
     @classmethod
-    def from_aug_llm(cls, aug_llm_config, name: str | None = None) -> "StateSchema":
+    def from_aug_llm(
+        cls, aug_llm_config: dict[str, Any], name: str | None = None
+    ) -> "StateSchema":
         """Create schema from AugLLMConfig."""
         # Extract name from AugLLMConfig if not provided
         schema_name = name or f"{aug_llm_config.name}State"

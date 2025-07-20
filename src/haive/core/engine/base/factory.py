@@ -88,7 +88,10 @@ class ComponentFactory(BaseModel, Generic[T]):
         # Resolve the engine
         engine = self.engine_ref.resolve()
         if not engine:
-            raise ValueError(f"Failed to resolve engine reference: {self.engine_ref}")
+            raise ValueError(
+                f"Failed to resolve engine reference: {
+                    self.engine_ref}"
+            )
 
         # Create the runtime component
         component = engine.create_runnable(self.runtime_config)

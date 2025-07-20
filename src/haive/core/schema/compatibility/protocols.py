@@ -1,20 +1,10 @@
-"""
+"""from typing import Any
 Protocol definitions for extending the schema compatibility system.
 """
 
 from __future__ import annotations
 
-from typing import (
-    Any,
-    Dict,
-    List,
-    Optional,
-    Protocol,
-    Tuple,
-    Type,
-    TypeVar,
-    runtime_checkable,
-)
+from typing import Any, Protocol, TypeVar, runtime_checkable
 
 from pydantic import BaseModel
 
@@ -33,12 +23,12 @@ U = TypeVar("U")
 class SchemaConvertible(Protocol):
     """Protocol for objects that can be converted to/from schemas."""
 
-    def to_schema(self) -> Type[BaseModel]:
+    def to_schema(self) -> type[BaseModel]:
         """Convert to a Pydantic schema."""
         ...
 
     @classmethod
-    def from_schema(cls: Type[T], schema: Type[BaseModel]) -> T:
+    def from_schema(cls: type[T], schema: type[BaseModel]) -> T:
         """Create instance from a Pydantic schema."""
         ...
 
@@ -47,7 +37,7 @@ class SchemaConvertible(Protocol):
 class FieldTransformer(Protocol):
     """Protocol for field transformation functions."""
 
-    def __call__(self, value: Any, context: Optional[Dict[str, Any]] = None) -> Any:
+    def __call__(self, value: Any, context: dict[str, Any] | None = None) -> Any:
         """Transform a field value."""
         ...
 
@@ -56,7 +46,7 @@ class FieldTransformer(Protocol):
 class SchemaValidator(Protocol):
     """Protocol for schema validators."""
 
-    def validate_schema(self, schema: SchemaInfo) -> List[str]:
+    def validate_schema(self, schema: SchemaInfo) -> list[str]:
         """Validate a schema and return list of issues."""
         ...
 
@@ -64,7 +54,7 @@ class SchemaValidator(Protocol):
         self,
         source: SchemaInfo,
         target: SchemaInfo,
-    ) -> List[str]:
+    ) -> list[str]:
         """Validate compatibility between schemas."""
         ...
 
@@ -78,15 +68,15 @@ class ConversionStrategy(Protocol):
         """Strategy name."""
         ...
 
-    def can_convert(self, source: Type, target: Type) -> bool:
+    def can_convert(self, source: type, target: type) -> bool:
         """Check if strategy can handle conversion."""
         ...
 
     def convert(
         self,
         value: Any,
-        source_type: Type,
-        target_type: Type,
+        source_type: type,
+        target_type: type,
         context: ConversionContext,
     ) -> Any:
         """Perform conversion."""
@@ -99,9 +89,9 @@ class FieldResolver(Protocol):
 
     def resolve_field(
         self,
-        source_fields: Dict[str, FieldInfo],
+        source_fields: dict[str, FieldInfo],
         target_field: FieldInfo,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Resolve source field for a target field."""
         ...
 
@@ -109,7 +99,7 @@ class FieldResolver(Protocol):
         self,
         source_schema: SchemaInfo,
         target_schema: SchemaInfo,
-    ) -> Dict[str, str]:
+    ) -> dict[str, str]:
         """Suggest field mappings."""
         ...
 
@@ -118,15 +108,15 @@ class FieldResolver(Protocol):
 class TypeInspector(Protocol):
     """Protocol for custom type inspection."""
 
-    def can_inspect(self, type_hint: Type) -> bool:
+    def can_inspect(self, type_hint: type) -> bool:
         """Check if this inspector can handle the type."""
         ...
 
-    def inspect(self, type_hint: Type) -> Dict[str, Any]:
+    def inspect(self, type_hint: type) -> dict[str, Any]:
         """Inspect the type and return metadata."""
         ...
 
-    def extract_constraints(self, type_hint: Type) -> Dict[str, Any]:
+    def extract_constraints(self, type_hint: type) -> dict[str, Any]:
         """Extract validation constraints from type."""
         ...
 
@@ -146,10 +136,10 @@ class SchemaEvolution(Protocol):
 
     def migrate(
         self,
-        data: Dict[str, Any],
+        data: dict[str, Any],
         from_version: str,
         to_version: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Migrate data between schema versions."""
         ...
 
@@ -170,9 +160,9 @@ class CompatibilityPlugin(Protocol):
 
     def check_compatibility(
         self,
-        source_type: Type,
-        target_type: Type,
-    ) -> Optional[CompatibilityLevel]:
+        source_type: type,
+        target_type: type,
+    ) -> CompatibilityLevel | None:
         """Check compatibility between types."""
         ...
 
@@ -208,23 +198,23 @@ class AsyncConverter(Protocol):
 class SchemaRegistry(Protocol):
     """Protocol for schema registries."""
 
-    def register(self, name: str, schema: Type[BaseModel]) -> None:
+    def register(self, name: str, schema: type[BaseModel]) -> None:
         """Register a schema."""
         ...
 
-    def get(self, name: str) -> Optional[Type[BaseModel]]:
+    def get(self, name: str) -> type[BaseModel] | None:
         """Get a schema by name."""
         ...
 
-    def list_schemas(self) -> List[str]:
+    def list_schemas(self) -> list[str]:
         """List all registered schema names."""
         ...
 
     def find_compatible(
         self,
-        target: Type[BaseModel],
+        target: type[BaseModel],
         min_score: float = 0.7,
-    ) -> List[Tuple[str, float]]:
+    ) -> list[tuple[str, float]]:
         """Find compatible schemas with scores."""
         ...
 
@@ -232,8 +222,8 @@ class SchemaRegistry(Protocol):
 class PluginManager:
     """Manages plugins for the compatibility system."""
 
-    def __init__(self):
-        self._plugins: Dict[str, List[Any]] = {
+    def __init__(self) -> None:
+        self._plugins: dict[str, list[Any]] = {
             "converters": [],
             "validators": [],
             "inspectors": [],
@@ -266,23 +256,23 @@ class PluginManager:
         """Register a field resolver."""
         self._plugins["resolvers"].append(resolver)
 
-    def get_converters(self) -> List[ConversionStrategy]:
+    def get_converters(self) -> list[ConversionStrategy]:
         """Get all registered converters."""
         return self._plugins["converters"].copy()
 
-    def get_validators(self) -> List[SchemaValidator]:
+    def get_validators(self) -> list[SchemaValidator]:
         """Get all registered validators."""
         return self._plugins["validators"].copy()
 
-    def get_inspectors(self) -> List[TypeInspector]:
+    def get_inspectors(self) -> list[TypeInspector]:
         """Get all registered inspectors."""
         return self._plugins["inspectors"].copy()
 
-    def get_compatibility_plugins(self) -> List[CompatibilityPlugin]:
+    def get_compatibility_plugins(self) -> list[CompatibilityPlugin]:
         """Get all registered compatibility plugins."""
         return self._plugins["compatibility"].copy()
 
-    def get_resolvers(self) -> List[FieldResolver]:
+    def get_resolvers(self) -> list[FieldResolver]:
         """Get all registered resolvers."""
         return self._plugins["resolvers"].copy()
 
@@ -292,13 +282,13 @@ _plugin_manager = PluginManager()
 
 
 # Decorator for registering plugins
-def converter_plugin(cls):
+def converter_plugin(cls) -> Any:
     """Decorator to register a converter plugin."""
     _plugin_manager.register_converter(cls())
     return cls
 
 
-def validator_plugin(cls):
+def validator_plugin(cls) -> Any:
     """Decorator to register a validator plugin."""
     _plugin_manager.register_validator(cls())
     return cls
@@ -307,7 +297,7 @@ def validator_plugin(cls):
 def compatibility_plugin(priority: int = 0):
     """Decorator to register a compatibility plugin."""
 
-    def decorator(cls):
+    def decorator(cls) -> Any:
         instance = cls()
         if not hasattr(instance, "priority"):
             instance.priority = priority
@@ -323,9 +313,9 @@ class ExampleFieldResolver:
 
     def resolve_field(
         self,
-        source_fields: Dict[str, FieldInfo],
+        source_fields: dict[str, FieldInfo],
         target_field: FieldInfo,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Resolve by name similarity."""
         target_name = target_field.name.lower()
 
@@ -349,7 +339,7 @@ class ExampleFieldResolver:
         self,
         source_schema: SchemaInfo,
         target_schema: SchemaInfo,
-    ) -> Dict[str, str]:
+    ) -> dict[str, str]:
         """Suggest mappings for all fields."""
         suggestions = {}
 
@@ -364,18 +354,18 @@ class ExampleFieldResolver:
 class ExampleTypeInspector:
     """Example type inspector for custom types."""
 
-    def can_inspect(self, type_hint: Type) -> bool:
+    def can_inspect(self, type_hint: type) -> bool:
         """Check if type has custom metadata."""
         return hasattr(type_hint, "__metadata__")
 
-    def inspect(self, type_hint: Type) -> Dict[str, Any]:
+    def inspect(self, type_hint: type) -> dict[str, Any]:
         """Extract custom metadata."""
         return {
             "has_metadata": True,
             "metadata": getattr(type_hint, "__metadata__", {}),
         }
 
-    def extract_constraints(self, type_hint: Type) -> Dict[str, Any]:
+    def extract_constraints(self, type_hint: type) -> dict[str, Any]:
         """Extract validation constraints."""
         metadata = getattr(type_hint, "__metadata__", {})
         constraints = {}

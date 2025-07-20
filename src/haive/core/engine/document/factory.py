@@ -6,7 +6,7 @@ and automatically select the appropriate document source and loader.
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from langchain_core.document_loaders.base import BaseLoader
 
@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 class AutoLoaderFactory:
     """Factory for automatically creating document loaders."""
 
-    def __init__(self, credential_manager: Optional[CredentialManager] = None):
+    def __init__(self, credential_manager: CredentialManager | None = None):
         """Initialize the factory.
 
         Args:
@@ -43,10 +43,10 @@ class AutoLoaderFactory:
     def create_loader(
         self,
         path: str,
-        strategy: Optional[str] = None,
-        options: Optional[Dict[str, Any]] = None,
-        preferences: Optional[Dict[str, Any]] = None,
-    ) -> Optional[BaseLoader]:
+        strategy: str | None = None,
+        options: dict[str, Any] | None = None,
+        preferences: dict[str, Any] | None = None,
+    ) -> BaseLoader | None:
         """Create the appropriate document loader for any path or URL.
 
         This factory function analyzes the given path to determine its nature (file, URL,
@@ -98,20 +98,20 @@ class AutoLoaderFactory:
 
             if loader:
                 logger.info(
-                    f"Created loader for {path} using source {source.source_type}"
+                    f"Created loader for {path} using source {
+                        source.source_type}"
                 )
                 return loader
-            else:
-                logger.warning(f"Failed to create loader for {path}, trying fallback")
-                return self._create_fallback_loader(path, options)
+            logger.warning(f"Failed to create loader for {path}, trying fallback")
+            return self._create_fallback_loader(path, options)
 
         except Exception as e:
-            logger.error(f"Error creating loader for {path}: {e}")
+            logger.exception(f"Error creating loader for {path}: {e}")
             return self._create_fallback_loader(path, options)
 
     def _create_fallback_loader(
-        self, path: str, options: Dict[str, Any]
-    ) -> Optional[BaseLoader]:
+        self, path: str, options: dict[str, Any]
+    ) -> BaseLoader | None:
         """Create a fallback loader when auto-detection fails."""
         try:
             # Try to determine type from file extension
@@ -151,34 +151,34 @@ class AutoLoaderFactory:
             return None
 
         except Exception as e:
-            logger.error(f"Fallback loader creation failed for {path}: {e}")
+            logger.exception(f"Fallback loader creation failed for {path}: {e}")
             return None
 
-    def analyze_path(self, path: str) -> Optional[PathAnalysisResult]:
+    def analyze_path(self, path: str) -> PathAnalysisResult | None:
         """Analyze a path to understand its properties."""
         try:
             return analyze_path_comprehensive(path)
         except Exception as e:
-            logger.error(f"Path analysis failed for {path}: {e}")
+            logger.exception(f"Path analysis failed for {path}: {e}")
             return None
 
-    def get_available_strategies(self) -> List[str]:
+    def get_available_strategies(self) -> list[str]:
         """Get list of available loader strategies."""
         strategies = strategy_registry.list_strategies(available_only=True)
         return [s.strategy_name for s in strategies]
 
-    def get_supported_sources(self) -> List[SourceType]:
+    def get_supported_sources(self) -> list[SourceType]:
         """Get list of supported source types."""
         return list(SourceType)
 
 
 def create_document_loader(
     path: str,
-    strategy: Optional[str] = None,
-    credential_manager: Optional[CredentialManager] = None,
-    options: Optional[Dict[str, Any]] = None,
-    preferences: Optional[Dict[str, Any]] = None,
-) -> Optional[BaseLoader]:
+    strategy: str | None = None,
+    credential_manager: CredentialManager | None = None,
+    options: dict[str, Any] | None = None,
+    preferences: dict[str, Any] | None = None,
+) -> BaseLoader | None:
     """Convenience function to create a document loader.
 
     Args:
@@ -195,7 +195,7 @@ def create_document_loader(
     return factory.create_loader(path, strategy, options, preferences)
 
 
-def analyze_source(path: str) -> Optional[Dict[str, Any]]:
+def analyze_source(path: str) -> dict[str, Any] | None:
     """Analyze a source path and return detailed information.
 
     Args:
@@ -237,6 +237,6 @@ def analyze_source(path: str) -> Optional[Dict[str, Any]]:
 # Export key components
 __all__ = [
     "AutoLoaderFactory",
-    "create_document_loader",
     "analyze_source",
+    "create_document_loader",
 ]

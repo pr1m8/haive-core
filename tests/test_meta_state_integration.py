@@ -100,7 +100,10 @@ class TestMetaStateSchema:
         agent = MockAgent("exec_agent")
 
         meta_state = MetaStateSchema(
-            agent=agent, agent_input={"messages": [HumanMessage(content="Test input")]}
+            agent=agent, agent_input={
+                "messages": [
+                    HumanMessage(
+                        content="Test input")]}
         )
 
         # Execute agent
@@ -162,7 +165,8 @@ class TestMetaStateSchema:
         meta_state.execute_agent()
 
         # Clone with new agent
-        cloned_state = meta_state.clone_with_agent(new_agent, reset_history=True)
+        cloned_state = meta_state.clone_with_agent(
+            new_agent, reset_history=True)
 
         assert cloned_state.agent is new_agent
         assert cloned_state.agent_name == "new"
@@ -284,7 +288,10 @@ class TestMetaAgentNodeConfig:
         """Test the complete node execution flow."""
         agent = MockAgent("flow_agent")
         meta_state = MetaStateSchema(
-            agent=agent, agent_input={"messages": [HumanMessage(content="Flow test")]}
+            agent=agent, agent_input={
+                "messages": [
+                    HumanMessage(
+                        content="Flow test")]}
         )
 
         node = MetaAgentNodeConfig(
@@ -301,7 +308,8 @@ class TestMetaAgentNodeConfig:
         assert hasattr(result, "update") or hasattr(result, "arg")
 
         # The result should contain updated state
-        update_data = result.update if hasattr(result, "update") else result.arg
+        update_data = result.update if hasattr(
+            result, "update") else result.arg
 
         assert update_data["execution_status"] == "completed"
         assert "agent_output" in update_data
@@ -317,7 +325,8 @@ class TestMetaAgentNodeConfig:
         result = node(meta_state)
 
         # Should get a result with error information
-        update_data = result.update if hasattr(result, "update") else result.arg
+        update_data = result.update if hasattr(
+            result, "update") else result.arg
 
         assert update_data["execution_status"] == "error"
         assert update_data["error_info"] is not None
@@ -396,7 +405,8 @@ class TestMetaStateIntegration:
         child_agent = MockAgent("child_agent")
 
         parent_state = MetaStateSchema(
-            agent=parent_agent, messages=[HumanMessage(content="Parent message")]
+            agent=parent_agent, messages=[
+                HumanMessage(content="Parent message")]
         )
 
         MetaStateSchema(

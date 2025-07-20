@@ -1,6 +1,6 @@
 # src/haive/core/engine/agent/persistence/factory.py
 import logging
-from typing import Any, Dict, Optional, Type, Union
+from typing import Any
 
 from haive.core.engine.agent.persistence.base import CheckpointerConfig
 from haive.core.engine.agent.persistence.manager import PersistenceManager
@@ -14,14 +14,14 @@ from haive.core.engine.agent.persistence.types import CheckpointerType
 logger = logging.getLogger(__name__)
 
 # Registry of checkpointer types to their config classes
-CHECKPOINTER_CONFIG_MAP: Dict[str, Type[CheckpointerConfig]] = {
+CHECKPOINTER_CONFIG_MAP: dict[str, type[CheckpointerConfig]] = {
     CheckpointerType.memory: MemoryCheckpointerConfig,
     CheckpointerType.postgres: PostgresCheckpointerConfig,
     CheckpointerType.mongodb: MongoDBCheckpointerConfig,
 }
 
 
-def load_checkpointer_config(data: Dict[str, Any]) -> CheckpointerConfig:
+def load_checkpointer_config(data: dict[str, Any]) -> CheckpointerConfig:
     """Create a checkpointer configuration from a dictionary.
 
     Args:
@@ -47,7 +47,7 @@ def load_checkpointer_config(data: Dict[str, Any]) -> CheckpointerConfig:
 
 
 def create_persistence_manager(
-    persistence_config: Optional[Union[Dict[str, Any], CheckpointerConfig]] = None,
+    persistence_config: dict[str, Any] | CheckpointerConfig | None = None,
 ) -> "PersistenceManager":
     """Create a PersistenceManager from a CheckpointerConfig.
 
@@ -65,20 +65,19 @@ def create_persistence_manager(
     if isinstance(persistence_config, dict):
         checkpointer_config = load_checkpointer_config(persistence_config)
         return PersistenceManager(checkpointer_config)
-    elif isinstance(persistence_config, CheckpointerConfig):
+    if isinstance(persistence_config, CheckpointerConfig):
         return PersistenceManager(persistence_config)
-    else:
-        # Extract config from object if possible
-        extracted_config = _extract_config_from_object(persistence_config)
-        if extracted_config:
-            checkpointer_config = load_checkpointer_config(extracted_config)
-            return PersistenceManager(checkpointer_config)
+    # Extract config from object if possible
+    extracted_config = _extract_config_from_object(persistence_config)
+    if extracted_config:
+        checkpointer_config = load_checkpointer_config(extracted_config)
+        return PersistenceManager(checkpointer_config)
 
     # Fallback to default
     return PersistenceManager()
 
 
-def _extract_config_from_object(obj: Any) -> Optional[Dict[str, Any]]:
+def _extract_config_from_object(obj: Any) -> dict[str, Any] | None:
     """Extract persistence configuration from an arbitrary object.
 
     Args:

@@ -64,7 +64,9 @@ class TestDynamicRegistry:
         registry = DynamicRegistry[MockTool]()
 
         # Create test tool
-        tool = MockTool(name="calculator", description="Mathematical calculations")
+        tool = MockTool(
+            name="calculator",
+            description="Mathematical calculations")
 
         # Create registry item
         item = RegistryItem(

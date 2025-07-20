@@ -6,16 +6,7 @@ It integrates with the field registry for standardized field definitions.
 """
 
 import logging
-from typing import (
-    Any,
-    Dict,
-    Generic,
-    List,
-    Type,
-    TypeVar,
-    Union,
-    overload,
-)
+from typing import Any, Generic, TypeVar, overload
 
 from langgraph.types import Command, RetryPolicy, Send
 from pydantic import BaseModel, Field
@@ -49,16 +40,16 @@ class GenericEngineNodeConfig(NodeConfig, Generic[TInput, TOutput]):
     engine_name: str | None = Field(default=None)
 
     # Schema definitions (new approach)
-    input_schema: Type[TInput] | None = Field(default=None)
-    output_schema: Type[TOutput] | None = Field(default=None)
+    input_schema: type[TInput] | None = Field(default=None)
+    output_schema: type[TOutput] | None = Field(default=None)
 
     # Field registry integration
     input_field_defs: list[FieldDefinition] = Field(default_factory=list)
     output_field_defs: list[FieldDefinition] = Field(default_factory=list)
 
     # Legacy field mappings (backwards compatibility)
-    input_fields: Union[List[str], Dict[str, str]] | None = Field(default=None)
-    output_fields: Union[List[str], Dict[str, str]] | None = Field(default=None)
+    input_fields: list[str] | dict[str, str] | None = Field(default=None)
+    output_fields: list[str] | dict[str, str] | None = Field(default=None)
 
     # Engine attribution
     auto_add_engine_attribution: bool = Field(
@@ -70,7 +61,7 @@ class GenericEngineNodeConfig(NodeConfig, Generic[TInput, TOutput]):
     use_send: bool = Field(default=False)
     debug: bool = Field(default=True)
 
-    def model_post_init(self, __context):
+    def model_post_init(self, __context) -> None:
         """Post-initialization to setup schemas from field definitions."""
         super().model_post_init(__context)
         self._setup_schemas_from_field_defs()
@@ -210,9 +201,10 @@ class GenericEngineNodeConfig(NodeConfig, Generic[TInput, TOutput]):
 class LLMNodeConfig(GenericEngineNodeConfig[BaseModel, BaseModel]):
     """Specialized node configuration for LLM engines."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         # For LLM engines, prefer using the engine's own input/output schemas if available
-        # Only set defaults if no field defs are provided and engine doesn't have schemas
+        # Only set defaults if no field defs are provided and engine doesn't
+        # have schemas
         engine = kwargs.get("engine")
 
         if "input_field_defs" not in kwargs and engine:
@@ -226,7 +218,8 @@ class LLMNodeConfig(GenericEngineNodeConfig[BaseModel, BaseModel]):
             # Check if engine has its own output schema
             if not (hasattr(engine, "output_schema") and engine.output_schema):
                 # LLM engines should ONLY output to messages field
-                # V2 structured output: Tool calls in AIMessage are extracted by downstream validation nodes
+                # V2 structured output: Tool calls in AIMessage are extracted
+                # by downstream validation nodes
                 kwargs["output_field_defs"] = [
                     # ONLY messages field
                     StandardFields.messages(use_enhanced=True),
@@ -238,7 +231,7 @@ class LLMNodeConfig(GenericEngineNodeConfig[BaseModel, BaseModel]):
 class RAGNodeConfig(GenericEngineNodeConfig[BaseModel, BaseModel]):
     """Specialized node configuration for RAG engines."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         # Set default field definitions for RAG nodes
         if "input_field_defs" not in kwargs:
             kwargs["input_field_defs"] = [
@@ -285,8 +278,8 @@ class NodeFactory:
         cls,
         engine: Engine,
         name: str,
-        custom_input_fields: List[FieldDefinition] | None = None,
-        custom_output_fields: List[FieldDefinition] | None = None,
+        custom_input_fields: list[FieldDefinition] | None = None,
+        custom_output_fields: list[FieldDefinition] | None = None,
         **kwargs,
     ) -> LLMNodeConfig:
         """Create an LLM node with optional custom fields."""
@@ -302,8 +295,8 @@ class NodeFactory:
         cls,
         engine: Engine,
         name: str,
-        custom_input_fields: List[FieldDefinition] | None = None,
-        custom_output_fields: List[FieldDefinition] | None = None,
+        custom_input_fields: list[FieldDefinition] | None = None,
+        custom_output_fields: list[FieldDefinition] | None = None,
         **kwargs,
     ) -> RAGNodeConfig:
         """Create a RAG node with optional custom fields."""

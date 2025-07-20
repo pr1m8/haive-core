@@ -5,7 +5,7 @@ and other structured data files.
 """
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 from langchain_core.document_loaders.base import BaseLoader
 
@@ -18,13 +18,13 @@ class CSVSource(LocalFileSource):
     """CSV file source."""
 
     def __init__(
-        self, file_path: str, csv_args: Optional[Dict[str, Any]] = None, **kwargs
+        self, file_path: str, csv_args: dict[str, Any] | None = None, **kwargs
     ):
         super().__init__(source_path=file_path, file_extensions=[".csv"], **kwargs)
         self.file_path = file_path
         self.csv_args = csv_args or {}
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a CSV loader."""
         try:
             from langchain_community.document_loaders import CSVLoader
@@ -35,7 +35,7 @@ class CSVSource(LocalFileSource):
             )
 
         except Exception as e:
-            logger.error(f"Failed to create CSV loader: {e}")
+            logger.exception(f"Failed to create CSV loader: {e}")
             return None
 
 
@@ -43,7 +43,7 @@ class TSVSource(LocalFileSource):
     """Tab-separated values (TSV) file source."""
 
     def __init__(
-        self, file_path: str, csv_args: Optional[Dict[str, Any]] = None, **kwargs
+        self, file_path: str, csv_args: dict[str, Any] | None = None, **kwargs
     ):
         super().__init__(
             source_path=file_path, file_extensions=[".tsv", ".tab"], **kwargs
@@ -53,7 +53,7 @@ class TSVSource(LocalFileSource):
         # Ensure tab delimiter for TSV
         self.csv_args["delimiter"] = "\t"
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a TSV loader."""
         try:
             from langchain_community.document_loaders import CSVLoader
@@ -64,7 +64,7 @@ class TSVSource(LocalFileSource):
             )
 
         except Exception as e:
-            logger.error(f"Failed to create TSV loader: {e}")
+            logger.exception(f"Failed to create TSV loader: {e}")
             return None
 
 
@@ -78,7 +78,7 @@ class JSONSource(LocalFileSource):
         self.file_path = file_path
         self.jq_schema = jq_schema
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a JSON loader."""
         try:
             from langchain_community.document_loaders import JSONLoader
@@ -92,7 +92,7 @@ class JSONSource(LocalFileSource):
             logger.warning(f"JSON loader dependency not available: {e}")
             return None
         except Exception as e:
-            logger.error(f"Failed to create JSON loader: {e}")
+            logger.exception(f"Failed to create JSON loader: {e}")
             return None
 
 
@@ -103,7 +103,7 @@ class XMLSource(LocalFileSource):
         super().__init__(source_path=file_path, file_extensions=[".xml"], **kwargs)
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create an XML loader."""
         try:
             from langchain_community.document_loaders import UnstructuredXMLLoader
@@ -116,7 +116,7 @@ class XMLSource(LocalFileSource):
             )
             return None
         except Exception as e:
-            logger.error(f"Failed to create XML loader: {e}")
+            logger.exception(f"Failed to create XML loader: {e}")
             return None
 
 
@@ -129,7 +129,7 @@ class YAMLSource(LocalFileSource):
         )
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a YAML loader."""
         try:
             # Use UnstructuredFileLoader for YAML
@@ -147,7 +147,7 @@ class YAMLSource(LocalFileSource):
             except Exception:
                 return None
         except Exception as e:
-            logger.error(f"Failed to create YAML loader: {e}")
+            logger.exception(f"Failed to create YAML loader: {e}")
             return None
 
 
@@ -158,7 +158,7 @@ class TOMLSource(LocalFileSource):
         super().__init__(source_path=file_path, file_extensions=[".toml"], **kwargs)
         self.file_path = file_path
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a TOML loader."""
         try:
             from langchain_community.document_loaders import TomlLoader
@@ -175,16 +175,16 @@ class TOMLSource(LocalFileSource):
             except Exception:
                 return None
         except Exception as e:
-            logger.error(f"Failed to create TOML loader: {e}")
+            logger.exception(f"Failed to create TOML loader: {e}")
             return None
 
 
 # Export data file sources
 __all__ = [
     "CSVSource",
-    "TSVSource",
     "JSONSource",
+    "TOMLSource",
+    "TSVSource",
     "XMLSource",
     "YAMLSource",
-    "TOMLSource",
 ]

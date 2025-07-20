@@ -1,43 +1,44 @@
 """Simple test script for the modular BaseGraph architecture.
 
+from typing import Any
 This script tests the basic functionality of the new modular components
 to ensure they work correctly before integrating with existing agents.
 """
 
 import logging
-from typing import Any, Dict
+import sys
+from typing import Any
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
-def test_node_functions():
+def test_node_functions() -> Any:
     """Test functions to use as nodes."""
 
-    def start_function(state: Dict[str, Any]) -> Dict[str, Any]:
+    def start_function(state: dict[str, Any]) -> dict[str, Any]:
         """Start node function."""
         logger.info("Start function called")
         return {"status": "started", "count": 0}
 
-    def process_function(state: Dict[str, Any]) -> Dict[str, Any]:
+    def process_function(state: dict[str, Any]) -> dict[str, Any]:
         """Process node function."""
         logger.info("Process function called")
         count = state.get("count", 0)
         return {"status": "processing", "count": count + 1}
 
-    def router_function(state: Dict[str, Any]) -> str:
+    def router_function(state: dict[str, Any]) -> str:
         """Router function for conditional edges."""
         count = state.get("count", 0)
         if count >= 3:
             return "finish"
-        else:
-            return "continue"
+        return "continue"
 
     return start_function, process_function, router_function
 
 
-def test_basic_modular_graph():
+def test_basic_modular_graph() -> bool:
     """Test basic ModularBaseGraph functionality."""
     try:
         from haive.core.graph.state_graph.components import ModularBaseGraph
@@ -45,7 +46,9 @@ def test_basic_modular_graph():
         logger.info("Testing basic ModularBaseGraph functionality...")
 
         # Create graph
-        graph = ModularBaseGraph(name="test_workflow", description="Test workflow")
+        graph = ModularBaseGraph(
+            name="test_workflow",
+            description="Test workflow")
 
         # Test initial state
         assert graph.name == "test_workflow"
@@ -108,19 +111,17 @@ def test_basic_modular_graph():
         return True
 
     except Exception as e:
-        logger.error(f"❌ Basic test failed: {e}")
+        logger.exception(f"❌ Basic test failed: {e}")
         import traceback
 
         traceback.print_exc()
         return False
 
 
-def test_component_isolation():
+def test_component_isolation() -> bool:
     """Test that components work in isolation."""
     try:
-        from haive.core.graph.state_graph.components import (
-            ModularBaseGraph,
-        )
+        from haive.core.graph.state_graph.components import ModularBaseGraph
 
         logger.info("Testing component isolation...")
 
@@ -155,14 +156,14 @@ def test_component_isolation():
         return True
 
     except Exception as e:
-        logger.error(f"❌ Component isolation test failed: {e}")
+        logger.exception(f"❌ Component isolation test failed: {e}")
         import traceback
 
         traceback.print_exc()
         return False
 
 
-def test_error_handling():
+def test_error_handling() -> bool:
     """Test error handling in modular components."""
     try:
         from haive.core.graph.state_graph.components import ModularBaseGraph
@@ -204,14 +205,14 @@ def test_error_handling():
         return True
 
     except Exception as e:
-        logger.error(f"❌ Error handling test failed: {e}")
+        logger.exception(f"❌ Error handling test failed: {e}")
         import traceback
 
         traceback.print_exc()
         return False
 
 
-def main():
+def main() -> bool:
     """Run all tests."""
     logger.info("🚀 Starting ModularBaseGraph tests...")
 
@@ -233,13 +234,13 @@ def main():
     logger.info(f"📊 Test Results: {passed}/{total} tests passed")
 
     if passed == total:
-        logger.info("🎉 All tests passed! Modular architecture is working correctly.")
+        logger.info(
+            "🎉 All tests passed! Modular architecture is working correctly.")
         return True
-    else:
-        logger.error("💥 Some tests failed. Please check the implementation.")
-        return False
+    logger.error("💥 Some tests failed. Please check the implementation.")
+    return False
 
 
 if __name__ == "__main__":
     success = main()
-    exit(0 if success else 1)
+    sys.exit(0 if success else 1)

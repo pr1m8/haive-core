@@ -1,5 +1,4 @@
-"""
-Stateful Validation Node - Tracks tool call validation results in state.
+"""Stateful Validation Node - Tracks tool call validation results in state.
 
 This node processes tool calls and stores validation results in state using computed fields.
 It separates validation logic from routing logic, enabling intelligent routing decisions
@@ -15,7 +14,7 @@ Key features:
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
 from langchain_core.messages import AIMessage, ToolMessage
 from langgraph.types import Command
@@ -34,10 +33,10 @@ class ToolCallValidationResult(BaseModel):
     tool_id: str = Field(..., description="Tool call ID")
     is_valid: bool = Field(..., description="Whether validation passed")
     validation_type: str = Field(..., description="Type of validation performed")
-    error_message: Optional[str] = Field(
+    error_message: str | None = Field(
         default=None, description="Error message if validation failed"
     )
-    validated_args: Optional[Dict[str, Any]] = Field(
+    validated_args: dict[str, Any] | None = Field(
         default=None, description="Validated arguments"
     )
     timestamp: str = Field(
@@ -47,8 +46,7 @@ class ToolCallValidationResult(BaseModel):
 
 
 class StatefulValidationNode(BaseNodeConfig):
-    """
-    Stateful validation node that tracks tool call validation results in state.
+    """Stateful validation node that tracks tool call validation results in state.
 
     This node processes tool calls and updates state with validation results,
     enabling intelligent routing decisions based on validation patterns.
@@ -73,10 +71,10 @@ class StatefulValidationNode(BaseNodeConfig):
     engine_name: str = Field(..., description="Engine name for tool routes")
     tool_node: str = Field(default="tool_node", description="Tool execution node name")
     parser_node: str = Field(default="parse_output", description="Parser node name")
-    available_nodes: List[str] = Field(
+    available_nodes: list[str] = Field(
         default_factory=list, description="Available nodes"
     )
-    pydantic_models: Dict[str, type[BaseModel]] = Field(
+    pydantic_models: dict[str, type[BaseModel]] = Field(
         default_factory=dict, description="Pydantic models for validation"
     )
     validation_history_limit: int = Field(
@@ -87,9 +85,8 @@ class StatefulValidationNode(BaseNodeConfig):
     )
     node_type: NodeType = Field(default=NodeType.VALIDATION, description="Node type")
 
-    def __call__(self, state: Dict[str, Any]) -> Command:
+    def __call__(self, state: dict[str, Any]) -> Command:
         """Process tool calls and update state with validation results."""
-
         # Get messages from state
         messages = state.get("messages", [])
         if not messages:
@@ -134,7 +131,8 @@ class StatefulValidationNode(BaseNodeConfig):
             if validation_result.is_valid:
                 if validation_result.validation_type == "pydantic_model":
                     tool_msg = ToolMessage(
-                        content=f"Successfully validated {tool_name}: {validation_result.validated_args}",
+                        content=f"Successfully validated {tool_name}: {
+                            validation_result.validated_args}",
                         tool_call_id=tool_id,
                         name=tool_name,
                     )
@@ -186,36 +184,34 @@ class StatefulValidationNode(BaseNodeConfig):
         goto = self._determine_destination(destinations, validation_results)
 
         logger.info(
-            f"StatefulValidation: Processed {len(validation_results)} tool calls, "
+            f"StatefulValidation: Processed {
+                len(validation_results)} tool calls, "
             f"routing to {goto}"
         )
 
         return Command(update=update_dict, goto=goto)
 
     def _validate_tool_call(
-        self, tool_name: str, tool_id: str, args: Dict[str, Any], route: str
+        self, tool_name: str, tool_id: str, args: dict[str, Any], route: str
     ) -> ToolCallValidationResult:
         """Validate a single tool call and return result."""
-
         if route == "pydantic_model":
             return self._validate_pydantic_model(tool_name, tool_id, args)
-        elif route in ["langchain_tool", "function"]:
+        if route in ["langchain_tool", "function"]:
             return self._validate_function_call(tool_name, tool_id, args, route)
-        else:
-            # Unknown route
-            return ToolCallValidationResult(
-                tool_name=tool_name,
-                tool_id=tool_id,
-                is_valid=False,
-                validation_type="unknown",
-                error_message=f"Unknown tool route: {route}",
-            )
+        # Unknown route
+        return ToolCallValidationResult(
+            tool_name=tool_name,
+            tool_id=tool_id,
+            is_valid=False,
+            validation_type="unknown",
+            error_message=f"Unknown tool route: {route}",
+        )
 
     def _validate_pydantic_model(
-        self, tool_name: str, tool_id: str, args: Dict[str, Any]
+        self, tool_name: str, tool_id: str, args: dict[str, Any]
     ) -> ToolCallValidationResult:
         """Validate a Pydantic model tool call."""
-
         try:
             # Get model class
             model_class = self.pydantic_models.get(tool_name)
@@ -250,7 +246,7 @@ class StatefulValidationNode(BaseNodeConfig):
                 tool_id=tool_id,
                 is_valid=False,
                 validation_type="pydantic_model",
-                error_message=f"Validation error: {str(e)}",
+                error_message=f"Validation error: {e!s}",
             )
         except Exception as e:
             return ToolCallValidationResult(
@@ -258,16 +254,16 @@ class StatefulValidationNode(BaseNodeConfig):
                 tool_id=tool_id,
                 is_valid=False,
                 validation_type="pydantic_model",
-                error_message=f"Unexpected error: {str(e)}",
+                error_message=f"Unexpected error: {e!s}",
             )
 
     def _validate_function_call(
-        self, tool_name: str, tool_id: str, args: Dict[str, Any], route: str
+        self, tool_name: str, tool_id: str, args: dict[str, Any], route: str
     ) -> ToolCallValidationResult:
         """Validate a function/tool call (basic validation)."""
-
         # For now, we assume function calls are valid if they have a known route
-        # More sophisticated validation could be added here (signature checking, etc.)
+        # More sophisticated validation could be added here (signature
+        # checking, etc.)
 
         return ToolCallValidationResult(
             tool_name=tool_name,
@@ -277,9 +273,8 @@ class StatefulValidationNode(BaseNodeConfig):
             validated_args=args,
         )
 
-    def _find_model_class(self, tool_name: str) -> Optional[type[BaseModel]]:
+    def _find_model_class(self, tool_name: str) -> type[BaseModel] | None:
         """Try to find Pydantic model class by name."""
-
         # Try to import from common locations
         try:
             from haive.agents.planning.p_and_e.models import (
@@ -303,10 +298,9 @@ class StatefulValidationNode(BaseNodeConfig):
         return None
 
     def _calculate_validation_stats(
-        self, validation_history: List[ToolCallValidationResult]
-    ) -> Dict[str, Any]:
+        self, validation_history: list[ToolCallValidationResult]
+    ) -> dict[str, Any]:
         """Calculate statistics from validation history."""
-
         if not validation_history:
             return {}
 
@@ -352,10 +346,9 @@ class StatefulValidationNode(BaseNodeConfig):
         }
 
     def _determine_destination(
-        self, destinations: Set[str], validation_results: List[ToolCallValidationResult]
+        self, destinations: set[str], validation_results: list[ToolCallValidationResult]
     ) -> str:
         """Determine where to route based on destinations and validation patterns."""
-
         if not destinations:
             return "END"
 
@@ -373,18 +366,16 @@ class StatefulValidationNode(BaseNodeConfig):
         # Default prioritization
         if self.tool_node in destinations_list:
             return self.tool_node
-        elif self.parser_node in destinations_list:
+        if self.parser_node in destinations_list:
             return self.parser_node
-        else:
-            return "END"
+        return "END"
 
     def _route_by_validation_pattern(
         self,
-        destinations: List[str],
-        validation_results: List[ToolCallValidationResult],
+        destinations: list[str],
+        validation_results: list[ToolCallValidationResult],
     ) -> str:
         """Route based on validation patterns."""
-
         # Count successful validations by destination type
         pydantic_successes = sum(
             1
@@ -401,8 +392,7 @@ class StatefulValidationNode(BaseNodeConfig):
         # Route based on success patterns
         if pydantic_successes > 0 and self.parser_node in destinations:
             return self.parser_node
-        elif tool_successes > 0 and self.tool_node in destinations:
+        if tool_successes > 0 and self.tool_node in destinations:
             return self.tool_node
-        else:
-            # Fallback to first available destination
-            return destinations[0]
+        # Fallback to first available destination
+        return destinations[0]

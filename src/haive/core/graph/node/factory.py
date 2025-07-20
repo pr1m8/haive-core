@@ -3,7 +3,8 @@
 import asyncio
 import inspect
 import logging
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from langgraph.graph import END
 from langgraph.prebuilt import ToolNode, ValidationNode
@@ -74,10 +75,11 @@ class NodeFactory:
             engine_id or getattr(engine, "name", None) or getattr(engine, "id", None)
         )
 
-        def node_function(state, config=None):
+        def node_function(state: dict[str, Any], config: dict[str, Any] | None = None):
             """Node function that uses engine's invoke method."""
             try:
-                # Extract input from state using the fixed _extract_input method
+                # Extract input from state using the fixed _extract_input
+                # method
                 input_data = cls._extract_input(state, input_mapping, engine_id)
                 # Create a fresh runnable with appropriate config
                 runnable = engine.create_runnable()
@@ -86,7 +88,8 @@ class NodeFactory:
                 result = runnable.invoke(input_data)
 
                 logger.debug(f"Result: {result}")
-                # Process output using the fixed _process_output method - ONLY PASS 2 REQUIRED ARGS
+                # Process output using the fixed _process_output method - ONLY
+                # PASS 2 REQUIRED ARGS
                 processed_output = cls._process_output(result, output_mapping)
 
                 # Handle structured output models (special case)
@@ -95,7 +98,8 @@ class NodeFactory:
                     and engine.structured_output_model
                 ):
                     model_name = engine.structured_output_model.__name__.lower()
-                    # If result is the model instance, ensure it's correctly mapped
+                    # If result is the model instance, ensure it's correctly
+                    # mapped
                     if isinstance(result, engine.structured_output_model):
                         # Check if already properly placed
                         if model_name not in processed_output:
@@ -104,7 +108,10 @@ class NodeFactory:
                 # Return with Command for routing
                 return Command(update=processed_output, goto=command_goto)
             except Exception as e:
-                logger.exception(f"Error in node {engine_id or 'unknown'}: {e}")
+                logger.exception(
+                    f"Error in node {
+                        engine_id or 'unknown'}: {e}"
+                )
                 return Command(update={"error": str(e)}, goto=command_goto)
 
         # Add metadata
@@ -141,7 +148,7 @@ class NodeFactory:
             output_fields = config.output_schema.model_fields.keys()
             output_mapping = {field: field for field in output_fields}
 
-        def node_function(state, config=None):
+        def node_function(state: dict[str, Any], config: dict[str, Any] | None = None):
             """Node function that instantiates the engine."""
             try:
                 # Extract input from state
@@ -163,7 +170,8 @@ class NodeFactory:
                 return Command(update=processed_output, goto=command_goto)
             except Exception as e:
                 logger.exception(
-                    f"Error in non-invokable node {engine_id or 'unknown'}: {e}"
+                    f"Error in non-invokable node {
+                        engine_id or 'unknown'}: {e}"
                 )
                 return Command(update={"error": str(e)}, goto=command_goto)
 
@@ -210,7 +218,7 @@ class NodeFactory:
             # Can't inspect signature - assume no config
             pass
 
-        def node_function(state, config=None):
+        def node_function(state: dict[str, Any], config: dict[str, Any] | None = None):
             """Node function for callable."""
             try:
                 # Extract input from state
@@ -321,7 +329,7 @@ class NodeFactory:
             output_fields = config.output_schema.model_fields.keys()
             output_mapping = {field: field for field in output_fields}
 
-        def node_function(state, config=None):
+        def node_function(state: dict[str, Any], config: dict[str, Any] | None = None):
             """Node function for tool node."""
             try:
                 # Extract input from state
@@ -440,7 +448,7 @@ class NodeFactory:
             output_fields = config.output_schema.model_fields.keys()
             output_mapping = {field: field for field in output_fields}
 
-        def node_function(state, config=None):
+        def node_function(state: dict[str, Any], config: dict[str, Any] | None = None):
             """Node function for validation node."""
             try:
                 # Extract input from state
@@ -515,7 +523,7 @@ class NodeFactory:
             input_fields = config.input_schema.model_fields.keys()
             input_mapping = {field: field for field in input_fields}
 
-        def node_function(state, config=None):
+        def node_function(state: dict[str, Any], config: dict[str, Any] | None = None):
             """Node function for branch node."""
             try:
                 # Extract input from state
@@ -573,7 +581,7 @@ class NodeFactory:
             input_fields = config.input_schema.model_fields.keys()
             input_mapping = {field: field for field in input_fields}
 
-        def node_function(state, config=None):
+        def node_function(state: dict[str, Any], config: dict[str, Any] | None = None):
             """Node function for send node."""
             try:
                 # Extract input from state
@@ -647,7 +655,7 @@ class NodeFactory:
             output_fields = config.output_schema.model_fields.keys()
             output_mapping = {field: field for field in output_fields}
 
-        def node_function(state, config=None):
+        def node_function(state: dict[str, Any], config: dict[str, Any] | None = None):
             """Node function for generic object."""
             try:
                 # Just return the object as result
@@ -718,7 +726,8 @@ class NodeFactory:
                         if field in state_dict:
                             engine_input[field] = state_dict[field]
 
-                    # If only one field is expected and we have exactly one field, return it directly
+                    # If only one field is expected and we have exactly one
+                    # field, return it directly
                     if len(input_fields) == 1 and len(engine_input) == 1:
                         return next(iter(engine_input.values()))
 

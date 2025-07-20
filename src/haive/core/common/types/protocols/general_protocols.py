@@ -1,10 +1,5 @@
 # Using TYPE_CHECKING to avoid circular imports
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Protocol,
-    runtime_checkable,
-)
+from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
 from pydantic import BaseModel
 

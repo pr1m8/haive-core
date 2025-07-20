@@ -1,7 +1,5 @@
 """Tests for ToolStateWithValidation functionality."""
 
-from typing import List
-
 import pytest
 from langchain_core.messages import AIMessage, ToolMessage
 from langchain_core.tools import tool
@@ -30,11 +28,11 @@ def calculator_tool(a: float, b: float, operation: str = "add") -> float:
     """Perform calculation."""
     if operation == "add":
         return a + b
-    elif operation == "subtract":
+    if operation == "subtract":
         return a - b
-    elif operation == "multiply":
+    if operation == "multiply":
         return a * b
-    elif operation == "divide":
+    if operation == "divide":
         return a / b if b != 0 else 0
     return 0
 
@@ -44,7 +42,7 @@ class CreateDocumentSchema(BaseModel):
 
     title: str = Field(..., description="Document title")
     content: str = Field(..., description="Document content")
-    tags: List[str] = Field(default_factory=list, description="Document tags")
+    tags: list[str] = Field(default_factory=list, description="Document tags")
 
 
 class TestToolStateWithValidation:
@@ -212,7 +210,8 @@ class TestToolStateWithValidation:
         # Get conditions
         assert state.get_branch_condition("has_valid_tools")
         assert state.get_branch_condition("error_count") == 0
-        assert state.get_branch_condition("missing_condition", "default") == "default"
+        assert state.get_branch_condition(
+            "missing_condition", "default") == "default"
 
         # Evaluate conditions
         assert state.evaluate_branch_condition("has_valid_tools == True")
@@ -343,7 +342,8 @@ class TestValidationNodeWithRouting:
 
     def test_tool_message_updates(self):
         """Test that tool messages are updated with validation status."""
-        node = ValidationNodeWithRouting(update_tool_messages=True, tools=[search_tool])
+        node = ValidationNodeWithRouting(
+            update_tool_messages=True, tools=[search_tool])
 
         # Create state with tool call and response
         ai_message = AIMessage(
@@ -353,7 +353,9 @@ class TestValidationNodeWithRouting:
             ],
         )
 
-        tool_message = ToolMessage(content="Search results", tool_call_id="call_001")
+        tool_message = ToolMessage(
+            content="Search results",
+            tool_call_id="call_001")
 
         state = {
             "messages": [ai_message, tool_message],

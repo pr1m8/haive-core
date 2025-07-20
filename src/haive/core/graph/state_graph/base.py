@@ -15,7 +15,8 @@ class SerializableModelMetaclass(type(BaseModel)):
     def __new__(mcs, name, bases, namespace, **kwargs):
         cls = super().__new__(mcs, name, bases, namespace, **kwargs)
 
-        # Register the model if it has a registry defined and is not an abstract base
+        # Register the model if it has a registry defined and is not an
+        # abstract base
         if (
             hasattr(cls, "_registry")
             and cls._registry is not None

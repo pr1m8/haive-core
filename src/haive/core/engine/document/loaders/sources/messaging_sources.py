@@ -1,5 +1,6 @@
 """Messaging and social media source registrations.
 
+from typing import Any
 This module implements comprehensive messaging and social media loaders from
 langchain_community including Discord, Slack, Twitter, Reddit, WhatsApp,
 Telegram, email systems, and other communication platforms.
@@ -7,7 +8,7 @@ Telegram, email systems, and other communication platforms.
 
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import Field, validator
 
@@ -78,7 +79,7 @@ class MessagingSource(RemoteSource):
     platform: MessagingPlatform = Field(..., description="Messaging platform type")
 
     # Content filtering
-    content_types: List[ContentType] = Field(
+    content_types: list[ContentType] = Field(
         default=[ContentType.MESSAGES], description="Types of content to extract"
     )
 
@@ -86,14 +87,14 @@ class MessagingSource(RemoteSource):
     date_range: DateRange = Field(
         DateRange.LAST_MONTH, description="Date range for content"
     )
-    start_date: Optional[datetime] = Field(None, description="Custom start date")
-    end_date: Optional[datetime] = Field(None, description="Custom end date")
+    start_date: datetime | None = Field(None, description="Custom start date")
+    end_date: datetime | None = Field(None, description="Custom end date")
 
     # Content limits
-    max_messages: Optional[int] = Field(
+    max_messages: int | None = Field(
         None, ge=1, description="Maximum messages to retrieve"
     )
-    max_channels: Optional[int] = Field(
+    max_channels: int | None = Field(
         None, ge=1, description="Maximum channels to process"
     )
 
@@ -103,20 +104,18 @@ class MessagingSource(RemoteSource):
     include_metadata: bool = Field(True, description="Include message metadata")
 
     # Filtering
-    user_filter: Optional[List[str]] = Field(
-        None, description="Filter by specific users"
-    )
-    keyword_filter: Optional[List[str]] = Field(None, description="Filter by keywords")
+    user_filter: list[str] | None = Field(None, description="Filter by specific users")
+    keyword_filter: list[str] | None = Field(None, description="Filter by keywords")
     exclude_bots: bool = Field(True, description="Exclude bot messages")
 
     @validator("start_date", "end_date")
-    def validate_dates(cls, v, values):
+    def validate_dates(self, v, values) -> Any:
         """Validate date ranges."""
         if v and "date_range" in values and values["date_range"] != DateRange.CUSTOM:
             raise ValueError("Custom dates only allowed when date_range is 'custom'")
         return v
 
-    def get_date_filter(self) -> Dict[str, Any]:
+    def get_date_filter(self) -> dict[str, Any]:
         """Get date filtering configuration."""
         if self.date_range == DateRange.CUSTOM:
             return {"start_date": self.start_date, "end_date": self.end_date}
@@ -135,7 +134,7 @@ class MessagingSource(RemoteSource):
 
         return {}  # All time
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         """Get loader arguments for messaging sources."""
         kwargs = super().get_loader_kwargs()
 
@@ -205,13 +204,13 @@ class DiscordSource(MessagingSource):
     platform: MessagingPlatform = MessagingPlatform.DISCORD
 
     # Discord-specific options
-    server_id: Optional[str] = Field(None, description="Discord server/guild ID")
-    channel_ids: Optional[List[str]] = Field(None, description="Specific channel IDs")
+    server_id: str | None = Field(None, description="Discord server/guild ID")
+    channel_ids: list[str] | None = Field(None, description="Specific channel IDs")
 
     # Authentication
-    bot_token: Optional[str] = Field(None, description="Discord bot token")
+    bot_token: str | None = Field(None, description="Discord bot token")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -264,13 +263,13 @@ class SlackSource(MessagingSource):
     platform: MessagingPlatform = MessagingPlatform.SLACK
 
     # Slack-specific options
-    workspace_url: Optional[str] = Field(None, description="Slack workspace URL")
-    slack_token: Optional[str] = Field(None, description="Slack API token")
+    workspace_url: str | None = Field(None, description="Slack workspace URL")
+    slack_token: str | None = Field(None, description="Slack API token")
 
     # Content options
-    zip_path: Optional[str] = Field(None, description="Path to Slack export ZIP file")
+    zip_path: str | None = Field(None, description="Path to Slack export ZIP file")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         if self.zip_path:
@@ -322,9 +321,9 @@ class MicrosoftTeamsSource(MessagingSource):
 
     # Teams-specific options
     tenant_id: str = Field(..., description="Microsoft tenant ID")
-    team_id: Optional[str] = Field(None, description="Specific team ID")
+    team_id: str | None = Field(None, description="Specific team ID")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update({"tenant_id": self.tenant_id, "team_id": self.team_id})
@@ -366,18 +365,18 @@ class TwitterSource(MessagingSource):
     platform: MessagingPlatform = MessagingPlatform.TWITTER
 
     # Twitter-specific options
-    bearer_token: Optional[str] = Field(None, description="Twitter Bearer token")
+    bearer_token: str | None = Field(None, description="Twitter Bearer token")
 
     # Search options
-    search_query: Optional[str] = Field(None, description="Twitter search query")
-    hashtags: Optional[List[str]] = Field(None, description="Hashtags to search")
-    usernames: Optional[List[str]] = Field(None, description="Specific usernames")
+    search_query: str | None = Field(None, description="Twitter search query")
+    hashtags: list[str] | None = Field(None, description="Hashtags to search")
+    usernames: list[str] | None = Field(None, description="Specific usernames")
 
     # Content options
     include_retweets: bool = Field(False, description="Include retweets")
     include_replies: bool = Field(False, description="Include replies")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -427,20 +426,20 @@ class RedditSource(MessagingSource):
     platform: MessagingPlatform = MessagingPlatform.REDDIT
 
     # Reddit-specific options
-    client_id: Optional[str] = Field(None, description="Reddit client ID")
-    client_secret: Optional[str] = Field(None, description="Reddit client secret")
+    client_id: str | None = Field(None, description="Reddit client ID")
+    client_secret: str | None = Field(None, description="Reddit client secret")
     user_agent: str = Field("haive-document-loader", description="User agent string")
 
     # Search options
-    subreddits: Optional[List[str]] = Field(None, description="Specific subreddits")
-    search_query: Optional[str] = Field(None, description="Search query")
+    subreddits: list[str] | None = Field(None, description="Specific subreddits")
+    search_query: str | None = Field(None, description="Search query")
     sort_by: str = Field("hot", description="Sort posts by: hot, new, top, rising")
 
     # Content options
     include_comments: bool = Field(True, description="Include post comments")
     max_comments: int = Field(100, ge=1, description="Maximum comments per post")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -485,14 +484,14 @@ class MastodonSource(MessagingSource):
 
     # Mastodon-specific options
     instance_url: str = Field(..., description="Mastodon instance URL")
-    access_token: Optional[str] = Field(None, description="Mastodon access token")
+    access_token: str | None = Field(None, description="Mastodon access token")
 
     # Content options
     timeline_type: str = Field(
         "home", description="Timeline type: home, local, federated"
     )
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -545,19 +544,17 @@ class IMAPEmailSource(MessagingSource):
 
     # Authentication
     username: str = Field(..., description="Email username")
-    password: Optional[str] = Field(None, description="Email password")
+    password: str | None = Field(None, description="Email password")
 
     # Email filtering
     folder: str = Field("INBOX", description="Email folder to read")
-    search_criteria: Optional[str] = Field(None, description="IMAP search criteria")
+    search_criteria: str | None = Field(None, description="IMAP search criteria")
 
     # Processing options
     include_attachments: bool = Field(False, description="Process email attachments")
-    max_emails: Optional[int] = Field(
-        None, ge=1, description="Maximum emails to process"
-    )
+    max_emails: int | None = Field(None, ge=1, description="Maximum emails to process")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -613,18 +610,16 @@ class GmailSource(MessagingSource):
     platform: MessagingPlatform = MessagingPlatform.GMAIL
 
     # Gmail API configuration
-    credentials_path: Optional[str] = Field(
+    credentials_path: str | None = Field(
         None, description="Path to Google credentials JSON"
     )
-    token_path: Optional[str] = Field(None, description="Path to OAuth token file")
+    token_path: str | None = Field(None, description="Path to OAuth token file")
 
     # Search options
-    query: Optional[str] = Field(None, description="Gmail search query")
-    label_ids: Optional[List[str]] = Field(
-        None, description="Gmail label IDs to filter"
-    )
+    query: str | None = Field(None, description="Gmail search query")
+    label_ids: list[str] | None = Field(None, description="Gmail label IDs to filter")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -669,7 +664,7 @@ class WhatsAppSource(MessagingSource):
     # WhatsApp-specific options
     chat_export_path: str = Field(..., description="Path to WhatsApp chat export file")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update({"path": self.chat_export_path})
@@ -702,7 +697,7 @@ class TelegramSource(MessagingSource):
     # Telegram-specific options
     chat_export_path: str = Field(..., description="Path to Telegram chat export JSON")
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update({"chat_file": self.chat_export_path})
@@ -746,11 +741,11 @@ class MultiChatExportSource(MessagingSource):
     auto_detect_platform: bool = Field(
         True, description="Auto-detect chat platform from files"
     )
-    supported_formats: List[str] = Field(
+    supported_formats: list[str] = Field(
         default=["json", "txt", "csv", "html"], description="Supported export formats"
     )
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
 
         kwargs.update(
@@ -770,7 +765,7 @@ class MultiChatExportSource(MessagingSource):
 # =============================================================================
 
 
-def get_messaging_sources_statistics() -> Dict[str, Any]:
+def get_messaging_sources_statistics() -> dict[str, Any]:
     """Get statistics about messaging sources."""
     registry = enhanced_registry
 
@@ -801,7 +796,7 @@ def get_messaging_sources_statistics() -> Dict[str, Any]:
     bulk_messaging = len(
         [
             name
-            for name in registry._sources.keys()
+            for name in registry._sources
             if any(keyword in name for keyword in ["multi", "bulk", "export"])
         ]
     )
@@ -837,17 +832,10 @@ def validate_messaging_sources() -> bool:
         if source_name not in registry._sources:
             missing.append(source_name)
 
-    if missing:
-        print(f"Missing messaging sources: {missing}")
-        return False
-
-    print(
-        f"✅ All {len(required_messaging_sources)} essential messaging sources registered!"
-    )
-    return True
+    return not missing
 
 
-def detect_chat_platform(file_path: str) -> Optional[MessagingPlatform]:
+def detect_chat_platform(file_path: str) -> MessagingPlatform | None:
     """Auto-detect chat platform from export file."""
     file_path_lower = file_path.lower()
 
@@ -872,4 +860,3 @@ def detect_chat_platform(file_path: str) -> Optional[MessagingPlatform]:
 if __name__ == "__main__":
     validate_messaging_sources()
     stats = get_messaging_sources_statistics()
-    print(f"Messaging Sources Statistics: {stats}")

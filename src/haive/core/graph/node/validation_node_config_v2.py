@@ -1,5 +1,4 @@
-"""
-Validation Node Configuration V2 - Improved version that can update state.
+"""Validation Node Configuration V2 - Improved version that can update state.
 
 This version addresses the key issues with the original validation node:
 1. Can add ToolMessages to state (not just route)
@@ -15,7 +14,7 @@ Key improvements:
 """
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from langchain_core.messages import AIMessage, ToolMessage
 from langgraph.types import Command
@@ -47,15 +46,15 @@ class ValidationNodeConfigV2(BaseNodeConfig):
     engine_name: str = Field(..., description="Engine name for tool routes")
     tool_node: str = Field(default="tool_node", description="Tool execution node name")
     parser_node: str = Field(default="parse_output", description="Parser node name")
-    available_nodes: List[str] = Field(
+    available_nodes: list[str] = Field(
         default_factory=list, description="Available nodes"
     )
-    pydantic_models: Dict[str, type[BaseModel]] = Field(
+    pydantic_models: dict[str, type[BaseModel]] = Field(
         default_factory=dict, description="Pydantic models for validation"
     )
     node_type: NodeType = Field(default=NodeType.VALIDATION, description="Node type")
 
-    def __call__(self, state: Dict[str, Any]) -> Command:
+    def __call__(self, state: dict[str, Any]) -> Command:
         """Process tool calls and update state with ToolMessages."""
         # Get messages from state
         messages = state.get("messages", [])
@@ -78,10 +77,12 @@ class ValidationNodeConfigV2(BaseNodeConfig):
                 logger.info(
                     f"Found engine attribution in AI message: {engine_name_from_message}"
                 )
-                # Override the validation node's engine_name with the one from the message
+                # Override the validation node's engine_name with the one from
+                # the message
                 self.engine_name = engine_name_from_message
                 logger.debug(
-                    f"Updated validation node engine_name to: {self.engine_name}"
+                    f"Updated validation node engine_name to: {
+                        self.engine_name}"
                 )
             else:
                 logger.debug(
@@ -146,13 +147,14 @@ class ValidationNodeConfigV2(BaseNodeConfig):
         goto = self._determine_destination(destinations)
 
         logger.info(
-            f"ValidationV2: Created {len(new_messages)} ToolMessages, routing to {goto}"
+            f"ValidationV2: Created {
+                len(new_messages)} ToolMessages, routing to {goto}"
         )
 
         return Command(update=update_dict, goto=goto)
 
     def _validate_pydantic_model(
-        self, tool_name: str, tool_id: str, args: Dict[str, Any], state: Dict[str, Any]
+        self, tool_name: str, tool_id: str, args: dict[str, Any], state: dict[str, Any]
     ) -> ToolMessage:
         """Validate Pydantic model and create ToolMessage."""
         try:
@@ -174,9 +176,8 @@ class ValidationNodeConfigV2(BaseNodeConfig):
             model_instance = model_class(**args)
 
             # Create success message with model data
-            success_msg = (
-                f"Successfully validated {tool_name}: {model_instance.model_dump()}"
-            )
+            success_msg = f"Successfully validated {tool_name}: {
+                    model_instance.model_dump()}"
 
             return ToolMessage(
                 content=success_msg, tool_call_id=tool_id, name=tool_name
@@ -184,14 +185,14 @@ class ValidationNodeConfigV2(BaseNodeConfig):
 
         except ValidationError as e:
             # Create error message
-            error_msg = f"Validation error for {tool_name}: {str(e)}"
+            error_msg = f"Validation error for {tool_name}: {e!s}"
             return ToolMessage(content=error_msg, tool_call_id=tool_id, name=tool_name)
         except Exception as e:
             # Create generic error message
-            error_msg = f"Error processing {tool_name}: {str(e)}"
+            error_msg = f"Error processing {tool_name}: {e!s}"
             return ToolMessage(content=error_msg, tool_call_id=tool_id, name=tool_name)
 
-    def _get_engine_from_state(self, state: Dict[str, Any]) -> Optional[Any]:
+    def _get_engine_from_state(self, state: dict[str, Any]) -> Any | None:
         """Get engine from state using engine_name."""
         if not self.engine_name:
             return None
@@ -200,13 +201,19 @@ class ValidationNodeConfigV2(BaseNodeConfig):
         if "engines" in state and isinstance(state["engines"], dict):
             engine = state["engines"].get(self.engine_name)
             if engine:
-                logger.info(f"Found engine in state.engines: {self.engine_name}")
+                logger.info(
+                    f"Found engine in state.engines: {
+                        self.engine_name}"
+                )
                 return engine
 
             # Try by engine.name attribute
             for _key, eng in state["engines"].items():
                 if hasattr(eng, "name") and eng.name == self.engine_name:
-                    logger.info(f"Found engine by name attribute: {self.engine_name}")
+                    logger.info(
+                        f"Found engine by name attribute: {
+                            self.engine_name}"
+                    )
                     return eng
 
         # Try registry
@@ -225,8 +232,8 @@ class ValidationNodeConfigV2(BaseNodeConfig):
         return None
 
     def _find_model_class_from_engine(
-        self, tool_name: str, state: Dict[str, Any]
-    ) -> Optional[type[BaseModel]]:
+        self, tool_name: str, state: dict[str, Any]
+    ) -> type[BaseModel] | None:
         """Find Pydantic model class from engine."""
         engine = self._get_engine_from_state(state)
         if not engine:
@@ -258,8 +265,8 @@ class ValidationNodeConfigV2(BaseNodeConfig):
         return None
 
     def _find_model_class(
-        self, tool_name: str, state: Dict[str, Any] = None
-    ) -> Optional[type[BaseModel]]:
+        self, tool_name: str, state: dict[str, Any] | None = None
+    ) -> type[BaseModel] | None:
         """Try to find Pydantic model class by name."""
         # FIRST: Try to find from engine (using attribution)
         if state:
@@ -309,7 +316,6 @@ class ValidationNodeConfigV2(BaseNodeConfig):
         # Multiple destinations - prioritize
         if self.tool_node in destinations_list:
             return self.tool_node
-        elif self.parser_node in destinations_list:
+        if self.parser_node in destinations_list:
             return self.parser_node
-        else:
-            return "END"
+        return "END"

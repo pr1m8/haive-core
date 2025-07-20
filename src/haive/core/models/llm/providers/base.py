@@ -62,7 +62,8 @@ class ProviderImportError(ImportError):
         message: Custom error message
     """
 
-    def __init__(self, provider: str, package: str, message: str | None = None):
+    def __init__(self, provider: str, package: str,
+                 message: str | None = None):
         """Initialize the provider import error.
 
         Args:
@@ -125,13 +126,15 @@ class BaseLLMProvider(
             llm = provider.instantiate()
     """
 
-    provider: LLMProvider = Field(..., description="The LLM provider identifier")
+    provider: LLMProvider = Field(...,
+                                  description="The LLM provider identifier")
     model: str | None = Field(None, description="The model to use")
     name: str | None = Field(None, description="Friendly display name")
     api_key: SecretStr = Field(
         default_factory=lambda: SecretStr(""), description="API key for the provider"
     )
-    cache_enabled: bool = Field(default=True, description="Enable response caching")
+    cache_enabled: bool = Field(default=True,
+                                description="Enable response caching")
     cache_ttl: int | None = Field(
         default=300, description="Cache time-to-live in seconds"
     )
@@ -178,7 +181,10 @@ class BaseLLMProvider(
     model_config = {"arbitrary_types_allowed": True}
 
     @model_validator(mode="after")
-    def set_defaults(self) -> "BaseLLMProvider":
+
+
+    @classmethod
+    def set_defaults(cls) -> "BaseLLMProvider":
         """Set default values after initialization.
 
         This validator ensures that model and name have appropriate

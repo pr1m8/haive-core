@@ -36,8 +36,8 @@ Usage:
 import asyncio
 import logging
 import uuid
-from collections.abc import AsyncGenerator
-from typing import Any, Generator
+from collections.abc import AsyncGenerator, Generator
+from typing import Any
 
 from langchain_core.runnables import RunnableConfig
 from pydantic import BaseModel, PrivateAttr
@@ -117,7 +117,9 @@ class CheckpointerMixin(BaseModel):
             try:
                 self._async_checkpointer = await persistence.create_async_checkpointer()
                 logger.debug(
-                    f"Initialized async checkpointer: {type(self._async_checkpointer).__name__}"
+                    f"Initialized async checkpointer: {
+                        type(
+                            self._async_checkpointer).__name__}"
                 )
             except Exception as e:
                 logger.warning(f"Failed to create async checkpointer: {e}")
@@ -228,7 +230,8 @@ class CheckpointerMixin(BaseModel):
         """
         self._ensure_checkpointer_initialized()
 
-        # Get the compiled app - this should be implemented by the class using the mixin
+        # Get the compiled app - this should be implemented by the class using
+        # the mixin
         app = self.compile() if hasattr(self, "compile") else self.app
 
         # Prepare runtime config

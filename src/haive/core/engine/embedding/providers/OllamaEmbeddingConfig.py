@@ -78,7 +78,7 @@ class OllamaEmbeddingConfig(BaseEmbeddingConfig):
 
     @validator("model")
     @classmethod
-    def validate_model(cls, v):
+    def validate_model(cls, v) -> Any:
         """Validate the Ollama model name."""
         popular_models = {
             "nomic-embed-text",
@@ -99,7 +99,7 @@ class OllamaEmbeddingConfig(BaseEmbeddingConfig):
 
     @validator("base_url")
     @classmethod
-    def validate_base_url(cls, v):
+    def validate_base_url(cls, v) -> Any:
         """Validate Ollama server URL."""
         if not v or not v.strip():
             raise ValueError("Base URL is required")

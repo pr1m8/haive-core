@@ -1,5 +1,6 @@
 """Amazon Kendra Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Amazon Kendra retriever,
 which uses AWS Kendra's intelligent enterprise search service. Kendra provides
 ML-powered search capabilities with natural language understanding and
@@ -136,7 +137,7 @@ class KendraRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create an Amazon Kendra retriever from this configuration.
 
         Returns:

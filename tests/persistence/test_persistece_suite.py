@@ -96,7 +96,10 @@ class TestMemoryCheckpointer:
         """Test listing checkpoints."""
         # Generate unique thread ID for this test
         thread_id = f"test-thread-{uuid.uuid4()}"
-        config = {"configurable": {"thread_id": thread_id, "checkpoint_ns": "test"}}
+        config = {
+            "configurable": {
+                "thread_id": thread_id,
+                "checkpoint_ns": "test"}}
 
         # Store multiple checkpoints
         for i in range(3):
@@ -181,7 +184,10 @@ class TestSQLiteCheckpointer:
         """Test listing checkpoints."""
         # Generate unique thread ID for this test
         thread_id = f"test-thread-{uuid.uuid4()}"
-        config = {"configurable": {"thread_id": thread_id, "checkpoint_ns": "test"}}
+        config = {
+            "configurable": {
+                "thread_id": thread_id,
+                "checkpoint_ns": "test"}}
 
         # Store multiple checkpoints
         for i in range(3):
@@ -272,7 +278,10 @@ class TestSupabaseCheckpointer:
         """Test listing checkpoints."""
         # Generate unique thread ID for this test
         thread_id = f"test-thread-{uuid.uuid4()}"
-        config = {"configurable": {"thread_id": thread_id, "checkpoint_ns": "test"}}
+        config = {
+            "configurable": {
+                "thread_id": thread_id,
+                "checkpoint_ns": "test"}}
 
         # Store multiple checkpoints
         for i in range(3):

@@ -6,7 +6,7 @@ from various sources and returns raw documents in DocumentState format.
 
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Union
 
 from langchain.schema import Document
 from pydantic import BaseModel, Field
@@ -37,7 +37,7 @@ class DocumentLoaderConfig(BaseModel):
     recursive: bool = Field(
         default=True, description="Whether to recursively process directories"
     )
-    max_documents: Optional[int] = Field(
+    max_documents: int | None = Field(
         default=None, ge=1, description="Maximum number of documents to load"
     )
     use_async: bool = Field(
@@ -51,15 +51,15 @@ class DocumentLoaderConfig(BaseModel):
     )
 
     # Filtering options
-    include_patterns: List[str] = Field(
+    include_patterns: list[str] = Field(
         default_factory=list, description="Glob patterns for files to include"
     )
-    exclude_patterns: List[str] = Field(
+    exclude_patterns: list[str] = Field(
         default_factory=list, description="Glob patterns for files to exclude"
     )
 
     # Additional options
-    loader_options: Dict[str, Any] = Field(
+    loader_options: dict[str, Any] = Field(
         default_factory=dict, description="Additional loader-specific options"
     )
 
@@ -82,7 +82,7 @@ class DocumentLoaderConfig(BaseModel):
 
 
 class DocumentLoaderEngine(
-    InvokableEngine[Union[str, Path, Dict[str, Any]], DocumentState]
+    InvokableEngine[Union[str, Path, dict[str, Any]], DocumentState]
 ):
     """Document loader engine for loading documents from various sources.
 
@@ -107,7 +107,7 @@ class DocumentLoaderEngine(
             result = runnable.invoke("https://example.com/docs")
     """
 
-    def __init__(self, config: Optional[DocumentLoaderConfig] = None):
+    def __init__(self, config: DocumentLoaderConfig | None = None):
         """Initialize the document loader engine.
 
         Args:
@@ -127,7 +127,7 @@ class DocumentLoaderEngine(
         self.auto_loader = AutoLoader(config=auto_loader_config)
 
     def create_runnable(
-        self, runnable_config: Optional[Dict[str, Any]] = None
+        self, runnable_config: dict[str, Any] | None = None
     ) -> "DocumentLoaderEngine":
         """Create a runnable instance with optional configuration overrides.
 
@@ -150,8 +150,8 @@ class DocumentLoaderEngine(
 
     def invoke(
         self,
-        input_data: Union[str, Path, Dict[str, Any], DocumentState],
-        config: Optional[RunnableConfig] = None,
+        input_data: str | Path | dict[str, Any] | DocumentState,
+        config: RunnableConfig | None = None,
     ) -> DocumentState:
         """Load documents from the specified source.
 
@@ -166,7 +166,7 @@ class DocumentLoaderEngine(
 
         try:
             # Extract source from input
-            if isinstance(input_data, (str, Path)):
+            if isinstance(input_data, str | Path):
                 source = str(input_data)
                 loader_options = {}
             elif isinstance(input_data, dict):
@@ -304,8 +304,8 @@ class DocumentLoaderEngine(
 
     async def ainvoke(
         self,
-        input_data: Union[str, Path, Dict[str, Any], DocumentState],
-        config: Optional[RunnableConfig] = None,
+        input_data: str | Path | dict[str, Any] | DocumentState,
+        config: RunnableConfig | None = None,
     ) -> DocumentState:
         """Asynchronously load documents.
 
@@ -334,26 +334,26 @@ class DocumentLoaderEngine(
         if isinstance(source, str):
             if source.endswith((".pdf", ".PDF")):
                 return "pdf"
-            elif source.endswith((".docx", ".DOCX", ".doc", ".DOC")):
+            if source.endswith((".docx", ".DOCX", ".doc", ".DOC")):
                 return "word"
-            elif source.endswith((".html", ".HTML", ".htm", ".HTM")):
+            if source.endswith((".html", ".HTML", ".htm", ".HTM")):
                 return "html"
-            elif source.endswith((".md", ".MD", ".markdown")):
+            if source.endswith((".md", ".MD", ".markdown")):
                 return "markdown"
-            elif source.endswith((".txt", ".TXT")):
+            if source.endswith((".txt", ".TXT")):
                 return "text"
 
         # Default
         return "unknown"
 
-    def _detect_format(self, document: Document) -> Optional[str]:
+    def _detect_format(self, document: Document) -> str | None:
         """Detect document format."""
         doc_type = self._detect_document_type(document)
         return doc_type if doc_type != "unknown" else None
 
     def _map_source_type(
-        self, auto_loader_source_type: Optional[str]
-    ) -> Optional[DocumentSourceType]:
+        self, auto_loader_source_type: str | None
+    ) -> DocumentSourceType | None:
         """Map auto loader source type to DocumentSourceType enum."""
         if not auto_loader_source_type:
             return None
@@ -396,8 +396,8 @@ def create_file_loader(
 def create_directory_loader(
     loader_preference: LoaderPreference = LoaderPreference.BALANCED,
     max_workers: int = 8,
-    include_patterns: Optional[List[str]] = None,
-    exclude_patterns: Optional[List[str]] = None,
+    include_patterns: list[str] | None = None,
+    exclude_patterns: list[str] | None = None,
 ) -> DocumentLoaderEngine:
     """Create a document loader engine optimized for directory processing.
 

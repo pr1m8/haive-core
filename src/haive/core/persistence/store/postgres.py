@@ -5,12 +5,12 @@ that integrate with LangGraph's BaseStore interface for persistent storage.
 """
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
+from core.persistence.postgres_config import PostgresCheckpointerConfig
 from langgraph.store.base import BaseStore
 from pydantic import Field, PrivateAttr
 
-from ..postgres_config import PostgresCheckpointerConfig
 from .base import SerializableStoreWrapper
 from .types import StoreConfig
 
@@ -25,11 +25,11 @@ class PostgresStoreWrapper(SerializableStoreWrapper):
     """
 
     config: StoreConfig = Field(description="Store configuration")
-    postgres_config: Optional[PostgresCheckpointerConfig] = Field(
+    postgres_config: PostgresCheckpointerConfig | None = Field(
         default=None,
         description="Optional PostgreSQL configuration for connection details",
     )
-    _store_context: Optional[Any] = PrivateAttr(default=None)
+    _store_context: Any | None = PrivateAttr(default=None)
 
     def _create_store(self) -> BaseStore:
         """Create the underlying PostgreSQL store.
@@ -40,7 +40,7 @@ class PostgresStoreWrapper(SerializableStoreWrapper):
         try:
             from langgraph.store.postgres import PostgresStore
         except ImportError:
-            logger.error(
+            logger.exception(
                 "PostgresStore not available. Install with: pip install langgraph-checkpoint-postgres"
             )
             # Fallback to memory store
@@ -122,14 +122,16 @@ class PostgresStoreWrapper(SerializableStoreWrapper):
                 )
 
             # Create store with the configured connection
-            if index_config:
-                store = PostgresStore(conn, index=index_config)
-            else:
-                store = PostgresStore(conn)
+            store = (
+                PostgresStore(conn, index=index_config)
+                if index_config
+                else PostgresStore(conn)
+            )
 
             # CRITICAL FIX: Force disable pipeline mode BEFORE setup to prevent prepared statement conflicts
             # This solves the "prepared statement '_pg3_X' already exists" error with
-            # connection pooling (especially Supabase pgBouncer in transaction mode)
+            # connection pooling (especially Supabase pgBouncer in transaction
+            # mode)
             store.supports_pipeline = False
             logger.debug(
                 "Forced pipeline mode OFF to prevent prepared statement conflicts"
@@ -147,7 +149,7 @@ class PostgresStoreWrapper(SerializableStoreWrapper):
                     logger.warning(f"Could not run store migrations: {e}")
 
         except Exception as e:
-            logger.error(f"Failed to create PostgresStore: {e}")
+            logger.exception(f"Failed to create PostgresStore: {e}")
             raise
 
         return store
@@ -167,11 +169,11 @@ class AsyncPostgresStoreWrapper(SerializableStoreWrapper):
     """
 
     config: StoreConfig = Field(description="Store configuration")
-    postgres_config: Optional[PostgresCheckpointerConfig] = Field(
+    postgres_config: PostgresCheckpointerConfig | None = Field(
         default=None,
         description="Optional PostgreSQL configuration for connection details",
     )
-    _store_context: Optional[Any] = PrivateAttr(default=None)
+    _store_context: Any | None = PrivateAttr(default=None)
 
     def _create_store(self) -> BaseStore:
         """Create sync store (not supported for async wrapper)."""
@@ -188,7 +190,7 @@ class AsyncPostgresStoreWrapper(SerializableStoreWrapper):
         try:
             from langgraph.store.postgres.aio import AsyncPostgresStore
         except ImportError:
-            logger.error(
+            logger.exception(
                 "AsyncPostgresStore not available. Install with: pip install langgraph-checkpoint-postgres"
             )
             # Fallback to memory store
@@ -279,7 +281,8 @@ class AsyncPostgresStoreWrapper(SerializableStoreWrapper):
 
             # CRITICAL FIX: Force disable pipeline mode BEFORE setup to prevent prepared statement conflicts
             # This solves the "prepared statement '_pg3_X' already exists" error with
-            # connection pooling (especially Supabase pgBouncer in transaction mode)
+            # connection pooling (especially Supabase pgBouncer in transaction
+            # mode)
             store.supports_pipeline = False
             logger.debug(
                 "Forced async pipeline mode OFF to prevent prepared statement conflicts"
@@ -297,7 +300,7 @@ class AsyncPostgresStoreWrapper(SerializableStoreWrapper):
                     logger.warning(f"Could not run store migrations: {e}")
 
         except Exception as e:
-            logger.error(f"Failed to create AsyncPostgresStore: {e}")
+            logger.exception(f"Failed to create AsyncPostgresStore: {e}")
             raise
 
         return store

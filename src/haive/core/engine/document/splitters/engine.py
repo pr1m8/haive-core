@@ -6,7 +6,7 @@ and enhancing metadata.
 """
 
 import time
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from langchain.schema import Document
 from pydantic import BaseModel, Field
@@ -36,14 +36,14 @@ from .config import DocSplitterType
 class DocSplitterInputSchema(BaseModel):
     """Input schema for document splitter engine."""
 
-    documents: List[Document] = Field(..., description="List of documents to split")
-    splitter_type: Optional[DocSplitterType] = Field(
+    documents: list[Document] = Field(..., description="List of documents to split")
+    splitter_type: DocSplitterType | None = Field(
         default=DocSplitterType.RECURSIVE_CHARACTER,
         description="Type of splitter to use",
     )
     chunk_size: int = Field(default=1000, description="Target chunk size")
     chunk_overlap: int = Field(default=200, description="Overlap between chunks")
-    separators: Optional[List[str]] = Field(
+    separators: list[str] | None = Field(
         default=None, description="Custom separators for splitting"
     )
     keep_separator: bool = Field(default=True, description="Keep separators in chunks")
@@ -66,7 +66,7 @@ class DocSplitterInputSchema(BaseModel):
 class DocSplitterOutputSchema(BaseModel):
     """Output schema for document splitter engine."""
 
-    documents: List[Document] = Field(..., description="Split documents with metadata")
+    documents: list[Document] = Field(..., description="Split documents with metadata")
     total_documents: int = Field(..., description="Total number of output documents")
     total_chunks: int = Field(..., description="Total number of chunks created")
     original_documents: int = Field(
@@ -74,7 +74,7 @@ class DocSplitterOutputSchema(BaseModel):
     )
     operation_time: float = Field(..., description="Time taken for splitting operation")
     splitter_type: str = Field(..., description="Splitter type used")
-    splitter_config: Dict[str, Any] = Field(
+    splitter_config: dict[str, Any] = Field(
         ..., description="Splitter configuration used"
     )
 
@@ -91,9 +91,7 @@ class DocSplitterConfig(BaseModel):
     )
     chunk_size: int = Field(default=1000, description="Default chunk size")
     chunk_overlap: int = Field(default=200, description="Default chunk overlap")
-    separators: Optional[List[str]] = Field(
-        default=None, description="Default separators"
-    )
+    separators: list[str] | None = Field(default=None, description="Default separators")
     keep_separator: bool = Field(default=True, description="Keep separators by default")
     strip_whitespace: bool = Field(
         default=True, description="Strip whitespace by default"
@@ -132,7 +130,7 @@ class DocumentSplitterEngine(InvokableEngine[DocumentState, DocumentState]):
             result = runnable.invoke(input_data)
     """
 
-    def __init__(self, config: Optional[DocSplitterConfig] = None):
+    def __init__(self, config: DocSplitterConfig | None = None):
         """Initialize the document splitter engine.
 
         Args:
@@ -143,7 +141,7 @@ class DocumentSplitterEngine(InvokableEngine[DocumentState, DocumentState]):
         self.engine_type = EngineType.DOCUMENT_SPLITTER
 
     def create_runnable(
-        self, runnable_config: Optional[Dict[str, Any]] = None
+        self, runnable_config: dict[str, Any] | None = None
     ) -> "DocumentSplitterEngine":
         """Create a runnable instance with optional configuration overrides.
 
@@ -166,8 +164,8 @@ class DocumentSplitterEngine(InvokableEngine[DocumentState, DocumentState]):
 
     def invoke(
         self,
-        input_data: Union[DocumentState, List[Document], Dict[str, Any]],
-        config: Optional[RunnableConfig] = None,
+        input_data: DocumentState | list[Document] | dict[str, Any],
+        config: RunnableConfig | None = None,
     ) -> DocumentState:
         """Split documents into chunks.
 
@@ -365,8 +363,8 @@ class DocumentSplitterEngine(InvokableEngine[DocumentState, DocumentState]):
 
     async def ainvoke(
         self,
-        input_data: Union[DocumentState, List[Document], Dict[str, Any]],
-        config: Optional[RunnableConfig] = None,
+        input_data: DocumentState | list[Document] | dict[str, Any],
+        config: RunnableConfig | None = None,
     ) -> DocumentState:
         """Asynchronously split documents into chunks.
 
@@ -389,7 +387,7 @@ class DocumentSplitterEngine(InvokableEngine[DocumentState, DocumentState]):
         splitter_type: DocSplitterType,
         chunk_size: int,
         chunk_overlap: int,
-        separators: Optional[List[str]],
+        separators: list[str] | None,
         keep_separator: bool,
         add_start_index: bool,
     ):
@@ -419,7 +417,7 @@ class DocumentSplitterEngine(InvokableEngine[DocumentState, DocumentState]):
                 **common_kwargs,
             )
 
-        elif splitter_type == DocSplitterType.RECURSIVE_CHARACTER:
+        if splitter_type == DocSplitterType.RECURSIVE_CHARACTER:
             splitter_separators = separators or ["\n\n", "\n", ". ", " ", ""]
             return RecursiveCharacterTextSplitter(
                 separators=splitter_separators,
@@ -427,41 +425,40 @@ class DocumentSplitterEngine(InvokableEngine[DocumentState, DocumentState]):
                 **common_kwargs,
             )
 
-        elif splitter_type == DocSplitterType.TOKEN:
+        if splitter_type == DocSplitterType.TOKEN:
             return TokenTextSplitter(**common_kwargs)
 
-        elif splitter_type == DocSplitterType.NLTK:
+        if splitter_type == DocSplitterType.NLTK:
             return NLTKTextSplitter(**common_kwargs)
 
-        elif splitter_type == DocSplitterType.SPACY:
+        if splitter_type == DocSplitterType.SPACY:
             return SpacyTextSplitter(**common_kwargs)
 
-        elif splitter_type == DocSplitterType.SENTENCE_TRANSFORMERS:
+        if splitter_type == DocSplitterType.SENTENCE_TRANSFORMERS:
             return SentenceTransformersTokenTextSplitter(**common_kwargs)
 
-        elif splitter_type == DocSplitterType.HTML:
+        if splitter_type == DocSplitterType.HTML:
             return HTMLHeaderTextSplitter()
 
-        elif splitter_type == DocSplitterType.MARKDOWN:
+        if splitter_type == DocSplitterType.MARKDOWN:
             return MarkdownTextSplitter(**common_kwargs)
 
-        elif splitter_type == DocSplitterType.LATEX:
+        if splitter_type == DocSplitterType.LATEX:
             return LatexTextSplitter(**common_kwargs)
 
-        elif splitter_type == DocSplitterType.PYTHON:
+        if splitter_type == DocSplitterType.PYTHON:
             return PythonCodeTextSplitter(**common_kwargs)
 
-        elif splitter_type == DocSplitterType.JSON:
+        if splitter_type == DocSplitterType.JSON:
             return RecursiveJsonSplitter()
 
-        else:
-            # Default to recursive character splitter
-            return RecursiveCharacterTextSplitter(**common_kwargs)
+        # Default to recursive character splitter
+        return RecursiveCharacterTextSplitter(**common_kwargs)
 
     @staticmethod
     def get_children_docs(
         document_state: DocumentState, parent_id: str
-    ) -> List[Document]:
+    ) -> list[Document]:
         """Get all child documents for a given parent document ID.
 
         Args:
@@ -478,9 +475,7 @@ class DocumentSplitterEngine(InvokableEngine[DocumentState, DocumentState]):
         ]
 
     @staticmethod
-    def get_parent_doc(
-        document_state: DocumentState, child_id: str
-    ) -> Optional[Document]:
+    def get_parent_doc(document_state: DocumentState, child_id: str) -> Document | None:
         """Get parent document for a given child document ID.
 
         Args:
@@ -514,7 +509,7 @@ class DocumentSplitterEngine(InvokableEngine[DocumentState, DocumentState]):
     @staticmethod
     def get_sibling_docs(
         document_state: DocumentState, chunk_id: str
-    ) -> List[Document]:
+    ) -> list[Document]:
         """Get all sibling documents (same parent) for a given chunk.
 
         Args:
@@ -542,7 +537,7 @@ class DocumentSplitterEngine(InvokableEngine[DocumentState, DocumentState]):
         return DocumentSplitterEngine.get_children_docs(document_state, parent_id)
 
     @staticmethod
-    def build_document_tree(document_state: DocumentState) -> Dict[str, Any]:
+    def build_document_tree(document_state: DocumentState) -> dict[str, Any]:
         """Build a tree structure showing document relationships.
 
         Args:
@@ -622,7 +617,7 @@ def create_document_splitter(
 def create_recursive_splitter(
     chunk_size: int = 1000,
     chunk_overlap: int = 200,
-    separators: Optional[List[str]] = None,
+    separators: list[str] | None = None,
 ) -> DocumentSplitterEngine:
     """Create a recursive character text splitter engine.
 

@@ -3,12 +3,12 @@
 
 import asyncio
 import logging
-import os
 import sys
 from datetime import datetime
 
 # Disable heavy import logging to speed up tests
-logging.getLogger("haive.core.engine.document.loaders").setLevel(logging.WARNING)
+logging.getLogger("haive.core.engine.document.loaders").setLevel(
+    logging.WARNING)
 logging.getLogger("haive.core.engine.document.loaders.sources").setLevel(
     logging.WARNING
 )
@@ -16,14 +16,10 @@ logging.getLogger("haive.core.engine.document.loaders.sources").setLevel(
 
 def print_status(message: str, success: bool = True):
     """Print test status."""
-    status = "✅" if success else "❌"
-    print(f"{status} {message}")
 
 
 def test_core_memory_components():
     """Test core memory components with minimal imports."""
-    print("🧪 Testing Core Memory Components...")
-
     # Test 1: Basic store operations
     try:
         from haive.core.persistence.store.types import StoreType
@@ -36,7 +32,7 @@ def test_core_memory_components():
 
         # Store and retrieve
         memory_id = store_manager.store_memory("Test memory", importance=0.8)
-        memory = store_manager.retrieve_memory(memory_id)
+        store_manager.retrieve_memory(memory_id)
 
         print_status(f"StoreManager: Store/retrieve works ({memory_id})")
 
@@ -59,7 +55,7 @@ def test_core_memory_components():
             store_manager=store_manager, auto_classify=False  # Disable to avoid LLM
         )
 
-        memory_store = MemoryStoreManager(config)
+        MemoryStoreManager(config)
         print_status("MemoryStoreManager: Created successfully")
 
         return True
@@ -71,14 +67,11 @@ def test_core_memory_components():
 
 async def test_async_memory_operations():
     """Test async memory operations."""
-    print("\n🔄 Testing Async Memory Operations...")
-
     try:
         from haive.agents.memory.core.stores import (
             MemoryStoreConfig,
             MemoryStoreManager,
         )
-
         from haive.core.persistence.store.types import StoreType
         from haive.core.tools.store_manager import StoreManager
 
@@ -87,7 +80,9 @@ async def test_async_memory_operations():
             store_config={"type": StoreType.MEMORY}, default_namespace=("test", "async")
         )
 
-        config = MemoryStoreConfig(store_manager=store_manager, auto_classify=False)
+        config = MemoryStoreConfig(
+            store_manager=store_manager,
+            auto_classify=False)
 
         memory_store = MemoryStoreManager(config)
 
@@ -115,13 +110,11 @@ async def test_async_memory_operations():
 
 def test_memory_classifier_without_llm():
     """Test memory classifier creation without LLM calls."""
-    print("\n🤖 Testing Memory Classifier (No LLM)...")
-
     try:
         from haive.agents.memory.core.classifier import MemoryClassifierConfig
 
         # Test config creation
-        config = MemoryClassifierConfig(
+        MemoryClassifierConfig(
             confidence_threshold=0.7, enable_llm_classification=False  # Disable LLM
         )
         print_status("MemoryClassifierConfig: Created without LLM")
@@ -135,8 +128,6 @@ def test_memory_classifier_without_llm():
 
 def test_unified_memory_config():
     """Test unified memory system configuration."""
-    print("\n🔧 Testing Unified Memory Configuration...")
-
     try:
         from haive.agents.memory.unified_memory_api import MemorySystemConfig
 
@@ -166,8 +157,6 @@ def test_unified_memory_config():
 
 def test_memory_types():
     """Test memory types and enums."""
-    print("\n📝 Testing Memory Types...")
-
     try:
         from haive.agents.memory.core.types import MemoryImportance, MemoryType
 
@@ -194,14 +183,11 @@ def test_memory_types():
 
 def test_store_integration():
     """Test complete store integration."""
-    print("\n🔗 Testing Complete Store Integration...")
-
     try:
         from haive.agents.memory.core.stores import (
             MemoryStoreConfig,
             MemoryStoreManager,
         )
-
         from haive.core.persistence.store.types import StoreType
         from haive.core.tools.store_manager import StoreManager
 
@@ -228,7 +214,7 @@ def test_store_integration():
         ]
 
         stored_ids = []
-        for i, content in enumerate(test_data):
+        for _i, content in enumerate(test_data):
             # Store through memory store
             memory_id = asyncio.run(memory_store.store_memory(content))
             stored_ids.append(memory_id)
@@ -236,16 +222,18 @@ def test_store_integration():
             # Verify in base store
             base_memory = base_store.retrieve_memory(memory_id)
             if base_memory is None:
-                print(f"Warning: Memory {memory_id} not found in base store")
                 continue
             assert base_memory.content == content
 
         print_status(f"Integration: Stored {len(stored_ids)} memories")
 
         # Test search integration
-        results = asyncio.run(memory_store.retrieve_memories("password", limit=5))
+        results = asyncio.run(
+            memory_store.retrieve_memories(
+                "password", limit=5))
         print_status(
-            f"Integration: Search found {len(results)} password-related memories"
+            f"Integration: Search found {
+                len(results)} password-related memories"
         )
 
         return True
@@ -257,16 +245,15 @@ def test_store_integration():
 
 def main():
     """Run focused integration tests."""
-    print("🧪 FOCUSED INTEGRATION TEST")
-    print("=" * 60)
-
     start_time = datetime.now()
 
     # Run tests
     results = []
 
     try:
-        results.append(("Core Memory Components", test_core_memory_components()))
+        results.append(
+            ("Core Memory Components",
+             test_core_memory_components()))
         results.append(
             ("Async Memory Operations", asyncio.run(test_async_memory_operations()))
         )
@@ -282,34 +269,17 @@ def main():
         return False
 
     end_time = datetime.now()
-    duration = (end_time - start_time).total_seconds()
+    (end_time - start_time).total_seconds()
 
     # Summary
-    print("\n" + "=" * 60)
-    print("📊 FOCUSED TEST SUMMARY")
-    print("=" * 60)
 
     passed = sum(1 for _, success in results if success)
     total = len(results)
 
-    print(f"Execution Time: {duration:.2f} seconds")
-    print(f"Tests Passed: {passed}/{total}")
-    print(f"Success Rate: {(passed/total)*100:.1f}%")
+    for _name, _success in results:
+        pass
 
-    print("\nDetailed Results:")
-    for name, success in results:
-        status = "✅ PASS" if success else "❌ FAIL"
-        print(f"  {status} - {name}")
-
-    if passed == total:
-        print("\n🎉 All focused integration tests passed!")
-        print("✅ API compatibility issues resolved")
-        print("✅ Async operations working correctly")
-        print("✅ Memory system components integrated properly")
-        return True
-    else:
-        print(f"\n⚠️  {total - passed} tests failed.")
-        return False
+    return passed == total
 
 
 if __name__ == "__main__":

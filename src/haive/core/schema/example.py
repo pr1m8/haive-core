@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-"""
-Haive Schema System Examples
+"""from typing import Any
+Haive Schema System Examples.
 
 This file demonstrates comprehensive usage of the Haive Schema System,
 including state creation, dynamic composition, reducers, and real-world patterns.
 """
 
+import contextlib
 import operator
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from pydantic import Field, validator
@@ -23,15 +24,14 @@ from haive.core.schema import (
 from haive.core.schema.ui import SchemaUI
 
 
-def example_basic_state_creation():
+def example_basic_state_creation() -> None:
     """Example 1: Basic state creation patterns."""
-    print("=== Example 1: Basic State Creation ===\n")
 
     # Method 1: Declarative definition
     class ConversationState(StateSchema):
         """Simple conversation state."""
 
-        messages: List[BaseMessage] = Field(default_factory=list)
+        messages: list[BaseMessage] = Field(default_factory=list)
         topic: str = Field(default="general chat")
         turn_count: int = Field(default=0)
 
@@ -50,23 +50,16 @@ def example_basic_state_creation():
         ]
     )
 
-    print(f"Topic: {state.topic}")
-    print(f"Messages: {len(state.messages)}")
-    print(f"First message: {state.messages[0].content}")
-
     # Method 2: Using factory function
     QuickState = create_message_state(
         {"user_id": (str, Field(default="")), "session_id": (str, Field(default=""))}
     )
 
-    quick_state = QuickState(user_id="user123")
-    print(f"\nQuick state user: {quick_state.user_id}")
+    QuickState(user_id="user123")
 
 
-def example_dynamic_composition():
+def example_dynamic_composition() -> None:
     """Example 2: Dynamic schema composition."""
-    print("\n\n=== Example 2: Dynamic Schema Composition ===\n")
-
     # Create composer
     composer = SchemaComposer(name="DynamicRAGState")
 
@@ -81,7 +74,7 @@ def example_dynamic_composition():
 
     composer.add_field(
         name="documents",
-        field_type=List[Dict[str, Any]],
+        field_type=list[dict[str, Any]],
         default_factory=list,
         description="Retrieved documents",
         output_from=["retriever"],
@@ -91,7 +84,7 @@ def example_dynamic_composition():
 
     composer.add_field(
         name="context",
-        field_type=List[str],
+        field_type=list[str],
         default_factory=list,
         description="Reranked context",
         output_from=["reranker"],
@@ -120,21 +113,16 @@ def example_dynamic_composition():
 
     # Use the dynamic schema
     DynamicRAGState(query="What is quantum computing?")
-    print(f"Schema name: {DynamicRAGState.__name__}")
-    print(f"Fields: {list(DynamicRAGState.model_fields.keys())}")
-    print(f"Shared fields: {DynamicRAGState.__shared_fields__}")
-    print(f"Reducer fields: {list(DynamicRAGState.__reducer_fields__.keys())}")
 
 
-def example_reducer_behavior():
+def example_reducer_behavior() -> None:
     """Example 3: Understanding reducer behavior."""
-    print("\n\n=== Example 3: Reducer Behavior ===\n")
 
     class MetricsState(StateSchema):
         """State with various reducer types."""
 
         # List concatenation
-        events: List[str] = Field(default_factory=list)
+        events: list[str] = Field(default_factory=list)
 
         # Number addition
         total_count: int = Field(default=0)
@@ -143,7 +131,7 @@ def example_reducer_behavior():
         status: str = Field(default="idle")
 
         # Custom reducer
-        tags: List[str] = Field(default_factory=list)
+        tags: list[str] = Field(default_factory=list)
 
         # Max value reducer
         high_score: float = Field(default=0.0)
@@ -169,13 +157,6 @@ def example_reducer_behavior():
     }
     state.apply_reducers(update1)
 
-    print("After first update:")
-    print(f"  Events: {state.events}")
-    print(f"  Count: {state.total_count}")
-    print(f"  Status: {state.status}")
-    print(f"  Tags: {state.tags}")
-    print(f"  High score: {state.high_score}")
-
     # Second update
     update2 = {
         "events": ["completed"],
@@ -186,26 +167,18 @@ def example_reducer_behavior():
     }
     state.apply_reducers(update2)
 
-    print("\nAfter second update:")
-    print(f"  Events: {state.events}")  # All events
-    print(f"  Count: {state.total_count}")  # 5 + 3 = 8
-    print(f"  Status: {state.status}")  # Replaced with 'done'
-    print(f"  Tags: {state.tags}")  # Unique: urgent, ml, production
-    print(f"  High score: {state.high_score}")  # Max: 0.92
 
-
-def example_parent_child_sharing():
+def example_parent_child_sharing() -> None:
     """Example 4: Parent-child graph state sharing."""
-    print("\n\n=== Example 4: Parent-Child State Sharing ===\n")
 
     # Parent graph state
     class ParentState(StateSchema):
         """Main workflow state."""
 
-        messages: List[BaseMessage] = Field(default_factory=list)
+        messages: list[BaseMessage] = Field(default_factory=list)
         user_query: str = Field(default="")
         final_answer: str = Field(default="")
-        metadata: Dict[str, Any] = Field(default_factory=dict)
+        metadata: dict[str, Any] = Field(default_factory=dict)
 
         # Only messages and query are shared
         __shared_fields__ = ["messages", "user_query"]
@@ -220,11 +193,11 @@ def example_parent_child_sharing():
         """Research subgraph state."""
 
         # Shared from parent
-        messages: List[BaseMessage] = Field(default_factory=list)
+        messages: list[BaseMessage] = Field(default_factory=list)
         user_query: str = Field(default="")
 
         # Local to child
-        search_results: List[Dict[str, str]] = Field(default_factory=list)
+        search_results: list[dict[str, str]] = Field(default_factory=list)
         research_summary: str = Field(default="")
 
         __shared_fields__ = ["messages", "user_query"]  # Must match parent
@@ -250,14 +223,10 @@ def example_parent_child_sharing():
     child.add_message(AIMessage(content="I found several resources..."))
 
     # Updates to shared fields would propagate back
-    print("Parent query:", parent.user_query)
-    print("Child query:", child.user_query)
-    print("Shared messages:", len(child.messages))
 
 
-def example_engine_io_tracking():
+def example_engine_io_tracking() -> None:
     """Example 5: Engine I/O tracking for complex workflows."""
-    print("\n\n=== Example 5: Engine I/O Tracking ===\n")
 
     class MultiEngineState(StateSchema):
         """State for multi-engine workflow."""
@@ -267,13 +236,13 @@ def example_engine_io_tracking():
         language: str = Field(default="en")
 
         # Intermediate fields
-        entities: List[Dict[str, str]] = Field(default_factory=list)
-        sentiment: Dict[str, float] = Field(default_factory=dict)
-        keywords: List[str] = Field(default_factory=list)
+        entities: list[dict[str, str]] = Field(default_factory=list)
+        sentiment: dict[str, float] = Field(default_factory=dict)
+        keywords: list[str] = Field(default_factory=list)
 
         # Output fields
         summary: str = Field(default="")
-        insights: Dict[str, Any] = Field(default_factory=dict)
+        insights: dict[str, Any] = Field(default_factory=dict)
 
         __engine_io_mappings__ = {
             "ner_engine": {"inputs": ["raw_text", "language"], "outputs": ["entities"]},
@@ -301,28 +270,22 @@ def example_engine_io_tracking():
     )
 
     # Prepare input for specific engine
-    ner_input = state.prepare_for_engine("ner_engine")
-    print("NER engine inputs:", list(ner_input.keys()))
+    state.prepare_for_engine("ner_engine")
 
     # Simulate engine outputs
     state.entities = [{"text": "Apple", "type": "ORG"}]
     state.keywords = ["profits", "record", "announcement"]
 
     # Get inputs for summary engine
-    summary_input = state.prepare_for_engine("summary_engine")
-    print("Summary engine inputs:", list(summary_input.keys()))
+    state.prepare_for_engine("summary_engine")
 
     # Display engine dependencies
-    print("\nEngine dependencies:")
-    for engine, io in state.__engine_io_mappings__.items():
-        print(f"  {engine}:")
-        print(f"    Inputs: {io['inputs']}")
-        print(f"    Outputs: {io['outputs']}")
+    for _engine, _io in state.__engine_io_mappings__.items():
+        pass
 
 
-def example_validation_and_custom_methods():
+def example_validation_and_custom_methods() -> Any:
     """Example 6: Validation and custom methods."""
-    print("\n\n=== Example 6: Validation & Custom Methods ===\n")
 
     class ValidatedState(StateSchema):
         """State with validation and custom methods."""
@@ -330,16 +293,16 @@ def example_validation_and_custom_methods():
         email: str = Field(default="")
         age: int = Field(default=0)
         score: float = Field(default=0.0)
-        tags: List[str] = Field(default_factory=list)
+        tags: list[str] = Field(default_factory=list)
 
         @validator("email")
-        def validate_email(cls, v):
+        def validate_email(self, v) -> Any:
             if v and "@" not in v:
                 raise ValueError("Invalid email format")
             return v.lower()  # Normalize
 
         @validator("age")
-        def validate_age(cls, v):
+        def validate_age(self, v) -> Any:
             if v < 0:
                 raise ValueError("Age cannot be negative")
             if v > 150:
@@ -347,22 +310,21 @@ def example_validation_and_custom_methods():
             return v
 
         @validator("score")
-        def validate_score(cls, v):
+        def validate_score(self, v) -> Any:
             return max(0.0, min(1.0, v))  # Clamp to [0, 1]
 
         @validator("tags")
-        def validate_tags(cls, v):
+        def validate_tags(self, v) -> Any:
             # Remove duplicates and empty strings
-            return list(set(tag.strip() for tag in v if tag.strip()))
+            return list({tag.strip() for tag in v if tag.strip()})
 
         def get_risk_level(self) -> str:
             """Calculate risk level based on score."""
             if self.score < 0.3:
                 return "low"
-            elif self.score < 0.7:
+            if self.score < 0.7:
                 return "medium"
-            else:
-                return "high"
+            return "high"
 
         def add_tag(self, tag: str) -> None:
             """Add a tag if not already present."""
@@ -370,7 +332,7 @@ def example_validation_and_custom_methods():
             if tag and tag not in self.tags:
                 self.tags.append(tag)
 
-        def to_summary(self) -> Dict[str, Any]:
+        def to_summary(self) -> dict[str, Any]:
             """Generate summary of state."""
             return {
                 "email": self.email,
@@ -380,10 +342,8 @@ def example_validation_and_custom_methods():
             }
 
     # Test validation
-    try:
+    with contextlib.suppress(ValueError):
         state = ValidatedState(email="invalid-email", age=200)
-    except ValueError as e:
-        print(f"Validation error: {e}")
 
     # Create valid state
     state = ValidatedState(email="user@example.com", age=25, score=1.5)  # Score clamped
@@ -393,26 +353,18 @@ def example_validation_and_custom_methods():
     state.add_tag("urgent")
     state.add_tag("important")  # Duplicate, won't be added
 
-    print(f"Email: {state.email}")
-    print(f"Score: {state.score}")  # Clamped to 1.0
-    print(f"Risk level: {state.get_risk_level()}")
-    print(f"Tags: {state.tags}")
-    print(f"Summary: {state.to_summary()}")
 
-
-def example_schema_merging():
+def example_schema_merging() -> None:
     """Example 7: Merging schemas from multiple sources."""
-    print("\n\n=== Example 7: Schema Merging ===\n")
-
     # Create first schema
     composer1 = SchemaComposer(name="SearchSchema")
     composer1.add_field("query", str, default="")
-    composer1.add_field("results", List[Dict[str, Any]], default_factory=list)
+    composer1.add_field("results", list[dict[str, Any]], default_factory=list)
 
     # Create second schema
     composer2 = SchemaComposer(name="AnalysisSchema")
     composer2.add_field("text", str, default="")
-    composer2.add_field("analysis", Dict[str, Any], default_factory=dict)
+    composer2.add_field("analysis", dict[str, Any], default_factory=dict)
 
     # Merge schemas
     merged = SchemaComposer.merge(
@@ -423,28 +375,22 @@ def example_schema_merging():
     MergedState = merged.build()
 
     # Check fields
-    print("Merged schema fields:")
-    for field_name, field_info in MergedState.model_fields.items():
-        print(f"  {field_name}: {field_info.annotation}")
+    for _field_name, _field_info in MergedState.model_fields.items():
+        pass
 
     # Use merged state
-    state = MergedState(query="AI safety", text="Recent research shows...")
-    print(f"\nState query: {state.query}")
-    print(f"State text: {state.text}")
-    print(f"Has messages: {'messages' in state.model_fields}")
+    MergedState(query="AI safety", text="Recent research shows...")
 
 
-def example_real_world_agent_state():
+def example_real_world_agent_state() -> None:
     """Example 8: Real-world agent state pattern."""
-    print("\n\n=== Example 8: Real-World Agent State ===\n")
-
     # Use factory for common agent pattern
     AgentState = create_agent_state(
         name="SmartAgentState",
         additional_fields={
-            "plan": (List[str], Field(default_factory=list)),
+            "plan": (list[str], Field(default_factory=list)),
             "current_step": (int, Field(default=0)),
-            "tools_used": (List[str], Field(default_factory=list)),
+            "tools_used": (list[str], Field(default_factory=list)),
             "reasoning": (str, Field(default="")),
         },
         shared_fields=["messages", "context"],
@@ -477,23 +423,16 @@ def example_real_world_agent_state():
         }
     )
 
-    print("Agent State Summary:")
-    print(f"  Current step: {state.current_step}/{len(state.plan)}")
-    print(f"  Tools used: {state.tools_used}")
-    print(f"  Context items: {len(state.context)}")
-    print(f"  Plan: {state.plan}")
 
-
-def example_serialization_patterns():
+def example_serialization_patterns() -> None:
     """Example 9: Serialization and persistence patterns."""
-    print("\n\n=== Example 9: Serialization Patterns ===\n")
 
     class PersistentState(StateSchema):
         """State designed for persistence."""
 
         session_id: str = Field(default="")
-        messages: List[BaseMessage] = Field(default_factory=list)
-        metadata: Dict[str, Any] = Field(default_factory=dict)
+        messages: list[BaseMessage] = Field(default_factory=list)
+        metadata: dict[str, Any] = Field(default_factory=dict)
         created_at: str = Field(default="")
 
         __reducer_fields__ = {
@@ -529,49 +468,42 @@ def example_serialization_patterns():
 
     # Serialize to JSON
     json_data = state.to_json()
-    print("Serialized JSON:")
-    print(json_data[:200] + "...")  # First 200 chars
 
     # Serialize to dict
-    dict_data = state.to_dict()
-    print(f"\nDict keys: {list(dict_data.keys())}")
+    state.to_dict()
 
     # Restore from JSON
     restored = PersistentState.from_json(json_data)
-    print(f"\nRestored session: {restored.session_id}")
-    print(f"Message count: {len(restored.messages)}")
 
     # Pretty print for debugging
-    print("\nPretty printed state:")
     restored.pretty_print()
 
 
-def example_schema_visualization():
+def example_schema_visualization() -> None:
     """Example 10: Schema visualization and introspection."""
-    print("\n\n=== Example 10: Schema Visualization ===\n")
 
     class ComplexState(StateSchema):
         """Complex state for visualization demo."""
 
         # Message handling
-        messages: List[BaseMessage] = Field(
+        messages: list[BaseMessage] = Field(
             default_factory=list, description="Conversation messages"
         )
 
         # Query processing
         query: str = Field(default="", description="User query")
-        query_embedding: Optional[List[float]] = Field(
+        query_embedding: list[float] | None = Field(
             default=None, description="Query vector"
         )
 
         # Results
-        results: List[Dict[str, Any]] = Field(
+        results: list[dict[str, Any]] = Field(
             default_factory=list, description="Search results"
         )
         score: float = Field(default=0.0, description="Relevance score")
 
         # Metadata
-        metadata: Dict[str, Any] = Field(
+        metadata: dict[str, Any] = Field(
             default_factory=dict, description="Additional metadata"
         )
 
@@ -591,29 +523,19 @@ def example_schema_visualization():
         }
 
     # Display schema information
-    print("Schema Visualization:")
     SchemaUI.display_schema(ComplexState)
 
     # Get schema info programmatically
-    info = get_schema_info(ComplexState)
-    print("\nSchema Info Summary:")
-    print(f"  Total fields: {info['total_fields']}")
-    print(f"  Required fields: {info['required_fields']}")
-    print(f"  Optional fields: {info['optional_fields']}")
-    print(f"  Has messages: {info['has_messages']}")
-    print(f"  Has reducers: {info['has_reducers']}")
+    get_schema_info(ComplexState)
 
     # Generate code representation
-    print("\nGenerated Code:")
-    code = ComplexState.to_python_code()
-    print(code[:500] + "...")  # First 500 chars
+    ComplexState.to_python_code()
 
     # Validate schema structure
-    is_valid = validate_schema(ComplexState)
-    print(f"\nSchema validation: {'✓ Passed' if is_valid else '✗ Failed'}")
+    validate_schema(ComplexState)
 
 
-def main():
+def main() -> None:
     """Run all examples."""
     examples = [
         example_basic_state_creation,
@@ -654,6 +576,6 @@ if __name__ == "__main__":
         if 0 <= example_num < len(examples):
             examples[example_num]()
         else:
-            print(f"Invalid example number. Choose 1-{len(examples)}")
+            pass
     else:
         main()

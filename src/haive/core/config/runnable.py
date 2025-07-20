@@ -132,7 +132,8 @@ class RunnableConfigManager:
                 if v is not None and not isinstance(v, BaseModel | dict | list)
             }
 
-        # Add engine parameters to both global config and engine-specific sections
+        # Add engine parameters to both global config and engine-specific
+        # sections
         if engine_params:
             # Add by engine ID (most specific)
             engine_id = getattr(engine, "id", str(uuid.uuid4()))

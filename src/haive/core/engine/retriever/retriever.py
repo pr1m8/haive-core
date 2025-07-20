@@ -2,6 +2,7 @@
 
 """Retriever engine implementation for the Haive framework.
 
+from typing import Any
 This module provides a flexible and extensible interface for document retrieval in the Haive framework.
 It includes base classes and implementations for various retriever types, with a focus on vector
 store-based retrieval.
@@ -42,7 +43,8 @@ import importlib
 import logging
 import pkgutil
 import sys
-from typing import Any, ClassVar, Dict, Sequence
+from collections.abc import Sequence
+from typing import Any, ClassVar
 
 from langchain_core.documents import Document
 from langchain_core.retrievers import BaseRetriever
@@ -62,7 +64,7 @@ class RetrieverInput(BaseModel):
 
     query: str = Field(description="Query string for retrieval")
     k: int | None = Field(default=None, description="Number of documents to retrieve")
-    filter: Dict[str, Any] | None = Field(
+    filter: dict[str, Any] | None = Field(
         default=None, description="Filter criteria for retrieval"
     )
     search_type: str | None = Field(
@@ -86,7 +88,7 @@ class RetrieverOutput(BaseModel):
 
     @field_validator("retrieved_documents", mode="before")
     @classmethod
-    def validate_documents(cls, v):
+    def validate_documents(cls, v) -> Any:
         """Validate that the documents are a list."""
         if v is None:
             return []
@@ -144,7 +146,7 @@ class BaseRetrieverConfig(InvokableEngine[RetrieverInput, RetrieverOutput]):
         default_factory=dict, description="Additional search parameters"
     )
     k: int = Field(default=4, description="Number of documents to retrieve")
-    filter: Dict[str, Any] | None = Field(
+    filter: dict[str, Any] | None = Field(
         default=None, description="Filter to apply to vector store search"
     )
 
@@ -168,7 +170,7 @@ class BaseRetrieverConfig(InvokableEngine[RetrieverInput, RetrieverOutput]):
 
     @field_validator("engine_type")
     @classmethod
-    def validate_engine_type(cls, v):
+    def validate_engine_type(cls, v) -> Any:
         """Validate that the engine type is RETRIEVER."""
         if v != EngineType.RETRIEVER:
             raise ValueError("engine_type must be RETRIEVER")
@@ -314,9 +316,10 @@ class BaseRetrieverConfig(InvokableEngine[RetrieverInput, RetrieverOutput]):
             Decorator function
         """
 
-        def decorator(subclass):
+        def decorator(subclass) -> Any:
             logger.debug(
-                f"Registering retriever type {retriever_type} with class {subclass.__name__}"
+                f"Registering retriever type {retriever_type} with class {
+                    subclass.__name__}"
             )
             cls._registry[retriever_type] = subclass
             return subclass
@@ -471,7 +474,10 @@ class BaseRetrieverConfig(InvokableEngine[RetrieverInput, RetrieverOutput]):
                         if metadata_items:
                             metadata_str = f" ({', '.join(metadata_items)})"
 
-                    results.append(f"Result {i+1}{metadata_str}:\n{content_preview}")
+                    results.append(
+                        f"Result {
+                            i + 1}{metadata_str}:\n{content_preview}"
+                    )
 
                 return "\n\n".join(results)
 
@@ -549,13 +555,13 @@ class VectorStoreRetrieverConfig(BaseRetrieverConfig):
         default_factory=dict, description="Additional search parameters"
     )
 
-    filter: Dict[str, Any] | None = Field(
+    filter: dict[str, Any] | None = Field(
         default=None, description="Filter to apply to vector store search"
     )
 
     @field_validator("retriever_type")
     @classmethod
-    def validate_retriever_type(cls, v):
+    def validate_retriever_type(cls, v) -> Any:
         """Validate that the retriever type is VECTOR_STORE."""
         if v != RetrieverType.VECTOR_STORE:
             raise ValueError("retriever_type must be VECTOR_STORE")

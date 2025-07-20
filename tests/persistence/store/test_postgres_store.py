@@ -10,7 +10,6 @@ This test suite validates the PostgreSQL store wrapper's ability to handle:
 
 import os
 import uuid
-from typing import Optional
 
 import pytest
 
@@ -18,7 +17,7 @@ import pytest
 
 
 @pytest.fixture
-def postgres_connection_string() -> Optional[str]:
+def postgres_connection_string() -> str | None:
     """Get PostgreSQL connection string from environment."""
     return os.getenv("POSTGRES_CONNECTION_STRING")
 
@@ -187,7 +186,8 @@ class TestPostgresStoreAsync:
 class TestPostgresStorePipelineFix:
     """Test the specific pipeline mode fix for prepared statement conflicts."""
 
-    def test_pipeline_mode_disabled_on_creation(self, postgres_connection_string):
+    def test_pipeline_mode_disabled_on_creation(
+            self, postgres_connection_string):
         """Test that pipeline mode is explicitly disabled to prevent prepared statement conflicts."""
         if not postgres_connection_string:
             pytest.skip("No POSTGRES_CONNECTION_STRING environment variable")
@@ -197,7 +197,8 @@ class TestPostgresStorePipelineFix:
 
         config = StoreConfig(
             type=StoreType.POSTGRES_SYNC,
-            connection_params={"connection_string": postgres_connection_string},
+            connection_params={
+                "connection_string": postgres_connection_string},
         )
 
         wrapper = PostgresStoreWrapper(config=config)
@@ -222,7 +223,8 @@ class TestPostgresStorePipelineFix:
 
         config = StoreConfig(
             type=StoreType.POSTGRES_ASYNC,
-            connection_params={"connection_string": postgres_connection_string},
+            connection_params={
+                "connection_string": postgres_connection_string},
         )
 
         wrapper = AsyncPostgresStoreWrapper(config=config)
@@ -249,7 +251,8 @@ class TestPostgresStorePipelineFix:
             connection_string=postgres_connection_string,
         )
 
-        # Perform multiple operations that would previously cause '_pg3_X' conflicts
+        # Perform multiple operations that would previously cause '_pg3_X'
+        # conflicts
         for i in range(5):
             key = f"multi_op_test_{i}"
             value = {"operation": i, "data": f"test_data_{i}"}
@@ -271,7 +274,6 @@ class TestStoreIntegration:
             pytest.skip("No POSTGRES_CONNECTION_STRING environment variable")
 
         from haive.agents.simple import SimpleAgent
-
         from haive.core.engine.aug_llm import AugLLMConfig
         from haive.core.persistence.postgres_config import PostgresCheckpointerConfig
         from haive.core.persistence.types import CheckpointerMode, CheckpointStorageMode
@@ -299,16 +301,16 @@ class TestStoreIntegration:
         # Test store functionality through agent
         namespace = ("agent", agent.name)
         key = "agent_memory"
-        value = {"message": "Agent can remember this!", "timestamp": "2025-01-14"}
+        value = {
+            "message": "Agent can remember this!",
+            "timestamp": "2025-01-14"}
 
         agent.store.put(namespace, key, value)
         retrieved = agent.store.get(namespace, key)
 
         # Handle Item object if needed
-        if hasattr(retrieved, "value"):
-            retrieved_value = retrieved.value
-        else:
-            retrieved_value = retrieved
+        retrieved_value = retrieved.value if hasattr(
+            retrieved, "value") else retrieved
 
         assert retrieved_value == value
 

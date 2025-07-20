@@ -1,5 +1,6 @@
 """PubMed Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the PubMed retriever,
 which retrieves biomedical and life science literature from the PubMed database.
 PubMed is a free search engine accessing primarily the MEDLINE database of references
@@ -126,7 +127,7 @@ class PubMedRetrieverConfig(BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a PubMed retriever from this configuration.
 
         Returns:

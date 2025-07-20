@@ -1,14 +1,75 @@
 """Agent Node V3 - Hierarchical state projection for multi-agent systems.
 
-This module provides AgentNodeV3 which properly handles state projection
-between container states (like MultiAgentState) and individual agent states,
-maintaining type safety and hierarchical access patterns.
+This module provides AgentNodeV3 which enables sophisticated multi-agent workflows
+by properly handling state projection between container states (like MultiAgentState)
+and individual agent states, maintaining type safety and hierarchical access patterns.
+
+Key Features:
+    - **Hierarchical State Management**: Projects container states to agent-specific schemas
+    - **Direct Field Updates**: Agents with output_schema update state fields directly
+    - **Type Safety**: Maintains schema validation throughout execution
+    - **Backward Compatibility**: Supports both structured and message-based agents
+    - **Dynamic Agent Lookup**: Resolves agents from state at runtime
+    - **Recompilation Tracking**: Monitors when agents need graph rebuilding
+
+Architecture:
+    The AgentNodeV3 follows a projection-based approach where:
+
+    1. **Container State**: MultiAgentState holds all agents and shared data
+    2. **State Projection**: Each agent gets exactly what it expects
+    3. **Output Processing**: Structured outputs update fields directly
+    4. **State Synchronization**: Changes propagate back to container
+
+Usage Patterns:
+    - **Self-Discover Workflows**: Sequential agents building on each other's outputs
+    - **Multi-Agent Coordination**: Parallel agents sharing common state
+    - **Hierarchical Processing**: Nested agent structures with state isolation
+
+Examples:
+    Basic agent node creation::
+
+        from haive.core.graph.node.agent_node_v3 import create_agent_node_v3
+        from haive.agents.simple import SimpleAgent
+
+        # Create agent with structured output
+        agent = SimpleAgent(
+            name="analyzer",
+            engine=AugLLMConfig(),
+            structured_output_model=AnalysisResult
+        )
+
+        # Create node that updates fields directly
+        node = create_agent_node_v3(
+            agent_name="analyzer",
+            agent=agent
+        )
+
+    Multi-agent workflow::
+
+        # Sequential execution where agents read each other's outputs
+        state = MultiAgentState()
+        state.agents["planner"] = planner_agent
+        state.agents["executor"] = executor_agent
+
+        # Step 1: Planner outputs planning_result field
+        planner_node = create_agent_node_v3("planner")
+        result1 = planner_node(state, config)
+
+        # Step 2: Executor reads planning_result directly from state
+        executor_node = create_agent_node_v3("executor")
+        result2 = executor_node(state, config)
+
+See Also:
+    - :class:`haive.core.schema.prebuilt.multi_agent_state.MultiAgentState`: Container state
+    - :class:`haive.agents.base.agent.Agent`: Base agent class
+    - :mod:`haive.core.graph.node.base_node_config`: Base node configuration
 """
 
 from __future__ import annotations
 
+import contextlib
 import logging
-from typing import TYPE_CHECKING, Any, Dict, Optional, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from langchain_core.messages import BaseMessage
 from langgraph.types import Command
@@ -37,17 +98,111 @@ TOutput = TypeVar("TOutput", bound=BaseModel)
 class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
     """Agent node configuration with hierarchical state projection support.
 
-    This node configuration handles:
-    - Execution of agents within container states (like MultiAgentState)
-    - State projection from container to agent-specific schema
-    - Updates back to the container maintaining hierarchy
-    - Recompilation tracking for dynamic agent changes
+    This node configuration enables sophisticated multi-agent workflows by handling
+    execution of agents within container states (like MultiAgentState) with proper
+    state projection, output processing, and hierarchy maintenance.
 
-    Key improvements over V2:
-    - Works with MultiAgentState and similar container patterns
-    - Projects state to exact agent schema (no flattening)
-    - Maintains type safety throughout execution
-    - Supports dynamic agent lookup from state
+    The AgentNodeV3Config is designed to work seamlessly with structured output agents,
+    enabling direct field updates (like engine nodes) while maintaining backward
+    compatibility with message-based agents.
+
+    Key Features:
+        - **Hierarchical State Management**: Projects container states to agent schemas
+        - **Direct Field Updates**: Agents with output_schema update state fields directly
+        - **Type Safety**: Maintains schema validation throughout execution
+        - **Dynamic Agent Resolution**: Resolves agents from state at runtime
+        - **Recompilation Tracking**: Monitors when agents need graph rebuilding
+        - **Flexible Output Modes**: Supports merge, replace, and isolate patterns
+
+    Architecture:
+        The node follows a three-phase execution pattern:
+
+        1. **State Projection**: Container state → Agent-specific schema
+        2. **Agent Execution**: Agent processes projected state
+        3. **Output Integration**: Results → Container state updates
+
+    Key Improvements Over V2:
+        - Works with MultiAgentState and similar container patterns
+        - Projects state to exact agent schema (no flattening)
+        - Maintains type safety throughout execution
+        - Supports dynamic agent lookup from state
+        - Enables Self-Discover style workflows
+
+    Attributes:
+        agent_name (str): Name of agent to execute (key in container's agents dict)
+        agent (Optional[Agent]): Agent instance (extracted from state if not provided)
+        agent_state_field (str): Field in container holding agent states (default: "agent_states")
+        agents_field (str): Field in container holding agent instances (default: "agents")
+        project_state (bool): Whether to project state to agent's expected schema (default: True)
+        shared_fields (List[str]): Fields to share from container to agent (default: ["messages"])
+        output_mode (str): How to handle outputs: 'merge', 'replace', or 'isolate' (default: "merge")
+        update_container_state (bool): Whether to update the container's agent_states (default: True)
+        track_recompilation (bool): Whether to track agent recompilation needs (default: True)
+
+    Examples:
+        Basic configuration::
+
+            from haive.core.graph.node.agent_node_v3 import AgentNodeV3Config
+            from haive.agents.simple import SimpleAgent
+
+            # Create agent with structured output
+            agent = SimpleAgent(
+                name="analyzer",
+                engine=AugLLMConfig(),
+                structured_output_model=AnalysisResult
+            )
+
+            # Create node configuration
+            config = AgentNodeV3Config(
+                name="analysis_node",
+                agent_name="analyzer",
+                agent=agent
+            )
+
+        Custom state projection::
+
+            # Custom shared fields and output mode
+            config = AgentNodeV3Config(
+                name="custom_node",
+                agent_name="custom_agent",
+                shared_fields=["messages", "context", "metadata"],
+                output_mode="replace",
+                project_state=True
+            )
+
+        Multi-agent workflow::
+
+            # Sequential agents with direct field access
+            planner_config = AgentNodeV3Config(
+                name="planner_node",
+                agent_name="planner"
+            )
+
+            executor_config = AgentNodeV3Config(
+                name="executor_node",
+                agent_name="executor"
+            )
+
+            # Execute in sequence
+            state = MultiAgentState()
+            result1 = planner_config(state, config)  # Updates planning fields
+            result2 = executor_config(state, config)  # Reads planning fields directly
+
+    Raises:
+        ValueError: If neither agent_name nor agent is provided
+        ValueError: If agent_name not found in state's agents dict
+        AgentExecutionError: If agent execution fails
+
+    Note:
+        For agents with structured output schemas, the node will update state fields
+        directly (like engine nodes). For message-based agents, it uses the traditional
+        agent_outputs pattern for backward compatibility.
+
+    See Also:
+        - :func:`create_agent_node_v3`: Convenience factory function
+        - :class:`haive.core.schema.prebuilt.multi_agent_state.MultiAgentState`: Container state
+        - :class:`haive.agents.base.agent.Agent`: Base agent class
+        - :class:`haive.core.graph.node.base_node_config.BaseNodeConfig`: Base configuration
     """
 
     node_type: NodeType = Field(
@@ -59,7 +214,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
         description="Name of agent to execute (key in container's agents dict)"
     )
 
-    agent: Optional["Agent"] = Field(
+    agent: Agent | None = Field(
         default=None,
         description="Agent instance (extracted from state if not provided)",
     )
@@ -98,7 +253,10 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
     )
 
     @model_validator(mode="after")
-    def validate_agent_config(self) -> "AgentNodeV3Config":
+
+
+    @classmethod
+    def validate_agent_config(cls) -> AgentNodeV3Config:
         """Validate configuration."""
         if not self.agent_name and not self.agent:
             raise ValueError("Either agent_name or agent must be provided")
@@ -168,7 +326,84 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
         return fields
 
     def __call__(self, state: StateLike, config: ConfigLike | None = None) -> Command:
-        """Execute agent with hierarchical state projection."""
+        """Execute agent with hierarchical state projection.
+
+        This is the main execution method that orchestrates the complete agent
+        execution workflow within a multi-agent system. It handles state projection,
+        agent execution, output processing, and state updates.
+
+        The method follows a three-phase execution pattern:
+        1. **State Projection**: Projects container state to agent-specific schema
+        2. **Agent Execution**: Executes agent with projected state
+        3. **Output Integration**: Processes results and updates container state
+
+        Args:
+            state (StateLike): Container state (e.g., MultiAgentState) containing
+                agents and shared data. Must have agents dict and agent_states dict.
+            config (Optional[ConfigLike]): Optional configuration for execution.
+                Can include debug flags, execution parameters, and runtime settings.
+
+        Returns:
+            Command: LangGraph command containing state updates and optional goto.
+                For agents with structured output, updates contain direct field updates.
+                For message-based agents, updates contain agent_outputs and messages.
+
+        Raises:
+            ValueError: If agent_name not found in state's agents dict
+            AgentExecutionError: If agent execution fails
+            ValidationError: If state projection or output processing fails
+
+        Examples:
+            Basic execution::
+
+                from haive.core.schema.prebuilt.multi_agent_state import MultiAgentState
+                from haive.agents.simple import SimpleAgent
+
+                # Setup state with agent
+                state = MultiAgentState()
+                state.agents["analyzer"] = SimpleAgent(
+                    name="analyzer",
+                    engine=AugLLMConfig(),
+                    structured_output_model=AnalysisResult
+                )
+
+                # Create and execute node
+                node = create_agent_node_v3("analyzer")
+                result = node(state, {"debug": True})
+
+                # Result contains direct field updates
+                print(result.update.keys())  # ['analysis_result', 'confidence', 'agent_states']
+
+            Sequential multi-agent execution::
+
+                # Sequential agents reading each other's outputs
+                state = MultiAgentState()
+                state.agents["planner"] = planner_agent
+                state.agents["executor"] = executor_agent
+
+                # Execute planner - outputs planning_result
+                planner_node = create_agent_node_v3("planner")
+                result1 = planner_node(state, config)
+
+                # Apply updates
+                for key, value in result1.update.items():
+                    setattr(state, key, value)
+
+                # Execute executor - reads planning_result directly
+                executor_node = create_agent_node_v3("executor")
+                result2 = executor_node(state, config)
+
+        Note:
+            The method automatically detects whether an agent has structured output
+            and adjusts the output processing accordingly. Agents with output_schema
+            will have their outputs used for direct field updates, while message-based
+            agents will use the traditional agent_outputs pattern.
+
+        See Also:
+            - :meth:`_project_state_for_agent`: State projection logic
+            - :meth:`_process_agent_output`: Output processing logic
+            - :class:`haive.core.schema.prebuilt.multi_agent_state.MultiAgentState`: Container state
+        """
         # Check if debug mode is enabled
         debug_mode = (
             (config and config.get("debug", False))
@@ -179,10 +414,10 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
         if debug_mode:
             self._display_debug_info(state, "BEFORE_EXECUTION")
 
-        logger.info(f"{'='*60}")
+        logger.info(f"{'=' * 60}")
         logger.info(f"AGENT NODE V3: {self.name}")
         logger.info(f"Agent: {self.agent_name}")
-        logger.info(f"{'='*60}")
+        logger.info(f"{'=' * 60}")
 
         try:
             # Get agent instance
@@ -220,7 +455,10 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
             if self.track_recompilation:
                 self._check_recompilation(state, agent)
 
-            logger.info(f"✅ Agent completed with {len(state_update)} field updates")
+            logger.info(
+                f"✅ Agent completed with {
+                    len(state_update)} field updates"
+            )
 
             if debug_mode:
                 self._display_debug_info(state, "AFTER_EXECUTION", state_update)
@@ -247,7 +485,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
 
             return Command(update=error_update, goto=self._get_goto_node())
 
-    def _get_agent(self, state: StateLike) -> Optional["Agent"]:
+    def _get_agent(self, state: StateLike) -> Agent | None:
         """Get agent from direct reference or state's agents dict."""
         # Priority 1: Direct agent reference
         if self.agent:
@@ -271,56 +509,107 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
             state.active_agent = self.agent_name
 
     def _project_state_for_agent(
-        self, state: StateLike, agent: "Agent"
+        self, state: StateLike, agent: Agent
     ) -> dict[str, Any]:
         """Project container state to agent's expected schema.
 
-        This is the key method that enables hierarchical state management.
-        Each agent gets exactly what it expects, not a flattened global state.
+        This is the key method that enables hierarchical state management in
+        multi-agent systems. It projects a container state (like MultiAgentState)
+        to the specific schema expected by an individual agent, ensuring type
+        safety and proper data isolation.
+
+        The projection process:
+        1. Extracts agent's isolated state from agent_states field
+        2. Adds shared fields from container (messages, context, etc.)
+        3. Preserves agent-specific data while sharing common information
+        4. Validates that all required inputs are available
+
+        Args:
+            state (StateLike): Container state containing all agents and shared data.
+                Must have agent_states dict and shared fields.
+            agent (Agent): Target agent instance that will receive the projected state.
+                Used to determine expected schema and validation requirements.
+
+        Returns:
+            Dict[str, Any]: Projected state dictionary containing:
+                - Agent's isolated state from agent_states[agent_name]
+                - Shared fields from container (messages, context, etc.)
+                - Properly formatted data matching agent's expected schema
+
+        Examples:
+            Basic state projection::
+
+                # Container state with multiple agents
+                state = MultiAgentState()
+                state.messages = [HumanMessage("Hello")]
+                state.agent_states = {
+                    "analyzer": {"analysis_ready": True},
+                    "executor": {"execution_ready": False}
+                }
+
+                # Project for specific agent
+                projected = node._project_state_for_agent(state, analyzer_agent)
+
+                # Result contains isolated state + shared fields
+                print(projected)
+                # {
+                #     "analysis_ready": True,      # From agent_states["analyzer"]
+                #     "messages": [HumanMessage("Hello")]  # Shared field
+                # }
+
+            Custom shared fields::
+
+                # Configure custom shared fields
+                config = AgentNodeV3Config(
+                    agent_name="custom_agent",
+                    shared_fields=["messages", "context", "metadata"]
+                )
+
+                # Projection includes all shared fields
+                projected = config._project_state_for_agent(state, agent)
+                # Contains: agent state + messages + context + metadata
+
+        Note:
+            The method ensures that each agent receives exactly what it expects,
+            maintaining type safety and preventing agents from accessing data
+            they shouldn't see. This enables true hierarchical state management
+            in complex multi-agent workflows.
+
+        See Also:
+            - :attr:`shared_fields`: Fields shared from container to agent
+            - :attr:`agent_state_field`: Container field holding agent states
+            - :meth:`_extract_message_objects`: Message extraction helper
         """
         # DEBUG: Print state projection debug info
-        print(f"\n🔍 DEBUG: Projecting state for agent '{self.agent_name}'")
-        print(f"  State type: {type(state)}")
-        print(f"  State.__dict__: {state.__dict__}")
-        print(f"  State fields: {[f for f in dir(state) if not f.startswith('_')]}")
 
         # Start with agent's isolated state
         agent_states = getattr(state, self.agent_state_field, {})
         agent_state = agent_states.get(self.agent_name, {})
         projected = agent_state.copy()
 
-        print(f"  Agent states field '{self.agent_state_field}': {agent_states}")
-        print(f"  Agent state for '{self.agent_name}': {agent_state}")
-
         # DEBUG: Show agent outputs
         if hasattr(state, "agent_outputs"):
             agent_outputs = getattr(state, "agent_outputs", {})
-            print(f"  Agent outputs available: {list(agent_outputs.keys())}")
-            for agent_name, output in agent_outputs.items():
-                print(f"    {agent_name}: {type(output)} - {str(output)[:100]}...")
+            for agent_name, _output in agent_outputs.items():
+                pass
 
         if not self.project_state:
-            print("  ❌ project_state=False, returning isolated state only")
             return projected
 
         # Add shared fields from container
-        print(f"  Shared fields to check: {self.shared_fields}")
         for field in self.shared_fields:
             if hasattr(state, field) and field not in projected:
                 value = getattr(state, field)
-                print(f"    Adding shared field '{field}': {str(value)[:100]}...")
                 # Special handling for messages
                 if field == "messages":
                     value = self._extract_message_objects(value)
                 projected[field] = value
             elif hasattr(state, field):
-                print(f"    Skipping '{field}' - already in projected")
+                pass
             else:
-                print(f"    Missing field '{field}' in state")
+                pass
 
         # DEBUG: Show projected state
-        print(f"  Projected state keys: {list(projected.keys())}")
-        print(f"  Projected state values: {projected}")
 
         # DEBUG: Check if required inputs are available
         agent_name = self.agent_name
@@ -335,12 +624,11 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
         else:
             required = []
 
-        print(f"  Required inputs: {required}")
         missing = [key for key in required if key not in projected]
         if missing:
-            print(f"  ❌ MISSING INPUTS: {missing}")
+            pass
         else:
-            print("  ✅ All required inputs available")
+            pass
 
         # Let the agent handle its own state schema validation
         # AgentNodeV3 just provides the projected data
@@ -352,20 +640,127 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
             return messages.root
         if isinstance(messages, list | tuple):
             return list(messages)
-        else:
-            try:
-                return list(messages)
-            except:
-                logger.warning(f"Cannot extract messages from {type(messages)}")
-                return []
+        try:
+            return list(messages)
+        except BaseException:
+            logger.warning(f"Cannot extract messages from {type(messages)}")
+            return []
 
     def _process_agent_output(
-        self, result: Any, state: StateLike, agent: "Agent"
+        self, result: Any, state: StateLike, agent: Agent
     ) -> dict[str, Any]:
         """Process agent output and prepare state update.
 
-        For agents with output_schema: Direct field updates (like engine nodes)
-        For agents without: Use messages or agent_outputs pattern
+        This method processes agent execution results and converts them into
+        appropriate state updates for the container state. It handles both
+        structured output agents (with output_schema) and traditional message-based
+        agents, ensuring proper integration with multi-agent workflows.
+
+        The processing follows different patterns based on agent type:
+        - **Structured Output Agents**: Direct field updates (like engine nodes)
+        - **Message-Based Agents**: Traditional agent_outputs pattern
+        - **Hybrid Agents**: Combination of both patterns
+
+        Processing Logic:
+            1. Detects if agent has structured output schema
+            2. For structured output: Extracts fields for direct state updates
+            3. For messages: Preserves message-based workflow compatibility
+            4. Updates agent_states for tracking and debugging
+            5. Handles shared fields and cross-agent communication
+
+        Args:
+            result (Any): Raw result from agent execution. Can be:
+                - BaseModel instance (structured output)
+                - Dict with messages and/or structured fields
+                - String or other primitive (fallback)
+            state (StateLike): Container state to update. Must have agent_states
+                and other container fields.
+            agent (Agent): Agent instance that produced the result. Used to
+                determine output schema and processing strategy.
+
+        Returns:
+            Dict[str, Any]: State update dictionary containing:
+                - Direct field updates for structured output agents
+                - agent_states updates for tracking
+                - agent_outputs for message-based agents
+                - messages for message-based workflows
+
+        Examples:
+            Structured output agent::
+
+                # Agent with output_schema returns BaseModel
+                class AnalysisResult(BaseModel):
+                    analysis: str
+                    confidence: float
+                    recommendations: List[str]
+
+                agent = SimpleAgent(
+                    name="analyzer",
+                    structured_output_model=AnalysisResult
+                )
+
+                result = AnalysisResult(
+                    analysis="Market analysis complete",
+                    confidence=0.95,
+                    recommendations=["Invest in AI", "Expand globally"]
+                )
+
+                # Processing creates direct field updates
+                update = node._process_agent_output(result, state, agent)
+                print(update)
+                # {
+                #     "analysis": "Market analysis complete",
+                #     "confidence": 0.95,
+                #     "recommendations": ["Invest in AI", "Expand globally"],
+                #     "agent_states": {
+                #         "analyzer": {"executed": True, "has_schema": True}
+                #     }
+                # }
+
+            Message-based agent::
+
+                # Traditional agent returns messages
+                result = {
+                    "messages": [
+                        AIMessage("I've completed the analysis.")
+                    ]
+                }
+
+                # Processing preserves message workflow
+                update = node._process_agent_output(result, state, agent)
+                print(update)
+                # {
+                #     "messages": [AIMessage("I've completed the analysis.")],
+                #     "agent_states": {
+                #         "analyzer": {"executed": True, "message_count": 1}
+                #     }
+                # }
+
+            Sequential workflow (Self-Discover pattern)::
+
+                # Agent 1 outputs structured data
+                planner_result = PlanningResult(
+                    plan=["Step 1", "Step 2", "Step 3"],
+                    priority="high"
+                )
+
+                # Creates direct field updates
+                update1 = node._process_agent_output(planner_result, state, planner)
+                # Updates: {"plan": [...], "priority": "high"}
+
+                # Agent 2 can read these fields directly
+                executor_input = node._project_state_for_agent(state, executor)
+                # Contains: {"plan": [...], "priority": "high", "messages": [...]}
+
+        Note:
+            This method is the key to enabling Self-Discover style workflows where
+            agents can read each other's outputs directly from state fields, rather
+            than navigating complex nested structures like agent_outputs[agent_name][field].
+
+        See Also:
+            - :attr:`output_mode`: Controls how outputs are merged
+            - :attr:`update_container_state`: Controls agent_states updates
+            - :meth:`_project_state_for_agent`: State projection for next agents
         """
         state_update = {}
 
@@ -469,7 +864,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
 
         return state_update
 
-    def _check_recompilation(self, state: StateLike, agent: "Agent") -> None:
+    def _check_recompilation(self, state: StateLike, agent: Agent) -> None:
         """Check and track recompilation needs."""
         if hasattr(agent, "graph") and hasattr(agent.graph, "needs_recompile"):
             if agent.graph.needs_recompile():
@@ -489,7 +884,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
         self,
         state: StateLike,
         phase: str,
-        state_update: Dict[str, Any] | None = None,
+        state_update: dict[str, Any] | None = None,
     ) -> None:
         """Display comprehensive debug information with rich visualization."""
         # Create main panel title
@@ -550,7 +945,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
             order = getattr(state, "agent_execution_order", [])
             order_branch = branch.add(f"📋 Execution Order ({len(order)})")
             for i, agent_name in enumerate(order):
-                order_branch.add(f"{i+1}. {agent_name}")
+                order_branch.add(f"{i + 1}. {agent_name}")
 
         # Active agent
         if hasattr(state, "active_agent"):
@@ -653,7 +1048,9 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
                     value.get(self.agent_name, {}) if isinstance(value, dict) else {}
                 )
                 update_branch = branch.add(
-                    f"📊 {key}: Agent '{self.agent_name}' ({len(agent_updates)} fields)"
+                    f"📊 {key}: Agent '{
+                        self.agent_name}' ({
+                        len(agent_updates)} fields)"
                 )
                 for field, field_value in agent_updates.items():
                     if isinstance(field_value, list | tuple):
@@ -670,7 +1067,9 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
                     value.get(self.agent_name, {}) if isinstance(value, dict) else {}
                 )
                 output_branch = branch.add(
-                    f"📤 {key}: Agent '{self.agent_name}' ({len(agent_output)} fields)"
+                    f"📤 {key}: Agent '{
+                        self.agent_name}' ({
+                        len(agent_output)} fields)"
                 )
                 for field, field_value in agent_output.items():
                     value_str = (
@@ -685,7 +1084,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
                 )
                 branch.add(f"📝 {key}: {value_str}")
 
-    def _display_agent_input(self, agent_input: dict[str, Any], agent: "Agent") -> None:
+    def _display_agent_input(self, agent_input: dict[str, Any], agent: Agent) -> None:
         """Display agent input projection with rich visualization."""
         input_tree = Tree(
             f"📥 Projected Input for '{self.agent_name}'", style="bold cyan"
@@ -724,7 +1123,11 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
 
     def _display_agent_output(self, result: Any, state_update: dict[str, Any]) -> None:
         """Display agent output and state updates with rich visualization."""
-        output_tree = Tree(f"📤 Agent '{self.agent_name}' Output", style="bold green")
+        output_tree = Tree(
+            f"📤 Agent '{
+                self.agent_name}' Output",
+            style="bold green",
+        )
 
         # Add raw result info
         result_branch = output_tree.add("🎯 Raw Result")
@@ -761,28 +1164,124 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
 
 def create_agent_node_v3(
     agent_name: str,
-    agent: Optional["Agent"] = None,
+    agent: Agent | None = None,
     name: str | None = None,
     **kwargs,
 ) -> AgentNodeV3Config:
     """Create an agent node V3 configuration.
 
+    Convenience factory function for creating AgentNodeV3Config instances with
+    sensible defaults. This function simplifies the creation of agent nodes for
+    multi-agent workflows and handles common configuration patterns.
+
+    The function automatically:
+    - Generates a descriptive node name if not provided
+    - Rebuilds the model to resolve forward references
+    - Applies default configuration suitable for most use cases
+    - Supports both direct agent provision and runtime resolution
+
     Args:
-        agent_name: Name of agent to execute (key in container)
-        agent: Optional agent instance (extracted from state if not provided)
-        name: Optional node name
-        **kwargs: Additional configuration options
+        agent_name (str): Name of agent to execute. This should match a key in
+            the container state's agents dictionary. Used for dynamic agent
+            resolution at runtime.
+        agent (Optional[Agent]): Optional agent instance to use directly.
+            If provided, the agent will be used regardless of what's in the
+            container state. If None, agent will be resolved from state.agents[agent_name].
+        name (Optional[str]): Optional node name for debugging and visualization.
+            If not provided, will be auto-generated as "agent_{agent_name}".
+        **kwargs: Additional configuration options passed to AgentNodeV3Config:
+            - shared_fields: Fields to share from container (default: ["messages"])
+            - output_mode: How to handle outputs ("merge", "replace", "isolate")
+            - project_state: Whether to project state to agent schema (default: True)
+            - track_recompilation: Whether to track recompilation needs (default: True)
 
     Returns:
-        AgentNodeV3Config instance
+        AgentNodeV3Config: Configured agent node ready for execution in graphs.
+            The returned configuration can be used directly in LangGraph workflows.
+
+    Examples:
+        Basic agent node creation::
+
+            from haive.core.graph.node.agent_node_v3 import create_agent_node_v3
+            from haive.agents.simple import SimpleAgent
+
+            # Create agent with structured output
+            agent = SimpleAgent(
+                name="analyzer",
+                engine=AugLLMConfig(),
+                structured_output_model=AnalysisResult
+            )
+
+            # Create node - agent will be resolved from state
+            node = create_agent_node_v3("analyzer")
+
+            # Or provide agent directly
+            node = create_agent_node_v3("analyzer", agent=agent)
+
+        Custom configuration::
+
+            # Advanced configuration with custom settings
+            node = create_agent_node_v3(
+                agent_name="custom_agent",
+                name="custom_analysis_node",
+                shared_fields=["messages", "context", "metadata"],
+                output_mode="replace",
+                project_state=True,
+                track_recompilation=False
+            )
+
+        Multi-agent workflow::
+
+            # Create nodes for sequential execution
+            planner_node = create_agent_node_v3("planner")
+            executor_node = create_agent_node_v3("executor")
+            reviewer_node = create_agent_node_v3("reviewer")
+
+            # Build graph
+            from langgraph.graph import StateGraph
+            graph = StateGraph(MultiAgentState)
+            graph.add_node("plan", planner_node)
+            graph.add_node("execute", executor_node)
+            graph.add_node("review", reviewer_node)
+
+            # Chain execution
+            graph.add_edge("plan", "execute")
+            graph.add_edge("execute", "review")
+
+        Usage in LangGraph::
+
+            # Direct usage in graph execution
+            state = MultiAgentState()
+            state.agents["analyzer"] = analyzer_agent
+
+            # Execute node
+            node = create_agent_node_v3("analyzer")
+            result = node(state, {"debug": True})
+
+            # Apply updates
+            for key, value in result.update.items():
+                if hasattr(state, key):
+                    setattr(state, key, value)
+
+    Raises:
+        ValueError: If agent_name is empty or None
+        ImportError: If Agent class cannot be imported for model rebuilding
+
+    Note:
+        The function automatically rebuilds the Pydantic model to resolve forward
+        references to the Agent class. This ensures proper type validation and
+        IDE support.
+
+    See Also:
+        - :class:`AgentNodeV3Config`: The main configuration class
+        - :class:`haive.core.schema.prebuilt.multi_agent_state.MultiAgentState`: Container state
+        - :class:`haive.agents.base.agent.Agent`: Base agent class
+        - :mod:`langgraph.graph`: LangGraph integration
     """
     # Ensure model is rebuilt if needed
-    try:
-        from haive.agents.base.agent import Agent
+    with contextlib.suppress(ImportError):
 
         AgentNodeV3Config.model_rebuild()
-    except ImportError:
-        pass
 
     if not name:
         name = f"agent_{agent_name}"

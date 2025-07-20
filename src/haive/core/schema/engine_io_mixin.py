@@ -149,11 +149,13 @@ class EngineIOSchemaMixin(BaseModel):
 
                 if not input_compatible:
                     logger.warning(
-                        f"Engine {engine_name} missing input fields: {expected_inputs - actual_inputs}"
+                        f"Engine {engine_name} missing input fields: {
+                            expected_inputs - actual_inputs}"
                     )
                 if not output_compatible:
                     logger.warning(
-                        f"Engine {engine_name} missing output fields: {expected_outputs - actual_outputs}"
+                        f"Engine {engine_name} missing output fields: {
+                            expected_outputs - actual_outputs}"
                     )
 
                 return input_compatible and output_compatible

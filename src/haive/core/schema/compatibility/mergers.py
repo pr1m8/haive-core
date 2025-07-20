@@ -1,22 +1,16 @@
-"""
-Schema merging strategies for combining multiple schemas.
-"""
+"""Schema merging strategies for combining multiple schemas."""
 
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple, Type, Union
+from typing import Any
 
 from pydantic import BaseModel, Field, create_model
 
 from haive.core.schema.compatibility.analyzer import TypeAnalyzer
 from haive.core.schema.compatibility.compatibility import CompatibilityChecker
-from haive.core.schema.compatibility.types import (
-    FieldInfo,
-    MergeStrategy,
-    SchemaInfo,
-)
+from haive.core.schema.compatibility.types import FieldInfo, MergeStrategy, SchemaInfo
 
 
 class ConflictResolution(str, Enum):
@@ -33,17 +27,17 @@ class ConflictResolution(str, Enum):
 class MergeContext:
     """Context for merge operations."""
 
-    def __init__(self):
-        self.conflicts: List[Dict[str, Any]] = []
-        self.warnings: List[str] = []
+    def __init__(self) -> None:
+        self.conflicts: list[dict[str, Any]] = []
+        self.warnings: list[str] = []
         # field -> [schema_names]
-        self.field_sources: Dict[str, List[str]] = {}
-        self.resolution_log: List[str] = []
+        self.field_sources: dict[str, list[str]] = {}
+        self.resolution_log: list[str] = []
 
     def add_conflict(
         self,
         field_name: str,
-        schemas: List[str],
+        schemas: list[str],
         reason: str,
         resolution: str,
     ) -> None:
@@ -77,21 +71,19 @@ class MergeStrategy(ABC):
     @abstractmethod
     def merge_fields(
         self,
-        field_infos: List[Tuple[str, FieldInfo]],  # (schema_name, field_info)
+        field_infos: list[tuple[str, FieldInfo]],  # (schema_name, field_info)
         context: MergeContext,
-    ) -> Optional[FieldInfo]:
+    ) -> FieldInfo | None:
         """Merge multiple field definitions."""
-        pass
 
     @abstractmethod
     def should_include_field(
         self,
         field_name: str,
-        schemas_with_field: List[str],
+        schemas_with_field: list[str],
         total_schemas: int,
     ) -> bool:
         """Determine if field should be included in merged schema."""
-        pass
 
 
 class UnionMergeStrategy(MergeStrategy):
@@ -105,7 +97,7 @@ class UnionMergeStrategy(MergeStrategy):
     def should_include_field(
         self,
         field_name: str,
-        schemas_with_field: List[str],
+        schemas_with_field: list[str],
         total_schemas: int,
     ) -> bool:
         """Include all fields."""
@@ -113,9 +105,9 @@ class UnionMergeStrategy(MergeStrategy):
 
     def merge_fields(
         self,
-        field_infos: List[Tuple[str, FieldInfo]],
+        field_infos: list[tuple[str, FieldInfo]],
         context: MergeContext,
-    ) -> Optional[FieldInfo]:
+    ) -> FieldInfo | None:
         """Merge field definitions."""
         if not field_infos:
             return None
@@ -126,7 +118,7 @@ class UnionMergeStrategy(MergeStrategy):
         # Check for conflicts
         field_name = field_infos[0][1].name
         types = [(name, info.type_info.type_hint) for name, info in field_infos]
-        unique_types = list(set(t[1] for t in types))
+        unique_types = list({t[1] for t in types})
 
         if len(unique_types) > 1:
             # Type conflict
@@ -139,9 +131,9 @@ class UnionMergeStrategy(MergeStrategy):
 
             if self.conflict_resolution == ConflictResolution.FIRST_WINS:
                 return field_infos[0][1]
-            elif self.conflict_resolution == ConflictResolution.LAST_WINS:
+            if self.conflict_resolution == ConflictResolution.LAST_WINS:
                 return field_infos[-1][1]
-            elif self.conflict_resolution == ConflictResolution.TYPE_UNION:
+            if self.conflict_resolution == ConflictResolution.TYPE_UNION:
                 # Create union type
                 from typing import Union
 
@@ -176,7 +168,7 @@ class IntersectionMergeStrategy(MergeStrategy):
     def should_include_field(
         self,
         field_name: str,
-        schemas_with_field: List[str],
+        schemas_with_field: list[str],
         total_schemas: int,
     ) -> bool:
         """Include only if in all schemas."""
@@ -184,9 +176,9 @@ class IntersectionMergeStrategy(MergeStrategy):
 
     def merge_fields(
         self,
-        field_infos: List[Tuple[str, FieldInfo]],
+        field_infos: list[tuple[str, FieldInfo]],
         context: MergeContext,
-    ) -> Optional[FieldInfo]:
+    ) -> FieldInfo | None:
         """Merge field definitions."""
         if not field_infos:
             return None
@@ -198,7 +190,8 @@ class IntersectionMergeStrategy(MergeStrategy):
         for _schema_name, field_info in field_infos[1:]:
             if not analyzer.is_subtype(field_info.type_info.type_hint, base_type):
                 context.add_warning(
-                    f"Type incompatibility in intersection for '{field_info.name}'"
+                    f"Type incompatibility in intersection for '{
+                        field_info.name}'"
                 )
                 # Use most general type
                 base_type = Any
@@ -219,9 +212,9 @@ class SchemaMerger:
 
     def __init__(
         self,
-        strategy: Union[MergeStrategy, str] = "union",
-        analyzer: Optional[TypeAnalyzer] = None,
-        compatibility_checker: Optional[CompatibilityChecker] = None,
+        strategy: MergeStrategy | str = "union",
+        analyzer: TypeAnalyzer | None = None,
+        compatibility_checker: CompatibilityChecker | None = None,
     ):
         self.analyzer = analyzer or TypeAnalyzer()
         self.compatibility_checker = compatibility_checker or CompatibilityChecker()
@@ -239,12 +232,11 @@ class SchemaMerger:
 
     def merge_schemas(
         self,
-        schemas: List[Union[Type[BaseModel], SchemaInfo]],
-        name: Optional[str] = None,
-        base_class: Optional[Type[BaseModel]] = None,
-    ) -> Type[BaseModel]:
-        """
-        Merge multiple schemas into one.
+        schemas: list[type[BaseModel] | SchemaInfo],
+        name: str | None = None,
+        base_class: type[BaseModel] | None = None,
+    ) -> type[BaseModel]:
+        """Merge multiple schemas into one.
 
         Args:
             schemas: List of schemas to merge
@@ -282,12 +274,12 @@ class SchemaMerger:
 
     def _merge_schema_infos(
         self,
-        schema_infos: List[SchemaInfo],
+        schema_infos: list[SchemaInfo],
         context: MergeContext,
     ) -> SchemaInfo:
         """Merge SchemaInfo objects."""
         # Group fields by name
-        field_groups: Dict[str, List[Tuple[str, FieldInfo]]] = {}
+        field_groups: dict[str, list[tuple[str, FieldInfo]]] = {}
 
         for schema_info in schema_infos:
             for field_name, field_info in schema_info.fields.items():
@@ -357,8 +349,8 @@ class SchemaMerger:
         self,
         schema_info: SchemaInfo,
         name: str,
-        base_class: Optional[Type[BaseModel]] = None,
-    ) -> Type[BaseModel]:
+        base_class: type[BaseModel] | None = None,
+    ) -> type[BaseModel]:
         """Create a Pydantic model from SchemaInfo."""
         # Build field definitions
         field_definitions = {}
@@ -422,26 +414,26 @@ class SchemaMerger:
 
 # Convenience functions
 def merge_schemas(
-    schemas: List[Union[Type[BaseModel], SchemaInfo]],
+    schemas: list[type[BaseModel] | SchemaInfo],
     strategy: str = "union",
-    name: Optional[str] = None,
-) -> Type[BaseModel]:
+    name: str | None = None,
+) -> type[BaseModel]:
     """Merge multiple schemas using specified strategy."""
     merger = SchemaMerger(strategy=strategy)
     return merger.merge_schemas(schemas, name=name)
 
 
 def create_union_schema(
-    *schemas: Union[Type[BaseModel], SchemaInfo],
-    name: Optional[str] = None,
-) -> Type[BaseModel]:
+    *schemas: type[BaseModel] | SchemaInfo,
+    name: str | None = None,
+) -> type[BaseModel]:
     """Create a union of multiple schemas."""
     return merge_schemas(list(schemas), strategy="union", name=name)
 
 
 def create_intersection_schema(
-    *schemas: Union[Type[BaseModel], SchemaInfo],
-    name: Optional[str] = None,
-) -> Type[BaseModel]:
+    *schemas: type[BaseModel] | SchemaInfo,
+    name: str | None = None,
+) -> type[BaseModel]:
     """Create an intersection of multiple schemas."""
     return merge_schemas(list(schemas), strategy="intersection", name=name)

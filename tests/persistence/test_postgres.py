@@ -1,7 +1,7 @@
 import logging
 import time
 import uuid
-from typing import Any, Dict, List
+from typing import Any
 
 import pytest
 from langchain_core.messages import AIMessage, HumanMessage
@@ -24,11 +24,11 @@ logger = logging.getLogger(__name__)
 class _TestState(BaseModel):
     """Simple state model for testing."""
 
-    messages: List[Any] = Field(default_factory=list)
+    messages: list[Any] = Field(default_factory=list)
 
 
 # Basic node function for testing
-def _simple_node(state: Dict[str, Any]) -> Dict[str, Any]:
+def _simple_node(state: dict[str, Any]) -> dict[str, Any]:
     """A simple node that adds an AI message."""
     logger.debug(f"Simple node processing state: {state}")
 
@@ -50,7 +50,7 @@ def _simple_node(state: Dict[str, Any]) -> Dict[str, Any]:
 # Helper function to generate thread IDs
 def _generate_thread_id() -> str:
     """Generate a unique thread ID for testing."""
-    return f"test_{int(time.time()*1000)}_{uuid.uuid4().hex[:8]}"
+    return f"test_{int(time.time() * 1000)}_{uuid.uuid4().hex[:8]}"
 
 
 # Test configuration basics
@@ -151,7 +151,8 @@ async def test_async_graph_with_checkpointer(async_postgres_config):
         messages = checkpoint["channel_values"]["messages"]
         assert any("Hello, async test message" in str(msg) for msg in messages)
 
-    # When using async with, the pool is automatically closed outside this block
+    # When using async with, the pool is automatically closed outside this
+    # block
 
 
 # Test shallow checkpointer
@@ -258,7 +259,7 @@ def db_params():
     }
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def sync_postgres_config(db_params):
     """Create a synchronous PostgreSQL config."""
     config = PostgresCheckpointerConfig(
@@ -267,7 +268,7 @@ def sync_postgres_config(db_params):
     return config
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def async_postgres_config(db_params):
     """Create an asynchronous PostgreSQL config."""
     config = PostgresCheckpointerConfig(
@@ -278,7 +279,7 @@ def async_postgres_config(db_params):
     return config
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def shallow_postgres_config(db_params):
     """Create a shallow PostgreSQL config."""
     config = PostgresCheckpointerConfig(

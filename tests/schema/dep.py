@@ -95,7 +95,11 @@ class TestStateSchemaManagerInit:
         logger.info("Testing initialization from dict")
 
         manager = StateSchemaManager(sample_dict, name="DictSchema")
-        logger.debug(f"Created manager with fields: {list(manager.fields.keys())}")
+        logger.debug(
+            f"Created manager with fields: {
+                list(
+                    manager.fields.keys())}"
+        )
 
         assert "text" in manager.fields
         assert "number" in manager.fields
@@ -117,7 +121,11 @@ class TestStateSchemaManagerInit:
         logger.info("Testing initialization from BaseModel class")
 
         manager = StateSchemaManager(simple_model_class)
-        logger.debug(f"Created manager with fields: {list(manager.fields.keys())}")
+        logger.debug(
+            f"Created manager with fields: {
+                list(
+                    manager.fields.keys())}"
+        )
 
         assert manager.name == "SimpleModel"
         assert "name" in manager.fields
@@ -133,7 +141,11 @@ class TestStateSchemaManagerInit:
         logger.info("Testing initialization from StateSchema class")
 
         manager = StateSchemaManager(state_schema_class)
-        logger.debug(f"Created manager with fields: {list(manager.fields.keys())}")
+        logger.debug(
+            f"Created manager with fields: {
+                list(
+                    manager.fields.keys())}"
+        )
 
         assert "text" in manager.fields
         assert "count" in manager.fields
@@ -166,7 +178,8 @@ class TestStateSchemaManagerFields:
         manager.add_field("count", int, default=0, description="A counter field")
 
         logger.debug(
-            f"Added field with description: {manager.field_descriptions.get('count')}"
+            f"Added field with description: {
+                manager.field_descriptions.get('count')}"
         )
         assert "count" in manager.fields
         assert "count" in manager.field_descriptions
@@ -226,7 +239,10 @@ class TestStateSchemaManagerFields:
         manager = StateSchemaManager(name="TestSchema")
         manager.add_field("maybe", str, optional=True)
 
-        logger.debug(f"Added optional field with type: {manager.fields['maybe'][0]}")
+        logger.debug(
+            f"Added optional field with type: {
+                manager.fields['maybe'][0]}"
+        )
         assert "maybe" in manager.fields
 
         field_type, _ = manager.fields["maybe"]
@@ -264,15 +280,22 @@ class TestStateSchemaManagerFields:
         manager = StateSchemaManager(name="TestSchema")
         manager.add_field("count", int, default=0)
 
-        logger.debug(f"Initial field default: {manager.fields['count'][1].default}")
+        logger.debug(
+            f"Initial field default: {
+                manager.fields['count'][1].default}"
+        )
         assert manager.fields["count"][1].default == 0
 
         # Modify the field
         manager.modify_field("count", new_default=10, new_description="Modified count")
 
-        logger.debug(f"Modified field default: {manager.fields['count'][1].default}")
         logger.debug(
-            f"Modified field description: {manager.field_descriptions.get('count')}"
+            f"Modified field default: {
+                manager.fields['count'][1].default}"
+        )
+        logger.debug(
+            f"Modified field description: {
+                manager.field_descriptions.get('count')}"
         )
 
         assert manager.fields["count"][1].default == 10
@@ -285,8 +308,14 @@ class TestStateSchemaManagerFields:
         manager = StateSchemaManager(name="TestSchema")
         manager.add_field("existing", str)
 
-        logger.debug(f"Checking existing field: {manager.has_field('existing')}")
-        logger.debug(f"Checking nonexistent field: {manager.has_field('nonexistent')}")
+        logger.debug(
+            f"Checking existing field: {
+                manager.has_field('existing')}"
+        )
+        logger.debug(
+            f"Checking nonexistent field: {
+                manager.has_field('nonexistent')}"
+        )
 
         assert manager.has_field("existing") is True
         assert manager.has_field("nonexistent") is False
@@ -384,7 +413,11 @@ class TestStateSchemaManagerModel:
         manager.add_field("name", str, default="test")
         manager.add_field("value", int, default=42)
 
-        logger.debug(f"Creating model from fields: {list(manager.fields.keys())}")
+        logger.debug(
+            f"Creating model from fields: {
+                list(
+                    manager.fields.keys())}"
+        )
         model_cls = manager.get_model()
 
         logger.debug(f"Created model class: {model_cls.__name__}")
@@ -503,7 +536,9 @@ class TestStateSchemaManagerModel:
         # Test setter
         instance.full_name = "Jane Smith"
         logger.debug(
-            f"After setting property: {instance.first_name} {instance.last_name}"
+            f"After setting property: {
+                instance.first_name} {
+                instance.last_name}"
         )
 
         assert instance.first_name == "Jane"

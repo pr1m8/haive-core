@@ -1,5 +1,4 @@
-"""
-Stateful Node Configuration - Enhanced Dynamic Architecture
+"""Stateful Node Configuration - Enhanced Dynamic Architecture.
 
 This module provides a truly dynamic node architecture where:
 - All routing destinations are discovered from state at runtime
@@ -16,7 +15,7 @@ Key Features:
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Set, Type, get_type_hints
+from typing import Any, get_type_hints
 
 from langchain_core.messages import BaseMessage
 from langgraph.types import Command
@@ -45,12 +44,12 @@ class StatefulNodeConfig(BaseNodeConfig, ABC):
     )
 
     # Engine discovery
-    engine_name: Optional[str] = Field(
+    engine_name: str | None = Field(
         default=None,
         description="Engine name to discover from state (if not found, uses discovery)",
     )
 
-    engine_type: Optional[Type] = Field(
+    engine_type: type | None = Field(
         default=None,
         description="Engine type to discover from state (fallback if name not found)",
     )
@@ -76,11 +75,11 @@ class StatefulNodeConfig(BaseNodeConfig, ABC):
     )
 
     # Fallback configuration
-    fallback_routing: Dict[str, str] = Field(
+    fallback_routing: dict[str, str] = Field(
         default_factory=dict, description="Fallback routing when state discovery fails"
     )
 
-    def discover_engine(self, state: StateLike) -> Optional[Any]:
+    def discover_engine(self, state: StateLike) -> Any | None:
         """Discover engine from state using multiple strategies.
 
         Args:
@@ -103,7 +102,10 @@ class StatefulNodeConfig(BaseNodeConfig, ABC):
         if self.engine_type:
             engine = self._discover_engine_by_type(state, self.engine_type)
             if engine:
-                logger.info(f"Discovered engine by type: {self.engine_type.__name__}")
+                logger.info(
+                    f"Discovered engine by type: {
+                        self.engine_type.__name__}"
+                )
                 return engine
 
         # Strategy 3: From last AI message attribution
@@ -123,7 +125,7 @@ class StatefulNodeConfig(BaseNodeConfig, ABC):
 
     def discover_routing_destination(
         self, state: StateLike, route_key: str
-    ) -> Optional[str]:
+    ) -> str | None:
         """Discover routing destination from state configuration.
 
         Args:
@@ -179,8 +181,8 @@ class StatefulNodeConfig(BaseNodeConfig, ABC):
         return None
 
     def discover_field_mapping(
-        self, state: StateLike, callable_func: Optional[callable] = None
-    ) -> Dict[str, str]:
+        self, state: StateLike, callable_func: callable | None = None
+    ) -> dict[str, str]:
         """Discover field mapping from state and function signatures.
 
         Args:
@@ -219,7 +221,7 @@ class StatefulNodeConfig(BaseNodeConfig, ABC):
         logger.info(f"Final field mapping: {mapping}")
         return mapping
 
-    def _discover_engine_by_name(self, state: StateLike, name: str) -> Optional[Any]:
+    def _discover_engine_by_name(self, state: StateLike, name: str) -> Any | None:
         """Discover engine by exact name match."""
         # Check state.engines dict
         if hasattr(state, "engines") and isinstance(state.engines, dict):
@@ -247,8 +249,8 @@ class StatefulNodeConfig(BaseNodeConfig, ABC):
         return None
 
     def _discover_engine_by_type(
-        self, state: StateLike, engine_type: Type
-    ) -> Optional[Any]:
+        self, state: StateLike, engine_type: type
+    ) -> Any | None:
         """Discover engine by type match."""
         if hasattr(state, "engines") and isinstance(state.engines, dict):
             for engine in state.engines.values():
@@ -264,9 +266,7 @@ class StatefulNodeConfig(BaseNodeConfig, ABC):
 
         return None
 
-    def _discover_engine_from_message_attribution(
-        self, state: StateLike
-    ) -> Optional[Any]:
+    def _discover_engine_from_message_attribution(self, state: StateLike) -> Any | None:
         """Discover engine from last AI message attribution."""
         messages = self._get_state_value(state, "messages")
         if not messages:
@@ -281,7 +281,7 @@ class StatefulNodeConfig(BaseNodeConfig, ABC):
 
         return None
 
-    def _discover_default_engine(self, state: StateLike) -> Optional[Any]:
+    def _discover_default_engine(self, state: StateLike) -> Any | None:
         """Discover default engine from state."""
         # Check for default_engine field
         default_engine = self._get_state_value(state, "default_engine")
@@ -297,7 +297,7 @@ class StatefulNodeConfig(BaseNodeConfig, ABC):
 
     def _auto_discover_field_mapping(
         self, state: StateLike, callable_func: callable
-    ) -> Dict[str, str]:
+    ) -> dict[str, str]:
         """Auto-discover field mapping based on parameter names and state fields."""
         import inspect
 
@@ -314,7 +314,7 @@ class StatefulNodeConfig(BaseNodeConfig, ABC):
 
     def _discover_field_mapping_by_types(
         self, state: StateLike, callable_func: callable
-    ) -> Dict[str, str]:
+    ) -> dict[str, str]:
         """Discover field mapping based on type hints."""
         import inspect
 
@@ -334,7 +334,7 @@ class StatefulNodeConfig(BaseNodeConfig, ABC):
 
         return mapping
 
-    def _get_available_state_fields(self, state: StateLike) -> Set[str]:
+    def _get_available_state_fields(self, state: StateLike) -> set[str]:
         """Get all available field names from state."""
         fields = set()
 
@@ -352,7 +352,7 @@ class StatefulNodeConfig(BaseNodeConfig, ABC):
 
         return fields
 
-    def _find_field_by_type(self, state: StateLike, target_type: Type) -> Optional[str]:
+    def _find_field_by_type(self, state: StateLike, target_type: type) -> str | None:
         """Find state field with matching type."""
         # Check state attributes
         if hasattr(state, "__dict__"):
@@ -398,7 +398,7 @@ class StatefulNodeConfig(BaseNodeConfig, ABC):
 
     @abstractmethod
     def execute_stateful_logic(
-        self, state: StateLike, config: Optional[ConfigLike] = None
+        self, state: StateLike, config: ConfigLike | None = None
     ) -> Command:
         """Execute the node's stateful logic.
 
@@ -412,11 +412,8 @@ class StatefulNodeConfig(BaseNodeConfig, ABC):
         Returns:
             Command object with updates and routing
         """
-        pass
 
-    def __call__(
-        self, state: StateLike, config: Optional[ConfigLike] = None
-    ) -> Command:
+    def __call__(self, state: StateLike, config: ConfigLike | None = None) -> Command:
         """Execute the stateful node with dynamic discovery."""
         try:
             # Perform discovery before execution
@@ -427,18 +424,22 @@ class StatefulNodeConfig(BaseNodeConfig, ABC):
                 engine = self.discover_engine(state)
                 if engine:
                     logger.info(
-                        f"Discovered engine: {getattr(engine, 'name', type(engine).__name__)}"
+                        f"Discovered engine: {
+                            getattr(
+                                engine,
+                                'name',
+                                type(engine).__name__)}"
                     )
 
             # Execute the actual node logic
             return self.execute_stateful_logic(state, config)
 
         except Exception as e:
-            logger.error(f"Error in stateful node {self.name}: {e}")
+            logger.exception(f"Error in stateful node {self.name}: {e}")
             # Fallback to default routing
             fallback_goto = self.fallback_routing.get("default", "END")
             return Command(
-                update={"error": f"Stateful node error: {str(e)}"}, goto=fallback_goto
+                update={"error": f"Stateful node error: {e!s}"}, goto=fallback_goto
             )
 
 
@@ -451,7 +452,7 @@ class StatefulValidationNodeConfig(StatefulNodeConfig):
     routing_prefix: str = Field(default="validation_")
 
     # Default fallbacks
-    fallback_routing: Dict[str, str] = Field(
+    fallback_routing: dict[str, str] = Field(
         default_factory=lambda: {
             "tool_node": "tool_node",
             "parser_node": "parse_output",
@@ -460,7 +461,7 @@ class StatefulValidationNodeConfig(StatefulNodeConfig):
     )
 
     def execute_stateful_logic(
-        self, state: StateLike, config: Optional[ConfigLike] = None
+        self, state: StateLike, config: ConfigLike | None = None
     ) -> Command:
         """Execute validation logic with dynamic discovery."""
         # Get messages
@@ -508,7 +509,7 @@ class StatefulValidationNodeConfig(StatefulNodeConfig):
         goto = self._determine_destination(destinations)
         return Command(update=update_dict, goto=goto)
 
-    def _validate_pydantic_model(self, tool_call: Dict, engine: Any) -> Any:
+    def _validate_pydantic_model(self, tool_call: dict, engine: Any) -> Any:
         """Validate pydantic model tool call."""
         from langchain_core.messages import ToolMessage
 
@@ -522,26 +523,26 @@ class StatefulValidationNodeConfig(StatefulNodeConfig):
             if model_class:
                 model_instance = model_class(**args)
                 return ToolMessage(
-                    content=f"Successfully validated {tool_name}: {model_instance.model_dump()}",
+                    content=f"Successfully validated {tool_name}: {
+                        model_instance.model_dump()}",
                     tool_call_id=tool_id,
                     name=tool_name,
                 )
-            else:
-                return ToolMessage(
-                    content=f"Model class not found: {tool_name}",
-                    tool_call_id=tool_id,
-                    name=tool_name,
-                )
+            return ToolMessage(
+                content=f"Model class not found: {tool_name}",
+                tool_call_id=tool_id,
+                name=tool_name,
+            )
         except Exception as e:
             return ToolMessage(
-                content=f"Validation error: {str(e)}",
+                content=f"Validation error: {e!s}",
                 tool_call_id=tool_id,
                 name=tool_name,
             )
 
     def _find_model_in_engine(
         self, engine: Any, tool_name: str
-    ) -> Optional[Type[BaseModel]]:
+    ) -> type[BaseModel] | None:
         """Find pydantic model in engine."""
         if not engine:
             return None
@@ -550,9 +551,8 @@ class StatefulValidationNodeConfig(StatefulNodeConfig):
         if (
             hasattr(engine, "structured_output_model")
             and engine.structured_output_model
-        ):
-            if getattr(engine.structured_output_model, "__name__", None) == tool_name:
-                return engine.structured_output_model
+        ) and getattr(engine.structured_output_model, "__name__", None) == tool_name:
+            return engine.structured_output_model
 
         # Check schemas
         if hasattr(engine, "schemas") and engine.schemas:
@@ -562,7 +562,7 @@ class StatefulValidationNodeConfig(StatefulNodeConfig):
 
         return None
 
-    def _determine_destination(self, destinations: Set[str]) -> str:
+    def _determine_destination(self, destinations: set[str]) -> str:
         """Determine routing destination."""
         if not destinations:
             return self.fallback_routing.get("default", "END")
@@ -588,12 +588,12 @@ class StatefulParserNodeConfig(StatefulNodeConfig):
     routing_prefix: str = Field(default="parser_")
 
     # Default fallbacks
-    fallback_routing: Dict[str, str] = Field(
+    fallback_routing: dict[str, str] = Field(
         default_factory=lambda: {"agent_node": "agent", "default": "END"}
     )
 
     def execute_stateful_logic(
-        self, state: StateLike, config: Optional[ConfigLike] = None
+        self, state: StateLike, config: ConfigLike | None = None
     ) -> Command:
         """Execute parser logic with dynamic discovery."""
         # Discover routing destination
@@ -634,10 +634,10 @@ class StatefulParserNodeConfig(StatefulNodeConfig):
 
         except Exception as e:
             return Command(
-                update={"error": f"Parse error: {str(e)}"}, goto=agent_node or "END"
+                update={"error": f"Parse error: {e!s}"}, goto=agent_node or "END"
             )
 
-    def _extract_tool_from_messages(self, messages: List[BaseMessage]) -> tuple:
+    def _extract_tool_from_messages(self, messages: list[BaseMessage]) -> tuple:
         """Extract tool information from messages."""
         # Find last AI message with tool calls
         for msg in reversed(messages):
@@ -656,7 +656,7 @@ class StatefulParserNodeConfig(StatefulNodeConfig):
 
         return None, None, None
 
-    def _find_tool_in_engine(self, engine: Any, tool_name: str) -> Optional[Type]:
+    def _find_tool_in_engine(self, engine: Any, tool_name: str) -> type | None:
         """Find tool class in engine."""
         if not engine:
             return None
@@ -684,7 +684,7 @@ class StatefulParserNodeConfig(StatefulNodeConfig):
 
         return None
 
-    def _parse_tool_content(self, content: Any, tool_class: Type) -> Any:
+    def _parse_tool_content(self, content: Any, tool_class: type) -> Any:
         """Parse tool content into model."""
         import json
 
@@ -696,19 +696,19 @@ class StatefulParserNodeConfig(StatefulNodeConfig):
             try:
                 json_data = json.loads(content)
                 return tool_class.model_validate(json_data)
-            except:
+            except BaseException:
                 pass
 
         # Try dict validation
         if isinstance(content, dict):
             try:
                 return tool_class.model_validate(content)
-            except:
+            except BaseException:
                 pass
 
         return {"content": content, "parse_error": "Could not parse"}
 
-    def _determine_field_name(self, tool_class: Type, tool_name: str) -> str:
+    def _determine_field_name(self, tool_class: type, tool_name: str) -> str:
         """Determine field name for parsed result."""
         # Try to use naming utilities
         try:
@@ -716,7 +716,7 @@ class StatefulParserNodeConfig(StatefulNodeConfig):
 
             field_info = get_field_info_from_model(tool_class)
             return field_info["field_name"]
-        except:
+        except BaseException:
             pass
 
         # Fallback to simple naming
@@ -735,12 +735,12 @@ class StatefulToolNodeConfig(StatefulNodeConfig):
     routing_prefix: str = Field(default="tool_")
 
     # Default fallbacks
-    fallback_routing: Dict[str, str] = Field(
+    fallback_routing: dict[str, str] = Field(
         default_factory=lambda: {"agent_node": "agent", "default": "END"}
     )
 
     def execute_stateful_logic(
-        self, state: StateLike, config: Optional[ConfigLike] = None
+        self, state: StateLike, config: ConfigLike | None = None
     ) -> Command:
         """Execute tool logic with dynamic discovery."""
         # Discover routing destination
@@ -759,7 +759,7 @@ class StatefulToolNodeConfig(StatefulNodeConfig):
 
         return Command(update={"messages": tool_messages}, goto=agent_node or "END")
 
-    def _execute_tools(self, messages: List[BaseMessage], engine: Any) -> List[Any]:
+    def _execute_tools(self, messages: list[BaseMessage], engine: Any) -> list[Any]:
         """Execute tools and return tool messages."""
         from langchain_core.messages import ToolMessage
 
@@ -796,7 +796,7 @@ class StatefulToolNodeConfig(StatefulNodeConfig):
                     except Exception as e:
                         tool_messages.append(
                             ToolMessage(
-                                content=f"Tool error: {str(e)}",
+                                content=f"Tool error: {e!s}",
                                 tool_call_id=tool_id,
                                 name=tool_name,
                             )
@@ -806,7 +806,7 @@ class StatefulToolNodeConfig(StatefulNodeConfig):
 
         return tool_messages
 
-    def _find_tool_in_engine(self, engine: Any, tool_name: str) -> Optional[Any]:
+    def _find_tool_in_engine(self, engine: Any, tool_name: str) -> Any | None:
         """Find executable tool in engine."""
         if not engine:
             return None

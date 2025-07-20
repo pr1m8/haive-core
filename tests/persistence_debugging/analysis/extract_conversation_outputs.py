@@ -136,7 +136,8 @@ def extract_key_content(file_path: str) -> dict:
     return {"type": "unknown", "file": str(file_path)}
 
 
-def create_conversation_summary(conv_type: str, files: list[str], base_path: str):
+def create_conversation_summary(
+    conv_type: str, files: list[str], base_path: str):
     """Create a summary file for each conversation type."""
     conv_dir = (
         Path(base_path)
@@ -169,7 +170,10 @@ This file provides easy access to all outputs from {conv_type} conversation agen
         summary += f"\n### {i}. {Path(content['file']).name}\n"
         summary += f"**Type:** {content['type']}\n"
         summary += f"**File:** `{content['file']}`\n"
-        summary += f"**Last Modified:** {content.get('last_modified', 'Unknown')}\n"
+        summary += f"**Last Modified:** {
+    content.get(
+        'last_modified',
+         'Unknown')}\n"
 
         if content["type"] == "state_history":
             summary += f"**Messages:** {content.get('message_count', 0)}\n"
@@ -189,7 +193,8 @@ This file provides easy access to all outputs from {conv_type} conversation agen
 
         elif content["type"] == "json_data":
             summary += (
-                f"**Content:** {content.get('content_keys', 'Unknown structure')}\n"
+                f"**Content:** {content.get('content_keys',
+     'Unknown structure')}\n"
             )
 
         elif content["type"] == "error":

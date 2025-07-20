@@ -543,7 +543,7 @@ class TestCloudStorageUtilities:
         assert result is True
 
     @pytest.mark.parametrize(
-        "auth_type,expected",
+        ("auth_type", "expected"),
         [
             (StorageAuthType.ACCESS_KEY, "access_key"),
             (StorageAuthType.SERVICE_ACCOUNT, "service_account"),
@@ -552,7 +552,8 @@ class TestCloudStorageUtilities:
             (StorageAuthType.IAM_ROLE, "iam_role"),
         ],
     )
-    def test_storage_auth_type_values(self, auth_type: StorageAuthType, expected: str):
+    def test_storage_auth_type_values(
+            self, auth_type: StorageAuthType, expected: str):
         """Test storage authentication type enum values."""
         assert auth_type.value == expected
 
@@ -562,7 +563,8 @@ class TestCloudStorageIntegration:
     """Integration tests for cloud storage sources."""
 
     @patch("boto3.client")
-    async def test_s3_loader_integration(self, mock_boto_client, s3_file_source):
+    async def test_s3_loader_integration(
+            self, mock_boto_client, s3_file_source):
         """Test S3 source integration with mock boto3."""
         # Mock S3 client
         mock_s3 = MagicMock()
@@ -580,7 +582,7 @@ class TestCloudStorageIntegration:
         assert kwargs["key"] == "path/to/file.pdf"
 
     @pytest.mark.parametrize(
-        "platform,expected_capability",
+        ("platform", "expected_capability"),
         [
             (CloudPlatform.AWS_S3, LoaderCapability.CLOUD_NATIVE),
             (CloudPlatform.GOOGLE_DRIVE, LoaderCapability.BULK_LOADING),
@@ -593,7 +595,7 @@ class TestCloudStorageIntegration:
     ):
         """Test that cloud platforms have expected capabilities."""
         # This verifies our capability assignments make sense
-        pass  # Implementation would check actual registry
+        # Implementation would check actual registry
 
 
 if __name__ == "__main__":

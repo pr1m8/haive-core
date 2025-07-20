@@ -261,7 +261,11 @@ class ValidationRoutingState(BaseModel):
         ]
 
         if self.target_nodes:
-            summary_parts.append(f"Target nodes: {', '.join(self.target_nodes)}")
+            summary_parts.append(
+                f"Target nodes: {
+                    ', '.join(
+                        self.target_nodes)}"
+            )
 
         summary_parts.append(f"Next action: {self.next_action.value}")
 

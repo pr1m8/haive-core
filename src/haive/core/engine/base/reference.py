@@ -1,5 +1,4 @@
-"""
-Component reference implementation for the Haive engine system.
+"""Component reference implementation for the Haive engine system.
 
 This module provides a reference mechanism that allows components to be referenced
 by their ID, name, or type, and resolved at runtime. This enables lazy loading,
@@ -7,7 +6,7 @@ serialization of references, and dynamic resolution of components.
 """
 
 # Forward declaration to avoid circular import
-from typing import TYPE_CHECKING, Any, Dict, Generic, List, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
 
@@ -21,8 +20,7 @@ T = TypeVar("T")  # Resolved component type
 
 
 class ComponentRef(BaseModel, Generic[T]):
-    """
-    Reference to a component that can be resolved at runtime.
+    """Reference to a component that can be resolved at runtime.
 
     This class provides a way to reference components (engines, tools, etc.) without
     directly holding the instance. References can be resolved to the actual component
@@ -41,34 +39,33 @@ class ComponentRef(BaseModel, Generic[T]):
     """
 
     # Reference fields
-    id: Optional[str] = Field(
+    id: str | None = Field(
         default=None, description="Unique identifier of the referenced component"
     )
-    name: Optional[str] = Field(
+    name: str | None = Field(
         default=None, description="Name of the referenced component"
     )
-    type: Optional[Union[str, EngineType]] = Field(
+    type: str | EngineType | None = Field(
         default=None, description="Type of the referenced component"
     )
 
     # Configuration and extensions
-    config_overrides: Dict[str, Any] = Field(
+    config_overrides: dict[str, Any] = Field(
         default_factory=dict,
         description="Configuration overrides to apply when resolving",
     )
-    extensions: List[Dict[str, Any]] = Field(
+    extensions: list[dict[str, Any]] = Field(
         default_factory=list, description="Extensions to apply to the component"
     )
 
     # Cache for resolved instance
-    _resolved: Optional[T] = PrivateAttr(default=None)
+    _resolved: T | None = PrivateAttr(default=None)
 
     # Configuration
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    def resolve(self) -> Optional[T]:
-        """
-        Resolve this reference to the actual component.
+    def resolve(self) -> T | None:
+        """Resolve this reference to the actual component.
 
         Attempts to find and return the referenced component. If the component
         has been previously resolved and cached, returns the cached instance.
@@ -85,11 +82,9 @@ class ComponentRef(BaseModel, Generic[T]):
             ...     response = llm_engine.generate("Hello, world!")
         """
         # Implementation details...
-        pass
 
     def invalidate_cache(self) -> None:
-        """
-        Clear the cached resolved component.
+        """Clear the cached resolved component.
 
         Forces the next call to resolve() to fetch the component fresh
         rather than using the cached instance.
@@ -104,8 +99,7 @@ class ComponentRef(BaseModel, Generic[T]):
 
     @classmethod
     def from_engine(cls, engine: "Any") -> "ComponentRef":
-        """
-        Create a reference from an engine instance.
+        """Create a reference from an engine instance.
 
         Factory method to create a component reference that points to
         the given engine.

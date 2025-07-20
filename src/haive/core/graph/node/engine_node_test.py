@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 """Comprehensive syntax error fixer for Haive codebase."""
 
-import ast
 import re
 import sys
 from pathlib import Path
-from typing import List, Tuple
+from typing import Any
 
 
-def fix_common_syntax_errors():
+def fix_common_syntax_errors() -> Any:
     """Fix the most common syntax errors that prevent documentation build."""
-
     fixes_applied = []
 
     # List of files with known syntax errors from the pre-build checker
@@ -30,7 +28,7 @@ def fix_common_syntax_errors():
             continue
 
         try:
-            with open(full_path, "r", encoding="utf-8") as f:
+            with open(full_path, encoding="utf-8") as f:
                 content = f.read()
 
             original_content = content
@@ -76,27 +74,22 @@ def fix_common_syntax_errors():
                 with open(full_path, "w", encoding="utf-8") as f:
                     f.write(content)
                 fixes_applied.append(str(full_path))
-                print(f"✅ Fixed syntax errors in {full_path}")
 
-        except Exception as e:
-            print(f"❌ Failed to fix {full_path}: {e}")
+        except Exception:
+            pass
 
     return fixes_applied
 
 
-def main():
+def main() -> int | float:
     """Main function to run syntax fixes."""
-    print("🔧 Fixing critical syntax errors for documentation build...")
-
     fixes = fix_common_syntax_errors()
 
     if fixes:
-        print(f"\n✅ Applied fixes to {len(fixes)} files:")
-        for fix in fixes:
-            print(f"  - {fix}")
-        print("\n🎉 Ready to try documentation build again!")
+        for _fix in fixes:
+            pass
     else:
-        print("\n✅ No syntax fixes needed or no files found to fix")
+        pass
 
     return 0
 

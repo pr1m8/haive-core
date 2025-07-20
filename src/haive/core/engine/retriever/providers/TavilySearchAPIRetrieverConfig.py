@@ -1,5 +1,6 @@
 """Tavily Search API Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Tavily Search API retriever, which
 retrieves web search results using the Tavily search API service.
 
@@ -115,7 +116,7 @@ class TavilySearchAPIRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a Tavily Search API retriever from this configuration.
 
         Returns:

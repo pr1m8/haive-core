@@ -42,7 +42,10 @@ class EmbeddingsEngineConfig(
     )
 
     @field_validator("engine_type")
-    def validate_engine_type(cls, v):
+
+
+    @classmethod
+    def validate_engine_type(cls, v) -> Any:
         if v != EngineType.EMBEDDINGS:
             raise ValueError("engine_type must be EMBEDDINGS")
         return v

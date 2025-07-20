@@ -1,8 +1,8 @@
 # src/haive/core/graph/node/message_transformation_node_config.py
 
 import logging
+from collections.abc import Callable
 from enum import Enum
-from typing import Callable, List, Optional
 
 from langchain_core.messages import (
     AIMessage,
@@ -36,8 +36,7 @@ class TransformationType(str, Enum):
 
 
 class MessageTransformationNodeConfig(NodeConfig):
-    """
-    Configuration for a node that transforms messages in various ways.
+    """Configuration for a node that transforms messages in various ways.
 
     Supports multiple transformation types including role swapping,
     metadata manipulation, and agent-to-agent communication.
@@ -59,13 +58,13 @@ class MessageTransformationNodeConfig(NodeConfig):
     )
 
     # Engine ID configuration
-    engine_id: Optional[str] = Field(
+    engine_id: str | None = Field(
         default=None,
         description="Engine ID to add to messages (for ADD_ENGINE_ID transformation)",
     )
 
     # Engine name configuration
-    engine_name: Optional[str] = Field(
+    engine_name: str | None = Field(
         default=None,
         description="Engine name to add to messages (for engine attribution)",
     )
@@ -87,14 +86,14 @@ class MessageTransformationNodeConfig(NodeConfig):
     )
 
     # Agent-specific configuration
-    agent_name: Optional[str] = Field(
+    agent_name: str | None = Field(
         default=None,
         description="Agent name for filtering (for AGENT_TO_AGENT transformation)",
     )
 
     # Custom transformation
-    custom_transformer: Optional[Callable[[List[BaseMessage]], List[BaseMessage]]] = (
-        Field(default=None, description="Custom transformation function")
+    custom_transformer: Callable[[list[BaseMessage]], list[BaseMessage]] | None = Field(
+        default=None, description="Custom transformation function"
     )
 
     # Additional options
@@ -106,7 +105,10 @@ class MessageTransformationNodeConfig(NodeConfig):
     debug: bool = Field(default=False, description="Enable debug output")
 
     @model_validator(mode="after")
-    def validate_transformation_config(self) -> "MessageTransformationNodeConfig":
+
+
+    @classmethod
+    def validate_transformation_config(cls) -> "MessageTransformationNodeConfig":
         """Validate transformation-specific configuration."""
         if (
             self.transformation_type == TransformationType.ADD_ENGINE_ID
@@ -125,14 +127,12 @@ class MessageTransformationNodeConfig(NodeConfig):
 
         return self
 
-    def __call__(
-        self, state: StateLike, config: Optional[ConfigLike] = None
-    ) -> Command:
+    def __call__(self, state: StateLike, config: ConfigLike | None = None) -> Command:
         """Execute the message transformation."""
-
         if self.debug:
             console.print(
-                f"[cyan]MessageTransformation[/] Starting {self.transformation_type} transformation"
+                f"[cyan]MessageTransformation[/] Starting {
+                    self.transformation_type} transformation"
             )
 
         try:
@@ -140,7 +140,10 @@ class MessageTransformationNodeConfig(NodeConfig):
             messages = self._get_messages_from_state(state)
 
             if not messages:
-                logger.warning(f"No messages found in state key '{self.messages_key}'")
+                logger.warning(
+                    f"No messages found in state key '{
+                        self.messages_key}'"
+                )
                 return Command(update={}, goto=self.command_goto)
 
             if self.debug:
@@ -151,7 +154,8 @@ class MessageTransformationNodeConfig(NodeConfig):
 
             if self.debug:
                 console.print(
-                    f"[green]Transformed to {len(transformed_messages)} messages[/]"
+                    f"[green]Transformed to {
+                        len(transformed_messages)} messages[/]"
                 )
 
             # Create update dictionary
@@ -160,23 +164,21 @@ class MessageTransformationNodeConfig(NodeConfig):
             return Command(update=update, goto=self.command_goto)
 
         except Exception as e:
-            logger.error(f"Error in message transformation: {e}")
+            logger.exception(f"Error in message transformation: {e}")
             return Command(
                 update={"transformation_error": str(e)}, goto=self.command_goto
             )
 
-    def _get_messages_from_state(self, state: StateLike) -> List[BaseMessage]:
+    def _get_messages_from_state(self, state: StateLike) -> list[BaseMessage]:
         """Extract messages from state."""
         if hasattr(state, self.messages_key):
             return getattr(state, self.messages_key, [])
-        elif isinstance(state, dict):
+        if isinstance(state, dict):
             return state.get(self.messages_key, [])
-        else:
-            return []
+        return []
 
-    def _apply_transformation(self, messages: List[BaseMessage]) -> List[BaseMessage]:
+    def _apply_transformation(self, messages: list[BaseMessage]) -> list[BaseMessage]:
         """Apply the specified transformation to messages."""
-
         transformation_map = {
             TransformationType.AI_TO_HUMAN: self._transform_ai_to_human,
             TransformationType.HUMAN_TO_AI: self._transform_human_to_ai,
@@ -195,7 +197,7 @@ class MessageTransformationNodeConfig(NodeConfig):
 
         return transformer(messages)
 
-    def _transform_ai_to_human(self, messages: List[BaseMessage]) -> List[BaseMessage]:
+    def _transform_ai_to_human(self, messages: list[BaseMessage]) -> list[BaseMessage]:
         """Transform AI messages to Human messages, preserving metadata."""
         transformed = []
 
@@ -238,7 +240,7 @@ class MessageTransformationNodeConfig(NodeConfig):
 
         return transformed
 
-    def _transform_human_to_ai(self, messages: List[BaseMessage]) -> List[BaseMessage]:
+    def _transform_human_to_ai(self, messages: list[BaseMessage]) -> list[BaseMessage]:
         """Transform Human messages to AI messages, preserving metadata."""
         transformed = []
 
@@ -281,9 +283,8 @@ class MessageTransformationNodeConfig(NodeConfig):
 
         return transformed
 
-    def _transform_reflection(self, messages: List[BaseMessage]) -> List[BaseMessage]:
-        """
-        Apply reflection transformation: swap AI ↔ Human roles.
+    def _transform_reflection(self, messages: list[BaseMessage]) -> list[BaseMessage]:
+        """Apply reflection transformation: swap AI ↔ Human roles.
 
         Based on the reflection pattern where:
         - First message (original user request) is preserved
@@ -331,21 +332,19 @@ class MessageTransformationNodeConfig(NodeConfig):
                     console.print(
                         f"[green]Reflection swap {msg.type} → {target_cls.__name__.lower()}:[/] {msg.content[:50]}..."
                     )
-            else:
-                # Keep non-human/ai messages unchanged (unless excluded)
-                if not (
-                    (self.exclude_system_messages and isinstance(msg, SystemMessage))
-                    or (self.exclude_tool_messages and isinstance(msg, ToolMessage))
-                ):
-                    transformed.append(msg)
+            # Keep non-human/ai messages unchanged (unless excluded)
+            elif not (
+                (self.exclude_system_messages and isinstance(msg, SystemMessage))
+                or (self.exclude_tool_messages and isinstance(msg, ToolMessage))
+            ):
+                transformed.append(msg)
 
         return transformed
 
     def _transform_agent_to_agent(
-        self, messages: List[BaseMessage]
-    ) -> List[BaseMessage]:
-        """
-        Transform messages for agent-to-agent communication.
+        self, messages: list[BaseMessage]
+    ) -> list[BaseMessage]:
+        """Transform messages for agent-to-agent communication.
 
         Excludes system messages and converts AI messages to Human messages.
         """
@@ -392,7 +391,7 @@ class MessageTransformationNodeConfig(NodeConfig):
 
         return transformed
 
-    def _add_engine_id(self, messages: List[BaseMessage]) -> List[BaseMessage]:
+    def _add_engine_id(self, messages: list[BaseMessage]) -> list[BaseMessage]:
         """Add engine_id and engine_name to all AI messages."""
         if not self.engine_id and not self.engine_name:
             return messages
@@ -426,7 +425,8 @@ class MessageTransformationNodeConfig(NodeConfig):
 
                 if self.debug:
                     console.print(
-                        f"[green]Added engine_id to AI message:[/] {self.engine_id}"
+                        f"[green]Added engine_id to AI message:[/] {
+                            self.engine_id}"
                     )
             else:
                 # Keep other messages unchanged
@@ -434,16 +434,16 @@ class MessageTransformationNodeConfig(NodeConfig):
 
         return transformed
 
-    def _extract_first_human(self, messages: List[BaseMessage]) -> List[BaseMessage]:
-        """
-        Extract the first real human input (content-only, no metadata).
+    def _extract_first_human(self, messages: list[BaseMessage]) -> list[BaseMessage]:
+        """Extract the first real human input (content-only, no metadata).
 
         Returns only the first human message that has pure content without
         metadata like engine_id or name.
         """
         for msg in messages:
             if isinstance(msg, HumanMessage):
-                # Check if this is a "real" human message (no metadata indicating transformation)
+                # Check if this is a "real" human message (no metadata
+                # indicating transformation)
                 has_metadata = (hasattr(msg, "name") and msg.name) or (
                     hasattr(msg, "additional_kwargs")
                     and msg.additional_kwargs
@@ -465,8 +465,8 @@ class MessageTransformationNodeConfig(NodeConfig):
         return []
 
     def _apply_custom_transformation(
-        self, messages: List[BaseMessage]
-    ) -> List[BaseMessage]:
+        self, messages: list[BaseMessage]
+    ) -> list[BaseMessage]:
         """Apply custom transformation function."""
         if not self.custom_transformer:
             return messages
@@ -476,12 +476,14 @@ class MessageTransformationNodeConfig(NodeConfig):
 
             if self.debug:
                 console.print(
-                    f"[green]Applied custom transformation:[/] {len(messages)} → {len(result)} messages"
+                    f"[green]Applied custom transformation:[/] {
+                        len(messages)} → {
+                        len(result)} messages"
                 )
 
             return result
         except Exception as e:
-            logger.error(f"Custom transformation failed: {e}")
+            logger.exception(f"Custom transformation failed: {e}")
             return messages
 
 
@@ -493,7 +495,7 @@ class MessageTransformationNodeConfig(NodeConfig):
 def create_ai_to_human_transformer(
     messages_key: str = "messages",
     output_key: str = "messages",
-    engine_id: Optional[str] = None,
+    engine_id: str | None = None,
     preserve_metadata: bool = True,
     **kwargs,
 ) -> MessageTransformationNodeConfig:
@@ -527,7 +529,7 @@ def create_reflection_transformer(
 
 
 def create_agent_to_agent_transformer(
-    agent_name: Optional[str] = None,
+    agent_name: str | None = None,
     messages_key: str = "messages",
     output_key: str = "transformed_messages",
     exclude_system_messages: bool = True,
@@ -576,7 +578,7 @@ def create_first_human_extractor(
 
 
 def create_custom_transformer(
-    transformer_func: Callable[[List[BaseMessage]], List[BaseMessage]],
+    transformer_func: Callable[[list[BaseMessage]], list[BaseMessage]],
     messages_key: str = "messages",
     output_key: str = "messages",
     **kwargs,

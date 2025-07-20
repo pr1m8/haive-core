@@ -6,7 +6,7 @@ to track token usage against thresholds and metadata.
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
 # Import BaseOutputParser for type resolution in LangGraph
 # This ensures it's available when LangGraph evaluates type hints
@@ -95,7 +95,7 @@ class LLMState(ToolState):
 
     # Override to make engine optional for LLM agents to prevent PydanticUndefined serialization errors
     # When creating state instances, engine can be None initially and set later
-    engine: Optional[AugLLMConfig] = Field(
+    engine: AugLLMConfig | None = Field(
         default=None, description="The LLM engine for this agent"
     )
 
@@ -122,7 +122,10 @@ class LLMState(ToolState):
     )
 
     @model_validator(mode="after")
-    def setup_primary_engine_references(self) -> LLMState:
+
+
+    @classmethod
+    def setup_primary_engine_references(cls) -> LLMState:
         """Ensure the primary LLM engine is available in engines dict with standard keys.
 
         This works with ToolState's engine management to provide consistent access.

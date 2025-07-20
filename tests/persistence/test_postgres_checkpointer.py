@@ -1,7 +1,8 @@
 # tests/persistence/test_postgres_checkpointer.py
 
 import uuid
-from typing import Any, Dict, Generator, List
+from collections.abc import Generator
+from typing import Any
 
 import pytest
 from langgraph.graph import END, START
@@ -22,15 +23,16 @@ from haive.core.schema.state_schema import StateSchema
 class PGTestState(StateSchema):
     """Test agent state schema with messages field."""
 
-    messages: List[Dict[str, Any]] = Field(default_factory=list)
-    test_data: Dict[str, Any] = Field(default_factory=dict)
+    messages: list[dict[str, Any]] = Field(default_factory=list)
+    test_data: dict[str, Any] = Field(default_factory=dict)
 
 
 class TestPostgresCheckpointer:
     """Tests for the PostgreSQL checkpointer implementation."""
 
     @pytest.fixture
-    def sync_persistence(self) -> Generator[PostgresCheckpointerConfig, None, None]:
+    def sync_persistence(
+            self) -> Generator[PostgresCheckpointerConfig, None, None]:
         """Create a synchronous PostgreSQL persistence config."""
         persistence = PostgresCheckpointerConfig(
             db_host="localhost",
@@ -46,7 +48,8 @@ class TestPostgresCheckpointer:
         persistence.close()
 
     @pytest.fixture
-    def async_persistence(self) -> Generator[PostgresCheckpointerConfig, None, None]:
+    def async_persistence(
+            self) -> Generator[PostgresCheckpointerConfig, None, None]:
         """Create an asynchronous PostgreSQL persistence config."""
         persistence = PostgresCheckpointerConfig(
             db_host="localhost",
@@ -84,7 +87,9 @@ class TestPostgresCheckpointer:
     def test_sync_checkpoint_storage(self, sync_persistence):
         """Test storing and retrieving a checkpoint synchronously."""
         thread_id = f"test-storage-{uuid.uuid4()}"
-        sync_persistence.register_thread(thread_id, metadata={"test_type": "storage"})
+        sync_persistence.register_thread(
+            thread_id, metadata={
+                "test_type": "storage"})
 
         test_data = {
             "messages": [{"role": "user", "content": "Hello, this is a test message."}],
@@ -101,7 +106,8 @@ class TestPostgresCheckpointer:
 
         assert retrieved_data is not None
 
-        # Use a more flexible checking pattern that handles both nested and direct access
+        # Use a more flexible checking pattern that handles both nested and
+        # direct access
         if isinstance(retrieved_data, dict):
             # Check for nested structure (channel_values.messages)
             if (
@@ -134,7 +140,8 @@ class TestPostgresCheckpointer:
 
         config = RunnableConfigManager.create(thread_id=thread_id)
 
-        input_data = {"messages": [{"role": "user", "content": "Hello, test agent!"}]}
+        input_data = {"messages": [
+            {"role": "user", "content": "Hello, test agent!"}]}
 
         graph.invoke(input_data, config)
         saved_state = sync_persistence.get_checkpoint(config)
@@ -159,7 +166,8 @@ class TestPostgresCheckpointer:
         assert checkpointer is not None
         assert async_persistence.type == CheckpointerType.postgres
 
-    # Skip the async tests since your implementation doesn't have async methods yet
+    # Skip the async tests since your implementation doesn't have async
+    # methods yet
     @pytest.mark.skip("Async methods not implemented")
     @pytest.mark.asyncio
     async def test_async_thread_registration(self, async_persistence):
@@ -171,16 +179,16 @@ class TestPostgresCheckpointer:
         )
         assert True
 
-    # Skip the async tests since your implementation doesn't have async methods yet
+    # Skip the async tests since your implementation doesn't have async
+    # methods yet
     @pytest.mark.skip("Async methods not implemented")
     @pytest.mark.asyncio
     async def test_async_checkpoint_storage(self, async_persistence):
         """Test storing and retrieving a checkpoint asynchronously."""
-        pass
 
-    # Skip the async tests since your implementation doesn't have async methods yet
+    # Skip the async tests since your implementation doesn't have async
+    # methods yet
     @pytest.mark.skip("Async methods not implemented")
     @pytest.mark.asyncio
     async def test_async_graph_workflow(self, async_persistence, llm_engine):
         """Test a full graph workflow with asynchronous persistence."""
-        pass

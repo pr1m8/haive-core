@@ -54,8 +54,10 @@ class RetrieverType(str, Enum):
 class RetrieverConfig(BaseModel):
     """Base configuration for all retrievers."""
 
-    retriever_type: RetrieverType = Field(description="The type of retriever to use")
-    name: str = Field(description="Name identifier for this retriever configuration")
+    retriever_type: RetrieverType = Field(
+        description="The type of retriever to use")
+    name: str = Field(
+        description="Name identifier for this retriever configuration")
     description: str | None = Field(
         default=None, description="Description of this retriever"
     )
@@ -74,20 +76,22 @@ class RetrieverConfig(BaseModel):
 
     def instantiate(self) -> BaseRetriever:
         """Create the retriever instance based on configuration."""
-        raise NotImplementedError("Subclasses must implement instantiate method")
+        raise NotImplementedError(
+            "Subclasses must implement instantiate method")
 
     @classmethod
     def register(cls, retriever_type: RetrieverType):
         """Decorator to register retriever config implementations."""
 
-        def decorator(subclass):
+        def decorator(subclass) -> Any:
             cls._registry[retriever_type] = subclass
             return subclass
 
         return decorator
 
     @classmethod
-    def get_config_class(cls, retriever_type: RetrieverType) -> type["RetrieverConfig"]:
+    def get_config_class(
+            cls, retriever_type: RetrieverType) -> type["RetrieverConfig"]:
         """Get the appropriate config class for the retriever type."""
         if retriever_type not in cls._registry:
             logger.warning(
@@ -146,9 +150,9 @@ def create_retriever_config(
     ):
         config_params["vector_store_config"] = vector_store_config
 
-    if retriever_type in [RetrieverType.MULTI_QUERY, RetrieverType.REPHRASE_QUERY]:
-        if llm_config:
-            config_params["llm_config"] = llm_config
+    if retriever_type in [RetrieverType.MULTI_QUERY,
+                          RetrieverType.REPHRASE_QUERY] and llm_config:
+        config_params["llm_config"] = llm_config
 
     # Create and return the appropriate configuration
     return RetrieverConfig.from_retriever_type(retriever_type, **config_params)

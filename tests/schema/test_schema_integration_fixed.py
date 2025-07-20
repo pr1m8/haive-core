@@ -89,7 +89,9 @@ class TestSchemaIntegration:
     def test_modular_imports(self):
         """Test modular structure imports work."""
         # Test token usage module components
-        from haive.core.schema.prebuilt.messages import MessagesStateWithTokenUsage
+        from haive.core.schema.prebuilt.messages import (
+            MessagesStateWithTokenUsage,
+        )
         from haive.core.schema.prebuilt.messages import TokenUsage as ModularTokenUsage
         from haive.core.schema.prebuilt.messages import TokenUsageMixin as ModularMixin
 
@@ -118,7 +120,8 @@ class TestSchemaIntegration:
         from haive.core.schema.schema_composer import SchemaComposer
 
         # Test class method still works
-        schema_class = SchemaComposer.from_components([], name="BackCompatSchema")
+        schema_class = SchemaComposer.from_components(
+            [], name="BackCompatSchema")
         assert schema_class is not None
 
         # Test class has expected attributes

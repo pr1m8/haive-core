@@ -89,7 +89,7 @@ class GoogleVertexAIEmbeddingConfig(BaseEmbeddingConfig):
 
     @validator("model")
     @classmethod
-    def validate_model(cls, v):
+    def validate_model(cls, v) -> Any:
         """Validate the Vertex AI model name."""
         valid_models = {
             "text-embedding-004",
@@ -112,7 +112,7 @@ class GoogleVertexAIEmbeddingConfig(BaseEmbeddingConfig):
 
     @validator("task_type")
     @classmethod
-    def validate_task_type(cls, v):
+    def validate_task_type(cls, v) -> Any:
         """Validate task type."""
         if v is None:
             return v
@@ -132,7 +132,7 @@ class GoogleVertexAIEmbeddingConfig(BaseEmbeddingConfig):
 
     @validator("location")
     @classmethod
-    def validate_location(cls, v):
+    def validate_location(cls, v) -> Any:
         """Validate Google Cloud location."""
         if not v or not v.strip():
             raise ValueError("Location is required")
@@ -140,7 +140,7 @@ class GoogleVertexAIEmbeddingConfig(BaseEmbeddingConfig):
 
     @validator("project")
     @classmethod
-    def validate_project(cls, v):
+    def validate_project(cls, v) -> Any:
         """Validate Google Cloud project ID."""
         if not v or not v.strip():
             raise ValueError("Project ID is required")

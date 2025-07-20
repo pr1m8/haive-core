@@ -185,7 +185,8 @@ class ComponentRegistry:
 
         if not isinstance(component, BaseGraphComponent):
             raise TypeError(
-                f"Component must be instance of BaseGraphComponent, got {type(component)}"
+                f"Component must be instance of BaseGraphComponent, got {
+                    type(component)}"
             )
 
         self._components[name] = component

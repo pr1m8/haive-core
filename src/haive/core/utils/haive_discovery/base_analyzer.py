@@ -137,7 +137,8 @@ class ComponentAnalyzer(ABC):
                 # Handle complex types that might cause issues
                 try:
                     if hasattr(param_type, "__origin__"):
-                        # For generic types like Dict[str, Tuple[Type, Any]], simplify to basic types
+                        # For generic types like Dict[str, Tuple[Type, Any]],
+                        # simplify to basic types
                         type_str = str(param_type)
                         if "Dict" in type_str:
                             param_type = dict
@@ -161,7 +162,10 @@ class ComponentAnalyzer(ABC):
                 **fields,
             )
         except Exception as e:
-            logger.warning(f"Error creating Pydantic model for {cls.__name__}: {e}")
+            logger.warning(
+                f"Error creating Pydantic model for {
+                    cls.__name__}: {e}"
+            )
             # Return a minimal model with just basic fields as fallback
             try:
                 return create_model(

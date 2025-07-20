@@ -32,7 +32,8 @@ def test_path_analyzer_direct():
     assert result.url_components["service"] == "github"
 
     # Test database
-    result = path_analyzer.PathAnalyzer.analyze("postgresql://user:pass@localhost/db")
+    result = path_analyzer.PathAnalyzer.analyze(
+        "postgresql://user:pass@localhost/db")
     assert result.path_type == path_analyzer.PathType.DATABASE_URI
     assert result.is_database is True
     assert result.database_type == "postgresql"
@@ -68,7 +69,9 @@ def test_source_classes_direct():
     assert kwargs["encoding"] == "utf-8"
 
     # Test RemoteSource with SecureConfigMixin
-    source = base.RemoteSource(url="https://api.openai.com/v1/data", provider="openai")
+    source = base.RemoteSource(
+        url="https://api.openai.com/v1/data",
+        provider="openai")
     assert source.url == "https://api.openai.com/v1/data"
     assert source.provider == "openai"
     assert hasattr(source, "get_api_key")  # From SecureConfigMixin
@@ -199,7 +202,8 @@ def test_auto_factory_direct():
         pass
 
     # Test analysis
-    result = auto_factory.document_loader_factory.analyze_path_with_sources("/test.txt")
+    result = auto_factory.document_loader_factory.analyze_path_with_sources(
+        "/test.txt")
 
     assert result["path"] == "/test.txt"
     assert result["analysis"]["file_extension"] == ".txt"
@@ -212,7 +216,8 @@ def test_auto_factory_direct():
     assert source.file_path == "/readme.txt"
 
     # Test finding available loaders
-    loaders = auto_factory.document_loader_factory.find_available_loaders("/test.txt")
+    loaders = auto_factory.document_loader_factory.find_available_loaders(
+        "/test.txt")
     assert "text" in loaders
 
 

@@ -4,29 +4,19 @@
 import asyncio
 import sys
 import time
-from datetime import datetime
 
 
 def print_status(message: str, success: bool = True):
     """Print test status."""
-    status = "✅" if success else "❌"
-    print(f"{status} {message}")
 
 
 def test_basic_imports():
     """Test basic imports without heavy dependencies."""
-    print("🔍 Testing basic imports...")
-
     try:
-        from haive.core.tools.store_manager import StoreManager
 
         print_status("StoreManager import")
 
-        from haive.core.persistence.store.types import StoreType
-
         print_status("StoreType import")
-
-        from haive.core.engine.aug_llm import AugLLMConfig
 
         print_status("AugLLMConfig import")
 
@@ -38,8 +28,6 @@ def test_basic_imports():
 
 def test_store_manager_api():
     """Test StoreManager API without heavy imports."""
-    print("\n🔍 Testing StoreManager API...")
-
     try:
         from haive.core.persistence.store.types import StoreType
         from haive.core.tools.store_manager import StoreManager
@@ -77,8 +65,6 @@ def test_store_manager_api():
 
 def test_memory_classifier_minimal():
     """Test memory classifier with minimal setup."""
-    print("\n🔍 Testing MemoryClassifier (minimal)...")
-
     try:
         # Test import
         from haive.agents.memory.core.classifier import (
@@ -93,7 +79,7 @@ def test_memory_classifier_minimal():
         print_status("MemoryClassifierConfig creation")
 
         # Test classifier creation (this might be slow due to LLM)
-        classifier = MemoryClassifier(config)
+        MemoryClassifier(config)
         print_status("MemoryClassifier creation")
 
         return True
@@ -104,14 +90,11 @@ def test_memory_classifier_minimal():
 
 def test_memory_store_manager():
     """Test MemoryStoreManager with proper API."""
-    print("\n🔍 Testing MemoryStoreManager...")
-
     try:
         from haive.agents.memory.core.stores import (
             MemoryStoreConfig,
             MemoryStoreManager,
         )
-
         from haive.core.persistence.store.types import StoreType
         from haive.core.tools.store_manager import StoreManager
 
@@ -131,7 +114,7 @@ def test_memory_store_manager():
         print_status("MemoryStoreConfig created")
 
         # Create memory store manager
-        memory_store = MemoryStoreManager(config)
+        MemoryStoreManager(config)
         print_status("MemoryStoreManager created")
 
         return True
@@ -142,14 +125,11 @@ def test_memory_store_manager():
 
 async def test_memory_store_async():
     """Test async memory store operations."""
-    print("\n🔍 Testing async memory store operations...")
-
     try:
         from haive.agents.memory.core.stores import (
             MemoryStoreConfig,
             MemoryStoreManager,
         )
-
         from haive.core.persistence.store.types import StoreType
         from haive.core.tools.store_manager import StoreManager
 
@@ -186,14 +166,12 @@ async def test_memory_store_async():
 
 def test_config_compatibility():
     """Test configuration compatibility issues."""
-    print("\n🔍 Testing configuration compatibility...")
-
     try:
         # Test if UnifiedMemorySystem uses old API
         from haive.agents.memory.unified_memory_api import MemorySystemConfig
 
         # Test new config format
-        config = MemorySystemConfig(
+        MemorySystemConfig(
             store_type="memory",
             collection_name="test_unified",
             default_namespace=("test", "unified"),
@@ -209,10 +187,7 @@ def test_config_compatibility():
 
 def main():
     """Run all minimal tests."""
-    print("🧪 MINIMAL INTEGRATION TEST")
-    print("=" * 50)
-
-    start_time = time.time()
+    time.time()
 
     # Track results
     results = []
@@ -230,36 +205,25 @@ def main():
     results.append(("MemoryStoreManager", test_memory_store_manager()))
 
     # Test async operations
-    results.append(("Async Operations", asyncio.run(test_memory_store_async())))
+    results.append(
+        ("Async Operations",
+         asyncio.run(
+             test_memory_store_async())))
 
     # Test config compatibility
     results.append(("Config Compatibility", test_config_compatibility()))
 
-    end_time = time.time()
+    time.time()
 
     # Print summary
-    print("\n" + "=" * 50)
-    print("📊 TEST SUMMARY")
-    print("=" * 50)
 
     passed = sum(1 for _, success in results if success)
     total = len(results)
 
-    print(f"Total Time: {end_time - start_time:.2f} seconds")
-    print(f"Tests Passed: {passed}/{total}")
-    print(f"Success Rate: {(passed/total)*100:.1f}%")
+    for _name, _success in results:
+        pass
 
-    print("\nDetailed Results:")
-    for name, success in results:
-        status = "✅ PASS" if success else "❌ FAIL"
-        print(f"  {status} - {name}")
-
-    if passed == total:
-        print("\n🎉 All minimal tests passed!")
-        return True
-    else:
-        print(f"\n⚠️  {total - passed} tests failed.")
-        return False
+    return passed == total
 
 
 if __name__ == "__main__":

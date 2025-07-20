@@ -7,7 +7,7 @@ from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import StructuredTool, Tool
 from langchain_core.tools.base import BaseTool, BaseToolkit
 from langgraph.types import RetryPolicy
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
 from haive.core.engine.base import EngineType, InvokableEngine
 
@@ -67,7 +67,7 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
     class Config:
         arbitrary_types_allowed = True
 
-    def create_runnable(self, runnable_config=None) -> Any:
+    def create_runnable(self, runnable_config: dict[str, Any] | None = None) -> Any:
         """Create a runnable tool node.
 
         Args:
@@ -123,7 +123,8 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
                             all_tools.append(structured_tool)
                         else:
                             logger.warning(
-                                f"Could not convert model to tool: {type(tool).__name__}"
+                                f"Could not convert model to tool: {
+                                    type(tool).__name__}"
                             )
                     except Exception as e:
                         logger.warning(f"Error converting model to tool: {e}")
@@ -172,7 +173,7 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
         from langchain_core.tools import tool
 
         @tool(name=name, description=description)
-        def model_tool(*args, **kwargs):
+        def model_tool(*args, **kwargs) -> Any:
             return call_method(*args, **kwargs)
 
         return model_tool
@@ -251,7 +252,7 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
 
     @field_validatorvalidate_engine_type
     @classmethod
-    def validate_engine_type(cls, v):
+    def validate_engine_type(cls, v) -> Any:
         """Validate engine type is TOOL."""
         if v != EngineType.TOOL:
             raise ValueError("engine_type must be TOOL")
@@ -259,7 +260,7 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
 
     @field_validatorvalidate_tools
     @classmethod
-    def validate_tools(cls, v):
+    def validate_tools(cls, v) -> Any:
         """Validate tools are of the correct type."""
         if v is None:
             return v
@@ -269,13 +270,16 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
             if isinstance(tool, BaseTool | Tool | StructuredTool | BaseModel):
                 valid_tools.append(tool)
             else:
-                logger.warning(f"Ignoring invalid tool type: {type(tool).__name__}")
+                logger.warning(
+                    f"Ignoring invalid tool type: {
+                        type(tool).__name__}"
+                )
 
         return valid_tools
 
     @field_validatorvalidate_toolkit
     @classmethod
-    def validate_toolkit(cls, v):
+    def validate_toolkit(cls, v) -> Any:
         """Validate toolkit is of the correct type."""
         if v is None:
             return v
@@ -297,7 +301,7 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
 
     @field_validatorvalidate_tool_choice
     @classmethod
-    def validate_tool_choice(cls, v):
+    def validate_tool_choice(cls, v) -> Any:
         """Validate tool_choice has a valid value."""
         valid_choices = ["auto", "required", "none"]
         if v not in valid_choices:

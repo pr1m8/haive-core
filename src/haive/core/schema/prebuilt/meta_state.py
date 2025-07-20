@@ -128,7 +128,10 @@ class MetaStateSchema(StateSchema, RecompileMixin):
     }
 
     @model_validator(mode="after")
-    def setup_graph_composition(self) -> MetaStateSchema:
+
+
+    @classmethod
+    def setup_graph_composition(cls) -> MetaStateSchema:
         """Setup graph composition with the contained agent.
 
         This validator:
@@ -188,7 +191,8 @@ class MetaStateSchema(StateSchema, RecompileMixin):
                 self.agent_type = new_agent.__class__.__name__
 
             # Mark for recompilation due to agent change
-            reason = f"Agent changed from {old_agent_name} to {self.agent_name}"
+            reason = f"Agent changed from {old_agent_name} to {
+                self.agent_name}"
             self.mark_for_recompile(reason)
 
             # Update composition metadata
@@ -238,7 +242,10 @@ class MetaStateSchema(StateSchema, RecompileMixin):
         if self.agent is None:
             raise ValueError("No agent configured for execution")
 
-        logger.info(f"Executing contained agent: {self.agent_name or 'unnamed'}")
+        logger.info(
+            f"Executing contained agent: {
+                self.agent_name or 'unnamed'}"
+        )
 
         # Prepare input from agent state if not provided
         if input_data is None:
@@ -252,7 +259,8 @@ class MetaStateSchema(StateSchema, RecompileMixin):
             # Check if agent needs recompilation before execution
             if self.check_agent_recompilation():
                 logger.info(
-                    f"Agent {self.agent_name} needs recompilation before execution"
+                    f"Agent {
+                        self.agent_name} needs recompilation before execution"
                 )
                 self.mark_for_recompile(f"Agent {self.agent_name} needs recompilation")
 
@@ -277,7 +285,10 @@ class MetaStateSchema(StateSchema, RecompileMixin):
                 # Callable - run in thread
                 result = await asyncio.to_thread(self.agent, input_data)
             else:
-                raise RuntimeError(f"Agent {self.agent_type} is not executable")
+                raise RuntimeError(
+                    f"Agent {
+                        self.agent_type} is not executable"
+                )
 
             # Create execution record
             execution_record = {
@@ -390,9 +401,12 @@ class MetaStateSchema(StateSchema, RecompileMixin):
             return None
 
         # Try to get from agent's engines dict
-        if hasattr(self.agent, "engines") and isinstance(self.agent.engines, dict):
-            if engine_name in self.agent.engines:
-                return self.agent.engines[engine_name]
+        if (
+            hasattr(self.agent, "engines")
+            and isinstance(self.agent.engines, dict)
+            and engine_name in self.agent.engines
+        ):
+            return self.agent.engines[engine_name]
 
         # Try to get main engine if requested
         if engine_name == "main" and hasattr(self.agent, "engine"):
@@ -489,7 +503,9 @@ class MetaStateSchema(StateSchema, RecompileMixin):
             f"{self.agent_type}({self.agent_name})" if self.agent else "No agent"
         )
         status_info = f"status={self.execution_status}"
-        execution_info = f"executions={self.graph_context.get('execution_count', 0)}"
+        execution_info = f"executions={
+            self.graph_context.get(
+                'execution_count', 0)}"
         recompile_info = f"needs_recompile={self.needs_recompile}"
 
         return f"MetaStateSchema(agent={agent_info}, {status_info}, {execution_info}, {recompile_info})"
@@ -502,7 +518,9 @@ class MetaStateSchema(StateSchema, RecompileMixin):
             f"agent_name='{self.agent_name}', "
             f"status='{self.execution_status}', "
             f"executions={self.graph_context.get('execution_count', 0)}, "
-            f"agent_state_keys={list(self.agent_state.keys()) if self.agent_state else []}, "
+            f"agent_state_keys={
+                list(
+                    self.agent_state.keys()) if self.agent_state else []}, "
             f"needs_recompile={self.needs_recompile}"
             f")"
         )

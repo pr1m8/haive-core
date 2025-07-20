@@ -53,7 +53,12 @@ def create_demo_graph():
         {
             "name": "main_llm",
             "invoke": lambda self, input_data, config=None: AIMessage(
-                content=f"Main LLM response to: {input_data.get('messages', [''])[0].content if isinstance(input_data, dict) and 'messages' in input_data else input_data}"
+                content=f"Main LLM response to: {
+    input_data.get(
+        'messages',
+        [''])[0].content if isinstance(
+            input_data,
+             dict) and 'messages' in input_data else input_data}"
             ),
         },
     )()
@@ -64,7 +69,12 @@ def create_demo_graph():
         {
             "name": "analyzer_llm",
             "invoke": lambda self, input_data, config=None: AIMessage(
-                content=f"Analysis of: {input_data.get('messages', [''])[0].content if isinstance(input_data, dict) and 'messages' in input_data else input_data}"
+                content=f"Analysis of: {
+    input_data.get(
+        'messages',
+        [''])[0].content if isinstance(
+            input_data,
+             dict) and 'messages' in input_data else input_data}"
             ),
         },
     )()
@@ -167,7 +177,8 @@ async def run_demo():
         # Count messages by engine
         engine_count = {}
         for msg in final_state.messages + final_state.analysis_messages:
-            if isinstance(msg, AIMessage) and hasattr(msg, "additional_kwargs"):
+            if isinstance(msg, AIMessage) and hasattr(
+                msg, "additional_kwargs"):
                 engine_name = msg.additional_kwargs.get(
                     "engine_name", "unknown")
                 engine_count[engine_name] = engine_count.get(

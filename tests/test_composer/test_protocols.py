@@ -1,6 +1,6 @@
 """Tests for composer protocols - using real components only."""
 
-from typing import Any, Dict, List
+from typing import Any
 
 from langchain_core.messages import AIMessage, HumanMessage
 from pydantic import BaseModel, Field
@@ -16,7 +16,7 @@ from haive.core.schema.prebuilt.messages_state import MessagesState
 class SampleState(BaseModel):
     """Sample state for testing protocols."""
 
-    messages: List[str] = Field(default_factory=list)
+    messages: list[str] = Field(default_factory=list)
     temperature: float = Field(default=0.7)
 
 
@@ -26,7 +26,8 @@ class TestProtocols:
     def test_extract_function_protocol(self):
         """Test that extract function protocol works with real implementations."""
 
-        def simple_extract(state: SampleState, config: Dict[str, Any]) -> List[str]:
+        def simple_extract(state: SampleState,
+                           config: dict[str, Any]) -> list[str]:
             """Simple extract function implementation."""
             field_name = config.get("field_name", "messages")
             return getattr(state, field_name, [])
@@ -34,7 +35,7 @@ class TestProtocols:
         # Test protocol compliance
         def use_extract_function(
             func: ExtractFunction, state: SampleState
-        ) -> List[str]:
+        ) -> list[str]:
             return func(state, {"field_name": "messages"})
 
         # Create test state
@@ -48,18 +49,18 @@ class TestProtocols:
         """Test that update function protocol works with real implementations."""
 
         def simple_update(
-            result: str, state: SampleState, config: Dict[str, Any]
-        ) -> Dict[str, Any]:
+            result: str, state: SampleState, config: dict[str, Any]
+        ) -> dict[str, Any]:
             """Simple update function implementation."""
             field_name = config.get("field_name", "messages")
             current = getattr(state, field_name, [])
-            updated = list(current) + [result]
+            updated = [*list(current), result]
             return {field_name: updated}
 
         # Test protocol compliance
         def use_update_function(
             func: UpdateFunction, result: str, state: SampleState
-        ) -> Dict[str, Any]:
+        ) -> dict[str, Any]:
             return func(result, state, {"field_name": "messages"})
 
         # Create test state
@@ -95,18 +96,22 @@ class TestProtocols:
     def test_real_state_extract_function(self):
         """Test extract function with real MessagesState."""
 
-        def extract_messages(state: MessagesState, config: Dict[str, Any]) -> List[Any]:
+        def extract_messages(state: MessagesState,
+                             config: dict[str, Any]) -> list[Any]:
             """Extract messages from real MessagesState."""
             messages = getattr(state, "messages", [])
             return list(messages)
 
         # Create real MessagesState
         state = MessagesState(
-            messages=[HumanMessage(content="Hello"), AIMessage(content="Hi there!")]
+            messages=[
+                HumanMessage(
+                    content="Hello"), AIMessage(
+                    content="Hi there!")]
         )
 
         # Extract through protocol
-        def use_extract(func: ExtractFunction) -> List[Any]:
+        def use_extract(func: ExtractFunction) -> list[Any]:
             return func(state, {})
 
         messages = use_extract(extract_messages)
@@ -118,8 +123,8 @@ class TestProtocols:
         """Test update function with real MessagesState."""
 
         def update_with_message(
-            result: AIMessage, state: MessagesState, config: Dict[str, Any]
-        ) -> Dict[str, Any]:
+            result: AIMessage, state: MessagesState, config: dict[str, Any]
+        ) -> dict[str, Any]:
             """Update messages with new AIMessage."""
             current_messages = list(getattr(state, "messages", []))
             current_messages.append(result)
@@ -130,7 +135,7 @@ class TestProtocols:
         new_message = AIMessage(content="Answer")
 
         # Update through protocol
-        def use_update(func: UpdateFunction) -> Dict[str, Any]:
+        def use_update(func: UpdateFunction) -> dict[str, Any]:
             return func(new_message, state, {})
 
         update = use_update(update_with_message)
@@ -155,7 +160,8 @@ class TestProtocols:
             return f"processed: {value}"
 
         # Chain transforms through protocol
-        def apply_transforms(value: Any, transforms: List[TransformFunction]) -> Any:
+        def apply_transforms(
+                value: Any, transforms: list[TransformFunction]) -> Any:
             result = value
             for transform in transforms:
                 result = transform(result)
@@ -172,13 +178,13 @@ class TestProtocols:
         """Test that protocols provide proper type checking."""
 
         # Valid extract function
-        def valid_extract(state: SampleState, config: Dict[str, Any]) -> str:
+        def valid_extract(state: SampleState, config: dict[str, Any]) -> str:
             return "extracted"
 
         # Valid update function
         def valid_update(
-            result: str, state: SampleState, config: Dict[str, Any]
-        ) -> Dict[str, Any]:
+            result: str, state: SampleState, config: dict[str, Any]
+        ) -> dict[str, Any]:
             return {"field": result}
 
         # Valid transform function

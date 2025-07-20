@@ -1,4 +1,4 @@
-"""
+"""from typing import Any
 Web Research Retriever implementation for the Haive framework.
 
 This module provides a configuration class for the Web Research retriever,
@@ -24,7 +24,7 @@ The implementation integrates with LangChain's WebResearchRetriever while
 providing a consistent Haive configuration interface with secure API key management.
 """
 
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any
 
 from langchain_core.documents import Document
 from pydantic import Field, SecretStr
@@ -38,8 +38,7 @@ from haive.core.engine.vectorstore.vectorstore import VectorStoreConfig
 
 @BaseRetrieverConfig.register(RetrieverType.WEB_RESEARCH)
 class WebResearchRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
-    """
-    Configuration for Web Research retriever in the Haive framework.
+    """Configuration for Web Research retriever in the Haive framework.
 
     This retriever performs comprehensive web research by searching the web,
     retrieving content, and providing retrieval capabilities over the collected data.
@@ -94,7 +93,7 @@ class WebResearchRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
     )
 
     # API configuration with SecureConfigMixin
-    api_key: Optional[SecretStr] = Field(
+    api_key: SecretStr | None = Field(
         default=None,
         description="Web search API key (auto-resolved from GOOGLE_API_KEY or TAVILY_API_KEY)",
     )
@@ -130,7 +129,7 @@ class WebResearchRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
         default="google", description="Search engine to use: 'google', 'tavily', 'bing'"
     )
 
-    def get_input_fields(self) -> Dict[str, Tuple[Type, Any]]:
+    def get_input_fields(self) -> dict[str, tuple[type, Any]]:
         """Return input field definitions for Web Research retriever."""
         return {
             "query": (
@@ -139,18 +138,17 @@ class WebResearchRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
             ),
         }
 
-    def get_output_fields(self) -> Dict[str, Tuple[Type, Any]]:
+    def get_output_fields(self) -> dict[str, tuple[type, Any]]:
         """Return output field definitions for Web Research retriever."""
         return {
             "documents": (
-                List[Document],
+                list[Document],
                 Field(default_factory=list, description="Documents from web research"),
             ),
         }
 
-    def instantiate(self):
-        """
-        Create a Web Research retriever from this configuration.
+    def instantiate(self) -> Any:
+        """Create a Web Research retriever from this configuration.
 
         Returns:
             WebResearchRetriever: Instantiated retriever ready for web research.

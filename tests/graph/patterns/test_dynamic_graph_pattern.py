@@ -50,9 +50,11 @@ def test_dynamic_graph_pattern():
 
                 # Simple function for the node
                 def node_fn(state):
-                    # Make sure to return the state to maintain input/output consistency
+                    # Make sure to return the state to maintain input/output
+                    # consistency
                     logger.info(f"Processing state in node_fn: {state}")
-                    # Make sure we don't modify the state in a way that would break the schema
+                    # Make sure we don't modify the state in a way that would
+                    # break the schema
                     if isinstance(state, dict) and "test" in state:
                         state["test"] = state.get("test", "") + " processed"
                     return state

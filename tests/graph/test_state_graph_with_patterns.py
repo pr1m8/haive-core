@@ -1,7 +1,7 @@
 # tests/graph/test_state_graph_with_patterns.py
 
 import logging
-from typing import Annotated, Any, ClassVar, Dict, List, Optional
+from typing import Annotated, Any, ClassVar
 
 import pytest
 from langchain_core.messages import BaseMessage
@@ -28,13 +28,14 @@ class SimpleState(StateSchema):
 
     query: str = Field(default="")
     response: str = Field(default="")
-    messages: Annotated[List[BaseMessage], add_messages] = Field(default_factory=list)
+    messages: Annotated[list[BaseMessage],
+                        add_messages] = Field(default_factory=list)
 
 
 class ToolsState(SimpleState):
     """State schema with tools support."""
 
-    tools_result: Optional[List[Dict[str, Any]]] = Field(default=None)
+    tools_result: list[dict[str, Any]] | None = Field(default=None)
     needs_tools: bool = Field(default=False)
 
 
@@ -42,16 +43,17 @@ class PlanState(StateSchema):
     """State schema for planning examples."""
 
     task: str = Field(default="")
-    plan: Optional[Dict[str, Any]] = Field(default=None)
+    plan: dict[str, Any] | None = Field(default=None)
     validated: bool = Field(default=False)
-    messages: Annotated[List[BaseMessage], add_messages] = Field(default_factory=list)
+    messages: Annotated[list[BaseMessage],
+                        add_messages] = Field(default_factory=list)
 
 
 # Define the Plan model for tools and validation
 class Plan(BaseModel):
-    """Model for creating a plan"""
+    """Model for creating a plan."""
 
-    steps: List[str] = Field(description="List of steps to complete")
+    steps: list[str] = Field(description="List of steps to complete")
 
 
 # First test - Basic graph building
@@ -62,10 +64,16 @@ def test_basic_graph():
 
     # Add nodes
     graph.add_node(
-        "process", lambda state: {"response": f"Processed: {state.get('query', '')}"}
+        "process", lambda state: {
+            "response": f"Processed: {
+                state.get(
+                    'query', '')}"}
     )
     graph.add_node(
-        "format", lambda state: {"response": f"Formatted: {state.get('response', '')}"}
+        "format", lambda state: {
+            "response": f"Formatted: {
+                state.get(
+                    'response', '')}"}
     )
 
     # Add edges
@@ -191,7 +199,10 @@ def test_subgraph():
     """Test integrating a subgraph into a larger graph."""
     # Create subgraph
     subgraph = BaseGraph(name="Processing Subgraph")
-    subgraph.add_node("extract", lambda state: {"data": state.get("input", "")})
+    subgraph.add_node(
+        "extract", lambda state: {
+            "data": state.get(
+                "input", "")})
     subgraph.add_node(
         "transform", lambda state: {"data": state.get("data", "").upper()}
     )
@@ -201,10 +212,16 @@ def test_subgraph():
 
     # Create main graph
     main_graph = BaseGraph(name="Main Graph")
-    main_graph.add_node("input", lambda state: {"input": state.get("query", "")})
+    main_graph.add_node(
+        "input", lambda state: {
+            "input": state.get(
+                "query", "")})
     main_graph.add_node("processing", subgraph)
     main_graph.add_node(
-        "output", lambda state: {"response": f"Processed: {state.get('data', '')}"}
+        "output", lambda state: {
+            "response": f"Processed: {
+                state.get(
+                    'data', '')}"}
     )
 
     # Connect nodes
@@ -337,7 +354,11 @@ def test_node_config_graph():
     paths = graph.find_all_paths(START, END)
     for i, path in enumerate(paths):
         logger.info(
-            f"Path {i+1}: {path.nodes} (conditional={path.contains_conditional})"
+            f"Path {
+                i +
+                1}: {
+                path.nodes} (conditional={
+                path.contains_conditional})"
         )
 
     # There should be multiple paths (agent -> validate -> execute_plan -> END or
@@ -359,13 +380,13 @@ class QAPattern(GraphPattern):
     """QA pattern with retrieval."""
 
     # Define structure with pattern_ prefix to match base class
-    pattern_nodes: ClassVar[Dict[str, Optional[NodeLike]]] = {
+    pattern_nodes: ClassVar[dict[str, NodeLike | None]] = {
         "query": None,
         "retrieve": None,
         "answer": None,
     }
 
-    pattern_edges: ClassVar[List[tuple]] = [
+    pattern_edges: ClassVar[list[tuple]] = [
         (START, "query"),
         ("query", "retrieve"),
         ("retrieve", "answer"),
@@ -373,7 +394,7 @@ class QAPattern(GraphPattern):
     ]
 
     # Add this line to match the base class
-    implementations: Dict[str, Any] = Field(default_factory=dict)
+    implementations: dict[str, Any] = Field(default_factory=dict)
 
     def _build(self):
         """Custom implementation logic."""
@@ -384,14 +405,14 @@ class QAPattern(GraphPattern):
 class AdvancedQAPattern(GraphPattern):
     """Advanced QA pattern with reranking."""
 
-    pattern_nodes: ClassVar[Dict[str, Optional[NodeLike]]] = {
+    pattern_nodes: ClassVar[dict[str, NodeLike | None]] = {
         "query": None,
         "retrieve": None,
         "rerank": None,
         "answer": None,
     }
 
-    pattern_edges: ClassVar[List[tuple]] = [
+    pattern_edges: ClassVar[list[tuple]] = [
         (START, "query"),
         ("query", "retrieve"),
         ("retrieve", "rerank"),
@@ -450,7 +471,11 @@ def test_react_pattern():
         paths = graph.find_all_paths(START, END)
         for i, path in enumerate(paths):
             logger.info(
-                f"React path {i+1}: {path.nodes} (conditional={path.contains_conditional})"
+                f"React path {
+                    i +
+                    1}: {
+                    path.nodes} (conditional={
+                    path.contains_conditional})"
             )
 
         assert len(paths) > 0

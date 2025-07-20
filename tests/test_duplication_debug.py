@@ -1,11 +1,10 @@
 """Debug test to investigate tool call and AI message duplication in SimpleAgentV2."""
 
 import logging
-from typing import List
 
-from haive.agents.simple.agent_v2 import SimpleAgentV2
 from pydantic import BaseModel, Field
 
+from haive.agents.simple.agent_v2 import SimpleAgentV2
 from haive.core.engine.aug_llm import AugLLMConfig
 
 # Enable debug logging to see what's happening
@@ -22,8 +21,6 @@ class TestModel(BaseModel):
 
 def test_duplication_debug():
     """Test to debug duplication issues."""
-    print("=== DEBUGGING DUPLICATION ISSUES ===\n")
-
     # Create agent with structured output
     engine = AugLLMConfig(temperature=0.1, structured_output_model=TestModel)
 
@@ -39,26 +36,15 @@ def test_duplication_debug():
     agent.checkpointer = None
     agent.store = None
 
-    print("Agent configuration:")
-    print(f"  use_parser_safety_net: {agent.use_parser_safety_net}")
-    print(f"  parser_safety_net_mode: {agent.parser_safety_net_mode}")
-    print(f"  structured_output_model: {agent.structured_output_model}")
-
     # Check the graph structure
     if hasattr(agent, "graph"):
-        print(f"\nGraph nodes: {agent.graph.metadata.get('available_nodes', [])}")
-        print(f"Tool routes: {agent.get_tool_routes()}")
+        pass
 
     try:
-        print("\n=== RUNNING AGENT ===")
-        result = agent.run(
+        agent.run(
             "Test input for duplication",
             debug=True,  # Enable debug to see execution flow
         )
-
-        print(f"\n=== RESULT ===")
-        print(f"Result type: {type(result)}")
-        print(f"Result: {result}")
 
         # Check if there are any duplicates in the state
         if hasattr(agent, "_app") and agent._app:
@@ -69,16 +55,15 @@ def test_duplication_debug():
                 )
                 if final_state and hasattr(final_state, "values"):
                     messages = final_state.values.get("messages", [])
-                    print(f"\n=== FINAL STATE MESSAGES ===")
-                    print(f"Total messages: {len(messages)}")
 
                     from langchain_core.messages import AIMessage, ToolMessage
 
-                    ai_messages = [m for m in messages if isinstance(m, AIMessage)]
-                    tool_messages = [m for m in messages if isinstance(m, ToolMessage)]
-
-                    print(f"AI Messages: {len(ai_messages)}")
-                    print(f"Tool Messages: {len(tool_messages)}")
+                    ai_messages = [
+                        m for m in messages if isinstance(
+                            m, AIMessage)]
+                    tool_messages = [
+                        m for m in messages if isinstance(
+                            m, ToolMessage)]
 
                     # Check for duplicates
                     tool_call_ids = []
@@ -92,34 +77,22 @@ def test_duplication_debug():
                         if hasattr(tool_msg, "tool_call_id"):
                             tool_message_ids.append(tool_msg.tool_call_id)
 
-                    print(f"Tool call IDs: {tool_call_ids}")
-                    print(f"Tool message IDs: {tool_message_ids}")
-
                     # Check for duplicates
-                    duplicate_tool_calls = len(tool_call_ids) != len(set(tool_call_ids))
+                    duplicate_tool_calls = len(
+                        tool_call_ids) != len(set(tool_call_ids))
                     duplicate_tool_messages = len(tool_message_ids) != len(
                         set(tool_message_ids)
                     )
 
-                    print(f"Duplicate tool calls: {duplicate_tool_calls}")
-                    print(f"Duplicate tool messages: {duplicate_tool_messages}")
-
                     if duplicate_tool_calls or duplicate_tool_messages:
-                        print("\n❌ DUPLICATION DETECTED!")
-                        print("This is likely caused by:")
-                        print("  1. Safety net creating duplicate ToolMessages")
-                        print(
-                            "  2. Multiple parser nodes processing the same tool call"
-                        )
-                        print("  3. Tool call ID mismatches")
+                        pass
                     else:
-                        print("\n✅ No duplicates found")
+                        pass
 
-            except Exception as e:
-                print(f"Error checking state: {e}")
+            except Exception:
+                pass
 
-    except Exception as e:
-        print(f"Error running agent: {e}")
+    except Exception:
         import traceback
 
         traceback.print_exc()

@@ -1,5 +1,6 @@
 """ChatGPT Plugin Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the ChatGPT Plugin retriever,
 which integrates with ChatGPT plugins to retrieve information from external
 services and APIs. This enables access to real-time data and specialized
@@ -148,7 +149,7 @@ class ChatGPTPluginRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a ChatGPT Plugin retriever from this configuration.
 
         Returns:

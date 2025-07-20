@@ -22,8 +22,9 @@ def test_simple_agent() -> dict[str, Any]:
     """Test Simple agent with persistence."""
     try:
 
-        from haive.agents.simple.agent import SimpleAgent
         from langchain_core.messages import HumanMessage
+
+        from haive.agents.simple.agent import SimpleAgent
 
         timestamp = datetime.now().strftime("%H%M%S")
         agent = SimpleAgent(
@@ -80,15 +81,17 @@ def test_simple_agent() -> dict[str, Any]:
         }
 
     except Exception as e:
-        return {"status": "❌ FAILED", "error": str(e), "error_type": type(e).__name__}
+        return {"status": "❌ FAILED", "error": str(
+            e), "error_type": type(e).__name__}
 
 
 def test_react_agent() -> dict[str, Any]:
     """Test React agent with persistence."""
     try:
 
-        from haive.agents.react.agent import ReactAgent
         from langchain_core.messages import HumanMessage
+
+        from haive.agents.react.agent import ReactAgent
 
         timestamp = datetime.now().strftime("%H%M%S")
         agent = ReactAgent(
@@ -144,15 +147,17 @@ def test_react_agent() -> dict[str, Any]:
         }
 
     except Exception as e:
-        return {"status": "❌ FAILED", "error": str(e), "error_type": type(e).__name__}
+        return {"status": "❌ FAILED", "error": str(
+            e), "error_type": type(e).__name__}
 
 
 def test_rag_agent() -> dict[str, Any]:
     """Test RAG agent with persistence."""
     try:
 
-        from haive.agents.rag.base.agent import BaseRAGAgent
         from langchain_core.messages import HumanMessage
+
+        from haive.agents.rag.base.agent import BaseRAGAgent
 
         timestamp = datetime.now().strftime("%H%M%S")
         agent = BaseRAGAgent(
@@ -215,7 +220,8 @@ def test_rag_agent() -> dict[str, Any]:
         }
 
     except Exception as e:
-        return {"status": "❌ FAILED", "error": str(e), "error_type": type(e).__name__}
+        return {"status": "❌ FAILED", "error": str(
+            e), "error_type": type(e).__name__}
 
 
 def test_collaborative_conversation() -> dict[str, Any]:
@@ -225,7 +231,6 @@ def test_collaborative_conversation() -> dict[str, Any]:
         from haive.agents.conversation.collaberative.agent import (
             CollaborativeConversation,
         )
-
         from haive.core.engine.aug_llm import AugLLMConfig
 
         timestamp = datetime.now().strftime("%H%M%S")
@@ -296,7 +301,8 @@ def test_collaborative_conversation() -> dict[str, Any]:
         }
 
     except Exception as e:
-        return {"status": "❌ FAILED", "error": str(e), "error_type": type(e).__name__}
+        return {"status": "❌ FAILED", "error": str(
+            e), "error_type": type(e).__name__}
 
 
 def test_debate_conversation() -> dict[str, Any]:
@@ -304,7 +310,6 @@ def test_debate_conversation() -> dict[str, Any]:
     try:
 
         from haive.agents.conversation.debate.agent import DebateAgent
-
         from haive.core.engine.aug_llm import AugLLMConfig
 
         timestamp = datetime.now().strftime("%H%M%S")
@@ -355,7 +360,8 @@ def test_debate_conversation() -> dict[str, Any]:
         }
 
     except Exception as e:
-        return {"status": "❌ FAILED", "error": str(e), "error_type": type(e).__name__}
+        return {"status": "❌ FAILED", "error": str(
+            e), "error_type": type(e).__name__}
 
 
 def main():

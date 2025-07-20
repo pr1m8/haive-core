@@ -1,19 +1,15 @@
 #!/usr/bin/env python3
 """Test BaseGraph integration with intelligent routing."""
 
-import asyncio
 
 from haive.agents.multi.clean import MultiAgent
 from haive.agents.simple.agent import SimpleAgent
-
 from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.graph.state_graph.base_graph2 import BaseGraph
 
 
 def test_basegraph_intelligent_routing():
     """Test BaseGraph's intelligent routing capabilities."""
-    print("🧪 Testing BaseGraph intelligent routing...")
-
     # Create agents
     planner = SimpleAgent(
         name="planner", engine=AugLLMConfig(prompt_template="Plan: {input}")
@@ -37,9 +33,6 @@ def test_basegraph_intelligent_routing():
         agents=agents, execution_mode="infer", prefix="agent_"
     )
 
-    print(f"✅ Graph nodes: {list(graph.nodes.keys())}")
-    print(f"✅ Graph edges: {graph.edges}")
-
     # Should have inferred sequence: planner → executor → reviewer
     expected_edges = [
         ("__start__", "agent_planner"),
@@ -50,17 +43,15 @@ def test_basegraph_intelligent_routing():
 
     for edge in expected_edges:
         if edge in graph.edges:
-            print(f"✅ Found expected edge: {edge}")
+            pass
         else:
-            print(f"❌ Missing edge: {edge}")
+            pass
 
     return graph
 
 
 def test_multiagent_basegraph_integration():
     """Test MultiAgent using BaseGraph intelligent routing."""
-    print("\n🧪 Testing MultiAgent with BaseGraph integration...")
-
     # Create agents
     planner = SimpleAgent(
         name="planner", engine=AugLLMConfig(prompt_template="Plan: {input}")
@@ -84,9 +75,6 @@ def test_multiagent_basegraph_integration():
     # Build graph
     graph = multi_agent.build_graph()
 
-    print(f"✅ MultiAgent graph nodes: {list(graph.nodes.keys())}")
-    print(f"✅ MultiAgent graph edges: {graph.edges}")
-
     # Should have inferred sequence: planner → executor → reviewer
     expected_edges = [
         ("__start__", "planner"),
@@ -97,17 +85,15 @@ def test_multiagent_basegraph_integration():
 
     for edge in expected_edges:
         if edge in graph.edges:
-            print(f"✅ Found expected edge: {edge}")
+            pass
         else:
-            print(f"❌ Missing edge: {edge}")
+            pass
 
     return multi_agent
 
 
 def test_branch_routing():
     """Test branch routing with BaseGraph."""
-    print("\n🧪 Testing branch routing...")
-
     # Create agents
     analyzer = SimpleAgent(
         name="analyzer", engine=AugLLMConfig(prompt_template="Analyze: {input}")
@@ -143,22 +129,16 @@ def test_branch_routing():
         agents=agents, execution_mode="branch", branches=branches, prefix="agent_"
     )
 
-    print(f"✅ Branch graph nodes: {list(graph.nodes.keys())}")
-    print(f"✅ Branch graph edges: {graph.edges}")
-
     # Should have branching structure
     assert "agent_analyzer" in graph.nodes
     assert "agent_success_handler" in graph.nodes
     assert "agent_error_handler" in graph.nodes
 
-    print("✅ Branch routing working correctly!")
     return graph
 
 
 def main():
     """Run all integration tests."""
-    print("🚀 Testing BaseGraph integration with intelligent routing...\n")
-
     try:
         # Test 1: Direct BaseGraph usage
         test_basegraph_intelligent_routing()
@@ -169,15 +149,7 @@ def main():
         # Test 3: Branch routing
         test_branch_routing()
 
-        print(f"\n✅ All BaseGraph integration tests passed!")
-        print(f"✅ Features working:")
-        print(f"  - BaseGraph intelligent routing")
-        print(f"  - MultiAgent BaseGraph integration")
-        print(f"  - Sequence inference in BaseGraph")
-        print(f"  - Branch routing in BaseGraph")
-
-    except Exception as e:
-        print(f"\n❌ Test failed: {e}")
+    except Exception:
         import traceback
 
         traceback.print_exc()

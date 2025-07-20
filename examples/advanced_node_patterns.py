@@ -9,9 +9,9 @@ This demonstrates:
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
+from langchain_core.messages import BaseMessage, HumanMessage
 from langgraph.types import Command, Send
 from pydantic import BaseModel, Field
 
@@ -28,22 +28,21 @@ from haive.core.graph.node.composer.advanced_node_composer import (
 class MessagesState(BaseModel):
     """Example state with messages."""
 
-    messages: List[BaseMessage] = Field(default_factory=list)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
-    config: Dict[str, Any] = Field(default_factory=dict)
+    messages: list[BaseMessage] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    config: dict[str, Any] = Field(default_factory=dict)
 
 
 class ProcessingState(BaseModel):
     """State for processing workflows."""
 
-    documents: List[Dict[str, Any]] = Field(default_factory=list)
+    documents: list[dict[str, Any]] = Field(default_factory=list)
     processing_status: str = "pending"
-    results: Dict[str, Any] = Field(default_factory=dict)
+    results: dict[str, Any] = Field(default_factory=dict)
 
 
 def example_1_different_callable_signatures():
     """Example 1: Handle various callable signatures automatically."""
-
     composer = AdvancedNodeComposer()
 
     # 1. Simple function - just state
@@ -58,7 +57,7 @@ def example_1_different_callable_signatures():
         return {"over_threshold": len(state.messages) > threshold}
 
     # 3. Typed function
-    def process_typed(state: MessagesState, config: Dict[str, Any]) -> Dict[str, Any]:
+    def process_typed(state: MessagesState, config: dict[str, Any]) -> dict[str, Any]:
         """Fully typed processor."""
         return {
             "last_message": state.messages[-1].content if state.messages else None,
@@ -86,7 +85,6 @@ def example_1_different_callable_signatures():
     command_node = composer.from_callable_advanced(process_command)
     no_args_node = composer.from_callable_advanced(process_no_args)
 
-    print("✅ All callable signatures handled automatically")
     return {
         "simple": simple_node,
         "config": config_node,
@@ -98,7 +96,6 @@ def example_1_different_callable_signatures():
 
 def example_2_extended_extraction_logic():
     """Example 2: Custom extraction logic beyond simple field mapping."""
-
     composer = AdvancedNodeComposer()
 
     # Custom extraction function
@@ -169,13 +166,11 @@ def example_2_extended_extraction_logic():
         name="conversation_analyzer",
     )
 
-    print("✅ Extended extraction and update logic implemented")
     return analysis_node
 
 
 def example_3_typed_callable_with_validation():
     """Example 3: Type-safe nodes with validation."""
-
     composer = AdvancedNodeComposer()
 
     # Define result type
@@ -186,7 +181,7 @@ def example_3_typed_callable_with_validation():
 
     # Typed processing function
     def analyze_messages(
-        state: MessagesState, config: Dict[str, Any]
+        state: MessagesState, config: dict[str, Any]
     ) -> AnalysisResult:
         """Analyze messages with type safety."""
         all_text = " ".join(msg.content for msg in state.messages)
@@ -212,7 +207,7 @@ def example_3_typed_callable_with_validation():
     typed_node = composer.create_typed_callable_node(
         func=analyze_messages,
         state_type=MessagesState,
-        config_type=Dict[str, Any],
+        config_type=dict[str, Any],
         result_type=AnalysisResult,
         output_mappings=[
             FieldMapping("summary", "analysis_summary"),
@@ -222,7 +217,6 @@ def example_3_typed_callable_with_validation():
         validate_types=True,
     )
 
-    print("✅ Type-safe callable node with runtime validation")
     return typed_node
 
 
@@ -247,8 +241,8 @@ def example_4_decorator_patterns():
         ],
     )
     def check_length_with_threshold(
-        conversation: List[BaseMessage], threshold: int
-    ) -> Dict[str, Any]:
+        conversation: list[BaseMessage], threshold: int
+    ) -> dict[str, Any]:
         """Check length against threshold."""
         count = len(conversation)
         return {"over_limit": count > threshold, "message_count": count}
@@ -259,13 +253,12 @@ def example_4_decorator_patterns():
         """Route based on state."""
         if state.get("should_summarize"):
             return Command(goto="summarize")
-        elif state.get("needs_response"):
+        if state.get("needs_response"):
             return Command(goto="respond")
-        else:
-            return Command(goto="continue")
+        return Command(goto="continue")
 
     # Quick callable conversion
-    def process_documents(docs: List[Dict]) -> Dict[str, Any]:
+    def process_documents(docs: list[dict]) -> dict[str, Any]:
         """Process documents."""
         return {
             "processed_count": len(docs),
@@ -279,7 +272,6 @@ def example_4_decorator_patterns():
         output_mappings=[FieldMapping("processed_count", "num_processed")],
     )
 
-    print("✅ Decorator patterns for clean node definitions")
     return {
         "length_checker": check_conversation_length,
         "threshold_checker": check_length_with_threshold,
@@ -353,13 +345,11 @@ def example_5_custom_pipeline_nodes():
         update=update_with_summaries,
     )
 
-    print("✅ Custom pipeline node created")
     return summarizer_node
 
 
 def example_6_command_send_handling():
     """Example 6: Advanced Command and Send handling."""
-
     composer = AdvancedNodeComposer()
 
     # Function that returns Send for parallel execution
@@ -386,14 +376,13 @@ def example_6_command_send_handling():
         # Complex routing logic
         if metadata.get("priority") == "high":
             return Command(update={"routed_to": "urgent_handler"}, goto="urgent")
-        elif state.get("message_count", 0) > 50:
+        if state.get("message_count", 0) > 50:
             return Command(
                 update={"routed_to": "batch_processor"},
                 goto=["preprocess", "batch_process"],  # Multiple steps
             )
-        else:
-            # Regular command
-            return Command(update={"routed_to": "normal_flow"})
+        # Regular command
+        return Command(update={"routed_to": "normal_flow"})
 
     # Create nodes with automatic Command/Send handling
     parallel_node = composer.from_callable_advanced(
@@ -408,13 +397,11 @@ def example_6_command_send_handling():
         handle_command=False,  # Already returns Command
     )
 
-    print("✅ Advanced Command/Send handling implemented")
     return {"parallel": parallel_node, "router": router_node}
 
 
 def example_7_real_world_integration():
     """Example 7: Real-world pattern - RAG with custom logic."""
-
     composer = AdvancedNodeComposer()
 
     # Complex extraction for RAG
@@ -506,42 +493,22 @@ def example_7_real_world_integration():
         """RAG using decorator pattern."""
         return retrieve_and_process(extracted_data)
 
-    print("✅ Real-world RAG pattern with custom logic")
     return {"rag_node": rag_node, "rag_decorated": rag_with_decorator}
 
 
 if __name__ == "__main__":
     """Run all examples to demonstrate advanced patterns."""
 
-    print("🚀 Advanced Node Patterns Examples")
-    print("=" * 50)
-
-    print("\n1. Different callable signatures:")
     nodes = example_1_different_callable_signatures()
 
-    print("\n2. Extended extraction logic:")
     analyzer = example_2_extended_extraction_logic()
 
-    print("\n3. Typed callables with validation:")
     typed = example_3_typed_callable_with_validation()
 
-    print("\n4. Decorator patterns:")
     decorated = example_4_decorator_patterns()
 
-    print("\n5. Custom pipeline nodes:")
     pipeline = example_5_custom_pipeline_nodes()
 
-    print("\n6. Command/Send handling:")
     command_nodes = example_6_command_send_handling()
 
-    print("\n7. Real-world RAG integration:")
     rag = example_7_real_world_integration()
-
-    print("\n✨ All advanced patterns demonstrated!")
-    print("\nKey capabilities shown:")
-    print("- Auto-detection of callable signatures")
-    print("- Custom extract/update logic")
-    print("- Type-safe nodes with validation")
-    print("- Clean decorator syntax")
-    print("- Command/Send handling")
-    print("- Real-world integration patterns")

@@ -1,5 +1,6 @@
 """Field extractor utility for the Haive Schema System.
 
+from typing import Any
 This module provides the FieldExtractor class, which offers a standardized way to
 extract field definitions from various sources including Pydantic models, engines,
 and dictionary specifications. It ensures consistent field handling throughout the
@@ -46,18 +47,8 @@ Example:
 
 import logging
 from collections import defaultdict
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Sequence,
-    Set,
-    Tuple,
-    Type,
-    TypeVar,
-)
+from collections.abc import Callable, Sequence
+from typing import Any, Optional, TypeVar
 
 from pydantic import BaseModel, Field
 
@@ -98,18 +89,17 @@ class FieldExtractor:
     """
 
     @staticmethod
-    def extract_from_model(model_cls: Type[BaseModel]) -> Tuple[
-        Dict[str, Tuple[Any, Any]],  # fields
-        Dict[str, str],  # descriptions
-        Set[str],  # shared_fields
-        Dict[str, str],  # reducer_names
-        Dict[str, Callable],  # reducer_functions
-        Dict[str, Dict[str, List[str]]],  # engine_io_mappings
-        Dict[str, Set[str]],  # input_fields
-        Dict[str, Set[str]],  # output_fields
+    def extract_from_model(model_cls: type[BaseModel]) -> tuple[
+        dict[str, tuple[Any, Any]],  # fields
+        dict[str, str],  # descriptions
+        set[str],  # shared_fields
+        dict[str, str],  # reducer_names
+        dict[str, Callable],  # reducer_functions
+        dict[str, dict[str, list[str]]],  # engine_io_mappings
+        dict[str, set[str]],  # input_fields
+        dict[str, set[str]],  # output_fields
     ]:
-        """
-        Extract all field information from a Pydantic model.
+        """Extract all field information from a Pydantic model.
 
         This method extracts standard field information as well as Haive-specific
         metadata like shared fields, reducers, and engine I/O mappings.
@@ -227,15 +217,14 @@ class FieldExtractor:
     @staticmethod
     def extract_from_engine(
         engine: Any,
-    ) -> Tuple[
-        Dict[str, Tuple[Any, Any]],  # fields
-        Dict[str, str],  # descriptions
-        Dict[str, Dict[str, List[str]]],  # engine_io_mappings
-        Dict[str, Set[str]],  # input_fields
-        Dict[str, Set[str]],  # output_fields
+    ) -> tuple[
+        dict[str, tuple[Any, Any]],  # fields
+        dict[str, str],  # descriptions
+        dict[str, dict[str, list[str]]],  # engine_io_mappings
+        dict[str, set[str]],  # input_fields
+        dict[str, set[str]],  # output_fields
     ]:
-        """
-        Extract all field information from an engine.
+        """Extract all field information from an engine.
 
         This method extracts field information specific to engines, including
         input and output fields, as well as structured output models.
@@ -246,7 +235,6 @@ class FieldExtractor:
         Returns:
             Tuple of (fields, descriptions, engine_io_mappings, input_fields, output_fields)
         """
-
         fields = {}
         descriptions = {}
         engine_io_mappings = {}
@@ -309,7 +297,8 @@ class FieldExtractor:
                         field_type,
                         field_info,
                     ) in output_fields_dict.items():
-                        # Skip if field already exists - keep input fields as priority
+                        # Skip if field already exists - keep input fields as
+                        # priority
                         if field_name in fields:
                             # Just mark as output field
                             output_fields[engine_name].add(field_name)
@@ -367,11 +356,9 @@ class FieldExtractor:
                 )
                 field_type = field_info_dict.get("field_type", Optional[model])
 
-                print(
-                    f"FIELD_EXTRACTOR: Found structured_output_model in {engine_name}: {model.__name__} -> {model_name}"
-                )
                 logger.info(
-                    f"Found structured_output_model in {engine_name}: {model.__name__} -> {model_name}"
+                    f"Found structured_output_model in {engine_name}: {
+                        model.__name__} -> {model_name}"
                 )
 
                 # Add a single field for the entire model
@@ -405,18 +392,17 @@ class FieldExtractor:
         return fields, descriptions, engine_io_mappings, input_fields, output_fields
 
     @staticmethod
-    def extract_from_dict(data: Dict[str, Any]) -> Tuple[
-        Dict[str, Tuple[Any, Any]],  # fields
-        Dict[str, str],  # descriptions
-        Set[str],  # shared_fields
-        Dict[str, str],  # reducer_names
-        Dict[str, Callable],  # reducer_functions
-        Dict[str, Dict[str, List[str]]],  # engine_io_mappings
-        Dict[str, Set[str]],  # input_fields
-        Dict[str, Set[str]],  # output_fields
+    def extract_from_dict(data: dict[str, Any]) -> tuple[
+        dict[str, tuple[Any, Any]],  # fields
+        dict[str, str],  # descriptions
+        set[str],  # shared_fields
+        dict[str, str],  # reducer_names
+        dict[str, Callable],  # reducer_functions
+        dict[str, dict[str, list[str]]],  # engine_io_mappings
+        dict[str, set[str]],  # input_fields
+        dict[str, set[str]],  # output_fields
     ]:
-        """
-        Extract fields from a dictionary definition.
+        """Extract fields from a dictionary definition.
 
         This method extracts field information from a dictionary, which can
         be provided in various formats.
@@ -429,7 +415,6 @@ class FieldExtractor:
                      reducer_functions, engine_io_mappings, input_fields,
                      output_fields)
         """
-
         fields = {}
         descriptions = {}
         shared_fields = set()
@@ -444,23 +429,23 @@ class FieldExtractor:
             if key == "shared_fields":
                 shared_fields.update(value)
                 continue
-            elif key == "reducer_names" or key == "serializable_reducers":
+            if key in {"reducer_names", "serializable_reducers"}:
                 reducer_names.update(value)
                 continue
-            elif key == "reducer_functions":
+            if key == "reducer_functions":
                 reducer_functions.update(value)
                 continue
-            elif key == "field_descriptions":
+            if key == "field_descriptions":
                 descriptions.update(value)
                 continue
-            elif key == "engine_io_mappings":
+            if key == "engine_io_mappings":
                 engine_io_mappings.update(value)
                 continue
-            elif key == "input_fields":
+            if key == "input_fields":
                 for engine, fields_list in value.items():
                     input_fields[engine].update(fields_list)
                 continue
-            elif key == "output_fields":
+            if key == "output_fields":
                 for engine, fields_list in value.items():
                     output_fields[engine].update(fields_list)
                 continue
@@ -538,12 +523,12 @@ class FieldExtractor:
 
     @staticmethod
     def extract_from_components(
-        components: List[Any], include_messages_field: bool = True
-    ) -> Tuple[
-        Dict[str, FieldDefinition],  # All field definitions
-        Dict[str, Dict[str, List[str]]],  # Engine I/O mappings
-        Dict[str, Set[str]],  # Structured model fields
-        Dict[str, Type],  # Structured models
+        components: list[Any], include_messages_field: bool = True
+    ) -> tuple[
+        dict[str, FieldDefinition],  # All field definitions
+        dict[str, dict[str, list[str]]],  # Engine I/O mappings
+        dict[str, set[str]],  # Structured model fields
+        dict[str, type],  # Structured models
     ]:
         """Extract field definitions from a list of heterogeneous components.
 
@@ -795,7 +780,7 @@ class FieldExtractor:
                 reducer = add_messages
             except ImportError:
                 # Fallback to a simple list concatenation
-                def concat_lists(a, b):
+                def concat_lists(a, b) -> Any:
                     return (a or []) + (b or [])
 
                 reducer = concat_lists

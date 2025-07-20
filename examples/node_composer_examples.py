@@ -7,16 +7,14 @@ This demonstrates solutions to the key problems:
 4. Adapting between different schema types
 """
 
-from typing import Any, Dict, List
+from typing import Any
 
 from langchain_core.messages import BaseMessage
 
 from haive.core.engine.retriever import RetrieverEngine
-from haive.core.graph.node.callable_node import CallableNodeConfig
 from haive.core.graph.node.composer import (
     FieldMapping,
     NodeSchemaComposer,
-    change_input_key,
     change_output_key,
     remap_fields,
 )
@@ -24,8 +22,7 @@ from haive.core.graph.node.engine_node import EngineNodeConfig
 
 
 def example_1_change_retriever_output():
-    """Example 1: Change retriever output from 'documents' to 'retrieved_documents'"""
-
+    """Example 1: Change retriever output from 'documents' to 'retrieved_documents'."""
     # Create base retriever node (existing pattern)
     retriever_engine = RetrieverEngine(name="my_retriever")
     base_retriever = EngineNodeConfig(name="retriever_node", engine=retriever_engine)
@@ -39,18 +36,15 @@ def example_1_change_retriever_output():
     )
 
     # OR use the quick factory function:
-    adapted_retriever_quick = change_output_key(
-        base_retriever, "documents", "retrieved_documents"
-    )
+    change_output_key(base_retriever, "documents", "retrieved_documents")
 
-    print("✅ Retriever now outputs 'retrieved_documents' instead of 'documents'")
     return adapted_retriever
 
 
 def example_2_callable_with_field_mapping():
-    """Example 2: Create callable node with custom input/output field mapping"""
+    """Example 2: Create callable node with custom input/output field mapping."""
 
-    def check_message_length(messages: List[BaseMessage], threshold: int = 100) -> bool:
+    def check_message_length(messages: list[BaseMessage], threshold: int = 100) -> bool:
         """Function that checks if total message length exceeds threshold."""
         total_length = sum(len(msg.content) for msg in messages)
         return total_length > threshold
@@ -76,19 +70,17 @@ def example_2_callable_with_field_mapping():
         goto_on_false="continue",
     )
 
-    print("✅ Callable node with custom field mappings created")
     return length_checker
 
 
 def example_3_complex_field_transformations():
-    """Example 3: Complex field transformations with custom logic"""
+    """Example 3: Complex field transformations with custom logic."""
 
-    def process_documents(docs: List[Dict], mode: str = "simple") -> Dict[str, Any]:
+    def process_documents(docs: list[dict], mode: str = "simple") -> dict[str, Any]:
         """Process documents with different modes."""
         if mode == "simple":
             return {"processed": [doc.get("content", "") for doc in docs]}
-        else:
-            return {"processed": docs, "metadata": {"count": len(docs), "mode": mode}}
+        return {"processed": docs, "metadata": {"count": len(docs), "mode": mode}}
 
     # SOLUTION: Advanced field mapping with transforms
     composer = NodeSchemaComposer()
@@ -115,13 +107,11 @@ def example_3_complex_field_transformations():
         ],
     )
 
-    print("✅ Complex processing node with transforms created")
     return processor
 
 
 def example_4_adapt_between_node_types():
-    """Example 4: Adapt between different node input/output expectations"""
-
+    """Example 4: Adapt between different node input/output expectations."""
     # Scenario: You have a node that expects "query" but your state has "user_question"
     # AND you want output as "answer" but node produces "response"
 
@@ -140,19 +130,16 @@ def example_4_adapt_between_node_types():
         },
     )
 
-    print("✅ Node adapted for different input/output field names")
     return adapted_node
 
 
 def example_5_schema_composition_for_compatibility():
-    """Example 5: Create composed nodes for type compatibility in graphs"""
-
+    """Example 5: Create composed nodes for type compatibility in graphs."""
     composer = NodeSchemaComposer()
 
     # Create a pipeline of adapted nodes
     def create_rag_pipeline():
         """Create a RAG pipeline with consistent field naming."""
-
         # 1. Query preparation node
         query_preparer = composer.from_callable(
             func=lambda user_input: f"Search query: {user_input.strip()}",
@@ -189,13 +176,11 @@ def example_5_schema_composition_for_compatibility():
         }
 
     pipeline = create_rag_pipeline()
-    print("✅ Complete RAG pipeline with consistent field naming")
     return pipeline
 
 
 def example_6_real_world_scenario():
-    """Example 6: Real-world scenario - integrating mismatched components"""
-
+    """Example 6: Real-world scenario - integrating mismatched components."""
     # Scenario: You have:
     # - A retriever that outputs "documents"
     # - An LLM that expects "context" and outputs "response"
@@ -224,7 +209,8 @@ def example_6_real_world_scenario():
         input_mapping={
             "retrieved_documents": "context"  # Use retrieved docs as context
         },
-        output_mapping={"response": "ai_answer"},  # Store response as ai_answer
+        output_mapping={"response": "ai_answer"},
+        # Store response as ai_answer
     )
 
     # 3. Optional: Add processing between retrieval and generation
@@ -246,32 +232,20 @@ def example_6_real_world_scenario():
         "generate": adapted_llm,  # retrieved_documents → ai_answer
     }
 
-    print("✅ Real-world component integration with field adaptation")
     return workflow
 
 
 if __name__ == "__main__":
     """Run all examples to demonstrate NodeSchemaComposer capabilities."""
 
-    print("🚀 NodeSchemaComposer Examples")
-    print("=" * 50)
-
-    print("\n1. Changing retriever output key:")
     example_1_change_retriever_output()
 
-    print("\n2. Callable with field mapping:")
     example_2_callable_with_field_mapping()
 
-    print("\n3. Complex transformations:")
     example_3_complex_field_transformations()
 
-    print("\n4. Node adaptation:")
     example_4_adapt_between_node_types()
 
-    print("\n5. Schema composition:")
     example_5_schema_composition_for_compatibility()
 
-    print("\n6. Real-world integration:")
     example_6_real_world_scenario()
-
-    print("\n✨ All examples completed! Your nodes can now have flexible I/O.")

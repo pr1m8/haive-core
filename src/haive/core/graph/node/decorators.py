@@ -1,5 +1,5 @@
 # src/haive/core/graph/node/decorators.py
-"""
+"""from typing import Any, Dict
 Decorators for creating and registering nodes.
 
 This module provides decorators that make it easy to create various types
@@ -7,7 +7,8 @@ of nodes from functions, with proper configuration and registration.
 """
 
 import logging
-from typing import Any, Callable, Dict, List, Optional, Union
+from collections.abc import Callable
+from typing import Any
 
 from langgraph.types import RetryPolicy
 
@@ -25,16 +26,15 @@ logger = logging.getLogger(__name__)
 
 
 def register_node(
-    name: Optional[str] = None,
-    node_type: Optional[NodeType] = None,
-    command_goto: Optional[CommandGoto] = None,
-    input_mapping: Optional[Dict[str, str]] = None,
-    output_mapping: Optional[Dict[str, str]] = None,
-    retry_policy: Optional[RetryPolicy] = None,
+    name: str | None = None,
+    node_type: NodeType | None = None,
+    command_goto: CommandGoto | None = None,
+    input_mapping: dict[str, str] | None = None,
+    output_mapping: dict[str, str] | None = None,
+    retry_policy: RetryPolicy | None = None,
     **kwargs,
 ):
-    """
-    Decorator to register a function as a node.
+    """Decorator to register a function as a node.
 
     This decorator wraps a function as a node function, with proper configuration
     for node type, command routing, input/output mapping, and retry policy.
@@ -52,7 +52,7 @@ def register_node(
         Decorated function as a node function
     """
 
-    def decorator(func: Callable[[StateInput, Optional[ConfigType]], StateOutput]):
+    def decorator(func: Callable[[StateInput, ConfigType | None], StateOutput]):
         # Get node name from function name if not provided
         node_name = name or func.__name__
 
@@ -82,13 +82,12 @@ def register_node(
 
 def tool_node(
     tools: list,
-    name: Optional[str] = None,
-    command_goto: Optional[CommandGoto] = None,
+    name: str | None = None,
+    command_goto: CommandGoto | None = None,
     messages_field: str = "messages",
-    handle_tool_errors: Union[bool, str, Callable[..., str]] = True,
+    handle_tool_errors: bool | str | Callable[..., str] = True,
 ):
-    """
-    Create a tool node.
+    """Create a tool node.
 
     This decorator creates a node that handles tool calls using LangGraph's
     ToolNode. It's a specialized version of register_node.
@@ -115,12 +114,11 @@ def tool_node(
 
 def validation_node(
     schemas: list,
-    name: Optional[str] = None,
-    command_goto: Optional[CommandGoto] = None,
+    name: str | None = None,
+    command_goto: CommandGoto | None = None,
     messages_field: str = "messages",
 ):
-    """
-    Create a validation node.
+    """Create a validation node.
 
     This decorator creates a node that validates inputs against a schema
     using LangGraph's ValidationNode. It's a specialized version of register_node.
@@ -145,12 +143,11 @@ def validation_node(
 
 def branch_node(
     condition: Callable,
-    routes: Dict[Any, str],
-    name: Optional[str] = None,
-    input_mapping: Optional[Dict[str, str]] = None,
+    routes: dict[Any, str],
+    name: str | None = None,
+    input_mapping: dict[str, str] | None = None,
 ):
-    """
-    Create a branch node.
+    """Create a branch node.
 
     This decorator creates a node that evaluates a condition on the state
     and routes to different nodes based on the result.
@@ -171,13 +168,12 @@ def branch_node(
 
 
 def send_node(
-    send_targets: List[str],
+    send_targets: list[str],
     send_field: str,
-    name: Optional[str] = None,
-    input_mapping: Optional[Dict[str, str]] = None,
+    name: str | None = None,
+    input_mapping: dict[str, str] | None = None,
 ):
-    """
-    Create a send node.
+    """Create a send node.
 
     This decorator creates a node that generates Send objects to route to
     different nodes with different states. It's useful for fan-out operations.
@@ -198,9 +194,8 @@ def send_node(
 
 
 # Add a new debug decorator
-def debug_node(name=None):
-    """
-    Decorator to add detailed debug logging to a node function.
+def debug_node(name: str | None = None):
+    """Decorator to add detailed debug logging to a node function.
     Logs input state and output result but does not modify the function behavior.
 
     Args:
@@ -215,14 +210,15 @@ def debug_node(name=None):
 
     console = Console()
 
-    def decorator(func):
+    def decorator(func) -> Any:
         func_name = name or func.__name__
 
-        def wrapper(state, config=None):
+        def wrapper(state: dict[str, Any], config: dict[str, Any] | None = None):
             # Log input
             console.print(
                 Panel.fit(
-                    f"[bold cyan]Node {func_name} Input:[/bold cyan]\n{Pretty(state)}",
+                    f"[bold cyan]Node {func_name} Input:[/bold cyan]\n{
+                        Pretty(state)}",
                     border_style="cyan",
                 )
             )

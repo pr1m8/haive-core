@@ -1,5 +1,6 @@
+from collections.abc import Callable
 from importlib import import_module
-from typing import Any, Callable, Protocol, TypeVar, runtime_checkable
+from typing import Any, Protocol, TypeVar, runtime_checkable
 
 P = TypeVar("P")
 R = TypeVar("R")

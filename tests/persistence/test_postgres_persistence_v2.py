@@ -213,7 +213,8 @@ class Test_PostgresCheckpointer:
 
         logger.info(f"✅ Thread {test_thread_id} registered successfully")
 
-    def test_put_and_get_checkpoint(self, postgres_config, test_thread_id, test_data):
+    def test_put_and_get_checkpoint(
+        self, postgres_config, test_thread_id, test_data):
         """Test storing and retrieving a checkpoint."""
         # Register the thread first
         postgres_config.register_thread(test_thread_id)
@@ -243,7 +244,8 @@ class Test_PostgresCheckpointer:
         logger.info(
             f"✅ Retrieved checkpoint data: {json.dumps(checkpoint, indent=2)}")
 
-    def test_get_checkpoint_tuple(self, postgres_config, test_thread_id, test_data):
+    def test_get_checkpoint_tuple(
+        self, postgres_config, test_thread_id, test_data):
         """Test retrieving a complete checkpoint tuple."""
         # Register thread
         postgres_config.register_thread(test_thread_id)
@@ -265,10 +267,12 @@ class Test_PostgresCheckpointer:
         assert tuple_result.metadata is not None
 
         logger.info(
-            f"✅ Retrieved checkpoint tuple with metadata: {tuple_result.metadata}"
+            f"✅ Retrieved checkpoint tuple with metadata: {
+    tuple_result.metadata}"
         )
 
-    def test_list_checkpoints(self, postgres_config, test_thread_id, test_data):
+    def test_list_checkpoints(self, postgres_config,
+                              test_thread_id, test_data):
         """Test listing checkpoints for a thread."""
         # Register thread
         postgres_config.register_thread(test_thread_id)

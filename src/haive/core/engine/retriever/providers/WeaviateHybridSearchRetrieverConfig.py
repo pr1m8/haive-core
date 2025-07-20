@@ -1,4 +1,4 @@
-"""
+"""from typing import Any
 Weaviate Hybrid Search Retriever implementation for the Haive framework.
 
 This module provides a configuration class for the Weaviate Hybrid Search retriever,
@@ -23,7 +23,7 @@ The implementation integrates with LangChain's WeaviateHybridSearchRetriever whi
 providing a consistent Haive configuration interface with secure API key management.
 """
 
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any
 
 from langchain_core.documents import Document
 from pydantic import Field, SecretStr
@@ -35,8 +35,7 @@ from haive.core.engine.retriever.types import RetrieverType
 
 @BaseRetrieverConfig.register(RetrieverType.WEAVIATE_HYBRID_SEARCH)
 class WeaviateHybridSearchRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
-    """
-    Configuration for Weaviate Hybrid Search retriever in the Haive framework.
+    """Configuration for Weaviate Hybrid Search retriever in the Haive framework.
 
     This retriever uses Weaviate's hybrid search capabilities to combine vector
     similarity search with keyword search for comprehensive retrieval.
@@ -95,7 +94,7 @@ class WeaviateHybridSearchRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig
     )
 
     # API configuration with SecureConfigMixin
-    api_key: Optional[SecretStr] = Field(
+    api_key: SecretStr | None = Field(
         default=None,
         description="Weaviate API key (auto-resolved from WEAVIATE_API_KEY)",
     )
@@ -118,7 +117,7 @@ class WeaviateHybridSearchRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig
     )
 
     # Filtering and where clauses
-    where_filter: Optional[Dict[str, Any]] = Field(
+    where_filter: dict[str, Any] | None = Field(
         default=None, description="Weaviate where clause for filtering results"
     )
 
@@ -127,31 +126,31 @@ class WeaviateHybridSearchRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig
         default="text", description="Property name containing the text content"
     )
 
-    attributes: Optional[List[str]] = Field(
+    attributes: list[str] | None = Field(
         default=None, description="List of properties to return in results"
     )
 
     # Connection parameters
-    timeout_config: Optional[Tuple[int, int]] = Field(
+    timeout_config: tuple[int, int] | None = Field(
         default=None,
         description="Timeout configuration as (connect_timeout, read_timeout)",
     )
 
-    additional_headers: Optional[Dict[str, str]] = Field(
+    additional_headers: dict[str, str] | None = Field(
         default=None, description="Additional headers for Weaviate requests"
     )
 
-    def get_input_fields(self) -> Dict[str, Tuple[Type, Any]]:
+    def get_input_fields(self) -> dict[str, tuple[type, Any]]:
         """Return input field definitions for Weaviate Hybrid Search retriever."""
         return {
             "query": (str, Field(description="Hybrid search query for Weaviate")),
         }
 
-    def get_output_fields(self) -> Dict[str, Tuple[Type, Any]]:
+    def get_output_fields(self) -> dict[str, tuple[type, Any]]:
         """Return output field definitions for Weaviate Hybrid Search retriever."""
         return {
             "documents": (
-                List[Document],
+                list[Document],
                 Field(
                     default_factory=list,
                     description="Documents from Weaviate hybrid search",
@@ -159,9 +158,8 @@ class WeaviateHybridSearchRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig
             ),
         }
 
-    def instantiate(self):
-        """
-        Create a Weaviate Hybrid Search retriever from this configuration.
+    def instantiate(self) -> Any:
+        """Create a Weaviate Hybrid Search retriever from this configuration.
 
         Returns:
             WeaviateHybridSearchRetriever: Instantiated retriever ready for hybrid search.

@@ -1,10 +1,7 @@
-"""
-Haive-specific component discovery implementation.
-"""
+"""Haive-specific component discovery implementation."""
 
 import logging
 from pathlib import Path
-from typing import Dict, List
 
 from haive.core.utils.haive_discovery.component_info import ComponentInfo
 from haive.core.utils.haive_discovery.discovery_engine import EnhancedComponentDiscovery
@@ -23,7 +20,7 @@ class HaiveComponentDiscovery(EnhancedComponentDiscovery):
 
     def discover_individual_tools(
         self, create_tools: bool = True
-    ) -> List[ComponentInfo]:
+    ) -> list[ComponentInfo]:
         """Discover individual tools (not toolkits)."""
         tools_path = (
             self.haive_root
@@ -40,7 +37,8 @@ class HaiveComponentDiscovery(EnhancedComponentDiscovery):
             )
         return []
 
-    def discover_toolkits(self, create_tools: bool = True) -> List[ComponentInfo]:
+    def discover_toolkits(
+            self, create_tools: bool = True) -> list[ComponentInfo]:
         """Discover toolkits (collections of tools)."""
         toolkits_path = (
             self.haive_root
@@ -57,7 +55,8 @@ class HaiveComponentDiscovery(EnhancedComponentDiscovery):
             )
         return []
 
-    def discover_retrievers(self, create_tools: bool = True) -> List[ComponentInfo]:
+    def discover_retrievers(
+            self, create_tools: bool = True) -> list[ComponentInfo]:
         """Discover retrievers from engine package."""
         retriever_path = (
             self.haive_root
@@ -101,7 +100,8 @@ class HaiveComponentDiscovery(EnhancedComponentDiscovery):
 
         return components
 
-    def discover_vector_stores(self, create_tools: bool = True) -> List[ComponentInfo]:
+    def discover_vector_stores(
+            self, create_tools: bool = True) -> list[ComponentInfo]:
         """Discover vector stores from engine package."""
         vectorstore_path = (
             self.haive_root
@@ -147,7 +147,7 @@ class HaiveComponentDiscovery(EnhancedComponentDiscovery):
 
     def discover_document_loaders(
         self, create_tools: bool = True
-    ) -> List[ComponentInfo]:
+    ) -> list[ComponentInfo]:
         """Discover document loaders."""
         loader_path = (
             self.haive_root
@@ -179,7 +179,8 @@ class HaiveComponentDiscovery(EnhancedComponentDiscovery):
 
         return components
 
-    def discover_engines(self, create_tools: bool = True) -> List[ComponentInfo]:
+    def discover_engines(
+            self, create_tools: bool = True) -> list[ComponentInfo]:
         """Discover engines from haive-core package."""
         core_path = (
             self.haive_root / "packages" / "haive-core" / "src" / "haive" / "core"
@@ -194,7 +195,7 @@ class HaiveComponentDiscovery(EnhancedComponentDiscovery):
 
     def discover_all_categorized(
         self, create_tools: bool = True
-    ) -> Dict[str, List[ComponentInfo]]:
+    ) -> dict[str, list[ComponentInfo]]:
         """Discover all components, properly categorized."""
         return {
             "individual_tools": self.discover_individual_tools(create_tools),
@@ -206,8 +207,8 @@ class HaiveComponentDiscovery(EnhancedComponentDiscovery):
         }
 
     def save_to_project_docs(
-        self, components: List[ComponentInfo], subfolder: str = "component_discovery"
-    ) -> Dict[str, str]:
+        self, components: list[ComponentInfo], subfolder: str = "component_discovery"
+    ) -> dict[str, str]:
         """Save components to project documentation."""
         return self.doc_writer.save_to_project_docs(
             components, project_root=str(self.haive_root), subfolder=subfolder

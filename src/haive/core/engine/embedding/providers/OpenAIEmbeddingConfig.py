@@ -76,7 +76,7 @@ class OpenAIEmbeddingConfig(BaseEmbeddingConfig):
 
     @validator("model")
     @classmethod
-    def validate_model(cls, v):
+    def validate_model(cls, v) -> Any:
         """Validate the OpenAI model name."""
         valid_models = {
             "text-embedding-3-large",
@@ -96,7 +96,7 @@ class OpenAIEmbeddingConfig(BaseEmbeddingConfig):
 
     @validator("dimensions")
     @classmethod
-    def validate_dimensions(cls, v, values):
+    def validate_dimensions(cls, v, values) -> Any:
         """Validate dimensions based on model."""
         if v is None:
             return v

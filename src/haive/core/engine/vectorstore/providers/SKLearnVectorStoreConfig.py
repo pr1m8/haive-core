@@ -1,5 +1,6 @@
 """SKLearn Vector Store implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the SKLearn vector store,
 which provides ML-integrated nearest neighbor search using scikit-learn.
 
@@ -103,7 +104,7 @@ class SKLearnVectorStoreConfig(BaseVectorStoreConfig):
     )
 
     @validator("metric")
-    def validate_metric(self, v):
+    def validate_metric(self, v) -> Any:
         """Validate distance metric is supported by scikit-learn."""
         # Common scikit-learn metrics - not exhaustive
         valid_metrics = [
@@ -132,7 +133,7 @@ class SKLearnVectorStoreConfig(BaseVectorStoreConfig):
         return v
 
     @validator("algorithm")
-    def validate_algorithm(self, v):
+    def validate_algorithm(self, v) -> Any:
         """Validate algorithm is supported by scikit-learn."""
         valid_algorithms = ["auto", "ball_tree", "kd_tree", "brute"]
         if v not in valid_algorithms:
@@ -140,7 +141,7 @@ class SKLearnVectorStoreConfig(BaseVectorStoreConfig):
         return v
 
     @validator("serializer")
-    def validate_serializer(self, v):
+    def validate_serializer(self, v) -> Any:
         """Validate serializer is supported."""
         valid_serializers = ["json", "bson", "parquet"]
         if v not in valid_serializers:
@@ -148,7 +149,7 @@ class SKLearnVectorStoreConfig(BaseVectorStoreConfig):
         return v
 
     @validator("n_jobs")
-    def validate_n_jobs(self, v):
+    def validate_n_jobs(self, v) -> Any:
         """Validate n_jobs parameter."""
         if v is not None and v < -1:
             raise ValueError("n_jobs must be None, -1, or positive integer")
@@ -172,7 +173,7 @@ class SKLearnVectorStoreConfig(BaseVectorStoreConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a SKLearn vector store from this configuration.
 
         Returns:

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Summary of the BaseGraph2 modular architecture refactoring.
 
+from typing import Any
 This script provides a comprehensive overview of the successful refactoring
 of the monolithic BaseGraph2 into focused, testable components.
 """
@@ -17,9 +18,8 @@ def count_lines_in_file(filepath: Path) -> int:
         return 0
 
 
-def analyze_codebase():
+def analyze_codebase() -> Any:
     """Analyze the modular codebase structure."""
-
     # Get the components directory
     components_dir = Path(__file__).parent
 
@@ -48,9 +48,8 @@ def analyze_codebase():
     return original_lines, total_new_lines
 
 
-def show_architecture_benefits():
+def show_architecture_benefits() -> None:
     """Display the benefits of the modular architecture."""
-
     benefits = [
         "Single Responsibility Principle - Each component has one clear purpose",
         "Composition over Inheritance - Components are composed, not inherited",
@@ -68,9 +67,8 @@ def show_architecture_benefits():
         pass
 
 
-def show_component_responsibilities():
+def show_component_responsibilities() -> None:
     """Show what each component is responsible for."""
-
     components = {
         "BaseGraphComponent": [
             "Abstract base class for all components",
@@ -115,9 +113,8 @@ def show_component_responsibilities():
             pass
 
 
-def show_design_patterns():
+def show_design_patterns() -> None:
     """Show the design patterns implemented."""
-
     patterns = {
         "Composition Pattern": "ModularBaseGraph composes specialized managers instead of inheriting",
         "Strategy Pattern": "Different branch modes implement different routing strategies",
@@ -131,9 +128,8 @@ def show_design_patterns():
         pass
 
 
-def show_coding_style_compliance():
+def show_coding_style_compliance() -> None:
     """Show compliance with coding style guide."""
-
     compliances = [
         "Functional composition over imperative patterns",
         "Descriptive variable names and clear function signatures",
@@ -151,7 +147,7 @@ def show_coding_style_compliance():
         pass
 
 
-def main():
+def main() -> None:
     """Main analysis function."""
     # Analyze codebase metrics
     original_lines, new_lines = analyze_codebase()

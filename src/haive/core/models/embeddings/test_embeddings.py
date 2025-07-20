@@ -30,14 +30,14 @@ from haive.core.models.embeddings import (  # Base; Cloud providers; Local provi
 class TestEmbeddingProviders(unittest.TestCase):
     """Test case for embedding providers."""
 
-    def test_provider_enum_values(self):
+    def test_provider_enum_values(self) -> None:
         """Test that all providers have proper string values."""
         # Verify all providers have non-empty string values
         for provider in EmbeddingProvider:
             assert isinstance(provider.value, str)
             assert provider.value  # Non-empty string
 
-    def test_config_classes_exist(self):
+    def test_config_classes_exist(self) -> None:
         """Test that all config classes exist for each provider."""
         provider_to_config = {
             EmbeddingProvider.AZURE: AzureEmbeddingConfig,
@@ -72,7 +72,7 @@ class TestEmbeddingProviders(unittest.TestCase):
             config_instance = config_class(**params)
             assert config_instance.provider == provider
 
-    def test_factory_function(self):
+    def test_factory_function(self) -> None:
         """Test that the factory function works with all config classes."""
         # Test with a provider that doesn't require external dependencies
         config = HuggingFaceEmbeddingConfig(
@@ -85,10 +85,10 @@ class TestEmbeddingProviders(unittest.TestCase):
 
         try:
             # Import directly to check if it exists
-            from langchain_huggingface import HuggingFaceEmbeddings
 
             # This will fail if the necessary packages aren't installed
-            # We catch the exception to make the test pass in environments without all dependencies
+            # We catch the exception to make the test pass in environments
+            # without all dependencies
             embeddings = create_embeddings(config)
             assert embeddings is not None
         except (ImportError, ModuleNotFoundError):

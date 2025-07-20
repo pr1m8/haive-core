@@ -49,7 +49,8 @@ class StoreFactory:
                 )
                 return MemoryStoreWrapper(config=config)
 
-            # Try to create PostgreSQL wrapper, fallback to memory on connection failure
+            # Try to create PostgreSQL wrapper, fallback to memory on
+            # connection failure
             try:
                 wrapper = PostgresStoreWrapper(config=config)
                 # Test the connection by attempting to get the store

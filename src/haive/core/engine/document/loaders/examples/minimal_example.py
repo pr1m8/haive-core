@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Minimal working example of the Haive Document Loader System.
 
+from typing import Any
 This example demonstrates the core functionality of the document loading system
 even with the source registration issues. It shows how to use the basic
 AutoLoader functionality and path analysis.
@@ -9,6 +10,7 @@ Run this example with:
     poetry run python src/haive/core/engine/document/loaders/examples/minimal_example.py
 """
 
+import contextlib
 import tempfile
 from pathlib import Path
 
@@ -21,7 +23,7 @@ from haive.core.engine.document.loaders import (
 )
 
 
-def create_test_files():
+def create_test_files() -> Any:
     """Create temporary test files for demonstration."""
     # Create a temporary directory
     temp_dir = Path(tempfile.mkdtemp())
@@ -76,33 +78,19 @@ docs = loader.load("document.md")
     return temp_dir, test_files
 
 
-def demonstrate_basic_functionality():
+def demonstrate_basic_functionality() -> None:
     """Demonstrate basic AutoLoader functionality."""
-    print("🚀 Haive Document Loader System - Minimal Example")
-    print("=" * 60)
-
     # Create test files
     temp_dir, test_files = create_test_files()
 
-    print(f"📁 Created test files in: {temp_dir}")
-    for file_type, file_path in test_files.items():
-        print(f"   {file_type}: {file_path.name}")
-
-    print("\n" + "=" * 60)
+    for _file_type, file_path in test_files.items():
+        pass
 
     # Test 1: Basic AutoLoader initialization
-    print("🔧 Test 1: AutoLoader Initialization")
-    print("-" * 40)
 
     loader = AutoLoader()
-    print("✅ AutoLoader initialized successfully")
-    print(f"   Default preference: {loader.config.preference}")
-    print(f"   Max concurrency: {loader.config.max_concurrency}")
-    print(f"   Caching enabled: {loader.config.enable_caching}")
 
     # Test 2: Custom configuration
-    print("\n🔧 Test 2: Custom Configuration")
-    print("-" * 40)
 
     custom_config = AutoLoaderConfig(
         preference=LoaderPreference.QUALITY,
@@ -110,31 +98,15 @@ def demonstrate_basic_functionality():
         enable_caching=True,
         timeout=120,
     )
-    custom_loader = AutoLoader(custom_config)
-    print("✅ Custom loader initialized")
-    print(f"   Preference: {custom_loader.config.preference}")
-    print(f"   Max concurrency: {custom_loader.config.max_concurrency}")
-    print(f"   Caching: {custom_loader.config.enable_caching}")
-    print(f"   Timeout: {custom_loader.config.timeout}s")
+    AutoLoader(custom_config)
 
     # Test 3: Source detection
-    print("\n🔍 Test 3: Source Detection")
-    print("-" * 40)
 
-    for file_type, file_path in test_files.items():
-        try:
-            source_info = loader.detect_source(str(file_path))
-            print(f"✅ {file_type.upper()} ({file_path.name}):")
-            print(f"   Source type: {source_info.source_type}")
-            print(f"   Category: {source_info.category}")
-            print(f"   Confidence: {source_info.confidence:.2f}")
-            print(f"   Capabilities: {len(source_info.capabilities)} detected")
-        except Exception as e:
-            print(f"❌ {file_type.upper()} detection failed: {e}")
+    for _file_type, file_path in test_files.items():
+        with contextlib.suppress(Exception):
+            loader.detect_source(str(file_path))
 
     # Test 4: URL detection
-    print("\n🌐 Test 4: URL Source Detection")
-    print("-" * 40)
 
     test_urls = [
         "https://example.com/document.html",
@@ -144,50 +116,32 @@ def demonstrate_basic_functionality():
     ]
 
     for url in test_urls:
-        try:
-            source_info = loader.detect_source(url)
-            print(f"✅ {url}:")
-            print(f"   Source type: {source_info.source_type}")
-            print(f"   Category: {source_info.category}")
-            print(f"   Confidence: {source_info.confidence:.2f}")
-        except Exception as e:
-            print(f"❌ URL detection failed: {e}")
+        with contextlib.suppress(Exception):
+            loader.detect_source(url)
 
     # Test 5: Registry status
-    print("\n📊 Test 5: Registry Status")
-    print("-" * 40)
 
     try:
-        status = get_registration_status()
-        print("✅ Registry status retrieved:")
-        print(f"   Total sources: {status.get('total_sources', 0)}")
-        print(f"   Categories: {status.get('categories_count', 0)}")
-        print(f"   Errors: {status.get('total_errors', 0)}")
+        get_registration_status()
 
         # Show available sources
         sources = list_available_sources()
-        print(f"   Available sources: {len(sources)}")
         if sources:
-            print(f"   Sample sources: {sources[:5]}...")
-    except Exception as e:
-        print(f"❌ Registry status failed: {e}")
+            pass
+    except Exception:
+        pass
 
     # Test 6: Error handling
-    print("\n🛡️ Test 6: Error Handling")
-    print("-" * 40)
 
     try:
         # Try to detect an invalid path
-        invalid_info = loader.detect_source("/invalid/path/that/does/not/exist.xyz")
-        print(f"❌ Should have failed but got: {invalid_info}")
-    except ValueError as e:
-        print(f"✅ Correctly handled invalid path: {e}")
-    except Exception as e:
-        print(f"⚠️ Unexpected error type: {e}")
+        loader.detect_source("/invalid/path/that/does/not/exist.xyz")
+    except ValueError:
+        pass
+    except Exception:
+        pass
 
     # Test 7: Loader preferences
-    print("\n⚖️ Test 7: Loader Preferences")
-    print("-" * 40)
 
     preferences = [
         LoaderPreference.SPEED,
@@ -196,47 +150,13 @@ def demonstrate_basic_functionality():
     ]
 
     for pref in preferences:
-        try:
+        with contextlib.suppress(Exception):
             AutoLoader(AutoLoaderConfig(preference=pref))
-            print(f"✅ {pref.value} preference loader created")
-        except Exception as e:
-            print(f"❌ {pref.value} preference failed: {e}")
-
-    print("\n" + "=" * 60)
-    print("🎉 Minimal Example Completed!")
-    print("=" * 60)
-
-    print(
-        """
-📝 Summary:
-   - AutoLoader initialization: ✅ Working
-   - Custom configuration: ✅ Working  
-   - Source detection: ✅ Working
-   - URL detection: ✅ Working
-   - Registry status: ✅ Working
-   - Error handling: ✅ Working
-   - Loader preferences: ✅ Working
-   
-🔧 Next Steps:
-   1. Fix source registration issues to enable actual document loading
-   2. Add more file format support
-   3. Implement async loading capabilities
-   4. Add bulk processing functionality
-   
-🏗️ System Status:
-   - Core infrastructure: ✅ Operational
-   - Source registration: ⚠️ Needs fixes (15 errors detected)
-   - Document loading: ⏳ Pending source fixes
-   - Auto-detection: ✅ Working
-   - Configuration: ✅ Working
-"""
-    )
 
     # Cleanup
     import shutil
 
     shutil.rmtree(temp_dir)
-    print(f"🧹 Cleaned up temporary files in {temp_dir}")
 
 
 if __name__ == "__main__":

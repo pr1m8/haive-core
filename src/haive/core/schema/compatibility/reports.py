@@ -1,19 +1,15 @@
-"""
-Compatibility reporting and debugging tools.
-"""
+"""Compatibility reporting and debugging tools."""
 
 from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any
 
 from pydantic import BaseModel
 
-from haive.core.schema.compatibility.compatibility import (
-    SchemaCompatibility,
-)
+from haive.core.schema.compatibility.compatibility import SchemaCompatibility
 from haive.core.schema.compatibility.types import (
     CompatibilityLevel,
     ConversionPath,
@@ -35,20 +31,20 @@ class CompatibilityReport:
     compatibility_score: float = 0.0  # 0-100
 
     # Detailed findings
-    field_analyses: Dict[str, FieldAnalysis] = field(default_factory=dict)
-    conversion_paths: Dict[str, ConversionPath] = field(default_factory=dict)
-    suggested_mappings: Dict[str, str] = field(default_factory=dict)
+    field_analyses: dict[str, FieldAnalysis] = field(default_factory=dict)
+    conversion_paths: dict[str, ConversionPath] = field(default_factory=dict)
+    suggested_mappings: dict[str, str] = field(default_factory=dict)
 
     # Issues and recommendations
-    critical_issues: List[str] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
-    recommendations: List[str] = field(default_factory=list)
+    critical_issues: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+    recommendations: list[str] = field(default_factory=list)
 
     # Metadata
     analysis_time_ms: float = 0.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert report to dictionary."""
         return {
             "timestamp": self.timestamp.isoformat(),
@@ -87,7 +83,8 @@ class CompatibilityReport:
             f"- **Target Schema**: `{self.target_schema.name}`",
             f"- **Compatible**: {'✅ Yes' if self.overall_compatible else '❌ No'}",
             f"- **Compatibility Score**: {self.compatibility_score:.1f}/100",
-            f"- **Compatibility Level**: {self.compatibility_result.level.value}",
+            f"- **Compatibility Level**: {
+                self.compatibility_result.level.value}",
             "",
         ]
 
@@ -101,7 +98,9 @@ class CompatibilityReport:
                 f"| Source Fields | {len(self.source_schema.fields)} |",
                 f"| Target Fields | {len(self.target_schema.fields)} |",
                 f"| Compatible Fields | {len([f for f in self.field_analyses.values() if f.is_compatible])} |",
-                f"| Missing Required | {len(self.compatibility_result.missing_required_fields)} |",
+                f"| Missing Required | {
+                    len(
+                        self.compatibility_result.missing_required_fields)} |",
                 f"| Extra Fields | {len(self.compatibility_result.extra_fields)} |",
                 "",
             ]
@@ -182,14 +181,14 @@ class FieldAnalysis:
     """Detailed analysis of field compatibility."""
 
     field_name: str
-    source_type: Optional[str] = None
-    target_type: Optional[str] = None
+    source_type: str | None = None
+    target_type: str | None = None
     is_compatible: bool = False
-    compatibility_level: Optional[CompatibilityLevel] = None
+    compatibility_level: CompatibilityLevel | None = None
     conversion_needed: bool = False
-    conversion_path: Optional[str] = None
-    issues: List[str] = field(default_factory=list)
-    notes: Optional[str] = None
+    conversion_path: str | None = None
+    issues: list[str] = field(default_factory=list)
+    notes: str | None = None
 
 
 class ReportGenerator:
@@ -200,8 +199,8 @@ class ReportGenerator:
         source_schema: SchemaInfo,
         target_schema: SchemaInfo,
         compatibility_result: SchemaCompatibility,
-        conversion_registry: Optional[Any] = None,
-        analysis_time_ms: Optional[float] = None,
+        conversion_registry: Any | None = None,
+        analysis_time_ms: float | None = None,
     ) -> CompatibilityReport:
         """Generate a comprehensive compatibility report."""
         report = CompatibilityReport(
@@ -267,7 +266,7 @@ class ReportGenerator:
         self,
         report: CompatibilityReport,
         result: SchemaCompatibility,
-        conversion_registry: Optional[Any],
+        conversion_registry: Any | None,
     ) -> None:
         """Analyze individual fields."""
         # Analyze matched fields
@@ -289,7 +288,8 @@ class ReportGenerator:
             elif field_result.level == CompatibilityLevel.SUBTYPE:
                 analysis.notes = "Subtype compatible"
             elif field_result.needs_conversion:
-                analysis.notes = f"Conversion available: {field_result.conversion_path}"
+                analysis.notes = f"Conversion available: {
+                    field_result.conversion_path}"
 
             report.field_analyses[field_name] = analysis
 
@@ -416,8 +416,14 @@ class VisualDiffer:
                         lines.append(f"  {field_name}: ✓ compatible")
                     else:
                         lines.append(f"- {field_name}: ✗ incompatible")
-                        lines.append(f"    Source: {source_field.type_info.type_hint}")
-                        lines.append(f"    Target: {target_field.type_info.type_hint}")
+                        lines.append(
+                            f"    Source: {
+                                source_field.type_info.type_hint}"
+                        )
+                        lines.append(
+                            f"    Target: {
+                                target_field.type_info.type_hint}"
+                        )
             elif source_field:
                 # Only in source
                 lines.append(f"+ {field_name}: (only in source)")
@@ -434,8 +440,8 @@ class VisualDiffer:
 
 # Module-level convenience functions
 def generate_report(
-    source_schema: Union[Type[BaseModel], SchemaInfo],
-    target_schema: Union[Type[BaseModel], SchemaInfo],
+    source_schema: type[BaseModel] | SchemaInfo,
+    target_schema: type[BaseModel] | SchemaInfo,
     mode: str = "subset",
 ) -> CompatibilityReport:
     """Generate a compatibility report between schemas."""
@@ -471,20 +477,15 @@ def generate_report(
 
 
 def print_compatibility_report(
-    source: Union[Type[BaseModel], SchemaInfo],
-    target: Union[Type[BaseModel], SchemaInfo],
+    source: type[BaseModel] | SchemaInfo,
+    target: type[BaseModel] | SchemaInfo,
     format: str = "markdown",
 ) -> None:
     """Print a compatibility report to console."""
-    report = generate_report(source, target)
+    generate_report(source, target)
 
-    if format == "markdown":
-        print(report.to_markdown())
-    elif format == "json":
-        print(report.to_json())
-    elif format == "dict":
-        import pprint
+    if format in {"markdown", "json"} or format == "dict":
+        pass
 
-        pprint.pprint(report.to_dict())
     else:
         raise ValueError(f"Unknown format: {format}")

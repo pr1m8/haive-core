@@ -2,7 +2,7 @@ import mimetypes
 import os
 from datetime import datetime
 from pathlib import Path
-from typing import Any, ClassVar, Dict, List, Union
+from typing import Any, ClassVar
 
 from pydantic import DirectoryPath, Field, FilePath, computed_field, model_validator
 
@@ -11,14 +11,12 @@ from haive.core.engine.loaders.sources.types import SourceType
 
 
 class FileSource(BaseSource):
-    """
-    Base class for all file-based sources.
-    """
+    """Base class for all file-based sources."""
 
     file_path: FilePath = Field(description="Path to the file")
 
     # Class variable for MIME type mapping
-    MIME_TYPES: ClassVar[Dict[str, str]] = {
+    MIME_TYPES: ClassVar[dict[str, str]] = {
         ".pdf": "application/pdf",
         ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         ".doc": "application/msword",
@@ -36,7 +34,10 @@ class FileSource(BaseSource):
     }
 
     @model_validator(mode="after")
-    def validate_file_exists(self):
+
+
+    @classmethod
+    def validate_file_exists(cls) -> Any:
         """Validate the file exists after model initialization."""
         if not os.path.isfile(self.file_path):
             raise ValueError(f"File does not exist: {self.file_path}")
@@ -82,7 +83,7 @@ class FileSource(BaseSource):
         mime_type, _ = mimetypes.guess_type(str(self.file_path))
         return mime_type or "application/octet-stream"
 
-    def get_metadata(self) -> Dict[str, Any]:
+    def get_metadata(self) -> dict[str, Any]:
         """Get file metadata."""
         metadata = super().get_metadata()
 
@@ -101,7 +102,7 @@ class FileSource(BaseSource):
         return metadata
 
     @classmethod
-    def from_path(cls, path: Union[str, Path], **kwargs) -> "FileSource":
+    def from_path(cls, path: str | Path, **kwargs) -> "FileSource":
         """Create a FileSource from a path."""
         if isinstance(path, str):
             path = Path(path)
@@ -114,18 +115,22 @@ class FileSource(BaseSource):
 
 
 class DirectorySource(BaseSource):
-    """
-    Source representing a directory of files.
-    """
+    """Source representing a directory of files."""
 
     source_type: SourceType = Field(default=SourceType.DIRECTORY)
     directory_path: DirectoryPath = Field(description="Path to the directory")
 
     @model_validator(mode="after")
-    def validate_directory_exists(self):
+
+
+    @classmethod
+    def validate_directory_exists(cls) -> Any:
         """Validate the directory exists after model initialization."""
         if not os.path.isdir(self.directory_path):
-            raise ValueError(f"Directory does not exist: {self.directory_path}")
+            raise ValueError(
+                f"Directory does not exist: {
+                    self.directory_path}"
+            )
         return self
 
     def get_source_value(self) -> DirectoryPath:
@@ -160,7 +165,7 @@ class DirectorySource(BaseSource):
         timestamp = os.path.getmtime(self.directory_path)
         return datetime.fromtimestamp(timestamp)
 
-    def get_metadata(self) -> Dict[str, Any]:
+    def get_metadata(self) -> dict[str, Any]:
         """Get directory metadata."""
         metadata = super().get_metadata()
         metadata.update(
@@ -173,9 +178,8 @@ class DirectorySource(BaseSource):
         )
         return metadata
 
-    def list_files(self, pattern: str = "*", recursive: bool = False) -> List[Path]:
-        """
-        List files in the directory.
+    def list_files(self, pattern: str = "*", recursive: bool = False) -> list[Path]:
+        """List files in the directory.
 
         Args:
             pattern: Glob pattern for filtering files
@@ -188,12 +192,12 @@ class DirectorySource(BaseSource):
             return list(self.directory_path.glob(f"**/{pattern}"))
         return list(self.directory_path.glob(pattern))
 
-    def list_subdirectories(self) -> List[Path]:
+    def list_subdirectories(self) -> list[Path]:
         """List subdirectories."""
         return [p for p in self.directory_path.iterdir() if p.is_dir()]
 
     @classmethod
-    def from_path(cls, path: Union[str, Path], **kwargs) -> "DirectorySource":
+    def from_path(cls, path: str | Path, **kwargs) -> "DirectorySource":
         """Create a DirectorySource from a path."""
         if isinstance(path, str):
             path = Path(path)

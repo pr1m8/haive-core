@@ -1,5 +1,6 @@
 """Elasticsearch Vector Store implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Elasticsearch vector store,
 which combines traditional text search with vector similarity search capabilities.
 
@@ -143,7 +144,7 @@ class ElasticsearchVectorStoreConfig(BaseVectorStoreConfig):
     )
 
     @validator("distance_strategy")
-    def validate_distance_strategy(self, v):
+    def validate_distance_strategy(self, v) -> Any:
         """Validate distance strategy is supported."""
         valid_strategies = ["cosine", "euclidean", "dot_product", "max_inner_product"]
         if v not in valid_strategies:
@@ -153,7 +154,7 @@ class ElasticsearchVectorStoreConfig(BaseVectorStoreConfig):
         return v
 
     @validator("elasticsearch_url")
-    def validate_elasticsearch_url(self, v):
+    def validate_elasticsearch_url(self, v) -> Any:
         """Basic validation of Elasticsearch URL."""
         if not v.startswith(("http://", "https://")):
             raise ValueError("elasticsearch_url must start with http:// or https://")
@@ -174,7 +175,7 @@ class ElasticsearchVectorStoreConfig(BaseVectorStoreConfig):
             "ids": (list[str], Field(description="Document IDs in Elasticsearch")),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create an Elasticsearch vector store from this configuration.
 
         Returns:

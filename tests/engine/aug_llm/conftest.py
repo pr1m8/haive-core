@@ -128,7 +128,8 @@ def calculator_tool():
     def calculator(expression: str) -> str:
         """Calculate the result of a mathematical expression."""
         try:
-            # This is for testing only - would use a safer approach in production
+            # This is for testing only - would use a safer approach in
+            # production
             return str(eval(expression))
         except Exception as e:
             return f"Error: {e!s}"

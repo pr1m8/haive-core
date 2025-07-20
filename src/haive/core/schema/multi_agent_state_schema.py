@@ -43,7 +43,10 @@ class MultiAgentStateSchema(StateSchema):
     )
 
     @model_validator(mode="after")
-    def populate_engines_dict(self) -> MultiAgentStateSchema:
+
+
+    @classmethod
+    def populate_engines_dict(cls) -> MultiAgentStateSchema:
         """Populate the engines dictionary with all available engines.
 
         This validator runs after the model is created and:
@@ -61,7 +64,10 @@ class MultiAgentStateSchema(StateSchema):
         # 1. First collect engines from instance fields
         field_engines = self.get_engines()
         if field_engines:
-            logger.debug(f"Found {len(field_engines)} engines in instance fields")
+            logger.debug(
+                f"Found {
+                    len(field_engines)} engines in instance fields"
+            )
             self.engines.update(field_engines)
 
         # 2. Then add engines from class-level .engines

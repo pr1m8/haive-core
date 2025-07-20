@@ -26,7 +26,9 @@ class CustomInputSchema(BaseModel):
 
     messages: list[BaseMessage] = Field(default_factory=list)
     query: str = Field(default="", description="User query")
-    context: list[str] = Field(default_factory=list, description="Context documents")
+    context: list[str] = Field(
+        default_factory=list,
+        description="Context documents")
 
 
 class CustomOutputSchema(BaseModel):
@@ -60,21 +62,32 @@ def test_agent_io_to_state_composition():
 
     # Log schema info
     logger.info(f"Input schema: {input_schema.__name__}")
-    logger.info(f"Input schema fields: {list(input_schema.model_fields.keys())}")
+    logger.info(
+        f"Input schema fields: {
+            list(
+                input_schema.model_fields.keys())}")
     logger.info(f"Output schema: {output_schema.__name__}")
-    logger.info(f"Output schema fields: {list(output_schema.model_fields.keys())}")
+    logger.info(
+        f"Output schema fields: {
+            list(
+                output_schema.model_fields.keys())}")
     logger.info(f"State schema: {state_schema.__name__}")
-    logger.info(f"State schema fields: {list(state_schema.model_fields.keys())}")
+    logger.info(
+        f"State schema fields: {
+            list(
+                state_schema.model_fields.keys())}")
 
     # Check engine_io_mappings in state schema
     if hasattr(state_schema, "__engine_io_mappings__"):
-        logger.info(f"Engine I/O mappings: {state_schema.__engine_io_mappings__}")
+        logger.info(
+            f"Engine I/O mappings: {state_schema.__engine_io_mappings__}")
 
     # Verify that the schemas are correctly related
     assert issubclass(state_schema, StateSchema)
     assert hasattr(state_schema, "model_fields")
 
-    # Verify state schema includes all fields from both input and output schemas
+    # Verify state schema includes all fields from both input and output
+    # schemas
     assert "messages" in state_schema.model_fields
     assert "query" in state_schema.model_fields
     assert "context" in state_schema.model_fields
@@ -83,7 +96,8 @@ def test_agent_io_to_state_composition():
     assert "confidence" in state_schema.model_fields
 
     # Our implementation uses composition rather than inheritance
-    # So we shouldn't expect the state schema to be a subclass of input/output schemas
+    # So we shouldn't expect the state schema to be a subclass of input/output
+    # schemas
 
     # Display schema with SchemaUI if available
     try:
@@ -94,7 +108,9 @@ def test_agent_io_to_state_composition():
     # Create a state instance to test functionality
     state = state_schema(
         query="What is the capital of France?",
-        context=["France is a country in Europe.", "Paris is a city in France."],
+        context=[
+            "France is a country in Europe.",
+            "Paris is a city in France."],
     )
 
     # Test updating the state
@@ -134,11 +150,20 @@ def test_agent_with_component_derived_schemas():
 
     # Log schema info
     logger.info(f"Input schema: {input_schema.__name__}")
-    logger.info(f"Input schema fields: {list(input_schema.model_fields.keys())}")
+    logger.info(
+        f"Input schema fields: {
+            list(
+                input_schema.model_fields.keys())}")
     logger.info(f"Output schema: {output_schema.__name__}")
-    logger.info(f"Output schema fields: {list(output_schema.model_fields.keys())}")
+    logger.info(
+        f"Output schema fields: {
+            list(
+                output_schema.model_fields.keys())}")
     logger.info(f"State schema: {state_schema.__name__}")
-    logger.info(f"State schema fields: {list(state_schema.model_fields.keys())}")
+    logger.info(
+        f"State schema fields: {
+            list(
+                state_schema.model_fields.keys())}")
 
     # Verify that the schemas are correctly related
     assert issubclass(state_schema, StateSchema)

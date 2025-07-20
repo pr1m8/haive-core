@@ -1,5 +1,4 @@
-"""
-Core types for the Haive graph system.
+"""Core types for the Haive graph system.
 
 This module defines fundamental types, protocols, and enums used throughout
 the graph system, providing a strong typing foundation for graph components.
@@ -14,20 +13,9 @@ These types ensure consistency and type safety across the system while
 enabling IDE auto-completion and static type checking.
 """
 
+from collections.abc import Callable
 from enum import Enum
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    List,
-    Literal,
-    Optional,
-    Protocol,
-    Type,
-    TypeVar,
-    Union,
-    runtime_checkable,
-)
+from typing import Any, Literal, Optional, Protocol, TypeVar, Union, runtime_checkable
 
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import BaseTool, StructuredTool, Tool
@@ -37,26 +25,24 @@ from pydantic import BaseModel, Field
 from haive.core.schema.state_schema import StateSchema
 
 # State type
-StateType = Union[StateSchema, Dict[str, Any]]
-ConfigType = Optional[Union[RunnableConfig, Dict[str, Any]]]
-NodeReturnType = Union[Dict[str, Any], Command, Send, List[Send], str, bool, Any]
-CommandGoto = Union[str, Literal["END"], Send, List[Union[Send, str]]]
+StateType = Union[StateSchema, dict[str, Any]]
+ConfigType = Optional[RunnableConfig | dict[str, Any]]
+NodeReturnType = Union[dict[str, Any], Command, Send, list[Send], str, bool, Any]
+CommandGoto = Union[str, Literal["END"], Send, list[Send | str]]
 
 # Tool type
 ToolType = Union[BaseTool, BaseModel, StructuredTool, Tool]
-ToolsType = Union[List[ToolType], List[List[ToolType]]]
+ToolsType = Union[list[ToolType], list[list[ToolType]]]
 
 # Node callable signature
-NodeCallable = Callable[[StateType, Optional[ConfigType]], NodeReturnType]
+NodeCallable = Callable[[StateType, ConfigType | None], NodeReturnType]
 
 # Branch condition function signatures
-BranchStringConditionFunc = Callable[[StateType, Optional[ConfigType]], str]
-BranchBoolConditionFunc = Callable[[StateType, Optional[ConfigType]], bool]
-BranchDictConditionFunc = Callable[[StateType, Optional[ConfigType]], Dict[str, Any]]
-BranchSendConditionFunc = Callable[
-    [StateType, Optional[ConfigType]], Union[Send, List[Send]]
-]
-BranchCommandConditionFunc = Callable[[StateType, Optional[ConfigType]], Command]
+BranchStringConditionFunc = Callable[[StateType, ConfigType | None], str]
+BranchBoolConditionFunc = Callable[[StateType, ConfigType | None], bool]
+BranchDictConditionFunc = Callable[[StateType, ConfigType | None], dict[str, Any]]
+BranchSendConditionFunc = Callable[[StateType, ConfigType | None], Send | list[Send]]
+BranchCommandConditionFunc = Callable[[StateType, ConfigType | None], Command]
 
 # Combined branch function type
 BranchConditionFunc = Union[
@@ -71,8 +57,7 @@ BranchConditionFunc = Union[
 # Protocol for named entities
 @runtime_checkable
 class NamedEntity(Protocol):
-    """
-    Protocol that requires a name property.
+    """Protocol that requires a name property.
 
     Any object implementing this protocol must have a name property
     that returns a string. This allows for consistent naming across
@@ -89,8 +74,7 @@ N = TypeVar("N", bound=NamedEntity)
 
 # Edge types
 class EdgeType(str, Enum):
-    """
-    Types of edges in the graph.
+    """Types of edges in the graph.
 
     Attributes:
         DIRECT: Simple direct edge from one node to another
@@ -105,8 +89,7 @@ class EdgeType(str, Enum):
 
 # Edge states
 class EdgeState(str, Enum):
-    """
-    States for edges with waiting conditions.
+    """States for edges with waiting conditions.
 
     Attributes:
         INACTIVE: Edge has not started waiting
@@ -125,8 +108,7 @@ class EdgeState(str, Enum):
 
 # Node types
 class NodeType(str, Enum):
-    """
-    Types of nodes in the graph.
+    """Types of nodes in the graph.
 
     Attributes:
         FUNCTION: Node containing a simple callable function
@@ -142,8 +124,7 @@ class NodeType(str, Enum):
 
 # Retry policy for node execution
 class RetryPolicy(BaseModel):
-    """
-    Policy for retrying node execution on failure.
+    """Policy for retrying node execution on failure.
 
     This model defines how and when to retry a failed node execution,
     including backoff strategy and exception filtering.
@@ -179,10 +160,10 @@ class RetryPolicy(BaseModel):
     initial_delay: float = Field(
         default=1.0, ge=0, description="Initial delay before first retry (seconds)"
     )
-    max_delay: Optional[float] = Field(
+    max_delay: float | None = Field(
         default=None, description="Maximum delay between retries (seconds)"
     )
-    retry_on: List[Union[Type[Exception], str]] = Field(
+    retry_on: list[type[Exception] | str] = Field(
         default_factory=list, description="Exception types or names to retry on"
     )
     jitter: bool = Field(
@@ -190,8 +171,7 @@ class RetryPolicy(BaseModel):
     )
 
     def should_retry(self, exception: Exception, attempt: int) -> bool:
-        """
-        Determine if an exception should trigger a retry.
+        """Determine if an exception should trigger a retry.
 
         Args:
             exception: The exception that occurred
@@ -221,8 +201,7 @@ class RetryPolicy(BaseModel):
         return False
 
     def get_delay(self, attempt: int) -> float:
-        """
-        Calculate the delay for a retry attempt.
+        """Calculate the delay for a retry attempt.
 
         Args:
             attempt: Current attempt number (1-based)

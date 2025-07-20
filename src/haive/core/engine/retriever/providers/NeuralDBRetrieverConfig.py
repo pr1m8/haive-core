@@ -1,5 +1,6 @@
 """NeuralDB Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the NeuralDB retriever,
 which uses ThirdAI's NeuralDB for fast neural search without GPUs.
 NeuralDB provides efficient neural information retrieval with CPU-only
@@ -159,7 +160,7 @@ class NeuralDBRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a NeuralDB retriever from this configuration.
 
         Returns:

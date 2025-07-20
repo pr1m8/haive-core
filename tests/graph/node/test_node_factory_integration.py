@@ -3,7 +3,6 @@
 import logging
 import os
 import tempfile
-from typing import List
 
 import pytest
 from dotenv import load_dotenv
@@ -43,7 +42,7 @@ class QA(BaseModel):
 class QAs(BaseModel):
     """Container for multiple QA pairs."""
 
-    qas: List[QA] = Field(description="List of QA pairs")
+    qas: list[QA] = Field(description="List of QA pairs")
 
 
 class DocumentSection(BaseModel):
@@ -51,7 +50,7 @@ class DocumentSection(BaseModel):
 
     title: str = Field(description="Section title")
     content: str = Field(description="Section content")
-    subsections: List["DocumentSection"] = Field(
+    subsections: list["DocumentSection"] = Field(
         default_factory=list, description="Subsections"
     )
 
@@ -64,7 +63,7 @@ class DocumentHierarchy(BaseModel):
     """Hierarchical document structure."""
 
     title: str = Field(description="Document title")
-    sections: List[DocumentSection] = Field(
+    sections: list[DocumentSection] = Field(
         default_factory=list, description="Document sections"
     )
 
@@ -72,9 +71,9 @@ class DocumentHierarchy(BaseModel):
 class DocumentAnalysis(BaseModel):
     """Structured analysis of a document."""
 
-    topics: List[str] = Field(description="Main topics in the document")
-    concepts: List[str] = Field(description="Key concepts in the document")
-    dates: List[str] = Field(description="Important dates mentioned")
+    topics: list[str] = Field(description="Main topics in the document")
+    concepts: list[str] = Field(description="Key concepts in the document")
+    dates: list[str] = Field(description="Important dates mentioned")
     summary: str = Field(description="Brief summary of the document")
 
 
@@ -109,7 +108,8 @@ def sample_documents():
 @pytest.fixture
 def embedding_model():
     """Create a HuggingFace embedding model."""
-    return HuggingFaceEmbeddingConfig(model="sentence-transformers/all-MiniLM-L6-v2")
+    return HuggingFaceEmbeddingConfig(
+        model="sentence-transformers/all-MiniLM-L6-v2")
 
 
 @pytest.fixture
@@ -203,7 +203,8 @@ def test_structured_output_model_fields(azure_llm_config):
                 "system",
                 "You are an AI assistant that generates questions and answers from text.",
             ),
-            ("human", "Generate questions and answers from this text:\n\n{contents}"),
+            ("human",
+             "Generate questions and answers from this text:\n\n{contents}"),
         ]
     )
 
@@ -216,7 +217,8 @@ def test_structured_output_model_fields(azure_llm_config):
     )
 
     # Schema composition should include the structured output model fields
-    schema = SchemaComposer.compose_schema(components=[qa_llm], name="QASchema")
+    schema = SchemaComposer.compose_schema(
+        components=[qa_llm], name="QASchema")
 
     # Verify schema includes the structured output model fields
     assert hasattr(schema, "model_fields")
@@ -224,7 +226,10 @@ def test_structured_output_model_fields(azure_llm_config):
     assert "contents" in schema.model_fields  # Field from prompt template
 
     # Create node config
-    node_config = NodeConfig(name="generate_qa", engine=qa_llm, command_goto=END)
+    node_config = NodeConfig(
+        name="generate_qa",
+        engine=qa_llm,
+        command_goto=END)
 
     # Create node function
     node_func = NodeFactory.create_node_function(node_config)
@@ -263,10 +268,10 @@ def test_implicit_schema_from_engines(azure_llm_config, retriever):
                 "human",
                 """
         Question: {query}
-        
+
         Context:
         {context}
-        
+
         Answer:""",
             ),
         ]
@@ -279,7 +284,11 @@ def test_implicit_schema_from_engines(azure_llm_config, retriever):
     )
 
     # Create graph without explicit schema
-    graph = DynamicGraph(name="rag_workflow", components=[retriever, answer_llm])
+    graph = DynamicGraph(
+        name="rag_workflow",
+        components=[
+            retriever,
+            answer_llm])
 
     # Get the implicitly derived schema
     derived_schema = graph.state_schema
@@ -334,7 +343,7 @@ def test_complex_field_mapping(azure_llm_config):
         1. Main topics
         2. Key concepts
         3. Important dates
-        
+
         Document: {document}
         """,
             ),
@@ -448,7 +457,10 @@ def test_node_factory_detects_engine_type(azure_llm_config):
     )
 
     # Create AugLLM
-    llm = AugLLMConfig(name="llm", prompt_template=prompt, llm_config=azure_llm_config)
+    llm = AugLLMConfig(
+        name="llm",
+        prompt_template=prompt,
+        llm_config=azure_llm_config)
 
     # Create NodeConfig with auto-detection of message usage
     node_config = NodeConfig(name="process", engine=llm, command_goto=END)

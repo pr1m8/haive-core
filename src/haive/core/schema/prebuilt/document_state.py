@@ -9,7 +9,7 @@ Version: 1.0.0
 """
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from langchain_core.documents import Document
 from pydantic import BaseModel, Field
@@ -100,21 +100,21 @@ class DocumentEngineInputSchema(StateSchema):
     """
 
     # Primary source(s)
-    source: Optional[Union[str, Path, Dict[str, Any]]] = Field(
+    source: str | Path | dict[str, Any] | None = Field(
         default=None,
         description="Primary source to process (path, URL, or configuration dict)",
     )
 
-    sources: Optional[List[Union[str, Path, Dict[str, Any]]]] = Field(
+    sources: list[str | Path | dict[str, Any]] | None = Field(
         default=None, description="Multiple sources for bulk processing"
     )
 
     # Source configuration
-    source_type: Optional[DocumentSourceType] = Field(
+    source_type: DocumentSourceType | None = Field(
         default=None, description="Explicit source type (auto-detected if not provided)"
     )
 
-    loader_name: Optional[str] = Field(
+    loader_name: str | None = Field(
         default=None,
         description="Specific loader to use (auto-selected if not provided)",
     )
@@ -147,7 +147,7 @@ class DocumentEngineInputSchema(StateSchema):
         default=True, description="Whether to recursively process directories"
     )
 
-    max_documents: Optional[int] = Field(
+    max_documents: int | None = Field(
         default=None, ge=1, description="Maximum number of documents to load"
     )
 
@@ -164,20 +164,20 @@ class DocumentEngineInputSchema(StateSchema):
     )
 
     # Filtering options
-    include_patterns: List[str] = Field(
+    include_patterns: list[str] = Field(
         default_factory=list, description="Glob patterns for files to include"
     )
 
-    exclude_patterns: List[str] = Field(
+    exclude_patterns: list[str] = Field(
         default_factory=list, description="Glob patterns for files to exclude"
     )
 
     # Additional options
-    loader_options: Dict[str, Any] = Field(
+    loader_options: dict[str, Any] = Field(
         default_factory=dict, description="Additional loader-specific options"
     )
 
-    processing_options: Dict[str, Any] = Field(
+    processing_options: dict[str, Any] = Field(
         default_factory=dict, description="Additional processing options"
     )
 
@@ -237,12 +237,12 @@ class DocumentEngineOutputSchema(StateSchema):
     """
 
     # Loaded documents
-    documents: List[ProcessedDocument] = Field(
+    documents: list[ProcessedDocument] = Field(
         default_factory=list, description="List of processed documents"
     )
 
     # Raw documents (langchain format)
-    raw_documents: List[Document] = Field(
+    raw_documents: list[Document] = Field(
         default_factory=list, description="Raw langchain Document objects"
     )
 
@@ -265,24 +265,24 @@ class DocumentEngineOutputSchema(StateSchema):
     )
 
     # Source information
-    original_source: Optional[str] = Field(
+    original_source: str | None = Field(
         default=None, description="Original source path/URL"
     )
 
-    source_type: Optional[DocumentSourceType] = Field(
+    source_type: DocumentSourceType | None = Field(
         default=None, description="Detected or specified source type"
     )
 
     # Processing information
-    loader_names: List[str] = Field(
+    loader_names: list[str] = Field(
         default_factory=list, description="Names of loaders used"
     )
 
-    processing_strategy: Optional[ProcessingStrategy] = Field(
+    processing_strategy: ProcessingStrategy | None = Field(
         default=None, description="Processing strategy used"
     )
 
-    chunking_strategy: Optional[ChunkingStrategy] = Field(
+    chunking_strategy: ChunkingStrategy | None = Field(
         default=None, description="Chunking strategy used"
     )
 
@@ -296,16 +296,16 @@ class DocumentEngineOutputSchema(StateSchema):
     total_words: int = Field(default=0, description="Estimated total word count")
 
     # Errors and warnings
-    errors: List[Dict[str, Any]] = Field(
+    errors: list[dict[str, Any]] = Field(
         default_factory=list, description="Errors encountered during processing"
     )
 
-    warnings: List[Dict[str, Any]] = Field(
+    warnings: list[dict[str, Any]] = Field(
         default_factory=list, description="Warnings generated during processing"
     )
 
     # Additional metadata
-    metadata: Dict[str, Any] = Field(
+    metadata: dict[str, Any] = Field(
         default_factory=dict, description="Additional operation metadata"
     )
 
@@ -330,7 +330,7 @@ class DocumentEngineOutputSchema(StateSchema):
             self.loader_names.append(document.loader_name)
 
     def add_error(
-        self, source: str, error: str, details: Optional[Dict[str, Any]] = None
+        self, source: str, error: str, details: dict[str, Any] | None = None
     ) -> None:
         """Adds an error record to the output state.
 
@@ -394,7 +394,7 @@ class DocumentWorkflowSchema(BaseModel):
         default=0, description="Index of last processed document"
     )
 
-    workflow_metadata: Dict[str, Any] = Field(
+    workflow_metadata: dict[str, Any] = Field(
         default_factory=dict, description="Workflow-specific metadata"
     )
 

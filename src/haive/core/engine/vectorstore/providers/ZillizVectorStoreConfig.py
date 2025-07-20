@@ -1,5 +1,6 @@
 """Zilliz Cloud Vector Store implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Zilliz Cloud vector store,
 which is a fully managed cloud-native vector database service based on Milvus.
 
@@ -126,7 +127,7 @@ class ZillizVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
     )
 
     @validator("consistency_level")
-    def validate_consistency_level(self, v):
+    def validate_consistency_level(self, v) -> Any:
         """Validate consistency level is supported."""
         valid_levels = ["Strong", "Session", "Bounded", "Eventually"]
         if v not in valid_levels:
@@ -136,7 +137,7 @@ class ZillizVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
         return v
 
     @validator("connection_args")
-    def validate_connection_args(self, v):
+    def validate_connection_args(self, v) -> Any:
         """Validate connection arguments."""
         if not v:
             raise ValueError("connection_args must be provided")
@@ -166,7 +167,7 @@ class ZillizVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a Zilliz vector store from this configuration.
 
         Returns:

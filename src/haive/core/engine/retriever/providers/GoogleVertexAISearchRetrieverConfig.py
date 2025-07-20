@@ -1,5 +1,6 @@
 """Google Vertex AI Search Retriever implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Google Vertex AI Search retriever,
 which uses Google Cloud's Vertex AI Search (formerly Enterprise Search) service.
 Vertex AI Search provides ML-powered search capabilities with natural language
@@ -149,7 +150,7 @@ class GoogleVertexAISearchRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig
             ),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a Google Vertex AI Search retriever from this configuration.
 
         Returns:

@@ -22,7 +22,8 @@ base_path = Path(
 
 # Import required dependencies first
 config_module = import_module_from_file(
-    "haive.core.engine.document.config", base_path / "engine" / "document" / "config.py"
+    "haive.core.engine.document.config", base_path /
+    "engine" / "document" / "config.py"
 )
 
 path_analyzer_module = import_module_from_file(
@@ -59,8 +60,10 @@ def test_path_analyzer():
     assert result.file_category == FileCategory.DOCUMENT
 
     # Test GitHub URL
-    result = PathAnalyzer.analyze("https://github.com/user/repo/blob/main/README.md")
-    service = result.url_components.get("service") if result.url_components else None
+    result = PathAnalyzer.analyze(
+        "https://github.com/user/repo/blob/main/README.md")
+    service = result.url_components.get(
+        "service") if result.url_components else None
     assert service == "github"
     assert result.file_extension == ".md"
 
@@ -145,7 +148,8 @@ def test_registry():
         """PDF source for testing."""
 
     # Test finding source by path
-    registration = source_registry.find_source_for_path("/path/to/document.pdf")
+    registration = source_registry.find_source_for_path(
+        "/path/to/document.pdf")
     assert registration.name == "pdf"
     assert len(registration.loaders) == 2
 
@@ -227,4 +231,4 @@ def main():
 
 if __name__ == "__main__":
     success = main()
-    exit(0 if success else 1)
+    sys.exit(0 if success else 1)

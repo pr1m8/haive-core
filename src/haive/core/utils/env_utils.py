@@ -47,7 +47,10 @@ def load_env_file(
 
     # If no file found or specified
     if filepath is None or not filepath.exists():
-        logger.warning(f"No .env file found at {filepath or 'any parent directory'}")
+        logger.warning(
+            f"No .env file found at {
+                filepath or 'any parent directory'}"
+        )
         return {}
 
     # Load the file
@@ -112,7 +115,8 @@ def get_env_var(
             return cast_to(value)
         except (ValueError, TypeError) as e:
             logger.warning(
-                f"Failed to cast environment variable '{name}' to {cast_to.__name__}: {e}"
+                f"Failed to cast environment variable '{name}' to {
+                    cast_to.__name__}: {e}"
             )
             return default
 
@@ -135,7 +139,8 @@ def load_project_env_files() -> dict[str, str]:
     # Get module path to find project root
     module_path = Path(__file__)
 
-    # Navigate to project root (src/haive.core/utils → src/haive.core → src → packages/haive-core → packages → project_root)
+    # Navigate to project root (src/haive.core/utils → src/haive.core → src →
+    # packages/haive-core → packages → project_root)
     project_root = module_path.parent.parent.parent.parent.parent.parent
 
     # Load from project root

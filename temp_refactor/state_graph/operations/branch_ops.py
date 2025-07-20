@@ -6,8 +6,9 @@ branches (conditional routing) in a graph.
 
 import logging
 import uuid
+from collections.abc import Callable
 from datetime import datetime
-from typing import Any, Callable
+from typing import Any
 
 from haive.core.graph.branches.branch import Branch
 from haive.core.graph.branches.types import BranchMode, ComparisonType
@@ -71,7 +72,10 @@ class BranchOperations:
 
             # Validate default node
             if branch.default != "END" and branch.default not in graph.nodes:
-                raise ValueError(f"Default node '{branch.default}' not found in graph")
+                raise ValueError(
+                    f"Default node '{
+                        branch.default}' not found in graph"
+                )
 
             # Add the branch
             graph.branches[branch.id] = branch
@@ -128,7 +132,11 @@ class BranchOperations:
             branch = Branch(**branch_data)
             graph.branches[branch.id] = branch
 
-        logger.debug(f"Added branch '{branch.name}' from node '{branch.source_node}'")
+        logger.debug(
+            f"Added branch '{
+                branch.name}' from node '{
+                branch.source_node}'"
+        )
 
         # Update graph timestamp
         graph.updated_at = datetime.now()
@@ -183,7 +191,8 @@ class BranchOperations:
         graph.branches[branch_id] = branch
 
         logger.debug(
-            f"Added conditional edges from '{source_node}' with {len(destinations)} destinations"
+            f"Added conditional edges from '{source_node}' with {
+                len(destinations)} destinations"
         )
 
         # Update graph timestamp
@@ -241,7 +250,10 @@ class BranchOperations:
         # Add to graph
         graph.branches[branch.id] = branch
 
-        logger.debug(f"Added function branch '{branch.name}' from {source_node}")
+        logger.debug(
+            f"Added function branch '{
+                branch.name}' from {source_node}"
+        )
 
         # Update graph timestamp
         graph.updated_at = datetime.now()
@@ -411,7 +423,10 @@ class BranchOperations:
                 raise ValueError(f"Destination node '{dest}' not found in graph")
 
         if new_branch.default != "END" and new_branch.default not in graph.nodes:
-            raise ValueError(f"Default node '{new_branch.default}' not found in graph")
+            raise ValueError(
+                f"Default node '{
+                    new_branch.default}' not found in graph"
+            )
 
         # Update the branch ID to match if needed
         if new_branch.id != branch_id:

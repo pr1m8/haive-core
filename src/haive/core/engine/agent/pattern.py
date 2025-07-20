@@ -72,7 +72,7 @@ class PatternManager:
     and application tracking.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the pattern manager."""
         self.patterns: list[PatternConfig] = []
         self.pattern_parameters: dict[str, dict[str, Any]] = {}

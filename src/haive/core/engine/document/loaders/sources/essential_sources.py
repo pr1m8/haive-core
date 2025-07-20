@@ -4,7 +4,7 @@ This module registers the most commonly used document loaders to support
 the core functionality needed for the document engine migration.
 """
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 from .enhanced_registry import (
     enhanced_registry,
@@ -65,7 +65,7 @@ class PDFSource(LocalFileSource):
     extract_images: bool = False
     layout_analysis: bool = False
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs.update({"extract_images": self.extract_images})
         return kwargs
@@ -100,9 +100,9 @@ class CSVSource(LocalFileSource):
     delimiter: str = ","
     encoding: str = "utf-8"
     skip_rows: int = 0
-    columns: Optional[list] = None
+    columns: list | None = None
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -134,10 +134,10 @@ class CSVSource(LocalFileSource):
 class JSONSource(LocalFileSource):
     """JSON file source with schema extraction."""
 
-    jq_schema: Optional[str] = None
+    jq_schema: str | None = None
     text_content: bool = True
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         if self.jq_schema:
             kwargs["jq_schema"] = self.jq_schema
@@ -165,7 +165,7 @@ class TextSource(LocalFileSource):
 
     autodetect_encoding: bool = True
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs["autodetect_encoding"] = self.autodetect_encoding
         return kwargs
@@ -192,7 +192,7 @@ class MarkdownSource(LocalFileSource):
 
     mode: str = "elements"  # single, elements, paged
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs["mode"] = self.mode
         return kwargs
@@ -226,7 +226,7 @@ class WordDocumentSource(LocalFileSource):
 
     mode: str = "elements"
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs["mode"] = self.mode
         return kwargs
@@ -253,7 +253,7 @@ class ExcelSource(LocalFileSource):
 
     mode: str = "elements"
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs["mode"] = self.mode
         return kwargs
@@ -287,7 +287,7 @@ class HTMLSource(LocalFileSource):
 
     mode: str = "elements"
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs["mode"] = self.mode
         return kwargs
@@ -331,9 +331,9 @@ class WebPageSource(RemoteSource):
 
     wait_for_js: bool = False
     scroll_to_bottom: bool = False
-    selector: Optional[str] = None
+    selector: str | None = None
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -366,9 +366,9 @@ class GitHubSource(RemoteSource):
 
     repository: str
     branch: str = "main"
-    file_path: Optional[str] = None
+    file_path: str | None = None
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -408,7 +408,7 @@ class LocalDirectorySource(DirectorySource):
     max_concurrency: int = 4
     show_progress: bool = False
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -445,7 +445,7 @@ class PostgreSQLSource(DatabaseSource):
 
     page_size: int = 1000
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs["page_size"] = self.page_size
         return kwargs
@@ -470,9 +470,9 @@ class MongoDBSource(DatabaseSource):
     """MongoDB database source."""
 
     collection_name: str
-    filter_criteria: Optional[dict] = None
+    filter_criteria: dict | None = None
 
-    def get_loader_kwargs(self) -> Dict[str, Any]:
+    def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
         kwargs.update(
             {
@@ -488,7 +488,7 @@ class MongoDBSource(DatabaseSource):
 # =============================================================================
 
 
-def get_essential_sources_statistics() -> Dict[str, Any]:
+def get_essential_sources_statistics() -> dict[str, Any]:
     """Get statistics about registered essential sources."""
     stats = enhanced_registry.get_statistics()
 
@@ -541,16 +541,10 @@ def validate_essential_sources() -> bool:
         if source_name not in enhanced_registry._sources:
             missing.append(source_name)
 
-    if missing:
-        print(f"Missing essential sources: {missing}")
-        return False
-
-    print(f"All {len(required_sources)} essential sources registered successfully!")
-    return True
+    return not missing
 
 
 # Auto-validate on import
 if __name__ == "__main__":
     validate_essential_sources()
     stats = get_essential_sources_statistics()
-    print(f"Registry Statistics: {stats}")

@@ -8,14 +8,10 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../src"))
 
 def test_core_imports():
     """Test that all core imports work."""
-    print("🧪 Testing Core Imports...")
-
     try:
 
-        print("✅ All core imports successful")
         return True
-    except Exception as e:
-        print(f"❌ Import failed: {e}")
+    except Exception:
         import traceback
 
         traceback.print_exc()
@@ -24,8 +20,6 @@ def test_core_imports():
 
 def test_state_schema_basic():
     """Test StateSchema basic functionality."""
-    print("🧪 Testing StateSchema Basic...")
-
     try:
         from haive.core.schema import StateSchema
 
@@ -41,10 +35,8 @@ def test_state_schema_basic():
         # Test engines is a dict
         assert isinstance(state.engines, dict)
 
-        print("✅ StateSchema basic functionality verified")
         return True
-    except Exception as e:
-        print(f"❌ StateSchema test failed: {e}")
+    except Exception:
         import traceback
 
         traceback.print_exc()
@@ -53,8 +45,6 @@ def test_state_schema_basic():
 
 def test_schema_composer_basic():
     """Test SchemaComposer basic functionality."""
-    print("🧪 Testing SchemaComposer Basic...")
-
     try:
         from haive.core.schema import SchemaComposer
 
@@ -74,10 +64,8 @@ def test_schema_composer_basic():
         instance = schema_class()
         assert instance is not None
 
-        print("✅ SchemaComposer basic functionality verified")
         return True
-    except Exception as e:
-        print(f"❌ SchemaComposer test failed: {e}")
+    except Exception:
         import traceback
 
         traceback.print_exc()
@@ -86,8 +74,6 @@ def test_schema_composer_basic():
 
 def test_messages_state_functionality():
     """Test MessagesState functionality."""
-    print("🧪 Testing MessagesState...")
-
     try:
         from haive.core.schema import MessagesState
 
@@ -103,10 +89,8 @@ def test_messages_state_functionality():
         assert isinstance(messages_state.messages, list)
         assert len(messages_state.messages) == 0
 
-        print("✅ MessagesState functionality verified")
         return True
-    except Exception as e:
-        print(f"❌ MessagesState test failed: {e}")
+    except Exception:
         import traceback
 
         traceback.print_exc()
@@ -115,8 +99,6 @@ def test_messages_state_functionality():
 
 def test_token_usage_functionality():
     """Test token usage functionality."""
-    print("🧪 Testing Token Usage...")
-
     try:
         from haive.core.schema import TokenUsage, TokenUsageMixin
 
@@ -134,10 +116,8 @@ def test_token_usage_functionality():
         assert hasattr(state, "get_token_usage")
         assert hasattr(state, "track_message_tokens")
 
-        print("✅ Token usage functionality verified")
         return True
-    except Exception as e:
-        print(f"❌ Token usage test failed: {e}")
+    except Exception:
         import traceback
 
         traceback.print_exc()
@@ -146,9 +126,6 @@ def test_token_usage_functionality():
 
 def run_all_tests():
     """Run all integration tests."""
-    print("🚀 Running Schema System Integration Tests")
-    print("=" * 50)
-
     tests = [
         test_core_imports,
         test_state_schema_basic,
@@ -166,23 +143,13 @@ def run_all_tests():
                 passed += 1
             else:
                 failed += 1
-        except Exception as e:
-            print(f"❌ Test {test.__name__} crashed: {e}")
+        except Exception:
             failed += 1
 
-    print("\n" + "=" * 50)
-    print("📊 TEST RESULTS SUMMARY")
-    print("=" * 50)
-    print(f"✅ Passed: {passed}")
-    print(f"❌ Failed: {failed}")
-    print(
-        f"📈 Success Rate: {passed}/{passed + failed} ({100 * passed / (passed + failed):.1f}%)"
-    )
-
     if failed == 0:
-        print("\n🎉 ALL TESTS PASSED! Schema system is working correctly.")
+        pass
     else:
-        print(f"\n⚠️  {failed} tests failed. Need to fix issues before proceeding.")
+        pass
 
     return failed == 0
 

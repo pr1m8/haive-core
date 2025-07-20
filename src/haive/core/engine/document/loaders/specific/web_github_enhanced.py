@@ -5,7 +5,7 @@ actions, and wiki pages.
 """
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 from urllib.parse import urlparse
 
 from langchain_core.document_loaders.base import BaseLoader
@@ -25,8 +25,8 @@ class GitHubDiscussionsSource(WebUrlSource):
     def __init__(
         self,
         repo_url: str,
-        discussion_number: Optional[int] = None,
-        category: Optional[str] = None,
+        discussion_number: int | None = None,
+        category: str | None = None,
         answered_only: bool = False,
         max_discussions: int = 100,
         include_comments: bool = True,
@@ -40,7 +40,7 @@ class GitHubDiscussionsSource(WebUrlSource):
         self.max_discussions = max_discussions
         self.include_comments = include_comments
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a GitHub Discussions loader using GraphQL API."""
         try:
             # Since LangChain doesn't have a native discussions loader,
@@ -56,10 +56,10 @@ class GitHubDiscussionsSource(WebUrlSource):
             )
 
         except Exception as e:
-            logger.error(f"Failed to create GitHub Discussions loader: {e}")
+            logger.exception(f"Failed to create GitHub Discussions loader: {e}")
             return None
 
-    def _get_github_token(self) -> Optional[str]:
+    def _get_github_token(self) -> str | None:
         """Get GitHub token from credential manager."""
         if self.credential_manager:
             cred = self.credential_manager.get_credential("github")
@@ -76,8 +76,8 @@ class GitHubGistsSource(WebUrlSource):
 
     def __init__(
         self,
-        username: Optional[str] = None,
-        gist_id: Optional[str] = None,
+        username: str | None = None,
+        gist_id: str | None = None,
         public_only: bool = True,
         max_gists: int = 100,
         **kwargs,
@@ -89,7 +89,7 @@ class GitHubGistsSource(WebUrlSource):
         self.public_only = public_only
         self.max_gists = max_gists
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a GitHub Gists loader."""
         try:
             return GitHubGistsLoader(
@@ -101,10 +101,10 @@ class GitHubGistsSource(WebUrlSource):
             )
 
         except Exception as e:
-            logger.error(f"Failed to create GitHub Gists loader: {e}")
+            logger.exception(f"Failed to create GitHub Gists loader: {e}")
             return None
 
-    def _get_github_token(self) -> Optional[str]:
+    def _get_github_token(self) -> str | None:
         """Get GitHub token from credential manager."""
         if self.credential_manager:
             cred = self.credential_manager.get_credential("github")
@@ -137,7 +137,7 @@ class GitHubReleasesSource(WebUrlSource):
         self.include_release_notes = include_release_notes
         self.include_assets = include_assets
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a GitHub Releases loader."""
         try:
             return GitHubReleasesLoader(
@@ -151,10 +151,10 @@ class GitHubReleasesSource(WebUrlSource):
             )
 
         except Exception as e:
-            logger.error(f"Failed to create GitHub Releases loader: {e}")
+            logger.exception(f"Failed to create GitHub Releases loader: {e}")
             return None
 
-    def _get_github_token(self) -> Optional[str]:
+    def _get_github_token(self) -> str | None:
         """Get GitHub token from credential manager."""
         if self.credential_manager:
             cred = self.credential_manager.get_credential("github")
@@ -172,8 +172,8 @@ class GitHubActionsSource(WebUrlSource):
     def __init__(
         self,
         repo_url: str,
-        workflow_name: Optional[str] = None,
-        status: Optional[str] = None,  # completed, in_progress, queued
+        workflow_name: str | None = None,
+        status: str | None = None,  # completed, in_progress, queued
         include_logs: bool = False,
         max_runs: int = 50,
         **kwargs,
@@ -185,7 +185,7 @@ class GitHubActionsSource(WebUrlSource):
         self.include_logs = include_logs
         self.max_runs = max_runs
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a GitHub Actions loader."""
         try:
             return GitHubActionsLoader(
@@ -198,10 +198,10 @@ class GitHubActionsSource(WebUrlSource):
             )
 
         except Exception as e:
-            logger.error(f"Failed to create GitHub Actions loader: {e}")
+            logger.exception(f"Failed to create GitHub Actions loader: {e}")
             return None
 
-    def _get_github_token(self) -> Optional[str]:
+    def _get_github_token(self) -> str | None:
         """Get GitHub token from credential manager."""
         if self.credential_manager:
             cred = self.credential_manager.get_credential("github")
@@ -219,7 +219,7 @@ class GitHubWikiSource(WebUrlSource):
     def __init__(
         self,
         repo_url: str,
-        page_name: Optional[str] = None,
+        page_name: str | None = None,
         include_history: bool = False,
         **kwargs,
     ):
@@ -228,7 +228,7 @@ class GitHubWikiSource(WebUrlSource):
         self.page_name = page_name
         self.include_history = include_history
 
-    def create_loader(self) -> Optional[BaseLoader]:
+    def create_loader(self) -> BaseLoader | None:
         """Create a GitHub Wiki loader."""
         try:
             return GitHubWikiLoader(
@@ -239,10 +239,10 @@ class GitHubWikiSource(WebUrlSource):
             )
 
         except Exception as e:
-            logger.error(f"Failed to create GitHub Wiki loader: {e}")
+            logger.exception(f"Failed to create GitHub Wiki loader: {e}")
             return None
 
-    def _get_github_token(self) -> Optional[str]:
+    def _get_github_token(self) -> str | None:
         """Get GitHub token from credential manager."""
         if self.credential_manager:
             cred = self.credential_manager.get_credential("github")
@@ -263,12 +263,12 @@ class GitHubDiscussionsLoader(BaseLoader):
     def __init__(
         self,
         repo_url: str,
-        discussion_number: Optional[int] = None,
-        category: Optional[str] = None,
+        discussion_number: int | None = None,
+        category: str | None = None,
         answered_only: bool = False,
         max_discussions: int = 100,
         include_comments: bool = True,
-        access_token: Optional[str] = None,
+        access_token: str | None = None,
     ):
         self.repo_url = repo_url
         self.discussion_number = discussion_number
@@ -287,7 +287,7 @@ class GitHubDiscussionsLoader(BaseLoader):
         else:
             raise ValueError(f"Invalid GitHub URL: {repo_url}")
 
-    def load(self) -> List[Document]:
+    def load(self) -> list[Document]:
         """Load GitHub discussions."""
         try:
             import requests
@@ -366,7 +366,8 @@ class GitHubDiscussionsLoader(BaseLoader):
 
                     content = f"# {discussion['title']}\n\n"
                     content += f"**Author:** {discussion['author']['login']}\n"
-                    content += f"**Category:** {discussion['category']['name']}\n"
+                    content += f"**Category:** {
+                        discussion['category']['name']}\n"
                     content += f"**Created:** {discussion['createdAt']}\n"
                     content += f"**Answered:** {discussion['isAnswered']}\n\n"
                     content += discussion["body"]
@@ -376,7 +377,9 @@ class GitHubDiscussionsLoader(BaseLoader):
                     ):
                         content += "\n\n## Comments\n\n"
                         for comment in discussion["comments"]["nodes"]:
-                            content += f"**{comment['author']['login']}** ({comment['createdAt']}):\n"
+                            content += f"**{
+                                comment['author']['login']}** ({
+                                comment['createdAt']}):\n"
                             content += f"{comment['body']}\n\n"
 
                     metadata = {
@@ -394,7 +397,7 @@ class GitHubDiscussionsLoader(BaseLoader):
             return documents
 
         except Exception as e:
-            logger.error(f"Failed to load GitHub discussions: {e}")
+            logger.exception(f"Failed to load GitHub discussions: {e}")
             return []
 
 
@@ -403,11 +406,11 @@ class GitHubGistsLoader(BaseLoader):
 
     def __init__(
         self,
-        username: Optional[str] = None,
-        gist_id: Optional[str] = None,
+        username: str | None = None,
+        gist_id: str | None = None,
         public_only: bool = True,
         max_gists: int = 100,
-        access_token: Optional[str] = None,
+        access_token: str | None = None,
     ):
         self.username = username
         self.gist_id = gist_id
@@ -415,7 +418,7 @@ class GitHubGistsLoader(BaseLoader):
         self.max_gists = max_gists
         self.access_token = access_token
 
-    def load(self) -> List[Document]:
+    def load(self) -> list[Document]:
         """Load GitHub gists."""
         try:
             import requests
@@ -451,17 +454,19 @@ class GitHubGistsLoader(BaseLoader):
             return documents
 
         except Exception as e:
-            logger.error(f"Failed to load GitHub gists: {e}")
+            logger.exception(f"Failed to load GitHub gists: {e}")
             return []
 
-    def _process_gist(self, gist: Dict[str, Any]) -> List[Document]:
+    def _process_gist(self, gist: dict[str, Any]) -> list[Document]:
         """Process a single gist into documents."""
         documents = []
 
         for filename, file_info in gist.get("files", {}).items():
             content = f"# Gist: {gist['description'] or 'Untitled'}\n"
             content += f"**File:** {filename}\n"
-            content += f"**Language:** {file_info.get('language', 'Unknown')}\n"
+            content += f"**Language:** {
+                file_info.get(
+                    'language', 'Unknown')}\n"
             content += f"**Size:** {file_info.get('size', 0)} bytes\n\n"
             content += "```" + (file_info.get("language", "").lower() or "") + "\n"
             content += file_info.get("content", "")
@@ -495,7 +500,7 @@ class GitHubReleasesLoader(BaseLoader):
         max_releases: int = 50,
         include_release_notes: bool = True,
         include_assets: bool = True,
-        access_token: Optional[str] = None,
+        access_token: str | None = None,
     ):
         self.repo_url = repo_url
         self.include_prereleases = include_prereleases
@@ -514,7 +519,7 @@ class GitHubReleasesLoader(BaseLoader):
         else:
             raise ValueError(f"Invalid GitHub URL: {repo_url}")
 
-    def load(self) -> List[Document]:
+    def load(self) -> list[Document]:
         """Load GitHub releases."""
         try:
             import requests
@@ -538,7 +543,8 @@ class GitHubReleasesLoader(BaseLoader):
                     if not self.include_prereleases and release.get("prerelease"):
                         continue
 
-                    content = f"# Release: {release['name'] or release['tag_name']}\n"
+                    content = f"# Release: {
+                        release['name'] or release['tag_name']}\n"
                     content += f"**Tag:** {release['tag_name']}\n"
                     content += f"**Published:** {release['published_at']}\n"
                     content += f"**Author:** {release['author']['login']}\n"
@@ -554,8 +560,10 @@ class GitHubReleasesLoader(BaseLoader):
                             content += (
                                 f"- **{asset['name']}** ({asset['size']} bytes)\n"
                             )
-                            content += f"  - Downloads: {asset['download_count']}\n"
-                            content += f"  - URL: {asset['browser_download_url']}\n\n"
+                            content += f"  - Downloads: {
+                                asset['download_count']}\n"
+                            content += f"  - URL: {
+                                asset['browser_download_url']}\n\n"
 
                     metadata = {
                         "source": release["html_url"],
@@ -573,7 +581,7 @@ class GitHubReleasesLoader(BaseLoader):
             return documents
 
         except Exception as e:
-            logger.error(f"Failed to load GitHub releases: {e}")
+            logger.exception(f"Failed to load GitHub releases: {e}")
             return []
 
 
@@ -583,11 +591,11 @@ class GitHubActionsLoader(BaseLoader):
     def __init__(
         self,
         repo_url: str,
-        workflow_name: Optional[str] = None,
-        status: Optional[str] = None,
+        workflow_name: str | None = None,
+        status: str | None = None,
         include_logs: bool = False,
         max_runs: int = 50,
-        access_token: Optional[str] = None,
+        access_token: str | None = None,
     ):
         self.repo_url = repo_url
         self.workflow_name = workflow_name
@@ -605,7 +613,7 @@ class GitHubActionsLoader(BaseLoader):
         else:
             raise ValueError(f"Invalid GitHub URL: {repo_url}")
 
-    def load(self) -> List[Document]:
+    def load(self) -> list[Document]:
         """Load GitHub Actions data."""
         try:
             import requests
@@ -627,7 +635,10 @@ class GitHubActionsLoader(BaseLoader):
                         continue
 
                     # Get runs for this workflow
-                    runs_url = f"https://api.github.com/repos/{self.owner}/{self.repo}/actions/workflows/{workflow['id']}/runs"
+                    runs_url = f"https://api.github.com/repos/{
+                        self.owner}/{
+                        self.repo}/actions/workflows/{
+                        workflow['id']}/runs"
                     params = {"per_page": min(self.max_runs, 100)}
                     if self.status:
                         params["status"] = self.status
@@ -646,7 +657,8 @@ class GitHubActionsLoader(BaseLoader):
                             content += f"**Conclusion:** {run['conclusion']}\n"
                             content += f"**Branch:** {run['head_branch']}\n"
                             content += f"**Commit:** {run['head_sha'][:8]}\n"
-                            content += f"**Started:** {run['run_started_at']}\n"
+                            content += f"**Started:** {
+                                run['run_started_at']}\n"
                             content += f"**Event:** {run['event']}\n\n"
 
                             metadata = {
@@ -668,7 +680,7 @@ class GitHubActionsLoader(BaseLoader):
             return documents
 
         except Exception as e:
-            logger.error(f"Failed to load GitHub Actions: {e}")
+            logger.exception(f"Failed to load GitHub Actions: {e}")
             return []
 
 
@@ -678,9 +690,9 @@ class GitHubWikiLoader(BaseLoader):
     def __init__(
         self,
         repo_url: str,
-        page_name: Optional[str] = None,
+        page_name: str | None = None,
         include_history: bool = False,
-        access_token: Optional[str] = None,
+        access_token: str | None = None,
     ):
         self.repo_url = repo_url
         self.page_name = page_name
@@ -696,7 +708,7 @@ class GitHubWikiLoader(BaseLoader):
         else:
             raise ValueError(f"Invalid GitHub URL: {repo_url}")
 
-    def load(self) -> List[Document]:
+    def load(self) -> list[Document]:
         """Load GitHub Wiki pages."""
         try:
             # GitHub Wiki pages are typically accessed via git clone
@@ -736,20 +748,20 @@ class GitHubWikiLoader(BaseLoader):
             return documents
 
         except Exception as e:
-            logger.error(f"Failed to load GitHub Wiki: {e}")
+            logger.exception(f"Failed to load GitHub Wiki: {e}")
             return []
 
 
 # Export enhanced GitHub sources
 __all__ = [
-    "GitHubDiscussionsSource",
-    "GitHubGistsSource",
-    "GitHubReleasesSource",
-    "GitHubActionsSource",
-    "GitHubWikiSource",
-    "GitHubDiscussionsLoader",
-    "GitHubGistsLoader",
-    "GitHubReleasesLoader",
     "GitHubActionsLoader",
+    "GitHubActionsSource",
+    "GitHubDiscussionsLoader",
+    "GitHubDiscussionsSource",
+    "GitHubGistsLoader",
+    "GitHubGistsSource",
+    "GitHubReleasesLoader",
+    "GitHubReleasesSource",
     "GitHubWikiLoader",
+    "GitHubWikiSource",
 ]

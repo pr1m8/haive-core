@@ -1,5 +1,6 @@
 """Weaviate Vector Store implementation for the Haive framework.
 
+from typing import Any
 This module provides a configuration class for the Weaviate vector store,
 which is an open-source vector database with built-in modules for ML.
 
@@ -130,7 +131,7 @@ class WeaviateVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
     )
 
     @validator("url")
-    def validate_url_or_embedded(self, v, values):
+    def validate_url_or_embedded(self, v, values) -> Any:
         """Validate that either URL is provided or embedded is True."""
         if not v and not values.get("use_embedded"):
             raise ValueError(
@@ -153,7 +154,7 @@ class WeaviateVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
             "ids": (list[str], Field(description="IDs of the added documents")),
         }
 
-    def instantiate(self):
+    def instantiate(self) -> Any:
         """Create a Weaviate vector store from this configuration.
 
         Returns:

@@ -46,14 +46,16 @@ class GraphSchemaMixin(BaseModel, Generic[T, C]):
             # Use state_schema for output if not provided
             if "output_schema" not in values or values["output_schema"] is None:
                 values["output_schema"] = state_schema
-        # Case 2: input_schema and output_schema are provided, derive state_schema
+        # Case 2: input_schema and output_schema are provided, derive
+        # state_schema
         elif (
             "input_schema" in values
             and values["input_schema"] is not None
             and "output_schema" in values
             and values["output_schema"] is not None
         ):
-            # If input and output schemas are provided but state isn't, create a pass-through state schema
+            # If input and output schemas are provided but state isn't, create
+            # a pass-through state schema
             if "state_schema" not in values or values["state_schema"] is None:
 
                 class PassThroughState(BaseModel):

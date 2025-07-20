@@ -1,3 +1,4 @@
+import contextlib
 import importlib
 import inspect
 from typing import Any, Literal, Optional
@@ -13,7 +14,8 @@ class FunctionReference(SerializableModel):
     module_path: str | None = Field(
         default=None, description="Module containing the callable"
     )
-    function_name: str | None = Field(default=None, description="Name of the callable")
+    function_name: str | None = Field(
+        default=None, description="Name of the callable")
     callable_type: Literal["function", "method", "class", "lambda", "unknown"] = Field(
         default="function", description="Type of callable"
     )
@@ -24,7 +26,10 @@ class FunctionReference(SerializableModel):
     __abstract__ = True  # Not registered directly
 
     @model_validator(mode="after")
-    def ensure_valid_reference(self) -> "FunctionReference":
+
+
+    @classmethod
+    def ensure_valid_reference(cls) -> "FunctionReference":
         """Ensure the reference is valid."""
         if not self.module_path and not self.function_name and not self.source_code:
             raise ValueError(
@@ -51,7 +56,8 @@ class FunctionReference(SerializableModel):
         if callable_obj is None:
             return None
 
-        instance_name = name or getattr(callable_obj, "__name__", "unnamed_function")
+        instance_name = name or getattr(
+            callable_obj, "__name__", "unnamed_function")
 
         ref = cls(
             name=instance_name,
@@ -63,20 +69,16 @@ class FunctionReference(SerializableModel):
         if inspect.isfunction(callable_obj):
             ref.callable_type = "function"
             # Try to get source code
-            try:
+            with contextlib.suppress(TypeError, OSError):
                 ref.source_code = inspect.getsource(callable_obj)
-            except (TypeError, OSError):
-                pass
         elif inspect.ismethod(callable_obj):
             ref.callable_type = "method"
         elif inspect.isclass(callable_obj):
             ref.callable_type = "class"
         elif callable(callable_obj) and ref.function_name is None:
             ref.callable_type = "lambda"
-            try:
+            with contextlib.suppress(TypeError, OSError):
                 ref.source_code = inspect.getsource(callable_obj)
-            except (TypeError, OSError):
-                pass
         else:
             ref.callable_type = "unknown"
 

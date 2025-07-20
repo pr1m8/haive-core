@@ -1,6 +1,7 @@
 # haive/core/graph/common/types.py
+from collections.abc import Callable
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union
+from typing import Any, TypeVar, Union
 
 from langchain_core.runnables import RunnableConfig
 from langgraph.types import Command, Send
@@ -13,20 +14,24 @@ from haive.core.schema.state_schema import StateSchema
 NodeLike = TypeVar("NodeLike", bound=Any)
 NodeOutput = TypeVar(
     "NodeOutput",
-    bound=Union[
-        Command, Send, List[Send], str, Type[BaseModel], BaseModel, Dict[str, Any]
-    ],
+    bound=Command
+    | Send
+    | list[Send]
+    | str
+    | type[BaseModel]
+    | BaseModel
+    | dict[str, Any],
 )
 StateLike = TypeVar(
-    "StateLike", bound=Union[Dict[str, Any], Type[BaseModel], BaseModel, StateSchema]
+    "StateLike", bound=dict[str, Any] | type[BaseModel] | BaseModel | StateSchema
 )
 ConfigLike = TypeVar(
-    "ConfigLike", bound=Union[RunnableConfig, Dict[str, Any], Type[BaseModel]]
+    "ConfigLike", bound=RunnableConfig | dict[str, Any] | type[BaseModel]
 )
-NodeCallable = Callable[[StateLike, Optional[ConfigLike]], NodeOutput]
-BaseEdge = Union[Tuple[str, str], Tuple[NodeLike, NodeLike]]
-StateType = Union[Dict[str, Any], BaseModel, StateSchema]
-ConfigType = Union[RunnableConfig, Dict[str, Any], BaseModel]
+NodeCallable = Callable[[StateLike, ConfigLike | None], NodeOutput]
+BaseEdge = Union[tuple[str, str], tuple[NodeLike, NodeLike]]
+StateType = Union[dict[str, Any], BaseModel, StateSchema]
+ConfigType = Union[RunnableConfig, dict[str, Any], BaseModel]
 
 
 # Node type enum - moved from BaseGraph to common types
