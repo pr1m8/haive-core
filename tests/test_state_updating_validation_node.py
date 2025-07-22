@@ -95,9 +95,7 @@ class TestStateUpdatingValidationNode:
         # Setup state
         state = MockState()
         state.tools = [MockTool("search"), MockTool("calculator")]
-        state.tool_routes = {
-            "search": "langchain_tool",
-            "calculator": "function"}
+        state.tool_routes = {"search": "langchain_tool", "calculator": "function"}
 
         # Add AI message with tool calls
         ai_msg = AIMessage(
@@ -119,8 +117,7 @@ class TestStateUpdatingValidationNode:
 
     def test_node_function_with_invalid_tools(self):
         """Test node function with invalid tool calls."""
-        node = StateUpdatingValidationNode(
-            update_messages=True, track_error_tools=True)
+        node = StateUpdatingValidationNode(update_messages=True, track_error_tools=True)
         node_func = node.create_node_function()
 
         # Setup state
@@ -273,8 +270,7 @@ class TestStateUpdatingValidationNode:
         # Add tool call for valid tool
         ai_msg = AIMessage(
             content="Processing...",
-            tool_calls=[{"id": "1", "name": "search",
-                         "args": {"query": "test"}}],
+            tool_calls=[{"id": "1", "name": "search", "args": {"query": "test"}}],
         )
         state.messages.append(ai_msg)
 
@@ -322,8 +318,7 @@ class TestStateUpdatingValidationNode:
         tool = MockTool("validated_tool", has_schema=True)
 
         # Mock validation error
-        tool.args_schema.model_validate.side_effect = ValueError(
-            "Invalid args")
+        tool.args_schema.model_validate.side_effect = ValueError("Invalid args")
 
         state.tools = [tool]
         state.tool_routes = {"validated_tool": "function"}
@@ -331,9 +326,7 @@ class TestStateUpdatingValidationNode:
         # Add tool call with bad args
         ai_msg = AIMessage(
             content="Testing validation",
-            tool_calls=[{"id": "1",
-                         "name": "validated_tool",
-                         "args": {"bad": "args"}}],
+            tool_calls=[{"id": "1", "name": "validated_tool", "args": {"bad": "args"}}],
         )
         state.messages.append(ai_msg)
 
@@ -495,8 +488,7 @@ class TestIntegrationScenarios:
 
     def test_dynamic_state_changes(self):
         """Test router adapting to state changes."""
-        node = StateUpdatingValidationNode(
-            validation_mode=ValidationMode.PARTIAL)
+        node = StateUpdatingValidationNode(validation_mode=ValidationMode.PARTIAL)
 
         node_func = node.create_node_function()
         router_func = node.create_router_function()

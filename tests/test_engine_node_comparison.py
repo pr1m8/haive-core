@@ -14,17 +14,14 @@ from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.graph.node.engine_node import EngineNodeConfig as OriginalEngineNode
 from haive.core.graph.node.engine_node_test import EngineNodeConfig as TestEngineNode
 
-sys.path.insert(
-    0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
-sys.path.insert(
-    0, "/home/will/Projects/haive/backend/haive/packages/haive-agents/src")
+sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
+sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-agents/src")
 
 
 # Create the same prompt from test_basic.py
 RAG_QUERY_REFINEMENT = ChatPromptTemplate.from_messages(
     [
-        ("system",
-         "You are an expert. Analyze query: {query} with context: {context}"),
+        ("system", "You are an expert. Analyze query: {query} with context: {context}"),
         ("human", "Process: {query}"),
     ]
 )

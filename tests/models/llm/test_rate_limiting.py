@@ -206,10 +206,7 @@ class TestRateLimitingMixin:
         """Test get_rate_limit_info with limits configured."""
         TestClass = create_rate_limited_class()
 
-        obj = TestClass(
-            requests_per_second=10,
-            tokens_per_minute=100000,
-            max_retries=5)
+        obj = TestClass(requests_per_second=10, tokens_per_minute=100000, max_retries=5)
         info = obj.get_rate_limit_info()
 
         assert info["requests_per_second"] == 10

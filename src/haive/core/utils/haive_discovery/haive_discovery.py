@@ -37,8 +37,7 @@ class HaiveComponentDiscovery(EnhancedComponentDiscovery):
             )
         return []
 
-    def discover_toolkits(
-            self, create_tools: bool = True) -> list[ComponentInfo]:
+    def discover_toolkits(self, create_tools: bool = True) -> list[ComponentInfo]:
         """Discover toolkits (collections of tools)."""
         toolkits_path = (
             self.haive_root
@@ -55,8 +54,7 @@ class HaiveComponentDiscovery(EnhancedComponentDiscovery):
             )
         return []
 
-    def discover_retrievers(
-            self, create_tools: bool = True) -> list[ComponentInfo]:
+    def discover_retrievers(self, create_tools: bool = True) -> list[ComponentInfo]:
         """Discover retrievers from engine package."""
         retriever_path = (
             self.haive_root
@@ -100,8 +98,7 @@ class HaiveComponentDiscovery(EnhancedComponentDiscovery):
 
         return components
 
-    def discover_vector_stores(
-            self, create_tools: bool = True) -> list[ComponentInfo]:
+    def discover_vector_stores(self, create_tools: bool = True) -> list[ComponentInfo]:
         """Discover vector stores from engine package."""
         vectorstore_path = (
             self.haive_root
@@ -179,8 +176,7 @@ class HaiveComponentDiscovery(EnhancedComponentDiscovery):
 
         return components
 
-    def discover_engines(
-            self, create_tools: bool = True) -> list[ComponentInfo]:
+    def discover_engines(self, create_tools: bool = True) -> list[ComponentInfo]:
         """Discover engines from haive-core package."""
         core_path = (
             self.haive_root / "packages" / "haive-core" / "src" / "haive" / "core"

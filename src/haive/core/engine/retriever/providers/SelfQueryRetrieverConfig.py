@@ -1,6 +1,5 @@
 """Self-Query Retriever implementation for the Haive framework.
 
-from typing import Any
 This module provides a configuration class for the Self-Query retriever,
 which enables natural language queries to be converted into structured queries
 that can filter on document metadata and perform semantic similarity search.
@@ -24,7 +23,7 @@ providing a consistent Haive configuration interface with metadata schema suppor
 
 from typing import Any
 
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.engine.retriever.retriever import BaseRetrieverConfig
@@ -109,25 +108,29 @@ class SelfQueryRetrieverConfig(BaseRetrieverConfig):
     # Retrieval parameters
     k: int = Field(default=4, ge=1, le=100, description="Number of documents to return")
 
-    @validator("metadata_field_info", each_item=True)
-    def validate_metadata_field_info(self, v) -> Any:
+    @field_validator("metadata_field_info")
+    @classmethod
+    def validate_metadata_field_info(cls, v):
         """Validate metadata field info structure."""
-        required_keys = {"name", "description", "type"}
-        if not isinstance(v, dict):
-            raise ValueError("Each metadata field info must be a dictionary")
+        if not isinstance(v, list):
+            raise ValueError("metadata_field_info must be a list")
 
-        missing_keys = required_keys - set(v.keys())
-        if missing_keys:
-            raise ValueError(
-                f"Metadata field info missing required keys: {missing_keys}"
-            )
+        for item in v:
+            required_keys = {"name", "description", "type"}
+            if not isinstance(item, dict):
+                raise ValueError("Each metadata field info must be a dictionary")
 
-        valid_types = {"string", "integer", "float", "boolean"}
-        if v["type"] not in valid_types:
-            raise ValueError(
-                f"Metadata field type must be one of {valid_types}, got {
-                    v['type']}"
-            )
+            missing_keys = required_keys - set(item.keys())
+            if missing_keys:
+                raise ValueError(
+                    f"Metadata field info missing required keys: {missing_keys}"
+                )
+
+            valid_types = {"string", "integer", "float", "boolean"}
+            if item["type"] not in valid_types:
+                raise ValueError(
+                    f"Metadata field type must be one of {valid_types}, got {item['type']}"
+                )
 
         return v
 
@@ -154,7 +157,7 @@ class SelfQueryRetrieverConfig(BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self) -> Any:
+    def instantiate(self):
         """Create a Self-Query retriever from this configuration.
 
         Returns:

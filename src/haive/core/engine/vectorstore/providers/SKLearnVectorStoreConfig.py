@@ -1,6 +1,5 @@
 """SKLearn Vector Store implementation for the Haive framework.
 
-from typing import Any
 This module provides a configuration class for the SKLearn vector store,
 which provides ML-integrated nearest neighbor search using scikit-learn.
 
@@ -26,7 +25,7 @@ a consistent Haive configuration interface.
 from typing import Any
 
 from langchain_core.documents import Document
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 from haive.core.engine.vectorstore.base import BaseVectorStoreConfig
 from haive.core.engine.vectorstore.types import VectorStoreType
@@ -103,8 +102,9 @@ class SKLearnVectorStoreConfig(BaseVectorStoreConfig):
         default=None, description="Number of parallel jobs (-1 for all cores)"
     )
 
-    @validator("metric")
-    def validate_metric(self, v) -> Any:
+    @field_validator("metric")
+    @classmethod
+    def validate_metric(cls, v):
         """Validate distance metric is supported by scikit-learn."""
         # Common scikit-learn metrics - not exhaustive
         valid_metrics = [
@@ -132,24 +132,27 @@ class SKLearnVectorStoreConfig(BaseVectorStoreConfig):
             )
         return v
 
-    @validator("algorithm")
-    def validate_algorithm(self, v) -> Any:
+    @field_validator("algorithm")
+    @classmethod
+    def validate_algorithm(cls, v):
         """Validate algorithm is supported by scikit-learn."""
         valid_algorithms = ["auto", "ball_tree", "kd_tree", "brute"]
         if v not in valid_algorithms:
             raise ValueError(f"algorithm must be one of {valid_algorithms}, got {v}")
         return v
 
-    @validator("serializer")
-    def validate_serializer(self, v) -> Any:
+    @field_validator("serializer")
+    @classmethod
+    def validate_serializer(cls, v):
         """Validate serializer is supported."""
         valid_serializers = ["json", "bson", "parquet"]
         if v not in valid_serializers:
             raise ValueError(f"serializer must be one of {valid_serializers}, got {v}")
         return v
 
-    @validator("n_jobs")
-    def validate_n_jobs(self, v) -> Any:
+    @field_validator("n_jobs")
+    @classmethod
+    def validate_n_jobs(cls, v):
         """Validate n_jobs parameter."""
         if v is not None and v < -1:
             raise ValueError("n_jobs must be None, -1, or positive integer")
@@ -173,7 +176,7 @@ class SKLearnVectorStoreConfig(BaseVectorStoreConfig):
             ),
         }
 
-    def instantiate(self) -> Any:
+    def instantiate(self):
         """Create a SKLearn vector store from this configuration.
 
         Returns:

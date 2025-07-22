@@ -39,6 +39,7 @@ async def test_memory_classifier():
             MemoryClassifier,
             MemoryClassifierConfig,
         )
+
         from haive.core.engine.aug_llm import AugLLMConfig
 
         # Create classifier with real LLM
@@ -104,6 +105,7 @@ async def test_memory_store_manager():
             MemoryStoreConfig,
             MemoryStoreManager,
         )
+
         from haive.core.tools.store_manager import StoreManager
 
         # Create store manager with correct API
@@ -182,6 +184,7 @@ async def test_kg_generator_agent():
             KGGeneratorAgent,
             KGGeneratorAgentConfig,
         )
+
         from haive.core.engine.aug_llm import AugLLMConfig
         from haive.core.tools.store_manager import StoreManager
 
@@ -283,6 +286,7 @@ async def test_graph_rag_retriever():
             KGGeneratorAgent,
             KGGeneratorAgentConfig,
         )
+
         from haive.core.engine.aug_llm import AugLLMConfig
         from haive.core.tools.store_manager import StoreManager
 
@@ -387,6 +391,7 @@ async def test_agentic_rag_coordinator():
             KGGeneratorAgent,
             KGGeneratorAgentConfig,
         )
+
         from haive.core.engine.aug_llm import AugLLMConfig
         from haive.core.tools.store_manager import StoreManager
 
@@ -514,6 +519,7 @@ async def test_multi_agent_coordinator():
             MultiAgentCoordinatorConfig,
             MultiAgentMemoryCoordinator,
         )
+
         from haive.core.engine.aug_llm import AugLLMConfig
         from haive.core.tools.store_manager import StoreManager
 

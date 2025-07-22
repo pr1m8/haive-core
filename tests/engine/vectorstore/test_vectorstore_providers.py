@@ -52,8 +52,7 @@ class TestVectorStoreProviders(unittest.TestCase):
                 return []
 
             @classmethod
-            def from_texts(cls, texts: list[str],
-                           embedding, metadatas=None, **kwargs):
+            def from_texts(cls, texts: list[str], embedding, metadatas=None, **kwargs):
                 """Create a vector store from texts."""
                 return cls()
 
@@ -63,12 +62,10 @@ class TestVectorStoreProviders(unittest.TestCase):
                 return cls()
 
         # Register the custom provider
-        VectorStoreProviderRegistry.register_provider(
-            "MockStore", MockVectorStore)
+        VectorStoreProviderRegistry.register_provider("MockStore", MockVectorStore)
 
         # Get the class from the registry
-        provider_class = VectorStoreProviderRegistry.get_provider_class(
-            "MockStore")
+        provider_class = VectorStoreProviderRegistry.get_provider_class("MockStore")
         assert provider_class == MockVectorStore
 
     def test_provider_factory(self):
@@ -81,8 +78,7 @@ class TestVectorStoreProviders(unittest.TestCase):
             class FactoryMockVectorStore(VectorStore):
                 """Mock vector store created from a factory."""
 
-                def add_texts(
-                        self, texts: list[str], metadatas=None, **kwargs):
+                def add_texts(self, texts: list[str], metadatas=None, **kwargs):
                     """Add texts to the vector store."""
                     return ["id1", "id2", "id3"]
 

@@ -11,10 +11,10 @@ import contextlib
 import sys
 from typing import Any
 
+from haive.agents.simple.agent import SimpleAgent
 from langchain_core.messages import BaseMessage, HumanMessage
 from pydantic import Field
 
-from haive.agents.simple.agent import SimpleAgent
 from haive.core.engine.llm.factories.litellm_factory import LiteLLMFactory
 from haive.core.schema.agent_schema_composer import AgentSchemaComposer, BuildMode
 from haive.core.schema.state_schema import StateSchema
@@ -70,16 +70,10 @@ def test_schema_composition_issues():
     llm = factory.create_engine(model="gpt-4o-mini")
 
     # Create planner agent
-    planner = SimpleAgent(
-        name="planner",
-        engine=llm,
-        state_schema=PlannerState)
+    planner = SimpleAgent(name="planner", engine=llm, state_schema=PlannerState)
 
     # Create executor agent
-    executor = SimpleAgent(
-        name="executor",
-        engine=llm,
-        state_schema=ExecutorState)
+    executor = SimpleAgent(name="executor", engine=llm, state_schema=ExecutorState)
 
     agents = [planner, executor]
 
@@ -99,9 +93,7 @@ def test_state_projection_issues():
     """Test state projection and agent execution issues."""
     # Create a global state instance
     global_state = GlobalMultiAgentState(
-        messages=[
-            HumanMessage(
-                content="Create a plan for building a web app")],
+        messages=[HumanMessage(content="Create a plan for building a web app")],
         task="Build a web app",
         current_agent="planner",
     )
@@ -110,18 +102,13 @@ def test_state_projection_issues():
     factory = LiteLLMFactory()
     llm = factory.create_engine(model="gpt-4o-mini")
 
-    planner = SimpleAgent(
-        name="planner",
-        engine=llm,
-        state_schema=PlannerState)
+    planner = SimpleAgent(name="planner", engine=llm, state_schema=PlannerState)
 
     # Problem 1: Agent expects PlannerState but gets GlobalMultiAgentState
     try:
         # This should fail because the agent expects PlannerState
         # but global_state is GlobalMultiAgentState
-        planner_input = {
-            "messages": global_state.messages,
-            "task": global_state.task}
+        planner_input = {"messages": global_state.messages, "task": global_state.task}
 
         # This will likely fail due to schema mismatch
         planner.invoke(planner_input)
@@ -134,8 +121,7 @@ def test_proposed_solution():
     """Test a proposed solution with proper state projection."""
 
     # Solution: Create state projection functions
-    def project_global_to_planner(
-            global_state: GlobalMultiAgentState) -> PlannerState:
+    def project_global_to_planner(global_state: GlobalMultiAgentState) -> PlannerState:
         """Project global state to planner state."""
         return PlannerState(
             messages=global_state.messages,
@@ -165,9 +151,7 @@ def test_proposed_solution():
 
     # Test the projection approach
     global_state = GlobalMultiAgentState(
-        messages=[
-            HumanMessage(
-                content="Create a plan for building a web app")],
+        messages=[HumanMessage(content="Create a plan for building a web app")],
         task="Build a web app",
         current_agent="planner",
     )
@@ -176,10 +160,7 @@ def test_proposed_solution():
     factory = LiteLLMFactory()
     llm = factory.create_engine(model="gpt-4o-mini")
 
-    planner = SimpleAgent(
-        name="planner",
-        engine=llm,
-        state_schema=PlannerState)
+    planner = SimpleAgent(name="planner", engine=llm, state_schema=PlannerState)
 
     try:
         # Step 1: Project global state to agent state
@@ -191,8 +172,7 @@ def test_proposed_solution():
         result = planner.invoke(planner_input)
 
         # Step 3: Merge result back to global state
-        planner_result = PlannerState(
-            **result) if isinstance(result, dict) else result
+        planner_result = PlannerState(**result) if isinstance(result, dict) else result
 
         merge_planner_to_global(planner_result, global_state)
 

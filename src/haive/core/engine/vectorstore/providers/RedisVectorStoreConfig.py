@@ -1,6 +1,5 @@
 """Redis Vector Store implementation for the Haive framework.
 
-from typing import Any
 This module provides a configuration class for the Redis vector store,
 which combines in-memory caching with vector similarity search capabilities.
 
@@ -26,7 +25,7 @@ a consistent Haive configuration interface.
 from typing import Any
 
 from langchain_core.documents import Document
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 from haive.core.engine.vectorstore.base import BaseVectorStoreConfig
 from haive.core.engine.vectorstore.types import VectorStoreType
@@ -148,16 +147,18 @@ class RedisVectorStoreConfig(BaseVectorStoreConfig):
         default=True, description="Whether to retry on timeout"
     )
 
-    @validator("distance_metric")
-    def validate_distance_metric(self, v) -> Any:
+    @field_validator("distance_metric")
+    @classmethod
+    def validate_distance_metric(cls, v):
         """Validate distance metric is supported."""
         valid_metrics = ["COSINE", "L2", "IP"]
         if v not in valid_metrics:
             raise ValueError(f"distance_metric must be one of {valid_metrics}, got {v}")
         return v
 
-    @validator("vector_algorithm")
-    def validate_vector_algorithm(self, v) -> Any:
+    @field_validator("vector_algorithm")
+    @classmethod
+    def validate_vector_algorithm(cls, v):
         """Validate vector algorithm is supported."""
         valid_algorithms = ["HNSW", "FLAT"]
         if v not in valid_algorithms:
@@ -181,7 +182,7 @@ class RedisVectorStoreConfig(BaseVectorStoreConfig):
             "ids": (list[str], Field(description="Redis document IDs")),
         }
 
-    def instantiate(self) -> Any:
+    def instantiate(self):
         """Create a Redis vector store from this configuration.
 
         Returns:

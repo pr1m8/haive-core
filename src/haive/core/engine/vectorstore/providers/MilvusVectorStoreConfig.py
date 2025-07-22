@@ -1,6 +1,5 @@
 """Milvus Vector Store implementation for the Haive framework.
 
-from typing import Any
 This module provides a configuration class for the Milvus vector store,
 which is a cloud-native vector database built for scalable similarity search.
 
@@ -26,7 +25,7 @@ a consistent Haive configuration interface.
 from typing import Any
 
 from langchain_core.documents import Document
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 from haive.core.engine.vectorstore.base import BaseVectorStoreConfig
 from haive.core.engine.vectorstore.types import VectorStoreType
@@ -138,8 +137,9 @@ class MilvusVectorStoreConfig(BaseVectorStoreConfig):
         default=None, description="Timeout for operations in seconds"
     )
 
-    @validator("consistency_level")
-    def validate_consistency_level(self, v) -> Any:
+    @field_validator("consistency_level")
+    @classmethod
+    def validate_consistency_level(cls, v):
         """Validate consistency level is supported."""
         valid_levels = ["Strong", "Session", "Bounded", "Eventually"]
         if v not in valid_levels:
@@ -148,14 +148,14 @@ class MilvusVectorStoreConfig(BaseVectorStoreConfig):
             )
         return v
 
-    @validator("connection_args")
-    def validate_connection_args(self, v) -> Any:
+    @field_validator("connection_args")
+    @classmethod
+    def validate_connection_args(cls, v):
         """Validate connection arguments."""
         if not v:
             raise ValueError("connection_args must be provided")
 
-        # Check for cloud connection (uri + token) or local connection (host +
-        # port)
+        # Check for cloud connection (uri + token) or local connection (host + port)
         has_cloud = "uri" in v
         has_local = "host" in v and "port" in v
 
@@ -185,7 +185,7 @@ class MilvusVectorStoreConfig(BaseVectorStoreConfig):
             ),
         }
 
-    def instantiate(self) -> Any:
+    def instantiate(self):
         """Create a Milvus vector store from this configuration.
 
         Returns:

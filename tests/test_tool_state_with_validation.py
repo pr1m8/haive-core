@@ -210,8 +210,7 @@ class TestToolStateWithValidation:
         # Get conditions
         assert state.get_branch_condition("has_valid_tools")
         assert state.get_branch_condition("error_count") == 0
-        assert state.get_branch_condition(
-            "missing_condition", "default") == "default"
+        assert state.get_branch_condition("missing_condition", "default") == "default"
 
         # Evaluate conditions
         assert state.evaluate_branch_condition("has_valid_tools == True")
@@ -342,8 +341,7 @@ class TestValidationNodeWithRouting:
 
     def test_tool_message_updates(self):
         """Test that tool messages are updated with validation status."""
-        node = ValidationNodeWithRouting(
-            update_tool_messages=True, tools=[search_tool])
+        node = ValidationNodeWithRouting(update_tool_messages=True, tools=[search_tool])
 
         # Create state with tool call and response
         ai_message = AIMessage(
@@ -353,9 +351,7 @@ class TestValidationNodeWithRouting:
             ],
         )
 
-        tool_message = ToolMessage(
-            content="Search results",
-            tool_call_id="call_001")
+        tool_message = ToolMessage(content="Search results", tool_call_id="call_001")
 
         state = {
             "messages": [ai_message, tool_message],

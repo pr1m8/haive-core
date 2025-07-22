@@ -104,10 +104,7 @@ TEST_CASES = [
 def run_test_cases():
     """Run the agent on test cases."""
     # Create LLM config (using Azure OpenAI)
-    llm_config = AzureLLMConfig(
-        model="gpt-4o",
-        parameters={
-            "temperature": 0.7})
+    llm_config = AzureLLMConfig(model="gpt-4o", parameters={"temperature": 0.7})
 
     # Create tools list
     tools = [search_web, get_current_date, calculate, translate_text]

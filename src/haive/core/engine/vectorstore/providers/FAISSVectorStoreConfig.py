@@ -1,6 +1,5 @@
 """FAISS Vector Store implementation for the Haive framework.
 
-from typing import Any
 This module provides a configuration class for the FAISS (Facebook AI Similarity Search)
 vector store, which is a library for efficient similarity search and clustering of dense vectors.
 
@@ -25,7 +24,7 @@ a consistent Haive configuration interface.
 from typing import Any
 
 from langchain_core.documents import Document
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 from haive.core.engine.vectorstore.base import BaseVectorStoreConfig
 from haive.core.engine.vectorstore.types import VectorStoreType
@@ -117,16 +116,18 @@ class FAISSVectorStoreConfig(BaseVectorStoreConfig):
         default=0, ge=0, description="GPU device ID to use if use_gpu is True"
     )
 
-    @validator("index_type")
-    def validate_index_type(self, v) -> Any:
+    @field_validator("index_type")
+    @classmethod
+    def validate_index_type(cls, v):
         """Validate index type is supported."""
         valid_types = ["Flat", "IVFFlat", "HNSW", "LSH"]
         if v not in valid_types:
             raise ValueError(f"index_type must be one of {valid_types}, got {v}")
         return v
 
-    @validator("distance_metric")
-    def validate_distance_metric(self, v) -> Any:
+    @field_validator("distance_metric")
+    @classmethod
+    def validate_distance_metric(cls, v):
         """Validate distance metric is supported."""
         valid_metrics = ["l2", "cosine", "inner_product"]
         if v not in valid_metrics:
@@ -148,7 +149,7 @@ class FAISSVectorStoreConfig(BaseVectorStoreConfig):
             "ids": (list[str], Field(description="IDs of the added documents")),
         }
 
-    def instantiate(self) -> Any:
+    def instantiate(self):
         """Create a FAISS vector store from this configuration.
 
         Returns:
@@ -215,7 +216,7 @@ class FAISSVectorStoreConfig(BaseVectorStoreConfig):
         # Handle GPU configuration
         if self.use_gpu:
             try:
-                pass
+                import faiss
 
                 # This would require additional GPU setup logic
                 # For now, we'll use the default CPU implementation

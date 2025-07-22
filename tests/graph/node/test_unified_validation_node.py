@@ -82,8 +82,7 @@ class TestUnifiedValidationNode:
 
     def test_no_messages_routing(self):
         """Test routing when no messages present."""
-        node = UnifiedValidationNodeConfig(
-            name="test", engine_name="test_engine")
+        node = UnifiedValidationNodeConfig(name="test", engine_name="test_engine")
 
         state = {"messages": [], "engines": {}}
         result = node(state)
@@ -94,8 +93,7 @@ class TestUnifiedValidationNode:
 
     def test_no_tool_calls_routing(self):
         """Test routing when no tool calls in messages."""
-        node = UnifiedValidationNodeConfig(
-            name="test", engine_name="test_engine")
+        node = UnifiedValidationNodeConfig(name="test", engine_name="test_engine")
 
         state = {
             "messages": [
@@ -115,8 +113,7 @@ class TestUnifiedValidationNode:
             tool_routes={"UserQuery": "pydantic_model"}, schemas=[UserQuery]
         )
 
-        node = UnifiedValidationNodeConfig(
-            name="test", engine_name="test_engine")
+        node = UnifiedValidationNodeConfig(name="test", engine_name="test_engine")
 
         state = {
             "messages": [
@@ -150,8 +147,7 @@ class TestUnifiedValidationNode:
             tool_routes={"UserQuery": "pydantic_model"}, schemas=[UserQuery]
         )
 
-        node = UnifiedValidationNodeConfig(
-            name="test", engine_name="test_engine")
+        node = UnifiedValidationNodeConfig(name="test", engine_name="test_engine")
 
         state = {
             "messages": [
@@ -186,8 +182,7 @@ class TestUnifiedValidationNode:
             tool_routes={"calculate": "langchain_tool"}, tools=[calculate]
         )
 
-        node = UnifiedValidationNodeConfig(
-            name="test", engine_name="test_engine")
+        node = UnifiedValidationNodeConfig(name="test", engine_name="test_engine")
 
         state = {
             "messages": [
@@ -216,16 +211,14 @@ class TestUnifiedValidationNode:
         """Test handling of unknown tools."""
         engine = MockEngine()
 
-        node = UnifiedValidationNodeConfig(
-            name="test", engine_name="test_engine")
+        node = UnifiedValidationNodeConfig(name="test", engine_name="test_engine")
 
         state = {
             "messages": [
                 HumanMessage(content="Test"),
                 AIMessage(
                     content="Using unknown",
-                    tool_calls=[{"name": "unknown_tool",
-                                 "args": {}, "id": "call_1"}],
+                    tool_calls=[{"name": "unknown_tool", "args": {}, "id": "call_1"}],
                 ),
             ],
             "engines": {"test_engine": engine},
@@ -243,9 +236,7 @@ class TestUnifiedValidationNode:
     def test_parallel_execution_multiple_tools(self):
         """Test parallel execution with multiple tool calls."""
         engine = MockEngine(
-            tool_routes={
-                "calculate": "langchain_tool",
-                "search_web": "langchain_tool"},
+            tool_routes={"calculate": "langchain_tool", "search_web": "langchain_tool"},
             tools=[calculate, search_web],
         )
 
@@ -264,8 +255,7 @@ class TestUnifiedValidationNode:
                             "args": {"expression": "2+2"},
                             "id": "call_1",
                         },
-                        {"name": "search_web", "args": {
-                            "query": "AI"}, "id": "call_2"},
+                        {"name": "search_web", "args": {"query": "AI"}, "id": "call_2"},
                     ],
                 ),
             ],
@@ -285,9 +275,7 @@ class TestUnifiedValidationNode:
     def test_single_execution_mode(self):
         """Test single execution mode."""
         engine = MockEngine(
-            tool_routes={
-                "calculate": "langchain_tool",
-                "UserQuery": "pydantic_model"},
+            tool_routes={"calculate": "langchain_tool", "UserQuery": "pydantic_model"},
             tools=[calculate],
             schemas=[UserQuery],
         )
@@ -337,8 +325,7 @@ class TestUnifiedValidationNode:
                 HumanMessage(content="Test"),
                 AIMessage(
                     content="Unknown tool",
-                    tool_calls=[
-                        {"name": "unknown", "args": {}, "id": "call_1"}],
+                    tool_calls=[{"name": "unknown", "args": {}, "id": "call_1"}],
                 ),
             ],
             "engines": {"test_engine": engine},
@@ -355,8 +342,7 @@ class TestUnifiedValidationNode:
         engine = MockEngine()
         engine.structured_output_model = UserQuery
 
-        node = UnifiedValidationNodeConfig(
-            name="test", engine_name="test_engine")
+        node = UnifiedValidationNodeConfig(name="test", engine_name="test_engine")
 
         state = {
             "messages": [
@@ -383,8 +369,7 @@ class TestUnifiedValidationNode:
     def test_model_validator(self):
         """Test the model validator."""
         # Should succeed with valid config
-        node = UnifiedValidationNodeConfig(
-            name="test", engine_name="test_engine")
+        node = UnifiedValidationNodeConfig(name="test", engine_name="test_engine")
         assert node is not None
 
         # Test with custom destinations

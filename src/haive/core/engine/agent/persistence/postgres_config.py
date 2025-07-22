@@ -57,8 +57,6 @@ class PostgresCheckpointerConfig(CheckpointerConfig):
     _checkpointer: Any | None = None
 
     @model_validator(mode="after")
-
-
     @classmethod
     def validate_postgres_available(cls) -> Any:
         """Validate that postgres dependencies are available if this config is used."""

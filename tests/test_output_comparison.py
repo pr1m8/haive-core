@@ -2,9 +2,9 @@
 
 import logging
 
+from haive.agents.simple.agent_v2 import SimpleAgentV2
 from pydantic import BaseModel, Field
 
-from haive.agents.simple.agent_v2 import SimpleAgentV2
 from haive.core.engine.aug_llm import AugLLMConfig
 
 # Only show WARNING and above to reduce noise
@@ -19,8 +19,7 @@ class QueryRefinementSuggestion(BaseModel):
     rationale: str = Field(
         description="Explanation of why this refinement is beneficial"
     )
-    expected_benefit: str = Field(
-        description="Expected benefit of this refinement")
+    expected_benefit: str = Field(description="Expected benefit of this refinement")
 
 
 class QueryRefinementResponse(BaseModel):

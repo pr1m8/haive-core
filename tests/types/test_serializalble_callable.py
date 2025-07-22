@@ -55,8 +55,7 @@ def test_is_serializable_positive():
 
 def test_is_serializable_negative():
     assert not SerializableCallable.is_serializable(lambda x: x)
-    assert not SerializableCallable.is_serializable(
-        MathUtils().instance_method)
+    assert not SerializableCallable.is_serializable(MathUtils().instance_method)
 
 
 def test_serialize_valid_function():

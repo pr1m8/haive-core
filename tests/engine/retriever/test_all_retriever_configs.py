@@ -20,8 +20,7 @@ def test_sparse_retriever_configs(sample_documents):
             BM25RetrieverConfig,
         )
 
-        config = BM25RetrieverConfig(
-            name="test_bm25", documents=sample_documents, k=2)
+        config = BM25RetrieverConfig(name="test_bm25", documents=sample_documents, k=2)
         assert config.name == "test_bm25"
         assert len(config.documents) == len(sample_documents)
         assert config.k == 2

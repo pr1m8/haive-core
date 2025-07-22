@@ -46,9 +46,7 @@ def test_basic_modular_graph() -> bool:
         logger.info("Testing basic ModularBaseGraph functionality...")
 
         # Create graph
-        graph = ModularBaseGraph(
-            name="test_workflow",
-            description="Test workflow")
+        graph = ModularBaseGraph(name="test_workflow", description="Test workflow")
 
         # Test initial state
         assert graph.name == "test_workflow"
@@ -234,8 +232,7 @@ def main() -> bool:
     logger.info(f"📊 Test Results: {passed}/{total} tests passed")
 
     if passed == total:
-        logger.info(
-            "🎉 All tests passed! Modular architecture is working correctly.")
+        logger.info("🎉 All tests passed! Modular architecture is working correctly.")
         return True
     logger.error("💥 Some tests failed. Please check the implementation.")
     return False

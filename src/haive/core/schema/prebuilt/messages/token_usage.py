@@ -49,8 +49,6 @@ class TokenUsage(BaseModel):
     )
 
     @model_validator(mode="after")
-
-
     @classmethod
     def validate_totals(cls) -> Any:
         """Ensure total_tokens and total_cost are calculated if not set."""

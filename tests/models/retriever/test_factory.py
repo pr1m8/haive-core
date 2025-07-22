@@ -39,8 +39,7 @@ class TestRetrieverFactory:
             )
 
             # Verify calls
-            mock_get_provider.assert_called_once_with(
-                RetrieverProvider.VECTOR_STORE)
+            mock_get_provider.assert_called_once_with(RetrieverProvider.VECTOR_STORE)
             mock_provider_class.assert_called_once_with(
                 vector_store=mock_vector_store, k=5
             )
@@ -64,8 +63,7 @@ class TestRetrieverFactory:
                 RetrieverProvider.VECTOR_STORE, vector_store=mock_vector_store
             )
 
-            mock_get_provider.assert_called_once_with(
-                RetrieverProvider.VECTOR_STORE)
+            mock_get_provider.assert_called_once_with(RetrieverProvider.VECTOR_STORE)
             assert result is not None
 
     def test_create_with_invalid_provider(self):
@@ -114,8 +112,7 @@ class TestRetrieverFactory:
             )
 
             assert result == mock_provider_instance
-            mock_provider_class.assert_called_once_with(
-                vector_store=mock_vector_store)
+            mock_provider_class.assert_called_once_with(vector_store=mock_vector_store)
 
     def test_get_provider_package_info(self):
         """Test getting package info for providers."""
@@ -124,8 +121,7 @@ class TestRetrieverFactory:
         )
         assert "langchain-core" in info
 
-        info = RetrieverFactory._get_provider_package_info(
-            RetrieverProvider.BM25)
+        info = RetrieverFactory._get_provider_package_info(RetrieverProvider.BM25)
         assert "langchain-community" in info
 
 
@@ -157,8 +153,7 @@ class TestConvenienceFunctions:
             mock_provider = Mock()
             mock_create.return_value = mock_provider
 
-            result = create_provider(
-                "vector_store", vector_store=mock_vector_store)
+            result = create_provider("vector_store", vector_store=mock_vector_store)
 
             mock_create.assert_called_once_with(
                 "vector_store", vector_store=mock_vector_store
@@ -170,9 +165,7 @@ class TestConvenienceFunctions:
         with patch(
             "haive.core.models.retriever.factory.get_available_providers"
         ) as mock_get:
-            mock_providers = [
-                RetrieverProvider.VECTOR_STORE,
-                RetrieverProvider.BM25]
+            mock_providers = [RetrieverProvider.VECTOR_STORE, RetrieverProvider.BM25]
             mock_get.return_value = mock_providers
 
             result = list_available_providers()

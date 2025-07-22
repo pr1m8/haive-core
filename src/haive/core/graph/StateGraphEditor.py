@@ -33,8 +33,6 @@ class NodeConfig(BaseModel):
     metadata: dict[str, Any] | None = None
 
     @field_validator("command_goto")
-
-
     @classmethod
     def validate_command_goto(cls, v) -> Any:
         if v == "END":
@@ -53,8 +51,6 @@ class EdgeConfig(BaseModel):
     )
 
     @field_validator("to_node")
-
-
     @classmethod
     def validate_to_node(cls, v) -> Any:
         if v == "END":
@@ -74,8 +70,6 @@ class BranchConfig(BaseModel):
     )
 
     @field_validator("destinations")
-
-
     @classmethod
     def validate_destinations(cls, destinations) -> Any:
         validated = {}
@@ -115,8 +109,6 @@ class StateGraphEditor(BaseModel):
     )
 
     @model_validator(mode="after")
-
-
     @classmethod
     def validate_schemas(cls) -> Any:
         """Ensure schemas are set correctly."""

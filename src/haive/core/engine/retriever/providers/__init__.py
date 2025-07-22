@@ -1,197 +1,149 @@
-"""Module exports."""
+"""Retriever provider implementations for the Haive framework.
 
-from providers.AmazonKnowledgeBasesRetrieverConfig import AmazonKnowledgeBasesRetrieverConfig
-from providers.AmazonKnowledgeBasesRetrieverConfig import get_input_fields
-from providers.AmazonKnowledgeBasesRetrieverConfig import get_output_fields
-from providers.AmazonKnowledgeBasesRetrieverConfig import instantiate
-from providers.ArceeRetrieverConfig import ArceeRetrieverConfig
-from providers.ArceeRetrieverConfig import get_input_fields
-from providers.ArceeRetrieverConfig import get_output_fields
-from providers.ArceeRetrieverConfig import instantiate
-from providers.ArxivRetrieverConfig import ArxivRetrieverConfig
-from providers.ArxivRetrieverConfig import get_input_fields
-from providers.ArxivRetrieverConfig import get_output_fields
-from providers.ArxivRetrieverConfig import instantiate
-from providers.AskNewsRetrieverConfig import AskNewsRetrieverConfig
-from providers.AskNewsRetrieverConfig import get_input_fields
-from providers.AskNewsRetrieverConfig import get_output_fields
-from providers.AskNewsRetrieverConfig import instantiate
-from providers.AzureAISearchRetrieverConfig import AzureAISearchRetrieverConfig
-from providers.AzureAISearchRetrieverConfig import get_input_fields
-from providers.AzureAISearchRetrieverConfig import get_output_fields
-from providers.AzureAISearchRetrieverConfig import instantiate
-from providers.BM25RetrieverConfig import BM25RetrieverConfig
-from providers.BM25RetrieverConfig import get_input_fields
-from providers.BM25RetrieverConfig import get_output_fields
-from providers.BM25RetrieverConfig import instantiate
-from providers.BedrockRetrieverConfig import BedrockRetrieverConfig
-from providers.BedrockRetrieverConfig import get_input_fields
-from providers.BedrockRetrieverConfig import get_output_fields
-from providers.BedrockRetrieverConfig import instantiate
-from providers.ChatGPTPluginRetrieverConfig import ChatGPTPluginRetrieverConfig
-from providers.ChatGPTPluginRetrieverConfig import get_input_fields
-from providers.ChatGPTPluginRetrieverConfig import get_output_fields
-from providers.ChatGPTPluginRetrieverConfig import instantiate
-from providers.CohereRagRetrieverConfig import CohereRagRetrieverConfig
-from providers.CohereRagRetrieverConfig import get_input_fields
-from providers.CohereRagRetrieverConfig import get_output_fields
-from providers.CohereRagRetrieverConfig import instantiate
-from providers.ContextualCompressionRetrieverConfig import ContextualCompressionRetrieverConfig
-from providers.ContextualCompressionRetrieverConfig import get_input_fields
-from providers.ContextualCompressionRetrieverConfig import get_output_fields
-from providers.ContextualCompressionRetrieverConfig import instantiate
-from providers.ContextualCompressionRetrieverConfig import validate_compressor_type
-from providers.ContextualCompressionRetrieverConfig import validate_llm_config_required
-from providers.DocArrayRetrieverConfig import DocArrayRetrieverConfig
-from providers.DocArrayRetrieverConfig import get_input_fields
-from providers.DocArrayRetrieverConfig import get_output_fields
-from providers.DocArrayRetrieverConfig import instantiate
-from providers.ElasticsearchRetrieverConfig import ElasticsearchRetrieverConfig
-from providers.ElasticsearchRetrieverConfig import get_input_fields
-from providers.ElasticsearchRetrieverConfig import get_output_fields
-from providers.ElasticsearchRetrieverConfig import instantiate
-from providers.EnsembleRetrieverConfig import EnsembleRetrieverConfig
-from providers.EnsembleRetrieverConfig import get_input_fields
-from providers.EnsembleRetrieverConfig import get_output_fields
-from providers.EnsembleRetrieverConfig import instantiate
-from providers.EnsembleRetrieverConfig import validate_weight_values
-from providers.EnsembleRetrieverConfig import validate_weights
-from providers.EnsembleRetrieverConfig import validate_weights_length
-from providers.GoogleDocumentAIWarehouseRetrieverConfig import GoogleDocumentAIWarehouseRetrieverConfig
-from providers.GoogleDocumentAIWarehouseRetrieverConfig import get_input_fields
-from providers.GoogleDocumentAIWarehouseRetrieverConfig import get_output_fields
-from providers.GoogleDocumentAIWarehouseRetrieverConfig import instantiate
-from providers.GoogleVertexAISearchRetrieverConfig import GoogleVertexAISearchRetrieverConfig
-from providers.GoogleVertexAISearchRetrieverConfig import get_input_fields
-from providers.GoogleVertexAISearchRetrieverConfig import get_output_fields
-from providers.GoogleVertexAISearchRetrieverConfig import instantiate
-from providers.KNNRetrieverConfig import KNNRetrieverConfig
-from providers.KNNRetrieverConfig import get_input_fields
-from providers.KNNRetrieverConfig import get_output_fields
-from providers.KNNRetrieverConfig import instantiate
-from providers.KendraRetrieverConfig import KendraRetrieverConfig
-from providers.KendraRetrieverConfig import get_input_fields
-from providers.KendraRetrieverConfig import get_output_fields
-from providers.KendraRetrieverConfig import instantiate
-from providers.LlamaIndexGraphRetrieverConfig import LlamaIndexGraphRetrieverConfig
-from providers.LlamaIndexGraphRetrieverConfig import get_input_fields
-from providers.LlamaIndexGraphRetrieverConfig import get_output_fields
-from providers.LlamaIndexGraphRetrieverConfig import instantiate
-from providers.LlamaIndexGraphRetrieverConfig import validate_connection_url
-from providers.LlamaIndexGraphRetrieverConfig import validate_graph_type
-from providers.LlamaIndexGraphRetrieverConfig import validate_query_type
-from providers.LlamaIndexRetrieverConfig import LlamaIndexRetrieverConfig
-from providers.LlamaIndexRetrieverConfig import get_input_fields
-from providers.LlamaIndexRetrieverConfig import get_output_fields
-from providers.LlamaIndexRetrieverConfig import instantiate
-from providers.MergerRetrieverConfig import MergerRetrieverConfig
-from providers.MergerRetrieverConfig import get_input_fields
-from providers.MergerRetrieverConfig import get_output_fields
-from providers.MergerRetrieverConfig import instantiate
-from providers.MetalRetrieverConfig import MetalRetrieverConfig
-from providers.MetalRetrieverConfig import get_input_fields
-from providers.MetalRetrieverConfig import get_output_fields
-from providers.MetalRetrieverConfig import instantiate
-from providers.MilvusRetrieverConfig import MilvusRetrieverConfig
-from providers.MilvusRetrieverConfig import get_input_fields
-from providers.MilvusRetrieverConfig import get_output_fields
-from providers.MilvusRetrieverConfig import instantiate
-from providers.MultiQueryRetrieverConfig import MultiQueryRetrieverConfig
-from providers.MultiQueryRetrieverConfig import get_input_fields
-from providers.MultiQueryRetrieverConfig import get_output_fields
-from providers.MultiQueryRetrieverConfig import instantiate
-from providers.MultiQueryRetrieverConfig import validate_num_queries
-from providers.MultiVectorRetrieverConfig import MultiVectorRetrieverConfig
-from providers.MultiVectorRetrieverConfig import get_input_fields
-from providers.MultiVectorRetrieverConfig import get_output_fields
-from providers.MultiVectorRetrieverConfig import instantiate
-from providers.MultiVectorRetrieverConfig import validate_docstore_path
-from providers.MultiVectorRetrieverConfig import validate_docstore_type
-from providers.MultiVectorRetrieverConfig import validate_indexing_strategy
-from providers.MultiVectorRetrieverConfig import validate_search_type
-from providers.NeuralDBRetrieverConfig import NeuralDBRetrieverConfig
-from providers.NeuralDBRetrieverConfig import get_input_fields
-from providers.NeuralDBRetrieverConfig import get_output_fields
-from providers.NeuralDBRetrieverConfig import instantiate
-from providers.ParentDocumentRetrieverConfig import ParentDocumentRetrieverConfig
-from providers.ParentDocumentRetrieverConfig import get_input_fields
-from providers.ParentDocumentRetrieverConfig import get_output_fields
-from providers.ParentDocumentRetrieverConfig import instantiate
-from providers.ParentDocumentRetrieverConfig import validate_child_chunk_overlap
-from providers.ParentDocumentRetrieverConfig import validate_docstore_path
-from providers.ParentDocumentRetrieverConfig import validate_docstore_type
-from providers.PineconeHybridSearchRetrieverConfig import PineconeHybridSearchRetrieverConfig
-from providers.PineconeHybridSearchRetrieverConfig import get_input_fields
-from providers.PineconeHybridSearchRetrieverConfig import get_output_fields
-from providers.PineconeHybridSearchRetrieverConfig import instantiate
-from providers.PubMedRetrieverConfig import PubMedRetrieverConfig
-from providers.PubMedRetrieverConfig import get_input_fields
-from providers.PubMedRetrieverConfig import get_output_fields
-from providers.PubMedRetrieverConfig import instantiate
-from providers.QdrantSparseVectorRetrieverConfig import QdrantSparseVectorRetrieverConfig
-from providers.QdrantSparseVectorRetrieverConfig import get_input_fields
-from providers.QdrantSparseVectorRetrieverConfig import get_output_fields
-from providers.QdrantSparseVectorRetrieverConfig import instantiate
-from providers.RePhraseQueryRetrieverConfig import RePhraseQueryRetrieverConfig
-from providers.RePhraseQueryRetrieverConfig import get_input_fields
-from providers.RePhraseQueryRetrieverConfig import get_output_fields
-from providers.RePhraseQueryRetrieverConfig import instantiate
-from providers.RemoteLangChainRetrieverConfig import RemoteLangChainRetrieverConfig
-from providers.RemoteLangChainRetrieverConfig import get_input_fields
-from providers.RemoteLangChainRetrieverConfig import get_output_fields
-from providers.RemoteLangChainRetrieverConfig import instantiate
-from providers.RemoteLangChainRetrieverConfig import validate_auth_method
-from providers.RemoteLangChainRetrieverConfig import validate_endpoint_url
-from providers.SVMRetrieverConfig import SVMRetrieverConfig
-from providers.SVMRetrieverConfig import get_input_fields
-from providers.SVMRetrieverConfig import get_output_fields
-from providers.SVMRetrieverConfig import instantiate
-from providers.SelfQueryRetrieverConfig import SelfQueryRetrieverConfig
-from providers.SelfQueryRetrieverConfig import get_input_fields
-from providers.SelfQueryRetrieverConfig import get_output_fields
-from providers.SelfQueryRetrieverConfig import instantiate
-from providers.SelfQueryRetrieverConfig import validate_metadata_field_info
-from providers.TFIDFRetrieverConfig import TFIDFRetrieverConfig
-from providers.TFIDFRetrieverConfig import get_input_fields
-from providers.TFIDFRetrieverConfig import get_output_fields
-from providers.TFIDFRetrieverConfig import instantiate
-from providers.TavilySearchAPIRetrieverConfig import TavilySearchAPIRetrieverConfig
-from providers.TavilySearchAPIRetrieverConfig import get_input_fields
-from providers.TavilySearchAPIRetrieverConfig import get_output_fields
-from providers.TavilySearchAPIRetrieverConfig import instantiate
-from providers.TimeWeightedVectorStoreRetrieverConfig import TimeWeightedVectorStoreRetrieverConfig
-from providers.TimeWeightedVectorStoreRetrieverConfig import get_input_fields
-from providers.TimeWeightedVectorStoreRetrieverConfig import get_output_fields
-from providers.TimeWeightedVectorStoreRetrieverConfig import instantiate
-from providers.TimeWeightedVectorStoreRetrieverConfig import validate_fetch_k
-from providers.TimeWeightedVectorStoreRetrieverConfig import validate_search_type
-from providers.VespaRetrieverConfig import VespaRetrieverConfig
-from providers.VespaRetrieverConfig import get_input_fields
-from providers.VespaRetrieverConfig import get_output_fields
-from providers.VespaRetrieverConfig import instantiate
-from providers.WeaviateHybridSearchRetrieverConfig import WeaviateHybridSearchRetrieverConfig
-from providers.WeaviateHybridSearchRetrieverConfig import get_input_fields
-from providers.WeaviateHybridSearchRetrieverConfig import get_output_fields
-from providers.WeaviateHybridSearchRetrieverConfig import instantiate
-from providers.WebResearchRetrieverConfig import WebResearchRetrieverConfig
-from providers.WebResearchRetrieverConfig import get_input_fields
-from providers.WebResearchRetrieverConfig import get_output_fields
-from providers.WebResearchRetrieverConfig import instantiate
-from providers.WikipediaRetrieverConfig import WikipediaRetrieverConfig
-from providers.WikipediaRetrieverConfig import get_input_fields
-from providers.WikipediaRetrieverConfig import get_output_fields
-from providers.WikipediaRetrieverConfig import instantiate
-from providers.YouRetrieverConfig import YouRetrieverConfig
-from providers.YouRetrieverConfig import get_input_fields
-from providers.YouRetrieverConfig import get_output_fields
-from providers.YouRetrieverConfig import instantiate
-from providers.ZepCloudRetrieverConfig import ZepCloudRetrieverConfig
-from providers.ZepCloudRetrieverConfig import get_input_fields
-from providers.ZepCloudRetrieverConfig import get_output_fields
-from providers.ZepCloudRetrieverConfig import instantiate
-from providers.ZepRetrieverConfig import ZepRetrieverConfig
-from providers.ZepRetrieverConfig import get_input_fields
-from providers.ZepRetrieverConfig import get_output_fields
-from providers.ZepRetrieverConfig import instantiate
+This package contains implementations of various retriever providers that extend
+the core retriever functionality. These implementations are automatically registered
+with the BaseRetrieverConfig registry system through the @BaseRetrieverConfig.register
+decorator, making them available for use through the common retriever interface.
 
-__all__ = ['AmazonKnowledgeBasesRetrieverConfig', 'ArceeRetrieverConfig', 'ArxivRetrieverConfig', 'AskNewsRetrieverConfig', 'AzureAISearchRetrieverConfig', 'BM25RetrieverConfig', 'BedrockRetrieverConfig', 'ChatGPTPluginRetrieverConfig', 'CohereRagRetrieverConfig', 'ContextualCompressionRetrieverConfig', 'DocArrayRetrieverConfig', 'ElasticsearchRetrieverConfig', 'EnsembleRetrieverConfig', 'GoogleDocumentAIWarehouseRetrieverConfig', 'GoogleVertexAISearchRetrieverConfig', 'KNNRetrieverConfig', 'KendraRetrieverConfig', 'LlamaIndexGraphRetrieverConfig', 'LlamaIndexRetrieverConfig', 'MergerRetrieverConfig', 'MetalRetrieverConfig', 'MilvusRetrieverConfig', 'MultiQueryRetrieverConfig', 'MultiVectorRetrieverConfig', 'NeuralDBRetrieverConfig', 'ParentDocumentRetrieverConfig', 'PineconeHybridSearchRetrieverConfig', 'PubMedRetrieverConfig', 'QdrantSparseVectorRetrieverConfig', 'RePhraseQueryRetrieverConfig', 'RemoteLangChainRetrieverConfig', 'SVMRetrieverConfig', 'SelfQueryRetrieverConfig', 'TFIDFRetrieverConfig', 'TavilySearchAPIRetrieverConfig', 'TimeWeightedVectorStoreRetrieverConfig', 'VespaRetrieverConfig', 'WeaviateHybridSearchRetrieverConfig', 'WebResearchRetrieverConfig', 'WikipediaRetrieverConfig', 'YouRetrieverConfig', 'ZepCloudRetrieverConfig', 'ZepRetrieverConfig', 'get_input_fields', 'get_output_fields', 'instantiate', 'validate_auth_method', 'validate_child_chunk_overlap', 'validate_compressor_type', 'validate_connection_url', 'validate_docstore_path', 'validate_docstore_type', 'validate_endpoint_url', 'validate_fetch_k', 'validate_graph_type', 'validate_indexing_strategy', 'validate_llm_config_required', 'validate_metadata_field_info', 'validate_num_queries', 'validate_query_type', 'validate_search_type', 'validate_weight_values', 'validate_weights', 'validate_weights_length']
+Available retriever categories:
+- Vector-based: VectorStore, MultiVector, SelfQuery, ParentDocument, TimeWeighted
+- Sparse/Traditional: BM25, TFIDF, KNN, SVM
+- Hybrid/Advanced: Ensemble, ContextualCompression, MultiQuery
+- Cloud Services: Amazon Knowledge Bases, Azure AI Search, Google Vertex AI
+- Specialty: Arxiv, PubMed, Wikipedia, WebResearch, Tavily
+
+Features:
+- Automatic registration through decorators
+- Dynamic loading and discovery
+- Consistent configuration interface
+- Support for metadata filtering and reranking
+- Integration with various vector stores and LLMs
+
+Examples:
+    Using a vector store retriever::
+
+        from haive.core.engine.retriever import VectorStoreRetrieverConfig
+
+        config = VectorStoreRetrieverConfig(
+            vectorstore=my_vectorstore,
+            search_kwargs={"k": 5}
+        )
+        retriever = config.instantiate()
+
+    Using an ensemble retriever::
+
+        from haive.core.engine.retriever import EnsembleRetrieverConfig
+
+        config = EnsembleRetrieverConfig(
+            retrievers=[vector_retriever, bm25_retriever],
+            weights=[0.7, 0.3]
+        )
+        ensemble = config.instantiate()
+
+See Also:
+    - BaseRetrieverConfig: Base class for all retriever configurations
+    - RetrieverType: Enumeration of available retriever types
+    - Retriever documentation: Complete usage guides and examples
+"""
+
+# Import all retriever provider configurations
+from .AmazonKnowledgeBasesRetrieverConfig import AmazonKnowledgeBasesRetrieverConfig
+from .ArceeRetrieverConfig import ArceeRetrieverConfig
+from .ArxivRetrieverConfig import ArxivRetrieverConfig
+from .AskNewsRetrieverConfig import AskNewsRetrieverConfig
+from .AzureAISearchRetrieverConfig import AzureAISearchRetrieverConfig
+from .BedrockRetrieverConfig import BedrockRetrieverConfig
+from .BM25RetrieverConfig import BM25RetrieverConfig
+from .ChatGPTPluginRetrieverConfig import ChatGPTPluginRetrieverConfig
+from .CohereRagRetrieverConfig import CohereRagRetrieverConfig
+from .ContextualCompressionRetrieverConfig import ContextualCompressionRetrieverConfig
+from .DocArrayRetrieverConfig import DocArrayRetrieverConfig
+from .ElasticsearchRetrieverConfig import ElasticsearchRetrieverConfig
+from .EnsembleRetrieverConfig import EnsembleRetrieverConfig
+from .GoogleDocumentAIWarehouseRetrieverConfig import (
+    GoogleDocumentAIWarehouseRetrieverConfig,
+)
+from .GoogleVertexAISearchRetrieverConfig import GoogleVertexAISearchRetrieverConfig
+from .KendraRetrieverConfig import KendraRetrieverConfig
+from .KNNRetrieverConfig import KNNRetrieverConfig
+from .LlamaIndexGraphRetrieverConfig import LlamaIndexGraphRetrieverConfig
+from .LlamaIndexRetrieverConfig import LlamaIndexRetrieverConfig
+from .MergerRetrieverConfig import MergerRetrieverConfig
+from .MetalRetrieverConfig import MetalRetrieverConfig
+from .MilvusRetrieverConfig import MilvusRetrieverConfig
+from .MultiQueryRetrieverConfig import MultiQueryRetrieverConfig
+from .MultiVectorRetrieverConfig import MultiVectorRetrieverConfig
+from .NeuralDBRetrieverConfig import NeuralDBRetrieverConfig
+from .ParentDocumentRetrieverConfig import ParentDocumentRetrieverConfig
+from .PineconeHybridSearchRetrieverConfig import PineconeHybridSearchRetrieverConfig
+from .PubMedRetrieverConfig import PubMedRetrieverConfig
+from .QdrantSparseVectorRetrieverConfig import QdrantSparseVectorRetrieverConfig
+from .RemoteLangChainRetrieverConfig import RemoteLangChainRetrieverConfig
+from .RePhraseQueryRetrieverConfig import RePhraseQueryRetrieverConfig
+from .SelfQueryRetrieverConfig import SelfQueryRetrieverConfig
+from .SVMRetrieverConfig import SVMRetrieverConfig
+from .TavilySearchAPIRetrieverConfig import TavilySearchAPIRetrieverConfig
+from .TFIDFRetrieverConfig import TFIDFRetrieverConfig
+from .TimeWeightedVectorStoreRetrieverConfig import (
+    TimeWeightedVectorStoreRetrieverConfig,
+)
+from .VespaRetrieverConfig import VespaRetrieverConfig
+from .WeaviateHybridSearchRetrieverConfig import WeaviateHybridSearchRetrieverConfig
+from .WebResearchRetrieverConfig import WebResearchRetrieverConfig
+from .WikipediaRetrieverConfig import WikipediaRetrieverConfig
+from .YouRetrieverConfig import YouRetrieverConfig
+from .ZepCloudRetrieverConfig import ZepCloudRetrieverConfig
+from .ZepRetrieverConfig import ZepRetrieverConfig
+
+__all__ = [
+    # Vector-based retrievers
+    "MultiVectorRetrieverConfig",
+    "SelfQueryRetrieverConfig",
+    "ParentDocumentRetrieverConfig",
+    "TimeWeightedVectorStoreRetrieverConfig",
+    # Sparse/Traditional retrievers
+    "BM25RetrieverConfig",
+    "TFIDFRetrieverConfig",
+    "KNNRetrieverConfig",
+    "SVMRetrieverConfig",
+    # Hybrid/Advanced retrievers
+    "EnsembleRetrieverConfig",
+    "ContextualCompressionRetrieverConfig",
+    "MultiQueryRetrieverConfig",
+    "MergerRetrieverConfig",
+    "RePhraseQueryRetrieverConfig",
+    # Cloud service retrievers
+    "AmazonKnowledgeBasesRetrieverConfig",
+    "AzureAISearchRetrieverConfig",
+    "GoogleVertexAISearchRetrieverConfig",
+    "GoogleDocumentAIWarehouseRetrieverConfig",
+    "BedrockRetrieverConfig",
+    "KendraRetrieverConfig",
+    # Search platform retrievers
+    "ElasticsearchRetrieverConfig",
+    "PineconeHybridSearchRetrieverConfig",
+    "WeaviateHybridSearchRetrieverConfig",
+    "QdrantSparseVectorRetrieverConfig",
+    "VespaRetrieverConfig",
+    "MilvusRetrieverConfig",
+    "DocArrayRetrieverConfig",
+    # Specialty/Domain retrievers
+    "ArxivRetrieverConfig",
+    "PubMedRetrieverConfig",
+    "WikipediaRetrieverConfig",
+    "WebResearchRetrieverConfig",
+    "TavilySearchAPIRetrieverConfig",
+    "AskNewsRetrieverConfig",
+    "YouRetrieverConfig",
+    # Integration retrievers
+    "ChatGPTPluginRetrieverConfig",
+    "CohereRagRetrieverConfig",
+    "LlamaIndexRetrieverConfig",
+    "LlamaIndexGraphRetrieverConfig",
+    "RemoteLangChainRetrieverConfig",
+    "MetalRetrieverConfig",
+    "NeuralDBRetrieverConfig",
+    "ArceeRetrieverConfig",
+    "ZepRetrieverConfig",
+    "ZepCloudRetrieverConfig",
+]

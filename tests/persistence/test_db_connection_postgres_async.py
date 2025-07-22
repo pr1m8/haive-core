@@ -52,8 +52,7 @@ async def test_postgres_with_augllm():
         # Create a simple AugLLMConfig (minimal example)
         azure_config = AzureLLMConfig(
             api_key=os.environ.get("AZURE_OPENAI_API_KEY", "demo-key"),
-            api_version=os.environ.get(
-                "AZURE_OPENAI_API_VERSION", "2023-05-15"),
+            api_version=os.environ.get("AZURE_OPENAI_API_VERSION", "2023-05-15"),
             api_base=os.environ.get(
                 "AZURE_OPENAI_API_BASE", "https://example.azure.openai.com/"
             ),

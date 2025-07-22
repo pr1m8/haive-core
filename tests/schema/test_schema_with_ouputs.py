@@ -17,8 +17,7 @@ class AnalysisResult(BaseModel):
     """Structured analysis of text content."""
 
     main_topic: str = Field(description="The main topic of the text")
-    keywords: list[str] = Field(
-        description="Key terms extracted from the text")
+    keywords: list[str] = Field(description="Key terms extracted from the text")
     sentiment: float = Field(description="Sentiment score from -1.0 to 1.0")
     summary: str = Field(description="Brief summary of the text")
 
@@ -249,8 +248,7 @@ class TestAugLLMWithStateSchema:
             )
             assert output_in_composed, "Output fields not found in composed schema"
 
-    def test_reducer_functionality(
-            self, aug_llm_config, composed_schema, test_input):
+    def test_reducer_functionality(self, aug_llm_config, composed_schema, test_input):
         """Test that reducers work properly with the composed schema."""
         # Create a runnable from the AugLLMConfig
         runnable = aug_llm_config.create_runnable()
@@ -281,8 +279,7 @@ class TestAugLLMWithStateSchema:
             if isinstance(result, dict) and "main_topic" in result:
                 analysis = AnalysisResult(**result)
             elif isinstance(result, str):
-                analysis_parser = PydanticOutputParser(
-                    pydantic_object=AnalysisResult)
+                analysis_parser = PydanticOutputParser(pydantic_object=AnalysisResult)
                 analysis = analysis_parser.parse(result)
             else:
                 # Create a placeholder for testing
@@ -310,5 +307,4 @@ class TestAugLLMWithStateSchema:
             assert updated_state.analysis is not None
 
         except Exception as e:
-            pytest.fail(
-                f"Failed during reducer testing: {e}\nResult was: {result}")
+            pytest.fail(f"Failed during reducer testing: {e}\nResult was: {result}")

@@ -91,7 +91,7 @@ class AnthropicProvider(BaseLLMProvider):
     """
 
     provider: LLMProvider = Field(
-        default=LLMProvider.ANTHROPIC, const=True, description="Provider identifier"
+        default=LLMProvider.ANTHROPIC, description="Provider identifier"
     )
 
     # Anthropic specific parameters
@@ -107,8 +107,7 @@ class AnthropicProvider(BaseLLMProvider):
     top_k: int | None = Field(
         default=None, ge=1, description="Top-k sampling parameter"
     )
-    streaming: bool = Field(default=False,
-                            description="Whether to stream responses")
+    streaming: bool = Field(default=False, description="Whether to stream responses")
 
     def _get_chat_class(self) -> type[Any]:
         """Get the Anthropic chat class.
@@ -153,12 +152,7 @@ class AnthropicProvider(BaseLLMProvider):
         params = super()._get_initialization_params(**kwargs)
 
         # Add Anthropic-specific parameters if set
-        optional_params = [
-            "temperature",
-            "max_tokens",
-            "top_p",
-            "top_k",
-            "streaming"]
+        optional_params = ["temperature", "max_tokens", "top_p", "top_k", "streaming"]
 
         for param in optional_params:
             value = getattr(self, param)

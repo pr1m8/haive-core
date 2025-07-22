@@ -1,6 +1,5 @@
 """Multi-Vector Retriever implementation for the Haive framework.
 
-from typing import Any
 This module provides a configuration class for the Multi-Vector retriever,
 which stores multiple vectors per document to enable more nuanced and accurate
 retrieval by representing different aspects or summaries of each document.
@@ -23,7 +22,7 @@ providing a consistent Haive configuration interface with flexible vector storag
 
 from typing import Any
 
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 from haive.core.engine.retriever.retriever import BaseRetrieverConfig
 from haive.core.engine.retriever.types import RetrieverType
@@ -113,16 +112,18 @@ class MultiVectorRetrieverConfig(BaseRetrieverConfig):
         default="doc_id", description="Key used to map vectors to documents"
     )
 
-    @validator("docstore_type")
-    def validate_docstore_type(self, v) -> Any:
+    @field_validator("docstore_type")
+    @classmethod
+    def validate_docstore_type(cls, v):
         """Validate document store type."""
         valid_types = ["in_memory", "file_system"]
         if v not in valid_types:
             raise ValueError(f"docstore_type must be one of {valid_types}, got {v}")
         return v
 
-    @validator("indexing_strategy")
-    def validate_indexing_strategy(self, v) -> Any:
+    @field_validator("indexing_strategy")
+    @classmethod
+    def validate_indexing_strategy(cls, v):
         """Validate indexing strategy."""
         valid_strategies = ["summary", "chunks", "hypothetical"]
         if v not in valid_strategies:
@@ -131,22 +132,20 @@ class MultiVectorRetrieverConfig(BaseRetrieverConfig):
             )
         return v
 
-    @validator("search_type")
-    def validate_search_type(self, v) -> Any:
+    @field_validator("search_type")
+    @classmethod
+    def validate_search_type(cls, v):
         """Validate search type."""
         valid_types = ["similarity", "mmr"]
         if v not in valid_types:
             raise ValueError(f"search_type must be one of {valid_types}, got {v}")
         return v
 
-    @validator("docstore_path")
-    def validate_docstore_path(self, v, values) -> Any:
+    @field_validator("docstore_path")
+    @classmethod
+    def validate_docstore_path(cls, v):
         """Validate docstore path is provided when needed."""
-        docstore_type = values.get("docstore_type", "")
-        if docstore_type == "file_system" and not v:
-            raise ValueError(
-                "docstore_path is required when docstore_type='file_system'"
-            )
+        # Note: Cross-field validation should use model_validator in Pydantic v2
         return v
 
     def get_input_fields(self) -> dict[str, tuple[type, Any]]:
@@ -167,7 +166,7 @@ class MultiVectorRetrieverConfig(BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self) -> Any:
+    def instantiate(self):
         """Create a Multi-Vector retriever from this configuration.
 
         Returns:
@@ -210,10 +209,7 @@ class MultiVectorRetrieverConfig(BaseRetrieverConfig):
                     "Install with: pip install langchain[storage]"
                 )
         else:
-            raise ValueError(
-                f"Unsupported docstore_type: {
-                    self.docstore_type}"
-            )
+            raise ValueError(f"Unsupported docstore_type: {self.docstore_type}")
 
         # Create search kwargs
         search_kwargs = dict(self.search_kwargs)

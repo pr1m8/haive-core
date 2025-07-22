@@ -132,8 +132,7 @@ def complex_state():
     """Create a complex state with tool calls."""
     return WorkflowState(
         messages=[
-            HumanMessage(
-                content="What's the weather in Seattle and calculate 2+2"),
+            HumanMessage(content="What's the weather in Seattle and calculate 2+2"),
             AIMessage(
                 content="",
                 additional_kwargs={
@@ -166,9 +165,7 @@ def complex_state():
 def validation_branching_graph(validation_node_config, mock_engines):
     """Create a graph with validation node that branches based on validation result."""
     # Create graph
-    graph = StateGraph(
-        name="validation_branching_test",
-        state_schema=WorkflowState)
+    graph = StateGraph(name="validation_branching_test", state_schema=WorkflowState)
 
     # Create nodes
     # Validation node with routing based on validation result

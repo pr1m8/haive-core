@@ -26,8 +26,7 @@ def test_path_analyzer_direct():
     assert result.file_category == FileCategory.DOCUMENT
 
     # Test GitHub URL
-    result = PathAnalyzer.analyze(
-        "https://github.com/user/repo/blob/main/README.md")
+    result = PathAnalyzer.analyze("https://github.com/user/repo/blob/main/README.md")
 
     assert result.service_detected == "github"
 

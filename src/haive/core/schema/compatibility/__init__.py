@@ -1,211 +1,96 @@
-"""Module exports."""
+"""
+Haive Schema Compatibility Module
 
-from compatibility.analyzer import TypeAnalyzer
-from compatibility.analyzer import analyze_schema
-from compatibility.analyzer import get_generic_parameters
-from compatibility.analyzer import is_subtype
-from compatibility.analyzer import resolve_forward_refs
-from compatibility.compatibility import DocumentConverter
-from compatibility.compatibility import MessageConverter
-from compatibility.compatibility import PromptConverter
-from compatibility.compatibility import can_convert
-from compatibility.compatibility import convert
-from compatibility.compatibility import get_quality
-from compatibility.compatibility import name
-from compatibility.compatibility import priority
-from compatibility.compatibility import register_langchain_converters
-from compatibility.examples import BasicInfo
-from compatibility.examples import Celsius
-from compatibility.examples import ChatState
-from compatibility.examples import ComplexSchema
-from compatibility.examples import Config
-from compatibility.examples import ContactInfo
-from compatibility.examples import Preferences
-from compatibility.examples import Role
-from compatibility.examples import SourceAgent
-from compatibility.examples import TargetAgent
-from compatibility.examples import Temperature
-from compatibility.examples import TemperatureConverter
-from compatibility.examples import UserInput
-from compatibility.examples import UserProfile
-from compatibility.examples import UserRegistration
-from compatibility.examples import UserV1
-from compatibility.examples import UserV2
-from compatibility.examples import can_convert
-from compatibility.examples import convert
-from compatibility.examples import example_basic_compatibility
-from compatibility.examples import example_compatibility_report
-from compatibility.examples import example_custom_converter
-from compatibility.examples import example_field_mapping
-from compatibility.examples import example_field_validation
-from compatibility.examples import example_langchain_conversion
-from compatibility.examples import example_performance_optimization
-from compatibility.examples import example_schema_evolution
-from compatibility.examples import example_schema_merging
-from compatibility.examples import example_state_schema_compatibility
-from compatibility.examples import get_quality
-from compatibility.examples import migrate_v1_to_v2
-from compatibility.examples import name
-from compatibility.examples import passwords_match
-from compatibility.field_mapping import FieldMapper
-from compatibility.field_mapping import FieldMapping
-from compatibility.field_mapping import add_aggregate_field
-from compatibility.field_mapping import add_computed_field
-from compatibility.field_mapping import add_mapping
-from compatibility.field_mapping import apply
-from compatibility.field_mapping import create_mapping
-from compatibility.field_mapping import get_mapping_for_target
-from compatibility.field_mapping import get_targets_for_source
-from compatibility.field_mapping import map_data
-from compatibility.field_mapping import to_dict
-from compatibility.field_mapping import validate_mappings
-from compatibility.langchain_converters import DocumentConverter
-from compatibility.langchain_converters import MessageConverter
-from compatibility.langchain_converters import PromptConverter
-from compatibility.langchain_converters import can_convert
-from compatibility.langchain_converters import convert
-from compatibility.langchain_converters import get_quality
-from compatibility.langchain_converters import name
-from compatibility.langchain_converters import priority
-from compatibility.langchain_converters import register_langchain_converters
-from compatibility.mergers import ConflictResolution
-from compatibility.mergers import IntersectionMergeStrategy
-from compatibility.mergers import MergeContext
-from compatibility.mergers import MergeStrategy
-from compatibility.mergers import SchemaMerger
-from compatibility.mergers import UnionMergeStrategy
-from compatibility.mergers import add_conflict
-from compatibility.mergers import add_warning
-from compatibility.mergers import create_intersection_schema
-from compatibility.mergers import create_union_schema
-from compatibility.mergers import merge_fields
-from compatibility.mergers import merge_schemas
-from compatibility.mergers import should_include_field
-from compatibility.mergers import track_field_source
-from compatibility.protocols import AsyncConverter
-from compatibility.protocols import CompatibilityPlugin
-from compatibility.protocols import ConversionStrategy
-from compatibility.protocols import ExampleFieldResolver
-from compatibility.protocols import ExampleTypeInspector
-from compatibility.protocols import FieldResolver
-from compatibility.protocols import FieldTransformer
-from compatibility.protocols import PluginManager
-from compatibility.protocols import SchemaConvertible
-from compatibility.protocols import SchemaEvolution
-from compatibility.protocols import SchemaRegistry
-from compatibility.protocols import SchemaValidator
-from compatibility.protocols import TypeInspector
-from compatibility.protocols import can_convert
-from compatibility.protocols import can_inspect
-from compatibility.protocols import can_migrate
-from compatibility.protocols import check_compatibility
-from compatibility.protocols import compatibility_plugin
-from compatibility.protocols import convert
-from compatibility.protocols import converter_plugin
-from compatibility.protocols import decorator
-from compatibility.protocols import enhance_report
-from compatibility.protocols import extract_constraints
-from compatibility.protocols import find_compatible
-from compatibility.protocols import from_schema
-from compatibility.protocols import get
-from compatibility.protocols import get_compatibility_plugins
-from compatibility.protocols import get_converters
-from compatibility.protocols import get_inspectors
-from compatibility.protocols import get_resolvers
-from compatibility.protocols import get_validators
-from compatibility.protocols import inspect
-from compatibility.protocols import list_schemas
-from compatibility.protocols import migrate
-from compatibility.protocols import name
-from compatibility.protocols import priority
-from compatibility.protocols import register
-from compatibility.protocols import register_compatibility_plugin
-from compatibility.protocols import register_converter
-from compatibility.protocols import register_inspector
-from compatibility.protocols import register_resolver
-from compatibility.protocols import register_validator
-from compatibility.protocols import resolve_field
-from compatibility.protocols import suggest_mapping
-from compatibility.protocols import supports_sync
-from compatibility.protocols import to_schema
-from compatibility.protocols import validate_compatibility
-from compatibility.protocols import validate_schema
-from compatibility.protocols import validator_plugin
-from compatibility.protocols import version
-from compatibility.reports import CompatibilityReport
-from compatibility.reports import FieldAnalysis
-from compatibility.reports import ReportGenerator
-from compatibility.reports import VisualDiffer
-from compatibility.reports import generate_diff
-from compatibility.reports import generate_report
-from compatibility.reports import print_compatibility_report
-from compatibility.reports import to_dict
-from compatibility.reports import to_json
-from compatibility.reports import to_markdown
-from compatibility.types import CompatibilityLevel
-from compatibility.types import Config
-from compatibility.types import ConversionContext
-from compatibility.types import ConversionPath
-from compatibility.types import ConversionQuality
-from compatibility.types import ConversionStep
-from compatibility.types import FieldInfo
-from compatibility.types import MergeStrategy
-from compatibility.types import SchemaInfo
-from compatibility.types import TypeInfo
-from compatibility.types import ValidationError
-from compatibility.types import ValidationResult
-from compatibility.types import ValidationWarning
-from compatibility.types import add_error
-from compatibility.types import add_step
-from compatibility.types import add_warning
-from compatibility.types import field_path
-from compatibility.types import full_name
-from compatibility.types import get_optional_fields
-from compatibility.types import get_required_fields
-from compatibility.types import step_count
-from compatibility.types import track_lost_field
-from compatibility.utils import calculate_similarity
-from compatibility.utils import create_example_value
-from compatibility.utils import create_schema_diff
-from compatibility.utils import estimate_memory_usage
-from compatibility.utils import extract_path_value
-from compatibility.utils import extract_type_name
-from compatibility.utils import find_similar_fields
-from compatibility.utils import flatten_nested_dict
-from compatibility.utils import format_type_path
-from compatibility.utils import generate_schema_hash
-from compatibility.utils import get_all_subclasses
-from compatibility.utils import memoize
-from compatibility.utils import merge_dicts
-from compatibility.utils import suggest_field_name
-from compatibility.utils import unflatten_dict
-from compatibility.utils import validate_field_name
-from compatibility.utils import wrapper
-from compatibility.validators import CommonValidators
-from compatibility.validators import Config
-from compatibility.validators import FieldValidator
-from compatibility.validators import ModelValidator
-from compatibility.validators import ValidationContext
-from compatibility.validators import Validator
-from compatibility.validators import ValidatorBuilder
-from compatibility.validators import ValidatorChain
-from compatibility.validators import add_cross_field_validator
-from compatibility.validators import add_field_validator
-from compatibility.validators import add_validator
-from compatibility.validators import combine
-from compatibility.validators import create_validator
-from compatibility.validators import current_path_str
-from compatibility.validators import for_length
-from compatibility.validators import for_pattern
-from compatibility.validators import for_range
-from compatibility.validators import for_type
-from compatibility.validators import is_email
-from compatibility.validators import is_url
-from compatibility.validators import is_uuid
-from compatibility.validators import not_empty
-from compatibility.validators import pop_path
-from compatibility.validators import push_path
-from compatibility.validators import supports_async
-from compatibility.validators import validate
+A comprehensive type checking, compatibility analysis, and schema transformation system.
+"""
 
-__all__ = ['AsyncConverter', 'BasicInfo', 'Celsius', 'ChatState', 'CommonValidators', 'CompatibilityLevel', 'CompatibilityPlugin', 'CompatibilityReport', 'ComplexSchema', 'Config', 'ConflictResolution', 'ContactInfo', 'ConversionContext', 'ConversionPath', 'ConversionQuality', 'ConversionStep', 'ConversionStrategy', 'DocumentConverter', 'ExampleFieldResolver', 'ExampleTypeInspector', 'FieldAnalysis', 'FieldInfo', 'FieldMapper', 'FieldMapping', 'FieldResolver', 'FieldTransformer', 'FieldValidator', 'IntersectionMergeStrategy', 'MergeContext', 'MergeStrategy', 'MessageConverter', 'ModelValidator', 'PluginManager', 'Preferences', 'PromptConverter', 'ReportGenerator', 'Role', 'SchemaConvertible', 'SchemaEvolution', 'SchemaInfo', 'SchemaMerger', 'SchemaRegistry', 'SchemaValidator', 'SourceAgent', 'TargetAgent', 'Temperature', 'TemperatureConverter', 'TypeAnalyzer', 'TypeInfo', 'TypeInspector', 'UnionMergeStrategy', 'UserInput', 'UserProfile', 'UserRegistration', 'UserV1', 'UserV2', 'ValidationContext', 'ValidationError', 'ValidationResult', 'ValidationWarning', 'Validator', 'ValidatorBuilder', 'ValidatorChain', 'VisualDiffer', 'add_aggregate_field', 'add_computed_field', 'add_conflict', 'add_cross_field_validator', 'add_error', 'add_field_validator', 'add_mapping', 'add_step', 'add_validator', 'add_warning', 'analyze_schema', 'apply', 'calculate_similarity', 'can_convert', 'can_inspect', 'can_migrate', 'check_compatibility', 'combine', 'compatibility_plugin', 'convert', 'converter_plugin', 'create_example_value', 'create_intersection_schema', 'create_mapping', 'create_schema_diff', 'create_union_schema', 'create_validator', 'current_path_str', 'decorator', 'enhance_report', 'estimate_memory_usage', 'example_basic_compatibility', 'example_compatibility_report', 'example_custom_converter', 'example_field_mapping', 'example_field_validation', 'example_langchain_conversion', 'example_performance_optimization', 'example_schema_evolution', 'example_schema_merging', 'example_state_schema_compatibility', 'extract_constraints', 'extract_path_value', 'extract_type_name', 'field_path', 'find_compatible', 'find_similar_fields', 'flatten_nested_dict', 'for_length', 'for_pattern', 'for_range', 'for_type', 'format_type_path', 'from_schema', 'full_name', 'generate_diff', 'generate_report', 'generate_schema_hash', 'get', 'get_all_subclasses', 'get_compatibility_plugins', 'get_converters', 'get_generic_parameters', 'get_inspectors', 'get_mapping_for_target', 'get_optional_fields', 'get_quality', 'get_required_fields', 'get_resolvers', 'get_targets_for_source', 'get_validators', 'inspect', 'is_email', 'is_subtype', 'is_url', 'is_uuid', 'list_schemas', 'map_data', 'memoize', 'merge_dicts', 'merge_fields', 'merge_schemas', 'migrate', 'migrate_v1_to_v2', 'name', 'not_empty', 'passwords_match', 'pop_path', 'print_compatibility_report', 'priority', 'push_path', 'register', 'register_compatibility_plugin', 'register_converter', 'register_inspector', 'register_langchain_converters', 'register_resolver', 'register_validator', 'resolve_field', 'resolve_forward_refs', 'should_include_field', 'step_count', 'suggest_field_name', 'suggest_mapping', 'supports_async', 'supports_sync', 'to_dict', 'to_json', 'to_markdown', 'to_schema', 'track_field_source', 'track_lost_field', 'unflatten_dict', 'validate', 'validate_compatibility', 'validate_field_name', 'validate_mappings', 'validate_schema', 'validator_plugin', 'version', 'wrapper']
+from haive.core.schema.compatibility.analyzer import (
+    TypeAnalyzer,
+    analyze_type,
+    get_type_info,
+)
+from haive.core.schema.compatibility.compatibility import (
+    CompatibilityChecker,
+    CompatibilityLevel,
+    check_compatibility,
+)
+from haive.core.schema.compatibility.converters import (
+    ConversionContext,
+    ConversionQuality,
+    ConverterRegistry,
+    TypeConverter,
+    register_converter,
+)
+from haive.core.schema.compatibility.field_mapping import (
+    FieldMapper,
+    FieldMapping,
+    create_mapping,
+)
+from haive.core.schema.compatibility.langchain_converters import (
+    DocumentConverter,
+    MessageConverter,
+    PromptConverter,
+    register_langchain_converters,
+)
+from haive.core.schema.compatibility.mergers import (
+    MergeStrategy,
+    SchemaMerger,
+    merge_schemas,
+)
+from haive.core.schema.compatibility.reports import CompatibilityReport, generate_report
+from haive.core.schema.compatibility.types import (
+    ConversionPath,
+    FieldInfo,
+    SchemaInfo,
+    TypeInfo,
+)
+from haive.core.schema.compatibility.validators import (
+    FieldValidator,
+    ModelValidator,
+    ValidationContext,
+    create_validator,
+)
+
+# Initialize default converters on import
+register_langchain_converters()
+
+__all__ = [
+    # Core types
+    "CompatibilityLevel",
+    "ConversionQuality",
+    "MergeStrategy",
+    "TypeInfo",
+    "FieldInfo",
+    "SchemaInfo",
+    "ConversionPath",
+    # Main classes
+    "TypeAnalyzer",
+    "CompatibilityChecker",
+    "ConverterRegistry",
+    "TypeConverter",
+    "FieldMapper",
+    "FieldMapping",
+    "SchemaMerger",
+    "CompatibilityReport",
+    "FieldValidator",
+    "ModelValidator",
+    "ValidationContext",
+    "ConversionContext",
+    # Converter classes
+    "MessageConverter",
+    "DocumentConverter",
+    "PromptConverter",
+    # Convenience functions
+    "analyze_type",
+    "get_type_info",
+    "check_compatibility",
+    "register_converter",
+    "create_mapping",
+    "merge_schemas",
+    "generate_report",
+    "create_validator",
+    "register_langchain_converters",
+]
+
+# Module version
+__version__ = "0.1.0"

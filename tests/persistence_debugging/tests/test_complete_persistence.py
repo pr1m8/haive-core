@@ -17,9 +17,9 @@ sys.path.insert(
 def test_sync_conversation():
     """Test synchronous conversation with content verification."""
 
+    from haive.agents.conversation.collaberative.agent import CollaborativeConversation
     from langchain_core.messages import HumanMessage
 
-    from haive.agents.conversation.collaberative.agent import CollaborativeConversation
     from haive.core.engine.aug_llm import AugLLMConfig
 
     timestamp = datetime.now().strftime("%H%M%S")

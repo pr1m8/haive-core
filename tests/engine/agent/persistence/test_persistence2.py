@@ -127,8 +127,7 @@ class TestPostgresCheckpointerConfig:
         checkpointer = config.create_checkpointer()
 
         # Verify fallback to memory saver
-        assert isinstance(
-            checkpointer, MemorySaver), "Should fallback to MemorySaver"
+        assert isinstance(checkpointer, MemorySaver), "Should fallback to MemorySaver"
 
     def test_thread_registration(self, test_config):
         """Test thread registration in the database."""
@@ -149,8 +148,7 @@ class TestPostgresCheckpointerConfig:
         # Verify thread exists in database by querying directly
         with test_config._pool.connection() as conn, conn.cursor() as cursor:
             cursor.execute(
-                "SELECT metadata FROM threads WHERE thread_id = %s", (
-                    thread_id,)
+                "SELECT metadata FROM threads WHERE thread_id = %s", (thread_id,)
             )
             result = cursor.fetchone()
 
@@ -192,8 +190,7 @@ class TestPostgresCheckpointerConfig:
         # Verify thread exists with original metadata (ON CONFLICT DO NOTHING)
         with test_config._pool.connection() as conn, conn.cursor() as cursor:
             cursor.execute(
-                "SELECT metadata FROM threads WHERE thread_id = %s", (
-                    thread_id,)
+                "SELECT metadata FROM threads WHERE thread_id = %s", (thread_id,)
             )
             result = cursor.fetchone()
 
@@ -210,8 +207,7 @@ class TestPostgresCheckpointerConfig:
             # registrations is sufficient
 
             # Log what was actually found for diagnosis
-            logger.info(
-                f"Thread metadata after multiple registrations: {db_metadata}")
+            logger.info(f"Thread metadata after multiple registrations: {db_metadata}")
 
     def test_thread_registration_without_metadata(self, test_config):
         """Test thread registration without providing metadata."""
@@ -225,8 +221,7 @@ class TestPostgresCheckpointerConfig:
         # Verify thread exists with default metadata
         with test_config._pool.connection() as conn, conn.cursor() as cursor:
             cursor.execute(
-                "SELECT metadata FROM threads WHERE thread_id = %s", (
-                    thread_id,)
+                "SELECT metadata FROM threads WHERE thread_id = %s", (thread_id,)
             )
             result = cursor.fetchone()
 
@@ -461,10 +456,8 @@ class TestPostgresCheckpointerConfig:
         config = {"configurable": {"thread_id": thread_id}}
 
         # Check if the checkpointer has the expected methods
-        assert hasattr(
-            checkpointer, "get"), "Checkpointer should have get method"
-        assert hasattr(
-            checkpointer, "put"), "Checkpointer should have put method"
+        assert hasattr(checkpointer, "get"), "Checkpointer should have get method"
+        assert hasattr(checkpointer, "put"), "Checkpointer should have put method"
 
         # Put data
         checkpointer.put(config, test_data)
@@ -479,8 +472,7 @@ class TestPostgresCheckpointerConfig:
             retrieved_data["test_key"] == "test_value"
         ), "Retrieved test_key should match"
         assert "numbers" in retrieved_data, "Retrieved data should contain numbers"
-        assert retrieved_data["numbers"] == [
-            1, 2, 3], "Retrieved numbers should match"
+        assert retrieved_data["numbers"] == [1, 2, 3], "Retrieved numbers should match"
 
     def test_list_checkpoints(self, test_config):
         """Test listing checkpoints for a thread."""
@@ -521,5 +513,4 @@ class TestPostgresCheckpointerConfig:
 
         # Check the data in first checkpoint
         checkpoint_data = checkpoints[0].checkpoint
-        assert isinstance(
-            checkpoint_data, dict), "Checkpoint data should be a dict"
+        assert isinstance(checkpoint_data, dict), "Checkpoint data should be a dict"

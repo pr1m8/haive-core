@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Test the actual test_basic.py scenario with persistence disabled."""
 
+from haive.agents.simple.agent_v2 import SimpleAgentV2
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
 
-from haive.agents.simple.agent_v2 import SimpleAgentV2
 from haive.core.engine.aug_llm import AugLLMConfig
 
 RAG_QUERY_REFINEMENT = ChatPromptTemplate.from_messages(
@@ -30,8 +30,7 @@ Focus on improvements that will lead to better document retrieval.""",
 class QueryRefinementSuggestion(BaseModel):
     refined_query: str = Field(description="The refined/improved query")
     improvement_type: str = Field(description="Type of improvement made")
-    rationale: str = Field(
-        description="Why this refinement improves the query")
+    rationale: str = Field(description="Why this refinement improves the query")
 
 
 class QueryRefinementResponse(BaseModel):
@@ -40,8 +39,7 @@ class QueryRefinementResponse(BaseModel):
     refinement_suggestions: list[QueryRefinementSuggestion] = Field(
         description="List of suggested improvements"
     )
-    best_refined_query: str = Field(
-        description="The recommended best refined query")
+    best_refined_query: str = Field(description="The recommended best refined query")
 
 
 def agent_tester_no_persistence(prompt, model, test_prompt):

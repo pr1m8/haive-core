@@ -117,8 +117,7 @@ class MockMessageAgent:
         self.name = name
         self.input_schema = None
         self.output_schema = None  # No structured output
-        self.prompt_template = ChatPromptTemplate.from_template(
-            "Process this: {input}")
+        self.prompt_template = ChatPromptTemplate.from_template("Process this: {input}")
 
     def invoke(self, state: Any, config: Any = None) -> dict[str, Any]:
         """Return messages-based output."""
@@ -199,10 +198,7 @@ class TestAgentNodeTypedPatterns:
 
         # Create message agent
         agent = MockMessageAgent("chat")
-        node = AgentNodeV3Config(
-            name="chat_node",
-            agent_name="chat",
-            agent=agent)
+        node = AgentNodeV3Config(name="chat_node", agent_name="chat", agent=agent)
 
         # Execute
         result = node(state, {})

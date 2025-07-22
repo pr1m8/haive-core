@@ -1,82 +1,239 @@
-"""Module exports."""
+"""Enhanced Document Engine Package.
 
-from document.agents import Agent
-from document.agents import DirectoryDocumentAgent
-from document.agents import DocumentAgent
-from document.agents import FileDocumentAgent
-from document.agents import WebDocumentAgent
-from document.agents import build_graph
-from document.agents import process_output
-from document.agents import setup_agent
-from document.config import ChunkingStrategy
-from document.config import DocumentChunk
-from document.config import DocumentEngineConfig
-from document.config import DocumentFormat
-from document.config import DocumentInput
-from document.config import DocumentOutput
-from document.config import DocumentSourceType
-from document.config import LoaderPreference
-from document.config import ProcessedDocument
-from document.config import ProcessingStrategy
-from document.config import update_statistics
-from document.config import validate_chunk_overlap
-from document.engine import DocumentEngine
-from document.engine import create_directory_document_engine
-from document.engine import create_file_document_engine
-from document.engine import create_runnable
-from document.engine import create_web_document_engine
-from document.engine import get_input_fields
-from document.engine import get_output_fields
-from document.engine import invoke
-from document.engine import split_recursive
-from document.engine import validate_config
-from document.factory import AutoLoaderFactory
-from document.factory import analyze_path
-from document.factory import analyze_source
-from document.factory import create_document_loader
-from document.factory import create_loader
-from document.factory import get_available_strategies
-from document.factory import get_supported_sources
-from document.path_analysis import CloudProvider
-from document.path_analysis import DatabaseType
-from document.path_analysis import DomainInfo
-from document.path_analysis import FileCategory
-from document.path_analysis import PathAnalysisResult
-from document.path_analysis import PathType
-from document.path_analysis import URLComponents
-from document.path_analysis import analyze_cloud_path
-from document.path_analysis import analyze_database_uri
-from document.path_analysis import analyze_local_path
-from document.path_analysis import analyze_network_path
-from document.path_analysis import analyze_path_comprehensive
-from document.path_analysis import analyze_special_path
-from document.path_analysis import analyze_url
-from document.path_analysis import detect_encoding
-from document.path_analysis import detect_mime_type
-from document.path_analysis import extract_cloud_storage_info
-from document.path_analysis import extract_database_info
-from document.path_analysis import extract_domain_info
-from document.path_analysis import extract_url_components
-from document.path_analysis import is_binary_file
-from document.path_analysis import source_summary
-from document.processors import ChunkingProcessor
-from document.processors import ContentNormalizer
-from document.processors import DocumentProcessor
-from document.processors import FormatDetector
-from document.processors import MetadataExtractor
-from document.processors import chunk_text
-from document.processors import detect_format
-from document.processors import extract_metadata
-from document.processors import normalize_content
-from document.processors import process
-from document.processors import split_recursive
-from document.universal_loader import SmartSourceRegistry
-from document.universal_loader import UniversalDocumentLoader
-from document.universal_loader import analyze_document_source
-from document.universal_loader import analyze_source
-from document.universal_loader import find_best_sources
-from document.universal_loader import get_supported_sources
-from document.universal_loader import load
-from document.universal_loader import load_document
+This package provides comprehensive document processing capabilities including:
+- Document loading from various sources (files, URLs, databases, cloud storage)
+- Advanced chunking and processing strategies
+- Path analysis and source type detection
+- Parallel processing and error handling
+- Integration with the Haive engine framework
 
-__all__ = ['Agent', 'AutoLoaderFactory', 'ChunkingProcessor', 'ChunkingStrategy', 'CloudProvider', 'ContentNormalizer', 'DatabaseType', 'DirectoryDocumentAgent', 'DocumentAgent', 'DocumentChunk', 'DocumentEngine', 'DocumentEngineConfig', 'DocumentFormat', 'DocumentInput', 'DocumentOutput', 'DocumentProcessor', 'DocumentSourceType', 'DomainInfo', 'FileCategory', 'FileDocumentAgent', 'FormatDetector', 'LoaderPreference', 'MetadataExtractor', 'PathAnalysisResult', 'PathType', 'ProcessedDocument', 'ProcessingStrategy', 'SmartSourceRegistry', 'URLComponents', 'UniversalDocumentLoader', 'WebDocumentAgent', 'analyze_cloud_path', 'analyze_database_uri', 'analyze_document_source', 'analyze_local_path', 'analyze_network_path', 'analyze_path', 'analyze_path_comprehensive', 'analyze_source', 'analyze_special_path', 'analyze_url', 'build_graph', 'chunk_text', 'create_directory_document_engine', 'create_document_loader', 'create_file_document_engine', 'create_loader', 'create_runnable', 'create_web_document_engine', 'detect_encoding', 'detect_format', 'detect_mime_type', 'extract_cloud_storage_info', 'extract_database_info', 'extract_domain_info', 'extract_metadata', 'extract_url_components', 'find_best_sources', 'get_available_strategies', 'get_input_fields', 'get_output_fields', 'get_supported_sources', 'invoke', 'is_binary_file', 'load', 'load_document', 'normalize_content', 'process', 'process_output', 'setup_agent', 'source_summary', 'split_recursive', 'update_statistics', 'validate_chunk_overlap', 'validate_config']
+Key Components:
+- DocumentEngine: Main engine for document processing
+- DocumentEngineConfig: Configuration model for the engine
+- Path analysis system for source type detection
+- Document loaders for various source types
+- Processing strategies for chunking and transformation
+"""
+
+from haive.core.engine.document.config import (
+    ChunkingStrategy,
+    DocumentChunk,
+    DocumentEngineConfig,
+    DocumentFormat,
+    DocumentInput,
+    DocumentOutput,
+    DocumentSourceType,
+    LoaderPreference,
+    ProcessedDocument,
+    ProcessingStrategy,
+)
+
+# Core engine components
+from haive.core.engine.document.engine import (
+    DocumentEngine,
+    create_directory_document_engine,
+    create_file_document_engine,
+    create_web_document_engine,
+)
+from haive.core.engine.document.factory import (
+    AutoLoaderFactory,
+    analyze_source,
+    create_document_loader,
+)
+
+# Loader components
+from haive.core.engine.document.loaders.base.base import (
+    BaseDocumentLoader,
+    SimpleDocumentLoader,
+    TextDocumentLoader,
+)
+from haive.core.engine.document.loaders.registry import (
+    DocumentLoaderRegistry,
+    create_loader,
+    get_default_registry,
+    get_loader,
+    register_loader,
+)
+from haive.core.engine.document.loaders.sources.implementation import (
+    CredentialManager,
+    EnhancedSource,
+)
+from haive.core.engine.document.loaders.specific import (  # Database sources
+    MongoDBSource,
+    PostgreSQLSource,
+)
+from haive.core.engine.document.loaders.strategy import (
+    LoaderCapability,
+    LoaderPriority,
+    LoaderStrategy,
+    strategy_registry,
+)
+
+# Path analysis
+from haive.core.engine.document.path_analysis import (
+    CloudProvider,
+    DatabaseType,
+    FileCategory,
+    PathAnalysisResult,
+    PathType,
+    analyze_path_comprehensive,
+)
+
+# Configuration models
+from haive.core.engine.document.processors import (
+    ChunkingProcessor,
+    ContentNormalizer,
+    DocumentProcessor,
+    FormatDetector,
+    MetadataExtractor,
+)
+
+
+# Factory functions for convenience
+def create_document_engine(name: str = "document_engine", **kwargs) -> DocumentEngine:
+    """Create a basic document engine with default configuration.
+
+    Args:
+        name: Name for the engine instance
+        **kwargs: Additional configuration options
+
+    Returns:
+        Configured DocumentEngine instance
+    """
+    config = DocumentEngineConfig(name=name, **kwargs)
+    return DocumentEngine(config=config)
+
+
+def load_documents(
+    source,
+    chunking_strategy: ChunkingStrategy = ChunkingStrategy.RECURSIVE,
+    chunk_size: int = 1000,
+    chunk_overlap: int = 200,
+    **kwargs
+) -> DocumentOutput:
+    """Quick function to load and process documents.
+
+    Args:
+        source: Source to load from (path, URL, etc.)
+        chunking_strategy: Strategy for chunking documents
+        chunk_size: Size of chunks in characters
+        chunk_overlap: Overlap between chunks
+        **kwargs: Additional processing options
+
+    Returns:
+        DocumentOutput with processed documents
+    """
+    engine = create_document_engine(
+        chunking_strategy=chunking_strategy,
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
+        **kwargs
+    )
+
+    return engine.invoke(source)
+
+
+# Agents (conditional import - only if agents package available)
+try:
+    from haive.core.engine.document.agents import (
+        DirectoryDocumentAgent,
+        DocumentAgent,
+        FileDocumentAgent,
+        WebDocumentAgent,
+    )
+except ImportError:
+    # Agents not available - they depend on haive-agents package
+    DirectoryDocumentAgent = None
+    DocumentAgent = None
+    FileDocumentAgent = None
+    WebDocumentAgent = None
+
+# Factory and enhanced loaders
+
+# Specific loader implementations - only import what exists
+
+# Processors
+
+# Universal loader system - temporarily commented out until dependencies are fixed
+# from .universal_loader import (
+#     UniversalDocumentLoader,
+#     SmartSourceRegistry,
+#     load_document,
+#     analyze_document_source,
+# )
+
+
+# Export all public components
+__all__ = [
+    # Core engine
+    "DocumentEngine",
+    "create_document_engine",
+    "load_documents",
+    # Factory functions
+    "create_file_document_engine",
+    "create_web_document_engine",
+    "create_directory_document_engine",
+    # Configuration
+    "DocumentEngineConfig",
+    "DocumentInput",
+    "DocumentOutput",
+    "ProcessedDocument",
+    "DocumentChunk",
+    # Enums
+    "DocumentFormat",
+    "DocumentSourceType",
+    "LoaderPreference",
+    "ProcessingStrategy",
+    "ChunkingStrategy",
+    # Path analysis
+    "analyze_path_comprehensive",
+    "PathAnalysisResult",
+    "PathType",
+    "FileCategory",
+    "DatabaseType",
+    "CloudProvider",
+    # Loaders
+    "BaseDocumentLoader",
+    "SimpleDocumentLoader",
+    "TextDocumentLoader",
+    # Registry
+    "DocumentLoaderRegistry",
+    "get_default_registry",
+    "register_loader",
+    "get_loader",
+    "create_loader",
+    # Agents
+    "DocumentAgent",
+    "FileDocumentAgent",
+    "WebDocumentAgent",
+    "DirectoryDocumentAgent",
+    # Processors
+    "DocumentProcessor",
+    "ChunkingProcessor",
+    "ContentNormalizer",
+    "FormatDetector",
+    "MetadataExtractor",
+    # Factory and enhanced loaders
+    "AutoLoaderFactory",
+    "create_document_loader",
+    "analyze_source",
+    # Universal loader system - commented out temporarily
+    # "UniversalDocumentLoader",
+    # "SmartSourceRegistry",
+    # "load_document",
+    # "analyze_document_source",
+    # Enhanced source system
+    "EnhancedSourceType",
+    "CredentialManager",
+    "EnhancedSource",
+    "source_registry",
+    # Strategy system
+    "LoaderStrategy",
+    "LoaderCapability",
+    "LoaderPriority",
+    "strategy_registry",
+    # Specific loader implementations - only what exists
+    # Database sources
+    "MongoDBSource",
+    "PostgreSQLSource",
+]

@@ -87,9 +87,7 @@ def hierarchical_graph(mock_engines, validation_tools):
     validation nodes, and engine nodes.
     """
     # Create main graph
-    main_graph = StateGraph(
-        name="MainWorkflow",
-        state_schema=ComplexWorkflowState)
+    main_graph = StateGraph(name="MainWorkflow", state_schema=ComplexWorkflowState)
 
     # Create preprocessing subgraph
     preprocessing = StateGraph(name="Preprocessing")
@@ -204,8 +202,7 @@ def hierarchical_graph(mock_engines, validation_tools):
                 type(
                     "ResponseSchema",
                     (BaseModel,),
-                    {"text": (str, ...), "confidence": (
-                        float, Field(gt=0, lt=1))},
+                    {"text": (str, ...), "confidence": (float, Field(gt=0, lt=1))},
                 )
             ],
             messages_field="generated_text",
@@ -256,9 +253,7 @@ def complex_branching_graph(mock_engines, validation_tools):
     validation results and engine outputs.
     """
     # Create main graph
-    graph = StateGraph(
-        name="BranchingWorkflow",
-        state_schema=ComplexWorkflowState)
+    graph = StateGraph(name="BranchingWorkflow", state_schema=ComplexWorkflowState)
 
     # Input validation node
     input_validator = ValidationNodeConfig(

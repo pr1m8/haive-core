@@ -238,8 +238,7 @@ class TestAgentNodeFieldUpdates:
                 self.internal_state["selection_count"] += 1
                 self.internal_state["history"].append("selection_1")
 
-                return {"selected_modules": [
-                    "A", "B"], "rationale": "First selection"}
+                return {"selected_modules": ["A", "B"], "rationale": "First selection"}
 
         agent = StatefulAgent()
         node = AgentNodeV3Config(
@@ -344,10 +343,7 @@ class TestAgentNodeFieldUpdates:
                 }
 
         agent = MultiFieldAgent()
-        node = AgentNodeV3Config(
-            name="multi_node",
-            agent_name="multi",
-            agent=agent)
+        node = AgentNodeV3Config(name="multi_node", agent_name="multi", agent=agent)
 
         result = node(state, {})
 

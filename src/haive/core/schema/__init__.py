@@ -1,305 +1,468 @@
-"""Module exports."""
+"""Haive Schema System - Dynamic State Management for AI Agents.
 
-from schema.agent_schema_composer import AgentSchemaComposer
-from schema.agent_schema_composer import BuildMode
-from schema.agent_schema_composer import add_messages
-from schema.agent_schema_composer import field_exists
-from schema.agent_schema_composer import from_agents
-from schema.agent_schema_composer import from_agents_with_multiagent_base
-from schema.base_state_schemas import AgentState
-from schema.base_state_schemas import Config
-from schema.base_state_schemas import DataProcessingState
-from schema.base_state_schemas import EngineState
-from schema.base_state_schemas import HierarchicalAgentState
-from schema.base_state_schemas import MessagingState
-from schema.base_state_schemas import MetaAgentState
-from schema.base_state_schemas import MinimalState
-from schema.base_state_schemas import MultiAgentState
-from schema.base_state_schemas import ToolExecutorState
-from schema.base_state_schemas import ToolState
-from schema.base_state_schemas import WorkflowState
-from schema.base_state_schemas import add_child_agent
-from schema.base_state_schemas import add_execution_step
-from schema.base_state_schemas import add_message
-from schema.base_state_schemas import aggregate_child_results
-from schema.base_state_schemas import broadcast_to_agents
-from schema.base_state_schemas import collect_agent_results
-from schema.base_state_schemas import create_agent_state
-from schema.base_state_schemas import create_multi_agent_state
-from schema.base_state_schemas import get_agent_state
-from schema.base_state_schemas import get_compiled_graph
-from schema.base_state_schemas import get_engine
-from schema.base_state_schemas import get_last_message
-from schema.base_state_schemas import mark_step_complete
-from schema.base_state_schemas import modify_graph
-from schema.base_state_schemas import primary_engine
-from schema.base_state_schemas import register_engine
-from schema.base_state_schemas import serialize_engines
-from schema.base_state_schemas import spawn_sub_agent
-from schema.base_state_schemas import update_sub_agent_result
-from schema.engine_io_mixin import EngineIOSchemaMixin
-from schema.engine_io_mixin import get_all_engine_input_fields
-from schema.engine_io_mixin import get_all_engine_output_fields
-from schema.engine_io_mixin import get_engine_input_fields
-from schema.engine_io_mixin import get_engine_io_mappings
-from schema.engine_io_mixin import get_engine_output_fields
-from schema.engine_io_mixin import get_engines_for_field
-from schema.engine_io_mixin import get_schema_summary
-from schema.engine_io_mixin import llm
-from schema.engine_io_mixin import main_engine
-from schema.engine_io_mixin import prepare_engine_input
-from schema.engine_io_mixin import update_from_engine_output
-from schema.engine_io_mixin import validate_engine_compatibility
-from schema.example import ComplexState
-from schema.example import Config
-from schema.example import ConversationState
-from schema.example import MetricsState
-from schema.example import MultiEngineState
-from schema.example import ParentState
-from schema.example import PersistentState
-from schema.example import ResearchState
-from schema.example import ValidatedState
-from schema.example import add_tag
-from schema.example import example_basic_state_creation
-from schema.example import example_dynamic_composition
-from schema.example import example_engine_io_tracking
-from schema.example import example_parent_child_sharing
-from schema.example import example_real_world_agent_state
-from schema.example import example_reducer_behavior
-from schema.example import example_schema_merging
-from schema.example import example_schema_visualization
-from schema.example import example_serialization_patterns
-from schema.example import example_validation_and_custom_methods
-from schema.example import get_risk_level
-from schema.example import main
-from schema.example import to_summary
-from schema.example import validate_age
-from schema.example import validate_email
-from schema.example import validate_score
-from schema.example import validate_tags
-from schema.field_definition import FieldDefinition
-from schema.field_definition import extract_from_model_field
-from schema.field_definition import get_reducer_name
-from schema.field_definition import to_annotated_field
-from schema.field_definition import to_dict
-from schema.field_definition import to_field_info
-from schema.field_extractor import FieldExtractor
-from schema.field_extractor import concat_lists
-from schema.field_extractor import extract_from_components
-from schema.field_extractor import extract_from_dict
-from schema.field_extractor import extract_from_engine
-from schema.field_extractor import extract_from_model
-from schema.field_registry import CommonFieldSets
-from schema.field_registry import FieldRegistry
-from schema.field_registry import PrebuiltStates
-from schema.field_registry import StandardFields
-from schema.field_registry import ai_message
-from schema.field_registry import available_nodes
-from schema.field_registry import base_messages_state
-from schema.field_registry import clear
-from schema.field_registry import context
-from schema.field_registry import documents
-from schema.field_registry import engine_name
-from schema.field_registry import get
-from schema.field_registry import get_standard_field
-from schema.field_registry import human_message
-from schema.field_registry import list_fields
-from schema.field_registry import llm_state
-from schema.field_registry import messages
-from schema.field_registry import messages_with_tokens
-from schema.field_registry import observations
-from schema.field_registry import plan_steps
-from schema.field_registry import query
-from schema.field_registry import register
-from schema.field_registry import structured_output
-from schema.field_registry import thoughts
-from schema.field_registry import tool_routes
-from schema.field_registry import tool_state
-from schema.field_utils import FieldMetadata
-from schema.field_utils import add_lists
-from schema.field_utils import add_messages
-from schema.field_utils import camel_to_snake_case
-from schema.field_utils import concat_lists
-from schema.field_utils import concat_strings
-from schema.field_utils import create_annotated_field
-from schema.field_utils import create_field
-from schema.field_utils import create_field_name_from_model
-from schema.field_utils import decorator
-from schema.field_utils import extract_field_info
-from schema.field_utils import extract_type_metadata
-from schema.field_utils import field_config
-from schema.field_utils import field_description
-from schema.field_utils import field_name
-from schema.field_utils import format_type_annotation
-from schema.field_utils import from_annotation
-from schema.field_utils import generic_lambda_reducer
-from schema.field_utils import get_common_reducers
-from schema.field_utils import get_field_info_from_model
-from schema.field_utils import get_reducer_name
-from schema.field_utils import infer_field_type
-from schema.field_utils import merge
-from schema.field_utils import resolve_reducer
-from schema.field_utils import sum_values
-from schema.field_utils import to_annotation_metadata
-from schema.field_utils import to_dict
-from schema.meta_agent_state import AgentExecutionInfo
-from schema.meta_agent_state import MetaAgentState
-from schema.meta_agent_state import get_agent_output
-from schema.meta_agent_state import get_shared_context
-from schema.meta_agent_state import record_agent_completion
-from schema.meta_agent_state import record_agent_error
-from schema.meta_agent_state import record_agent_start
-from schema.meta_agent_state import set_shared_context
-from schema.meta_agent_state import signal_stop
-from schema.meta_agent_state import update_workflow_stage
-from schema.multi_agent_state_schema import MultiAgentSchemaComposer
-from schema.multi_agent_state_schema import MultiAgentStateSchema
-from schema.multi_agent_state_schema import from_components
-from schema.multi_agent_state_schema import from_schema
-from schema.multi_agent_state_schema import from_state_schema
-from schema.multi_agent_state_schema import populate_engines_dict
-from schema.preserve_messages_reducer import preserve_messages_reducer
-from schema.schema_composer import SchemaComposer
-from schema.schema_composer import add_engine
-from schema.schema_composer import add_engine_management
-from schema.schema_composer import add_field
-from schema.schema_composer import add_fields_from_components
-from schema.schema_composer import add_fields_from_dict
-from schema.schema_composer import add_fields_from_engine
-from schema.schema_composer import add_fields_from_model
-from schema.schema_composer import add_standard_field
-from schema.schema_composer import build
-from schema.schema_composer import build_with_engine_generics
-from schema.schema_composer import compose_input_schema
-from schema.schema_composer import compose_output_schema
-from schema.schema_composer import compose_state_from_io
-from schema.schema_composer import concat_lists
-from schema.schema_composer import configure_messages_field
-from schema.schema_composer import create_message_state
-from schema.schema_composer import create_state_from_io_schemas
-from schema.schema_composer import engines_factory
-from schema.schema_composer import extract_tool_schemas
-from schema.schema_composer import from_components
-from schema.schema_composer import get_class_engines
-from schema.schema_composer import get_engine_union_type
-from schema.schema_composer import get_engines_by_type
-from schema.schema_composer import mark_as_input_field
-from schema.schema_composer import mark_as_output_field
-from schema.schema_composer import merge
-from schema.schema_composer import resolve_engine_types
-from schema.schema_composer import schema_post_init
-from schema.schema_composer import show_engines
-from schema.schema_composer import to_manager
-from schema.schema_composer import update_engine_provider
-from schema.schema_manager import StateSchemaManager
-from schema.schema_manager import add_field
-from schema.schema_manager import add_method
-from schema.schema_manager import create_message_state
-from schema.schema_manager import from_components
-from schema.schema_manager import get_model
-from schema.schema_manager import has_field
-from schema.schema_manager import mark_as_input_field
-from schema.schema_manager import mark_as_output_field
-from schema.schema_manager import merge
-from schema.schema_manager import modify_field
-from schema.schema_manager import remove_field
-from schema.schema_manager import to_composer
-from schema.state_schema import EngineIOConfig
-from schema.state_schema import StateConfig
-from schema.state_schema import StateSchema
-from schema.state_schema import add_engine
-from schema.state_schema import add_message
-from schema.state_schema import add_messages
-from schema.state_schema import apply_reducers
-from schema.state_schema import as_table
-from schema.state_schema import clear_messages
-from schema.state_schema import combine_with
-from schema.state_schema import compare_with
-from schema.state_schema import concat_lists
-from schema.state_schema import concat_strings
-from schema.state_schema import copy
-from schema.state_schema import create_input_schema
-from schema.state_schema import create_output_schema
-from schema.state_schema import deep_copy
-from schema.state_schema import derive_input_schema
-from schema.state_schema import derive_output_schema
-from schema.state_schema import dict
-from schema.state_schema import differences_from
-from schema.state_schema import display_code
-from schema.state_schema import display_schema
-from schema.state_schema import display_table
-from schema.state_schema import extract_values
-from schema.state_schema import from_dict
-from schema.state_schema import from_json
-from schema.state_schema import from_partial_dict
-from schema.state_schema import from_runnable_config
-from schema.state_schema import from_snapshot
-from schema.state_schema import generic_lambda_reducer
-from schema.state_schema import get
-from schema.state_schema import get_all_class_engines
-from schema.state_schema import get_all_instance_engines
-from schema.state_schema import get_class_engine
-from schema.state_schema import get_engine
-from schema.state_schema import get_engines
-from schema.state_schema import get_instance_engine
-from schema.state_schema import get_last_message
-from schema.state_schema import get_state_values
-from schema.state_schema import get_structured_model
-from schema.state_schema import has_engine
-from schema.state_schema import is_shared
-from schema.state_schema import list_engines
-from schema.state_schema import list_structured_models
-from schema.state_schema import llm
-from schema.state_schema import main_engine
-from schema.state_schema import manager
-from schema.state_schema import merge_engine_output
-from schema.state_schema import merge_messages
-from schema.state_schema import model_dump
-from schema.state_schema import model_post_init
-from schema.state_schema import patch
-from schema.state_schema import prepare_for_engine
-from schema.state_schema import pretty_print
-from schema.state_schema import remove_engine
-from schema.state_schema import setup_engines_and_tools
-from schema.state_schema import shared_fields
-from schema.state_schema import sum_values
-from schema.state_schema import sync_engine_fields
-from schema.state_schema import to_command
-from schema.state_schema import to_dict
-from schema.state_schema import to_json
-from schema.state_schema import to_manager
-from schema.state_schema import to_python_code
-from schema.state_schema import to_runnable_config
-from schema.state_schema import update
-from schema.state_schema import validate_engine
-from schema.state_schema import validate_engines
-from schema.state_schema import with_shared_fields
-from schema.typed_state_schema import AgentState
-from schema.typed_state_schema import HierarchicalStateSchema
-from schema.typed_state_schema import MultiEngineStateSchema
-from schema.typed_state_schema import RoutingState
-from schema.typed_state_schema import SharedState
-from schema.typed_state_schema import TypedStateSchema
-from schema.typed_state_schema import _TypedSchema
-from schema.typed_state_schema import create_typed_state_schema
-from schema.typed_state_schema import get_agent_view
-from schema.typed_state_schema import get_typed_engine
-from schema.typed_state_schema import llm_engine
-from schema.typed_state_schema import merge_agent_results
-from schema.typed_state_schema import register_engine
-from schema.typed_state_schema import retriever_engine
-from schema.typed_state_schema import validate_typed_engine
-from schema.ui import SchemaUI
-from schema.ui import compare_schemas
-from schema.ui import display_schema
-from schema.ui import display_schema_code
-from schema.ui import schema_to_code
-from schema.utils import SchemaUtils
-from schema.utils import add_field_to_schema
-from schema.utils import build_state_schema
-from schema.utils import extract_field_info
-from schema.utils import format_schema_as_python
-from schema.utils import format_type_annotation
-from schema.utils import get_reducer_name
+This package provides a powerful foundation for dynamic state management in AI agents
+and workflows. It extends Pydantic's model system with features specifically designed
+for graph-based AI workflows, including field sharing between graphs, reducer functions
+for state updates, and engine I/O tracking.
 
-__all__ = ['AgentExecutionInfo', 'AgentSchemaComposer', 'AgentState', 'BuildMode', 'CommonFieldSets', 'ComplexState', 'Config', 'ConversationState', 'DataProcessingState', 'EngineIOConfig', 'EngineIOSchemaMixin', 'EngineState', 'FieldDefinition', 'FieldExtractor', 'FieldMetadata', 'FieldRegistry', 'HierarchicalAgentState', 'HierarchicalStateSchema', 'MessagingState', 'MetaAgentState', 'MetricsState', 'MinimalState', 'MultiAgentSchemaComposer', 'MultiAgentState', 'MultiAgentStateSchema', 'MultiEngineState', 'MultiEngineStateSchema', 'ParentState', 'PersistentState', 'PrebuiltStates', 'ResearchState', 'RoutingState', 'SchemaComposer', 'SchemaUI', 'SchemaUtils', 'SharedState', 'StandardFields', 'StateConfig', 'StateSchema', 'StateSchemaManager', 'ToolExecutorState', 'ToolState', 'TypedStateSchema', 'ValidatedState', 'WorkflowState', '_TypedSchema', 'add_child_agent', 'add_engine', 'add_engine_management', 'add_execution_step', 'add_field', 'add_field_to_schema', 'add_fields_from_components', 'add_fields_from_dict', 'add_fields_from_engine', 'add_fields_from_model', 'add_lists', 'add_message', 'add_messages', 'add_method', 'add_standard_field', 'add_tag', 'aggregate_child_results', 'ai_message', 'apply_reducers', 'as_table', 'available_nodes', 'base_messages_state', 'broadcast_to_agents', 'build', 'build_state_schema', 'build_with_engine_generics', 'camel_to_snake_case', 'clear', 'clear_messages', 'collect_agent_results', 'combine_with', 'compare_schemas', 'compare_with', 'compose_input_schema', 'compose_output_schema', 'compose_state_from_io', 'concat_lists', 'concat_strings', 'configure_messages_field', 'context', 'copy', 'create_agent_state', 'create_annotated_field', 'create_field', 'create_field_name_from_model', 'create_input_schema', 'create_message_state', 'create_multi_agent_state', 'create_output_schema', 'create_state_from_io_schemas', 'create_typed_state_schema', 'decorator', 'deep_copy', 'derive_input_schema', 'derive_output_schema', 'dict', 'differences_from', 'display_code', 'display_schema', 'display_schema_code', 'display_table', 'documents', 'engine_name', 'engines_factory', 'example_basic_state_creation', 'example_dynamic_composition', 'example_engine_io_tracking', 'example_parent_child_sharing', 'example_real_world_agent_state', 'example_reducer_behavior', 'example_schema_merging', 'example_schema_visualization', 'example_serialization_patterns', 'example_validation_and_custom_methods', 'extract_field_info', 'extract_from_components', 'extract_from_dict', 'extract_from_engine', 'extract_from_model', 'extract_from_model_field', 'extract_tool_schemas', 'extract_type_metadata', 'extract_values', 'field_config', 'field_description', 'field_exists', 'field_name', 'format_schema_as_python', 'format_type_annotation', 'from_agents', 'from_agents_with_multiagent_base', 'from_annotation', 'from_components', 'from_dict', 'from_json', 'from_partial_dict', 'from_runnable_config', 'from_schema', 'from_snapshot', 'from_state_schema', 'generic_lambda_reducer', 'get', 'get_agent_output', 'get_agent_state', 'get_agent_view', 'get_all_class_engines', 'get_all_engine_input_fields', 'get_all_engine_output_fields', 'get_all_instance_engines', 'get_class_engine', 'get_class_engines', 'get_common_reducers', 'get_compiled_graph', 'get_engine', 'get_engine_input_fields', 'get_engine_io_mappings', 'get_engine_output_fields', 'get_engine_union_type', 'get_engines', 'get_engines_by_type', 'get_engines_for_field', 'get_field_info_from_model', 'get_instance_engine', 'get_last_message', 'get_model', 'get_reducer_name', 'get_risk_level', 'get_schema_summary', 'get_shared_context', 'get_standard_field', 'get_state_values', 'get_structured_model', 'get_typed_engine', 'has_engine', 'has_field', 'human_message', 'infer_field_type', 'is_shared', 'list_engines', 'list_fields', 'list_structured_models', 'llm', 'llm_engine', 'llm_state', 'main', 'main_engine', 'manager', 'mark_as_input_field', 'mark_as_output_field', 'mark_step_complete', 'merge', 'merge_agent_results', 'merge_engine_output', 'merge_messages', 'messages', 'messages_with_tokens', 'model_dump', 'model_post_init', 'modify_field', 'modify_graph', 'observations', 'patch', 'plan_steps', 'populate_engines_dict', 'prepare_engine_input', 'prepare_for_engine', 'preserve_messages_reducer', 'pretty_print', 'primary_engine', 'query', 'record_agent_completion', 'record_agent_error', 'record_agent_start', 'register', 'register_engine', 'remove_engine', 'remove_field', 'resolve_engine_types', 'resolve_reducer', 'retriever_engine', 'schema_post_init', 'schema_to_code', 'serialize_engines', 'set_shared_context', 'setup_engines_and_tools', 'shared_fields', 'show_engines', 'signal_stop', 'spawn_sub_agent', 'structured_output', 'sum_values', 'sync_engine_fields', 'thoughts', 'to_annotated_field', 'to_annotation_metadata', 'to_command', 'to_composer', 'to_dict', 'to_field_info', 'to_json', 'to_manager', 'to_python_code', 'to_runnable_config', 'to_summary', 'tool_routes', 'tool_state', 'update', 'update_engine_provider', 'update_from_engine_output', 'update_sub_agent_result', 'update_workflow_stage', 'validate_age', 'validate_email', 'validate_engine', 'validate_engine_compatibility', 'validate_engines', 'validate_score', 'validate_tags', 'validate_typed_engine', 'with_shared_fields']
+The schema system enables fully dynamic and serializable state schemas that can be
+composed, modified, and extended at runtime, making it ideal for complex agent
+architectures and nested workflows.
+
+Architecture:
+    The schema system is built around a core StateSchema that extends Pydantic BaseModel
+    with additional capabilities for AI agent workflows:
+
+    - Field sharing between parent and child graphs
+    - Reducer functions for intelligent state merging
+    - Engine I/O tracking for workflow coordination
+    - Structured output model integration
+    - Rich visualization and debugging tools
+
+Core Components:
+    StateSchema: Base class that extends Pydantic models with sharing, reducers,
+        and I/O tracking. Serves as the foundation for all agent state management.
+    SchemaComposer: Utility for building schemas from components dynamically.
+        Supports field extraction from engines, models, and dictionaries.
+    StateSchemaManager: Tool for manipulating schemas at runtime.
+        Provides methods for schema modification and transformation.
+    MultiAgentStateSchema: Enhanced schema for multi-agent architectures.
+        Handles complex state coordination across multiple agents.
+    AgentSchemaComposer: Schema composer specialized for agent architectures.
+        Includes build modes and agent-specific optimizations.
+    FieldDefinition: Representation of field type, default, and metadata.
+        Provides comprehensive field information for schema building.
+    FieldExtractor: Utility for extracting fields from various sources.
+        Supports engines, models, tools, and custom components.
+    Field Utilities: Common functions for field manipulation.
+        Includes type inference, reducer resolution, and field creation.
+
+Prebuilt Schemas:
+    # BasicAgentState: Simple state with common agent fields (Module doesn't exist)
+    MessagesState: State optimized for conversation handling
+    ToolState: State with built-in tool management
+    TokenUsage: Token tracking and cost calculation utilities
+
+Usage Patterns:
+    Basic Usage::
+
+        from haive.core.schema import StateSchema, Field
+        from typing import List, Dict, Any
+
+        class MyAgentState(StateSchema):
+            messages: List[str] = Field(default_factory=list)
+            context: Dict[str, Any] = Field(default_factory=dict)
+
+            __shared_fields__ = ["messages"]
+            __reducer_fields__ = {
+                "messages": lambda a, b: a + b
+            }
+
+    Dynamic Schema Building::
+
+        from haive.core.schema import SchemaComposer
+
+        composer = SchemaComposer(name="DynamicState")
+        composer.add_field("query", str, default="")
+        composer.add_field("results", List[str], default_factory=list)
+
+        DynamicState = composer.build()
+        state = DynamicState()
+
+    Multi-Agent Coordination::
+
+        from haive.core.schema import MultiAgentStateSchema
+
+        class CoordinatedState(MultiAgentStateSchema):
+            shared_memory: Dict[str, Any] = Field(default_factory=dict)
+            agent_states: Dict[str, Dict] = Field(default_factory=dict)
+
+            __shared_fields__ = ["shared_memory"]
+
+Examples:
+    For detailed usage examples, see the documentation and examples directory.
+    Key example files:
+    - examples/basic_schema_usage.py
+    - examples/dynamic_schema_building.py
+    - examples/multi_agent_coordination.py
+    - examples/engine_integration.py
+
+Version: 2.0.0
+Author: Haive Team
+License: MIT
+"""
+
+# Version information
+__version__ = "2.0.0"
+__author__ = "Haive Team"
+__license__ = "MIT"
+
+# Type imports for better IDE support
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type, Union
+
+if TYPE_CHECKING:
+    from pydantic import BaseModel
+    from typing_extensions import TypeAlias
+
+# Core schema imports
+# Schema composition imports
+from haive.core.schema.agent_schema_composer import AgentSchemaComposer, BuildMode
+
+# Field management imports
+from haive.core.schema.field_definition import FieldDefinition
+from haive.core.schema.field_extractor import FieldExtractor
+from haive.core.schema.field_utils import (
+    create_annotated_field,
+    create_field,
+    extract_type_metadata,
+    get_common_reducers,
+    infer_field_type,
+    resolve_reducer,
+)
+from haive.core.schema.multi_agent_state_schema import (
+    MultiAgentSchemaComposer,
+)
+from haive.core.schema.multi_agent_state_schema import MultiAgentStateSchema
+from haive.core.schema.multi_agent_state_schema import (
+    MultiAgentStateSchema as PrebuiltMultiAgentStateSchema,
+)
+
+# Token usage and messages utilities
+from haive.core.schema.prebuilt.messages import (
+    MessagesStateWithTokenUsage,
+    TokenUsage,
+    TokenUsageMixin,
+    aggregate_token_usage,
+    calculate_token_cost,
+    extract_token_usage_from_message,
+)
+from haive.core.schema.prebuilt.messages_state import MessagesState
+from haive.core.schema.prebuilt.tool_state import ToolState
+
+# Reducer utilities
+from haive.core.schema.preserve_messages_reducer import preserve_messages_reducer
+from haive.core.schema.schema_manager import StateSchemaManager
+from haive.core.schema.state_schema import StateSchema
+from haive.core.schema.ui import SchemaUI
+
+# Prebuilt state schemas
+# from haive.core.schema.prebuilt.basic_agent_state import BasicAgentState  # Module doesn't exist
+
+
+# Schema composer with fallback handling
+try:
+    from haive.core.schema.composer.schema_composer import SchemaComposer
+except ImportError:
+    # Fallback to original location for backward compatibility
+    from haive.core.schema.schema_composer import (  # type: ignore[attr-defined]
+        SchemaComposer,
+    )
+
+# Type aliases for better API clarity
+SchemaType: "TypeAlias" = Type[StateSchema]
+FieldType: "TypeAlias" = Type[Any]
+ReducerType: "TypeAlias" = Callable[[Any, Any], Any]
+ValidatorType: "TypeAlias" = Callable[[Any], Any]
+
+# Define public API
+__all__ = [
+    # Version information
+    "__version__",
+    "__author__",
+    "__license__",
+    # Core classes
+    "StateSchema",
+    "StateSchemaManager",
+    "SchemaUI",
+    # Schema composition
+    "SchemaComposer",
+    "AgentSchemaComposer",
+    "BuildMode",
+    "MultiAgentStateSchema",
+    "MultiAgentSchemaComposer",
+    "PrebuiltMultiAgentStateSchema",
+    # Field management
+    "FieldDefinition",
+    "FieldExtractor",
+    "create_field",
+    "create_annotated_field",
+    "extract_type_metadata",
+    "infer_field_type",
+    "get_common_reducers",
+    "resolve_reducer",
+    # Prebuilt schemas
+    # "BasicAgentState",  # Module doesn't exist
+    "MessagesState",
+    "ToolState",
+    # Token usage utilities
+    "TokenUsage",
+    "TokenUsageMixin",
+    "MessagesStateWithTokenUsage",
+    "extract_token_usage_from_message",
+    "aggregate_token_usage",
+    "calculate_token_cost",
+    # Reducer utilities
+    "preserve_messages_reducer",
+    # Type aliases
+    "SchemaType",
+    "FieldType",
+    "ReducerType",
+    "ValidatorType",
+    # Convenience functions
+    "create_simple_state",
+    "create_agent_state",
+    "validate_schema",
+    "get_schema_info",
+]
+
+
+# Module initialization
+def _initialize_schema_module() -> None:
+    """Initialize the schema module with default configurations."""
+    import logging
+
+    # Set up logging for schema operations
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+
+    # Validate critical imports
+    try:
+        from typing import get_type_hints
+
+        from pydantic import BaseModel, Field
+    except ImportError as e:
+        raise ImportError(
+            f"Critical schema dependencies missing: {e.name}. "
+            f"Please install with: pip install haive-core[schema]"
+        )
+
+
+# Convenience factory functions
+def create_simple_state(
+    fields: Dict[str, Any],
+    name: str = "SimpleState",
+    shared_fields: Optional[List[str]] = None,
+    reducers: Optional[Dict[str, ReducerType]] = None,
+) -> SchemaType:
+    """Create a simple state schema with basic configuration.
+
+    Args:
+        fields: Dictionary mapping field names to types or (type, default) tuples
+        name: Name for the generated schema class
+        shared_fields: List of fields to share with parent graphs
+        reducers: Dictionary mapping field names to reducer functions
+
+    Returns:
+        StateSchema subclass with specified configuration
+
+    Examples:
+        Basic state::
+
+            MyState = create_simple_state({
+                "messages": (List[str], []),
+                "query": str,
+                "response": (str, "")
+            })
+
+        With sharing and reducers::
+
+            ConversationState = create_simple_state(
+                fields={"messages": (List[BaseMessage], [])},
+                shared_fields=["messages"],
+                reducers={"messages": preserve_messages_reducer}
+            )
+    """
+    composer = SchemaComposer(name=name)
+
+    # Add fields
+    for field_name, field_spec in fields.items():
+        if isinstance(field_spec, tuple):
+            field_type, default = field_spec
+            composer.add_field(
+                name=field_name,
+                field_type=field_type,
+                default=default,
+                shared=shared_fields and field_name in shared_fields,
+            )
+        else:
+            composer.add_field(
+                name=field_name,
+                field_type=field_spec,
+                shared=shared_fields and field_name in shared_fields,
+            )
+
+    # Add reducers
+    if reducers:
+        for field_name, reducer in reducers.items():
+            composer.add_reducer(field_name, reducer)
+
+    return composer.build()
+
+
+def create_agent_state(
+    agent_name: str,
+    engines: Optional[List[Any]] = None,
+    tools: Optional[List[Any]] = None,
+    include_messages: bool = True,
+    include_tools: bool = True,
+    custom_fields: Optional[Dict[str, Any]] = None,
+) -> SchemaType:
+    """Create an agent state schema with common patterns.
+
+    Args:
+        agent_name: Name for the agent and schema
+        engines: List of engines to extract fields from
+        tools: List of tools to include
+        include_messages: Whether to include message handling
+        include_tools: Whether to include tool state
+        custom_fields: Additional custom fields to add
+
+    Returns:
+        StateSchema subclass optimized for agent use
+
+    Examples:
+        Basic agent state::
+
+            MyAgentState = create_agent_state(
+                agent_name="MyAgent",
+                engines=[llm_engine, retriever]
+            )
+
+        Customized agent state::
+
+            SpecializedState = create_agent_state(
+                agent_name="SpecializedAgent",
+                custom_fields={
+                    "special_data": (Dict[str, Any], {}),
+                    "processing_stage": (str, "init")
+                }
+            )
+    """
+    composer = AgentSchemaComposer(name=f"{agent_name}State")
+
+    # Add engines
+    if engines:
+        for engine in engines:
+            composer.add_engine(engine)
+
+    # Add tools
+    if tools:
+        for tool in tools:
+            composer.add_tool(tool)
+
+    # Configure base schema
+    if include_messages and include_tools:
+        composer.set_base_schema(ToolState)
+    elif include_messages:
+        composer.set_base_schema(MessagesState)
+    elif include_tools:
+        composer.set_base_schema(ToolState)
+    else:
+        composer.set_base_schema(MessagesState)
+
+    # Add custom fields
+    if custom_fields:
+        for field_name, field_spec in custom_fields.items():
+            if isinstance(field_spec, tuple):
+                field_type, default = field_spec
+                composer.add_field(
+                    name=field_name, field_type=field_type, default=default
+                )
+            else:
+                composer.add_field(name=field_name, field_type=field_spec)
+
+    return composer.build()
+
+
+def validate_schema(schema: SchemaType) -> bool:
+    """Validate a schema for common issues.
+
+    Args:
+        schema: StateSchema class to validate
+
+    Returns:
+        True if schema is valid, False otherwise
+
+    Raises:
+        ValueError: If schema has critical issues
+    """
+    import logging
+
+    logger = logging.getLogger(__name__)
+
+    # Check basic inheritance
+    if not issubclass(schema, StateSchema):
+        raise ValueError(f"Schema {schema.__name__} must inherit from StateSchema")
+
+    # Check for field conflicts
+    field_names = set(schema.model_fields.keys())
+    reserved_names = {"model_fields", "model_config", "model_validate"}
+    conflicts = field_names & reserved_names
+    if conflicts:
+        logger.warning(
+            f"Schema {schema.__name__} has conflicting field names: {conflicts}"
+        )
+
+    # Check shared fields exist
+    shared_fields = getattr(schema, "__shared_fields__", [])
+    missing_shared = set(shared_fields) - field_names
+    if missing_shared:
+        logger.warning(
+            f"Schema {schema.__name__} has missing shared fields: {missing_shared}"
+        )
+
+    # Check reducer fields exist
+    reducer_fields = getattr(schema, "__reducer_fields__", {})
+    missing_reducer = set(reducer_fields.keys()) - field_names
+    if missing_reducer:
+        logger.warning(
+            f"Schema {schema.__name__} has missing reducer fields: {missing_reducer}"
+        )
+
+    return True
+
+
+def get_schema_info(schema: SchemaType) -> Dict[str, Any]:
+    """Get comprehensive information about a schema.
+
+    Args:
+        schema: StateSchema class to analyze
+
+    Returns:
+        Dictionary with schema information
+    """
+    info = {
+        "name": schema.__name__,
+        "base_classes": [cls.__name__ for cls in schema.__bases__],
+        "fields": {},
+        "shared_fields": getattr(schema, "__shared_fields__", []),
+        "reducers": getattr(schema, "__serializable_reducers__", {}),
+        "engine_io": getattr(schema, "__engine_io_mappings__", {}),
+        "structured_models": getattr(schema, "__structured_models__", {}),
+    }
+
+    # Analyze fields
+    for field_name, field_info in schema.model_fields.items():
+        info["fields"][field_name] = {
+            "type": str(field_info.annotation),
+            "required": field_info.is_required(),
+            "default": field_info.default if field_info.default is not ... else None,
+            "description": field_info.description,
+        }
+
+    return info
+
+
+def __dir__() -> List[str]:
+    """Override dir() to show only public API."""
+    return __all__
+
+
+# Initialize module
+_initialize_schema_module()
+
+# Add convenience imports to global namespace
+create_simple_state.__module__ = __name__
+create_agent_state.__module__ = __name__
+validate_schema.__module__ = __name__
+get_schema_info.__module__ = __name__

@@ -1,6 +1,5 @@
 """Pinecone Vector Store implementation for the Haive framework.
 
-from typing import Any
 This module provides a configuration class for the Pinecone vector store,
 which is a fully managed vector database service designed for production workloads.
 
@@ -26,7 +25,7 @@ a consistent Haive configuration interface with secure API key management.
 from typing import Any
 
 from langchain_core.documents import Document
-from pydantic import Field, SecretStr, validator
+from pydantic import Field, SecretStr, field_validator
 
 from haive.core.common.mixins.secure_config import SecureConfigMixin
 from haive.core.engine.vectorstore.base import BaseVectorStoreConfig
@@ -131,8 +130,9 @@ class PineconeVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
         default=1, ge=1, description="Number of replicas (used only during creation)"
     )
 
-    @validator("metric")
-    def validate_metric(self, v) -> Any:
+    @field_validator("metric")
+    @classmethod
+    def validate_metric(cls, v):
         """Validate distance metric is supported."""
         valid_metrics = ["cosine", "euclidean", "dotproduct"]
         if v not in valid_metrics:
@@ -154,7 +154,7 @@ class PineconeVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
             "ids": (list[str], Field(description="IDs of the added documents")),
         }
 
-    def instantiate(self) -> Any:
+    def instantiate(self):
         """Create a Pinecone vector store from this configuration.
 
         Returns:

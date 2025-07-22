@@ -19,8 +19,6 @@ class LocalSource(BaseSource):
     file_path: FilePath = Field(description="The path to the file to load.")
 
     @field_validator("file_path")
-
-
     @classmethod
     def validate_file_path(cls, v) -> Any:
         if not os.path.exists(v):
@@ -28,8 +26,6 @@ class LocalSource(BaseSource):
         return v
 
     @field_validator("file_path", mode="before")
-
-
     @classmethod
     def convert_to_path(cls, v) -> Any:
         if isinstance(v, str):
@@ -37,8 +33,6 @@ class LocalSource(BaseSource):
         return v
 
     @field_validator("file_path", mode="before")
-
-
     @classmethod
     def is_file(cls, v) -> bool:
         if not v.is_file():
@@ -69,8 +63,6 @@ class FileSource(ABC, LocalSource):
     # file_type: LocalSourceFileType = Field(description="The type of file.")
 
     @field_validator("file_path")
-
-
     @classmethod
     def validate_file_path(cls, v) -> Any:
         if not os.path.exists(v):
@@ -78,8 +70,6 @@ class FileSource(ABC, LocalSource):
         return v
 
     @field_validator("file_path", mode="before")
-
-
     @classmethod
     def convert_to_path(cls, v) -> Any:
         if isinstance(v, str):
@@ -117,8 +107,6 @@ class DirectorySource(LocalSource):
     )
 
     @field_validator("directory_path")
-
-
     @classmethod
     def validate_directory_path(cls, v) -> Any:
         if not os.path.exists(v):

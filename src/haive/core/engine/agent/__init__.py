@@ -1,96 +1,84 @@
-"""Module exports."""
+"""Agent engine module for the Haive framework.
 
-from agent.agent import Agent
-from agent.agent import app
-from agent.agent import apply_pattern
-from agent.agent import compile
-from agent.agent import debug_simple
-from agent.agent import decorator
-from agent.agent import extract_field_info
-from agent.agent import inspect_state
-from agent.agent import load_from_state
-from agent.agent import register_agent
-from agent.agent import reset_state
-from agent.agent import run
-from agent.agent import save_state_history
-from agent.agent import set_traceback_mode
-from agent.agent import setup_workflow
-from agent.agent import stream
-from agent.agent import visualize_graph
-from agent.config import AgentConfig
-from agent.config import PatternConfig
-from agent.config import add_node_config
-from agent.config import add_subagent
-from agent.config import apply_runnable_config
-from agent.config import build_agent
-from agent.config import clear_schema_caches
-from agent.config import create_runnable
-from agent.config import derive_input_schema
-from agent.config import derive_output_schema
-from agent.config import derive_schema
-from agent.config import disable_pattern
-from agent.config import enable_pattern
-from agent.config import ensure_engine
-from agent.config import ensure_state_schema
-from agent.config import extract_params
-from agent.config import from_dict
-from agent.config import from_json
-from agent.config import get_input_fields
-from agent.config import get_output_fields
-from agent.config import get_pattern_order
-from agent.config import get_pattern_parameters
-from agent.config import get_schema_fields
-from agent.config import get_schema_manager
-from agent.config import invoke
-from agent.config import is_pattern_applied
-from agent.config import mark_pattern_applied
-from agent.config import merge_with
-from agent.config import register_agent_class
-from agent.config import resolve_engine
-from agent.config import set_pattern_parameters
-from agent.config import set_testing_mode
-from agent.config import to_dict
-from agent.config import to_json
-from agent.config import use_pattern
-from agent.config import with_config_overrides
-from agent.pattern import PatternConfig
-from agent.pattern import PatternManager
-from agent.pattern import add_pattern
-from agent.pattern import applied_patterns_as_set
-from agent.pattern import disable_pattern
-from agent.pattern import enable_pattern
-from agent.pattern import from_dict
-from agent.pattern import get_pattern_order
-from agent.pattern import get_pattern_parameters
-from agent.pattern import get_required_components
-from agent.pattern import is_pattern_applied
-from agent.pattern import mark_pattern_applied
-from agent.pattern import merge_with
-from agent.pattern import parameters_as_dict
-from agent.pattern import patterns_as_list
-from agent.pattern import set_pattern_parameters
-from agent.pattern import to_dict
-from agent.pattern import validate_patterns
-from agent.protocols import AgentProtocol
-from agent.protocols import ExtensibilityAgentProtocol
-from agent.protocols import FullAgentProtocol
-from agent.protocols import PersistentAgentProtocol
-from agent.protocols import StreamingAgentProtocol
-from agent.protocols import VisualizationAgentProtocol
-from agent.protocols import app
-from agent.protocols import apply_pattern
-from agent.protocols import assert_agent_protocols
-from agent.protocols import compile
-from agent.protocols import inspect_state
-from agent.protocols import reset_state
-from agent.protocols import run
-from agent.protocols import save_state_history
-from agent.protocols import setup_workflow
-from agent.protocols import stream
-from agent.protocols import visualize_graph
-from agent.registry import decorator
-from agent.registry import register_agent
-from agent.registry import register_agents_from_module
-from agent.registry import resolve_agent_class
+This module provides the core architecture for all agent implementations in Haive.
+It delivers consistent schema handling, execution flows, persistence management,
+and extensibility through patterns.
 
-__all__ = ['Agent', 'AgentConfig', 'AgentProtocol', 'ExtensibilityAgentProtocol', 'FullAgentProtocol', 'PatternConfig', 'PatternManager', 'PersistentAgentProtocol', 'StreamingAgentProtocol', 'VisualizationAgentProtocol', 'add_node_config', 'add_pattern', 'add_subagent', 'app', 'applied_patterns_as_set', 'apply_pattern', 'apply_runnable_config', 'assert_agent_protocols', 'build_agent', 'clear_schema_caches', 'compile', 'create_runnable', 'debug_simple', 'decorator', 'derive_input_schema', 'derive_output_schema', 'derive_schema', 'disable_pattern', 'enable_pattern', 'ensure_engine', 'ensure_state_schema', 'extract_field_info', 'extract_params', 'from_dict', 'from_json', 'get_input_fields', 'get_output_fields', 'get_pattern_order', 'get_pattern_parameters', 'get_required_components', 'get_schema_fields', 'get_schema_manager', 'inspect_state', 'invoke', 'is_pattern_applied', 'load_from_state', 'mark_pattern_applied', 'merge_with', 'parameters_as_dict', 'patterns_as_list', 'register_agent', 'register_agent_class', 'register_agents_from_module', 'reset_state', 'resolve_agent_class', 'resolve_engine', 'run', 'save_state_history', 'set_pattern_parameters', 'set_testing_mode', 'set_traceback_mode', 'setup_workflow', 'stream', 'to_dict', 'to_json', 'use_pattern', 'validate_patterns', 'visualize_graph', 'with_config_overrides']
+The agent engine implements protocol-based interfaces to ensure all agent
+implementations conform to consistent APIs, while providing flexibility for
+custom agent behaviors and execution patterns.
+
+Key Components:
+    Agent: Base agent class with graph-based execution
+    AgentConfig: Comprehensive configuration for agents
+    AgentProtocol: Protocol interface for agent implementations
+    PersistenceManager: State persistence and checkpointing
+    Pattern: Reusable agent implementation patterns
+
+The agent engine integrates tightly with LangGraph for execution flow management
+and provides built-in support for:
+- Dynamic state schema management
+- Streaming outputs
+- State persistence
+- Graph visualization
+- Tool integration
+- Custom execution patterns
+
+Examples:
+    Basic agent creation::
+
+        from haive.core.engine.agent import Agent, AgentConfig
+        from haive.core.engine.aug_llm import AugLLMConfig
+
+        agent = Agent(
+            name="assistant",
+            engine=AugLLMConfig(model="gpt-4")
+        )
+
+        result = agent.invoke("Hello!")
+
+    Agent with persistence::
+
+        from haive.core.engine.agent import Agent, AgentConfig
+        from haive.core.engine.agent.persistence import CheckpointerConfig
+
+        config = AgentConfig(
+            name="persistent_agent",
+            engine=AugLLMConfig(model="gpt-4"),
+            checkpointer_config=CheckpointerConfig(
+                type="sqlite",
+                connection_string="agent_state.db"
+            )
+        )
+
+        agent = Agent(config)
+
+See Also:
+    - Agent Protocol documentation: protocols.py
+    - Persistence system: persistence/
+    - Agent patterns: pattern.py
+    - Configuration guide: config.py
+"""
+
+from haive.core.engine.agent.agent import AGENT_REGISTRY, Agent
+from haive.core.engine.agent.config import AgentConfig
+from haive.core.engine.agent.pattern import PatternConfig, PatternManager
+from haive.core.engine.agent.protocols import (
+    AgentProtocol,
+    PersistentAgentProtocol,
+    StreamingAgentProtocol,
+)
+
+__all__ = [
+    # Core Classes
+    "Agent",
+    "AgentConfig",
+    "PatternConfig",
+    "PatternManager",
+    # Protocols
+    "AgentProtocol",
+    "StreamingAgentProtocol",
+    "PersistentAgentProtocol",
+    # Registry
+    "AGENT_REGISTRY",
+]

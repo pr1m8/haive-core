@@ -1,214 +1,95 @@
-"""Module exports."""
+"""Prebuilt state schemas for common agent patterns.
 
-from prebuilt.document_state import Config
-from prebuilt.document_state import DocumentEngineInputSchema
-from prebuilt.document_state import DocumentEngineOutputSchema
-from prebuilt.document_state import DocumentState
-from prebuilt.document_state import DocumentWorkflowSchema
-from prebuilt.document_state import add_document
-from prebuilt.document_state import add_error
-from prebuilt.document_state import calculate_statistics
-from prebuilt.dynamic_activation_state import DynamicActivationState
-from prebuilt.dynamic_activation_state import activate_component
-from prebuilt.dynamic_activation_state import deactivate_component
-from prebuilt.dynamic_activation_state import get_activation_stats
-from prebuilt.dynamic_activation_state import get_active_components
-from prebuilt.dynamic_activation_state import get_meta_state
-from prebuilt.dynamic_activation_state import get_unsatisfied_capabilities
-from prebuilt.dynamic_activation_state import is_capability_satisfied
-from prebuilt.dynamic_activation_state import mark_capability_satisfied
-from prebuilt.dynamic_activation_state import reset_state
-from prebuilt.dynamic_activation_state import setup_dynamic_activation
-from prebuilt.dynamic_activation_state import update_capabilities
-from prebuilt.dynamic_activation_state import validate_current_task
-from prebuilt.dynamic_activation_state import validate_missing_capabilities
-from prebuilt.dynamic_activation_state import validate_required_capabilities
-from prebuilt.flexible_multi_agent_state import ContainerMultiAgentState
-from prebuilt.flexible_multi_agent_state import FlexibleMultiAgentState
-from prebuilt.flexible_multi_agent_state import MinimalMultiAgentState
-from prebuilt.flexible_multi_agent_state import apply_state_transfer
-from prebuilt.flexible_multi_agent_state import get_agent
-from prebuilt.flexible_multi_agent_state import get_agent_state
-from prebuilt.flexible_multi_agent_state import initialize_agent_states
-from prebuilt.flexible_multi_agent_state import normalize_agents
-from prebuilt.flexible_multi_agent_state import record_agent_output
-from prebuilt.flexible_multi_agent_state import set_current_agent
-from prebuilt.flexible_multi_agent_state import setup_execution_order
-from prebuilt.flexible_multi_agent_state import update_agent_state
-from prebuilt.llm_state import LLMState
-from prebuilt.llm_state import context_length
-from prebuilt.llm_state import from_engine
-from prebuilt.llm_state import get_engine_metadata
-from prebuilt.llm_state import is_approaching_token_limit
-from prebuilt.llm_state import is_at_critical_limit
-from prebuilt.llm_state import is_at_token_limit
-from prebuilt.llm_state import remaining_tokens
-from prebuilt.llm_state import setup_primary_engine_references
-from prebuilt.llm_state import should_summarize_context
-from prebuilt.llm_state import token_usage_percentage
-from prebuilt.messages_state import MessagesState
-from prebuilt.messages_state import add_message
-from prebuilt.messages_state import add_system_message
-from prebuilt.messages_state import decide_next_node
-from prebuilt.messages_state import deduplicate_tool_calls
-from prebuilt.messages_state import enable_structured_output_parsing
-from prebuilt.messages_state import ensure_system_before_human
-from prebuilt.messages_state import format_for_structured_output
-from prebuilt.messages_state import from_dict
-from prebuilt.messages_state import get_completed_tool_calls
-from prebuilt.messages_state import get_conversation_rounds
-from prebuilt.messages_state import get_filtered_messages
-from prebuilt.messages_state import get_last_ai_message
-from prebuilt.messages_state import get_last_human_message
-from prebuilt.messages_state import get_last_message
-from prebuilt.messages_state import get_last_tool_message
-from prebuilt.messages_state import get_latest_structured_output
-from prebuilt.messages_state import get_parsed_tool_calls
-from prebuilt.messages_state import get_system_message
-from prebuilt.messages_state import get_tool_calls
-from prebuilt.messages_state import has_tool_calls
-from prebuilt.messages_state import inject_state_into_tool_calls
-from prebuilt.messages_state import is_last_message_from_ai
-from prebuilt.messages_state import is_last_message_from_human
-from prebuilt.messages_state import is_last_message_from_tool
-from prebuilt.messages_state import is_real_human_message
-from prebuilt.messages_state import is_tool_error
-from prebuilt.messages_state import parse_ai_structured_outputs
-from prebuilt.messages_state import send_tool_calls
-from prebuilt.messages_state import setup_structured_output_parser
-from prebuilt.messages_state import sync_message_engine_settings
-from prebuilt.messages_state import to_langchain_prompt
-from prebuilt.messages_state import to_openai_format
-from prebuilt.messages_state import transform_ai_to_human
-from prebuilt.messages_state import validate_message_format
-from prebuilt.messages_state import with_system_message
-from prebuilt.meta_state import MetaStateSchema
-from prebuilt.meta_state import check_agent_recompilation
-from prebuilt.meta_state import clone_with_agent
-from prebuilt.meta_state import from_agent
-from prebuilt.meta_state import get_agent_engine
-from prebuilt.meta_state import get_execution_summary
-from prebuilt.meta_state import prepare_agent_input
-from prebuilt.meta_state import reset_execution_state
-from prebuilt.meta_state import setup_graph_composition
-from prebuilt.meta_state import update_agent
-from prebuilt.multi_agent_state import MultiAgentState
-from prebuilt.multi_agent_state import agent_count
-from prebuilt.multi_agent_state import convert_agents_to_dict
-from prebuilt.multi_agent_state import create_agent_table
-from prebuilt.multi_agent_state import display_agent_table
-from prebuilt.multi_agent_state import display_debug_info
-from prebuilt.multi_agent_state import get_agent
-from prebuilt.multi_agent_state import get_agent_output
-from prebuilt.multi_agent_state import get_agent_state
-from prebuilt.multi_agent_state import get_agents_needing_recompile
-from prebuilt.multi_agent_state import has_active_agent
-from prebuilt.multi_agent_state import mark_agent_for_recompile
-from prebuilt.multi_agent_state import needs_any_recompile
-from prebuilt.multi_agent_state import record_agent_output
-from prebuilt.multi_agent_state import resolve_agent_recompile
-from prebuilt.multi_agent_state import set_active_agent
-from prebuilt.multi_agent_state import setup_agent_hierarchy
-from prebuilt.multi_agent_state import update_agent_state
-from prebuilt.query_state import Config
-from prebuilt.query_state import QueryComplexity
-from prebuilt.query_state import QueryIntent
-from prebuilt.query_state import QueryMetrics
-from prebuilt.query_state import QueryProcessingConfig
-from prebuilt.query_state import QueryResult
-from prebuilt.query_state import QueryState
-from prebuilt.query_state import QueryType
-from prebuilt.query_state import RetrievalStrategy
-from prebuilt.query_state import add_citation
-from prebuilt.query_state import add_context_document
-from prebuilt.query_state import add_error
-from prebuilt.query_state import add_expanded_query
-from prebuilt.query_state import add_intermediate_result
-from prebuilt.query_state import add_query_variation
-from prebuilt.query_state import add_refined_query
-from prebuilt.query_state import add_retrieved_document
-from prebuilt.query_state import create_cache_key
-from prebuilt.query_state import get_active_filters
-from prebuilt.query_state import get_all_documents
-from prebuilt.query_state import get_all_queries
-from prebuilt.query_state import get_confidence_score
-from prebuilt.query_state import get_processing_summary
-from prebuilt.query_state import is_multi_query_workflow
-from prebuilt.query_state import requires_structured_output
-from prebuilt.query_state import set_confidence_score
-from prebuilt.query_state import update_stage
-from prebuilt.query_state import validate_original_query
-from prebuilt.query_state import validate_refined_queries
-from prebuilt.query_state import validate_time_range
-from prebuilt.structured_output_state import StructuredOutputMixin
-from prebuilt.structured_output_state import StructuredOutputState
-from prebuilt.structured_output_state import format_for_structured_output
-from prebuilt.structured_output_state import get_latest_parsed_output
-from prebuilt.structured_output_state import get_parsed_output
-from prebuilt.structured_output_state import get_tool_calls
-from prebuilt.structured_output_state import parse_structured_outputs
-from prebuilt.structured_output_state import parse_structured_outputs_mixin
-from prebuilt.structured_output_state import setup_output_parser
-from prebuilt.tool_state import ToolState
-from prebuilt.tool_state import add_engine_route
-from prebuilt.tool_state import add_tool
-from prebuilt.tool_state import add_tool_to_engine
-from prebuilt.tool_state import configure_engine_routes
-from prebuilt.tool_state import get_tool_by_name
-from prebuilt.tool_state import get_tool_route
-from prebuilt.tool_state import get_tool_type
-from prebuilt.tool_state import get_tools_by_route
-from prebuilt.tool_state import get_tools_by_type
-from prebuilt.tool_state import has_tool_route
-from prebuilt.tool_state import has_tool_type
-from prebuilt.tool_state import refresh_tool_routes
-from prebuilt.tool_state import remove_engine_route
-from prebuilt.tool_state import remove_tool
-from prebuilt.tool_state import sync_tools_and_update_routes
-from prebuilt.tool_state import tool_types
-from prebuilt.tool_state import update_tool_types
-from prebuilt.tool_state_with_validation import EnhancedToolState
-from prebuilt.tool_state_with_validation import add_tool_enhanced
-from prebuilt.tool_state_with_validation import add_tool_to_category
-from prebuilt.tool_state_with_validation import apply_validation_results
-from prebuilt.tool_state_with_validation import enhanced_tool_setup
-from prebuilt.tool_state_with_validation import evaluate_branch_condition
-from prebuilt.tool_state_with_validation import get_branch_condition
-from prebuilt.tool_state_with_validation import get_correctable_tool_calls
-from prebuilt.tool_state_with_validation import get_enhanced_summary
-from prebuilt.tool_state_with_validation import get_next_nodes
-from prebuilt.tool_state_with_validation import get_tool_message_status
-from prebuilt.tool_state_with_validation import get_tools_by_category
-from prebuilt.tool_state_with_validation import get_valid_tool_calls_for_execution
-from prebuilt.tool_state_with_validation import get_validation_routing_data
-from prebuilt.tool_state_with_validation import set_branch_condition
-from prebuilt.tool_state_with_validation import should_continue_to_tools
-from prebuilt.tool_state_with_validation import should_end_processing
-from prebuilt.tool_state_with_validation import should_return_to_agent
-from prebuilt.tool_state_with_validation import track_tool_execution
-from prebuilt.tool_state_with_validation import update_tool_message_status
-from prebuilt.validation_aware_tool_state import ValidationAwareToolState
-from prebuilt.validation_aware_tool_state import add_validation_result
-from prebuilt.validation_aware_tool_state import clear_current_validation_results
-from prebuilt.validation_aware_tool_state import current_validation_success_rate
-from prebuilt.validation_aware_tool_state import get_preferred_tools
-from prebuilt.validation_aware_tool_state import get_routing_recommendation
-from prebuilt.validation_aware_tool_state import get_validation_summary
-from prebuilt.validation_aware_tool_state import overall_validation_success_rate
-from prebuilt.validation_aware_tool_state import problematic_tools
-from prebuilt.validation_aware_tool_state import recent_validation_failures
-from prebuilt.validation_aware_tool_state import recommended_routing_strategy
-from prebuilt.validation_aware_tool_state import should_route_to_tool
-from prebuilt.validation_aware_tool_state import update_validation_stats
-from prebuilt.validation_aware_tool_state import validation_success_by_tool
-from prebuilt.validation_aware_tool_state import validation_success_by_type
-from prebuilt.validation_aware_tool_state import validation_trending
-from prebuilt.validation_routing_example import Config
-from prebuilt.validation_routing_example import ValidationExample
-from prebuilt.validation_routing_example import agent_node
-from prebuilt.validation_routing_example import build_validation_graph
-from prebuilt.validation_routing_example import langchain_tools_node
-from prebuilt.validation_routing_example import pydantic_tools_node
-from prebuilt.validation_routing_example import validation_node
+This module provides ready-to-use state schemas for various agent architectures:
 
-__all__ = ['Config', 'ContainerMultiAgentState', 'DocumentEngineInputSchema', 'DocumentEngineOutputSchema', 'DocumentState', 'DocumentWorkflowSchema', 'DynamicActivationState', 'EnhancedToolState', 'FlexibleMultiAgentState', 'LLMState', 'MessagesState', 'MetaStateSchema', 'MinimalMultiAgentState', 'MultiAgentState', 'QueryComplexity', 'QueryIntent', 'QueryMetrics', 'QueryProcessingConfig', 'QueryResult', 'QueryState', 'QueryType', 'RetrievalStrategy', 'StructuredOutputMixin', 'StructuredOutputState', 'ToolState', 'ValidationAwareToolState', 'ValidationExample', 'activate_component', 'add_citation', 'add_context_document', 'add_document', 'add_engine_route', 'add_error', 'add_expanded_query', 'add_intermediate_result', 'add_message', 'add_query_variation', 'add_refined_query', 'add_retrieved_document', 'add_system_message', 'add_tool', 'add_tool_enhanced', 'add_tool_to_category', 'add_tool_to_engine', 'add_validation_result', 'agent_count', 'agent_node', 'apply_state_transfer', 'apply_validation_results', 'build_validation_graph', 'calculate_statistics', 'check_agent_recompilation', 'clear_current_validation_results', 'clone_with_agent', 'configure_engine_routes', 'context_length', 'convert_agents_to_dict', 'create_agent_table', 'create_cache_key', 'current_validation_success_rate', 'deactivate_component', 'decide_next_node', 'deduplicate_tool_calls', 'display_agent_table', 'display_debug_info', 'enable_structured_output_parsing', 'enhanced_tool_setup', 'ensure_system_before_human', 'evaluate_branch_condition', 'format_for_structured_output', 'from_agent', 'from_dict', 'from_engine', 'get_activation_stats', 'get_active_components', 'get_active_filters', 'get_agent', 'get_agent_engine', 'get_agent_output', 'get_agent_state', 'get_agents_needing_recompile', 'get_all_documents', 'get_all_queries', 'get_branch_condition', 'get_completed_tool_calls', 'get_confidence_score', 'get_conversation_rounds', 'get_correctable_tool_calls', 'get_engine_metadata', 'get_enhanced_summary', 'get_execution_summary', 'get_filtered_messages', 'get_last_ai_message', 'get_last_human_message', 'get_last_message', 'get_last_tool_message', 'get_latest_parsed_output', 'get_latest_structured_output', 'get_meta_state', 'get_next_nodes', 'get_parsed_output', 'get_parsed_tool_calls', 'get_preferred_tools', 'get_processing_summary', 'get_routing_recommendation', 'get_system_message', 'get_tool_by_name', 'get_tool_calls', 'get_tool_message_status', 'get_tool_route', 'get_tool_type', 'get_tools_by_category', 'get_tools_by_route', 'get_tools_by_type', 'get_unsatisfied_capabilities', 'get_valid_tool_calls_for_execution', 'get_validation_routing_data', 'get_validation_summary', 'has_active_agent', 'has_tool_calls', 'has_tool_route', 'has_tool_type', 'initialize_agent_states', 'inject_state_into_tool_calls', 'is_approaching_token_limit', 'is_at_critical_limit', 'is_at_token_limit', 'is_capability_satisfied', 'is_last_message_from_ai', 'is_last_message_from_human', 'is_last_message_from_tool', 'is_multi_query_workflow', 'is_real_human_message', 'is_tool_error', 'langchain_tools_node', 'mark_agent_for_recompile', 'mark_capability_satisfied', 'needs_any_recompile', 'normalize_agents', 'overall_validation_success_rate', 'parse_ai_structured_outputs', 'parse_structured_outputs', 'parse_structured_outputs_mixin', 'prepare_agent_input', 'problematic_tools', 'pydantic_tools_node', 'recent_validation_failures', 'recommended_routing_strategy', 'record_agent_output', 'refresh_tool_routes', 'remaining_tokens', 'remove_engine_route', 'remove_tool', 'requires_structured_output', 'reset_execution_state', 'reset_state', 'resolve_agent_recompile', 'send_tool_calls', 'set_active_agent', 'set_branch_condition', 'set_confidence_score', 'set_current_agent', 'setup_agent_hierarchy', 'setup_dynamic_activation', 'setup_execution_order', 'setup_graph_composition', 'setup_output_parser', 'setup_primary_engine_references', 'setup_structured_output_parser', 'should_continue_to_tools', 'should_end_processing', 'should_return_to_agent', 'should_route_to_tool', 'should_summarize_context', 'sync_message_engine_settings', 'sync_tools_and_update_routes', 'to_langchain_prompt', 'to_openai_format', 'token_usage_percentage', 'tool_types', 'track_tool_execution', 'transform_ai_to_human', 'update_agent', 'update_agent_state', 'update_capabilities', 'update_stage', 'update_tool_message_status', 'update_tool_types', 'update_validation_stats', 'validate_current_task', 'validate_message_format', 'validate_missing_capabilities', 'validate_original_query', 'validate_refined_queries', 'validate_required_capabilities', 'validate_time_range', 'validation_node', 'validation_success_by_tool', 'validation_success_by_type', 'validation_trending', 'with_system_message']
+- BasicAgentState: Simple agent state with messages and context
+- MessagesState: Conversation management with LangChain integration
+- ToolState: Extended MessagesState with tool management
+- MultiAgentStateSchema: State for multi-agent architectures
+- MessagesStateWithTokenUsage: MessagesState with token tracking
+
+The messages submodule provides additional functionality:
+- TokenUsage: Token tracking and cost calculation
+- TokenUsageMixin: Mixin for adding token tracking to any schema
+- Enhanced message utilities (if available)
+"""
+
+from haive.core.schema.multi_agent_state_schema import MultiAgentStateSchema
+
+# Import document and query state components
+from haive.core.schema.prebuilt.document_state import (
+    DocumentEngineInputSchema,
+    DocumentEngineOutputSchema,
+    DocumentState,
+)
+
+# from haive.core.schema.prebuilt.basic_agent_state import BasicAgentState
+from haive.core.schema.prebuilt.dynamic_activation_state import DynamicActivationState
+from haive.core.schema.prebuilt.llm_state import LLMState
+
+# Import messages module components
+from haive.core.schema.prebuilt.messages import (
+    MessagesStateWithTokenUsage,
+    TokenUsage,
+    TokenUsageMixin,
+    aggregate_token_usage,
+    calculate_token_cost,
+    extract_token_usage_from_message,
+)
+from haive.core.schema.prebuilt.messages_state import MessagesState
+from haive.core.schema.prebuilt.meta_state import MetaStateSchema
+from haive.core.schema.prebuilt.multi_agent_state import MultiAgentState
+from haive.core.schema.prebuilt.query_state import (
+    QueryComplexity,
+    QueryIntent,
+    QueryMetrics,
+    QueryProcessingConfig,
+    QueryProcessingState,
+    QueryResult,
+    QueryState,
+    QueryType,
+    RetrievalStrategy,
+)
+from haive.core.schema.prebuilt.tool_state import ToolState
+
+# Convenient aliases
+TokenAwareState = MessagesStateWithTokenUsage  # Shorter name
+TokenToolState = ToolState  # Makes it clear it has token tracking
+AgentState = LLMState  # Generic agent state with single engine
+
+__all__ = [
+    # Core prebuilt schemas
+    # "BasicAgentState",
+    "DynamicActivationState",
+    "MessagesState",
+    "ToolState",
+    "MultiAgentStateSchema",
+    "MultiAgentState",
+    "LLMState",
+    # Document and query schemas
+    "DocumentState",
+    "DocumentEngineInputSchema",
+    "DocumentEngineOutputSchema",
+    "MetaStateSchema",
+    "QueryState",
+    "QueryProcessingState",
+    "QueryType",
+    "RetrievalStrategy",
+    "QueryComplexity",
+    "QueryIntent",
+    "QueryProcessingConfig",
+    "QueryMetrics",
+    "QueryResult",
+    # Token usage components
+    "TokenUsage",
+    "TokenUsageMixin",
+    "MessagesStateWithTokenUsage",
+    # Token usage utilities
+    "extract_token_usage_from_message",
+    "aggregate_token_usage",
+    "calculate_token_cost",
+    # Aliases
+    "TokenAwareState",
+    "TokenToolState",
+    "AgentState",
+]

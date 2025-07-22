@@ -4,21 +4,18 @@ import asyncio
 import logging
 import sys
 
-from langchain_core.messages import HumanMessage
-
 from haive.agents.reasoning_and_critique.self_discover.v2.agent import (
     DEFAULT_REASONING_MODULES,
     self_discovery,
 )
+from langchain_core.messages import HumanMessage
 
 # Suppress all logging except errors
 logging.getLogger().setLevel(logging.ERROR)
 
 # Add direct paths to avoid import issues
-sys.path.insert(
-    0, "/home/will/Projects/haive/backend/haive/packages/haive-agents/src")
-sys.path.insert(
-    0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
+sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-agents/src")
+sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
 
 
 async def simple_test():

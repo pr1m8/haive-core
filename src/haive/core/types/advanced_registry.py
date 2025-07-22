@@ -13,7 +13,7 @@ from typing import (
     runtime_checkable,
 )
 
-from pydantic import BaseModel, Field, computed_field, model_validator
+from pydantic import BaseModel, Field, computed_field, model_serializer, model_validator
 from pydantic.functional_validators import BeforeValidator
 
 # ────────────────────────────  Typing helpers  ─────────────────────────── #
@@ -178,6 +178,19 @@ class TextPipeline(Registered[list[str]]):
         norm = self.normaliser.build()
         return [t.lower() for t in tokens] + [norm]
 
+
+# ───────────────────────────── Advanced Registry Alias ─────────────────────────── #
+# Provide AdvancedRegistry as an alias to Registered for compatibility
+AdvancedRegistry = Registered
+
+# Export for external use
+__all__ = [
+    "AdvancedRegistry",
+    "Registered", 
+    "ComponentSpec",
+    "Buildable",
+    "TypeKey",
+]
 
 # ───────────────────────────── Smoke Test Runner ─────────────────────────── #
 if __name__ == "__main__":

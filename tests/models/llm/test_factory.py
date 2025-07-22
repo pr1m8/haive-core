@@ -50,8 +50,7 @@ class TestLLMFactory:
 
         # Verify calls
         mock_get_provider.assert_called_once_with(LLMProvider.OPENAI)
-        mock_provider_class.assert_called_once_with(
-            model="gpt-4", temperature=0.7)
+        mock_provider_class.assert_called_once_with(model="gpt-4", temperature=0.7)
         mock_provider_instance.instantiate.assert_called_once()
         assert result == mock_llm
 
@@ -224,8 +223,7 @@ class TestFactoryFunctions:
         """Test get_provider_models function."""
         # Mock provider class with get_models method
         mock_provider_class = Mock()
-        mock_provider_class.get_models.return_value = [
-            "gpt-4", "gpt-3.5-turbo"]
+        mock_provider_class.get_models.return_value = ["gpt-4", "gpt-3.5-turbo"]
 
         mock_get_provider.return_value = mock_provider_class
 

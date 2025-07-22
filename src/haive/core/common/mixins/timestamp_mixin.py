@@ -112,8 +112,6 @@ class AccessTimestampsMixin(CreatedTimestampMixin):
     )
 
     @model_validator(mode="after")
-
-
     @classmethod
     def _sync_last_accessed(cls) -> "AccessTimestampsMixin":
         """Sync `last_accessed_at` to `created_at` immediately after model creation.

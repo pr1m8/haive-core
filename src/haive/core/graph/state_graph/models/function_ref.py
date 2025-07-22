@@ -14,8 +14,7 @@ class FunctionReference(SerializableModel):
     module_path: str | None = Field(
         default=None, description="Module containing the callable"
     )
-    function_name: str | None = Field(
-        default=None, description="Name of the callable")
+    function_name: str | None = Field(default=None, description="Name of the callable")
     callable_type: Literal["function", "method", "class", "lambda", "unknown"] = Field(
         default="function", description="Type of callable"
     )
@@ -26,8 +25,6 @@ class FunctionReference(SerializableModel):
     __abstract__ = True  # Not registered directly
 
     @model_validator(mode="after")
-
-
     @classmethod
     def ensure_valid_reference(cls) -> "FunctionReference":
         """Ensure the reference is valid."""
@@ -56,8 +53,7 @@ class FunctionReference(SerializableModel):
         if callable_obj is None:
             return None
 
-        instance_name = name or getattr(
-            callable_obj, "__name__", "unnamed_function")
+        instance_name = name or getattr(callable_obj, "__name__", "unnamed_function")
 
         ref = cls(
             name=instance_name,

@@ -107,8 +107,7 @@ class TestAdvancedNodeComposer:
 
         def process(state, config):
             threshold = config.get("threshold", 5)
-            return {"over_threshold": len(
-                state.get("messages", [])) > threshold}
+            return {"over_threshold": len(state.get("messages", [])) > threshold}
 
         node = composer.from_callable_advanced(process)
 
@@ -168,11 +167,9 @@ class TestAdvancedNodeComposer:
         """Test Send command handling."""
 
         def split_work(state) -> list[Send]:
-            return [Send("worker1", {"task": "A"}),
-                    Send("worker2", {"task": "B"})]
+            return [Send("worker1", {"task": "A"}), Send("worker2", {"task": "B"})]
 
-        node = composer.from_callable_advanced(
-            split_work, handle_command=False)
+        node = composer.from_callable_advanced(split_work, handle_command=False)
 
         result = node({}, {})
 
@@ -224,8 +221,7 @@ class TestAdvancedNodeComposer:
                 "metadata": {**state.get("metadata", {}), "last_count": count},
             }
 
-        node = composer.from_callable_advanced(
-            func=process, update_logic=custom_update)
+        node = composer.from_callable_advanced(func=process, update_logic=custom_update)
 
         result = node({"messages": ["a", "b", "c"]}, {})
 
@@ -245,10 +241,8 @@ class TestAdvancedNodeComposer:
             processed: str
             length: int
 
-        def process_typed(state: InputState,
-                          config: dict[str, Any]) -> OutputResult:
-            return OutputResult(processed=state.text.upper(),
-                                length=len(state.text))
+        def process_typed(state: InputState, config: dict[str, Any]) -> OutputResult:
+            return OutputResult(processed=state.text.upper(), length=len(state.text))
 
         node = composer.create_typed_callable_node(
             func=process_typed,
@@ -293,8 +287,7 @@ class TestAdvancedNodeComposer:
             name="message_counter",
         )
 
-        result = node(
-            {"messages": ["a", "b", "c", "d", "e", "f"]}, {"window": 3})
+        result = node({"messages": ["a", "b", "c", "d", "e", "f"]}, {"window": 3})
 
         assert result.update["recent_count"] == 3
         assert result.update["is_empty"] is False
@@ -368,8 +361,7 @@ class TestDecoratorPatterns:
             return {"count": len(data)}
 
         def update(result, state, config):
-            return {"data_count": result["count"],
-                    "has_data": result["count"] > 0}
+            return {"data_count": result["count"], "has_data": result["count"] > 0}
 
         node = node_with_custom_logic(
             name="data_processor", extract=extract, process=process, update=update
@@ -397,8 +389,7 @@ class TestRealWorldScenarios:
             messages = state.get("messages", [])
 
             if len(messages) > 20:
-                return {"should_continue": False,
-                        "reason": "max_length_reached"}
+                return {"should_continue": False, "reason": "max_length_reached"}
 
             last_message = messages[-1] if messages else ""
             if "goodbye" in last_message.lower():
@@ -412,14 +403,12 @@ class TestRealWorldScenarios:
         assert result1.update["stop_reason"] == "max_length_reached"
 
         # Test goodbye
-        result2 = check_conversation_end(
-            {"messages": ["hello", "goodbye"]}, {})
+        result2 = check_conversation_end({"messages": ["hello", "goodbye"]}, {})
         assert result2.update["continue_conversation"] is False
         assert result2.update["stop_reason"] == "user_goodbye"
 
         # Test continue
-        result3 = check_conversation_end(
-            {"messages": ["hello", "how are you?"]}, {})
+        result3 = check_conversation_end({"messages": ["hello", "how are you?"]}, {})
         assert result3.update["continue_conversation"] is True
         assert result3.update["stop_reason"] is None
 
@@ -447,10 +436,8 @@ class TestRealWorldScenarios:
             summaries = []
             for doc in extracted["docs"]:
                 content = doc["content"]
-                summary = content[:30] + \
-                    "..." if len(content) > 30 else content
-                summaries.append(
-                    {"id": doc.get("id", "unknown"), "summary": summary})
+                summary = content[:30] + "..." if len(content) > 30 else content
+                summaries.append({"id": doc.get("id", "unknown"), "summary": summary})
 
             return {
                 "summaries": summaries,

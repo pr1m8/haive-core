@@ -1,6 +1,5 @@
 """Amazon OpenSearch Vector Store implementation for the Haive framework.
 
-from typing import Any
 This module provides a configuration class for the Amazon OpenSearch Service vector store,
 which is AWS's managed version of OpenSearch with enhanced features.
 
@@ -25,7 +24,7 @@ The implementation extends the base OpenSearch configuration with AWS-specific f
 from typing import Any
 
 from langchain_core.documents import Document
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 from haive.core.engine.vectorstore.base import BaseVectorStoreConfig
 from haive.core.engine.vectorstore.types import VectorStoreType
@@ -115,8 +114,7 @@ class AmazonOpenSearchVectorStoreConfig(BaseVectorStoreConfig):
         default=False, description="Whether this is an AOSS (serverless) deployment"
     )
 
-    # Engine configuration (inherited from OpenSearch but with AOSS
-    # constraints)
+    # Engine configuration (inherited from OpenSearch but with AOSS constraints)
     engine: str = Field(
         default="nmslib",
         description="Vector engine: 'nmslib' or 'faiss' (lucene not supported on AOSS)",
@@ -184,8 +182,9 @@ class AmazonOpenSearchVectorStoreConfig(BaseVectorStoreConfig):
         description="Maximum chunk size for bulk operations in bytes",
     )
 
-    @validator("opensearch_url")
-    def validate_opensearch_url(self, v) -> Any:
+    @field_validator("opensearch_url")
+    @classmethod
+    def validate_opensearch_url(cls, v):
         """Validate Amazon OpenSearch URL format."""
         if not v.startswith("https://"):
             raise ValueError("Amazon OpenSearch URL must use HTTPS")
@@ -195,8 +194,9 @@ class AmazonOpenSearchVectorStoreConfig(BaseVectorStoreConfig):
             raise ValueError("URL must be an Amazon OpenSearch Service endpoint")
         return v
 
-    @validator("engine")
-    def validate_engine(self, v, values) -> Any:
+    @field_validator("engine")
+    @classmethod
+    def validate_engine(cls, v, values):
         """Validate vector engine is supported, considering AOSS limitations."""
         is_aoss = values.get("is_aoss", False)
         if is_aoss:
@@ -209,8 +209,9 @@ class AmazonOpenSearchVectorStoreConfig(BaseVectorStoreConfig):
                 raise ValueError(f"engine must be one of {valid_engines}, got {v}")
         return v
 
-    @validator("aws_region")
-    def validate_aws_region(self, v) -> Any:
+    @field_validator("aws_region")
+    @classmethod
+    def validate_aws_region(cls, v):
         """Validate AWS region format."""
         import re
 
@@ -218,8 +219,9 @@ class AmazonOpenSearchVectorStoreConfig(BaseVectorStoreConfig):
             raise ValueError(f"Invalid AWS region format: {v}")
         return v
 
-    @validator("index_name")
-    def validate_index_name(self, v) -> Any:
+    @field_validator("index_name")
+    @classmethod
+    def validate_index_name(cls, v):
         """Validate index name format."""
         if not v or len(v.strip()) == 0:
             raise ValueError("index_name cannot be empty")
@@ -249,7 +251,7 @@ class AmazonOpenSearchVectorStoreConfig(BaseVectorStoreConfig):
             ),
         }
 
-    def instantiate(self) -> Any:
+    def instantiate(self):
         """Create an Amazon OpenSearch Service vector store from this configuration.
 
         Returns:

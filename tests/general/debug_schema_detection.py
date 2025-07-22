@@ -15,10 +15,7 @@ composer = SchemaComposer(name="TestSchema")
 
 # Manually trace through the detection logic
 if hasattr(config, "engine_type"):
-    engine_type_value = getattr(
-        config.engine_type,
-        "value",
-        config.engine_type)
+    engine_type_value = getattr(config.engine_type, "value", config.engine_type)
     engine_type_str = str(engine_type_value).lower()
 
 # Call the detection method
@@ -28,10 +25,7 @@ composer._detect_base_class_requirements([config])
 # Check if it's detecting has_llm_engine correctly
 has_llm_engine = False
 if hasattr(config, "engine_type"):
-    engine_type_value = getattr(
-        config.engine_type,
-        "value",
-        config.engine_type)
+    engine_type_value = getattr(config.engine_type, "value", config.engine_type)
     engine_type_str = str(engine_type_value).lower()
     if engine_type_str == "llm":
         has_llm_engine = True

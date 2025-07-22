@@ -42,8 +42,7 @@ class TestPathAnalyzer:
 
     def test_database_uri_analysis(self):
         """Test analyzing database URIs."""
-        result = PathAnalyzer.analyze(
-            "postgresql://user:pass@localhost:5432/mydb")
+        result = PathAnalyzer.analyze("postgresql://user:pass@localhost:5432/mydb")
 
         assert result.path_type == PathType.DATABASE_URI
         assert result.is_database is True
@@ -139,9 +138,7 @@ class TestSourceRegistry:
         class TestMultiSource(LocalSource):
             pass
 
-        source = TestMultiSource(
-            file_path="/test.multi",
-            source_type="test_multi")
+        source = TestMultiSource(file_path="/test.multi", source_type="test_multi")
 
         # Test speed preference
         from haive.core.engine.document.config import LoaderPreference

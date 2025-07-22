@@ -7,11 +7,11 @@ Tests real field updates, synchronization, and complex workflows.
 from typing import Any
 
 import pytest
+from haive.agents.simple import SimpleAgent
 from langchain_core.messages import BaseMessage, HumanMessage
 from langgraph.types import Command
 from pydantic import BaseModel, Field
 
-from haive.agents.simple import SimpleAgent
 from haive.core.engine.aug_llm import AugLLMConfig
 
 # Import and create agent node function to handle forward refs
@@ -72,8 +72,7 @@ class TestAgentNodeRealAgents:
     @pytest.fixture
     def real_llm_config(self):
         """Real LLM configuration for testing."""
-        return AugLLMConfig(
-            temperature=0.1, max_tokens=500)  # Low for consistency
+        return AugLLMConfig(temperature=0.1, max_tokens=500)  # Low for consistency
 
     def test_simple_agent_message_updates(self, real_llm_config):
         """Test SimpleAgent (no structured output) updates messages."""
@@ -87,9 +86,7 @@ class TestAgentNodeRealAgents:
         state.agents["assistant"] = agent
 
         # Create node using factory function - no agent passed directly
-        node = create_agent_node_v3(
-            agent_name="assistant",
-            name="assistant_node")
+        node = create_agent_node_v3(agent_name="assistant", name="assistant_node")
 
         # Execute with real LLM
         result = node(state, {"debug": True})
@@ -142,8 +139,7 @@ class TestAgentNodeRealAgents:
             # Direct field update
             assert isinstance(result.update["selected_modules"], list)
             assert len(result.update["selected_modules"]) >= 2
-            assert all(isinstance(m, str)
-                       for m in result.update["selected_modules"])
+            assert all(isinstance(m, str) for m in result.update["selected_modules"])
         elif (
             "agent_outputs" in result.update
             and "module_selector" in result.update["agent_outputs"]
@@ -210,8 +206,7 @@ class TestAgentNodeRealAgents:
         self._apply_command_updates(state, adapter_result)
 
         # Verify adaptation
-        assert len(
-            state.adapted_modules) > 0 or "adapt_modules" in state.agent_outputs
+        assert len(state.adapted_modules) > 0 or "adapt_modules" in state.agent_outputs
 
     def test_complex_reasoning_agent(self, real_llm_config):
         """Test agent that produces complex reasoning structure."""
@@ -226,8 +221,7 @@ class TestAgentNodeRealAgents:
                 "module": "sustainability_analysis",
                 "adaptation": "Evaluate environmental impact",
             },
-            {"module": "future_planning",
-             "adaptation": "Project 50-year scenarios"},
+            {"module": "future_planning", "adaptation": "Project 50-year scenarios"},
         ]
 
         # Agent that creates reasoning structure
@@ -273,9 +267,7 @@ class TestAgentNodeRealAgents:
         planner_agent = SimpleAgent(
             name="planner",
             engine=real_llm_config,
-            tools=[
-                "gantt_chart",
-                "resource_allocator"],
+            tools=["gantt_chart", "resource_allocator"],
             # Different private tools
             system_message="You are a project planner.",
         )

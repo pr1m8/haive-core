@@ -127,11 +127,7 @@ def test_apply_runnable_config():
     assert params == {"test_param": "custom"}
 
     # Config with engine ID targeting
-    config = {
-        "configurable": {
-            "engine_configs": {
-                engine.id: {
-                    "test_param": "by_id"}}}}
+    config = {"configurable": {"engine_configs": {engine.id: {"test_param": "by_id"}}}}
     params = engine.apply_runnable_config(config)
     assert params == {"test_param": "by_id"}
 

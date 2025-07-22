@@ -2,9 +2,9 @@
 
 import logging
 
+from haive.agents.simple.agent_v2 import SimpleAgentV2
 from pydantic import BaseModel, Field
 
-from haive.agents.simple.agent_v2 import SimpleAgentV2
 from haive.core.engine.aug_llm import AugLLMConfig
 
 # Reduce logging to focus on the issue
@@ -21,9 +21,7 @@ class SampleTestModel(BaseModel):
 def test_duplication_fix():
     """Test that the duplication fix is working."""
     # Create agent with structured output
-    engine = AugLLMConfig(
-        temperature=0.1,
-        structured_output_model=SampleTestModel)
+    engine = AugLLMConfig(temperature=0.1, structured_output_model=SampleTestModel)
 
     agent = SimpleAgentV2(
         name="duplication_fix_test",
@@ -36,9 +34,7 @@ def test_duplication_fix():
     agent.store = None
 
     try:
-        result = agent.run(
-            "Analyze the quality of this test input",
-            debug=False)
+        result = agent.run("Analyze the quality of this test input", debug=False)
 
         # Verify the result has the expected structure
         if hasattr(result, "original_data"):

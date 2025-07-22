@@ -22,9 +22,8 @@ def test_rag_base_agent() -> dict[str, Any]:
     """Test RAG Base agent with persistence."""
     try:
 
-        from langchain_core.messages import HumanMessage
-
         from haive.agents.rag.base.agent import BaseRAGAgent
+        from langchain_core.messages import HumanMessage
 
         timestamp = datetime.now().strftime("%H%M%S")
         agent = BaseRAGAgent(
@@ -72,9 +71,8 @@ def test_rag_simple_agent() -> dict[str, Any]:
     """Test Simple RAG agent with persistence."""
     try:
 
-        from langchain_core.messages import HumanMessage
-
         from haive.agents.rag.simple.agent import SimpleRAGAgent
+        from langchain_core.messages import HumanMessage
 
         timestamp = datetime.now().strftime("%H%M%S")
         agent = SimpleRAGAgent(
@@ -124,6 +122,7 @@ def test_collaborative_conversation() -> dict[str, Any]:
         from haive.agents.conversation.collaberative.agent import (
             CollaborativeConversation,
         )
+
         from haive.core.engine.aug_llm import AugLLMConfig
 
         timestamp = datetime.now().strftime("%H%M%S")
@@ -195,6 +194,7 @@ def test_debate_conversation() -> dict[str, Any]:
     try:
 
         from haive.agents.conversation.debate.agent import DebateConversation
+
         from haive.core.engine.aug_llm import AugLLMConfig
 
         timestamp = datetime.now().strftime("%H%M%S")
@@ -255,6 +255,7 @@ def test_directed_conversation() -> dict[str, Any]:
     try:
 
         from haive.agents.conversation.directed.agent import DirectedConversation
+
         from haive.core.engine.aug_llm import AugLLMConfig
 
         timestamp = datetime.now().strftime("%H%M%S")
@@ -311,6 +312,7 @@ def test_round_robin_conversation() -> dict[str, Any]:
     try:
 
         from haive.agents.conversation.round_robin.agent import RoundRobinConversation
+
         from haive.core.engine.aug_llm import AugLLMConfig
 
         timestamp = datetime.now().strftime("%H%M%S")
@@ -367,6 +369,7 @@ def test_social_media_conversation() -> dict[str, Any]:
     try:
 
         from haive.agents.conversation.social_media.agent import SocialMediaConversation
+
         from haive.core.engine.aug_llm import AugLLMConfig
 
         timestamp = datetime.now().strftime("%H%M%S")

@@ -20,9 +20,7 @@ class EdgeModel(SerializableModel):
 
     source: str = Field(..., description="Source node name")
     target: str = Field(..., description="Target node name")
-    edge_type: EdgeType = Field(
-        default=EdgeType.STANDARD,
-        description="Type of edge")
+    edge_type: EdgeType = Field(default=EdgeType.STANDARD, description="Type of edge")
     sources: list[str] | None = Field(
         default=None, description="Source nodes for waiting edges"
     )
@@ -37,8 +35,6 @@ class EdgeModel(SerializableModel):
     __abstract__ = False
 
     @model_validator(mode="after")
-
-
     @classmethod
     def validate_edge_structure(cls) -> "EdgeModel":
         """Validate edge structure based on type."""

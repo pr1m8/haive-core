@@ -1,6 +1,5 @@
 """Typesense Vector Store implementation for the Haive framework.
 
-from typing import Any
 This module provides a configuration class for the Typesense vector store,
 which combines typo-tolerant search with vector similarity.
 
@@ -26,7 +25,7 @@ a consistent Haive configuration interface.
 from typing import Any
 
 from langchain_core.documents import Document
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 from haive.core.common.mixins.secure_config import SecureConfigMixin
 from haive.core.engine.vectorstore.base import BaseVectorStoreConfig
@@ -120,16 +119,18 @@ class TypesenseVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
         default=True, description="Whether to create collection if it doesn't exist"
     )
 
-    @validator("protocol")
-    def validate_protocol(self, v) -> Any:
+    @field_validator("protocol")
+    @classmethod
+    def validate_protocol(cls, v):
         """Validate protocol is supported."""
         valid_protocols = ["http", "https"]
         if v not in valid_protocols:
             raise ValueError(f"protocol must be one of {valid_protocols}, got {v}")
         return v
 
-    @validator("port")
-    def validate_port(self, v) -> Any:
+    @field_validator("port")
+    @classmethod
+    def validate_port(cls, v):
         """Validate port is numeric."""
         try:
             port_num = int(v)
@@ -139,8 +140,9 @@ class TypesenseVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
             raise ValueError("port must be a valid integer")
         return v
 
-    @validator("collection_name")
-    def validate_collection_name(self, v) -> Any:
+    @field_validator("collection_name")
+    @classmethod
+    def validate_collection_name(cls, v):
         """Validate collection name format."""
         if not v or len(v.strip()) == 0:
             raise ValueError("collection_name cannot be empty")
@@ -171,7 +173,7 @@ class TypesenseVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
             ),
         }
 
-    def instantiate(self) -> Any:
+    def instantiate(self):
         """Create a Typesense vector store from this configuration.
 
         Returns:

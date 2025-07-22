@@ -120,8 +120,7 @@ class TestSchemaIntegration:
         from haive.core.schema.schema_composer import SchemaComposer
 
         # Test class method still works
-        schema_class = SchemaComposer.from_components(
-            [], name="BackCompatSchema")
+        schema_class = SchemaComposer.from_components([], name="BackCompatSchema")
         assert schema_class is not None
 
         # Test class has expected attributes

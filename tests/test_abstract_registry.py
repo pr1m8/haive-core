@@ -110,10 +110,7 @@ def test_registry_dependencies():
     registry.register("base", "Base item")
     registry.register("dependent1", "Depends on base", dependencies=["base"])
     registry.register("dependent2", "Depends on base", dependencies=["base"])
-    registry.register(
-        "nested",
-        "Depends on dependent1",
-        dependencies=["dependent1"])
+    registry.register("nested", "Depends on dependent1", dependencies=["dependent1"])
 
     # Check dependencies
     base_deps = registry.get_dependencies("base")
@@ -215,8 +212,7 @@ def test_specialized_registries():
     assert calculator_fn("2 + 3 * 4") == 14
 
     # Get tags
-    workflow_items = registry_manager.get_registry(
-        "graphs").get_by_tag("workflow")
+    workflow_items = registry_manager.get_registry("graphs").get_by_tag("workflow")
     assert "linear_workflow" in workflow_items
 
     return registry_manager

@@ -6,6 +6,7 @@ with a single node that validates and routes in one unified operation.
 Fixed to follow proper Pydantic patterns without custom __init__ methods.
 """
 
+import logging
 from typing import Any
 
 from langchain_core.messages import AIMessage, ToolMessage

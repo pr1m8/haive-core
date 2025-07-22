@@ -29,10 +29,7 @@ class TestMessageListBasics:
 
     def test_list_initialization(self):
         """Test creating MessageList from list of messages."""
-        messages = [
-            HumanMessage(
-                content="Hello"), AIMessage(
-                content="Hi there!")]
+        messages = [HumanMessage(content="Hello"), AIMessage(content="Hi there!")]
         state = MessageList(root=messages)
         assert len(state) == 2
         assert state[0].content == "Hello"
@@ -65,8 +62,7 @@ class TestMessageListBasics:
         assert len(state) == 2
 
         # Test extend with mixed types
-        state.extend(["Another message",
-                      AIMessage(content="Another AI message")])
+        state.extend(["Another message", AIMessage(content="Another AI message")])
         assert len(state) == 4
         assert isinstance(state[2], HumanMessage)
         assert isinstance(state[3], AIMessage)
@@ -168,8 +164,7 @@ class TestToolCallManagement:
     """Test tool call management functionality."""
 
     # In the test file, update the create_ai_message_with_tool_calls method:
-    def create_ai_message_with_tool_calls(
-            self, tool_calls: list[dict]) -> AIMessage:
+    def create_ai_message_with_tool_calls(self, tool_calls: list[dict]) -> AIMessage:
         """Helper to create AI message with tool calls."""
         # Fix the tool call format
         formatted_calls = []
@@ -218,8 +213,7 @@ class TestToolCallManagement:
                 self.create_ai_message_with_tool_calls(
                     [{"id": "call_2", "function": {"name": "test2"}}]
                 ),
-                self.create_tool_message(
-                    "call_2", "Error occurred", is_error=True),
+                self.create_tool_message("call_2", "Error occurred", is_error=True),
             ]
         )
 
@@ -235,10 +229,8 @@ class TestToolCallManagement:
 
         state = MessagesState(
             [
-                self.create_ai_message_with_tool_calls(
-                    [tool_call_1, tool_call_2]),
-                self.create_tool_message(
-                    "call_1", "Success 1", is_error=False),
+                self.create_ai_message_with_tool_calls([tool_call_1, tool_call_2]),
+                self.create_tool_message("call_1", "Success 1", is_error=False),
                 self.create_tool_message("call_2", "Error 2", is_error=True),
             ]
         )
@@ -257,9 +249,7 @@ class TestToolCallManagement:
 
     def test_deduplicate_tool_calls(self):
         """Test tool call deduplication."""
-        duplicate_tool_call = {
-            "id": "call_1", "function": {
-                "name": "test_tool"}}
+        duplicate_tool_call = {"id": "call_1", "function": {"name": "test_tool"}}
 
         ai_msg1 = self.create_ai_message_with_tool_calls([duplicate_tool_call])
         ai_msg2 = self.create_ai_message_with_tool_calls([duplicate_tool_call])
@@ -341,8 +331,7 @@ class TestAdvancedFiltering:
             ]
         )
 
-        error_messages = state.filter_by_content_pattern(
-            r"error", case_sensitive=False)
+        error_messages = state.filter_by_content_pattern(r"error", case_sensitive=False)
         success_messages = state.filter_by_content_pattern(r"Success")
 
         assert len(error_messages) == 2
@@ -409,10 +398,8 @@ class TestAdvancedFiltering:
             ]
         )
 
-        recent_with_human = state.get_messages_since_last_human(
-            include_human=True)
-        recent_without_human = state.get_messages_since_last_human(
-            include_human=False)
+        recent_with_human = state.get_messages_since_last_human(include_human=True)
+        recent_without_human = state.get_messages_since_last_human(include_human=False)
 
         assert len(recent_with_human) == 3  # Human + 2 AI responses
         assert len(recent_without_human) == 2  # Just 2 AI responses
@@ -445,8 +432,7 @@ class TestConversationRounds:
                 "Question 2",
                 AIMessage(
                     content="Answer 2",
-                    tool_calls=[
-                        {"id": "call_1", "function": {"name": "test"}}],
+                    tool_calls=[{"id": "call_1", "function": {"name": "test"}}],
                 ),
                 ToolMessage(content="Tool response", tool_call_id="call_1"),
             ]
@@ -474,8 +460,7 @@ class TestConversationRounds:
                 "Question 1",
                 AIMessage(
                     content="Answer with tool",
-                    tool_calls=[
-                        {"id": "call_1", "function": {"name": "test"}}],
+                    tool_calls=[{"id": "call_1", "function": {"name": "test"}}],
                 ),
                 # Missing tool response
             ]
@@ -495,16 +480,11 @@ class TestMessageTransformations:
             [
                 "Human message",
                 AIMessage(content="AI message 1"),
-                AIMessage(
-                    content="AI message 2",
-                    additional_kwargs={
-                        "test": "value"}),
+                AIMessage(content="AI message 2", additional_kwargs={"test": "value"}),
             ]
         )
 
-        state.transform_ai_to_human(
-            preserve_metadata=True,
-            engine_id="llm-123")
+        state.transform_ai_to_human(preserve_metadata=True, engine_id="llm-123")
 
         # All should be human messages now
         human_count = len(state.filter_by_type(HumanMessage))
@@ -641,8 +621,7 @@ class TestStaticConstructors:
 
     def test_with_system_message(self):
         """Test creating with system message."""
-        state = MessagesState.with_system_message(
-            "You are a helpful assistant")
+        state = MessagesState.with_system_message("You are a helpful assistant")
 
         assert len(state) == 1
         assert isinstance(state[0], SystemMessage)

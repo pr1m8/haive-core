@@ -68,10 +68,7 @@ class TestMultiAgentStateTypedIO:
         state = MultiAgentState()
 
         # Add initial messages
-        state.messages = [
-            HumanMessage(
-                content="Hello"), AIMessage(
-                content="Hi there!")]
+        state.messages = [HumanMessage(content="Hello"), AIMessage(content="Hi there!")]
 
         # The field should support message operations
         assert len(state.messages) == 2

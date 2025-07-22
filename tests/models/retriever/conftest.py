@@ -42,8 +42,7 @@ def mock_vector_store():
 def mock_retriever(sample_documents):
     """Mock retriever that returns sample documents."""
     mock_retriever = Mock(spec=BaseRetriever)
-    mock_retriever.get_relevant_documents = Mock(
-        return_value=sample_documents[:2])
+    mock_retriever.get_relevant_documents = Mock(return_value=sample_documents[:2])
     mock_retriever.invoke = Mock(return_value=sample_documents[:2])
     return mock_retriever
 

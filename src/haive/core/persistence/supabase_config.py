@@ -1069,8 +1069,6 @@ class SupabaseCheckpointerConfig(CheckpointerConfig):
     checkpointer: Any | None = Field(default=None, exclude=True)
 
     @model_validator(mode="after")
-
-
     @classmethod
     def validate_supabase_available(cls) -> Any:
         """Validate that Supabase dependencies are available."""

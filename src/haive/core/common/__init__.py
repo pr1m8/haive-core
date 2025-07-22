@@ -1,23 +1,65 @@
-"""Module exports."""
+"""Haive Core Common Module.
 
-from common.logging_config import GameLogger
-from common.logging_config import LogFormat
-from common.logging_config import LogLevel
-from common.logging_config import critical
-from common.logging_config import debug
-from common.logging_config import decision
-from common.logging_config import dice_roll
-from common.logging_config import error
-from common.logging_config import game_event
-from common.logging_config import game_state_summary
-from common.logging_config import get_game_logger
-from common.logging_config import info
-from common.logging_config import performance_end
-from common.logging_config import performance_start
-from common.logging_config import player_move
-from common.logging_config import property_action
-from common.logging_config import set_level
-from common.logging_config import turn_start
-from common.logging_config import warning
+This module provides common utilities, models, types, and mixins used throughout the Haive
+framework. It contains foundational components that enable consistent behavior across
+different parts of the system.
 
-__all__ = ['GameLogger', 'LogFormat', 'LogLevel', 'critical', 'debug', 'decision', 'dice_roll', 'error', 'game_event', 'game_state_summary', 'get_game_logger', 'info', 'performance_end', 'performance_start', 'player_move', 'property_action', 'set_level', 'turn_start', 'warning']
+Key Components:
+    - Mixins: Reusable component behaviors through mixin classes
+    - Models: Common data structures and models
+    - Types: Type definitions and protocol interfaces
+    - Structures: Collection structures with enhanced functionality
+    - Logging: Centralized logging configuration
+
+Typical usage example:
+    ```python
+    from haive.core.common.mixins import IdentifierMixin, TimestampMixin
+    from haive.core.common.types import JsonType, DictStrAny
+    from haive.core.common.logging_config import configure_logging
+
+    # Use mixins in your class
+    class MyComponent(IdentifierMixin, TimestampMixin):
+        def __init__(self, name: str):
+            super().__init__()
+            self.name = name
+
+    # Configure logging
+    configure_logging(level="INFO")
+    ```
+"""
+
+# Import common mixins
+from haive.core.common.mixins import (
+    IdentifierMixin as IDMixin,  # Alias for backward compatibility
+)
+from haive.core.common.mixins import (
+    MetadataMixin,
+    RichLoggerMixin,
+    SerializationMixin,
+    TimestampMixin,
+    VersionMixin,
+)
+
+# Import common models
+from haive.core.common.models import DynamicChoiceModel, NamedList
+
+# Import common types
+from haive.core.common.types import DictStrAny, JsonType, StrOrPath
+
+# Export all these symbols when using star imports
+__all__ = [
+    "DictStrAny",
+    # Models
+    "DynamicChoiceModel",
+    # Mixins
+    "IDMixin",
+    # Types
+    "JsonType",
+    "MetadataMixin",
+    "NamedList",
+    "RichLoggerMixin",
+    "SerializationMixin",
+    "StrOrPath",
+    "TimestampMixin",
+    "VersionMixin",
+]

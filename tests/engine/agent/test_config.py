@@ -32,11 +32,9 @@ class SimpleTestEngine(InvokableEngine):
                 # Extract the last message content if available
                 messages = input_data.get("messages", [])
                 content = "I am a test assistant."
-                if messages and isinstance(
-                        messages, list) and len(messages) > 0:
+                if messages and isinstance(messages, list) and len(messages) > 0:
                     last_message = messages[-1]
-                    if isinstance(last_message,
-                                  dict) and "content" in last_message:
+                    if isinstance(last_message, dict) and "content" in last_message:
                         query = last_message.get("content", "")
                         content = f"You asked: '{query}'. This is a test response."
                 return {"content": content}
@@ -91,8 +89,7 @@ class AgentForTests:
         # Format input for the LLM
         formatted_input = input_data
         if isinstance(input_data, str):
-            formatted_input = {"messages": [
-                {"role": "user", "content": input_data}]}
+            formatted_input = {"messages": [{"role": "user", "content": input_data}]}
 
         # Run the app
         return self.app.invoke(formatted_input, config=runnable_config)
@@ -393,11 +390,7 @@ class TestAgentConfig:
 
         # Add a pattern directly to the patterns list
         basic_agent_config.patterns = [
-            PatternConfig(
-                name="test_pattern",
-                parameters={},
-                order=1,
-                enabled=True)
+            PatternConfig(name="test_pattern", parameters={}, order=1, enabled=True)
         ]
 
         # Patch the to_dict method to return a controlled response

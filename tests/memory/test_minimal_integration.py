@@ -95,6 +95,7 @@ def test_memory_store_manager():
             MemoryStoreConfig,
             MemoryStoreManager,
         )
+
         from haive.core.persistence.store.types import StoreType
         from haive.core.tools.store_manager import StoreManager
 
@@ -130,6 +131,7 @@ async def test_memory_store_async():
             MemoryStoreConfig,
             MemoryStoreManager,
         )
+
         from haive.core.persistence.store.types import StoreType
         from haive.core.tools.store_manager import StoreManager
 
@@ -205,10 +207,7 @@ def main():
     results.append(("MemoryStoreManager", test_memory_store_manager()))
 
     # Test async operations
-    results.append(
-        ("Async Operations",
-         asyncio.run(
-             test_memory_store_async())))
+    results.append(("Async Operations", asyncio.run(test_memory_store_async())))
 
     # Test config compatibility
     results.append(("Config Compatibility", test_config_compatibility()))

@@ -94,6 +94,7 @@ result2 = exec_node(state, config)  # Reads planning fields directly
 ```
 
 **Key Benefits:**
+
 - **No Schema Flattening**: Each agent maintains its own schema
 - **Direct Field Updates**: Agents update container fields directly
 - **Self-Discover Workflows**: Sequential agents reading each other's outputs
@@ -370,15 +371,15 @@ class SelfDiscoverState(MultiAgentState):
     # Input fields
     task_description: str = ""
     available_modules: List[str] = Field(default_factory=list)
-    
+
     # Output fields (directly updated by agents)
     selected_modules: List[str] = Field(default_factory=list)
     rationale: str = ""
     confidence: float = 0.0
-    
+
     adapted_modules: List[Dict[str, str]] = Field(default_factory=list)
     task_context: str = ""
-    
+
     reasoning_structure: Dict[str, Any] = Field(default_factory=dict)
     steps: List[str] = Field(default_factory=list)
     methodology: str = ""
@@ -396,7 +397,7 @@ adapter_node = create_agent_node_v3("adapter")
 reasoner_node = create_agent_node_v3("reasoner")
 
 result1 = selector_node(state, config)  # Updates: selected_modules, rationale, confidence
-result2 = adapter_node(state, config)   # Reads: selected_modules, Updates: adapted_modules  
+result2 = adapter_node(state, config)   # Reads: selected_modules, Updates: adapted_modules
 result3 = reasoner_node(state, config)  # Reads: adapted_modules, Updates: reasoning_structure
 
 # Final state has all results directly accessible

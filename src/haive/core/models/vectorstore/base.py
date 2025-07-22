@@ -126,10 +126,7 @@ class VectorStoreConfig(BaseModel):
         **kwargs,
     ) -> VectorStoreConfig:
         """Create a VectorStoreConfig from a list of documents."""
-        config = cls(
-            documents=documents,
-            embedding_model=embedding_model,
-            **kwargs)
+        config = cls(documents=documents, embedding_model=embedding_model, **kwargs)
         return config
 
     @classmethod

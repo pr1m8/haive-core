@@ -195,8 +195,7 @@ class TestAgentClass:
                 AgentForTests(agent_config)
 
                 # Should create output directory
-                mock_makedirs.assert_any_call(
-                    agent_config.output_dir, exist_ok=True)
+                mock_makedirs.assert_any_call(agent_config.output_dir, exist_ok=True)
 
                 # Should create state history directory
                 state_history_dir = os.path.join(
@@ -224,8 +223,7 @@ class TestAgentClass:
                 mock_registry.get_instance.return_value = registry_instance
 
                 # Mock get method to return a test engine for "string_engine"
-                string_engine = AugLLMConfig(
-                    name="string_engine", model="gpt-4")
+                string_engine = AugLLMConfig(name="string_engine", model="gpt-4")
 
                 def mock_get(engine_type, name):
                     if name == "string_engine":

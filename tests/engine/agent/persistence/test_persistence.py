@@ -87,6 +87,4 @@ thread_id = "conversation-123"
 result1 = agent.run("Hello, I'm new here!", thread_id=thread_id)
 
 # Run again to test persistence
-result2 = agent.run(
-    "Do you remember our previous conversation?",
-    thread_id=thread_id)
+result2 = agent.run("Do you remember our previous conversation?", thread_id=thread_id)

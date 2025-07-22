@@ -161,9 +161,7 @@ class TestGoogleProviders:
         except ImportError:
             pytest.skip("Google providers not implemented yet")
 
-        provider = VertexAIProvider(
-            project="test-project",
-            location="us-central1")
+        provider = VertexAIProvider(project="test-project", location="us-central1")
 
         assert provider.provider == LLMProvider.VERTEX_AI
         assert provider.model == "gemini-1.5-pro"

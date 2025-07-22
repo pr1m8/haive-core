@@ -399,8 +399,7 @@ def sample_code_requirements():
 
 
 @skip_if_no_api_keys
-def test_summarization_example(
-        azure_llm_config, summarization_prompt, sample_article):
+def test_summarization_example(azure_llm_config, summarization_prompt, sample_article):
     """Test AugLLMConfig for content summarization."""
     # Create AugLLM for summarization
     summarizer = AugLLMConfig(
@@ -448,8 +447,7 @@ def test_qa_example(azure_llm_config, qa_prompt, sample_article):
     ]
 
     for question in questions:
-        answer = qa_system.invoke(
-            {"content": sample_article, "question": question})
+        answer = qa_system.invoke({"content": sample_article, "question": question})
 
         content = answer.content if hasattr(answer, "content") else answer
 
@@ -492,8 +490,7 @@ def test_data_extraction_example(
     )
 
     # Extract structured data
-    structured_data = structured_extractor.invoke(
-        {"content": sample_business_data})
+    structured_data = structured_extractor.invoke({"content": sample_business_data})
 
     # Basic validation
     assert len(structured_data.people) > 0
@@ -516,8 +513,7 @@ def test_comparison_example(
     # Compare the products
     comparison = comparator.invoke(sample_product_comparison)
 
-    content = comparison.content if hasattr(
-        comparison, "content") else comparison
+    content = comparison.content if hasattr(comparison, "content") else comparison
 
     # Try another comparison
     custom_comparison = {
@@ -557,8 +553,7 @@ def test_code_generation_example(
     generated_code = code_generator.invoke(sample_code_requirements)
 
     content = (
-        generated_code.content if hasattr(
-            generated_code, "content") else generated_code
+        generated_code.content if hasattr(generated_code, "content") else generated_code
     )
 
     # Try a simpler code generation task
@@ -797,8 +792,7 @@ def test_analysis_example(azure_llm_config, analysis_prompt, sample_article):
     swot_analysis = swot_analyzer.invoke({"business_info": business_info})
 
     swot_content = (
-        swot_analysis.content if hasattr(
-            swot_analysis, "content") else swot_analysis
+        swot_analysis.content if hasattr(swot_analysis, "content") else swot_analysis
     )
 
     # Basic validation

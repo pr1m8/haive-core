@@ -1,6 +1,5 @@
 """OpenSearch Vector Store implementation for the Haive framework.
 
-from typing import Any
 This module provides a configuration class for the OpenSearch vector store,
 which provides scalable vector search capabilities with Amazon OpenSearch.
 
@@ -26,7 +25,7 @@ a consistent Haive configuration interface.
 from typing import Any
 
 from langchain_core.documents import Document
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 from haive.core.engine.vectorstore.base import BaseVectorStoreConfig
 from haive.core.engine.vectorstore.types import VectorStoreType
@@ -167,23 +166,26 @@ class OpenSearchVectorStoreConfig(BaseVectorStoreConfig):
         description="Maximum chunk size for bulk operations in bytes",
     )
 
-    @validator("opensearch_url")
-    def validate_opensearch_url(self, v) -> Any:
+    @field_validator("opensearch_url")
+    @classmethod
+    def validate_opensearch_url(cls, v):
         """Validate OpenSearch URL format."""
         if not v.startswith(("http://", "https://")):
             raise ValueError("opensearch_url must start with http:// or https://")
         return v
 
-    @validator("engine")
-    def validate_engine(self, v) -> Any:
+    @field_validator("engine")
+    @classmethod
+    def validate_engine(cls, v):
         """Validate vector engine is supported."""
         valid_engines = ["nmslib", "faiss", "lucene"]
         if v not in valid_engines:
             raise ValueError(f"engine must be one of {valid_engines}, got {v}")
         return v
 
-    @validator("space_type")
-    def validate_space_type(self, v) -> Any:
+    @field_validator("space_type")
+    @classmethod
+    def validate_space_type(cls, v):
         """Validate space type is supported."""
         valid_space_types = [
             "l2",
@@ -197,8 +199,9 @@ class OpenSearchVectorStoreConfig(BaseVectorStoreConfig):
             raise ValueError(f"space_type must be one of {valid_space_types}, got {v}")
         return v
 
-    @validator("index_name")
-    def validate_index_name(self, v) -> Any:
+    @field_validator("index_name")
+    @classmethod
+    def validate_index_name(cls, v):
         """Validate index name format."""
         if not v or len(v.strip()) == 0:
             raise ValueError("index_name cannot be empty")
@@ -229,7 +232,7 @@ class OpenSearchVectorStoreConfig(BaseVectorStoreConfig):
             ),
         }
 
-    def instantiate(self) -> Any:
+    def instantiate(self):
         """Create an OpenSearch vector store from this configuration.
 
         Returns:

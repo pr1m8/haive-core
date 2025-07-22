@@ -122,8 +122,6 @@ class LLMState(ToolState):
     )
 
     @model_validator(mode="after")
-
-
     @classmethod
     def setup_primary_engine_references(cls) -> LLMState:
         """Ensure the primary LLM engine is available in engines dict with standard keys.

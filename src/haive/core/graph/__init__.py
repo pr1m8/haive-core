@@ -1,169 +1,112 @@
-"""Module exports."""
+"""Graph system for building AI workflows in the Haive framework.
 
-from graph.StateGraphEditor import BranchConfig
-from graph.StateGraphEditor import EdgeConfig
-from graph.StateGraphEditor import NodeConfig
-from graph.StateGraphEditor import RegisteredStateGraphEditor
-from graph.StateGraphEditor import StateGraphEditor
-from graph.StateGraphEditor import add_conditional_edges
-from graph.StateGraphEditor import add_edge
-from graph.StateGraphEditor import add_node
-from graph.StateGraphEditor import build_graph
-from graph.StateGraphEditor import compile
-from graph.StateGraphEditor import from_dict
-from graph.StateGraphEditor import get_graph
-from graph.StateGraphEditor import initialize_graph
-from graph.StateGraphEditor import set_entry_point
-from graph.StateGraphEditor import to_dict
-from graph.StateGraphEditor import validate_command_goto
-from graph.StateGraphEditor import validate_destinations
-from graph.StateGraphEditor import validate_schemas
-from graph.StateGraphEditor import validate_to_node
-from graph.StateGraphEditor import visualize
-from graph.StateSchema import StateSchema
-from graph.StateSchema import add_field
-from graph.StateSchema import apply_config
-from graph.StateSchema import create_model
-from graph.StateSchema import from_aug_llm
-from graph.StateSchema import from_models
-from graph.StateSchema import mark_config_aware
-from graph.ToolManager import ToolConfig
-from graph.ToolManager import ToolManager
-from graph.ToolManager import ToolResult
-from graph.ToolManager import create_and_register_tool
-from graph.ToolManager import create_hybrid_tool
-from graph.ToolManager import create_state_tool
-from graph.ToolManager import create_store_tool
-from graph.ToolManager import decorator
-from graph.ToolManager import execute_tool
-from graph.ToolManager import executed_tools
-from graph.ToolManager import get_allowed_tools
-from graph.ToolManager import get_execution_history
-from graph.ToolManager import get_tool_descriptions
-from graph.ToolManager import hybrid_tool
-from graph.ToolManager import register_tool
-from graph.ToolManager import reset
-from graph.ToolManager import state_tool
-from graph.ToolManager import store_tool
-from graph.ToolManager import wrapped_func
-from graph.dynamic_graph_builder import ComponentRef
-from graph.dynamic_graph_builder import Config
-from graph.dynamic_graph_builder import DebugLevel
-from graph.dynamic_graph_builder import DynamicGraph
-from graph.dynamic_graph_builder import DynamicGraphEdge
-from graph.dynamic_graph_builder import NodeStatus
-from graph.dynamic_graph_builder import add_conditional_edges
-from graph.dynamic_graph_builder import add_conditional_node
-from graph.dynamic_graph_builder import add_edge
-from graph.dynamic_graph_builder import add_error_handler
-from graph.dynamic_graph_builder import add_mapping_node
-from graph.dynamic_graph_builder import add_node
-from graph.dynamic_graph_builder import apply_pattern
-from graph.dynamic_graph_builder import build
-from graph.dynamic_graph_builder import compile
-from graph.dynamic_graph_builder import debug_graph
-from graph.dynamic_graph_builder import debug_node
-from graph.dynamic_graph_builder import set_default_runnable_config
-from graph.dynamic_graph_builder import set_entry_point
-from graph.dynamic_graph_builder import update_default_runnable_config
-from graph.dynamic_graph_builder import validate_node_config
-from graph.dynamic_graph_builder import visualize_graph
-from graph.dynamic_graph_builder import with_runnable_config
-from graph.graph_builder2 import EnhancedNodeFactory
-from graph.graph_builder2 import InputTransform
-from graph.graph_builder2 import NodeConfig
-from graph.graph_builder2 import NodeHooks
-from graph.graph_builder2 import NodeType
-from graph.graph_builder2 import OutputTransform
-from graph.graph_builder2 import RetryPolicy
-from graph.graph_builder2 import RoutingConfig
-from graph.graph_builder2 import ToolInjectionConfig
-from graph.graph_builder2 import ValidationMode
-from graph.graph_builder2 import create_conditional_router_config
-from graph.graph_builder2 import create_interrupt_config
-from graph.graph_builder2 import create_node
-from graph.graph_builder2 import create_processing_config
-from graph.graph_builder2 import create_router_config
-from graph.graph_builder2 import create_tool_config
-from graph.graph_builder2 import decorator
-from graph.graph_builder2 import interrupt_node
-from graph.graph_builder2 import node
-from graph.graph_builder2 import node_function
-from graph.graph_builder2 import processing_node
-from graph.graph_builder2 import register_node_type
-from graph.graph_builder2 import router_func
-from graph.graph_builder2 import router_node
-from graph.graph_builder2 import tool_node
-from graph.graph_pattern_registry import BranchDefinition
-from graph.graph_pattern_registry import GraphPattern
-from graph.graph_pattern_registry import GraphPatternRegistry
-from graph.graph_pattern_registry import apply
-from graph.graph_pattern_registry import apply_error_handling
-from graph.graph_pattern_registry import apply_persistence
-from graph.graph_pattern_registry import clear
-from graph.graph_pattern_registry import create_condition
-from graph.graph_pattern_registry import decorator
-from graph.graph_pattern_registry import default_condition
-from graph.graph_pattern_registry import get_branch
-from graph.graph_pattern_registry import get_instance
-from graph.graph_pattern_registry import get_pattern
-from graph.graph_pattern_registry import intent_router
-from graph.graph_pattern_registry import list_branches
-from graph.graph_pattern_registry import list_patterns
-from graph.graph_pattern_registry import register_branch
-from graph.graph_pattern_registry import register_pattern
-from graph.routing import Router
-from graph.routing import ValidationConfig
-from graph.routing import add_composite_route
-from graph.routing import add_content_route
-from graph.routing import add_function_route
-from graph.routing import add_route
-from graph.routing import add_state_route
-from graph.routing import add_tool_route
-from graph.routing import add_tool_schema
-from graph.routing import add_tool_schemas
-from graph.routing import create_content_router
-from graph.routing import create_router
-from graph.routing import create_router_function
-from graph.routing import create_tool_router
-from graph.routing import default_format_error
-from graph.routing import router_function
-from graph.routing import set_validation_config
-from graph.routing import to_node_config
-from graph.state_graph import StateGraph
-from graph.state_graph import add_edge
-from graph.state_graph import add_node
-from graph.state_graph import compile
-from graph.state_graph_manager import StateGraphManager
-from graph.state_graph_manager import add_node
-from graph.state_graph_manager import attach_to_graph
-from graph.state_graph_manager import ensure_compiled
-from graph.state_graph_manager import extract_metadata
-from graph.state_graph_manager import get_manager
-from graph.state_graph_manager import get_metadata
-from graph.state_graph_manager import insert_end_node
-from graph.state_graph_manager import insert_node
-from graph.state_graph_manager import insert_start_node
-from graph.state_graph_manager import remove_edge
-from graph.state_graph_manager import update_branch
-from graph.state_graph_manager import visualize
-from graph.tool_config import NodeConfig
-from graph.tool_config import ToolConfig
-from graph.tool_config import configure_tool
-from graph.tool_config import create_node_config
-from graph.tool_config import process_tools
-from graph.tool_injector import ToolInjector
-from graph.tool_injector import create_hybrid_tool
-from graph.tool_injector import create_state_tool
-from graph.tool_injector import create_store_tool
-from graph.tool_injector import decorator
-from graph.tool_injector import hybrid_tool
-from graph.tool_injector import state_tool
-from graph.tool_injector import store_tool
-from graph.tool_injector import wrapped_func
-from graph.tool_manager import ToolManager
-from graph.tool_manager import add_tool
-from graph.tool_manager import get_tool
-from graph.tool_manager import list_tools
+This module provides a powerful, flexible system for creating graph-based workflows
+that orchestrate AI agents, tools, and data processing pipelines. The graph system
+is built on top of LangGraph and extends it with Haive-specific features for
+agent coordination, dynamic state management, and advanced workflow patterns.
 
-__all__ = ['BranchConfig', 'BranchDefinition', 'ComponentRef', 'Config', 'DebugLevel', 'DynamicGraph', 'DynamicGraphEdge', 'EdgeConfig', 'EnhancedNodeFactory', 'GraphPattern', 'GraphPatternRegistry', 'InputTransform', 'NodeConfig', 'NodeHooks', 'NodeStatus', 'NodeType', 'OutputTransform', 'RegisteredStateGraphEditor', 'RetryPolicy', 'Router', 'RoutingConfig', 'StateGraph', 'StateGraphEditor', 'StateGraphManager', 'StateSchema', 'ToolConfig', 'ToolInjectionConfig', 'ToolInjector', 'ToolManager', 'ToolResult', 'ValidationConfig', 'ValidationMode', 'add_composite_route', 'add_conditional_edges', 'add_conditional_node', 'add_content_route', 'add_edge', 'add_error_handler', 'add_field', 'add_function_route', 'add_mapping_node', 'add_node', 'add_route', 'add_state_route', 'add_tool', 'add_tool_route', 'add_tool_schema', 'add_tool_schemas', 'apply', 'apply_config', 'apply_error_handling', 'apply_pattern', 'apply_persistence', 'attach_to_graph', 'build', 'build_graph', 'clear', 'compile', 'configure_tool', 'create_and_register_tool', 'create_condition', 'create_conditional_router_config', 'create_content_router', 'create_hybrid_tool', 'create_interrupt_config', 'create_model', 'create_node', 'create_node_config', 'create_processing_config', 'create_router', 'create_router_config', 'create_router_function', 'create_state_tool', 'create_store_tool', 'create_tool_config', 'create_tool_router', 'debug_graph', 'debug_node', 'decorator', 'default_condition', 'default_format_error', 'ensure_compiled', 'execute_tool', 'executed_tools', 'extract_metadata', 'from_aug_llm', 'from_dict', 'from_models', 'get_allowed_tools', 'get_branch', 'get_execution_history', 'get_graph', 'get_instance', 'get_manager', 'get_metadata', 'get_pattern', 'get_tool', 'get_tool_descriptions', 'hybrid_tool', 'initialize_graph', 'insert_end_node', 'insert_node', 'insert_start_node', 'intent_router', 'interrupt_node', 'list_branches', 'list_patterns', 'list_tools', 'mark_config_aware', 'node', 'node_function', 'process_tools', 'processing_node', 'register_branch', 'register_node_type', 'register_pattern', 'register_tool', 'remove_edge', 'reset', 'router_func', 'router_function', 'router_node', 'set_default_runnable_config', 'set_entry_point', 'set_validation_config', 'state_tool', 'store_tool', 'to_dict', 'to_node_config', 'tool_node', 'update_branch', 'update_default_runnable_config', 'validate_command_goto', 'validate_destinations', 'validate_node_config', 'validate_schemas', 'validate_to_node', 'visualize', 'visualize_graph', 'with_runnable_config', 'wrapped_func']
+The graph system enables complex AI workflows through composable nodes, conditional
+routing, parallel processing, and state persistence. It's designed to handle
+everything from simple linear workflows to complex multi-agent orchestration.
+
+Key Components:
+    BaseGraph: Foundation class for all graph implementations
+        - State schema management and validation
+        - Node registration and execution
+        - Edge definition and routing logic
+        - Built-in persistence and checkpointing
+        - Visual graph representation and debugging
+
+    Graph Builder Components:
+        - Dynamic graph construction from configuration
+        - Pattern-based graph templates
+        - Node factory system for component creation
+        - Advanced routing and branching logic
+
+    State Management:
+        - Schema composition and validation
+        - State sharing between parent and child graphs
+        - Reducer functions for intelligent state merging
+        - Field-level access control and visibility
+
+Features:
+    - Dynamic graph construction and modification
+    - Schema-aware state management
+    - Parallel and conditional execution
+    - Built-in persistence and checkpointing
+    - Visual graph debugging and analysis
+    - Pattern-based workflow templates
+    - Tool and agent integration
+    - Error handling and recovery
+    - Performance monitoring and optimization
+
+Examples:
+    Basic graph creation::
+
+        from haive.core.graph import BaseGraph
+        from haive.core.schema import StateSchema
+
+        class MyWorkflowState(StateSchema):
+            query: str = ""
+            results: List[str] = []
+
+        graph = BaseGraph(state_schema=MyWorkflowState)
+
+        # Add nodes
+        graph.add_node("process", processing_function)
+        graph.add_node("validate", validation_function)
+
+        # Define flow
+        graph.set_entry_point("process")
+        graph.add_edge("process", "validate")
+        graph.set_finish_point("validate")
+
+        # Compile and run
+        compiled_graph = graph.compile()
+        result = compiled_graph.invoke({"query": "What is AI?"})
+
+    Agent integration::
+
+        from haive.core.graph import BaseGraph
+        from haive.agents.simple import SimpleAgent
+
+        # Create agents
+        research_agent = SimpleAgent(name="researcher")
+        writer_agent = SimpleAgent(name="writer")
+
+        # Build workflow
+        graph = BaseGraph()
+        graph.add_agent_node("research", research_agent)
+        graph.add_agent_node("write", writer_agent)
+
+        # Sequential workflow
+        graph.set_entry_point("research")
+        graph.add_edge("research", "write")
+        graph.set_finish_point("write")
+
+    Conditional routing::
+
+        def route_logic(state):
+            if state["requires_verification"]:
+                return "verify"
+            return "finalize"
+
+        graph.add_conditional_edges(
+            source="process",
+            path=route_logic,
+            path_map={"verify": "verification", "finalize": "finalization"}
+        )
+
+See Also:
+    - Node system: haive.core.graph.node
+    - State management: haive.core.schema
+    - Agent integration: haive.agents
+    - Workflow patterns: haive.core.graph.patterns
+"""
+
+# Import current graph implementation
+from haive.core.graph.state_graph.base_graph2 import BaseGraph
+
+__all__ = [
+    "BaseGraph",
+]

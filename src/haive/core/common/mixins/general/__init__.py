@@ -1,30 +1,46 @@
-"""Module exports."""
+"""General-purpose mixins providing basic functionality for Haive components.
 
-from general.id import IdMixin
-from general.id import regenerate_id
-from general.id import with_id
-from general.metadata import MetadataMixin
-from general.metadata import add_metadata
-from general.metadata import clear_metadata
-from general.metadata import get_metadata
-from general.metadata import has_metadata
-from general.metadata import remove_metadata
-from general.metadata import update_metadata
-from general.serialization import SerializationMixin
-from general.serialization import from_dict
-from general.serialization import from_json
-from general.serialization import to_dict
-from general.serialization import to_json
-from general.state import StateMixin
-from general.state import change_state
-from general.state import get_state_changes
-from general.state import is_in_state
-from general.timestamp import TimestampMixin
-from general.timestamp import age_in_seconds
-from general.timestamp import time_since_update
-from general.timestamp import update_timestamp
-from general.version import VersionMixin
-from general.version import bump_version
-from general.version import get_version_history
+This package contains fundamental mixins that provide core functionality
+like ID management, serialization, state tracking, and versioning. These
+mixins are designed to be lightweight and composable, making them suitable
+for inclusion in a wide variety of components.
 
-__all__ = ['IdMixin', 'MetadataMixin', 'SerializationMixin', 'StateMixin', 'TimestampMixin', 'VersionMixin', 'add_metadata', 'age_in_seconds', 'bump_version', 'change_state', 'clear_metadata', 'from_dict', 'from_json', 'get_metadata', 'get_state_changes', 'get_version_history', 'has_metadata', 'is_in_state', 'regenerate_id', 'remove_metadata', 'time_since_update', 'to_dict', 'to_json', 'update_metadata', 'update_timestamp', 'with_id']
+Available mixins:
+- IdMixin: Basic ID generation and management
+- MetadataMixin: Key-value metadata storage
+- SerializationMixin: Enhanced serialization capabilities
+- StateMixin: State tracking and validation
+- TimestampMixin: Creation and modification timestamp tracking
+- VersionMixin: Version tracking and compatibility checking
+
+Usage:
+    ```python
+    from pydantic import BaseModel
+    from haive.core.common.mixins.general import (
+        IdMixin, TimestampMixin, VersionMixin
+    )
+
+    class MyComponent(IdMixin, TimestampMixin, VersionMixin, BaseModel):
+        name: str
+
+        def __init__(self, **data):
+            super().__init__(**data)
+            # Now the component has ID, timestamp, and version capabilities
+    ```
+"""
+
+from haive.core.common.mixins.general.id import IdMixin
+from haive.core.common.mixins.general.metadata import MetadataMixin
+from haive.core.common.mixins.general.serialization import SerializationMixin
+from haive.core.common.mixins.general.state import StateMixin
+from haive.core.common.mixins.general.timestamp import TimestampMixin
+from haive.core.common.mixins.general.version import VersionMixin
+
+__all__ = [
+    "IdMixin",
+    "MetadataMixin",
+    "SerializationMixin",
+    "StateMixin",
+    "TimestampMixin",
+    "VersionMixin",
+]

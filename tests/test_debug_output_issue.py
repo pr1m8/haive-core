@@ -2,9 +2,9 @@
 
 import logging
 
+from haive.agents.simple.agent_v2 import SimpleAgentV2
 from pydantic import BaseModel, Field
 
-from haive.agents.simple.agent_v2 import SimpleAgentV2
 from haive.core.engine.aug_llm import AugLLMConfig
 
 # Set up logging to see debug output
@@ -22,8 +22,7 @@ class QueryRefinementSuggestion(BaseModel):
     rationale: str = Field(
         description="Explanation of why this refinement is beneficial"
     )
-    expected_benefit: str = Field(
-        description="Expected benefit of this refinement")
+    expected_benefit: str = Field(description="Expected benefit of this refinement")
 
 
 class QueryRefinementResponse(BaseModel):
@@ -64,9 +63,7 @@ def test_debug_output_issue():
     )
 
     # Test with debug=True to see the messy output
-    result = agent.run(
-        "what is the tallest tower in north america",
-        debug=True)
+    result = agent.run("what is the tallest tower in north america", debug=True)
 
     # Check what we're getting
     if hasattr(result, "query_refinement_response"):

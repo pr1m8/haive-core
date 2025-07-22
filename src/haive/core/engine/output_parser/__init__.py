@@ -1,18 +1,69 @@
-"""Module exports."""
+r"""Output parser engine module for the Haive framework.
 
-from output_parser.base import OutputParserEngine
-from output_parser.base import create_enum_parser
-from output_parser.base import create_json_parser
-from output_parser.base import create_list_parser
-from output_parser.base import create_output_parser_engine
-from output_parser.base import create_pydantic_parser
-from output_parser.base import create_regex_parser
-from output_parser.base import create_runnable
-from output_parser.base import create_str_parser
-from output_parser.base import create_structured_parser
-from output_parser.base import get_input_fields
-from output_parser.base import get_output_fields
-from output_parser.base import invoke
-from output_parser.types import OutputParserType
+This module provides engine implementations for LangChain output parsers,
+enabling structured output parsing from LLM responses within the Haive framework.
 
-__all__ = ['OutputParserEngine', 'OutputParserType', 'create_enum_parser', 'create_json_parser', 'create_list_parser', 'create_output_parser_engine', 'create_pydantic_parser', 'create_regex_parser', 'create_runnable', 'create_str_parser', 'create_structured_parser', 'get_input_fields', 'get_output_fields', 'invoke']
+Output parsers transform raw LLM text outputs into structured data formats,
+including JSON, Pydantic models, enums, lists, and custom formats. This module
+wraps LangChain's output parser functionality in Haive's engine system for
+consistent usage across the framework.
+
+Key Components:
+    OutputParserEngine: Engine wrapper for LangChain output parsers
+    OutputParserType: Enumeration of supported parser types
+
+Supported Parser Types:
+    - JSON: Parse output as JSON objects
+    - PydanticOutputParser: Parse into Pydantic model instances
+    - EnumOutputParser: Parse into enum values
+    - DatetimeOutputParser: Parse datetime strings
+    - BooleanOutputParser: Parse boolean values
+    - CommaSeparatedListOutputParser: Parse comma-separated lists
+    - MarkdownListOutputParser: Parse markdown formatted lists
+    - NumberedListOutputParser: Parse numbered lists
+    - XMLOutputParser: Parse XML formatted output
+
+Examples:
+    JSON output parsing::
+
+        from haive.core.engine.output_parser import OutputParserEngine, OutputParserType
+
+        parser = OutputParserEngine(
+            parser_type=OutputParserType.JSON,
+            name="json_parser"
+        )
+
+        result = parser.invoke('{"name": "John", "age": 30}')
+        # Returns: {"name": "John", "age": 30}
+
+    Pydantic model parsing::
+
+        from pydantic import BaseModel, Field
+        from haive.core.engine.output_parser import OutputParserEngine, OutputParserType
+
+        class Person(BaseModel):
+            name: str = Field(description="Person's name")
+            age: int = Field(description="Person's age")
+
+        parser = OutputParserEngine(
+            parser_type=OutputParserType.PYDANTIC,
+            pydantic_object=Person,
+            name="person_parser"
+        )
+
+        result = parser.invoke("name: John\\nage: 30")
+        # Returns: Person(name="John", age=30)
+
+See Also:
+    - LangChain output parsers documentation
+    - Output parser types: types.py
+    - Base implementation: base.py
+"""
+
+from haive.core.engine.output_parser.base import OutputParserEngine
+from haive.core.engine.output_parser.types import OutputParserType
+
+__all__ = [
+    "OutputParserEngine",
+    "OutputParserType",
+]

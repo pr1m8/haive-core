@@ -202,8 +202,6 @@ class MessagesState(StateSchema):
     # The base MessagesState doesn't have token_usage fields
 
     @model_validator(mode="after")
-
-
     @classmethod
     def sync_message_engine_settings(cls) -> "MessagesState":
         """Sync message-related settings with engine if present.

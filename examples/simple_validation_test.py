@@ -15,8 +15,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 class MockAIMessage:
     """Mock AI message for testing."""
 
-    def __init__(self, content: str,
-                 tool_calls: list[dict[str, Any]] | None = None):
+    def __init__(self, content: str, tool_calls: list[dict[str, Any]] | None = None):
         self.content = content
         self.tool_calls = tool_calls or []
 
@@ -145,9 +144,7 @@ def test_validation_scenarios():
     # Scenario 3: Mixed tools
     state3 = MockState()
     state3.tools = [MockTool("search"), MockTool("writer", has_schema=True)]
-    state3.tool_routes = {
-        "search": "langchain_tool",
-        "writer": "pydantic_model"}
+    state3.tool_routes = {"search": "langchain_tool", "writer": "pydantic_model"}
 
     ai_msg3 = MockAIMessage(
         content="Mixed request",
@@ -190,8 +187,7 @@ def test_validation_modes():
         return state
 
     # Test STRICT mode
-    strict_node = StateUpdatingValidationNode(
-        validation_mode=ValidationMode.STRICT)
+    strict_node = StateUpdatingValidationNode(validation_mode=ValidationMode.STRICT)
     node_func = strict_node.create_node_function()
     router_func = strict_node.create_router_function()
 
@@ -211,8 +207,7 @@ def test_validation_modes():
     router_func(updated_state)
 
     # Test PARTIAL mode (default)
-    partial_node = StateUpdatingValidationNode(
-        validation_mode=ValidationMode.PARTIAL)
+    partial_node = StateUpdatingValidationNode(validation_mode=ValidationMode.PARTIAL)
     node_func = partial_node.create_node_function()
     router_func = partial_node.create_router_function()
 

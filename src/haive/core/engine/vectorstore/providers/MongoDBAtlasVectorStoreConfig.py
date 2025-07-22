@@ -1,4 +1,4 @@
-"""from typing import Any
+"""
 MongoDB Atlas Vector Store implementation for the Haive framework.
 
 This module provides a configuration class for the MongoDB Atlas vector store,
@@ -23,10 +23,10 @@ The implementation integrates with LangChain's MongoDB Atlas while providing
 a consistent Haive configuration interface.
 """
 
-from typing import Any
+from typing import Any, Dict, List, Optional, Tuple, Type
 
 from langchain_core.documents import Document
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 from haive.core.engine.vectorstore.base import BaseVectorStoreConfig
 from haive.core.engine.vectorstore.types import VectorStoreType
@@ -34,7 +34,8 @@ from haive.core.engine.vectorstore.types import VectorStoreType
 
 @BaseVectorStoreConfig.register(VectorStoreType.MONGODB_ATLAS)
 class MongoDBAtlasVectorStoreConfig(BaseVectorStoreConfig):
-    """Configuration for MongoDB Atlas vector store in the Haive framework.
+    """
+    Configuration for MongoDB Atlas vector store in the Haive framework.
 
     This vector store uses MongoDB Atlas Vector Search for combining
     document database capabilities with vector similarity search.
@@ -114,12 +115,13 @@ class MongoDBAtlasVectorStoreConfig(BaseVectorStoreConfig):
     )
 
     # Index configuration for creation
-    index_config: dict[str, Any] | None = Field(
+    index_config: Optional[Dict[str, Any]] = Field(
         default=None, description="Custom index configuration for Atlas Search"
     )
 
-    @validator("relevance_score_fn")
-    def validate_relevance_score_fn(self, v) -> Any:
+    @field_validator("relevance_score_fn")
+    @classmethod
+    def validate_relevance_score_fn(cls, v):
         """Validate relevance score function is supported."""
         valid_functions = ["cosine", "euclidean", "dotProduct"]
         if v not in valid_functions:
@@ -128,8 +130,9 @@ class MongoDBAtlasVectorStoreConfig(BaseVectorStoreConfig):
             )
         return v
 
-    @validator("connection_string")
-    def validate_connection_string(self, v) -> Any:
+    @field_validator("connection_string")
+    @classmethod
+    def validate_connection_string(cls, v):
         """Basic validation of MongoDB connection string."""
         if not v.startswith(("mongodb://", "mongodb+srv://")):
             raise ValueError(
@@ -137,26 +140,27 @@ class MongoDBAtlasVectorStoreConfig(BaseVectorStoreConfig):
             )
         return v
 
-    def get_input_fields(self) -> dict[str, tuple[type, Any]]:
+    def get_input_fields(self) -> Dict[str, Tuple[Type, Any]]:
         """Return input field definitions for MongoDB Atlas vector store."""
         return {
             "documents": (
-                list[Document],
+                List[Document],
                 Field(description="Documents to add to the vector store"),
             ),
         }
 
-    def get_output_fields(self) -> dict[str, tuple[type, Any]]:
+    def get_output_fields(self) -> Dict[str, Tuple[Type, Any]]:
         """Return output field definitions for MongoDB Atlas vector store."""
         return {
             "ids": (
-                list[str],
+                List[str],
                 Field(description="MongoDB ObjectIds of the added documents"),
             ),
         }
 
-    def instantiate(self) -> Any:
-        """Create a MongoDB Atlas vector store from this configuration.
+    def instantiate(self):
+        """
+        Create a MongoDB Atlas vector store from this configuration.
 
         Returns:
             MongoDBAtlasVectorSearch: Instantiated MongoDB Atlas vector store.

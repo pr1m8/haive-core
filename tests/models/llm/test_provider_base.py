@@ -192,9 +192,7 @@ class TestBaseLLMProvider:
                 return False
 
         # Create provider with rate limiting
-        provider = TestProvider(
-            requests_per_second=10,
-            tokens_per_minute=100000)
+        provider = TestProvider(requests_per_second=10, tokens_per_minute=100000)
 
         # Check rate limiting params are set
         assert provider.requests_per_second == 10

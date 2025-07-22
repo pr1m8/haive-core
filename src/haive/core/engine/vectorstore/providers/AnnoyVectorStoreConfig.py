@@ -1,6 +1,5 @@
 """Annoy Vector Store implementation for the Haive framework.
 
-from typing import Any
 This module provides a configuration class for the Annoy vector store,
 which provides memory-efficient approximate nearest neighbor search.
 
@@ -29,7 +28,7 @@ can be added once the index is created.
 from typing import Any
 
 from langchain_core.documents import Document
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 from haive.core.engine.vectorstore.base import BaseVectorStoreConfig
 from haive.core.engine.vectorstore.types import VectorStoreType
@@ -105,16 +104,18 @@ class AnnoyVectorStoreConfig(BaseVectorStoreConfig):
         default=True, description="Whether to build index immediately on instantiation"
     )
 
-    @validator("metric")
-    def validate_metric(self, v) -> Any:
+    @field_validator("metric")
+    @classmethod
+    def validate_metric(cls, v):
         """Validate distance metric is supported by Annoy."""
         valid_metrics = ["angular", "euclidean", "manhattan", "hamming", "dot"]
         if v not in valid_metrics:
             raise ValueError(f"metric must be one of {valid_metrics}, got {v}")
         return v
 
-    @validator("n_jobs")
-    def validate_n_jobs(self, v) -> Any:
+    @field_validator("n_jobs")
+    @classmethod
+    def validate_n_jobs(cls, v):
         """Validate n_jobs parameter."""
         if v < -1 or v == 0:
             raise ValueError("n_jobs must be -1 (all cores) or positive integer")

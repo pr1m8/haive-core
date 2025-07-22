@@ -76,8 +76,7 @@ class TestExtractFunctions:
                 HumanMessage(content="What is AI?"),
                 AIMessage(content="AI stands for Artificial Intelligence."),
                 HumanMessage(content="How does it work?"),
-                AIMessage(
-                    content="AI works through machine learning algorithms."),
+                AIMessage(content="AI works through machine learning algorithms."),
             ]
         )
 
@@ -91,8 +90,7 @@ class TestExtractFunctions:
         assert result == ["Hello", "How are you?", "Goodbye"]
 
         # Test with default
-        extract_missing = extract_lib.extract_simple_field(
-            "missing_field", "default")
+        extract_missing = extract_lib.extract_simple_field("missing_field", "default")
         result = extract_missing(complex_state, {})
         assert result == "default"
 
@@ -191,8 +189,7 @@ class TestExtractFunctions:
         ]
         assert result == expected
 
-    def test_extract_messages_content_custom_field(
-            self, extract_lib, complex_state):
+    def test_extract_messages_content_custom_field(self, extract_lib, complex_state):
         """Test message content extraction with custom field name."""
         # Extract from regular string list (simulating message content)
         extract_content = extract_lib.extract_messages_content("messages")
@@ -202,8 +199,7 @@ class TestExtractFunctions:
         assert result == ["Hello", "How are you?", "Goodbye"]
 
         # Test with missing field
-        extract_missing = extract_lib.extract_messages_content(
-            "missing_messages")
+        extract_missing = extract_lib.extract_messages_content("missing_messages")
         result = extract_missing(complex_state, {})
         assert result == []
 
@@ -233,8 +229,7 @@ class TestExtractFunctions:
         result = extract_input(state, {})
         assert result == "Just current message"
 
-    def test_extract_conditional_with_defaults(
-            self, extract_lib, complex_state):
+    def test_extract_conditional_with_defaults(self, extract_lib, complex_state):
         """Test conditional extraction with defaults."""
         extract_input = extract_lib.extract_conditional(
             "config.use_history",
@@ -266,8 +261,7 @@ class TestExtractFunctions:
         }
         assert result == expected
 
-    def test_extract_multi_field_with_defaults(
-            self, extract_lib, complex_state):
+    def test_extract_multi_field_with_defaults(self, extract_lib, complex_state):
         """Test multi-field extraction with defaults."""
         extract_multi = extract_lib.extract_multi_field(
             {
@@ -295,8 +289,7 @@ class TestExtractFunctions:
         assert isinstance(result, int)
 
         # Extract float field
-        extract_temp = extract_lib.extract_typed(
-            "config.temperature", float, 0.0)
+        extract_temp = extract_lib.extract_typed("config.temperature", float, 0.0)
         result = extract_temp(complex_state, {})
         assert result == 0.8
         assert isinstance(result, float)
@@ -309,20 +302,17 @@ class TestExtractFunctions:
         assert result == 999  # Should return default
 
         # Try to extract int as string
-        extract_bad2 = extract_lib.extract_typed(
-            "iteration_count", str, "default")
+        extract_bad2 = extract_lib.extract_typed("iteration_count", str, "default")
         result = extract_bad2(complex_state, {})
         assert result == "default"  # Should return default
 
     def test_extract_typed_missing_field(self, extract_lib, complex_state):
         """Test typed extraction with missing field."""
-        extract_missing = extract_lib.extract_typed(
-            "missing_field", str, "not_found")
+        extract_missing = extract_lib.extract_typed("missing_field", str, "not_found")
         result = extract_missing(complex_state, {})
         assert result == "not_found"
 
-    def test_all_module_functions_work(
-            self, complex_state, real_messages_state):
+    def test_all_module_functions_work(self, complex_state, real_messages_state):
         """Test that all module-level functions work correctly."""
         # Test all module functions
         result1 = extract_simple_field("current_query")(complex_state, {})
@@ -331,9 +321,7 @@ class TestExtractFunctions:
         result2 = extract_with_path("config.name")(complex_state, {})
         assert result2 == "test"
 
-        result3 = extract_with_projection(
-            "agents[0]", ["name"])(
-            complex_state, {})
+        result3 = extract_with_projection("agents[0]", ["name"])(complex_state, {})
         assert result3 == {"name": "agent1"}
 
         result4 = extract_messages_content()(real_messages_state, {})
@@ -344,8 +332,7 @@ class TestExtractFunctions:
         )(complex_state, {})
         assert result5 == "Hello. How are you? What is the weather?"
 
-        result6 = extract_multi_field(
-            {"query": "current_query"})(complex_state, {})
+        result6 = extract_multi_field({"query": "current_query"})(complex_state, {})
         assert result6 == {"query": "What is the weather?"}
 
         result7 = extract_typed("iteration_count", int, 0)(complex_state, {})

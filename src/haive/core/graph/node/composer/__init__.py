@@ -1,69 +1,136 @@
-"""Module exports."""
+"""Node Schema Composer - Flexible I/O configuration for graph nodes."""
 
-from composer.advanced_node_composer import AdvancedComposedNode
-from composer.advanced_node_composer import AdvancedNodeComposer
-from composer.advanced_node_composer import TypedCallableNode
-from composer.advanced_node_composer import as_node
-from composer.advanced_node_composer import callable_to_node
-from composer.advanced_node_composer import create_extract_update_node
-from composer.advanced_node_composer import create_typed_callable_node
-from composer.advanced_node_composer import decorator
-from composer.advanced_node_composer import from_callable_advanced
-from composer.advanced_node_composer import node_with_custom_logic
-from composer.advanced_node_composer import normalized_wrapper
-from composer.advanced_node_composer import pipeline_callable
-from composer.advanced_node_composer import typed_wrapper
-from composer.extract_functions import ExtractFunctions
-from composer.extract_functions import extract_conditional
-from composer.extract_functions import extract_messages_content
-from composer.extract_functions import extract_multi_field
-from composer.extract_functions import extract_simple_field
-from composer.extract_functions import extract_typed
-from composer.extract_functions import extract_with_path
-from composer.extract_functions import extract_with_projection
-from composer.field_mapping import FieldMapping
-from composer.integrated_node_composer import IntegratedNodeComposer
-from composer.integrated_node_composer import SchemaAwareComposedNode
-from composer.integrated_node_composer import StateSchemaAdapter
-from composer.integrated_node_composer import adapt
-from composer.integrated_node_composer import compose_node_with_schema
-from composer.integrated_node_composer import create_schema_adapter
-from composer.integrated_node_composer import create_schema_aware_node
-from composer.integrated_node_composer import decorator
-from composer.integrated_node_composer import from_callable_with_schema
-from composer.integrated_node_composer import input_schema
-from composer.integrated_node_composer import integrate_node_with_schema
-from composer.integrated_node_composer import output_schema
-from composer.integrated_node_composer import with_state_schema
-from composer.node_schema_composer import ComposedCallableNode
-from composer.node_schema_composer import ComposedNode
-from composer.node_schema_composer import NodeSchemaComposer
-from composer.node_schema_composer import SchemaAdapter
-from composer.node_schema_composer import adapt
-from composer.node_schema_composer import change_input_key
-from composer.node_schema_composer import change_output_key
-from composer.node_schema_composer import compose_node
-from composer.node_schema_composer import create_adapter
-from composer.node_schema_composer import create_extract_function
-from composer.node_schema_composer import create_update_function
-from composer.node_schema_composer import from_callable
-from composer.node_schema_composer import register_extract_function
-from composer.node_schema_composer import register_transform_function
-from composer.node_schema_composer import register_update_function
-from composer.node_schema_composer import remap_fields
-from composer.path_resolver import PathResolver
-from composer.path_resolver import extract_value
-from composer.protocols import ExtractFunction
-from composer.protocols import TransformFunction
-from composer.protocols import UpdateFunction
-from composer.update_functions import UpdateFunctions
-from composer.update_functions import update_conditional
-from composer.update_functions import update_hierarchical
-from composer.update_functions import update_messages_append
-from composer.update_functions import update_multi_field
-from composer.update_functions import update_simple_field
-from composer.update_functions import update_type_aware
-from composer.update_functions import update_with_path
-from composer.update_functions import update_with_transform
+from haive.core.graph.node.composer.extract_functions import (
+    ExtractFunctions,
+    extract_conditional,
+    extract_functions,
+    extract_messages_content,
+    extract_multi_field,
+    extract_simple_field,
+    extract_typed,
+    extract_with_path,
+    extract_with_projection,
+)
+from haive.core.graph.node.composer.field_mapping import FieldMapping
+from haive.core.graph.node.composer.node_schema_composer import (
+    ComposedCallableNode,
+    ComposedNode,
+    NodeSchemaComposer,
+    SchemaAdapter,
+    change_input_key,
+    change_output_key,
+    remap_fields,
+)
+from haive.core.graph.node.composer.path_resolver import PathResolver
+from haive.core.graph.node.composer.protocols import (
+    ExtractFunction,
+    TransformFunction,
+    UpdateFunction,
+)
+from haive.core.graph.node.composer.update_functions import (
+    UpdateFunctions,
+    update_conditional,
+    update_functions,
+    update_hierarchical,
+    update_messages_append,
+    update_multi_field,
+    update_simple_field,
+    update_type_aware,
+    update_with_path,
+    update_with_transform,
+)
 
-__all__ = ['AdvancedComposedNode', 'AdvancedNodeComposer', 'ComposedCallableNode', 'ComposedNode', 'ExtractFunction', 'ExtractFunctions', 'FieldMapping', 'IntegratedNodeComposer', 'NodeSchemaComposer', 'PathResolver', 'SchemaAdapter', 'SchemaAwareComposedNode', 'StateSchemaAdapter', 'TransformFunction', 'TypedCallableNode', 'UpdateFunction', 'UpdateFunctions', 'adapt', 'as_node', 'callable_to_node', 'change_input_key', 'change_output_key', 'compose_node', 'compose_node_with_schema', 'create_adapter', 'create_extract_function', 'create_extract_update_node', 'create_schema_adapter', 'create_schema_aware_node', 'create_typed_callable_node', 'create_update_function', 'decorator', 'extract_conditional', 'extract_messages_content', 'extract_multi_field', 'extract_simple_field', 'extract_typed', 'extract_value', 'extract_with_path', 'extract_with_projection', 'from_callable', 'from_callable_advanced', 'from_callable_with_schema', 'input_schema', 'integrate_node_with_schema', 'node_with_custom_logic', 'normalized_wrapper', 'output_schema', 'pipeline_callable', 'register_extract_function', 'register_transform_function', 'register_update_function', 'remap_fields', 'typed_wrapper', 'update_conditional', 'update_hierarchical', 'update_messages_append', 'update_multi_field', 'update_simple_field', 'update_type_aware', 'update_with_path', 'update_with_transform', 'with_state_schema']
+# Import advanced features if available
+try:
+    from haive.core.graph.node.composer.advanced_node_composer import (
+        AdvancedComposedNode,
+        AdvancedNodeComposer,
+        TypedCallableNode,
+        as_node,
+        callable_to_node,
+        node_with_custom_logic,
+    )
+
+    _advanced_available = True
+except ImportError:
+    _advanced_available = False
+
+__all__ = [
+    # Core composer
+    "NodeSchemaComposer",
+    "ComposedNode",
+    "ComposedCallableNode",
+    "SchemaAdapter",
+    # Quick factory functions
+    "change_output_key",
+    "change_input_key",
+    "remap_fields",
+    # Foundation classes
+    "FieldMapping",
+    "PathResolver",
+    "ExtractFunction",
+    "UpdateFunction",
+    "TransformFunction",
+    # Extract functions
+    "ExtractFunctions",
+    "extract_functions",
+    "extract_simple_field",
+    "extract_with_path",
+    "extract_with_projection",
+    "extract_messages_content",
+    "extract_conditional",
+    "extract_multi_field",
+    "extract_typed",
+    # Update functions
+    "UpdateFunctions",
+    "update_functions",
+    "update_simple_field",
+    "update_with_path",
+    "update_messages_append",
+    "update_type_aware",
+    "update_conditional",
+    "update_multi_field",
+    "update_with_transform",
+    "update_hierarchical",
+]
+
+# Add advanced features to __all__ if available
+if _advanced_available:
+    __all__.extend(
+        [
+            "AdvancedNodeComposer",
+            "AdvancedComposedNode",
+            "TypedCallableNode",
+            "callable_to_node",
+            "node_with_custom_logic",
+            "as_node",
+        ]
+    )
+
+# Import integrated features if available
+try:
+    from haive.core.graph.node.composer.integrated_node_composer import (
+        IntegratedNodeComposer,
+        SchemaAwareComposedNode,
+        StateSchemaAdapter,
+        create_schema_aware_node,
+        integrate_node_with_schema,
+        with_state_schema,
+    )
+
+    _integrated_available = True
+except ImportError:
+    _integrated_available = False
+
+# Add integrated features to __all__ if available
+if _integrated_available:
+    __all__.extend(
+        [
+            "IntegratedNodeComposer",
+            "SchemaAwareComposedNode",
+            "StateSchemaAdapter",
+            "integrate_node_with_schema",
+            "create_schema_aware_node",
+            "with_state_schema",
+        ]
+    )

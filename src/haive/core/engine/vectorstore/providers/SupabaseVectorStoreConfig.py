@@ -1,6 +1,5 @@
 """Supabase Vector Store implementation for the Haive framework.
 
-from typing import Any
 This module provides a configuration class for the Supabase vector store,
 which is a managed PostgreSQL service with built-in pgvector support.
 
@@ -26,7 +25,7 @@ a consistent Haive configuration interface.
 from typing import Any
 
 from langchain_core.documents import Document
-from pydantic import Field, SecretStr, validator
+from pydantic import Field, SecretStr, field_validator
 
 from haive.core.common.mixins.secure_config import SecureConfigMixin
 from haive.core.engine.vectorstore.base import BaseVectorStoreConfig
@@ -122,8 +121,9 @@ class SupabaseVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
         default=True, description="Whether to create the table if it doesn't exist"
     )
 
-    @validator("supabase_url")
-    def validate_supabase_url(self, v) -> Any:
+    @field_validator("supabase_url")
+    @classmethod
+    def validate_supabase_url(cls, v):
         """Validate Supabase URL format."""
         if not v.startswith("https://") or not v.endswith(".supabase.co"):
             raise ValueError("supabase_url must be a valid Supabase project URL")
@@ -147,7 +147,7 @@ class SupabaseVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
             ),
         }
 
-    def instantiate(self) -> Any:
+    def instantiate(self):
         """Create a Supabase vector store from this configuration.
 
         Returns:
@@ -282,6 +282,5 @@ class SupabaseVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
             client.rpc("exec_sql", {"sql": create_index_sql}).execute()
 
         except Exception:
-            # If exec_sql RPC doesn't exist, the setup needs to be done
-            # manually
+            # If exec_sql RPC doesn't exist, the setup needs to be done manually
             pass

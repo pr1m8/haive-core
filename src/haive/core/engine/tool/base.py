@@ -7,7 +7,7 @@ from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import StructuredTool, Tool
 from langchain_core.tools.base import BaseTool, BaseToolkit
 from langgraph.types import RetryPolicy
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from haive.core.engine.base import EngineType, InvokableEngine
 
@@ -250,7 +250,7 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
 
         return result
 
-    @field_validatorvalidate_engine_type
+    @field_validator("engine_type")
     @classmethod
     def validate_engine_type(cls, v) -> Any:
         """Validate engine type is TOOL."""
@@ -258,7 +258,7 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
             raise ValueError("engine_type must be TOOL")
         return v
 
-    @field_validatorvalidate_tools
+    @field_validator("tools")
     @classmethod
     def validate_tools(cls, v) -> Any:
         """Validate tools are of the correct type."""
@@ -277,7 +277,7 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
 
         return valid_tools
 
-    @field_validatorvalidate_toolkit
+    @field_validator("toolkit")
     @classmethod
     def validate_toolkit(cls, v) -> Any:
         """Validate toolkit is of the correct type."""
@@ -299,7 +299,7 @@ class ToolEngine(InvokableEngine[dict[str, Any], dict[str, Any]]):
         logger.warning(f"Ignoring invalid toolkit type: {type(v).__name__}")
         return None
 
-    @field_validatorvalidate_tool_choice
+    @field_validator("tool_choice")
     @classmethod
     def validate_tool_choice(cls, v) -> Any:
         """Validate tool_choice has a valid value."""

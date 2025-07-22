@@ -370,9 +370,7 @@ class TestLangChainConverters:
         )
 
         converter = MessageConverter()
-        context = ConversionContext(
-            source_type="HumanMessage",
-            target_type="AIMessage")
+        context = ConversionContext(source_type="HumanMessage", target_type="AIMessage")
 
         human_msg = HumanMessage(content="Hello")
         ai_msg = converter.convert(human_msg, context)

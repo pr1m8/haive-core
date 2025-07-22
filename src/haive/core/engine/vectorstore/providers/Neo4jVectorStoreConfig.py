@@ -1,6 +1,5 @@
 """Neo4j Vector Store implementation for the Haive framework.
 
-from typing import Any
 This module provides a configuration class for the Neo4j vector store,
 which combines graph database capabilities with vector similarity search.
 
@@ -26,7 +25,7 @@ a consistent Haive configuration interface.
 from typing import Any
 
 from langchain_core.documents import Document
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 # Note: Not using SecureConfigMixin since Neo4j uses 'password' not 'api_key'
 from haive.core.engine.vectorstore.base import BaseVectorStoreConfig
@@ -122,24 +121,27 @@ class Neo4jVectorStoreConfig(BaseVectorStoreConfig):
         default=True, description="Whether to create index if it doesn't exist"
     )
 
-    @validator("url")
-    def validate_url(self, v) -> Any:
+    @field_validator("url")
+    @classmethod
+    def validate_url(cls, v):
         """Validate Neo4j URL format."""
         valid_schemes = ["bolt://", "neo4j://", "bolt+s://", "neo4j+s://"]
         if not any(v.startswith(scheme) for scheme in valid_schemes):
             raise ValueError(f"url must start with one of {valid_schemes}")
         return v
 
-    @validator("search_type")
-    def validate_search_type(self, v) -> Any:
+    @field_validator("search_type")
+    @classmethod
+    def validate_search_type(cls, v):
         """Validate search type is supported."""
         valid_types = ["vector", "hybrid"]
         if v not in valid_types:
             raise ValueError(f"search_type must be one of {valid_types}, got {v}")
         return v
 
-    @validator("distance_strategy")
-    def validate_distance_strategy(self, v) -> Any:
+    @field_validator("distance_strategy")
+    @classmethod
+    def validate_distance_strategy(cls, v):
         """Validate distance strategy is supported."""
         valid_strategies = ["cosine", "euclidean"]
         if v not in valid_strategies:
@@ -166,7 +168,7 @@ class Neo4jVectorStoreConfig(BaseVectorStoreConfig):
             ),
         }
 
-    def instantiate(self) -> Any:
+    def instantiate(self):
         """Create a Neo4j vector store from this configuration.
 
         Returns:

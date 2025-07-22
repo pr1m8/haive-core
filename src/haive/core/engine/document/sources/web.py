@@ -32,8 +32,6 @@ class WebSource(BaseSource):
     }
 
     @model_validator(mode="after")
-
-
     @classmethod
     def validate_source_type(cls) -> Any:
         """Automatically set more specific source type based on URL domain."""

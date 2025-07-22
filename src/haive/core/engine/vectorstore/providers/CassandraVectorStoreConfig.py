@@ -1,6 +1,5 @@
 """Cassandra Vector Store implementation for the Haive framework.
 
-from typing import Any
 This module provides a configuration class for the Cassandra vector store,
 which provides distributed vector storage with Apache Cassandra.
 
@@ -26,7 +25,7 @@ a consistent Haive configuration interface.
 from typing import Any
 
 from langchain_core.documents import Document
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 from haive.core.engine.vectorstore.base import BaseVectorStoreConfig
 from haive.core.engine.vectorstore.types import VectorStoreType
@@ -126,23 +125,26 @@ class CassandraVectorStoreConfig(BaseVectorStoreConfig):
         default=30, ge=1, le=300, description="Request timeout in seconds"
     )
 
-    @validator("hosts")
-    def validate_hosts(self, v) -> Any:
+    @field_validator("hosts")
+    @classmethod
+    def validate_hosts(cls, v):
         """Validate hosts list is not empty."""
         if not v or len(v) == 0:
             raise ValueError("hosts list cannot be empty")
         return v
 
-    @validator("setup_mode")
-    def validate_setup_mode(self, v) -> Any:
+    @field_validator("setup_mode")
+    @classmethod
+    def validate_setup_mode(cls, v):
         """Validate setup mode is supported."""
         valid_modes = ["SYNC", "ASYNC", "OFF"]
         if v not in valid_modes:
             raise ValueError(f"setup_mode must be one of {valid_modes}, got {v}")
         return v
 
-    @validator("metadata_indexing")
-    def validate_metadata_indexing(self, v) -> Any:
+    @field_validator("metadata_indexing")
+    @classmethod
+    def validate_metadata_indexing(cls, v):
         """Validate metadata indexing policy."""
         valid_policies = ["all", "none"]
         if v not in valid_policies:
@@ -155,8 +157,9 @@ class CassandraVectorStoreConfig(BaseVectorStoreConfig):
             )
         return v
 
-    @validator("keyspace")
-    def validate_keyspace(self, v) -> Any:
+    @field_validator("keyspace")
+    @classmethod
+    def validate_keyspace(cls, v):
         """Validate keyspace name format."""
         if not v or len(v.strip()) == 0:
             raise ValueError("keyspace cannot be empty")
@@ -187,7 +190,7 @@ class CassandraVectorStoreConfig(BaseVectorStoreConfig):
             ),
         }
 
-    def instantiate(self) -> Any:
+    def instantiate(self):
         """Create a Cassandra vector store from this configuration.
 
         Returns:

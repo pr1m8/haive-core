@@ -4,9 +4,9 @@ import logging
 import uuid
 from typing import Any
 
+from haive.agents.simple.config import SimpleAgentConfig
 from langchain_core.messages import HumanMessage
 
-from haive.agents.simple.config import SimpleAgentConfig
 from haive.core.engine.aug_llm import AugLLMConfig
 
 logger = logging.getLogger(__name__)

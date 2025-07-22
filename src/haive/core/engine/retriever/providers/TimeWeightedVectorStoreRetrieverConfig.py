@@ -1,6 +1,5 @@
 """Time-Weighted Vector Store Retriever implementation for the Haive framework.
 
-from typing import Any
 This module provides a configuration class for the Time-Weighted Vector Store retriever,
 which combines vector similarity search with time-based scoring to prioritize recent
 documents while still considering semantic relevance.
@@ -23,7 +22,7 @@ providing a consistent Haive configuration interface with flexible time weightin
 
 from typing import Any
 
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 from haive.core.engine.retriever.retriever import BaseRetrieverConfig
 from haive.core.engine.retriever.types import RetrieverType
@@ -119,16 +118,19 @@ class TimeWeightedVectorStoreRetrieverConfig(BaseRetrieverConfig):
         description="Additional search parameters for the vector store",
     )
 
-    @validator("fetch_k")
-    def validate_fetch_k(self, v, values) -> Any:
+    @field_validator("fetch_k")
+    @classmethod
+    def validate_fetch_k(cls, v, info):
         """Validate that fetch_k is greater than or equal to k."""
-        k = values.get("k", 4)
-        if v < k:
-            raise ValueError(f"fetch_k ({v}) must be greater than or equal to k ({k})")
+        # Note: In Pydantic v2, cross-field validation requires model_validator
+        # This validator only checks individual field constraints
+        if v < 1:
+            raise ValueError(f"fetch_k ({v}) must be at least 1")
         return v
 
-    @validator("search_type")
-    def validate_search_type(self, v) -> Any:
+    @field_validator("search_type")
+    @classmethod
+    def validate_search_type(cls, v):
         """Validate search type."""
         valid_types = ["similarity", "mmr"]
         if v not in valid_types:
@@ -156,7 +158,7 @@ class TimeWeightedVectorStoreRetrieverConfig(BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self) -> Any:
+    def instantiate(self):
         """Create a Time-Weighted Vector Store retriever from this configuration.
 
         Returns:

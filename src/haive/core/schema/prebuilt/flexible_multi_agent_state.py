@@ -123,8 +123,6 @@ class FlexibleMultiAgentState(StateSchema):
         return v
 
     @model_validator(mode="after")
-
-
     @classmethod
     def initialize_agent_states(cls) -> "FlexibleMultiAgentState":
         """Initialize empty states for each agent."""
@@ -202,8 +200,6 @@ class ContainerMultiAgentState(FlexibleMultiAgentState):
     )
 
     @model_validator(mode="after")
-
-
     @classmethod
     def setup_execution_order(cls) -> "ContainerMultiAgentState":
         """Set default execution order if not provided."""

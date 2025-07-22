@@ -2,9 +2,9 @@
 
 import logging
 
+from haive.agents.simple.agent_v2 import SimpleAgentV2
 from pydantic import BaseModel, Field
 
-from haive.agents.simple.agent_v2 import SimpleAgentV2
 from haive.core.engine.aug_llm import AugLLMConfig
 
 # Enable debug logging to see what's happening
@@ -58,12 +58,8 @@ def test_duplication_debug():
 
                     from langchain_core.messages import AIMessage, ToolMessage
 
-                    ai_messages = [
-                        m for m in messages if isinstance(
-                            m, AIMessage)]
-                    tool_messages = [
-                        m for m in messages if isinstance(
-                            m, ToolMessage)]
+                    ai_messages = [m for m in messages if isinstance(m, AIMessage)]
+                    tool_messages = [m for m in messages if isinstance(m, ToolMessage)]
 
                     # Check for duplicates
                     tool_call_ids = []
@@ -78,8 +74,7 @@ def test_duplication_debug():
                             tool_message_ids.append(tool_msg.tool_call_id)
 
                     # Check for duplicates
-                    duplicate_tool_calls = len(
-                        tool_call_ids) != len(set(tool_call_ids))
+                    duplicate_tool_calls = len(tool_call_ids) != len(set(tool_call_ids))
                     duplicate_tool_messages = len(tool_message_ids) != len(
                         set(tool_message_ids)
                     )

@@ -50,8 +50,7 @@ class TestVectorStoreProvider:
         assert params["search_kwargs"]["fetch_k"] == 20
         assert params["search_type"] == "mmr"
 
-    def test_instantiate_success(
-            self, mock_vector_store, mock_vector_store_retriever):
+    def test_instantiate_success(self, mock_vector_store, mock_vector_store_retriever):
         """Test successful instantiation."""
         with patch(
             "haive.core.models.retriever.providers.vector_store.VectorStoreProvider._get_retriever_class"
@@ -131,8 +130,7 @@ class TestMultiQueryProvider:
         ) as mock_get_class:
             mock_get_class.return_value = mock_multi_query_retriever
 
-            provider = MultiQueryProvider(
-                retriever=mock_retriever, llm=mock_llm)
+            provider = MultiQueryProvider(retriever=mock_retriever, llm=mock_llm)
             result = provider.instantiate()
 
             mock_multi_query_retriever.assert_called_once()
@@ -199,9 +197,7 @@ class TestEnsembleProvider:
         retriever3 = Mock()
 
         provider = EnsembleProvider(
-            retrievers=[
-                mock_retriever, retriever2, retriever3], weights=[
-                0.4, 0.3, 0.3]
+            retrievers=[mock_retriever, retriever2, retriever3], weights=[0.4, 0.3, 0.3]
         )
 
         provider.remove_retriever(1)  # Remove middle retriever
@@ -291,8 +287,7 @@ class TestBm25Provider:
         assert params["k1"] == 1.8
         assert "preprocess_func" in params
 
-    def test_instantiate_with_documents(
-            self, sample_documents, mock_bm25_retriever):
+    def test_instantiate_with_documents(self, sample_documents, mock_bm25_retriever):
         """Test instantiation with documents."""
         with patch(
             "haive.core.models.retriever.providers.bm25.Bm25Provider._get_retriever_class"

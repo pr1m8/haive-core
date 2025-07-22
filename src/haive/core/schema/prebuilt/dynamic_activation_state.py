@@ -174,8 +174,6 @@ class DynamicActivationState(StateSchema):
         return [cap.strip().lower() for cap in v if cap.strip()]
 
     @model_validator(mode="after")
-
-
     @classmethod
     def setup_dynamic_activation(cls) -> "DynamicActivationState":
         """Setup dynamic activation state after model creation.

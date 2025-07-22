@@ -1,4 +1,4 @@
-"""from typing import Any
+"""
 Azure Cognitive Search Vector Store implementation for the Haive framework.
 
 This module provides a configuration class for the Azure Cognitive Search vector store,
@@ -23,10 +23,10 @@ The implementation integrates with LangChain's Azure Search while providing
 a consistent Haive configuration interface with secure credential management.
 """
 
-from typing import Any
+from typing import Any, Dict, List, Optional, Tuple, Type
 
 from langchain_core.documents import Document
-from pydantic import Field, SecretStr, validator
+from pydantic import Field, SecretStr, field_validator
 
 from haive.core.common.mixins.secure_config import SecureConfigMixin
 from haive.core.engine.vectorstore.base import BaseVectorStoreConfig
@@ -35,7 +35,8 @@ from haive.core.engine.vectorstore.types import VectorStoreType
 
 @BaseVectorStoreConfig.register(VectorStoreType.AZURE_SEARCH)
 class AzureSearchVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
-    """Configuration for Azure Cognitive Search vector store in the Haive framework.
+    """
+    Configuration for Azure Cognitive Search vector store in the Haive framework.
 
     This vector store uses Azure Cognitive Search for enterprise-grade search
     with vector capabilities and AI enrichment.
@@ -79,7 +80,7 @@ class AzureSearchVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
         ..., description="Name of the Azure Cognitive Search service"
     )
 
-    api_key: SecretStr | None = Field(
+    api_key: Optional[SecretStr] = Field(
         default=None,
         description="Admin API key (auto-resolved from AZURE_SEARCH_API_KEY)",
     )
@@ -95,18 +96,18 @@ class AzureSearchVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
     )
 
     # Semantic search configuration
-    semantic_configuration_name: str | None = Field(
+    semantic_configuration_name: Optional[str] = Field(
         default=None,
         description="Name of the semantic configuration for semantic search",
     )
 
     # Field configuration
-    fields: list[dict[str, Any]] | None = Field(
+    fields: Optional[List[Dict[str, Any]]] = Field(
         default=None, description="Field definitions for the index schema"
     )
 
     # Vector search configuration
-    vector_search_configuration: dict[str, Any] | None = Field(
+    vector_search_configuration: Optional[Dict[str, Any]] = Field(
         default=None, description="Vector search algorithm configuration"
     )
 
@@ -134,31 +135,33 @@ class AzureSearchVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
         default="2023-11-01", description="Azure Search API version"
     )
 
-    @validator("search_type")
-    def validate_search_type(self, v) -> Any:
+    @field_validator("search_type")
+    @classmethod
+    def validate_search_type(cls, v):
         """Validate search type is supported."""
         valid_types = ["similarity", "hybrid", "semantic_hybrid"]
         if v not in valid_types:
             raise ValueError(f"search_type must be one of {valid_types}, got {v}")
         return v
 
-    def get_input_fields(self) -> dict[str, tuple[type, Any]]:
+    def get_input_fields(self) -> Dict[str, Tuple[Type, Any]]:
         """Return input field definitions for Azure Search vector store."""
         return {
             "documents": (
-                list[Document],
+                List[Document],
                 Field(description="Documents to add to the vector store"),
             ),
         }
 
-    def get_output_fields(self) -> dict[str, tuple[type, Any]]:
+    def get_output_fields(self) -> Dict[str, Tuple[Type, Any]]:
         """Return output field definitions for Azure Search vector store."""
         return {
-            "ids": (list[str], Field(description="Document IDs in Azure Search")),
+            "ids": (List[str], Field(description="Document IDs in Azure Search")),
         }
 
-    def instantiate(self) -> Any:
-        """Create an Azure Search vector store from this configuration.
+    def instantiate(self):
+        """
+        Create an Azure Search vector store from this configuration.
 
         Returns:
             AzureSearch: Instantiated Azure Search vector store.

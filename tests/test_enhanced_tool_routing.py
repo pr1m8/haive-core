@@ -122,8 +122,7 @@ class TestEnhancedToolRouting:
         config = SampleConfig(name="test_call_detection", tools=[])
 
         # Act - Analyze regular model (no explicit __call__)
-        regular_route, regular_metadata = config._analyze_tool(
-            SamplePydanticModel)
+        regular_route, regular_metadata = config._analyze_tool(SamplePydanticModel)
 
         # Act - Analyze executable model (explicit __call__)
         executable_route, executable_metadata = config._analyze_tool(
@@ -167,8 +166,7 @@ class TestEnhancedToolRouting:
         # Assert - Verify routing
         assert len(config.tools) == 2
         assert config.tool_routes.get("sample_base_tool") == "langchain_tool"
-        assert config.tool_routes.get(
-            "sample_structured_tool") == "langchain_tool"
+        assert config.tool_routes.get("sample_structured_tool") == "langchain_tool"
 
         # Assert - Verify tool instances
         assert config.get_tool("sample_base_tool") == base_tool

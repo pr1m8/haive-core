@@ -62,11 +62,7 @@ def create_sample_graph():
     # Create a graph
     graph = DynamicGraph(
         name="TestRAGWorkflow",
-        components=[
-            llm_engine,
-            retriever_engine,
-            vectorstore_engine,
-            retrieve_engine],
+        components=[llm_engine, retriever_engine, vectorstore_engine, retrieve_engine],
         description="A test RAG workflow for visualization",
         visualize=True,
         debug_level="verbose",
@@ -100,16 +96,8 @@ def create_sample_graph():
         return "simple"
 
     # Add branching nodes with clear names and configurations
-    graph.add_node(
-        "complex_retrieval",
-        retriever_engine,
-        config_overrides={
-            "k": 10})
-    graph.add_node(
-        "simple_retrieval",
-        retriever_engine,
-        config_overrides={
-            "k": 3})
+    graph.add_node("complex_retrieval", retriever_engine, config_overrides={"k": 10})
+    graph.add_node("simple_retrieval", retriever_engine, config_overrides={"k": 3})
     graph.add_node("medium_retrieval", retrieve_engine)
 
     # Add conditional routing - this will create the conditional edges

@@ -54,9 +54,7 @@ class UserProfile(BaseModel):
     username: str = Field(description="User's handle")
     name: str | None = Field(None, description="User's full name")
     age: int | None = Field(None, description="User's age")
-    interests: list[str] = Field(
-        default_factory=list,
-        description="User's interests")
+    interests: list[str] = Field(default_factory=list, description="User's interests")
     bio: str | None = Field(None, description="User's biography")
     contact_info: dict[str, str] | None = Field(
         None, description="User's contact information"
@@ -72,8 +70,7 @@ class RecipeIngredient(BaseModel):
     name: str = Field(description="Ingredient name")
     quantity: float | None = Field(None, description="Amount needed")
     unit: str | None = Field(None, description="Unit of measurement")
-    notes: str | None = Field(
-        None, description="Special notes about this ingredient")
+    notes: str | None = Field(None, description="Special notes about this ingredient")
 
 
 class RecipeStep(BaseModel):
@@ -94,11 +91,9 @@ class Recipe(BaseModel):
     prep_time_minutes: int | None = Field(
         None, description="Preparation time in minutes"
     )
-    cook_time_minutes: int | None = Field(
-        None, description="Cooking time in minutes")
+    cook_time_minutes: int | None = Field(None, description="Cooking time in minutes")
     servings: int | None = Field(None, description="Number of servings")
-    ingredients: list[RecipeIngredient] = Field(
-        description="List of ingredients")
+    ingredients: list[RecipeIngredient] = Field(description="List of ingredients")
     steps: list[RecipeStep] = Field(description="List of steps")
     tags: list[str] | None = Field(None, description="Recipe tags")
 
@@ -109,10 +104,7 @@ class MovieReview(BaseModel):
     movie_title: str = Field(description="Title of the movie")
     year: int | None = Field(None, description="Release year")
     director: str | None = Field(None, description="Movie director")
-    rating: float = Field(
-        description="Rating from 0.0 to 10.0",
-        ge=0.0,
-        le=10.0)
+    rating: float = Field(description="Rating from 0.0 to 10.0", ge=0.0, le=10.0)
     review_text: str = Field(description="The main review text")
     pros: list[str] | None = Field(None, description="Positive aspects")
     cons: list[str] | None = Field(None, description="Negative aspects")
@@ -166,9 +158,7 @@ def custom_template_with_variables():
             HumanMessagePromptTemplate.from_template(
                 "I want to know about {query}. Remember to include {important_aspect}."
             ),
-            MessagesPlaceholder(
-                variable_name="additional_context",
-                optional=True),
+            MessagesPlaceholder(variable_name="additional_context", optional=True),
             MessagesPlaceholder(variable_name="messages", optional=True),
         ]
     )
@@ -328,8 +318,7 @@ def recipe_search_tool():
         query_terms = query.lower().split()
         for recipe in recipes:
             # Search in title and ingredients
-            title_matches = any(
-                term in recipe["title"].lower() for term in query_terms)
+            title_matches = any(term in recipe["title"].lower() for term in query_terms)
             ingredient_matches = any(
                 any(term in ingredient.lower() for term in query_terms)
                 for ingredient in recipe["ingredients"]
@@ -402,8 +391,7 @@ def test_schema_pretty_printing(azure_llm_config, structured_chat_prompt):
     user_schema = SchemaComposer.create_model(
         [person_extractor], name="UserProfileSchema"
     )
-    recipe_schema = SchemaComposer.create_model(
-        [recipe_analyzer], name="RecipeSchema")
+    recipe_schema = SchemaComposer.create_model([recipe_analyzer], name="RecipeSchema")
     movie_schema = SchemaComposer.create_model(
         [movie_reviewer], name="MovieReviewSchema"
     )
@@ -456,9 +444,7 @@ def test_schema_pretty_printing(azure_llm_config, structured_chat_prompt):
                         "instruction": "Add chocolate chips",
                         "time_minutes": 1,
                     },
-                    {"number": 3,
-                     "instruction": "Bake at 350°F",
-                     "time_minutes": 10},
+                    {"number": 3, "instruction": "Bake at 350°F", "time_minutes": 10},
                 ],
                 tags=["dessert", "baking", "cookies"],
             )
@@ -488,8 +474,7 @@ def test_schema_pretty_printing(azure_llm_config, structured_chat_prompt):
 
     # Test StateSchema creation
     state_schema = SchemaComposer.create_model(
-        [person_extractor, recipe_analyzer,
-            movie_reviewer], name="ContentAnalysisState"
+        [person_extractor, recipe_analyzer, movie_reviewer], name="ContentAnalysisState"
     )
     state_schema.pretty_print()
 
@@ -536,8 +521,7 @@ def test_various_input_formats(
     # Test 3: Complex input with all template variables
     complex_input = {
         "context": [
-            SystemMessage(
-                content="Azure is Microsoft's cloud computing platform.")
+            SystemMessage(content="Azure is Microsoft's cloud computing platform.")
         ],
         "examples": [
             HumanMessage(content="What services does Azure offer?"),
@@ -546,8 +530,7 @@ def test_various_input_formats(
             ),
         ],
         "messages": [
-            HumanMessage(
-                content="How do Azure Functions compare to AWS Lambda?")
+            HumanMessage(content="How do Azure Functions compare to AWS Lambda?")
         ],
         "instructions": "Compare pricing, features, and integration capabilities",
     }
@@ -569,8 +552,7 @@ def test_various_input_formats(
         "query": "the impact of large language models",
         "important_aspect": "bias and fairness",
         "additional_context": [
-            SystemMessage(
-                content="Large language models have revolutionized NLP.")
+            SystemMessage(content="Large language models have revolutionized NLP.")
         ],
     }
 
@@ -668,10 +650,8 @@ def test_different_output_parsers(
         """Custom function to extract key points from text."""
         # In a real scenario, this might use regex or more complex parsing
         lines = text.split("\n")
-        points = [line.strip()
-                  for line in lines if line.strip().startswith("-")]
-        return points if points else [line.strip()
-                                      for line in lines if line.strip()]
+        points = [line.strip() for line in lines if line.strip().startswith("-")]
+        return points if points else [line.strip() for line in lines if line.strip()]
 
     system_prompt = """
     You are a summarization assistant. Provide key points from the given text.

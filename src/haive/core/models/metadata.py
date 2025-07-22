@@ -196,6 +196,5 @@ def get_model_metadata(
         return _MODEL_METADATA_CACHE[candidates[0][0]]
 
     # 4. Fallback - return empty dictionary
-    logger.warning(
-        f"No metadata found for model {model_name} with provider {provider}")
+    logger.warning(f"No metadata found for model {model_name} with provider {provider}")
     return {}

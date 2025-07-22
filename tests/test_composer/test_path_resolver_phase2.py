@@ -59,8 +59,7 @@ class TestPathResolverPhase2:
         return ComplexState(
             messages=["first", "second", "third"],
             config=NestedConfig(temperature=0.5, model_name="gpt-4-turbo"),
-            agents=[{"id": "a1", "role": "worker"},
-                    {"id": "a2", "role": "manager"}],
+            agents=[{"id": "a1", "role": "worker"}, {"id": "a2", "role": "manager"}],
         )
 
     @pytest.fixture
@@ -131,12 +130,10 @@ class TestPathResolverPhase2:
         assert result == "world"
 
         # Test out of bounds
-        result = resolver.extract_value(
-            nested_dict, "messages[99]", default="oob")
+        result = resolver.extract_value(nested_dict, "messages[99]", default="oob")
         assert result == "oob"
 
-        result = resolver.extract_value(
-            nested_dict, "messages[-99]", default="oob")
+        result = resolver.extract_value(nested_dict, "messages[-99]", default="oob")
         assert result == "oob"
 
     def test_array_access_with_pydantic(self, resolver, nested_pydantic):
@@ -173,12 +170,10 @@ class TestPathResolverPhase2:
         )
         assert result == "none"
 
-        result = resolver.extract_value(
-            nested_dict, "agents[99].name", default="none")
+        result = resolver.extract_value(nested_dict, "agents[99].name", default="none")
         assert result == "none"
 
-    def test_real_messages_state_complex_paths(
-            self, resolver, real_messages_state):
+    def test_real_messages_state_complex_paths(self, resolver, real_messages_state):
         """Test complex paths with real MessagesState."""
         # Test array access on real messages
         result = resolver.extract_value(real_messages_state, "messages[0]")
@@ -196,12 +191,10 @@ class TestPathResolverPhase2:
         # Test accessing message content directly
         # Note: This tests the path parsing but content access depends on
         # message structure
-        result = resolver.extract_value(
-            real_messages_state, "messages[0].content")
+        result = resolver.extract_value(real_messages_state, "messages[0].content")
         assert result == "First question"
 
-        result = resolver.extract_value(
-            real_messages_state, "messages[-1].content")
+        result = resolver.extract_value(real_messages_state, "messages[-1].content")
         assert result == "Second question"
 
     def test_path_segment_parsing(self, resolver):
@@ -269,8 +262,7 @@ class TestPathResolverPhase2:
         assert result == {"nested": "value"}
 
         # Test error handling still works
-        result = resolver.extract_value(
-            simple_state, "missing", default="default")
+        result = resolver.extract_value(simple_state, "missing", default="default")
         assert result == "default"
 
     def test_error_handling_complex_paths(self, resolver):
@@ -278,23 +270,19 @@ class TestPathResolverPhase2:
         test_data = {"config": {"temp": 0.7}, "messages": ["hello", "world"]}
 
         # Test missing intermediate objects
-        result = resolver.extract_value(
-            test_data, "missing.field", default="error")
+        result = resolver.extract_value(test_data, "missing.field", default="error")
         assert result == "error"
 
         # Test array access on non-arrays
-        result = resolver.extract_value(
-            test_data, "config[0]", default="error")
+        result = resolver.extract_value(test_data, "config[0]", default="error")
         assert result == "error"
 
         # Test field access on arrays
-        result = resolver.extract_value(
-            test_data, "messages.missing", default="error")
+        result = resolver.extract_value(test_data, "messages.missing", default="error")
         assert result == "error"
 
         # Test deeply nested missing paths
-        result = resolver.extract_value(
-            test_data, "a.b.c.d.e", default="deep_error")
+        result = resolver.extract_value(test_data, "a.b.c.d.e", default="deep_error")
         assert result == "deep_error"
 
     def test_edge_cases(self, resolver):
@@ -307,17 +295,14 @@ class TestPathResolverPhase2:
         }
 
         # Test empty containers
-        result = resolver.extract_value(
-            test_data, "empty_list[0]", default="empty")
+        result = resolver.extract_value(test_data, "empty_list[0]", default="empty")
         assert result == "empty"
 
-        result = resolver.extract_value(
-            test_data, "empty_dict.field", default="empty")
+        result = resolver.extract_value(test_data, "empty_dict.field", default="empty")
         assert result == "empty"
 
         # Test null values in path
-        result = resolver.extract_value(
-            test_data, "null_value.field", default="null")
+        result = resolver.extract_value(test_data, "null_value.field", default="null")
         assert result == "null"
 
         result = resolver.extract_value(

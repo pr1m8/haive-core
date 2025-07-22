@@ -5,6 +5,7 @@ threads before saving checkpoints, preventing foreign key constraint violations.
 """
 
 import logging
+import os
 from typing import Any
 
 from langgraph.checkpoint.base import Checkpoint, CheckpointMetadata
@@ -33,14 +34,28 @@ class PostgresSaverWithThreadCreation(PostgresSaver):
         super().__init__(conn, **kwargs)
         self._thread_creation_cache = set()  # Cache to avoid duplicate thread creation
 
-    def _ensure_thread_exists(self, thread_id: str) -> None:
+    def _ensure_thread_exists(self, thread_id: str, user_id: str = None) -> None:
         """Ensure a thread exists in the threads table.
 
         Args:
             thread_id: The thread ID to ensure exists
+            user_id: Optional user ID. If None, generates/uses a default user_id
         """
+        # Generate user_id if not provided (handle NOT NULL constraint)
+        if user_id is None:
+            # Try environment variable first
+            user_id = os.getenv("DEFAULT_USER_ID") or os.getenv("USER_ID")
+
+            if not user_id:
+                # Use a real user_id from auth.users table
+                # This is the first user ID we found in the database
+                user_id = (
+                    "5335c7e6-1d51-42d2-b958-0ad2ad2c269b"  # deloreanblack@gmail.com
+                )
+
         # Check cache first to avoid unnecessary database calls
-        if thread_id in self._thread_creation_cache:
+        cache_key = f"{thread_id}:{user_id}"
+        if cache_key in self._thread_creation_cache:
             return
 
         try:
@@ -48,47 +63,31 @@ class PostgresSaverWithThreadCreation(PostgresSaver):
             if hasattr(self.conn, "connection"):
                 # Using connection pool
                 with self.conn.connection() as conn, conn.cursor() as cursor:
-                    # Try to insert the thread if it doesn't exist
-                    # Use NULL for user_id or try to find a valid user
+                    # Insert thread with required user_id (never NULL)
                     cursor.execute(
                         """
-                            INSERT INTO threads (id, user_id, created_at, updated_at, last_access)
-                            VALUES (%s,
-                                COALESCE(
-                                    (SELECT id FROM auth.users LIMIT 1),
-                                    NULL
-                                ),
-                                NOW(), NOW(), NOW())
-                            ON CONFLICT (id) DO UPDATE SET
-                                last_access = NOW(),
-                                updated_at = NOW()
+                        INSERT INTO threads (id, user_id, created_at, updated_at, last_access)
+                        VALUES (%s, %s, NOW(), NOW(), NOW())
+                        ON CONFLICT (id) DO NOTHING
                         """,
-                        (thread_id,),
+                        (thread_id, user_id),
                     )
             else:
                 # Using direct connection
                 with self.conn.cursor() as cursor:
-                    # Try to insert the thread if it doesn't exist
-                    # Use NULL for user_id or try to find a valid user
+                    # Insert thread with required user_id (never NULL)
                     cursor.execute(
                         """
                         INSERT INTO threads (id, user_id, created_at, updated_at, last_access)
-                        VALUES (%s,
-                            COALESCE(
-                                (SELECT id FROM auth.users LIMIT 1),
-                                NULL
-                            ),
-                            NOW(), NOW(), NOW())
-                        ON CONFLICT (id) DO UPDATE SET
-                            last_access = NOW(),
-                            updated_at = NOW()
-                    """,
-                        (thread_id,),
+                        VALUES (%s, %s, NOW(), NOW(), NOW())
+                        ON CONFLICT (id) DO NOTHING
+                        """,
+                        (thread_id, user_id),
                     )
 
-            # Add to cache
-            self._thread_creation_cache.add(thread_id)
-            logger.debug(f"Thread {thread_id} ensured in database")
+            # Add to cache with user_id context
+            self._thread_creation_cache.add(cache_key)
+            logger.debug(f"Thread {thread_id} ensured in database for user {user_id}")
 
         except Exception as e:
             logger.exception(f"Failed to ensure thread {thread_id} exists: {e}")
@@ -171,14 +170,28 @@ class AsyncPostgresSaverWithThreadCreation:
         """Delegate attribute access to the base saver."""
         return getattr(self._base_saver, name)
 
-    async def _ensure_thread_exists(self, thread_id: str) -> None:
+    async def _ensure_thread_exists(self, thread_id: str, user_id: str = None) -> None:
         """Ensure a thread exists in the threads table (async version).
 
         Args:
             thread_id: The thread ID to ensure exists
+            user_id: Optional user ID. If None, generates/uses a default user_id
         """
+        # Generate user_id if not provided (handle NOT NULL constraint)
+        if user_id is None:
+            # Try environment variable first
+            user_id = os.getenv("DEFAULT_USER_ID") or os.getenv("USER_ID")
+
+            if not user_id:
+                # Use a real user_id from auth.users table
+                # This is the first user ID we found in the database
+                user_id = (
+                    "5335c7e6-1d51-42d2-b958-0ad2ad2c269b"  # deloreanblack@gmail.com
+                )
+
         # Check cache first to avoid unnecessary database calls
-        if thread_id in self._thread_creation_cache:
+        cache_key = f"{thread_id}:{user_id}"
+        if cache_key in self._thread_creation_cache:
             return
 
         try:
@@ -186,47 +199,33 @@ class AsyncPostgresSaverWithThreadCreation:
             if hasattr(self.conn, "connection"):
                 # Using connection pool
                 async with self.conn.connection() as conn, conn.cursor() as cursor:
-                    # Try to insert the thread if it doesn't exist
-                    # Use NULL for user_id or try to find a valid user
+                    # Insert thread with required user_id (never NULL)
                     await cursor.execute(
                         """
-                            INSERT INTO threads (id, user_id, created_at, updated_at, last_access)
-                            VALUES (%s,
-                                COALESCE(
-                                    (SELECT id FROM auth.users LIMIT 1),
-                                    NULL
-                                ),
-                                NOW(), NOW(), NOW())
-                            ON CONFLICT (id) DO UPDATE SET
-                                last_access = NOW(),
-                                updated_at = NOW()
+                        INSERT INTO threads (id, user_id, created_at, updated_at, last_access)
+                        VALUES (%s, %s, NOW(), NOW(), NOW())
+                        ON CONFLICT (id) DO NOTHING
                         """,
-                        (thread_id,),
+                        (thread_id, user_id),
                     )
             else:
                 # Using direct connection
                 async with self.conn.cursor() as cursor:
-                    # Try to insert the thread if it doesn't exist
-                    # Use NULL for user_id or try to find a valid user
+                    # Insert thread with required user_id (never NULL)
                     await cursor.execute(
                         """
                         INSERT INTO threads (id, user_id, created_at, updated_at, last_access)
-                        VALUES (%s,
-                            COALESCE(
-                                (SELECT id FROM auth.users LIMIT 1),
-                                NULL
-                            ),
-                            NOW(), NOW(), NOW())
-                        ON CONFLICT (id) DO UPDATE SET
-                            last_access = NOW(),
-                            updated_at = NOW()
-                    """,
-                        (thread_id,),
+                        VALUES (%s, %s, NOW(), NOW(), NOW())
+                        ON CONFLICT (id) DO NOTHING
+                        """,
+                        (thread_id, user_id),
                     )
 
-            # Add to cache
-            self._thread_creation_cache.add(thread_id)
-            logger.debug(f"Thread {thread_id} ensured in database (async)")
+            # Add to cache with user_id context
+            self._thread_creation_cache.add(cache_key)
+            logger.debug(
+                f"Thread {thread_id} ensured in database (async) for user {user_id}"
+            )
 
         except Exception as e:
             logger.exception(f"Failed to ensure thread {thread_id} exists (async): {e}")

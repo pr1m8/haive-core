@@ -104,13 +104,12 @@ class OllamaProvider(BaseLLMProvider):
     """
 
     provider: LLMProvider = Field(
-        default=LLMProvider.OLLAMA, const=True, description="Provider identifier"
+        default=LLMProvider.OLLAMA, description="Provider identifier"
     )
 
     # Ollama specific parameters
     base_url: str = Field(
-        default_factory=lambda: os.getenv(
-            "OLLAMA_BASE_URL", "http://localhost:11434"),
+        default_factory=lambda: os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
         description="Ollama server URL",
     )
     temperature: float | None = Field(

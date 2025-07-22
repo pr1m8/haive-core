@@ -159,8 +159,7 @@ def test_retriever_with_runtime_config():
     graph.add_edge(START, "retrieve")
 
     # Set default runtime config
-    graph.set_default_runnable_config(
-        {"configurable": {"k": 1}})  # Only get 1 result
+    graph.set_default_runnable_config({"configurable": {"k": 1}})  # Only get 1 result
 
     # Compile the graph
     app = graph.compile()
@@ -215,8 +214,7 @@ def test_retriever_in_dynamic_graph():
         texts = [doc.page_content for doc in docs]
 
         # Return with Command
-        return Command(update={"documents": docs,
-                       "text_contents": texts}, goto=END)
+        return Command(update={"documents": docs, "text_contents": texts}, goto=END)
 
     # Add nodes to the graph
     graph.add_node("retrieve", retriever_config)

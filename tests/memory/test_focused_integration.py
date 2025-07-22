@@ -72,6 +72,7 @@ async def test_async_memory_operations():
             MemoryStoreConfig,
             MemoryStoreManager,
         )
+
         from haive.core.persistence.store.types import StoreType
         from haive.core.tools.store_manager import StoreManager
 
@@ -188,6 +189,7 @@ def test_store_integration():
             MemoryStoreConfig,
             MemoryStoreManager,
         )
+
         from haive.core.persistence.store.types import StoreType
         from haive.core.tools.store_manager import StoreManager
 

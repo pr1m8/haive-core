@@ -50,8 +50,6 @@ class MessagesStateWithTokenUsage(MessagesState, TokenUsageMixin):
     """
 
     @model_validator(mode="after")
-
-
     @classmethod
     def auto_track_all_tokens(cls) -> "MessagesStateWithTokenUsage":
         """Automatically track token usage for ALL messages in the state.

@@ -31,8 +31,7 @@ class TestPostgresCheckpointer:
     """Tests for the PostgreSQL checkpointer implementation."""
 
     @pytest.fixture
-    def sync_persistence(
-            self) -> Generator[PostgresCheckpointerConfig, None, None]:
+    def sync_persistence(self) -> Generator[PostgresCheckpointerConfig, None, None]:
         """Create a synchronous PostgreSQL persistence config."""
         persistence = PostgresCheckpointerConfig(
             db_host="localhost",
@@ -48,8 +47,7 @@ class TestPostgresCheckpointer:
         persistence.close()
 
     @pytest.fixture
-    def async_persistence(
-            self) -> Generator[PostgresCheckpointerConfig, None, None]:
+    def async_persistence(self) -> Generator[PostgresCheckpointerConfig, None, None]:
         """Create an asynchronous PostgreSQL persistence config."""
         persistence = PostgresCheckpointerConfig(
             db_host="localhost",
@@ -87,9 +85,7 @@ class TestPostgresCheckpointer:
     def test_sync_checkpoint_storage(self, sync_persistence):
         """Test storing and retrieving a checkpoint synchronously."""
         thread_id = f"test-storage-{uuid.uuid4()}"
-        sync_persistence.register_thread(
-            thread_id, metadata={
-                "test_type": "storage"})
+        sync_persistence.register_thread(thread_id, metadata={"test_type": "storage"})
 
         test_data = {
             "messages": [{"role": "user", "content": "Hello, this is a test message."}],
@@ -140,8 +136,7 @@ class TestPostgresCheckpointer:
 
         config = RunnableConfigManager.create(thread_id=thread_id)
 
-        input_data = {"messages": [
-            {"role": "user", "content": "Hello, test agent!"}]}
+        input_data = {"messages": [{"role": "user", "content": "Hello, test agent!"}]}
 
         graph.invoke(input_data, config)
         saved_state = sync_persistence.get_checkpoint(config)

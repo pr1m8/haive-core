@@ -151,8 +151,7 @@ class TestAutoLoaderBasic:
         auto_loader.registry.get_loader_for_source.return_value = "pypdf"
         auto_loader.registry.get_loader_config.return_value = {"speed": "fast"}
 
-        loader_name, loader_config = auto_loader.get_best_loader(
-            mock_source_info)
+        loader_name, loader_config = auto_loader.get_best_loader(mock_source_info)
 
         assert loader_name == "pypdf"
         assert loader_config == {"speed": "fast"}
@@ -192,8 +191,7 @@ class TestAutoLoaderLoading:
 
         # Mock source instance
         mock_source_instance = Mock()
-        mock_source_instance.get_loader_kwargs.return_value = {
-            "file_path": "/test.pdf"}
+        mock_source_instance.get_loader_kwargs.return_value = {"file_path": "/test.pdf"}
 
         with patch.object(
             auto_loader, "create_source_instance", return_value=mock_source_instance
@@ -224,8 +222,7 @@ class TestAutoLoaderLoading:
         mock_detect2.assert_not_called()
         mock_load2.assert_not_called()
 
-    def test_load_detailed(
-            self, auto_loader, sample_documents, mock_source_info):
+    def test_load_detailed(self, auto_loader, sample_documents, mock_source_info):
         """Test detailed loading with result information."""
         with patch.object(auto_loader, "detect_source", return_value=mock_source_info):
             with patch.object(
@@ -364,8 +361,7 @@ class TestAutoLoaderBulkLoading:
         assert result.summary["failed_loads"] == 1
         assert result.summary["success_rate"] == pytest.approx(66.67, abs=0.01)
 
-    def test_load_bulk_with_progress_callback(
-            self, auto_loader, sample_documents):
+    def test_load_bulk_with_progress_callback(self, auto_loader, sample_documents):
         """Test bulk loading with progress callback."""
         sources = ["/test1.pdf", "/test2.pdf"]
         progress_calls = []
@@ -529,8 +525,7 @@ class TestAutoLoaderUtilities:
         result = auto_loader.get_capabilities("pdf")
 
         assert result == capabilities
-        auto_loader.registry.get_source_capabilities.assert_called_once_with(
-            "pdf")
+        auto_loader.registry.get_source_capabilities.assert_called_once_with("pdf")
 
     def test_validate_credentials_success(self, auto_loader, mock_pdf_source):
         """Test successful credential validation."""
@@ -547,8 +542,7 @@ class TestAutoLoaderUtilities:
             "Invalid credentials"
         )
 
-        result = auto_loader.validate_credentials(
-            "pdf", invalid_param="invalid")
+        result = auto_loader.validate_credentials("pdf", invalid_param="invalid")
 
         assert result is False
 
@@ -591,8 +585,7 @@ class TestConvenienceFunctions:
             result = load_document("/test.pdf", extract_images=True)
 
         assert result == sample_documents
-        mock_loader.load.assert_called_once_with(
-            "/test.pdf", extract_images=True)
+        mock_loader.load.assert_called_once_with("/test.pdf", extract_images=True)
 
     def test_load_documents_bulk(self, sample_documents):
         """Test load_documents_bulk convenience function."""
@@ -688,8 +681,7 @@ class TestErrorScenarios:
 
     def test_invalid_source_path(self, auto_loader):
         """Test loading from invalid source path."""
-        auto_loader.path_analyzer.analyze_path.side_effect = ValueError(
-            "Invalid path")
+        auto_loader.path_analyzer.analyze_path.side_effect = ValueError("Invalid path")
 
         with pytest.raises(ValueError, match="Could not detect source type"):
             auto_loader.load("/invalid/path")
@@ -755,10 +747,7 @@ class TestPerformance:
         def mock_load_detailed(path, **kwargs):
             time.sleep(0.1)  # Simulate loading time
             return LoadingResult(
-                documents=[
-                    Document(
-                        page_content=f"Content from {path}",
-                        metadata={})],
+                documents=[Document(page_content=f"Content from {path}", metadata={})],
                 source_info=Mock(source_type="pdf"),
                 loader_used="pypdf",
                 loading_time=0.1,
@@ -776,8 +765,7 @@ class TestPerformance:
         assert end_time - start_time < 1.0
         assert result.total_documents == 20
 
-    def test_caching_performance_improvement(
-            self, auto_loader, sample_documents):
+    def test_caching_performance_improvement(self, auto_loader, sample_documents):
         """Test that caching improves performance."""
         auto_loader.config.enable_caching = True
 
@@ -840,10 +828,7 @@ class TestRealWorldScenarios:
     def test_large_document_processing(self, auto_loader):
         """Test processing of large documents."""
         large_content = "Lorem ipsum dolor sit amet. " * 10000  # Large content
-        large_doc = Document(
-            page_content=large_content,
-            metadata={
-                "size": "large"})
+        large_doc = Document(page_content=large_content, metadata={"size": "large"})
 
         def mock_load_detailed(path, **kwargs):
             return LoadingResult(
@@ -861,15 +846,9 @@ class TestRealWorldScenarios:
         assert len(result) == 1
         assert len(result[0].page_content) > 100000
 
-    def test_error_recovery_in_bulk_loading(
-            self, auto_loader, sample_documents):
+    def test_error_recovery_in_bulk_loading(self, auto_loader, sample_documents):
         """Test error recovery during bulk loading."""
-        sources = [
-            "/good1.pdf",
-            "/bad.pdf",
-            "/good2.pdf",
-            "/bad2.pdf",
-            "/good3.pdf"]
+        sources = ["/good1.pdf", "/bad.pdf", "/good2.pdf", "/bad2.pdf", "/good3.pdf"]
 
         def mock_load_detailed(path, **kwargs):
             if "bad" in path:
@@ -902,22 +881,13 @@ class TestRealWorldScenarios:
     ):
         """Test loading with different configurations."""
         configs = [
-            AutoLoaderConfig(
-                preference=LoaderPreference.SPEED,
-                max_concurrency=20),
-            AutoLoaderConfig(
-                preference=LoaderPreference.QUALITY,
-                max_concurrency=5),
-            AutoLoaderConfig(
-                preference=LoaderPreference.BALANCED,
-                enable_caching=True),
+            AutoLoaderConfig(preference=LoaderPreference.SPEED, max_concurrency=20),
+            AutoLoaderConfig(preference=LoaderPreference.QUALITY, max_concurrency=5),
+            AutoLoaderConfig(preference=LoaderPreference.BALANCED, enable_caching=True),
         ]
 
         for config in configs:
-            loader = AutoLoader(
-                config,
-                mock_enhanced_registry,
-                mock_path_analyzer)
+            loader = AutoLoader(config, mock_enhanced_registry, mock_path_analyzer)
 
             # Verify configuration is applied
             assert loader.config.preference == config.preference

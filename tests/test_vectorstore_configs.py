@@ -11,8 +11,7 @@ from haive.core.models.embeddings.base import HuggingFaceEmbeddingConfig
 @pytest.fixture
 def sample_embedding_config():
     """Create a sample embedding configuration."""
-    return HuggingFaceEmbeddingConfig(
-        model="sentence-transformers/all-MiniLM-L6-v2")
+    return HuggingFaceEmbeddingConfig(model="sentence-transformers/all-MiniLM-L6-v2")
 
 
 @pytest.fixture

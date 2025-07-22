@@ -1,6 +1,5 @@
 """Multi-Query Retriever implementation for the Haive framework.
 
-from typing import Any
 This module provides a configuration class for the Multi-Query retriever,
 which generates multiple query variations to improve retrieval coverage
 and find more relevant documents for complex or ambiguous queries.
@@ -23,7 +22,7 @@ providing a consistent Haive configuration interface with LLM integration.
 
 from typing import Any
 
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.engine.retriever.retriever import BaseRetrieverConfig
@@ -95,8 +94,9 @@ class MultiQueryRetrieverConfig(BaseRetrieverConfig):
         description="Custom prompt template for query generation (uses default if None)",
     )
 
-    @validator("num_queries")
-    def validate_num_queries(self, v) -> Any:
+    @field_validator("num_queries")
+    @classmethod
+    def validate_num_queries(cls, v):
         """Ensure reasonable number of queries."""
         if v < 1:
             raise ValueError("num_queries must be at least 1")
@@ -125,7 +125,7 @@ class MultiQueryRetrieverConfig(BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self) -> Any:
+    def instantiate(self):
         """Create a Multi-Query retriever from this configuration.
 
         Returns:

@@ -176,8 +176,6 @@ class MessageList(RootModel[list[AnyMessage]]):
         return convert_to_messages(data)
 
     @model_validator(mode="after")
-
-
     @classmethod
     def ensure_proper_messages_and_ordering(cls) -> "MessageList":
         """Ensure all messages are proper Message objects and system messages come before human."""

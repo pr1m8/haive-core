@@ -38,8 +38,6 @@ class DynamicMapping(BaseModel):
     model_config = {"arbitrary_types_allowed": True}
 
     @model_validator(mode="after")
-
-
     @classmethod
     def validate_mappings(cls) -> Any:
         for _key, mapping_data in self.mappings.items():

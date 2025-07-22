@@ -9,9 +9,9 @@ This test validates that the refactored MetaStateSchema:
 
 from unittest.mock import Mock
 
+from haive.agents.simple.agent import SimpleAgent
 from langchain_core.messages import HumanMessage
 
-from haive.agents.simple.agent import SimpleAgent
 from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.schema.prebuilt.meta_state import MetaStateSchema
 
@@ -100,8 +100,7 @@ class TestMetaStateSchemaRefactored:
         )
 
         # Test input preparation
-        input_data = meta_state.prepare_agent_input(
-            additional_input={"extra": "data"})
+        input_data = meta_state.prepare_agent_input(additional_input={"extra": "data"})
 
         assert "messages" in input_data
         assert "graph_context" in input_data

@@ -109,10 +109,7 @@ class TestEngineIntegration(unittest.TestCase):
         )
 
         # Add LLM node
-        graph.add_node(
-            name="generate",
-            config=self.llm_config,
-            command_goto="END")
+        graph.add_node(name="generate", config=self.llm_config, command_goto="END")
 
         # Set entry point
         graph.set_entry_point("retrieve")
@@ -163,10 +160,7 @@ class TestEngineIntegration(unittest.TestCase):
         prompt_template = ChatPromptTemplate.from_messages(messages)
 
         # Create the LLM config
-        llm_config = AzureLLMConfig(
-            model="gpt-4o",
-            parameters={
-                "temperature": 0.7})
+        llm_config = AzureLLMConfig(model="gpt-4o", parameters={"temperature": 0.7})
 
         # Create the AugLLM config
         aug_llm = AugLLMConfig(

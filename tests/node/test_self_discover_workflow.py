@@ -6,9 +6,9 @@ workflows where agents read each other's outputs directly from state fields.
 
 from typing import Any
 
+from haive.agents.simple import SimpleAgent
 from pydantic import BaseModel, Field
 
-from haive.agents.simple import SimpleAgent
 from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.graph.node.agent_node_v3 import create_agent_node_v3
 from haive.core.schema.prebuilt.multi_agent_state import MultiAgentState

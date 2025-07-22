@@ -1,4 +1,4 @@
-"""from typing import Any
+"""
 DocArray Vector Store implementation for the Haive framework.
 
 This module provides a configuration class for the DocArray vector store,
@@ -23,10 +23,10 @@ The implementation integrates with LangChain's DocArray while providing
 a consistent Haive configuration interface.
 """
 
-from typing import Any
+from typing import Any, Dict, List, Optional, Tuple, Type
 
 from langchain_core.documents import Document
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 from haive.core.engine.vectorstore.base import BaseVectorStoreConfig
 from haive.core.engine.vectorstore.types import VectorStoreType
@@ -34,7 +34,8 @@ from haive.core.engine.vectorstore.types import VectorStoreType
 
 @BaseVectorStoreConfig.register(VectorStoreType.DOCARRAY)
 class DocArrayVectorStoreConfig(BaseVectorStoreConfig):
-    """Configuration for DocArray vector store in the Haive framework.
+    """
+    Configuration for DocArray vector store in the Haive framework.
 
     This vector store uses DocArray for document-oriented vector operations
     with multiple storage backend options.
@@ -87,12 +88,12 @@ class DocArrayVectorStoreConfig(BaseVectorStoreConfig):
     )
 
     # HNSW-specific configuration
-    work_dir: str | None = Field(
+    work_dir: Optional[str] = Field(
         default=None,
         description="Working directory for HNSW backend (required for HNSW)",
     )
 
-    n_dim: int | None = Field(
+    n_dim: Optional[int] = Field(
         default=None, description="Vector dimension (auto-detected if not specified)"
     )
 
@@ -135,16 +136,18 @@ class DocArrayVectorStoreConfig(BaseVectorStoreConfig):
         default=True, description="Whether to build index for the field"
     )
 
-    @validator("backend")
-    def validate_backend(self, v) -> Any:
+    @field_validator("backend")
+    @classmethod
+    def validate_backend(cls, v):
         """Validate backend is supported."""
         valid_backends = ["in_memory", "hnsw"]
         if v not in valid_backends:
             raise ValueError(f"backend must be one of {valid_backends}, got {v}")
         return v
 
-    @validator("metric")
-    def validate_metric(self, v, values) -> Any:
+    @field_validator("metric")
+    @classmethod
+    def validate_metric(cls, v, values):
         """Validate metric is supported for the backend."""
         backend = values.get("backend", "in_memory")
 
@@ -159,34 +162,36 @@ class DocArrayVectorStoreConfig(BaseVectorStoreConfig):
             )
         return v
 
-    @validator("work_dir")
-    def validate_work_dir(self, v, values) -> Any:
+    @field_validator("work_dir")
+    @classmethod
+    def validate_work_dir(cls, v, values):
         """Validate work_dir is provided for HNSW backend."""
         backend = values.get("backend", "in_memory")
         if backend == "hnsw" and not v:
             raise ValueError("work_dir is required for HNSW backend")
         return v
 
-    def get_input_fields(self) -> dict[str, tuple[type, Any]]:
+    def get_input_fields(self) -> Dict[str, Tuple[Type, Any]]:
         """Return input field definitions for DocArray vector store."""
         return {
             "documents": (
-                list[Document],
+                List[Document],
                 Field(description="Documents to add to the vector store"),
             ),
         }
 
-    def get_output_fields(self) -> dict[str, tuple[type, Any]]:
+    def get_output_fields(self) -> Dict[str, Tuple[Type, Any]]:
         """Return output field definitions for DocArray vector store."""
         return {
             "ids": (
-                list[str],
+                List[str],
                 Field(description="IDs of the added documents in DocArray"),
             ),
         }
 
-    def instantiate(self) -> Any:
-        """Create a DocArray vector store from this configuration.
+    def instantiate(self):
+        """
+        Create a DocArray vector store from this configuration.
 
         Returns:
             DocArrayIndex: Instantiated DocArray vector store.

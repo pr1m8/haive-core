@@ -335,9 +335,7 @@ class TestBaseGraph(unittest.TestCase):
     def test_to_from_dict(self):
         """Test serialization to/from dictionary."""
         # Create a graph with module-level functions
-        graph = BaseGraph(
-            name="dict_test_graph",
-            description="Test dict serialization")
+        graph = BaseGraph(name="dict_test_graph", description="Test dict serialization")
 
         # Add nodes with predefined functions
         graph.add_node("node1", node1_func)
@@ -369,9 +367,7 @@ class TestBaseGraph(unittest.TestCase):
     def test_to_from_json(self):
         """Test serialization to/from JSON string."""
         # Create a test graph with predefined functions only
-        graph = BaseGraph(
-            name="json_test_graph",
-            description="Test JSON serialization")
+        graph = BaseGraph(name="json_test_graph", description="Test JSON serialization")
 
         # Add nodes with predefined functions
         graph.add_node("node1", node1_func)
@@ -484,10 +480,8 @@ class TestSerializableGraph(unittest.TestCase):
         )
 
         # Add test nodes with properly defined functions
-        self.base_graph.add_node(
-            "node1", node1_func, node_type=NodeType.CALLABLE)
-        self.base_graph.add_node(
-            "node2", node2_func, node_type=NodeType.CALLABLE)
+        self.base_graph.add_node("node1", node1_func, node_type=NodeType.CALLABLE)
+        self.base_graph.add_node("node2", node2_func, node_type=NodeType.CALLABLE)
 
         # Add test edges
         self.base_graph.add_edge(START_NODE, "node1")
@@ -520,9 +514,7 @@ class TestSerializableGraph(unittest.TestCase):
             assert ser_node.node_type == node.node_type.value
 
         # Verify edges were converted
-        assert len(
-            self.serializable.direct_edges) == len(
-            self.base_graph.edges)
+        assert len(self.serializable.direct_edges) == len(self.base_graph.edges)
         for edge in self.base_graph.edges:
             assert edge in self.serializable.direct_edges
 
@@ -667,9 +659,7 @@ class TestSerializableGraph(unittest.TestCase):
         # Verify reconstructed serializable
         assert reconstructed.name == self.serializable.name
         assert len(reconstructed.nodes) == len(self.serializable.nodes)
-        assert len(
-            reconstructed.direct_edges) == len(
-            self.serializable.direct_edges)
+        assert len(reconstructed.direct_edges) == len(self.serializable.direct_edges)
         assert len(reconstructed.branches) == len(self.serializable.branches)
 
     def test_to_json_from_json(self):
@@ -718,8 +708,7 @@ class TestSerializableGraph(unittest.TestCase):
             )
 
             # Verify specific branch data
-            assert "json_branch" in [
-                b.name for b in reconstructed.branches.values()]
+            assert "json_branch" in [b.name for b in reconstructed.branches.values()]
         except (TypeError, ValueError) as e:
             self.fail(f"JSON serialization failed: {e!s}")
 
@@ -776,8 +765,7 @@ class TestSerializableGraph(unittest.TestCase):
                 assert edge in final.edges
 
             # Check branch
-            assert "roundtrip_branch" in [
-                b.name for b in final.branches.values()]
+            assert "roundtrip_branch" in [b.name for b in final.branches.values()]
         except (TypeError, ValueError) as e:
             self.fail(f"Round-trip serialization failed: {e!s}")
 

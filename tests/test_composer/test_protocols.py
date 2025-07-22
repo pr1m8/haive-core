@@ -26,8 +26,7 @@ class TestProtocols:
     def test_extract_function_protocol(self):
         """Test that extract function protocol works with real implementations."""
 
-        def simple_extract(state: SampleState,
-                           config: dict[str, Any]) -> list[str]:
+        def simple_extract(state: SampleState, config: dict[str, Any]) -> list[str]:
             """Simple extract function implementation."""
             field_name = config.get("field_name", "messages")
             return getattr(state, field_name, [])
@@ -96,18 +95,14 @@ class TestProtocols:
     def test_real_state_extract_function(self):
         """Test extract function with real MessagesState."""
 
-        def extract_messages(state: MessagesState,
-                             config: dict[str, Any]) -> list[Any]:
+        def extract_messages(state: MessagesState, config: dict[str, Any]) -> list[Any]:
             """Extract messages from real MessagesState."""
             messages = getattr(state, "messages", [])
             return list(messages)
 
         # Create real MessagesState
         state = MessagesState(
-            messages=[
-                HumanMessage(
-                    content="Hello"), AIMessage(
-                    content="Hi there!")]
+            messages=[HumanMessage(content="Hello"), AIMessage(content="Hi there!")]
         )
 
         # Extract through protocol
@@ -160,8 +155,7 @@ class TestProtocols:
             return f"processed: {value}"
 
         # Chain transforms through protocol
-        def apply_transforms(
-                value: Any, transforms: list[TransformFunction]) -> Any:
+        def apply_transforms(value: Any, transforms: list[TransformFunction]) -> Any:
             result = value
             for transform in transforms:
                 result = transform(result)

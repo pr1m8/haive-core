@@ -42,8 +42,7 @@ def test_sync_postgres_store():
         logger.info(f"Retrieved value: {retrieved}")
 
         # Extract value from Item object if needed
-        retrieved_value = retrieved.value if hasattr(
-            retrieved, "value") else retrieved
+        retrieved_value = retrieved.value if hasattr(retrieved, "value") else retrieved
 
         assert (
             retrieved_value == value
@@ -85,9 +84,7 @@ async def test_async_postgres_store():
         # Test basic operations
         namespace = ("test", "async", "namespace")
         key = "test_async_key"
-        value = {
-            "message": "Hello from async PostgreSQL store!",
-            "async": True}
+        value = {"message": "Hello from async PostgreSQL store!", "async": True}
 
         logger.info("Testing async put operation...")
         await store.aput(namespace, key, value)
@@ -97,8 +94,7 @@ async def test_async_postgres_store():
         logger.info(f"Retrieved value: {retrieved}")
 
         # Extract value from Item object if needed
-        retrieved_value = retrieved.value if hasattr(
-            retrieved, "value") else retrieved
+        retrieved_value = retrieved.value if hasattr(retrieved, "value") else retrieved
 
         assert (
             retrieved_value == value

@@ -62,8 +62,7 @@ class TestMultiAgentStateSchema:
         assert isinstance(state.agent_outputs, dict)
 
         # Test setting different output types
-        state.agent_outputs["simple_agent"] = {
-            "messages": [AIMessage(content="Hello")]}
+        state.agent_outputs["simple_agent"] = {"messages": [AIMessage(content="Hello")]}
         state.agent_outputs["structured_agent"] = {"result": {"key": "value"}}
         state.agent_outputs["list_agent"] = ["item1", "item2"]
 
@@ -128,9 +127,7 @@ class TestMultiAgentStateSchema:
         assert isinstance(
             state.agent_outputs["simple_agent"]["messages"][0], HumanMessage
         )
-        assert isinstance(
-            state.agent_outputs["simple_agent"]["messages"][1],
-            AIMessage)
+        assert isinstance(state.agent_outputs["simple_agent"]["messages"][1], AIMessage)
 
     def test_structured_agent_output_no_messages(self):
         """Test that structured agents can output without messages."""
@@ -145,10 +142,8 @@ class TestMultiAgentStateSchema:
             },
             "adapt_modules": {
                 "adapted_modules": [
-                    {"module": "reasoning",
-                     "adaptation": "Focus on logical steps"},
-                    {"module": "planning",
-                     "adaptation": "Create step-by-step plan"},
+                    {"module": "reasoning", "adaptation": "Focus on logical steps"},
+                    {"module": "planning", "adaptation": "Create step-by-step plan"},
                 ]
             },
             "create_structure": {

@@ -1,14 +1,86 @@
-"""Module exports."""
+"""Tool engine module for the Haive framework.
 
-from tool.base import Config
-from tool.base import ToolEngine
-from tool.base import apply_runnable_config
-from tool.base import create_runnable
-from tool.base import invoke
-from tool.base import model_tool
-from tool.base import validate_engine_type
-from tool.base import validate_tool_choice
-from tool.base import validate_toolkit
-from tool.base import validate_tools
+This module provides engine implementations for LangChain tools and toolkits,
+enabling tool execution within the Haive framework's engine system.
 
-__all__ = ['Config', 'ToolEngine', 'apply_runnable_config', 'create_runnable', 'invoke', 'model_tool', 'validate_engine_type', 'validate_tool_choice', 'validate_toolkit', 'validate_tools']
+The tool engine supports individual tools, collections of tools, and toolkits,
+with features like automatic routing, parallel execution, and retry policies.
+It integrates with LangGraph for tool execution management and provides a
+consistent interface for tool usage across the framework.
+
+Key Components:
+    ToolEngine: Engine for executing tools based on input state
+
+Features:
+    - Support for multiple tool types (BaseTool, Tool, StructuredTool, BaseModel)
+    - Toolkit integration for grouped tool functionality
+    - Automatic tool routing based on input
+    - Parallel tool execution when appropriate
+    - Configurable retry policies
+    - Message-based tool invocation
+    - Source tracking for tool results
+
+Examples:
+    Basic tool engine::
+
+        from haive.core.engine.tool import ToolEngine
+        from langchain_core.tools import Tool
+
+        def calculator(expression: str) -> str:
+            return str(eval(expression))
+
+        calc_tool = Tool(
+            name="calculator",
+            description="Calculate mathematical expressions",
+            func=calculator
+        )
+
+        engine = ToolEngine(
+            name="calc_engine",
+            tools=[calc_tool]
+        )
+
+        result = engine.invoke({
+            "messages": [{"role": "user", "content": "Calculate 2 + 2"}]
+        })
+
+    Tool engine with toolkit::
+
+        from haive.core.engine.tool import ToolEngine
+        from langchain_community.agent_toolkits import SQLDatabaseToolkit
+
+        toolkit = SQLDatabaseToolkit(db=database)
+
+        engine = ToolEngine(
+            name="sql_engine",
+            toolkit=toolkit,
+            parallel=True,
+            auto_route=True
+        )
+
+    Tool engine with retry policy::
+
+        from haive.core.engine.tool import ToolEngine
+        from langgraph.types import RetryPolicy
+
+        engine = ToolEngine(
+            name="robust_engine",
+            tools=my_tools,
+            retry_policy=RetryPolicy(
+                max_attempts=3,
+                initial_interval=1.0,
+                backoff_factor=2.0
+            )
+        )
+
+See Also:
+    - LangChain tools documentation
+    - Tool implementation: base.py
+    - LangGraph integration guide
+"""
+
+from haive.core.engine.tool.base import ToolEngine
+
+__all__ = [
+    "ToolEngine",
+]

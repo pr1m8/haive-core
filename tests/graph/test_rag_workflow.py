@@ -30,10 +30,8 @@ class Document(BaseModel):
     metadata: dict[str, Any] = Field(
         default_factory=dict, description="Document metadata"
     )
-    embedding: list[float] | None = Field(
-        default=None, description="Vector embedding")
-    relevance_score: float | None = Field(
-        default=None, description="Relevance score")
+    embedding: list[float] | None = Field(default=None, description="Vector embedding")
+    relevance_score: float | None = Field(default=None, description="Relevance score")
 
 
 class RetrievalResult(BaseModel):
@@ -43,8 +41,7 @@ class RetrievalResult(BaseModel):
     documents: list[Document] = Field(
         default_factory=list, description="Retrieved documents"
     )
-    total_found: int = Field(...,
-                             description="Total number of documents found")
+    total_found: int = Field(..., description="Total number of documents found")
     metadata: dict[str, Any] = Field(
         default_factory=dict, description="Retrieval metadata"
     )
@@ -80,8 +77,7 @@ class RAGState(ToolState):
 
     # RAG-specific fields
     query: str | None = Field(default=None, description="User query")
-    rewritten_query: str | None = Field(
-        default=None, description="Rewritten query")
+    rewritten_query: str | None = Field(default=None, description="Rewritten query")
     retrieval_result: RetrievalResult | None = Field(
         default=None, description="Retrieved documents"
     )
@@ -104,9 +100,7 @@ class RAGState(ToolState):
     )
 
     # Workflow state
-    workflow_stage: str = Field(
-        default="init",
-        description="Current workflow stage")
+    workflow_stage: str = Field(default="init", description="Current workflow stage")
     workflow_complete: bool = Field(
         default=False, description="Whether workflow is complete"
     )
@@ -262,8 +256,7 @@ def rag_workflow(rag_engines):
         schemas=[
             # Schema for validating query
             type(
-                "QuerySchema", (BaseModel,), {"query": (
-                    str, Field(..., min_length=3))}
+                "QuerySchema", (BaseModel,), {"query": (str, Field(..., min_length=3))}
             )
         ],
         messages_field="query",
@@ -473,8 +466,7 @@ def sample_query_input():
     return RAGState(
         query="What is the capital of France?",
         messages=[HumanMessage(content="What is the capital of France?")],
-        generation_params=GenerationParameters(
-            temperature=0.7, max_length=500),
+        generation_params=GenerationParameters(temperature=0.7, max_length=500),
     )
 
 
@@ -625,18 +617,10 @@ def test_graph_validation_and_cycles():
     )
 
     # Add the same nodes and edges
-    no_cycles_graph.add_node(
-        "query_analysis", lambda state: {
-            "query_analyzed": True})
-    no_cycles_graph.add_node(
-        "retrieval", lambda state: {
-            "documents_retrieved": True})
-    no_cycles_graph.add_node(
-        "generation", lambda state: {
-            "response_generated": True})
-    no_cycles_graph.add_node(
-        "feedback", lambda state: {
-            "feedback_processed": True})
+    no_cycles_graph.add_node("query_analysis", lambda state: {"query_analyzed": True})
+    no_cycles_graph.add_node("retrieval", lambda state: {"documents_retrieved": True})
+    no_cycles_graph.add_node("generation", lambda state: {"response_generated": True})
+    no_cycles_graph.add_node("feedback", lambda state: {"feedback_processed": True})
 
     no_cycles_graph.add_edge(START, "query_analysis")
     no_cycles_graph.add_edge("query_analysis", "retrieval")

@@ -1,10 +1,17 @@
 from typing import TypeVar
 
-from langchain_community.graphs import GraphDocument
 from langchain_core.documents import Document
 from pydantic import BaseModel, Field
 
-DocumentLike = TypeVar("DocumentLike", bound=Document | GraphDocument)
+# Try to import GraphDocument, fallback gracefully if not available
+try:
+    from langchain_community.graphs import GraphDocument
+
+    DocumentLike = TypeVar("DocumentLike", bound=Document | GraphDocument)
+except ImportError:
+    # GraphDocument not available, use Document only
+    GraphDocument = None
+    DocumentLike = TypeVar("DocumentLike", bound=Document)
 
 
 class LoaderInputSchema(BaseModel):

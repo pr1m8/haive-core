@@ -18,9 +18,8 @@ sys.path.insert(
 def test_simple_agent_persistence():
     """Test simple agent with message persistence."""
 
-    from langchain_core.messages import HumanMessage
-
     from haive.agents.simple.agent import SimpleAgent
+    from langchain_core.messages import HumanMessage
 
     timestamp = datetime.now().strftime("%H%M%S")
 

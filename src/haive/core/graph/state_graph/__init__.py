@@ -1,233 +1,75 @@
-"""Module exports."""
+"""Haive State Graph System.
 
-from state_graph.base import SerializableModel
-from state_graph.base import SerializableModelMetaclass
-from state_graph.base import find_by_id
-from state_graph.base import get
-from state_graph.base import get_all
-from state_graph.base import is_modified
-from state_graph.base import list_all
-from state_graph.base import mark_modified
-from state_graph.base import register
-from state_graph.base import reset_modified
-from state_graph.base_graph2 import BaseGraph
-from state_graph.base_graph2 import BranchType
-from state_graph.base_graph2 import EdgeType
-from state_graph.base_graph2 import Node
-from state_graph.base_graph2 import PassThroughState
-from state_graph.base_graph2 import action
-from state_graph.base_graph2 import add_boolean_conditional_edges
-from state_graph.base_graph2 import add_branch
-from state_graph.base_graph2 import add_conditional_edges
-from state_graph.base_graph2 import add_edge
-from state_graph.base_graph2 import add_function_branch
-from state_graph.base_graph2 import add_intelligent_agent_routing
-from state_graph.base_graph2 import add_key_value_branch
-from state_graph.base_graph2 import add_node
-from state_graph.base_graph2 import add_parallel_branches
-from state_graph.base_graph2 import add_postlude_node
-from state_graph.base_graph2 import add_prelude_node
-from state_graph.base_graph2 import add_sequence
-from state_graph.base_graph2 import add_subgraph
-from state_graph.base_graph2 import add_tool_node
-from state_graph.base_graph2 import all_entry_points
-from state_graph.base_graph2 import all_exit_points
-from state_graph.base_graph2 import all_finish_points
-from state_graph.base_graph2 import analyze_cycles
-from state_graph.base_graph2 import branch_condition
-from state_graph.base_graph2 import branch_wrapper
-from state_graph.base_graph2 import check_full_recompilation_needed
-from state_graph.base_graph2 import check_graph_validity
-from state_graph.base_graph2 import compile
-from state_graph.base_graph2 import condition
-from state_graph.base_graph2 import conditional_edges
-from state_graph.base_graph2 import create_debug_has_tool_calls
-from state_graph.base_graph2 import debug_conditional_routing
-from state_graph.base_graph2 import debug_wrapper
-from state_graph.base_graph2 import dfs
-from state_graph.base_graph2 import display_name
-from state_graph.base_graph2 import entry_points_data
-from state_graph.base_graph2 import exit_points
-from state_graph.base_graph2 import extend_from
-from state_graph.base_graph2 import find_all_paths
-from state_graph.base_graph2 import find_dangling_edges
-from state_graph.base_graph2 import find_nodes_without_end_path
-from state_graph.base_graph2 import find_nodes_without_finish_path
-from state_graph.base_graph2 import find_orphan_nodes
-from state_graph.base_graph2 import find_unreachable_nodes
-from state_graph.base_graph2 import from_dict
-from state_graph.base_graph2 import from_json
-from state_graph.base_graph2 import from_langgraph
-from state_graph.base_graph2 import get_branch
-from state_graph.base_graph2 import get_branch_by_name
-from state_graph.base_graph2 import get_branches_for_node
-from state_graph.base_graph2 import get_compilation_info
-from state_graph.base_graph2 import get_conditional_entries
-from state_graph.base_graph2 import get_conditional_exits
-from state_graph.base_graph2 import get_edges
-from state_graph.base_graph2 import get_node
-from state_graph.base_graph2 import get_node_pattern
-from state_graph.base_graph2 import get_sink_nodes
-from state_graph.base_graph2 import get_source_nodes
-from state_graph.base_graph2 import has_entry_point
-from state_graph.base_graph2 import has_path
-from state_graph.base_graph2 import has_tool_calls_fixed
-from state_graph.base_graph2 import inner
-from state_graph.base_graph2 import insert_node_after
-from state_graph.base_graph2 import insert_node_before
-from state_graph.base_graph2 import log_function_call
-from state_graph.base_graph2 import make_condition
-from state_graph.base_graph2 import mark_compiled
-from state_graph.base_graph2 import needs_recompile
-from state_graph.base_graph2 import needs_recompile_for_interrupts
-from state_graph.base_graph2 import needs_recompile_for_schemas
-from state_graph.base_graph2 import process
-from state_graph.base_graph2 import remove_branch
-from state_graph.base_graph2 import remove_conditional_entry
-from state_graph.base_graph2 import remove_conditional_exit
-from state_graph.base_graph2 import remove_edge
-from state_graph.base_graph2 import remove_node
-from state_graph.base_graph2 import replace_branch
-from state_graph.base_graph2 import replace_node
-from state_graph.base_graph2 import set_conditional_entry
-from state_graph.base_graph2 import set_conditional_exit
-from state_graph.base_graph2 import set_end_point
-from state_graph.base_graph2 import set_entry_point
-from state_graph.base_graph2 import set_finish_point
-from state_graph.base_graph2 import set_state_schema
-from state_graph.base_graph2 import to_dict
-from state_graph.base_graph2 import to_json
-from state_graph.base_graph2 import to_langgraph
-from state_graph.base_graph2 import to_mermaid
-from state_graph.base_graph2 import update_branch
-from state_graph.base_graph2 import update_node
-from state_graph.base_graph2 import validate_graph
-from state_graph.base_graph2 import validation_wrapper
-from state_graph.base_graph2 import visualize
-from state_graph.base_graph2 import wrapper
-from state_graph.graph_path import GraphPath
-from state_graph.graph_path import append
-from state_graph.graph_path import display
-from state_graph.graph_path import merge
-from state_graph.graph_visualizer import AgentInfo
-from state_graph.graph_visualizer import GraphVisualizer
-from state_graph.graph_visualizer import NodeStyle
-from state_graph.graph_visualizer import VisualizationContext
-from state_graph.graph_visualizer import debug_graph_structure
-from state_graph.graph_visualizer import display_graph
-from state_graph.graph_visualizer import generate_mermaid
-from state_graph.mixin import GraphSchemaMixin
-from state_graph.mixin import PassThroughState
-from state_graph.mixin import create_state
-from state_graph.mixin import validate_input
-from state_graph.mixin import validate_output
-from state_graph.mixin import validate_schema_setup
-from state_graph.pattern_decorator import decorator
-from state_graph.pattern_decorator import register_pattern
-from state_graph.pattern_decorator import wrapper
-from state_graph.pattern_definition import PatternDefinition
-from state_graph.pattern_definition import from_function
-from state_graph.pattern_registry import PatternRegistry
-from state_graph.pattern_registry import clear
-from state_graph.pattern_registry import find_by_id
-from state_graph.pattern_registry import get
-from state_graph.pattern_registry import get_all
-from state_graph.pattern_registry import get_by_type
-from state_graph.pattern_registry import get_instance
-from state_graph.pattern_registry import list
-from state_graph.pattern_registry import list_by_type
-from state_graph.pattern_registry import register
-from state_graph.recompilation_demo import ExtendedState
-from state_graph.recompilation_demo import SimpleState
-from state_graph.recompilation_demo import demo_recompilation_tracking
-from state_graph.recompilation_demo import demo_usage_patterns
-from state_graph.recompilation_demo import demo_what_needs_recompilation
-from state_graph.recompilation_demo import finish_func
-from state_graph.recompilation_demo import main
-from state_graph.recompilation_demo import process_func
-from state_graph.recompilation_demo import router
-from state_graph.recompilation_demo import start_func
-from state_graph.recompilation_demo import validate_func
-from state_graph.registry import GraphRegistry
-from state_graph.registry import clear
-from state_graph.registry import find_by_id
-from state_graph.registry import get
-from state_graph.registry import get_all
-from state_graph.registry import get_instance
-from state_graph.registry import list
-from state_graph.registry import register
-from state_graph.schema_graph import SchemaGraph
-from state_graph.schema_graph import compile
-from state_graph.schema_graph import display
-from state_graph.schema_graph import to_langgraph
-from state_graph.schema_mixin import GraphSchemaMixin
-from state_graph.schema_mixin import PassThroughState
-from state_graph.schema_mixin import create_state
-from state_graph.schema_mixin import get_reducer_fields
-from state_graph.schema_mixin import get_shared_fields
-from state_graph.schema_mixin import has_field
-from state_graph.schema_mixin import validate_input
-from state_graph.schema_mixin import validate_output
-from state_graph.schema_mixin import validate_schema_setup
-from state_graph.serializable import SerializableBranch
-from state_graph.serializable import SerializableGraph
-from state_graph.serializable import SerializableNode
-from state_graph.serializable import TypeReference
-from state_graph.serializable import from_dict
-from state_graph.serializable import from_graph
-from state_graph.serializable import from_json
-from state_graph.serializable import from_type
-from state_graph.serializable import resolve
-from state_graph.serializable import to_dict
-from state_graph.serializable import to_graph
-from state_graph.serializable import to_json
-from state_graph.state_graph import StateGraphSerializable
-from state_graph.state_graph import add_conditional_edge
-from state_graph.state_graph import add_edge
-from state_graph.state_graph import add_node
-from state_graph.state_graph import add_sequence
-from state_graph.state_graph import add_waiting_edge
-from state_graph.state_graph import all_edges
-from state_graph.state_graph import edge_count
-from state_graph.state_graph import from_dict
-from state_graph.state_graph import from_json
-from state_graph.state_graph import from_state_graph
-from state_graph.state_graph import get_node_connections
-from state_graph.state_graph import is_modified
-from state_graph.state_graph import is_node_reachable
-from state_graph.state_graph import mark_modified
-from state_graph.state_graph import node_count
-from state_graph.state_graph import remove_conditional_edge
-from state_graph.state_graph import remove_edge
-from state_graph.state_graph import remove_node
-from state_graph.state_graph import remove_waiting_edge
-from state_graph.state_graph import reset_modified
-from state_graph.state_graph import set_entry_point
-from state_graph.state_graph import set_finish_point
-from state_graph.state_graph import to_dict
-from state_graph.state_graph import to_json
-from state_graph.state_graph import validate
-from state_graph.state_graph import validate_graph_structure
-from state_graph.state_graph import validate_name
-from state_graph.state_graph_builder import GraphBuilder
-from state_graph.state_graph_builder import add_edge
-from state_graph.state_graph_builder import add_node
-from state_graph.state_graph_builder import add_sequence
-from state_graph.state_graph_builder import add_waiting_edge
-from state_graph.state_graph_builder import apply_pattern
-from state_graph.state_graph_builder import build
-from state_graph.state_graph_builder import register
-from state_graph.state_graph_builder import set_entry_point
-from state_graph.state_graph_builder import set_finish_point
-from state_graph.validation_mixin import GraphValidationProtocol
-from state_graph.validation_mixin import ValidationMixin
-from state_graph.validation_mixin import analyze_cycles
-from state_graph.validation_mixin import display_validation_report
-from state_graph.validation_mixin import find_dangling_edges
-from state_graph.validation_mixin import find_nodes_without_end_path
-from state_graph.validation_mixin import find_orphan_nodes
-from state_graph.validation_mixin import find_unreachable_nodes
-from state_graph.validation_mixin import has_entry_point
-from state_graph.validation_mixin import validate_graph
+This package provides a comprehensive graph implementation for the Haive framework,
+with flexible node and branch management, visualization, and LangGraph integration.
 
-__all__ = ['AgentInfo', 'BaseGraph', 'BranchType', 'EdgeType', 'ExtendedState', 'GraphBuilder', 'GraphPath', 'GraphRegistry', 'GraphSchemaMixin', 'GraphValidationProtocol', 'GraphVisualizer', 'Node', 'NodeStyle', 'PassThroughState', 'PatternDefinition', 'PatternRegistry', 'SchemaGraph', 'SerializableBranch', 'SerializableGraph', 'SerializableModel', 'SerializableModelMetaclass', 'SerializableNode', 'SimpleState', 'StateGraphSerializable', 'TypeReference', 'ValidationMixin', 'VisualizationContext', 'action', 'add_boolean_conditional_edges', 'add_branch', 'add_conditional_edge', 'add_conditional_edges', 'add_edge', 'add_function_branch', 'add_intelligent_agent_routing', 'add_key_value_branch', 'add_node', 'add_parallel_branches', 'add_postlude_node', 'add_prelude_node', 'add_sequence', 'add_subgraph', 'add_tool_node', 'add_waiting_edge', 'all_edges', 'all_entry_points', 'all_exit_points', 'all_finish_points', 'analyze_cycles', 'append', 'apply_pattern', 'branch_condition', 'branch_wrapper', 'build', 'check_full_recompilation_needed', 'check_graph_validity', 'clear', 'compile', 'condition', 'conditional_edges', 'create_debug_has_tool_calls', 'create_state', 'debug_conditional_routing', 'debug_graph_structure', 'debug_wrapper', 'decorator', 'demo_recompilation_tracking', 'demo_usage_patterns', 'demo_what_needs_recompilation', 'dfs', 'display', 'display_graph', 'display_name', 'display_validation_report', 'edge_count', 'entry_points_data', 'exit_points', 'extend_from', 'find_all_paths', 'find_by_id', 'find_dangling_edges', 'find_nodes_without_end_path', 'find_nodes_without_finish_path', 'find_orphan_nodes', 'find_unreachable_nodes', 'finish_func', 'from_dict', 'from_function', 'from_graph', 'from_json', 'from_langgraph', 'from_state_graph', 'from_type', 'generate_mermaid', 'get', 'get_all', 'get_branch', 'get_branch_by_name', 'get_branches_for_node', 'get_by_type', 'get_compilation_info', 'get_conditional_entries', 'get_conditional_exits', 'get_edges', 'get_instance', 'get_node', 'get_node_connections', 'get_node_pattern', 'get_reducer_fields', 'get_shared_fields', 'get_sink_nodes', 'get_source_nodes', 'has_entry_point', 'has_field', 'has_path', 'has_tool_calls_fixed', 'inner', 'insert_node_after', 'insert_node_before', 'is_modified', 'is_node_reachable', 'list', 'list_all', 'list_by_type', 'log_function_call', 'main', 'make_condition', 'mark_compiled', 'mark_modified', 'merge', 'needs_recompile', 'needs_recompile_for_interrupts', 'needs_recompile_for_schemas', 'node_count', 'process', 'process_func', 'register', 'register_pattern', 'remove_branch', 'remove_conditional_edge', 'remove_conditional_entry', 'remove_conditional_exit', 'remove_edge', 'remove_node', 'remove_waiting_edge', 'replace_branch', 'replace_node', 'reset_modified', 'resolve', 'router', 'set_conditional_entry', 'set_conditional_exit', 'set_end_point', 'set_entry_point', 'set_finish_point', 'set_state_schema', 'start_func', 'to_dict', 'to_graph', 'to_json', 'to_langgraph', 'to_mermaid', 'update_branch', 'update_node', 'validate', 'validate_func', 'validate_graph', 'validate_graph_structure', 'validate_input', 'validate_name', 'validate_output', 'validate_schema_setup', 'validation_wrapper', 'visualize', 'wrapper']
+The state graph system is the foundational computational graph infrastructure in Haive,
+enabling the creation, manipulation, and execution of complex workflows with robust
+state management and schema validation.
+
+Key Features:
+    - Schema Validation: Enforce type safety through Pydantic models
+    - Dynamic Routing: Create complex workflows with conditional branching
+    - Serialization: Full serialization and deserialization support
+    - LangGraph Integration: Seamless integration with LangChain's LangGraph
+    - Visualization: Built-in visualization capabilities
+    - Pattern Support: Reusable graph patterns and templates
+
+Modules:
+    base_graph2: Core graph implementation (transitional version)
+    schema_graph: Schema-aware graph with validation
+    state_graph: State graph serialization model
+    components: Node and branch implementations
+    models: Data models for graph components
+    conversion: Format conversion utilities
+    pattern: Graph pattern implementations
+    utils: Utility functions
+
+Example:
+    Basic graph creation:
+    ```python
+    from haive.core.graph.state_graph import BaseGraph
+    from langgraph.graph import START, END
+
+    # Create a new graph
+    graph = BaseGraph(name="my_graph")
+
+    # Add nodes
+    graph.add_node("node1", lambda state: state)
+    graph.add_node("node2", lambda state: state)
+
+    # Add edges
+    graph.add_edge(START, "node1")
+    graph.add_edge("node1", "node2")
+    graph.add_edge("node2", END)
+
+    # Compile and run the graph
+    compiled_graph = graph.compile()
+    result = compiled_graph.invoke({"input": "some input"})
+    ```
+"""
+
+# Base graph implementation
+from haive.core.graph.state_graph.base_graph2 import BaseGraph
+
+# Core components
+from haive.core.graph.state_graph.components import Branch, Node
+
+# Conversion utilities
+from haive.core.graph.state_graph.conversion import convert_to_langgraph
+
+# Visualization
+from haive.core.graph.state_graph.graph_visualizer import GraphVisualizer
+from haive.core.graph.state_graph.schema_graph import SchemaGraph
+
+__all__ = [
+    # Core classes
+    "BaseGraph",
+    "SchemaGraph",
+    "Node",
+    "Branch",
+    # Conversion
+    "convert_to_langgraph",
+    # Visualization
+    "GraphVisualizer",
+]

@@ -303,8 +303,6 @@ class ProcessedDocument(BaseModel):
     word_count: int = Field(default=0, description="Estimated word count")
 
     @model_validator(mode="after")
-
-
     @classmethod
     def update_statistics(cls) -> "ProcessedDocument":
         """Update statistics based on content and chunks."""
@@ -362,8 +360,6 @@ class DocumentOutput(BaseModel):
     total_words: int = Field(0, description="Total estimated words")
 
     @model_validator(mode="after")
-
-
     @classmethod
     def update_statistics(cls) -> "DocumentOutput":
         """Update statistics based on processed documents."""

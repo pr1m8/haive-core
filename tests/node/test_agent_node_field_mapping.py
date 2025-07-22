@@ -68,8 +68,7 @@ class MockSchemaAgent:
         if self.output_schema == TaskAnalysis:
             return TaskAnalysis(
                 task_complexity="high",
-                required_capabilities=[
-                    "logical_reasoning", "planning", "synthesis"],
+                required_capabilities=["logical_reasoning", "planning", "synthesis"],
                 estimated_duration=120,
             )
         raise ValueError(f"Unknown output schema: {self.output_schema}")
@@ -81,8 +80,7 @@ class TestAgentNodeFieldMapping:
     def test_agent_output_schema_field_mapping(self):
         """Test that agent output schema fields map to state fields."""
         state = AnalysisWorkflowState()
-        state.available_modules = [
-            "reasoning", "planning", "analysis", "synthesis"]
+        state.available_modules = ["reasoning", "planning", "analysis", "synthesis"]
 
         # Create agent with ModuleSelection output schema
         agent = MockSchemaAgent("selector", ModuleSelection)
@@ -171,8 +169,7 @@ class TestAgentNodeFieldMapping:
             return mapping
 
         # Test the detection
-        mapping = get_schema_field_mapping(
-            ModuleSelection, AnalysisWorkflowState)
+        mapping = get_schema_field_mapping(ModuleSelection, AnalysisWorkflowState)
 
         assert mapping == {
             "selected_modules": "selected_modules",
@@ -222,8 +219,7 @@ class TestAgentNodeFieldMapping:
         """Test how agent node should process different output types."""
 
         # Pattern to implement in agent node:
-        def process_agent_output(
-                agent: Any, output: Any, state: Any) -> dict[str, Any]:
+        def process_agent_output(agent: Any, output: Any, state: Any) -> dict[str, Any]:
             """Process agent output based on output schema."""
             update = {}
 

@@ -3,9 +3,9 @@
 import logging
 import os
 
+from haive.agents.simple.agent_v2 import SimpleAgentV2
 from pydantic import BaseModel, Field
 
-from haive.agents.simple.agent_v2 import SimpleAgentV2
 from haive.core.engine.aug_llm import AugLLMConfig
 
 # Disable database connection
@@ -26,9 +26,7 @@ class SampleTestModel(BaseModel):
 def test_duplication_fix_clean():
     """Test that the duplication fix is working without database warnings."""
     # Create agent with structured output
-    engine = AugLLMConfig(
-        temperature=0.1,
-        structured_output_model=SampleTestModel)
+    engine = AugLLMConfig(temperature=0.1, structured_output_model=SampleTestModel)
 
     agent = SimpleAgentV2(
         name="duplication_fix_test",

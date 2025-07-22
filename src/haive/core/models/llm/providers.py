@@ -57,8 +57,7 @@ class OpenAIConfig(LLMEngineConfig[TOpenAIConfig]):
 
     model: str = Field(..., description="OpenAI model identifier")
     api_key: str = Field(..., description="OpenAI API key")
-    organization: str | None = Field(
-        None, description="OpenAI organization ID")
+    organization: str | None = Field(None, description="OpenAI organization ID")
 
     def instantiate(self, **kwargs) -> OpenAIEngine:
         """Create an OpenAI engine instance.
@@ -195,9 +194,7 @@ class AzureConfig(LLMEngineConfig[TAzureConfig]):
     deployment_name: str = Field(..., description="Azure deployment name")
     api_key: str = Field(..., description="Azure API key")
     api_base: str = Field(..., description="Azure API base URL")
-    api_version: str = Field(
-        default="2023-05-15",
-        description="Azure API version")
+    api_version: str = Field(default="2023-05-15", description="Azure API version")
 
     def instantiate(self, **kwargs) -> AzureEngine:
         """Create an Azure engine instance.

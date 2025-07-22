@@ -24,8 +24,7 @@ class EnsembleRetrieverConfig(RetrieverConfig):
         from langchain_community.retrievers import EnsembleRetriever
 
         # Create the component retrievers
-        retrievers = [config.instantiate()
-                      for config in self.retriever_configs]
+        retrievers = [config.instantiate() for config in self.retriever_configs]
 
         # Create and return the retriever
         return EnsembleRetriever(retrievers=retrievers, weights=self.weights)

@@ -3,20 +3,18 @@
 
 import sys
 
+from haive.agents.simple.agent_v2 import SimpleAgentV2
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
 
 import haive.core.graph.node.engine_node as engine_node_module
-from haive.agents.simple.agent_v2 import SimpleAgentV2
 from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.graph.node.engine_node_test import (
     EngineNodeConfig as TestEngineNodeConfig,
 )
 
-sys.path.insert(
-    0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
-sys.path.insert(
-    0, "/home/will/Projects/haive/backend/haive/packages/haive-agents/src")
+sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
+sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-agents/src")
 
 # Monkey patch to use the test engine node
 
@@ -49,8 +47,7 @@ Focus on improvements that will lead to better document retrieval.""",
 class QueryRefinementSuggestion(BaseModel):
     refined_query: str = Field(description="The refined/improved query")
     improvement_type: str = Field(description="Type of improvement made")
-    rationale: str = Field(
-        description="Why this refinement improves the query")
+    rationale: str = Field(description="Why this refinement improves the query")
 
 
 class QueryRefinementResponse(BaseModel):
@@ -59,8 +56,7 @@ class QueryRefinementResponse(BaseModel):
     refinement_suggestions: list[QueryRefinementSuggestion] = Field(
         description="List of suggested improvements"
     )
-    best_refined_query: str = Field(
-        description="The recommended best refined query")
+    best_refined_query: str = Field(description="The recommended best refined query")
 
 
 def agent_tester(prompt, model, test_prompt):

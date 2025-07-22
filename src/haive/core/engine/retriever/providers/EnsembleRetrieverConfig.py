@@ -1,6 +1,5 @@
 """Ensemble Retriever implementation for the Haive framework.
 
-from typing import Any
 This module provides a configuration class for the Ensemble retriever,
 which combines multiple retrieval strategies using weighted combination
 to improve overall retrieval performance and coverage.
@@ -23,7 +22,7 @@ providing a consistent Haive configuration interface.
 
 from typing import Any
 
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 from haive.core.engine.retriever.retriever import BaseRetrieverConfig
 from haive.core.engine.retriever.types import RetrieverType
@@ -101,30 +100,21 @@ class EnsembleRetrieverConfig(BaseRetrieverConfig):
         description="Parameter for score normalization (higher values reduce score variance)",
     )
 
-    @validator("weights")
-    def validate_weights(self, v, values) -> Any:
+    @field_validator("weights")
+    @classmethod
+    def validate_weights(cls, v):
         """Validate that weights sum to 1.0."""
         if abs(sum(v) - 1.0) > 1e-6:
             raise ValueError(f"Weights must sum to 1.0, got {sum(v)}")
         return v
 
-    @validator("weights")
-    def validate_weights_length(self, v, values) -> Any:
-        """Validate that weights match number of retrievers."""
-        if "retrievers" in values and len(v) != len(values["retrievers"]):
-            raise ValueError(
-                f"Number of weights ({
-                    len(v)}) must match number of retrievers ({
-                    len(
-                        values['retrievers'])})"
-            )
-        return v
-
-    @validator("weights", each_item=True)
-    def validate_weight_values(self, v) -> Any:
+    @field_validator("weights")
+    @classmethod
+    def validate_weight_values(cls, v):
         """Validate that each weight is between 0 and 1."""
-        if not 0 <= v <= 1:
-            raise ValueError(f"Each weight must be between 0 and 1, got {v}")
+        for weight in v:
+            if not 0 <= weight <= 1:
+                raise ValueError(f"Each weight must be between 0 and 1, got {weight}")
         return v
 
     def get_input_fields(self) -> dict[str, tuple[type, Any]]:
@@ -145,7 +135,7 @@ class EnsembleRetrieverConfig(BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self) -> Any:
+    def instantiate(self):
         """Create an Ensemble retriever from this configuration.
 
         Returns:
@@ -171,15 +161,13 @@ class EnsembleRetrieverConfig(BaseRetrieverConfig):
                 instantiated_retrievers.append(retriever)
             except Exception as e:
                 raise ValueError(
-                    f"Failed to instantiate retriever {
-                        retriever_config.name}: {e}"
+                    f"Failed to instantiate retriever {retriever_config.name}: {e}"
                 )
 
         # Validate we have the right number of retrievers
         if len(instantiated_retrievers) != len(self.weights):
             raise ValueError(
-                f"Number of instantiated retrievers ({
-                    len(instantiated_retrievers)}) "
+                f"Number of instantiated retrievers ({len(instantiated_retrievers)}) "
                 f"doesn't match number of weights ({len(self.weights)})"
             )
 

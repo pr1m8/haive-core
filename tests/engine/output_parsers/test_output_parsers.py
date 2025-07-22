@@ -31,8 +31,7 @@ class Person(BaseModel):
 
     name: str = Field(description="The person's name")
     age: int = Field(description="The person's age")
-    occupation: str | None = Field(
-        default=None, description="The person's job")
+    occupation: str | None = Field(default=None, description="The person's job")
 
 
 class MovieGenre(str, Enum):
@@ -103,8 +102,7 @@ def test_create_list_parser():
     assert parser.parser_type == OutputParserType.LIST
 
     # Numbered list parser
-    numbered_parser = create_list_parser(
-        list_type="numbered", name="numbered_parser")
+    numbered_parser = create_list_parser(list_type="numbered", name="numbered_parser")
     assert numbered_parser.parser_type == OutputParserType.NUMBERED_LIST
 
     # Test parsing
@@ -119,9 +117,7 @@ def test_create_list_parser():
 
 def test_create_pydantic_parser():
     """Test creating and using a Pydantic parser."""
-    parser = create_pydantic_parser(
-        pydantic_model=Person,
-        name="person_parser")
+    parser = create_pydantic_parser(pydantic_model=Person, name="person_parser")
     assert parser.parser_type == OutputParserType.PYDANTIC
     assert parser.pydantic_model == Person
 
@@ -160,8 +156,7 @@ def test_parser_with_list_of_messages():
 # Chain integration tests
 def test_simple_llm_parser_chain(mock_llm):
     """Test a simple LLM -> Parser chain."""
-    json_parser = create_output_parser_engine(
-        parser_type=OutputParserType.JSON)
+    json_parser = create_output_parser_engine(parser_type=OutputParserType.JSON)
 
     # Create a simple chain
     chain = mock_llm | json_parser
@@ -326,8 +321,7 @@ async def test_parser_with_streaming_llm():
     )
 
     # Create parser
-    json_parser = create_output_parser_engine(
-        parser_type=OutputParserType.JSON)
+    json_parser = create_output_parser_engine(parser_type=OutputParserType.JSON)
 
     # Create chain
     chain = streaming_llm | json_parser
@@ -346,8 +340,7 @@ def test_parser_with_runnable_map():
     from langchain_core.runnables import RunnableMap
 
     # Create two parsers
-    json_parser = create_output_parser_engine(
-        parser_type=OutputParserType.JSON)
+    json_parser = create_output_parser_engine(parser_type=OutputParserType.JSON)
     list_parser = create_output_parser_engine(
         parser_type=OutputParserType.MARKDOWN_LIST
     )
@@ -379,12 +372,9 @@ def test_parser_chain_with_lcel_branching():
     from langchain_core.runnables import RunnableBranch
 
     # Create parsers
-    json_parser = create_output_parser_engine(
-        parser_type=OutputParserType.JSON)
-    list_parser = create_output_parser_engine(
-        parser_type=OutputParserType.LIST)
-    str_parser = create_output_parser_engine(
-        parser_type=OutputParserType.STRING)
+    json_parser = create_output_parser_engine(parser_type=OutputParserType.JSON)
+    list_parser = create_output_parser_engine(parser_type=OutputParserType.LIST)
+    str_parser = create_output_parser_engine(parser_type=OutputParserType.STRING)
 
     # Create a branch that chooses parser based on input format
     branch = RunnableBranch(
@@ -415,8 +405,7 @@ def test_parser_chain_with_lcel_branching():
 def test_output_parser_as_graph_component():
     """Test using an output parser as a component in Haive framework."""
     # Create parser
-    json_parser = create_output_parser_engine(
-        parser_type=OutputParserType.JSON)
+    json_parser = create_output_parser_engine(parser_type=OutputParserType.JSON)
 
     # Test basic functionality
     assert hasattr(json_parser, "get_input_fields")
@@ -446,8 +435,7 @@ def test_output_parser_as_graph_component():
 def test_parser_with_runnable_config():
     """Test parser with different runnable configurations."""
     # Create parser with no default config
-    json_parser = create_output_parser_engine(
-        parser_type=OutputParserType.JSON)
+    json_parser = create_output_parser_engine(parser_type=OutputParserType.JSON)
 
     # Create a runnable config
     runnable_config = {

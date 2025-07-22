@@ -1,50 +1,108 @@
-"""Module exports."""
+"""Registry management module for the Haive framework.
 
-from registry.base import AbstractRegistry
-from registry.base import clear
-from registry.base import find_by_id
-from registry.base import get
-from registry.base import get_all
-from registry.base import list
-from registry.base import register
-from registry.decorators import decorator
-from registry.decorators import new_init
-from registry.decorators import register_component
-from registry.decorators import register_instance
-from registry.dynamic_registry import DynamicRegistry
-from registry.dynamic_registry import RegistryItem
-from registry.dynamic_registry import activate
-from registry.dynamic_registry import clear_inactive
-from registry.dynamic_registry import deactivate
-from registry.dynamic_registry import get_active_components
-from registry.dynamic_registry import get_active_items
-from registry.dynamic_registry import get_component
-from registry.dynamic_registry import get_inactive_items
-from registry.dynamic_registry import get_item
-from registry.dynamic_registry import get_stats
-from registry.dynamic_registry import is_active
-from registry.dynamic_registry import list_components
-from registry.dynamic_registry import register
-from registry.dynamic_registry import validate_active_items
-from registry.dynamic_registry import validate_id
-from registry.dynamic_registry import validate_max_active
-from registry.dynamic_registry import validate_name
-from registry.factory import RegistryFactory
-from registry.factory import create
-from registry.factory import register_registry_type
-from registry.manager import RegistryManager
-from registry.manager import create_registry
-from registry.manager import get_instance
-from registry.manager import get_registry
-from registry.manager import register_registry_type
-from registry.manager import set_registry
-from registry.memory import MemoryRegistry
-from registry.memory import clear
-from registry.memory import find
-from registry.memory import find_by_id
-from registry.memory import get
-from registry.memory import get_all
-from registry.memory import list
-from registry.memory import register
+This module provides a comprehensive registry system for managing and discovering
+components dynamically throughout the Haive framework. It supports multiple
+registry types and provides both static and dynamic registration capabilities.
 
-__all__ = ['AbstractRegistry', 'DynamicRegistry', 'MemoryRegistry', 'RegistryFactory', 'RegistryItem', 'RegistryManager', 'activate', 'clear', 'clear_inactive', 'create', 'create_registry', 'deactivate', 'decorator', 'find', 'find_by_id', 'get', 'get_active_components', 'get_active_items', 'get_all', 'get_component', 'get_inactive_items', 'get_instance', 'get_item', 'get_registry', 'get_stats', 'is_active', 'list', 'list_components', 'new_init', 'register', 'register_component', 'register_instance', 'register_registry_type', 'set_registry', 'validate_active_items', 'validate_id', 'validate_max_active', 'validate_name']
+The registry system enables loose coupling between components while maintaining
+discoverability and type safety. Components can be registered at runtime and
+discovered by name or type.
+
+Key Components:
+    RegistryManager: Central manager for all registry operations
+    AbstractRegistry: Base class for custom registry implementations
+    DynamicRegistry: Registry with runtime modification capabilities
+    MemoryRegistry: In-memory registry implementation
+    RegistryItem: Data structure for registry entries
+
+Registry Types:
+    - Memory Registry: In-memory storage for fast access
+    - Dynamic Registry: Supports runtime modification
+    - File Registry: Persistent file-based storage (when available)
+    - Database Registry: Database-backed registry (when available)
+
+Features:
+    - Component discovery by name or type
+    - Type-safe registration and retrieval
+    - Multiple registry backend support
+    - Runtime component modification
+    - Registry federation and merging
+    - Metadata and versioning support
+
+Examples:
+    Basic registry usage::
+
+        from haive.core.registry import RegistryManager
+
+        # Get registry for engines
+        engine_registry = RegistryManager.get_registry("engines")
+
+        # Register a component
+        engine_registry.register(
+            name="my_engine",
+            component=MyEngineClass,
+            metadata={"version": "1.0.0", "type": "llm"}
+        )
+
+        # Retrieve component
+        engine_class = engine_registry.get("my_engine")
+
+    Dynamic registry operations::
+
+        from haive.core.registry import DynamicRegistry, RegistryItem
+
+        # Create dynamic registry
+        registry = DynamicRegistry()
+
+        # Register with metadata
+        item = RegistryItem(
+            name="advanced_engine",
+            component=AdvancedEngine,
+            metadata={"capabilities": ["reasoning", "memory"]},
+            version="2.0.0"
+        )
+        registry.register_item(item)
+
+        # Query by metadata
+        reasoning_engines = registry.find_by_metadata(
+            {"capabilities": "reasoning"}
+        )
+
+    Registry management::
+
+        # Create custom registry type
+        RegistryManager.register_registry_type(
+            "custom", CustomRegistryClass
+        )
+
+        # Get typed registry
+        custom_registry = RegistryManager.get_registry(
+            "custom", registry_type="custom"
+        )
+
+See Also:
+    - Component architecture documentation
+    - Engine registration guides
+    - Plugin development guides
+"""
+
+from haive.core.registry.base import AbstractRegistry
+from haive.core.registry.decorators import register_component
+from haive.core.registry.dynamic_registry import DynamicRegistry, RegistryItem
+from haive.core.registry.manager import RegistryManager
+from haive.core.registry.memory import MemoryRegistry
+
+# Initialize registry types
+RegistryManager.register_registry_type("memory", MemoryRegistry)
+
+# Export primary classes
+__all__ = [
+    # Core Registry Classes
+    "AbstractRegistry",
+    "DynamicRegistry",
+    "MemoryRegistry",
+    "RegistryItem",
+    "RegistryManager",
+    # Decorators
+    "register_component",
+]

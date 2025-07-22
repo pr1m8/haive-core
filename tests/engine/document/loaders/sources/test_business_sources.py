@@ -122,8 +122,7 @@ class TestBusinessPlatformDetection:
             ("https://company.atlassian.net/wiki", BusinessPlatform.CONFLUENCE),
         ],
     )
-    def test_detect_various_platforms(
-            self, url: str, expected: BusinessPlatform):
+    def test_detect_various_platforms(self, url: str, expected: BusinessPlatform):
         """Test detecting various business platforms."""
         result = detect_business_platform(url)
         assert result == expected
@@ -235,11 +234,7 @@ class TestHubSpotSource:
         source = HubSpotSource(
             source_id="hubspot-test-002",
             category=SourceCategory.BUSINESS,
-            contact_properties=[
-                "email",
-                "firstname",
-                "lastname",
-                "custom_score"],
+            contact_properties=["email", "firstname", "lastname", "custom_score"],
             company_properties=["name", "domain", "industry"],
         )
 
@@ -481,8 +476,7 @@ class TestBusinessUtilityFunctions:
     def test_get_business_sources_statistics(self, mock_registry):
         """Test business sources statistics calculation."""
         # Mock registry responses
-        mock_registry.find_sources_by_category.return_value = [
-            "hubspot", "salesforce"]
+        mock_registry.find_sources_by_category.return_value = ["hubspot", "salesforce"]
         mock_registry._sources = {
             "hubspot": MagicMock(
                 requires_credentials=True, credential_type=CredentialType.API_KEY
@@ -524,9 +518,7 @@ class TestBusinessUtilityFunctions:
     def test_validate_business_sources_missing(self, mock_registry):
         """Test validation failure when sources are missing."""
         # Mock only some sources as present
-        mock_registry._sources = {
-            "hubspot": MagicMock(),
-            "salesforce": MagicMock()}
+        mock_registry._sources = {"hubspot": MagicMock(), "salesforce": MagicMock()}
 
         result = validate_business_sources()
         assert result is False
@@ -537,8 +529,7 @@ class TestBusinessSourceIntegration:
     """Integration tests for business sources with mock loaders."""
 
     @patch("langchain_community.document_loaders.HubSpotLoader")
-    async def test_hubspot_loader_integration(
-            self, mock_loader_class, hubspot_source):
+    async def test_hubspot_loader_integration(self, mock_loader_class, hubspot_source):
         """Test HubSpot source integration with mock loader."""
         # Mock the loader instance
         mock_loader = MagicMock()

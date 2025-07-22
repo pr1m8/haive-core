@@ -32,9 +32,7 @@ def test_auto_detection_uses_token_aware_state():
 def test_custom_base_schema_override():
     """Test that custom base schema overrides auto-detection."""
     # Use regular MessagesState as custom base
-    composer = SchemaComposer(
-        name="TestState",
-        base_state_schema=MessagesState)
+    composer = SchemaComposer(name="TestState", base_state_schema=MessagesState)
 
     # Should use the custom base even if we detect messages
     class MockLLMEngine:
@@ -83,8 +81,7 @@ def test_build_creates_correct_schema():
 
     # Should have token tracking capabilities
     instance = schema_class()
-    assert hasattr(
-        instance, "token_usage"), "Schema should have token_usage field"
+    assert hasattr(instance, "token_usage"), "Schema should have token_usage field"
     assert hasattr(
         instance, "get_token_usage_summary"
     ), "Schema should have token usage methods"

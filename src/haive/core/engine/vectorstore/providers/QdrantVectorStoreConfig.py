@@ -1,6 +1,5 @@
 """Qdrant Vector Store implementation for the Haive framework.
 
-from typing import Any
 This module provides a configuration class for the Qdrant vector store,
 which is a vector similarity search engine with extended filtering support.
 
@@ -26,7 +25,7 @@ a consistent Haive configuration interface.
 from typing import Any
 
 from langchain_core.documents import Document
-from pydantic import Field, SecretStr, validator
+from pydantic import Field, SecretStr, field_validator
 
 from haive.core.common.mixins.secure_config import SecureConfigMixin
 from haive.core.engine.vectorstore.base import BaseVectorStoreConfig
@@ -145,16 +144,18 @@ class QdrantVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
         default=None, description="Timeout for operations in seconds"
     )
 
-    @validator("distance_metric")
-    def validate_distance_metric(self, v) -> Any:
+    @field_validator("distance_metric")
+    @classmethod
+    def validate_distance_metric(cls, v):
         """Validate distance metric is supported."""
         valid_metrics = ["cosine", "euclidean", "dot", "manhattan"]
         if v not in valid_metrics:
             raise ValueError(f"distance_metric must be one of {valid_metrics}, got {v}")
         return v
 
-    @validator("url", "host")
-    def validate_connection(self, v, values) -> Any:
+    @field_validator("url", "host")
+    @classmethod
+    def validate_connection(cls, v, values):
         """Validate that either url or host is provided."""
         if not v and not values.get("url") and not values.get("host"):
             raise ValueError("Either 'url' or 'host' must be provided")
@@ -175,7 +176,7 @@ class QdrantVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
             "ids": (list[str], Field(description="IDs of the added documents")),
         }
 
-    def instantiate(self) -> Any:
+    def instantiate(self):
         """Create a Qdrant vector store from this configuration.
 
         Returns:

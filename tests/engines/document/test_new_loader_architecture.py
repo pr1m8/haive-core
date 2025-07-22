@@ -52,8 +52,7 @@ class TestPathAnalyzer:
 
     def test_database_uri_analysis(self):
         """Test analysis of database URI."""
-        result = PathAnalyzer.analyze(
-            "postgresql://user:pass@localhost:5432/db")
+        result = PathAnalyzer.analyze("postgresql://user:pass@localhost:5432/db")
 
         assert result.path_type == PathType.DATABASE_URI
         assert result.is_remote is True
@@ -124,14 +123,12 @@ class TestSourceRegistration:
             pass
 
         # Test finding by extension
-        registration = source_registry.find_source_for_path(
-            "/path/to/file.txt")
+        registration = source_registry.find_source_for_path("/path/to/file.txt")
         assert registration is not None
         assert registration.name == "text"
 
         # Test with different extension
-        registration = source_registry.find_source_for_path(
-            "/path/to/file.text")
+        registration = source_registry.find_source_for_path("/path/to/file.text")
         assert registration is not None
         assert registration.name == "text"
 
@@ -252,8 +249,7 @@ class TestDocumentLoaderFactory:
         source = factory.create_source("/path/to/document.pdf")
 
         # Test speed preference (should use fast loader)
-        factory.create_loader_from_source(
-            source, preference=LoaderPreference.SPEED)
+        factory.create_loader_from_source(source, preference=LoaderPreference.SPEED)
         mock_fast_loader.assert_called()
 
         # Reset mocks
@@ -261,8 +257,7 @@ class TestDocumentLoaderFactory:
         mock_quality_loader.reset_mock()
 
         # Test quality preference (should use quality loader)
-        factory.create_loader_from_source(
-            source, preference=LoaderPreference.QUALITY)
+        factory.create_loader_from_source(source, preference=LoaderPreference.QUALITY)
         mock_quality_loader.assert_called()
 
     def test_analyze_path_with_sources(self):

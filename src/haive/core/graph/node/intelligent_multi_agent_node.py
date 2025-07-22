@@ -62,8 +62,6 @@ class IntelligentMultiAgentNode(BaseNodeConfig[MultiAgentState, MultiAgentState]
     )
 
     @model_validator(mode="after")
-
-
     @classmethod
     def validate_config(cls) -> "IntelligentMultiAgentNode":
         """Validate node configuration."""

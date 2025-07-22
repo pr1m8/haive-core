@@ -1,121 +1,73 @@
-"""Module exports."""
+"""Components module for the Haive state graph system.
 
-from components.architecture_summary import analyze_codebase
-from components.architecture_summary import count_lines_in_file
-from components.architecture_summary import main
-from components.architecture_summary import show_architecture_benefits
-from components.architecture_summary import show_coding_style_compliance
-from components.architecture_summary import show_component_responsibilities
-from components.architecture_summary import show_design_patterns
-from components.base_component import BaseGraphComponent
-from components.base_component import ComponentRegistry
-from components.base_component import cleanup
-from components.base_component import cleanup_all
-from components.base_component import get
-from components.base_component import get_all
-from components.base_component import get_component_info
-from components.base_component import get_registry_info
-from components.base_component import graph
-from components.base_component import initialize
-from components.base_component import initialize_all
-from components.base_component import is_initialized
-from components.base_component import register
-from components.base_component import validate_all
-from components.base_component import validate_state
-from components.branch import Branch
-from components.branch import evaluate
-from components.branch import setup_function_and_mappings
-from components.branch import validate_destinations_and_default
-from components.branch_manager import BranchManager
-from components.branch_manager import add_conditional_edges
-from components.branch_manager import add_function_branch
-from components.branch_manager import add_key_value_branch
-from components.branch_manager import add_send_branch
-from components.branch_manager import cleanup
-from components.branch_manager import get_branch
-from components.branch_manager import get_branch_count
-from components.branch_manager import get_branches_by_mode
-from components.branch_manager import get_branches_for_node
-from components.branch_manager import get_component_info
-from components.branch_manager import initialize
-from components.branch_manager import remove_branch
-from components.branch_manager import update_branch
-from components.branch_manager import validate_state
-from components.demo_modular_benefits import MockGraph
-from components.demo_modular_benefits import TestComponent
-from components.demo_modular_benefits import add_test_item
-from components.demo_modular_benefits import demonstrate_code_quality_improvements
-from components.demo_modular_benefits import demonstrate_component_separation
-from components.demo_modular_benefits import demonstrate_composition_benefits
-from components.demo_modular_benefits import demonstrate_focused_testing
-from components.demo_modular_benefits import demonstrate_memory_management
-from components.demo_modular_benefits import main
-from components.edge_manager import EdgeManager
-from components.edge_manager import add_edge
-from components.edge_manager import cleanup
-from components.edge_manager import find_dangling_edges
-from components.edge_manager import get_component_info
-from components.edge_manager import get_connected_components
-from components.edge_manager import get_edge_count
-from components.edge_manager import get_edges
-from components.edge_manager import get_incoming_edges
-from components.edge_manager import get_isolated_nodes
-from components.edge_manager import get_outgoing_edges
-from components.edge_manager import has_edge
-from components.edge_manager import initialize
-from components.edge_manager import remove_edge
-from components.edge_manager import validate_state
-from components.modular_base_graph import ModularBaseGraph
-from components.modular_base_graph import add_conditional_edges
-from components.modular_base_graph import add_edge
-from components.modular_base_graph import add_function_branch
-from components.modular_base_graph import add_key_value_branch
-from components.modular_base_graph import add_node
-from components.modular_base_graph import cleanup
-from components.modular_base_graph import compile
-from components.modular_base_graph import find_dangling_edges
-from components.modular_base_graph import get_branch_count
-from components.modular_base_graph import get_branches_for_node
-from components.modular_base_graph import get_edge_count
-from components.modular_base_graph import get_edges
-from components.modular_base_graph import get_graph_summary
-from components.modular_base_graph import get_node
-from components.modular_base_graph import get_node_count
-from components.modular_base_graph import get_nodes_by_type
-from components.modular_base_graph import has_edge
-from components.modular_base_graph import has_entry_point
-from components.modular_base_graph import is_valid
-from components.modular_base_graph import remove_branch
-from components.modular_base_graph import remove_edge
-from components.modular_base_graph import remove_node
-from components.modular_base_graph import set_entry_point
-from components.modular_base_graph import set_finish_point
-from components.modular_base_graph import update_node
-from components.modular_base_graph import validate_graph
-from components.node import Node
-from components.node import display_name
-from components.node import process
-from components.node import to_dict
-from components.node_manager import NodeManager
-from components.node_manager import add_node
-from components.node_manager import add_node_from_config
-from components.node_manager import cleanup
-from components.node_manager import get_component_info
-from components.node_manager import get_node
-from components.node_manager import get_node_count
-from components.node_manager import get_node_types_summary
-from components.node_manager import get_nodes_by_type
-from components.node_manager import initialize
-from components.node_manager import remove_node
-from components.node_manager import update_node
-from components.node_manager import validate_state
-from components.test_modular_graph import main
-from components.test_modular_graph import process_function
-from components.test_modular_graph import router_function
-from components.test_modular_graph import start_function
-from components.test_modular_graph import test_basic_modular_graph
-from components.test_modular_graph import test_component_isolation
-from components.test_modular_graph import test_error_handling
-from components.test_modular_graph import test_node_functions
+This module provides both legacy components and new modular components for building
+computational graphs with rich state management and control flow capabilities.
 
-__all__ = ['BaseGraphComponent', 'Branch', 'BranchManager', 'ComponentRegistry', 'EdgeManager', 'MockGraph', 'ModularBaseGraph', 'Node', 'NodeManager', 'TestComponent', 'add_conditional_edges', 'add_edge', 'add_function_branch', 'add_key_value_branch', 'add_node', 'add_node_from_config', 'add_send_branch', 'add_test_item', 'analyze_codebase', 'cleanup', 'cleanup_all', 'compile', 'count_lines_in_file', 'demonstrate_code_quality_improvements', 'demonstrate_component_separation', 'demonstrate_composition_benefits', 'demonstrate_focused_testing', 'demonstrate_memory_management', 'display_name', 'evaluate', 'find_dangling_edges', 'get', 'get_all', 'get_branch', 'get_branch_count', 'get_branches_by_mode', 'get_branches_for_node', 'get_component_info', 'get_connected_components', 'get_edge_count', 'get_edges', 'get_graph_summary', 'get_incoming_edges', 'get_isolated_nodes', 'get_node', 'get_node_count', 'get_node_types_summary', 'get_nodes_by_type', 'get_outgoing_edges', 'get_registry_info', 'graph', 'has_edge', 'has_entry_point', 'initialize', 'initialize_all', 'is_initialized', 'is_valid', 'main', 'process', 'process_function', 'register', 'remove_branch', 'remove_edge', 'remove_node', 'router_function', 'set_entry_point', 'set_finish_point', 'setup_function_and_mappings', 'show_architecture_benefits', 'show_coding_style_compliance', 'show_component_responsibilities', 'show_design_patterns', 'start_function', 'test_basic_modular_graph', 'test_component_isolation', 'test_error_handling', 'test_node_functions', 'to_dict', 'update_branch', 'update_node', 'validate_all', 'validate_destinations_and_default', 'validate_graph', 'validate_state']
+Legacy Components:
+    - Node: Base processing unit in a graph that handles state transformation
+    - Branch: Conditional routing component for decision points in the graph
+
+New Modular Components (Composition-based architecture):
+    - BaseGraphComponent: Abstract base for all graph components
+    - ComponentRegistry: Manages component lifecycle
+    - NodeManager: Handles all node operations
+    - EdgeManager: Handles direct edge operations
+    - BranchManager: Handles conditional routing and branches
+    - ModularBaseGraph: Main graph class using composition
+
+Example:
+    Using the new modular architecture:
+    ```python
+    from haive.core.graph.state_graph.components import ModularBaseGraph
+
+    # Create a modular graph
+    graph = ModularBaseGraph(name="my_workflow")
+
+    # Add nodes
+    graph.add_node("start", start_function)
+    graph.add_node("process", process_function)
+
+    # Add edges and routing
+    graph.add_edge("start", "process")
+    graph.add_conditional_edges("process", router_function, {
+        "success": "finish",
+        "error": "retry"
+    })
+    ```
+"""
+
+# New modular components
+from haive.core.graph.state_graph.components.base_component import (
+    BaseGraphComponent,
+    ComponentRegistry,
+)
+
+# Modular components
+from haive.core.graph.state_graph.components.branch_manager import BranchManager
+from haive.core.graph.state_graph.components.edge_manager import EdgeManager
+from haive.core.graph.state_graph.components.modular_base_graph import ModularBaseGraph
+from haive.core.graph.state_graph.components.node_manager import NodeManager
+
+# Legacy components (if they exist)
+try:
+    from haive.core.graph.state_graph.components.branch import Branch
+except ImportError:
+    from haive.core.graph.branches.branch import Branch
+
+try:
+    from haive.core.graph.state_graph.components.node import Node
+except ImportError:
+    from haive.core.graph.state_graph.base_graph2 import Node
+
+__all__ = [
+    # Legacy components
+    "Node",
+    "Branch",
+    # New modular components
+    "BaseGraphComponent",
+    "ComponentRegistry",
+    "NodeManager",
+    "EdgeManager",
+    "BranchManager",
+    "ModularBaseGraph",
+]

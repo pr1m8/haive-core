@@ -20,8 +20,7 @@ from haive.core.schema.prebuilt.multi_agent_state import MultiAgentState
 class SelectorAgentState(BaseModel):
     """State for selector agent."""
 
-    messages: Annotated[list[BaseMessage],
-                        add_messages] = Field(default_factory=list)
+    messages: Annotated[list[BaseMessage], add_messages] = Field(default_factory=list)
     available_modules: list[str] = Field(default_factory=list)
     selected_modules: list[str] = Field(default_factory=list)  # Output field
     rationale: str | None = None
@@ -33,12 +32,9 @@ class SelectorAgentState(BaseModel):
 class AdapterAgentState(BaseModel):
     """State for adapter agent."""
 
-    messages: Annotated[list[BaseMessage],
-                        add_messages] = Field(default_factory=list)
-    selected_modules: list[str] = Field(
-        default_factory=list)  # Input from selector
-    adapted_modules: list[dict[str, str]] = Field(
-        default_factory=list)  # Output field
+    messages: Annotated[list[BaseMessage], add_messages] = Field(default_factory=list)
+    selected_modules: list[str] = Field(default_factory=list)  # Input from selector
+    adapted_modules: list[dict[str, str]] = Field(default_factory=list)  # Output field
     task_context: str = ""
     # Private to this agent
     adaptation_rules: dict[str, str] = Field(default_factory=dict)
@@ -48,10 +44,8 @@ class AdapterAgentState(BaseModel):
 class ReasoningAgentState(BaseModel):
     """State for reasoning agent."""
 
-    messages: Annotated[list[BaseMessage],
-                        add_messages] = Field(default_factory=list)
-    adapted_modules: list[dict[str, str]] = Field(
-        default_factory=list)  # Input
+    messages: Annotated[list[BaseMessage], add_messages] = Field(default_factory=list)
+    adapted_modules: list[dict[str, str]] = Field(default_factory=list)  # Input
     reasoning_structure: dict[str, Any] = Field(default_factory=dict)  # Output
     final_answer: str = ""  # Output
     # Private
@@ -87,8 +81,7 @@ class TestMultiAgentStateSynchronization:
 
         # Set shared context
         state.task_description = "Solve complex reasoning problem"
-        state.available_modules = [
-            "reasoning", "planning", "analysis", "synthesis"]
+        state.available_modules = ["reasoning", "planning", "analysis", "synthesis"]
 
         # Selector agent updates selected_modules directly
         selector_update = {
@@ -140,9 +133,7 @@ class TestMultiAgentStateSynchronization:
         }
 
         # Selector produces output
-        selector_output = {
-            "selected_modules": [
-                "A", "B"], "rationale": "Best for task"}
+        selector_output = {"selected_modules": ["A", "B"], "rationale": "Best for task"}
 
         # Update both agent state and combined state
         state.agent_states["selector"]["selected_modules"] = selector_output[
@@ -170,10 +161,7 @@ class TestMultiAgentStateSynchronization:
         # Each agent has different tools
         selector_tools = ["module_analyzer", "dependency_checker"]
         adapter_tools = ["context_analyzer", "task_mapper"]
-        reasoning_tools = [
-            "logic_checker",
-            "fact_validator",
-            "proof_assistant"]
+        reasoning_tools = ["logic_checker", "fact_validator", "proof_assistant"]
 
         # Store in agent states (private)
         state.agent_states["selector"] = {"tools": selector_tools}
@@ -275,8 +263,7 @@ class TestMultiAgentStateSynchronization:
             state.messages.extend(selector_update["messages"])
 
         if "agent_states" in selector_update:
-            for agent_name, agent_state in selector_update["agent_states"].items(
-            ):
+            for agent_name, agent_state in selector_update["agent_states"].items():
                 if agent_name not in state.agent_states:
                     state.agent_states[agent_name] = {}
                 state.agent_states[agent_name].update(agent_state)
@@ -301,8 +288,7 @@ class TestMultiAgentStateSynchronization:
         state.selected_modules = ["A", "B", "C"]
 
         # From AdaptedModules output schema
-        state.adapted_modules = [
-            {"module": "A", "adaptation": "Enhanced for task"}]
+        state.adapted_modules = [{"module": "A", "adaptation": "Enhanced for task"}]
 
         # From ReasoningStructure output schema
         state.reasoning_structure = {
@@ -364,7 +350,5 @@ class TestMultiAgentStateSynchronization:
         # Verify composition
         assert state.selected_modules == ["A", "C"]  # Shared
         assert state.adapted_modules[0]["module"] == "A"  # Shared
-        assert state.agent_states["selector"]["tools"] == [
-            "module_analyzer"]  # Private
-        assert state.agent_states["adapter"]["tools"] == [
-            "context_analyzer"]  # Private
+        assert state.agent_states["selector"]["tools"] == ["module_analyzer"]  # Private
+        assert state.agent_states["adapter"]["tools"] == ["context_analyzer"]  # Private

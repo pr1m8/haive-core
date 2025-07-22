@@ -10,9 +10,9 @@ and actual LLM interactions (no mocks). Tests cover:
 """
 
 import pytest
+from haive.agents.simple.agent import SimpleAgent
 from langchain_core.messages import AIMessage
 
-from haive.agents.simple.agent import SimpleAgent
 from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.schema.prebuilt.messages.messages_with_token_usage import (
     MessagesStateWithTokenUsage,
@@ -37,8 +37,7 @@ class TestMessagesStateWithTokenUsage:
         """Create a MessagesStateWithTokenUsage instance for testing."""
         return MessagesStateWithTokenUsage()
 
-    def test_basic_token_state_creation(
-            self, token_state: MessagesStateWithTokenUsage):
+    def test_basic_token_state_creation(self, token_state: MessagesStateWithTokenUsage):
         """Test basic creation and initial state of MessagesStateWithTokenUsage."""
         assert token_state.messages == []
         assert token_state.token_usage is None
@@ -122,7 +121,8 @@ class TestMessagesStateWithTokenUsage:
 
         for i, token_data in enumerate(messages_data):
             ai_message = AIMessage(
-                content=f"Response {i + 1}", response_metadata={"token_usage": token_data}
+                content=f"Response {i + 1}",
+                response_metadata={"token_usage": token_data},
             )
             token_state.add_message(ai_message)
 
@@ -165,8 +165,7 @@ class TestMessagesStateWithTokenUsage:
             abs(summary["total_cost"] - 0.06) < 0.001
         )  # Allow for floating point precision
 
-    def test_conversation_cost_analysis(
-            self, token_state: MessagesStateWithTokenUsage):
+    def test_conversation_cost_analysis(self, token_state: MessagesStateWithTokenUsage):
         """Test the comprehensive conversation cost analysis."""
         # Add messages to simulate a conversation
         for i in range(3):
@@ -183,9 +182,7 @@ class TestMessagesStateWithTokenUsage:
             token_state.add_message(ai_message)
 
         # Set some costs
-        token_state.calculate_costs(
-            input_cost_per_1k=0.001,
-            output_cost_per_1k=0.002)
+        token_state.calculate_costs(input_cost_per_1k=0.001, output_cost_per_1k=0.002)
 
         # Get cost analysis
         analysis = token_state.get_conversation_cost_analysis()
@@ -222,8 +219,7 @@ class TestMessagesStateWithTokenUsage:
                 assert state.token_usage is not None or len(state.messages) > 0
 
         # Alternative: Check if agent has conversation memory/state persistence
-        if hasattr(simple_agent, "get_state") or hasattr(
-                simple_agent, "memory"):
+        if hasattr(simple_agent, "get_state") or hasattr(simple_agent, "memory"):
             # Test agent state retrieval methods if they exist
             pass
 
@@ -251,8 +247,7 @@ class TestMessagesStateWithTokenUsage:
         assert token_state.get_system_message() is not None
         assert token_state.token_usage.total_tokens == 33
 
-    def test_empty_state_summary(
-            self, token_state: MessagesStateWithTokenUsage):
+    def test_empty_state_summary(self, token_state: MessagesStateWithTokenUsage):
         """Test token usage summary for empty state."""
         summary = token_state.get_token_usage_summary()
 

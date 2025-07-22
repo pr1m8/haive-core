@@ -23,8 +23,7 @@ def test_aug_llm_config_uses_llm_state():
     # But it will appear later in the chain through LLMState
     llm_index = mro_names.index("LLMState")
     messages_index = (
-        mro_names.index(
-            "MessagesState") if "MessagesState" in mro_names else -1
+        mro_names.index("MessagesState") if "MessagesState" in mro_names else -1
     )
 
     if messages_index != -1:

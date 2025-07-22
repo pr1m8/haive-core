@@ -107,8 +107,6 @@ class IdentifierMixin(BaseModel):
         return v
 
     @model_validator(mode="after")
-
-
     @classmethod
     def initialize_uuid_obj(cls) -> "IdentifierMixin":
         """Initialize UUID object after model validation.

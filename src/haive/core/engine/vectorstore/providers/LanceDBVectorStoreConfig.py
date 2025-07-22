@@ -1,6 +1,5 @@
 """LanceDB Vector Store implementation for the Haive framework.
 
-from typing import Any
 This module provides a configuration class for the LanceDB vector store,
 which is a modern, high-performance vector database built on Lance format.
 
@@ -26,7 +25,7 @@ a consistent Haive configuration interface.
 from typing import Any
 
 from langchain_core.documents import Document
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 from haive.core.common.mixins.secure_config import SecureConfigMixin
 from haive.core.engine.vectorstore.base import BaseVectorStoreConfig
@@ -146,24 +145,27 @@ class LanceDBVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
         default=None, ge=1, description="Refine factor for improving search quality"
     )
 
-    @validator("distance")
-    def validate_distance(self, v) -> Any:
+    @field_validator("distance")
+    @classmethod
+    def validate_distance(cls, v):
         """Validate distance metric is supported."""
         valid_distances = ["cosine", "l2", "dot", "hamming"]
         if v not in valid_distances:
             raise ValueError(f"distance must be one of {valid_distances}, got {v}")
         return v
 
-    @validator("mode")
-    def validate_mode(self, v) -> Any:
+    @field_validator("mode")
+    @classmethod
+    def validate_mode(cls, v):
         """Validate mode is supported."""
         valid_modes = ["overwrite", "append"]
         if v not in valid_modes:
             raise ValueError(f"mode must be one of {valid_modes}, got {v}")
         return v
 
-    @validator("uri")
-    def validate_uri(self, v) -> Any:
+    @field_validator("uri")
+    @classmethod
+    def validate_uri(cls, v):
         """Basic validation of LanceDB URI."""
         if v.startswith("db://") and len(v) < 6:
             raise ValueError(
@@ -189,7 +191,7 @@ class LanceDBVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
             ),
         }
 
-    def instantiate(self) -> Any:
+    def instantiate(self):
         """Create a LanceDB vector store from this configuration.
 
         Returns:

@@ -1,4 +1,4 @@
-"""from typing import Any
+"""
 PGVector Vector Store implementation for the Haive framework.
 
 This module provides a configuration class for the PGVector vector store,
@@ -23,10 +23,10 @@ The implementation integrates with LangChain's PGVector while providing
 a consistent Haive configuration interface.
 """
 
-from typing import Any
+from typing import Any, Dict, List, Optional, Tuple, Type
 
 from langchain_core.documents import Document
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 from haive.core.engine.vectorstore.base import BaseVectorStoreConfig
 from haive.core.engine.vectorstore.types import VectorStoreType
@@ -34,7 +34,8 @@ from haive.core.engine.vectorstore.types import VectorStoreType
 
 @BaseVectorStoreConfig.register(VectorStoreType.PGVECTOR)
 class PGVectorStoreConfig(BaseVectorStoreConfig):
-    """Configuration for PGVector vector store in the Haive framework.
+    """
+    Configuration for PGVector vector store in the Haive framework.
 
     This vector store uses PostgreSQL with the pgvector extension for
     SQL-compatible vector similarity search operations.
@@ -103,7 +104,7 @@ class PGVectorStoreConfig(BaseVectorStoreConfig):
     )
 
     # Advanced configuration
-    vector_dimension: int | None = Field(
+    vector_dimension: Optional[int] = Field(
         default=None, description="Vector dimension (auto-detected if not specified)"
     )
 
@@ -118,8 +119,9 @@ class PGVectorStoreConfig(BaseVectorStoreConfig):
         default=30, ge=1, le=300, description="Connection pool timeout in seconds"
     )
 
-    @validator("distance_strategy")
-    def validate_distance_strategy(self, v) -> Any:
+    @field_validator("distance_strategy")
+    @classmethod
+    def validate_distance_strategy(cls, v):
         """Validate distance strategy is supported."""
         valid_strategies = ["cosine", "l2", "inner_product"]
         if v not in valid_strategies:
@@ -128,8 +130,9 @@ class PGVectorStoreConfig(BaseVectorStoreConfig):
             )
         return v
 
-    @validator("connection_string")
-    def validate_connection_string(self, v) -> Any:
+    @field_validator("connection_string")
+    @classmethod
+    def validate_connection_string(cls, v):
         """Basic validation of PostgreSQL connection string."""
         if not v.startswith(("postgresql://", "postgres://")):
             raise ValueError(
@@ -137,23 +140,24 @@ class PGVectorStoreConfig(BaseVectorStoreConfig):
             )
         return v
 
-    def get_input_fields(self) -> dict[str, tuple[type, Any]]:
+    def get_input_fields(self) -> Dict[str, Tuple[Type, Any]]:
         """Return input field definitions for PGVector vector store."""
         return {
             "documents": (
-                list[Document],
+                List[Document],
                 Field(description="Documents to add to the vector store"),
             ),
         }
 
-    def get_output_fields(self) -> dict[str, tuple[type, Any]]:
+    def get_output_fields(self) -> Dict[str, Tuple[Type, Any]]:
         """Return output field definitions for PGVector vector store."""
         return {
-            "ids": (list[str], Field(description="UUIDs of the added documents")),
+            "ids": (List[str], Field(description="UUIDs of the added documents")),
         }
 
-    def instantiate(self) -> Any:
-        """Create a PGVector vector store from this configuration.
+    def instantiate(self):
+        """
+        Create a PGVector vector store from this configuration.
 
         Returns:
             PGVector: Instantiated PGVector vector store.

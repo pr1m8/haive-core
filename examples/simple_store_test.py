@@ -17,9 +17,7 @@ def test_store_system():
     """Test the basic store system functionality."""
     # Create store manager with memory store
     store = create_store(store_type=StoreType.MEMORY)
-    store_manager = StoreManager(
-        store=store, default_namespace=(
-            "test", "demo"))
+    store_manager = StoreManager(store=store, default_namespace=("test", "demo"))
 
     # Store some memories
     memory_id1 = store_manager.store_memory(

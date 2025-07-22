@@ -62,8 +62,7 @@ class TestDirectFieldUpdates:
             "selection_rationale": agent_output.rationale,  # Optional mapping
             # Messages if any
             "messages": [
-                AIMessage(
-                    content="Selected modules based on task requirements")
+                AIMessage(content="Selected modules based on task requirements")
             ],
             # Agent state tracking (but not the primary output mechanism)
             "agent_states": {
@@ -125,8 +124,7 @@ class TestDirectFieldUpdates:
             selected_modules=["A", "B"], rationale="Test rationale"
         )
 
-        updates = get_field_updates(
-            output, {"rationale": "selection_rationale"})
+        updates = get_field_updates(output, {"rationale": "selection_rationale"})
 
         assert updates == {
             "selected_modules": ["A", "B"],

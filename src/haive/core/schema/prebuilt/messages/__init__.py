@@ -1,95 +1,54 @@
-"""Module exports."""
+"""Messages state module with token usage tracking and utilities.
 
-from messages.compatibility import MessagesStateAdapter
-from messages.compatibility import deduplicate_tool_calls
-from messages.compatibility import get_completed_tool_calls
-from messages.compatibility import get_conversation_rounds
-from messages.compatibility import send_tool_calls
-from messages.compatibility import transform_ai_to_human
-from messages.examples import agent_handoff_example
-from messages.examples import basic_usage_example
-from messages.examples import enhanced_features_example
-from messages.examples import enhanced_implementation_example
-from messages.examples import tool_usage_example
-from messages.messages_state import MessageList
-from messages.messages_state import MessageRound
-from messages.messages_state import MessagesState
-from messages.messages_state import ToolCallInfo
-from messages.messages_state import add_engine_metadata
-from messages.messages_state import add_message
-from messages.messages_state import add_system_message
-from messages.messages_state import append
-from messages.messages_state import clear
-from messages.messages_state import completed_tool_calls
-from messages.messages_state import conversation_rounds
-from messages.messages_state import convert_strings_to_messages
-from messages.messages_state import copy
-from messages.messages_state import deduplicate_tool_calls
-from messages.messages_state import ensure_proper_messages_and_ordering
-from messages.messages_state import extend
-from messages.messages_state import filter_by_content_pattern
-from messages.messages_state import filter_by_engine
-from messages.messages_state import filter_by_metadata
-from messages.messages_state import filter_by_time_range
-from messages.messages_state import filter_by_type
-from messages.messages_state import first_real_human_message
-from messages.messages_state import from_dict
-from messages.messages_state import from_messages
-from messages.messages_state import from_string
-from messages.messages_state import get_filtered_messages
-from messages.messages_state import get_messages_in_current_round
-from messages.messages_state import get_messages_since_last_human
-from messages.messages_state import get_pending_tool_calls
-from messages.messages_state import get_tool_calls_from_message
-from messages.messages_state import has_tool_calls
-from messages.messages_state import has_tool_errors
-from messages.messages_state import inject_state_into_tool_calls
-from messages.messages_state import insert
-from messages.messages_state import last_ai_message
-from messages.messages_state import last_human_message
-from messages.messages_state import last_message
-from messages.messages_state import message_count
-from messages.messages_state import real_human_messages
-from messages.messages_state import remove
-from messages.messages_state import round_count
-from messages.messages_state import send_tool_calls
-from messages.messages_state import serialize_model
-from messages.messages_state import system_message
-from messages.messages_state import to_langchain_prompt
-from messages.messages_state import to_openai_format
-from messages.messages_state import tool_call_errors
-from messages.messages_state import transform_ai_to_human
-from messages.messages_state import transform_for_agent_handoff
-from messages.messages_state import transform_for_reflection
-from messages.messages_state import transformed_human_messages
-from messages.messages_state import with_system_message
-from messages.messages_with_token_usage import MessagesStateWithTokenUsage
-from messages.messages_with_token_usage import add_message
-from messages.messages_with_token_usage import auto_track_all_tokens
-from messages.messages_with_token_usage import get_conversation_cost_analysis
-from messages.messages_with_token_usage import with_system_message_and_tracking
-from messages.token_usage import TokenUsage
-from messages.token_usage import add
-from messages.token_usage import aggregate_token_usage
-from messages.token_usage import calculate_token_cost
-from messages.token_usage import extract_token_usage_from_message
-from messages.token_usage import validate_totals
-from messages.token_usage_mixin import TokenUsageMixin
-from messages.token_usage_mixin import calculate_costs
-from messages.token_usage_mixin import clear_token_usage
-from messages.token_usage_mixin import get_capacity_status
-from messages.token_usage_mixin import get_last_token_usage
-from messages.token_usage_mixin import get_token_usage
-from messages.token_usage_mixin import get_token_usage_summary
-from messages.token_usage_mixin import recalculate_token_usage
-from messages.token_usage_mixin import track_message_tokens
-from messages.utils import MessageRound
-from messages.utils import ToolCallInfo
-from messages.utils import extract_tool_calls
-from messages.utils import has_agent_metadata_attribute
-from messages.utils import has_engine_metadata_attribute
-from messages.utils import inject_state_into_tool_calls
-from messages.utils import is_real_human_message
-from messages.utils import is_tool_error
+This module provides enhanced message state functionality including:
+- Token usage tracking and cost calculation
+- Message round analysis and conversation tracking
+- Tool call management and deduplication
+- Message transformation utilities
+"""
 
-__all__ = ['MessageList', 'MessageRound', 'MessagesState', 'MessagesStateAdapter', 'MessagesStateWithTokenUsage', 'TokenUsage', 'TokenUsageMixin', 'ToolCallInfo', 'add', 'add_engine_metadata', 'add_message', 'add_system_message', 'agent_handoff_example', 'aggregate_token_usage', 'append', 'auto_track_all_tokens', 'basic_usage_example', 'calculate_costs', 'calculate_token_cost', 'clear', 'clear_token_usage', 'completed_tool_calls', 'conversation_rounds', 'convert_strings_to_messages', 'copy', 'deduplicate_tool_calls', 'enhanced_features_example', 'enhanced_implementation_example', 'ensure_proper_messages_and_ordering', 'extend', 'extract_token_usage_from_message', 'extract_tool_calls', 'filter_by_content_pattern', 'filter_by_engine', 'filter_by_metadata', 'filter_by_time_range', 'filter_by_type', 'first_real_human_message', 'from_dict', 'from_messages', 'from_string', 'get_capacity_status', 'get_completed_tool_calls', 'get_conversation_cost_analysis', 'get_conversation_rounds', 'get_filtered_messages', 'get_last_token_usage', 'get_messages_in_current_round', 'get_messages_since_last_human', 'get_pending_tool_calls', 'get_token_usage', 'get_token_usage_summary', 'get_tool_calls_from_message', 'has_agent_metadata_attribute', 'has_engine_metadata_attribute', 'has_tool_calls', 'has_tool_errors', 'inject_state_into_tool_calls', 'insert', 'is_real_human_message', 'is_tool_error', 'last_ai_message', 'last_human_message', 'last_message', 'message_count', 'real_human_messages', 'recalculate_token_usage', 'remove', 'round_count', 'send_tool_calls', 'serialize_model', 'system_message', 'to_langchain_prompt', 'to_openai_format', 'tool_call_errors', 'tool_usage_example', 'track_message_tokens', 'transform_ai_to_human', 'transform_for_agent_handoff', 'transform_for_reflection', 'transformed_human_messages', 'validate_totals', 'with_system_message', 'with_system_message_and_tracking']
+from haive.core.schema.prebuilt.messages.messages_with_token_usage import (
+    MessagesStateWithTokenUsage,
+)
+from haive.core.schema.prebuilt.messages.token_usage import (
+    TokenUsage,
+    aggregate_token_usage,
+    calculate_token_cost,
+    extract_token_usage_from_message,
+)
+from haive.core.schema.prebuilt.messages.token_usage_mixin import TokenUsageMixin
+
+# Import compatibility and utils if they exist
+try:
+    from haive.core.schema.prebuilt.messages.compatibility import MessagesStateAdapter
+    from haive.core.schema.prebuilt.messages.utils import (
+        MessageRound,
+        ToolCallInfo,
+        is_real_human_message,
+        is_tool_error,
+    )
+
+    ENHANCED_FEATURES_AVAILABLE = True
+except ImportError:
+    ENHANCED_FEATURES_AVAILABLE = False
+
+__all__ = [
+    "TokenUsage",
+    "extract_token_usage_from_message",
+    "aggregate_token_usage",
+    "calculate_token_cost",
+    "TokenUsageMixin",
+    "MessagesStateWithTokenUsage",
+]
+
+# Add enhanced features to exports if available
+if ENHANCED_FEATURES_AVAILABLE:
+    __all__.extend(
+        [
+            "MessagesStateAdapter",
+            "MessageRound",
+            "ToolCallInfo",
+            "is_real_human_message",
+            "is_tool_error",
+        ]
+    )

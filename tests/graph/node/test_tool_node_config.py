@@ -13,8 +13,7 @@ from haive.core.schema.state_schema import StateSchema
 class CalculatorState(StateSchema):
     """Simple state schema for testing the tool node."""
 
-    messages: list[Annotated[BaseMessage, add_messages]
-                   ] = Field(default_factory=list)
+    messages: list[Annotated[BaseMessage, add_messages]] = Field(default_factory=list)
     result: str = Field(default="")
 
 
@@ -85,9 +84,7 @@ def test_tool_node_config():
     assert any(isinstance(msg, ToolMessage) for msg in updated_messages)
 
     # Find the tool message and check its content
-    tool_messages = [
-        msg for msg in updated_messages if isinstance(
-            msg, ToolMessage)]
+    tool_messages = [msg for msg in updated_messages if isinstance(msg, ToolMessage)]
     assert len(tool_messages) > 0
     assert "The result of 5 + 3 = 8" in tool_messages[0].content
 

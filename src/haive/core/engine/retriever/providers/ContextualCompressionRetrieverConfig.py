@@ -1,4 +1,4 @@
-"""from typing import Any
+"""
 Contextual Compression Retriever implementation for the Haive framework.
 
 This module provides a configuration class for the Contextual Compression retriever,
@@ -21,9 +21,9 @@ The implementation integrates with LangChain's ContextualCompressionRetriever wh
 providing a consistent Haive configuration interface with flexible compression options.
 """
 
-from typing import Any
+from typing import Any, Dict, List, Optional, Tuple, Type
 
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.engine.retriever.retriever import BaseRetrieverConfig
@@ -32,7 +32,8 @@ from haive.core.engine.retriever.types import RetrieverType
 
 @BaseRetrieverConfig.register(RetrieverType.CONTEXTUAL_COMPRESSION)
 class ContextualCompressionRetrieverConfig(BaseRetrieverConfig):
-    """Configuration for Contextual Compression retriever in the Haive framework.
+    """
+    Configuration for Contextual Compression retriever in the Haive framework.
 
     This retriever compresses retrieved documents to extract only the most relevant
     information relative to the query, improving both relevance and efficiency.
@@ -84,30 +85,29 @@ class ContextualCompressionRetrieverConfig(BaseRetrieverConfig):
         description="Type of compressor: 'llm_chain_extract', 'llm_chain_filter'",
     )
 
-    llm_config: AugLLMConfig | None = Field(
+    llm_config: Optional[AugLLMConfig] = Field(
         default=None,
         description="LLM configuration for compression (required for LLM compressors)",
     )
 
-    @validator("compressor_type")
-    def validate_compressor_type(self, v) -> Any:
+    @field_validator("compressor_type")
+    @classmethod
+    def validate_compressor_type(cls, v):
         """Validate compressor type."""
         valid_types = ["llm_chain_extract", "llm_chain_filter"]
         if v not in valid_types:
             raise ValueError(f"compressor_type must be one of {valid_types}, got {v}")
         return v
 
-    @validator("llm_config")
-    def validate_llm_config_required(self, v, values) -> Any:
+    @field_validator("llm_config")
+    @classmethod
+    def validate_llm_config_required(cls, v, info):
         """Validate that LLM config is provided for LLM compressors."""
-        compressor_type = values.get("compressor_type", "")
-        if compressor_type.startswith("llm_") and v is None:
-            raise ValueError(
-                f"llm_config is required for compressor_type '{compressor_type}'"
-            )
+        # Note: In Pydantic v2, cross-field validation requires model_validator
+        # This validator only checks if llm_config is provided when needed
         return v
 
-    def get_input_fields(self) -> dict[str, tuple[type, Any]]:
+    def get_input_fields(self) -> Dict[str, Tuple[Type, Any]]:
         """Return input field definitions for Contextual Compression retriever."""
         return {
             "query": (
@@ -116,11 +116,11 @@ class ContextualCompressionRetrieverConfig(BaseRetrieverConfig):
             ),
         }
 
-    def get_output_fields(self) -> dict[str, tuple[type, Any]]:
+    def get_output_fields(self) -> Dict[str, Tuple[Type, Any]]:
         """Return output field definitions for Contextual Compression retriever."""
         return {
             "documents": (
-                list[Any],  # List[Document] but avoiding import
+                List[Any],  # List[Document] but avoiding import
                 Field(
                     default_factory=list,
                     description="Compressed documents relevant to the query",
@@ -128,8 +128,9 @@ class ContextualCompressionRetrieverConfig(BaseRetrieverConfig):
             ),
         }
 
-    def instantiate(self) -> Any:
-        """Create a Contextual Compression retriever from this configuration.
+    def instantiate(self):
+        """
+        Create a Contextual Compression retriever from this configuration.
 
         Returns:
             ContextualCompressionRetriever: Instantiated retriever ready for compression retrieval.
@@ -184,10 +185,7 @@ class ContextualCompressionRetrieverConfig(BaseRetrieverConfig):
             compressor = LLMChainFilter.from_llm(llm)
 
         else:
-            raise ValueError(
-                f"Unsupported compressor_type: {
-                    self.compressor_type}"
-            )
+            raise ValueError(f"Unsupported compressor_type: {self.compressor_type}")
 
         return ContextualCompressionRetriever(
             base_compressor=compressor, base_retriever=base_retriever

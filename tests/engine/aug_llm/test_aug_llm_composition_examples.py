@@ -167,8 +167,7 @@ def auto_detect_state_schema(aug_llm_configs, name="AutoDetectedStateSchema"):
 
     # Ensure the reducer fields are properly set
     # This is important for the test assertion to pass
-    if hasattr(schema_cls,
-               "__reducer_fields__") and not schema_cls.__reducer_fields__:
+    if hasattr(schema_cls, "__reducer_fields__") and not schema_cls.__reducer_fields__:
         from langgraph.graph import add_messages
 
         schema_cls.__reducer_fields__["messages"] = add_messages
@@ -226,8 +225,7 @@ class Person(BaseModel):
 
     name: str = Field(description="The person's full name")
     age: int | None = Field(None, description="The person's age in years")
-    occupation: str | None = Field(
-        None, description="The person's job or profession")
+    occupation: str | None = Field(None, description="The person's job or profession")
     location: str | None = Field(None, description="Where the person lives")
 
 
@@ -248,8 +246,7 @@ class TaskInfo(BaseModel):
     description: str | None = Field(None, description="Task description")
     priority: int = Field(1, description="Task priority (1-5)")
     completed: bool = Field(False, description="Whether the task is completed")
-    assigned_to: str | None = Field(
-        None, description="Person assigned to the task")
+    assigned_to: str | None = Field(None, description="Person assigned to the task")
 
 
 # Test fixtures
@@ -352,8 +349,7 @@ def weather_tool():
             "Tokyo": "Cloudy, 70°F",
             "Sydney": "Clear, 80°F",
         }
-        return weather_data.get(
-            location, f"Weather data for {location} not available")
+        return weather_data.get(location, f"Weather data for {location} not available")
 
     return get_weather
 
@@ -454,9 +450,7 @@ def test_auto_detect_schema_from_configs(
                 elif var == "question":
                     input_data[var] = "What is multimodal learning?"
                 elif var == "context":
-                    input_data[var] = [
-                        SystemMessage(
-                            content="Additional context here")]
+                    input_data[var] = [SystemMessage(content="Additional context here")]
                 else:
                     input_data[var] = f"Test value for {var}"
 
@@ -470,8 +464,7 @@ def test_auto_detect_schema_from_configs(
     # Step 2: Auto-detect a state schema from all configs
 
     # Use our utility to auto-detect schema
-    detected_schema = auto_detect_state_schema(
-        all_configs, name="DetectedStateSchema")
+    detected_schema = auto_detect_state_schema(all_configs, name="DetectedStateSchema")
 
     # Print details about the schema
     print_schema_info(detected_schema)
@@ -481,8 +474,7 @@ def test_auto_detect_schema_from_configs(
     # Create an instance
     state = detected_schema(
         messages=[
-            HumanMessage(
-                content="Hello, I need information about machine learning.")
+            HumanMessage(content="Hello, I need information about machine learning.")
         ],
         content=sample_article,
         question="What are the key areas of progress in ML?",

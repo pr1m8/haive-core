@@ -17,8 +17,7 @@ logger = logging.getLogger(__name__)
 class MockStoreManager:
     """Mock store manager for testing."""
 
-    def __init__(self, store_type: str = "memory",
-                 collection_name: str = "test"):
+    def __init__(self, store_type: str = "memory", collection_name: str = "test"):
         self.store_type = store_type
         self.collection_name = collection_name
         self.memories = {}
@@ -143,8 +142,7 @@ class MockMemoryClassifier:
     def __init__(self, config=None):
         self.config = config or {}
 
-    def classify_memory(self, content: str,
-                        user_context: dict[str, Any] | None = None):
+    def classify_memory(self, content: str, user_context: dict[str, Any] | None = None):
         """Mock memory classification."""
         return MockClassificationResult(
             memory_types=["semantic", "episodic"],
@@ -375,8 +373,7 @@ async def test_unified_memory_api():
                 }
             except Exception as e:
                 self.stats["failed_operations"] += 1
-                return {"success": False,
-                        "operation": "store_memory", "error": str(e)}
+                return {"success": False, "operation": "store_memory", "error": str(e)}
 
         async def retrieve_memories(
             self, query: str, limit: int = 10
