@@ -32,7 +32,7 @@ def pydantic_aware_json_dumps(obj):
         def default(self, o):
             if isinstance(o, BaseModel):
                 return o.model_dump()
-            elif isinstance(o, datetime):
+            if isinstance(o, datetime):
                 return o.isoformat()
             return super().default(o)
 
