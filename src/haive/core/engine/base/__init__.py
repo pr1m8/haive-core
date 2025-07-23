@@ -1,5 +1,4 @@
-"""
-Base abstractions for the Haive engine system.
+"""Base abstractions for the Haive engine system.
 
 This package provides the core abstractions and base classes for all engine types
 in the Haive framework. Engines are configurable factory objects that create and
