@@ -9,30 +9,26 @@ Demonstrates all features of the haive logging system including:
 - Real-time monitoring
 """
 
+# Import haive logging components
+import logging
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-# Import haive logging components
 from haive.core.logging import (
     debug_mode,
-    get_logger,
     haive_only,
     logging_control,
     quiet_mode,
 )
 
-# Import auto-config
-from haive.core.logging.auto_config import (
-    auto_configure_logging,
-    configure_for_agent_development,
-    configure_for_game_development,
-)
+# Basic logging setup - replace the auto-config imports
+# These functions don't exist in current haive.core structure
 
 
 def demo_basic_control():
     """Demonstrate basic logging control."""
     # Get a logger
-    logger = get_logger("haive.demo.basic")
+    logger = logging.getLogger("haive.demo.basic")
 
     # Show different log levels
     logger.debug("This is a debug message")
@@ -59,9 +55,9 @@ def demo_basic_control():
 def demo_module_control():
     """Demonstrate module-specific control."""
     # Create loggers for different modules
-    engine_logger = get_logger("haive.core.engine.demo")
-    agent_logger = get_logger("haive.agents.demo")
-    tool_logger = get_logger("haive.tools.demo")
+    engine_logger = logging.getLogger("haive.core.engine.demo")
+    agent_logger = logging.getLogger("haive.agents.demo")
+    tool_logger = logging.getLogger("haive.tools.demo")
 
     # Set different levels
     logging_control.set_module_level("haive.core.engine", "DEBUG")
@@ -87,10 +83,10 @@ def demo_filtering():
     """Demonstrate log filtering."""
     # Create various loggers
     loggers = {
-        "haive.core.engine": get_logger("haive.core.engine.test"),
-        "haive.games.chess": get_logger("haive.games.chess"),
-        "haive.agents.planner": get_logger("haive.agents.planner"),
-        "external.library": get_logger("external.library"),
+        "haive.core.engine": logging.getLogger("haive.core.engine.test"),
+        "haive.games.chess": logging.getLogger("haive.games.chess"),
+        "haive.agents.planner": logging.getLogger("haive.agents.planner"),
+        "external.library": logging.getLogger("external.library"),
     }
 
     logging_control.only_show(["haive.core", "haive.games"])
@@ -109,34 +105,42 @@ def demo_filtering():
 
 def demo_auto_configuration():
     """Demonstrate auto-configuration presets."""
-    # Game development preset
-    configure_for_game_development()
+    # Game development preset - using basic config
+    logging.basicConfig(
+        level=logging.DEBUG, format="%(name)s - %(levelname)s - %(message)s"
+    )
 
-    game_logger = get_logger("haive.games.demo")
-    engine_logger = get_logger("haive.games.engine")
-    agent_logger = get_logger("haive.games.chess.agent")
+    game_logger = logging.getLogger("haive.games.demo")
+    engine_logger = logging.getLogger("haive.games.engine")
+    agent_logger = logging.getLogger("haive.games.chess.agent")
 
     game_logger.debug("Game debug message - visible")
     engine_logger.debug("Engine internals - suppressed")
     agent_logger.info("Agent decision - visible")
 
-    # Agent development preset
-    configure_for_agent_development()
+    # Agent development preset - using basic config
+    logging.basicConfig(
+        level=logging.DEBUG, format="%(name)s - %(levelname)s - %(message)s"
+    )
 
-    agent_logger = get_logger("haive.agents.demo")
-    graph_logger = get_logger("haive.core.graph.dynamic")
+    agent_logger = logging.getLogger("haive.agents.demo")
+    graph_logger = logging.getLogger("haive.core.graph.dynamic")
 
     agent_logger.debug("Agent debug - visible")
     graph_logger.debug("Graph building - suppressed")
 
     # Reset to default
-    auto_configure_logging(preset="default")
+    logging.basicConfig(
+        level=logging.INFO, format="%(name)s - %(levelname)s - %(message)s"
+    )
 
 
 def simulate_application_logs():
     """Simulate a real application generating logs."""
     # Apply default configuration
-    auto_configure_logging(preset="default")
+    logging.basicConfig(
+        level=logging.INFO, format="%(name)s - %(levelname)s - %(message)s"
+    )
 
     # Simulate different components
     components = [
@@ -150,7 +154,7 @@ def simulate_application_logs():
 
     for _ in range(3):
         for module, message in components:
-            logger = get_logger(module)
+            logger = logging.getLogger(module)
             logger.info(f"{message} - {time.time()}")
             time.sleep(0.1)
 
@@ -160,7 +164,7 @@ def demo_concurrent_logging():
 
     def worker(worker_id: int, count: int):
         """Worker function that generates logs."""
-        logger = get_logger(f"haive.worker.{worker_id}")
+        logger = logging.getLogger(f"haive.worker.{worker_id}")
         for i in range(count):
             logger.info(f"Worker {worker_id} - Task {i}")
             time.sleep(0.05)
@@ -176,19 +180,19 @@ def demo_concurrent_logging():
 
 def demo_debug_toggle():
     """Demonstrate the debug toggle functionality."""
-    logger = get_logger("haive.demo.toggle")
+    logger = logging.getLogger("haive.demo.toggle")
 
     logger.debug("Debug - not visible by default")
     logger.info("Info - visible")
 
-    from haive.core.logging.debug_toggle import toggle_debug
-
-    toggle_debug("on")
+    # Toggle debug - using standard logging
+    logging.getLogger().setLevel(logging.DEBUG)
 
     logger.debug("Debug - now visible!")
     logger.info("Info - still visible")
 
-    toggle_debug("off")
+    # Toggle debug off
+    logging.getLogger().setLevel(logging.INFO)
 
     logger.debug("Debug - hidden again")
     logger.info("Info - still visible")

@@ -6,14 +6,17 @@ This shows the easiest ways to configure logging to see sources.
 
 # Method 2: Just see your code (recommended for most cases)
 # Method 1: Quick one-liner to see EVERYTHING
-from haive.core.logging import get_logger
-from haive.core.logging.quick_setup import setup_development_logging
+import logging
+
+# Using standard Python logging with basic configuration
 
 # Uncomment this to see EVERYTHING with sources:
 
 
-# This is usually what you want:
-setup_development_logging()
+# Basic logging setup
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 
 
 # Now let's test it!
@@ -23,7 +26,7 @@ class MyService:
     """Example service class."""
 
     def __init__(self):
-        self.logger = get_logger("myapp.service")
+        self.logger = logging.getLogger("myapp.service")
 
     def do_work(self):
         """Do some work with logging."""
@@ -43,14 +46,14 @@ class MyService:
 
 def standalone_function():
     """Function outside of a class."""
-    logger = get_logger("myapp.functions")
+    logger = logging.getLogger("myapp.functions")
     logger.info("This is from a standalone function")
 
 
 def main():
     """Main function to demonstrate source tracking."""
     # Create a logger
-    logger = get_logger("myapp.main")
+    logger = logging.getLogger("myapp.main")
 
     # Log from main
     logger.info("Starting application")
@@ -64,9 +67,10 @@ def main():
 
     # Show how to check status
 
-    from haive.core.logging.quick_setup import check_status
-
-    check_status()
+    # Show current logging configuration
+    print(f"Root logger level: {logging.root.level}")
+    print(f"Handlers: {len(logging.root.handlers)}")
+    print(f"Active loggers: {len(logging.Logger.manager.loggerDict)}")
 
 
 if __name__ == "__main__":

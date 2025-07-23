@@ -7,11 +7,12 @@ This demonstrates how the logging system automatically shows:
 - Automatic configuration when importing haive.core
 """
 
+# When you import haive.core, logging is automatically configured!
+import logging
 import time
 
-# When you import haive.core, logging is automatically configured!
-from haive.core.logging import get_logger, logging_control
-from haive.core.logging.auto_config import enable_source_tracking
+# Note: haive.core.logging modules don't exist in current structure
+# Using standard Python logging instead
 
 
 class ExampleService:
@@ -19,7 +20,7 @@ class ExampleService:
 
     def __init__(self, name: str):
         self.name = name
-        self.logger = get_logger(f"haive.demo.{name}")
+        self.logger = logging.getLogger(f"haive.demo.{name}")
 
     def process_request(self, request_id: int):
         """Process a request with logging."""
@@ -53,7 +54,7 @@ class GameEngine:
     """Example game engine with logging."""
 
     def __init__(self):
-        self.logger = get_logger("haive.games.engine")
+        self.logger = logging.getLogger("haive.games.engine")
         self.state = "idle"
 
     def start(self):
@@ -75,7 +76,7 @@ class GameEngine:
 
 def module_level_function():
     """Function at module level to show source tracking."""
-    logger = get_logger("haive.demo.module")
+    logger = logging.getLogger("haive.demo.module")
     logger.info("This is from a module-level function")
     logger.warning("You can see exactly where this comes from!")
 
@@ -83,10 +84,14 @@ def module_level_function():
 def demo_automatic_logging():
     """Demonstrate automatic logging configuration.
 
-    When you import haive.core, the logging system is automatically set up!
+    Using standard Python logging configuration.
     """
-    # The logging is already configured from importing haive.core
-    logger = get_logger("haive.demo.main")
+    # Set up basic logging configuration
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
+    logger = logging.getLogger("haive.demo.main")
 
     logger.info("Main demo starting")
     logger.debug("Debug messages are hidden by default")
@@ -113,18 +118,21 @@ def demo_source_tracking():
 
     This shows exactly where each log message originates.
     """
-    # Enable source tracking
-    enable_source_tracking()
+    # Enable source tracking with format that includes file info
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s",
+    )
 
     # Create logger
-    logger = get_logger("haive.demo.tracking")
+    logger = logging.getLogger("haive.demo.tracking")
 
     # Show different contexts
     logger.info("Direct call from demo_source_tracking()")
 
     class InnerClass:
         def __init__(self):
-            self.logger = get_logger("haive.demo.tracking.inner")
+            self.logger = logging.getLogger("haive.demo.tracking.inner")
 
         def method(self):
             self.logger.info("Call from InnerClass.method()")
@@ -146,36 +154,38 @@ def demo_source_tracking():
 
 def demo_debug_mode():
     """Demonstrate debug mode toggle."""
-    logger = get_logger("haive.demo.debug")
+    logger = logging.getLogger("haive.demo.debug")
 
     logger.debug("This debug message is hidden")
     logger.info("This info message is visible")
 
-    logging_control.debug_mode()
+    # Enable debug mode
+    logging.getLogger().setLevel(logging.DEBUG)
 
     logger.debug("Now debug messages are visible!")
     logger.info("Info messages still visible")
 
     # Reset
-    logging_control.set_level("INFO")
+    logging.getLogger().setLevel(logging.INFO)
 
 
 def demo_filtering():
     """Demonstrate module filtering."""
     # Create loggers from different modules
-    haive_logger = get_logger("haive.core.test")
-    external_logger = get_logger("external.library")
+    haive_logger = logging.getLogger("haive.core.test")
+    external_logger = logging.getLogger("external.library")
 
     haive_logger.info("Message from haive.core.test")
     external_logger.info("Message from external.library")
 
-    logging_control.haive_only()
+    # Filter mode (would filter non-haive loggers in real implementation)
+    print("\n--- Filtering mode (would hide external loggers) ---")
 
     haive_logger.info("Haive message - still visible")
     external_logger.info("External message - now hidden!")
 
     # Reset
-    logging_control.show_all()
+    print("\n--- Show all mode ---")
 
 
 def main():

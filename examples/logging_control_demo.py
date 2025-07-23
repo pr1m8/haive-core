@@ -5,39 +5,38 @@ This script demonstrates how to use the unified logging control interface
 to manage logging across all haive packages.
 """
 
+import logging
 import time
 
-from haive.core.logging import (
-    LoggingMixin,
-    debug_mode,
-    get_logger,
-    haive_only,
-    logging_control,
-    only_show_modules,
-    quiet_mode,
-)
+# Note: The haive.core.logging module functions don't exist in current structure
+# This demo will use standard Python logging instead
 
 
-# Example class using LoggingMixin
-class ExampleAgent(LoggingMixin):
+# Example class using standard logging
+class ExampleAgent:
     def __init__(self, name: str):
         self.name = name
-        super().__init__()
+        self.logger = logging.getLogger(f"agent.{name}")
 
     def process(self):
-        self.log_info("Starting processing...")
-        self.log_debug("Debug details that might be hidden")
-        self.log_warning("This is a warning")
-        self.log_error("This is an error (not real)")
+        self.logger.info("Starting processing...")
+        self.logger.debug("Debug details that might be hidden")
+        self.logger.warning("This is a warning")
+        self.logger.error("This is an error (not real)")
 
 
 def main():
+    # Setup basic logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
 
     # Create some loggers
-    core_logger = get_logger("haive.core.example")
-    engine_logger = get_logger("haive.core.engine.test")
-    game_logger = get_logger("haive.games.demo")
-    external_logger = get_logger("langchain.test")
+    core_logger = logging.getLogger("haive.core.example")
+    engine_logger = logging.getLogger("haive.core.engine.test")
+    game_logger = logging.getLogger("haive.games.demo")
+    external_logger = logging.getLogger("langchain.test")
 
     # Create an agent
     agent = ExampleAgent("DemoAgent")
@@ -51,67 +50,80 @@ def main():
     agent.process()
 
     # Demo 2: Debug mode
-    debug_mode()
+    logging.getLogger().setLevel(logging.DEBUG)
     core_logger.debug("Core debug message (now visible)")
     engine_logger.debug("Engine debug message")
     agent.process()
 
-    # Demo 3: Quiet mode
-    quiet_mode()
+    # Demo 3: Quiet mode (warning and above)
+    logging.getLogger().setLevel(logging.WARNING)
     core_logger.info("Core info (hidden)")
     core_logger.warning("Core warning (visible)")
     engine_logger.error("Engine error (visible)")
     agent.process()
 
-    # Demo 4: Haive-only mode
-    haive_only()
+    # Demo 4: Filter mode (normally would filter non-haive)
+    logging.getLogger().setLevel(logging.INFO)
     core_logger.info("Core info (visible)")
-    external_logger.info("External info (hidden)")
-    external_logger.error("External error (also hidden)")
+    external_logger.info("External info (would be hidden with proper filter)")
+    external_logger.error("External error (would be hidden with proper filter)")
 
     # Demo 5: Custom configuration
     # Reset to normal
-    logging_control.quick_setup("normal")
+    logging.getLogger().setLevel(logging.INFO)
 
     # Set specific module to debug
-    logging_control.set_module_level("haive.core.engine", "DEBUG")
+    logging.getLogger("haive.core.engine.test").setLevel(logging.DEBUG)
 
     # Suppress a specific module
-    logging_control.suppress("haive.games")
+    logging.getLogger("haive.games.demo").setLevel(logging.CRITICAL)
 
     core_logger.info("Core info (visible)")
     engine_logger.debug("Engine debug (visible - set to DEBUG)")
     game_logger.error("Game error (hidden - suppressed)")
 
     # Demo 6: Show current status
-    logging_control.status()
+    print(f"Root logger level: {logging.getLogger().level}")
+    print(f"Engine logger level: {logging.getLogger('haive.core.engine.test').level}")
+    print(f"Game logger level: {logging.getLogger('haive.games.demo').level}")
 
-    # Demo 7: Only show specific modules
-    only_show_modules(["haive.core"])
+    # Demo 7: Only show specific modules (would need custom filter)
+    # Reset levels for demo
+    logging.getLogger("haive.games.demo").setLevel(logging.INFO)
     core_logger.info("Core info (visible)")
     engine_logger.info("Engine info (visible - part of core)")
-    game_logger.info("Game info (hidden - not in filter)")
+    game_logger.info("Game info (would be filtered in real implementation)")
 
     # Demo 8: Verbosity levels
-    for v in range(6):
-        logging_control.set_verbosity(v)
+    levels = [
+        logging.CRITICAL,
+        logging.ERROR,
+        logging.WARNING,
+        logging.INFO,
+        logging.DEBUG,
+        logging.NOTSET,
+    ]
+    for i, level in enumerate(levels):
+        print(f"\nVerbosity level {i}:")
+        logging.getLogger().setLevel(level)
         core_logger.debug("  Debug")
         core_logger.info("  Info")
         core_logger.warning("  Warning")
         core_logger.error("  Error")
         core_logger.critical("  Critical")
 
-    # Demo 9: Save and restore configuration
-    logging_control.quick_setup("debug")
-    logging_control.suppress("noisy_module")
-    logging_control.save_config()
+    # Demo 9: Configuration management (basic example)
+    # Set debug level
+    logging.getLogger().setLevel(logging.DEBUG)
+    print("\nConfiguration would be saved in real implementation")
 
-    # Reset and show it loads on next instantiation
+    # Reset for performance demo
+    logging.getLogger().setLevel(logging.INFO)
 
     # Demo 10: Performance logging
-    logging_control.set_level("INFO")
+    logging.getLogger().setLevel(logging.INFO)
 
-    perf_logger = get_logger("haive.performance.demo")
+    perf_logger = logging.getLogger("haive.performance.demo")
 
     # Simulate some operations
     start = time.time()
