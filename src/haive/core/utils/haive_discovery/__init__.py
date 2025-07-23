@@ -1,5 +1,4 @@
-"""
-Haive Component Discovery System
+"""Haive Component Discovery System
 
 A comprehensive tool for discovering, analyzing, and documenting components
 in the Haive AI framework.
