@@ -1,8 +1,7 @@
-"""
-Branch system for dynamic routing based on state values.
-"""
+"""Branch system for dynamic routing based on state values."""
 
-from typing import Any, Callable, Dict, List, Optional, Union
+from collections.abc import Callable
+from typing import Any, Dict, List, Optional, Union
 
 from haive.core.graph.branches.branch import Branch
 from haive.core.graph.branches.dynamic import DynamicMapping
@@ -53,8 +52,8 @@ def key_exists(
 
 
 def from_function(
-    function: Callable[[StateLike], Union[bool, str]],
-    destinations: Optional[Dict[Union[bool, str], str]] = None,
+    function: Callable[[StateLike], bool | str],
+    destinations: dict[bool | str, str] | None = None,
     default: str = "END",
 ) -> Branch:
     """Create a Branch from a function."""
@@ -73,8 +72,8 @@ def chain(*branches: Branch, default: str = "END") -> Branch:
 
 def conditional(
     condition: Callable[[StateLike], bool],
-    if_true: Union[str, Branch],
-    if_false: Union[str, Branch],
+    if_true: str | Branch,
+    if_false: str | Branch,
     default: str = "END",
 ) -> Branch:
     """Create a Branch with conditional evaluation."""
@@ -103,9 +102,9 @@ def message_contains(
 
 
 def send_mapper(
-    function: Optional[Callable[[StateLike], List[Any]]] = None,
-    mappings: Optional[List[SendMapping]] = None,
-    generators: Optional[List[SendGenerator]] = None,
+    function: Callable[[StateLike], list[Any]] | None = None,
+    mappings: list[SendMapping] | None = None,
+    generators: list[SendGenerator] | None = None,
 ) -> Branch:
     """Create a Branch that generates Send objects."""
     function_ref = CallableReference.from_callable(function) if function else None
@@ -119,7 +118,7 @@ def send_mapper(
 
 
 def create_from_send_function(
-    mapper_function: Callable[[StateLike], List[Any]],
+    mapper_function: Callable[[StateLike], list[Any]],
 ) -> Branch:
     """Create a Send mapper branch from a function that returns Send objects."""
     return send_mapper(function=mapper_function)

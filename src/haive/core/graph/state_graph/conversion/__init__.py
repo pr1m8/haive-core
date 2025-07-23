@@ -1,5 +1,4 @@
-"""
-Conversion utilities for Haive graphs.
+"""Conversion utilities for Haive graphs.
 
 This module provides tools to convert between different graph formats.
 """
