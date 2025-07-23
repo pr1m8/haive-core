@@ -989,6 +989,23 @@ class ValidationNodeConfig(NodeConfig, ToolRouteMixin):
                         },
                     )
                     tool_messages_to_add.append(tool_message)
+
+                    # Debug validated tool call (breakpoint removed)
+                    logger.debug("=" * 80)
+                    logger.debug("🔍 VALIDATED TOOL CALL DEBUG")
+                    logger.debug("=" * 80)
+                    logger.debug(f"Tool name: {tool_name}")
+                    logger.debug(f"Tool ID: {tool_id}")
+                    logger.debug(f"Tool args (raw): {tool_args}")
+                    logger.debug(f"Validated data: {validated_data}")
+                    logger.debug(f"Result content: {result_content}")
+                    logger.debug(f"Tool message content: {tool_message.content}")
+                    logger.debug(
+                        f"Tool message content type: {type(tool_message.content)}"
+                    )
+                    logger.debug(f"Destination: {destination}")
+                    logger.debug("=" * 80)
+
                     logger.info(
                         f"  [bold green]✓ Pydantic validation passed, created ToolMessage, routing to {destination}[/bold green]"
                     )
