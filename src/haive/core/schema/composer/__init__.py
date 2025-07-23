@@ -13,6 +13,6 @@ from haive.core.schema.composer.engine.engine_manager import EngineComposerMixin
 from haive.core.schema.composer.schema_composer import SchemaComposer
 
 __all__ = [
-    "SchemaComposer",
     "EngineComposerMixin",
+    "SchemaComposer",
 ]

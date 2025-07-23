@@ -98,11 +98,13 @@ __author__ = "Haive Team"
 __license__ = "MIT"
 
 # Type imports for better IDE support
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type, Union
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
 
 if TYPE_CHECKING:
+    from typing import TypeAlias
+
     from pydantic import BaseModel
-    from typing_extensions import TypeAlias
 
 # Core schema imports
 # Schema composition imports
@@ -159,8 +161,8 @@ except ImportError:
     )
 
 # Type aliases for better API clarity
-SchemaType: "TypeAlias" = Type[StateSchema]
-FieldType: "TypeAlias" = Type[Any]
+SchemaType: "TypeAlias" = type[StateSchema]
+FieldType: "TypeAlias" = type[Any]
 ReducerType: "TypeAlias" = Callable[[Any, Any], Any]
 ValidatorType: "TypeAlias" = Callable[[Any], Any]
 
@@ -239,10 +241,10 @@ def _initialize_schema_module() -> None:
 
 # Convenience factory functions
 def create_simple_state(
-    fields: Dict[str, Any],
+    fields: dict[str, Any],
     name: str = "SimpleState",
-    shared_fields: Optional[List[str]] = None,
-    reducers: Optional[Dict[str, ReducerType]] = None,
+    shared_fields: list[str] | None = None,
+    reducers: dict[str, ReducerType] | None = None,
 ) -> SchemaType:
     """Create a simple state schema with basic configuration.
 
@@ -301,11 +303,11 @@ def create_simple_state(
 
 def create_agent_state(
     agent_name: str,
-    engines: Optional[List[Any]] = None,
-    tools: Optional[List[Any]] = None,
+    engines: list[Any] | None = None,
+    tools: list[Any] | None = None,
     include_messages: bool = True,
     include_tools: bool = True,
-    custom_fields: Optional[Dict[str, Any]] = None,
+    custom_fields: dict[str, Any] | None = None,
 ) -> SchemaType:
     """Create an agent state schema with common patterns.
 
@@ -422,7 +424,7 @@ def validate_schema(schema: SchemaType) -> bool:
     return True
 
 
-def get_schema_info(schema: SchemaType) -> Dict[str, Any]:
+def get_schema_info(schema: SchemaType) -> dict[str, Any]:
     """Get comprehensive information about a schema.
 
     Args:
@@ -453,7 +455,7 @@ def get_schema_info(schema: SchemaType) -> Dict[str, Any]:
     return info
 
 
-def __dir__() -> List[str]:
+def __dir__() -> list[str]:
     """Override dir() to show only public API."""
     return __all__
 

@@ -16,13 +16,6 @@ The messages submodule provides additional functionality:
 
 from haive.core.schema.multi_agent_state_schema import MultiAgentStateSchema
 
-# Import document and query state components
-from haive.core.schema.prebuilt.document_state import (
-    DocumentEngineInputSchema,
-    DocumentEngineOutputSchema,
-    DocumentState,
-)
-
 # from haive.core.schema.prebuilt.basic_agent_state import BasicAgentState
 from haive.core.schema.prebuilt.dynamic_activation_state import DynamicActivationState
 from haive.core.schema.prebuilt.llm_state import LLMState
@@ -52,10 +45,40 @@ from haive.core.schema.prebuilt.query_state import (
 )
 from haive.core.schema.prebuilt.tool_state import ToolState
 
+# Document state components are imported lazily to avoid triggering document system auto-registry
+# from haive.core.schema.prebuilt.document_state import (
+#     DocumentEngineInputSchema,
+#     DocumentEngineOutputSchema,
+#     DocumentState,
+# )
+
+
 # Convenient aliases
 TokenAwareState = MessagesStateWithTokenUsage  # Shorter name
 TokenToolState = ToolState  # Makes it clear it has token tracking
 AgentState = LLMState  # Generic agent state with single engine
+
+# Lazy loading for document components to avoid auto-registry initialization
+_DOCUMENT_COMPONENTS = {
+    "DocumentState",
+    "DocumentEngineInputSchema",
+    "DocumentEngineOutputSchema",
+}
+
+
+def __getattr__(name: str):
+    """Lazy loading for document state components."""
+    if name in _DOCUMENT_COMPONENTS:
+        from haive.core.schema.prebuilt.document_state import (
+            DocumentEngineInputSchema,
+            DocumentEngineOutputSchema,
+            DocumentState,
+        )
+
+        return locals()[name]
+
+    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
+
 
 __all__ = [
     # Core prebuilt schemas
@@ -66,7 +89,7 @@ __all__ = [
     "MultiAgentStateSchema",
     "MultiAgentState",
     "LLMState",
-    # Document and query schemas
+    # Document and query schemas - lazy loaded via __getattr__
     "DocumentState",
     "DocumentEngineInputSchema",
     "DocumentEngineOutputSchema",

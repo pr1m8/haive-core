@@ -62,7 +62,21 @@ from typing import Any
 from langchain_core.documents import Document
 from pydantic import BaseModel, Field, field_validator
 
-from haive.core.schema.prebuilt.document_state import DocumentState
+# Conditionally import DocumentState to avoid auto-registry initialization
+try:
+    # Try to import without triggering the full document system
+    # This is a stub to check if DocumentState is available
+    import sys
+    if 'haive.core.engine.document' in sys.modules:
+        from haive.core.schema.prebuilt.document_state import DocumentState
+        _HAS_DOCUMENT_STATE = True
+    else:
+        DocumentState = None
+        _HAS_DOCUMENT_STATE = False
+except ImportError:
+    DocumentState = None
+    _HAS_DOCUMENT_STATE = False
+
 from haive.core.schema.prebuilt.messages_state import MessagesState
 
 
@@ -170,7 +184,16 @@ class QueryResult(BaseModel):
         arbitrary_types_allowed = True
 
 
-class QueryState(MessagesState, DocumentState):
+# Define QueryState with conditional inheritance based on DocumentState availability
+if _HAS_DOCUMENT_STATE and DocumentState is not None:
+    class QueryState(MessagesState, DocumentState):
+        pass
+else:
+    class QueryState(MessagesState):
+        pass
+
+# Now redefine the actual QueryState class with its full implementation
+class QueryState(QueryState):
     """Comprehensive query state for advanced RAG and document processing.
 
     This state schema combines messages, documents, and query-specific information

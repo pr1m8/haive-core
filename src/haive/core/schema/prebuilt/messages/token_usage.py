@@ -5,7 +5,7 @@ across different LLM providers and models. It supports comprehensive metrics
 including cached tokens, audio tokens, and reasoning tokens.
 """
 
-from typing import Any, Self
+from typing import Self
 
 from langchain_core.messages import AIMessage, BaseMessage
 from pydantic import BaseModel, Field, model_validator

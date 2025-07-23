@@ -97,7 +97,8 @@ class MessagesState(StateSchema):
     # tokenizer: ClassVar = tiktoken.get_encoding("cl100k_base")
 
     @model_validator(mode="before")
-    def validate_message_format(self, data: Any) -> Any:
+    @classmethod
+    def validate_message_format(cls, data: Any) -> Any:
         """Automatically convert message dicts to proper Message objects."""
         if isinstance(data, dict) and "messages" in data:
             data["messages"] = convert_to_messages(data["messages"])
@@ -123,15 +124,15 @@ class MessagesState(StateSchema):
 
     # Basic message handling
     @model_validator(mode="after")
-    def ensure_system_before_human(self, instance: "MessagesState") -> Self:
+    def ensure_system_before_human(self) -> Self:
         """Ensure system messages come before human messages.
         If a human message is followed by a system message, flip their order.
         """
-        if len(instance.messages) < 2:
-            return instance
+        if len(self.messages) < 2:
+            return self
 
         # Look for adjacent human->system pairs and flip them
-        messages = instance.messages
+        messages = self.messages
         i = 0
         while i < len(messages) - 1:
             current_msg = messages[i]
@@ -147,7 +148,7 @@ class MessagesState(StateSchema):
             else:
                 i += 1
 
-        return instance
+        return self
 
     @field_validator("messages", mode="after")
     @classmethod
