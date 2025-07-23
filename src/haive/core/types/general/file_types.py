@@ -4,8 +4,6 @@ This module provides comprehensive file type definitions used throughout
 the Haive framework for file processing, validation, and categorization.
 """
 
-from typing import Set
-
 
 class FileTypes:
     """Comprehensive file type definitions and utilities.
@@ -15,7 +13,7 @@ class FileTypes:
     """
 
     # Document types
-    DOCUMENTS: Set[str] = {
+    DOCUMENTS: set[str] = {
         ".txt",
         ".md",
         ".rst",
@@ -27,7 +25,7 @@ class FileTypes:
     }
 
     # Code file types
-    CODE: Set[str] = {
+    CODE: set[str] = {
         ".py",
         ".js",
         ".ts",
@@ -49,7 +47,7 @@ class FileTypes:
     }
 
     # Configuration files
-    CONFIG: Set[str] = {
+    CONFIG: set[str] = {
         ".json",
         ".yaml",
         ".yml",
@@ -61,10 +59,10 @@ class FileTypes:
     }
 
     # Data files
-    DATA: Set[str] = {".csv", ".tsv", ".xlsx", ".parquet", ".jsonl", ".xml", ".sql"}
+    DATA: set[str] = {".csv", ".tsv", ".xlsx", ".parquet", ".jsonl", ".xml", ".sql"}
 
     # Image files
-    IMAGES: Set[str] = {
+    IMAGES: set[str] = {
         ".jpg",
         ".jpeg",
         ".png",
@@ -76,7 +74,7 @@ class FileTypes:
     }
 
     # Archive files
-    ARCHIVES: Set[str] = {".zip", ".tar", ".gz", ".rar", ".7z", ".bz2", ".xz"}
+    ARCHIVES: set[str] = {".zip", ".tar", ".gz", ".rar", ".7z", ".bz2", ".xz"}
 
     @classmethod
     def get_category(cls, extension: str) -> str:
@@ -92,18 +90,17 @@ class FileTypes:
 
         if extension in cls.DOCUMENTS:
             return "document"
-        elif extension in cls.CODE:
+        if extension in cls.CODE:
             return "code"
-        elif extension in cls.CONFIG:
+        if extension in cls.CONFIG:
             return "config"
-        elif extension in cls.DATA:
+        if extension in cls.DATA:
             return "data"
-        elif extension in cls.IMAGES:
+        if extension in cls.IMAGES:
             return "image"
-        elif extension in cls.ARCHIVES:
+        if extension in cls.ARCHIVES:
             return "archive"
-        else:
-            return "unknown"
+        return "unknown"
 
     @classmethod
     def is_supported(cls, extension: str) -> bool:
@@ -118,7 +115,7 @@ class FileTypes:
         return cls.get_category(extension) != "unknown"
 
     @classmethod
-    def get_all_extensions(cls) -> Set[str]:
+    def get_all_extensions(cls) -> set[str]:
         """Get all supported file extensions.
 
         Returns:

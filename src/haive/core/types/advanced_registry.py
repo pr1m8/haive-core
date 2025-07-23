@@ -184,9 +184,9 @@ AdvancedRegistry = Registered
 # Export for external use
 __all__ = [
     "AdvancedRegistry",
-    "Registered", 
-    "ComponentSpec",
     "Buildable",
+    "ComponentSpec",
+    "Registered",
     "TypeKey",
 ]
 

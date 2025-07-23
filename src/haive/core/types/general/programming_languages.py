@@ -5,7 +5,6 @@ the Haive framework for code analysis, syntax highlighting, and processing.
 """
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Set
 
 
 @dataclass
@@ -13,9 +12,9 @@ class LanguageInfo:
     """Information about a programming language."""
 
     name: str
-    extensions: Set[str]
+    extensions: set[str]
     type: str  # "compiled", "interpreted", "markup", etc.
-    description: Optional[str] = None
+    description: str | None = None
 
 
 class ProgrammingLanguages:
@@ -25,7 +24,7 @@ class ProgrammingLanguages:
     file extensions, language types, and metadata for code analysis.
     """
 
-    _LANGUAGES: Dict[str, LanguageInfo] = {
+    _LANGUAGES: dict[str, LanguageInfo] = {
         "python": LanguageInfo(
             name="Python",
             extensions={".py", ".pyw", ".pyi"},
@@ -89,7 +88,7 @@ class ProgrammingLanguages:
     }
 
     @classmethod
-    def get_by_name(cls, name: str) -> Optional[LanguageInfo]:
+    def get_by_name(cls, name: str) -> LanguageInfo | None:
         """Get language info by language name.
 
         Args:
@@ -101,7 +100,7 @@ class ProgrammingLanguages:
         return cls._LANGUAGES.get(name.lower())
 
     @classmethod
-    def get_by_extension(cls, extension: str) -> Optional[LanguageInfo]:
+    def get_by_extension(cls, extension: str) -> LanguageInfo | None:
         """Get language info by file extension.
 
         Args:
@@ -117,7 +116,7 @@ class ProgrammingLanguages:
         return None
 
     @classmethod
-    def get_all_languages(cls) -> List[LanguageInfo]:
+    def get_all_languages(cls) -> list[LanguageInfo]:
         """Get all supported programming languages.
 
         Returns:
@@ -126,7 +125,7 @@ class ProgrammingLanguages:
         return list(cls._LANGUAGES.values())
 
     @classmethod
-    def get_all_extensions(cls) -> Set[str]:
+    def get_all_extensions(cls) -> set[str]:
         """Get all supported file extensions.
 
         Returns:
