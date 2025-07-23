@@ -15,10 +15,10 @@ from .source_base import (
 
 __all__ = [
     "BaseSource",
+    "CloudSource",
+    "DatabaseSource",
     "LocalSource",
     "RemoteSource",
-    "DatabaseSource",
-    "CloudSource",
-    "source_registry",
     "register_source",
+    "source_registry",
 ]
