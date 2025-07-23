@@ -47,11 +47,20 @@ Examples:
 
 """
 
-# Import providers to trigger registration
-from . import providers
+# Lazy loading - providers imported on first use to avoid startup overhead
 from .base import BaseEmbeddingConfig
 from .config import EmbeddingConfigFactory, create_embedding_config
 from .types import EmbeddingType
+
+
+def __getattr__(name: str):
+    """Lazy load providers to avoid import-time registration overhead."""
+    if name == "providers":
+        from . import providers
+
+        return providers
+    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
+
 
 __all__ = [
     "BaseEmbeddingConfig",

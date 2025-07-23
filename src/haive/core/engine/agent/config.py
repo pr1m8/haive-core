@@ -534,15 +534,20 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
                             getattr(c, "engine_type", None) == EngineType.RETRIEVER
                             for c in [self.engine, *list(self.engines.values())]
                         ):
-                            from haive.core.engine.retriever import (
-                                VectorStoreRetrieverConfig,
-                            )
-
-                            components.append(
-                                VectorStoreRetrieverConfig(
-                                    name="pattern_required_retriever"
+                            # Lazy import to avoid registration during initialization
+                            try:
+                                from haive.core.engine.retriever import (
+                                    VectorStoreRetrieverConfig,
                                 )
-                            )
+                                components.append(
+                                    VectorStoreRetrieverConfig(
+                                        name="pattern_required_retriever"
+                                    )
+                                )
+                            except ImportError:
+                                # Retriever module not available, skip
+                                logger.debug("Retriever module not available for pattern components")
+                                pass
         except ImportError:
             # Pattern system not available
             logger.debug("Pattern system not available for schema component extraction")

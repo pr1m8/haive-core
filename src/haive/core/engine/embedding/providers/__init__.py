@@ -38,14 +38,31 @@ Examples:
 
 """
 
-# Import all provider configurations
-from .AzureOpenAIEmbeddingConfig import AzureOpenAIEmbeddingConfig
-from .CohereEmbeddingConfig import CohereEmbeddingConfig
-from .FakeEmbeddingConfig import FakeEmbeddingConfig
-from .GoogleVertexAIEmbeddingConfig import GoogleVertexAIEmbeddingConfig
-from .HuggingFaceEmbeddingConfig import HuggingFaceEmbeddingConfig
-from .OllamaEmbeddingConfig import OllamaEmbeddingConfig
-from .OpenAIEmbeddingConfig import OpenAIEmbeddingConfig
+# Lazy import all provider configurations to avoid registration overhead
+_PROVIDER_CLASSES = {
+    "AzureOpenAIEmbeddingConfig": "AzureOpenAIEmbeddingConfig",
+    "CohereEmbeddingConfig": "CohereEmbeddingConfig",
+    "FakeEmbeddingConfig": "FakeEmbeddingConfig",
+    "GoogleVertexAIEmbeddingConfig": "GoogleVertexAIEmbeddingConfig",
+    "HuggingFaceEmbeddingConfig": "HuggingFaceEmbeddingConfig",
+    "OllamaEmbeddingConfig": "OllamaEmbeddingConfig",
+    "OpenAIEmbeddingConfig": "OpenAIEmbeddingConfig",
+}
+
+
+def __getattr__(name: str):
+    """Lazy load provider configurations to avoid import-time registration."""
+    if name in _PROVIDER_CLASSES:
+        module_name = _PROVIDER_CLASSES[name]
+        module = __import__(
+            f"haive.core.engine.embedding.providers.{module_name}", fromlist=[name]
+        )
+        config_class = getattr(module, name)
+        # Cache the class in globals for subsequent access
+        globals()[name] = config_class
+        return config_class
+    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
+
 
 # Export all configurations
 __all__ = [
@@ -58,61 +75,67 @@ __all__ = [
     "OpenAIEmbeddingConfig",
 ]
 
-# Provider information for discovery
-PROVIDER_INFO = {
-    "OpenAI": {
-        "class": OpenAIEmbeddingConfig,
-        "description": "OpenAI embedding models",
-        "requires": ["langchain-openai"],
-        "auth_required": True,
-        "popular_models": ["text-embedding-3-large", "text-embedding-3-small"],
-    },
-    "AzureOpenAI": {
-        "class": AzureOpenAIEmbeddingConfig,
-        "description": "Azure OpenAI embedding models",
-        "requires": ["langchain-openai"],
-        "auth_required": True,
-        "popular_models": ["text-embedding-3-large", "text-embedding-3-small"],
-    },
-    "HuggingFace": {
-        "class": HuggingFaceEmbeddingConfig,
-        "description": "HuggingFace Hub and local transformer models",
-        "requires": ["langchain-huggingface", "sentence-transformers"],
-        "auth_required": False,
-        "popular_models": [
-            "sentence-transformers/all-MiniLM-L6-v2",
-            "BAAI/bge-large-en-v1.5",
-        ],
-    },
-    "Cohere": {
-        "class": CohereEmbeddingConfig,
-        "description": "Cohere embedding models",
-        "requires": ["langchain-cohere"],
-        "auth_required": True,
-        "popular_models": ["embed-english-v3.0", "embed-multilingual-v3.0"],
-    },
-    "GoogleVertexAI": {
-        "class": GoogleVertexAIEmbeddingConfig,
-        "description": "Google Vertex AI embedding models",
-        "requires": ["langchain-google-vertexai"],
-        "auth_required": True,
-        "popular_models": ["text-embedding-004", "text-multilingual-embedding-002"],
-    },
-    "Ollama": {
-        "class": OllamaEmbeddingConfig,
-        "description": "Locally hosted Ollama embedding models",
-        "requires": ["langchain-ollama"],
-        "auth_required": False,
-        "popular_models": ["nomic-embed-text", "mxbai-embed-large"],
-    },
-    "Fake": {
-        "class": FakeEmbeddingConfig,
-        "description": "Fake embeddings for testing",
-        "requires": ["langchain-community"],
-        "auth_required": False,
-        "popular_models": ["fake-model"],
-    },
-}
+
+# Provider information for discovery - lazy class loading
+def _get_provider_info():
+    """Generate provider info with lazy class loading."""
+    return {
+        "OpenAI": {
+            "class_name": "OpenAIEmbeddingConfig",
+            "description": "OpenAI embedding models",
+            "requires": ["langchain-openai"],
+            "auth_required": True,
+            "popular_models": ["text-embedding-3-large", "text-embedding-3-small"],
+        },
+        "AzureOpenAI": {
+            "class_name": "AzureOpenAIEmbeddingConfig",
+            "description": "Azure OpenAI embedding models",
+            "requires": ["langchain-openai"],
+            "auth_required": True,
+            "popular_models": ["text-embedding-3-large", "text-embedding-3-small"],
+        },
+        "HuggingFace": {
+            "class_name": "HuggingFaceEmbeddingConfig",
+            "description": "HuggingFace Hub and local transformer models",
+            "requires": ["langchain-huggingface", "sentence-transformers"],
+            "auth_required": False,
+            "popular_models": [
+                "sentence-transformers/all-MiniLM-L6-v2",
+                "BAAI/bge-large-en-v1.5",
+            ],
+        },
+        "Cohere": {
+            "class_name": "CohereEmbeddingConfig",
+            "description": "Cohere embedding models",
+            "requires": ["langchain-cohere"],
+            "auth_required": True,
+            "popular_models": ["embed-english-v3.0", "embed-multilingual-v3.0"],
+        },
+        "GoogleVertexAI": {
+            "class_name": "GoogleVertexAIEmbeddingConfig",
+            "description": "Google Vertex AI embedding models",
+            "requires": ["langchain-google-vertexai"],
+            "auth_required": True,
+            "popular_models": ["text-embedding-004", "text-multilingual-embedding-002"],
+        },
+        "Ollama": {
+            "class_name": "OllamaEmbeddingConfig",
+            "description": "Locally hosted Ollama embedding models",
+            "requires": ["langchain-ollama"],
+            "auth_required": False,
+            "popular_models": ["nomic-embed-text", "mxbai-embed-large"],
+        },
+        "Fake": {
+            "class_name": "FakeEmbeddingConfig",
+            "description": "Fake embeddings for testing",
+            "requires": ["langchain-community"],
+            "auth_required": False,
+            "popular_models": ["fake-model"],
+        },
+    }
+
+
+PROVIDER_INFO = _get_provider_info()
 
 
 def get_provider_info(provider_name: str | None = None) -> dict:

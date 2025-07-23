@@ -60,10 +60,9 @@ Examples:
 
 # Agent imports are lazy-loaded to avoid expensive schema_composer initialization (17+ seconds)
 # from haive.core.engine.agent import (...)
-from haive.core.engine.aug_llm import (
+from haive.core.engine.aug_llm import (  # Temporarily commented out to fix circular import; MCPAugLLMConfig,
     AugLLMConfig,
     AugLLMFactory,
-    MCPAugLLMConfig,
     compose_runnable,
     merge_configs,
 )
@@ -322,7 +321,8 @@ __all__ = [
     # LLM Components
     "AugLLMConfig",
     "AugLLMFactory",
-    "MCPAugLLMConfig",
+    # Temporarily commented out to fix circular import
+    # "MCPAugLLMConfig",
     "compose_runnable",
     "merge_configs",
     # Base Engine Classes
