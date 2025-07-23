@@ -11,6 +11,7 @@ TODO: Need to clean up patterns and registry system.
 
 import json
 import logging
+import os
 import uuid
 from typing import (
     TYPE_CHECKING,
@@ -216,9 +217,15 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
     # =============================================
     persistence: CheckpointerConfig | None = Field(
         default_factory=lambda: (
-            PostgresCheckpointerConfig()
-            if POSTGRES_AVAILABLE
-            else MemoryCheckpointerConfig()
+            PostgresCheckpointerConfig(
+                connection_string=os.getenv("POSTGRES_CONNECTION_STRING")
+            )
+            if POSTGRES_AVAILABLE and os.getenv("POSTGRES_CONNECTION_STRING")
+            else (
+                PostgresCheckpointerConfig()
+                if POSTGRES_AVAILABLE
+                else MemoryCheckpointerConfig()
+            )
         ),
         description="Persistence configuration for state checkpointing",
     )
@@ -539,6 +546,7 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
                                 from haive.core.engine.retriever import (
                                     VectorStoreRetrieverConfig,
                                 )
+
                                 components.append(
                                     VectorStoreRetrieverConfig(
                                         name="pattern_required_retriever"
@@ -546,7 +554,9 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
                                 )
                             except ImportError:
                                 # Retriever module not available, skip
-                                logger.debug("Retriever module not available for pattern components")
+                                logger.debug(
+                                    "Retriever module not available for pattern components"
+                                )
                                 pass
         except ImportError:
             # Pattern system not available
