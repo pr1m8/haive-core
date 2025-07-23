@@ -1,5 +1,4 @@
-"""
-PGVector Vector Store implementation for the Haive framework.
+"""PGVector Vector Store implementation for the Haive framework.
 
 This module provides a configuration class for the PGVector vector store,
 which adds vector similarity search capabilities to PostgreSQL databases.
@@ -23,7 +22,7 @@ The implementation integrates with LangChain's PGVector while providing
 a consistent Haive configuration interface.
 """
 
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any
 
 from langchain_core.documents import Document
 from pydantic import Field, field_validator
@@ -34,8 +33,7 @@ from haive.core.engine.vectorstore.types import VectorStoreType
 
 @BaseVectorStoreConfig.register(VectorStoreType.PGVECTOR)
 class PGVectorStoreConfig(BaseVectorStoreConfig):
-    """
-    Configuration for PGVector vector store in the Haive framework.
+    """Configuration for PGVector vector store in the Haive framework.
 
     This vector store uses PostgreSQL with the pgvector extension for
     SQL-compatible vector similarity search operations.
@@ -104,7 +102,7 @@ class PGVectorStoreConfig(BaseVectorStoreConfig):
     )
 
     # Advanced configuration
-    vector_dimension: Optional[int] = Field(
+    vector_dimension: int | None = Field(
         default=None, description="Vector dimension (auto-detected if not specified)"
     )
 
@@ -140,24 +138,23 @@ class PGVectorStoreConfig(BaseVectorStoreConfig):
             )
         return v
 
-    def get_input_fields(self) -> Dict[str, Tuple[Type, Any]]:
+    def get_input_fields(self) -> dict[str, tuple[type, Any]]:
         """Return input field definitions for PGVector vector store."""
         return {
             "documents": (
-                List[Document],
+                list[Document],
                 Field(description="Documents to add to the vector store"),
             ),
         }
 
-    def get_output_fields(self) -> Dict[str, Tuple[Type, Any]]:
+    def get_output_fields(self) -> dict[str, tuple[type, Any]]:
         """Return output field definitions for PGVector vector store."""
         return {
-            "ids": (List[str], Field(description="UUIDs of the added documents")),
+            "ids": (list[str], Field(description="UUIDs of the added documents")),
         }
 
     def instantiate(self):
-        """
-        Create a PGVector vector store from this configuration.
+        """Create a PGVector vector store from this configuration.
 
         Returns:
             PGVector: Instantiated PGVector vector store.

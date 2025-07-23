@@ -1,5 +1,4 @@
-"""
-Vector store provider implementations for the Haive framework.
+"""Vector store provider implementations for the Haive framework.
 
 This package contains implementations of vector store providers that extend
 the base vector store configuration. Each provider configuration class

@@ -1,5 +1,4 @@
-"""
-Vector store module for the Haive framework.
+"""Vector store module for the Haive framework.
 
 This module provides a comprehensive interface for working with vector databases
 in the Haive framework. It includes configuration models, utility functions, and

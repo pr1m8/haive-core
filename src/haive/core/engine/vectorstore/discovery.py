@@ -27,7 +27,6 @@ Examples:
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List, Optional
 
 
 class VectorStoreType(str, Enum):
@@ -68,16 +67,16 @@ class VectorStoreInfo:
     supports_real_time_updates: bool = True
 
     # Technical specs
-    max_dimensions: Optional[int] = None
-    index_types: List[str] = None
-    distance_metrics: List[str] = None
+    max_dimensions: int | None = None
+    index_types: list[str] = None
+    distance_metrics: list[str] = None
 
     # Requirements
-    python_packages: List[str] = None
-    external_dependencies: List[str] = None
+    python_packages: list[str] = None
+    external_dependencies: list[str] = None
 
     # Usage info
-    popular_use_cases: List[str] = None
+    popular_use_cases: list[str] = None
     best_for: str = ""
 
     def __post_init__(self):
@@ -94,7 +93,7 @@ class VectorStoreInfo:
             self.popular_use_cases = ["semantic_search", "rag", "similarity_matching"]
 
 
-def get_vectorstore_providers() -> Dict[str, VectorStoreInfo]:
+def get_vectorstore_providers() -> dict[str, VectorStoreInfo]:
     """Get comprehensive information about all vector store providers.
 
     Returns:
@@ -290,13 +289,13 @@ def get_vectorstore_providers() -> Dict[str, VectorStoreInfo]:
 
 
 def filter_vectorstores(
-    type_filter: Optional[VectorStoreType] = None,
-    cost_filter: Optional[CostTier] = None,
-    auth_required: Optional[bool] = None,
-    supports_metadata: Optional[bool] = None,
-    supports_hybrid: Optional[bool] = None,
-    setup_complexity: Optional[str] = None,
-) -> Dict[str, VectorStoreInfo]:
+    type_filter: VectorStoreType | None = None,
+    cost_filter: CostTier | None = None,
+    auth_required: bool | None = None,
+    supports_metadata: bool | None = None,
+    supports_hybrid: bool | None = None,
+    setup_complexity: str | None = None,
+) -> dict[str, VectorStoreInfo]:
     """Filter vector stores by criteria.
 
     Args:
@@ -351,7 +350,7 @@ def filter_vectorstores(
     return filtered
 
 
-def recommend_vectorstore(use_case: str) -> List[str]:
+def recommend_vectorstore(use_case: str) -> list[str]:
     """Get vector store recommendations for specific use cases.
 
     Args:
@@ -375,30 +374,29 @@ def recommend_vectorstore(use_case: str) -> List[str]:
     if use_case == "development":
         return ["Chroma", "InMemory", "FAISS"]
 
-    elif use_case == "production":
+    if use_case == "production":
         return ["Pinecone", "Qdrant", "Weaviate", "Chroma"]
 
-    elif use_case == "research":
+    if use_case == "research":
         return ["FAISS", "Annoy", "Chroma", "Qdrant"]
 
-    elif use_case == "enterprise":
+    if use_case == "enterprise":
         return ["PGVector", "Elasticsearch", "Weaviate", "Qdrant"]
 
-    elif use_case == "free_only":
+    if use_case == "free_only":
         free_stores = filter_vectorstores(cost_filter=CostTier.FREE)
         return list(free_stores.keys())
 
-    elif use_case == "local_only":
+    if use_case == "local_only":
         local_stores = filter_vectorstores(type_filter=VectorStoreType.LOCAL)
         return list(local_stores.keys())
 
-    elif use_case == "no_auth":
+    if use_case == "no_auth":
         no_auth_stores = filter_vectorstores(auth_required=False)
         return list(no_auth_stores.keys())
 
-    else:
-        # Default general recommendations
-        return ["Chroma", "Pinecone", "FAISS", "Qdrant"]
+    # Default general recommendations
+    return ["Chroma", "Pinecone", "FAISS", "Qdrant"]
 
 
 def get_setup_instructions(provider_name: str) -> str:
@@ -448,7 +446,7 @@ def get_setup_instructions(provider_name: str) -> str:
     return instructions
 
 
-def compare_vectorstores(provider_names: List[str]) -> str:
+def compare_vectorstores(provider_names: list[str]) -> str:
     """Compare multiple vector store providers.
 
     Args:

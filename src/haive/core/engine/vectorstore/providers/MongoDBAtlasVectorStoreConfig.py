@@ -1,5 +1,4 @@
-"""
-MongoDB Atlas Vector Store implementation for the Haive framework.
+"""MongoDB Atlas Vector Store implementation for the Haive framework.
 
 This module provides a configuration class for the MongoDB Atlas vector store,
 which combines document database capabilities with vector search functionality.
@@ -23,7 +22,7 @@ The implementation integrates with LangChain's MongoDB Atlas while providing
 a consistent Haive configuration interface.
 """
 
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any
 
 from langchain_core.documents import Document
 from pydantic import Field, field_validator
@@ -34,8 +33,7 @@ from haive.core.engine.vectorstore.types import VectorStoreType
 
 @BaseVectorStoreConfig.register(VectorStoreType.MONGODB_ATLAS)
 class MongoDBAtlasVectorStoreConfig(BaseVectorStoreConfig):
-    """
-    Configuration for MongoDB Atlas vector store in the Haive framework.
+    """Configuration for MongoDB Atlas vector store in the Haive framework.
 
     This vector store uses MongoDB Atlas Vector Search for combining
     document database capabilities with vector similarity search.
@@ -115,7 +113,7 @@ class MongoDBAtlasVectorStoreConfig(BaseVectorStoreConfig):
     )
 
     # Index configuration for creation
-    index_config: Optional[Dict[str, Any]] = Field(
+    index_config: dict[str, Any] | None = Field(
         default=None, description="Custom index configuration for Atlas Search"
     )
 
@@ -140,27 +138,26 @@ class MongoDBAtlasVectorStoreConfig(BaseVectorStoreConfig):
             )
         return v
 
-    def get_input_fields(self) -> Dict[str, Tuple[Type, Any]]:
+    def get_input_fields(self) -> dict[str, tuple[type, Any]]:
         """Return input field definitions for MongoDB Atlas vector store."""
         return {
             "documents": (
-                List[Document],
+                list[Document],
                 Field(description="Documents to add to the vector store"),
             ),
         }
 
-    def get_output_fields(self) -> Dict[str, Tuple[Type, Any]]:
+    def get_output_fields(self) -> dict[str, tuple[type, Any]]:
         """Return output field definitions for MongoDB Atlas vector store."""
         return {
             "ids": (
-                List[str],
+                list[str],
                 Field(description="MongoDB ObjectIds of the added documents"),
             ),
         }
 
     def instantiate(self):
-        """
-        Create a MongoDB Atlas vector store from this configuration.
+        """Create a MongoDB Atlas vector store from this configuration.
 
         Returns:
             MongoDBAtlasVectorSearch: Instantiated MongoDB Atlas vector store.

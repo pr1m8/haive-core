@@ -1,5 +1,4 @@
-"""
-Vectara Vector Store implementation for the Haive framework.
+"""Vectara Vector Store implementation for the Haive framework.
 
 This module provides a configuration class for the Vectara vector store,
 which is a managed vector search platform with advanced NLP capabilities.
@@ -25,7 +24,7 @@ The implementation integrates with LangChain's Vectara while providing
 a consistent Haive configuration interface.
 """
 
-from typing import Any, Dict, List, Tuple, Type
+from typing import Any
 
 from langchain_core.documents import Document
 from pydantic import Field, field_validator
@@ -37,8 +36,7 @@ from haive.core.engine.vectorstore.types import VectorStoreType
 
 @BaseVectorStoreConfig.register(VectorStoreType.VECTARA)
 class VectaraVectorStoreConfig(BaseVectorStoreConfig, SecureConfigMixin):
-    """
-    Configuration for Vectara vector store in the Haive framework.
+    """Configuration for Vectara vector store in the Haive framework.
 
     This vector store uses Vectara's managed platform for advanced semantic search
     with built-in NLP capabilities and document processing.
@@ -157,33 +155,30 @@ class VectaraVectorStoreConfig(BaseVectorStoreConfig, SecureConfigMixin):
 
     @classmethod
     def validate_embedding(self):
-        """
-        Override to make embedding optional for Vectara.
+        """Override to make embedding optional for Vectara.
 
         Vectara manages its own embeddings internally, so we don't require
         an embedding configuration.
         """
         # Vectara doesn't need external embeddings
-        pass
 
-    def get_input_fields(self) -> Dict[str, Tuple[Type, Any]]:
+    def get_input_fields(self) -> dict[str, tuple[type, Any]]:
         """Return input field definitions for Vectara vector store."""
         return {
             "documents": (
-                List[Document],
+                list[Document],
                 Field(description="Documents to add to Vectara"),
             ),
         }
 
-    def get_output_fields(self) -> Dict[str, Tuple[Type, Any]]:
+    def get_output_fields(self) -> dict[str, tuple[type, Any]]:
         """Return output field definitions for Vectara vector store."""
         return {
-            "ids": (List[str], Field(description="Document IDs in Vectara")),
+            "ids": (list[str], Field(description="Document IDs in Vectara")),
         }
 
     def instantiate(self):
-        """
-        Create a Vectara vector store from this configuration.
+        """Create a Vectara vector store from this configuration.
 
         Returns:
             Vectara: Instantiated Vectara vector store.

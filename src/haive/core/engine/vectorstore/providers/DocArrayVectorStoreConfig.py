@@ -1,5 +1,4 @@
-"""
-DocArray Vector Store implementation for the Haive framework.
+"""DocArray Vector Store implementation for the Haive framework.
 
 This module provides a configuration class for the DocArray vector store,
 which offers multiple storage backends for document-oriented vector operations.
@@ -23,7 +22,7 @@ The implementation integrates with LangChain's DocArray while providing
 a consistent Haive configuration interface.
 """
 
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any
 
 from langchain_core.documents import Document
 from pydantic import Field, field_validator
@@ -34,8 +33,7 @@ from haive.core.engine.vectorstore.types import VectorStoreType
 
 @BaseVectorStoreConfig.register(VectorStoreType.DOCARRAY)
 class DocArrayVectorStoreConfig(BaseVectorStoreConfig):
-    """
-    Configuration for DocArray vector store in the Haive framework.
+    """Configuration for DocArray vector store in the Haive framework.
 
     This vector store uses DocArray for document-oriented vector operations
     with multiple storage backend options.
@@ -88,12 +86,12 @@ class DocArrayVectorStoreConfig(BaseVectorStoreConfig):
     )
 
     # HNSW-specific configuration
-    work_dir: Optional[str] = Field(
+    work_dir: str | None = Field(
         default=None,
         description="Working directory for HNSW backend (required for HNSW)",
     )
 
-    n_dim: Optional[int] = Field(
+    n_dim: int | None = Field(
         default=None, description="Vector dimension (auto-detected if not specified)"
     )
 
@@ -171,27 +169,26 @@ class DocArrayVectorStoreConfig(BaseVectorStoreConfig):
             raise ValueError("work_dir is required for HNSW backend")
         return v
 
-    def get_input_fields(self) -> Dict[str, Tuple[Type, Any]]:
+    def get_input_fields(self) -> dict[str, tuple[type, Any]]:
         """Return input field definitions for DocArray vector store."""
         return {
             "documents": (
-                List[Document],
+                list[Document],
                 Field(description="Documents to add to the vector store"),
             ),
         }
 
-    def get_output_fields(self) -> Dict[str, Tuple[Type, Any]]:
+    def get_output_fields(self) -> dict[str, tuple[type, Any]]:
         """Return output field definitions for DocArray vector store."""
         return {
             "ids": (
-                List[str],
+                list[str],
                 Field(description="IDs of the added documents in DocArray"),
             ),
         }
 
     def instantiate(self):
-        """
-        Create a DocArray vector store from this configuration.
+        """Create a DocArray vector store from this configuration.
 
         Returns:
             DocArrayIndex: Instantiated DocArray vector store.
