@@ -1,5 +1,4 @@
-"""
-Retriever module for the Haive framework.
+"""Retriever module for the Haive framework.
 
 This module provides a comprehensive interface for document retrieval in the Haive
 framework. It includes configuration classes, type definitions, and utilities for
@@ -37,18 +36,28 @@ Examples:
     >>> documents = retriever.get_relevant_documents("What is machine learning?")
 """
 
+# Lazy loading to avoid import-time registration
 from haive.core.engine.retriever.retriever import (
     BaseRetrieverConfig,
-    VectorStoreRetrieverConfig,
     create_retriever_config,
     create_retriever_from_vectorstore,
 )
 from haive.core.engine.retriever.types import RetrieverType
 
+
+def __getattr__(name: str):
+    """Lazy load VectorStoreRetrieverConfig to avoid registration overhead."""
+    if name == "VectorStoreRetrieverConfig":
+        from haive.core.engine.retriever.retriever import VectorStoreRetrieverConfig
+
+        return VectorStoreRetrieverConfig
+    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
+
+
 __all__ = [
     "BaseRetrieverConfig",
-    "VectorStoreRetrieverConfig",
     "RetrieverType",
+    "VectorStoreRetrieverConfig",
     "create_retriever_config",
     "create_retriever_from_vectorstore",
 ]
