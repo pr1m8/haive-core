@@ -10,10 +10,11 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from core.persistence.store.base import SerializableStoreWrapper
-from core.persistence.store.factory import create_store
-from core.persistence.store.types import StoreType
 from pydantic import BaseModel, Field
+
+from haive.core.persistence.store.base import SerializableStoreWrapper
+from haive.core.persistence.store.factory import create_store
+from haive.core.persistence.store.types import StoreType
 
 logger = logging.getLogger(__name__)
 

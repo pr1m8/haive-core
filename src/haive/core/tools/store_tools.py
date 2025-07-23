@@ -11,7 +11,7 @@ from typing import Any
 from langchain_core.tools import Tool, tool
 from pydantic import BaseModel, Field
 
-from .store_manager import StoreManager
+from haive.core.tools.store_manager import StoreManager
 
 logger = logging.getLogger(__name__)
 

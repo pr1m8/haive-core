@@ -3,10 +3,11 @@
 
 import logging
 
-from core.persistence.store.base import SerializableStoreWrapper
-from core.persistence.store.embeddings import EmbeddingAdapter
 from langgraph.store.base import BaseStore
 from langgraph.store.memory import InMemoryStore
+
+from haive.core.persistence.store.base import SerializableStoreWrapper
+from haive.core.persistence.store.embeddings import EmbeddingAdapter
 
 logger = logging.getLogger(__name__)
 

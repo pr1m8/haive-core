@@ -3,13 +3,14 @@
 
 import logging
 
-from core.persistence.store.base import SerializableStoreWrapper
-from core.persistence.store.connection import ConnectionManager
-from core.persistence.store.embeddings import EmbeddingAdapter
-from core.persistence.store.types import StoreType
 from langgraph.store.base import BaseStore
 from langgraph.store.postgres import PostgresStore
 from langgraph.store.postgres.aio import AsyncPostgresStore
+
+from haive.core.persistence.store.base import SerializableStoreWrapper
+from haive.core.persistence.store.connection import ConnectionManager
+from haive.core.persistence.store.embeddings import EmbeddingAdapter
+from haive.core.persistence.store.types import StoreType
 
 logger = logging.getLogger(__name__)
 
