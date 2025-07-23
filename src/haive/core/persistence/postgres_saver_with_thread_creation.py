@@ -68,7 +68,7 @@ class PostgresSaverWithThreadCreation(PostgresSaver):
                         """
                         INSERT INTO threads (id, user_id, created_at, updated_at, last_access)
                         VALUES (%s, %s, NOW(), NOW(), NOW())
-                        ON CONFLICT (id) DO NOTHING
+                        ON CONFLICT (id, user_id) DO NOTHING
                         """,
                         (thread_id, user_id),
                     )
@@ -80,7 +80,7 @@ class PostgresSaverWithThreadCreation(PostgresSaver):
                         """
                         INSERT INTO threads (id, user_id, created_at, updated_at, last_access)
                         VALUES (%s, %s, NOW(), NOW(), NOW())
-                        ON CONFLICT (id) DO NOTHING
+                        ON CONFLICT (id, user_id) DO NOTHING
                         """,
                         (thread_id, user_id),
                     )
@@ -204,7 +204,7 @@ class AsyncPostgresSaverWithThreadCreation:
                         """
                         INSERT INTO threads (id, user_id, created_at, updated_at, last_access)
                         VALUES (%s, %s, NOW(), NOW(), NOW())
-                        ON CONFLICT (id) DO NOTHING
+                        ON CONFLICT (id, user_id) DO NOTHING
                         """,
                         (thread_id, user_id),
                     )
@@ -216,7 +216,7 @@ class AsyncPostgresSaverWithThreadCreation:
                         """
                         INSERT INTO threads (id, user_id, created_at, updated_at, last_access)
                         VALUES (%s, %s, NOW(), NOW(), NOW())
-                        ON CONFLICT (id) DO NOTHING
+                        ON CONFLICT (id, user_id) DO NOTHING
                         """,
                         (thread_id, user_id),
                     )
