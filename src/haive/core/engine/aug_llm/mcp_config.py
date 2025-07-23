@@ -8,7 +8,7 @@ The configuration automatically discovers MCP tools, manages resources, and enha
 prompts while maintaining compatibility with all existing AugLLMConfig features.
 """
 
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Optional, Self
 
 from pydantic import Field, model_validator
 
@@ -97,10 +97,7 @@ class MCPAugLLMConfig(MCPMixin, AugLLMConfig):
     )
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def _validate_mcp_integration(cls) -> "MCPAugLLMConfig":
+    def _validate_mcp_integration(self) -> Self:
         """Validate MCP integration with AugLLMConfig.
 
         Ensures that MCP configuration is compatible with the base

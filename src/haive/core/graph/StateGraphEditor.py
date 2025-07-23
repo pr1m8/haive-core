@@ -4,7 +4,7 @@ import importlib
 import logging
 import uuid
 from collections.abc import Callable
-from typing import Any, Literal
+from typing import Any, Literal, Self
 
 from langchain_core.runnables import RunnableConfig
 from langgraph.graph import END, StateGraph
@@ -109,8 +109,7 @@ class StateGraphEditor(BaseModel):
     )
 
     @model_validator(mode="after")
-    @classmethod
-    def validate_schemas(cls) -> Any:
+    def validate_schemas(self) -> Self:
         """Ensure schemas are set correctly."""
         if self.state_schema is None and (
             self.input_schema is not None or self.output_schema is not None

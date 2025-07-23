@@ -1,6 +1,5 @@
 """Agent configuration for the Haive framework with protocol support.
 
-from typing import Any, Optional
 This module provides the AgentConfig base class for configuring agent components
 with protocol-based validation and type checking to ensure that agent implementations
 conform to the expected interfaces.
@@ -18,6 +17,7 @@ from typing import (
     Any,
     ClassVar,
     Generic,
+    Self,
     TypeVar,
     Union,
     get_args,
@@ -242,10 +242,7 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
     _testing_mode: bool = False
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def ensure_engine(cls) -> Any:
+    def ensure_engine(self) -> Self:
         """Ensure at least one engine is available."""
         if not self.engine and not self.engines and not self.node_configs:
             from haive.core.engine.aug_llm import AugLLMConfig
@@ -254,10 +251,7 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
         return self
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def ensure_state_schema(cls) -> Any:
+    def ensure_state_schema(self) -> Self:
         """Ensure state schema is derived if not provided."""
         # Only auto-generate schema if explicitly requested AND no schema is
         # provided
@@ -383,7 +377,7 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
 
         return self
 
-    def get_schema_manager(self, schema_instance=None) -> Optional[Any]:
+    def get_schema_manager(self, schema_instance=None) -> Any | None:
         """Get a StateSchemaManager for the agent's schema.
 
         Args:

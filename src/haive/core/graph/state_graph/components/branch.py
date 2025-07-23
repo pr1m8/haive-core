@@ -31,7 +31,7 @@ Typical usage:
 import logging
 import uuid
 from collections.abc import Callable
-from typing import Any, Generic, TypeVar
+from typing import Any, Generic, Self, TypeVar
 
 from langgraph.graph import END
 from langgraph.types import Command, Send
@@ -127,10 +127,7 @@ class Branch(BaseModel, Generic[T, C, O]):
     model_config = {"arbitrary_types_allowed": True}
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def setup_function_and_mappings(cls) -> "Branch":
+    def setup_function_and_mappings(self) -> Self:
         """Set up function and mappings after initialization.
 
         Resolves function references and ensures proper function setup.
@@ -151,10 +148,7 @@ class Branch(BaseModel, Generic[T, C, O]):
         return self
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def validate_destinations_and_default(cls) -> "Branch":
+    def validate_destinations_and_default(self) -> Self:
         """Validate destinations and set default if needed.
 
         Ensures proper destination mappings and sets reasonable defaults.

@@ -3,7 +3,7 @@
 from collections.abc import Callable, Iterator
 from datetime import datetime
 from functools import cached_property
-from typing import Annotated, Any, ClassVar
+from typing import Annotated, Any, ClassVar, Self
 
 import tiktoken
 from langchain_core.messages import (
@@ -176,8 +176,7 @@ class MessageList(RootModel[list[AnyMessage]]):
         return convert_to_messages(data)
 
     @model_validator(mode="after")
-    @classmethod
-    def ensure_proper_messages_and_ordering(cls) -> "MessageList":
+    def ensure_proper_messages_and_ordering(self) -> Self:
         """Ensure all messages are proper Message objects and system messages come before human."""
         # First ensure all items are proper Message objects
         # This handles cases where persistence returns dicts instead of Message

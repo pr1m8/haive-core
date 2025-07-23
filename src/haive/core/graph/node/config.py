@@ -1,7 +1,7 @@
 import logging
 import uuid
 from collections.abc import Callable, Sequence
-from typing import Any
+from typing import Any, Self
 
 from langchain_core.tools import BaseTool
 from langgraph.graph import END
@@ -180,10 +180,7 @@ class NodeConfig(BaseModel):
         return data
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def validate_and_determine_node_type(cls) -> "NodeConfig":
+    def validate_and_determine_node_type(self) -> Self:
         """Validate the configuration and determine the node type automatically if not specified."""
         # Convert END string to Literal
         if self.command_goto == "END":

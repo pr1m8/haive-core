@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Any, ClassVar, Generic, TypeVar
+from typing import Any, ClassVar, Generic, Self, TypeVar
 
 from pydantic import Field, computed_field, model_validator
 
@@ -112,10 +112,7 @@ class GraphModel(SerializableModel, Generic[TNode]):
         return result
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def validate_graph_structure(cls) -> "GraphModel":
+    def validate_graph_structure(self) -> Self:
         """Validate the overall graph structure."""
         # Check that entry and finish points exist if set
         if self.entry_point and self.entry_point not in self.nodes:

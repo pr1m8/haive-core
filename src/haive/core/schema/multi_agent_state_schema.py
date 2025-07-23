@@ -9,7 +9,7 @@ in complex agent workflows.
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, Self
 
 from pydantic import Field, create_model, model_validator
 
@@ -43,7 +43,7 @@ class MultiAgentStateSchema(StateSchema):
     )
 
     @model_validator(mode="after")
-    def populate_engines_dict(self) -> MultiAgentStateSchema:
+    def populate_engines_dict(self) -> Self:
         """Populate the engines dictionary with all available engines.
 
         This validator runs after the model is created and:

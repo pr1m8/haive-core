@@ -13,7 +13,7 @@ It will serialize as `{"query": "Hello, world!"}` instead of `{"root": "Hello, w
 """
 
 from abc import ABC
-from typing import ClassVar, Generic, TypeVar
+from typing import Any, ClassVar, Generic, Optional, TypeVar
 
 from pydantic import RootModel
 
@@ -32,7 +32,7 @@ class ABCRootWrapper(RootModel[T], Generic[T], ABC):
             # SERIALIZED_KEY = "query"  # Optional override
     """
 
-    SERIALIZED_KEY: ClassVar[str] | None = None
+    SERIALIZED_KEY: ClassVar[Optional[str]] = None
 
     def model_dump(self, *args, **kwargs) -> Any:
         data = super().model_dump(*args, **kwargs)

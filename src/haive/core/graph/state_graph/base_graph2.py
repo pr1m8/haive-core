@@ -13,7 +13,7 @@ import uuid
 from collections.abc import Callable
 from datetime import datetime
 from enum import Enum
-from typing import Any, Generic, Literal, Union
+from typing import Any, Generic, Literal, Self, Union
 
 from langchain_core.runnables import RunnableConfig
 from langgraph.graph import END, START  # Import the actual constants
@@ -192,10 +192,7 @@ class BaseGraph(BaseModel, ValidationMixin):
     )
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def validate_graph(cls) -> "BaseGraph":
+    def validate_graph(self) -> Self:
         """Validate the graph structure."""
         # Filter out None values from nodes and check uniqueness
         non_none_nodes = {k: v for k, v in self.nodes.items() if v is not None}

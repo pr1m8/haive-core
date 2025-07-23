@@ -1,12 +1,14 @@
 from collections.abc import Callable, Sequence
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
 
-from haive.agents.base.agent import Agent
 from langchain_core.tools import BaseTool, StructuredTool
 from langchain_core.tools.base import BaseToolkit
 from pydantic import BaseModel
 
 from haive.core.engine.base import Engine
+
+if TYPE_CHECKING:
+    from haive.agents.base.agent import Agent
 
 # ============================================================================
 # Engine Protocol
@@ -35,4 +37,4 @@ class ToolAware(Protocol):
 class AgentAware(Protocol):
     """Protocol for objects that have an agent attribute."""
 
-    agent: Agent | None
+    agent: "Agent | None"

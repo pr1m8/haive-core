@@ -9,6 +9,7 @@ from typing import (
     ClassVar,
     Generic,
     Protocol,
+    Self,
     TypeVar,
     runtime_checkable,
 )
@@ -130,10 +131,7 @@ class ComponentSpec(BaseModel, Generic[C]):
     inline: Registered[C] | None = None
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def _exclusive(cls) -> ComponentSpec:
+    def _exclusive(self) -> Self:
         if bool(self.type) == bool(self.inline):
             raise ValueError("Must provide exactly one of 'type' or 'inline'")
         return self

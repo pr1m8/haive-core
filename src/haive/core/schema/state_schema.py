@@ -510,7 +510,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                         )
 
     @model_validator(mode="after")
-    def sync_engine_fields(self) -> StateSchema:
+    def sync_engine_fields(self) -> Self:
         """Sync between engine and engines dict for backward compatibility.
 
         This validator ensures that:

@@ -36,7 +36,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from datetime import datetime
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Self
 
 from pydantic import Field, model_validator
 
@@ -128,10 +128,7 @@ class MetaStateSchema(StateSchema, RecompileMixin):
     }
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def setup_graph_composition(cls) -> MetaStateSchema:
+    def setup_graph_composition(self) -> Self:
         """Setup graph composition with the contained agent.
 
         This validator:

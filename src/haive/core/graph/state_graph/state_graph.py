@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from datetime import datetime
-from typing import Any, ClassVar, Generic, TypeVar
+from typing import Any, ClassVar, Generic, Self, TypeVar
 from uuid import uuid4
 
 from pydantic import (
@@ -122,10 +122,7 @@ class StateGraphSerializable(BaseModel, Generic[TNode]):
         return v
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def validate_graph_structure(cls) -> "StateGraphSerializable":
+    def validate_graph_structure(self) -> Self:
         """Validate the overall graph structure."""
         # Check that entry and finish points exist if set
         if self.entry_point and self.entry_point not in self.nodes:

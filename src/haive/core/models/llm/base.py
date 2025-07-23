@@ -12,7 +12,7 @@ with support for model metadata, context windows, and capabilities.
 import logging
 import os
 from collections.abc import Sequence
-from typing import Any
+from typing import Any, Self
 
 from langchain.chat_models.base import BaseChatModel
 from langchain_core.messages import AnyMessage
@@ -171,10 +171,7 @@ class LLMConfig(SecureConfigMixin, ModelMetadataMixin,
         default=None, description="Alias for the model.")
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def set_default_name(cls) -> "LLMConfig":
+    def set_default_name(self) -> Self:
         """Set a default name for the model if not provided."""
         if self.name is None:
             # Default to model ID if no name provided
@@ -182,10 +179,7 @@ class LLMConfig(SecureConfigMixin, ModelMetadataMixin,
         return self
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def load_model_metadata(cls) -> "LLMConfig":
+    def load_model_metadata(self) -> Self:
         """Load and validate model metadata after initialization."""
         logger.debug(f"Loading metadata for {self.model} from {self.provider}")
 

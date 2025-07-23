@@ -5,7 +5,7 @@ handle state projection between the container state and individual agent states.
 """
 
 import logging
-from typing import Any, TypeVar
+from typing import Any, Self, TypeVar
 
 from haive.agents.base.agent import Agent
 from langgraph.types import Command
@@ -66,10 +66,7 @@ class MultiAgentNode(BaseNodeConfig[MultiAgentState, MultiAgentState]):
     )
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def validate_config(cls) -> "MultiAgentNode":
+    def validate_config(self) -> Self:
         """Validate node configuration."""
         if not self.agent_name:
             raise ValueError("agent_name is required")

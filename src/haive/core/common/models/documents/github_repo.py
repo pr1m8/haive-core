@@ -2,7 +2,7 @@ import logging
 import re
 from datetime import datetime
 from functools import lru_cache
-from typing import Any
+from typing import Any, Self
 
 import httpx
 from pydantic import (
@@ -241,10 +241,7 @@ class GithubRepo(BaseModel):
         return v
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def extract_from_url_and_validate(cls) -> "GithubRepo":
+    def extract_from_url_and_validate(self) -> Self:
         """Extract owner/name from URL if provided and validate the repository."""
         # Step 1: Extract owner/name from URL if needed
         if self.url and (not self.owner or not self.name):

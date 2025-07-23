@@ -37,7 +37,7 @@ Examples:
 import logging
 import os
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Self
 
 from pydantic import BaseModel, Field, SecretStr, field_validator, model_validator
 
@@ -178,8 +178,7 @@ class BaseLLMProvider(
     model_config = {"arbitrary_types_allowed": True}
 
     @model_validator(mode="after")
-    @classmethod
-    def set_defaults(cls) -> "BaseLLMProvider":
+    def set_defaults(self) -> Self:
         """Set default values after initialization.
 
         This validator ensures that model and name have appropriate

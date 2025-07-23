@@ -25,7 +25,7 @@ import json
 import logging
 import os
 from collections.abc import Callable, Sequence
-from typing import TYPE_CHECKING, Any, Literal, Union, cast
+from typing import TYPE_CHECKING, Any, Literal, Self, Union, cast
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 from langchain_core.output_parsers import (
@@ -646,10 +646,7 @@ class AugLLMConfig(
         return data
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def comprehensive_validation_and_setup(cls) -> Any:
+    def comprehensive_validation_and_setup(self) -> Self:
         """Comprehensive validation and setup after initialization."""
         # Prevent infinite recursion
         if self._is_processing_validation:

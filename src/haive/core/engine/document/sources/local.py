@@ -2,7 +2,7 @@ import mimetypes
 import os
 from datetime import datetime
 from pathlib import Path
-from typing import Any, ClassVar
+from typing import Any, ClassVar, Self
 
 from pydantic import DirectoryPath, Field, FilePath, computed_field, model_validator
 
@@ -34,10 +34,7 @@ class FileSource(BaseSource):
     }
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def validate_file_exists(cls) -> Any:
+    def validate_file_exists(self) -> Self:
         """Validate the file exists after model initialization."""
         if not os.path.isfile(self.file_path):
             raise ValueError(f"File does not exist: {self.file_path}")
@@ -121,10 +118,7 @@ class DirectorySource(BaseSource):
     directory_path: DirectoryPath = Field(description="Path to the directory")
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def validate_directory_exists(cls) -> Any:
+    def validate_directory_exists(self) -> Self:
         """Validate the directory exists after model initialization."""
         if not os.path.isdir(self.directory_path):
             raise ValueError(

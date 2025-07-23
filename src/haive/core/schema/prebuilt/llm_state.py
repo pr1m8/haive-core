@@ -6,7 +6,7 @@ to track token usage against thresholds and metadata.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Self
 
 # Import BaseOutputParser for type resolution in LangGraph
 # This ensures it's available when LangGraph evaluates type hints
@@ -122,8 +122,7 @@ class LLMState(ToolState):
     )
 
     @model_validator(mode="after")
-    @classmethod
-    def setup_primary_engine_references(cls) -> LLMState:
+    def setup_primary_engine_references(self) -> Self:
         """Ensure the primary LLM engine is available in engines dict with standard keys.
 
         This works with ToolState's engine management to provide consistent access.

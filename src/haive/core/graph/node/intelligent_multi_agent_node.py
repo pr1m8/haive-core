@@ -8,7 +8,7 @@ This module provides an enhanced multi-agent node that can automatically:
 """
 
 import logging
-from typing import Any
+from typing import Any, Self
 
 from langgraph.graph import END
 from langgraph.types import Command
@@ -62,8 +62,7 @@ class IntelligentMultiAgentNode(BaseNodeConfig[MultiAgentState, MultiAgentState]
     )
 
     @model_validator(mode="after")
-    @classmethod
-    def validate_config(cls) -> "IntelligentMultiAgentNode":
+    def validate_config(self) -> Self:
         """Validate node configuration."""
         if self.execution_mode not in [
             "infer",

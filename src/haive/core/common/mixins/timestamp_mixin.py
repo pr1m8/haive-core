@@ -32,7 +32,7 @@ Intended for use with Sphinx AutoAPI and Google-style docstrings.
 """
 
 from datetime import UTC, datetime, timedelta
-from typing import Any
+from typing import Any, Self
 
 from pydantic import BaseModel, Field, computed_field, field_serializer, model_validator
 
@@ -112,8 +112,7 @@ class AccessTimestampsMixin(CreatedTimestampMixin):
     )
 
     @model_validator(mode="after")
-    @classmethod
-    def _sync_last_accessed(cls) -> "AccessTimestampsMixin":
+    def _sync_last_accessed(self) -> Self:
         """Sync `last_accessed_at` to `created_at` immediately after model creation.
 
         Returns:

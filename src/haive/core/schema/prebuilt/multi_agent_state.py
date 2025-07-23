@@ -98,7 +98,7 @@ See Also:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Self
 
 from pydantic import Field, computed_field, field_validator, model_validator
 from rich.console import Console
@@ -355,10 +355,7 @@ class MultiAgentState(ToolState):
         return v
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def setup_agent_hierarchy(cls) -> MultiAgentState:
+    def setup_agent_hierarchy(self) -> Self:
         """Initialize agent hierarchy and sync engines.
 
         This validator:

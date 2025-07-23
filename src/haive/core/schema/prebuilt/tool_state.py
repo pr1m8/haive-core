@@ -1,5 +1,5 @@
 import logging
-from typing import Any
+from typing import Any, Self
 
 from langchain_core.tools import BaseTool
 from pydantic import Field, computed_field, model_validator
@@ -80,10 +80,7 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
     )
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def sync_tools_and_update_routes(cls) -> "ToolState":
+    def sync_tools_and_update_routes(self) -> Self:
         """Sync tools from engines and update tool routes after model creation.
 
         This runs after the parent validators, so engines and tool routes are already set up.

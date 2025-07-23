@@ -54,6 +54,44 @@ See Also:
 import logging
 import os
 
+# ============================================================================
+# Lazy Core Imports - Performance Optimization
+# ============================================================================
+
+# Define lazy import mappings to avoid heavy loading at import time
+_CORE_IMPORTS = {
+    # Engine components (heaviest - lazy load these)
+    "AugLLMConfig": ("haive.core.engine", "AugLLMConfig"),
+    "AugLLMFactory": ("haive.core.engine", "AugLLMFactory"),
+    "Engine": ("haive.core.engine", "Engine"),
+    "InvokableEngine": ("haive.core.engine", "InvokableEngine"),
+    "NonInvokableEngine": ("haive.core.engine", "NonInvokableEngine"),
+    # Graph and other components (lighter weight)
+    "BaseGraph": ("haive.core.graph", "BaseGraph"),
+    "DynamicRegistry": ("haive.core.registry", "DynamicRegistry"),
+    "RegistryItem": ("haive.core.registry", "RegistryItem"),
+    "SchemaComposer": ("haive.core.schema", "SchemaComposer"),
+}
+
+
+def __getattr__(name: str):
+    """Lazy load core components to avoid heavy import overhead."""
+    if name in _CORE_IMPORTS:
+        module_path, class_name = _CORE_IMPORTS[name]
+
+        # Import module and get class only when accessed
+        import importlib
+
+        module = importlib.import_module(module_path)
+        component = getattr(module, class_name)
+
+        # Cache in globals for subsequent access
+        globals()[name] = component
+        return component
+
+    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
+
+
 # Configure reduced logging verbosity
 logging.basicConfig(level=logging.WARNING, format="%(levelname)s: %(message)s")
 
@@ -81,30 +119,6 @@ os.environ.setdefault("HAIVE_SKIP_HEAVY_INIT", "1")
 os.environ.setdefault("HAIVE_QUIET_IMPORTS", "1")
 os.environ.setdefault("HAIVE_DEBUG_CONFIG", "false")
 
-# ============================================================================
-# Core Imports
-# ============================================================================
-
-from haive.core.engine import (
-    AugLLMConfig,
-    AugLLMFactory,
-    Engine,
-    InvokableEngine,
-    NonInvokableEngine,
-)
-from haive.core.graph import (
-    BaseGraph,
-)
-from haive.core.registry import (
-    DynamicRegistry,
-    RegistryItem,
-)
-
-# Set version
-from haive.core.schema import (  # BasicAgentState,  # Module doesn't exist
-    SchemaComposer,
-)
-
 __version__ = "0.1.0"
 
 # Core imports for convenience
@@ -113,18 +127,12 @@ __version__ = "0.1.0"
 __all__ = [
     "AugLLMConfig",
     "AugLLMFactory",
-    # Graph system
     "BaseGraph",
-    # "BasicAgentState",  # Module doesn't exist
-    # Registry system
     "DynamicRegistry",
-    "RegistryItem",
-    # Engine system
     "Engine",
     "InvokableEngine",
     "NonInvokableEngine",
-    # Schema system
+    "RegistryItem",
     "SchemaComposer",
-    # Version
     "__version__",
 ]

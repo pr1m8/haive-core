@@ -8,7 +8,7 @@ Based on the Dynamic Activation Pattern:
 """
 
 from datetime import datetime
-from typing import Any, Generic, TypeVar
+from typing import Any, Generic, Self, TypeVar
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
@@ -195,7 +195,7 @@ class DynamicRegistry(BaseModel, Generic[T]):
         return v
 
     @model_validator(mode="after")
-    def validate_active_items(self) -> "DynamicRegistry[T]":
+    def validate_active_items(self) -> Self:
         """Validate that active_items are consistent with items."""
         # Remove any active items that don't exist in items
         valid_active = {

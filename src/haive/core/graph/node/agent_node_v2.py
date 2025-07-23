@@ -3,7 +3,7 @@
 # ============================================================================
 
 import logging
-from typing import Any, Literal, Optional, TypeVar
+from typing import Any, Literal, Optional, Self, TypeVar
 
 from haive.agents.base.agent import Agent
 from langchain_core.messages import BaseMessage
@@ -86,10 +86,7 @@ class AgentNodeConfig(BaseNodeConfig[TInput, TOutput]):
     )
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def validate_agent_schema(cls) -> "AgentNodeConfig":
+    def validate_agent_schema(self) -> Self:
         """Extract agent's state schema if not provided."""
         if not self.agent_state_schema and hasattr(self.agent, "state_schema"):
             self.agent_state_schema = self.agent.state_schema

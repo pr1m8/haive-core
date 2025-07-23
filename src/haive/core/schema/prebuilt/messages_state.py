@@ -1,4 +1,4 @@
-from typing import Annotated, Any
+from typing import Annotated, Any, Self
 
 from langchain_core.messages import (
     AIMessage,
@@ -123,7 +123,7 @@ class MessagesState(StateSchema):
 
     # Basic message handling
     @model_validator(mode="after")
-    def ensure_system_before_human(self, instance: "MessagesState") -> "MessagesState":
+    def ensure_system_before_human(self, instance: "MessagesState") -> Self:
         """Ensure system messages come before human messages.
         If a human message is followed by a system message, flip their order.
         """
@@ -202,8 +202,7 @@ class MessagesState(StateSchema):
     # The base MessagesState doesn't have token_usage fields
 
     @model_validator(mode="after")
-    @classmethod
-    def sync_message_engine_settings(cls) -> "MessagesState":
+    def sync_message_engine_settings(self) -> Self:
         """Sync message-related settings with engine if present.
 
         This enhances MessagesState to work better with the new engine management.

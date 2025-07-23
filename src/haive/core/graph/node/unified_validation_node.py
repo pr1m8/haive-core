@@ -7,7 +7,7 @@ Fixed to follow proper Pydantic patterns without custom __init__ methods.
 """
 
 import logging
-from typing import Any
+from typing import Any, Self
 
 from langchain_core.messages import AIMessage, ToolMessage
 from langgraph.types import Command, Send
@@ -63,10 +63,7 @@ class UnifiedValidationNodeConfig(BaseNodeConfig):
     )
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def validate_config(cls) -> "UnifiedValidationNodeConfig":
+    def validate_config(self) -> Self:
         """Validate node configuration."""
         # Ensure we have at least one destination node
         if not any([self.tool_node, self.parse_output_node, self.agent_node]):

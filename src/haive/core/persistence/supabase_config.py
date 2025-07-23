@@ -24,7 +24,7 @@ import logging
 import os
 import uuid
 from datetime import datetime
-from typing import Any
+from typing import Any, Self
 
 from pydantic import Field, model_validator
 
@@ -1069,7 +1069,7 @@ class SupabaseCheckpointerConfig(CheckpointerConfig):
     checkpointer: Any | None = Field(default=None, exclude=True)
 
     @model_validator(mode="after")
-    def validate_supabase_available(self) -> Any:
+    def validate_supabase_available(self) -> Self:
         """Validate that Supabase dependencies are available."""
         if not SUPABASE_AVAILABLE:
             raise ImportError(

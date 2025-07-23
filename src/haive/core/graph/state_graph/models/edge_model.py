@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import ClassVar
+from typing import ClassVar, Self
 
 from pydantic import Field, model_validator
 
@@ -35,8 +35,7 @@ class EdgeModel(SerializableModel):
     __abstract__ = False
 
     @model_validator(mode="after")
-    @classmethod
-    def validate_edge_structure(cls) -> "EdgeModel":
+    def validate_edge_structure(self) -> Self:
         """Validate edge structure based on type."""
         if self.edge_type == EdgeType.WAITING and not self.sources:
             raise ValueError("Waiting edges must specify sources")

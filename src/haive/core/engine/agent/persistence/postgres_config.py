@@ -3,7 +3,7 @@
 import json
 import logging
 import urllib.parse
-from typing import Any
+from typing import Any, Self
 
 from pydantic import Field, model_validator
 
@@ -57,8 +57,7 @@ class PostgresCheckpointerConfig(CheckpointerConfig):
     _checkpointer: Any | None = None
 
     @model_validator(mode="after")
-    @classmethod
-    def validate_postgres_available(cls) -> Any:
+    def validate_postgres_available(self) -> Self:
         """Validate that postgres dependencies are available if this config is used."""
         if not POSTGRES_AVAILABLE:
             raise ImportError(

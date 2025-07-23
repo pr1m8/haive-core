@@ -69,7 +69,7 @@ from __future__ import annotations
 
 import contextlib
 import logging
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, Self, TypeVar
 
 from langchain_core.messages import BaseMessage
 from langgraph.types import Command
@@ -253,10 +253,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
     )
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def validate_agent_config(cls) -> AgentNodeV3Config:
+    def validate_agent_config(self) -> Self:
         """Validate configuration."""
         if not self.agent_name and not self.agent:
             raise ValueError("Either agent_name or agent must be provided")

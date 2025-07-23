@@ -1,7 +1,7 @@
 import contextlib
 import importlib
 import inspect
-from typing import Any, Literal, Optional
+from typing import Any, Literal, Optional, Self
 
 from pydantic import Field, field_validator, model_validator
 
@@ -25,8 +25,7 @@ class FunctionReference(SerializableModel):
     __abstract__ = True  # Not registered directly
 
     @model_validator(mode="after")
-    @classmethod
-    def ensure_valid_reference(cls) -> "FunctionReference":
+    def ensure_valid_reference(self) -> Self:
         """Ensure the reference is valid."""
         if not self.module_path and not self.function_name and not self.source_code:
             raise ValueError(

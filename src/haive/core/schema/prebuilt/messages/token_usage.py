@@ -5,7 +5,7 @@ across different LLM providers and models. It supports comprehensive metrics
 including cached tokens, audio tokens, and reasoning tokens.
 """
 
-from typing import Any
+from typing import Any, Self
 
 from langchain_core.messages import AIMessage, BaseMessage
 from pydantic import BaseModel, Field, model_validator
@@ -49,8 +49,7 @@ class TokenUsage(BaseModel):
     )
 
     @model_validator(mode="after")
-    @classmethod
-    def validate_totals(cls) -> Any:
+    def validate_totals(self) -> Self:
         """Ensure total_tokens and total_cost are calculated if not set."""
         if self.total_tokens == 0:
             self.total_tokens = self.input_tokens + self.output_tokens

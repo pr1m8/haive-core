@@ -1,5 +1,13 @@
 """Module exports."""
 
-from types.abc_root_wrapper import ABCRootWrapper, model_dump, model_dump_json
+from pathlib import Path
+from typing import Any, Union
 
-__all__ = ["ABCRootWrapper", "model_dump", "model_dump_json"]
+from haive.core.common.types.abc_root_wrapper import ABCRootWrapper
+
+# Common type aliases
+DictStrAny = dict[str, Any]
+JsonType = Union[str, int, float, bool, None, dict[str, Any], list[Any]]
+StrOrPath = Union[str, Path]
+
+__all__ = ["ABCRootWrapper", "DictStrAny", "JsonType", "StrOrPath"]

@@ -2,7 +2,7 @@
 
 import logging
 import time
-from typing import Any
+from typing import Any, Self
 
 from pydantic import Field, model_validator
 
@@ -76,10 +76,7 @@ class EnhancedToolState(ToolState):
     )
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def enhanced_tool_setup(cls) -> "EnhancedToolState":
+    def enhanced_tool_setup(self) -> Self:
         """Enhanced setup that preserves ToolState functionality."""
         # Call parent setup first to maintain all existing functionality
         super().sync_tools_and_update_routes()

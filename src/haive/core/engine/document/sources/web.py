@@ -1,5 +1,5 @@
 import re
-from typing import Any, ClassVar
+from typing import Any, ClassVar, Self
 from urllib.parse import parse_qs, urlparse
 
 from pydantic import Field, HttpUrl, computed_field, model_validator
@@ -32,8 +32,7 @@ class WebSource(BaseSource):
     }
 
     @model_validator(mode="after")
-    @classmethod
-    def validate_source_type(cls) -> Any:
+    def validate_source_type(self) -> Self:
         """Automatically set more specific source type based on URL domain."""
         url_str = str(self.url)
         parsed = urlparse(url_str)

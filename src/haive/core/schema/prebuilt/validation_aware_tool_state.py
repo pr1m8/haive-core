@@ -7,7 +7,7 @@ patterns and history.
 
 import logging
 from datetime import datetime
-from typing import Any
+from typing import Any, Self
 
 from pydantic import Field, computed_field, model_validator
 
@@ -177,10 +177,7 @@ class ValidationAwareToolState(ToolState):
         return "stable"
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def update_validation_stats(cls) -> "ValidationAwareToolState":
+    def update_validation_stats(self) -> Self:
         """Update validation statistics after model creation."""
         # Call parent validator
         super().sync_tools_and_update_routes()

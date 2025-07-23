@@ -9,7 +9,7 @@ Based on the Dynamic Activation Pattern:
 """
 
 from datetime import datetime
-from typing import Any, TypeVar
+from typing import Any, Self, TypeVar
 
 from pydantic import Field, field_validator, model_validator
 
@@ -174,8 +174,7 @@ class DynamicActivationState(StateSchema):
         return [cap.strip().lower() for cap in v if cap.strip()]
 
     @model_validator(mode="after")
-    @classmethod
-    def setup_dynamic_activation(cls) -> "DynamicActivationState":
+    def setup_dynamic_activation(self) -> Self:
         """Setup dynamic activation state after model creation.
 
         This validator:

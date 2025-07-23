@@ -4,7 +4,7 @@ This module provides flexible state schemas for multi-agent systems without
 forcing specific fields like messages or tools.
 """
 
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Optional, Self
 
 from pydantic import Field, field_validator, model_validator
 from typing_extensions import TypedDict
@@ -123,8 +123,7 @@ class FlexibleMultiAgentState(StateSchema):
         return v
 
     @model_validator(mode="after")
-    @classmethod
-    def initialize_agent_states(cls) -> "FlexibleMultiAgentState":
+    def initialize_agent_states(self) -> Self:
         """Initialize empty states for each agent."""
         if isinstance(self.agents, dict):
             for agent_name in self.agents:
@@ -200,8 +199,7 @@ class ContainerMultiAgentState(FlexibleMultiAgentState):
     )
 
     @model_validator(mode="after")
-    @classmethod
-    def setup_execution_order(cls) -> "ContainerMultiAgentState":
+    def setup_execution_order(self) -> Self:
         """Set default execution order if not provided."""
         if not self.agent_execution_order and isinstance(self.agents, dict):
             self.agent_execution_order = list(self.agents.keys())

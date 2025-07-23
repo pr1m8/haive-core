@@ -5,7 +5,7 @@
 import logging
 from collections.abc import Callable
 from enum import Enum
-from typing import Any, Optional, TypeVar
+from typing import Any, Optional, Self, TypeVar
 
 from langchain_core.messages import (
     AIMessage,
@@ -138,10 +138,7 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
     debug: bool = Field(default=False, description="Enable debug output")
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def validate_transformation_config(cls) -> "MessageTransformationNodeConfig":
+    def validate_transformation_config(self) -> Self:
         """Validate transformation-specific configuration."""
         if (
             self.transformation_type == TransformationType.ADD_ENGINE_ID

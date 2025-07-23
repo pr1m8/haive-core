@@ -4,7 +4,7 @@
 
 import logging
 from collections.abc import Callable
-from typing import Any, Optional, TypeVar
+from typing import Any, Optional, Self, TypeVar
 
 from langchain_core.messages import AIMessage, BaseMessage, ToolMessage
 from langchain_core.tools import BaseTool
@@ -98,10 +98,7 @@ class ToolNodeConfig(BaseNodeConfig[TInput, TOutput]):
     )
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def validate_tool_source(cls) -> "ToolNodeConfig":
+    def validate_tool_source(self) -> Self:
         """Validate that we have a source for tools."""
         if not self.tools and not self.engine_name:
             raise ValueError("Either 'tools' or 'engine_name' must be provided")

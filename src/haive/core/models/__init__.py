@@ -21,12 +21,28 @@ Typical usage example:
     ```
 """
 
-# Import submodules
-from haive.core.models import embeddings, llm, retriever, vectorstore
-
 # Model metadata utilities
 from haive.core.models.metadata import ModelMetadata
 from haive.core.models.metadata_mixin import ModelMetadataMixin as MetadataMixin
+
+# Submodules are lazy-loaded to avoid heavy imports (embeddings trigger numpy/pandas)
+# Use __getattr__ for lazy loading of submodules
+
+_SUBMODULES = {"embeddings", "llm", "retriever", "vectorstore"}
+
+
+def __getattr__(name):
+    """Lazy load submodules to avoid heavy imports during module initialization.
+
+    The embeddings module in particular triggers langchain_community imports
+    which load numpy/pandas, adding 17+ seconds to import time.
+    """
+    if name in _SUBMODULES:
+        import importlib
+
+        return importlib.import_module(f"haive.core.models.{name}")
+    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
+
 
 __all__ = [
     "MetadataMixin",

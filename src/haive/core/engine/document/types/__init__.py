@@ -1,6 +1,6 @@
 """Module exports."""
 
-from types.enums import (
+from haive.core.engine.document.types.enums import (
     ArchiveType,
     AudioType,
     BasePathAnalyzer,

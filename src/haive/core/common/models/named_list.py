@@ -3,7 +3,7 @@
 # ============================================================================
 
 from collections.abc import Iterator, Sequence
-from typing import Any, Generic, TypeVar
+from typing import Any, Generic, Self, TypeVar
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
@@ -55,10 +55,7 @@ class NamedList(BaseModel, Generic[T]):
         return v
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def process_input(cls) -> Any:
+    def process_input(self) -> Self:
         """Process the input and resolve references."""
         if not self.items:
             return self

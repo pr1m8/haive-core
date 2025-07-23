@@ -13,7 +13,7 @@ import logging
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Optional, Self, Union
 
 from langchain_core.documents import Document
 from langchain_core.runnables import RunnableConfig
@@ -99,10 +99,7 @@ class DocumentEngine(
         logger.debug(f"Initialized DocumentEngine: {self.config.name}")
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def validate_config(cls) -> "DocumentEngine":
+    def validate_config(self) -> Self:
         """Validate engine configuration."""
         # Ensure chunk overlap is less than chunk size
         if self.config.chunk_overlap >= self.config.chunk_size:
