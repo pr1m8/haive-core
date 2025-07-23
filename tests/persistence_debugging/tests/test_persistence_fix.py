@@ -49,11 +49,11 @@ def test_persistence_fix():
             checkpoint = session2.checkpointer.get(checkpoint_config)
             if checkpoint:
             else:
-                pass")
+                pass
         except Exception as e:
-            pass")
+            pass
     else:
-        pass")
+        pass
 
     # Test 3: Query database directly to verify thread and checkpoint tables
     try:
@@ -72,7 +72,7 @@ def test_persistence_fix():
                         if thread_result:
                             pass
                         else:
-                            pass")
+                            pass
 
                         # Check checkpoints table
                         cursor.execute(
@@ -84,12 +84,12 @@ def test_persistence_fix():
                         if checkpoint_count > 0:
                             pass
                         else:
-                            pass")
+                            pass
         else:
-            pass")
+            pass
 
     except Exception as e:
-        pass")
+        pass
 
 
 

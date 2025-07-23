@@ -56,7 +56,6 @@ async def test_async_saver():
     logger.info("Testing asynchronous PostgresSaver...")
 
     # Import async psycopg
-    import psycopg
     from psycopg_pool import AsyncConnectionPool
 
     # Create async connection pool

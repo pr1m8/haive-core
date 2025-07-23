@@ -206,7 +206,7 @@ class TestEngineAttribution:
             transformed_msg.additional_kwargs["custom_field"] == "test_value"
         ), "Other metadata should also be preserved"
 
-        print("\n✅ SUCCESS: Transformation preserved engine attribution"n")
+        print("\n✅ SUCCESS: Transformation preserved engine attributionn")
         print(f"   Transformed to: {type(transformed_msg).__name__}")
         print(
             f"   Engine name preserved: '{transformed_msg.additional_kwargs['engine_name']}'"
@@ -304,11 +304,11 @@ class TestEngineAttribution:
         assert reflected_msg.additional_kwargs.get("engine_name") == engine_name
         assert reflected_msg.additional_kwargs.get("engine_id") == engine_id
 
-        print("7. Reflection changed AI → Human but preserved attribution"n")
+        print("7. Reflection changed AI → Human but preserved attributionn")
         print(f"   Message type: {type(reflected_msg).__name__}")
         print(f"   Attribution preserved: {reflected_msg.additional_kwargs}")
 
-        print("\n✅ COMPLETE FLOW SUCCESS:":")
+        print("\n✅ COMPLETE FLOW SUCCESS::")
         print("   - Engine node added engine_name attribution")
         print("   - Transformation node added engine_id")
         print("   - Reflection preserved all metadata")
@@ -393,7 +393,7 @@ class TestEngineAttribution:
                 engine = msg.additional_kwargs["engine_name"]
                 engine_counts[engine] = engine_counts.get(engine, 0) + 1
 
-        print("\n✅ SUCCESS: Multiple engines with proper attribution"n")
+        print("\n✅ SUCCESS: Multiple engines with proper attributionn")
         print(f"   Engine message counts: {engine_counts}")
         print("   Each AI message is properly attributed to its source engine")
 

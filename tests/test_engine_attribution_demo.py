@@ -217,14 +217,14 @@ def test_direct_attribution():
         content="Test response", additional_kwargs={"custom_field": "value"}
     )
 
-    print("\n📝 Original Message:"e: ")
+    print("\n📝 Original Message:e: ")
     print(f"   Content: {original_msg.content}")
     print(f"   Additional kwargs: {original_msg.additional_kwargs}")
 
     # Add attribution
     attributed_msg = node._add_engine_attribution_to_message(original_msg)
 
-    print("\n✅ After Attribution:":")
+    print("\n✅ After Attribution::")
     print(f"   Content: {attributed_msg.content}")
     print(f"   Additional kwargs: {attributed_msg.additional_kwargs}")
     print(

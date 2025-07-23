@@ -146,18 +146,18 @@ def test_complete_file_system():
                 for loader in registration.loaders.values()
             )
             if has_unstructured:
-                pass")
+                pass
         else:
-            pass")
+            pass
 
     # Test 5: Generic and Fallback Loaders
 
     # Test generic file source
     generic_source = enhanced_registry.create_source("/path/to/unknown.xyz")
     if generic_source:
-        pass")
+        pass
     else:
-        pass")
+        pass
 
     # Test known file types
     test_files = {
@@ -191,7 +191,7 @@ def test_complete_file_system():
         if source:
             passe}")
         else:
-            pass")
+            pass
 
     # Test 7: Bulk Processing Capabilities
 
@@ -214,7 +214,7 @@ def test_complete_file_system():
             max_concurrent = registration.bulk_info.max_concurrent
 
         else:
-            pass")
+            pass
 
     # Test 8: Advanced Filtering and Processing
 

@@ -188,16 +188,16 @@ def check_store_persistence_link():
                         if "ConnectionManager.get_or_create" in line:
                             pass
                 else:
-                    pass")
+                    pass
 
                 # Check for prepare_threshold
                 if "prepare_threshold" in content:
                     passon")
 
             except Exception as e:
-                pass")
+                pass
         else:
-            pass")
+            pass
 
     # Check persistence config integration
 
@@ -207,12 +207,12 @@ def check_store_persistence_link():
         config = PostgresCheckpointerConfig()
 
         if config.prepare_threshold is None:
-            pass")
+            pass
         else:
-            pass")
+            pass
 
     except Exception as e:
-        pass")
+        pass
 
 
 def main():

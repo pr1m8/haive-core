@@ -74,7 +74,7 @@ def test_engine_attribution_mechanism():
         attributed_message.additional_kwargs["existing_field"] == "value"
     )  # Original data preserved
 
-    print("\n✅ SUCCESS: Engine attribution added correctly"y")
+    print("\n✅ SUCCESS: Engine attribution added correctlyy")
     print(f"   engine_name = '{attributed_message.additional_kwargs['engine_name']}'")
 
 
@@ -126,7 +126,7 @@ def test_message_transformation_preservation():
     assert transformed_msg.additional_kwargs.get("engine_name") == "source_engine"
     assert transformed_msg.additional_kwargs.get("custom_data") == "preserved"
 
-    print("\n✅ SUCCESS: Attribution preserved during transformation"n")
+    print("\n✅ SUCCESS: Attribution preserved during transformationn")
 
 
 def test_complete_attribution_flow():
@@ -206,7 +206,7 @@ def test_complete_attribution_flow():
     assert reflected_msg.additional_kwargs.get("engine_name") == "gpt4_engine"
     assert reflected_msg.additional_kwargs.get("engine_id") == "engine_123"
 
-    print("\n✅ SUCCESS: Complete attribution flow works correctly"y")
+    print("\n✅ SUCCESS: Complete attribution flow works correctlyy")
 
 
 def test_multiple_engine_attribution():
@@ -265,7 +265,7 @@ def test_multiple_engine_attribution():
     assert engine_counts["analyzer_engine"] == 1
     assert engine_counts["summarizer_engine"] == 1
 
-    print("\n✅ SUCCESS: Multiple engines properly attributed"d")
+    print("\n✅ SUCCESS: Multiple engines properly attributedd")
 
 
 if __name__ == "__main__":

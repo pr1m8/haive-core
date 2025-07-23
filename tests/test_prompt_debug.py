@@ -1,20 +1,17 @@
 #!/usr/bin/env python3
 """Debug script to trace BasePromptTemplate serialization issue step by step."""
 
-import os
 import sys
 import traceback
 
-from langchain_core.prompts import BasePromptTemplate, ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 
 from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.persistence.serializers import SecureSecretStrSerializer
 
 # Add the packages to Python path
-sys.path.insert(
-    0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
-sys.path.insert(
-    0, "/home/will/Projects/haive/backend/haive/packages/haive-agents/src")
+sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
+sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-agents/src")
 
 
 def step_1_create_config():
@@ -40,7 +37,7 @@ def step_2_test_model_dump(config):
         else:
             pass
         return dumped
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
         return None
 
@@ -57,13 +54,12 @@ def step_3_test_serialization(config):
         # Deserialize
         deserialized = serializer.loads(serialized)
 
-        if hasattr(deserialized,
-                   "prompt_template") and deserialized.prompt_template:
+        if hasattr(deserialized, "prompt_template") and deserialized.prompt_template:
             pass
 
         return deserialized
 
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
         return None
 
@@ -83,7 +79,7 @@ def step_4_test_recreate_from_dict(dumped_data):
 
         return recreated
 
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
         return None
 
@@ -98,9 +94,9 @@ def step_5_test_isinstance_checks(config):
 
     # Test some of the actual isinstance checks from the code
     if isinstance(prompt_template, ChatPromptTemplate):
-        pass")
+        pass
     else:
-        pass")
+        pass
 
     if hasattr(prompt_template, "__dict__"):
         pass
@@ -119,8 +115,7 @@ def step_6_test_model_validator(config):
         if hasattr(config, "_validate_and_setup"):
             config._validate_and_setup()
 
-
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
 
 
@@ -148,7 +143,6 @@ def main():
 
     # Step 6: Test model validators
     step_6_test_model_validator(deserialized_config)
-
 
 
 if __name__ == "__main__":

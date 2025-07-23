@@ -110,9 +110,9 @@ def test_proper_conversation_flow():
                             else:
                                 passed")
                         else:
-                            pass")
+                            pass
             except Exception as e:
-                pass")
+                pass
 
     except Exception as e:
         import traceback

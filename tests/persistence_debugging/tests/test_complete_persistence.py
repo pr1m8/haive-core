@@ -86,9 +86,9 @@ def test_sync_conversation():
             or "bob" in last_msg.lower()
             or "introduce" in last_msg.lower()
         ):
-            pass")
+            pass
         else:
-            pass")
+            pass
 
     return thread_id
 
@@ -138,9 +138,9 @@ async def test_async_persistence():
             # Try to retrieve
             retrieved = await checkpointer.aget(config_dict)
             if retrieved:
-                pass")
+                pass
             else:
-                pass")
+                pass
         else:
             passds")
 
@@ -228,7 +228,7 @@ def verify_database_content(thread_id: str):
                 ps_count = cur.fetchone()[0]
 
     except Exception as e:
-        pass")
+        pass
 
 
 def main():

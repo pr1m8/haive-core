@@ -65,7 +65,7 @@ try:
 
 
 except Exception as e:
-    pass")
+    pass
 
 
 def test_platform_detection():
@@ -210,7 +210,7 @@ def test_s3_sources():
             s3_tests_passed += 1
 
         except Exception as e:
-            pass")
+            pass
 
 
     return s3_tests_passed >= 2
@@ -273,7 +273,7 @@ def test_file_sharing_services():
             sharing_tests_passed += 1
 
         except Exception as e:
-            pass")
+            pass
 
 
     return sharing_tests_passed >= 2
@@ -348,7 +348,7 @@ def test_data_lake_sources():
             lake_tests_passed += 1
 
         except Exception as e:
-            pass")
+            pass
 
 
     return lake_tests_passed >= 2
@@ -400,7 +400,7 @@ def test_enterprise_storage():
             enterprise_tests_passed += 1
 
         except Exception as e:
-            pass")
+            pass
 
 
     return enterprise_tests_passed >= 1
@@ -444,7 +444,7 @@ def test_authentication_types():
             auth_tests_passed += 1
 
         except Exception as e:
-            pass")
+            pass
 
 
     return auth_tests_passed >= 4
@@ -471,37 +471,37 @@ def main():
     if test_platform_detection():
         tests_passed += 1
     else:
-        pass")
+        pass
 
     # Test 2: S3 Sources
     if test_s3_sources():
         tests_passed += 1
     else:
-        pass")
+        pass
 
     # Test 3: File Sharing Services
     if test_file_sharing_services():
         tests_passed += 1
     else:
-        pass")
+        pass
 
     # Test 4: Data Lake Sources
     if test_data_lake_sources():
         tests_passed += 1
     else:
-        pass")
+        pass
 
     # Test 5: Enterprise Storage
     if test_enterprise_storage():
         tests_passed += 1
     else:
-        pass")
+        pass
 
     # Test 6: Authentication Types
     if test_authentication_types():
         tests_passed += 1
     else:
-        pass")
+        pass
 
     # Results
 

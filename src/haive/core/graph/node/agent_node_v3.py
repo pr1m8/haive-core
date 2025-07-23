@@ -86,6 +86,13 @@ from haive.core.schema.field_registry import StandardFields
 # Handle Agent import - use TYPE_CHECKING to avoid circular import
 if TYPE_CHECKING:
     from haive.agents.base.agent import Agent
+else:
+    # For runtime Pydantic validation
+    try:
+        from haive.agents.base.agent import Agent
+    except ImportError:
+        # If circular import, use Any
+        from typing import Any as Agent
 
 logger = logging.getLogger(__name__)
 console = Console()

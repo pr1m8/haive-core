@@ -259,8 +259,7 @@ def test_graph_extension():
     # Check paths
     paths = base_graph.find_all_paths(START, END)
     assert len(paths) == 1
-    assert paths[0].nodes == [START, "query_parser",
-        "router", "tool", "formatter", END]
+    assert paths[0].nodes == [START, "query_parser", "router", "tool", "formatter", END]
 
 
 # Test schema graph with NodeConfig objects
@@ -309,8 +308,7 @@ def test_node_config_graph():
     # STEP 3: Define the route validation function
     def route_by_validation(state: Dict[str, Any]) -> str:
         """Route based on validation status"""
-        print(
-            f"DEBUG: Routing with validation status: {state.get('validated', False)}")
+        print(f"DEBUG: Routing with validation status: {state.get('validated', False)}")
         if state.get("validated", False):
             print("DEBUG: Routing to 'execute'")
             return "execute"
@@ -337,8 +335,7 @@ def test_node_config_graph():
     print(f"Added node: 'tools' (type: {graph.node_types.get('tools')})")
 
     graph.add_node("execute_plan", execute_plan)
-    print(
-        f"Added node: 'execute_plan' (type: {graph.node_types.get('execute_plan')})")
+    print(f"Added node: 'execute_plan' (type: {graph.node_types.get('execute_plan')})")
 
     # STEP 6: Add direct edges
     print("\n--- Adding Direct Edges ---")
@@ -346,10 +343,10 @@ def test_node_config_graph():
     print(f"Added edge: {START} → agent")
 
     graph.add_edge("agent", "validate")
-    print("Added edge: agent → validate"e")
+    print("Added edge: agent → validatee")
 
     graph.add_edge("tools", "agent")  # Loop back to agent
-    print("Added edge: tools → agent"t")
+    print("Added edge: tools → agentt")
 
     graph.add_edge("execute_plan", END)
     print(f"Added edge: execute_plan → {END}")

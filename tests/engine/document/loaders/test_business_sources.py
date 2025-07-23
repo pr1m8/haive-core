@@ -13,11 +13,9 @@ This test validates:
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List
 
 # Add the source path to sys.path
-base_path = Path(
-    "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
+base_path = Path("/home/will/Projects/haive/backend/haive/packages/haive-core/src")
 sys.path.insert(0, str(base_path))
 
 
@@ -85,9 +83,8 @@ try:
         APPEND_ONLY = "append_only"
         DEDUPED = "deduped"
 
-
-except Exception as e:
-    pass")
+except Exception:
+    pass
 
 
 def test_platform_detection():
@@ -126,11 +123,10 @@ def test_platform_detection():
     detection_success = 0
     for url, expected_platform in test_urls.items():
         detected = detect_business_platform(url)
-        status = "✅" if detected == expected_platform else "❌"
         if detected == expected_platform:
             detection_success += 1
 
-    success_rate = (detection_success / len(test_urls)) * 100
+    (detection_success / len(test_urls)) * 100
 
     return detection_success >= 6
 
@@ -170,16 +166,14 @@ def test_sync_modes():
                 max_records=1000,
             )
 
-
             assert test_sync["expected_key"] in sync_params
             assert sync_params["page_size"] == 100
             assert sync_params.get("max_records") == 1000
 
             sync_tests_passed += 1
 
-        except Exception as e:
-            pass")
-
+        except Exception:
+            pass
 
     return sync_tests_passed >= 3
 
@@ -259,14 +253,12 @@ def test_business_source_creation():
 
             loader_kwargs = source.get_loader_kwargs()
 
-
             assert loader_kwargs["platform"] == config["platform"].value
 
             source_tests_passed += 1
 
-        except Exception as e:
-            pass")
-
+        except Exception:
+            pass
 
     return source_tests_passed >= 3
 
@@ -335,7 +327,6 @@ def test_data_filtering():
                 max_records=test_filter.get("max_records"),
             )
 
-
             if test_filter.get("custom_fields"):
                 pass
             if test_filter.get("filter_query"):
@@ -345,9 +336,8 @@ def test_data_filtering():
 
             filter_tests_passed += 1
 
-        except Exception as e:
-            pass")
-
+        except Exception:
+            pass
 
     return filter_tests_passed >= 4
 
@@ -392,19 +382,17 @@ def test_platform_authentication():
     auth_tests_passed = 0
     for config in auth_configs:
         try:
-            platform = config["platform"]
-            auth_type = config["auth_type"]
+            config["platform"]
+            config["auth_type"]
             required_fields = config["required_fields"]
-
 
             # Validate that we have all required authentication fields
             assert len(required_fields) > 0, "Must have required auth fields"
 
             auth_tests_passed += 1
 
-        except Exception as e:
-            pass")
-
+        except Exception:
+            pass
 
     return auth_tests_passed >= 4
 
@@ -469,16 +457,14 @@ def test_bulk_sync_operations():
                 page_size=operation["page_size"],
             )
 
-
             # Check expected features
             for feature in operation["expected_features"]:
                 assert feature in config, f"Missing expected feature: {feature}"
 
             bulk_tests_passed += 1
 
-        except Exception as e:
-            pass")
-
+        except Exception:
+            pass
 
     return bulk_tests_passed >= 2
 
@@ -487,54 +473,46 @@ def display_business_system_summary():
     """Display summary of the business sources implementation."""
 
 
-
-
-
-
-
-
-
 def main():
     """Run all business sources tests."""
 
     tests_passed = 0
-    total_tests = 6
 
     # Test 1: Platform Detection
     if test_platform_detection():
         tests_passed += 1
     else:
-        pass")
+        pass
 
     # Test 2: Sync Modes
     if test_sync_modes():
         tests_passed += 1
     else:
-        pass")
+        pass
 
     # Test 3: Business Source Creation
     if test_business_source_creation():
         tests_passed += 1
     else:
-        pass")
+        pass
 
     # Test 4: Data Filtering
     if test_data_filtering():
         tests_passed += 1
     else:
-        pass")
+        pass
 
     # Test 5: Platform Authentication
     if test_platform_authentication():
         tests_passed += 1
     else:
-        pass")
+        pass
 
     # Test 6: Bulk Sync Operations
     if test_bulk_sync_operations():
         tests_passed += 1
     else:
-        pass")
+        pass
 
     # Results
 

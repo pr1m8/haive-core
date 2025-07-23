@@ -76,7 +76,7 @@ def query_database(thread_id):
             thread_data = cursor.fetchone()
             if thread_data:
             else:
-                pass")
+                pass
 
             # 2. Check checkpoints table
             cursor.execute(
@@ -125,7 +125,7 @@ def query_database(thread_id):
                                     if content:
                                         pass
             else:
-                pass")
+                pass
 
             # 3. List recent threads
             cursor.execute(

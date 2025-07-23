@@ -157,7 +157,7 @@ def test_web_loaders_system():
                 if hasattr(loader, "requires_packages") and loader.requires_packages
             )
         else:
-            pass")
+            pass
 
     # Test 5: Recursive Crawling Configuration
 
@@ -185,7 +185,7 @@ def test_web_loaders_system():
             category = registration.category
             is_bulk = registration.bulk_info.supports_bulk
         else:
-            pass")
+            pass
 
     # Test 7: Metadata Extraction
 

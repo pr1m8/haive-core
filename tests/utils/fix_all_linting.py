@@ -61,7 +61,7 @@ def fix_package_linting(package_dir: Path) -> Dict[str, any]:
     }
 
     # Step 1: Check current issues
-    print("  📊 Checking current issues..."..")
+    print("  📊 Checking current issues.....")
     returncode, stdout, stderr = run_trunk_command(
         package_dir, ["trunk", "check", "--no-fix", "--ci"]
     )
@@ -75,25 +75,25 @@ def fix_package_linting(package_dir: Path) -> Dict[str, any]:
     print(f"  📝 Found {initial_issues} initial issues")
 
     # Step 2: Apply automatic fixes
-    print("  🛠️  Applying automatic fixes..."s...")
+    print("  🛠️  Applying automatic fixes...s...")
     returncode, stdout, stderr = run_trunk_command(
         package_dir, ["trunk", "fmt", "--all"]
     )
 
     if returncode == 0:
         results["format_applied"] = True
-        print("  ✅ Formatting applied successfully"y")
+        print("  ✅ Formatting applied successfullyy")
     else:
         print(f"  ⚠️  Formatting had issues: {stderr}")
 
     # Step 3: Run fix for remaining issues
-    print("  🔨 Running trunk check with auto-fix..."..")
+    print("  🔨 Running trunk check with auto-fix.....")
     returncode, stdout, stderr = run_trunk_command(
         package_dir, ["trunk", "check", "--fix", "--all"]
     )
 
     # Step 4: Final check
-    print("  🏁 Final validation..."..")
+    print("  🏁 Final validation.....")
     returncode, stdout, stderr = run_trunk_command(
         package_dir, ["trunk", "check", "--no-fix", "--ci"]
     )
@@ -150,7 +150,7 @@ def count_issues_from_output(output: str) -> int:
 def generate_report(all_results: List[Dict[str, any]]) -> None:
     """Generate a comprehensive report of all linting fixes."""
     print("\n" + "=" * 80)
-    print("🎯 LINTING FIX REPORT"RT")
+    print("🎯 LINTING FIX REPORTRT")
     print("=" * 80)
 
     total_packages = len(all_results)
@@ -158,14 +158,14 @@ def generate_report(all_results: List[Dict[str, any]]) -> None:
     total_issues_fixed = sum(r["issues_fixed"] for r in all_results)
     total_remaining = sum(r["remaining_issues"] for r in all_results)
 
-    print("📊 SUMMARY:"Y:")
+    print("📊 SUMMARY:Y:")
     print(f"  • Total packages processed: {total_packages}")
     print(f"  • Successfully cleaned: {successful_packages}")
     print(f"  • Packages with remaining issues: {total_packages - successful_packages}")
     print(f"  • Total issues fixed: {total_issues_fixed}")
     print(f"  • Total remaining issues: {total_remaining}")
 
-    print("\n📋 PACKAGE DETAILS:"S:")
+    print("\n📋 PACKAGE DETAILS:S:")
     for result in all_results:
         status_icon = "✅" if result["success"] else "❌"
         print(
@@ -175,7 +175,7 @@ def generate_report(all_results: List[Dict[str, any]]) -> None:
         )
 
     if total_remaining > 0:
-        print("\n⚠️  PACKAGES WITH REMAINING ISSUES:"ES:")
+        print("\n⚠️  PACKAGES WITH REMAINING ISSUES:ES:")
         for result in all_results:
             if not result["success"] and result["remaining_issues"] > 0:
                 print(f"  • {result['package']}: {result['remaining_issues']} issues")
@@ -186,13 +186,13 @@ def generate_report(all_results: List[Dict[str, any]]) -> None:
                         if ":high" in line or ":medium" in line:
                             print(f"    - {line.strip()}")
 
-    print("\n🎉 NEXT STEPS:"S:")
+    print("\n🎉 NEXT STEPS:S:")
     if total_remaining == 0:
-        print("  ✅ All packages are now lint-free!"!")
+        print("  ✅ All packages are now lint-free!!")
     else:
-        print("  🔍 Review remaining issues in packages listed above"ve")
-        print("  🛠️  Run 'trunk check' in specific packages for details"ails")
-        print("  📝 Some issues may require manual fixes"es")
+        print("  🔍 Review remaining issues in packages listed aboveve")
+        print("  🛠️  Run 'trunk check' in specific packages for detailsails")
+        print("  📝 Some issues may require manual fixeses")
 
 
 def main():

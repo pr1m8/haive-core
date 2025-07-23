@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 """Supabase metadata viewer utility for monitoring conversation agent errors."""
 
-import json
 import os
 import sys
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -302,7 +301,7 @@ def test_conversation_agent_with_new_id():
 
         return fresh_thread_id, True
 
-    except Exception as e:
+    except Exception:
         import traceback
 
         traceback.print_exc()
@@ -317,18 +316,18 @@ def main():
 
         errors = view_recent_errors(limit=5)
         if errors:
-            for i, error in enumerate(errors, 1):
+            for _i, error in enumerate(errors, 1):
 
-                for err in error["errors_found"][:3]:  # Show first 3 errors
+                for _err in error["errors_found"][:3]:  # Show first 3 errors
                     pass
         else:
-            pass")
+            pass
 
         # View conversation threads
 
         threads = view_conversation_threads(limit=10)
         for thread in threads:
-            status = "❌ HAS ERRORS" if thread["error_count"] > 0 else "✅ Clean"
+            "❌ HAS ERRORS" if thread["error_count"] > 0 else "✅ Clean"
 
         # Test with new thread ID
 
@@ -339,11 +338,11 @@ def main():
 
 
             if details["error_count"] == 0:
-                pass")
+                pass
             else:
-                pass")
+                pass
 
-    except Exception as e:
+    except Exception:
         import traceback
 
         traceback.print_exc()

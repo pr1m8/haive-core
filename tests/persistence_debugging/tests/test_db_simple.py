@@ -24,8 +24,7 @@ def test_conversation_with_db():
     )
 
     # Run with specific thread ID
-    result = session.invoke(
-        {}, config={"configurable": {"thread_id": thread_id}})
+    result = session.invoke({}, config={"configurable": {"thread_id": thread_id}})
 
     # Handle result which might be an object
     if hasattr(result, "messages"):
@@ -56,7 +55,7 @@ def query_database(thread_id):
 
             thread = cursor.fetchone()
             if thread:
-                print(f"✅ Thread found in threads table")
+                print("✅ Thread found in threads table"e")
                 print(f"   Created: {thread[1]}")
                 print(f"   Last access: {thread[2]}")
 
@@ -85,7 +84,7 @@ def query_database(thread_id):
 
             checkpoint = cursor.fetchone()
             if checkpoint:
-                print(f"\nLatest checkpoint:")
+                print("\nLatest checkpoint:")
                 print(f"   ID: {checkpoint[0]}")
                 print(f"   Created: {checkpoint[2]}")
 
@@ -93,7 +92,7 @@ def query_database(thread_id):
                 data = checkpoint[1]
                 if "channel_values" in data:
                     values = data["channel_values"]
-                    print(f"\nState summary:")
+                    print("\nState summary:")
                     print(f"   Messages: {len(values.get('messages', []))}")
                     print(f"   Topic: {values.get('topic')}")
                     print(f"   Speakers: {values.get('speakers', [])}")
@@ -102,13 +101,13 @@ def query_database(thread_id):
                     # Show sections
                     sections = values.get("document_sections", {})
                     if sections:
-                        print(f"\nDocument sections:")
+                        print("\nDocument sections:")
                         for section, content in sections.items():
                             if content:
                                 print(f"   - {section}: {len(content)} chars")
 
-    except Exception as e:
-        pass")
+    except Exception:
+        pass
 
 
 if __name__ == "__main__":

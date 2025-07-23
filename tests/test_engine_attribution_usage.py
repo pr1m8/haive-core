@@ -121,7 +121,7 @@ def route_based_on_engine(messages: List[BaseMessage]) -> str:
 
     route = routing_rules.get(engine_name, "default")
 
-    print("\n🔀 Routing Decision:"n: ")
+    print("\n🔀 Routing Decision:n: ")
     print(f"Last message from: {engine_name}")
     print(f"Routing to: {route}")
 

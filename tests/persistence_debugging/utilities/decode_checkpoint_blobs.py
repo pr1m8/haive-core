@@ -56,7 +56,7 @@ def decode_checkpoint_blobs(thread_id: str):
                                     else:
                                         pass
                         except Exception as e:
-                            pass")
+                            pass
                     else:
                         pass
 
@@ -112,13 +112,13 @@ def check_persistence_store_link():
                         content = f.read()
 
                     if "ConnectionManager" in content:
-                        pass")
+                        pass
                     elif "connection" in content.lower():
                         passde")
                 except:
                     pass
     else:
-        pass")
+        pass
 
 
 def main():

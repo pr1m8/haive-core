@@ -27,5 +27,5 @@ for field in ["messages", "token_usage", "engine", "engines"]:
 # Try to create instance
 try:
     instance = schema_class()
-except Exception as e:
-    pass")
+except Exception:
+    pass

@@ -29,11 +29,11 @@ schema = composer.build()
 for field_name, field_info in schema.__fields__.items():
     default_value = field_info.default
     if default_value is ...:
-        pass")
+        pass
     else:
-        pass")
+        pass
 
-for cls in schema.__mro__:
+for _cls in schema.__mro__:
     pass
 
 # Try to instantiate the schema
@@ -44,11 +44,11 @@ try:
     for field_name in schema.__fields__:
         value = getattr(instance, field_name)
         if value is ...:
-            pass")
+            pass
         else:
-            pass")
+            pass
 
-except Exception as e:
+except Exception:
     import traceback
 
     traceback.print_exc()
@@ -59,7 +59,7 @@ try:
 
     instance2 = schema_class()
 
-except Exception as e:
+except Exception:
     import traceback
 
     traceback.print_exc()

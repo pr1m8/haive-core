@@ -12,11 +12,9 @@ This test validates:
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List
 
 # Add the source path to sys.path
-base_path = Path(
-    "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
+base_path = Path("/home/will/Projects/haive/backend/haive/packages/haive-core/src")
 sys.path.insert(0, str(base_path))
 
 
@@ -66,9 +64,8 @@ try:
         ALL_TIME = "all_time"
         CUSTOM = "custom"
 
-
-except Exception as e:
-    pass")
+except Exception:
+    pass
 
 
 def test_platform_detection():
@@ -105,11 +102,10 @@ def test_platform_detection():
     detection_success = 0
     for file_path, expected_platform in test_files.items():
         detected = detect_chat_platform(file_path)
-        status = "✅" if detected == expected_platform else "❌"
         if detected == expected_platform:
             detection_success += 1
 
-    success_rate = (detection_success / len(test_files)) * 100
+    (detection_success / len(test_files)) * 100
 
     return detection_success >= 5
 
@@ -158,8 +154,8 @@ def test_date_filtering():
 
             date_tests_passed += 1
 
-        except Exception as e:
-            pass")
+        except Exception:
+            pass
 
     # Test custom date range
     try:
@@ -172,9 +168,8 @@ def test_date_filtering():
 
         date_tests_passed += 1
 
-    except Exception as e:
-        pass")
-
+    except Exception:
+        pass
 
     return date_tests_passed >= 5
 
@@ -253,14 +248,12 @@ def test_messaging_source_creation():
 
             loader_kwargs = source.get_loader_kwargs()
 
-
             assert loader_kwargs["platform"] == config["platform"].value
 
             source_tests_passed += 1
 
-        except Exception as e:
-            pass")
-
+        except Exception:
+            pass
 
     return source_tests_passed >= 3
 
@@ -338,7 +331,6 @@ def test_content_filtering():
                 keyword_filter=test_filter.get("keyword_filter"),
             )
 
-
             if test_filter.get("user_filter"):
                 pass
             if test_filter.get("keyword_filter"):
@@ -348,9 +340,8 @@ def test_content_filtering():
 
             filter_tests_passed += 1
 
-        except Exception as e:
-            pass")
-
+        except Exception:
+            pass
 
     return filter_tests_passed >= 4
 
@@ -395,19 +386,17 @@ def test_api_authentication():
     auth_tests_passed = 0
     for config in auth_configs:
         try:
-            platform = config["platform"]
-            auth_type = config["auth_type"]
+            config["platform"]
+            config["auth_type"]
             required_fields = config["required_fields"]
-
 
             # Validate that we have all required authentication fields
             assert len(required_fields) > 0, "Must have required auth fields"
 
             auth_tests_passed += 1
 
-        except Exception as e:
-            pass")
-
+        except Exception:
+            pass
 
     return auth_tests_passed >= 4
 
@@ -466,15 +455,13 @@ def test_bulk_messaging_operations():
                 auto_detect=True,
             )
 
-
             assert result["total_files"] == operation["expected_files"]
             assert result["config"]["auto_detect_platform"]
 
             bulk_tests_passed += 1
 
-        except Exception as e:
-            pass")
-
+        except Exception:
+            pass
 
     return bulk_tests_passed >= 2
 
@@ -483,54 +470,46 @@ def display_messaging_system_summary():
     """Display summary of the messaging sources implementation."""
 
 
-
-
-
-
-
-
-
 def main():
     """Run all messaging sources tests."""
 
     tests_passed = 0
-    total_tests = 6
 
     # Test 1: Platform Detection
     if test_platform_detection():
         tests_passed += 1
     else:
-        pass")
+        pass
 
     # Test 2: Date Filtering
     if test_date_filtering():
         tests_passed += 1
     else:
-        pass")
+        pass
 
     # Test 3: Messaging Source Creation
     if test_messaging_source_creation():
         tests_passed += 1
     else:
-        pass")
+        pass
 
     # Test 4: Content Filtering
     if test_content_filtering():
         tests_passed += 1
     else:
-        pass")
+        pass
 
     # Test 5: API Authentication
     if test_api_authentication():
         tests_passed += 1
     else:
-        pass")
+        pass
 
     # Test 6: Bulk Operations
     if test_bulk_messaging_operations():
         tests_passed += 1
     else:
-        pass")
+        pass
 
     # Results
 

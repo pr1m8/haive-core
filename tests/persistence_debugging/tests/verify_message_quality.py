@@ -62,23 +62,23 @@ def test_message_flow():
         # Check quality based on test type
         if test_type == "greeting":
             if "hello" in response.lower() or "hi" in response.lower():
-                pass")
+                pass
             else:
-                pass")
+                pass
 
         elif test_type == "memory_check":
             if "john" in response.lower():
-                pass")
+                pass
             else:
-                pass")
+                pass
 
         elif test_type == "summary_request":
             keywords = ["python", "database", "postgresql", "prepared statements"]
             found = sum(1 for k in keywords if k in response.lower())
             if found >= 2:
-                pass")
+                pass
             else:
-                pass")
+                pass
 
     # Save conversation for review
     output_file = f"conversation_flow_{timestamp}.json"
@@ -133,10 +133,10 @@ def check_ssl_connection_issue():
             if "keepalives_idle" in kwargs:
                 pass
             else:
-                pass")
+                pass
 
     except Exception as e:
-        pass")
+        pass
 
 
 def main():

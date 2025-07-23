@@ -10,11 +10,9 @@ This test validates:
 
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional
 
 # Add the source path to sys.path
-base_path = Path(
-    "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
+base_path = Path("/home/will/Projects/haive/backend/haive/packages/haive-core/src")
 sys.path.insert(0, str(base_path))
 
 
@@ -69,9 +67,8 @@ try:
         RELEASES = "releases"
         DISCUSSIONS = "discussions"
 
-
-except Exception as e:
-    pass")
+except Exception:
+    pass
 
 
 def test_platform_detection():
@@ -108,11 +105,10 @@ def test_platform_detection():
     detection_success = 0
     for url, expected_platform in test_urls.items():
         detected = detect_specialized_platform(url)
-        status = "✅" if detected == expected_platform else "❌"
         if detected == expected_platform:
             detection_success += 1
 
-    success_rate = (detection_success / len(test_urls)) * 100
+    (detection_success / len(test_urls)) * 100
 
     return detection_success >= 5
 
@@ -179,14 +175,12 @@ def test_academic_sources():
 
             loader_kwargs = source.get_loader_kwargs()
 
-
             assert loader_kwargs["platform"] == config["platform"].value
 
             academic_tests_passed += 1
 
-        except Exception as e:
-            pass")
-
+        except Exception:
+            pass
 
     return academic_tests_passed >= 2
 
@@ -261,7 +255,6 @@ def test_media_sources():
             source = MockYouTubeSource(**config)
             loader_kwargs = source.get_loader_kwargs()
 
-
             # Verify video ID extraction
             if "expected_id" in config:
                 assert (
@@ -276,9 +269,8 @@ def test_media_sources():
 
             media_tests_passed += 1
 
-        except Exception as e:
-            pass")
-
+        except Exception:
+            pass
 
     return media_tests_passed >= 2
 
@@ -347,10 +339,9 @@ def test_development_sources():
             source = MockGitHubSource(**config)
             loader_kwargs = source.get_loader_kwargs()
 
-
             # Check data types
             if "data_types" in config:
-                data_type_names = [dt.value for dt in config["data_types"]]
+                [dt.value for dt in config["data_types"]]
 
             # Verify loader kwargs
             assert loader_kwargs["repo"] == config["repo"]
@@ -360,9 +351,8 @@ def test_development_sources():
 
             dev_tests_passed += 1
 
-        except Exception as e:
-            pass")
-
+        except Exception:
+            pass
 
     return dev_tests_passed >= 2
 
@@ -425,7 +415,6 @@ def test_knowledge_sources():
             source = MockWikipediaSource(**config)
             loader_kwargs = source.get_loader_kwargs()
 
-
             if config.get("query"):
                 pass
             elif config.get("page_titles"):
@@ -436,9 +425,8 @@ def test_knowledge_sources():
 
             knowledge_tests_passed += 1
 
-        except Exception as e:
-            pass")
-
+        except Exception:
+            pass
 
     return knowledge_tests_passed >= 2
 
@@ -447,50 +435,40 @@ def display_specialized_system_summary():
     """Display summary of the specialized sources implementation."""
 
 
-
-
-
-
-
-
-
-
-
 def main():
     """Run all specialized sources tests."""
 
     tests_passed = 0
-    total_tests = 5
 
     # Test 1: Platform Detection
     if test_platform_detection():
         tests_passed += 1
     else:
-        pass")
+        pass
 
     # Test 2: Academic Sources
     if test_academic_sources():
         tests_passed += 1
     else:
-        pass")
+        pass
 
     # Test 3: Media Sources
     if test_media_sources():
         tests_passed += 1
     else:
-        pass")
+        pass
 
     # Test 4: Development Sources
     if test_development_sources():
         tests_passed += 1
     else:
-        pass")
+        pass
 
     # Test 5: Knowledge Sources
     if test_knowledge_sources():
         tests_passed += 1
     else:
-        pass")
+        pass
 
     # Results
 

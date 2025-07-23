@@ -37,27 +37,22 @@ def test_prompt_template_directly():
 
     # Test with proper variables
     try:
-        formatted = RAG_QUERY_REFINEMENT.format(
-            query="what is the tallest building in france"
-        )
-    except Exception as e:
-        pass")
+        RAG_QUERY_REFINEMENT.format(query="what is the tallest building in france")
+    except Exception:
+        pass
 
 
 def test_augllm_config():
     """Test AugLLMConfig with the prompt template."""
     from haive.core.engine.aug_llm import AugLLMConfig
 
-
-    config = AugLLMConfig(
+    AugLLMConfig(
         prompt_template=RAG_QUERY_REFINEMENT,
         structured_output_model=QueryRefinementResponse,
         structured_output_version="v2",
     )
 
-
     # Test what happens when we provide input data as dict
-    input_data = {"query": "what is the tallest building in france"}
 
     # Check if the engine can handle this
 
@@ -65,8 +60,8 @@ def test_augllm_config():
 async def test_simple_agent():
     """Test SimpleAgent with debug output."""
     from haive.agents.simple.agent_v2 import SimpleAgentV2
-    from haive.core.engine.aug_llm import AugLLMConfig
 
+    from haive.core.engine.aug_llm import AugLLMConfig
 
     try:
         agent = SimpleAgentV2(
@@ -88,7 +83,7 @@ async def test_simple_agent():
             {"query": "what is the tallest building in france"}, debug=True
         )
 
-    except Exception as e:
+    except Exception:
         import traceback
 
         traceback.print_exc()

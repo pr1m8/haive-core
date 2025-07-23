@@ -105,7 +105,7 @@ def view_metadata_details():
 
                             # Check for errors in metadata
                             if "error" in meta_dict:
-                                pass")
+                                pass
 
                             # Show other keys
                             other_keys = [
@@ -146,7 +146,7 @@ def view_metadata_details():
 
 
     except Exception as e:
-        pass")
+        pass
 
 
 if __name__ == "__main__":

@@ -53,13 +53,12 @@ try:
 
     retrieved_data = postgres_config.get_checkpoint(updated_config)
 
-    if retrieved_data and retrieved_data.get(
-        "test_key") == test_data["test_key"]:
-        pass")
+    if retrieved_data and retrieved_data.get("test_key") == test_data["test_key"]:
+        pass
     else:
-        pass")
+        pass
 
-except Exception as e:
+except Exception:
     import traceback
 
     traceback.print_exc()

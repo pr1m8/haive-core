@@ -64,9 +64,9 @@ async def test_async_persistence():
         none_count = content.count('"prepare_threshold": None')
 
         if none_count > 0:
-            pass")
+            pass
         else:
-            pass")
+            pass
 
     except Exception as e:
         import traceback
@@ -97,16 +97,16 @@ def check_langgraph_modifications():
                         if "prepare_threshold" in line:
 
                             if "prepare_threshold=0" in line:
-                                pass")
+                                pass
                             elif "prepare_threshold=None" in line:
-                                pass")
+                                pass
                 else:
                     passnd")
 
             except Exception as e:
                 passe}")
         else:
-            pass")
+            pass
 
 
 def main():

@@ -44,7 +44,7 @@ def main():
                         if len(contrib) >= 3:
                             agent, section, content = contrib[0], contrib[1], contrib[2]
                             if "prepared statement" in content:
-                                pass")
+                                pass
                             elif "Error" in content:
                                 pass..")
 

@@ -209,7 +209,7 @@ class GenericEngineNodeConfig(NodeConfig, Generic[TInput, TOutput]):
         self, result: Any, state: StateLike, engine: Engine
     ) -> Command | Send:
         """Simple result wrapping - handle messages for LLM engines."""
-        logger.debug(f"🔍 WRAPPING RESULT:")
+        logger.debug("🔍 WRAPPING RESULT:")
         logger.debug(f"   Result type: {type(result)}")
         logger.debug(f"   Result value: {result}")
         logger.debug(f"   Has content: {hasattr(result, 'content')}")

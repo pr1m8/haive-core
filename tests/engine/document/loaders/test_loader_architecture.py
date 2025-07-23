@@ -143,7 +143,7 @@ def test_registry():
 
         pass
 
-    print("  ✓ Registered PDF source"e")
+    print("  ✓ Registered PDF sourcee")
 
     # Test finding source by path
     registration = source_registry.find_source_for_path("/path/to/document.pdf")
@@ -218,7 +218,7 @@ def test_complete_workflow():
     # Test the convenience function
     result = analyze_document_source("/path/to/document.pdf")
 
-    print("  ✓ Complete analysis:":")
+    print("  ✓ Complete analysis::")
     print(f"    - Path: {result['path']}")
     print(f"    - Path type: {result['analysis']['path_type']}")
     print(f"    - File extension: {result['analysis']['file_extension']}")

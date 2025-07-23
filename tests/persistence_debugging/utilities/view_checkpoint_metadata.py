@@ -57,7 +57,7 @@ def view_checkpoint_metadata(thread_id: str | None = None):
                             pass
 
                         if "error" in meta_dict:
-                            pass")
+                            pass
 
                         # Check writes for errors
                         if "writes" in meta_dict:
@@ -91,7 +91,7 @@ def view_checkpoint_metadata(thread_id: str | None = None):
                         passe}")
 
     except Exception as e:
-        pass")
+        pass
 
 
 def organize_test_files():

@@ -9,10 +9,8 @@ from datetime import datetime
 import psycopg
 
 # Add paths
-sys.path.insert(
-    0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
-sys.path.insert(
-    0, "/home/will/Projects/haive/backend/haive/packages/haive-agents/src")
+sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
+sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-agents/src")
 
 
 def test_simple_agent_persistence():
@@ -38,32 +36,32 @@ def test_simple_agent_persistence():
     # First interaction
 
     result1 = agent.invoke(
-        {"messages": [HumanMessage(
-            content="Hello, what's your name?")]}, config
+        {"messages": [HumanMessage(content="Hello, what's your name?")]}, config
     )
 
     # Handle result format
-    messages1 = result1.messages if hasattr(
-        result1, "messages") else result1.get("messages", [])
+    (result1.messages if hasattr(result1, "messages") else result1.get("messages", []))
 
     # Second interaction - test memory
 
     result2 = agent.invoke(
-        {"messages": [HumanMessage(
-            content="What did I just ask you?")]}, config
+        {"messages": [HumanMessage(content="What did I just ask you?")]}, config
     )
 
     # Handle result format
-    messages2 = result2.messages if hasattr(
-        result2, "messages") else result2.get("messages", [])
+    messages2 = (
+        result2.messages
+        if hasattr(result2, "messages")
+        else result2.get("messages", [])
+    )
 
     response = messages2[-1].content if messages2 else ""
 
     # Check if agent remembers
     if "name" in response.lower() or "asked" in response.lower():
-        pass")
+        pass
     else:
-        pass")
+        pass
 
     return thread_id, len(messages2)
 
@@ -116,22 +114,22 @@ def verify_checkpoint_content(thread_id: str, expected_messages: int):
                             pass
 
                         # Show messages
-                        for i, msg in enumerate(messages):
-                            msg_type = msg.get("type", "unknown")
-                            content = msg.get("content", "")[:100]
+                        for _i, msg in enumerate(messages):
+                            msg.get("type", "unknown")
+                            msg.get("content", "")[:100]
                     else:
-                        pass")
+                        pass
                 else:
-                    pass")
+                    pass
 
                 # Check prepared statements
                 cur.execute(
                     "SELECT COUNT(*) FROM pg_prepared_statements WHERE name LIKE '%pg%'"
                 )
-                ps_count = cur.fetchone()[0]
+                cur.fetchone()[0]
 
-    except Exception as e:
-        pass")
+    except Exception:
+        pass
 
 
 def test_async_checkpointer():
@@ -140,7 +138,7 @@ def test_async_checkpointer():
     from haive.core.persistence.postgres_config import PostgresCheckpointerConfig
 
     # Create async config
-    config = PostgresCheckpointerConfig(
+    PostgresCheckpointerConfig(
         mode="async",
         prepare_threshold=None,
         connection_kwargs={
@@ -148,7 +146,6 @@ def test_async_checkpointer():
             "application_name": "test_async_checkpointer",
         },
     )
-
 
 
 def main():
@@ -162,7 +159,6 @@ def main():
 
     # Test async config
     test_async_checkpointer()
-
 
 
 if __name__ == "__main__":

@@ -50,7 +50,7 @@ try:
 
 
 except Exception as e:
-    pass")
+    pass
 
 
 def test_connection_string_detection():
@@ -301,7 +301,7 @@ def test_database_source_creation():
             source_tests_passed += 1
 
         except Exception as e:
-            pass")
+            pass
 
 
     return source_tests_passed >= 2
@@ -327,31 +327,31 @@ def main():
     if test_connection_string_detection():
         tests_passed += 1
     else:
-        pass")
+        pass
 
     # Test 2: Loading Strategies
     if test_loading_strategies():
         tests_passed += 1
     else:
-        pass")
+        pass
 
     # Test 3: Text Splitter Configuration
     if test_text_splitter_config():
         tests_passed += 1
     else:
-        pass")
+        pass
 
     # Test 4: Fetch All Configuration
     if test_fetch_all_config():
         tests_passed += 1
     else:
-        pass")
+        pass
 
     # Test 5: Database Source Creation
     if test_database_source_creation():
         tests_passed += 1
     else:
-        pass")
+        pass
 
     # Results
 

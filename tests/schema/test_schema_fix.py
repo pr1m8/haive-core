@@ -102,7 +102,7 @@ if __name__ == "__main__":
         expected_field = "queryrefinementresponse"
         if hasattr(result, "keys") and expected_field in result:
         else:
-            pass")
+            pass
 
     except Exception as e:
         import traceback

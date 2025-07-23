@@ -1,18 +1,14 @@
 #!/usr/bin/env python3
 """Final comprehensive test of PostgreSQL persistence fixes."""
 
-import json
 import os
 import sys
-from datetime import datetime
 
 import psycopg
 
 # Add paths
-sys.path.insert(
-    0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
-sys.path.insert(
-    0, "/home/will/Projects/haive/backend/haive/packages/haive-agents/src")
+sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-core/src")
+sys.path.insert(0, "/home/will/Projects/haive/backend/haive/packages/haive-agents/src")
 
 
 def check_prepared_statements():
@@ -52,19 +48,20 @@ def test_persistence_fixes():
         )
         agent.compile()
 
-        result = agent.invoke(
+        agent.invoke(
             {"messages": [HumanMessage(content="Test message")]},
             {"configurable": {"thread_id": "final_test_simple"}},
         )
 
-    except Exception as e:
-        pass")
+    except Exception:
+        pass
 
     # Test 2: Conversation agent
     try:
         from haive.agents.conversation.collaberative.agent import (
             CollaborativeConversation,
         )
+
         from haive.core.engine.aug_llm import AugLLMConfig
 
         participants = {
@@ -87,16 +84,16 @@ def test_persistence_fixes():
             {"configurable": {"thread_id": "final_test_collab"}},
         )
 
-    except Exception as e:
-        pass")
+    except Exception:
+        pass
 
     # Check for new prepared statements
     final_ps = check_prepared_statements()
 
     if final_ps > initial_ps:
-        pass")
+        pass
     else:
-        pass")
+        pass
 
     # Check configurations
 
@@ -109,11 +106,11 @@ def test_persistence_fixes():
             content = f.read()
 
         if '"prepare_threshold": None' in content:
-            pass")
+            pass
         else:
-            pass")
-    except Exception as e:
-        pass")
+            pass
+    except Exception:
+        pass
 
     # Check persistence mixin
     try:
@@ -124,12 +121,11 @@ def test_persistence_fixes():
             content = f.read()
 
         if "prepare_threshold=None" in content:
-            pass")
+            pass
         else:
-            pass")
-    except Exception as e:
-        pass")
-
+            pass
+    except Exception:
+        pass
 
 
 if __name__ == "__main__":
