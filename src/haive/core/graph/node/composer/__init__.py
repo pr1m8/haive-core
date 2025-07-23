@@ -98,12 +98,12 @@ __all__ = [
 if _advanced_available:
     __all__.extend(
         [
-            "AdvancedNodeComposer",
             "AdvancedComposedNode",
+            "AdvancedNodeComposer",
             "TypedCallableNode",
+            "as_node",
             "callable_to_node",
             "node_with_custom_logic",
-            "as_node",
         ]
     )
 
@@ -129,8 +129,8 @@ if _integrated_available:
             "IntegratedNodeComposer",
             "SchemaAwareComposedNode",
             "StateSchemaAdapter",
-            "integrate_node_with_schema",
             "create_schema_aware_node",
+            "integrate_node_with_schema",
             "with_state_schema",
         ]
     )

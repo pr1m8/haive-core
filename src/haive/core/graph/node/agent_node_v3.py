@@ -61,7 +61,7 @@ Examples:
 
 See Also:
     - :class:`haive.core.schema.prebuilt.multi_agent_state.MultiAgentState`: Container state
-    - :class:`haive.agents.base.agent.Agent`: Base agent class
+    - :class:`haive.agents.base.Agent`: Base agent class
     - :mod:`haive.core.graph.node.base_node_config`: Base node configuration
 """
 
@@ -201,7 +201,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
     See Also:
         - :func:`create_agent_node_v3`: Convenience factory function
         - :class:`haive.core.schema.prebuilt.multi_agent_state.MultiAgentState`: Container state
-        - :class:`haive.agents.base.agent.Agent`: Base agent class
+        - :class:`haive.agents.base.Agent`: Base agent class
         - :class:`haive.core.graph.node.base_node_config.BaseNodeConfig`: Base configuration
     """
 
@@ -1272,7 +1272,7 @@ def create_agent_node_v3(
     See Also:
         - :class:`AgentNodeV3Config`: The main configuration class
         - :class:`haive.core.schema.prebuilt.multi_agent_state.MultiAgentState`: Container state
-        - :class:`haive.agents.base.agent.Agent`: Base agent class
+        - :class:`haive.agents.base.Agent`: Base agent class
         - :mod:`langgraph.graph`: LangGraph integration
     """
     # Ensure model is rebuilt if needed

@@ -8,6 +8,7 @@ It integrates with the field registry for standardized field definitions.
 import logging
 from typing import Any, Generic, TypeVar, overload
 
+from langgraph.graph import END
 from langgraph.types import Command, RetryPolicy, Send
 from pydantic import BaseModel, Field
 
@@ -60,6 +61,8 @@ class GenericEngineNodeConfig(NodeConfig, Generic[TInput, TOutput]):
     retry_policy: RetryPolicy | None = Field(default=None)
     use_send: bool = Field(default=False)
     debug: bool = Field(default=True)
+    config_overrides: dict[str, Any] = Field(default_factory=dict)
+    command_goto: str | None = Field(default=None)
 
     def model_post_init(self, __context) -> None:
         """Post-initialization to setup schemas from field definitions."""
@@ -119,7 +122,7 @@ class GenericEngineNodeConfig(NodeConfig, Generic[TInput, TOutput]):
                 raise ValueError(f"No engine available for node '{self.name}'")
 
             # Extract input using schema-aware method
-            input_data = self._extract_typed_input(state, engine)
+            input_data = self._extract_smart_input(state, engine)
 
             # Execute engine
             result = self._execute_with_config(engine, input_data, config)
@@ -173,26 +176,64 @@ class GenericEngineNodeConfig(NodeConfig, Generic[TInput, TOutput]):
         # Fallback to original logic
         return self._wrap_smart_result(result, state, engine)
 
-    # Placeholder methods for backwards compatibility
+    # Simple implementation - just copy the core method that was missing
     def _get_engine(self, state: StateLike | None = None) -> Engine | None:
-        """Get engine (to be implemented by subclasses or copied from original)."""
-        raise NotImplementedError("Subclasses should implement _get_engine")
+        """Get engine from direct reference or state's engines dict."""
+        # Priority 1: Direct engine reference
+        if self.engine:
+            return self.engine
+
+        # Priority 2: Get from state's engines dict using engine_name
+        if self.engine_name and state:
+            if hasattr(state, "engines"):
+                engines_dict = getattr(state, "engines", {})
+                if isinstance(engines_dict, dict) and self.engine_name in engines_dict:
+                    return engines_dict[self.engine_name]
+
+        return None
 
     def _extract_smart_input(self, state: StateLike, engine: Engine) -> Any:
-        """Extract smart input (to be implemented by subclasses or copied from original)."""
-        raise NotImplementedError("Subclasses should implement _extract_smart_input")
+        """Simple input extraction - just get messages for LLM engines."""
+        if hasattr(engine, "engine_type") and engine.engine_type.value == "llm":
+            messages = getattr(state, "messages", [])
+            return {"messages": messages}
+        return state
 
     def _execute_with_config(
         self, engine: Engine, input_data: Any, config: ConfigLike | None
     ) -> Any:
-        """Execute engine with config (to be implemented by subclasses or copied from original)."""
-        raise NotImplementedError("Subclasses should implement _execute_with_config")
+        """Simple execution - just call engine.invoke."""
+        return engine.invoke(input_data, config)
 
     def _wrap_smart_result(
         self, result: Any, state: StateLike, engine: Engine
     ) -> Command | Send:
-        """Wrap smart result (to be implemented by subclasses or copied from original)."""
-        raise NotImplementedError("Subclasses should implement _wrap_smart_result")
+        """Simple result wrapping - handle messages for LLM engines."""
+        logger.debug(f"🔍 WRAPPING RESULT:")
+        logger.debug(f"   Result type: {type(result)}")
+        logger.debug(f"   Result value: {result}")
+        logger.debug(f"   Has content: {hasattr(result, 'content')}")
+        logger.debug(f"   Has type: {hasattr(result, 'type')}")
+
+        # Check if result is a message-like object
+        if hasattr(result, "content") and hasattr(result, "type"):
+            update = {"messages": [result]}
+            logger.debug(f"   ✅ Treating as message, update: {update}")
+        else:
+            update = {"result": result}
+            logger.debug(f"   ⚠️  Treating as generic result, update: {update}")
+
+        logger.debug(f"   Creating Command with goto: {self.command_goto}")
+        logger.debug(f"   Final update dict: {update}")
+
+        if update is None:
+            logger.error("   ❌ UPDATE IS NONE! This will crash LangGraph!")
+            update = {}
+
+        # Fix: If command_goto is None, default to END
+        goto = self.command_goto if self.command_goto is not None else END
+        logger.debug(f"   Fixed goto: {goto}")
+        return Command(update=update, goto=goto)
 
 
 # Specialized node configurations for different engine types

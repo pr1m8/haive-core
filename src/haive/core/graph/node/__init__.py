@@ -93,7 +93,8 @@ Factory functions for quick node creation::
     )
 """
 
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from collections.abc import Callable
+from typing import Any, Dict, List, Optional, Type, Union
 
 from langgraph.graph import END
 from langgraph.prebuilt import ToolNode, ValidationNode
@@ -192,11 +193,11 @@ from .utils import (
 
 def create_node(
     engine_or_callable: Any,
-    name: Optional[str] = None,
-    command_goto: Optional[CommandGoto] = None,
-    input_mapping: Optional[Dict[str, str]] = None,
-    output_mapping: Optional[Dict[str, str]] = None,
-    retry_policy: Optional[RetryPolicy] = None,
+    name: str | None = None,
+    command_goto: CommandGoto | None = None,
+    input_mapping: dict[str, str] | None = None,
+    output_mapping: dict[str, str] | None = None,
+    retry_policy: RetryPolicy | None = None,
     **kwargs
 ) -> NodeFunction:
     """Create a node function from an engine or callable.
@@ -245,11 +246,11 @@ def create_node(
 
 def create_engine_node(
     engine: Any,
-    name: Optional[str] = None,
-    command_goto: Optional[CommandGoto] = None,
-    input_mapping: Optional[Dict[str, str]] = None,
-    output_mapping: Optional[Dict[str, str]] = None,
-    retry_policy: Optional[RetryPolicy] = None,
+    name: str | None = None,
+    command_goto: CommandGoto | None = None,
+    input_mapping: dict[str, str] | None = None,
+    output_mapping: dict[str, str] | None = None,
+    retry_policy: RetryPolicy | None = None,
 ) -> NodeFunction:
     """Create a node function specifically from an engine.
 
@@ -278,9 +279,9 @@ def create_engine_node(
 
 
 def create_validation_node(
-    schemas: List[Union[Type[BaseModel], Callable]],
-    name: Optional[str] = None,
-    command_goto: Optional[CommandGoto] = None,
+    schemas: list[type[BaseModel] | Callable],
+    name: str | None = None,
+    command_goto: CommandGoto | None = None,
     messages_key: str = "messages",
 ) -> NodeFunction:
     """Create a validation node.
@@ -310,11 +311,11 @@ def create_validation_node(
 
 
 def create_tool_node(
-    tools: List[Any],
-    name: Optional[str] = None,
-    command_goto: Optional[CommandGoto] = None,
+    tools: list[Any],
+    name: str | None = None,
+    command_goto: CommandGoto | None = None,
     messages_key: str = "messages",
-    handle_tool_errors: Union[bool, str, Callable[..., str]] = True,
+    handle_tool_errors: bool | str | Callable[..., str] = True,
 ) -> NodeFunction:
     """Create a tool node.
 
@@ -345,9 +346,9 @@ def create_tool_node(
 
 def create_branch_node(
     condition: Callable,
-    routes: Dict[Any, str],
-    name: Optional[str] = None,
-    input_mapping: Optional[Dict[str, str]] = None,
+    routes: dict[Any, str],
+    name: str | None = None,
+    input_mapping: dict[str, str] | None = None,
 ) -> NodeFunction:
     """Create a branch node.
 
@@ -378,7 +379,7 @@ def get_registry() -> NodeRegistry:
     return NodeRegistry.get_instance()
 
 
-def register_custom_node_type(name: str, config_class: Type[NodeConfig]) -> None:
+def register_custom_node_type(name: str, config_class: type[NodeConfig]) -> None:
     """Register a custom node type."""
     NodeRegistry.get_instance().register_custom_node_type(name, config_class)
 
