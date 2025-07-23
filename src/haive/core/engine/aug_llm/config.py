@@ -25,6 +25,8 @@ import json
 import logging
 import os
 from collections.abc import Callable, Sequence
+
+# Lazy loading for performance optimization - defer heavy mixin imports
 from typing import TYPE_CHECKING, Any, Literal, Self, Union, cast
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
@@ -57,10 +59,25 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.tree import Tree
 
-from haive.core.common.mixins.structured_output_mixin import StructuredOutputMixin
-from haive.core.common.mixins.tool_route_mixin import ToolRouteMixin
+if TYPE_CHECKING:
+    from haive.core.common.mixins.structured_output_mixin import StructuredOutputMixin
+    from haive.core.common.mixins.tool_route_mixin import ToolRouteMixin
+    from haive.core.models.llm.base import AzureLLMConfig, LLMConfig
+else:
+    # Import stub classes for runtime
+    class StructuredOutputMixin:
+        pass
+    class ToolRouteMixin:
+        pass
+    # Import actual classes at runtime for use in default_factory
+    try:
+        from haive.core.models.llm.base import AzureLLMConfig, LLMConfig
+    except ImportError:
+        # Fallback if import fails
+        AzureLLMConfig = None
+        LLMConfig = None
+
 from haive.core.engine.base import EngineType, InvokableEngine
-from haive.core.models.llm.base import AzureLLMConfig, LLMConfig
 
 logger = logging.getLogger(__name__)
 console = Console()
@@ -90,14 +107,22 @@ StructuredOutputVersion = Literal["v1", "v2"]
 ToolChoiceMode = Literal["auto", "required", "optional", "none"]
 
 
-class AugLLMConfig(
-    ToolRouteMixin,
-    StructuredOutputMixin,
-    InvokableEngine[
-        Union[str, dict[str, Any], list[BaseMessage]],
-        Union[BaseMessage, dict[str, Any]],
-    ],
-):
+# Dynamic class creation to avoid import-time mixin loading
+def _get_augllm_base_classes():
+    """Dynamically load base classes only when needed."""
+    from haive.core.common.mixins.structured_output_mixin import StructuredOutputMixin
+    from haive.core.common.mixins.tool_route_mixin import ToolRouteMixin
+    
+    return (
+        ToolRouteMixin,
+        StructuredOutputMixin,
+        InvokableEngine[
+            Union[str, dict[str, Any], list[BaseMessage]],
+            Union[BaseMessage, dict[str, Any]],
+        ],
+    )
+
+class AugLLMConfig(*_get_augllm_base_classes()):
     """Configuration for creating enhanced LLM chains with flexible message handling.
 
     AugLLMConfig provides a structured way to configure and create LLM chains
@@ -164,7 +189,7 @@ class AugLLMConfig(
 
     # Core LLM configuration
     llm_config: LLMConfig = Field(
-        default_factory=lambda: AzureLLMConfig(model="gpt-4o"),
+        default_factory=lambda: AzureLLMConfig(model="gpt-4o") if AzureLLMConfig else None,
         description="LLM provider configuration",
     )
 

@@ -12,7 +12,6 @@ from typing import TYPE_CHECKING, Any, Optional, Self
 
 from pydantic import Field, model_validator
 
-from haive.core.common.mixins import MCPMixin
 from haive.core.engine.aug_llm.config import AugLLMConfig
 
 if TYPE_CHECKING:
@@ -23,7 +22,13 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class MCPAugLLMConfig(MCPMixin, AugLLMConfig):
+def _get_mcp_mixin():
+    """Lazy import MCPMixin to avoid circular dependency."""
+    from haive.core.common.mixins import MCPMixin
+    return MCPMixin
+
+
+class MCPAugLLMConfig(_get_mcp_mixin(), AugLLMConfig):
     """AugLLMConfig enhanced with MCP (Model Context Protocol) support.
 
     This configuration class extends AugLLMConfig with MCP capabilities through

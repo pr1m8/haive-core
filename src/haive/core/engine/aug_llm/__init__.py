@@ -41,10 +41,12 @@ Examples:
 
 from haive.core.engine.aug_llm.config import AugLLMConfig
 from haive.core.engine.aug_llm.factory import AugLLMFactory
-from haive.core.engine.aug_llm.mcp_config import (
-    MCPAugLLMConfig,
-    create_mcp_aug_llm_config,
-)
+
+# Temporarily commented out to fix circular import
+# from haive.core.engine.aug_llm.mcp_config import (
+#     MCPAugLLMConfig,
+#     create_mcp_aug_llm_config,
+# )
 from haive.core.engine.aug_llm.utils import (
     chain_runnables,
     compose_runnable,
@@ -56,11 +58,12 @@ from haive.core.engine.aug_llm.utils import (
 __all__ = [
     "AugLLMConfig",
     "AugLLMFactory",
-    "MCPAugLLMConfig",
+    # Temporarily commented out to fix circular import
+    # "MCPAugLLMConfig",
     "chain_runnables",
     "compose_runnable",
     "compose_runnables_from_dict",
-    "create_mcp_aug_llm_config",
+    # "create_mcp_aug_llm_config",
     "create_runnables_dict",
     "merge_configs",
 ]
