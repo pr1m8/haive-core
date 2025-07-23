@@ -1,7 +1,7 @@
 """Dynamic output mapping based on state."""
 
 import logging
-from typing import Any
+from typing import Any, Self
 
 from langgraph.graph import END
 from pydantic import BaseModel, Field, model_validator
@@ -38,8 +38,7 @@ class DynamicMapping(BaseModel):
     model_config = {"arbitrary_types_allowed": True}
 
     @model_validator(mode="after")
-    @classmethod
-    def validate_mappings(cls) -> Any:
+    def validate_mappings(self) -> Self:
         for _key, mapping_data in self.mappings.items():
             if "mapping" in mapping_data and isinstance(mapping_data["mapping"], dict):
                 # No conversion needed now - we accept dict directly

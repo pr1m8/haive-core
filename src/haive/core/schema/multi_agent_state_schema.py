@@ -43,10 +43,7 @@ class MultiAgentStateSchema(StateSchema):
     )
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def populate_engines_dict(cls) -> MultiAgentStateSchema:
+    def populate_engines_dict(self) -> MultiAgentStateSchema:
         """Populate the engines dictionary with all available engines.
 
         This validator runs after the model is created and:

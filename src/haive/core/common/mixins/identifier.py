@@ -30,6 +30,7 @@ Usage:
 """
 
 import uuid
+from typing import Self
 from uuid import UUID
 
 from pydantic import (
@@ -107,8 +108,7 @@ class IdentifierMixin(BaseModel):
         return v
 
     @model_validator(mode="after")
-    @classmethod
-    def initialize_uuid_obj(cls) -> "IdentifierMixin":
+    def initialize_uuid_obj(self) -> Self:
         """Initialize UUID object after model validation.
 
         Returns:

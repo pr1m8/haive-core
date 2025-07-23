@@ -38,7 +38,7 @@ Usage:
 import inspect
 import logging
 from collections.abc import Callable
-from typing import Any, get_type_hints
+from typing import Any, Self, get_type_hints
 
 from pydantic import BaseModel, Field, model_validator
 from rich.console import Console
@@ -221,10 +221,7 @@ class ToolRouteMixin(BaseModel):
         return self
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def _validate_and_process_tools(cls) -> "ToolRouteMixin":
+    def _validate_and_process_tools(self) -> Self:
         """Process tools_dict and routed_tools into tool_routes after initialization."""
         # Process tools_dict into tool_routes
         self._process_tools_dict()
@@ -684,8 +681,7 @@ class ToolRouteMixin(BaseModel):
             for i, (tool, route) in enumerate(self.routed_tools):
                 tool_name = self._generate_tool_name(tool, f"routed_{route}", i)
                 routed_tree.add(
-                    f"{tool_name} → [yellow]{route}[/yellow] [dim]({
-                        type(tool).__name__})[/dim]"
+                    f"{tool_name} → [yellow]{route}[/yellow] [dim]({type(tool).__name__})[/dim]"
                 )
             console.print(routed_tree)
 

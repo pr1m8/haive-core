@@ -1069,8 +1069,7 @@ class SupabaseCheckpointerConfig(CheckpointerConfig):
     checkpointer: Any | None = Field(default=None, exclude=True)
 
     @model_validator(mode="after")
-    @classmethod
-    def validate_supabase_available(cls) -> Any:
+    def validate_supabase_available(self) -> Any:
         """Validate that Supabase dependencies are available."""
         if not SUPABASE_AVAILABLE:
             raise ImportError(

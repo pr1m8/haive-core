@@ -8,7 +8,7 @@ as a proper graph node that returns Command or Send objects.
 import inspect
 import logging
 from collections.abc import Callable
-from typing import Any, TypeVar
+from typing import Any, Self, TypeVar
 
 from langgraph.types import Command
 from pydantic import BaseModel, Field, model_validator
@@ -115,10 +115,7 @@ class CallableNodeConfig(BaseNodeConfig):
     )
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def validate_config(cls) -> "CallableNodeConfig":
+    def validate_config(self) -> Self:
         """Validate the configuration."""
         # Check that we have some way to route
         if not any(
@@ -167,8 +164,7 @@ class CallableNodeConfig(BaseNodeConfig):
                 name=field_name,
                 field_type=field_type,
                 required=(param.default == inspect.Parameter.empty),
-                description=f"Parameter {param_name} for {
-                    self.callable_func.__name__}",
+                description=f"Parameter {param_name} for {self.callable_func.__name__}",
             )
             fields.append(field)
 

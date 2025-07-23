@@ -7,7 +7,7 @@ functionality for document loading, processing, and management.
 
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import Any, Self
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
@@ -303,8 +303,7 @@ class ProcessedDocument(BaseModel):
     word_count: int = Field(default=0, description="Estimated word count")
 
     @model_validator(mode="after")
-    @classmethod
-    def update_statistics(cls) -> "ProcessedDocument":
+    def update_statistics(self) -> Self:
         """Update statistics based on content and chunks."""
         self.chunk_count = len(self.chunks)
         self.character_count = len(self.content)
@@ -360,8 +359,7 @@ class DocumentOutput(BaseModel):
     total_words: int = Field(0, description="Total estimated words")
 
     @model_validator(mode="after")
-    @classmethod
-    def update_statistics(cls) -> "DocumentOutput":
+    def update_statistics(self) -> Self:
         """Update statistics based on processed documents."""
         self.total_documents = len(self.documents)
         self.successful_documents = len([d for d in self.documents if d.content])

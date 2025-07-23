@@ -35,7 +35,7 @@ Usage:
 import json
 import logging
 from datetime import datetime
-from typing import Any
+from typing import Any, Self
 
 from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, model_validator
 from rich.console import Console
@@ -91,10 +91,7 @@ class EngineStateMixin(BaseModel):
     model_config = ConfigDict(validate_assignment=True, arbitrary_types_allowed=True)
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def validate_and_organize_engines(cls) -> "EngineStateMixin":
+    def validate_and_organize_engines(self) -> Self:
         """Ensure engines are properly organized by type and validated.
 
         This validator rebuilds the engines_by_type index to ensure consistency
@@ -159,10 +156,7 @@ class EngineStateMixin(BaseModel):
             "performance": {"total_calls": 0, "total_time": 0.0, "avg_time": 0.0},
         }
 
-        logger.debug(
-            f"Added engine '{engine_name}' of type {
-                engine.engine_type}"
-        )
+        logger.debug(f"Added engine '{engine_name}' of type {engine.engine_type}")
 
     def get_engine(self, name: str) -> Engine | None:
         """Get an engine by name with access logging.

@@ -373,10 +373,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         return data
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def setup_engines_and_tools(cls) -> Self:
+    def setup_engines_and_tools(self) -> Self:
         """Setup engines and sync their tools, structured output models, and add engine to state.
 
         This validator runs after the model is created and:
@@ -513,10 +510,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                         )
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def sync_engine_fields(cls) -> StateSchema:
+    def sync_engine_fields(self) -> StateSchema:
         """Sync between engine and engines dict for backward compatibility.
 
         This validator ensures that:

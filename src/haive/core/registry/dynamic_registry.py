@@ -195,8 +195,7 @@ class DynamicRegistry(BaseModel, Generic[T]):
         return v
 
     @model_validator(mode="after")
-    @classmethod
-    def validate_active_items(cls) -> "DynamicRegistry[T]":
+    def validate_active_items(self) -> "DynamicRegistry[T]":
         """Validate that active_items are consistent with items."""
         # Remove any active items that don't exist in items
         valid_active = {

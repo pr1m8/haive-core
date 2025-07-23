@@ -1,4 +1,4 @@
-from typing import ClassVar, Literal, Optional
+from typing import ClassVar, Literal, Optional, Self
 
 from pydantic import Field, field_validator, model_validator
 
@@ -36,8 +36,7 @@ class BranchModel(SerializableModel):
         return v
 
     @model_validator(mode="after")
-    @classmethod
-    def ensure_valid_branch(cls) -> "BranchModel":
+    def ensure_valid_branch(self) -> Self:
         """Ensure the branch specification is valid."""
         # For conditional branches, we need either ends or then
         if self.branch_type == "conditional" and not self.ends and not self.then:

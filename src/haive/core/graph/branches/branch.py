@@ -7,7 +7,7 @@ separate ConditionalEdge objects, consolidating all routing logic.
 import logging
 import uuid
 from collections.abc import Callable
-from typing import Any, Union
+from typing import Any, Self, Union
 
 from langgraph.graph import END
 from langgraph.types import Command
@@ -74,10 +74,7 @@ class Branch(BaseModel):
     model_config = {"arbitrary_types_allowed": True}
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def setup_function_and_mappings(cls) -> "Branch":
+    def setup_function_and_mappings(self) -> Self:
         """Set up function and mappings after initialization."""
         # Resolve function from reference
         if self.function_ref and not self.function:
@@ -98,10 +95,7 @@ class Branch(BaseModel):
         return self
 
     @model_validator(mode="after")
-
-
-    @classmethod
-    def validate_destinations_and_default(cls) -> "Branch":
+    def validate_destinations_and_default(self) -> Self:
         """Validate destinations and set default if needed."""
         if not self.destinations:
             self.destinations = {True: "continue", False: END}
