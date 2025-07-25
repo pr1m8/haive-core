@@ -507,9 +507,13 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
 
     def _set_active_agent(self, state: StateLike) -> None:
         """Set active agent if container supports it."""
-        if hasattr(state, "set_active_agent"):
+        # Only try to set active agent if the state supports it
+        # and we're not using a direct agent reference
+        if hasattr(state, "set_active_agent") and not self.agent:
+            # Only validate if we're relying on state's agents dict
             state.set_active_agent(self.agent_name)
         elif hasattr(state, "active_agent"):
+            # Direct assignment doesn't validate
             state.active_agent = self.agent_name
 
     def _project_state_for_agent(
