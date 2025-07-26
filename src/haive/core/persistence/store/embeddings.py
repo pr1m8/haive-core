@@ -63,7 +63,7 @@ class EmbeddingAdapter:
                 )
             else:
                 # Try generic langchain embeddings
-                from langchain.embeddings import init_embeddings
+                from langchain_community.embeddings import init_embeddings
 
                 return init_embeddings(provider)
 
@@ -85,7 +85,7 @@ class EmbeddingAdapter:
 
             # Try fallback to langchain
             try:
-                from langchain.embeddings import init_embeddings
+                from langchain_community.embeddings import init_embeddings
 
                 embeddings = init_embeddings(provider)
 

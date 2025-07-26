@@ -85,7 +85,7 @@ class PostgresStoreWrapper(SerializableStoreWrapper):
             # Add embedding function if specified
             if "embed_model" in self.config.index_config:
                 try:
-                    from langchain.embeddings import init_embeddings
+                    from langchain_community.embeddings import init_embeddings
 
                     index_config["embed"] = init_embeddings(
                         self.config.index_config["embed_model"]
@@ -235,7 +235,7 @@ class AsyncPostgresStoreWrapper(SerializableStoreWrapper):
             # Add embedding function if specified
             if "embed_model" in self.config.index_config:
                 try:
-                    from langchain.embeddings import init_embeddings
+                    from langchain_community.embeddings import init_embeddings
 
                     index_config["embed"] = init_embeddings(
                         self.config.index_config["embed_model"]
