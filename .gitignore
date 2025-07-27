@@ -127,3 +127,5 @@ token.json
 venv/
 .secrets/
 docker/nginx/sites-enabled/
+.venv/
+poetry.lock
