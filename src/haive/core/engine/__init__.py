@@ -198,7 +198,9 @@ _VECTORSTORE_COMPONENTS = {
 
 
 def __getattr__(name: str):
-    """Lazy loading for agent, document and retriever components to avoid expensive initialization."""
+    """Lazy loading for agent, document and retriever components to avoid expensive
+    initialization.
+    """
     if name in _AGENT_COMPONENTS:
         # Only import agent module when actually needed (17+ second schema_composer delay)
         from haive.core.engine.agent import (
