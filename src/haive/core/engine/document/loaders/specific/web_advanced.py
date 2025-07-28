@@ -1,7 +1,7 @@
 """Advanced Web Loaders for Document Engine.
 
-This module implements advanced web loaders including HuggingFace, PubMed, RSS,
-and other specialized web sources.
+This module implements advanced web loaders including HuggingFace, PubMed, RSS, and
+other specialized web sources.
 """
 
 import logging

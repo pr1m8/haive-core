@@ -1,7 +1,7 @@
 """Cloud Storage Loaders for Document Engine.
 
-This module implements cloud storage loaders for AWS S3, Google Cloud Storage,
-Azure Blob Storage, and other cloud providers.
+This module implements cloud storage loaders for AWS S3, Google Cloud Storage, Azure
+Blob Storage, and other cloud providers.
 """
 
 import logging

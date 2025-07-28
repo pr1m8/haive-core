@@ -1,7 +1,7 @@
 """Advanced File Loaders for Document Engine.
 
-This module implements advanced file loaders for specialized formats including
-BibTeX, ReStructuredText, TSV, Org Mode, MHTML, Visio, and subtitle files.
+This module implements advanced file loaders for specialized formats including BibTeX,
+ReStructuredText, TSV, Org Mode, MHTML, Visio, and subtitle files.
 """
 
 import logging

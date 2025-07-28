@@ -1,7 +1,7 @@
 """Scientific and Academic File Loaders.
 
-This module contains loaders for scientific formats like BibTeX, LaTeX,
-and other academic file types.
+This module contains loaders for scientific formats like BibTeX, LaTeX, and other
+academic file types.
 """
 
 import logging

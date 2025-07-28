@@ -1,7 +1,7 @@
 """Microsoft Office and Office-like File Loaders.
 
-This module contains loaders for Office formats like Word, Excel, PowerPoint,
-and their open-source equivalents.
+This module contains loaders for Office formats like Word, Excel, PowerPoint, and their
+open-source equivalents.
 """
 
 import logging

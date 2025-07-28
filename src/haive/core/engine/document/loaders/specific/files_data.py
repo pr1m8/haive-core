@@ -1,7 +1,7 @@
 """Data File Loaders.
 
-This module contains loaders for data formats like CSV, JSON, XML, YAML, TOML,
-and other structured data files.
+This module contains loaders for data formats like CSV, JSON, XML, YAML, TOML, and other
+structured data files.
 """
 
 import logging

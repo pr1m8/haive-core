@@ -1,7 +1,7 @@
 """Code and Programming File Loaders.
 
-This module contains loaders for source code, notebooks, and other
-programming-related files.
+This module contains loaders for source code, notebooks, and other programming-related
+files.
 """
 
 import logging

@@ -1,7 +1,7 @@
 """Media and Special Format File Loaders.
 
-This module contains loaders for media files like images, PDFs, subtitles,
-and other special format files.
+This module contains loaders for media files like images, PDFs, subtitles, and other
+special format files.
 """
 
 import logging

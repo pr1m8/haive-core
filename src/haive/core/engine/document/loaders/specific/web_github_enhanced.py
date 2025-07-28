@@ -1,7 +1,7 @@
 """Enhanced GitHub Loaders with Additional Features.
 
-This module contains enhanced GitHub loaders for discussions, gists, releases,
-actions, and wiki pages.
+This module contains enhanced GitHub loaders for discussions, gists, releases, actions,
+and wiki pages.
 """
 
 import logging

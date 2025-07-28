@@ -1,7 +1,7 @@
 """Service and Application Loaders for Document Engine.
 
-This module implements loaders for various services and applications including
-Notion, Obsidian, Slack, and other productivity tools.
+This module implements loaders for various services and applications including Notion,
+Obsidian, Slack, and other productivity tools.
 """
 
 import logging
@@ -260,7 +260,7 @@ class ConfluenceSource(EnhancedSource):
         return True
 
     def get_credential_requirements(self) -> list[CredentialType]:
-        """Confluence needs username/password or API token."""
+        """Confluence needs username/pass or API token."""
         return [CredentialType.USERNAME_PASSWORD, CredentialType.API_KEY]
 
     def create_loader(self) -> BaseLoader | None:
@@ -276,7 +276,7 @@ class ConfluenceSource(EnhancedSource):
                 cred = self.credential_manager.get_credential("confluence")
                 if cred:
                     if cred.credential_type == CredentialType.USERNAME_PASSWORD:
-                        # Assume format "username:password"
+                        # Assume format "username:pass
                         if ":" in cred.value:
                             username, api_key = cred.value.split(":", 1)
                     elif cred.credential_type == CredentialType.API_KEY:
