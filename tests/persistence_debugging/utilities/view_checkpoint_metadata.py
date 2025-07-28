@@ -88,8 +88,7 @@ def view_checkpoint_metadata(thread_id: str | None = None):
                                                             pass
 
                     except Exception as e:
-                        passe}")
-
+                        pass
     except Exception as e:
         pass
 

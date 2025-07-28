@@ -274,8 +274,7 @@ def main():
                 conv_type, files, base_path)
             summary_files.append(summary_file)
         else:
-            passe}")
-
+            pass
     # Create master index
     master_index = (
         Path(base_path)

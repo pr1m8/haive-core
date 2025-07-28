@@ -176,7 +176,7 @@ def test_database_system():
                 splitters_tested += 1
 
             except Exception as e:
-                pass
+                passe}")
 
 
     except Exception as e:

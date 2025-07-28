@@ -114,7 +114,7 @@ def check_persistence_store_link():
                     if "ConnectionManager" in content:
                         pass
                     elif "connection" in content.lower():
-                        pass
+                        passde")
                 except:
                     pass
     else:

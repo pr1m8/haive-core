@@ -123,9 +123,7 @@ def test_loading_strategies():
             loading_method = get_loading_method(strategy)
             strategy_tests_passed += 1
         except Exception as e:
-            passe}")
-
-
+            pass
     return strategy_tests_passed >= 4
 
 
@@ -162,9 +160,7 @@ def test_text_splitter_config():
             splitter_tests_passed += 1
 
         except Exception as e:
-            passe}")
-
-
+            pass
     return splitter_tests_passed >= 5
 
 

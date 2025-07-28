@@ -126,7 +126,7 @@ def view_metadata_details():
 
                         except Exception as e:
                     else:
-                        pass
+                        passa")
 
 
                 # Get summary stats
