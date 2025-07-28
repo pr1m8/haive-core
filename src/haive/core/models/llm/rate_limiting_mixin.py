@@ -1,7 +1,8 @@
 """Rate limiting mixin for LLM configurations.
 
-This module provides a mixin class that adds rate limiting capabilities to LLM configurations,
-allowing for controlled request rates to prevent API throttling and manage costs.
+This module provides a mixin class that adds rate limiting capabilities to LLM
+configurations, allowing for controlled request rates to prevent API throttling and
+manage costs.
 """
 
 import logging

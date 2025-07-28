@@ -78,12 +78,12 @@ class OpenAIConfig(LLMEngineConfig[TOpenAIConfig]):
 class OpenAIEngine(LLMEngine[OpenAIConfig]):
     """OpenAI LLM engine implementation.
 
-    This class implements the LLM engine interface for OpenAI's API,
-    providing text generation and streaming capabilities with appropriate
-    error handling and resource management.
+    This class implements the LLM engine interface for OpenAI's API, providing text
+    generation and streaming capabilities with appropriate error handling and resource
+    management.
 
-    The engine lazily initializes the underlying LangChain ChatOpenAI model
-    when needed and handles prompt formatting and response parsing.
+    The engine lazily initializes the underlying LangChain ChatOpenAI model when needed
+    and handles prompt formatting and response parsing.
     """
 
     def __init__(self, config: OpenAIConfig):
@@ -120,9 +120,9 @@ class OpenAIEngine(LLMEngine[OpenAIConfig]):
     def cleanup(self) -> None:
         """Clean up OpenAI resources.
 
-        This method ensures any resources associated with the OpenAI model
-        are properly released. Currently, no specific cleanup is needed
-        for OpenAI models beyond releasing the reference.
+        This method ensures any resources associated with the OpenAI model are properly
+        released. Currently, no specific cleanup is needed for OpenAI models beyond
+        releasing the reference.
         """
         self._model = None
 
@@ -215,12 +215,12 @@ class AzureConfig(LLMEngineConfig[TAzureConfig]):
 class AzureEngine(LLMEngine[AzureConfig]):
     """Azure OpenAI LLM engine implementation.
 
-    This class implements the LLM engine interface for Azure's OpenAI API,
-    providing text generation and streaming capabilities with appropriate
-    error handling and resource management.
+    This class implements the LLM engine interface for Azure's OpenAI API, providing
+    text generation and streaming capabilities with appropriate error handling and
+    resource management.
 
-    The engine lazily initializes the underlying LangChain AzureChatOpenAI model
-    when needed and handles prompt formatting and response parsing.
+    The engine lazily initializes the underlying LangChain AzureChatOpenAI model when
+    needed and handles prompt formatting and response parsing.
     """
 
     def __init__(self, config: AzureConfig):
@@ -258,9 +258,9 @@ class AzureEngine(LLMEngine[AzureConfig]):
     def cleanup(self) -> None:
         """Clean up Azure resources.
 
-        This method ensures any resources associated with the Azure model
-        are properly released. Currently, no specific cleanup is needed
-        for Azure models beyond releasing the reference.
+        This method ensures any resources associated with the Azure model are properly
+        released. Currently, no specific cleanup is needed for Azure models beyond
+        releasing the reference.
         """
         self._model = None
 
