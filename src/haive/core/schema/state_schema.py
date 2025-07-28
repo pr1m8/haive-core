@@ -951,11 +951,11 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
     def values(self):
         """Return an iterator over field values (dict-like interface)."""
-        return (getattr(self, key) for key in self.model_fields.keys())
+        return (getattr(self, key) for key in self.model_fields)
 
     def items(self):
         """Return an iterator over (field_name, field_value) pairs (dict-like interface)."""
-        return ((key, getattr(self, key)) for key in self.model_fields.keys())
+        return ((key, getattr(self, key)) for key in self.model_fields)
 
     def update(self, other: builtins.dict[str, Any] | StateSchema) -> StateSchema:
         """Update the state with values from another state or dictionary.

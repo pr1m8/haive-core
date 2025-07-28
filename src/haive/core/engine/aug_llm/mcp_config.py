@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 def _get_mcp_mixin():
     """Lazy import MCPMixin to avoid circular dependency."""
     from haive.core.common.mixins import MCPMixin
+
     return MCPMixin
 
 

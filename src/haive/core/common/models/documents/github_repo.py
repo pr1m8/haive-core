@@ -45,13 +45,7 @@ class GithubSettings(BaseSettings):
     )
 
     github_fallback_branches: list[str] = Field(
-        default=[
-            "main",
-            "master",
-            "develop",
-            "development",
-            "prod",
-            "production"],
+        default=["main", "master", "develop", "development", "prod", "production"],
         description="Branches to try if default fails",
         alias="GITHUB_FALLBACK_BRANCHES",
     )
@@ -202,9 +196,7 @@ class GithubRepo(BaseModel):
     _http_client: httpx.Client | None = PrivateAttr(default=None)
     _branch_cache: dict[str, bool] = PrivateAttr(default_factory=dict)
 
-    model_config = {
-        "arbitrary_types_allowed": True,
-        "validate_assignment": True}
+    model_config = {"arbitrary_types_allowed": True, "validate_assignment": True}
 
     @property
     def settings(self) -> GithubSettings:
@@ -217,8 +209,7 @@ class GithubRepo(BaseModel):
     def http_client(self) -> httpx.Client:
         """Lazy-load HTTP client."""
         if self._http_client is None:
-            self._http_client = httpx.Client(
-                timeout=self.settings.github_api_timeout)
+            self._http_client = httpx.Client(timeout=self.settings.github_api_timeout)
         return self._http_client
 
     def __del__(self):
@@ -261,12 +252,9 @@ class GithubRepo(BaseModel):
             self.access_token = self.settings.active_token
 
         # Step 3: Generate URLs
-        self.api_url = HttpUrl(
-            f"https://api.github.com/repos/{self.owner}/{self.name}")
-        self.clone_url = HttpUrl(
-            f"https://github.com/{self.owner}/{self.name}.git")
-        self.url = self.url or HttpUrl(
-            f"https://github.com/{self.owner}/{self.name}")
+        self.api_url = HttpUrl(f"https://api.github.com/repos/{self.owner}/{self.name}")
+        self.clone_url = HttpUrl(f"https://github.com/{self.owner}/{self.name}.git")
+        self.url = self.url or HttpUrl(f"https://github.com/{self.owner}/{self.name}")
 
         # Step 4: Configure fallback branches
         if self.auto_retry_branches and self.settings.github_auto_retry_branches:
@@ -329,8 +317,7 @@ class GithubRepo(BaseModel):
             )
 
             if response.status_code == 404:
-                raise ValueError(
-                    f"Repository {self.owner}/{self.name} not found")
+                raise ValueError(f"Repository {self.owner}/{self.name} not found")
             if response.status_code == 403:
                 # Rate limited or forbidden
                 if not self.access_token:
@@ -338,8 +325,7 @@ class GithubRepo(BaseModel):
                         "GitHub API rate limit exceeded or repository is private. "
                         "Please provide an access token."
                     )
-                raise ValueError(
-                    "Access forbidden - check your token permissions")
+                raise ValueError("Access forbidden - check your token permissions")
             if response.status_code != 200:
                 raise ValueError(
                     f"GitHub API error: {response.status_code} - {response.text}"
@@ -372,8 +358,7 @@ class GithubRepo(BaseModel):
 
         # First, try to get all branches
         try:
-            response = self.http_client.get(
-                f"{self.api_url}/branches", headers=headers)
+            response = self.http_client.get(f"{self.api_url}/branches", headers=headers)
             if response.status_code == 200:
                 branches_data = response.json()
                 self.available_branches = [b["name"] for b in branches_data]
@@ -421,7 +406,8 @@ class GithubRepo(BaseModel):
                     self.branch = valid_branch
                 logger.info(
                     f"Using branch '{valid_branch}' for {
-                        self.full_name}")
+                        self.full_name}"
+                )
             else:
                 # No valid branch found
                 tried_branches = ", ".join(branches_to_try[:5])

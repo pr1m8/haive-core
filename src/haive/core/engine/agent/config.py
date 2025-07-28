@@ -557,7 +557,6 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
                                 logger.debug(
                                     "Retriever module not available for pattern components"
                                 )
-                                pass
         except ImportError:
             # Pattern system not available
             logger.debug("Pattern system not available for schema component extraction")

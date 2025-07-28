@@ -1,5 +1,4 @@
-"""
-Generic List Wrapper for Structured Output Models.
+"""Generic List Wrapper for Structured Output Models.
 
 This module defines a reusable generic class `Listified[T]` that wraps a list of structured
 Pydantic models while retaining rich metadata and semantic serialization.
@@ -31,7 +30,7 @@ Example:
     {'summaries': [{'topic': 'AI', 'bullets': ['...']}], 'source': 'user input'}
 """
 
-from typing import Generic, List, TypeVar
+from typing import Generic, TypeVar
 
 from pydantic import BaseModel, Field
 
@@ -39,8 +38,7 @@ T = TypeVar("T", bound=BaseModel)
 
 
 class Listified(BaseModel, Generic[T]):
-    """
-    A generic wrapper for a list of structured Pydantic items.
+    """A generic wrapper for a list of structured Pydantic items.
 
     This class enables structured output for agents or APIs that return a list
     of typed objects (e.g. `Summary`, `Answer`, `Finding`), while preserving
@@ -66,7 +64,7 @@ class Listified(BaseModel, Generic[T]):
         {'summaries': [{'topic': 'AI', 'points': ['point 1']}], 'source': 'user question'}
     """
 
-    items: List[T] = Field(
+    items: list[T] = Field(
         ...,
         description="List of structured items to wrap and serialize.",
     )
@@ -77,8 +75,7 @@ class Listified(BaseModel, Generic[T]):
 
     @classmethod
     def field_name(cls) -> str:
-        """
-        Returns the pluralized name of the generic type for output serialization.
+        """Returns the pluralized name of the generic type for output serialization.
 
         Returns:
             str: Name like 'summaries', 'answers', etc.
@@ -87,8 +84,7 @@ class Listified(BaseModel, Generic[T]):
         return name + "s" if not name.endswith("s") else name
 
     def model_dump(self, *args, **kwargs) -> dict:
-        """
-        Serializes the model with the list field renamed to match the generic type.
+        """Serializes the model with the list field renamed to match the generic type.
 
         Args:
             *args: Passed to BaseModel.model_dump.

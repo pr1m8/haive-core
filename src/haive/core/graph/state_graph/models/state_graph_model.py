@@ -25,14 +25,11 @@ class GraphModel(SerializableModel, Generic[TNode]):
     compiled: bool = Field(default=False, description="Compilation status")
 
     # Entry and exit points
-    entry_point: str | None = Field(
-        default=None, description="Entry point node name")
-    finish_point: str | None = Field(
-        default=None, description="Finish point node name")
+    entry_point: str | None = Field(default=None, description="Entry point node name")
+    finish_point: str | None = Field(default=None, description="Finish point node name")
 
     # Schemas
-    schema: TypeReference | None = Field(
-        default=None, description="State schema type")
+    schema: TypeReference | None = Field(default=None, description="State schema type")
     input_schema: TypeReference | None = Field(
         default=None, description="Input schema type"
     )
@@ -74,8 +71,7 @@ class GraphModel(SerializableModel, Generic[TNode]):
             len(self.edges)
             + len(self.waiting_edges)
             + sum(
-                sum(1 for branch in branch_dict.values()
-                    if branch.ends or branch.then)
+                sum(1 for branch in branch_dict.values() if branch.ends or branch.then)
                 for branch_dict in self.branches.values()
             )
         )
@@ -100,13 +96,11 @@ class GraphModel(SerializableModel, Generic[TNode]):
                 if branch.ends:
                     for condition, target in branch.ends.items():
                         result.append(
-                            EdgeModel.create_branch(
-                                src, target, branch_name, condition)
+                            EdgeModel.create_branch(src, target, branch_name, condition)
                         )
                 if branch.then:
                     result.append(
-                        EdgeModel.create_branch_then(
-                            src, branch.then, branch_name)
+                        EdgeModel.create_branch_then(src, branch.then, branch_name)
                     )
 
         return result
@@ -150,8 +144,7 @@ class GraphModel(SerializableModel, Generic[TNode]):
             raise ValueError(f"Node '{name}' does not exist")
 
         # Remove edges to/from this node
-        self.edges = {(src, dst)
-                      for src, dst in self.edges if name not in (src, dst)}
+        self.edges = {(src, dst) for src, dst in self.edges if name not in (src, dst)}
 
         # Remove waiting edges involving this node
         new_waiting_edges = set()
@@ -174,8 +167,7 @@ class GraphModel(SerializableModel, Generic[TNode]):
             for branch_name, branch in list(branch_dict.items()):
                 if branch.ends:
                     # Filter out ends that point to the removed node
-                    branch.ends = {
-                        k: v for k, v in branch.ends.items() if v != name}
+                    branch.ends = {k: v for k, v in branch.ends.items() if v != name}
 
                     # Remove branch if it has no ends left
                     if not branch.ends and not branch.then:
@@ -218,8 +210,7 @@ class GraphModel(SerializableModel, Generic[TNode]):
         self.mark_modified()
         return self
 
-    def add_sequence(
-            self, nodes: list[Union[str, tuple[str, Any]]]) -> "GraphModel":
+    def add_sequence(self, nodes: list[Union[str, tuple[str, Any]]]) -> "GraphModel":
         """Add a sequence of nodes that will be executed in order.
 
         Args:
@@ -244,8 +235,7 @@ class GraphModel(SerializableModel, Generic[TNode]):
             if name not in self.nodes and node_spec is not None:
                 self.add_node(name, node_spec)
             elif name not in self.nodes:
-                raise ValueError(
-                    f"Node '{name}' does not exist and no spec provided")
+                raise ValueError(f"Node '{name}' does not exist and no spec provided")
 
             # Connect to previous node
             if previous_name is not None:
@@ -257,8 +247,7 @@ class GraphModel(SerializableModel, Generic[TNode]):
         return self
 
     @classmethod
-    def from_state_graph(cls, graph: Any,
-                         name: str = "unnamed_graph") -> "GraphModel":
+    def from_state_graph(cls, graph: Any, name: str = "unnamed_graph") -> "GraphModel":
         """Create a GraphModel from a StateGraph."""
         model = cls(name=name)
 
@@ -287,8 +276,7 @@ class GraphModel(SerializableModel, Generic[TNode]):
         # Copy branches
         for source, branch_dict in graph.branches.items():
             for branch_name, branch in branch_dict.items():
-                branch_model = BranchModel.from_branch(
-                    branch_name, source, branch)
+                branch_model = BranchModel.from_branch(branch_name, source, branch)
                 if branch_model:
                     model.branches[source][branch_name] = branch_model
 

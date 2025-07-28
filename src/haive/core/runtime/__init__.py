@@ -80,10 +80,10 @@ from haive.core.runtime.extension.base import ExtensionBase
 from haive.core.runtime.extension.protocols import ExtensionProtocol
 
 __all__ = [
-    # Runtime Components
-    "RuntimeComponent",
-    "RuntimeProtocol",
     # Extension System
     "ExtensionBase",
     "ExtensionProtocol",
+    # Runtime Components
+    "RuntimeComponent",
+    "RuntimeProtocol",
 ]

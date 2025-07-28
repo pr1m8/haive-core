@@ -170,40 +170,40 @@ __all__ = [
     # 🚀 Ultimate Auto-Loader (Primary Interface)
     "AutoLoader",
     "AutoLoaderConfig",
-    "LoadingResult",
-    "BulkLoadingResult",
-    "default_loader",
-    # ⚡ Convenience Functions (One-liner usage)
-    "load_document",
-    "load_documents_bulk",
-    "aload_document",
     # 📊 Auto-Registry System
     "AutoRegistry",
-    "auto_register_all",
-    "get_registration_status",
-    "list_available_sources",
-    "get_sources_by_category",
-    # 🔍 Path Analysis
-    "PathAnalyzer",
-    "SourceInfo",
-    "analyze_path",
-    # 🎛️ Registry Management
-    "enhanced_registry",
-    "LoaderPreference",
-    "register_source",
-    "register_file_source",
-    "register_bulk_source",
     # 🏗️ Core Types (Advanced usage)
     "BaseSource",
-    "LocalFileSource",
-    "RemoteSource",
-    "SourceCategory",
-    "LoaderCapability",
+    "BulkLoadingResult",
     "CredentialType",
+    "LoaderCapability",
+    "LoaderPreference",
+    "LoadingResult",
+    "LocalFileSource",
+    # 🔍 Path Analysis
+    "PathAnalyzer",
     # 📈 Status and Info
     "RegistrationInfo",
     "RegistrationStats",
+    "RemoteSource",
+    "SourceCategory",
+    "SourceInfo",
+    "aload_document",
+    "analyze_path",
+    "auto_register_all",
     "auto_registry",
+    "default_loader",
+    # 🎛️ Registry Management
+    "enhanced_registry",
+    "get_registration_status",
+    "get_sources_by_category",
+    "list_available_sources",
+    # ⚡ Convenience Functions (One-liner usage)
+    "load_document",
+    "load_documents_bulk",
+    "register_bulk_source",
+    "register_file_source",
+    "register_source",
 ]
 
 # 🔄 Auto-Registration on Import
@@ -220,7 +220,7 @@ try:
 except Exception as e:
     # Fallback gracefully if auto-registration fails
     logger = logging.getLogger(__name__)
-    logger.error(f"❌ Auto-registration failed: {e}")
+    logger.exception(f"❌ Auto-registration failed: {e}")
     logger.info("💡 Manual registration may be required")
 
 # Export version info

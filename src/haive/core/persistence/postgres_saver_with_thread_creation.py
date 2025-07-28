@@ -46,9 +46,9 @@ class PostgresSaverWithThreadCreation(PostgresSaver):
             # Check if user_id column exists in threads table
             cursor.execute(
                 """
-                SELECT column_name 
-                FROM information_schema.columns 
-                WHERE table_name = 'threads' 
+                SELECT column_name
+                FROM information_schema.columns
+                WHERE table_name = 'threads'
                 AND column_name = 'user_id'
             """
             )
@@ -60,11 +60,11 @@ class PostgresSaverWithThreadCreation(PostgresSaver):
             # Check for composite unique constraint on (id, user_id)
             cursor.execute(
                 """
-                SELECT COUNT(*) 
+                SELECT COUNT(*)
                 FROM information_schema.table_constraints tc
-                JOIN information_schema.constraint_column_usage AS ccu 
+                JOIN information_schema.constraint_column_usage AS ccu
                     USING (constraint_schema, constraint_name)
-                WHERE tc.table_name = 'threads' 
+                WHERE tc.table_name = 'threads'
                 AND tc.constraint_type = 'UNIQUE'
                 AND ccu.column_name IN ('id', 'user_id')
                 GROUP BY tc.constraint_name
@@ -79,7 +79,7 @@ class PostgresSaverWithThreadCreation(PostgresSaver):
             logger.warning(f"Failed to detect schema type, assuming standard: {e}")
             return "standard"
 
-    def _ensure_thread_exists(self, thread_id: str, user_id: str = None) -> None:
+    def _ensure_thread_exists(self, thread_id: str, user_id: str | None = None) -> None:
         """Ensure a thread exists in the threads table.
 
         Args:
@@ -148,7 +148,9 @@ class PostgresSaverWithThreadCreation(PostgresSaver):
             logger.exception(f"Failed to ensure thread {thread_id} exists: {e}")
             raise
 
-    def _insert_thread(self, cursor, thread_id: str, user_id: str = None) -> None:
+    def _insert_thread(
+        self, cursor, thread_id: str, user_id: str | None = None
+    ) -> None:
         """Insert thread using appropriate schema."""
         if self._schema_type == "supabase":
             # Supabase schema with user_id and composite constraint
@@ -262,9 +264,9 @@ class AsyncPostgresSaverWithThreadCreation:
             # Check if user_id column exists in threads table
             await cursor.execute(
                 """
-                SELECT column_name 
-                FROM information_schema.columns 
-                WHERE table_name = 'threads' 
+                SELECT column_name
+                FROM information_schema.columns
+                WHERE table_name = 'threads'
                 AND column_name = 'user_id'
             """
             )
@@ -276,11 +278,11 @@ class AsyncPostgresSaverWithThreadCreation:
             # Check for composite unique constraint on (id, user_id)
             await cursor.execute(
                 """
-                SELECT COUNT(*) 
+                SELECT COUNT(*)
                 FROM information_schema.table_constraints tc
-                JOIN information_schema.constraint_column_usage AS ccu 
+                JOIN information_schema.constraint_column_usage AS ccu
                     USING (constraint_schema, constraint_name)
-                WHERE tc.table_name = 'threads' 
+                WHERE tc.table_name = 'threads'
                 AND tc.constraint_type = 'UNIQUE'
                 AND ccu.column_name IN ('id', 'user_id')
                 GROUP BY tc.constraint_name
@@ -295,7 +297,9 @@ class AsyncPostgresSaverWithThreadCreation:
             logger.warning(f"Failed to detect schema type, assuming standard: {e}")
             return "standard"
 
-    async def _ensure_thread_exists(self, thread_id: str, user_id: str = None) -> None:
+    async def _ensure_thread_exists(
+        self, thread_id: str, user_id: str | None = None
+    ) -> None:
         """Ensure a thread exists in the threads table (async version).
 
         Args:
@@ -364,7 +368,9 @@ class AsyncPostgresSaverWithThreadCreation:
             logger.exception(f"Failed to ensure thread {thread_id} exists (async): {e}")
             raise
 
-    async def _insert_thread(self, cursor, thread_id: str, user_id: str = None) -> None:
+    async def _insert_thread(
+        self, cursor, thread_id: str, user_id: str | None = None
+    ) -> None:
         """Insert thread using appropriate schema (async)."""
         if self._schema_type == "supabase":
             # Supabase schema with user_id and composite constraint

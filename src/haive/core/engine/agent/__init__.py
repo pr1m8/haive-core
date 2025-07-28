@@ -70,15 +70,15 @@ from haive.core.engine.agent.protocols import (
 )
 
 __all__ = [
+    # Registry
+    "AGENT_REGISTRY",
     # Core Classes
     "Agent",
     "AgentConfig",
-    "PatternConfig",
-    "PatternManager",
     # Protocols
     "AgentProtocol",
-    "StreamingAgentProtocol",
+    "PatternConfig",
+    "PatternManager",
     "PersistentAgentProtocol",
-    # Registry
-    "AGENT_REGISTRY",
+    "StreamingAgentProtocol",
 ]

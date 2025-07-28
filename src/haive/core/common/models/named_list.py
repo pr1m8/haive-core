@@ -22,9 +22,7 @@ class NamedList(BaseModel, Generic[T]):
     Automatically resolves string references to actual instances.
     """
 
-    items: Sequence[T] = Field(
-        default_factory=list,
-        description="The resolved items")
+    items: Sequence[T] = Field(default_factory=list, description="The resolved items")
     names: list[str] = Field(
         default_factory=list, description="Names of items (in order)"
     )
@@ -166,8 +164,7 @@ class NamedList(BaseModel, Generic[T]):
                     self.items[i] = resolved_item
                     self.name_map[self.names[i]] = resolved_item
                 elif not self.allow_unresolved:
-                    raise ValueError(
-                        f"Could not resolve reference: '{ref_name}'")
+                    raise ValueError(f"Could not resolve reference: '{ref_name}'")
 
         # Clear unresolved refs for successfully resolved items
         self.unresolved_refs = [
@@ -218,9 +215,7 @@ class NamedList(BaseModel, Generic[T]):
                 self.append(value, name=key)
         else:
             # Set by index
-            valid_indices = [
-                i for i, item in enumerate(
-                    self.items) if item is not None]
+            valid_indices = [i for i, item in enumerate(self.items) if item is not None]
             if 0 <= key < len(valid_indices):
                 actual_index = valid_indices[key]
                 self.items[actual_index] = value
@@ -265,8 +260,7 @@ class NamedList(BaseModel, Generic[T]):
 
     def keys(self) -> list[str]:
         """Get all names."""
-        return [name for i, name in enumerate(
-            self.names) if self.items[i] is not None]
+        return [name for i, name in enumerate(self.names) if self.items[i] is not None]
 
     def values(self) -> list[T]:
         """Get all instances."""
@@ -274,8 +268,7 @@ class NamedList(BaseModel, Generic[T]):
 
     def to_dict(self) -> dict[str, T]:
         """Convert to dictionary mapping names to instances."""
-        return {name: item for name, item in self.name_map.items()
-                if item is not None}
+        return {name: item for name, item in self.name_map.items() if item is not None}
 
     def to_list(self) -> list[T]:
         """Convert to simple list of instances."""
@@ -283,8 +276,7 @@ class NamedList(BaseModel, Generic[T]):
 
     def has_unresolved_references(self) -> bool:
         """Check if there are unresolved references."""
-        return len(self.unresolved_refs) > 0 or any(
-            item is None for item in self.items)
+        return len(self.unresolved_refs) > 0 or any(item is None for item in self.items)
 
     def get_unresolved_references(self) -> list[str]:
         """Get list of unresolved references."""
@@ -337,8 +329,7 @@ def create_named_list(
     allow_unresolved: bool = False,
 ) -> NamedList[T]:
     """Convenience function to create a NamedList."""
-    return NamedList(items=items, registry=registry,
-                     allow_unresolved=allow_unresolved)
+    return NamedList(items=items, registry=registry, allow_unresolved=allow_unresolved)
 
 
 # ========================================================================

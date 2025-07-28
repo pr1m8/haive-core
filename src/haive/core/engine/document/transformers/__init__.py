@@ -84,10 +84,10 @@ from haive.core.engine.document.transformers.types import (
 )
 
 __all__ = [
-    # Engine and Configuration
-    "DocumentTransformerEngine",
     "DocTransformerConfig",
     "DocTransformerType",
+    # Engine and Configuration
+    "DocumentTransformerEngine",
     # LangChain Transformers
     "Html2TextTransformer",
 ]

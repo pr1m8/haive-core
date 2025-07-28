@@ -86,7 +86,8 @@ def main() -> None:
             save_models_to_csv(model_names, filename)
             summary.append(
                 f"{provider}: {
-                    len(model_names)} models saved to {filename}")
+                    len(model_names)} models saved to {filename}"
+            )
         except Exception as e:
             summary.append(f"{provider}: ERROR - {e}")
 

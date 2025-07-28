@@ -204,7 +204,8 @@ class LLMFactory:
         except Exception as e:
             raise ValueError(
                 f"Failed to create provider for {provider}: {
-                    e!s}")
+                    e!s}"
+            )
 
         # Create LLM instance
         try:
@@ -216,7 +217,8 @@ class LLMFactory:
             raise RuntimeError(
                 f"Failed to create {
                     provider.value} LLM: {
-                    e!s}") from e
+                    e!s}"
+            ) from e
 
         return llm
 
@@ -299,8 +301,7 @@ class LLMFactory:
 _factory = LLMFactory()
 
 
-def create_llm(provider: LLMProvider | str, model: str |
-               None = None, **kwargs) -> Any:
+def create_llm(provider: LLMProvider | str, model: str | None = None, **kwargs) -> Any:
     """Create an LLM instance using the global factory.
 
     This is a convenience function that uses a global LLMFactory instance

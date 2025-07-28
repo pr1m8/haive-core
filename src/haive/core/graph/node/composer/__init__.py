@@ -56,42 +56,42 @@ except ImportError:
     _advanced_available = False
 
 __all__ = [
-    # Core composer
-    "NodeSchemaComposer",
-    "ComposedNode",
     "ComposedCallableNode",
-    "SchemaAdapter",
-    # Quick factory functions
-    "change_output_key",
-    "change_input_key",
-    "remap_fields",
-    # Foundation classes
-    "FieldMapping",
-    "PathResolver",
+    "ComposedNode",
     "ExtractFunction",
-    "UpdateFunction",
-    "TransformFunction",
     # Extract functions
     "ExtractFunctions",
-    "extract_functions",
-    "extract_simple_field",
-    "extract_with_path",
-    "extract_with_projection",
-    "extract_messages_content",
-    "extract_conditional",
-    "extract_multi_field",
-    "extract_typed",
+    # Foundation classes
+    "FieldMapping",
+    # Core composer
+    "NodeSchemaComposer",
+    "PathResolver",
+    "SchemaAdapter",
+    "TransformFunction",
+    "UpdateFunction",
     # Update functions
     "UpdateFunctions",
-    "update_functions",
-    "update_simple_field",
-    "update_with_path",
-    "update_messages_append",
-    "update_type_aware",
+    "change_input_key",
+    # Quick factory functions
+    "change_output_key",
+    "extract_conditional",
+    "extract_functions",
+    "extract_messages_content",
+    "extract_multi_field",
+    "extract_simple_field",
+    "extract_typed",
+    "extract_with_path",
+    "extract_with_projection",
+    "remap_fields",
     "update_conditional",
-    "update_multi_field",
-    "update_with_transform",
+    "update_functions",
     "update_hierarchical",
+    "update_messages_append",
+    "update_multi_field",
+    "update_simple_field",
+    "update_type_aware",
+    "update_with_path",
+    "update_with_transform",
 ]
 
 # Add advanced features to __all__ if available

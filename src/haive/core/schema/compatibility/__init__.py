@@ -1,4 +1,4 @@
-"""Haive Schema Compatibility Module
+"""Haive Schema Compatibility Module.
 
 A comprehensive type checking, compatibility analysis, and schema transformation system.
 """
@@ -54,40 +54,40 @@ from haive.core.schema.compatibility.validators import (
 register_langchain_converters()
 
 __all__ = [
+    "CompatibilityChecker",
     # Core types
     "CompatibilityLevel",
-    "ConversionQuality",
-    "MergeStrategy",
-    "TypeInfo",
-    "FieldInfo",
-    "SchemaInfo",
+    "CompatibilityReport",
+    "ConversionContext",
     "ConversionPath",
-    # Main classes
-    "TypeAnalyzer",
-    "CompatibilityChecker",
+    "ConversionQuality",
     "ConverterRegistry",
-    "TypeConverter",
+    "DocumentConverter",
+    "FieldInfo",
     "FieldMapper",
     "FieldMapping",
-    "SchemaMerger",
-    "CompatibilityReport",
     "FieldValidator",
-    "ModelValidator",
-    "ValidationContext",
-    "ConversionContext",
+    "MergeStrategy",
     # Converter classes
     "MessageConverter",
-    "DocumentConverter",
+    "ModelValidator",
     "PromptConverter",
+    "SchemaInfo",
+    "SchemaMerger",
+    # Main classes
+    "TypeAnalyzer",
+    "TypeConverter",
+    "TypeInfo",
+    "ValidationContext",
     # Convenience functions
     "analyze_type",
-    "get_type_info",
     "check_compatibility",
-    "register_converter",
     "create_mapping",
-    "merge_schemas",
-    "generate_report",
     "create_validator",
+    "generate_report",
+    "get_type_info",
+    "merge_schemas",
+    "register_converter",
     "register_langchain_converters",
 ]
 

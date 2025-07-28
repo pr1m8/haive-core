@@ -67,8 +67,10 @@ else:
     # Import stub classes for runtime
     class StructuredOutputMixin:
         pass
+
     class ToolRouteMixin:
         pass
+
     # Import actual classes at runtime for use in default_factory
     try:
         from haive.core.models.llm.base import AzureLLMConfig, LLMConfig
@@ -112,7 +114,7 @@ def _get_augllm_base_classes():
     """Dynamically load base classes only when needed."""
     from haive.core.common.mixins.structured_output_mixin import StructuredOutputMixin
     from haive.core.common.mixins.tool_route_mixin import ToolRouteMixin
-    
+
     return (
         ToolRouteMixin,
         StructuredOutputMixin,
@@ -121,6 +123,7 @@ def _get_augllm_base_classes():
             Union[BaseMessage, dict[str, Any]],
         ],
     )
+
 
 class AugLLMConfig(*_get_augllm_base_classes()):
     """Configuration for creating enhanced LLM chains with flexible message handling.
@@ -189,7 +192,9 @@ class AugLLMConfig(*_get_augllm_base_classes()):
 
     # Core LLM configuration
     llm_config: LLMConfig = Field(
-        default_factory=lambda: AzureLLMConfig(model="gpt-4o") if AzureLLMConfig else None,
+        default_factory=lambda: (
+            AzureLLMConfig(model="gpt-4o") if AzureLLMConfig else None
+        ),
         description="LLM provider configuration",
     )
 

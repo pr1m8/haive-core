@@ -19,8 +19,8 @@ FieldManager = FieldManagerMixin
 
 __all__ = [
     "EngineComposerMixin",
-    "FieldManagerMixin",
-    "SchemaComposer",
     "EngineManager",  # Alias for EngineComposerMixin
     "FieldManager",  # Alias for FieldManagerMixin
+    "FieldManagerMixin",
+    "SchemaComposer",
 ]

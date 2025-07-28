@@ -67,8 +67,7 @@ except ImportError:
     logger.debug("LangChain cache modules not available, skipping cache setup")
 
 
-class LLMConfig(SecureConfigMixin, ModelMetadataMixin,
-                RateLimitingMixin, BaseModel):
+class LLMConfig(SecureConfigMixin, ModelMetadataMixin, RateLimitingMixin, BaseModel):
     """Base configuration for Language Model providers with security and metadata support.
 
     This class provides:
@@ -127,9 +126,7 @@ class LLMConfig(SecureConfigMixin, ModelMetadataMixin,
     extra_params: dict[str, Any] | None = Field(
         default_factory=dict, description="Optional extra parameters."
     )
-    debug: bool = Field(
-        default=False,
-        description="Enable detailed debug output.")
+    debug: bool = Field(default=False, description="Enable detailed debug output.")
 
     # Rate limiting fields (from RateLimitingMixin)
     requests_per_second: float | None = Field(
@@ -167,8 +164,7 @@ class LLMConfig(SecureConfigMixin, ModelMetadataMixin,
     )
 
     model_config = {"arbitrary_types_allowed": True}
-    model_alias: str | None = Field(
-        default=None, description="Alias for the model.")
+    model_alias: str | None = Field(default=None, description="Alias for the model.")
 
     @model_validator(mode="after")
     def set_default_name(self) -> Self:
@@ -189,7 +185,8 @@ class LLMConfig(SecureConfigMixin, ModelMetadataMixin,
             context_window = self.get_context_window()
             logger.debug(
                 f"Model {
-                    self.model} context window: {context_window}")
+                    self.model} context window: {context_window}"
+            )
 
             pricing = self.get_token_pricing()
             logger.debug(f"Model {self.model} pricing: {pricing}")
@@ -226,8 +223,7 @@ class LLMConfig(SecureConfigMixin, ModelMetadataMixin,
                         )
                         for i, item in enumerate(value):
                             if isinstance(item, dict | list):
-                                sub_branch = branch.add(
-                                    f"[blue]Item {i}[/blue]")
+                                sub_branch = branch.add(f"[blue]Item {i}[/blue]")
                                 _add_dict_to_tree(sub_branch, item)
                             else:
                                 branch.add(f"[blue]Item {i}:[/blue] {item}")
@@ -288,7 +284,9 @@ class LLMConfig(SecureConfigMixin, ModelMetadataMixin,
             Panel(
                 info_text,
                 title=f"[bold]{
-                    self.model} Summary[/bold]"))
+                    self.model} Summary[/bold]",
+            )
+        )
 
     def format_metadata_for_display(self) -> dict[str, Any]:
         """Format metadata for structured display or comparison.
@@ -352,8 +350,7 @@ class LLMConfig(SecureConfigMixin, ModelMetadataMixin,
         Raises:
             NotImplementedError: If not overridden by a subclass
         """
-        raise NotImplementedError(
-            "This method should be overridden in subclasses.")
+        raise NotImplementedError("This method should be overridden in subclasses.")
 
     def create_graph_transformer(self) -> Any:
         """Creates an LLMGraphTransformer instance using the LLM."""
@@ -486,8 +483,7 @@ class LLMConfig(SecureConfigMixin, ModelMetadataMixin,
         """
         try:
             # Count input tokens
-            input_tokens = self.get_num_tokens_from_messages(
-                messages, tools=tools)
+            input_tokens = self.get_num_tokens_from_messages(messages, tools=tools)
 
             # Get pricing information
             input_cost_per_token, output_cost_per_token = self.get_token_pricing()
@@ -619,8 +615,7 @@ class LLMConfig(SecureConfigMixin, ModelMetadataMixin,
             ```
         """
         try:
-            input_tokens = self.get_num_tokens_from_messages(
-                messages, tools=tools)
+            input_tokens = self.get_num_tokens_from_messages(messages, tools=tools)
             context_window = self.get_context_window()
             available_tokens = context_window - reserve_output_tokens
 
@@ -650,9 +645,7 @@ class AzureLLMConfig(LLMConfig):
     """Configuration specific to Azure OpenAI."""
 
     provider: LLMProvider = LLMProvider.AZURE
-    model: str = Field(
-        default="gpt-4o",
-        description="Azure deployment name (model).")
+    model: str = Field(default="gpt-4o", description="Azure deployment name (model).")
     api_version: str = Field(
         default_factory=lambda: os.getenv(
             "AZURE_OPENAI_API_VERSION", "2024-02-15-preview"
@@ -669,8 +662,7 @@ class AzureLLMConfig(LLMConfig):
     )
     # Direct loading of API key from environment
     api_key: SecretStr = Field(
-        default_factory=lambda: SecretStr(
-            os.getenv("AZURE_OPENAI_API_KEY", "")),
+        default_factory=lambda: SecretStr(os.getenv("AZURE_OPENAI_API_KEY", "")),
         description="API key for Azure OpenAI.",
     )
 
@@ -723,8 +715,7 @@ class AzureLLMConfig(LLMConfig):
         logger.debug(f"- API version: {self.api_version}")
         logger.debug(f"- API base: {self.api_base}")
         logger.debug(f"- API type: {self.api_type}")
-        logger.debug(
-            f"- API key available: {'Yes' if self.get_api_key() else 'No'}")
+        logger.debug(f"- API key available: {'Yes' if self.get_api_key() else 'No'}")
 
         # Validate required parameters
         if not self.get_api_key():
@@ -753,7 +744,8 @@ class AzureLLMConfig(LLMConfig):
         except Exception as e:
             logger.exception(
                 f"Failed to instantiate Azure OpenAI model: {
-                    e!s}")
+                    e!s}"
+            )
             raise RuntimeError(
                 f"Failed to instantiate Azure OpenAI model: {e!s}"
             ) from e
@@ -807,7 +799,8 @@ class OpenAILLMConfig(LLMConfig):
         except Exception as e:
             raise RuntimeError(
                 f"Failed to instantiate OpenAI model: {
-                    e!s}") from e
+                    e!s}"
+            ) from e
 
 
 class AnthropicLLMConfig(LLMConfig):
@@ -815,8 +808,7 @@ class AnthropicLLMConfig(LLMConfig):
 
     provider: LLMProvider = LLMProvider.ANTHROPIC
     model: str = Field(
-        default_factory=lambda: os.getenv(
-            "ANTHROPIC_MODEL", "claude-3-opus-20240229"),
+        default_factory=lambda: os.getenv("ANTHROPIC_MODEL", "claude-3-opus-20240229"),
         description="Anthropic model name.",
     )
     api_key: SecretStr = Field(
@@ -873,16 +865,15 @@ class AnthropicLLMConfig(LLMConfig):
         except Exception as e:
             raise RuntimeError(
                 f"Failed to instantiate Anthropic model: {
-                    e!s}") from e
+                    e!s}"
+            ) from e
 
 
 class GeminiLLMConfig(LLMConfig):
     """Configuration for Google Gemini models."""
 
     provider: LLMProvider = LLMProvider.GEMINI
-    model: str = Field(
-        default="gemini-1.5-pro",
-        description="Gemini model name.")
+    model: str = Field(default="gemini-1.5-pro", description="Gemini model name.")
     api_key: SecretStr = Field(
         default_factory=lambda: SecretStr(os.getenv("GEMINI_API_KEY", "")),
         description="API key for Google Gemini.",
@@ -919,16 +910,15 @@ class GeminiLLMConfig(LLMConfig):
         except Exception as e:
             raise RuntimeError(
                 f"Failed to instantiate Gemini model: {
-                    e!s}") from e
+                    e!s}"
+            ) from e
 
 
 class DeepSeekLLMConfig(LLMConfig):
     """Configuration for DeepSeek models."""
 
     provider: LLMProvider = LLMProvider.DEEPSEEK
-    model: str = Field(
-        default="deepseek-chat",
-        description="DeepSeek model name.")
+    model: str = Field(default="deepseek-chat", description="DeepSeek model name.")
     api_key: SecretStr = Field(
         default_factory=lambda: SecretStr(os.getenv("DEEPSEEK_API_KEY", "")),
         description="API key for DeepSeek.",
@@ -964,7 +954,8 @@ class DeepSeekLLMConfig(LLMConfig):
         except Exception as e:
             raise RuntimeError(
                 f"Failed to instantiate DeepSeek model: {
-                    e!s}") from e
+                    e!s}"
+            ) from e
 
 
 class MistralLLMConfig(LLMConfig):
@@ -1018,16 +1009,15 @@ class MistralLLMConfig(LLMConfig):
         except Exception as e:
             raise RuntimeError(
                 f"Failed to instantiate Mistral model: {
-                    e!s}") from e
+                    e!s}"
+            ) from e
 
 
 class GroqLLMConfig(LLMConfig):
     """Configuration for Groq models."""
 
     provider: LLMProvider = LLMProvider.GROQ
-    model: str = Field(
-        default="llama3-70b-8192",
-        description="Groq model name.")
+    model: str = Field(default="llama3-70b-8192", description="Groq model name.")
     api_key: SecretStr = Field(
         default_factory=lambda: SecretStr(os.getenv("GROQ_API_KEY", "")),
         description="API key for Groq.",
@@ -1064,7 +1054,8 @@ class GroqLLMConfig(LLMConfig):
         except Exception as e:
             raise RuntimeError(
                 f"Failed to instantiate Groq model: {
-                    e!s}") from e
+                    e!s}"
+            ) from e
 
 
 class CohereLLMConfig(LLMConfig):
@@ -1108,7 +1099,8 @@ class CohereLLMConfig(LLMConfig):
         except Exception as e:
             raise RuntimeError(
                 f"Failed to instantiate Cohere model: {
-                    e!s}") from e
+                    e!s}"
+            ) from e
 
 
 class TogetherAILLMConfig(LLMConfig):
@@ -1119,8 +1111,7 @@ class TogetherAILLMConfig(LLMConfig):
         default="meta-llama/Llama-3-70b-chat-hf", description="Together AI model name."
     )
     api_key: SecretStr = Field(
-        default_factory=lambda: SecretStr(
-            os.getenv("TOGETHER_AI_API_KEY", "")),
+        default_factory=lambda: SecretStr(os.getenv("TOGETHER_AI_API_KEY", "")),
         description="API key for Together AI.",
     )
 
@@ -1155,7 +1146,8 @@ class TogetherAILLMConfig(LLMConfig):
         except Exception as e:
             raise RuntimeError(
                 f"Failed to instantiate Together AI model: {
-                    e!s}") from e
+                    e!s}"
+            ) from e
 
 
 class FireworksAILLMConfig(LLMConfig):
@@ -1166,8 +1158,7 @@ class FireworksAILLMConfig(LLMConfig):
         default="fireworks/llama-v3-70b-chat", description="Fireworks AI model name."
     )
     api_key: SecretStr = Field(
-        default_factory=lambda: SecretStr(
-            os.getenv("FIREWORKS_AI_API_KEY", "")),
+        default_factory=lambda: SecretStr(os.getenv("FIREWORKS_AI_API_KEY", "")),
         description="API key for Fireworks AI.",
     )
 
@@ -1248,7 +1239,8 @@ class PerplexityLLMConfig(LLMConfig):
         except Exception as e:
             raise RuntimeError(
                 f"Failed to instantiate Perplexity model: {
-                    e!s}") from e
+                    e!s}"
+            ) from e
 
 
 class HuggingFaceLLMConfig(LLMConfig):
@@ -1257,8 +1249,7 @@ class HuggingFaceLLMConfig(LLMConfig):
     provider: LLMProvider = LLMProvider.HUGGINGFACE
     model: str = Field(..., description="Model ID on Hugging Face Hub.")
     api_key: SecretStr = Field(
-        default_factory=lambda: SecretStr(
-            os.getenv("HUGGING_FACE_API_KEY", "")),
+        default_factory=lambda: SecretStr(os.getenv("HUGGING_FACE_API_KEY", "")),
         description="API key for Hugging Face.",
     )
     endpoint_url: str | None = Field(
@@ -1366,19 +1357,17 @@ class AI21LLMConfig(LLMConfig):
         except Exception as e:
             raise RuntimeError(
                 f"Failed to instantiate AI21 model: {
-                    e!s}") from e
+                    e!s}"
+            ) from e
 
 
 class AlephAlphaLLMConfig(LLMConfig):
     """Configuration for Aleph Alpha models."""
 
     provider: LLMProvider = LLMProvider.ALEPH_ALPHA
-    model: str = Field(
-        default="luminous-base",
-        description="Aleph Alpha model name.")
+    model: str = Field(default="luminous-base", description="Aleph Alpha model name.")
     api_key: SecretStr = Field(
-        default_factory=lambda: SecretStr(
-            os.getenv("ALEPH_ALPHA_API_KEY", "")),
+        default_factory=lambda: SecretStr(os.getenv("ALEPH_ALPHA_API_KEY", "")),
         description="API key for Aleph Alpha.",
     )
 
@@ -1413,16 +1402,15 @@ class AlephAlphaLLMConfig(LLMConfig):
         except Exception as e:
             raise RuntimeError(
                 f"Failed to instantiate Aleph Alpha model: {
-                    e!s}") from e
+                    e!s}"
+            ) from e
 
 
 class GooseAILLMConfig(LLMConfig):
     """Configuration for GooseAI models."""
 
     provider: LLMProvider = LLMProvider.GOOSEAI
-    model: str = Field(
-        default="gpt-neo-20b",
-        description="GooseAI model name.")
+    model: str = Field(default="gpt-neo-20b", description="GooseAI model name.")
     api_key: SecretStr = Field(
         default_factory=lambda: SecretStr(os.getenv("GOOSEAI_API_KEY", "")),
         description="API key for GooseAI.",
@@ -1465,7 +1453,8 @@ class GooseAILLMConfig(LLMConfig):
         except Exception as e:
             raise RuntimeError(
                 f"Failed to instantiate GooseAI model: {
-                    e!s}") from e
+                    e!s}"
+            ) from e
 
 
 class MosaicMLLLMConfig(LLMConfig):
@@ -1509,7 +1498,8 @@ class MosaicMLLLMConfig(LLMConfig):
         except Exception as e:
             raise RuntimeError(
                 f"Failed to instantiate MosaicML model: {
-                    e!s}") from e
+                    e!s}"
+            ) from e
 
 
 class NLPCloudLLMConfig(LLMConfig):
@@ -1561,16 +1551,15 @@ class NLPCloudLLMConfig(LLMConfig):
         except Exception as e:
             raise RuntimeError(
                 f"Failed to instantiate NLP Cloud model: {
-                    e!s}") from e
+                    e!s}"
+            ) from e
 
 
 class OpenLMLLMConfig(LLMConfig):
     """Configuration for OpenLM models."""
 
     provider: LLMProvider = LLMProvider.OPENLM
-    model: str = Field(
-        default="open-llama-3b",
-        description="OpenLM model name.")
+    model: str = Field(default="open-llama-3b", description="OpenLM model name.")
     api_key: SecretStr = Field(
         default_factory=lambda: SecretStr(os.getenv("OPENLM_API_KEY", "")),
         description="API key for OpenLM.",
@@ -1607,16 +1596,15 @@ class OpenLMLLMConfig(LLMConfig):
         except Exception as e:
             raise RuntimeError(
                 f"Failed to instantiate OpenLM model: {
-                    e!s}") from e
+                    e!s}"
+            ) from e
 
 
 class PetalsLLMConfig(LLMConfig):
     """Configuration for Petals distributed models."""
 
     provider: LLMProvider = LLMProvider.PETALS
-    model: str = Field(
-        default="bigscience/bloom",
-        description="Petals model name.")
+    model: str = Field(default="bigscience/bloom", description="Petals model name.")
     # No API key needed for Petals distributed inference
 
     def instantiate(self, **kwargs) -> Any:
@@ -1633,7 +1621,8 @@ class PetalsLLMConfig(LLMConfig):
         except Exception as e:
             raise RuntimeError(
                 f"Failed to instantiate Petals model: {
-                    e!s}") from e
+                    e!s}"
+            ) from e
 
 
 class ReplicateLLMConfig(LLMConfig):
@@ -1680,18 +1669,16 @@ class ReplicateLLMConfig(LLMConfig):
         except Exception as e:
             raise RuntimeError(
                 f"Failed to instantiate Replicate model: {
-                    e!s}") from e
+                    e!s}"
+            ) from e
 
 
 class VertexAILLMConfig(LLMConfig):
     """Configuration for Google Vertex AI models."""
 
     provider: LLMProvider = LLMProvider.VERTEX_AI
-    model: str = Field(
-        default="gemini-1.5-pro",
-        description="Vertex AI model name.")
-    project: str | None = Field(default="",
-                                description="Google Cloud Project ID.")
+    model: str = Field(default="gemini-1.5-pro", description="Vertex AI model name.")
+    project: str | None = Field(default="", description="Google Cloud Project ID.")
     location: str = Field(
         default="us-central1", description="Google Cloud region/location."
     )
@@ -1735,7 +1722,8 @@ class VertexAILLMConfig(LLMConfig):
         except Exception as e:
             raise RuntimeError(
                 f"Failed to instantiate Vertex AI model: {
-                    e!s}") from e
+                    e!s}"
+            ) from e
 
 
 class BedrockLLMConfig(LLMConfig):
@@ -1764,8 +1752,7 @@ class BedrockLLMConfig(LLMConfig):
         description="AWS access key ID.",
     )
     aws_secret_access_key: SecretStr | None = Field(
-        default_factory=lambda: SecretStr(
-            os.getenv("AWS_SECRET_ACCESS_KEY", "")),
+        default_factory=lambda: SecretStr(os.getenv("AWS_SECRET_ACCESS_KEY", "")),
         description="AWS secret access key.",
     )
 
@@ -1802,7 +1789,8 @@ class BedrockLLMConfig(LLMConfig):
         except Exception as e:
             raise RuntimeError(
                 f"Failed to instantiate Bedrock model: {
-                    e!s}") from e
+                    e!s}"
+            ) from e
 
 
 class NVIDIALLMConfig(LLMConfig):
@@ -1848,7 +1836,8 @@ class NVIDIALLMConfig(LLMConfig):
         except Exception as e:
             raise RuntimeError(
                 f"Failed to instantiate NVIDIA model: {
-                    e!s}") from e
+                    e!s}"
+            ) from e
 
 
 class OllamaLLMConfig(LLMConfig):
@@ -1857,8 +1846,7 @@ class OllamaLLMConfig(LLMConfig):
     provider: LLMProvider = LLMProvider.OLLAMA
     model: str = Field(default="llama3", description="Ollama model name.")
     base_url: str = Field(
-        default_factory=lambda: os.getenv(
-            "OLLAMA_BASE_URL", "http://localhost:11434"),
+        default_factory=lambda: os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
         description="Ollama server URL.",
     )
     # No API key needed for local Ollama
@@ -1883,19 +1871,17 @@ class OllamaLLMConfig(LLMConfig):
         except Exception as e:
             raise RuntimeError(
                 f"Failed to instantiate Ollama model: {
-                    e!s}") from e
+                    e!s}"
+            ) from e
 
 
 class LlamaCppLLMConfig(LLMConfig):
     """Configuration for Llama.cpp local models."""
 
     provider: LLMProvider = LLMProvider.LLAMACPP
-    model: str = Field(
-        description="Path to the GGUF model file.",
-        alias="model_path")
+    model: str = Field(description="Path to the GGUF model file.", alias="model_path")
     n_ctx: int = Field(default=2048, description="Context window size.")
-    n_threads: int | None = Field(default=None,
-                                  description="Number of threads to use.")
+    n_threads: int | None = Field(default=None, description="Number of threads to use.")
     n_gpu_layers: int = Field(
         default=0, description="Number of layers to offload to GPU."
     )
@@ -1926,16 +1912,15 @@ class LlamaCppLLMConfig(LLMConfig):
         except Exception as e:
             raise RuntimeError(
                 f"Failed to instantiate Llama.cpp model: {
-                    e!s}") from e
+                    e!s}"
+            ) from e
 
 
 class UpstageLLMConfig(LLMConfig):
     """Configuration for Upstage models."""
 
     provider: LLMProvider = LLMProvider.UPSTAGE
-    model: str = Field(
-        default="solar-1-mini-chat",
-        description="Upstage model name.")
+    model: str = Field(default="solar-1-mini-chat", description="Upstage model name.")
     api_key: SecretStr = Field(
         default_factory=lambda: SecretStr(os.getenv("UPSTAGE_API_KEY", "")),
         description="API key for Upstage.",
@@ -1967,7 +1952,8 @@ class UpstageLLMConfig(LLMConfig):
         except Exception as e:
             raise RuntimeError(
                 f"Failed to instantiate Upstage model: {
-                    e!s}") from e
+                    e!s}"
+            ) from e
 
 
 class DatabricksLLMConfig(LLMConfig):
@@ -2015,7 +2001,8 @@ class DatabricksLLMConfig(LLMConfig):
         except Exception as e:
             raise RuntimeError(
                 f"Failed to instantiate Databricks model: {
-                    e!s}") from e
+                    e!s}"
+            ) from e
 
 
 class WatsonxLLMConfig(LLMConfig):
@@ -2074,7 +2061,8 @@ class WatsonxLLMConfig(LLMConfig):
         except Exception as e:
             raise RuntimeError(
                 f"Failed to instantiate Watson.x model: {
-                    e!s}") from e
+                    e!s}"
+            ) from e
 
 
 class XAILLMConfig(LLMConfig):
@@ -2117,7 +2105,8 @@ class XAILLMConfig(LLMConfig):
         except Exception as e:
             raise RuntimeError(
                 f"Failed to instantiate xAI model: {
-                    e!s}") from e
+                    e!s}"
+            ) from e
 
 
 # TODO: CONVERT OT LIST AND ADD SUPP FOR GEMINI

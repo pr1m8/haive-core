@@ -67,8 +67,10 @@ try:
     # Try to import without triggering the full document system
     # This is a stub to check if DocumentState is available
     import sys
-    if 'haive.core.engine.document' in sys.modules:
+
+    if "haive.core.engine.document" in sys.modules:
         from haive.core.schema.prebuilt.document_state import DocumentState
+
         _HAS_DOCUMENT_STATE = True
     else:
         DocumentState = None
@@ -186,11 +188,15 @@ class QueryResult(BaseModel):
 
 # Define QueryState with conditional inheritance based on DocumentState availability
 if _HAS_DOCUMENT_STATE and DocumentState is not None:
+
     class QueryState(MessagesState, DocumentState):
         pass
+
 else:
+
     class QueryState(MessagesState):
         pass
+
 
 # Now redefine the actual QueryState class with its full implementation
 class QueryState(QueryState):

@@ -1,4 +1,4 @@
-"""Haive Component Discovery System
+"""Haive Component Discovery System.
 
 A comprehensive tool for discovering, analyzing, and documenting components
 in the Haive AI framework.
@@ -45,44 +45,44 @@ from haive.core.utils.haive_discovery.utils import (  # Quick discovery function
 )
 
 __all__ = [
+    "ComponentAnalyzer",
     # Core classes
     "ComponentInfo",
-    "ComponentAnalyzer",
-    "ToolAnalyzer",
     "DocumentLoaderAnalyzer",
-    "RetrieverAnalyzer",
-    "VectorStoreAnalyzer",
+    "DocumentationWriter",
     "EngineAnalyzer",
     "EnhancedComponentDiscovery",
-    "DocumentationWriter",
     "HaiveComponentDiscovery",
-    # Quick discovery functions
-    "quick_discover",
-    "discover_tools",
-    "discover_retrievers",
-    "discover_vector_stores",
-    "discover_loaders",
-    "discover_engines",
-    "discover_all",
-    # Tool functions
-    "get_all_tools",
-    "get_tools_by_type",
-    "create_tool_from_component",
-    # Engine functions
-    "get_all_engine_configs",
-    "get_engines_by_type",
-    # Documentation functions
-    "save_discovery_report",
-    "generate_markdown_report",
-    "generate_json_catalog",
+    "RetrieverAnalyzer",
+    "ToolAnalyzer",
+    "VectorStoreAnalyzer",
     # Analysis functions
     "analyze_failed_imports",
-    "get_discovery_stats",
-    "find_components_by_name",
-    "find_components_with_env_vars",
+    "create_custom_analyzer",
     # Factory functions
     "create_discovery",
-    "create_custom_analyzer",
+    "create_tool_from_component",
+    "discover_all",
+    "discover_engines",
+    "discover_loaders",
+    "discover_retrievers",
+    "discover_tools",
+    "discover_vector_stores",
+    "find_components_by_name",
+    "find_components_with_env_vars",
+    "generate_json_catalog",
+    "generate_markdown_report",
+    # Engine functions
+    "get_all_engine_configs",
+    # Tool functions
+    "get_all_tools",
+    "get_discovery_stats",
+    "get_engines_by_type",
+    "get_tools_by_type",
+    # Quick discovery functions
+    "quick_discover",
+    # Documentation functions
+    "save_discovery_report",
 ]
 
 __version__ = "0.1.0"

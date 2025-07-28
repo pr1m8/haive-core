@@ -176,7 +176,7 @@ class MarqoVectorStoreConfig(BaseVectorStoreConfig):
         return v
 
     @classmethod
-    def validate_embedding(self):
+    def validate_embedding(cls):
         """Override to make embedding optional for Marqo.
 
         Marqo manages its own embeddings internally based on the specified model,
