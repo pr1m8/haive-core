@@ -54,7 +54,7 @@ def setup_example_state() -> ExampleAgentState:
         MockTool("web_search", "langchain_tool"),
         MockTool("calculator", "function"),
         MockTool("DocumentGenerator", "pydantic_model"),
-        MockTool("memory_retriever", "retriever"),
+        MockTool("memory_retriever", "retrievef"),
     ]
 
     # Set up routes
@@ -75,7 +75,7 @@ def create_dual_validation_graph():
 
     # Create validation node with dual functionality
     validator = StateUpdatingValidationNode(
-        name="dual_validator",
+        name="dual_validatof",
         validation_mode=ValidationMode.PARTIAL,
         update_messages=True,
         track_error_tools=True,

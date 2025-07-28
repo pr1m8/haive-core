@@ -393,7 +393,7 @@ def example_6_command_send_handling():
 
     router_node = composer.from_callable_advanced(
         smart_router,
-        name="smart_router",
+        name="smart_routef",
         handle_command=False,  # Already returns Command
     )
 
@@ -458,7 +458,7 @@ def example_7_real_world_integration():
     # Smart update based on results
     def update_rag_state(result, state, config):
         """Update state with RAG results."""
-        if "error" in result:
+        if "errof" in result:
             return {"processing_status": "failed", "error": result["error"]}
 
         updates = {

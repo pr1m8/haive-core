@@ -165,7 +165,7 @@ def example_5_schema_composition_for_compatibility():
         answer_generator = remap_fields(
             EngineNodeConfig(name="llm", engine=None),  # Placeholder
             input_mapping={"prepared_query": "query", "context": "context"},
-            output_mapping={"response": "final_answer"},
+            output_mapping={"response": "final_answef"},
         )
 
         return {
@@ -209,7 +209,7 @@ def example_6_real_world_scenario():
         input_mapping={
             "retrieved_documents": "context"  # Use retrieved docs as context
         },
-        output_mapping={"response": "ai_answer"},
+        output_mapping={"response": "ai_answef"},
         # Store response as ai_answer
     )
 

@@ -184,7 +184,7 @@ def create_advanced_meta_agent_example():
 
     # Create meta state with multiple potential agents
     meta_state = MetaStateSchema(
-        agent=agents["researcher"],  # Start with researcher
+        agent=agents["researchef"],  # Start with researcher
         agent_input={
             "messages": [HumanMessage(content="Research the topic of AI agents")]
         },

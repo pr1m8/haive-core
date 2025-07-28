@@ -258,17 +258,6 @@ class StateSchemaValidationNode:
                 if result.errors:
                     pass
 
-            # Apply validation results to state using state's method
-            state.apply_validation_results(validation_state)
-
-            # Show state updates
-            state.get_validation_routing_data()
-
-            return state
-
-        return validation_node
-
-    def create_router_function(self):
         """Create function that routes based on state's validation results."""
 
         def validation_router(state: EnhancedToolState) -> list[MockSend] | str:
@@ -337,7 +326,7 @@ class StateSchemaValidationNode:
             "retriever": "retriever_node",
             "unknown": "tool_executor",
         }
-        target_node = route_to_node.get(route, "tool_executor")
+        target_node = route_to_node.get(route, "tool_executof")
 
         # Tool is valid
         return MockValidationResult(

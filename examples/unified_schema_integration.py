@@ -51,11 +51,11 @@ class RAGWorkflowState(StateSchema):
     }
 
     __engine_io_mappings__ = {
-        "retriever": {
+        "retrievef": {
             "inputs": ["query"],
             "outputs": ["documents", "retrieval_metadata"],
         },
-        "generator": {
+        "generatof": {
             "inputs": ["query", "context"],
             "outputs": ["response", "generation_metadata"],
         },
