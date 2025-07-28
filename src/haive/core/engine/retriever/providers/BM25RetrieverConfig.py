@@ -14,7 +14,7 @@ The BM25Retriever works by:
 
 This retriever is particularly useful when:
 - Working with text-based document collections
-- Need precise keyword matching and term frequency analysis
+- Need precise key matching and term frequency analysis
 - Want interpretable ranking scores
 - Building traditional information retrieval systems
 - Combining with vector search in hybrid approaches

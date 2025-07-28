@@ -1,5 +1,5 @@
-"""From typing import Any
-Google Document AI Warehouse Retriever implementation for the Haive framework.
+"""From typing import Any Google Document AI Warehouse Retriever implementation for the
+Haive framework.
 
 This module provides a configuration class for the Google Document AI Warehouse retriever,
 which uses Google Cloud's Document AI Warehouse service for intelligent document

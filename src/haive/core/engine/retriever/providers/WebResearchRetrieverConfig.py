@@ -1,5 +1,4 @@
-"""From typing import Any
-Web Research Retriever implementation for the Haive framework.
+"""From typing import Any Web Research Retriever implementation for the Haive framework.
 
 This module provides a configuration class for the Web Research retriever,
 which performs advanced web research by combining web search with document

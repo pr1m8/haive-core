@@ -1,19 +1,19 @@
-"""From typing import Any
-Weaviate Hybrid Search Retriever implementation for the Haive framework.
+"""From typing import Any Weaviate Hybrid Search Retriever implementation for the Haive
+framework.
 
 This module provides a configuration class for the Weaviate Hybrid Search retriever,
-which combines vector similarity search with keyword search using Weaviate's
+which combines vector similarity search with key search using Weaviate's
 hybrid search capabilities. Weaviate is an open-source vector database that
-supports both vector and keyword search in a single query.
+supports both vector and key search in a single query.
 
 The WeaviateHybridSearchRetriever works by:
 1. Connecting to a Weaviate instance
-2. Performing both vector and keyword search simultaneously
+2. Performing both vector and key search simultaneously
 3. Combining results using Weaviate's hybrid ranking algorithm
 4. Supporting advanced filtering and where clauses
 
 This retriever is particularly useful when:
-- Need both semantic and keyword search
+- Need both semantic and key search
 - Want optimized hybrid search performance
 - Building applications with diverse query types
 - Using Weaviate as the vector database
@@ -38,7 +38,7 @@ class WeaviateHybridSearchRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig
     """Configuration for Weaviate Hybrid Search retriever in the Haive framework.
 
     This retriever uses Weaviate's hybrid search capabilities to combine vector
-    similarity search with keyword search for comprehensive retrieval.
+    similarity search with key search for comprehensive retrieval.
 
     Attributes:
         retriever_type (RetrieverType): The type of retriever (always WEAVIATE_HYBRID_SEARCH).
@@ -46,7 +46,7 @@ class WeaviateHybridSearchRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig
         index_name (str): Name of the Weaviate class/index.
         api_key (Optional[SecretStr]): Weaviate API key (auto-resolved from WEAVIATE_API_KEY).
         k (int): Number of documents to retrieve.
-        alpha (float): Balance between vector and keyword search.
+        alpha (float): Balance between vector and key search.
         where_filter (Optional[Dict]): Weaviate where clause for filtering.
 
     Examples:
@@ -58,7 +58,7 @@ class WeaviateHybridSearchRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig
         ...     weaviate_url="https://my-cluster.weaviate.network",
         ...     index_name="Document",
         ...     k=10,
-        ...     alpha=0.5  # Equal weight to vector and keyword search
+        ...     alpha=0.5  # Equal weight to vector and key search
         ... )
         >>>
         >>> # Instantiate and use the retriever
@@ -113,7 +113,7 @@ class WeaviateHybridSearchRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig
         default=0.5,
         ge=0.0,
         le=1.0,
-        description="Balance between vector (1.0) and keyword (0.0) search",
+        description="Balance between vector (1.0) and key (0.0) search",
     )
 
     # Filtering and where clauses

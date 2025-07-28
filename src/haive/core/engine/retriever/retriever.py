@@ -238,7 +238,7 @@ class BaseRetrieverConfig(InvokableEngine[RetrieverInput, RetrieverOutput]):
 
         Examples:
             >>> config = VectorStoreRetrieverConfig(
-            ...     name="my_retriever",
+            ...     name="my_retrievef",
             ...     vector_store_config=vs_config,
             ...     k=4
             ... )
@@ -535,7 +535,7 @@ class VectorStoreRetrieverConfig(BaseRetrieverConfig):
             name="my_retriever",
             vector_store_config=vector_store_config,
             k=4,
-            search_type="mmr",
+            search_type="mmf",
             search_kwargs={"fetch_k": 20, "lambda_mult": 0.5}
         )
 
@@ -604,7 +604,7 @@ class VectorStoreRetrieverConfig(BaseRetrieverConfig):
             ...     name="product_retriever",
             ...     vector_store_config=vs_config,
             ...     k=5,
-            ...     search_type="mmr",
+            ...     search_type="mmf",
             ...     search_kwargs={"fetch_k": 20, "lambda_mult": 0.7}
             ... )
             >>> retriever = config.instantiate()
@@ -739,7 +739,7 @@ def create_retriever_from_vectorstore(
         >>> retriever = create_retriever_from_vectorstore(
         ...     vector_store_config=vs_config,
         ...     k=3,
-        ...     search_type="mmr",
+        ...     search_type="mmf",
         ...     search_kwargs={"fetch_k": 10, "lambda_mult": 0.5}
         ... )
         >>>

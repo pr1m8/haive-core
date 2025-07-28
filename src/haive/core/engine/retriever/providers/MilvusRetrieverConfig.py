@@ -63,7 +63,7 @@ class MilvusRetrieverConfig(BaseRetrieverConfig):
         >>>
         >>> # Create the Milvus retriever config
         >>> config = MilvusRetrieverConfig(
-        ...     name="milvus_retriever",
+        ...     name="milvus_retrievef",
         ...     vectorstore_config=vectorstore_config,
         ...     k=10,
         ...     search_params={"nprobe": 16},

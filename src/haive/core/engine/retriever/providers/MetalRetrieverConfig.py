@@ -69,7 +69,7 @@ class MetalRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
         ...     k=5,
         ...     filters={
         ...         "category": "technology",
-        ...         "published_year": {"$gte": 2020}
+        ...         "published_yeaf": {"$gte": 2020}
         ...     }
         ... )
     """

@@ -8,7 +8,7 @@ sophisticated indexing and retrieval mechanisms.
 
 The LlamaIndexRetriever works by:
 1. Using LlamaIndex's retrieval engines
-2. Supporting various index types (vector, keyword, graph, etc.)
+2. Supporting various index types (vector, key, graph, etc.)
 3. Enabling sophisticated query processing
 4. Providing LlamaIndex-specific optimizations
 
@@ -109,7 +109,7 @@ class LlamaIndexRetrieverConfig(BaseRetrieverConfig):
     # LlamaIndex specific parameters
     index_type: str = Field(
         default="vector",
-        description="Type of LlamaIndex index: 'vector', 'keyword', 'knowledge_graph', 'list'",
+        description="Type of LlamaIndex index: 'vector', 'key', 'knowledge_graph', 'list'",
     )
 
     chunk_size: int = Field(

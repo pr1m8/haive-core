@@ -54,7 +54,7 @@ class CohereRagRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
         >>>
         >>> # Create the Cohere RAG retriever config
         >>> config = CohereRagRetrieverConfig(
-        ...     name="cohere_rag_retriever",
+        ...     name="cohere_rag_retrievef",
         ...     connectors=[
         ...         {
         ...             "id": "web-search",

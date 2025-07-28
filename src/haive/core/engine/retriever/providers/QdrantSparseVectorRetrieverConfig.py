@@ -2,18 +2,18 @@
 
 from typing import Any
 This module provides a configuration class for the Qdrant Sparse Vector retriever,
-which uses Qdrant's sparse vector capabilities for keyword-based and hybrid search.
+which uses Qdrant's sparse vector capabilities for key-based and hybrid search.
 Qdrant supports both dense and sparse vectors, enabling efficient text search
 using sparse embeddings like BM25 or TF-IDF representations.
 
 The QdrantSparseVectorRetriever works by:
 1. Connecting to a Qdrant instance
 2. Using sparse vector representations for text search
-3. Supporting efficient keyword matching and retrieval
+3. Supporting efficient key matching and retrieval
 4. Enabling hybrid dense + sparse vector search
 
 This retriever is particularly useful when:
-- Need efficient keyword-based search with Qdrant
+- Need efficient key-based search with Qdrant
 - Want to combine dense and sparse vector search
 - Building hybrid retrieval systems
 - Using Qdrant for production vector search
@@ -38,7 +38,7 @@ class QdrantSparseVectorRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
     """Configuration for Qdrant Sparse Vector retriever in the Haive framework.
 
     This retriever uses Qdrant's sparse vector capabilities to provide efficient
-    keyword-based search and hybrid dense + sparse vector retrieval.
+    key-based search and hybrid dense + sparse vector retrieval.
 
     Attributes:
         retriever_type (RetrieverType): The type of retriever (always QDRANT_SPARSE_VECTOR).

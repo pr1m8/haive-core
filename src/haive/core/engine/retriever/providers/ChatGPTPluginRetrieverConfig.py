@@ -68,8 +68,7 @@ class ChatGPTPluginRetrieverConfig(SecureConfigMixin, BaseRetrieverConfig):
         ...     name="db_chatgpt_plugin_retriever",
         ...     plugin_url="https://api.db-plugin.com",
         ...     plugin_name="DatabasePlugin",
-        ...     aiopg_dsn="postgresql://user:pass@host:port/db"
-        ... )
+        ...     aiopg_dsn="postgresql://user:pass
     """
 
     retriever_type: RetrieverType = Field(

@@ -57,7 +57,7 @@ class TFIDFRetrieverConfig(BaseRetrieverConfig):
         >>>
         >>> # Create the TF-IDF retriever config
         >>> config = TFIDFRetrieverConfig(
-        ...     name="tfidf_retriever",
+        ...     name="tfidf_retrievef",
         ...     documents=docs,
         ...     k=2,
         ...     tfidf_params={"max_features": 1000, "stop_words": "english"}
