@@ -127,9 +127,6 @@ def agent_handoff_example() -> Any:
 
     for msg in agent1.messages:
         pass
-
-    # Second agent's state
-    agent2 = MessagesState()
     agent2.add_system_message("You are Agent 2, an expert in visualization.")
 
     # Transform and transfer messages
