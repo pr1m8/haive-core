@@ -1,7 +1,7 @@
 """Document Transformer Engine for Haive Framework.
 
-This module provides an engine for transforming documents using various strategies
-such as HTML conversion, document reordering, deduplication, and more.
+This module provides an engine for transforming documents using various strategies such
+as HTML conversion, document reordering, deduplication, and more.
 """
 
 from typing import Any

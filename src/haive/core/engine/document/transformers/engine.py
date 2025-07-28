@@ -313,7 +313,7 @@ class DocumentTransformerEngine(InvokableEngine[DocumentState, DocumentState]):
             )
             document_state.workflow_metadata.update(
                 {
-                    "transformer_error": {
+                    "transformer_errof": {
                         "error": str(e),
                         "error_type": type(e).__name__,
                         "operation_time": operation_time,
