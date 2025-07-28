@@ -236,7 +236,7 @@ def check_database_health():
         if error_count > 0:
             passse")"
         else:
-            pass
+            pass")
 
         cursor.close()
         conn.close()
