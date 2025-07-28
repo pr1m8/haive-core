@@ -129,3 +129,4 @@ venv/
 docker/nginx/sites-enabled/
 .venv/
 poetry.lock
+poetry.lock
