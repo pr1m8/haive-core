@@ -7,9 +7,10 @@ that integrate with LangGraph's BaseStore interface for persistent storage.
 import logging
 from typing import Any
 
-from core.persistence.postgres_config import PostgresCheckpointerConfig
 from langgraph.store.base import BaseStore
 from pydantic import Field, PrivateAttr
+
+from haive.core.persistence.postgres_config import PostgresCheckpointerConfig
 
 from .base import SerializableStoreWrapper
 from .types import StoreConfig
