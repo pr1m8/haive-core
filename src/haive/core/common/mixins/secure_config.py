@@ -193,13 +193,15 @@ class SecureConfigMixin:
                     provider_str.lower(), f"{provider_str.upper()}_API_KEY"
                 )
                 logger.warning(
-                    f"API key for {provider_str} is empty. Please ensure the {env_var} environment variable is set."
+                    f"API key for {provider_str} is empty. Please ensure the {env_var} "
+                    f"environment variable is set."
                 )
 
                 # For Azure, provide additional helpful info
                 if provider_str.lower() == "azure":
                     logger.warning(
-                        "For Azure OpenAI, make sure both AZURE_OPENAI_API_KEY and AZURE_OPENAI_ENDPOINT are set."
+                        "For Azure OpenAI, make sure both AZURE_OPENAI_API_KEY and "
+                        "AZURE_OPENAI_ENDPOINT are set."
                     )
 
                 return None
