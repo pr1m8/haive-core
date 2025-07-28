@@ -1,5 +1,5 @@
 # This file controls the behavior of Trunk: https://docs.trunk.io/cli
-# To learn more about the format of this file, see https://docs.trunk.io/trunk-yaml
+# To learn more about the format of this file, see https://docs.trunk.io/reference/trunk-yaml
 version: 0.1
 
 cli:
@@ -12,14 +12,16 @@ plugins:
       ref: v1.7.1
       uri: https://github.com/trunk-io/plugins
 
-# Many linters and tools depend on runtimes – configure them here. (https://docs.trunk.io/runtimes)
+# Many linters and tools depend on runtimes – configure them here.
+# (https://docs.trunk.io/runtimes)
 runtimes:
   enabled:
     - go@1.21.0
     - node@22.16.0
     - python@3.10.8
 
-# This is the section where you manage your linters. (https://docs.trunk.io/check/configuration)
+# This is the section where you manage your linters.
+# (https://docs.trunk.io/check/configuration)
 lint:
   enabled:
     - shellcheck@0.10.0
@@ -42,16 +44,12 @@ lint:
     - linters: [ALL]
       paths:
         - tests/**
-        - haive-core/tests/**
-        - ../tests/**
         - tmp/**
         - plugins/**
         - tools/**
         - logs/**
         - actions/**
         - notifications/**
-        - user_trunk.yaml
-        - user.yaml
 
 # Trunk Actions (Git hooks and workflow automation)
 actions:
