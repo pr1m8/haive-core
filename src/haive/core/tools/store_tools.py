@@ -1,7 +1,7 @@
 """Store tools for Haive agents.
 
-This module provides LangChain-compatible tools that agents can use to
-interact with the store system for memory management, similar to LangMem.
+This module provides LangChain-compatible tools that agents can use to interact with the
+store system for memory management, similar to LangMem.
 """
 
 import json
@@ -102,7 +102,8 @@ def create_store_memory_tool(
         tags: list[str] | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> str:
-        """Store important information in memory for later retrieval. Use this to remember user preferences, facts, events, or any important information.
+        """Store important information in memory for later retrieval. Use this to remember
+        user preferences, facts, events, or any important information.
 
         Args:
             content: The memory content to store
@@ -169,7 +170,8 @@ def create_search_memory_tool(
         tags: list[str] | None = None,
         limit: int = 10,
     ) -> str:
-        """Search for relevant memories based on a query. Use this to recall information about users, facts, or past events.
+        """Search for relevant memories based on a query. Use this to recall information
+        about users, facts, or past events.
 
         Args:
             query: Search query to find relevant memories

@@ -1,7 +1,7 @@
 """Haive Core Tools Package.
 
-This package provides tools that agents can use, including store management
-tools for memory operations similar to LangMem.
+This package provides tools that agents can use, including store management tools for
+memory operations similar to LangMem.
 """
 
 from .store_manager import MemoryEntry, StoreManager

@@ -1,8 +1,8 @@
 """Store management system for Haive agents.
 
-This module provides a comprehensive store management system similar to LangMem,
-with tools for storing, retrieving, and managing agent memories using our
-PostgreSQL store infrastructure.
+This module provides a comprehensive store management system similar to LangMem, with
+tools for storing, retrieving, and managing agent memories using our PostgreSQL store
+infrastructure.
 """
 
 import logging

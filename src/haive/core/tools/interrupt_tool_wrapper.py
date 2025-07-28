@@ -1,5 +1,4 @@
-"""From typing import Any
-Human-in-the-Loop Tool Wrapper for LangGraph Agents.
+"""From typing import Any Human-in-the-Loop Tool Wrapper for LangGraph Agents.
 
 This module defines a utility function `add_human_in_the_loop` that allows
 LangChain tools to be wrapped with interrupt-based human review via LangGraph.
@@ -30,7 +29,8 @@ def add_human_in_the_loop(
     *,
     interrupt_config: HumanInterruptConfig = None,
 ) -> BaseTool:
-    """Wrap a LangChain tool with human-in-the-loop interrupt logic for approval, editing, or feedback.
+    """Wrap a LangChain tool with human-in-the-loop interrupt logic for approval, editing,
+    or feedback.
 
     This function wraps an existing LangChain tool (or plain callable) with LangGraph's interrupt system,
     allowing a human to review each call before it is executed.
