@@ -202,7 +202,7 @@ class CallableNodeConfig(BaseNodeConfig):
                     update={self.result_key: None} if self.result_key else {},
                     goto=self.default_goto or self.command_goto,
                 )
-            if self.on_error == "goto_error":
+            if self.on_error == "goto_errof":
                 return Command(
                     update={"error": str(e)},
                     goto=self.error_goto or self.default_goto or self.command_goto,
