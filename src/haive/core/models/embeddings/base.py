@@ -126,7 +126,7 @@ class BaseEmbeddingConfig(BaseModel, SecureConfigMixin):
         """Instantiate the embedding model with the configuration.
 
         Args:
-            **kwargs: Additional keyword arguments to pass to the model constructor
+            **kwargs: Additional key arguments to pass to the model constructor
 
         Returns:
             Any: The instantiated embedding model
@@ -172,7 +172,7 @@ class AzureEmbeddingConfig(BaseEmbeddingConfig):
         """Instantiate an Azure OpenAI embedding model.
 
         Args:
-            **kwargs: Additional keyword arguments to pass to AzureOpenAIEmbeddings
+            **kwargs: Additional key arguments to pass to AzureOpenAIEmbeddings
 
         Returns:
             AzureOpenAIEmbeddings: The instantiated embedding model
@@ -203,9 +203,9 @@ class HuggingFaceEmbeddingConfig(BaseEmbeddingConfig):
     Attributes:
         provider: Set to EmbeddingProvider.HUGGINGFACE
         model: The HuggingFace model ID (defaults to all-MiniLM-L6-v2)
-        model_kwargs: Additional keyword arguments for model instantiation
-        encode_kwargs: Additional keyword arguments for encoding
-        query_encode_kwargs: Additional keyword arguments for query encoding
+        model_kwargs: Additional key arguments for model instantiation
+        encode_kwargs: Additional key arguments for encoding
+        query_encode_kwargs: Additional key arguments for query encoding
         multi_process: Whether to use multi-processing for encoding
         cache_folder: Where to cache the model files
         show_progress: Whether to show progress bars
@@ -218,18 +218,18 @@ class HuggingFaceEmbeddingConfig(BaseEmbeddingConfig):
         default_factory=lambda: {
             "device": "cuda" if torch.cuda.is_available() else "cpu"
         },
-        description="Additional keyword arguments for model instantiation",
+        description="Additional key arguments for model instantiation",
     )
     model: str = Field(
         default="sentence-transformers/all-MiniLM-L6-v2",
         description="HuggingFace model ID",
     )
     encode_kwargs: dict[str, Any] | None = Field(
-        default_factory=dict, description="Additional keyword arguments for encoding"
+        default_factory=dict, description="Additional key arguments for encoding"
     )
     query_encode_kwargs: dict[str, Any] | None = Field(
         default_factory=dict,
-        description="Additional keyword arguments for query encoding",
+        description="Additional key arguments for query encoding",
     )
     multi_process: bool = Field(
         default=False, description="Whether to use multi-processing for encoding"
@@ -251,7 +251,7 @@ class HuggingFaceEmbeddingConfig(BaseEmbeddingConfig):
         in case of initialization failures.
 
         Args:
-            **kwargs: Additional keyword arguments to pass to HuggingFaceEmbeddings
+            **kwargs: Additional key arguments to pass to HuggingFaceEmbeddings
 
         Returns:
             HuggingFaceEmbeddings: The instantiated embedding model
@@ -339,7 +339,7 @@ class OpenAIEmbeddingConfig(BaseEmbeddingConfig):
         """Instantiate an OpenAI embedding model.
 
         Args:
-            **kwargs: Additional keyword arguments to pass to OpenAIEmbeddings
+            **kwargs: Additional key arguments to pass to OpenAIEmbeddings
 
         Returns:
             OpenAIEmbeddings: The instantiated embedding model
@@ -380,7 +380,7 @@ class CohereEmbeddingConfig(BaseEmbeddingConfig):
         """Instantiate a Cohere embedding model.
 
         Args:
-            **kwargs: Additional keyword arguments to pass to CohereEmbeddings
+            **kwargs: Additional key arguments to pass to CohereEmbeddings
 
         Returns:
             CohereEmbeddings: The instantiated embedding model
@@ -415,7 +415,7 @@ class OllamaEmbeddingConfig(BaseEmbeddingConfig):
         """Instantiate an Ollama embedding model.
 
         Args:
-            **kwargs: Additional keyword arguments to pass to OllamaEmbeddings
+            **kwargs: Additional key arguments to pass to OllamaEmbeddings
 
         Returns:
             OllamaEmbeddings: The instantiated embedding model
@@ -455,7 +455,7 @@ class SentenceTransformerEmbeddingConfig(BaseEmbeddingConfig):
         """Instantiate a SentenceTransformer embedding model.
 
         Args:
-            **kwargs: Additional keyword arguments to pass to SentenceTransformerEmbeddings
+            **kwargs: Additional key arguments to pass to SentenceTransformerEmbeddings
 
         Returns:
             SentenceTransformerEmbeddings: The instantiated embedding model
@@ -507,7 +507,7 @@ class FastEmbedEmbeddingConfig(BaseEmbeddingConfig):
         """Instantiate a FastEmbed embedding model.
 
         Args:
-            **kwargs: Additional keyword arguments to pass to FastEmbedEmbeddings
+            **kwargs: Additional key arguments to pass to FastEmbedEmbeddings
 
         Returns:
             FastEmbedEmbeddings: The instantiated embedding model
@@ -549,7 +549,7 @@ class JinaEmbeddingConfig(BaseEmbeddingConfig):
         """Instantiate a Jina AI embedding model.
 
         Args:
-            **kwargs: Additional keyword arguments to pass to JinaEmbeddings
+            **kwargs: Additional key arguments to pass to JinaEmbeddings
 
         Returns:
             JinaEmbeddings: The instantiated embedding model
@@ -587,7 +587,7 @@ class VertexAIEmbeddingConfig(BaseEmbeddingConfig):
         """Instantiate a Google Vertex AI embedding model.
 
         Args:
-            **kwargs: Additional keyword arguments to pass to VertexAIEmbeddings
+            **kwargs: Additional key arguments to pass to VertexAIEmbeddings
 
         Returns:
             VertexAIEmbeddings: The instantiated embedding model
@@ -628,7 +628,7 @@ class BedrockEmbeddingConfig(BaseEmbeddingConfig):
         """Instantiate an AWS Bedrock embedding model.
 
         Args:
-            **kwargs: Additional keyword arguments to pass to BedrockEmbeddings
+            **kwargs: Additional key arguments to pass to BedrockEmbeddings
 
         Returns:
             BedrockEmbeddings: The instantiated embedding model
@@ -669,7 +669,7 @@ class CloudflareEmbeddingConfig(BaseEmbeddingConfig):
         """Instantiate a Cloudflare Workers AI embedding model.
 
         Args:
-            **kwargs: Additional keyword arguments to pass to CloudflareWorkersAIEmbeddings
+            **kwargs: Additional key arguments to pass to CloudflareWorkersAIEmbeddings
 
         Returns:
             CloudflareWorkersAIEmbeddings: The instantiated embedding model
@@ -711,7 +711,7 @@ class LlamaCppEmbeddingConfig(BaseEmbeddingConfig):
         """Instantiate a LlamaCpp embedding model.
 
         Args:
-            **kwargs: Additional keyword arguments to pass to LlamaCppEmbeddings
+            **kwargs: Additional key arguments to pass to LlamaCppEmbeddings
 
         Returns:
             LlamaCppEmbeddings: The instantiated embedding model
@@ -751,7 +751,7 @@ class VoyageAIEmbeddingConfig(BaseEmbeddingConfig):
         """Instantiate a Voyage AI embedding model.
 
         Args:
-            **kwargs: Additional keyword arguments to pass to VoyageEmbeddings
+            **kwargs: Additional key arguments to pass to VoyageEmbeddings
 
         Returns:
             VoyageEmbeddings: The instantiated embedding model
@@ -786,7 +786,7 @@ class AnyscaleEmbeddingConfig(BaseEmbeddingConfig):
         """Instantiate an Anyscale embedding model.
 
         Args:
-            **kwargs: Additional keyword arguments to pass to AnyscaleEmbeddings
+            **kwargs: Additional key arguments to pass to AnyscaleEmbeddings
 
         Returns:
             AnyscaleEmbeddings: The instantiated embedding model

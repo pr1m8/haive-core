@@ -1,7 +1,7 @@
 """Test module for embedding providers.
 
-This module contains tests for the embedding providers to ensure
-that they are properly registered and can be instantiated.
+This module contains tests for the embedding providers to ensure that they are properly
+registered and can be instantiated.
 """
 
 import unittest
