@@ -1,15 +1,15 @@
 """File type definitions and utilities.
 
-This module provides comprehensive file type definitions used throughout
-the Haive framework for file processing, validation, and categorization.
+This module provides comprehensive file type definitions used throughout the Haive
+framework for file processing, validation, and categorization.
 """
 
 
 class FileTypes:
     """Comprehensive file type definitions and utilities.
 
-    Provides categorized file extensions and utilities for file type
-    detection and validation used in document processing workflows.
+    Provides categorized file extensions and utilities for file type detection and
+    validation used in document processing workflows.
     """
 
     # Document types
@@ -43,7 +43,7 @@ class FileTypes:
         ".swift",
         ".kt",
         ".scala",
-        ".r",
+        ".f",
     }
 
     # Configuration files

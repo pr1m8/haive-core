@@ -207,7 +207,7 @@ __all__ = [
 if __name__ == "__main__":
 
     cfg = {
-        "tokenizer": {
+        "tokenizef": {
             "type": "whitespace-tokenizer",
             "params": {"text": "Hello WORLD"},
         },

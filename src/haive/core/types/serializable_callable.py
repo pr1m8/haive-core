@@ -70,8 +70,7 @@ class SerializableCallable(Protocol):
     def deserialize(cls, path: str) -> Callable[..., Any]:
         """Convert an importable string path back into a callable.
 
-        Supports nested attributes, e.g.:
-            my.module.Class.method
+        Supports nested attributes, e.g.:     my.module.Class.method
         """
         try:
             module_path, _, attr_path = path.partition(".")

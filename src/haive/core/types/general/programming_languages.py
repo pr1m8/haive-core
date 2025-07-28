@@ -1,7 +1,7 @@
 """Programming language definitions and utilities.
 
-This module provides programming language definitions used throughout
-the Haive framework for code analysis, syntax highlighting, and processing.
+This module provides programming language definitions used throughout the Haive
+framework for code analysis, syntax highlighting, and processing.
 """
 
 from dataclasses import dataclass
@@ -20,8 +20,8 @@ class LanguageInfo:
 class ProgrammingLanguages:
     """Programming language definitions and utilities.
 
-    Provides comprehensive programming language information including
-    file extensions, language types, and metadata for code analysis.
+    Provides comprehensive programming language information including file extensions,
+    language types, and metadata for code analysis.
     """
 
     _LANGUAGES: dict[str, LanguageInfo] = {

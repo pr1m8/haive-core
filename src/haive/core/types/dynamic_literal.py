@@ -38,6 +38,7 @@ class _DynLitMeta(type):
 
 class DynamicLiteral(str, Generic[T], metaclass=_DynLitMeta):
     """Dynamic "Literal-like" type with runtime-extensible allowed values.
+
     Meant to be used as a Pydantic field type.
     """
 
