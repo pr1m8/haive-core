@@ -110,7 +110,7 @@ def transform_messages(
 
     :param state: The state dictionary containing "messages".
     :param transform_fn: A function that transforms each message.
-    :param kwargs: Additional keyword arguments for the transform function.
+    :param kwargs: Additional key arguments for the transform function.
     :return: A new state dictionary with transformed messages.
     """
     return {
@@ -312,8 +312,8 @@ def get_last_message(state: dict[str, Any] | Any) -> BaseMessage | None:
 class MessageNormalizingToolNode:
     """A wrapper around LangGraph's ToolNode that ensures proper message normalization.
 
-    This fixes serialization warnings by ensuring all messages are properly
-    converted to and from the correct types.
+    This fixes serialization warnings by ensuring all messages are properly converted to
+    and from the correct types.
     """
 
     def __init__(self, tools: list[BaseTool | Tool | StructuredTool | Callable]):

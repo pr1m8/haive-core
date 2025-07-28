@@ -192,5 +192,8 @@ def is_test() -> bool:
 
 
 def is_testing() -> bool:
-    """Alias for is_test(). Check if the application is running in test mode."""
+    """Alias for is_test().
+
+    Check if the application is running in test mode.
+    """
     return is_test()

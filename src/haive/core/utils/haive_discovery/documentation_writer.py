@@ -19,7 +19,9 @@ class DocumentationWriter:
         project_root: str | None = None,
         subfolder: str = "component_discovery",
     ) -> dict[str, str]:
-        """Save components to timestamped project documentation with separate files for each type."""
+        """Save components to timestamped project documentation with separate files for
+        each type.
+        """
         if project_root is None:
             project_root = self._find_project_root()
 

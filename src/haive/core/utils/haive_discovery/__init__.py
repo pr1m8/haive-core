@@ -1,7 +1,7 @@
 """Haive Component Discovery System.
 
-A comprehensive tool for discovering, analyzing, and documenting components
-in the Haive AI framework.
+A comprehensive tool for discovering, analyzing, and documenting components in the Haive
+AI framework.
 """
 
 from haive.core.utils.haive_discovery.base_analyzer import ComponentAnalyzer

@@ -1,9 +1,9 @@
 """Tool schema extraction utilities for the Haive framework.
 
-from typing import Any
-This module provides utilities to extract Pydantic input schemas from various
-callable types including regular functions, LangChain tools, and other tool types.
-Also includes utilities for creating StructuredTool instances and ToolNode configurations.
+from typing import Any This module provides utilities to extract Pydantic input schemas
+from various callable types including regular functions, LangChain tools, and other tool
+types. Also includes utilities for creating StructuredTool instances and ToolNode
+configurations.
 """
 
 import inspect
@@ -422,7 +422,7 @@ def invoke_from_schema(schema_instance: BaseModel, **extra_kwargs) -> Any:
 
     Args:
         schema_instance: Instance of a schema created by extract_input_schema
-        **extra_kwargs: Additional keyword arguments to pass to the callable
+        **extra_kwargs: Additional key arguments to pass to the callable
 
     Returns:
         Result of calling the original function

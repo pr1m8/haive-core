@@ -1,4 +1,5 @@
-"""Utilities for detecting whether a callable uses `pause_for_human(...)` to pause execution.
+"""Utilities for detecting whether a callable uses `pause_for_human(...)` to pause
+execution.
 
 This wraps LangGraph's `interrupt(...)` signal and provides AST-based static analysis to detect
 if a function or callable object may yield control for human input.

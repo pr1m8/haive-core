@@ -72,13 +72,6 @@ class ToolList(NamedDict):
                         expanded_tools.extend(toolkit_tools)
                     except Exception:
                         pass
-                else:
-                    expanded_tools.append(tool)
-
-            # Now let NamedDict's validator build the dictionary from the
-            # expanded tools
-            return expanded_tools
-
         # If we have a dictionary with 'tools' key
         if (
             isinstance(data, dict)

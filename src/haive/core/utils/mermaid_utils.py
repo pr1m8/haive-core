@@ -1,7 +1,7 @@
 """Mermaid diagram utilities for Haive.
 
-This module provides utilities for generating and displaying Mermaid diagrams
-in different environments, with fallback mechanisms.
+This module provides utilities for generating and displaying Mermaid diagrams in
+different environments, with fallback mechanisms.
 """
 
 import contextlib

@@ -1,8 +1,7 @@
-"""From typing import Any
-Collection utilities for Haive Core.
+"""From typing import Any Collection utilities for Haive Core.
 
-This module includes advanced collection types and utilities that extend
-standard Python collections with additional functionality.
+This module includes advanced collection types and utilities that extend standard Python
+collections with additional functionality.
 """
 
 from collections.abc import Iterable
@@ -18,8 +17,8 @@ T = TypeVar("T")
 class NamedDict(BaseModel, Generic[T], GetterMixin[T]):
     """A dictionary that automatically builds keys from object names.
 
-    This class combines dictionary-like access with attributes extraction
-    and rich lookup capabilities from GetterMixin.
+    This class combines dictionary-like access with attributes extraction and rich
+    lookup capabilities from GetterMixin.
     """
 
     values: dict[str, T] = Field(default_factory=dict)

@@ -13,8 +13,8 @@ T = TypeVar("T")
 class GetterMixin(Generic[T]):
     """A mixin providing rich lookup and filtering capabilities for collections.
 
-    This mixin can be added to any collection class that implements
-    _get_items() to provide powerful querying capabilities.
+    This mixin can be added to any collection class that implements _get_items() to
+    provide powerful querying capabilities.
     """
 
     def _get_items(self) -> list[T]:

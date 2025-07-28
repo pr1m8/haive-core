@@ -44,7 +44,8 @@ def apply_config_to_app(app: Any, config: RunnableConfig | None = None) -> Any:
 def prepare_compile_kwargs(
     checkpointer=None, default_config=None, **kwargs
 ) -> dict[str, Any]:
-    """Prepare kwargs for StateGraph.compile() method, filtering out unsupported parameters.
+    """Prepare kwargs for StateGraph.compile() method, filtering out unsupported
+    parameters.
 
     Args:
         checkpointer: Optional checkpoint saver

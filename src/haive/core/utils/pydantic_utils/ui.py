@@ -1,8 +1,8 @@
 """Pydantic model utilities for serialization, visualization, and code generation.
 
-This module provides standalone functions for visualizing, comparing, and
-generating code from Pydantic BaseModel classes and instances, without
-requiring inheritance from specialized base classes.
+This module provides standalone functions for visualizing, comparing, and generating
+code from Pydantic BaseModel classes and instances, without requiring inheritance from
+specialized base classes.
 """
 
 import inspect
