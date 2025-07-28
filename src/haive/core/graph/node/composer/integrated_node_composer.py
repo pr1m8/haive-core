@@ -320,35 +320,6 @@ class SchemaAwareComposedNode:
             else:
                 # Fallback to dict
                 pass
-
-        # Extract inputs with schema awareness
-        if self.extract_func:
-            node_input = self.extract_func(state, config)
-
-            # Create proper state for node
-            if isinstance(state, StateSchema):
-                # Use StateSchema's update mechanism
-                node_state = state.model_copy(
-                    update=node_input if isinstance(node_input, dict) else {}
-                )
-            else:
-                # Dict-based update
-                node_state = {
-                    **state,
-                    **(node_input if isinstance(node_input, dict) else {}),
-                }
-        else:
-            node_state = state
-
-        # Execute base node
-        result = self.base_node(node_state, config)
-
-        # Apply output mappings with schema awareness
-        if self.update_func:
-            from langgraph.types import Command
-
-            # Extract actual result
-            actual_result = result
             if hasattr(result, "update") and result.update:
                 actual_result = result.update
             elif hasattr(result, "arg"):

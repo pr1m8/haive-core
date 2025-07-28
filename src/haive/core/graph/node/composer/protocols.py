@@ -18,10 +18,7 @@ class ExtractFunction(Protocol[TState, TInput]):
     """Protocol for extract functions.
 
     Extract functions take a state object and configuration, returning
-    the extracted input data that will be passed to the node's processing.
-
-    Examples:
-        def extract_messages(state: MessagesState, config: Dict[str, Any]) -> List[BaseMessage]:
+    the extracted input data that will be pass
             field_name = config.get("field_name", "messages")
             return getattr(state, field_name, [])
 
