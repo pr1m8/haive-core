@@ -40,7 +40,7 @@ class StateGraph(GraphBase, ValidationMixin, CompilationMixin, SchemaMixin):
         """Initialize a StateGraph.
 
         Args:
-            **data: Keyword arguments for graph initialization
+            **data: Key arguments for graph initialization
         """
         super().__init__(**data)
 
