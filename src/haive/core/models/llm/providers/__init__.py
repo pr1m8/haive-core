@@ -52,7 +52,6 @@ Examples:
 """
 
 import logging
-from typing import Dict, List, Optional, Type
 
 from haive.core.models.llm.provider_types import LLMProvider
 from haive.core.models.llm.providers.base import BaseLLMProvider, ProviderImportError
@@ -212,8 +211,8 @@ def list_providers() -> list[str]:
 def __getattr__(name: str):
     """Handle dynamic attribute access for provider classes.
 
-    This allows importing provider classes directly from the module
-    while maintaining lazy loading and proper error messages.
+    This allows importing provider classes directly from the module while maintaining
+    lazy loading and proper error messages.
     """
     # Map class names to providers
     class_to_provider = {
@@ -245,7 +244,7 @@ def __getattr__(name: str):
         "NLPCloudProvider": LLMProvider.NLP_CLOUD,
         "OpenLMProvider": LLMProvider.OPENLM,
         "PetalsProvider": LLMProvider.PETALS,
-        "ReplicateProvider": LLMProvider.REPLICATE,
+        "ReplicateProvidef": LLMProvider.REPLICATE,
     }
 
     if name in class_to_provider:

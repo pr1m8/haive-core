@@ -183,10 +183,7 @@ class LLMConfig(SecureConfigMixin, ModelMetadataMixin, RateLimitingMixin, BaseMo
         try:
             # Get metadata for validation and logging
             context_window = self.get_context_window()
-            logger.debug(
-                f"Model {
-                    self.model} context window: {context_window}"
-            )
+            logger.debug(f"Model {self.model} context window: {context_window}")
 
             pricing = self.get_token_pricing()
             logger.debug(f"Model {self.model} pricing: {pricing}")
@@ -252,11 +249,7 @@ class LLMConfig(SecureConfigMixin, ModelMetadataMixin, RateLimitingMixin, BaseMo
 
         capability_text = "\n".join(
             [
-                f"  {
-                    '✓' if supported else '✗'} {
-                    capability.replace(
-                        '_',
-                        ' ').title()}"
+                f"  {'✓' if supported else '✗'} {capability.replace('_', ' ').title()}"
                 for capability, supported in capabilities.items()
             ]
         )
@@ -283,8 +276,7 @@ class LLMConfig(SecureConfigMixin, ModelMetadataMixin, RateLimitingMixin, BaseMo
         console.print(
             Panel(
                 info_text,
-                title=f"[bold]{
-                    self.model} Summary[/bold]",
+                title=f"[bold]{self.model} Summary[/bold]",
             )
         )
 
@@ -742,10 +734,7 @@ class AzureLLMConfig(LLMConfig):
                 **kwargs,
             )
         except Exception as e:
-            logger.exception(
-                f"Failed to instantiate Azure OpenAI model: {
-                    e!s}"
-            )
+            logger.exception(f"Failed to instantiate Azure OpenAI model: {e!s}")
             raise RuntimeError(
                 f"Failed to instantiate Azure OpenAI model: {e!s}"
             ) from e
@@ -797,10 +786,7 @@ class OpenAILLMConfig(LLMConfig):
                 **kwargs,
             )
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to instantiate OpenAI model: {
-                    e!s}"
-            ) from e
+            raise RuntimeError(f"Failed to instantiate OpenAI model: {e!s}") from e
 
 
 class AnthropicLLMConfig(LLMConfig):
@@ -863,10 +849,7 @@ class AnthropicLLMConfig(LLMConfig):
                 **kwargs,
             )
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to instantiate Anthropic model: {
-                    e!s}"
-            ) from e
+            raise RuntimeError(f"Failed to instantiate Anthropic model: {e!s}") from e
 
 
 class GeminiLLMConfig(LLMConfig):
@@ -908,10 +891,7 @@ class GeminiLLMConfig(LLMConfig):
                 **kwargs,
             )
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to instantiate Gemini model: {
-                    e!s}"
-            ) from e
+            raise RuntimeError(f"Failed to instantiate Gemini model: {e!s}") from e
 
 
 class DeepSeekLLMConfig(LLMConfig):
@@ -952,10 +932,7 @@ class DeepSeekLLMConfig(LLMConfig):
                 **kwargs,
             )
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to instantiate DeepSeek model: {
-                    e!s}"
-            ) from e
+            raise RuntimeError(f"Failed to instantiate DeepSeek model: {e!s}") from e
 
 
 class MistralLLMConfig(LLMConfig):
@@ -1007,10 +984,7 @@ class MistralLLMConfig(LLMConfig):
                 **kwargs,
             )
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to instantiate Mistral model: {
-                    e!s}"
-            ) from e
+            raise RuntimeError(f"Failed to instantiate Mistral model: {e!s}") from e
 
 
 class GroqLLMConfig(LLMConfig):
@@ -1052,10 +1026,7 @@ class GroqLLMConfig(LLMConfig):
                 **kwargs,
             )
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to instantiate Groq model: {
-                    e!s}"
-            ) from e
+            raise RuntimeError(f"Failed to instantiate Groq model: {e!s}") from e
 
 
 class CohereLLMConfig(LLMConfig):
@@ -1097,10 +1068,7 @@ class CohereLLMConfig(LLMConfig):
                 **kwargs,
             )
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to instantiate Cohere model: {
-                    e!s}"
-            ) from e
+            raise RuntimeError(f"Failed to instantiate Cohere model: {e!s}") from e
 
 
 class TogetherAILLMConfig(LLMConfig):
@@ -1144,10 +1112,7 @@ class TogetherAILLMConfig(LLMConfig):
                 **kwargs,
             )
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to instantiate Together AI model: {
-                    e!s}"
-            ) from e
+            raise RuntimeError(f"Failed to instantiate Together AI model: {e!s}") from e
 
 
 class FireworksAILLMConfig(LLMConfig):
@@ -1237,10 +1202,7 @@ class PerplexityLLMConfig(LLMConfig):
                 **kwargs,
             )
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to instantiate Perplexity model: {
-                    e!s}"
-            ) from e
+            raise RuntimeError(f"Failed to instantiate Perplexity model: {e!s}") from e
 
 
 class HuggingFaceLLMConfig(LLMConfig):
@@ -1355,10 +1317,7 @@ class AI21LLMConfig(LLMConfig):
                 **kwargs,
             )
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to instantiate AI21 model: {
-                    e!s}"
-            ) from e
+            raise RuntimeError(f"Failed to instantiate AI21 model: {e!s}") from e
 
 
 class AlephAlphaLLMConfig(LLMConfig):
@@ -1400,10 +1359,7 @@ class AlephAlphaLLMConfig(LLMConfig):
                 **kwargs,
             )
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to instantiate Aleph Alpha model: {
-                    e!s}"
-            ) from e
+            raise RuntimeError(f"Failed to instantiate Aleph Alpha model: {e!s}") from e
 
 
 class GooseAILLMConfig(LLMConfig):
@@ -1451,10 +1407,7 @@ class GooseAILLMConfig(LLMConfig):
                 **kwargs,
             )
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to instantiate GooseAI model: {
-                    e!s}"
-            ) from e
+            raise RuntimeError(f"Failed to instantiate GooseAI model: {e!s}") from e
 
 
 class MosaicMLLLMConfig(LLMConfig):
@@ -1496,10 +1449,7 @@ class MosaicMLLLMConfig(LLMConfig):
                 **kwargs,
             )
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to instantiate MosaicML model: {
-                    e!s}"
-            ) from e
+            raise RuntimeError(f"Failed to instantiate MosaicML model: {e!s}") from e
 
 
 class NLPCloudLLMConfig(LLMConfig):
@@ -1549,10 +1499,7 @@ class NLPCloudLLMConfig(LLMConfig):
                 **kwargs,
             )
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to instantiate NLP Cloud model: {
-                    e!s}"
-            ) from e
+            raise RuntimeError(f"Failed to instantiate NLP Cloud model: {e!s}") from e
 
 
 class OpenLMLLMConfig(LLMConfig):
@@ -1594,10 +1541,7 @@ class OpenLMLLMConfig(LLMConfig):
                 **kwargs,
             )
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to instantiate OpenLM model: {
-                    e!s}"
-            ) from e
+            raise RuntimeError(f"Failed to instantiate OpenLM model: {e!s}") from e
 
 
 class PetalsLLMConfig(LLMConfig):
@@ -1619,10 +1563,7 @@ class PetalsLLMConfig(LLMConfig):
                 **kwargs,
             )
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to instantiate Petals model: {
-                    e!s}"
-            ) from e
+            raise RuntimeError(f"Failed to instantiate Petals model: {e!s}") from e
 
 
 class ReplicateLLMConfig(LLMConfig):
@@ -1667,10 +1608,7 @@ class ReplicateLLMConfig(LLMConfig):
                 **kwargs,
             )
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to instantiate Replicate model: {
-                    e!s}"
-            ) from e
+            raise RuntimeError(f"Failed to instantiate Replicate model: {e!s}") from e
 
 
 class VertexAILLMConfig(LLMConfig):
@@ -1720,10 +1658,7 @@ class VertexAILLMConfig(LLMConfig):
                 **kwargs,
             )
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to instantiate Vertex AI model: {
-                    e!s}"
-            ) from e
+            raise RuntimeError(f"Failed to instantiate Vertex AI model: {e!s}") from e
 
 
 class BedrockLLMConfig(LLMConfig):
@@ -1787,10 +1722,7 @@ class BedrockLLMConfig(LLMConfig):
 
             return ChatBedrock(**params)
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to instantiate Bedrock model: {
-                    e!s}"
-            ) from e
+            raise RuntimeError(f"Failed to instantiate Bedrock model: {e!s}") from e
 
 
 class NVIDIALLMConfig(LLMConfig):
@@ -1834,10 +1766,7 @@ class NVIDIALLMConfig(LLMConfig):
                 **kwargs,
             )
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to instantiate NVIDIA model: {
-                    e!s}"
-            ) from e
+            raise RuntimeError(f"Failed to instantiate NVIDIA model: {e!s}") from e
 
 
 class OllamaLLMConfig(LLMConfig):
@@ -1869,10 +1798,7 @@ class OllamaLLMConfig(LLMConfig):
                 **kwargs,
             )
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to instantiate Ollama model: {
-                    e!s}"
-            ) from e
+            raise RuntimeError(f"Failed to instantiate Ollama model: {e!s}") from e
 
 
 class LlamaCppLLMConfig(LLMConfig):
@@ -1910,10 +1836,7 @@ class LlamaCppLLMConfig(LLMConfig):
 
             return ChatLlamaCpp(**params)
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to instantiate Llama.cpp model: {
-                    e!s}"
-            ) from e
+            raise RuntimeError(f"Failed to instantiate Llama.cpp model: {e!s}") from e
 
 
 class UpstageLLMConfig(LLMConfig):
@@ -1950,10 +1873,7 @@ class UpstageLLMConfig(LLMConfig):
                 **kwargs,
             )
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to instantiate Upstage model: {
-                    e!s}"
-            ) from e
+            raise RuntimeError(f"Failed to instantiate Upstage model: {e!s}") from e
 
 
 class DatabricksLLMConfig(LLMConfig):
@@ -1999,10 +1919,7 @@ class DatabricksLLMConfig(LLMConfig):
                 **kwargs,
             )
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to instantiate Databricks model: {
-                    e!s}"
-            ) from e
+            raise RuntimeError(f"Failed to instantiate Databricks model: {e!s}") from e
 
 
 class WatsonxLLMConfig(LLMConfig):
@@ -2059,10 +1976,7 @@ class WatsonxLLMConfig(LLMConfig):
                 **kwargs,
             )
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to instantiate Watson.x model: {
-                    e!s}"
-            ) from e
+            raise RuntimeError(f"Failed to instantiate Watson.x model: {e!s}") from e
 
 
 class XAILLMConfig(LLMConfig):
@@ -2103,10 +2017,7 @@ class XAILLMConfig(LLMConfig):
                 **kwargs,
             )
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to instantiate xAI model: {
-                    e!s}"
-            ) from e
+            raise RuntimeError(f"Failed to instantiate xAI model: {e!s}") from e
 
 
 # TODO: CONVERT OT LIST AND ADD SUPP FOR GEMINI
