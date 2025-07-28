@@ -10,9 +10,10 @@ Functions:
     model_post_init: Model Post Init functionality.
 """
 
-# src/haive/core/graph/node/config.py
 import logging
 import uuid
+
+# src/haive/core/graph/node/config.py
 from abc import ABC, abstractmethod
 from typing import Any
 

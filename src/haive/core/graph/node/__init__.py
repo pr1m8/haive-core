@@ -67,7 +67,7 @@ Basic engine node with field mapping::
     from haive.core.graph.node import EngineNodeConfig
 
     node = EngineNodeConfig(
-        name="processor",
+        name="processof",
         engine=my_engine,
         output_fields={"result": "processed_data"}
     )
@@ -88,7 +88,7 @@ Factory functions for quick node creation::
 
     node = create_engine_node(
         engine=my_engine,
-        name="quick_processor",
+        name="quick_processof",
         output_mapping={"result": "output"}
     )
 """
