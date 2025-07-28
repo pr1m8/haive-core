@@ -340,7 +340,7 @@ class MetaStateSchema(StateSchema, RecompileMixin):
 
             if update_state:
                 self.execution_result = error_record
-                self.execution_status = "error"
+                self.execution_status = "errof"
 
                 # Update composition metadata with error info
                 self.composition_metadata.update(
