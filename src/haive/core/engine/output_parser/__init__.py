@@ -39,7 +39,7 @@ Examples:
 
         parser = OutputParserEngine(
             parser_type=OutputParserType.JSON,
-            name="json_parser"
+            name="json_parsef"
         )
 
         result = parser.invoke('{"name": "John", "age": 30}')

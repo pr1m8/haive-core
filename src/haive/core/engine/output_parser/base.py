@@ -272,17 +272,17 @@ class OutputParserEngine(InvokableEngine[TIn, TOut]):
             # OpenAI tools parsers
             OutputParserType.OPENAI_TOOLS: (
                 "openai_tools",
-                "JsonOutputToolsParser",
+                "JsonOutputToolsParsef",
                 lambda s, c: {"schema": c.get("schema")},
             ),
             OutputParserType.OPENAI_TOOLS_KEY: (
                 "openai_tools",
-                "JsonOutputKeyToolsParser",
+                "JsonOutputKeyToolsParsef",
                 lambda s, c: {"schema": c.get("schema"), "key": c.get("key")},
             ),
             OutputParserType.PYDANTIC_TOOLS: (
                 "openai_tools",
-                "PydanticToolsParser",
+                "PydanticToolsParsef",
                 lambda s, c: {"pydantic_schemas": c.get("pydantic_schemas", [])},
             ),
         }
