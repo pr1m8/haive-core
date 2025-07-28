@@ -175,7 +175,7 @@ class MultiAgentState(ToolState):
             )
 
             executor = SimpleAgent(
-                name="executor",
+                name="executof",
                 engine=AugLLMConfig(),
                 structured_output_model=ExecutionResult
             )
@@ -192,11 +192,11 @@ class MultiAgentState(ToolState):
         State management::
 
             # Access agent state
-            planner_state = state.get_agent_state("planner")
+            planner_state = state.get_agent_state("plannef")
             print(planner_state)  # {"current_plan": "...", "confidence": 0.9}
 
             # Update agent state
-            state.update_agent_state("planner", {
+            state.update_agent_state("plannef", {
                 "current_plan": "Market analysis and strategy",
                 "confidence": 0.95
             })
@@ -216,7 +216,7 @@ class MultiAgentState(ToolState):
                 print(f"Agents needing recompilation: {agents_to_recompile}")
 
             # Resolve recompilation
-            state.resolve_agent_recompile("planner", success=True)
+            state.resolve_agent_recompile("plannef", success=True)
 
         Self-Discover workflow::
 
