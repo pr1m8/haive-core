@@ -1,8 +1,8 @@
 """MCP-enhanced AugLLMConfig with full type checking.
 
 This module provides MCPAugLLMConfig, which extends AugLLMConfig with Model Context
-Protocol (MCP) support through proper mixin composition. It includes full type
-checking and seamless integration with the existing Haive configuration system.
+Protocol (MCP) support through proper mixin composition. It includes full type checking
+and seamless integration with the existing Haive configuration system.
 
 The configuration automatically discovers MCP tools, manages resources, and enhances
 prompts while maintaining compatibility with all existing AugLLMConfig features.
@@ -106,8 +106,8 @@ class MCPAugLLMConfig(_get_mcp_mixin(), AugLLMConfig):
     def _validate_mcp_integration(self) -> Self:
         """Validate MCP integration with AugLLMConfig.
 
-        Ensures that MCP configuration is compatible with the base
-        AugLLMConfig settings and tool management.
+        Ensures that MCP configuration is compatible with the base AugLLMConfig settings
+        and tool management.
         """
         # If MCP is enabled and we have tool conflicts, log warning
         if self.mcp_config and self.mcp_config.enabled:

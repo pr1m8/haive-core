@@ -39,7 +39,8 @@ logger = logging.getLogger(__name__)
 
 
 class AugLLMFactory:
-    """Factory for creating structured LLM runnables from AugLLMConfig with flexible message handling.
+    """Factory for creating structured LLM runnables from AugLLMConfig with flexible
+    message handling.
 
     This factory class takes an AugLLMConfig instance and transforms it into an
     executable LLM chain runnable, applying any runtime configuration overrides

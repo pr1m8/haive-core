@@ -613,7 +613,9 @@ class AugLLMConfig(*_get_augllm_base_classes()):
     @model_validator(mode="before")
     @classmethod
     def set_default_structured_output_version(cls, data: dict[str, Any]):
-        """Set default structured output version to v2 (tools) when model is provided but version is not."""
+        """Set default structured output version to v2 (tools) when model is provided but
+        version is not.
+        """
         if isinstance(data, dict):
             structured_output_model = data.get("structured_output_model")
             structured_output_version = data.get("structured_output_version")
@@ -1979,7 +1981,9 @@ The output should be valid JSON that conforms to the {model_name} schema."""
         as_tools: bool = False,
         var_name: str = "format_instructions",
     ) -> AugLLMConfig:
-        """Add format instructions to partial_variables without changing structured output configuration."""
+        """Add format instructions to partial_variables without changing structured output
+        configuration.
+        """
         instructions = self.get_format_instructions(model, as_tools)
         if instructions:
             self.partial_variables[var_name] = instructions
