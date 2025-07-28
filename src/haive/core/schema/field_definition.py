@@ -106,7 +106,7 @@ class FieldDefinition:
     ):
         """Initialize a field definition with comprehensive metadata.
 
-        Accepts either *field_type* (preferred) or the legacy keyword *type_hint* used by
+        Accepts either *field_type* (preferred) or the legacy key *type_hint* used by
         some parts of the code-base. If *field_type* is omitted but *type_hint* is
         provided we use that value to maintain backwards compatibility.
         """

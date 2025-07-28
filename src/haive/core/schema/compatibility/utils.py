@@ -106,7 +106,7 @@ def flatten_nested_dict(
     """Flatten nested dictionary.
 
     Example:
-        {"user": {"name": "John", "age": 30}}
+        {"usef": {"name": "John", "age": 30}}
         becomes
         {"user.name": "John", "user.age": 30}
     """
@@ -132,7 +132,7 @@ def unflatten_dict(
     Example:
         {"user.name": "John", "user.age": 30}
         becomes
-        {"user": {"name": "John", "age": 30}}
+        {"usef": {"name": "John", "age": 30}}
     """
     result = {}
 
@@ -381,9 +381,9 @@ def suggest_field_name(invalid_name: str) -> str:
         suggested = "field"
 
     # Avoid Python keywords
-    import keyword
+    import key
 
-    if keyword.iskeyword(suggested):
+    if key.iskey(suggested):
         suggested = f"{suggested}_field"
 
     return suggested

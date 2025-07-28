@@ -530,8 +530,8 @@ def example_schema_visualization() -> None:
             "metadata": lambda old, new: {**old, **new},
         }
         __engine_io_mappings__ = {
-            "embedder": {"inputs": ["query"], "outputs": ["query_embedding"]},
-            "searcher": {
+            "embeddef": {"inputs": ["query"], "outputs": ["query_embedding"]},
+            "searchef": {
                 "inputs": ["query", "query_embedding"],
                 "outputs": ["results", "score"],
             },

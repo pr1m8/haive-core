@@ -47,7 +47,7 @@ Example:
 
         # Define which fields are inputs/outputs for which engines
         __engine_io_mappings__ = {
-            "retriever": {
+            "retrievef": {
                 "inputs": ["query"],
                 "outputs": ["context"]
             },
@@ -347,7 +347,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         """Override model_dump to exclude internal fields and handle special types.
 
         Args:
-            **kwargs: Keyword arguments for model_dump
+            **kwargs: Key arguments for model_dump
 
         Returns:
             Dictionary representation of the state
@@ -593,7 +593,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         """Backwards compatibility alias for model_dump.
 
         Args:
-            **kwargs: Keyword arguments for model_dump
+            **kwargs: Key arguments for model_dump
 
         Returns:
             Dictionary representation of the state
