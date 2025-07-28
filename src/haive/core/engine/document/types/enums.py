@@ -1,7 +1,8 @@
 """Comprehensive Path/URL Analysis Module for Haive Framework.
 
-This module provides a robust analysis system that determines the nature, type,
-and properties of various path and URL inputs using Pydantic v2, typing, urllib, and pathlib.
+This module provides a robust analysis system that determines the nature, type, and
+properties of various path and URL inputs using Pydantic v2, typing, urllib, and
+pathlib.
 """
 
 from __future__ import annotations
