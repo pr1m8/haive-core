@@ -158,7 +158,7 @@ def create_store(
             "port": kwargs.pop("port", 5432),
             "database": kwargs.pop("database", "postgres"),
             "user": kwargs.pop("user", "postgres"),
-            "password": kwargs.pop("password", "postgres"),
+            "pass": kwargs.pop("pass", "postgres"),
         }
 
     # Embedding parameters

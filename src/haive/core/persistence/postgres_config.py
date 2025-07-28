@@ -5,13 +5,13 @@ stores state data in a PostgreSQL database. This allows for durable, reliable st
 persistence across application restarts and deployments.
 
 The PostgreSQL implementation offers advanced features including connection pooling,
-automatic retry with exponential backoff, comprehensive error handling, and support
-for both synchronous and asynchronous operation modes. It integrates with LangGraph's
+automatic retry with exponential backoff, comprehensive error handling, and support for
+both synchronous and asynchronous operation modes. It integrates with LangGraph's
 checkpoint system while adding enhanced robustness and configurability.
 
-For production deployments, the PostgreSQL implementation is generally recommended
-over in-memory or SQLite options due to its scalability, reliability, and
-concurrent access capabilities.
+For production deployments, the PostgreSQL implementation is generally recommended over
+in-memory or SQLite options due to its scalability, reliability, and concurrent access
+capabilities.
 """
 
 import logging

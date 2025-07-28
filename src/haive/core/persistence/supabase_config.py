@@ -159,8 +159,8 @@ class SupabaseSaver:
     def setup(self) -> None:
         """Set up the Supabase database schema.
 
-        Creates necessary tables, foreign key relationships, indexes,
-        and RLS policies for secure access.
+        Creates necessary tables, foreign key relationships, indexes, and RLS policies
+        for secure access.
         """
         try:
             # Execute SQL - either using dataflow utility or directly

@@ -35,9 +35,8 @@ _async_lock = asyncio.Lock()
 class ConnectionManager:
     """Manages shared connections and pools for stores.
 
-    This class ensures that stores with the same connection_id share
-    the same connection pool, preventing resource exhaustion and
-    improving performance.
+    This class ensures that stores with the same connection_id share the same connection
+    pool, preventing resource exhaustion and improving performance.
     """
 
     @staticmethod

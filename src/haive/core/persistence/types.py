@@ -1,12 +1,11 @@
 """Type definitions for the Haive persistence system.
 
-This module provides enumeration types and utility classes for the persistence
-system, defining the available checkpointer types, operational modes, and
-storage strategies. These types are used throughout the persistence system
-for configuration and operation.
+This module provides enumeration types and utility classes for the persistence system,
+defining the available checkpointer types, operational modes, and storage strategies.
+These types are used throughout the persistence system for configuration and operation.
 
-The module includes special handling for Python keyword conflicts (like 'async')
-and backward compatibility mappings for evolving terminology.
+The module includes special handling for Python keyword conflicts (like 'async') and
+backward compatibility mappings for evolving terminology.
 """
 
 from enum import Enum
@@ -129,13 +128,13 @@ class ConnectionOptions:
     """Common connection options and utilities for database-backed checkpointers.
 
     This utility class provides standardized methods for working with database
-    connection parameters across different checkpointer implementations. It
-    includes helpers for constructing connection strings, validating connection
-    parameters, and accessing standard options for different database systems.
+    connection parameters across different checkpointer implementations. It includes
+    helpers for constructing connection strings, validating connection parameters, and
+    accessing standard options for different database systems.
 
-    The class is designed to be used statically without instantiation, offering
-    a centralized place for connection-related utilities that can be shared
-    across different database-backed checkpointer implementations.
+    The class is designed to be used statically without instantiation, offering a
+    centralized place for connection-related utilities that can be shared across
+    different database-backed checkpointer implementations.
     """
 
     @staticmethod

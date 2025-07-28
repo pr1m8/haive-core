@@ -27,9 +27,8 @@ logger = logging.getLogger(__name__)
 class EmbeddingAdapter:
     """Adapts Haive embedding configs to LangGraph embedding functions.
 
-    This adapter handles the conversion between Haive's rich embedding
-    configuration system and the simpler embedding functions expected
-    by LangGraph stores.
+    This adapter handles the conversion between Haive's rich embedding configuration
+    system and the simpler embedding functions expected by LangGraph stores.
     """
 
     @staticmethod

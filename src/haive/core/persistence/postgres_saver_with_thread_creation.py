@@ -1,7 +1,7 @@
 """PostgreSQL Saver with automatic thread creation.
 
-This module provides a PostgreSQL checkpointer that automatically creates
-threads before saving checkpoints, preventing foreign key constraint violations.
+This module provides a PostgreSQL checkpointer that automatically creates threads before
+saving checkpoints, preventing foreign key constraint violations.
 """
 
 import logging
@@ -19,9 +19,8 @@ logger = logging.getLogger(__name__)
 class PostgresSaverWithThreadCreation(PostgresSaver):
     """PostgreSQL checkpointer that ensures threads exist before saving checkpoints.
 
-    This class extends the standard PostgresSaver to automatically create
-    thread records before attempting to save checkpoints, preventing foreign
-    key constraint violations.
+    This class extends the standard PostgresSaver to automatically create thread records
+    before attempting to save checkpoints, preventing foreign key constraint violations.
     """
 
     def __init__(self, conn: Connection | ConnectionPool, **kwargs):
@@ -230,8 +229,8 @@ class PostgresSaverWithThreadCreation(PostgresSaver):
 class AsyncPostgresSaverWithThreadCreation:
     """Async version of PostgresSaver with thread creation.
 
-    This class provides the same functionality as PostgresSaverWithThreadCreation
-    but for async operations.
+    This class provides the same functionality as PostgresSaverWithThreadCreation but
+    for async operations.
     """
 
     def __init__(self, conn, **kwargs) -> None:

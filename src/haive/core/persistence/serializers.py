@@ -1,8 +1,8 @@
 """Custom serializers for LangGraph persistence with SecretStr support.
 
-This module provides secure serialization for SecretStr and other sensitive data
-while maintaining security and avoiding the pickle_fallback security issue.
-Supports both basic secure serialization and production-grade encryption.
+This module provides secure serialization for SecretStr and other sensitive data while
+maintaining security and avoiding the pickle_fallback security issue. Supports both
+basic secure serialization and production-grade encryption.
 """
 
 import logging
@@ -19,9 +19,9 @@ logger = logging.getLogger(__name__)
 class SecureSecretStrSerializer(JsonPlusSerializer):
     """Custom serializer that handles SecretStr securely.
 
-    This serializer extends JsonPlusSerializer to handle SecretStr objects
-    by converting them to masked values during serialization, preserving
-    security while avoiding serialization errors.
+    This serializer extends JsonPlusSerializer to handle SecretStr objects by converting
+    them to masked values during serialization, preserving security while avoiding
+    serialization errors.
     """
 
     def _encode_constructor_args(
@@ -291,7 +291,7 @@ def create_encrypted_serializer_for_postgres(
         Production PostgreSQL setup::
 
             serializer = create_encrypted_serializer_for_postgres(
-                connection_string="postgresql://user:pass@host:5432/db",
+                connection_string="postgresql://user:pass
                 encryption_key=os.getenv("LANGGRAPH_AES_KEY")
             )
     """

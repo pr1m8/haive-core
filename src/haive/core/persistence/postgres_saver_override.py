@@ -1,12 +1,12 @@
 """PostgreSQL persistence utilities with Pydantic support.
 
-This module provides utilities for handling Pydantic models in PostgreSQL
-persistence. The main functionality is the JSON encoder configuration that
-ensures Pydantic models are properly serialized to JSONB columns.
+This module provides utilities for handling Pydantic models in PostgreSQL persistence.
+The main functionality is the JSON encoder configuration that ensures Pydantic models
+are properly serialized to JSONB columns.
 
-The override classes are kept for backward compatibility and as a fallback
-when using connection strings directly. However, the preferred approach is
-to configure the connection pool with the configure parameter.
+The override classes are kept for backward compatibility and as a fallback when using
+connection strings directly. However, the preferred approach is to configure the
+connection pool with the configure parameter.
 """
 
 import json
@@ -24,8 +24,8 @@ from pydantic import BaseModel
 def pydantic_aware_json_dumps(obj):
     """JSON encoder that handles Pydantic models.
 
-    This encoder ensures that Pydantic models are properly serialized
-    when stored in PostgreSQL JSONB columns.
+    This encoder ensures that Pydantic models are properly serialized when stored in
+    PostgreSQL JSONB columns.
     """
 
     class PydanticEncoder(json.JSONEncoder):
@@ -56,9 +56,9 @@ def configure_postgres_json(connection):
 class PostgresSaverNoPreparedStatements(BasePostgresSaver):
     """PostgresSaver that disables prepared statements and handles Pydantic models.
 
-    This class is kept for backward compatibility and for cases where you need
-    to use from_conn_string directly. The preferred approach is to configure
-    the connection pool with the configure parameter in postgres_config.py.
+    This class is kept for backward compatibility and for cases where you need to use
+    from_conn_string directly. The preferred approach is to configure the connection
+    pool with the configure parameter in postgres_config.py.
     """
 
     @classmethod
@@ -77,9 +77,9 @@ class PostgresSaverNoPreparedStatements(BasePostgresSaver):
 class AsyncPostgresSaverNoPreparedStatements(BaseAsyncPostgresSaver):
     """Async PostgresSaver with proper configuration.
 
-    This class is kept for backward compatibility and for cases where you need
-    to use from_conn_string directly. The preferred approach is to configure
-    the connection pool with the configure parameter in postgres_config.py.
+    This class is kept for backward compatibility and for cases where you need to use
+    from_conn_string directly. The preferred approach is to configure the connection
+    pool with the configure parameter in postgres_config.py.
     """
 
     @classmethod

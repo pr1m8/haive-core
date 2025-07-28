@@ -29,9 +29,8 @@ logger = logging.getLogger(__name__)
 class PostgresStoreWrapper(SerializableStoreWrapper):
     """Wrapper for LangGraph's PostgresStore with connection sharing.
 
-    This wrapper provides persistent storage using PostgreSQL with
-    support for connection pooling, semantic search, and proper
-    resource management.
+    This wrapper provides persistent storage using PostgreSQL with support for
+    connection pooling, semantic search, and proper resource management.
     """
 
     def _create_store(self) -> BaseStore:
@@ -92,9 +91,8 @@ class PostgresStoreWrapper(SerializableStoreWrapper):
 class AsyncPostgresStoreWrapper(SerializableStoreWrapper):
     """Wrapper for LangGraph's AsyncPostgresStore with connection sharing.
 
-    This wrapper provides async persistent storage using PostgreSQL with
-    support for connection pooling, semantic search, and proper
-    resource management.
+    This wrapper provides async persistent storage using PostgreSQL with support for
+    connection pooling, semantic search, and proper resource management.
     """
 
     def _create_store(self) -> BaseStore:

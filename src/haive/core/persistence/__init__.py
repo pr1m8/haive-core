@@ -44,17 +44,7 @@ For more advanced usage with PostgreSQL:
         db_port=5432,
         db_name="haive",
         db_user="postgres",
-        db_pass="password"
-    )
-
-    # For async usage
-    async def setup():
-        async_checkpointer = await postgres_config.create_async_checkpointer()
-        # Use the checkpointer...
-    ```
-
-This module is designed to work seamlessly with both synchronous and asynchronous
-code, providing appropriate interfaces for each context.
+        db_pass="pass
 """
 
 # Base persistence classes

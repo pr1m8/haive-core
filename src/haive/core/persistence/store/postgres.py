@@ -1,7 +1,7 @@
 """PostgreSQL store implementation for LangGraph.
 
-This module provides synchronous and asynchronous PostgreSQL store wrappers
-that integrate with LangGraph's BaseStore interface for persistent storage.
+This module provides synchronous and asynchronous PostgreSQL store wrappers that
+integrate with LangGraph's BaseStore interface for persistent storage.
 """
 
 import logging
@@ -21,8 +21,8 @@ logger = logging.getLogger(__name__)
 class PostgresStoreWrapper(SerializableStoreWrapper):
     """Synchronous PostgreSQL store wrapper.
 
-    This wrapper provides a serializable interface to LangGraph's PostgresStore
-    with support for configuration management and lifecycle handling.
+    This wrapper provides a serializable interface to LangGraph's PostgresStore with
+    support for configuration management and lifecycle handling.
     """
 
     config: StoreConfig = Field(description="Store configuration")
@@ -63,7 +63,7 @@ class PostgresStoreWrapper(SerializableStoreWrapper):
                 # Build from individual connection params
                 conn_string = (
                     f"postgresql://{params.get('user', 'postgres')}:"
-                    f"{params.get('password', 'postgres')}@"
+                    f"{params.get('pass', 'postgres')}@"
                     f"{params.get('host', 'localhost')}:"
                     f"{params.get('port', 5432)}/"
                     f"{params.get('database', 'postgres')}"
@@ -213,7 +213,7 @@ class AsyncPostgresStoreWrapper(SerializableStoreWrapper):
                 # Build from individual connection params
                 conn_string = (
                     f"postgresql://{params.get('user', 'postgres')}:"
-                    f"{params.get('password', 'postgres')}@"
+                    f"{params.get('pass', 'postgres')}@"
                     f"{params.get('host', 'localhost')}:"
                     f"{params.get('port', 5432)}/"
                     f"{params.get('database', 'postgres')}"

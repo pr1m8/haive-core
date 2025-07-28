@@ -2,13 +2,13 @@
 
 This module provides helper functions for working with checkpointers and their
 associated resources. It includes utilities for connection pool management,
-serialization/deserialization of metadata, and other common operations needed
-across different persistence implementations.
+serialization/deserialization of metadata, and other common operations needed across
+different persistence implementations.
 
-The utilities are designed to be used by the persistence system internals and
-generally aren't intended to be used directly by application code. They provide
-consistent behavior across different checkpointer implementations and handle
-edge cases and error conditions gracefully.
+The utilities are designed to be used by the persistence system internals and generally
+aren't intended to be used directly by application code. They provide consistent
+behavior across different checkpointer implementations and handle edge cases and error
+conditions gracefully.
 """
 
 import json
