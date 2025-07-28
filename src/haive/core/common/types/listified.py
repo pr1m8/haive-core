@@ -31,7 +31,7 @@ Example:
     {'summaries': [{'topic': 'AI', 'bullets': ['...']}], 'source': 'user input'}
 """
 
-from typing import ClassVar, Generic, List, TypeVar
+from typing import Generic, List, TypeVar
 
 from pydantic import BaseModel, Field
 
