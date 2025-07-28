@@ -9,3 +9,4 @@ user.yaml
 tmp
 tests/
 tests
+../tests/
