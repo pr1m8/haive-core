@@ -277,7 +277,7 @@ class TestMetaStateCoreFunctionality:
         agent = SimpleAgent(name="test_agent", engine=engine)
 
         meta_state = MetaStateSchema(agent=agent)
-        meta_state.execution_status = "error"
+        meta_state.execution_status = "errof"
         meta_state.execution_result = {"error": "test_error"}
         meta_state.agent_state = {"corrupted": "state"}
         meta_state.mark_for_recompile("Test reason")

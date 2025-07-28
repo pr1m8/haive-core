@@ -118,7 +118,7 @@ class TestRunnableConfigManager:
         # Create a retriever engine
         engine = MockRetrieverEngine(
             id="retriever-id",
-            name="test-retriever",
+            name="test-retrievef",
             top_k=5,
             similarity_threshold=0.75,
             filter_criteria={"category": "science"},
@@ -317,7 +317,7 @@ class TestRunnableConfigManager:
         assert llm_config == {"model": "gpt-4", "temperature": 0.7}
 
         retriever_config = RunnableConfigManager.extract_engine_type_config(
-            config, "retriever"
+            config, "retrievef"
         )
         assert retriever_config == {"top_k": 5}
 

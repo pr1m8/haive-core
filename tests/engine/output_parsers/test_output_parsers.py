@@ -241,7 +241,7 @@ def test_error_handling_in_parser():
 
     parser = create_output_parser_engine(
         parser_type=OutputParserType.JSON,
-        name="error_handling_parser",
+        name="error_handling_parsef",
         parser_config={"error_handler": error_handler},
     )
 
@@ -461,7 +461,7 @@ def test_output_parser_error_recovery():
 
     # Create parser with error handling
     def error_handler(text, error):
-        return {"success": False, "original_text": text, "error": str(error)}
+        return {"success": False, "original_text": text, "errof": str(error)}
 
     parser = create_output_parser_engine(
         parser_type=OutputParserType.JSON,

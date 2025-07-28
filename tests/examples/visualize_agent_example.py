@@ -26,9 +26,12 @@ from haive.core.graph.state_graph.graph_visualizer import GraphVisualizer
 from haive.core.graph.utils.mermaid_visualizer import MermaidVisualizer
 from haive.core.utils.visualize_graph_utils import render_and_display_graph
 
-# Add the packages to path
-sys.path.insert(0, str(Path(__file__).parent / "packages" / "haive-core" / "src"))
-sys.path.insert(0, str(Path(__file__).parent / "packages" / "haive-agents" / "src"))
+# Add the packages to path - FIXED FOR NAMESPACE PACKAGES
+project_root = Path(__file__).parent.parent.parent.parent.parent
+sys.path.insert(0, str(project_root / "packages" / "haive-core" / "src"))
+sys.path.insert(0, str(project_root / "packages" / "haive-agents" / "src"))
+sys.path.insert(0, str(project_root / "packages" / "haive-prebuilt" / "src"))
+sys.path.insert(0, str(project_root / "packages" / "haive-games" / "src"))
 
 
 # Configure logging
@@ -235,8 +238,8 @@ class AgentGraphVisualizer:
                 try:
                     # Try to call functions that look like they create agents
                     if any(
-                        keyword in name.lower()
-                        for keyword in ["create", "build", "setup", "demo", "example"]
+                        key in name.lower()
+                        for key in ["create", "build", "setup", "demo", "example"]
                     ):
                         logger.info(f"Trying to call function: {name}")
 

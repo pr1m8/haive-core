@@ -284,7 +284,7 @@ class TestDocumentLoadingWithMocks:
                     metadata={},
                     capabilities=[],
                 ),
-                loader_used="mock_loader",
+                loader_used="mock_loadef",
                 loading_time=0.1,
                 metadata={},
                 errors=[],

@@ -46,8 +46,7 @@ def main():
                             if "prepared statement" in content:
                                 pass
                             elif "Error" in content:
-                                pass..")
-
+                                pass
     # Also look for any records with "prepared statement" in text
     cursor.execute(
         """

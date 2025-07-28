@@ -29,7 +29,7 @@ def test_component_spec_inline():
 
 
 def test_component_spec_type_and_params():
-    spec = ComponentSpec[str](type="lowercaser", params={"text": "HeLLo"})
+    spec = ComponentSpec[str](type="lowercasef", params={"text": "HeLLo"})
     assert spec.build() == "hello"
 
 
@@ -38,7 +38,7 @@ def test_component_spec_invalid_both_type_and_inline():
     with pytest.raises(
         ValueError, match="Must provide exactly one of 'type' or 'inline'"
     ):
-        ComponentSpec[str](type="lowercaser", params={}, inline=inline)
+        ComponentSpec[str](type="lowercasef", params={}, inline=inline)
 
 
 def test_component_spec_invalid_neither_type_nor_inline():
@@ -50,8 +50,8 @@ def test_component_spec_invalid_neither_type_nor_inline():
 
 def test_text_pipeline_build():
     config = {
-        "tokenizer": {"type": "whitespace-tokenizer", "params": {"text": "Hi AI"}},
-        "normaliser": {"type": "lowercaser", "params": {"text": "MoDeRn"}},
+        "tokenizef": {"type": "whitespace-tokenizer", "params": {"text": "Hi AI"}},
+        "normalisef": {"type": "lowercaser", "params": {"text": "MoDeRn"}},
     }
     pipeline = TextPipeline(**config)
     result = pipeline.build()

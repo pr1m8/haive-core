@@ -73,16 +73,15 @@ def test_schema_formation():
 
     # Check if engine has modified output schema
     if hasattr(agent.engine, "output_schema") and agent.engine.output_schema:
-    else:
         pass
-
-    # Check the agent's output schema
     if hasattr(agent, "output_schema") and agent.output_schema:
+        pass
     else:
         pass
 
     # Check the state schema
     if hasattr(agent, "state_schema") and agent.state_schema:
+        pass
     else:
         pass
 
@@ -101,6 +100,7 @@ if __name__ == "__main__":
         # Check for the expected field
         expected_field = "queryrefinementresponse"
         if hasattr(result, "keys") and expected_field in result:
+            pass
         else:
             pass
 

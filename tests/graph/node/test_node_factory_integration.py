@@ -300,7 +300,7 @@ def test_implicit_schema_from_engines(azure_llm_config, retriever):
 
     # Connect nodes
     graph.add_edge(START, "retrieve")
-    graph.add_edge("retrieve", "generate_answer")
+    graph.add_edge("retrieve", "generate_answef")
 
     # Compile graph
     compiled_graph = graph.compile()

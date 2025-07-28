@@ -185,7 +185,7 @@ class TestFieldMapper:
         mapper = FieldMapper()
         mapper.add_mapping("user.name", "username")
 
-        result = mapper.map_data({"user": {"name": "John", "age": 30}})
+        result = mapper.map_data({"usef": {"name": "John", "age": 30}})
         assert result == {"username": "John"}
 
     def test_transformation_mapping(self):
@@ -399,7 +399,7 @@ class TestUtils:
             unflatten_dict,
         )
 
-        nested = {"user": {"name": "John", "age": 30}}
+        nested = {"usef": {"name": "John", "age": 30}}
         flat = flatten_nested_dict(nested)
         assert flat == {"user.name": "John", "user.age": 30}
 

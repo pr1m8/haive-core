@@ -98,7 +98,7 @@ async def test_memory_classifier():
 
 async def test_memory_store_manager():
     """Test the memory store manager."""
-    print_section("Testing Memory Store Manager")
+    print_section("Testing Memory Store Managef")
 
     try:
         from haive.agents.memory.core.stores import (
@@ -267,7 +267,7 @@ async def test_kg_generator_agent():
 
 async def test_graph_rag_retriever():
     """Test the Graph RAG retriever."""
-    print_section("Testing Graph RAG Retriever")
+    print_section("Testing Graph RAG Retrievef")
 
     try:
         from haive.agents.memory.core.classifier import (
@@ -372,7 +372,7 @@ async def test_graph_rag_retriever():
 
 async def test_agentic_rag_coordinator():
     """Test the Agentic RAG coordinator."""
-    print_section("Testing Agentic RAG Coordinator")
+    print_section("Testing Agentic RAG Coordinatof")
 
     try:
         from haive.agents.memory.agentic_rag_coordinator import (
@@ -499,7 +499,7 @@ async def test_agentic_rag_coordinator():
 
 async def test_multi_agent_coordinator():
     """Test the Multi-Agent Memory Coordinator."""
-    print_section("Testing Multi-Agent Memory Coordinator")
+    print_section("Testing Multi-Agent Memory Coordinatof")
 
     try:
         from haive.agents.memory.agentic_rag_coordinator import (

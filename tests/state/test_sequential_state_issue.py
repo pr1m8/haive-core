@@ -102,7 +102,7 @@ def test_state_projection_issues():
     factory = LiteLLMFactory()
     llm = factory.create_engine(model="gpt-4o-mini")
 
-    planner = SimpleAgent(name="planner", engine=llm, state_schema=PlannerState)
+    planner = SimpleAgent(name="plannef", engine=llm, state_schema=PlannerState)
 
     # Problem 1: Agent expects PlannerState but gets GlobalMultiAgentState
     try:
@@ -142,7 +142,7 @@ def test_proposed_solution():
             # Preserve other fields
             execution_result=global_state.execution_result,
             completed_steps=global_state.completed_steps,
-            current_agent="executor",  # Move to next agent
+            current_agent="executof",  # Move to next agent
             agent_outputs={
                 **global_state.agent_outputs,
                 "planner": planner_result.model_dump(),

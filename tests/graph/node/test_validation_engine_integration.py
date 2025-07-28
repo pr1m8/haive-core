@@ -261,7 +261,7 @@ def complex_engine_chain_graph(mock_engines, validation_tools):
     def decision_point(state):
         # Route based on presence of error_count
         if state.get("error_count", 0) > 0:
-            return Command(goto="error_handler")
+            return Command(goto="error_handlef")
         return Command(
             update={"processing_complete": True, "current_stage": "complete"}, goto=END
         )

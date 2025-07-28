@@ -147,7 +147,7 @@ class TestAgentNodeTypedPatterns:
 
         # Create node
         node = AgentNodeV3Config(
-            name="analyzer_node", agent_name="analyzer", agent=agent
+            name="analyzer_node", agent_name="analyzef", agent=agent
         )
 
         # Execute
@@ -169,7 +169,7 @@ class TestAgentNodeTypedPatterns:
         # Create typed agent
         agent = MockTypedAgent("analyzer", AnalysisInput, AnalysisResult)
         node = AgentNodeV3Config(
-            name="analyzer_node", agent_name="analyzer", agent=agent
+            name="analyzer_node", agent_name="analyzef", agent=agent
         )
 
         # Execute
@@ -227,7 +227,7 @@ class TestAgentNodeTypedPatterns:
         # Create selector agent
         agent = MockTypedAgent("selector", SelectorInput, SelectedModules)
         node = AgentNodeV3Config(
-            name="selector_node", agent_name="selector", agent=agent
+            name="selector_node", agent_name="selectof", agent=agent
         )
 
         # Execute
@@ -310,7 +310,7 @@ class TestAgentNodeTypedPatterns:
         # First agent: selector
         selector = MockTypedAgent("selector", SelectorInput, SelectedModules)
         selector_node = AgentNodeV3Config(
-            name="selector_node", agent_name="selector", agent=selector
+            name="selector_node", agent_name="selectof", agent=selector
         )
 
         # Execute selector
@@ -348,7 +348,7 @@ class TestAgentNodeTypedPatterns:
 
         analyzer = MockTypedAgent("analyzer", AnalysisInput, AnalysisResult)
         analyzer_node = AgentNodeV3Config(
-            name="analyzer_node", agent_name="analyzer", agent=analyzer
+            name="analyzer_node", agent_name="analyzef", agent=analyzer
         )
 
         result2 = analyzer_node(state, {})

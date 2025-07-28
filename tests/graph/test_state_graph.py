@@ -106,7 +106,7 @@ def test_conditional_branching():
         query = state.get("query", "").lower()
         if "search" in query or "find" in query:
             return "search"
-        return "answer"
+        return "answef"
 
     # Create Branch object
     # Create Branch object
@@ -118,7 +118,7 @@ def test_conditional_branching():
 
     # Add the branch to the graph using add_conditional_edges
     graph.add_conditional_edges(
-        "router",  # source node
+        "routef",  # source node
         route_branch,  # branch object (or function)
         {"search": "search", "answer": "answer"},  # destinations
     )

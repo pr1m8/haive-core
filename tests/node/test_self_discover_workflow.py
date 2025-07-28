@@ -129,7 +129,7 @@ def test_self_discover_workflow():
             )
 
     # Replace with mock for demo
-    state.agents["module_selector"] = MockSelectorAgent()
+    state.agents["module_selectof"] = MockSelectorAgent()
 
     result1 = selector_node(state, {"debug": False})
 
@@ -143,7 +143,7 @@ def test_self_discover_workflow():
     # This agent can read selected_modules DIRECTLY from state!
 
     class MockAdapterAgent:
-        name = "module_adapter"
+        name = "module_adaptef"
         output_schema = AdaptedModules
 
         def invoke(self, state_dict, config=None):
@@ -183,7 +183,7 @@ def test_self_discover_workflow():
     # Agent 3: Reasoning Structure
 
     class MockReasoningAgent:
-        name = "reasoning_builder"
+        name = "reasoning_buildef"
         output_schema = ReasoningStructure
 
         def invoke(self, state_dict, config=None):

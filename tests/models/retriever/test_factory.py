@@ -179,7 +179,7 @@ class TestConvenienceFunctions:
         ) as mock_get_provider:
             mock_provider_class = Mock()
             mock_provider_class.__name__ = "VectorStoreProvider"
-            mock_provider_class.__doc__ = "Test provider"
+            mock_provider_class.__doc__ = "Test providef"
             mock_provider_class.model_fields = {
                 "vector_store": Mock(
                     annotation="Any", default=None, description="Vector store"

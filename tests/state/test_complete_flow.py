@@ -79,8 +79,11 @@ async def test_complete_flow():
         if hasattr(result, "keys") and expected_field in result:
             field_value = result[expected_field]
             if isinstance(field_value, QueryRefinementResponse):
+                pass
             else:
+                pass
         else:
+            pass
 
         return True
 

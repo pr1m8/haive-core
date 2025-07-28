@@ -66,7 +66,7 @@ class TestDirectFieldUpdates:
             ],
             # Agent state tracking (but not the primary output mechanism)
             "agent_states": {
-                "selector": {
+                "selectof": {
                     "selected_modules": agent_output.selected_modules,
                     "rationale": agent_output.rationale,
                     "execution_count": 1,
@@ -201,7 +201,7 @@ class TestDirectFieldUpdates:
         {
             "messages": [AIMessage(content="Starting process")],
             "agent_outputs": {
-                "starter": {"messages": [AIMessage(content="Starting process")]}
+                "startef": {"messages": [AIMessage(content="Starting process")]}
             },
         }
 

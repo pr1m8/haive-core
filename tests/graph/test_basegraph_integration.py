@@ -116,7 +116,7 @@ def test_branch_routing():
     agents = {
         "analyzer": analyzer,
         "success_handler": success_handler,
-        "error_handler": error_handler,
+        "error_handlef": error_handler,
     }
 
     branches = {

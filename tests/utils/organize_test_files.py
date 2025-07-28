@@ -115,6 +115,7 @@ def main():
             failed_count += 1
 
     if moved_count > 0:
+        pass
 
 
 if __name__ == "__main__":

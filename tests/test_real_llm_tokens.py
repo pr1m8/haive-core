@@ -29,8 +29,6 @@ async def test_real_llm_token_metadata():
                 pass
             if hasattr(msg, "usage_metadata"):
                 pass
-
-    # Try to access the agent's graph state
     if hasattr(agent, "graph") and hasattr(agent.graph, "get_state"):
         try:
             # This might require a thread_id or config

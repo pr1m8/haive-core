@@ -128,6 +128,7 @@ def main():
         success = test_loader_selection_fix()
 
         if success:
+            pass
 
         return success
 

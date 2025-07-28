@@ -412,15 +412,6 @@ def main():
             failed_count += 1
         elif "⚠️" in status:
             pass
-
-    # Overall status
-
-    if failed_count == 0:
-        pass
-    else:
-        passs.")
-
-    # Save detailed results
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     results_file = (
         f"/home/will/Projects/haive/backend/haive/agent_test_results_{timestamp}.json"

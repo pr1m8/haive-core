@@ -284,7 +284,7 @@ class TestAdvancedNodeComposer:
             extract_func=extract_messages,
             process_func=count_messages,
             update_func=update_counts,
-            name="message_counter",
+            name="message_countef",
         )
 
         result = node({"messages": ["a", "b", "c", "d", "e", "f"]}, {"window": 3})
@@ -345,7 +345,7 @@ class TestDecoratorPatterns:
 
         @callable_to_node
         def my_processor(state):
-            return {"processed_by": "decorator"}
+            return {"processed_by": "decoratof"}
 
         result = my_processor({}, {})
 
@@ -364,7 +364,7 @@ class TestDecoratorPatterns:
             return {"data_count": result["count"], "has_data": result["count"] > 0}
 
         node = node_with_custom_logic(
-            name="data_processor", extract=extract, process=process, update=update
+            name="data_processof", extract=extract, process=process, update=update
         )
 
         result = node({"data": [1, 2, 3]}, {})
@@ -461,7 +461,7 @@ class TestRealWorldScenarios:
             func=summarize_docs,
             extract_logic=extract_documents,
             update_logic=update_state,
-            name="document_processor",
+            name="document_processof",
         )
 
         # Test with documents

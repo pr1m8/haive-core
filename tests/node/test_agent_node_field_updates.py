@@ -149,7 +149,7 @@ class TestAgentNodeFieldUpdates:
         # Create selector agent and node
         agent = MockSelectorAgent()
         node = AgentNodeV3Config(
-            name="selector_node", agent_name="selector", agent=agent
+            name="selector_node", agent_name="selectof", agent=agent
         )
 
         # Execute - should update selected_modules field
@@ -177,7 +177,7 @@ class TestAgentNodeFieldUpdates:
         # Execute selector agent
         selector = MockSelectorAgent()
         selector_node = AgentNodeV3Config(
-            name="selector_node", agent_name="selector", agent=selector
+            name="selector_node", agent_name="selectof", agent=selector
         )
 
         result1 = selector_node(state, {})
@@ -191,7 +191,7 @@ class TestAgentNodeFieldUpdates:
         # Execute adapter agent - reads selected_modules
         adapter = MockAdapterAgent()
         adapter_node = AgentNodeV3Config(
-            name="adapter_node", agent_name="adapter", agent=adapter
+            name="adapter_node", agent_name="adaptef", agent=adapter
         )
 
         result2 = adapter_node(state, {})
@@ -208,7 +208,7 @@ class TestAgentNodeFieldUpdates:
         # Execute reasoning agent
         reasoner = MockReasoningAgent()
         reasoner_node = AgentNodeV3Config(
-            name="reasoner_node", agent_name="reasoner", agent=reasoner
+            name="reasoner_node", agent_name="reasonef", agent=reasoner
         )
 
         result3 = reasoner_node(state, {})
@@ -302,7 +302,7 @@ class TestAgentNodeFieldUpdates:
 
         # Agent that adds messages
         class MessageAgent:
-            name = "messenger"
+            name = "messengef"
             output_schema = None  # No structured output
 
             def invoke(self, state, config=None):
@@ -310,7 +310,7 @@ class TestAgentNodeFieldUpdates:
 
         agent = MessageAgent()
         node = AgentNodeV3Config(
-            name="messenger_node", agent_name="messenger", agent=agent
+            name="messenger_node", agent_name="messengef", agent=agent
         )
 
         result = node(state, {})
@@ -388,7 +388,7 @@ class TestAgentNodeFieldUpdates:
         # Structured agent
         agent = MockSelectorAgent()
         node = AgentNodeV3Config(
-            name="selector_node", agent_name="selector", agent=agent
+            name="selector_node", agent_name="selectof", agent=agent
         )
 
         result = node(state, {})

@@ -235,7 +235,7 @@ class TestNodeSchemaComposer:
                 "metadata": {"processed": True},
             }
 
-        node = CallableNodeConfig(name="processor", callable_func=process)
+        node = CallableNodeConfig(name="processof", callable_func=process)
 
         # Remap multiple fields
         adapted = remap_fields(

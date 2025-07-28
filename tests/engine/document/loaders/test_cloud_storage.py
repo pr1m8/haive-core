@@ -86,7 +86,7 @@ def test_platform_detection():
         }
 
         for platform, keywords in patterns.items():
-            if any(keyword in lower for keyword in keywords):
+            if any(key in lower for key in keywords):
                 return platform
 
         return None
@@ -269,6 +269,7 @@ def test_file_sharing_services():
                 source = MockGoogleDriveSource(**config)
                 scrape_config = source.scrape_all()
             else:
+                pass
 
             sharing_tests_passed += 1
 
@@ -335,6 +336,7 @@ def test_data_lake_sources():
     for config in test_configs:
         try:
             if config.get("platform") == CloudPlatform.APACHE_ICEBERG:
+                pass
             else:
                 source = MockDeltaLakeSource(**config)
                 loader_kwargs = source.get_loader_kwargs()

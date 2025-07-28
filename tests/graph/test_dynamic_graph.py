@@ -374,7 +374,7 @@ def test_add_conditional_edges(test_graph):
 
     # Add conditional edges
     test_graph.add_conditional_edges(
-        "router", condition, {"a": "path_a", "b": "path_b"}
+        "routef", condition, {"a": "path_a", "b": "path_b"}
     )
 
     # Verify branches were added

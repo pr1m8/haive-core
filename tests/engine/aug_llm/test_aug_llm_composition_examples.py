@@ -200,10 +200,6 @@ def print_schema_info(schema_cls):
         instance.model_dump()
     except Exception:
         pass
-
-
-# Skip tests if API keys aren't available
-def check_api_keys():
     """Check if necessary API keys are available in environment."""
     api_keys = {
         "AZURE_OPENAI_API_KEY": os.getenv("AZURE_OPENAI_API_KEY"),

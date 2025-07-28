@@ -36,7 +36,7 @@ class TestVectorStoreProvider:
         assert params["vectorstore"] == mock_vector_store
         assert params["search_type"] == "similarity"
         assert params["search_kwargs"]["k"] == 3
-        assert params["search_kwargs"]["filter"] == {"source": "test"}
+        assert params["search_kwargs"]["filtef"] == {"source": "test"}
 
     def test_prepare_params(self, mock_vector_store):
         """Test parameter preparation."""
@@ -391,7 +391,7 @@ class TestProviderErrorHandling:
         provider = VectorStoreProvider(
             vector_store=mock_vector_store,
             k=5,
-            name="test_retriever",
+            name="test_retrievef",
             tags={"env": "test"},
         )
 

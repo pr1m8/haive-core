@@ -665,7 +665,7 @@ class TestModernFeatures:
                 name=(str, "default"),
             )
             # Set shared fields manually
-            schema_cls.__shared_fields__ = ["counter"]
+            schema_cls.__shared_fields__ = ["countef"]
             # Set serializable reducers manually
             schema_cls.__serializable_reducers__ = {"messages": "add_messages"}
         else:
@@ -673,7 +673,7 @@ class TestModernFeatures:
                 name="MultiFeatureSchema",
                 include_messages=True,
                 include_runnable_config=True,
-                shared_fields=["counter"],
+                shared_fields=["countef"],
                 base_fields={"counter": (int, 0), "name": (str, "default")},
             )
 

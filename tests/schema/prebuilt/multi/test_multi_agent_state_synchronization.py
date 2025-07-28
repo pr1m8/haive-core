@@ -116,7 +116,7 @@ class TestMultiAgentStateSynchronization:
         state = CombinedMultiAgentState()
 
         # Initialize agent-specific states
-        state.agent_states["selector"] = {
+        state.agent_states["selectof"] = {
             "messages": [],
             "available_modules": ["A", "B", "C"],
             "selected_modules": [],
@@ -124,12 +124,12 @@ class TestMultiAgentStateSynchronization:
             "tools": ["module_analyzer"],  # Private
         }
 
-        state.agent_states["adapter"] = {
+        state.agent_states["adaptef"] = {
             "messages": [],
             "selected_modules": [],  # Will sync from selector
             "adapted_modules": [],
             "adaptation_rules": {"A": "enhance", "B": "simplify"},  # Private
-            "tools": ["context_analyzer"],  # Private
+            "tools": ["context_analyzef"],  # Private
         }
 
         # Selector produces output
@@ -164,8 +164,8 @@ class TestMultiAgentStateSynchronization:
         reasoning_tools = ["logic_checker", "fact_validator", "proof_assistant"]
 
         # Store in agent states (private)
-        state.agent_states["selector"] = {"tools": selector_tools}
-        state.agent_states["adapter"] = {"tools": adapter_tools}
+        state.agent_states["selectof"] = {"tools": selector_tools}
+        state.agent_states["adaptef"] = {"tools": adapter_tools}
         state.agent_states["reasoning"] = {"tools": reasoning_tools}
 
         # Tools should NOT be in combined state fields
@@ -196,7 +196,7 @@ class TestMultiAgentStateSynchronization:
         state.selected_modules = ["A", "B"]
 
         # 2. In its agent_state (all fields including private)
-        state.agent_states["selector"] = {
+        state.agent_states["selectof"] = {
             "selected_modules": ["A", "B"],  # Duplicated for agent's view
             "selection_history": [{"modules": ["A", "B"]}],  # Private
             "tools": ["module_analyzer"],  # Private
@@ -217,7 +217,7 @@ class TestMultiAgentStateSynchronization:
         ]
 
         # Each agent can have its own message view
-        state.agent_states["selector"] = {
+        state.agent_states["selectof"] = {
             "messages": state.messages.copy(),  # Starts with global
             "selected_modules": [],
         }
@@ -230,7 +230,7 @@ class TestMultiAgentStateSynchronization:
         state.messages.append(selector_message)  # Sync to global
 
         # Next agent sees updated messages
-        state.agent_states["adapter"] = {
+        state.agent_states["adaptef"] = {
             "messages": state.messages.copy(),  # Gets all messages
             "adapted_modules": [],
         }
@@ -247,7 +247,7 @@ class TestMultiAgentStateSynchronization:
             "selected_modules": ["reasoning", "planning"],
             "messages": [AIMessage(content="Selection complete")],
             "agent_states": {
-                "selector": {
+                "selectof": {
                     "selected_modules": ["reasoning", "planning"],
                     "selection_history": [{"round": 1, "selected": 2}],
                     "rationale": "Best modules for complex reasoning",
@@ -281,7 +281,7 @@ class TestMultiAgentStateSynchronization:
         """Test that agent output schemas become state field keys."""
         state = CombinedMultiAgentState()
 
-        # Instead of agent_outputs["selector"] = {...}
+        # Instead of agent_outputs["selectof"] = {...}
         # We update the actual fields:
 
         # From SelectedModules output schema
@@ -316,7 +316,7 @@ class TestMultiAgentStateSynchronization:
             available_modules=["A", "B", "C", "D"],
             selected_modules=["A", "C"],
             selection_history=[{"round": 1}],
-            tools=["module_analyzer"],
+            tools=["module_analyzef"],
         )
 
         adapter_state = AdapterAgentState(
@@ -337,12 +337,12 @@ class TestMultiAgentStateSynchronization:
         state.adapted_modules = adapter_state.adapted_modules
 
         # Private fields go to agent_states
-        state.agent_states["selector"] = {
+        state.agent_states["selectof"] = {
             "selection_history": selector_state.selection_history,
             "tools": selector_state.tools,
         }
 
-        state.agent_states["adapter"] = {
+        state.agent_states["adaptef"] = {
             "adaptation_rules": adapter_state.adaptation_rules,
             "tools": adapter_state.tools,
         }

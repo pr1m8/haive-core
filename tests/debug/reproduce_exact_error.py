@@ -79,8 +79,8 @@ def test_exact_reproduction():
                 function = frame.f_code.co_name
 
                 if any(
-                    keyword in filename
-                    for keyword in ["state_schema", "agent", "schema_composer"]
+                    key in filename
+                    for key in ["state_schema", "agent", "schema_composer"]
                 ):
                     console.print(
                         f"[yellow]Frame in suspect file: {filename}:{lineno} in {function}[/yellow]"

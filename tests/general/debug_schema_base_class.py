@@ -23,3 +23,4 @@ engine_type_str = str(engine_type_value).lower()
 
 # Check if it's an enum
 if hasattr(config.engine_type, "value"):
+    pass

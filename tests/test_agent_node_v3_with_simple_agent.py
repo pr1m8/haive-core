@@ -133,7 +133,7 @@ def test_agent_node_v3_with_multi_agent_state():
         print("\n🧪 Test 1: Direct MultiAgentState")
         result1 = node_config(multi_state)
 
-        print("✅ Direct execution successful!"!")
+        print("✅ Direct execution successful!")
         print(f"   Result type: {type(result1)}")
 
     except Exception as e:
@@ -148,7 +148,7 @@ def test_agent_node_v3_with_multi_agent_state():
         dict_state = multi_state.model_dump()
         result2 = node_config(dict_state)
 
-        print("✅ Dict execution successful!"!")
+        print("✅ Dict execution successful!")
         print(f"   Result type: {type(result2)}")
 
         return result2
@@ -251,10 +251,10 @@ def main():
         )
 
         if dict_result and hasattr(dict_result, "update"):
-            print("\n🎯 KEY INSIGHT: AgentNodeV3 returns Command objects"ts")
+            print("\n🎯 KEY INSIGHT: AgentNodeV3 returns Command objects")
             print("   This is CORRECT for LangGraph 0.3.31+")
 
-        print("\n🎯 ISSUE CONFIRMED: MultiAgentState objects are not subscriptable"le")
+        print("\n🎯 ISSUE CONFIRMED: MultiAgentState objects are not subscriptable")
         print("   LangGraph nodes expect dict access: state['key']")
         print("   But MultiAgentState uses attribute access: state.key")
 

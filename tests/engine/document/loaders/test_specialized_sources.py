@@ -88,7 +88,7 @@ def test_platform_detection():
         }
 
         for platform, keywords in patterns.items():
-            if any(keyword in lower for keyword in keywords):
+            if any(key in lower for key in keywords):
                 return platform
 
         return None

@@ -403,7 +403,7 @@ def test_summarization_example(azure_llm_config, summarization_prompt, sample_ar
     """Test AugLLMConfig for content summarization."""
     # Create AugLLM for summarization
     summarizer = AugLLMConfig(
-        name="content_summarizer",
+        name="content_summarizef",
         llm_config=azure_llm_config,
         prompt_template=summarization_prompt,
         output_parser=StrOutputParser(),
@@ -463,7 +463,7 @@ def test_data_extraction_example(
     """Test AugLLMConfig for data extraction from specific content."""
     # Create AugLLM for data extraction
     extractor = AugLLMConfig(
-        name="data_extractor",
+        name="data_extractof",
         llm_config=azure_llm_config,
         prompt_template=extraction_prompt,
     )
@@ -483,7 +483,7 @@ def test_data_extraction_example(
 
     # Create structured extractor
     structured_extractor = AugLLMConfig(
-        name="structured_data_extractor",
+        name="structured_data_extractof",
         llm_config=azure_llm_config,
         prompt_template=extraction_prompt,
         structured_output_model=BusinessDataExtraction,
@@ -624,7 +624,7 @@ def test_format_conversion_example(azure_llm_config, format_conversion_prompt):
     # Convert JSON to YAML
     json_content = """
     {
-      "server": {
+      "servef": {
         "host": "example.com",
         "port": 8080,
         "ssl": true
@@ -633,7 +633,7 @@ def test_format_conversion_example(azure_llm_config, format_conversion_prompt):
         "type": "postgres",
         "credentials": {
           "username": "admin",
-          "password": "secure_password"
+          "pass": "secure_pass"
         },
         "options": {
           "max_connections": 100,
@@ -666,7 +666,7 @@ def test_translation_example(azure_llm_config, translation_prompt):
     """Test AugLLMConfig for language translation."""
     # Create AugLLM for translation
     translator = AugLLMConfig(
-        name="translator",
+        name="translatof",
         llm_config=azure_llm_config,
         prompt_template=translation_prompt,
     )
@@ -735,7 +735,7 @@ def test_analysis_example(azure_llm_config, analysis_prompt, sample_article):
     """Test AugLLMConfig for content analysis."""
     # Create AugLLM for analysis
     analyzer = AugLLMConfig(
-        name="content_analyzer",
+        name="content_analyzef",
         llm_config=azure_llm_config,
         prompt_template=analysis_prompt,
     )

@@ -55,7 +55,7 @@ def query_database(thread_id):
 
             thread = cursor.fetchone()
             if thread:
-                print("✅ Thread found in threads table"e")
+                print("✅ Thread found in threads table")
                 print(f"   Created: {thread[1]}")
                 print(f"   Last access: {thread[2]}")
 

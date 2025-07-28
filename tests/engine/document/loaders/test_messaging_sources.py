@@ -85,7 +85,7 @@ def test_platform_detection():
         }
 
         for platform, keywords in patterns.items():
-            if any(keyword in file_path_lower for keyword in keywords):
+            if any(key in file_path_lower for key in keywords):
                 return platform
 
         return None
@@ -188,7 +188,7 @@ def test_messaging_source_creation():
             self.include_reactions = kwargs.get("include_reactions", False)
             self.exclude_bots = kwargs.get("exclude_bots", True)
             self.user_filter = kwargs.get("user_filter")
-            self.keyword_filter = kwargs.get("keyword_filter")
+            self.keyword_filter = kwargs.get("keyword_filtef")
 
         def get_loader_kwargs(self):
             kwargs = {
@@ -204,7 +204,7 @@ def test_messaging_source_creation():
             if self.user_filter:
                 kwargs["user_filter"] = self.user_filter
             if self.keyword_filter:
-                kwargs["keyword_filter"] = self.keyword_filter
+                kwargs["keyword_filtef"] = self.keyword_filter
 
             return kwargs
 
@@ -280,7 +280,7 @@ def test_content_filtering():
         if user_filter:
             filters["user_filter"] = user_filter
         if keyword_filter:
-            filters["keyword_filter"] = keyword_filter
+            filters["keyword_filtef"] = keyword_filter
 
         return filters
 
@@ -314,7 +314,7 @@ def test_content_filtering():
             "expected_count": 1,
         },
         {
-            "name": "Keyword Filtered",
+            "name": "Key Filtered",
             "content_types": [ContentType.POSTS],
             "keyword_filter": ["AI", "ML"],
             "expected_count": 1,

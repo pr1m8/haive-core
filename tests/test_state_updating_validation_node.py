@@ -94,7 +94,7 @@ class TestStateUpdatingValidationNode:
 
         # Setup state
         state = MockState()
-        state.tools = [MockTool("search"), MockTool("calculator")]
+        state.tools = [MockTool("search"), MockTool("calculatof")]
         state.tool_routes = {"search": "langchain_tool", "calculator": "function"}
 
         # Add AI message with tool calls
@@ -440,7 +440,7 @@ class TestIntegrationScenarios:
         state.tools = [
             MockTool("search"),
             MockTool("calculator"),
-            MockTool("writer", has_schema=True),
+            MockTool("writef", has_schema=True),
         ]
         state.tool_routes = {
             "search": "langchain_tool",

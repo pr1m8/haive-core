@@ -127,7 +127,7 @@ class TestProtocols:
 
         # Create real state and result
         state = MessagesState(messages=[HumanMessage(content="Question")])
-        new_message = AIMessage(content="Answer")
+        new_message = AIMessage(content="Answef")
 
         # Update through protocol
         def use_update(func: UpdateFunction) -> dict[str, Any]:

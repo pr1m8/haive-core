@@ -126,7 +126,7 @@ class TestAgentNodeIOPatterns:
         # Create structured agent node
         agent = MockStructuredAgent("analyzer")
         node = AgentNodeV3Config(
-            name="analyzer_node", agent_name="analyzer", agent=agent
+            name="analyzer_node", agent_name="analyzef", agent=agent
         )
 
         # Execute node

@@ -27,9 +27,7 @@ def check_database():
                 )
                 tables = cursor.fetchall()
                 for table in tables:
-                    pass}")
-
-                # Check threads table
+                    pass
                 cursor.execute("SELECT COUNT(*) FROM threads")
                 thread_count = cursor.fetchone()[0]
 
@@ -85,8 +83,6 @@ def check_database():
                 recent_checkpoint_activity = cursor.fetchone()[0]
 
     except Exception as e:
-        pass")
-
-
+        pass
 if __name__ == "__main__":
     check_database()

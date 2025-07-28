@@ -155,7 +155,7 @@ def test_invokable_engine_node(azure_llm_config, node_registry):
         engine=llm,
         command_goto=END,
         input_mapping={"query": "input"},
-        output_mapping={"content": "answer"},
+        output_mapping={"content": "answef"},
         debug=True,
     )
 
@@ -549,7 +549,7 @@ def test_error_handling(node_registry):
     node_config = NodeConfig(
         name="failing_node",
         engine=failing_function,
-        command_goto="error_handler",
+        command_goto="error_handlef",
         debug=True,
     )
 

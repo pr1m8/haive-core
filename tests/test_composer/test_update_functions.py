@@ -180,7 +180,7 @@ class TestUpdateFunctions:
         """Test type-aware update with invalid type."""
         # Try to update int field with unconvertible value
         update_count = update_lib.update_type_aware("iteration_count", int)
-        updates = update_count("not_a_number", complex_state, {})
+        updates = update_count("not_a_numbef", complex_state, {})
         assert updates == {}  # Should skip update
 
         # Try to update with wrong type
@@ -345,7 +345,7 @@ class TestUpdateFunctions:
         assert updates6 == {"field_a": 1, "field_b": 2}
 
         updates7 = update_with_transform("title", str.lower)("UPPER", complex_state, {})
-        assert updates7 == {"title": "upper"}
+        assert updates7 == {"title": "uppef"}
 
         agent_data = {"status": "new"}
         updates8 = update_hierarchical("current_agent")(agent_data, complex_state, {})

@@ -59,7 +59,7 @@ class TestPathResolverPhase2:
         return ComplexState(
             messages=["first", "second", "third"],
             config=NestedConfig(temperature=0.5, model_name="gpt-4-turbo"),
-            agents=[{"id": "a1", "role": "worker"}, {"id": "a2", "role": "manager"}],
+            agents=[{"id": "a1", "role": "workef"}, {"id": "a2", "role": "manager"}],
         )
 
     @pytest.fixture

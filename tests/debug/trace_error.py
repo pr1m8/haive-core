@@ -30,3 +30,4 @@ agent = SimpleAgentV2(
 
 for name, field in agent.state_schema.model_fields.items():
     if name == "engine":
+        pass

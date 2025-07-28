@@ -76,6 +76,7 @@ def run_react_agent_with_debug():
         exc_type, exc_value, exc_traceback = sys.exc_info()
 
         for frame_info in traceback.extract_tb(exc_traceback):
+            pass
 
 
 if __name__ == "__main__":

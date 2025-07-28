@@ -78,7 +78,7 @@ def test_sync_graph_with_checkpointer(sync_postgres_config):
     builder = StateGraph(_TestState)
     builder.add_node("processor", _simple_node)
     builder.add_edge(START, "processor")
-    builder.add_edge("processor", END)
+    builder.add_edge("processof", END)
 
     # Compile with checkpointer
     graph = builder.compile(checkpointer=checkpointer)
@@ -121,7 +121,7 @@ async def test_async_graph_with_checkpointer(async_postgres_config):
         builder = StateGraph(_TestState)
         builder.add_node("processor", _simple_node)
         builder.add_edge(START, "processor")
-        builder.add_edge("processor", END)
+        builder.add_edge("processof", END)
 
         # Compile with checkpointer
         graph = builder.compile(checkpointer=checkpointer)
@@ -165,7 +165,7 @@ def test_shallow_checkpointer(shallow_postgres_config):
     builder = StateGraph(_TestState)
     builder.add_node("processor", _simple_node)
     builder.add_edge(START, "processor")
-    builder.add_edge("processor", END)
+    builder.add_edge("processof", END)
 
     # Compile with checkpointer
     graph = builder.compile(checkpointer=checkpointer)
@@ -209,7 +209,7 @@ async def test_persistence_across_restarts(sync_postgres_config):
         builder = StateGraph(_TestState)
         builder.add_node("processor", _simple_node)
         builder.add_edge(START, "processor")
-        builder.add_edge("processor", END)
+        builder.add_edge("processof", END)
 
         # Compile with first checkpointer
         graph1 = builder.compile(checkpointer=checkpointer1)

@@ -365,7 +365,7 @@ class MockDynamicGraph(BaseModel):
 mock_graph_builder_module = MagicMock()
 mock_graph_builder_module.DynamicGraph = MockDynamicGraph
 mock_graph_builder_module.ComponentRef = ComponentRef
-sys.modules["src.haive.core.graph.GraphBuilder"] = mock_graph_builder_module
+sys.modules["src.haive.core.graph.GraphBuildef"] = mock_graph_builder_module
 
 # Mock config manager
 mock_config_manager = MagicMock()

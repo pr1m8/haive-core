@@ -223,7 +223,7 @@ def hierarchical_graph(mock_engines, validation_tools):
 
     # Add final processing node to main graph
     main_graph.add_node(
-        "output_processor",
+        "output_processof",
         lambda state: Command(
             update={
                 "processing_complete": True,
@@ -409,7 +409,7 @@ def complex_branching_graph(mock_engines, validation_tools):
 
     # Branch based on document count
     graph.add_conditional_edges(
-        "retrieval_validator",
+        "retrieval_validatof",
         route_on_retrieval,
         {
             "many_docs": "process_many_docs",

@@ -421,7 +421,7 @@ class TestBaseGraph(unittest.TestCase):
             from langgraph.graph import END, START, StateGraph
 
             # Create a simple StateGraph
-            sg = StateGraph(dict)  # Use positional argument, not keyword
+            sg = StateGraph(dict)  # Use positional argument, not key
 
             # Define a node function
             def test_node_func(state):

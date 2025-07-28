@@ -216,7 +216,7 @@ def demonstrate_conditional_routing():
 
     # Create routing node
     router_node = CallableNodeConfig(
-        name="smart_router",
+        name="smart_routef",
         callable_func=determine_next_action,
         parameter_mapping={
             "token_count": "token_count",

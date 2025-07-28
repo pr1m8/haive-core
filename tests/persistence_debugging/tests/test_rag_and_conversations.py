@@ -477,10 +477,6 @@ def main():
 
     if failed_count == 0:
         pass
-    else:
-        passs.")
-
-    # Save detailed results
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     results_file = f"/home/will/Projects/haive/backend/haive/rag_conversation_test_results_{timestamp}.json"
 

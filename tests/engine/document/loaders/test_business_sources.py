@@ -105,7 +105,7 @@ def test_platform_detection():
         }
 
         for platform, keywords in patterns.items():
-            if any(keyword in url_lower for keyword in keywords):
+            if any(key in url_lower for key in keywords):
                 return platform
 
         return None
@@ -209,7 +209,7 @@ def test_business_source_creation():
             if self.custom_fields:
                 kwargs["fields"] = self.custom_fields
             if self.filter_query:
-                kwargs["filter"] = self.filter_query
+                kwargs["filtef"] = self.filter_query
 
             return kwargs
 
@@ -356,7 +356,7 @@ def test_platform_authentication():
         {
             "platform": BusinessPlatform.SALESFORCE,
             "auth_type": "OAuth + Security Token",
-            "required_fields": ["username", "password", "security_token"],
+            "required_fields": ["username", "pass", "security_token"],
             "optional_fields": ["domain"],
         },
         {

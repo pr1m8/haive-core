@@ -83,7 +83,7 @@ class TestAgentNodeFieldMapping:
         state.available_modules = ["reasoning", "planning", "analysis", "synthesis"]
 
         # Create agent with ModuleSelection output schema
-        agent = MockSchemaAgent("selector", ModuleSelection)
+        agent = MockSchemaAgent("selectof", ModuleSelection)
 
         # What we want: agent node detects output schema and maps fields
         # Current behavior: stores in agent_outputs
@@ -190,14 +190,14 @@ class TestAgentNodeFieldMapping:
             update={
                 "messages": [AIMessage(content="Starting analysis")],
                 "agent_outputs": {
-                    "starter": {"messages": [AIMessage(content="Starting analysis")]}
+                    "startef": {"messages": [AIMessage(content="Starting analysis")]}
                 },
             }
         )
 
         # Agent 2: Schema-based (with output schema)
         # Should update fields directly
-        analyzer = MockSchemaAgent("analyzer", TaskAnalysis)
+        analyzer = MockSchemaAgent("analyzef", TaskAnalysis)
         output = analyzer.invoke(state)
 
         Command(
