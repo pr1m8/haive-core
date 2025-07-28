@@ -684,7 +684,6 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         # Create instance with Pydantic v2 method
         return cls.model_validate(full_data)
 
-
     @classmethod
     def get_class_engine(cls, name: str) -> Any | None:
         """Get a class-level engine by name.
