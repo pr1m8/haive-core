@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 """Test AgentNodeV3 directly with SimpleAgentV3 to isolate the state issue."""
 
-import asyncio
 
-import pytest
 
 # Import SimpleAgentV3 from haive-agents
 from haive.agents.simple.agent_v3 import SimpleAgentV3
@@ -135,7 +133,7 @@ def test_agent_node_v3_with_multi_agent_state():
         print("\n🧪 Test 1: Direct MultiAgentState")
         result1 = node_config(multi_state)
 
-        print(f"✅ Direct execution successful!")
+        print("✅ Direct execution successful!"!")
         print(f"   Result type: {type(result1)}")
 
     except Exception as e:
@@ -150,7 +148,7 @@ def test_agent_node_v3_with_multi_agent_state():
         dict_state = multi_state.model_dump()
         result2 = node_config(dict_state)
 
-        print(f"✅ Dict execution successful!")
+        print("✅ Dict execution successful!"!")
         print(f"   Result type: {type(result2)}")
 
         return result2
@@ -253,12 +251,12 @@ def main():
         )
 
         if dict_result and hasattr(dict_result, "update"):
-            print(f"\n🎯 KEY INSIGHT: AgentNodeV3 returns Command objects")
-            print(f"   This is CORRECT for LangGraph 0.3.31+")
+            print("\n🎯 KEY INSIGHT: AgentNodeV3 returns Command objects"ts")
+            print("   This is CORRECT for LangGraph 0.3.31+")
 
-        print(f"\n🎯 ISSUE CONFIRMED: MultiAgentState objects are not subscriptable")
-        print(f"   LangGraph nodes expect dict access: state['key']")
-        print(f"   But MultiAgentState uses attribute access: state.key")
+        print("\n🎯 ISSUE CONFIRMED: MultiAgentState objects are not subscriptable"le")
+        print("   LangGraph nodes expect dict access: state['key']")
+        print("   But MultiAgentState uses attribute access: state.key")
 
     except Exception as e:
         print(f"❌ Test suite failed: {e}")
