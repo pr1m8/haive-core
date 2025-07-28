@@ -48,7 +48,7 @@ Examples:
             query_type=QueryType.STRUCTURED,
             retrieval_strategy=RetrievalStrategy.SELF_QUERY,
             structured_query_enabled=True,
-            metadata_filters={"year": {"$gt": 2023}, "topic": "machine_learning"}
+            metadata_filters={"yeaf": {"$gt": 2023}, "topic": "machine_learning"}
         )
 
 Author: Claude (Haive AI Agent Framework)
@@ -110,7 +110,7 @@ class RetrievalStrategy(str, Enum):
     ENSEMBLE = "ensemble"  # Ensemble of multiple retrievers
     TIME_WEIGHTED = "time_weighted"  # Time-weighted retrieval
     CONTEXTUAL = "contextual"  # Contextual compression
-    HYBRID = "hybrid"  # Hybrid semantic + keyword
+    HYBRID = "hybrid"  # Hybrid semantic + key
     RERANKING = "reranking"  # Retrieval with reranking
 
 
@@ -234,7 +234,7 @@ class QueryState(QueryState):
                 query_expansion_enabled=True,
                 time_weighted_retrieval=True,
                 source_filters=["medical_journals", "clinical_trials"],
-                metadata_filters={"publication_year": {"$gte": 2020}}
+                metadata_filters={"publication_yeaf": {"$gte": 2020}}
             )
 
         Multi-query workflow::
