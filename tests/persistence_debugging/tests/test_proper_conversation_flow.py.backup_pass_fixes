@@ -108,7 +108,7 @@ def test_proper_conversation_flow():
                                 persisted_msg_count = len(
                                     channel_values["messages"])
                             else:
-                                print("Tests passed")
+                                passed")
                         else:
                             pass
             except Exception as e:

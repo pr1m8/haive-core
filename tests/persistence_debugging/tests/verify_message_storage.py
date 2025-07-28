@@ -192,8 +192,7 @@ def check_store_persistence_link():
 
                 # Check for prepare_threshold
                 if "prepare_threshold" in content:
-                    passon")
-
+                    pass
             except Exception as e:
                 pass
         else:

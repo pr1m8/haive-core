@@ -167,7 +167,7 @@ def test_react_agent_persistence():
             last_message = result["messages"][-1] if result["messages"] else None
             if last_message and hasattr(last_message, "content"):
                 if "error" in str(last_message.content).lower():
-                    passt}")
+                    print("pass")
                 else:
                     pass")
 
