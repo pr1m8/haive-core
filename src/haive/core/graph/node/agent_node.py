@@ -619,7 +619,7 @@ class AgentNodeConfig(EngineNodeConfig):
         """Prepare input for agent execution.
 
         If agent has a private state schema, extract only relevant fields.
-        Otherwise, pass appropriate fields based on agent's input schema.
+        Otherwise, pass
         """
         logger.debug("=== _prepare_agent_input called ===")
         logger.debug(f"  Agent: {agent.name}")
