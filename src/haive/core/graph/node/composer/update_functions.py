@@ -198,13 +198,13 @@ class UpdateFunctions:
             if not isinstance(result, expected_type):
                 # Try to convert if possible
                 try:
-                    if expected_type == int:
+                    if expected_type is int:
                         result = int(result)
-                    elif expected_type == float:
+                    elif expected_type is float:
                         result = float(result)
-                    elif expected_type == str:
+                    elif expected_type is str:
                         result = str(result)
-                    elif expected_type == bool:
+                    elif expected_type is bool:
                         result = bool(result)
                     else:
                         # Can't convert, skip update
