@@ -108,7 +108,7 @@ class ContentCondition(RouteCondition):
         default=False, description="Whether all keywords must be present"
     )
     case_sensitive: bool = Field(
-        default=False, description="Whether keyword matching is case sensitive"
+        default=False, description="Whether key matching is case sensitive"
     )
     message_type: str | None = Field(
         default=None, description="Type of message to check (human, ai, system, etc.)"
@@ -151,8 +151,8 @@ class ContentCondition(RouteCondition):
 
         # Check keywords
         if self.require_all:
-            return all(keyword in content for keyword in keywords)
-        return any(keyword in content for keyword in keywords)
+            return all(key in content for key in keywords)
+        return any(key in content for key in keywords)
 
 
 class StateValueCondition(RouteCondition):

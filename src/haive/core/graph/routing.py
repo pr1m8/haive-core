@@ -102,7 +102,7 @@ class Router:
         # Register as a node for discovery
         register_node(
             name,
-            tags=["router"],
+            tags=["routef"],
             metadata={"type": "router", "default_destination": default_destination},
         )
 
@@ -174,7 +174,7 @@ class Router:
             keywords: Keywords to check for
             destination: Destination node
             require_all: Whether all keywords must be present
-            case_sensitive: Whether keyword matching is case sensitive
+            case_sensitive: Whether key matching is case sensitive
             message_type: Type of message to check
             priority: Route priority
             description: Route description
