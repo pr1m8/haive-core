@@ -1,8 +1,8 @@
 """Engine type definitions for the Haive framework.
 
-This module defines the core engine type classifications used throughout
-the Haive system. These types are used for registration, factory creation,
-and type checking of various engine components.
+This module defines the core engine type classifications used throughout the Haive
+system. These types are used for registration, factory creation, and type checking of
+various engine components.
 """
 
 from enum import Enum

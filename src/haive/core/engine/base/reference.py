@@ -1,7 +1,7 @@
 """Component reference implementation for the Haive engine system.
 
-This module provides a reference mechanism that allows components to be referenced
-by their ID, name, or type, and resolved at runtime. This enables lazy loading,
+This module provides a reference mechanism that allows components to be referenced by
+their ID, name, or type, and resolved at runtime. This enables lazy loading,
 serialization of references, and dynamic resolution of components.
 """
 

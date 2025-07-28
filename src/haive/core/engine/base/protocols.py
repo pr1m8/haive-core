@@ -1,9 +1,8 @@
 """Protocol definitions for the Haive engine system.
 
-This module defines protocol classes that establish common interfaces
-for various components in the Haive framework. These protocols enable
-static type checking, runtime type checking, and duck typing for components
-that implement common behaviors.
+This module defines protocol classes that establish common interfaces for various
+components in the Haive framework. These protocols enable static type checking, runtime
+type checking, and duck typing for components that implement common behaviors.
 """
 
 from typing import Protocol, TypeVar, runtime_checkable
@@ -46,7 +45,7 @@ class Invokable(Protocol[I, O]):
 
         Args:
             input_data (I): The input data to process.
-            **kwargs: Additional keyword arguments for processing.
+            **kwargs: Additional key arguments for processing.
 
         Returns:
             O: The processed output data.
@@ -91,7 +90,7 @@ class AsyncInvokable(Protocol[I, O]):
 
         Args:
             input_data (I): The input data to process.
-            **kwargs: Additional keyword arguments for processing.
+            **kwargs: Additional key arguments for processing.
 
         Returns:
             O: The processed output data.

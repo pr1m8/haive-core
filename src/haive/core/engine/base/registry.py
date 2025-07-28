@@ -1,8 +1,8 @@
 """Registry management for Haive engines.
 
-This module provides a centralized registry for all engine instances in the Haive system.
-The registry allows engines to be registered, retrieved, and managed through a singleton
-pattern, ensuring consistent access across the application.
+This module provides a centralized registry for all engine instances in the Haive
+system. The registry allows engines to be registered, retrieved, and managed through a
+singleton pattern, ensuring consistent access across the application.
 """
 
 import logging
@@ -53,8 +53,8 @@ class EngineRegistry(AbstractRegistry[Engine]):
     def __init__(self) -> None:
         """Initialize the registry with empty dictionaries.
 
-        Creates an empty registry structure with dictionaries for each engine type
-        and an empty ID mapping dictionary.
+        Creates an empty registry structure with dictionaries for each engine type and
+        an empty ID mapping dictionary.
         """
         self.engines = {engine_type: {} for engine_type in EngineType}
         self.engine_ids = {}  # id -> engine mapping

@@ -1,12 +1,12 @@
 """Core engine abstractions for the Haive framework.
 
-This module provides the base classes and abstractions for all engines in the Haive framework.
-Engines are the core components that provide a consistent interface for creating and using
-AI components like LLMs, retrievers, vector stores, etc.
+This module provides the base classes and abstractions for all engines in the Haive
+framework. Engines are the core components that provide a consistent interface for
+creating and using AI components like LLMs, retrievers, vector stores, etc.
 
-The Engine class is a configuration/factory class that produces runnable objects,
-not an invokable itself. It standardizes how engines define their input and output
-field requirements.
+The Engine class is a configuration/factory class that produces runnable objects, not an
+invokable itself. It standardizes how engines define their input and output field
+requirements.
 """
 
 from __future__ import annotations
@@ -83,8 +83,8 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
 
     @abstractmethod
     def get_input_fields(self) -> dict[str, tuple[type, Any]]:
-        """Return input field definitions as field_name -> (type, default) pairs.
-        Must be implemented by all engine subclasses.
+        """Return input field definitions as field_name -> (type, default) pairs. Must be
+        implemented by all engine subclasses.
 
         This can represent BaseModel fields, dictionary keys, or primitive inputs.
 
@@ -94,8 +94,8 @@ class Engine(ABC, BaseModel, Generic[TIn, TOut]):
 
     @abstractmethod
     def get_output_fields(self) -> dict[str, tuple[type, Any]]:
-        """Return output field definitions as field_name -> (type, default) pairs.
-        Must be implemented by all engine subclasses.
+        """Return output field definitions as field_name -> (type, default) pairs. Must be
+        implemented by all engine subclasses.
 
         This can represent BaseModel fields, dictionary keys, or primitive outputs.
 
