@@ -82,17 +82,12 @@ class VectorStoreRetrieverConfig(RetrieverConfig):
             retriever = self._create_retriever(vector_store)
 
             logger.info(
-                f"Created VectorStoreRetriever '{
-                    self.name}' with search_type={
-                    self.search_type}"
+                f"Created VectorStoreRetriever '{self.name}' with search_type={self.search_type}"
             )
             return retriever
 
         except Exception as e:
-            logger.exception(
-                f"Error instantiating VectorStoreRetriever: {
-                    e!s}"
-            )
+            logger.exception(f"Error instantiating VectorStoreRetriever: {e!s}")
             raise ValueError(f"Failed to create VectorStoreRetriever: {e!s}")
 
     def _get_embeddings(self):
