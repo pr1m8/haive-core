@@ -417,7 +417,7 @@ class Test_PostgresShallowCheckpointer:
         counter = state.get("_counter", None)
         assert counter == 3, f"Expected counter 3, got {counter}"
 
-        logger.info("✅ Shallow mode correctly retained only the latest checkpoint"t")"
+        logger.info("✅ Shallow mode correctly retained only the latest checkpoint")
 
 
 class Test_PostgresAsyncCheckpointer:
@@ -562,7 +562,7 @@ class Test_CheckpointerSetup:
             # Test it works by registering a thread
             register_thread_if_needed(checkpointer, test_thread_id, {"test": True})
 
-            logger.info("✅ Set up PostgreSQL checkpointer using utility function"n")
+            logger.info("✅ Set up PostgreSQL checkpointer using utility function")
 
         except ImportError:
             pytest.skip("PostgreSQL dependencies not available")

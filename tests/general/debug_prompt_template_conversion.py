@@ -75,7 +75,7 @@ def trace_model_dump_calls():
 
     def debug_model_dump(self, *args, **kwargs):
         if hasattr(self, "prompt_template") or "prompt_template" in str(type(self)):
-            logger.error("🔍 MODEL_DUMP CALL on object with prompt_template!"e!")
+            logger.error("🔍 MODEL_DUMP CALL on object with prompt_template!")
             logger.error(f"   Object type: {type(self)}")
             logger.error(f"   Args: {args}")
             logger.error(f"   Kwargs: {kwargs}")
