@@ -82,7 +82,8 @@ class MCPToolWrapper(BaseTool):
     """Wrapper to convert MCP tools to Haive-compatible tools.
 
     This wrapper allows MCP tools to be used seamlessly within the Haive
-    framework by adapting their interface to match BaseTool expectations.
+    framework by adapting their interface to match BaseTool
+    expectations.
     """
 
     name: str
@@ -169,8 +170,8 @@ class MCPMixin(BaseModel):
         Sets up the MCP manager, discovers tools, loads resources, and
         configures prompts based on the MCP configuration.
 
-        This method should be called after creating the configuration but
-        before using any MCP features.
+        This method should be called after creating the configuration
+        but before using any MCP features.
         """
         if not self.mcp_config or not getattr(self.mcp_config, "enabled", False):
             logger.info("MCP not enabled or configured")

@@ -96,7 +96,8 @@ class CreatedTimestampMixin(BaseModel):
 
 
 class AccessTimestampsMixin(CreatedTimestampMixin):
-    """Mixin to add a frozen `last_accessed_at` timestamp, `touch` logic, and age calculation.
+    """Mixin to add a frozen `last_accessed_at` timestamp, `touch` logic, and age
+    calculation.
 
     Inherits:
         CreatedTimestampMixin: Provides `created_at`.
@@ -113,7 +114,8 @@ class AccessTimestampsMixin(CreatedTimestampMixin):
 
     @model_validator(mode="after")
     def _sync_last_accessed(self) -> Self:
-        """Sync `last_accessed_at` to `created_at` immediately after model creation.
+        """Sync `last_accessed_at` to `created_at` immediately after model
+        creation.
 
         Returns:
             AccessTimestampsMixin: The validated model instance.
@@ -137,7 +139,8 @@ class AccessTimestampsMixin(CreatedTimestampMixin):
     def _touch(self) -> None:
         """Update the `last_accessed_at` timestamp to the current time.
 
-        Only to be used by internal logic; bypasses frozen field restriction.
+        Only to be used by internal logic; bypasses frozen field
+        restriction.
         """
         object.__setattr__(self, "last_accessed_at", utcnow())
 

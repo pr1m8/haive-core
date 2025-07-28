@@ -1,7 +1,7 @@
 """Recompilation mixin for agents and engines that need dynamic recompilation.
 
-This mixin provides standardized recompilation tracking and management
-for components that can be dynamically updated (agents, engines, graphs).
+This mixin provides standardized recompilation tracking and management for components
+that can be dynamically updated (agents, engines, graphs).
 """
 
 import logging
@@ -208,8 +208,8 @@ class RecompileMixin:
     def _trigger_auto_recompile(self) -> None:
         """Trigger automatic recompilation if supported.
 
-        This method should be overridden by subclasses to implement
-        actual recompilation logic.
+        This method should be overridden by subclasses to implement actual recompilation
+        logic.
         """
         logger.info(
             "Auto-recompile triggered - override _trigger_auto_recompile() to implement"

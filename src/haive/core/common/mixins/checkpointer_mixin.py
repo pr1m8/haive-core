@@ -80,8 +80,8 @@ class CheckpointerMixin(BaseModel):
     def _ensure_checkpointer_initialized(self) -> None:
         """Initialize checkpointers if not already done.
 
-        This method creates the appropriate checkpointer instances
-        based on the persistence configuration and checkpoint mode.
+        This method creates the appropriate checkpointer instances based on the
+        persistence configuration and checkpoint mode.
         """
         if self._checkpointer_initialized:
             return
@@ -106,8 +106,8 @@ class CheckpointerMixin(BaseModel):
     async def _ensure_async_checkpointer_initialized(self) -> None:
         """Initialize async checkpointer if needed.
 
-        This method creates the asynchronous checkpointer instance
-        if async mode is enabled and setup is pending.
+        This method creates the asynchronous checkpointer instance if async mode is
+        enabled and setup is pending.
         """
         if not self._async_setup_pending:
             return

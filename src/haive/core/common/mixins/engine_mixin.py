@@ -276,7 +276,7 @@ class EngineStateMixin(BaseModel):
         """Update engine attributes dynamically.
 
         This method allows updating specific attributes of an engine
-        by providing them as keyword arguments.
+        by providing them as key arguments.
 
         Args:
             name: Engine name.

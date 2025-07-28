@@ -24,7 +24,7 @@ Usage:
                 raise
 
     # Create with debug enabled
-    processor = MyProcessor(name="TestProcessor", debug=True)
+    processor = MyProcessor(name="TestProcessof", debug=True)
     processor.process({"test": "data"})
     ```
 """
@@ -96,7 +96,7 @@ class RichLoggerMixin(BaseModel):
         Args:
             msg: The message to log.
             *args: Additional positional arguments for the logger.
-            **kwargs: Additional keyword arguments for the logger.
+            **kwargs: Additional key arguments for the logger.
         """
         if self.debug:
             self.logger.debug(
@@ -109,7 +109,7 @@ class RichLoggerMixin(BaseModel):
         Args:
             msg: The message to log.
             *args: Additional positional arguments for the logger.
-            **kwargs: Additional keyword arguments for the logger.
+            **kwargs: Additional key arguments for the logger.
         """
         self.logger.info(msg, *args, **kwargs)
 
@@ -119,7 +119,7 @@ class RichLoggerMixin(BaseModel):
         Args:
             msg: The message to log.
             *args: Additional positional arguments for the logger.
-            **kwargs: Additional keyword arguments for the logger.
+            **kwargs: Additional key arguments for the logger.
         """
         self.logger.warning(f"[yellow]{msg}[/]", *args, **kwargs)
 
@@ -129,6 +129,6 @@ class RichLoggerMixin(BaseModel):
         Args:
             msg: The message to log.
             *args: Additional positional arguments for the logger.
-            **kwargs: Additional keyword arguments for the logger.
+            **kwargs: Additional key arguments for the logger.
         """
         self.logger.error(f"[red]{msg}[/]", *args, **kwargs)

@@ -106,7 +106,7 @@ class MetadataMixin(BaseModel):
     def clear_metadata(self) -> None:
         """Clear all metadata.
 
-        This method removes all metadata entries, resulting in an empty
-        metadata dictionary.
+        This method removes all metadata entries, resulting in an empty metadata
+        dictionary.
         """
         self.metadata.clear()

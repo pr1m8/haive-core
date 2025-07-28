@@ -88,7 +88,7 @@ class ToolList(NamedDict):
 
         Args:
             arg: Optional positional argument (treated as tools if provided).
-            **kwargs: Keyword arguments for initialization.
+            **kwargs: Key arguments for initialization.
 
         Returns:
             New ToolList instance.
@@ -126,13 +126,6 @@ class ToolList(NamedDict):
                         expanded_tools.extend(toolkit_tools)
                     except Exception:
                         pass
-                else:
-                    expanded_tools.append(tool)
-
-            # Now let NamedDict's validator build the dictionary from the
-            # expanded tools
-            return expanded_tools
-
         # If we have a dictionary with 'tools' key
         if (
             isinstance(data, dict)
@@ -176,8 +169,8 @@ class ToolList(NamedDict):
     def model_post_init(self, __context) -> None:
         """Build tool type information after initialization.
 
-        This method runs after model initialization to set up the tool type
-        tracking system and process any toolkit tools.
+        This method runs after model initialization to set up the tool type tracking
+        system and process any toolkit tools.
         """
         # Initialize tool_types
         self.tool_types = {}
@@ -239,9 +232,9 @@ class ToolList(NamedDict):
     def _process_tool_types(self) -> None:
         """Process tools based on their types.
 
-        This method handles special tool types like toolkits by expanding
-        them into their component tools. It preserves model classes as classes
-        rather than instantiating them.
+        This method handles special tool types like toolkits by expanding them into
+        their component tools. It preserves model classes as classes rather than
+        instantiating them.
         """
         # Process toolkit classes and instances by expanding their tools
         for name, tool_type in list(self.tool_types.items()):

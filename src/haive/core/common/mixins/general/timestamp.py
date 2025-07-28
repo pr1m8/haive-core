@@ -58,8 +58,8 @@ class TimestampMixin(BaseModel):
     def update_timestamp(self) -> None:
         """Update the updated_at timestamp to the current time.
 
-        This method should be called whenever the object is modified
-        to track the time of the latest change.
+        This method should be called whenever the object is modified to track the time
+        of the latest change.
         """
         self.updated_at = datetime.now()
 

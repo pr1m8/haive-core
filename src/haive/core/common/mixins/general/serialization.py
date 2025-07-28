@@ -42,12 +42,12 @@ from pydantic import BaseModel
 class SerializationMixin(BaseModel):
     """Mixin for enhanced serialization and deserialization capabilities.
 
-    This mixin provides methods for converting Pydantic models to dictionaries
-    and JSON strings, and for creating models from dictionaries and JSON strings.
-    It handles private fields (starting with underscore) appropriately.
+    This mixin provides methods for converting Pydantic models to dictionaries and JSON
+    strings, and for creating models from dictionaries and JSON strings. It handles
+    private fields (starting with underscore) appropriately.
 
-    When combined with other mixins like IdMixin, TimestampMixin, etc.,
-    it provides a complete solution for model persistence.
+    When combined with other mixins like IdMixin, TimestampMixin, etc., it provides a
+    complete solution for model persistence.
     """
 
     def to_dict(self, exclude_private: bool = True) -> dict[str, Any]:

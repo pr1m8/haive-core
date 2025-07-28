@@ -1,7 +1,7 @@
 """Dynamic Tool Route Mixin with Recompilation Signaling.
 
-This mixin extends ToolRouteMixin to provide callbacks when tool routes change,
-enabling graphs to know when they need recompilation.
+This mixin extends ToolRouteMixin to provide callbacks when tool routes change, enabling
+graphs to know when they need recompilation.
 """
 
 import logging
@@ -18,9 +18,9 @@ logger = logging.getLogger(__name__)
 class DynamicToolRouteMixin(ToolRouteMixin):
     """Extended tool route mixin that signals when routes change.
 
-    This allows graphs and agents to register callbacks that get triggered
-    when tool routes are added, updated, or removed, enabling dynamic
-    recompilation of graphs when needed.
+    This allows graphs and agents to register callbacks that get triggered when tool
+    routes are added, updated, or removed, enabling dynamic recompilation of graphs when
+    needed.
     """
 
     # Private attributes for change tracking

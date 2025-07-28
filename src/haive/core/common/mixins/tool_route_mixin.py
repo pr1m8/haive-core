@@ -24,7 +24,7 @@ Usage:
     )
 
     # Set tool routes
-    config.set_tool_route("search", "retriever", {"source": "web"})
+    config.set_tool_route("search", "retrievef", {"source": "web"})
     config.set_tool_route("math", "function", {"language": "python"})
 
     # Create a tool

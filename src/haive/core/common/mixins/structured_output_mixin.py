@@ -1,7 +1,7 @@
 """Mixin for handling structured output in LLM configurations.
 
-This mixin provides functionality to configure and manage structured output models
-with support for both v1 (parser-based) and v2 (tool-based) approaches.
+This mixin provides functionality to configure and manage structured output models with
+support for both v1 (parser-based) and v2 (tool-based) approaches.
 """
 
 from typing import Any, Literal, cast
