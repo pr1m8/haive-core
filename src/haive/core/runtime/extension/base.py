@@ -41,4 +41,7 @@ class Extension(BaseModel, Generic[T], ExtensionProtocol[T]):
         return target
 
     def apply(self, target: T) -> None:
-        """Apply extension to target. Override in subclasses."""
+        """Apply extension to target.
+
+        Override in subclasses.
+        """

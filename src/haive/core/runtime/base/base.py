@@ -57,7 +57,8 @@ class RuntimeComponent(Runnable[I, O], Generic[EC, I, O]):
     ) -> O:
         """Asynchronously invoke the component.
 
-        By default, this calls invoke in a thread. Override for true async implementation.
+        By default, this calls invoke in a thread. Override for true async
+        implementation.
         """
         import asyncio
 
