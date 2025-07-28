@@ -1,3 +1,26 @@
+"""Schema protocol definitions for type-safe schema interactions.
+
+This module defines protocol interfaces for objects that work with Pydantic schemas and state
+management in the Haive framework. These protocols enable type-safe schema composition and
+validation across different components.
+
+The protocols in this module support:
+- Input/output schema awareness for structured data flow
+- State schema protocols for stateful components
+- Schema validation and composition patterns
+
+Example:
+    Create a schema-aware component::
+
+        class MyProcessor(IOSchemaAware):
+            input_schema = InputModel
+            output_schema = OutputModel
+
+See Also:
+    haive.core.schema.state_schema: Core state schema implementations
+    haive.core.schema.composer: Schema composition utilities
+"""
+
 from typing import Any, Protocol, runtime_checkable
 
 from pydantic import BaseModel

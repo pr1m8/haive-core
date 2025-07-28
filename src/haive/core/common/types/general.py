@@ -1,3 +1,27 @@
+"""General type definitions and type aliases for the Haive framework.
+
+This module provides commonly used type definitions, type aliases, and type variables
+that are shared across the Haive framework. It centralizes type definitions to ensure
+consistency and type safety across all components.
+
+The types in this module include:
+- Generic type variables for flexible typing
+- Tool-related type aliases for LangChain integration
+- State and configuration type aliases
+- Protocol-based type definitions
+
+Example:
+    Use tool-like types::
+
+        def process_tools(tools: ToolLike) -> list[BaseTool]:
+            # Handle various tool input formats
+            pass
+
+See Also:
+    haive.core.common.types.protocols: Protocol definitions
+    langchain_core.tools: LangChain tool types
+"""
+
 from collections.abc import Callable, Sequence
 from typing import Any, TypeVar, Union
 

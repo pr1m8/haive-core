@@ -1,3 +1,28 @@
+"""General protocol definitions for common object behaviors.
+
+This module defines fundamental protocol interfaces for common behaviors and attributes
+used throughout the Haive framework. These protocols enable duck typing and interface
+composition for basic object capabilities.
+
+The protocols in this module support:
+- Named objects with consistent name attributes
+- Identifiable objects with ID management
+- Configurable objects with configuration awareness
+- Runnable objects with execution interfaces
+
+Example:
+    Create a named, configurable component::
+
+        class MyComponent(Nameable, Configurable):
+            def __init__(self, name: str, config: dict):
+                self.name = name
+                self.config = config
+
+See Also:
+    haive.core.common.types.protocols.engine_protocols: Engine-specific protocols
+    haive.core.common.types.protocols.schema_protocols: Schema-specific protocols
+"""
+
 # Using TYPE_CHECKING to avoid circular imports
 from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 

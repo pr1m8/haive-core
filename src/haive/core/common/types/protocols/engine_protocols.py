@@ -1,3 +1,25 @@
+"""Engine protocol definitions for type-safe engine interactions.
+
+This module defines protocol interfaces for objects that work with engines in the Haive framework.
+These protocols enable type-safe composition and dependency injection for engine-aware components.
+
+The protocols in this module support:
+- Engine-aware objects that maintain an engine reference
+- Tool-aware objects that can work with LangChain tools
+- Agent protocols for structured interactions
+
+Example:
+    Create an engine-aware component::
+
+        class MyComponent(EngineAware):
+            def __init__(self, engine: Engine):
+                self.engine = engine
+
+See Also:
+    haive.core.engine.base: Core engine implementations
+    haive.core.common.types.protocols.general_protocols: General protocol definitions
+"""
+
 from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING, Protocol
 
