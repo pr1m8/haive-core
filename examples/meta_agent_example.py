@@ -12,9 +12,6 @@ The example shows:
 5. Advanced patterns like agent swapping and conditional execution
 """
 
-"""
-"""
-
 import contextlib
 from typing import Any
 
@@ -184,7 +181,7 @@ def create_advanced_meta_agent_example():
 
     # Create meta state with multiple potential agents
     meta_state = MetaStateSchema(
-        agent=agents["researchef"],  # Start with researcher
+        agent=agents["researcher"],  # Start with researcher
         agent_input={
             "messages": [HumanMessage(content="Research the topic of AI agents")]
         },
