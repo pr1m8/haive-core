@@ -307,7 +307,7 @@ def test_database_system():
     if detection_success >= 7:
         passed_tests += 1
     else:
-        pass")
+        pass
 
     if registration_success:
         passed_tests += 1

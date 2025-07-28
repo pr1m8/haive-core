@@ -102,7 +102,7 @@ def trace_model_dump_calls():
 
                 # Breakpoint for dict conversion
                 if isinstance(result["prompt_template"], dict):
-                    logger.error("🚨 PROMPT TEMPLATE CONVERTED TO DICT!"T!")
+                    logger.error("🚨 PROMPT TEMPLATE CONVERTED TO DICT!")
                     pdb.set_trace()
 
             return result

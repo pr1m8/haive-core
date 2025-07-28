@@ -234,7 +234,7 @@ def check_database_health():
         error_count = error_stats["error_count"]
 
         if error_count > 0:
-            passse")"
+            pass
         else:
             pass
 
@@ -313,7 +313,7 @@ async def main():
     )
 
     if not all(results.values()):
-        passs")
+        pass
 
 
 if __name__ == "__main__":
