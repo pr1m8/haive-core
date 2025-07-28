@@ -413,8 +413,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                 if hasattr(field_value, "tools") and hasattr(self, "tools"):
                     engine_tools = getattr(field_value, "tools", [])
                     logger.debug(
-                        f"Found engine '{engine_name}' with {
-                            len(engine_tools)} tools"
+                        f"Found engine '{engine_name}' with {len(engine_tools)} tools"
                     )
 
                     # Initialize tools list if None
@@ -455,9 +454,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
         if found_engines:
             logger.debug(
-                f"Found engines in {
-                    self.__class__.__name__}: {
-                    ', '.join(found_engines)}"
+                f"Found engines in {self.__class__.__name__}: {', '.join(found_engines)}"
             )
 
         return self
@@ -589,11 +586,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                     first_engine = next(iter(self.engines.values()))
                     self.engine = first_engine
                     logger.debug(
-                        f"Set first available engine as main: {
-                            getattr(
-                                first_engine,
-                                'name',
-                                'unnamed')}"
+                        f"Set first available engine as main: {getattr(first_engine, 'name', 'unnamed')}"
                     )
 
     def dict(self, **kwargs) -> builtins.dict[str, Any]:
@@ -691,81 +684,6 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         # Create instance with Pydantic v2 method
         return cls.model_validate(full_data)
 
-    def get_engine(self, name: str) -> Any | None:
-        """Get an engine by name from any engine fields.
-
-        Args:
-            name: Name of the engine to retrieve
-
-        Returns:
-            Engine instance if found, None otherwise
-        """
-        logger.debug(f"Looking for engine: {name}")
-
-        # First check engines dict
-        if name in self.engines:
-            logger.debug(f"Found engine '{name}' in engines dict")
-            return self.engines[name]
-
-        # Then try by field name
-        if hasattr(self, name):
-            field_value = getattr(self, name)
-            if hasattr(field_value, "engine_type"):
-                logger.debug(f"Found engine '{name}' by field name")
-                return field_value
-
-        # Then try by engine name attribute
-        for field_name, field_value in self.__dict__.items():
-            if field_value is None:
-                continue
-
-            if hasattr(field_value, "engine_type") and field_name not in [
-                "engine",
-                "engines",
-            ]:
-                engine_name = getattr(field_value, "name", "")
-                if engine_name == name:
-                    logger.debug(f"Found engine '{name}' in field '{field_name}'")
-                    return field_value
-
-        logger.debug(f"Engine '{name}' not found")
-        return None
-
-    def get_engines(self) -> builtins.dict[str, Any]:
-        """Get all engines in this state.
-
-        Returns:
-            Dictionary mapping engine names to engine instances
-        """
-        engines = {}
-
-        # First add engines from the engines dict
-        engines.update(self.engines)
-
-        # Then find engine fields (for backward compatibility)
-        for field_name, field_value in self.__dict__.items():
-            if field_value is None:
-                continue
-
-            if hasattr(field_value, "engine_type") and field_name not in [
-                "engine",
-                "engines",
-            ]:
-                engine_name = getattr(field_value, "name", field_name)
-                engines[engine_name] = field_value
-
-        return engines
-
-    def has_engine(self, name: str) -> bool:
-        """Check if an engine exists in this state.
-
-        Args:
-            name: Name of the engine to check
-
-        Returns:
-            True if engine exists, False otherwise
-        """
-        return self.get_engine(name) is not None
 
     @classmethod
     def get_class_engine(cls, name: str) -> Any | None:
@@ -910,10 +828,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         """
         # Log extraction request
         key_str = str(keys) if keys else "all fields"
-        logger.debug(
-            f"Extracting values ({key_str}) from {
-                type(state).__name__}"
-        )
+        logger.debug(f"Extracting values ({key_str}) from {type(state).__name__}")
 
         # If state is already a StateSchema instance, use its get_state_values
         # method
@@ -966,6 +881,82 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         if hasattr(self, key):
             return getattr(self, key)
         return default
+
+    # ========================================================================
+    # DICT COMPATIBILITY METHODS
+    # ========================================================================
+
+    def __getitem__(self, key: str) -> Any:
+        """Enable dict-style access: state["key"].
+
+        This makes StateSchema objects compatible with LangGraph nodes that
+        expect dict access patterns.
+
+        Args:
+            key: Field name to access
+
+        Returns:
+            Field value
+
+        Raises:
+            KeyError: If field doesn't exist
+
+        Example:
+            >>> state = MyState(messages=[...])
+            >>> messages = state["messages"]  # Same as state.messages
+        """
+        if hasattr(self, key):
+            return getattr(self, key)
+        raise KeyError(f"'{key}' not found in {self.__class__.__name__}")
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        """Enable dict-style assignment: state["key"] = value.
+
+        Args:
+            key: Field name to set
+            value: Value to assign
+
+        Raises:
+            KeyError: If field is not a valid model field
+
+        Example:
+            >>> state = MyState()
+            >>> state["messages"] = [HumanMessage(...)]
+        """
+        if key in self.model_fields:
+            setattr(self, key, value)
+        else:
+            raise KeyError(
+                f"Cannot set '{key}' - not a valid field in {self.__class__.__name__}"
+            )
+
+    def __contains__(self, key: str) -> bool:
+        """Enable 'in' operator: "key" in state.
+
+        Args:
+            key: Field name to check
+
+        Returns:
+            True if field exists
+
+        Example:
+            >>> state = MyState(messages=[...])
+            >>> "messages" in state  # True
+            >>> "nonexistent" in state  # False
+        """
+        return key in self.model_fields
+
+    def keys(self):
+        """Return an iterator over field names (dict-like interface)."""
+        return self.model_fields.keys()
+
+    def values(self):
+        """Return an iterator over field values (dict-like interface)."""
+        return (getattr(self, key) for key in self.model_fields.keys())
+
+    def items(self):
+        """Return an iterator over (field_name, field_value) pairs (dict-like interface)."""
+        return ((key, getattr(self, key)) for key in self.model_fields.keys())
 
     def update(self, other: builtins.dict[str, Any] | StateSchema) -> StateSchema:
         """Update the state with values from another state or dictionary.
@@ -1357,8 +1348,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                     and field_name in base_class.model_fields
                 ):
                     logger.debug(
-                        f"Skipping field '{field_name}' - already defined in {
-                            base_class.__name__}"
+                        f"Skipping field '{field_name}' - already defined in {base_class.__name__}"
                     )
                     continue
 
@@ -1469,8 +1459,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                     and field_name in base_class.model_fields
                 ):
                     logger.debug(
-                        f"Skipping field '{field_name}' - already defined in {
-                            base_class.__name__}"
+                        f"Skipping field '{field_name}' - already defined in {base_class.__name__}"
                     )
                     continue
 
@@ -1653,10 +1642,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
             return cls.from_dict(snapshot)
 
         # Last resort - empty state
-        logger.warning(
-            f"Couldn't extract state from snapshot of type {
-                type(snapshot)}"
-        )
+        logger.warning(f"Couldn't extract state from snapshot of type {type(snapshot)}")
         return cls()
 
     # Engine integration methods
@@ -1773,15 +1759,11 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         # Apply update with or without reducers
         if apply_reducers:
             logger.debug(
-                f"Applying reducers to engine output (fields: {
-                    list(
-                        filtered_output.keys())})"
+                f"Applying reducers to engine output (fields: {list(filtered_output.keys())})"
             )
             return self.apply_reducers(filtered_output)
         logger.debug(
-            f"Updating with engine output without reducers (fields: {
-                list(
-                    filtered_output.keys())})"
+            f"Updating with engine output without reducers (fields: {list(filtered_output.keys())})"
         )
         return self.update(filtered_output)
 
@@ -1902,8 +1884,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
                 items = list(value.items())[:3]
                 items_str = ", ".join(f"{k}: {str(v)[:20]}" for k, v in items)
                 return f"[cyan]{{{items_str}, ... ({len(value)} items)}}[/cyan]"
-            return f"[cyan]{{{', '.join(f'{k}: {str(v)[:50]}' for k,
-                                        v in value.items())}}}[/cyan]"
+            return f"[cyan]{{{', '.join(f'{k}: {str(v)[:50]}' for k, v in value.items())}}}[/cyan]"
         if hasattr(value, "__class__"):
             class_name = value.__class__.__name__
             if hasattr(value, "model_dump"):
@@ -1957,8 +1938,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
         # Create main tree
         tree = Tree(
-            f"[bold blue]class {schema_name}([/bold blue][italic]{
-                cls.__base__.__name__}[/italic][bold blue])[/bold blue]:"
+            f"[bold blue]class {schema_name}([/bold blue][italic]{cls.__base__.__name__}[/italic][bold blue])[/bold blue]:"
         )
 
         # Add fields
@@ -1981,10 +1961,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
             else:
                 default = field_info.default
                 default_str = (
-                    "[red]required[/red]"
-                    if default is ...
-                    else f"default={
-                        default!r}"
+                    "[red]required[/red]" if default is ... else f"default={default!r}"
                 )
 
             # Add description if available
@@ -2073,10 +2050,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
             else:
                 default = field_info.default
                 default_str = (
-                    "Field(..."
-                    if default is ...
-                    else f"Field(default={
-                        default!r}"
+                    "Field(..." if default is ... else f"Field(default={default!r}"
                 )
 
             # Add description if available
@@ -2097,30 +2071,22 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
         if cls.__serializable_reducers__:
             lines.append(
-                f"    __serializable_reducers__ = {
-                    cls.__serializable_reducers__}"
+                f"    __serializable_reducers__ = {cls.__serializable_reducers__}"
             )
 
         if cls.__engine_io_mappings__:
-            lines.append(
-                f"    __engine_io_mappings__ = {
-                    cls.__engine_io_mappings__}"
-            )
+            lines.append(f"    __engine_io_mappings__ = {cls.__engine_io_mappings__}")
 
         # Add structured models if available
         if hasattr(cls, "__structured_models__") and cls.__structured_models__:
-            lines.append(
-                f"    __structured_models__ = {
-                    cls.__structured_models__}"
-            )
+            lines.append(f"    __structured_models__ = {cls.__structured_models__}")
 
         if (
             hasattr(cls, "__structured_model_fields__")
             and cls.__structured_model_fields__
         ):
             lines.append(
-                f"    __structured_model_fields__ = {
-                    cls.__structured_model_fields__}"
+                f"    __structured_model_fields__ = {cls.__structured_model_fields__}"
             )
 
         return "\n".join(lines)
@@ -2179,9 +2145,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         # Use logger to display
         logger.info(
             str(syntax),
-            title=title
-            or f"{
-                cls.__name__} Code",
+            title=title or f"{cls.__name__} Code",
             style="yellow",
         )
 
@@ -2285,10 +2249,7 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
         else:
             default = field_info.default
             default_str = (
-                "[red]required[/red]"
-                if default is ...
-                else f"default={
-                    default!r}"
+                "[red]required[/red]" if default is ... else f"default={default!r}"
             )
 
         return f"[yellow]{type_str}[/yellow] ({default_str})"
