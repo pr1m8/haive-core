@@ -1,4 +1,4 @@
-"""from typing import Any
+"""From typing import Any
 Typed State Schema with Generic Engine Support.
 
 This module provides enhanced state schema classes that use generics for proper

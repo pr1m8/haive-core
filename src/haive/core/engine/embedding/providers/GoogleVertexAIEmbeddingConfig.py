@@ -54,7 +54,6 @@ class GoogleVertexAIEmbeddingConfig(BaseEmbeddingConfig):
         location: Google Cloud location/region
         task_type: Task type for embeddings
         credentials_path: Path to service account credentials
-
     """
 
     embedding_type: EmbeddingType = Field(
@@ -155,7 +154,6 @@ class GoogleVertexAIEmbeddingConfig(BaseEmbeddingConfig):
         Raises:
             ImportError: If langchain-google-vertexai is not installed
             ValueError: If configuration is invalid
-
         """
         try:
             from langchain_google_vertexai import VertexAIEmbeddings

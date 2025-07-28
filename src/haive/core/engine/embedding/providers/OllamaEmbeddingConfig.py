@@ -50,7 +50,6 @@ class OllamaEmbeddingConfig(BaseEmbeddingConfig):
         base_url: Ollama server URL
         headers: Optional HTTP headers for requests
         model_options: Optional model-specific options
-
     """
 
     embedding_type: EmbeddingType = Field(
@@ -123,7 +122,6 @@ class OllamaEmbeddingConfig(BaseEmbeddingConfig):
         Raises:
             ImportError: If langchain-ollama is not installed
             ValueError: If configuration is invalid
-
         """
         try:
             from langchain_ollama import OllamaEmbeddings
@@ -225,7 +223,6 @@ class OllamaEmbeddingConfig(BaseEmbeddingConfig):
 
         Returns:
             True if connection is successful, False otherwise
-
         """
         try:
             import requests
@@ -240,7 +237,6 @@ class OllamaEmbeddingConfig(BaseEmbeddingConfig):
 
         Returns:
             List of model names available on the server
-
         """
         try:
             import requests

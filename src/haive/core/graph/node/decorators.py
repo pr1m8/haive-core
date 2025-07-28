@@ -1,5 +1,5 @@
 # src/haive/core/graph/node/decorators.py
-"""from typing import Any, Dict
+"""From typing import Any, Dict
 Decorators for creating and registering nodes.
 
 This module provides decorators that make it easy to create various types

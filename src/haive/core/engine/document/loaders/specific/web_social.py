@@ -330,7 +330,7 @@ class FacebookChatSource(WebSource):
 
 
 class IFixitSource(WebSource):
-    """iFixit repair guides and manuals loader."""
+    """IFixit repair guides and manuals loader."""
 
     def __init__(
         self,

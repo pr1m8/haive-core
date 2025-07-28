@@ -1,4 +1,4 @@
-"""from typing import Any
+"""From typing import Any
 Examples demonstrating the use of the enhanced MessagesState system.
 
 This file contains complete examples of common usage patterns, demonstrating

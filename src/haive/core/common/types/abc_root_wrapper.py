@@ -1,4 +1,4 @@
-"""from typing import Any
+"""From typing import Any
 This module provides an abstract base class for root-wrapped models that serialize with a named key.
 
 This is useful for models that are used as the root of a response, but need to be serialized with a named key.

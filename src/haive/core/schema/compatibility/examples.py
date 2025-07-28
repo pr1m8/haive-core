@@ -1,4 +1,4 @@
-"""from typing import Any
+"""From typing import Any
 Examples demonstrating the schema compatibility module.
 
 This file shows various use cases and patterns for using the

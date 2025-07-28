@@ -1,4 +1,4 @@
-"""from typing import Any, Dict
+"""From typing import Any, Dict
 Stateful Node Integration Example - How it works with SimpleAgent and LLMState.
 
 This example shows how the stateful node architecture integrates with the existing

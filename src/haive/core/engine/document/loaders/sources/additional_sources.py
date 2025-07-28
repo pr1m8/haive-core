@@ -48,7 +48,7 @@ from .source_types import (
     priority=8,
 )
 class BiorxivSource(RemoteSource):
-    """bioRxiv preprint source."""
+    """BioRxiv preprint source."""
 
     source_type: str = "biorxiv"
     query: str = Field(..., description="Search query")
@@ -73,7 +73,7 @@ class BiorxivSource(RemoteSource):
     priority=8,
 )
 class MedrxivSource(RemoteSource):
-    """medRxiv medical preprint source."""
+    """MedRxiv medical preprint source."""
 
     source_type: str = "medrxiv"
     query: str = Field(..., description="Search query")

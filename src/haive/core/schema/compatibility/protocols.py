@@ -1,4 +1,4 @@
-"""from typing import Any
+"""From typing import Any
 Protocol definitions for extending the schema compatibility system.
 """
 

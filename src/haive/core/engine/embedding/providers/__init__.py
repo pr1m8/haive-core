@@ -35,7 +35,6 @@ Examples:
 
         # Get a specific provider
         provider_class = BaseEmbeddingConfig.get_config_class("OpenAI")
-
 """
 
 # Lazy import all provider configurations to avoid registration overhead
@@ -158,7 +157,6 @@ def get_provider_info(provider_name: str | None = None) -> dict:
 
             info = get_provider_info("OpenAI")
             print(f"Requires: {info['requires']}")
-
     """
     if provider_name:
         return PROVIDER_INFO.get(provider_name, {})
@@ -176,7 +174,6 @@ def list_providers() -> list[str]:
 
             providers = list_providers()
             print(f"Available providers: {providers}")
-
     """
     return list(PROVIDER_INFO.keys())
 
@@ -201,7 +198,6 @@ def get_providers_by_requirement(
         Get local providers::
 
             providers = get_providers_by_requirement(local_only=True)
-
     """
     providers = []
 
@@ -231,7 +227,6 @@ def get_installation_requirements(provider_name: str) -> list[str]:
 
             reqs = get_installation_requirements("OpenAI")
             print(f"Install: pip install {' '.join(reqs)}")
-
     """
     info = PROVIDER_INFO.get(provider_name, {})
     return info.get("requires", [])

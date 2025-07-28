@@ -1,4 +1,4 @@
-"""xAI Provider Module.
+"""XAI Provider Module.
 
 This module implements the xAI language model provider for the Haive framework,
 supporting Grok models developed by Elon Musk's xAI company.
@@ -42,7 +42,7 @@ from haive.core.models.llm.providers.base import BaseLLMProvider, ProviderImport
 
 
 class XAIProvider(BaseLLMProvider):
-    """xAI language model provider configuration.
+    """XAI language model provider configuration.
 
     This provider supports xAI's Grok family of models known for their
     real-time information access and conversational capabilities.

@@ -54,7 +54,6 @@ class AzureOpenAIEmbeddingConfig(BaseEmbeddingConfig):
         api_version: Azure OpenAI API version
         api_key: Azure OpenAI API key
         dimensions: Output dimensions (optional, model-dependent)
-
     """
 
     embedding_type: EmbeddingType = Field(
@@ -141,7 +140,6 @@ class AzureOpenAIEmbeddingConfig(BaseEmbeddingConfig):
         Raises:
             ImportError: If langchain-openai is not installed
             ValueError: If configuration is invalid
-
         """
         try:
             from langchain_openai import AzureOpenAIEmbeddings

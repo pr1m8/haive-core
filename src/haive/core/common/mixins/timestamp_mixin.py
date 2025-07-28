@@ -1,4 +1,4 @@
-"""mixins.timestamps.
+"""Mixins.timestamps.
 =================
 
 Reusable timestamp mixins for Pydantic models.

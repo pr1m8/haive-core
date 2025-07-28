@@ -49,7 +49,6 @@ class CohereEmbeddingConfig(BaseEmbeddingConfig):
         api_key: Cohere API key (auto-resolved from COHERE_API_KEY env var)
         input_type: Input type for embeddings (search_document, search_query, etc.)
         truncate: How to handle inputs longer than max length
-
     """
 
     embedding_type: EmbeddingType = Field(
@@ -147,7 +146,6 @@ class CohereEmbeddingConfig(BaseEmbeddingConfig):
         Raises:
             ImportError: If langchain-cohere is not installed
             ValueError: If configuration is invalid
-
         """
         try:
             from langchain_cohere import CohereEmbeddings

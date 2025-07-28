@@ -117,7 +117,7 @@ class DevelopmentDataType(str, Enum):
     priority=9,
 )
 class ArxivSource(RemoteSource):
-    """arXiv research paper source."""
+    """ArXiv research paper source."""
 
     source_type: str = "arxiv"
     category: SourceCategory = SourceCategory.SPECIALIZED

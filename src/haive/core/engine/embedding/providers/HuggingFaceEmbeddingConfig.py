@@ -51,7 +51,6 @@ class HuggingFaceEmbeddingConfig(BaseEmbeddingConfig):
         encode_kwargs: Additional arguments for encoding
         use_cache: Whether to use embedding caching
         cache_folder: Directory for caching embeddings
-
     """
 
     embedding_type: EmbeddingType = Field(
@@ -133,7 +132,6 @@ class HuggingFaceEmbeddingConfig(BaseEmbeddingConfig):
         Raises:
             ImportError: If required packages are not installed
             ValueError: If configuration is invalid
-
         """
         try:
             from langchain_huggingface import HuggingFaceEmbeddings

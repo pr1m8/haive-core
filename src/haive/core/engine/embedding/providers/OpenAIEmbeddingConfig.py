@@ -50,7 +50,6 @@ class OpenAIEmbeddingConfig(BaseEmbeddingConfig):
         dimensions: Output dimensions (optional, model-dependent)
         max_retries: Maximum number of retries for API calls
         request_timeout: Timeout for API requests in seconds
-
     """
 
     embedding_type: EmbeddingType = Field(
@@ -120,7 +119,6 @@ class OpenAIEmbeddingConfig(BaseEmbeddingConfig):
         Raises:
             ImportError: If langchain-openai is not installed
             ValueError: If configuration is invalid
-
         """
         try:
             from langchain_openai import OpenAIEmbeddings

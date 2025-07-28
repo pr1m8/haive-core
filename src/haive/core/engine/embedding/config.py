@@ -34,7 +34,6 @@ class EmbeddingConfigFactory:
 
             factory = EmbeddingConfigFactory()
             info = factory.get_provider_info("OpenAI")
-
     """
 
     @staticmethod
@@ -74,7 +73,6 @@ class EmbeddingConfigFactory:
                     model="sentence-transformers/all-MiniLM-L6-v2",
                     use_cache=True
                 )
-
         """
         # Convert string to EmbeddingType if needed
         if isinstance(provider, str):
@@ -115,7 +113,6 @@ class EmbeddingConfigFactory:
 
         Returns:
             List of provider names
-
         """
         registered = BaseEmbeddingConfig.list_registered_types()
         return list(registered.keys())
@@ -129,7 +126,6 @@ class EmbeddingConfigFactory:
 
         Returns:
             Dictionary with provider information
-
         """
         # Convert to string for lookup
         provider_str = str(provider.value if hasattr(provider, "value") else provider)
@@ -189,7 +185,6 @@ class EmbeddingConfigFactory:
 
         Returns:
             True if provider is available, False otherwise
-
         """
         try:
             provider_str = str(
@@ -236,7 +231,6 @@ def create_embedding_config(
                 use_cache=True,
                 cache_folder="./my_cache"
             )
-
     """
     return EmbeddingConfigFactory.create(
         provider=provider, model=model, name=name, **kwargs
@@ -254,7 +248,6 @@ def list_embedding_providers() -> list[str]:
 
             providers = list_embedding_providers()
             print(f"Available: {providers}")
-
     """
     return EmbeddingConfigFactory.list_providers()
 
@@ -274,7 +267,6 @@ def get_embedding_provider_info(provider: str | EmbeddingType) -> dict[str, Any]
             info = get_embedding_provider_info("OpenAI")
             print(f"Default model: {info['default_model']}")
             print(f"Supported models: {info['supported_models']}")
-
     """
     return EmbeddingConfigFactory.get_provider_info(provider)
 
@@ -295,6 +287,5 @@ def validate_embedding_provider(provider: str | EmbeddingType) -> bool:
                 print("OpenAI provider is available")
             else:
                 print("OpenAI provider not found")
-
     """
     return EmbeddingConfigFactory.validate_provider(provider)

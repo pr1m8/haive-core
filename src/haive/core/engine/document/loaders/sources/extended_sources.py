@@ -1008,7 +1008,7 @@ class DiscourseSource(RemoteSource):
     priority=6,
 )
 class phpBBSource(RemoteSource):
-    """phpBB forum source."""
+    """PhpBB forum source."""
 
     source_type: str = "phpbb"
     forum_url: str = Field(..., description="Forum URL")

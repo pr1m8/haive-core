@@ -1,4 +1,4 @@
-"""from typing import Any, Dict
+"""From typing import Any, Dict
 Serialization support for BaseGraph.
 
 This module provides serialization and deserialization utilities for BaseGraph,

@@ -1,0 +1,1439 @@
+[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G[2K[0G
+[1m[30m[107m  ISSUES  [0m
+
+[1m[4msrc/haive/core/common/mixins/structured_output_mixin.py[0m[4m[90m:120:0[0m
+ [1m[90m[49m120:0[22m[39m[49m  [33m[49mlow[39m[49m  Try, Except, Pass detected.  [1m[90m[49mbandit/B110[22m[39m[49m
+
+[1m[4msrc/haive/core/common/mixins/tool_list_mixin.py[0m[4m[90m:127:0[0m
+ [1m[90m[49m127:0[22m[39m[49m  [33m[49mlow[39m[49m  Try, Except, Pass detected.  [1m[90m[49mbandit/B110[22m[39m[49m
+ [1m[90m[49m152:0[22m[39m[49m  [33m[49mlow[39m[49m  Try, Except, Pass detected.  [1m[90m[49mbandit/B110[22m[39m[49m
+ [1m[90m[49m265:0[22m[39m[49m  [33m[49mlow[39m[49m  Try, Except, Pass detected.  [1m[90m[49mbandit/B110[22m[39m[49m
+ [1m[90m[49m293:0[22m[39m[49m  [33m[49mlow[39m[49m  Try, Except, Pass detected.  [1m[90m[49mbandit/B110[22m[39m[49m
+ [1m[90m[49m324:0[22m[39m[49m  [33m[49mlow[39m[49m  Try, Except, Pass detected.  [1m[90m[49mbandit/B110[22m[39m[49m
+
+[1m[4msrc/haive/core/common/types/protocols/__init__.py[0m[4m[90m:18:28[0m
+ [1m[90m[49m18:28[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.common.types.protocols.schema_protocols.CompleteSchemaAware` imported but unused;    [1m[90m[49mruff/F401[22m[39m[49m
+              consider removing, adding to `__all__`, or using a redundant alias                                        
+ [1m[90m[49m21:24[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.common.types.protocols.schema_protocols.FullSchemaAware` imported but unused;        [1m[90m[49mruff/F401[22m[39m[49m
+              consider removing, adding to `__all__`, or using a redundant alias                                        
+ [1m[90m[49m24:21[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.common.types.protocols.schema_protocols.IOFieldAware` imported but unused; consider  [1m[90m[49mruff/F401[22m[39m[49m
+              removing, adding to `__all__`, or using a redundant alias                                                 
+ [1m[90m[49m27:22[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.common.types.protocols.schema_protocols.IOSchemaAware` imported but unused;          [1m[90m[49mruff/F401[22m[39m[49m
+              consider removing, adding to `__all__`, or using a redundant alias                                        
+ [1m[90m[49m30:25[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.common.types.protocols.schema_protocols.StateSchemaAware` imported but unused;       [1m[90m[49mruff/F401[22m[39m[49m
+              consider removing, adding to `__all__`, or using a redundant alias                                        
+
+[1m[4msrc/haive/core/engine/__init__.py[0m[4m[90m:205:13[0m
+ [1m[90m[49m205:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.agent.AGENT_REGISTRY` imported but unused                         [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m206:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.agent.Agent` imported but unused                                  [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m207:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.agent.AgentConfig` imported but unused                            [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m208:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.agent.AgentProtocol` imported but unused                          [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m209:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.agent.PatternConfig` imported but unused                          [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m210:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.agent.PatternManager` imported but unused                         [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m211:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.agent.PersistentAgentProtocol` imported but unused                [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m212:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.agent.StreamingAgentProtocol` imported but unused                 [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m221:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.AutoLoaderFactory` imported but unused                   [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m222:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.BaseDocumentLoader` imported but unused                  [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m223:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.ChunkingProcessor` imported but unused                   [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m224:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.ChunkingStrategy` imported but unused                    [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m225:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.CloudProvider` imported but unused                       [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m226:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.ContentNormalizer` imported but unused                   [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m227:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.CredentialManager` imported but unused                   [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m228:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.DatabaseType` imported but unused                        [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m229:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.DocumentChunk` imported but unused                       [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m230:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.DocumentEngine` imported but unused                      [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m231:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.DocumentEngineConfig` imported but unused                [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m232:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.DocumentFormat` imported but unused                      [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m233:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.DocumentInput` imported but unused                       [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m234:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.DocumentLoaderRegistry` imported but unused              [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m235:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.DocumentOutput` imported but unused                      [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m236:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.DocumentProcessor` imported but unused                   [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m237:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.DocumentSourceType` imported but unused                  [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m238:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.EnhancedSource` imported but unused                      [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m239:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.FileCategory` imported but unused                        [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m240:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.FormatDetector` imported but unused                      [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m241:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.LoaderCapability` imported but unused                    [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m242:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.LoaderPreference` imported but unused                    [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m243:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.LoaderPriority` imported but unused                      [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m244:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.LoaderStrategy` imported but unused                      [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m245:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.MetadataExtractor` imported but unused                   [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m246:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.MongoDBSource` imported but unused                       [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m247:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.PathAnalysisResult` imported but unused                  [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m248:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.PathType` imported but unused                            [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m249:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.PostgreSQLSource` imported but unused                    [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m250:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.ProcessedDocument` imported but unused                   [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m251:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.ProcessingStrategy` imported but unused                  [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m252:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.SimpleDocumentLoader` imported but unused                [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m253:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.TextDocumentLoader` imported but unused                  [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m254:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.analyze_path_comprehensive` imported but unused          [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m255:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.analyze_source` imported but unused                      [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m256:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.create_directory_document_engine` imported but unused    [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m257:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.create_document_engine` imported but unused              [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m258:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.create_document_loader` imported but unused              [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m259:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.create_file_document_engine` imported but unused         [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m260:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.create_loader` imported but unused                       [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m261:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.create_web_document_engine` imported but unused          [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m262:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.get_default_registry` imported but unused                [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m263:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.get_loader` imported but unused                          [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m264:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.load_documents` imported but unused                      [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m265:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.document.register_loader` imported but unused                     [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m274:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.retriever.BaseRetrieverConfig` imported but unused                [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m275:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.retriever.RetrieverType` imported but unused                      [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m276:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.retriever.VectorStoreRetrieverConfig` imported but unused         [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m284:55[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.prompt_template.PromptTemplateEngine` imported but unused         [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m292:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.embedding.BaseEmbeddingConfig` imported but unused                [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m293:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.embedding.EmbeddingType` imported but unused                      [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m294:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.embedding.create_embedding_config` imported but unused            [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m303:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.vectorstore.VectorStoreConfig` imported but unused                [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m304:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.vectorstore.create_retriever` imported but unused                 [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m305:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.vectorstore.create_retriever_from_documents` imported but unused  [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m306:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.vectorstore.create_vectorstore` imported but unused               [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m307:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.vectorstore.create_vs_config_from_documents` imported but unused  [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m308:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.engine.vectorstore.create_vs_from_documents` imported but unused         [1m[90m[49mruff/F401[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/agent/persistence/manager.py[0m[4m[90m:55:32[0m
+ [1m[90m[49m 55:32[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Dict`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m 55:42[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Any`   [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m 68:58[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Dict`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m 68:68[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Any`   [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m543:41[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Dict`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m543:51[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Any`   [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m828:26[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Any`   [1m[90m[49mruff/F821[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/aug_llm/config.py[0m[4m[90m:3174:9[0m
+ [1m[90m[49m3174:9 [22m[39m[49m  [31m[49mhigh[39m[49m  Redefinition of unused `add_prompt_template` from line 2264  [1m[90m[49mruff/F811[22m[39m[49m
+ [1m[90m[49m3263:9 [22m[39m[49m  [31m[49mhigh[39m[49m  Redefinition of unused `add_tool` from line 2285             [1m[90m[49mruff/F811[22m[39m[49m
+ [1m[90m[49m3284:9 [22m[39m[49m  [31m[49mhigh[39m[49m  Redefinition of unused `remove_tool` from line 2311          [1m[90m[49mruff/F811[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/document/README.md[0m[4m[90m:79:0[0m
+ [1m[90m[49m79:0[22m[39m[49m  [33m[49mlow[39m[49m  Fenced code blocks should have a language specified  [1m[90m[49mmarkdownlint/MD040[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/document/base/schema.py[0m[4m[90m:34:0[0m
+ [1m[90m[49m34:0[22m[39m[49m  [33m[49mlow[39m[49m  Possible hardcoded password: 'token'  [1m[90m[49mbandit/B105[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/document/examples/universal_loader_demo.py[0m[4m[90m:91:0[0m
+ [1m[90m[49m 91:0[22m[39m[49m  [33m[49mlow[39m[49m  Try, Except, Pass detected.  [1m[90m[49mbandit/B110[22m[39m[49m
+ [1m[90m[49m112:0[22m[39m[49m  [33m[49mlow[39m[49m  Try, Except, Pass detected.  [1m[90m[49mbandit/B110[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/document/loaders/auto_loader.py[0m[4m[90m:1011:47[0m
+ [1m[90m[49m1011:47[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Dict`  [1m[90m[49mruff/F821[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/document/loaders/base_new.py[0m[4m[90m:167:13[0m
+ [1m[90m[49m167:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m241:9 [22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/document/loaders/examples/minimal_example.py[0m[4m[90m:26:28[0m
+ [1m[90m[49m 26:28[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Any`                                         [1m[90m[49mruff/F821[22m[39m[49m  
+ [1m[90m[49m 86:21[22m[39m[49m  [31m[49mhigh[39m[49m  Loop control variable `file_path` not used within loop body  [1m[90m[49mruff/B007[22m[39m[49m  
+ [1m[90m[49m131:0 [22m[39m[49m  [33m[49mlow[39m[49m   Try, Except, Pass detected.                                  [1m[90m[49mbandit/B110[22m[39m[49m
+ [1m[90m[49m141:0 [22m[39m[49m  [33m[49mlow[39m[49m   Try, Except, Pass detected.                                  [1m[90m[49mbandit/B110[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/document/loaders/examples.py[0m[4m[90m:45:0[0m
+ [1m[90m[49m 45:0 [22m[39m[49m  [33m[49mlow[39m[49m   Try, Except, Pass detected.                                    [1m[90m[49mbandit/B110[22m[39m[49m
+ [1m[90m[49m 54:0 [22m[39m[49m  [33m[49mlow[39m[49m   Possible hardcoded password: 'your-secret-key'                 [1m[90m[49mbandit/B106[22m[39m[49m
+ [1m[90m[49m 78:0 [22m[39m[49m  [33m[49mlow[39m[49m   Try, Except, Pass detected.                                    [1m[90m[49mbandit/B110[22m[39m[49m
+ [1m[90m[49m140:0 [22m[39m[49m  [33m[49mlow[39m[49m   Try, Except, Pass detected.                                    [1m[90m[49mbandit/B110[22m[39m[49m
+ [1m[90m[49m169:0 [22m[39m[49m  [33m[49mlow[39m[49m   Try, Except, Pass detected.                                    [1m[90m[49mbandit/B110[22m[39m[49m
+ [1m[90m[49m198:0 [22m[39m[49m  [33m[49mlow[39m[49m   Try, Except, Pass detected.                                    [1m[90m[49mbandit/B110[22m[39m[49m
+ [1m[90m[49m259:0 [22m[39m[49m  [33m[49mlow[39m[49m   Try, Except, Pass detected.                                    [1m[90m[49mbandit/B110[22m[39m[49m
+ [1m[90m[49m267:0 [22m[39m[49m  [33m[49mlow[39m[49m   Try, Except, Pass detected.                                    [1m[90m[49mbandit/B110[22m[39m[49m
+ [1m[90m[49m300:0 [22m[39m[49m  [33m[49mlow[39m[49m   Try, Except, Pass detected.                                    [1m[90m[49mbandit/B110[22m[39m[49m
+ [1m[90m[49m359:13[22m[39m[49m  [31m[49mhigh[39m[49m  Loop control variable `source_type` not used within loop body  [1m[90m[49mruff/B007[22m[39m[49m  
+ [1m[90m[49m362:0 [22m[39m[49m  [33m[49mlow[39m[49m   Try, Except, Pass detected.                                    [1m[90m[49mbandit/B110[22m[39m[49m
+ [1m[90m[49m417:0 [22m[39m[49m  [33m[49mlow[39m[49m   Try, Except, Pass detected.                                    [1m[90m[49mbandit/B110[22m[39m[49m
+ [1m[90m[49m480:0 [22m[39m[49m  [33m[49mlow[39m[49m   Try, Except, Pass detected.                                    [1m[90m[49mbandit/B110[22m[39m[49m
+ [1m[90m[49m499:0 [22m[39m[49m  [33m[49mlow[39m[49m   Try, Except, Pass detected.                                    [1m[90m[49mbandit/B110[22m[39m[49m
+ [1m[90m[49m506:13[22m[39m[49m  [31m[49mhigh[39m[49m  Loop control variable `category` not used within loop body     [1m[90m[49mruff/B007[22m[39m[49m  
+ [1m[90m[49m512:0 [22m[39m[49m  [33m[49mlow[39m[49m   Try, Except, Pass detected.                                    [1m[90m[49mbandit/B110[22m[39m[49m
+ [1m[90m[49m526:0 [22m[39m[49m  [33m[49mlow[39m[49m   Try, Except, Pass detected.                                    [1m[90m[49mbandit/B110[22m[39m[49m
+ [1m[90m[49m539:13[22m[39m[49m  [31m[49mhigh[39m[49m  Loop control variable `source_type` not used within loop body  [1m[90m[49mruff/B007[22m[39m[49m  
+ [1m[90m[49m542:0 [22m[39m[49m  [33m[49mlow[39m[49m   Try, Except, Pass detected.                                    [1m[90m[49mbandit/B110[22m[39m[49m
+ [1m[90m[49m594:0 [22m[39m[49m  [33m[49mlow[39m[49m   Try, Except, Pass detected.                                    [1m[90m[49mbandit/B110[22m[39m[49m
+ [1m[90m[49m609:17[22m[39m[49m  [31m[49mhigh[39m[49m  Loop control variable `source` not used within loop body       [1m[90m[49mruff/B007[22m[39m[49m  
+ [1m[90m[49m612:0 [22m[39m[49m  [33m[49mlow[39m[49m   Try, Except, Pass detected.                                    [1m[90m[49mbandit/B110[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/document/loaders/path_analyzer.py[0m[4m[90m:121:16[0m
+ [1m[90m[49m121:16[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceCategory`    [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m130:25[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `LoaderCapability`  [1m[90m[49mruff/F821[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/document/loaders/sources/cloud_storage_sources.py[0m[4m[90m:57:0[0m
+ [1m[90m[49m57:0[22m[39m[49m  [33m[49mlow[39m[49m  Possible hardcoded password: 'api_token'  [1m[90m[49mbandit/B105[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/document/loaders/sources/database_sources.py[0m[4m[90m:73:0[0m
+ [1m[90m[49m73:0[22m[39m[49m  [33m[49mlow[39m[49m  Possible hardcoded password: 'token'  [1m[90m[49mbandit/B105[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/document/loaders/sources/factory.py[0m[4m[90m:87:13[0m
+ [1m[90m[49m 87:13[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m114:45[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m125:32[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m126:24[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m127:24[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m128:28[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m129:25[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m130:36[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m131:35[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m132:23[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m141:12[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m144:59[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m162:16[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m163:17[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m164:16[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m165:17[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m166:16[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m167:16[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m168:17[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m169:17[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m170:16[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m171:15[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m172:16[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m173:16[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m174:15[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m175:18[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m176:17[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m177:16[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m178:17[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m179:16[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m180:16[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m183:41[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/document/loaders/sources/implementation.py[0m[4m[90m:46:0[0m
+ [1m[90m[49m46:0[22m[39m[49m  [33m[49mlow[39m[49m  Possible hardcoded password: 'username_password'  [1m[90m[49mbandit/B105[22m[39m[49m
+ [1m[90m[49m48:0[22m[39m[49m  [33m[49mlow[39m[49m  Possible hardcoded password: 'access_token'       [1m[90m[49mbandit/B105[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/document/loaders/sources/registry.py[0m[4m[90m:296:23[0m
+ [1m[90m[49m296:23[22m[39m[49m  [31m[49mhigh[39m[49m  Ambiguous variable name: `l`  [1m[90m[49mruff/E741[22m[39m[49m
+ [1m[90m[49m304:23[22m[39m[49m  [31m[49mhigh[39m[49m  Ambiguous variable name: `l`  [1m[90m[49mruff/E741[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/document/loaders/sources/remote/__init__.py[0m[4m[90m:1:20[0m
+ [1m[90m[49m 1:20[22m[39m[49m  [31m[49mhigh[39m[49m  `typing.Union` imported but unused              [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m 3:38[22m[39m[49m  [31m[49mhigh[39m[49m  `pydantic.field_validator` imported but unused  [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m17:6 [22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `field_validatorvalidate_url`    [1m[90m[49mruff/F821[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/document/loaders/sources/remote/arxiv_source.py[0m[4m[90m:13:18[0m
+ [1m[90m[49m13:18[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m13:45[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SourceType`  [1m[90m[49mruff/F821[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/document/loaders/sources/remote/base.py[0m[4m[90m:16:6[0m
+ [1m[90m[49m16:6[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `field_validatorvalidate_url`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m35:6[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `field_validatorvalidate_url`  [1m[90m[49mruff/F821[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/document/loaders/sources/remote/hacker_news_source.py[0m[4m[90m:15:6[0m
+ [1m[90m[49m15:6[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `field_validatorvalidate_url`  [1m[90m[49mruff/F821[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/document/loaders/sources/source_types.py[0m[4m[90m:94:0[0m
+ [1m[90m[49m 94:0[22m[39m[49m  [33m[49mlow[39m[49m  Possible hardcoded password: 'oauth_token'        [1m[90m[49mbandit/B105[22m[39m[49m
+ [1m[90m[49m 97:0[22m[39m[49m  [33m[49mlow[39m[49m  Possible hardcoded password: 'username_password'  [1m[90m[49mbandit/B105[22m[39m[49m
+ [1m[90m[49m 98:0[22m[39m[49m  [33m[49mlow[39m[49m  Possible hardcoded password: 'password'           [1m[90m[49mbandit/B105[22m[39m[49m
+ [1m[90m[49m101:0[22m[39m[49m  [33m[49mlow[39m[49m  Possible hardcoded password: 'bearer_token'       [1m[90m[49mbandit/B105[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/document/loaders/specific/database.py[0m[4m[90m:184:0[0m
+ [1m[90m[49m184:0[22m[39m[49m  [35m[49mmedium[39m[49m  Possible SQL injection vector through string-based query construction.  [1m[90m[49mbandit/B608[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/document/loaders/specific/web.py[0m[4m[90m:96:0[0m
+ [1m[90m[49m96:0[22m[39m[49m  [35m[49mmedium[39m[49m  Probable insecure usage of temp file/directory.  [1m[90m[49mbandit/B108[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/document/loaders/utils/__init__.py[0m[4m[90m:7:29[0m
+ [1m[90m[49m 7:29[22m[39m[49m  [31m[49mhigh[39m[49m  `collections.abc.Callable` imported but unused  [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m 7:39[22m[39m[49m  [31m[49mhigh[39m[49m  `collections.abc.Iterator` imported but unused  [1m[90m[49mruff/F401[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/document/path_analysis.py[0m[4m[90m:867:0[0m
+ [1m[90m[49m867:0[22m[39m[49m  [33m[49mlow[39m[49m  Try, Except, Pass detected.  [1m[90m[49mbandit/B110[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/document/splitters/config.py[0m[4m[90m:4:5[0m
+ [1m[90m[49m 4:5[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `CharacterTextSplitter` in `__all__`                  [1m[90m[49mruff/F822[22m[39m[49m  
+ [1m[90m[49m 6:5[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `ElementType` in `__all__`                            [1m[90m[49mruff/F822[22m[39m[49m  
+ [1m[90m[49m 7:5[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `HTMLHeaderTextSplitter` in `__all__`                 [1m[90m[49mruff/F822[22m[39m[49m  
+ [1m[90m[49m 8:5[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `HeaderType` in `__all__`                             [1m[90m[49mruff/F822[22m[39m[49m  
+ [1m[90m[49m 9:5[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `KonlpyTextSplitter` in `__all__`                     [1m[90m[49mruff/F822[22m[39m[49m  
+ [1m[90m[49m10:5[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Language` in `__all__`                               [1m[90m[49mruff/F822[22m[39m[49m  
+ [1m[90m[49m11:5[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `LatexTextSplitter` in `__all__`                      [1m[90m[49mruff/F822[22m[39m[49m  
+ [1m[90m[49m12:5[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `LineType` in `__all__`                               [1m[90m[49mruff/F822[22m[39m[49m  
+ [1m[90m[49m13:5[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `MarkdownHeaderTextSplitter` in `__all__`             [1m[90m[49mruff/F822[22m[39m[49m  
+ [1m[90m[49m14:5[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `MarkdownTextSplitter` in `__all__`                   [1m[90m[49mruff/F822[22m[39m[49m  
+ [1m[90m[49m15:5[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `NLTKTextSplitter` in `__all__`                       [1m[90m[49mruff/F822[22m[39m[49m  
+ [1m[90m[49m16:5[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `PythonCodeTextSplitter` in `__all__`                 [1m[90m[49mruff/F822[22m[39m[49m  
+ [1m[90m[49m17:5[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `RecursiveCharacterTextSplitter` in `__all__`         [1m[90m[49mruff/F822[22m[39m[49m  
+ [1m[90m[49m18:5[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `RecursiveJsonSplitter` in `__all__`                  [1m[90m[49mruff/F822[22m[39m[49m  
+ [1m[90m[49m19:5[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SentenceTransformersTokenTextSplitter` in `__all__`  [1m[90m[49mruff/F822[22m[39m[49m  
+ [1m[90m[49m20:5[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `SpacyTextSplitter` in `__all__`                      [1m[90m[49mruff/F822[22m[39m[49m  
+ [1m[90m[49m21:5[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `TextSplitter` in `__all__`                           [1m[90m[49mruff/F822[22m[39m[49m  
+ [1m[90m[49m22:5[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `TokenTextSplitter` in `__all__`                      [1m[90m[49mruff/F822[22m[39m[49m  
+ [1m[90m[49m23:5[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Tokenizer` in `__all__`                              [1m[90m[49mruff/F822[22m[39m[49m  
+ [1m[90m[49m24:5[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `split_text_on_tokens` in `__all__`                   [1m[90m[49mruff/F822[22m[39m[49m  
+ [1m[90m[49m42:0[22m[39m[49m  [33m[49mlow[39m[49m   Possible hardcoded password: 'token'                                 [1m[90m[49mbandit/B105[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/document/transformers/README.md[0m[4m[90m:457:0[0m
+ [1m[90m[49m457:0[22m[39m[49m  [33m[49mlow[39m[49m  Multiple headings with the same content  [1m[90m[49mmarkdownlint/MD024[22m[39m[49m
+ [1m[90m[49m464:0[22m[39m[49m  [33m[49mlow[39m[49m  Multiple headings with the same content  [1m[90m[49mmarkdownlint/MD024[22m[39m[49m
+ [1m[90m[49m471:0[22m[39m[49m  [33m[49mlow[39m[49m  Multiple headings with the same content  [1m[90m[49mmarkdownlint/MD024[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/document/transformers/engine.py[0m[4m[90m:437:13[0m
+ [1m[90m[49m437:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m441:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/document/types/README.md[0m[4m[90m:434:0[0m
+ [1m[90m[49m434:0[22m[39m[49m  [33m[49mlow[39m[49m  Fenced code blocks should have a language specified  [1m[90m[49mmarkdownlint/MD040[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/document/types/enums.py[0m[4m[90m:403:42[0m
+ [1m[90m[49m403:42[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `PathAnalysisResult`  [1m[90m[49mruff/F821[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/embedding/config.py[0m[4m[90m:92:21[0m
+ [1m[90m[49m 92:21[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from      [1m[90m[49mruff/B904[22m[39m[49m  
+               None` to distinguish them from errors in exception handling                                              
+ [1m[90m[49m110:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from      [1m[90m[49mruff/B904[22m[39m[49m  
+               None` to distinguish them from errors in exception handling                                              
+ [1m[90m[49m178:0 [22m[39m[49m  [33m[49mlow[39m[49m   Try, Except, Pass detected.                                                                   [1m[90m[49mbandit/B110[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/embedding/providers/AzureOpenAIEmbeddingConfig.py[0m[4m[90m:149:13[0m
+ [1m[90m[49m149:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/embedding/providers/CohereEmbeddingConfig.py[0m[4m[90m:155:13[0m
+ [1m[90m[49m155:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/embedding/providers/FakeEmbeddingConfig.py[0m[4m[90m:88:13[0m
+ [1m[90m[49m88:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`   [1m[90m[49mruff/B904[22m[39m[49m
+              to distinguish them from errors in exception handling                                                     
+
+[1m[4msrc/haive/core/engine/embedding/providers/GoogleVertexAIEmbeddingConfig.py[0m[4m[90m:163:13[0m
+ [1m[90m[49m163:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/embedding/providers/HuggingFaceEmbeddingConfig.py[0m[4m[90m:141:13[0m
+ [1m[90m[49m141:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m207:17[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/embedding/providers/OllamaEmbeddingConfig.py[0m[4m[90m:131:13[0m
+ [1m[90m[49m131:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/embedding/providers/OpenAIEmbeddingConfig.py[0m[4m[90m:128:13[0m
+ [1m[90m[49m128:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/prompt_template/prompt_engine.py[0m[4m[90m:93:1[0m
+ [1m[90m[49m 93:1[22m[39m[49m  [31m[49mhigh[39m[49m  Module level import not at top of file  [1m[90m[49mruff/E402[22m[39m[49m
+ [1m[90m[49m 94:1[22m[39m[49m  [31m[49mhigh[39m[49m  Module level import not at top of file  [1m[90m[49mruff/E402[22m[39m[49m
+ [1m[90m[49m 96:1[22m[39m[49m  [31m[49mhigh[39m[49m  Module level import not at top of file  [1m[90m[49mruff/E402[22m[39m[49m
+ [1m[90m[49m 97:1[22m[39m[49m  [31m[49mhigh[39m[49m  Module level import not at top of file  [1m[90m[49mruff/E402[22m[39m[49m
+ [1m[90m[49m104:1[22m[39m[49m  [31m[49mhigh[39m[49m  Module level import not at top of file  [1m[90m[49mruff/E402[22m[39m[49m
+ [1m[90m[49m105:1[22m[39m[49m  [31m[49mhigh[39m[49m  Module level import not at top of file  [1m[90m[49mruff/E402[22m[39m[49m
+ [1m[90m[49m107:1[22m[39m[49m  [31m[49mhigh[39m[49m  Module level import not at top of file  [1m[90m[49mruff/E402[22m[39m[49m
+ [1m[90m[49m108:1[22m[39m[49m  [31m[49mhigh[39m[49m  Module level import not at top of file  [1m[90m[49mruff/E402[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/retriever/providers/AmazonKnowledgeBasesRetrieverConfig.py[0m[4m[90m:154:13[0m
+ [1m[90m[49m154:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/ArceeRetrieverConfig.py[0m[4m[90m:136:13[0m
+ [1m[90m[49m136:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/ArxivRetrieverConfig.py[0m[4m[90m:102:13[0m
+ [1m[90m[49m102:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/AskNewsRetrieverConfig.py[0m[4m[90m:157:13[0m
+ [1m[90m[49m157:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/AzureAISearchRetrieverConfig.py[0m[4m[90m:132:13[0m
+ [1m[90m[49m132:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/BM25RetrieverConfig.py[0m[4m[90m:141:13[0m
+ [1m[90m[49m141:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/BedrockRetrieverConfig.py[0m[4m[90m:167:13[0m
+ [1m[90m[49m167:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/ChatGPTPluginRetrieverConfig.py[0m[4m[90m:165:13[0m
+ [1m[90m[49m165:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/CohereRagRetrieverConfig.py[0m[4m[90m:174:13[0m
+ [1m[90m[49m174:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/ContextualCompressionRetrieverConfig.py[0m[4m[90m:146:13[0m
+ [1m[90m[49m146:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m155:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m167:17[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m180:17[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/DocArrayRetrieverConfig.py[0m[4m[90m:161:13[0m
+ [1m[90m[49m161:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/ElasticsearchRetrieverConfig.py[0m[4m[90m:173:13[0m
+ [1m[90m[49m173:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/EnsembleRetrieverConfig.py[0m[4m[90m:151:13[0m
+ [1m[90m[49m151:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m163:17[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/GoogleDocumentAIWarehouseRetrieverConfig.py[0m[4m[90m:163:13[0m
+ [1m[90m[49m163:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/GoogleVertexAISearchRetrieverConfig.py[0m[4m[90m:166:13[0m
+ [1m[90m[49m166:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/KNNRetrieverConfig.py[0m[4m[90m:132:13[0m
+ [1m[90m[49m132:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/KendraRetrieverConfig.py[0m[4m[90m:154:13[0m
+ [1m[90m[49m154:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/LlamaIndexGraphRetrieverConfig.py[0m[4m[90m:197:13[0m
+ [1m[90m[49m197:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/LlamaIndexRetrieverConfig.py[0m[4m[90m:170:13[0m
+ [1m[90m[49m170:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/MergerRetrieverConfig.py[0m[4m[90m:118:13[0m
+ [1m[90m[49m118:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m130:17[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/MetalRetrieverConfig.py[0m[4m[90m:156:13[0m
+ [1m[90m[49m156:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/MilvusRetrieverConfig.py[0m[4m[90m:148:13[0m
+ [1m[90m[49m148:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/MultiQueryRetrieverConfig.py[0m[4m[90m:150:13[0m
+ [1m[90m[49m150:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m156:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m175:17[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/MultiVectorRetrieverConfig.py[0m[4m[90m:183:13[0m
+ [1m[90m[49m183:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m192:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m207:17[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/NeuralDBRetrieverConfig.py[0m[4m[90m:176:13[0m
+ [1m[90m[49m176:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/ParentDocumentRetrieverConfig.py[0m[4m[90m:172:13[0m
+ [1m[90m[49m172:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m181:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m196:17[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/PineconeHybridSearchRetrieverConfig.py[0m[4m[90m:129:13[0m
+ [1m[90m[49m129:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/PubMedRetrieverConfig.py[0m[4m[90m:142:13[0m
+ [1m[90m[49m142:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/QdrantSparseVectorRetrieverConfig.py[0m[4m[90m:178:13[0m
+ [1m[90m[49m178:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/RePhraseQueryRetrieverConfig.py[0m[4m[90m:120:13[0m
+ [1m[90m[49m120:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m129:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m135:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m153:17[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/RemoteLangChainRetrieverConfig.py[0m[4m[90m:162:13[0m
+ [1m[90m[49m162:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/SVMRetrieverConfig.py[0m[4m[90m:143:13[0m
+ [1m[90m[49m143:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/SelfQueryRetrieverConfig.py[0m[4m[90m:174:13[0m
+ [1m[90m[49m174:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m183:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m189:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/TFIDFRetrieverConfig.py[0m[4m[90m:122:13[0m
+ [1m[90m[49m122:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/TavilySearchAPIRetrieverConfig.py[0m[4m[90m:132:13[0m
+ [1m[90m[49m132:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/TimeWeightedVectorStoreRetrieverConfig.py[0m[4m[90m:174:13[0m
+ [1m[90m[49m174:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m183:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/VespaRetrieverConfig.py[0m[4m[90m:153:13[0m
+ [1m[90m[49m153:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/WeaviateHybridSearchRetrieverConfig.py[0m[4m[90m:175:13[0m
+ [1m[90m[49m175:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/WebResearchRetrieverConfig.py[0m[4m[90m:164:13[0m
+ [1m[90m[49m164:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/WikipediaRetrieverConfig.py[0m[4m[90m:110:13[0m
+ [1m[90m[49m110:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/YouRetrieverConfig.py[0m[4m[90m:148:13[0m
+ [1m[90m[49m148:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/ZepCloudRetrieverConfig.py[0m[4m[90m:164:13[0m
+ [1m[90m[49m164:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/providers/ZepRetrieverConfig.py[0m[4m[90m:155:13[0m
+ [1m[90m[49m155:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/retriever/retriever.py[0m[4m[90m:449:13[0m
+ [1m[90m[49m449:13[22m[39m[49m  [31m[49mhigh[39m[49m  f-string used as docstring. Python will interpret this as a joined string, rather than a        [1m[90m[49mruff/B021[22m[39m[49m
+               docstring.                                                                                               
+
+[1m[4msrc/haive/core/engine/vectorstore/providers/AnnoyVectorStoreConfig.py[0m[4m[90m:156:13[0m
+ [1m[90m[49m156:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m192:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/vectorstore/providers/AzureSearchVectorStoreConfig.py[0m[4m[90m:173:13[0m
+ [1m[90m[49m173:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/vectorstore/providers/CassandraVectorStoreConfig.py[0m[4m[90m:208:13[0m
+ [1m[90m[49m208:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m249:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m284:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/vectorstore/providers/ChromaVectorStoreConfig.py[0m[4m[90m:142:17[0m
+ [1m[90m[49m142:17[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m155:24[22m[39m[49m  [31m[49mhigh[39m[49m  `chromadb` imported but unused; consider using `importlib.util.find_spec` to test for           [1m[90m[49mruff/F401[22m[39m[49m
+               availability                                                                                             
+ [1m[90m[49m164:17[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/vectorstore/providers/DocArrayVectorStoreConfig.py[0m[4m[90m:210:13[0m
+ [1m[90m[49m210:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/vectorstore/providers/ElasticsearchVectorStoreConfig.py[0m[4m[90m:195:17[0m
+ [1m[90m[49m195:17[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m249:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/vectorstore/providers/FAISSVectorStoreConfig.py[0m[4m[90m:165:13[0m
+ [1m[90m[49m165:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m219:24[22m[39m[49m  [31m[49mhigh[39m[49m  `faiss` imported but unused; consider using `importlib.util.find_spec` to test for              [1m[90m[49mruff/F401[22m[39m[49m
+               availability                                                                                             
+
+[1m[4msrc/haive/core/engine/vectorstore/providers/InMemoryVectorStoreConfig.py[0m[4m[90m:99:13[0m
+ [1m[90m[49m 99:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m112:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/vectorstore/providers/LanceDBVectorStoreConfig.py[0m[4m[90m:85:0[0m
+ [1m[90m[49m 85:0 [22m[39m[49m  [35m[49mmedium[39m[49m  Probable insecure usage of temp file/directory.                                             [1m[90m[49mbandit/B108[22m[39m[49m
+ [1m[90m[49m207:13[22m[39m[49m  [31m[49mhigh[39m[49m    Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from    [1m[90m[49mruff/B904[22m[39m[49m  
+                 None` to distinguish them from errors in exception handling                                            
+ [1m[90m[49m261:13[22m[39m[49m  [31m[49mhigh[39m[49m    Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from    [1m[90m[49mruff/B904[22m[39m[49m  
+                 None` to distinguish them from errors in exception handling                                            
+
+[1m[4msrc/haive/core/engine/vectorstore/providers/MilvusVectorStoreConfig.py[0m[4m[90m:204:17[0m
+ [1m[90m[49m204:17[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/vectorstore/providers/MongoDBAtlasVectorStoreConfig.py[0m[4m[90m:175:17[0m
+ [1m[90m[49m175:17[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m195:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/vectorstore/providers/Neo4jVectorStoreConfig.py[0m[4m[90m:187:17[0m
+ [1m[90m[49m187:17[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from      [1m[90m[49mruff/B904[22m[39m[49m  
+               None` to distinguish them from errors in exception handling                                              
+ [1m[90m[49m254:0 [22m[39m[49m  [33m[49mlow[39m[49m   Try, Except, Pass detected.                                                                   [1m[90m[49mbandit/B110[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/vectorstore/providers/PGVectorStoreConfig.py[0m[4m[90m:172:17[0m
+ [1m[90m[49m172:17[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/vectorstore/providers/PineconeVectorStoreConfig.py[0m[4m[90m:173:17[0m
+ [1m[90m[49m173:17[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m207:29[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m238:29[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m256:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/vectorstore/providers/QdrantVectorStoreConfig.py[0m[4m[90m:195:17[0m
+ [1m[90m[49m195:17[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m255:21[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/vectorstore/providers/RedisVectorStoreConfig.py[0m[4m[90m:198:13[0m
+ [1m[90m[49m198:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from      [1m[90m[49mruff/B904[22m[39m[49m  
+               None` to distinguish them from errors in exception handling                                              
+ [1m[90m[49m238:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from      [1m[90m[49mruff/B904[22m[39m[49m  
+               None` to distinguish them from errors in exception handling                                              
+ [1m[90m[49m282:0 [22m[39m[49m  [33m[49mlow[39m[49m   Try, Except, Pass detected.                                                                   [1m[90m[49mbandit/B110[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/vectorstore/providers/SKLearnVectorStoreConfig.py[0m[4m[90m:192:13[0m
+ [1m[90m[49m192:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m222:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/vectorstore/providers/SupabaseVectorStoreConfig.py[0m[4m[90m:163:13[0m
+ [1m[90m[49m163:13[22m[39m[49m  [31m[49mhigh[39m[49m    Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from    [1m[90m[49mruff/B904[22m[39m[49m  
+                 None` to distinguish them from errors in exception handling                                            
+ [1m[90m[49m198:13[22m[39m[49m  [31m[49mhigh[39m[49m    Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from    [1m[90m[49mruff/B904[22m[39m[49m  
+                 None` to distinguish them from errors in exception handling                                            
+ [1m[90m[49m236:0 [22m[39m[49m  [35m[49mmedium[39m[49m  Possible SQL injection vector through string-based query construction.                      [1m[90m[49mbandit/B608[22m[39m[49m
+ [1m[90m[49m284:0 [22m[39m[49m  [33m[49mlow[39m[49m     Try, Except, Pass detected.                                                                 [1m[90m[49mbandit/B110[22m[39m[49m
+
+[1m[4msrc/haive/core/engine/vectorstore/providers/TypesenseVectorStoreConfig.py[0m[4m[90m:140:13[0m
+ [1m[90m[49m140:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m190:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m225:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m236:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/vectorstore/providers/USearchVectorStoreConfig.py[0m[4m[90m:129:13[0m
+ [1m[90m[49m129:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m150:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m158:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/vectorstore/providers/WeaviateVectorStoreConfig.py[0m[4m[90m:173:17[0m
+ [1m[90m[49m173:17[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/engine/vectorstore/providers/ZillizVectorStoreConfig.py[0m[4m[90m:184:13[0m
+ [1m[90m[49m184:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/graph/ToolManager.py[0m[4m[90m:122:9[0m
+ [1m[90m[49m122:9 [22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `register_tool`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m385:20[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `tool_registry`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m466:20[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `tool_registry`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m539:21[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `tool_registry`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m596:31[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `tool_registry`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m601:20[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `tool_registry`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m605:24[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `tool_registry`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m638:20[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `tool_registry`  [1m[90m[49mruff/F821[22m[39m[49m
+
+[1m[4msrc/haive/core/graph/branches/__init__.py[0m[4m[90m:4:25[0m
+ [1m[90m[49m 4:25[22m[39m[49m  [31m[49mhigh[39m[49m  `typing.Dict` imported but unused      [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m 4:31[22m[39m[49m  [31m[49mhigh[39m[49m  `typing.List` imported but unused      [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m 4:37[22m[39m[49m  [31m[49mhigh[39m[49m  `typing.Optional` imported but unused  [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m 4:47[22m[39m[49m  [31m[49mhigh[39m[49m  `typing.Union` imported but unused     [1m[90m[49mruff/F401[22m[39m[49m
+
+[1m[4msrc/haive/core/graph/gb/__init__.py[0m[4m[90m:1:39[0m
+ [1m[90m[49m 1:39[22m[39m[49m  [31m[49mhigh[39m[49m  `collections.abc.Sequence` imported but unused  [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m 6:5 [22m[39m[49m  [31m[49mhigh[39m[49m  `typing.Dict` imported but unused               [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m 8:5 [22m[39m[49m  [31m[49mhigh[39m[49m  `typing.List` imported but unused               [1m[90m[49mruff/F401[22m[39m[49m
+
+[1m[4msrc/haive/core/graph/node/__init__.py[0m[4m[90m:97:25[0m
+ [1m[90m[49m97:25[22m[39m[49m  [31m[49mhigh[39m[49m  `typing.Dict` imported but unused      [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m97:37[22m[39m[49m  [31m[49mhigh[39m[49m  `typing.Optional` imported but unused  [1m[90m[49mruff/F401[22m[39m[49m
+
+[1m[4msrc/haive/core/graph/node/agent_node_v3.py[0m[4m[90m:601:17[0m
+ [1m[90m[49m601:17[22m[39m[49m  [31m[49mhigh[39m[49m  Loop control variable `agent_name` not used within loop body  [1m[90m[49mruff/B007[22m[39m[49m
+
+[1m[4msrc/haive/core/graph/node/composer/__init__.py[0m[4m[90m:46:9[0m
+ [1m[90m[49m 46:9[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.graph.node.composer.advanced_node_composer.AdvancedComposedNode` imported but        [1m[90m[49mruff/F401[22m[39m[49m
+              unused; consider using `importlib.util.find_spec` to test for availability                                
+ [1m[90m[49m 47:9[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.graph.node.composer.advanced_node_composer.AdvancedNodeComposer` imported but        [1m[90m[49mruff/F401[22m[39m[49m
+              unused; consider using `importlib.util.find_spec` to test for availability                                
+ [1m[90m[49m 48:9[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.graph.node.composer.advanced_node_composer.TypedCallableNode` imported but unused;   [1m[90m[49mruff/F401[22m[39m[49m
+              consider using `importlib.util.find_spec` to test for availability                                        
+ [1m[90m[49m 49:9[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.graph.node.composer.advanced_node_composer.as_node` imported but unused; consider    [1m[90m[49mruff/F401[22m[39m[49m
+              using `importlib.util.find_spec` to test for availability                                                 
+ [1m[90m[49m 50:9[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.graph.node.composer.advanced_node_composer.callable_to_node` imported but unused;    [1m[90m[49mruff/F401[22m[39m[49m
+              consider using `importlib.util.find_spec` to test for availability                                        
+ [1m[90m[49m 51:9[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.graph.node.composer.advanced_node_composer.node_with_custom_logic` imported but      [1m[90m[49mruff/F401[22m[39m[49m
+              unused; consider using `importlib.util.find_spec` to test for availability                                
+ [1m[90m[49m113:9[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.graph.node.composer.integrated_node_composer.IntegratedNodeComposer` imported but    [1m[90m[49mruff/F401[22m[39m[49m
+              unused; consider using `importlib.util.find_spec` to test for availability                                
+ [1m[90m[49m114:9[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.graph.node.composer.integrated_node_composer.SchemaAwareComposedNode` imported but   [1m[90m[49mruff/F401[22m[39m[49m
+              unused; consider using `importlib.util.find_spec` to test for availability                                
+ [1m[90m[49m115:9[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.graph.node.composer.integrated_node_composer.StateSchemaAdapter` imported but        [1m[90m[49mruff/F401[22m[39m[49m
+              unused; consider using `importlib.util.find_spec` to test for availability                                
+ [1m[90m[49m116:9[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.graph.node.composer.integrated_node_composer.create_schema_aware_node` imported but  [1m[90m[49mruff/F401[22m[39m[49m
+              unused; consider using `importlib.util.find_spec` to test for availability                                
+ [1m[90m[49m117:9[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.graph.node.composer.integrated_node_composer.integrate_node_with_schema` imported    [1m[90m[49mruff/F401[22m[39m[49m
+              but unused; consider using `importlib.util.find_spec` to test for availability                            
+ [1m[90m[49m118:9[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.graph.node.composer.integrated_node_composer.with_state_schema` imported but         [1m[90m[49mruff/F401[22m[39m[49m
+              unused; consider using `importlib.util.find_spec` to test for availability                                
+
+[1m[4msrc/haive/core/graph/node/composer/update_functions.py[0m[4m[90m:201:24[0m
+ [1m[90m[49m201:24[22m[39m[49m  [31m[49mhigh[39m[49m  Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks  [1m[90m[49mruff/E721[22m[39m[49m
+ [1m[90m[49m203:26[22m[39m[49m  [31m[49mhigh[39m[49m  Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks  [1m[90m[49mruff/E721[22m[39m[49m
+ [1m[90m[49m205:26[22m[39m[49m  [31m[49mhigh[39m[49m  Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks  [1m[90m[49mruff/E721[22m[39m[49m
+ [1m[90m[49m207:26[22m[39m[49m  [31m[49mhigh[39m[49m  Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks  [1m[90m[49mruff/E721[22m[39m[49m
+
+[1m[4msrc/haive/core/graph/node/engine_node_test.py[0m[4m[90m:78:0[0m
+ [1m[90m[49m78:0[22m[39m[49m  [33m[49mlow[39m[49m  Try, Except, Pass detected.  [1m[90m[49mbandit/B110[22m[39m[49m
+
+[1m[4msrc/haive/core/graph/node/stateful_integration_example.py[0m[4m[90m:24:50[0m
+ [1m[90m[49m 24:50[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Any`   [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m 50:46[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Any`   [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m 86:41[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Any`   [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m146:45[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Any`   [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m176:50[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Any`   [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m217:45[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Any`   [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m227:46[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Any`   [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m289:39[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Dict`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m289:49[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Any`   [1m[90m[49mruff/F821[22m[39m[49m
+
+[1m[4msrc/haive/core/graph/patterns/integration.py[0m[4m[90m:123:29[0m
+ [1m[90m[49m123:29[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Dict`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m123:53[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Dict`  [1m[90m[49mruff/F821[22m[39m[49m
+
+[1m[4msrc/haive/core/graph/state_graph/components/architecture_summary.py[0m[4m[90m:21:27[0m
+ [1m[90m[49m21:27[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Any`  [1m[90m[49mruff/F821[22m[39m[49m
+
+[1m[4msrc/haive/core/graph/state_graph/components/base_component.py[0m[4m[90m:14:7[0m
+ [1m[90m[49m14:7[22m[39m[49m  [31m[49mhigh[39m[49m  `BaseGraphComponent` is an abstract base class, but it has no abstract methods or properties  [1m[90m[49mruff/B024[22m[39m[49m
+
+[1m[4msrc/haive/core/graph/state_graph/components/test_modular_graph.py[0m[4m[90m:52:0[0m
+ [1m[90m[49m 52:0[22m[39m[49m  [33m[49mlow[39m[49m  Use of assert detected. The enclosed code will be removed when compiling to optimised byte      [1m[90m[49mbandit/B101[22m[39m[49m
+             code.                                                                                                      
+ [1m[90m[49m 53:0[22m[39m[49m  [33m[49mlow[39m[49m  Use of assert detected. The enclosed code will be removed when compiling to optimised byte      [1m[90m[49mbandit/B101[22m[39m[49m
+             code.                                                                                                      
+ [1m[90m[49m 54:0[22m[39m[49m  [33m[49mlow[39m[49m  Use of assert detected. The enclosed code will be removed when compiling to optimised byte      [1m[90m[49mbandit/B101[22m[39m[49m
+             code.                                                                                                      
+ [1m[90m[49m 55:0[22m[39m[49m  [33m[49mlow[39m[49m  Use of assert detected. The enclosed code will be removed when compiling to optimised byte      [1m[90m[49mbandit/B101[22m[39m[49m
+             code.                                                                                                      
+ [1m[90m[49m 66:0[22m[39m[49m  [33m[49mlow[39m[49m  Use of assert detected. The enclosed code will be removed when compiling to optimised byte      [1m[90m[49mbandit/B101[22m[39m[49m
+             code.                                                                                                      
+ [1m[90m[49m 67:0[22m[39m[49m  [33m[49mlow[39m[49m  Use of assert detected. The enclosed code will be removed when compiling to optimised byte      [1m[90m[49mbandit/B101[22m[39m[49m
+             code.                                                                                                      
+ [1m[90m[49m 68:0[22m[39m[49m  [33m[49mlow[39m[49m  Use of assert detected. The enclosed code will be removed when compiling to optimised byte      [1m[90m[49mbandit/B101[22m[39m[49m
+             code.                                                                                                      
+ [1m[90m[49m 74:0[22m[39m[49m  [33m[49mlow[39m[49m  Use of assert detected. The enclosed code will be removed when compiling to optimised byte      [1m[90m[49mbandit/B101[22m[39m[49m
+             code.                                                                                                      
+ [1m[90m[49m 75:0[22m[39m[49m  [33m[49mlow[39m[49m  Use of assert detected. The enclosed code will be removed when compiling to optimised byte      [1m[90m[49mbandit/B101[22m[39m[49m
+             code.                                                                                                      
+ [1m[90m[49m 76:0[22m[39m[49m  [33m[49mlow[39m[49m  Use of assert detected. The enclosed code will be removed when compiling to optimised byte      [1m[90m[49mbandit/B101[22m[39m[49m
+             code.                                                                                                      
+ [1m[90m[49m 82:0[22m[39m[49m  [33m[49mlow[39m[49m  Use of assert detected. The enclosed code will be removed when compiling to optimised byte      [1m[90m[49mbandit/B101[22m[39m[49m
+             code.                                                                                                      
+ [1m[90m[49m 83:0[22m[39m[49m  [33m[49mlow[39m[49m  Use of assert detected. The enclosed code will be removed when compiling to optimised byte      [1m[90m[49mbandit/B101[22m[39m[49m
+             code.                                                                                                      
+ [1m[90m[49m 84:0[22m[39m[49m  [33m[49mlow[39m[49m  Use of assert detected. The enclosed code will be removed when compiling to optimised byte      [1m[90m[49mbandit/B101[22m[39m[49m
+             code.                                                                                                      
+ [1m[90m[49m 92:0[22m[39m[49m  [33m[49mlow[39m[49m  Use of assert detected. The enclosed code will be removed when compiling to optimised byte      [1m[90m[49mbandit/B101[22m[39m[49m
+             code.                                                                                                      
+ [1m[90m[49m 94:0[22m[39m[49m  [33m[49mlow[39m[49m  Use of assert detected. The enclosed code will be removed when compiling to optimised byte      [1m[90m[49mbandit/B101[22m[39m[49m
+             code.                                                                                                      
+ [1m[90m[49m106:0[22m[39m[49m  [33m[49mlow[39m[49m  Use of assert detected. The enclosed code will be removed when compiling to optimised byte      [1m[90m[49mbandit/B101[22m[39m[49m
+             code.                                                                                                      
+ [1m[90m[49m131:0[22m[39m[49m  [33m[49mlow[39m[49m  Use of assert detected. The enclosed code will be removed when compiling to optimised byte      [1m[90m[49mbandit/B101[22m[39m[49m
+             code.                                                                                                      
+ [1m[90m[49m132:0[22m[39m[49m  [33m[49mlow[39m[49m  Use of assert detected. The enclosed code will be removed when compiling to optimised byte      [1m[90m[49mbandit/B101[22m[39m[49m
+             code.                                                                                                      
+ [1m[90m[49m136:0[22m[39m[49m  [33m[49mlow[39m[49m  Use of assert detected. The enclosed code will be removed when compiling to optimised byte      [1m[90m[49mbandit/B101[22m[39m[49m
+             code.                                                                                                      
+ [1m[90m[49m137:0[22m[39m[49m  [33m[49mlow[39m[49m  Use of assert detected. The enclosed code will be removed when compiling to optimised byte      [1m[90m[49mbandit/B101[22m[39m[49m
+             code.                                                                                                      
+ [1m[90m[49m141:0[22m[39m[49m  [33m[49mlow[39m[49m  Use of assert detected. The enclosed code will be removed when compiling to optimised byte      [1m[90m[49mbandit/B101[22m[39m[49m
+             code.                                                                                                      
+ [1m[90m[49m142:0[22m[39m[49m  [33m[49mlow[39m[49m  Use of assert detected. The enclosed code will be removed when compiling to optimised byte      [1m[90m[49mbandit/B101[22m[39m[49m
+             code.                                                                                                      
+ [1m[90m[49m149:0[22m[39m[49m  [33m[49mlow[39m[49m  Use of assert detected. The enclosed code will be removed when compiling to optimised byte      [1m[90m[49mbandit/B101[22m[39m[49m
+             code.                                                                                                      
+ [1m[90m[49m150:0[22m[39m[49m  [33m[49mlow[39m[49m  Use of assert detected. The enclosed code will be removed when compiling to optimised byte      [1m[90m[49mbandit/B101[22m[39m[49m
+             code.                                                                                                      
+ [1m[90m[49m151:0[22m[39m[49m  [33m[49mlow[39m[49m  Use of assert detected. The enclosed code will be removed when compiling to optimised byte      [1m[90m[49mbandit/B101[22m[39m[49m
+             code.                                                                                                      
+
+[1m[4msrc/haive/core/graph/state_graph/conversion/langgraph.py[0m[4m[90m:137:27[0m
+ [1m[90m[49m137:27[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Dict`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m137:51[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Dict`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m157:24[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Dict`  [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m157:48[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Dict`  [1m[90m[49mruff/F821[22m[39m[49m
+
+[1m[4msrc/haive/core/graph/state_graph/models/function_ref.py[0m[4m[90m:104:0[0m
+ [1m[90m[49m104:0[22m[39m[49m  [33m[49mlow[39m[49m  Try, Except, Pass detected.  [1m[90m[49mbandit/B110[22m[39m[49m
+
+[1m[4msrc/haive/core/graph/state_graph/pattern_decorator.py[0m[4m[90m:51:41[0m
+ [1m[90m[49m51:41[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Any`  [1m[90m[49mruff/F821[22m[39m[49m
+
+[1m[4msrc/haive/core/graph/state_graph/pattern_registry.py[0m[4m[90m:58:50[0m
+ [1m[90m[49m58:50[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `builtins`  [1m[90m[49mruff/F821[22m[39m[49m
+
+[1m[4msrc/haive/core/graph/state_graph/recompilation_demo.py[0m[4m[90m:35:38[0m
+ [1m[90m[49m 35:38[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Any`         [1m[90m[49mruff/F821[22m[39m[49m  
+ [1m[90m[49m 44:27[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Dict`        [1m[90m[49mruff/F821[22m[39m[49m  
+ [1m[90m[49m 44:37[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Any`         [1m[90m[49mruff/F821[22m[39m[49m  
+ [1m[90m[49m 47:29[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Dict`        [1m[90m[49mruff/F821[22m[39m[49m  
+ [1m[90m[49m 47:39[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Any`         [1m[90m[49mruff/F821[22m[39m[49m  
+ [1m[90m[49m 50:28[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Dict`        [1m[90m[49mruff/F821[22m[39m[49m  
+ [1m[90m[49m 50:38[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Any`         [1m[90m[49mruff/F821[22m[39m[49m  
+ [1m[90m[49m 66:23[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Dict`        [1m[90m[49mruff/F821[22m[39m[49m  
+ [1m[90m[49m 66:33[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Any`         [1m[90m[49mruff/F821[22m[39m[49m  
+ [1m[90m[49m 83:0 [22m[39m[49m  [33m[49mlow[39m[49m   Try, Except, Pass detected.  [1m[90m[49mbandit/B110[22m[39m[49m
+ [1m[90m[49m 91:30[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Dict`        [1m[90m[49mruff/F821[22m[39m[49m  
+ [1m[90m[49m 91:40[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Any`         [1m[90m[49mruff/F821[22m[39m[49m  
+ [1m[90m[49m140:15[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Any`         [1m[90m[49mruff/F821[22m[39m[49m  
+
+[1m[4msrc/haive/core/models/embeddings/test_embeddings.py[0m[4m[90m:37:0[0m
+ [1m[90m[49m37:0[22m[39m[49m  [33m[49mlow[39m[49m  Use of assert detected. The enclosed code will be removed when compiling to optimised byte       [1m[90m[49mbandit/B101[22m[39m[49m
+            code.                                                                                                       
+ [1m[90m[49m38:0[22m[39m[49m  [33m[49mlow[39m[49m  Use of assert detected. The enclosed code will be removed when compiling to optimised byte       [1m[90m[49mbandit/B101[22m[39m[49m
+            code.                                                                                                       
+ [1m[90m[49m68:0[22m[39m[49m  [33m[49mlow[39m[49m  Use of assert detected. The enclosed code will be removed when compiling to optimised byte       [1m[90m[49mbandit/B101[22m[39m[49m
+            code.                                                                                                       
+ [1m[90m[49m73:0[22m[39m[49m  [33m[49mlow[39m[49m  Use of assert detected. The enclosed code will be removed when compiling to optimised byte       [1m[90m[49mbandit/B101[22m[39m[49m
+            code.                                                                                                       
+ [1m[90m[49m93:0[22m[39m[49m  [33m[49mlow[39m[49m  Use of assert detected. The enclosed code will be removed when compiling to optimised byte       [1m[90m[49mbandit/B101[22m[39m[49m
+            code.                                                                                                       
+
+[1m[4msrc/haive/core/models/llm/base.py[0m[4m[90m:1764:13[0m
+ [1m[90m[49m1764:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from       [1m[90m[49mruff/B904[22m[39m[49m
+                None` to distinguish them from errors in exception handling                                             
+ [1m[90m[49m1817:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from       [1m[90m[49mruff/B904[22m[39m[49m
+                None` to distinguish them from errors in exception handling                                             
+ [1m[90m[49m1859:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from       [1m[90m[49mruff/B904[22m[39m[49m
+                None` to distinguish them from errors in exception handling                                             
+ [1m[90m[49m1894:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from       [1m[90m[49mruff/B904[22m[39m[49m
+                None` to distinguish them from errors in exception handling                                             
+ [1m[90m[49m1934:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from       [1m[90m[49mruff/B904[22m[39m[49m
+                None` to distinguish them from errors in exception handling                                             
+ [1m[90m[49m1982:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from       [1m[90m[49mruff/B904[22m[39m[49m
+                None` to distinguish them from errors in exception handling                                             
+ [1m[90m[49m2035:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from       [1m[90m[49mruff/B904[22m[39m[49m
+                None` to distinguish them from errors in exception handling                                             
+ [1m[90m[49m2086:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from       [1m[90m[49mruff/B904[22m[39m[49m
+                None` to distinguish them from errors in exception handling                                             
+
+[1m[4msrc/haive/core/models/llm/factory.py[0m[4m[90m:167:17[0m
+ [1m[90m[49m167:17[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m179:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m205:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m271:17[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m385:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m391:9 [22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/models/llm/providers/__init__.py[0m[4m[90m:55:20[0m
+ [1m[90m[49m55:20[22m[39m[49m  [31m[49mhigh[39m[49m  `typing.Dict` imported but unused      [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m55:26[22m[39m[49m  [31m[49mhigh[39m[49m  `typing.List` imported but unused      [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m55:32[22m[39m[49m  [31m[49mhigh[39m[49m  `typing.Optional` imported but unused  [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m55:42[22m[39m[49m  [31m[49mhigh[39m[49m  `typing.Type` imported but unused      [1m[90m[49mruff/F401[22m[39m[49m
+
+[1m[4msrc/haive/core/models/llm/providers/ollama.py[0m[4m[90m:246:0[0m
+ [1m[90m[49m246:0[22m[39m[49m  [33m[49mlow[39m[49m  Try, Except, Pass detected.  [1m[90m[49mbandit/B110[22m[39m[49m
+
+[1m[4msrc/haive/core/models/llm/providers/openai.py[0m[4m[90m:218:13[0m
+ [1m[90m[49m218:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+ [1m[90m[49m223:13[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/persistence/POSTGRESQL_SECURITY.md[0m[4m[90m:11:0[0m
+ [1m[90m[49m11:0[22m[39m[49m  [33m[49mlow[39m[49m  Fenced code blocks should have a language specified  [1m[90m[49mmarkdownlint/MD040[22m[39m[49m
+
+[1m[4msrc/haive/core/persistence/serializers.py[0m[4m[90m:339:17[0m
+ [1m[90m[49m339:17[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/persistence/store/README.md[0m[4m[90m:409:0[0m
+ [1m[90m[49m409:0[22m[39m[49m  [33m[49mlow[39m[49m  Emphasis used instead of a heading  [1m[90m[49mmarkdownlint/MD036[22m[39m[49m
+ [1m[90m[49m421:0[22m[39m[49m  [33m[49mlow[39m[49m  Emphasis used instead of a heading  [1m[90m[49mmarkdownlint/MD036[22m[39m[49m
+ [1m[90m[49m437:0[22m[39m[49m  [33m[49mlow[39m[49m  Emphasis used instead of a heading  [1m[90m[49mmarkdownlint/MD036[22m[39m[49m
+
+[1m[4msrc/haive/core/persistence/supabase_config.py[0m[4m[90m:144:21[0m
+ [1m[90m[49m144:21[22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/schema/README.md[0m[4m[90m:22:0[0m
+ [1m[90m[49m  22:0[22m[39m[49m  [33m[49mlow[39m[49m  Fenced code blocks should have a language specified  [1m[90m[49mmarkdownlint/MD040[22m[39m[49m
+ [1m[90m[49m 197:0[22m[39m[49m  [33m[49mlow[39m[49m  Multiple headings with the same content              [1m[90m[49mmarkdownlint/MD024[22m[39m[49m
+ [1m[90m[49m 256:0[22m[39m[49m  [33m[49mlow[39m[49m  Multiple headings with the same content              [1m[90m[49mmarkdownlint/MD024[22m[39m[49m
+ [1m[90m[49m1005:0[22m[39m[49m  [33m[49mlow[39m[49m  Multiple headings with the same content              [1m[90m[49mmarkdownlint/MD024[22m[39m[49m
+ [1m[90m[49m1019:0[22m[39m[49m  [33m[49mlow[39m[49m  Multiple headings with the same content              [1m[90m[49mmarkdownlint/MD024[22m[39m[49m
+ [1m[90m[49m1030:0[22m[39m[49m  [33m[49mlow[39m[49m  Multiple headings with the same content              [1m[90m[49mmarkdownlint/MD024[22m[39m[49m
+
+[1m[4msrc/haive/core/schema/__init__.py[0m[4m[90m:102:40[0m
+ [1m[90m[49m102:40[22m[39m[49m  [31m[49mhigh[39m[49m  `typing.Dict` imported but unused                                                               [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m102:46[22m[39m[49m  [31m[49mhigh[39m[49m  `typing.List` imported but unused                                                               [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m102:52[22m[39m[49m  [31m[49mhigh[39m[49m  `typing.Optional` imported but unused                                                           [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m102:62[22m[39m[49m  [31m[49mhigh[39m[49m  `typing.Type` imported but unused                                                               [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m102:68[22m[39m[49m  [31m[49mhigh[39m[49m  `typing.Union` imported but unused                                                              [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m107:26[22m[39m[49m  [31m[49mhigh[39m[49m  `pydantic.BaseModel` imported but unused                                                        [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m232:28[22m[39m[49m  [31m[49mhigh[39m[49m  `typing.get_type_hints` imported but unused; consider using `importlib.util.find_spec` to test  [1m[90m[49mruff/F401[22m[39m[49m
+               for availability                                                                                         
+ [1m[90m[49m234:30[22m[39m[49m  [31m[49mhigh[39m[49m  `pydantic.BaseModel` imported but unused; consider using `importlib.util.find_spec` to test     [1m[90m[49mruff/F401[22m[39m[49m
+               for availability                                                                                         
+ [1m[90m[49m234:41[22m[39m[49m  [31m[49mhigh[39m[49m  `pydantic.Field` imported but unused; consider using `importlib.util.find_spec` to test for     [1m[90m[49mruff/F401[22m[39m[49m
+               availability                                                                                             
+ [1m[90m[49m236:9 [22m[39m[49m  [31m[49mhigh[39m[49m  Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None`  [1m[90m[49mruff/B904[22m[39m[49m
+               to distinguish them from errors in exception handling                                                    
+
+[1m[4msrc/haive/core/schema/agent_schema_composer.py[0m[4m[90m:759:35[0m
+ [1m[90m[49m759:35[22m[39m[49m  [31m[49mhigh[39m[49m  Loop control variable `ftype` not used within loop body  [1m[90m[49mruff/B007[22m[39m[49m
+ [1m[90m[49m759:42[22m[39m[49m  [31m[49mhigh[39m[49m  Loop control variable `finfo` not used within loop body  [1m[90m[49mruff/B007[22m[39m[49m
+
+[1m[4msrc/haive/core/schema/agent_schema_composer_README.md[0m[4m[90m:42:0[0m
+ [1m[90m[49m42:0[22m[39m[49m  [33m[49mlow[39m[49m  Multiple headings with the same content  [1m[90m[49mmarkdownlint/MD024[22m[39m[49m
+
+[1m[4msrc/haive/core/schema/compatibility/analyzer.py[0m[4m[90m:222:0[0m
+ [1m[90m[49m222:0[22m[39m[49m  [35m[49mmedium[39m[49m  Use of possibly insecure function - consider using safer ast.literal_eval.  [1m[90m[49mbandit/B307[22m[39m[49m
+
+[1m[4msrc/haive/core/schema/compatibility/compatibility.py[0m[4m[90m:219:40[0m
+ [1m[90m[49m219:40[22m[39m[49m  [31m[49mhigh[39m[49m  Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks  [1m[90m[49mruff/E721[22m[39m[49m
+ [1m[90m[49m223:40[22m[39m[49m  [31m[49mhigh[39m[49m  Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks  [1m[90m[49mruff/E721[22m[39m[49m
+ [1m[90m[49m358:12[22m[39m[49m  [31m[49mhigh[39m[49m  Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks  [1m[90m[49mruff/E721[22m[39m[49m
+ [1m[90m[49m362:60[22m[39m[49m  [31m[49mhigh[39m[49m  Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks  [1m[90m[49mruff/E721[22m[39m[49m
+ [1m[90m[49m372:21[22m[39m[49m  [31m[49mhigh[39m[49m  Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks  [1m[90m[49mruff/E721[22m[39m[49m
+
+[1m[4msrc/haive/core/schema/compatibility/langchain_converters.py[0m[4m[90m:219:40[0m
+ [1m[90m[49m219:40[22m[39m[49m  [31m[49mhigh[39m[49m  Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks  [1m[90m[49mruff/E721[22m[39m[49m
+ [1m[90m[49m223:40[22m[39m[49m  [31m[49mhigh[39m[49m  Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks  [1m[90m[49mruff/E721[22m[39m[49m
+ [1m[90m[49m358:12[22m[39m[49m  [31m[49mhigh[39m[49m  Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks  [1m[90m[49mruff/E721[22m[39m[49m
+ [1m[90m[49m362:60[22m[39m[49m  [31m[49mhigh[39m[49m  Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks  [1m[90m[49mruff/E721[22m[39m[49m
+ [1m[90m[49m372:21[22m[39m[49m  [31m[49mhigh[39m[49m  Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks  [1m[90m[49mruff/E721[22m[39m[49m
+
+[1m[4msrc/haive/core/schema/compatibility/mergers.py[0m[4m[90m:68:7[0m
+ [1m[90m[49m 68:7 [22m[39m[49m  [31m[49mhigh[39m[49m  Redefinition of unused `MergeStrategy` from line 13       [1m[90m[49mruff/F811[22m[39m[49m
+ [1m[90m[49m342:13[22m[39m[49m  [31m[49mhigh[39m[49m  Loop control variable `engine` not used within loop body  [1m[90m[49mruff/B007[22m[39m[49m
+
+[1m[4msrc/haive/core/schema/compatibility/utils.py[0m[4m[90m:98:0[0m
+ [1m[90m[49m 98:0 [22m[39m[49m  [31m[49mhigh[39m[49m  Use of weak MD5 hash for security. Consider usedforsecurity=False                    [1m[90m[49mbandit/B324[22m[39m[49m
+ [1m[90m[49m395:8 [22m[39m[49m  [31m[49mhigh[39m[49m  Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks  [1m[90m[49mruff/E721[22m[39m[49m  
+ [1m[90m[49m397:8 [22m[39m[49m  [31m[49mhigh[39m[49m  Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks  [1m[90m[49mruff/E721[22m[39m[49m  
+ [1m[90m[49m399:8 [22m[39m[49m  [31m[49mhigh[39m[49m  Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks  [1m[90m[49mruff/E721[22m[39m[49m  
+ [1m[90m[49m401:8 [22m[39m[49m  [31m[49mhigh[39m[49m  Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks  [1m[90m[49mruff/E721[22m[39m[49m  
+ [1m[90m[49m403:8 [22m[39m[49m  [31m[49mhigh[39m[49m  Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks  [1m[90m[49mruff/E721[22m[39m[49m  
+ [1m[90m[49m403:29[22m[39m[49m  [31m[49mhigh[39m[49m  Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks  [1m[90m[49mruff/E721[22m[39m[49m  
+ [1m[90m[49m405:8 [22m[39m[49m  [31m[49mhigh[39m[49m  Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks  [1m[90m[49mruff/E721[22m[39m[49m  
+ [1m[90m[49m405:29[22m[39m[49m  [31m[49mhigh[39m[49m  Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks  [1m[90m[49mruff/E721[22m[39m[49m  
+ [1m[90m[49m407:8 [22m[39m[49m  [31m[49mhigh[39m[49m  Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks  [1m[90m[49mruff/E721[22m[39m[49m  
+ [1m[90m[49m407:28[22m[39m[49m  [31m[49mhigh[39m[49m  Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks  [1m[90m[49mruff/E721[22m[39m[49m  
+ [1m[90m[49m437:12[22m[39m[49m  [31m[49mhigh[39m[49m  Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks  [1m[90m[49mruff/E721[22m[39m[49m  
+ [1m[90m[49m439:14[22m[39m[49m  [31m[49mhigh[39m[49m  Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks  [1m[90m[49mruff/E721[22m[39m[49m  
+ [1m[90m[49m441:14[22m[39m[49m  [31m[49mhigh[39m[49m  Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks  [1m[90m[49mruff/E721[22m[39m[49m  
+ [1m[90m[49m443:14[22m[39m[49m  [31m[49mhigh[39m[49m  Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks  [1m[90m[49mruff/E721[22m[39m[49m  
+ [1m[90m[49m445:14[22m[39m[49m  [31m[49mhigh[39m[49m  Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks  [1m[90m[49mruff/E721[22m[39m[49m  
+ [1m[90m[49m445:35[22m[39m[49m  [31m[49mhigh[39m[49m  Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks  [1m[90m[49mruff/E721[22m[39m[49m  
+ [1m[90m[49m447:14[22m[39m[49m  [31m[49mhigh[39m[49m  Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks  [1m[90m[49mruff/E721[22m[39m[49m  
+ [1m[90m[49m447:35[22m[39m[49m  [31m[49mhigh[39m[49m  Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks  [1m[90m[49mruff/E721[22m[39m[49m  
+
+[1m[4msrc/haive/core/schema/prebuilt/__init__.py[0m[4m[90m:73:13[0m
+ [1m[90m[49m73:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.schema.prebuilt.document_state.DocumentEngineInputSchema` imported but unused   [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m74:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.schema.prebuilt.document_state.DocumentEngineOutputSchema` imported but unused  [1m[90m[49mruff/F401[22m[39m[49m
+ [1m[90m[49m75:13[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.schema.prebuilt.document_state.DocumentState` imported but unused               [1m[90m[49mruff/F401[22m[39m[49m
+
+[1m[4msrc/haive/core/schema/prebuilt/messages/MIGRATION.md[0m[4m[90m:160:0[0m
+ [1m[90m[49m160:0[22m[39m[49m  [33m[49mlow[39m[49m  Fenced code blocks should have a language specified  [1m[90m[49mmarkdownlint/MD040[22m[39m[49m
+
+[1m[4msrc/haive/core/schema/prebuilt/messages/README.md[0m[4m[90m:130:0[0m
+ [1m[90m[49m130:0[22m[39m[49m  [33m[49mlow[39m[49m  Fenced code blocks should have a language specified  [1m[90m[49mmarkdownlint/MD040[22m[39m[49m
+
+[1m[4msrc/haive/core/schema/prebuilt/messages/__init__.py[0m[4m[90m:23:67[0m
+ [1m[90m[49m23:67[22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.schema.prebuilt.messages.compatibility.MessagesStateAdapter` imported but unused;    [1m[90m[49mruff/F401[22m[39m[49m
+              consider using `importlib.util.find_spec` to test for availability                                        
+ [1m[90m[49m25:9 [22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.schema.prebuilt.messages.utils.MessageRound` imported but unused; consider using     [1m[90m[49mruff/F401[22m[39m[49m
+              `importlib.util.find_spec` to test for availability                                                       
+ [1m[90m[49m26:9 [22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.schema.prebuilt.messages.utils.ToolCallInfo` imported but unused; consider using     [1m[90m[49mruff/F401[22m[39m[49m
+              `importlib.util.find_spec` to test for availability                                                       
+ [1m[90m[49m27:9 [22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.schema.prebuilt.messages.utils.is_real_human_message` imported but unused; consider  [1m[90m[49mruff/F401[22m[39m[49m
+              using `importlib.util.find_spec` to test for availability                                                 
+ [1m[90m[49m28:9 [22m[39m[49m  [31m[49mhigh[39m[49m  `haive.core.schema.prebuilt.messages.utils.is_tool_error` imported but unused; consider using    [1m[90m[49mruff/F401[22m[39m[49m
+              `importlib.util.find_spec` to test for availability                                                       
+
+[1m[4msrc/haive/core/schema/prebuilt/messages/examples.py[0m[4m[90m:14:30[0m
+ [1m[90m[49m 14:30[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Any`                                   [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m 42:29[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Any`                                   [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m 87:36[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Any`                                   [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m114:32[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Any`                                   [1m[90m[49mruff/F821[22m[39m[49m
+ [1m[90m[49m128:9 [22m[39m[49m  [31m[49mhigh[39m[49m  Loop control variable `msg` not used within loop body  [1m[90m[49mruff/B007[22m[39m[49m
+ [1m[90m[49m142:13[22m[39m[49m  [31m[49mhigh[39m[49m  Loop control variable `msg` not used within loop body  [1m[90m[49mruff/B007[22m[39m[49m
+ [1m[90m[49m162:42[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Any`                                   [1m[90m[49mruff/F821[22m[39m[49m
+
+[1m[4msrc/haive/core/schema/prebuilt/messages/messages_with_token_usage.py[0m[4m[90m:9:1[0m
+ [1m[90m[49m 9:1[22m[39m[49m  [31m[49mhigh[39m[49m  Module level import not at top of file  [1m[90m[49mruff/E402[22m[39m[49m
+ [1m[90m[49m10:1[22m[39m[49m  [31m[49mhigh[39m[49m  Module level import not at top of file  [1m[90m[49mruff/E402[22m[39m[49m
+ [1m[90m[49m12:1[22m[39m[49m  [31m[49mhigh[39m[49m  Module level import not at top of file  [1m[90m[49mruff/E402[22m[39m[49m
+ [1m[90m[49m13:1[22m[39m[49m  [31m[49mhigh[39m[49m  Module level import not at top of file  [1m[90m[49mruff/E402[22m[39m[49m
+
+[1m[4msrc/haive/core/schema/prebuilt/messages_state.py[0m[4m[90m:195:0[0m
+ [1m[90m[49m195:0[22m[39m[49m  [33m[49mlow[39m[49m  Try, Except, Pass detected.  [1m[90m[49mbandit/B110[22m[39m[49m
+
+[1m[4msrc/haive/core/schema/prebuilt/structured_output_state.py[0m[4m[90m:153:0[0m
+ [1m[90m[49m153:0[22m[39m[49m  [33m[49mlow[39m[49m  Try, Except, Pass detected.  [1m[90m[49mbandit/B110[22m[39m[49m
+
+[1m[4msrc/haive/core/schema/typed_state_schema.py[0m[4m[90m:199:13[0m
+ [1m[90m[49m199:13[22m[39m[49m  [31m[49mhigh[39m[49m  Loop control variable `name` not used within loop body  [1m[90m[49mruff/B007[22m[39m[49m
+ [1m[90m[49m217:13[22m[39m[49m  [31m[49mhigh[39m[49m  Loop control variable `name` not used within loop body  [1m[90m[49mruff/B007[22m[39m[49m
+ [1m[90m[49m278:50[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `AgentView`                              [1m[90m[49mruff/F821[22m[39m[49m
+
+[1m[4msrc/haive/core/types/dynamic_literal.py[0m[4m[90m:51:13[0m
+ [1m[90m[49m51:13[22m[39m[49m  [31m[49mhigh[39m[49m  Found useless attribute access. Either assign it to a variable or remove it.  [1m[90m[49mruff/B018[22m[39m[49m
+
+[1m[4msrc/haive/core/utils/interrupt_utils.py[0m[4m[90m:111:19[0m
+ [1m[90m[49m111:19[22m[39m[49m  [31m[49mhigh[39m[49m  Using `hasattr(x, "__call__")` to test if x is callable is unreliable. Use `callable(x)` for    [1m[90m[49mruff/B004[22m[39m[49m
+               consistent results.                                                                                      
+ [1m[90m[49m113:14[22m[39m[49m  [31m[49mhigh[39m[49m  Using `hasattr(x, "__call__")` to test if x is callable is unreliable. Use `callable(x)` for    [1m[90m[49mruff/B004[22m[39m[49m
+               consistent results.                                                                                      
+
+[1m[4msrc/haive/core/utils/message_utils.py[0m[4m[90m:16:27[0m
+ [1m[90m[49m 16:27[22m[39m[49m  [31m[49mhigh[39m[49m  Undefined name `Dict`  [1m[90m[49mruff/F821[22m[39m[49m
+
+[1m[4msrc/haive/core/utils/tool_list.py[0m[4m[90m:73:0[0m
+ [1m[90m[49m 73:0[22m[39m[49m  [33m[49mlow[39m[49m  Try, Except, Pass detected.  [1m[90m[49mbandit/B110[22m[39m[49m
+ [1m[90m[49m 98:0[22m[39m[49m  [33m[49mlow[39m[49m  Try, Except, Pass detected.  [1m[90m[49mbandit/B110[22m[39m[49m
+ [1m[90m[49m202:0[22m[39m[49m  [33m[49mlow[39m[49m  Try, Except, Pass detected.  [1m[90m[49mbandit/B110[22m[39m[49m
+ [1m[90m[49m227:0[22m[39m[49m  [33m[49mlow[39m[49m  Try, Except, Pass detected.  [1m[90m[49mbandit/B110[22m[39m[49m
+ [1m[90m[49m255:0[22m[39m[49m  [33m[49mlow[39m[49m  Try, Except, Pass detected.  [1m[90m[49mbandit/B110[22m[39m[49m
+
+[1m[4msrc/haive/core/utils/visualize_graph_utils.py[0m[4m[90m:25:0[0m
+ [1m[90m[49m25:0[22m[39m[49m  [33m[49mlow[39m[49m  Try, Except, Pass detected.  [1m[90m[49mbandit/B110[22m[39m[49m
+
+[1m[30m[107m  FAILURES  [0m
+
+ [1mgit-diff-check[22m  [1msrc/haive/core/__init__.py[22m                                                        .trunk/out/EKeHa.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/common/__init__.py[22m                                                 .trunk/out/yDxXU.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/common/logging_config.py[22m                                           .trunk/out/lhYik.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/common/mixins/__init__.py[22m                                          .trunk/out/KAQuG.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/common/mixins/checkpointer_mixin.py[22m                                .trunk/out/GgHET.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/common/mixins/engine_mixin.py[22m                                      .trunk/out/mimI6.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/common/mixins/general/__init__.py[22m                                  .trunk/out/HS4Ea.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/common/mixins/general/id.py[22m                                        .trunk/out/XBlYK.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/common/mixins/general/metadata.py[22m                                  .trunk/out/AK9W7.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/common/mixins/general/serialization.py[22m                             .trunk/out/g5qqa.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/common/mixins/general/state.py[22m                                     .trunk/out/lRwuh.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/common/mixins/general/timestamp.py[22m                                 .trunk/out/LPeKo.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/common/mixins/general/version.py[22m                                   .trunk/out/9dneU.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/common/mixins/getter_mixin.py[22m                                      .trunk/out/uIRCK.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/common/mixins/identifier.py[22m                                        .trunk/out/e82tk.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/common/mixins/rich_logger_mixin.py[22m                                 .trunk/out/Bl0Ix.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/common/mixins/secure_config.py[22m                                     .trunk/out/3oZfF.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/common/mixins/state_interface_mixin.py[22m                             .trunk/out/9ITV5.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/common/mixins/tool_list_mixin.py[22m                                   .trunk/out/FoHWl.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/common/mixins/tool_route_mixin.py[22m                                  .trunk/out/vtfCY.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/common/models/__init__.py[22m                                          .trunk/out/1bkIh.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/common/models/documents/__init__.py[22m                                .trunk/out/iYtFY.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/common/models/documents/github_repo.py[22m                             .trunk/out/XbhHY.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/common/models/dynamic_choice_model.py[22m                              .trunk/out/NOMIU.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/common/models/named_list.py[22m                                        .trunk/out/7MngB.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/common/structures/named_dict.py[22m                                    .trunk/out/l9AbA.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/common/structures/tree.py[22m                                          .trunk/out/TxOBn.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/common/types/__init__.py[22m                                           .trunk/out/pM8xs.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/common/types/general.py[22m                                            .trunk/out/SsNeA.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/common/types/protocols/__init__.py[22m                                 .trunk/out/HVji5.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/common/types/protocols/engine_protocols.py[22m                         .trunk/out/byl3f.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/common/types/protocols/general_protocols.py[22m                        .trunk/out/ZRgyL.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/common/types/protocols/schema_protocols.py[22m                         .trunk/out/Icyun.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/config/__init__.py[22m                                                 .trunk/out/8fWsc.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/config/auth_runnable.py[22m                                            .trunk/out/fiUaA.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/config/constants.py[22m                                                .trunk/out/ohEdd.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/config/protocols.py[22m                                                .trunk/out/1J8FH.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/config/runnable.py[22m                                                 .trunk/out/LyRaR.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/__init__.py[22m                                                 .trunk/out/6fcpU.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/agent/__init__.py[22m                                           .trunk/out/pWqaY.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/agent/agent.py[22m                                              .trunk/out/6PKCJ.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/agent/config.py[22m                                             .trunk/out/U9sOT.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/agent/pattern.py[22m                                            .trunk/out/6vzzQ.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/agent/persistence/__init__.py[22m                               .trunk/out/N7ibk.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/agent/persistence/base.py[22m                                   .trunk/out/BAE43.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/agent/persistence/factory.py[22m                                .trunk/out/ZZz4K.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/agent/persistence/handlers.py[22m                               .trunk/out/PhJg1.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/agent/persistence/integration.py[22m                            .trunk/out/LQ1Ws.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/agent/persistence/manager.py[22m                                .trunk/out/AG6TB.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/agent/persistence/memory_config.py[22m                          .trunk/out/IkpXc.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/agent/persistence/mongodb_config.py[22m                         .trunk/out/d5pia.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/agent/persistence/postgres_config.py[22m                        .trunk/out/81OFK.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/agent/persistence/types.py[22m                                  .trunk/out/JYbKf.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/agent/protocols.py[22m                                          .trunk/out/XlYSB.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/agent/registry.py[22m                                           .trunk/out/f4urG.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/agent/utils/__init__.py[22m                                     .trunk/out/hF8KI.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/agent/utils/input_handling.py[22m                               .trunk/out/tYlFF.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/agent/utils/state_handling.py[22m                               .trunk/out/dgGA4.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/aug_llm/__init__.py[22m                                         .trunk/out/wJ8mr.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/aug_llm/config.py[22m                                           .trunk/out/Stnoy.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/aug_llm/factory.py[22m                                          .trunk/out/bOwgZ.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/aug_llm/utils.py[22m                                            .trunk/out/GmsmF.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/base/__init__.py[22m                                            .trunk/out/CkZ8J.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/base/base.py[22m                                                .trunk/out/IvYmu.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/base/factory.py[22m                                             .trunk/out/4f3Gk.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/base/protocols.py[22m                                           .trunk/out/pp2ht.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/base/reference.py[22m                                           .trunk/out/XSZSP.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/base/registry.py[22m                                            .trunk/out/VjkbN.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/base/types.py[22m                                               .trunk/out/HhS4R.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/__init__.py[22m                                        .trunk/out/nwulL.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/base/__init__.py[22m                                   .trunk/out/r6fVa.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/base/schema.py[22m                                     .trunk/out/qLuAl.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/__init__.py[22m                                .trunk/out/11MWs.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/adapters/__init__.py[22m                       .trunk/out/9aAoT.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/adapters/base.py[22m                           .trunk/out/t5XXz.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/adapters/local.py[22m                          .trunk/out/Bm96G.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/base/__init__.py[22m                           .trunk/out/v3rkm.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/base/base.py[22m                               .trunk/out/vTOeV.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/base/methods.py[22m                            .trunk/out/mqaxO.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/base/schema.py[22m                             .trunk/out/ZZpHV.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/base.py[22m                                    .trunk/out/k5jpb.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/engine.py[22m                                  .trunk/out/Xxvqx.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/registry.py[22m                                .trunk/out/qtRPC.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/__init__.py[22m                        .trunk/out/Eu33I.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/base/__init__.py[22m                   .trunk/out/rxFY4.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/base/base.py[22m                       .trunk/out/tcbYH.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/chat/__init__.py[22m                   .trunk/out/Xu2A2.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/chat/base.py[22m                       .trunk/out/L7FnJ.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/chat_gpt_loader.py[22m                 .trunk/out/M6UdY.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/database/__init__.py[22m               .trunk/out/OQOlr.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/database/types.py[22m                  .trunk/out/C69RF.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/factory.py[22m                         .trunk/out/TvDTI.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/groups.py[22m                          .trunk/out/sHWqb.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/local/__init__.py[22m                  .trunk/out/IsLry.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/local/base.py[22m                      .trunk/out/wAVnD.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/local/bibtex_source.py[22m             .trunk/out/sqXWD.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/local/chm_source.py[22m                .trunk/out/YTrtw.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/local/csv_source.py[22m                .trunk/out/0lxYN.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/local/docx_source.py[22m               .trunk/out/KSgd5.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/local/enex_source.py[22m               .trunk/out/RXcw4.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/local/epub_source.py[22m               .trunk/out/52b0i.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/local/excel_source.py[22m              .trunk/out/TfD2Q.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/local/git_source.py[22m                .trunk/out/kxJML.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/local/html_source.py[22m               .trunk/out/oaD9g.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/local/json_source.py[22m               .trunk/out/9p7Nf.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/local/markdown_source.py[22m           .trunk/out/PsTqC.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/local/md_source.py[22m                 .trunk/out/GBLnL.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/local/mhtml_source.py[22m              .trunk/out/sNVY9.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/local/notebook_source.py[22m           .trunk/out/jdgGN.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/local/odt_source.py[22m                .trunk/out/WxNQv.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/local/pdf_source.py[22m                .trunk/out/Y0mT0.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/local/ppt_source.py[22m                .trunk/out/1JGmR.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/local/programming_languages[22m        .trunk/out/nDs9e.yaml
+                 [1m /__init__.py[22m                                                                                          
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/local/python_source.py[22m             .trunk/out/GaEnV.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/local/rst_source.py[22m                .trunk/out/MDzf0.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/local/rtf_source.py[22m                .trunk/out/8QGYC.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/local/srt_source.py[22m                .trunk/out/l5FVG.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/local/toml_source.py[22m               .trunk/out/1m3qm.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/local/txt_source.py[22m                .trunk/out/QeB6F.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/local/types.py[22m                     .trunk/out/PuB62.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/local/vsdx_source.py[22m               .trunk/out/Y3TV9.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/local/xls_source.py[22m                .trunk/out/4lAyt.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/local/xlsx_source.py[22m               .trunk/out/phSHq.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/local/xml_source.py[22m                .trunk/out/9yQjW.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/local/yaml_source.py[22m               .trunk/out/I95KM.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/remote/__init__.py[22m                 .trunk/out/nOHeH.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/remote/arxiv_source.py[22m             .trunk/out/tMleF.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/remote/az_lyrics_source.py[22m         .trunk/out/LUNLA.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/remote/base.py[22m                     .trunk/out/ZD6z7.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/remote/bilibili_source.py[22m          .trunk/out/H7yf3.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/remote/blackboard_source.py[22m        .trunk/out/QzX89.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/remote/college_confidential.py[22m     .trunk/out/hp5BN.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/remote/diffbot_source.py[22m           .trunk/out/vvrAh.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/remote/hacker_news_source.py[22m       .trunk/out/DKVUF.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/remote/ifixit_source.py[22m            .trunk/out/WzTGi.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/remote/imsdb_source.py[22m             .trunk/out/ruodf.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/remote/read_the_docs_source.py[22m     .trunk/out/1S4A1.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/remote/wikipedia_source.py[22m         .trunk/out/a9Mtj.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/remote/youtube_audio_source.py[22m     .trunk/out/4kzi2.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/sources/remote/youtube_source.py[22m           .trunk/out/8OgAa.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/loaders/utils/__init__.py[22m                          .trunk/out/YRYiv.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/sources/__init__.py[22m                                .trunk/out/TuMES.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/sources/base.py[22m                                    .trunk/out/sL4gn.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/sources/local.py[22m                                   .trunk/out/KMsIB.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/sources/web.py[22m                                     .trunk/out/yMcdd.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/splitters/__init__.py[22m                              .trunk/out/e8gHm.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/splitters/base.py[22m                                  .trunk/out/B431R.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/splitters/config.py[22m                                .trunk/out/zpGhU.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/transformers/__init__.py[22m                           .trunk/out/WPo3j.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/transformers/base.py[22m                               .trunk/out/SMRNW.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/document/transformers/types.py[22m                              .trunk/out/Mfogi.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/embedding/__init__.py[22m                                       .trunk/out/Kr9Ca.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/embedding/base.py[22m                                           .trunk/out/f9FDF.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/embedding/config.py[22m                                         .trunk/out/Qzof1.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/embedding/types.py[22m                                          .trunk/out/aZ5gF.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/embeddings.py[22m                                               .trunk/out/bXcp9.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/output_parser/__init__.py[22m                                   .trunk/out/4VlOs.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/output_parser/base.py[22m                                       .trunk/out/MdbsN.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/output_parser/types.py[22m                                      .trunk/out/KwfuR.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/retriever/README.md[22m                                         .trunk/out/d0cM4.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/retriever/__init__.py[22m                                       .trunk/out/6cADg.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/retriever/providers/MultiQueryRetrieverConfig.py[22m            .trunk/out/igCUg.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/retriever/providers/RePhraseQueryRetrieverConfig.py[22m         .trunk/out/1YCCs.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/retriever/providers/__init__.py[22m                             .trunk/out/tLYkE.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/retriever/retriever.py[22m                                      .trunk/out/QZvLV.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/retriever/types.py[22m                                          .trunk/out/IYDVL.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/tool/__init__.py[22m                                            .trunk/out/TXmIs.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/tool/base.py[22m                                                .trunk/out/dlHe5.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/vectorstore/README.md[22m                                       .trunk/out/dO9hH.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/vectorstore/__init__.py[22m                                     .trunk/out/AS67I.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/vectorstore/providers/__init__.py[22m                           .trunk/out/LnQkM.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/engine/vectorstore/vectorstore.py[22m                                  .trunk/out/CQ3WL.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/NodeFactory.py[22m                                               .trunk/out/WndIK.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/StateGraphEditor.py[22m                                          .trunk/out/jb8MC.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/StateSchema.py[22m                                               .trunk/out/r7Alr.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/ToolManager.py[22m                                               .trunk/out/JoGGS.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/__init__.py[22m                                                  .trunk/out/ZqkiY.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/branches/__init__.py[22m                                         .trunk/out/xCWqr.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/branches/branch.py[22m                                           .trunk/out/1VMa3.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/branches/dynamic.py[22m                                          .trunk/out/7NbvT.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/branches/send_mapping.py[22m                                     .trunk/out/KkBZK.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/branches/types.py[22m                                            .trunk/out/9ExII.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/branches/utils.py[22m                                            .trunk/out/IUZDr.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/common/__init__.py[22m                                           .trunk/out/wLwYo.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/common/field_utils.py[22m                                        .trunk/out/eKbtx.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/common/references.py[22m                                         .trunk/out/iO4RE.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/common/serialization.py[22m                                      .trunk/out/55kQL.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/common/types.py[22m                                              .trunk/out/6oPVQ.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/dynamic_graph_builder.py[22m                                     .trunk/out/wCtBI.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/gb/__init__.py[22m                                               .trunk/out/ttSMr.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/gb/types.py[22m                                                  .trunk/out/weO8V.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/graph_builder2.py[22m                                            .trunk/out/Hp62z.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/graph_pattern_registry.py[22m                                    .trunk/out/mbqdy.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/node/__init__.py[22m                                             .trunk/out/y5uwp.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/node/base_config.py[22m                                          .trunk/out/i8Xhu.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/node/config.py[22m                                               .trunk/out/PgAs4.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/node/decorators.py[22m                                           .trunk/out/VVzAP.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/node/engine_node.py[22m                                          .trunk/out/2dvFo.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/node/factory.py[22m                                              .trunk/out/tXVQh.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/node/handlers.py[22m                                             .trunk/out/pdIVm.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/node/message_transformation.py[22m                               .trunk/out/l8luG.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/node/output_parsing.py[22m                                       .trunk/out/tN7ed.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/node/parser_node_config.py[22m                                   .trunk/out/0zLRJ.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/node/placeholder_node.py[22m                                     .trunk/out/vhWYd.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/node/processors.py[22m                                           .trunk/out/qenpa.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/node/protocols.py[22m                                            .trunk/out/WYOkM.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/node/registry.py[22m                                             .trunk/out/AMaxH.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/node/test.py[22m                                                 .trunk/out/3tY9p.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/node/tool_node_config.py[22m                                     .trunk/out/GTpiu.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/node/types.py[22m                                                .trunk/out/M5qmf.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/node/utils.py[22m                                                .trunk/out/Xagiq.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/node/validation_node_config.py[22m                               .trunk/out/xFgH4.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/patterns/__init__.py[22m                                         .trunk/out/23cC3.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/patterns/base.py[22m                                             .trunk/out/IqOKp.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/patterns/integration.py[22m                                      .trunk/out/vnrAU.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/patterns/registry.py[22m                                         .trunk/out/zBHsJ.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/retry/__init__.py[22m                                            .trunk/out/Osdg2.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/retry/base.py[22m                                                .trunk/out/P7zwb.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/routers/__init__.py[22m                                          .trunk/out/xKmC7.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/routers/base.py[22m                                              .trunk/out/6Ja43.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/routers/conditions.py[22m                                        .trunk/out/rxb6T.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/routers/test.py[22m                                              .trunk/out/qSECb.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/routing.py[22m                                                   .trunk/out/tq5le.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/README.md[22m                                        .trunk/out/6z1kU.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/__init__.py[22m                                      .trunk/out/ske0t.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/base.py[22m                                          .trunk/out/PGqrE.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/base_graph2.py[22m                                   .trunk/out/ENFUD.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/basegraph-readme.md[22m                              .trunk/out/IJrHT.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/components/__init__.py[22m                           .trunk/out/lqI80.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/components/branch.py[22m                             .trunk/out/AMTUl.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/components/node.py[22m                               .trunk/out/aixu4.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/conversion/__init__.py[22m                           .trunk/out/D2TAF.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/conversion/langgraph.py[22m                          .trunk/out/F2DQp.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/graph_path.py[22m                                    .trunk/out/bvcSc.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/graph_visualizer.py[22m                              .trunk/out/6Z2Rm.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/mixin.py[22m                                         .trunk/out/j5uzX.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/models/branch_model.py[22m                           .trunk/out/vJNtx.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/models/edge_model.py[22m                             .trunk/out/7OlJK.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/models/function_ref.py[22m                           .trunk/out/6DYgg.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/models/node_model.py[22m                             .trunk/out/LiO4h.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/models/state_graph_model.py[22m                      .trunk/out/Vi49r.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/packages/haive-core/src/haive/core/graph[22m         .trunk/out/nRk6t.yaml
+                 [1m /state_graph/components/__init__.py[22m                                                                   
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/packages/haive-core/src/haive/core/graph[22m         .trunk/out/pCIIc.yaml
+                 [1m /state_graph/conversion/__init__.py[22m                                                                   
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/packages/haive-core/src/haive/core/graph[22m         .trunk/out/M9GlE.yaml
+                 [1m /state_graph/utils/__init__.py[22m                                                                        
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/pattern/__init__.py[22m                              .trunk/out/71n3S.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/pattern/base.py[22m                                  .trunk/out/99kyD.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/pattern/implementations.py[22m                       .trunk/out/6nnfQ.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/pattern_decorator.py[22m                             .trunk/out/CIdlp.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/pattern_definition.py[22m                            .trunk/out/vQ3YZ.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/pattern_registry.py[22m                              .trunk/out/mGYZP.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/registry.py[22m                                      .trunk/out/jOJ45.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/schema_graph.py[22m                                  .trunk/out/DgnI7.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/schema_mixin.py[22m                                  .trunk/out/2B26b.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/serializable.py[22m                                  .trunk/out/yiT4U.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/state_graph.py[22m                                   .trunk/out/Khct8.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/state_graph_builder.py[22m                           .trunk/out/Hmn00.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/types.py[22m                                         .trunk/out/mnVyn.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/utils/__init__.py[22m                                .trunk/out/pLcS0.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph/validation_mixin.py[22m                              .trunk/out/e10WC.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/state_graph_manager.py[22m                                       .trunk/out/47nIe.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/tool_config.py[22m                                               .trunk/out/4ubwc.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/tool_injector.py[22m                                             .trunk/out/hr1oY.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/utils/__init__.py[22m                                            .trunk/out/ocggl.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/utils/mermaid_visualizer.py[22m                                  .trunk/out/TKYuY.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/graph/utils/readme.md[22m                                              .trunk/out/QjCuS.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/models/__init__.py[22m                                                 .trunk/out/vbDtX.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/models/embeddings/__init__.py[22m                                      .trunk/out/WyXFr.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/models/embeddings/base.py[22m                                          .trunk/out/W3ERH.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/models/embeddings/filter/__init__.py[22m                               .trunk/out/EjkS0.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/models/embeddings/filter/base.py[22m                                   .trunk/out/T8WH5.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/models/embeddings/provider_types.py[22m                                .trunk/out/JK44w.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/models/llm/__init__.py[22m                                             .trunk/out/8c8mo.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/models/llm/base.py[22m                                                 .trunk/out/Zfcqa.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/models/llm/export_llm_models_to_csv.py[22m                             .trunk/out/MoobI.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/models/llm/provider_types.py[22m                                       .trunk/out/TXKSJ.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/models/llm/providers.py[22m                                            .trunk/out/jx0mE.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/models/metadata.py[22m                                                 .trunk/out/W4MJL.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/models/metadata_mixin.py[22m                                           .trunk/out/z1Agb.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/models/retriever/__init__.py[22m                                       .trunk/out/wzRrj.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/models/retriever/asknews_retriever.py[22m                              .trunk/out/pprNg.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/models/retriever/base.py[22m                                           .trunk/out/3YIPs.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/models/retriever/community/base.py[22m                                 .trunk/out/b9Bk4.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/models/retriever/retrievers/ensemble.py[22m                            .trunk/out/VbEur.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/models/retriever/retrievers/multiqery.py[22m                           .trunk/out/URSbj.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/models/retriever/retrievers/parent_document.py[22m                     .trunk/out/6DUuD.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/models/retriever/retrievers/self_query.py[22m                          .trunk/out/gdMGM.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/models/retriever/retrievers/time_weighted.py[22m                       .trunk/out/KbswF.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/models/retriever/vectorstore_retriever.py[22m                          .trunk/out/2vzkl.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/models/vectorstore/__init__.py[22m                                     .trunk/out/1doIc.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/models/vectorstore/base.py[22m                                         .trunk/out/XeDHL.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/persistence/README.md[22m                                              .trunk/out/igQx5.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/persistence/__init__.py[22m                                            .trunk/out/hAOBb.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/persistence/base.py[22m                                                .trunk/out/Pafjn.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/persistence/factory.py[22m                                             .trunk/out/YG41T.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/persistence/handlers.py[22m                                            .trunk/out/GO4MF.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/persistence/memory.py[22m                                              .trunk/out/2X9T5.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/persistence/postgres_config.py[22m                                     .trunk/out/o3itZ.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/persistence/sqlite_config.py[22m                                       .trunk/out/NsRrN.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/persistence/supabase_config.py[22m                                     .trunk/out/gbGt0.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/persistence/types.py[22m                                               .trunk/out/gYebf.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/persistence/utils.py[22m                                               .trunk/out/zME5W.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/registry/__init__.py[22m                                               .trunk/out/RCnGg.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/registry/base.py[22m                                                   .trunk/out/QHpvx.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/registry/decorators.py[22m                                             .trunk/out/NCD2O.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/registry/factory.py[22m                                                .trunk/out/xllW8.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/registry/manager.py[22m                                                .trunk/out/QWTtS.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/registry/memory.py[22m                                                 .trunk/out/7sE19.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/runtime/__init__.py[22m                                                .trunk/out/McKQq.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/runtime/base/base.py[22m                                               .trunk/out/8X2Fs.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/runtime/base/protocols.py[22m                                          .trunk/out/IKqQP.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/runtime/extension/base.py[22m                                          .trunk/out/7LYKH.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/runtime/extension/protocols.py[22m                                     .trunk/out/ZoFHQ.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/schema/__init__.py[22m                                                 .trunk/out/Elzfp.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/schema/agent_schema_composer.py[22m                                    .trunk/out/HeAG8.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/schema/field_definition.py[22m                                         .trunk/out/ZOMGk.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/schema/field_extractor.py[22m                                          .trunk/out/EMHFU.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/schema/field_utils.py[22m                                              .trunk/out/TFnXw.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/schema/prebuilt/messages/__init__.py[22m                               .trunk/out/PlHk2.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/schema/prebuilt/messages/messages_state.py[22m                         .trunk/out/QVJL1.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/schema/prebuilt/messages_state.py[22m                                  .trunk/out/pQV76.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/schema/prebuilt/tool_state.py[22m                                      .trunk/out/hKvdM.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/schema/schema_composer.py[22m                                          .trunk/out/hOgmt.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/schema/schema_manager.py[22m                                           .trunk/out/tsQD6.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/schema/state_schema.py[22m                                             .trunk/out/6NDjR.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/schema/ui.py[22m                                                       .trunk/out/sbfsF.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/schema/utils.py[22m                                                    .trunk/out/erjWE.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/types/advanced_registry.py[22m                                         .trunk/out/n4ZP4.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/types/dynamic_enum.py[22m                                              .trunk/out/OPXvT.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/types/dynamic_literal.py[22m                                           .trunk/out/kzMur.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/types/general/file_types.py[22m                                        .trunk/out/5rHJJ.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/types/general/programming_languages.py[22m                             .trunk/out/3blaz.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/types/serializable_callable.py[22m                                     .trunk/out/TYh39.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/types/tree_leaf.py[22m                                                 .trunk/out/uVYyk.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/utils/__init__.py[22m                                                  .trunk/out/SXe7g.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/utils/chat_utils.py[22m                                                .trunk/out/6OimB.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/utils/collections.py[22m                                               .trunk/out/jylkj.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/utils/config.py[22m                                                    .trunk/out/5pMoZ.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/utils/config_utils.py[22m                                              .trunk/out/HcHJB.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/utils/doc_utils.py[22m                                                 .trunk/out/GgLw0.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/utils/env_utils.py[22m                                                 .trunk/out/BGddr.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/utils/file_utils.py[22m                                                .trunk/out/eZ2Ut.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/utils/getter_mixin.py[22m                                              .trunk/out/UXNN4.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/utils/inspection.py[22m                                                .trunk/out/gBOMV.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/utils/logging_utils.py[22m                                             .trunk/out/hA6B4.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/utils/mermaid_utils.py[22m                                             .trunk/out/XwyeR.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/utils/message_utils.py[22m                                             .trunk/out/3SDSS.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/utils/model_utils.py[22m                                               .trunk/out/rr2vg.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/utils/parser_utils.py[22m                                              .trunk/out/F475S.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/utils/pydantic_utils/__init__.py[22m                                   .trunk/out/XdoXF.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/utils/pydantic_utils/general.py[22m                                    .trunk/out/kpmIo.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/utils/pydantic_utils/sync_properties.py[22m                            .trunk/out/VgivT.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/utils/pydantic_utils/ui.py[22m                                         .trunk/out/4LjmT.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/utils/runnable_config_utils.py[22m                                     .trunk/out/3GMVV.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/utils/serialization.py[22m                                             .trunk/out/xCLtj.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/utils/state_utils.py[22m                                               .trunk/out/hBVba.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/utils/tool_list.py[22m                                                 .trunk/out/MDFVw.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/utils/tool_utils.py[22m                                                .trunk/out/G9gyG.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/utils/tools/__init__.py[22m                                            .trunk/out/oNEAu.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/utils/tools/tool_schema_generator.py[22m                               .trunk/out/Y3GM1.yaml
+ [1mgit-diff-check[22m  [1msrc/haive/core/utils/visualize_graph_utils.py[22m                                     .trunk/out/TG9nC.yaml
+
+[1m[30m[107m  NOTICES  [0m
+
+ [90m[49mSome tools failed to run. You can open the details yaml files for more information.[39m[49m
+
+Checked 702 files
+[90m197 existing issues (use --show-existing to see them)
+[0m[1m[91m✖ 91 new security issues
+[0m[1m[91m✖ 455 new lint issues
+[0m[1m[91m✖ 360 failures
+[0m

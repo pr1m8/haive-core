@@ -47,7 +47,7 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
     agents that interact with external systems or perform complex operations.
 
     Tool Synchronization:
-    --------------------
+    ---------------------
     Tools are synchronized from multiple sources:
 
     1. Instance-level engines: The setup_engines_and_tools validator finds engines

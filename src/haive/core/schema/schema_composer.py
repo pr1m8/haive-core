@@ -2225,7 +2225,7 @@ class SchemaComposer:
         be instantiated directly or used as a state schema in a LangGraph workflow.
 
         Engine Tool Synchronization:
-        --------------------------
+        ----------------------------
         This method stores engines directly on the schema class and implements an
         enhanced model_post_init that ensures:
 

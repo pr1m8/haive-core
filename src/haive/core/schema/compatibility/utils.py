@@ -1,4 +1,4 @@
-"""from typing import Any
+"""From typing import Any
 Utility functions for the schema compatibility module.
 """
 

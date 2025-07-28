@@ -1,4 +1,4 @@
-"""from typing import Any
+"""From typing import Any
 Collection utilities for Haive Core.
 
 This module includes advanced collection types and utilities that extend

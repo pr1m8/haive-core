@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""from typing import Any
+"""From typing import Any
 Haive Schema System Examples.
 
 This file demonstrates comprehensive usage of the Haive Schema System,

@@ -38,7 +38,6 @@ class FakeEmbeddingConfig(BaseEmbeddingConfig):
         embedding_type: Always EmbeddingType.FAKE
         model: Fake model name (can be any string)
         size: Dimension of the fake embeddings
-
     """
 
     embedding_type: EmbeddingType = Field(
@@ -80,7 +79,6 @@ class FakeEmbeddingConfig(BaseEmbeddingConfig):
         Raises:
             ImportError: If langchain-community is not installed
             ValueError: If configuration is invalid
-
         """
         try:
             from langchain_community.embeddings import FakeEmbeddings

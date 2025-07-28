@@ -50,7 +50,6 @@ class BaseEmbeddingConfig(SecureConfigMixin, InvokableEngine):
         name: Human-readable name for this configuration
         model: Model name/identifier for the embedding provider
         dimensions: Optional output dimensions for the embeddings
-
     """
 
     # Required by base Engine class
@@ -95,7 +94,6 @@ class BaseEmbeddingConfig(SecureConfigMixin, InvokableEngine):
                 class OpenAIEmbeddingConfig(BaseEmbeddingConfig):
                     # Implementation here
                     pass
-
         """
 
         def decorator(
@@ -133,7 +131,6 @@ class BaseEmbeddingConfig(SecureConfigMixin, InvokableEngine):
                 config_class = BaseEmbeddingConfig.get_config_class(EmbeddingType.OPENAI)
                 if config_class:
                     config = config_class(model="text-embedding-3-large")
-
         """
         type_str = str(
             embedding_type.value if hasattr(embedding_type, "value") else embedding_type
@@ -153,7 +150,6 @@ class BaseEmbeddingConfig(SecureConfigMixin, InvokableEngine):
                 providers = BaseEmbeddingConfig.list_registered_types()
                 for name, config_class in providers.items():
                     print(f"Available provider: {name}")
-
         """
         return _EMBEDDING_REGISTRY.copy()
 
@@ -185,7 +181,6 @@ class BaseEmbeddingConfig(SecureConfigMixin, InvokableEngine):
                         model=self.model,
                         api_key=self.get_api_key()
                     )
-
         """
         raise NotImplementedError("Subclasses must implement instantiate()")
 
@@ -194,7 +189,6 @@ class BaseEmbeddingConfig(SecureConfigMixin, InvokableEngine):
 
         Returns:
             Dictionary mapping field names to (type, Field) tuples
-
         """
         return {
             "text": (str, Field(description="Text to embed")),
@@ -209,7 +203,6 @@ class BaseEmbeddingConfig(SecureConfigMixin, InvokableEngine):
 
         Returns:
             Dictionary mapping field names to (type, Field) tuples
-
         """
         return {
             "embeddings": (list, Field(description="List of embedding vectors")),
@@ -224,7 +217,6 @@ class BaseEmbeddingConfig(SecureConfigMixin, InvokableEngine):
 
         Raises:
             ValueError: If configuration is invalid
-
         """
         if not self.model:
             raise ValueError("Model name is required")
@@ -240,7 +232,6 @@ class BaseEmbeddingConfig(SecureConfigMixin, InvokableEngine):
 
         Returns:
             The embedding instance
-
         """
         return self.instantiate()
 
@@ -249,7 +240,6 @@ class BaseEmbeddingConfig(SecureConfigMixin, InvokableEngine):
 
         Returns:
             Dictionary containing provider information
-
         """
         return {
             "provider": self.embedding_type,
