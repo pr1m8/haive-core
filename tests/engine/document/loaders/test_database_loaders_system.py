@@ -162,7 +162,7 @@ def test_database_loaders_system():
                 if actual_source == expected_source:
                     classification_success += 1
             else:
-                passed")"
+                pass
         except Exception as e:
             pass  # {e}
 

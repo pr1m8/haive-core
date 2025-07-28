@@ -337,7 +337,7 @@ def test_database_system():
     if class_tests_passed >= 6:
         passed_tests += 1
     else:
-        pass")
+        pass
 
 
     if passed_tests >= 6:
