@@ -93,7 +93,8 @@ def get_github_settings() -> GithubSettings:
 
 
 class GithubRepo(BaseModel):
-    """Configuration for a GitHub repository with automatic validation and discovery.
+    """Configuration for a GitHub repository with automatic validation and
+    discovery.
 
     Features:
     - Automatic branch discovery with fallback (main -> master -> develop -> etc.)

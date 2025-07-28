@@ -1,8 +1,7 @@
 """Model metadata mixin for LLM configurations.
 
-This module provides a mixin class that adds comprehensive model metadata
-access to LLM configuration classes, including context windows, pricing,
-and capability information.
+This module provides a mixin class that adds comprehensive model metadata access to LLM
+configuration classes, including context windows, pricing, and capability information.
 """
 
 import logging
@@ -16,8 +15,8 @@ logger = logging.getLogger(__name__)
 class ModelMetadataMixin:
     """Mixin to add comprehensive model metadata methods to LLMConfig classes.
 
-    This mixin provides access to model capabilities, context window sizes,
-    pricing information, and other metadata from the model catalog.
+    This mixin provides access to model capabilities, context window sizes, pricing
+    information, and other metadata from the model catalog.
     """
 
     def get_context_window(self) -> int:

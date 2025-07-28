@@ -60,7 +60,8 @@ class LogLevel(str, Enum):
         INFO: Confirmation that things are working as expected
         WARNING: Indication that something unexpected happened, or may happen
         ERROR: Due to a more serious problem, the software has not been able to perform a function
-        CRITICAL: A serious error, indicating that the program itself may be unable to continue running
+        CRITICAL: A serious error, indicating that the program itself may be unable to
+            continue running
         SILENT: No logging except critical errors
     """
 
@@ -147,10 +148,10 @@ class GameLogger:
     def _setup_logger(self) -> None:
         """Set up the logging configuration based on the current settings.
 
-        This method configures the underlying Python logger with appropriate
-        handlers and formatters based on the format and level settings.
-        It is called automatically during initialization but can also be
-        called to reconfigure the logger after changing settings.
+        This method configures the underlying Python logger with appropriate handlers
+        and formatters based on the format and level settings. It is called
+        automatically during initialization but can also be called to reconfigure the
+        logger after changing settings.
         """
         self.logger = logging.getLogger(self.name)
 

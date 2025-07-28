@@ -203,7 +203,7 @@ def __getattr__(name: str):
     """
     if name in _AGENT_COMPONENTS:
         # Only import agent module when actually needed (17+ second schema_composer delay)
-        from haive.core.engine.agent import (
+        from haive.core.engine.agent import (  # noqa: F401
             AGENT_REGISTRY,
             Agent,
             AgentConfig,
@@ -219,7 +219,7 @@ def __getattr__(name: str):
 
     if name in _DOCUMENT_COMPONENTS:
         # Only import document module when actually needed
-        from haive.core.engine.document import (  # Core engine components; Factory functions; Configuration models; Enums; Path analysis; Loaders; Processors; Advanced components
+        from haive.core.engine.document import (  # noqa: F401
             AutoLoaderFactory,
             BaseDocumentLoader,
             ChunkingProcessor,

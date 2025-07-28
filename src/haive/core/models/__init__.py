@@ -34,8 +34,8 @@ _SUBMODULES = {"embeddings", "llm", "retriever", "vectorstore"}
 def __getattr__(name):
     """Lazy load submodules to avoid heavy imports during module initialization.
 
-    The embeddings module in particular triggers langchain_community imports
-    which load numpy/pandas, adding 17+ seconds to import time.
+    The embeddings module in particular triggers langchain_community imports which load
+    numpy/pandas, adding 17+ seconds to import time.
     """
     if name in _SUBMODULES:
         import importlib

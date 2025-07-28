@@ -1,7 +1,8 @@
 """Dynamic Choice Model Builder with Protocol-based Generic Options Support.
 
-Uses Protocol to ensure options have extractable names, making it flexible for
-strings, dicts, BaseModels, or any custom class with a name attribute.
+Uses Protocol to ensure options have extractable names, making it
+flexible for strings, dicts, BaseModels, or any custom class with a name
+attribute.
 """
 
 import logging
@@ -26,8 +27,10 @@ OptionItem = TypeVar("OptionItem", str, dict[str, Any], Nameable)
 
 class DynamicChoiceModel(BaseModel, Generic[OptionItem]):
     """Dynamic choice model builder that is itself a BaseModel.
+
     Can be called to generate new choice models with current options.
-    Supports strings, dicts with name keys, or any object with name attribute.
+    Supports strings, dicts with name keys, or any object with name
+    attribute.
     """
 
     # Core configuration

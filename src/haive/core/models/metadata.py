@@ -1,7 +1,7 @@
 """Model metadata utilities for LLM configurations.
 
-This module provides utilities for downloading, caching, and accessing
-model metadata from LiteLLM's model_prices_and_context_window.json.
+This module provides utilities for downloading, caching, and accessing model metadata
+from LiteLLM's model_prices_and_context_window.json.
 """
 
 import json
@@ -18,8 +18,8 @@ import requests
 class ModelMetadata:
     """A class to store and provide model metadata.
 
-    This class encapsulates metadata about a language model, including
-    its pricing, context window limits, and provider information.
+    This class encapsulates metadata about a language model, including its pricing,
+    context window limits, and provider information.
     """
 
     name: str
