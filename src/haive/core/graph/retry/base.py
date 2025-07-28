@@ -87,7 +87,7 @@ def execute_with_retry(
         *args: Positional arguments for the function
         retry_policy: Retry policy to use
         fallback_result: Result to return if all retries fail
-        **kwargs: Keyword arguments for the function
+        **kwargs: Key arguments for the function
 
     Returns:
         Result of the function or fallback result
@@ -136,7 +136,7 @@ async def execute_with_retry_async(
         *args: Positional arguments for the function
         retry_policy: Retry policy to use
         fallback_result: Result to return if all retries fail
-        **kwargs: Keyword arguments for the function
+        **kwargs: Key arguments for the function
 
     Returns:
         Result of the function or fallback result
