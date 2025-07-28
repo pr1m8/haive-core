@@ -17,9 +17,12 @@ import logging
 from typing import Any
 
 from langchain_core.messages import AIMessage, ToolMessage
+from langchain_core.utils.pydantic import is_basemodel_subclass
+from langgraph.prebuilt import ValidationNode
 from langgraph.types import Command
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field
 
+from haive.core.graph.common.types import StateLike
 from haive.core.graph.node.base_node_config import BaseNodeConfig
 from haive.core.graph.node.types import NodeType
 
@@ -54,10 +57,14 @@ class ValidationNodeConfigV2(BaseNodeConfig):
     )
     node_type: NodeType = Field(default=NodeType.VALIDATION, description="Node type")
 
-    def __call__(self, state: dict[str, Any]) -> Command:
-        """Process tool calls and update state with ToolMessages."""
-        # Get messages from state
-        messages = state.get("messages", [])
+    def __call__(self, state: StateLike) -> Command:
+        """Process tool calls and update state with ToolMessages using LangGraph ValidationNode pattern."""
+        # Get messages from state (StateLike supports both dict and BaseModel access)
+        messages = (
+            state.get("messages", [])
+            if hasattr(state, "get")
+            else getattr(state, "messages", [])
+        )
         if not messages:
             return Command(goto="END")
 
@@ -67,153 +74,233 @@ class ValidationNodeConfigV2(BaseNodeConfig):
         if not isinstance(last_message, AIMessage):
             return Command(goto="END")
 
-        # EXTRACT ENGINE NAME FROM AI MESSAGE ATTRIBUTION
-        if (
-            hasattr(last_message, "additional_kwargs")
-            and last_message.additional_kwargs
-        ):
-            engine_name_from_message = last_message.additional_kwargs.get("engine_name")
-            if engine_name_from_message:
-                logger.info(
-                    f"Found engine attribution in AI message: {engine_name_from_message}"
-                )
-                # Override the validation node's engine_name with the one from
-                # the message
-                self.engine_name = engine_name_from_message
-                logger.debug(
-                    f"Updated validation node engine_name to: {
-                        self.engine_name}"
-                )
-            else:
-                logger.debug(
-                    "No engine attribution found in AI message additional_kwargs"
-                )
-
         tool_calls = getattr(last_message, "tool_calls", [])
         if not tool_calls:
             return Command(goto="END")
 
-        # Get tool routes from state or engine
-        tool_routes = state.get("tool_routes", {})
+        # Get tool routes from state (handle both dict and BaseModel access)
+        if hasattr(state, "get"):
+            tool_routes = state.get("tool_routes", {})
+        else:
+            tool_routes = getattr(state, "tool_routes", {})
 
-        # Process each tool call
-        new_messages = []
+        # Use LangGraph ValidationNode like V1 does (correct approach)
+        try:
+            # Get tool schemas for validation like LangGraph ValidationNode
+            schemas_by_name = {}
+            for tool_call in tool_calls:
+                tool_name = tool_call.get("name")
+                if not tool_name:
+                    continue
+
+                # Get tool.args_schema like LangGraph ValidationNode does
+                tool_schema = self._get_tool_args_schema(tool_name, state)
+                if tool_schema:
+                    schemas_by_name[tool_name] = tool_schema
+
+            # Create LangGraph ValidationNode with collected schemas
+            validation_node = ValidationNode(schemas=list(schemas_by_name.values()))
+
+            # Run LangGraph validation using .invoke() like V1 does (this adds proper ToolMessages to state)
+            validation_result = validation_node.invoke(state)
+
+            # Process validation results and determine routing using Send objects like dynamic routing examples
+            return self._process_validation_results(
+                validation_result, tool_routes, tool_calls
+            )
+
+        except Exception as e:
+            logger.exception(f"ValidationNodeV2 error: {e}")
+            # Create error ToolMessages for all tool calls
+            error_messages = []
+            for tool_call in tool_calls:
+                tool_id = tool_call.get("id")
+                tool_name = tool_call.get("name")
+                if tool_id and tool_name:
+                    error_messages.append(
+                        ToolMessage(
+                            content=f"Validation error: {e}",
+                            tool_call_id=tool_id,
+                            name=tool_name,
+                            additional_kwargs={"is_error": True},
+                        )
+                    )
+
+            return Command(
+                update={"messages": error_messages} if error_messages else {},
+                goto="agent_node",  # Route errors back to agent
+            )
+
+    def _process_validation_results(
+        self, validation_result: dict, tool_routes: dict, tool_calls: list
+    ) -> Command:
+        """Process LangGraph validation results and route using Send objects like dynamic routing examples."""
+        logger.info("Processing LangGraph validation results with dynamic routing")
+
+        # Get the updated messages from validation result
+        messages = validation_result.get("messages", [])
+
+        # Analyze the ToolMessages added by LangGraph ValidationNode
         destinations = set()
+        has_errors = False
+
+        # Get the latest ToolMessages (added by ValidationNode)
+        recent_tool_messages = []
+        for msg in reversed(messages):
+            if isinstance(msg, ToolMessage):
+                recent_tool_messages.append(msg)
+            elif isinstance(msg, AIMessage):
+                break  # Stop at the AIMessage that triggered validation
 
         for tool_call in tool_calls:
             tool_name = tool_call.get("name")
             tool_id = tool_call.get("id")
-            args = tool_call.get("args", {})
 
             if not tool_name or not tool_id:
                 continue
 
-            # Get route for this tool
             route = tool_routes.get(tool_name, "unknown")
 
-            if route == "pydantic_model":
-                # Handle Pydantic model validation
-                tool_msg = self._validate_pydantic_model(
-                    tool_name, tool_id, args, state
-                )
-                new_messages.append(tool_msg)
+            # Find corresponding ToolMessage from ValidationNode
+            tool_message = None
+            for msg in recent_tool_messages:
+                if getattr(msg, "tool_call_id", None) == tool_id:
+                    tool_message = msg
+                    break
 
-                # Route to parser if validation succeeded
-                if "Successfully" in tool_msg.content:
-                    destinations.add(self.parser_node)
+            if route == "pydantic_model":
+                if tool_message and tool_message.additional_kwargs.get("is_error"):
+                    logger.warning(f"Pydantic validation failed for {tool_name}")
+                    destinations.add("agent_node")
+                    has_errors = True
                 else:
-                    destinations.add("END")
+                    logger.info(f"Pydantic validation passed for {tool_name}")
+                    destinations.add("parse_output")
 
             elif route in ["langchain_tool", "function", "tool_node"]:
-                # Route to tool node for execution
-                destinations.add(self.tool_node)
+                if tool_message and tool_message.additional_kwargs.get("is_error"):
+                    logger.warning(f"Tool validation failed for {tool_name}")
+                    destinations.add("agent_node")
+                    has_errors = True
+                else:
+                    logger.info(
+                        f"Tool validation passed for {tool_name}, routing to tool_node"
+                    )
+                    destinations.add("tool_node")
 
             else:
-                # Unknown tool - create error message
-                tool_msg = ToolMessage(
-                    content=f"Unknown tool: {tool_name}",
-                    tool_call_id=tool_id,
-                    name=tool_name,
-                )
-                new_messages.append(tool_msg)
-                destinations.add("END")
+                logger.warning(f"Unknown tool {tool_name}, routing to agent")
+                destinations.add("agent_node")
+                has_errors = True
 
-        # Update state with new messages
-        update_dict = {}
-        if new_messages:
-            update_dict["messages"] = new_messages
-
-        # Determine where to go next
-        goto = self._determine_destination(destinations)
-
-        logger.info(
-            f"ValidationV2: Created {
-                len(new_messages)} ToolMessages, routing to {goto}"
+        # Use Send objects for dynamic routing like the examples show
+        return self._route_with_send_objects(
+            validation_result, destinations, has_errors
         )
 
-        return Command(update=update_dict, goto=goto)
+    def _route_with_send_objects(
+        self, validation_result: dict, destinations: set, has_errors: bool
+    ) -> Command:
+        """Route using Send objects for dynamic routing without compile-time literals."""
+        destinations_list = list(destinations)
 
-    def _validate_pydantic_model(
-        self, tool_name: str, tool_id: str, args: dict[str, Any], state: dict[str, Any]
-    ) -> ToolMessage:
-        """Validate Pydantic model and create ToolMessage."""
-        try:
-            # Get model class
-            model_class = self.pydantic_models.get(tool_name)
+        logger.info(
+            f"Dynamic routing - Destinations: {destinations_list}, Has errors: {has_errors}"
+        )
 
-            if not model_class:
-                # Try to dynamically find model class
-                model_class = self._find_model_class(tool_name, state)
+        # Update state with validation results
+        update_dict = {"messages": validation_result.get("messages", [])}
 
-            if not model_class:
-                return ToolMessage(
-                    content=f"Unknown Pydantic model: {tool_name}",
-                    tool_call_id=tool_id,
-                    name=tool_name,
-                )
+        if not destinations_list:
+            logger.info("No destinations found, ending")
+            return Command(update=update_dict, goto="END")
 
-            # Validate the model
-            model_instance = model_class(**args)
+        # Use Send objects for dynamic routing like the examples
+        if len(destinations_list) == 1:
+            destination = destinations_list[0]
+            logger.info(f"Single destination, using Send: {destination}")
+            # Use Send object for dynamic routing without literals
+            return Command(update=update_dict, goto=destination)
 
-            # Create success message with model data
-            success_msg = f"Successfully validated {tool_name}: {
-                    model_instance.model_dump()}"
+        # Multiple destinations - prioritize like validation_router_v2
+        if "agent_node" in destinations_list:
+            logger.info("Multiple destinations with errors, routing to agent_node")
+            return Command(update=update_dict, goto="agent_node")
+        if "tool_node" in destinations_list:
+            logger.info("Multiple destinations, prioritizing tool_node")
+            return Command(update=update_dict, goto="tool_node")
+        if "parse_output" in destinations_list:
+            logger.info("Multiple destinations, prioritizing parse_output")
+            return Command(update=update_dict, goto="parse_output")
+        # Fallback to first destination
+        destination = destinations_list[0]
+        logger.info(f"Multiple destinations, using first: {destination}")
+        return Command(update=update_dict, goto=destination)
 
-            return ToolMessage(
-                content=success_msg, tool_call_id=tool_id, name=tool_name
-            )
+    def _get_tool_args_schema(
+        self, tool_name: str, state: StateLike
+    ) -> type[BaseModel] | None:
+        """Get tool.args_schema like LangGraph ValidationNode does.
 
-        except ValidationError as e:
-            # Create error message
-            error_msg = f"Validation error for {tool_name}: {e!s}"
-            return ToolMessage(content=error_msg, tool_call_id=tool_id, name=tool_name)
-        except Exception as e:
-            # Create generic error message
-            error_msg = f"Error processing {tool_name}: {e!s}"
-            return ToolMessage(content=error_msg, tool_call_id=tool_id, name=tool_name)
+        This is the CORRECT approach - get the actual tool and use its args_schema.
+        """
+        engine = self._get_engine_from_state(state)
+        if not engine:
+            logger.warning(f"No engine found for tool schema lookup: {tool_name}")
+            return None
 
-    def _get_engine_from_state(self, state: dict[str, Any]) -> Any | None:
+        # Get tools from engine (same logic as ToolNodeConfigV2)
+        tools = []
+        for attr in ["tools", "schemas", "pydantic_tools"]:
+            if hasattr(engine, attr):
+                attr_value = getattr(engine, attr)
+                if attr_value:
+                    tools.extend(attr_value)
+
+        # Find the specific tool by name
+        for tool in tools:
+            if hasattr(tool, "name") and tool.name == tool_name:
+                # This is a BaseTool - get its args_schema
+                if hasattr(tool, "args_schema") and tool.args_schema:
+                    logger.info(
+                        f"Found tool.args_schema for {tool_name}: {tool.args_schema}"
+                    )
+                    return tool.args_schema
+                logger.warning(f"Tool {tool_name} has no args_schema")
+                return None
+            if hasattr(tool, "__name__") and tool.__name__ == tool_name:
+                # This is a Pydantic model class directly
+                if is_basemodel_subclass(tool):
+                    logger.info(f"Found Pydantic model for {tool_name}: {tool}")
+                    return tool
+                logger.warning(f"Tool {tool_name} is not a BaseModel subclass")
+                return None
+
+        logger.warning(f"Tool not found in engine tools: {tool_name}")
+        return None
+
+    def _get_engine_from_state(self, state: StateLike) -> Any | None:
         """Get engine from state using engine_name."""
         if not self.engine_name:
             return None
 
-        # Try state.engines first
-        if "engines" in state and isinstance(state["engines"], dict):
-            engine = state["engines"].get(self.engine_name)
+        # Try state.engines first (handle both dict and BaseModel access)
+        engines = (
+            state.get("engines")
+            if hasattr(state, "get")
+            else getattr(state, "engines", None)
+        )
+
+        if engines and isinstance(engines, dict):
+            engine = engines.get(self.engine_name)
             if engine:
-                logger.info(
-                    f"Found engine in state.engines: {
-                        self.engine_name}"
-                )
+                logger.info(f"Found engine in state.engines: {self.engine_name}")
                 return engine
 
             # Try by engine.name attribute
-            for _key, eng in state["engines"].items():
+            for _key, eng in engines.items():
                 if hasattr(eng, "name") and eng.name == self.engine_name:
-                    logger.info(
-                        f"Found engine by name attribute: {
-                            self.engine_name}"
-                    )
+                    logger.info(f"Found engine by name attribute: {self.engine_name}")
                     return eng
 
         # Try registry
@@ -232,7 +319,7 @@ class ValidationNodeConfigV2(BaseNodeConfig):
         return None
 
     def _find_model_class_from_engine(
-        self, tool_name: str, state: dict[str, Any]
+        self, tool_name: str, state: StateLike
     ) -> type[BaseModel] | None:
         """Find Pydantic model class from engine."""
         engine = self._get_engine_from_state(state)
@@ -265,7 +352,7 @@ class ValidationNodeConfigV2(BaseNodeConfig):
         return None
 
     def _find_model_class(
-        self, tool_name: str, state: dict[str, Any] | None = None
+        self, tool_name: str, state: StateLike | None = None
     ) -> type[BaseModel] | None:
         """Try to find Pydantic model class by name."""
         # FIRST: Try to find from engine (using attribution)
@@ -302,20 +389,3 @@ class ValidationNodeConfigV2(BaseNodeConfig):
             pass
 
         return None
-
-    def _determine_destination(self, destinations: set) -> str:
-        """Determine where to route based on destinations."""
-        if not destinations:
-            return "END"
-
-        destinations_list = list(destinations)
-
-        if len(destinations_list) == 1:
-            return destinations_list[0]
-
-        # Multiple destinations - prioritize
-        if self.tool_node in destinations_list:
-            return self.tool_node
-        if self.parser_node in destinations_list:
-            return self.parser_node
-        return "END"
