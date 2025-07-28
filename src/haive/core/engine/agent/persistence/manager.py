@@ -185,7 +185,7 @@ class PersistenceManager:
         db_pass = config.get("db_pass", "postgres")
         ssl_mode = config.get("ssl_mode", "disable")
 
-        # URL encode the password to handle special characters
+        # URL encode the pass to handle special characters
         encoded_pass = urllib.parse.quote_plus(str(db_pass))
 
         # Format the connection URI
@@ -798,7 +798,7 @@ class PersistenceManager:
             db_port: Database port
             db_name: Database name
             db_user: Database user
-            db_pass: Database password
+            db_pass: Database pass
             use_async: Whether to use async connections
             use_pool: Whether to use connection pooling
             setup_needed: Whether table setup is needed
