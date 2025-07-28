@@ -2,7 +2,15 @@ from collections.abc import Callable
 from importlib import import_module
 from typing import Any, Protocol, TypeVar, runtime_checkable
 
-P = TypeVar("P")
+# Use ParamSpec instead of TypeVar for parameter specification
+try:
+    from typing import ParamSpec
+
+    P = ParamSpec("P")
+except ImportError:
+    # Fallback for older Python versions
+    P = TypeVar("P")
+
 R = TypeVar("R")
 
 
@@ -32,7 +40,7 @@ class SerializableCallable(Protocol):
         return not (hasattr(func, "__self__") and not isinstance(func.__self__, type))
 
     @classmethod
-    def serialize(cls, func: Callable[P, R]) -> str:
+    def serialize(cls, func: Callable[..., Any]) -> str:
         """Convert a callable to a string path.
 
         Example:
