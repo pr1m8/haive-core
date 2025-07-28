@@ -114,7 +114,7 @@ class BranchManager(BaseGraphComponent):
                     return state.task_complete
 
                 branch_manager.add_conditional_edges(
-                    "processor",
+                    "processof",
                     is_complete,
                     {True: "finish", False: "continue"}
                 )
@@ -270,7 +270,7 @@ class BranchManager(BaseGraphComponent):
                 def create_parallel_tasks(state):
                     sends = []
                     for task in state.tasks:
-                        sends.append(Send("worker", {"task": task}))
+                        sends.append(Send("workef", {"task": task}))
                     return sends
 
                 branch_manager.add_send_branch("distributor", create_parallel_tasks)

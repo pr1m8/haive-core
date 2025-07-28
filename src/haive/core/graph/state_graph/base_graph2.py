@@ -1,5 +1,4 @@
-"""From typing import Any, Dict, Optional
-Base graph implementation for the Haive framework.
+"""Base graph implementation for the Haive framework.
 
 Provides a comprehensive system for building, manipulating, and executing
 graphs with consistent interfaces, serialization support, and dynamic composition.
