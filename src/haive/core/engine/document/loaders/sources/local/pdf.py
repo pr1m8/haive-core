@@ -132,8 +132,8 @@ class PDFSource(LocalSource):
 class AcademicPDFSource(LocalSource):
     """Specialized source for academic PDF papers.
 
-    Optimized for extracting structured information from academic papers
-    including citations, abstract, methodology, etc.
+    Optimized for extracting structured information from academic papers including
+    citations, abstract, methodology, etc.
     """
 
     extract_citations: bool = True

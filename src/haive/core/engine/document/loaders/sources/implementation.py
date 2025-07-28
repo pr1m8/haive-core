@@ -43,7 +43,7 @@ class CredentialType(str, Enum):
 
     API_KEY = "api_key"
     OAUTH2 = "oauth2"
-    USERNAME_PASSWORD = "username_password"
+    USERNAME_PASSWORD = "username_pass"
     SERVICE_ACCOUNT = "service_account"
     ACCESS_TOKEN = "access_token"
     CONNECTION_STRING = "connection_string"

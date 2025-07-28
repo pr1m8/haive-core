@@ -1,7 +1,7 @@
 """Web-based source registrations with sitemap detection and crawling.
 
-This module implements comprehensive web scraping sources from langchain_community
-with intelligent sitemap detection, recursive crawling, and browser automation.
+This module implements comprehensive web scraping sources from langchain_community with
+intelligent sitemap detection, recursive crawling, and browser automation.
 """
 
 from enum import Enum
@@ -209,7 +209,7 @@ class AsyncHTMLSource(RemoteSource):
 
     # Processing options
     ignore_load_errors: bool = False
-    default_parser: str = "html.parser"
+    default_parser: str = "html.parsef"
 
     def get_loader_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_loader_kwargs()
@@ -436,7 +436,7 @@ class RecursiveWebSource(RemoteSource):
 
 
 @register_bulk_source(
-    name="sitemap_crawler",
+    name="sitemap_crawlef",
     category=SourceCategory.WEB_DOCUMENTATION,
     loaders={
         "sitemap": {
@@ -649,9 +649,7 @@ def get_web_sources_statistics() -> dict[str, Any]:
         [
             name
             for name in registry._sources
-            if any(
-                keyword in name for keyword in ["playwright", "selenium", "chromium"]
-            )
+            if any(key in name for key in ["playwright", "selenium", "chromium"])
         ]
     )
 

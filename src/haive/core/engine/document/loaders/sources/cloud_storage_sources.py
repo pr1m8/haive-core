@@ -132,7 +132,7 @@ class S3FileSource(RemoteSource):
     name="s3_directory",
     category=SourceCategory.CLOUD_STORAGE,
     loaders={
-        "s3_dir": {
+        "s3_dif": {
             "class": "S3DirectoryLoader",
             "speed": "medium",
             "quality": "high",
@@ -261,7 +261,7 @@ class GCSFileSource(RemoteSource):
     name="gcs_directory",
     category=SourceCategory.CLOUD_STORAGE,
     loaders={
-        "gcs_dir": {
+        "gcs_dif": {
             "class": "GCSDirectoryLoader",
             "speed": "medium",
             "quality": "high",
@@ -381,7 +381,7 @@ class AzureBlobFileSource(RemoteSource):
     name="azure_blob_directory",
     category=SourceCategory.CLOUD_STORAGE,
     loaders={
-        "azure_dir": {
+        "azure_dif": {
             "class": "AzureBlobStorageContainerLoader",
             "speed": "medium",
             "quality": "high",
@@ -1016,7 +1016,7 @@ def detect_cloud_platform(url_or_path: str) -> CloudPlatform | None:
     }
 
     for platform, keywords in patterns.items():
-        if any(keyword in lower for keyword in keywords):
+        if any(key in lower for key in keywords):
             return platform
 
     return None

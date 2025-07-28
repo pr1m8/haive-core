@@ -1,8 +1,7 @@
 """Messaging and social media source registrations.
 
-from typing import Any
-This module implements comprehensive messaging and social media loaders from
-langchain_community including Discord, Slack, Twitter, Reddit, WhatsApp,
+from typing import Any This module implements comprehensive messaging and social media
+loaders from langchain_community including Discord, Slack, Twitter, Reddit, WhatsApp,
 Telegram, email systems, and other communication platforms.
 """
 

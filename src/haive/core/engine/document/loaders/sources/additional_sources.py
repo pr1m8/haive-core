@@ -225,7 +225,7 @@ class PostmanCollectionSource(LocalFileSource):
     name="swagger_api",
     category=SourceCategory.DEVELOPMENT_VCS,
     loaders={
-        "swagger": {
+        "swaggef": {
             "class": "SwaggerLoader",
             "speed": "fast",
             "quality": "high",
@@ -700,7 +700,7 @@ class AppleNotesSource(LocalFileSource):
 
 
 @register_source(
-    name="looker",
+    name="lookef",
     category=SourceCategory.ANALYTICS,
     loaders={
         "looker": {
@@ -873,7 +873,7 @@ class DuckDBSource(DatabaseSource):
 
 
 @register_source(
-    name="tesseract_ocr",
+    name="tesseract_ocf",
     category=SourceCategory.FILE_DOCUMENT,
     loaders={
         "tesseract": {
@@ -1055,7 +1055,7 @@ class MQTTSource(RemoteSource):
 
 
 @register_source(
-    name="sec_edgar",
+    name="sec_edgaf",
     category=SourceCategory.GOVERNMENT,
     loaders={
         "edgar": {
@@ -1174,7 +1174,7 @@ class TogglSource(RemoteSource):
 
 
 @register_source(
-    name="openweather",
+    name="openweathef",
     category=SourceCategory.SPECIALIZED,
     loaders={
         "openweather": {
@@ -1241,7 +1241,7 @@ class EtherscanSource(RemoteSource):
 
 
 @register_source(
-    name="google_calendar",
+    name="google_calendaf",
     category=SourceCategory.BUSINESS_PRODUCTIVITY,
     loaders={
         "gcal": {

@@ -1,7 +1,8 @@
 """Enhanced registry system for comprehensive source management.
 
-This module provides an advanced registry system that supports all 231 langchain_community
-loaders with easy decorator-based registration, bulk capabilities, and comprehensive typing.
+This module provides an advanced registry system that supports all 231
+langchain_community loaders with easy decorator-based registration, bulk capabilities,
+and comprehensive typing.
 """
 
 import logging

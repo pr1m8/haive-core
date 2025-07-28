@@ -1,7 +1,7 @@
 """Complete file-based source registrations.
 
-This module implements all file-based document loaders from langchain_community
-with focus on unstructured processing, generic loaders, and code language support.
+This module implements all file-based document loaders from langchain_community with
+focus on unstructured processing, generic loaders, and code language support.
 """
 
 from typing import Any
@@ -576,7 +576,7 @@ class PDFDirectorySource(DirectorySource):
 class UnstructuredDirectorySource(DirectorySource):
     """Directory source with unstructured processing."""
 
-    loader_cls_name: str = "UnstructuredFileLoader"
+    loader_cls_name: str = "UnstructuredFileLoadef"
     loader_kwargs: dict[str, Any] = {}
 
     def get_loader_kwargs(self) -> dict[str, Any]:

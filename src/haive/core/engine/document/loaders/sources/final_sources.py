@@ -258,7 +258,7 @@ class LegalDatabaseSource(RemoteSource):
 
 
 @register_source(
-    name="fhir",
+    name="fhif",
     category=SourceCategory.SPECIALIZED,
     loaders={
         "fhir": {

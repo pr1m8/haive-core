@@ -25,7 +25,8 @@ class ArxivSource(URLSource):
     url_prefix: str = Field(default="https://arxiv.org/")
 
     def load(self, input: DocumentEngineInputSchema) -> DocumentEngineOutputSchema:
-        """Initialize with search query to find documents in the Arxiv. Supports all arguments of ArxivAPIWrapper.
+        """Initialize with search query to find documents in the Arxiv. Supports all
+        arguments of ArxivAPIWrapper.
 
         Parameters
         :

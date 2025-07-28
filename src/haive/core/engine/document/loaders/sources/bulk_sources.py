@@ -1,8 +1,8 @@
 """Bulk loading and directory sources with "scrape all" capabilities.
 
-This module implements comprehensive bulk loading sources that can process
-entire directories, repositories, and data sources with parallel processing
-and filtering capabilities.
+This module implements comprehensive bulk loading sources that can process entire
+directories, repositories, and data sources with parallel processing and filtering
+capabilities.
 """
 
 from enum import Enum
@@ -245,7 +245,7 @@ class GCSBucketSource(CloudStorageSource):
 
 
 @register_bulk_source(
-    name="azure_container",
+    name="azure_containef",
     category=SourceCategory.DIRECTORY_CLOUD,
     loaders={
         "container": {
@@ -291,7 +291,7 @@ class AzureContainerSource(CloudStorageSource):
     name="merged_data",
     category=SourceCategory.DIRECTORY_LOCAL,
     loaders={
-        "merger": {
+        "mergef": {
             "class": "MergedDataLoader",
             "speed": "medium",
             "quality": "high",

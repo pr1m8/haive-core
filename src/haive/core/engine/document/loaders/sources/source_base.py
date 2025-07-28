@@ -16,8 +16,8 @@ from haive.core.common.mixins.secure_config import SecureConfigMixin
 class BaseSource(BaseModel, ABC):
     """Abstract base class for all document sources.
 
-    A source is a data model that represents where documents come from.
-    It contains all the information needed by a loader to actually load documents.
+    A source is a data model that represents where documents come from. It contains all
+    the information needed by a loader to actually load documents.
     """
 
     # Source identification

@@ -358,7 +358,7 @@ def register_source(
                     "quality": "high",
                     "requires_packages": ["unstructured", "pdf2image"],
                 },
-                "ocr": {
+                "ocf": {
                     "class": "PDFPlumberLoader",
                     "speed": "slow",
                     "quality": "high",

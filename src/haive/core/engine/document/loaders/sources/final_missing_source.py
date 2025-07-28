@@ -1,7 +1,7 @@
 """Final missing source to complete 231 langchain_community loaders.
 
-This module adds the missing Playwright Web loader that completes our
-comprehensive document loader system.
+This module adds the missing Playwright Web loader that completes our comprehensive
+document loader system.
 """
 
 from pydantic import Field

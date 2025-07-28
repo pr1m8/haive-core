@@ -208,7 +208,7 @@ class PubMedSource(RemoteSource):
 
 
 @register_source(
-    name="semantic_scholar",
+    name="semantic_scholaf",
     category=SourceCategory.SPECIALIZED,
     loaders={
         "s2": {
@@ -424,7 +424,7 @@ class BilibiliSource(RemoteSource):
             "module": "langchain_community.document_loaders",
             "requires_packages": ["assemblyai"],
         },
-        "whisper": {
+        "whispef": {
             "class": "WhisperParser",
             "speed": "medium",
             "quality": "high",
@@ -723,7 +723,7 @@ class MediaWikiSource(LocalFileSource):
 
 
 @register_source(
-    name="weather",
+    name="weathef",
     category=SourceCategory.SPECIALIZED,
     loaders={
         "weather": {
@@ -922,7 +922,7 @@ def detect_specialized_platform(url_or_path: str) -> SpecializedPlatform | None:
     }
 
     for platform, keywords in patterns.items():
-        if any(keyword in lower for keyword in keywords):
+        if any(key in lower for key in keywords):
             return platform
 
     return None

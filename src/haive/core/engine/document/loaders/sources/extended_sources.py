@@ -24,7 +24,7 @@ from .source_types import (
 
 
 @register_source(
-    name="paddleocr",
+    name="paddleocf",
     category=SourceCategory.FILE_DOCUMENT,
     loaders={
         "paddleocr": {
@@ -49,7 +49,7 @@ class PaddleOCRSource(LocalFileSource):
 
 
 @register_source(
-    name="azure_form_recognizer",
+    name="azure_form_recognizef",
     category=SourceCategory.FILE_DOCUMENT,
     loaders={
         "azure_form": {
@@ -497,7 +497,7 @@ class GhostSource(RemoteSource):
 
 
 @register_source(
-    name="linear",
+    name="lineaf",
     category=SourceCategory.BUSINESS_PRODUCTIVITY,
     loaders={
         "linear": {
@@ -557,7 +557,7 @@ class ShortcutSource(RemoteSource):
 
 
 @register_source(
-    name="epic_fhir",
+    name="epic_fhif",
     category=SourceCategory.HEALTHCARE,
     loaders={
         "epic": {
@@ -584,7 +584,7 @@ class EpicFHIRSource(RemoteSource):
 
 
 @register_source(
-    name="cerner_fhir",
+    name="cerner_fhif",
     category=SourceCategory.HEALTHCARE,
     loaders={
         "cerner": {

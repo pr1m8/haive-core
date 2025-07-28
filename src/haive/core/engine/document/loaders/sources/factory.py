@@ -1,7 +1,7 @@
 """Source object factory for creating sources from various input formats.
 
-This module provides utility functions for creating source objects from
-strings, paths, and dictionaries, determining the correct source type.
+This module provides utility functions for creating source objects from strings, paths,
+and dictionaries, determining the correct source type.
 """
 
 import os

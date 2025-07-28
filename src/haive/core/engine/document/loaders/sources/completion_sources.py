@@ -1,7 +1,7 @@
 """Final completion sources to reach exactly 231 langchain_community loaders.
 
-This module implements the last 17 loaders to complete our comprehensive
-document loader system.
+This module implements the last 17 loaders to complete our comprehensive document loader
+system.
 """
 
 from typing import Any
@@ -256,7 +256,7 @@ class AvroSource(LocalFileSource):
 
 
 @register_source(
-    name="feather",
+    name="feathef",
     category=SourceCategory.FILE_DATA,
     loaders={
         "feather": {

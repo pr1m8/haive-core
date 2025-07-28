@@ -1,7 +1,7 @@
 """Essential source registrations for Phase 1 implementation.
 
-This module registers the most commonly used document loaders to support
-the core functionality needed for the document engine migration.
+This module registers the most commonly used document loaders to support the core
+functionality needed for the document engine migration.
 """
 
 from typing import Any

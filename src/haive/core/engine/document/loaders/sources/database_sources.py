@@ -1,9 +1,8 @@
 """Database source registrations with connection string auto-detection.
 
-from typing import Any
-This module implements comprehensive database loaders from langchain_community
-including SQL, NoSQL, Graph databases, and Data Warehouses with intelligent
-connection string detection and query optimization.
+from typing import Any This module implements comprehensive database loaders from
+langchain_community including SQL, NoSQL, Graph databases, and Data Warehouses with
+intelligent connection string detection and query optimization.
 """
 
 from enum import Enum

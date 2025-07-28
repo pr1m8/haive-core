@@ -1,7 +1,7 @@
 """Document sources module.
 
-Sources represent the data about where documents come from.
-They are data models that hold configuration and metadata.
+Sources represent the data about where documents come from. They are data models that
+hold configuration and metadata.
 """
 
 from .registry import register_source, source_registry
