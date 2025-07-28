@@ -1,3 +1,28 @@
+"""Base persistence configuration for agent state checkpointing.
+
+This module provides the foundational configuration classes for agent persistence in the Haive
+framework. It defines the base checkpointer configuration that all persistence backends extend.
+
+The persistence system supports:
+- Multiple checkpointer types (memory, PostgreSQL, MongoDB, Redis)
+- Configurable checkpoint naming and thread management
+- Type-safe configuration with validation
+- Consistent interfaces across persistence backends
+
+Example:
+    Configure basic persistence::
+
+        config = CheckpointerConfig(
+            checkpointer_type=CheckpointerType.MEMORY,
+            checkpoint_ns="my_agent",
+            thread_id="session_123"
+        )
+
+See Also:
+    haive.core.engine.agent.persistence.factory: Factory for creating checkpointers
+    haive.core.engine.agent.persistence.types: Type definitions for persistence
+"""
+
 # src/haive/core/engine/agent/persistence/base.py
 import logging
 from typing import Any
