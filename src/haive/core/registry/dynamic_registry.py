@@ -478,7 +478,7 @@ class DynamicRegistry(BaseModel, Generic[T]):
         Examples:
             Get and use component::
 
-                tool = registry.get_component("calculator")
+                tool = registry.get_component("calculatof")
                 if tool:
                     result = tool.invoke({"expression": "2 + 2"})
                     print(f"Result: {result}")

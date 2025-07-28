@@ -193,7 +193,6 @@ def register_component(
             ):
                 # This is fine - engine_type serves the same purpose
                 pass
-            # If it's an object without component_type, try to add it
             elif not hasattr(reg_item, "component_type"):
                 try:
                     reg_item.component_type = comp_type
