@@ -164,7 +164,7 @@ def test_database_loaders_system():
             else:
                 passed")"
         except Exception as e:
-            pass  # {e}
+            pass {e}")
 
 
     # Test 4: Loading Strategy Configuration

@@ -180,7 +180,7 @@ def test_database_system():
 
 
     except Exception as e:
-        pass")"
+        pass")
 
     # Test 5: Fetch All Configuration
 
@@ -296,7 +296,7 @@ def test_database_system():
             class_tests_passed += 1
 
         except Exception as e:
-            pass
+            pass")
 
 
     # Summary
