@@ -1,3 +1,12 @@
+"""Inspection utility module.
+
+This module provides inspection functionality for the Haive framework.
+
+Functions:
+    check_interfaces: Check Interfaces functionality.
+"""
+
+
 def check_interfaces(
     obj: Any,
     interfaces: Dict[str, Optional[List[str]]],

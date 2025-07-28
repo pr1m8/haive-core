@@ -1,3 +1,15 @@
+"""Factory core module.
+
+This module provides factory functionality for the Haive framework.
+
+Classes:
+    RegistryFactory: RegistryFactory implementation.
+
+Functions:
+    register_registry_type: Register Registry Type functionality.
+    create: Create functionality.
+"""
+
 # src/haive/core/registry/factory.py
 
 import logging

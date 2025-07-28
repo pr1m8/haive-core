@@ -1,3 +1,18 @@
+"""Conditions graph module.
+
+This module provides conditions functionality for the Haive framework.
+
+Classes:
+    RouteCondition: RouteCondition implementation.
+    ToolCallCondition: ToolCallCondition implementation.
+    ContentCondition: ContentCondition implementation.
+
+Functions:
+    evaluate: Evaluate functionality.
+    evaluate: Evaluate functionality.
+    evaluate: Evaluate functionality.
+"""
+
 # src/haive/core/router/Router.py
 
 import logging

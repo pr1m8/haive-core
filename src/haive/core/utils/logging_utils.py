@@ -1,3 +1,11 @@
+"""Logging_Utils utility module.
+
+This module provides logging utils functionality for the Haive framework.
+
+Functions:
+    setup_test_logger: Setup Test Logger functionality.
+"""
+
 # src/haive.core/utils/logging.py
 
 import logging

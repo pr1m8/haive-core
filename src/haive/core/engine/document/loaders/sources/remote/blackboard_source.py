@@ -1,3 +1,11 @@
+"""Blackboard_Source engine module.
+
+This module provides blackboard source functionality for the Haive framework.
+
+Classes:
+    BlackboardSource: BlackboardSource implementation.
+"""
+
 from pydantic import Field
 
 from haive.core.engine.loaders.sources.remote.base import URLSource

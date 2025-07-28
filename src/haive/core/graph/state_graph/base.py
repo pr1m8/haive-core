@@ -1,3 +1,17 @@
+"""Base graph module.
+
+This module provides base functionality for the Haive framework.
+
+Classes:
+    SerializableModelMetaclass: SerializableModelMetaclass implementation.
+    for: for implementation.
+    model_type: model_type implementation.
+
+Functions:
+    mark_modified: Mark Modified functionality.
+    is_modified: Is Modified functionality.
+"""
+
 from datetime import datetime
 from typing import ClassVar, Optional, TypeVar
 from uuid import uuid4

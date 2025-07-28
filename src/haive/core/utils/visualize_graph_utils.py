@@ -1,3 +1,11 @@
+"""Visualize_Graph_Utils graph module.
+
+This module provides visualize graph utils functionality for the Haive framework.
+
+Functions:
+    render_and_display_graph: Render And Display Graph functionality.
+"""
+
 import os
 
 # Optionally display the image (for local viewing, using PIL)

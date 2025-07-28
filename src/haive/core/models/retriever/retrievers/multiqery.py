@@ -1,3 +1,15 @@
+"""Multiqery model module.
+
+This module provides multiqery functionality for the Haive framework.
+
+Classes:
+    MultiQueryRetrieverConfig: MultiQueryRetrieverConfig implementation.
+    from: from implementation.
+
+Functions:
+    instantiate: Instantiate functionality.
+"""
+
 import logging
 from typing import Any
 

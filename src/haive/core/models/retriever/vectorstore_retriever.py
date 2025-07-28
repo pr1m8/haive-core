@@ -1,3 +1,14 @@
+"""Vectorstore_Retriever model module.
+
+This module provides vectorstore retriever functionality for the Haive framework.
+
+Classes:
+    VectorStoreRetrieverConfig: VectorStoreRetrieverConfig implementation.
+
+Functions:
+    instantiate: Instantiate functionality.
+"""
+
 import logging
 from typing import Any
 

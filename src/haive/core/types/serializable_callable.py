@@ -1,3 +1,15 @@
+"""Serializable_Callable core module.
+
+This module provides serializable callable functionality for the Haive framework.
+
+Classes:
+    SerializableCallable: SerializableCallable implementation.
+
+Functions:
+    is_serializable: Is Serializable functionality.
+    serialize: Serialize functionality.
+"""
+
 from collections.abc import Callable
 from importlib import import_module
 from typing import Any, Protocol, TypeVar, runtime_checkable

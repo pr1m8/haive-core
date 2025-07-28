@@ -1,3 +1,15 @@
+"""Pattern_Registry graph module.
+
+This module provides pattern registry functionality for the Haive framework.
+
+Classes:
+    PatternRegistry: PatternRegistry implementation.
+
+Functions:
+    get_instance: Get Instance functionality.
+    register: Register functionality.
+"""
+
 from typing import Any, ClassVar, Optional
 
 from haive.core.registry.base import AbstractRegistry

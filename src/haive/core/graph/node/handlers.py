@@ -1,3 +1,18 @@
+"""Handlers graph module.
+
+This module provides handlers functionality for the Haive framework.
+
+Classes:
+    StandardCommandHandler: StandardCommandHandler implementation.
+    DirectInputProcessor: DirectInputProcessor implementation.
+    MappedInputProcessor: MappedInputProcessor implementation.
+
+Functions:
+    process_result: Process Result functionality.
+    extract_input: Extract Input functionality.
+    extract_input: Extract Input functionality.
+"""
+
 # src/haive/core/graph/node/handlers.py
 
 import logging

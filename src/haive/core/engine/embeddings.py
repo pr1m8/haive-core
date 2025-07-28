@@ -1,3 +1,16 @@
+"""Embeddings engine module.
+
+This module provides embeddings functionality for the Haive framework.
+
+Classes:
+    EmbeddingsEngineConfig: EmbeddingsEngineConfig implementation.
+
+Functions:
+    validate_engine_type: Validate Engine Type functionality.
+    create_runnable: Create Runnable functionality.
+    apply_runnable_config: Apply Runnable Config functionality.
+"""
+
 # src/haive/core/engine/embeddings.py
 
 import logging

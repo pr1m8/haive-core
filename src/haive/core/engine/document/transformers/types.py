@@ -1,3 +1,11 @@
+"""Types engine module.
+
+This module provides types functionality for the Haive framework.
+
+Classes:
+    DocTransformerType: DocTransformerType implementation.
+"""
+
 from enum import Enum
 
 

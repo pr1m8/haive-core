@@ -1,3 +1,17 @@
+"""_Base schema module.
+
+This module provides  base functionality for the Haive framework.
+
+Classes:
+    _SchemaComposerBase: _SchemaComposerBase implementation.
+    for: for implementation.
+    detection: detection implementation.
+
+Functions:
+    build: Build functionality.
+    in: In functionality.
+"""
+
 from __future__ import annotations
 
 import logging

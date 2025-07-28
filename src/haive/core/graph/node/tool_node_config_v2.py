@@ -1,3 +1,18 @@
+"""Tool_Node_Config_V2 graph module.
+
+This module provides tool node config v2 functionality for the Haive framework.
+
+Classes:
+    ToolNodeConfig: ToolNodeConfig implementation.
+    LangChainToolNode: LangChainToolNode implementation.
+    FunctionToolNode: FunctionToolNode implementation.
+
+Functions:
+    validate_tool_source: Validate Tool Source functionality.
+    get_default_input_fields: Get Default Input Fields functionality.
+    get_default_output_fields: Get Default Output Fields functionality.
+"""
+
 # ============================================================================
 # TOOL NODE CONFIG V2 - WITH SCHEMA SUPPORT
 # ============================================================================

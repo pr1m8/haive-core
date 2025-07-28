@@ -1,3 +1,18 @@
+"""Decorators core module.
+
+This module provides decorators functionality for the Haive framework.
+
+Classes:
+    with: with implementation.
+    method: method implementation.
+    for: for implementation.
+
+Functions:
+    register_component: Register Component functionality.
+    decorator: Decorator functionality.
+    new_init: New Init functionality.
+"""
+
 # src/haive/core/registry/decorators.py
 
 import logging

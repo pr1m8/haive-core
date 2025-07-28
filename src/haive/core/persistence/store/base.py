@@ -1,3 +1,15 @@
+"""Base core module.
+
+This module provides base functionality for the Haive framework.
+
+Classes:
+    for: for implementation.
+    SerializableStoreWrapper: SerializableStoreWrapper implementation.
+    provides: provides implementation.
+
+Functions:
+"""
+
 # src/haive/core/persistence/store/base.py
 """Base store wrapper for LangGraph stores with serialization support.
 

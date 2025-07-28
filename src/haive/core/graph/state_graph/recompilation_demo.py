@@ -1,3 +1,17 @@
+"""Recompilation_Demo graph module.
+
+This module provides recompilation demo functionality for the Haive framework.
+
+Classes:
+    SimpleState: SimpleState implementation.
+    ExtendedState: ExtendedState implementation.
+
+Functions:
+    demo_recompilation_tracking: Demo Recompilation Tracking functionality.
+    start_func: Start Func functionality.
+    process_func: Process Func functionality.
+"""
+
 #!/usr/bin/env python3
 """Demonstration of BaseGraph2 recompilation tracking.
 

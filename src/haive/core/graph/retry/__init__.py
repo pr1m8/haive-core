@@ -1,3 +1,11 @@
+"""Retry package.
+
+This package provides retry functionality for the Haive framework.
+
+Modules:
+    base: Base implementation.
+"""
+
 from haive.core.graph.retry.base import (
     RetryPolicy,
     create_exponential_backoff_policy,

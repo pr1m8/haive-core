@@ -1,3 +1,17 @@
+"""Toolmanager graph module.
+
+This module provides ToolManager functionality for the Haive framework.
+
+Classes:
+    ToolConfig: ToolConfig implementation.
+    ToolResult: ToolResult implementation.
+    ToolManager: ToolManager implementation.
+
+Functions:
+    register_tool: Register Tool functionality.
+    create_and_register_tool: Create And Register Tool functionality.
+"""
+
 # src/haive/core/tools/ToolManager.py
 
 import asyncio

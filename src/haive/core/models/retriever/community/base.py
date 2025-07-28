@@ -1,3 +1,17 @@
+"""Base model module.
+
+This module provides base functionality for the Haive framework.
+
+Classes:
+    BaseRetrieverConfig: BaseRetrieverConfig implementation.
+    for: for implementation.
+    CommunityRetrieverType: CommunityRetrieverType implementation.
+
+Functions:
+    create: Create functionality.
+    create: Create functionality.
+"""
+
 from enum import Enum
 from typing import Any
 

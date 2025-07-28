@@ -1,3 +1,18 @@
+"""Config graph module.
+
+This module provides config functionality for the Haive framework.
+
+Classes:
+    NodeConfig: NodeConfig implementation.
+    for: for implementation.
+    name: name implementation.
+
+Functions:
+    to_dict: To Dict functionality.
+    validate_and_determine_node_type: Validate And Determine Node Type functionality.
+    get_engine: Get Engine functionality.
+"""
+
 import logging
 import uuid
 from collections.abc import Callable, Sequence

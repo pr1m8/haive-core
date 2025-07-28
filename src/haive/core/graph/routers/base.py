@@ -1,3 +1,12 @@
+"""Base graph module.
+
+This module provides base functionality for the Haive framework.
+
+Classes:
+    RoutingConfig: RoutingConfig implementation.
+    Route: Route implementation.
+"""
+
 from collections.abc import Callable
 from typing import Any
 

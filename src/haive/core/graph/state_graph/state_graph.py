@@ -1,3 +1,16 @@
+"""State_Graph graph module.
+
+This module provides state graph functionality for the Haive framework.
+
+Classes:
+    StateGraphSerializable: StateGraphSerializable implementation.
+    provides: provides implementation.
+
+Functions:
+    validate_name: Validate Name functionality.
+    validate_graph_structure: Validate Graph Structure functionality.
+"""
+
 from collections.abc import Callable
 from datetime import datetime
 from typing import Any, ClassVar, Generic, Self, TypeVar

@@ -1,3 +1,12 @@
+"""Output_Parser package.
+
+This package provides output parser functionality for the Haive framework.
+
+Modules:
+    base: Base implementation.
+    types: Types implementation.
+"""
+
 r"""Output parser engine module for the Haive framework.
 
 This module provides engine implementations for LangChain output parsers,

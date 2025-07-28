@@ -1,3 +1,17 @@
+"""Mixin graph module.
+
+This module provides mixin functionality for the Haive framework.
+
+Classes:
+    GraphSchemaMixin: GraphSchemaMixin implementation.
+    PassThroughState: PassThroughState implementation.
+
+Functions:
+    validate_schema_setup: Validate Schema Setup functionality.
+    validate_input: Validate Input functionality.
+    validate_output: Validate Output functionality.
+"""
+
 # src/haive/core/graph/graph_mixin.py
 
 from typing import Any, Generic

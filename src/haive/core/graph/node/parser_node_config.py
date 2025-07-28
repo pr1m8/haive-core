@@ -1,3 +1,15 @@
+"""Parser_Node_Config graph module.
+
+This module provides parser node config functionality for the Haive framework.
+
+Classes:
+    ParserNodeConfig: ParserNodeConfig implementation.
+    from: from implementation.
+    for: for implementation.
+
+Functions:
+"""
+
 # src/haive/core/graph/node/parser_node_config.py
 
 import json

@@ -1,3 +1,16 @@
+"""Message_Utils utility module.
+
+This module provides message utils functionality for the Haive framework.
+
+Classes:
+    MessageNormalizingToolNode: MessageNormalizingToolNode implementation.
+
+Functions:
+    has_tool_calls: Has Tool Calls functionality.
+    has_tool_call: Has Tool Call functionality.
+    has_tool_error: Has Tool Error functionality.
+"""
+
 from collections.abc import Callable, Sequence
 from typing import Any
 from uuid import uuid4

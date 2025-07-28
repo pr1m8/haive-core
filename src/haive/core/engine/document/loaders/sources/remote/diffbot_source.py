@@ -1,3 +1,11 @@
+"""Diffbot_Source engine module.
+
+This module provides diffbot source functionality for the Haive framework.
+
+Classes:
+    DiffbotSource: DiffbotSource implementation.
+"""
+
 from pydantic import Field, SecretStr
 
 from haive.core.engine.loaders.sources.remote.base import URLSource

@@ -1,3 +1,18 @@
+"""Registry engine module.
+
+This module provides registry functionality for the Haive framework.
+
+Classes:
+    with: with implementation.
+    to: to implementation.
+    logger: logger implementation.
+
+Functions:
+    register_agent: Register Agent functionality.
+    decorator: Decorator functionality.
+    resolve_agent_class: Resolve Agent Class functionality.
+"""
+
 # src/haive/core/engine/agent/registry.py
 
 """Agent registry module for managing and resolving agent classes.

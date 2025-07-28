@@ -1,3 +1,14 @@
+"""Memory_Config engine module.
+
+This module provides memory config functionality for the Haive framework.
+
+Classes:
+    MemoryCheckpointerConfig: MemoryCheckpointerConfig implementation.
+
+Functions:
+    create_checkpointer: Create Checkpointer functionality.
+"""
+
 # src/haive/core/engine/agent/persistence/memory_config.py
 from typing import Any, Literal
 

@@ -1,3 +1,13 @@
+"""Integration engine module.
+
+This module provides integration functionality for the Haive framework.
+
+Functions:
+    create_persistence_manager: Create Persistence Manager functionality.
+    prepare_agent_run: Prepare Agent Run functionality.
+    aprepare_agent_run: Aprepare Agent Run functionality.
+"""
+
 # src/haive/core/engine/agent/persistence/integration.py
 import logging
 from typing import Any

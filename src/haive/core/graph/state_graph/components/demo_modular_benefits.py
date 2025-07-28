@@ -1,3 +1,16 @@
+"""Demo_Modular_Benefits graph module.
+
+This module provides demo modular benefits functionality for the Haive framework.
+
+Classes:
+    MockGraph: MockGraph implementation.
+    TestComponent: TestComponent implementation.
+
+Functions:
+    demonstrate_component_separation: Demonstrate Component Separation functionality.
+    demonstrate_focused_testing: Demonstrate Focused Testing functionality.
+"""
+
 #!/usr/bin/env python3
 """Demonstration of the modular BaseGraph2 architecture benefits.
 

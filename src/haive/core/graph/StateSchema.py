@@ -1,3 +1,15 @@
+"""Stateschema graph module.
+
+This module provides StateSchema functionality for the Haive framework.
+
+Classes:
+    StateSchema: StateSchema implementation.
+
+Functions:
+    add_field: Add Field functionality.
+    mark_config_aware: Mark Config Aware functionality.
+"""
+
 # src/haive/core/graph/StateSchema.py
 from typing import Any
 

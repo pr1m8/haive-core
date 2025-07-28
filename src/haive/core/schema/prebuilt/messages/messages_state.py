@@ -1,3 +1,17 @@
+"""Messages_State schema module.
+
+This module provides messages state functionality for the Haive framework.
+
+Classes:
+    ToolCallInfo: ToolCallInfo implementation.
+    MessageRound: MessageRound implementation.
+    MessageList: MessageList implementation.
+
+Functions:
+    convert_strings_to_messages: Convert Strings To Messages functionality.
+    ensure_proper_messages_and_ordering: Ensure Proper Messages And Ordering functionality.
+"""
+
 # src/haive/core/graph/state/messages_state.py
 
 from collections.abc import Callable, Iterator

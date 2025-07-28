@@ -1,3 +1,15 @@
+"""Mongodb_Config engine module.
+
+This module provides mongodb config functionality for the Haive framework.
+
+Classes:
+    MongoDBCheckpointerConfig: MongoDBCheckpointerConfig implementation.
+
+Functions:
+    create_checkpointer: Create Checkpointer functionality.
+    acreate_checkpointer: Acreate Checkpointer functionality.
+"""
+
 # src/haive/core/engine/agent/persistence/mongodb_config.py
 import logging
 from typing import Any, Literal

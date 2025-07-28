@@ -1,3 +1,18 @@
+"""Base model module.
+
+This module provides base functionality for the Haive framework.
+
+Classes:
+    RetrieverType: RetrieverType implementation.
+    RetrieverConfig: RetrieverConfig implementation.
+    return: return implementation.
+
+Functions:
+    instantiate: Instantiate functionality.
+    register: Register functionality.
+    decorator: Decorator functionality.
+"""
+
 import logging
 from enum import Enum
 from typing import Any, ClassVar

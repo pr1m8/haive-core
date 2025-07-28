@@ -1,3 +1,16 @@
+"""State_Graph_Model graph module.
+
+This module provides state graph model functionality for the Haive framework.
+
+Classes:
+    GraphModel: GraphModel implementation.
+
+Functions:
+    node_count: Node Count functionality.
+    edge_count: Edge Count functionality.
+    all_edges: All Edges functionality.
+"""
+
 from collections import defaultdict
 from typing import Any, ClassVar, Generic, Self, TypeVar
 

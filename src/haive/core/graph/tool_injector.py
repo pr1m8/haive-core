@@ -1,3 +1,18 @@
+"""Tool_Injector graph module.
+
+This module provides tool injector functionality for the Haive framework.
+
+Classes:
+    ToolInjector: ToolInjector implementation.
+    for: for implementation.
+    helps: helps implementation.
+
+Functions:
+    create_state_tool: Create State Tool functionality.
+    wrapped_func: Wrapped Func functionality.
+    create_store_tool: Create Store Tool functionality.
+"""
+
 # src/haive/core/graph/tool_injector.py
 
 import functools

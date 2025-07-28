@@ -1,3 +1,13 @@
+"""Types core module.
+
+This module provides types functionality for the Haive framework.
+
+Classes:
+    StoreType: StoreType implementation.
+    StoreConfig: StoreConfig implementation.
+    Config: Config implementation.
+"""
+
 # src/haive/core/persistence/store/types.py
 """Store type definitions and configuration for Haive persistence.
 

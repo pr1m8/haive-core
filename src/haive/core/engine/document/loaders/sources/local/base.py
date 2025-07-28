@@ -1,3 +1,18 @@
+"""Base engine module.
+
+This module provides base functionality for the Haive framework.
+
+Classes:
+    LocalSource: LocalSource implementation.
+    FileSource: FileSource implementation.
+    DirectorySource: DirectorySource implementation.
+
+Functions:
+    validate_file_path: Validate File Path functionality.
+    convert_to_path: Convert To Path functionality.
+    is_file: Is File functionality.
+"""
+
 import os
 from abc import ABC
 from pathlib import Path

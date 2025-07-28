@@ -1,3 +1,17 @@
+"""Dynamic_Literal core module.
+
+This module provides dynamic literal functionality for the Haive framework.
+
+Classes:
+    _DynLitMeta: _DynLitMeta implementation.
+    attr: attr implementation.
+    DynamicLiteral: DynamicLiteral implementation.
+
+Functions:
+    register: Register functionality.
+    unregister: Unregister functionality.
+"""
+
 from __future__ import annotations
 
 import contextlib

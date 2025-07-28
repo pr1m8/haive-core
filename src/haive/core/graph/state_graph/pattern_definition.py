@@ -1,3 +1,15 @@
+"""Pattern_Definition graph module.
+
+This module provides pattern definition functionality for the Haive framework.
+
+Classes:
+    PatternDefinition: PatternDefinition implementation.
+
+Functions:
+    from_function: From Function functionality.
+"""
+
+
 class PatternDefinition(SerializableModel):
     """Definition of a reusable graph pattern."""
 

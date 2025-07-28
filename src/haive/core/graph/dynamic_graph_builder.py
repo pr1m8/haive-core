@@ -1,3 +1,15 @@
+"""Dynamic_Graph_Builder graph module.
+
+This module provides dynamic graph builder functionality for the Haive framework.
+
+Classes:
+    DebugLevel: DebugLevel implementation.
+    DynamicGraphEdge: DynamicGraphEdge implementation.
+    Config: Config implementation.
+
+Functions:
+"""
+
 # src/haive/core/graph/dynamic_graph_builder.py
 
 import inspect

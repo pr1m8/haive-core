@@ -1,3 +1,14 @@
+"""Base engine module.
+
+This module provides base functionality for the Haive framework.
+
+Classes:
+    BaseTextSplitter: BaseTextSplitter implementation.
+    for: for implementation.
+
+Functions:
+"""
+
 from langchain.document_loaders.base import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 

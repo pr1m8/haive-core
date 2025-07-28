@@ -1,3 +1,17 @@
+"""Base engine module.
+
+This module provides base functionality for the Haive framework.
+
+Classes:
+    DocumentLoaderEngine: DocumentLoaderEngine implementation.
+    from: from implementation.
+
+Functions:
+    supported_source_types_names: Supported Source Types Names functionality.
+    get_input_fields: Get Input Fields functionality.
+    get_output_fields: Get Output Fields functionality.
+"""
+
 import contextlib
 import logging
 from datetime import datetime

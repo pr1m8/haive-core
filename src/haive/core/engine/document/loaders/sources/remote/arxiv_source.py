@@ -1,3 +1,14 @@
+"""Arxiv_Source engine module.
+
+This module provides arxiv source functionality for the Haive framework.
+
+Classes:
+    ArxivSource: ArxivSource implementation.
+
+Functions:
+    load: Load functionality.
+"""
+
 from pydantic import Field
 
 from haive.core.engine.document.loaders.base.schema import (

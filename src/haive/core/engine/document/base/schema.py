@@ -1,3 +1,13 @@
+"""Schema engine module.
+
+This module provides schema functionality for the Haive framework.
+
+Classes:
+    DocumentLoadingStatus: DocumentLoadingStatus implementation.
+    LoadingStrategy: LoadingStrategy implementation.
+    TextSplitterType: TextSplitterType implementation.
+"""
+
 from enum import Enum
 from typing import Any
 

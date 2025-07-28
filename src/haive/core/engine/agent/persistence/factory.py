@@ -1,3 +1,15 @@
+"""Factory engine module.
+
+This module provides factory functionality for the Haive framework.
+
+Classes:
+    config_cls: config_cls implementation.
+
+Functions:
+    load_checkpointer_config: Load Checkpointer Config functionality.
+    create_persistence_manager: Create Persistence Manager functionality.
+"""
+
 # src/haive/core/engine/agent/persistence/factory.py
 import logging
 from typing import Any

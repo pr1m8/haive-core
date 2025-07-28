@@ -1,3 +1,16 @@
+"""Base engine module.
+
+This module provides base functionality for the Haive framework.
+
+Classes:
+    URLSource: URLSource implementation.
+
+Functions:
+    validate_url: Validate Url functionality.
+    source: Source functionality.
+    from_url: From Url functionality.
+"""
+
 from typing import Any
 
 from pydantic import Field, HttpUrl

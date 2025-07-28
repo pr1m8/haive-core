@@ -1,3 +1,11 @@
+"""Source_Analysis engine module.
+
+This module provides source analysis functionality for the Haive framework.
+
+Classes:
+    SourceType: SourceType implementation.
+"""
+
 from __future__ import annotations
 
 import logging

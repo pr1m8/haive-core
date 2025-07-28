@@ -1,3 +1,16 @@
+"""Graph_Builder2 graph module.
+
+This module provides graph builder2 functionality for the Haive framework.
+
+Classes:
+    RetryPolicy: RetryPolicy implementation.
+    ValidationMode: ValidationMode implementation.
+    NodeType: NodeType implementation.
+
+Functions:
+    create_node: Create Node functionality.
+"""
+
 # src/haive/core/node/NodeFactory.py
 
 import asyncio

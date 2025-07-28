@@ -1,3 +1,15 @@
+"""Base_Config graph module.
+
+This module provides base config functionality for the Haive framework.
+
+Classes:
+    NodeConfig: NodeConfig implementation.
+    supports: supports implementation.
+
+Functions:
+    model_post_init: Model Post Init functionality.
+"""
+
 # src/haive/core/graph/node/config.py
 import logging
 import uuid

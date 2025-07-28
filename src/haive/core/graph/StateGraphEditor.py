@@ -1,3 +1,18 @@
+"""Stategrapheditor graph module.
+
+This module provides StateGraphEditor functionality for the Haive framework.
+
+Classes:
+    NodeConfig: NodeConfig implementation.
+    EdgeConfig: EdgeConfig implementation.
+    BranchConfig: BranchConfig implementation.
+
+Functions:
+    validate_command_goto: Validate Command Goto functionality.
+    validate_to_node: Validate To Node functionality.
+    validate_destinations: Validate Destinations functionality.
+"""
+
 # src/haive/core/graph/StateGraphEditor.py
 
 import importlib

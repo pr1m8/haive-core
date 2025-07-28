@@ -1,3 +1,13 @@
+"""Sync_Properties utility module.
+
+This module provides sync properties functionality for the Haive framework.
+
+Functions:
+    create_sync_properties: Create Sync Properties functionality.
+    decorator: Decorator functionality.
+    make_property: Make Property functionality.
+"""
+
 # Usage example
 
 

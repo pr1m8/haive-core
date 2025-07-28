@@ -1,3 +1,17 @@
+"""Routing graph module.
+
+This module provides routing functionality for the Haive framework.
+
+Classes:
+    from: from implementation.
+    ValidationConfig: ValidationConfig implementation.
+    Router: Router implementation.
+
+Functions:
+    default_format_error: Default Format Error functionality.
+    add_route: Add Route functionality.
+"""
+
 # src/haive/core/router/Router.py
 
 import logging

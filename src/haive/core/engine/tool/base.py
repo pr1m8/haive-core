@@ -1,3 +1,15 @@
+"""Base engine module.
+
+This module provides base functionality for the Haive framework.
+
+Classes:
+    ToolEngine: ToolEngine implementation.
+    Config: Config implementation.
+
+Functions:
+    create_runnable: Create Runnable functionality.
+"""
+
 # src/haive/core/engine/tool/base.py
 
 import logging

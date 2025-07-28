@@ -1,3 +1,15 @@
+"""Agent_Node graph module.
+
+This module provides agent node functionality for the Haive framework.
+
+Classes:
+    AgentNodeConfig: AgentNodeConfig implementation.
+    if: if implementation.
+    from: from implementation.
+
+Functions:
+"""
+
 # haive/agents/multi/agent_node.py
 """Agent-specific node configurations for multi-agent systems.
 

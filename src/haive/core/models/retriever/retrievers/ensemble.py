@@ -1,3 +1,15 @@
+"""Ensemble model module.
+
+This module provides ensemble functionality for the Haive framework.
+
+Classes:
+    EnsembleRetrieverConfig: EnsembleRetrieverConfig implementation.
+    from: from implementation.
+
+Functions:
+    instantiate: Instantiate functionality.
+"""
+
 from langchain_core.retrievers import BaseRetriever
 from pydantic import Field
 

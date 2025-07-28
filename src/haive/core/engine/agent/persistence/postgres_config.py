@@ -1,3 +1,17 @@
+"""Postgres_Config engine module.
+
+This module provides postgres config functionality for the Haive framework.
+
+Classes:
+    PostgresCheckpointerConfig: PostgresCheckpointerConfig implementation.
+    handles: handles implementation.
+
+Functions:
+    validate_postgres_available: Validate Postgres Available functionality.
+    create_checkpointer: Create Checkpointer functionality.
+    close: Close functionality.
+"""
+
 # src/haive/core/engine/agent/persistence/postgres_config.py
 
 import json

@@ -1,3 +1,17 @@
+"""Meta_Agent_State schema module.
+
+This module provides meta agent state functionality for the Haive framework.
+
+Classes:
+    AgentExecutionInfo: AgentExecutionInfo implementation.
+    MetaAgentState: MetaAgentState implementation.
+
+Functions:
+    record_agent_start: Record Agent Start functionality.
+    record_agent_completion: Record Agent Completion functionality.
+    record_agent_error: Record Agent Error functionality.
+"""
+
 # haive/core/schema/meta_agent_state.py
 """Meta agent state for multi-agent coordination.
 

@@ -1,3 +1,16 @@
+"""Architecture_Summary graph module.
+
+This module provides architecture summary functionality for the Haive framework.
+
+Classes:
+    for: for implementation.
+
+Functions:
+    count_lines_in_file: Count Lines In File functionality.
+    analyze_codebase: Analyze Codebase functionality.
+    show_architecture_benefits: Show Architecture Benefits functionality.
+"""
+
 #!/usr/bin/env python3
 """Summary of the BaseGraph2 modular architecture refactoring.
 

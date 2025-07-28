@@ -1,3 +1,17 @@
+"""Schema_Mixin schema module.
+
+This module provides schema mixin functionality for the Haive framework.
+
+Classes:
+    GraphSchemaMixin: GraphSchemaMixin implementation.
+    PassThroughState: PassThroughState implementation.
+
+Functions:
+    validate_schema_setup: Validate Schema Setup functionality.
+    validate_input: Validate Input functionality.
+    validate_output: Validate Output functionality.
+"""
+
 # haive/core/graph/schema.py
 
 from typing import Any, Generic, TypeVar

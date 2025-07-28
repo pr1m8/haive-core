@@ -1,3 +1,12 @@
+"""Config_Utils utility module.
+
+This module provides config utils functionality for the Haive framework.
+
+Functions:
+    apply_config_to_app: Apply Config To App functionality.
+    prepare_compile_kwargs: Prepare Compile Kwargs functionality.
+"""
+
 # src/haive/core/utils/config_utils.py
 
 import logging

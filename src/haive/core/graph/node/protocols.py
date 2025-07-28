@@ -1,3 +1,18 @@
+"""Protocols graph module.
+
+This module provides protocols functionality for the Haive framework.
+
+Classes:
+    NodeProcessor: NodeProcessor implementation.
+    CommandHandler: CommandHandler implementation.
+    InputProcessor: InputProcessor implementation.
+
+Functions:
+    can_process: Can Process functionality.
+    create_node_function: Create Node Function functionality.
+    process_result: Process Result functionality.
+"""
+
 # src/haive/core/graph/node/protocols.py
 
 from typing import Any, Protocol, runtime_checkable

@@ -1,3 +1,13 @@
+"""State_Handling engine module.
+
+This module provides state handling functionality for the Haive framework.
+
+Functions:
+    extract_output: Extract Output functionality.
+    extract_state_snapshot: Extract State Snapshot functionality.
+    prepare_merged_input: Prepare Merged Input functionality.
+"""
+
 # src/haive.core/engine/agent/utils/state_handling.py
 
 """State handling utilities for agent inputs and outputs.

@@ -1,3 +1,16 @@
+"""Factory core module.
+
+This module provides factory functionality for the Haive framework.
+
+Classes:
+    StoreFactory: StoreFactory implementation.
+
+Functions:
+    create: Create functionality.
+    create_with_lifecycle: Create With Lifecycle functionality.
+    create_async_with_lifecycle: Create Async With Lifecycle functionality.
+"""
+
 # src/haive/core/persistence/store/factory.py
 """Store factory for creating store instances."""
 

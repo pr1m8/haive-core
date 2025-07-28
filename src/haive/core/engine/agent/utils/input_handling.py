@@ -1,3 +1,12 @@
+"""Input_Handling engine module.
+
+This module provides input handling functionality for the Haive framework.
+
+Functions:
+    process_input: Process Input functionality.
+    prepare_merged_input: Prepare Merged Input functionality.
+"""
+
 # src/haive/core/engine/agent/utils/input_handling.py
 
 import logging

@@ -1,3 +1,15 @@
+"""Time_Weighted model module.
+
+This module provides time weighted functionality for the Haive framework.
+
+Classes:
+    TimeWeightedRetrieverConfig: TimeWeightedRetrieverConfig implementation.
+    from: from implementation.
+
+Functions:
+    instantiate: Instantiate functionality.
+"""
+
 import logging
 
 from langchain_core.retrievers import BaseRetriever

@@ -1,3 +1,15 @@
+"""Graph_Path graph module.
+
+This module provides graph path functionality for the Haive framework.
+
+Classes:
+    GraphPath: GraphPath implementation.
+
+Functions:
+    display: Display functionality.
+    merge: Merge functionality.
+"""
+
 # haive/core/graph/paths.py
 
 

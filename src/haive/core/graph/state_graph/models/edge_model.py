@@ -1,3 +1,17 @@
+"""Edge_Model graph module.
+
+This module provides edge model functionality for the Haive framework.
+
+Classes:
+    EdgeType: EdgeType implementation.
+    EdgeModel: EdgeModel implementation.
+
+Functions:
+    validate_edge_structure: Validate Edge Structure functionality.
+    create_standard: Create Standard functionality.
+    create_waiting: Create Waiting functionality.
+"""
+
 from enum import Enum
 from typing import ClassVar, Self
 

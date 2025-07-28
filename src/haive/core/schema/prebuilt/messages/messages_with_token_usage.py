@@ -1,3 +1,16 @@
+"""Messages_With_Token_Usage schema module.
+
+This module provides messages with token usage functionality for the Haive framework.
+
+Classes:
+    MessagesStateWithTokenUsage: MessagesStateWithTokenUsage implementation.
+
+Functions:
+    auto_track_all_tokens: Auto Track All Tokens functionality.
+    add_message: Add Message functionality.
+    with_system_message_and_tracking: With System Message And Tracking functionality.
+"""
+
 from typing import Self
 
 """MessagesState with integrated token usage tracking.

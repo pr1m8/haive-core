@@ -1,3 +1,18 @@
+"""Base engine module.
+
+This module provides base functionality for the Haive framework.
+
+Classes:
+    SourceInterface: SourceInterface implementation.
+    BaseSource: BaseSource implementation.
+    for: for implementation.
+
+Functions:
+    get_source_value: Get Source Value functionality.
+    validate: Validate functionality.
+    get_metadata: Get Metadata functionality.
+"""
+
 import hashlib
 from abc import ABC, abstractmethod
 from datetime import datetime

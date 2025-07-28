@@ -1,3 +1,8 @@
+"""Config utility module.
+
+This module provides config functionality for the Haive framework.
+"""
+
 import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))

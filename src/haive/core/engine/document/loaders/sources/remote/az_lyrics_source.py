@@ -1,3 +1,14 @@
+"""Az_Lyrics_Source engine module.
+
+This module provides az lyrics source functionality for the Haive framework.
+
+Classes:
+    AzLyricsSource: AzLyricsSource implementation.
+
+Functions:
+    from_artist_and_song: From Artist And Song functionality.
+"""
+
 from pydantic import Field
 
 from haive.core.engine.loaders.sources.remote.base import URLSource

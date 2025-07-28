@@ -1,3 +1,16 @@
+"""Advanced_Registry core module.
+
+This module provides advanced registry functionality for the Haive framework.
+
+Classes:
+    Buildable: Buildable implementation.
+    Registered: Registered implementation.
+    for: for implementation.
+
+Functions:
+    build: Build functionality.
+"""
+
 from __future__ import annotations
 
 import abc

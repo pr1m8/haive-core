@@ -1,3 +1,15 @@
+"""Memory core module.
+
+This module provides memory functionality for the Haive framework.
+
+Classes:
+    MemoryRegistry: MemoryRegistry implementation.
+
+Functions:
+    register: Register functionality.
+    get: Get functionality.
+"""
+
 # src/haive/core/registry/memory.py
 
 import logging

@@ -1,3 +1,12 @@
+"""Errors core module.
+
+This module provides errors functionality for the Haive framework.
+
+Functions:
+    short_traceback: Short Traceback functionality.
+    install_short_tracebacks: Install Short Tracebacks functionality.
+"""
+
 import sys
 
 

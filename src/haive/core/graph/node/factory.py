@@ -1,3 +1,17 @@
+"""Factory graph module.
+
+This module provides factory functionality for the Haive framework.
+
+Classes:
+    NodeFactory: NodeFactory implementation.
+    provides: provides implementation.
+    name: name implementation.
+
+Functions:
+    create_node_function: Create Node Function functionality.
+    node_function: Node Function functionality.
+"""
+
 # src/haive/core/graph/node/factory.py
 
 import asyncio

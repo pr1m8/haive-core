@@ -1,3 +1,11 @@
+"""Types engine module.
+
+This module provides types functionality for the Haive framework.
+
+Classes:
+    DatabaseSourceType: DatabaseSourceType implementation.
+"""
+
 from enum import Enum
 
 

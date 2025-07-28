@@ -1,3 +1,18 @@
+"""Processors graph module.
+
+This module provides processors functionality for the Haive framework.
+
+Classes:
+    name: name implementation.
+    InvokableNodeProcessor: InvokableNodeProcessor implementation.
+    AsyncInvokableNodeProcessor: AsyncInvokableNodeProcessor implementation.
+
+Functions:
+    process_state: Process State functionality.
+    merge_configs: Merge Configs functionality.
+    ensure_engine_id_targeting: Ensure Engine Id Targeting functionality.
+"""
+
 # src/haive/core/graph/node/processors.py
 
 import asyncio

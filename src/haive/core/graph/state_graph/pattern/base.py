@@ -1,3 +1,17 @@
+"""Base graph module.
+
+This module provides base functionality for the Haive framework.
+
+Classes:
+    GraphPattern: GraphPattern implementation.
+    for: for implementation.
+    name: name implementation.
+
+Functions:
+    set_implementation: Set Implementation functionality.
+    build: Build functionality.
+"""
+
 import logging
 from abc import ABC
 from typing import Any, ClassVar

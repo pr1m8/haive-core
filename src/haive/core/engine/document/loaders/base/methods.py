@@ -1,3 +1,11 @@
+"""Methods engine module.
+
+This module provides methods functionality for the Haive framework.
+
+Classes:
+    LoadMethod: LoadMethod implementation.
+"""
+
 from enum import Enum
 
 

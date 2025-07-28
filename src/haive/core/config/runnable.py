@@ -1,3 +1,18 @@
+"""Runnable configuration module.
+
+This module provides runnable functionality for the Haive framework.
+
+Classes:
+    RunnableConfigManager: RunnableConfigManager implementation.
+    for: for implementation.
+    RunnableConfigManager: RunnableConfigManager implementation.
+
+Functions:
+    create: Create functionality.
+    create_with_engine: Create With Engine functionality.
+    create_with_metadata: Create With Metadata functionality.
+"""
+
 # src/haive/core/config/runnable.py
 
 """Configuration management for Haive runnables.

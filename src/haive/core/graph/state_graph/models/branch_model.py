@@ -1,3 +1,16 @@
+"""Branch_Model graph module.
+
+This module provides branch model functionality for the Haive framework.
+
+Classes:
+    BranchModel: BranchModel implementation.
+
+Functions:
+    validate_branch_type: Validate Branch Type functionality.
+    ensure_valid_branch: Ensure Valid Branch functionality.
+    from_branch: From Branch functionality.
+"""
+
 from typing import ClassVar, Literal, Optional, Self
 
 from pydantic import Field, field_validator, model_validator

@@ -1,3 +1,15 @@
+"""Node_Model graph module.
+
+This module provides node model functionality for the Haive framework.
+
+Classes:
+    NodeModel: NodeModel implementation.
+
+Functions:
+    validate_name: Validate Name functionality.
+    from_node_spec: From Node Spec functionality.
+"""
+
 from typing import Any, ClassVar, Generic, Optional, TypeVar
 
 from pydantic import Field, field_validator

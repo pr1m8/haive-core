@@ -1,3 +1,18 @@
+"""Base engine module.
+
+This module provides base functionality for the Haive framework.
+
+Classes:
+    SourceClass: SourceClass implementation.
+    BaseSource: BaseSource implementation.
+    for: for implementation.
+
+Functions:
+    source: Source functionality.
+    source_class: Source Class functionality.
+    source_as_string: Source As String functionality.
+"""
+
 from abc import ABC, abstractmethod
 from enum import Enum
 

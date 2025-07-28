@@ -1,3 +1,12 @@
+"""Engine_Node_Test engine module.
+
+This module provides engine node test functionality for the Haive framework.
+
+Functions:
+    fix_common_syntax_errors: Fix Common Syntax Errors functionality.
+    main: Main functionality.
+"""
+
 #!/usr/bin/env python3
 """Comprehensive syntax error fixer for Haive codebase."""
 

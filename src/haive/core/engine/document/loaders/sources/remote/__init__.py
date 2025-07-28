@@ -1,3 +1,15 @@
+"""Remote package.
+
+This package provides remote functionality for the Haive framework.
+
+Modules:
+    arxiv_source: Arxiv Source implementation.
+    az_lyrics_source: Az Lyrics Source implementation.
+    base: Base implementation.
+    bilibili_source: Bilibili Source implementation.
+    blackboard_source: Blackboard Source implementation.
+"""
+
 from typing import Union
 
 from pydantic import Field, HttpUrl, field_validator

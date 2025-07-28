@@ -1,3 +1,18 @@
+"""Base graph module.
+
+This module provides base functionality for the Haive framework.
+
+Classes:
+    RetryPolicy: RetryPolicy implementation.
+    ExponentialBackoffRetry: ExponentialBackoffRetry implementation.
+    LinearBackoffRetry: LinearBackoffRetry implementation.
+
+Functions:
+    should_retry: Should Retry functionality.
+    get_delay: Get Delay functionality.
+    get_delay: Get Delay functionality.
+"""
+
 import time
 from typing import Any
 

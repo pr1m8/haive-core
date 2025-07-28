@@ -1,3 +1,14 @@
+"""Self_Query model module.
+
+This module provides self query functionality for the Haive framework.
+
+Classes:
+    SelfQueryRetrieverConfig: SelfQueryRetrieverConfig implementation.
+
+Functions:
+    instantiate: Instantiate functionality.
+"""
+
 import logging
 from typing import Any
 

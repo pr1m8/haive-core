@@ -1,3 +1,18 @@
+"""Graph_Pattern_Registry graph module.
+
+This module provides graph pattern registry functionality for the Haive framework.
+
+Classes:
+    GraphPattern: GraphPattern implementation.
+    BranchDefinition: BranchDefinition implementation.
+    GraphPatternRegistry: GraphPatternRegistry implementation.
+
+Functions:
+    apply: Apply functionality.
+    create_condition: Create Condition functionality.
+    default_condition: Default Condition functionality.
+"""
+
 # src/haive/core/graph/GraphPatternRegistry.py
 
 import logging

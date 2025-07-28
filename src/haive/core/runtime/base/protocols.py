@@ -1,3 +1,16 @@
+"""Protocols core module.
+
+This module provides protocols functionality for the Haive framework.
+
+Classes:
+    RuntimeComponentProtocol: RuntimeComponentProtocol implementation.
+
+Functions:
+    initialize: Initialize functionality.
+    invoke: Invoke functionality.
+    ainvoke: Ainvoke functionality.
+"""
+
 # src/haive/core/runtime/base/protocols.py
 from typing import Protocol, TypeVar, runtime_checkable
 

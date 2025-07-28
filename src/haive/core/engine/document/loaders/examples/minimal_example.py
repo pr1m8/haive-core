@@ -1,3 +1,12 @@
+"""Minimal_Example engine module.
+
+This module provides minimal example functionality for the Haive framework.
+
+Functions:
+    create_test_files: Create Test Files functionality.
+    demonstrate_basic_functionality: Demonstrate Basic Functionality functionality.
+"""
+
 #!/usr/bin/env python3
 """Minimal working example of the Haive Document Loader System.
 

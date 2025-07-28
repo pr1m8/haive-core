@@ -1,3 +1,11 @@
+"""Serialization utility module.
+
+This module provides serialization functionality for the Haive framework.
+
+Functions:
+    ensure_json_serializable: Ensure Json Serializable functionality.
+"""
+
 # In haive/core/utils/serialization.py
 from typing import Any
 

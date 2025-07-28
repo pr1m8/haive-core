@@ -1,3 +1,18 @@
+"""Vectorstore engine module.
+
+This module provides vectorstore functionality for the Haive framework.
+
+Classes:
+    for: for implementation.
+    class: class implementation.
+    VectorStoreProvider: VectorStoreProvider implementation.
+
+Functions:
+    get_my_vectorstore_class: Get My Vectorstore Class functionality.
+    extend: Extend functionality.
+    validate_engine_type: Validate Engine Type functionality.
+"""
+
 # src/haive/core/engine/vectorstore.py
 
 """Vector store engine implementation for the Haive framework.

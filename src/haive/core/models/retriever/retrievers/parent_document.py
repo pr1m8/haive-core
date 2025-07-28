@@ -1,3 +1,14 @@
+"""Parent_Document model module.
+
+This module provides parent document functionality for the Haive framework.
+
+Classes:
+    ParentDocumentRetrieverConfig: ParentDocumentRetrieverConfig implementation.
+
+Functions:
+    instantiate: Instantiate functionality.
+"""
+
 # Additional retriever configurations
 import logging
 from typing import Any

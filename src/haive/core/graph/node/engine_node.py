@@ -1,3 +1,15 @@
+"""Engine_Node engine module.
+
+This module provides engine node functionality for the Haive framework.
+
+Classes:
+    EngineNodeConfig: EngineNodeConfig implementation.
+    instance: instance implementation.
+
+Functions:
+    model_post_init: Model Post Init functionality.
+"""
+
 # src/haive/core/graph/node/engine_node.py
 
 import logging

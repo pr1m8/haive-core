@@ -1,3 +1,15 @@
+"""Types graph module.
+
+This module provides types functionality for the Haive framework.
+
+Classes:
+    NodeType: NodeType implementation.
+    NodeFunction: NodeFunction implementation.
+    AsyncNodeFunction: AsyncNodeFunction implementation.
+
+Functions:
+"""
+
 # src/haive/core/graph/node/types.py
 """Core types and protocols for the node system.
 

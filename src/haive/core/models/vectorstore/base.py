@@ -1,3 +1,17 @@
+"""Base model module.
+
+This module provides base functionality for the Haive framework.
+
+Classes:
+    VectorStoreProvider: VectorStoreProvider implementation.
+    VectorStoreConfig: VectorStoreConfig implementation.
+
+Functions:
+    add_document: Add Document functionality.
+    create_vectorstore: Create Vectorstore functionality.
+    create_retriever: Create Retriever functionality.
+"""
+
 from __future__ import annotations
 
 from enum import Enum

@@ -1,3 +1,17 @@
+"""Base core module.
+
+This module provides base functionality for the Haive framework.
+
+Classes:
+    RuntimeComponent: RuntimeComponent implementation.
+    for: for implementation.
+    self: self implementation.
+
+Functions:
+    initialize: Initialize functionality.
+    invoke: Invoke functionality.
+"""
+
 # src/haive/core/runtime/base.py
 
 from abc import abstractmethod

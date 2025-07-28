@@ -1,3 +1,16 @@
+"""Base core module.
+
+This module provides base functionality for the Haive framework.
+
+Classes:
+    AbstractRegistry: AbstractRegistry implementation.
+
+Functions:
+    register: Register functionality.
+    get: Get functionality.
+    find_by_id: Find By Id functionality.
+"""
+
 # src/haive/core/registry/base.py
 
 from abc import ABC, abstractmethod

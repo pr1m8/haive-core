@@ -1,3 +1,8 @@
+"""Test graph module.
+
+This module provides test functionality for the Haive framework.
+"""
+
 from haive.core.graph.routers.conditions import *
 
 should_continue = StateValueCondition(

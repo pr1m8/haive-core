@@ -1,3 +1,18 @@
+"""Mixins engine module.
+
+This module provides mixins functionality for the Haive framework.
+
+Classes:
+    RetrieverMixin: RetrieverMixin implementation.
+    methods: methods implementation.
+    that: that implementation.
+
+Functions:
+    convert_vectorstore_to_retriever: Convert Vectorstore To Retriever functionality.
+    from_vectorstore: From Vectorstore functionality.
+    from_documents: From Documents functionality.
+"""
+
 # src/haive/core/engine/retriever/mixins.py
 
 """Retriever mixins for the Haive framework."""

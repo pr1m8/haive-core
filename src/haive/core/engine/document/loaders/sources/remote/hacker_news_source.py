@@ -1,3 +1,14 @@
+"""Hacker_News_Source engine module.
+
+This module provides hacker news source functionality for the Haive framework.
+
+Classes:
+    HackerNewsSource: HackerNewsSource implementation.
+
+Functions:
+    validate_url: Validate Url functionality.
+"""
+
 from typing import Any
 
 from pydantic import Field, HttpUrl

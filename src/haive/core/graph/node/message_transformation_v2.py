@@ -1,3 +1,18 @@
+"""Message_Transformation_V2 graph module.
+
+This module provides message transformation v2 functionality for the Haive framework.
+
+Classes:
+    TransformationType: TransformationType implementation.
+    MessageTransformationNodeConfig: MessageTransformationNodeConfig implementation.
+    target_cls: target_cls implementation.
+
+Functions:
+    validate_transformation_config: Validate Transformation Config functionality.
+    get_default_input_fields: Get Default Input Fields functionality.
+    get_default_output_fields: Get Default Output Fields functionality.
+"""
+
 # ============================================================================
 # MESSAGE TRANSFORMATION NODE CONFIG V2 - WITH SCHEMA SUPPORT
 # ============================================================================

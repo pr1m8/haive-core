@@ -1,3 +1,18 @@
+"""Validation_Node_Config graph module.
+
+This module provides validation node config functionality for the Haive framework.
+
+Classes:
+    ValidationNodeConfig: ValidationNodeConfig implementation.
+    if: if implementation.
+    from: from implementation.
+
+Functions:
+    has_tool_error: Has Tool Error functionality.
+    get_tool_name: Get Tool Name functionality.
+    get_tool_args: Get Tool Args functionality.
+"""
+
 # src/haive/core/graph/node/validation_node_config.py
 
 import json

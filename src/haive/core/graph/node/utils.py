@@ -1,3 +1,16 @@
+"""Utils graph module.
+
+This module provides utils functionality for the Haive framework.
+
+Classes:
+    engine_id: engine_id implementation.
+
+Functions:
+    create_node: Create Node functionality.
+    create_validation_node: Create Validation Node functionality.
+    create_branch_node: Create Branch Node functionality.
+"""
+
 # src/haive/core/graph/node/utils.py
 """Utility functions for creating and working with nodes.
 

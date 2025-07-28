@@ -1,3 +1,16 @@
+"""Base core module.
+
+This module provides base functionality for the Haive framework.
+
+Classes:
+    Extension: Extension implementation.
+    for: for implementation.
+
+Functions:
+    apply_to: Apply To functionality.
+    apply: Apply functionality.
+"""
+
 # src/haive/core/runtime/extensions/base.py
 
 import uuid

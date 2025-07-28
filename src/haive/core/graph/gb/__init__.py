@@ -1,3 +1,11 @@
+"""Gb package.
+
+This package provides gb functionality for the Haive framework.
+
+Modules:
+    types: Types implementation.
+"""
+
 from collections.abc import Callable, Sequence
 from typing import (
     Annotated,

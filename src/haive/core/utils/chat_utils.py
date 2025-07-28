@@ -1,3 +1,11 @@
+"""Chat_Utils utility module.
+
+This module provides chat utils functionality for the Haive framework.
+
+Functions:
+    create_response: Create Response functionality.
+"""
+
 from langchain_core.messages import AIMessage, ToolMessage
 
 

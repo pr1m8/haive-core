@@ -1,3 +1,13 @@
+"""Memory core module.
+
+This module provides memory functionality for the Haive framework.
+
+Classes:
+    MemoryStoreWrapper: MemoryStoreWrapper implementation.
+
+Functions:
+"""
+
 # src/haive/core/persistence/store/wrappers/memory.py
 """In-memory store wrapper implementation."""
 

@@ -1,3 +1,13 @@
+"""Handlers engine module.
+
+This module provides handlers functionality for the Haive framework.
+
+Functions:
+    process_input: Process Input functionality.
+    prepare_merged_input: Prepare Merged Input functionality.
+    extract_output: Extract Output functionality.
+"""
+
 # src/haive/core/engine/agent/persistence/handlers.py
 import logging
 from typing import Any

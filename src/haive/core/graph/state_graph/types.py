@@ -1,3 +1,8 @@
+"""Types graph module.
+
+This module provides types functionality for the Haive framework.
+"""
+
 # src/haive/core/graph/common/types.py
 
 from collections.abc import Callable

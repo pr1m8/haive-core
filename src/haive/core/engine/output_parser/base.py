@@ -1,3 +1,18 @@
+"""Base engine module.
+
+This module provides base functionality for the Haive framework.
+
+Classes:
+    OutputParsingInputSchema: OutputParsingInputSchema implementation.
+    OutputParserEngine: OutputParserEngine implementation.
+    for: for implementation.
+
+Functions:
+    get_input_fields: Get Input Fields functionality.
+    get_output_fields: Get Output Fields functionality.
+    create_runnable: Create Runnable functionality.
+"""
+
 from typing import Any, TypeVar, Union
 
 # from langchain_core.output_parsers

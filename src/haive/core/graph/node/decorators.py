@@ -1,3 +1,13 @@
+"""Decorators graph module.
+
+This module provides decorators functionality for the Haive framework.
+
+Functions:
+    register_node: Register Node functionality.
+    decorator: Decorator functionality.
+    tool_node: Tool Node functionality.
+"""
+
 # src/haive/core/graph/node/decorators.py
 """From typing import Any, Dict
 Decorators for creating and registering nodes.

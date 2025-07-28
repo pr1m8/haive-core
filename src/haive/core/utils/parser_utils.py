@@ -1,3 +1,12 @@
+"""Parser_Utils utility module.
+
+This module provides parser utils functionality for the Haive framework.
+
+Functions:
+    parse_list_to_string: Parse List To String functionality.
+    parse_reasoning_modules_to_string: Parse Reasoning Modules To String functionality.
+"""
+
 from haive_agents_dep.self_discover.models import ReasoningModule
 from langchain_core.tools import BaseTool
 

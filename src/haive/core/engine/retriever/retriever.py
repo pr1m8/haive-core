@@ -1,3 +1,18 @@
+"""Retriever engine module.
+
+This module provides retriever functionality for the Haive framework.
+
+Classes:
+    for: for implementation.
+    RetrieverInput: RetrieverInput implementation.
+    RetrieverOutput: RetrieverOutput implementation.
+
+Functions:
+    validate_documents: Validate Documents functionality.
+    validate_engine_type: Validate Engine Type functionality.
+    get_input_fields: Get Input Fields functionality.
+"""
+
 # src/haive/core/engine/retriever.py
 
 """Retriever engine implementation for the Haive framework.

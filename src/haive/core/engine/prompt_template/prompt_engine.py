@@ -1,3 +1,16 @@
+"""Prompt_Engine engine module.
+
+This module provides prompt engine functionality for the Haive framework.
+
+Classes:
+    InvokableEngines: InvokableEngines implementation.
+    for: for implementation.
+    Author: Author implementation.
+
+Functions:
+    derive_input_schema: Derive Input Schema functionality.
+"""
+
 from typing import Any
 
 r"""PromptTemplateEngine: InvokableEngine wrapper for LangChain prompt templates.

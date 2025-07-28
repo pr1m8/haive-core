@@ -1,3 +1,14 @@
+"""Postgres core module.
+
+This module provides postgres functionality for the Haive framework.
+
+Classes:
+    PostgresStoreWrapper: PostgresStoreWrapper implementation.
+    AsyncPostgresStoreWrapper: AsyncPostgresStoreWrapper implementation.
+
+Functions:
+"""
+
 # src/haive/core/persistence/store/wrappers/postgres.py
 """PostgreSQL store wrapper implementations."""
 

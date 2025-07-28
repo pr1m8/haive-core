@@ -1,3 +1,15 @@
+"""State_Graph_Builder graph module.
+
+This module provides state graph builder functionality for the Haive framework.
+
+Classes:
+    GraphBuilder: GraphBuilder implementation.
+
+Functions:
+    add_node: Add Node functionality.
+    add_edge: Add Edge functionality.
+"""
+
 from typing import Any
 
 from haive.core.graph.models.graph_model import GraphModel

@@ -1,3 +1,13 @@
+"""Doc_Utils utility module.
+
+This module provides doc utils functionality for the Haive framework.
+
+Functions:
+    save_docs_to_jsonl: Save Docs To Jsonl functionality.
+    clean_text: Clean Text functionality.
+    clean_page_content: Clean Page Content functionality.
+"""
+
 from collections.abc import Iterable
 from pathlib import Path
 

@@ -1,3 +1,18 @@
+"""Web engine module.
+
+This module provides web functionality for the Haive framework.
+
+Classes:
+    WebSource: WebSource implementation.
+    for: for implementation.
+    ApiSource: ApiSource implementation.
+
+Functions:
+    validate_source_type: Validate Source Type functionality.
+    get_source_value: Get Source Value functionality.
+    validate: Validate functionality.
+"""
+
 import re
 from typing import Any, ClassVar, Self
 from urllib.parse import parse_qs, urlparse

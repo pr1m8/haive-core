@@ -1,3 +1,16 @@
+"""Message_Transformation graph module.
+
+This module provides message transformation functionality for the Haive framework.
+
+Classes:
+    TransformationType: TransformationType implementation.
+    MessageTransformationNodeConfig: MessageTransformationNodeConfig implementation.
+    target_cls: target_cls implementation.
+
+Functions:
+    validate_transformation_config: Validate Transformation Config functionality.
+"""
+
 # src/haive/core/graph/node/message_transformation_node_config.py
 
 import logging

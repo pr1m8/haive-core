@@ -1,3 +1,13 @@
+"""Types engine module.
+
+This module provides types functionality for the Haive framework.
+
+Classes:
+    ProgrammingLanguage: ProgrammingLanguage implementation.
+    CodeFileType: CodeFileType implementation.
+    LocalSourceFileType: LocalSourceFileType implementation.
+"""
+
 from enum import Enum
 
 

@@ -1,3 +1,8 @@
+"""Utils package.
+
+This package provides utility functions and helpers for the Haive framework.
+"""
+
 from __future__ import annotations
 
 import importlib

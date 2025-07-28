@@ -1,3 +1,15 @@
+"""Registry graph module.
+
+This module provides registry functionality for the Haive framework.
+
+Classes:
+    GraphPatternRegistry: GraphPatternRegistry implementation.
+
+Functions:
+    get_instance: Get Instance functionality.
+    register: Register functionality.
+"""
+
 import builtins
 import inspect
 import logging

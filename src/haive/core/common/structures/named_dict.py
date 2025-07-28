@@ -1,3 +1,15 @@
+"""Named_Dict core module.
+
+This module provides named dict functionality for the Haive framework.
+
+Classes:
+    NamedDict: NamedDict implementation.
+    combines: combines implementation.
+
+Functions:
+    convert_input: Convert Input functionality.
+"""
+
 from collections.abc import Iterable
 from typing import Any, Generic, TypeVar
 

@@ -1,3 +1,15 @@
+"""Manager core module.
+
+This module provides manager functionality for the Haive framework.
+
+Classes:
+    RegistryManager: RegistryManager implementation.
+
+Functions:
+    register_registry_type: Register Registry Type functionality.
+    get_instance: Get Instance functionality.
+"""
+
 # src/haive/core/registry/manager.py
 
 import logging

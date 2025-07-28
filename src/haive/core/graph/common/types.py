@@ -1,3 +1,11 @@
+"""Types graph module.
+
+This module provides types functionality for the Haive framework.
+
+Classes:
+    NodeType: NodeType implementation.
+"""
+
 # haive/core/graph/common/types.py
 from collections.abc import Callable
 from enum import Enum

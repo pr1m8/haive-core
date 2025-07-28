@@ -1,3 +1,16 @@
+"""Connection core module.
+
+This module provides connection functionality for the Haive framework.
+
+Classes:
+    ConnectionManager: ConnectionManager implementation.
+    ensures: ensures implementation.
+
+Functions:
+    get_or_create_sync_pool: Get Or Create Sync Pool functionality.
+    get_or_create_async_pool: Get Or Create Async Pool functionality.
+"""
+
 # src/haive/core/persistence/store/connection.py
 """Connection management for shared database connections.
 

@@ -1,3 +1,11 @@
+"""Git_Source engine module.
+
+This module provides git source functionality for the Haive framework.
+
+Classes:
+    GitSource: GitSource implementation.
+"""
+
 from pydantic import Field
 
 from haive.core.engine.loaders.sources.types import SourceType

@@ -1,3 +1,14 @@
+"""Vsdx_Source engine module.
+
+This module provides vsdx source functionality for the Haive framework.
+
+Classes:
+    VsdxSource: VsdxSource implementation.
+
+Functions:
+    load: Load functionality.
+"""
+
 from langchain_community.document_loaders import VsdxLoader
 from pydantic import Field
 

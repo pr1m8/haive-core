@@ -1,3 +1,17 @@
+"""Agent_Node_V2 graph module.
+
+This module provides agent node v2 functionality for the Haive framework.
+
+Classes:
+    AgentNodeConfig: AgentNodeConfig implementation.
+    CoordinatorNodeConfig: CoordinatorNodeConfig implementation.
+
+Functions:
+    validate_agent_schema: Validate Agent Schema functionality.
+    get_default_input_fields: Get Default Input Fields functionality.
+    get_default_output_fields: Get Default Output Fields functionality.
+"""
+
 # ============================================================================
 # AGENT NODE CONFIG V2 - WITH SCHEMA SUPPORT
 # ============================================================================

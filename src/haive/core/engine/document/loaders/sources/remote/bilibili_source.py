@@ -1,3 +1,11 @@
+"""Bilibili_Source engine module.
+
+This module provides bilibili source functionality for the Haive framework.
+
+Classes:
+    BilibiliSource: BilibiliSource implementation.
+"""
+
 from pydantic import Field
 
 from haive.core.engine.loaders.sources.remote.base import URLSource

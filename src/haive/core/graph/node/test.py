@@ -1,3 +1,11 @@
+"""Test graph module.
+
+This module provides test functionality for the Haive framework.
+
+Classes:
+    Plan: Plan implementation.
+"""
+
 # test_node_factory.py
 
 import uuid

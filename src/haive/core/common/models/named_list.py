@@ -1,3 +1,18 @@
+"""Named_List model module.
+
+This module provides named list functionality for the Haive framework.
+
+Classes:
+    NamedList: NamedList implementation.
+    name: name implementation.
+    class: class implementation.
+
+Functions:
+    validate_items: Validate Items functionality.
+    process_input: Process Input functionality.
+    process_dict_input: Process Dict Input functionality.
+"""
+
 # ============================================================================
 # NAMED LIST TYPE
 # ============================================================================

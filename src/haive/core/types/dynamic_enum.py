@@ -1,3 +1,15 @@
+"""Dynamic_Enum core module.
+
+This module provides dynamic enum functionality for the Haive framework.
+
+Classes:
+    _DynEnumMeta: _DynEnumMeta implementation.
+    for: for implementation.
+    DynamicEnum: DynamicEnum implementation.
+
+Functions:
+"""
+
 from __future__ import annotations
 
 from collections.abc import Iterable

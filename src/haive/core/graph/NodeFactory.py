@@ -1,3 +1,16 @@
+"""Nodefactory graph module.
+
+This module provides NodeFactory functionality for the Haive framework.
+
+Classes:
+    NodeFunction: NodeFunction implementation.
+    NodeFactory: NodeFactory implementation.
+
+Functions:
+    create_node_function: Create Node Function functionality.
+    create_node_function: Create Node Function functionality.
+"""
+
 # src/haive/core/graph/NodeFactory.py
 
 import importlib

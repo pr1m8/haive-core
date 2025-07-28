@@ -1,3 +1,11 @@
+"""Config engine module.
+
+This module provides config functionality for the Haive framework.
+
+Classes:
+    DocSplitterType: DocSplitterType implementation.
+"""
+
 from enum import Enum
 
 __all__ = [

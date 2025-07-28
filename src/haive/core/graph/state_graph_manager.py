@@ -1,3 +1,15 @@
+"""State_Graph_Manager graph module.
+
+This module provides state graph manager functionality for the Haive framework.
+
+Classes:
+    StateGraphManager: StateGraphManager implementation.
+
+Functions:
+    extract_metadata: Extract Metadata functionality.
+    ensure_compiled: Ensure Compiled functionality.
+"""
+
 from collections import defaultdict
 from typing import Any
 

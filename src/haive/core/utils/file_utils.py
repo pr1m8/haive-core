@@ -1,3 +1,12 @@
+"""File_Utils utility module.
+
+This module provides file utils functionality for the Haive framework.
+
+Functions:
+    read_yaml_file: Read Yaml File functionality.
+    read_file_content: Read File Content functionality.
+"""
+
 from typing import Any
 
 import yaml

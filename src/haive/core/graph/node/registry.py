@@ -1,3 +1,16 @@
+"""Registry graph module.
+
+This module provides registry functionality for the Haive framework.
+
+Classes:
+    NodeRegistry: NodeRegistry implementation.
+    logger: logger implementation.
+
+Functions:
+    get_instance: Get Instance functionality.
+    register: Register functionality.
+"""
+
 # src/haive/core/graph/node/registry.py
 """Node registry for managing and accessing nodes.
 

@@ -1,3 +1,15 @@
+"""Tool_Node_Config graph module.
+
+This module provides tool node config functionality for the Haive framework.
+
+Classes:
+    ToolNodeConfig: ToolNodeConfig implementation.
+    node_type: node_type implementation.
+
+Functions:
+    from_route_filter: From Route Filter functionality.
+"""
+
 # src/haive/core/graph/node/tool_node_config.py
 
 import logging

@@ -1,3 +1,11 @@
+"""College_Confidential engine module.
+
+This module provides college confidential functionality for the Haive framework.
+
+Classes:
+    CollegeConfidentialSource: CollegeConfidentialSource implementation.
+"""
+
 from pydantic import Field
 
 from haive.core.engine.loaders.sources.remote.base import URLSource

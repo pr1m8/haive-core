@@ -1,3 +1,15 @@
+"""Implementations graph module.
+
+This module provides implementations functionality for the Haive framework.
+
+Classes:
+    SimplePattern: SimplePattern implementation.
+    attributes: attributes implementation.
+    pattern_nodes: pattern_nodes implementation.
+
+Functions:
+"""
+
 # src/haive/core/graph/state_graph/patterns/implementations.py
 
 import logging

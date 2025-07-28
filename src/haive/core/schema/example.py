@@ -1,3 +1,18 @@
+"""Example schema module.
+
+This module provides example functionality for the Haive framework.
+
+Classes:
+    ConversationState: ConversationState implementation.
+    MetricsState: MetricsState implementation.
+    ParentState: ParentState implementation.
+
+Functions:
+    example_basic_state_creation: Example Basic State Creation functionality.
+    example_dynamic_composition: Example Dynamic Composition functionality.
+    example_reducer_behavior: Example Reducer Behavior functionality.
+"""
+
 #!/usr/bin/env python3
 """From typing import Any
 Haive Schema System Examples.

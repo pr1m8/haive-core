@@ -1,3 +1,16 @@
+"""Embeddings core module.
+
+This module provides embeddings functionality for the Haive framework.
+
+Classes:
+    EmbeddingAdapter: EmbeddingAdapter implementation.
+
+Functions:
+    create_embedding_function: Create Embedding Function functionality.
+    embed_texts: Embed Texts functionality.
+    embed_texts: Embed Texts functionality.
+"""
+
 # src/haive/core/persistence/store/embeddings.py
 """Embedding adapter for integrating Haive embeddings with LangGraph stores.
 

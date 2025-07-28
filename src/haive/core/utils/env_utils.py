@@ -1,3 +1,13 @@
+"""Env_Utils utility module.
+
+This module provides env utils functionality for the Haive framework.
+
+Functions:
+    load_env_file: Load Env File functionality.
+    get_env_var: Get Env Var functionality.
+    load_project_env_files: Load Project Env Files functionality.
+"""
+
 # src/haive.core/utils/env_utils.py
 
 import logging

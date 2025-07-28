@@ -1,3 +1,17 @@
+"""Tool_Config graph module.
+
+This module provides tool config functionality for the Haive framework.
+
+Classes:
+    ToolConfig: ToolConfig implementation.
+    NodeConfig: NodeConfig implementation.
+
+Functions:
+    configure_tool: Configure Tool functionality.
+    create_node_config: Create Node Config functionality.
+    process_tools: Process Tools functionality.
+"""
+
 # src/haive/core/graph/tool_config.py
 
 from collections.abc import Callable

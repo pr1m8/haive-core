@@ -1,3 +1,17 @@
+"""Github_Repo model module.
+
+This module provides github repo functionality for the Haive framework.
+
+Classes:
+    GithubSettings: GithubSettings implementation.
+    GithubRepo: GithubRepo implementation.
+
+Functions:
+    active_token: Active Token functionality.
+    get_github_settings: Get Github Settings functionality.
+    settings: Settings functionality.
+"""
+
 import logging
 import re
 from datetime import datetime

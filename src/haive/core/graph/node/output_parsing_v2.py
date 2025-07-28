@@ -1,3 +1,17 @@
+"""Output_Parsing_V2 graph module.
+
+This module provides output parsing v2 functionality for the Haive framework.
+
+Classes:
+    OutputParserNodeConfig: OutputParserNodeConfig implementation.
+    JsonParserNodeConfig: JsonParserNodeConfig implementation.
+    PydanticParserNodeConfig: PydanticParserNodeConfig implementation.
+
+Functions:
+    get_default_input_fields: Get Default Input Fields functionality.
+    get_default_output_fields: Get Default Output Fields functionality.
+"""
+
 # ============================================================================
 # OUTPUT PARSER NODE CONFIG V2 - WITH SCHEMA SUPPORT
 # ============================================================================

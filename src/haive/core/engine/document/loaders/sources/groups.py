@@ -1,3 +1,11 @@
+"""Groups engine module.
+
+This module provides groups functionality for the Haive framework.
+
+Classes:
+    SourceGroups: SourceGroups implementation.
+"""
+
 from haive.core.engine.loaders.sources.types import SourceType
 
 

@@ -1,3 +1,18 @@
+"""Local engine module.
+
+This module provides local functionality for the Haive framework.
+
+Classes:
+    FileSource: FileSource implementation.
+    for: for implementation.
+    mapping: mapping implementation.
+
+Functions:
+    validate_file_exists: Validate File Exists functionality.
+    get_source_value: Get Source Value functionality.
+    validate: Validate functionality.
+"""
+
 import mimetypes
 import os
 from datetime import datetime

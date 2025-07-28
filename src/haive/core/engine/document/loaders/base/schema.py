@@ -1,3 +1,12 @@
+"""Schema engine module.
+
+This module provides schema functionality for the Haive framework.
+
+Classes:
+    LoaderInputSchema: LoaderInputSchema implementation.
+    LoaderOutputSchema: LoaderOutputSchema implementation.
+"""
+
 from typing import TypeVar
 
 from langchain_core.documents import Document

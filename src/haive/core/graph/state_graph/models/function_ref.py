@@ -1,3 +1,16 @@
+"""Function_Ref graph module.
+
+This module provides function ref functionality for the Haive framework.
+
+Classes:
+    FunctionReference: FunctionReference implementation.
+
+Functions:
+    ensure_valid_reference: Ensure Valid Reference functionality.
+    validate_callable_type: Validate Callable Type functionality.
+    from_callable: From Callable functionality.
+"""
+
 import contextlib
 import importlib
 import inspect

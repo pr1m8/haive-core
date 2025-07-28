@@ -1,3 +1,16 @@
+"""Schema_Graph schema module.
+
+This module provides schema graph functionality for the Haive framework.
+
+Classes:
+    SchemaGraph: SchemaGraph implementation.
+
+Functions:
+    to_langgraph: To Langgraph functionality.
+    compile: Compile functionality.
+    display: Display functionality.
+"""
+
 # haive/core/graph/graph.py
 
 import logging

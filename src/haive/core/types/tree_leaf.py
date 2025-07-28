@@ -1,3 +1,18 @@
+"""Tree_Leaf core module.
+
+This module provides tree leaf functionality for the Haive framework.
+
+Classes:
+    Leaf: Leaf implementation.
+    Branch: Branch implementation.
+    NodeMixin: NodeMixin implementation.
+
+Functions:
+    is_leaf: Is Leaf functionality.
+    add: Add functionality.
+    size: Size functionality.
+"""
+
 # tree_model.py
 from __future__ import annotations
 

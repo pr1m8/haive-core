@@ -1,3 +1,12 @@
+"""General utility module.
+
+This module provides general functionality for the Haive framework.
+
+Functions:
+    stringify_pydantic_model: Stringify Pydantic Model functionality.
+    ensure_json_serializable: Ensure Json Serializable functionality.
+"""
+
 import inspect
 import json
 from typing import Any
