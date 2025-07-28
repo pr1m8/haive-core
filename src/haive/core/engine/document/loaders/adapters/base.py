@@ -1,7 +1,7 @@
 """Base loader adapter for document loaders.
 
-This module provides the base LoaderAdapter class that all specific
-loader adapters inherit from, establishing a consistent interface.
+This module provides the base LoaderAdapter class that all specific loader adapters
+inherit from, establishing a consistent interface.
 """
 
 from abc import ABC, abstractmethod
