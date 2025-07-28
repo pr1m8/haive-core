@@ -49,7 +49,16 @@ lint:
         - tools/**
         - logs/**
         - actions/**
+        - docs/**
+        - scripts/**
+        - scratches/**
         - notifications/**
+        - .secrets/**
+        - .venv/**
+        - venv/**
+        - ENV/**
+        - env/**
+        - .env/**
 
 # Trunk Actions (Git hooks and workflow automation)
 actions:
