@@ -67,6 +67,7 @@ class WebSource(BaseSource):
 
     def validate(self) -> bool:
         """Basic validation of URL format.
+
         Note: This doesn't check if the URL is accessible.
         """
         return True  # URL is already validated by Pydantic

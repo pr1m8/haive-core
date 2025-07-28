@@ -34,7 +34,7 @@ class FileSource(BaseSource):
     MIME_TYPES: ClassVar[dict[str, str]] = {
         ".pdf": "application/pdf",
         ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        ".doc": "application/msword",
+        ".doc": "application/ms",
         ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         ".xls": "application/vnd.ms-excel",
         ".csv": "text/csv",
