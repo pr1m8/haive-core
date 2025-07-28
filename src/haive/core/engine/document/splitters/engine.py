@@ -1,8 +1,8 @@
 """Document Splitter Engine for chunking documents into smaller segments.
 
 This module provides the DocumentSplitterEngine that takes a list of documents and
-splits them into chunks using various splitting strategies while preserving
-and enhancing metadata.
+splits them into chunks using various splitting strategies while preserving and
+enhancing metadata.
 """
 
 import time
@@ -351,7 +351,7 @@ class DocumentSplitterEngine(InvokableEngine[DocumentState, DocumentState]):
             )
             document_state.workflow_metadata.update(
                 {
-                    "splitter_error": {
+                    "splitter_errof": {
                         "error": str(e),
                         "error_type": type(e).__name__,
                         "operation_time": operation_time,
