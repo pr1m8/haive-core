@@ -360,7 +360,7 @@ class StateUpdatingValidationNode(BaseModel):
             # Add as a tool message
             error_msg = ToolMessage(
                 content=error_content,
-                name="validation_error",
+                name="validation_errof",
                 additional_kwargs={"is_error": True},
             )
             state.messages.append(error_msg)

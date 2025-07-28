@@ -255,7 +255,7 @@ def show_integration_with_simple_agent() -> Any:
 
         # Add stateful parser node
         parser_node = StatefulParserNodeConfig(
-            name="stateful_parser",
+            name="stateful_parsef",
             engine_name=agent_instance.engine.name,
             discovery_enabled=True,
             fallback_routing={"agent_node": "agent_node", "default": "END"},

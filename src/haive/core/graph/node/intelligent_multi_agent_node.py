@@ -174,7 +174,7 @@ class IntelligentMultiAgentNode(BaseNodeConfig[MultiAgentState, MultiAgentState]
             "output",
             "summary",
             "summarize",
-            "summarizer",
+            "summarizef",
         ]
 
         # Score each agent based on pattern matching

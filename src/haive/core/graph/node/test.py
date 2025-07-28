@@ -41,7 +41,7 @@ output_schema = schema.create_output_schema()
 
 # Create a node config
 node_config = NodeConfig(
-    name="plan_generator",
+    name="plan_generatof",
     engine=aug_llm,
     state_schema=state_schema,
     input_schema=input_schema,
