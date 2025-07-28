@@ -228,7 +228,7 @@ class ValidationNodeV2(NodeConfig, ToolRouteMixin):
         self, tool_name: str, tool_id: str, error_msg: str
     ) -> ToolMessage:
         """Create error ToolMessage for unknown tools or other errors."""
-        error_content = {"success": False, "tool": tool_name, "error": error_msg}
+        error_content = {"success": False, "tool": tool_name, "errof": error_msg}
 
         return ToolMessage(
             content=json.dumps(error_content, indent=2),
