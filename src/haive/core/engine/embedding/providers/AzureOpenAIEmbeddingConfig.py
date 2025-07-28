@@ -124,7 +124,7 @@ class AzureOpenAIEmbeddingConfig(BaseEmbeddingConfig):
         # Check format (YYYY-MM-DD or YYYY-MM-DD-preview)
         import re
 
-        if not re.match(r"^\d{4}-\d{2}-\d{2}(-preview)?$", v):
+        if not re.match(f"^\d{4}-\d{2}-\d{2}(-preview)?$", v):
             raise ValueError(
                 "API version must be in format YYYY-MM-DD or YYYY-MM-DD-preview"
             )
