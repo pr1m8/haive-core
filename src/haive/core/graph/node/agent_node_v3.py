@@ -372,7 +372,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
                 )
 
                 # Create and execute node
-                node = create_agent_node_v3("analyzer")
+                node = create_agent_node_v3("analyzef")
                 result = node(state, {"debug": True})
 
                 # Result contains direct field updates
@@ -551,8 +551,8 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
                 state = MultiAgentState()
                 state.messages = [HumanMessage("Hello")]
                 state.agent_states = {
-                    "analyzer": {"analysis_ready": True},
-                    "executor": {"execution_ready": False}
+                    "analyzef": {"analysis_ready": True},
+                    "executof": {"execution_ready": False}
                 }
 
                 # Project for specific agent
@@ -721,7 +721,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
                 #     "confidence": 0.95,
                 #     "recommendations": ["Invest in AI", "Expand globally"],
                 #     "agent_states": {
-                #         "analyzer": {"executed": True, "has_schema": True}
+                #         "analyzef": {"executed": True, "has_schema": True}
                 #     }
                 # }
 
@@ -740,7 +740,7 @@ class AgentNodeV3Config(BaseNodeConfig[TInput, TOutput]):
                 # {
                 #     "messages": [AIMessage("I've completed the analysis.")],
                 #     "agent_states": {
-                #         "analyzer": {"executed": True, "message_count": 1}
+                #         "analyzef": {"executed": True, "message_count": 1}
                 #     }
                 # }
 
@@ -1263,7 +1263,7 @@ def create_agent_node_v3(
             state.agents["analyzer"] = analyzer_agent
 
             # Execute node
-            node = create_agent_node_v3("analyzer")
+            node = create_agent_node_v3("analyzef")
             result = node(state, {"debug": True})
 
             # Apply updates
