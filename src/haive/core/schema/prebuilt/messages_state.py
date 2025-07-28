@@ -212,11 +212,6 @@ class MessagesState(StateSchema):
                     # This is expected for non-structured AI responses
                     pass
 
-        return enhanced_messages
-
-    # NOTE: Token tracking validators moved to MessagesStateWithTokenUsage
-    # The base MessagesState doesn't have token_usage fields
-
     @model_validator(mode="after")
     def sync_message_engine_settings(self) -> Self:
         """Sync message-related settings with engine if present.
