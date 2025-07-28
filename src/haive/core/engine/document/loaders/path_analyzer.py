@@ -1,7 +1,7 @@
 """Path analysis for automatic source detection.
 
-This module provides comprehensive path analysis to automatically detect
-the type of document source from a path string. Critical for auto-loading.
+This module provides comprehensive path analysis to automatically detect the type of
+document source from a path string. Critical for auto-loading.
 """
 
 import mimetypes

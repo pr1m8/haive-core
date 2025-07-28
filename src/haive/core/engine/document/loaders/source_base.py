@@ -1,7 +1,7 @@
 """Base classes for document sources.
 
-This module provides base classes for different types of document sources.
-Sources represent the location/type of documents, while loaders handle the actual loading.
+This module provides base classes for different types of document sources. Sources
+represent the location/type of documents, while loaders handle the actual loading.
 """
 
 from abc import ABC, abstractmethod

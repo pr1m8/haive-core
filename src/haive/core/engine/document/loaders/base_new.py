@@ -1,8 +1,8 @@
 """Base classes for document loaders.
 
-This module provides the foundation for all document loaders in the system,
-including base source classes, pattern matching, and loader strategies.
-Kept under 300 lines as per code style guidelines.
+This module provides the foundation for all document loaders in the system, including
+base source classes, pattern matching, and loader strategies. Kept under 300 lines as
+per code style guidelines.
 """
 
 from abc import ABC, abstractmethod

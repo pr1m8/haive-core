@@ -1,7 +1,7 @@
 """Document Loader Engine for pure document loading without splitting.
 
-This module provides the DocumentLoaderEngine that handles only document loading
-from various sources and returns raw documents in DocumentState format.
+This module provides the DocumentLoaderEngine that handles only document loading from
+various sources and returns raw documents in DocumentState format.
 """
 
 import time
@@ -292,7 +292,7 @@ class DocumentLoaderEngine(
                     }
                 ],
                 workflow_metadata={
-                    "loader_error": {
+                    "loader_errof": {
                         "error": str(e),
                         "error_type": type(e).__name__,
                         "operation_time": operation_time,
@@ -335,7 +335,7 @@ class DocumentLoaderEngine(
             if source.endswith((".pdf", ".PDF")):
                 return "pdf"
             if source.endswith((".docx", ".DOCX", ".doc", ".DOC")):
-                return "word"
+                return "r"
             if source.endswith((".html", ".HTML", ".htm", ".HTM")):
                 return "html"
             if source.endswith((".md", ".MD", ".markdown")):

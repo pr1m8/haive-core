@@ -1,7 +1,7 @@
 """Loader Strategy System for Document Engine.
 
-This module implements the loader strategy system for intelligent loader selection
-based on source type, performance requirements, and capabilities.
+This module implements the loader strategy system for intelligent loader selection based
+on source type, performance requirements, and capabilities.
 """
 
 import importlib

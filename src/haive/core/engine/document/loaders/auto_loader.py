@@ -1,6 +1,5 @@
 """Ultimate Auto-Loader for Document Sources.
 
-from typing import Any, Dict
 This module provides the ultimate auto-loader functionality that can automatically
 detect, instantiate, and load documents from any source type. It integrates with
 the enhanced registry and path analyzer to provide seamless document loading.
@@ -38,7 +37,7 @@ import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict
 
 from langchain_core.documents import Document
 from pydantic import BaseModel, Field
@@ -648,7 +647,7 @@ class AutoLoader:
                 URIs, and API endpoints. Examples:
                 - "/path/to/file.pdf" (local file)
                 - "https://example.com/doc.html" (web page)
-                - "postgresql://user:pass@host/db" (database)
+                - "postgresql://user:pass
                 - "s3://bucket/key" (cloud storage)
             **kwargs: Additional parameters passed to the source and loader.
                 Common parameters include:
@@ -690,7 +689,7 @@ class AutoLoader:
             Database with custom query::
 
                 docs = loader.load(
-                    "postgresql://user:pass@localhost:5432/knowledge",
+                    "postgresql://user:pass
                     query="SELECT title, content FROM articles WHERE published = true",
                     chunk_size=2000
                 )
@@ -1114,7 +1113,7 @@ class AutoLoader:
 
             Load all tables from database::
 
-                documents = loader.load_all("postgresql://user:pass@host/db")
+                documents = loader.load_all("postgresql://user:pass
         """
         try:
             # Detect source and create instance
@@ -1190,7 +1189,8 @@ class AutoLoader:
     async def aload_documents(
         self, sources: list[str | dict[str, Any]], **kwargs
     ) -> list[Document]:
-        """Asynchronously load documents from multiple sources (standard langchain plural method name).
+        """Asynchronously load documents from multiple sources (standard langchain plural
+        method name).
 
         This is the async version of load_documents() that takes a list of sources
         and returns a flattened list of all documents.
@@ -1352,8 +1352,7 @@ class AutoLoader:
                     "postgresql",
                     host="localhost",
                     username="user",
-                    password="pass"
-                )
+                    pass="pass
         """
         try:
             source_class = self.registry.get_source_class(source_type)

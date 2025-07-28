@@ -1,7 +1,7 @@
 """Document loader registry system.
 
-This module provides a registry for document loaders, allowing them to be
-registered, looked up, and managed throughout the application.
+This module provides a registry for document loaders, allowing them to be registered,
+looked up, and managed throughout the application.
 """
 
 import builtins
@@ -50,8 +50,8 @@ class LoaderMetadata(BaseModel):
 class DocumentLoaderRegistry(AbstractRegistry[type[BaseLoader]]):
     """Registry for document loaders.
 
-    This registry keeps track of document loader classes and their metadata,
-    allowing for discovery and instantiation of loaders based on source types.
+    This registry keeps track of document loader classes and their metadata, allowing
+    for discovery and instantiation of loaders based on source types.
     """
 
     _instance = None

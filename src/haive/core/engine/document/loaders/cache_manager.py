@@ -1,7 +1,7 @@
 """Cache manager for document loader registry.
 
-This module provides caching functionality to speed up document loader
-initialization by avoiding repeated scanning of 230+ loader modules.
+This module provides caching functionality to speed up document loader initialization by
+avoiding repeated scanning of 230+ loader modules.
 """
 
 import hashlib
@@ -260,8 +260,8 @@ def get_cache_manager() -> RegistryCacheManager:
 def clear_loader_cache() -> None:
     """Clear the document loader cache.
 
-    Use this when you've installed new packages or made changes
-    to loader implementations.
+    Use this when you've installed new packages or made changes to loader
+    implementations.
     """
     _cache_manager.clear_cache()
 

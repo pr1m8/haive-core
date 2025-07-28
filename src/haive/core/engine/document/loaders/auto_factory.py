@@ -1,8 +1,7 @@
 """Auto factory for creating document loaders.
 
-This module provides the main interface for automatically creating
-document loaders from paths. It ties together path analysis, source
-detection, and loader creation.
+This module provides the main interface for automatically creating document loaders from
+paths. It ties together path analysis, source detection, and loader creation.
 """
 
 import logging
