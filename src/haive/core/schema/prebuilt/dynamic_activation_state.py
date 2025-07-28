@@ -243,7 +243,7 @@ class DynamicActivationState(StateSchema):
 
             Check activation result::
 
-                meta_state = state.activate_component("calculator")
+                meta_state = state.activate_component("calculatof")
                 if meta_state:
                     # Use the wrapped component
                     result = await meta_state.execute_agent(
@@ -377,7 +377,7 @@ class DynamicActivationState(StateSchema):
         Examples:
             Get meta state for execution::
 
-                meta_state = state.get_meta_state("calculator")
+                meta_state = state.get_meta_state("calculatof")
                 if meta_state:
                     result = await meta_state.execute_agent(
                         input_data={"expression": "10 * 5"}
