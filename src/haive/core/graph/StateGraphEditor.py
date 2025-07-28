@@ -430,7 +430,7 @@ class StateGraphEditor(BaseModel):
         """Compile the StateGraph.
 
         Args:
-            **kwargs: Additional keyword arguments to pass to StateGraph.compile()
+            **kwargs: Additional key arguments to pass to StateGraph.compile()
 
         Returns:
             Compiled graph instance

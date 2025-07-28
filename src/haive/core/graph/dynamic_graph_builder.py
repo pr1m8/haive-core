@@ -149,7 +149,7 @@ class DynamicGraph:
             default_runnable_config: Default runtime configuration for nodes
             visualize: Whether to automatically visualize the graph
             debug_level: Level of debugging information
-            **kwargs: Additional keyword arguments
+            **kwargs: Additional key arguments
         """
         try:
             logger.info(f"Initializing DynamicGraph: {name}")
@@ -1383,10 +1383,10 @@ class DynamicGraph:
             if "has no attribute 'apply'" in str(e):
                 logger.exception("Pattern doesn't have required method")
                 logger.exception("Verify pattern implementation")
-            elif "TypeError" in str(e) and "unexpected keyword argument" in str(e):
+            elif "TypeError" in str(e) and "unexpected key argument" in str(e):
                 import re
 
-                param_match = re.search(r"unexpected keyword argument '(.*?)'", str(e))
+                param_match = re.search(r"unexpected key argument '(.*?)'", str(e))
                 if param_match:
                     invalid_param = param_match.group(1)
                     logger.exception(f"Invalid parameter: '{invalid_param}'")

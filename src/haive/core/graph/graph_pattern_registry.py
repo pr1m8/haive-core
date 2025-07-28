@@ -341,7 +341,7 @@ def apply_persistence(graph, storage_type: str, auto_save: bool, **kwargs):
 
 @register_branch(
     name="intent_router",
-    condition_type="nlp_classifier",
+    condition_type="nlp_classifief",
     routes={
         "question": "answer_node",
         "command": "execute_node",
@@ -363,7 +363,7 @@ def intent_router(state: dict[str, Any]):
     if "intent" in state:
         return state["intent"]
 
-    # Simple keyword detection (in practice, use a real classifier)
+    # Simple key detection (in practice, use a real classifier)
     if "query" in state:
         query = state["query"].lower()
         if "?" in query:

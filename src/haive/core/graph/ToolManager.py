@@ -386,7 +386,7 @@ class ToolManager:
         Args:
             tool_name: Name of the tool to execute
             args: Positional arguments
-            kwargs: Keyword arguments
+            kwargs: Key arguments
 
         Returns:
             ToolResult with execution results
@@ -467,7 +467,7 @@ class ToolManager:
         Args:
             tool_name: Name of the tool to execute
             args: Positional arguments
-            kwargs: Keyword arguments
+            kwargs: Key arguments
 
         Returns:
             ToolResult with execution results
