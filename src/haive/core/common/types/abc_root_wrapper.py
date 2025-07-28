@@ -1,5 +1,5 @@
-"""From typing import Any
-This module provides an abstract base class for root-wrapped models that serialize with a named key.
+"""From typing import Any This module provides an abstract base class for root-wrapped
+models that serialize with a named key.
 
 This is useful for models that are used as the root of a response, but need to be serialized with a named key.
 
@@ -21,8 +21,8 @@ T = TypeVar("T")
 
 
 class ABCRootWrapper(RootModel[T], Generic[T], ABC):
-    """Abstract base class for root-wrapped models that serialize with a named key
-    (like 'query' instead of 'root').
+    """Abstract base class for root-wrapped models that serialize with a named key (like
+    'query' instead of 'root').
 
     The key is inferred automatically from the class name (lowercased),
     unless explicitly overridden by setting `SERIALIZED_KEY`.
