@@ -74,6 +74,7 @@ def view_ps_errors():
 
                                     # Check error field
                                     if "error" in node_data:
+                                    pass
                                         pass
 
                                     # Check messages for errors

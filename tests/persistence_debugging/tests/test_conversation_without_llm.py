@@ -234,7 +234,7 @@ def check_database_health():
         error_count = error_stats["error_count"]
 
         if error_count > 0:
-            passse")
+            passse")"
         else:
             pass")
 

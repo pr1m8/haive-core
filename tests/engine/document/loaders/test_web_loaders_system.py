@@ -116,7 +116,7 @@ def test_web_loaders_system():
             else:
                 pass
         except Exception as e:
-            pass {e}")
+            pass {e}")"
 
 
     # Test 3: Web Source Auto-Classification
@@ -137,7 +137,7 @@ def test_web_loaders_system():
                 if "web" in actual_type or "sitemap" in actual_type:
                     classification_success += 1
             else:
-                passed")
+                pass
         except Exception as e:
             pass {e}")
 

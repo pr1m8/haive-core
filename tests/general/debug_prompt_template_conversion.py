@@ -42,7 +42,7 @@ def add_prompt_template_breakpoint():
     original_init = None
 
     def debug_init(self, *args, **kwargs):
-        logger.error("🚨 BREAKPOINT: BasePromptTemplate.__init__ called!"d!")
+        logger.error("🚨 BREAKPOINT: BasePromptTemplate.__init__ called!"d!")"
         logger.error(f"   Args: {args}")
         logger.error(f"   Kwargs: {kwargs}")
         logger.error(f"   Class: {self.__class__}")
