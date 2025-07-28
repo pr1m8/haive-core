@@ -1,8 +1,8 @@
 """Universal Document Loader with Auto-Detection.
 
-This module provides a comprehensive universal loader that automatically detects
-the best loader for any given input (URL, file path, text, etc.) and can
-handle preferences for optimal loader selection.
+This module provides a comprehensive universal loader that automatically detects the
+best loader for any given input (URL, file path, text, etc.) and can handle preferences
+for optimal loader selection.
 """
 
 import logging
@@ -329,7 +329,7 @@ class SmartSourceRegistry:
         candidates = []
 
         # Chat file exports (usually text files with specific content)
-        if any(keyword in path.lower() for keyword in ["whatsapp", "telegram", "chat"]):
+        if any(key in path.lower() for key in ["whatsapp", "telegram", "chat"]):
             if "whatsapp" in path.lower():
                 candidates.append((WhatsAppSource, 0.90))
             if "telegram" in path.lower():

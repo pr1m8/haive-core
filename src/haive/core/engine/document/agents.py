@@ -90,8 +90,8 @@ class DocumentAgent(Agent):
     def setup_agent(self) -> None:
         """Set up the agent by configuring the document engine.
 
-        This method is called during agent initialization to set up the engine
-        with the agent's configuration parameters.
+        This method is called during agent initialization to set up the engine with the
+        agent's configuration parameters.
         """
         # Ensure we have a document engine
         if not isinstance(self.engine, DocumentEngine):

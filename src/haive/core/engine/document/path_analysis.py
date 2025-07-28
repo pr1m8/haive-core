@@ -1,7 +1,7 @@
 """Path Analysis System for Document Loader Engine.
 
-This module provides a path analysis system for the document loader engine,
-which analyzes paths and URLs to determine their nature and properties.
+This module provides a path analysis system for the document loader engine, which
+analyzes paths and URLs to determine their nature and properties.
 """
 
 import contextlib

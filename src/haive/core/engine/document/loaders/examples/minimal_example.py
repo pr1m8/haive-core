@@ -8,9 +8,11 @@ Functions:
 """
 
 #!/usr/bin/env python3
-"""Minimal working example of the Haive Document Loader System.
 
 from typing import Any
+
+"""Minimal working example of the Haive Document Loader System.
+
 This example demonstrates the core functionality of the document loading system
 even with the source registration issues. It shows how to use the basic
 AutoLoader functionality and path analysis.

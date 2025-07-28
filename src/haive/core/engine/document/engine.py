@@ -4,8 +4,8 @@ This module provides a comprehensive document engine that integrates with the Ha
 engine framework for loading, processing, and managing documents from various sources.
 
 The engine supports multiple input types, advanced processing strategies, and
-comprehensive error handling while maintaining compatibility with the existing
-Haive engine infrastructure.
+comprehensive error handling while maintaining compatibility with the existing Haive
+engine infrastructure.
 """
 
 import asyncio

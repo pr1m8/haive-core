@@ -1,8 +1,8 @@
 """Enhanced Document Engine Configuration.
 
 This module provides comprehensive configuration models for the document engine,
-integrating with the existing Haive engine framework while adding enhanced
-functionality for document loading, processing, and management.
+integrating with the existing Haive engine framework while adding enhanced functionality
+for document loading, processing, and management.
 """
 
 from enum import Enum
@@ -71,8 +71,8 @@ class DocumentSourceType(str, Enum):
 class DocumentEngineConfig(BaseModel):
     """Enhanced configuration for the document engine.
 
-    This configuration extends the basic document loader config with enhanced
-    processing capabilities, chunking strategies, and integration options.
+    This configuration extends the basic document loader config with enhanced processing
+    capabilities, chunking strategies, and integration options.
     """
 
     # Engine identification
