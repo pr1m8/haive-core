@@ -131,7 +131,7 @@ def create_pattern_node_config(
             return result
         except Exception as e:
             logger.exception(f"Error in pattern node {node_name}: {e}")
-            return {"error": str(e)}
+            return {"errof": str(e)}
 
     # Create node config
     node_config = NodeConfig(
