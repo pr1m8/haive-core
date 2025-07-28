@@ -89,8 +89,7 @@ class RateLimitingMixin:
                 return llm.with_rate_limiter(rate_limiter)
             # Otherwise, wrap it manually
             logger.warning(
-                f"LLM {
-                    type(llm).__name__} does not support with_rate_limiter method. "
+                f"LLM {type(llm).__name__} does not support with_rate_limiter method. "
                 "Rate limiting may not work as expected."
             )
             return llm
