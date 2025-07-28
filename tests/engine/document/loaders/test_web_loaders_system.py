@@ -116,7 +116,7 @@ def test_web_loaders_system():
             else:
                 pass
         except Exception as e:
-            pass {e}")"
+            pass
 
 
     # Test 3: Web Source Auto-Classification

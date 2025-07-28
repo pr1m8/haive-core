@@ -42,7 +42,7 @@ def add_prompt_template_breakpoint():
     original_init = None
 
     def debug_init(self, *args, **kwargs):
-        logger.error("🚨 BREAKPOINT: BasePromptTemplate.__init__ called!"d!")"
+        logger.error("🚨 BREAKPOINT: BasePromptTemplate.__init__ called!")
         logger.error(f"   Args: {args}")
         logger.error(f"   Kwargs: {kwargs}")
         logger.error(f"   Class: {self.__class__}")
@@ -124,7 +124,7 @@ def trace_pydantic_validation():
 
     def debug_validate_python(self, obj, *args, **kwargs):
         if "BasePromptTemplate" in str(self) or "prompt_template" in str(obj):
-            logger.error("🔍 PYDANTIC VALIDATION of prompt_template!"e!")
+            logger.error("🔍 PYDANTIC VALIDATION of prompt_template!")
             logger.error(f"   Validator: {self}")
             logger.error(f"   Object type: {type(obj)}")
             logger.error(f"   Object: {obj}")
@@ -133,7 +133,7 @@ def trace_pydantic_validation():
             if isinstance(obj, dict) and all(
                 k in obj for k in ["name", "input_variables", "optional_variables"]
             ):
-                logger.error("🚨 FOUND THE PROBLEMATIC DICT!"T!")
+                logger.error("🚨 FOUND THE PROBLEMATIC DICT!")
                 logger.error(f"   Dict keys: {list(obj.keys())}")
                 logger.error(f"   Dict values: {obj}")
 
@@ -168,7 +168,7 @@ def trace_serialization():
         if hasattr(obj, "prompt_template") or (
             isinstance(obj, dict) and "prompt_template" in obj
         ):
-            logger.error("🔍 SERIALIZATION of object with prompt_template!"e!")
+            logger.error("🔍 SERIALIZATION of object with prompt_template!")
             logger.error(f"   Object type: {type(obj)}")
 
             if hasattr(obj, "prompt_template"):
@@ -287,7 +287,7 @@ def main():
                     "validate_python",
                 ]
             ):
-                logger.error("📍 CRITICAL FRAME:"E:")
+                logger.error("📍 CRITICAL FRAME:")
                 logger.error(f"   File: {frame_info.filename}")
                 logger.error(f"   Line: {frame_info.lineno}")
                 logger.error(f"   Function: {frame_info.name}")

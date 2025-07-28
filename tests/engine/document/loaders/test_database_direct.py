@@ -312,27 +312,27 @@ def test_database_system():
     if registration_success:
         passed_tests += 1
     else:
-        pass")
+        pass
 
     if strategies_tested >= 4:
         passed_tests += 1
     else:
-        pass")
+        pass
 
     if splitters_tested >= 5:
         passed_tests += 1
     else:
-        pass")
+        pass
 
     if fetch_all_success:
         passed_tests += 1
     else:
-        pass")
+        pass
 
     if schema_success:
         passed_tests += 1
     else:
-        pass")
+        pass
 
     if class_tests_passed >= 6:
         passed_tests += 1
