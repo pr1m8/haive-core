@@ -1,6 +1,5 @@
 """PostgreSQL persistence manager for the Haive framework.
 
-from typing import Any, Dict, List, Optional
 This module provides a comprehensive persistence manager that integrates
 Supabase authentication with PostgreSQL persistence for agent state management.
 It centralizes thread registration, checkpoint management, and connection
@@ -14,6 +13,7 @@ import json  # Import json at the module level for consistent serialization
 import logging
 import urllib.parse
 import uuid
+from typing import Any, Dict, List, Optional
 
 from langgraph.checkpoint.memory import MemorySaver
 
