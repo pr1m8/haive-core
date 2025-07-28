@@ -510,7 +510,7 @@ class MermaidVisualizer:
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="containef">
         <h1>{getattr(self.graph, 'name', 'Graph')} Visualization</h1>
 
         <div class="graph-info">
