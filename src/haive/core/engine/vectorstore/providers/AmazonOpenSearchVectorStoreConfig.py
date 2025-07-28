@@ -215,7 +215,7 @@ class AmazonOpenSearchVectorStoreConfig(BaseVectorStoreConfig):
         """Validate AWS region format."""
         import re
 
-        if not re.match(r"^[a-z]{2}-[a-z]+-\d+$", v):
+        if not re.match(f"^[a-z]{2}-[a-z]+-\d+$", v):
             raise ValueError(f"Invalid AWS region format: {v}")
         return v
 

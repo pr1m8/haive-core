@@ -6,7 +6,7 @@ which is an open-source vector database with built-in modules for ML.
 Weaviate provides:
 1. GraphQL and RESTful APIs for querying
 2. Built-in vectorization modules
-3. Hybrid search combining vector and keyword search
+3. Hybrid search combining vector and key search
 4. Real-time data updates
 5. Horizontal scalability
 6. Multi-tenancy support
@@ -205,7 +205,7 @@ class WeaviateVectorStoreConfig(SecureConfigMixin, BaseVectorStoreConfig):
             if api_key:
                 auth_config = weaviate.AuthApiKey(api_key=api_key)
             elif self.auth_client_secret:
-                auth_config = weaviate.AuthClientPassword(**self.auth_client_secret)
+                auth_config = weaviate.AuthClientPass(**self.auth_client_secret)
 
             # Prepare additional headers
             additional_headers = self.additional_headers or {}

@@ -157,8 +157,8 @@ class VectaraVectorStoreConfig(BaseVectorStoreConfig, SecureConfigMixin):
     def validate_embedding(cls):
         """Override to make embedding optional for Vectara.
 
-        Vectara manages its own embeddings internally, so we don't require
-        an embedding configuration.
+        Vectara manages its own embeddings internally, so we don't require an embedding
+        configuration.
         """
         # Vectara doesn't need external embeddings
 

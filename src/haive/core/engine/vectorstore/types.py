@@ -9,8 +9,9 @@ from enum import Enum
 class VectorStoreType(str, Enum):
     """Enumeration of supported vector store types.
 
-    This enum defines all the vector store implementations available in the Haive framework.
-    Each type corresponds to a specific vector database or vector storage solution.
+    This enum defines all the vector store implementations available in the Haive
+    framework. Each type corresponds to a specific vector database or vector storage
+    solution.
     """
 
     # Open source vector databases

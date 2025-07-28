@@ -14,7 +14,6 @@ Functions:
 """
 
 # src/haive/core/engine/vectorstore.py
-
 """Vector store engine implementation for the Haive framework.
 
 from typing import Any

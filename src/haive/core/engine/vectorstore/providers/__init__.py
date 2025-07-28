@@ -1,9 +1,9 @@
 """Vector store provider implementations for the Haive framework.
 
-This package contains implementations of vector store providers that extend
-the base vector store configuration. Each provider configuration class
-extends BaseVectorStoreConfig and provides specific implementation details
-for that vector store backend.
+This package contains implementations of vector store providers that extend the base
+vector store configuration. Each provider configuration class extends
+BaseVectorStoreConfig and provides specific implementation details for that vector store
+backend.
 
 The providers are automatically registered when imported, allowing them to be
 instantiated by type through the base configuration system.

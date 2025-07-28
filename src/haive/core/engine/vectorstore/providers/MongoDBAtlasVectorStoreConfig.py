@@ -55,7 +55,7 @@ class MongoDBAtlasVectorStoreConfig(BaseVectorStoreConfig):
         >>> config = MongoDBAtlasVectorStoreConfig(
         ...     name="document_store",
         ...     embedding=OpenAIEmbeddingConfig(),
-        ...     connection_string="mongodb+srv://user:pass@cluster.mongodb.net",
+        ...     connection_string="mongodb+srv://user:pass
         ...     database_name="my_database",
         ...     collection_name="documents",
         ...     index_name="vector_index"
@@ -233,7 +233,7 @@ class MongoDBAtlasVectorStoreConfig(BaseVectorStoreConfig):
                                     self.embedding_key: {
                                         "dimensions": dimensions,
                                         "similarity": self.relevance_score_fn,
-                                        "type": "knnVector",
+                                        "type": "knnVectof",
                                     }
                                 },
                             }
