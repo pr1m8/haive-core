@@ -33,6 +33,51 @@ class PostgresSaverWithThreadCreation(PostgresSaver):
         """
         super().__init__(conn, **kwargs)
         self._thread_creation_cache = set()  # Cache to avoid duplicate thread creation
+        self._schema_type = None  # Will be detected on first use
+
+    def _detect_schema_type(self, cursor) -> str:
+        """Detect if using Supabase or standard LangGraph schema.
+
+        Returns:
+            'supabase' if using Supabase schema with composite constraint
+            'standard' if using standard LangGraph schema with single constraint
+        """
+        try:
+            # Check if user_id column exists in threads table
+            cursor.execute(
+                """
+                SELECT column_name 
+                FROM information_schema.columns 
+                WHERE table_name = 'threads' 
+                AND column_name = 'user_id'
+            """
+            )
+            has_user_id = cursor.fetchone() is not None
+
+            if not has_user_id:
+                return "standard"
+
+            # Check for composite unique constraint on (id, user_id)
+            cursor.execute(
+                """
+                SELECT COUNT(*) 
+                FROM information_schema.table_constraints tc
+                JOIN information_schema.constraint_column_usage AS ccu 
+                    USING (constraint_schema, constraint_name)
+                WHERE tc.table_name = 'threads' 
+                AND tc.constraint_type = 'UNIQUE'
+                AND ccu.column_name IN ('id', 'user_id')
+                GROUP BY tc.constraint_name
+                HAVING COUNT(*) = 2
+            """
+            )
+            has_composite = cursor.fetchone() is not None
+
+            return "supabase" if has_composite else "standard"
+
+        except Exception as e:
+            logger.warning(f"Failed to detect schema type, assuming standard: {e}")
+            return "standard"
 
     def _ensure_thread_exists(self, thread_id: str, user_id: str = None) -> None:
         """Ensure a thread exists in the threads table.
@@ -41,57 +86,92 @@ class PostgresSaverWithThreadCreation(PostgresSaver):
             thread_id: The thread ID to ensure exists
             user_id: Optional user ID. If None, generates/uses a default user_id
         """
-        # Generate user_id if not provided (handle NOT NULL constraint)
-        if user_id is None:
+        # Detect schema type on first use
+        if self._schema_type is None:
+            if hasattr(self.conn, "connection"):
+                with self.conn.connection() as conn, conn.cursor() as cursor:
+                    self._schema_type = self._detect_schema_type(cursor)
+            else:
+                with self.conn.cursor() as cursor:
+                    self._schema_type = self._detect_schema_type(cursor)
+
+            # Also check environment variable override
+            schema_override = os.getenv("POSTGRES_THREADS_SCHEMA_TYPE")
+            if schema_override in ["supabase", "standard"]:
+                self._schema_type = schema_override
+
+            logger.info(f"Detected PostgreSQL threads schema type: {self._schema_type}")
+
+        # For Supabase schema, we need a user_id
+        if self._schema_type == "supabase" and user_id is None:
             # Try environment variable first
-            user_id = os.getenv("DEFAULT_USER_ID") or os.getenv("USER_ID")
+            user_id = (
+                os.getenv("HAIVE_USER_ID")
+                or os.getenv("DEFAULT_USER_ID")
+                or os.getenv("USER_ID")
+            )
 
             if not user_id:
-                # Use a real user_id from auth.users table
-                # This is the first user ID we found in the database
-                user_id = (
-                    "5335c7e6-1d51-42d2-b958-0ad2ad2c269b"  # deloreanblack@gmail.com
+                # Use your specific user_id as default
+                user_id = "b9284d47-72b5-4960-a177-0788fc4b0809"
+                logger.info(
+                    "Using default user_id: b9284d47-72b5-4960-a177-0788fc4b0809. "
+                    "To override, set HAIVE_USER_ID in your .env file."
                 )
 
         # Check cache first to avoid unnecessary database calls
-        cache_key = f"{thread_id}:{user_id}"
+        cache_key = (
+            f"{thread_id}:{user_id if self._schema_type == 'supabase' else 'none'}"
+        )
         if cache_key in self._thread_creation_cache:
             return
 
         try:
             # Handle both connection pool and direct connection
             if hasattr(self.conn, "connection"):
-                # Using connection pool
                 with self.conn.connection() as conn, conn.cursor() as cursor:
-                    # Insert thread with required user_id (never NULL)
-                    cursor.execute(
-                        """
-                        INSERT INTO threads (id, user_id, created_at, updated_at, last_access)
-                        VALUES (%s, %s, NOW(), NOW(), NOW())
-                        ON CONFLICT (id, user_id) DO NOTHING
-                        """,
-                        (thread_id, user_id),
-                    )
+                    self._insert_thread(cursor, thread_id, user_id)
             else:
-                # Using direct connection
                 with self.conn.cursor() as cursor:
-                    # Insert thread with required user_id (never NULL)
-                    cursor.execute(
-                        """
-                        INSERT INTO threads (id, user_id, created_at, updated_at, last_access)
-                        VALUES (%s, %s, NOW(), NOW(), NOW())
-                        ON CONFLICT (id, user_id) DO NOTHING
-                        """,
-                        (thread_id, user_id),
-                    )
+                    self._insert_thread(cursor, thread_id, user_id)
 
-            # Add to cache with user_id context
+            # Add to cache
             self._thread_creation_cache.add(cache_key)
-            logger.debug(f"Thread {thread_id} ensured in database for user {user_id}")
+            if self._schema_type == "supabase":
+                logger.debug(
+                    f"Thread {thread_id} ensured in database for user {user_id}"
+                )
+            else:
+                logger.debug(f"Thread {thread_id} ensured in database")
 
         except Exception as e:
             logger.exception(f"Failed to ensure thread {thread_id} exists: {e}")
             raise
+
+    def _insert_thread(self, cursor, thread_id: str, user_id: str = None) -> None:
+        """Insert thread using appropriate schema."""
+        if self._schema_type == "supabase":
+            # Supabase schema with user_id and composite constraint
+            cursor.execute(
+                """
+                INSERT INTO threads (id, user_id, created_at, updated_at, last_access)
+                VALUES (%s, %s, NOW(), NOW(), NOW())
+                ON CONFLICT (id, user_id) DO UPDATE SET
+                    last_access = NOW()
+                """,
+                (thread_id, user_id),
+            )
+        else:
+            # Standard LangGraph schema without user_id
+            cursor.execute(
+                """
+                INSERT INTO threads (id, created_at, updated_at)
+                VALUES (%s, NOW(), NOW())
+                ON CONFLICT (id) DO UPDATE SET
+                    updated_at = NOW()
+                """,
+                (thread_id,),
+            )
 
     def put(
         self,
@@ -165,10 +245,55 @@ class AsyncPostgresSaverWithThreadCreation:
         self._base_saver = AsyncPostgresSaver(conn, **kwargs)
         self._thread_creation_cache = set()  # Cache to avoid duplicate thread creation
         self.conn = conn
+        self._schema_type = None  # Will be detected on first use
 
     def __getattr__(self, name):
         """Delegate attribute access to the base saver."""
         return getattr(self._base_saver, name)
+
+    async def _detect_schema_type(self, cursor) -> str:
+        """Detect if using Supabase or standard LangGraph schema (async).
+
+        Returns:
+            'supabase' if using Supabase schema with composite constraint
+            'standard' if using standard LangGraph schema with single constraint
+        """
+        try:
+            # Check if user_id column exists in threads table
+            await cursor.execute(
+                """
+                SELECT column_name 
+                FROM information_schema.columns 
+                WHERE table_name = 'threads' 
+                AND column_name = 'user_id'
+            """
+            )
+            has_user_id = await cursor.fetchone() is not None
+
+            if not has_user_id:
+                return "standard"
+
+            # Check for composite unique constraint on (id, user_id)
+            await cursor.execute(
+                """
+                SELECT COUNT(*) 
+                FROM information_schema.table_constraints tc
+                JOIN information_schema.constraint_column_usage AS ccu 
+                    USING (constraint_schema, constraint_name)
+                WHERE tc.table_name = 'threads' 
+                AND tc.constraint_type = 'UNIQUE'
+                AND ccu.column_name IN ('id', 'user_id')
+                GROUP BY tc.constraint_name
+                HAVING COUNT(*) = 2
+            """
+            )
+            has_composite = await cursor.fetchone() is not None
+
+            return "supabase" if has_composite else "standard"
+
+        except Exception as e:
+            logger.warning(f"Failed to detect schema type, assuming standard: {e}")
+            return "standard"
 
     async def _ensure_thread_exists(self, thread_id: str, user_id: str = None) -> None:
         """Ensure a thread exists in the threads table (async version).
@@ -177,59 +302,92 @@ class AsyncPostgresSaverWithThreadCreation:
             thread_id: The thread ID to ensure exists
             user_id: Optional user ID. If None, generates/uses a default user_id
         """
-        # Generate user_id if not provided (handle NOT NULL constraint)
-        if user_id is None:
+        # Detect schema type on first use
+        if self._schema_type is None:
+            if hasattr(self.conn, "connection"):
+                async with self.conn.connection() as conn, conn.cursor() as cursor:
+                    self._schema_type = await self._detect_schema_type(cursor)
+            else:
+                async with self.conn.cursor() as cursor:
+                    self._schema_type = await self._detect_schema_type(cursor)
+
+            # Also check environment variable override
+            schema_override = os.getenv("POSTGRES_THREADS_SCHEMA_TYPE")
+            if schema_override in ["supabase", "standard"]:
+                self._schema_type = schema_override
+
+            logger.info(f"Detected PostgreSQL threads schema type: {self._schema_type}")
+
+        # For Supabase schema, we need a user_id
+        if self._schema_type == "supabase" and user_id is None:
             # Try environment variable first
-            user_id = os.getenv("DEFAULT_USER_ID") or os.getenv("USER_ID")
+            user_id = (
+                os.getenv("HAIVE_USER_ID")
+                or os.getenv("DEFAULT_USER_ID")
+                or os.getenv("USER_ID")
+            )
 
             if not user_id:
-                # Use a real user_id from auth.users table
-                # This is the first user ID we found in the database
-                user_id = (
-                    "5335c7e6-1d51-42d2-b958-0ad2ad2c269b"  # deloreanblack@gmail.com
+                # Use your specific user_id as default
+                user_id = "b9284d47-72b5-4960-a177-0788fc4b0809"
+                logger.info(
+                    "Using default user_id: b9284d47-72b5-4960-a177-0788fc4b0809. "
+                    "To override, set HAIVE_USER_ID in your .env file."
                 )
 
         # Check cache first to avoid unnecessary database calls
-        cache_key = f"{thread_id}:{user_id}"
+        cache_key = (
+            f"{thread_id}:{user_id if self._schema_type == 'supabase' else 'none'}"
+        )
         if cache_key in self._thread_creation_cache:
             return
 
         try:
             # Handle both connection pool and direct connection
             if hasattr(self.conn, "connection"):
-                # Using connection pool
                 async with self.conn.connection() as conn, conn.cursor() as cursor:
-                    # Insert thread with required user_id (never NULL)
-                    await cursor.execute(
-                        """
-                        INSERT INTO threads (id, user_id, created_at, updated_at, last_access)
-                        VALUES (%s, %s, NOW(), NOW(), NOW())
-                        ON CONFLICT (id, user_id) DO NOTHING
-                        """,
-                        (thread_id, user_id),
-                    )
+                    await self._insert_thread(cursor, thread_id, user_id)
             else:
-                # Using direct connection
                 async with self.conn.cursor() as cursor:
-                    # Insert thread with required user_id (never NULL)
-                    await cursor.execute(
-                        """
-                        INSERT INTO threads (id, user_id, created_at, updated_at, last_access)
-                        VALUES (%s, %s, NOW(), NOW(), NOW())
-                        ON CONFLICT (id, user_id) DO NOTHING
-                        """,
-                        (thread_id, user_id),
-                    )
+                    await self._insert_thread(cursor, thread_id, user_id)
 
-            # Add to cache with user_id context
+            # Add to cache
             self._thread_creation_cache.add(cache_key)
-            logger.debug(
-                f"Thread {thread_id} ensured in database (async) for user {user_id}"
-            )
+            if self._schema_type == "supabase":
+                logger.debug(
+                    f"Thread {thread_id} ensured in database (async) for user {user_id}"
+                )
+            else:
+                logger.debug(f"Thread {thread_id} ensured in database (async)")
 
         except Exception as e:
             logger.exception(f"Failed to ensure thread {thread_id} exists (async): {e}")
             raise
+
+    async def _insert_thread(self, cursor, thread_id: str, user_id: str = None) -> None:
+        """Insert thread using appropriate schema (async)."""
+        if self._schema_type == "supabase":
+            # Supabase schema with user_id and composite constraint
+            await cursor.execute(
+                """
+                INSERT INTO threads (id, user_id, created_at, updated_at, last_access)
+                VALUES (%s, %s, NOW(), NOW(), NOW())
+                ON CONFLICT (id, user_id) DO UPDATE SET
+                    last_access = NOW()
+                """,
+                (thread_id, user_id),
+            )
+        else:
+            # Standard LangGraph schema without user_id
+            await cursor.execute(
+                """
+                INSERT INTO threads (id, created_at, updated_at)
+                VALUES (%s, NOW(), NOW())
+                ON CONFLICT (id) DO UPDATE SET
+                    updated_at = NOW()
+                """,
+                (thread_id,),
+            )
 
     async def put(
         self,
