@@ -1,5 +1,4 @@
-"""Automatic tree structure generator for Pydantic BaseModels with Union type
-support.
+"""Automatic tree structure generator for Pydantic BaseModels with Union type support.
 
 This module provides the AutoTree class that automatically wraps any BaseModel
 in a tree structure, handling complex type relationships including Union types.
@@ -55,8 +54,7 @@ T = TypeVar("T", bound=BaseModel)
 
 
 class AutoTree(BaseModel, Generic[T]):
-    """Automatically wraps any BaseModel in a tree structure with Union type
-    support.
+    """Automatically wraps any BaseModel in a tree structure with Union type support.
 
     This generic class creates a tree representation of any BaseModel by automatically
     detecting fields that contain other BaseModels (including those in Union types)
@@ -108,8 +106,7 @@ class AutoTree(BaseModel, Generic[T]):
         self._build_children()
 
     def _is_basemodel_type(self, type_hint: Any) -> bool:
-        """Check if a type hint represents a BaseModel or Union containing
-        BaseModels.
+        """Check if a type hint represents a BaseModel or Union containing BaseModels.
 
         This method analyzes type hints to determine if they represent BaseModel
         types, either directly or within Union types. It's used to identify
@@ -161,8 +158,7 @@ class AutoTree(BaseModel, Generic[T]):
         return types
 
     def _build_children(self):
-        """Auto-detect all fields containing BaseModels and create child tree
-        nodes.
+        """Auto-detect all fields containing BaseModels and create child tree nodes.
 
         This method scans all fields in the wrapped content, identifies those
         containing BaseModels (including within lists and Union types), and
@@ -275,8 +271,7 @@ class AutoTree(BaseModel, Generic[T]):
         show_type: bool = True,
         max_depth: int | None = None,
     ) -> str:
-        r"""Generate a visual tree representation with customizable display
-        options.
+        r"""Generate a visual tree representation with customizable display options.
 
         Creates a text-based tree visualization using Unicode box-drawing characters
         to show the hierarchical structure. The display can be customized to include

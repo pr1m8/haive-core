@@ -23,8 +23,8 @@ T = TypeVar("T")
 class NamedDict(BaseModel, Generic[T], GetterMixin[T]):
     """A dictionary that automatically builds keys from object names.
 
-    This class combines dictionary-like access with attributes
-    extraction and rich lookup capabilities from GetterMixin.
+    This class combines dictionary-like access with attributes extraction and rich
+    lookup capabilities from GetterMixin.
     """
 
     values: dict[str, T] = Field(default_factory=dict)
