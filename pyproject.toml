@@ -218,8 +218,48 @@ cloud-retrievers = [
 langchain-google-vertexai = "^2.0.24"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+# Tool configurations - respect .gitignore in this package
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+respect-gitignore = true
+exclude = ["__pycache__", ".mypy_cache", ".pytest_cache", ".ruff_cache"]
+
+[tool.ruff.lint]
+select = [
+  "E",
+  "F",
+  "W",
+  "I",
+  "N",
+  "UP",
+  "B",
+  "A",
+  "C4",
+  "PIE",
+  "T20",
+  "Q",
+  "SIM",
+  "ARG",
+  "ERA",
+  "PL",
+  "RUF",
+]
+ignore = ["E501", "D100", "D104", "D107"]
+
+[tool.mypy]
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+strict_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+exclude = ["build/", "dist/", ".venv/", "__pycache__/", "*.egg-info/"]
 
 [tool.trailrunner]
 exclude = [
