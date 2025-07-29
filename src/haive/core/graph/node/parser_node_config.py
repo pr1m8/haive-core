@@ -48,8 +48,8 @@ if not any(isinstance(handler, logging.StreamHandler) for handler in logger.hand
 class ParserNodeConfig(NodeConfig):
     """Configuration for a node that parses tool outputs into Pydantic models.
 
-    This node extracts tool information from the AI messages and parses
-    the tool responses into structured Pydantic models.
+    This node extracts tool information from the AI messages and parses the tool
+    responses into structured Pydantic models.
     """
 
     node_type: NodeType = Field(default=NodeType.PARSER)

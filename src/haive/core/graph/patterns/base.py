@@ -1,7 +1,7 @@
 """Base pattern definitions for the Haive framework.
 
-This module provides the core classes for pattern definition, registration,
-and application in graph-based workflows.
+This module provides the core classes for pattern definition, registration, and
+application in graph-based workflows.
 """
 
 import logging
@@ -22,8 +22,8 @@ ComponentType = Literal[
 class ComponentRequirement(BaseModel):
     """Defines a requirement for a component needed by a pattern.
 
-    Component requirements can specify types, capabilities, and other attributes
-    that must be present for a pattern to be applied successfully.
+    Component requirements can specify types, capabilities, and other attributes that
+    must be present for a pattern to be applied successfully.
     """
 
     type: ComponentType = Field(description="Type of component required")
@@ -130,8 +130,8 @@ class ParameterDefinition(BaseModel):
 class PatternMetadata(BaseModel):
     """Enhanced metadata for graph patterns.
 
-    Provides comprehensive information about a pattern, including its
-    requirements, parameters, and documentation.
+    Provides comprehensive information about a pattern, including its requirements,
+    parameters, and documentation.
     """
 
     name: str = Field(description="Unique pattern identifier")
@@ -378,7 +378,8 @@ class GraphPattern(BaseModel):
     def validate_for_application(
         self, components: list[Any], params: dict[str, Any]
     ) -> tuple[bool, list[str]]:
-        """Validate that a pattern can be applied with the provided components and parameters.
+        """Validate that a pattern can be applied with the provided components and
+        parameters.
 
         Args:
             components: List of components to check requirements against

@@ -52,8 +52,8 @@ class TransformationType(str, Enum):
 class MessageTransformationNodeConfig(NodeConfig):
     """Configuration for a node that transforms messages in various ways.
 
-    Supports multiple transformation types including role swapping,
-    metadata manipulation, and agent-to-agent communication.
+    Supports multiple transformation types including role swapping, metadata
+    manipulation, and agent-to-agent communication.
     """
 
     node_type: NodeType = Field(default=NodeType.MESSAGE_TRANSFORMER)
@@ -448,8 +448,8 @@ class MessageTransformationNodeConfig(NodeConfig):
     def _extract_first_human(self, messages: list[BaseMessage]) -> list[BaseMessage]:
         """Extract the first real human input (content-only, no metadata).
 
-        Returns only the first human message that has pure content without
-        metadata like engine_id or name.
+        Returns only the first human message that has pure content without metadata like
+        engine_id or name.
         """
         for msg in messages:
             if isinstance(msg, HumanMessage):

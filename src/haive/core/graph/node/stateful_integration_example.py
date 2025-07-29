@@ -286,7 +286,7 @@ def show_integration_with_simple_agent() -> Any:
 # =============================================================================
 
 
-def complete_integration_example() -> Dict[str, Any]:
+def complete_integration_example() -> dict[str, Any]:
     """Complete example showing all components working together."""
     # 1. Create base components
     engine = AugLLMConfig(

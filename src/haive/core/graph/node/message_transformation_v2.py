@@ -536,8 +536,8 @@ class MessageTransformationNodeConfig(BaseNodeConfig[TInput, TOutput]):
     def _extract_first_human(self, messages: list[BaseMessage]) -> list[BaseMessage]:
         """Extract the first real human input (content-only, no metadata).
 
-        Returns only the first human message that has pure content without
-        metadata like engine_id or name.
+        Returns only the first human message that has pure content without metadata like
+        engine_id or name.
         """
         for msg in messages:
             if isinstance(msg, HumanMessage):

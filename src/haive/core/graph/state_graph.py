@@ -10,8 +10,8 @@ from haive.core.graph.state_graph.state_graph import StateGraphSerializable
 class StateGraph(BaseModel):
     """Wrapper for LangGraph StateGraph with enhanced features.
 
-    This class provides a simplified interface for working with LangGraph
-    StateGraphs while maintaining compatibility with the existing infrastructure.
+    This class provides a simplified interface for working with LangGraph StateGraphs
+    while maintaining compatibility with the existing infrastructure.
     """
 
     name: str = Field(default="state_graph", description="Name of the graph")

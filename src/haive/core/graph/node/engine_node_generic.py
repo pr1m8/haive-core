@@ -1,8 +1,8 @@
 """Generic Engine Node Configuration with Type Safety and Field Registry Integration.
 
 This module provides generic engine node configurations that can distinguish between
-different engine types (LLM, RAG, etc.) while maintaining backwards compatibility.
-It integrates with the field registry for standardized field definitions.
+different engine types (LLM, RAG, etc.) while maintaining backwards compatibility. It
+integrates with the field registry for standardized field definitions.
 """
 
 import logging
@@ -31,8 +31,8 @@ logger.setLevel(logging.DEBUG)
 class GenericEngineNodeConfig(NodeConfig, Generic[TInput, TOutput]):
     """Generic engine node with type-safe input/output schemas.
 
-    This base class provides the foundation for type-safe engine nodes
-    that can declare their input and output schemas explicitly.
+    This base class provides the foundation for type-safe engine nodes that can declare
+    their input and output schemas explicitly.
     """
 
     # Core identity
@@ -633,7 +633,9 @@ class GenericEngineNodeConfig(NodeConfig, Generic[TInput, TOutput]):
         return command
 
     def extract_input_from_state(self, state: Any) -> dict[str, Any]:
-        """Extract input fields from state using engine-aware logic (like EngineNodeConfig)."""
+        """Extract input fields from state using engine-aware logic (like
+        EngineNodeConfig).
+        """
         logger.debug("Generic engine node extracting input from state...")
 
         # Use input schema if available

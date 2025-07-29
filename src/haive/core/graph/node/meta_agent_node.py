@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Meta agent node for executing embedded agents from meta state.
 
 This module provides MetaAgentNodeConfig, a specialized node configuration
@@ -30,7 +32,6 @@ Example:
     ```
 """
 
-from __future__ import annotations
 
 import logging
 import traceback

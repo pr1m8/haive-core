@@ -29,8 +29,8 @@ F = TypeVar("F", bound=Callable[..., Any])
 class ToolInjector:
     """Utility class for creating tools with automatic state and store injection.
 
-    This class helps create tools that can access graph state and store
-    without requiring the agent to provide these values.
+    This class helps create tools that can access graph state and store without
+    requiring the agent to provide these values.
     """
 
     @staticmethod

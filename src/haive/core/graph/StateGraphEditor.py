@@ -99,8 +99,8 @@ class BranchConfig(BaseModel):
 class StateGraphEditor(BaseModel):
     """Editor for manipulating StateGraph instances.
 
-    This component provides methods for adding/removing nodes and edges,
-    as well as visualizing and modifying the graph structure.
+    This component provides methods for adding/removing nodes and edges, as well as
+    visualizing and modifying the graph structure.
     """
 
     name: str = Field(default_factory=lambda: f"graph_{uuid.uuid4().hex[:8]}")

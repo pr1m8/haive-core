@@ -35,8 +35,8 @@ logger.setLevel(logging.WARNING)
 class OutputParserNodeConfig(ParserNodeConfig):
     """Configuration for a node that parses LLM output using LangChain output parsers.
 
-    This extends ParserNodeConfig to handle regular output parsing (not tool calls).
-    It parses the last message content using a LangChain BaseOutputParser.
+    This extends ParserNodeConfig to handle regular output parsing (not tool calls). It
+    parses the last message content using a LangChain BaseOutputParser.
     """
 
     node_type: NodeType = Field(default=NodeType.OUTPUT_PARSER)

@@ -364,8 +364,8 @@ class NodeSchemaComposer:
 class ComposedNode:
     """A node composed with custom I/O mappings.
 
-    This wraps an existing node and applies field mappings to transform
-    inputs and outputs according to the "result → potato" pattern.
+    This wraps an existing node and applies field mappings to transform inputs and
+    outputs according to the "result → potato" pattern.
     """
 
     def __init__(

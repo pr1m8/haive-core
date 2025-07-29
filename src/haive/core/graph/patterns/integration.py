@@ -1,9 +1,8 @@
 """Integration utilities for the pattern system.
 
-from typing import Any, Dict
-This module provides helper functions for integrating the pattern system with
-other components of the Haive framework, particularly with the DynamicGraph
-builder and the NodeFactory.
+from typing import Any, Dict This module provides helper functions for integrating the
+pattern system with other components of the Haive framework, particularly with the
+DynamicGraph builder and the NodeFactory.
 """
 
 import logging

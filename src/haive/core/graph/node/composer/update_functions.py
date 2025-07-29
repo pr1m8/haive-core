@@ -1,10 +1,10 @@
 """Update function library for NodeSchemaComposer.
 
-This module provides common update patterns identified from node analysis,
-offering pluggable update functions for flexible I/O configuration.
+This module provides common update patterns identified from node analysis, offering
+pluggable update functions for flexible I/O configuration.
 
-Based on analysis of 6 node types, these functions handle the most common
-state update patterns found in actual Haive nodes.
+Based on analysis of 6 node types, these functions handle the most common state update
+patterns found in actual Haive nodes.
 """
 
 from typing import Any

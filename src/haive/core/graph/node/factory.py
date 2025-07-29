@@ -35,8 +35,8 @@ logger = logging.getLogger(__name__)
 class NodeFactory:
     """Factory for creating node functions from configurations.
 
-    This class provides methods for creating different types of node functions
-    based on their configuration, engine type, or specialized functionality.
+    This class provides methods for creating different types of node functions based on
+    their configuration, engine type, or specialized functionality.
     """
 
     @classmethod

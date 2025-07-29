@@ -58,7 +58,12 @@ class ValidationNodeConfigV2(BaseNodeConfig):
     node_type: NodeType = Field(default=NodeType.VALIDATION, description="Node type")
 
     def __call__(self, state: StateLike) -> Command:
-        """Process tool calls and update state with ToolMessages using LangGraph ValidationNode pattern."""
+        """Process tool calls and update state with ToolMessages using LangGraph
+        ValidationNode pattern.
+        """
+        # Store current state for use in processing
+        self._current_state = state
+
         # Get messages from state (StateLike supports both dict and BaseModel access)
         messages = (
             state.get("messages", [])
@@ -134,15 +139,33 @@ class ValidationNodeConfigV2(BaseNodeConfig):
     def _process_validation_results(
         self, validation_result: dict, tool_routes: dict, tool_calls: list
     ) -> Command:
-        """Process LangGraph validation results and route using Send objects like dynamic routing examples."""
+        """Process LangGraph validation results and route using Send objects like dynamic
+        routing examples.
+        """
         logger.info("Processing LangGraph validation results with dynamic routing")
 
-        # Get the updated messages from validation result
-        messages = validation_result.get("messages", [])
+        # Get the ToolMessages from validation result and combine with original state messages
+        validation_tool_messages = validation_result.get("messages", [])
+
+        # The validation_result contains only new ToolMessages, we need to add them to the original state
+        # Get original messages from the state that was passed to ValidationNode
+        original_messages = []
+        if hasattr(self, "_current_state"):
+            if hasattr(self._current_state, "get"):
+                original_messages = self._current_state.get("messages", [])
+            else:
+                original_messages = getattr(self._current_state, "messages", [])
+
+        # Combine original messages with new ToolMessages
+        messages = original_messages + validation_tool_messages
+        logger.info(
+            f"Combined {len(original_messages)} original messages with {len(validation_tool_messages)} validation results"
+        )
 
         # Analyze the ToolMessages added by LangGraph ValidationNode
         destinations = set()
         has_errors = False
+        validated_tool_calls = []  # Tool calls that passed validation for tool_node
 
         # Get the latest ToolMessages (added by ValidationNode)
         recent_tool_messages = []
@@ -187,15 +210,24 @@ class ValidationNodeConfigV2(BaseNodeConfig):
                         f"Tool validation passed for {tool_name}, routing to tool_node"
                     )
                     destinations.add("tool_node")
+                    # Keep validated tool call for injection into AIMessage
+                    validated_tool_calls.append(tool_call)
 
             else:
                 logger.warning(f"Unknown tool {tool_name}, routing to agent")
                 destinations.add("agent_node")
                 has_errors = True
 
+        # If routing to tool_node, inject validated tool calls into AIMessage
+        updated_messages = messages
+        if "tool_node" in destinations and validated_tool_calls:
+            updated_messages = self._inject_validated_tool_calls(
+                messages, validated_tool_calls
+            )
+
         # Use Send objects for dynamic routing like the examples show
         return self._route_with_send_objects(
-            validation_result, destinations, has_errors
+            {"messages": updated_messages}, destinations, has_errors
         )
 
     def _route_with_send_objects(
@@ -208,8 +240,8 @@ class ValidationNodeConfigV2(BaseNodeConfig):
             f"Dynamic routing - Destinations: {destinations_list}, Has errors: {has_errors}"
         )
 
-        # Update state with validation results
-        update_dict = {"messages": validation_result.get("messages", [])}
+        # Update state with validation results (which already includes injected AIMessage if needed)
+        update_dict = validation_result
 
         if not destinations_list:
             logger.info("No destinations found, ending")
@@ -389,3 +421,45 @@ class ValidationNodeConfigV2(BaseNodeConfig):
             pass
 
         return None
+
+    def _inject_validated_tool_calls(
+        self, messages: list, validated_tool_calls: list
+    ) -> list:
+        """Inject validated tool calls back into AIMessage for ToolNode execution.
+
+        This is critical for langchain_tool routes - ToolNode expects AIMessage with tool_calls.
+        """
+        if not validated_tool_calls:
+            return messages
+
+        # Find the last AIMessage and create a new one with only validated tool calls
+        updated_messages = messages.copy()
+
+        # Find the AIMessage that contains these tool calls
+        for i in reversed(range(len(updated_messages))):
+            msg = updated_messages[i]
+            if (
+                isinstance(msg, AIMessage)
+                and hasattr(msg, "tool_calls")
+                and msg.tool_calls
+            ):
+                # Create new AIMessage with only the validated tool calls
+                validated_ai_message = AIMessage(
+                    content=msg.content,
+                    tool_calls=validated_tool_calls,
+                    id=msg.id,
+                    name=msg.name,
+                    additional_kwargs=msg.additional_kwargs,
+                    response_metadata=msg.response_metadata,
+                    invalid_tool_calls=msg.invalid_tool_calls,
+                    usage_metadata=msg.usage_metadata,
+                )
+
+                # Replace the original AIMessage
+                updated_messages[i] = validated_ai_message
+                logger.info(
+                    f"Injected {len(validated_tool_calls)} validated tool calls into AIMessage"
+                )
+                break
+
+        return updated_messages

@@ -205,8 +205,8 @@ def send_node(
 
 # Add a new debug decorator
 def debug_node(name: str | None = None):
-    """Decorator to add detailed debug logging to a node function.
-    Logs input state and output result but does not modify the function behavior.
+    """Decorator to add detailed debug logging to a node function. Logs input state and
+    output result but does not modify the function behavior.
 
     Args:
         name: Name for the node in logs (defaults to function name)

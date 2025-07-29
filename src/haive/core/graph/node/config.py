@@ -196,7 +196,9 @@ class NodeConfig(BaseModel):
 
     @model_validator(mode="after")
     def validate_and_determine_node_type(self) -> Self:
-        """Validate the configuration and determine the node type automatically if not specified."""
+        """Validate the configuration and determine the node type automatically if not
+        specified.
+        """
         # Convert END string to Literal
         if self.command_goto == "END":
             self.command_goto = END

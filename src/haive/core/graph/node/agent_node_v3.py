@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Agent Node V3 - Hierarchical state projection for multi-agent systems.
 
 This module provides AgentNodeV3 which enables sophisticated multi-agent workflows
@@ -65,7 +67,6 @@ See Also:
     - :mod:`haive.core.graph.node.base_node_config`: Base node configuration
 """
 
-from __future__ import annotations
 
 import contextlib
 import logging

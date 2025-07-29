@@ -33,8 +33,8 @@ from haive.core.schema.prebuilt.meta_state import MetaStateSchema
 class StatefulValidationNodeV2(ValidationNodeConfigV2):
     """Enhanced ValidationNodeConfigV2 with stateful discovery capabilities.
 
-    This extends the existing ValidationNodeConfigV2 to add dynamic discovery
-    while maintaining full backward compatibility.
+    This extends the existing ValidationNodeConfigV2 to add dynamic discovery while
+    maintaining full backward compatibility.
     """
 
     # Enable stateful discovery

@@ -51,8 +51,8 @@ class NodeFunction(Protocol):
 class NodeFactory:
     """Factory for creating node functions with comprehensive engine support.
 
-    Handles creation of node functions from different engine types,
-    ensuring proper input/output mapping and runtime configuration.
+    Handles creation of node functions from different engine types, ensuring proper
+    input/output mapping and runtime configuration.
     """
 
     # Improvements to NodeFactory.py to better handle Engine integration

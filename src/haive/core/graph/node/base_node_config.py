@@ -1,7 +1,7 @@
 """Base Node Configuration for V2 Nodes.
 
-This module provides the base configuration class for v2 nodes with
-improved type safety and generic support.
+This module provides the base configuration class for v2 nodes with improved type safety
+and generic support.
 """
 
 from typing import Generic, TypeVar

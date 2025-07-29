@@ -82,7 +82,8 @@ class StateGraphManager:
     def insert_node(
         self, node: str, between: tuple[str, str], func: callable | None = None
     ):
-        """Insert a new node between two existing nodes, using LangGraph's `add_node` and `add_edge` methods.
+        """Insert a new node between two existing nodes, using LangGraph's `add_node` and
+        `add_edge` methods.
 
         Args:
             node (str): The name of the new node.
@@ -178,7 +179,8 @@ class StateGraphManager:
         self.ensure_compiled()
 
     def visualize(self, output_file: str = "state_graph.png"):
-        """Visualize the StateGraph using NetworkX, ensuring **arrows are drawn correctly**.
+        """Visualize the StateGraph using NetworkX, ensuring **arrows are drawn
+        correctly**.
 
         Args:
             output_file (str): The filename to save the visualization.

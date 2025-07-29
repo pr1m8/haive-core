@@ -31,8 +31,8 @@ logger.setLevel(logging.DEBUG)
 class ToolNodeConfig(NodeConfig):
     """Configuration for a tool node in a graph.
 
-    Tool nodes execute LangChain tools and handle tool calls from LLM messages.
-    Uses tools directly from the associated engine in state.
+    Tool nodes execute LangChain tools and handle tool calls from LLM messages. Uses
+    tools directly from the associated engine in state.
     """
 
     # Override node_type from base class

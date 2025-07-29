@@ -121,9 +121,9 @@ class NodeStatus(str, Enum):
 class DynamicGraph:
     """Dynamic graph builder with enhanced error tracing and node system integration.
 
-    This class provides a builder interface for creating StateGraph instances
-    with improved error diagnostics, tracing, and full integration with the
-    advanced node system.
+    This class provides a builder interface for creating StateGraph instances with
+    improved error diagnostics, tracing, and full integration with the advanced node
+    system.
     """
 
     def __init__(
@@ -1980,8 +1980,8 @@ class DynamicGraph:
     def debug_graph(self) -> str:
         """Print comprehensive debug information about the graph state.
 
-        This method displays a detailed overview of the current state
-        of the DynamicGraph, including nodes, edges, connections, and potential issues.
+        This method displays a detailed overview of the current state of the
+        DynamicGraph, including nodes, edges, connections, and potential issues.
         """
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         logger.debug(f"\n===== DEBUG GRAPH: {self.name} ({timestamp}) =====")

@@ -1,8 +1,7 @@
-"""From typing import Any
-Graph visualization utilities for DynamicGraph.
+"""From typing import Any Graph visualization utilities for DynamicGraph.
 
-This module provides enhanced visualization capabilities using Mermaid diagrams
-with rich styling, interactive features, and multiple output formats.
+This module provides enhanced visualization capabilities using Mermaid diagrams with
+rich styling, interactive features, and multiple output formats.
 """
 
 import base64
@@ -96,8 +95,8 @@ class MermaidStyle:
 class MermaidVisualizer:
     """Enhanced Mermaid diagram visualizer for DynamicGraph.
 
-    Generates interactive, richly styled Mermaid diagrams for graph visualization
-    with special handling for different node and edge types.
+    Generates interactive, richly styled Mermaid diagrams for graph visualization with
+    special handling for different node and edge types.
     """
 
     def __init__(self, graph: Any):

@@ -1,7 +1,7 @@
 """Protocols for extract and update functions in NodeSchemaComposer.
 
-This module defines the protocol interfaces that extract and update functions
-must implement to be compatible with the NodeSchemaComposer system.
+This module defines the protocol interfaces that extract and update functions must
+implement to be compatible with the NodeSchemaComposer system.
 """
 
 from typing import Any, Protocol, TypeVar
@@ -17,14 +17,12 @@ TOutput = TypeVar("TOutput")
 class ExtractFunction(Protocol[TState, TInput]):
     """Protocol for extract functions.
 
-    Extract functions take a state object and configuration, returning
-    the extracted input data that will be pass
-            field_name = config.get("field_name", "messages")
-            return getattr(state, field_name, [])
+    Extract functions take a state object and configuration, returning the extracted
+    input data that will be pass         field_name = config.get("field_name",
+    "messages")         return getattr(state, field_name, [])
 
-        def extract_with_projection(state: MultiAgentState, config: Dict[str, Any]) -> Dict[str, Any]:
-            # Complex projection logic
-            return projected_state
+    def extract_with_projection(state: MultiAgentState, config: Dict[str, Any]) ->
+    Dict[str, Any]:     # Complex projection logic     return projected_state
     """
 
     def __call__(self, state: TState, config: dict[str, Any]) -> TInput:

@@ -60,8 +60,8 @@ CommandGoto = Union[str, Literal["END"], Send, list[Send | str]]
 class NodeFunction(Protocol[StateInput, StateOutput]):
     """Protocol for node functions.
 
-    A node function takes a state and optional config and returns an output.
-    This output can be a dictionary (state update), Command, Send, or list of Send objects.
+    A node function takes a state and optional config and returns an output. This output
+    can be a dictionary (state update), Command, Send, or list of Send objects.
     """
 
     def __call__(

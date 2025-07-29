@@ -1,7 +1,7 @@
 """Path resolver for extracting values from objects using path notation.
 
-This module provides path-based value extraction from objects, supporting
-simple field access initially, with progressive enhancement for complex paths.
+This module provides path-based value extraction from objects, supporting simple field
+access initially, with progressive enhancement for complex paths.
 """
 
 from typing import Any

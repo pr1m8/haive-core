@@ -10,8 +10,8 @@ from haive.core.graph.ToolManager import ToolManager as CoreToolManager
 class ToolManager(BaseModel):
     """Wrapper for the core ToolManager with simplified interface.
 
-    This class provides a simplified interface for managing tools
-    while maintaining compatibility with the existing ToolManager infrastructure.
+    This class provides a simplified interface for managing tools while maintaining
+    compatibility with the existing ToolManager infrastructure.
     """
 
     name: str = Field(default="tool_manager", description="Name of the tool manager")

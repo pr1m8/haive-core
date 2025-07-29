@@ -1,7 +1,7 @@
 """Multi-agent node with hierarchical state projection.
 
-This module provides node configurations for multi-agent systems that properly
-handle state projection between the container state and individual agent states.
+This module provides node configurations for multi-agent systems that properly handle
+state projection between the container state and individual agent states.
 """
 
 import logging
@@ -141,8 +141,8 @@ class MultiAgentNode(BaseNodeConfig[MultiAgentState, MultiAgentState]):
     ) -> dict[str, Any]:
         """Project container state to agent's expected schema.
 
-        This is the key method that gives each agent its exact
-        expected state type instead of a flattened global state.
+        This is the key method that gives each agent its exact expected state type
+        instead of a flattened global state.
         """
         # Start with agent's isolated state
         agent_state = state.get_agent_state(self.agent_name)
@@ -251,8 +251,8 @@ class MultiAgentNode(BaseNodeConfig[MultiAgentState, MultiAgentState]):
 class StateProjectionNode(BaseNodeConfig[TInput, TOutput]):
     """Generic state projection node for any schema transformation.
 
-    This node can project from any input schema to any output schema,
-    useful for bridging between different state representations.
+    This node can project from any input schema to any output schema, useful for
+    bridging between different state representations.
     """
 
     node_type: NodeType = Field(

@@ -42,14 +42,6 @@ from haive.core.graph.node.composer.update_functions import (
 
 # Import advanced features if available
 try:
-    from haive.core.graph.node.composer.advanced_node_composer import (
-        AdvancedComposedNode,
-        AdvancedNodeComposer,
-        TypedCallableNode,
-        as_node,
-        callable_to_node,
-        node_with_custom_logic,
-    )
 
     _advanced_available = True
 except ImportError:
@@ -109,14 +101,6 @@ if _advanced_available:
 
 # Import integrated features if available
 try:
-    from haive.core.graph.node.composer.integrated_node_composer import (
-        IntegratedNodeComposer,
-        SchemaAwareComposedNode,
-        StateSchemaAdapter,
-        create_schema_aware_node,
-        integrate_node_with_schema,
-        with_state_schema,
-    )
 
     _integrated_available = True
 except ImportError:

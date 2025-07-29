@@ -59,9 +59,9 @@ BranchConditionFunc = Union[
 class NamedEntity(Protocol):
     """Protocol that requires a name property.
 
-    Any object implementing this protocol must have a name property
-    that returns a string. This allows for consistent naming across
-    different entity types in the graph system.
+    Any object implementing this protocol must have a name property that returns a
+    string. This allows for consistent naming across different entity types in the graph
+    system.
     """
 
     @property
