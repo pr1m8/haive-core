@@ -9,13 +9,13 @@ Functions:
 
 def check_interfaces(
     obj: Any,
-    interfaces: Dict[str, Optional[List[str]]],
+    interfaces: dict[str, list[str] | None],
     require_callable: bool = True,
     check_signatures: bool = False,
     return_mode: str = "detailed",
-) -> Union[
-    bool, Dict[str, Dict[str, bool]], Tuple[Dict[str, Set[str]], Dict[str, Set[str]]]
-]:
+) -> (
+    bool | dict[str, dict[str, bool]] | Tuple[dict[str, Set[str]], dict[str, Set[str]]]
+):
     """Check if an object implements specified interfaces with optional parameter checking.
 
     Args:
