@@ -1,7 +1,7 @@
 """Base graph implementation for the Haive framework.
 
-Provides a comprehensive system for building, manipulating, and executing
-graphs with consistent interfaces, serialization support, and dynamic composition.
+Provides a comprehensive system for building, manipulating, and executing graphs with
+consistent interfaces, serialization support, and dynamic composition.
 """
 
 import inspect
@@ -2358,8 +2358,8 @@ class BaseGraph(BaseModel, ValidationMixin):
         return no_end_path
 
     def find_nodes_without_finish_path(self) -> Any | None:
-        """Find nodes that can't reach a finish point.
-        Alias for find_nodes_without_end_path for API consistency.
+        """Find nodes that can't reach a finish point. Alias for
+        find_nodes_without_end_path for API consistency.
 
         Returns:
             List of node names that can't reach a finish point
