@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Dynamic_Literal core module.
 
 This module provides dynamic literal functionality for the Haive framework.
@@ -12,7 +14,6 @@ Functions:
     unregister: Unregister functionality.
 """
 
-from __future__ import annotations
 
 import contextlib
 import inspect

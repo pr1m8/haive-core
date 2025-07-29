@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Dynamic_Enum core module.
 
 This module provides dynamic enum functionality for the Haive framework.
@@ -10,7 +12,6 @@ Classes:
 Functions:
 """
 
-from __future__ import annotations
 
 from collections.abc import Iterable
 from enum import Enum

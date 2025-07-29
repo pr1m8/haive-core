@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Advanced_Registry core module.
 
 This module provides advanced registry functionality for the Haive framework.
@@ -11,7 +13,6 @@ Functions:
     build: Build functionality.
 """
 
-from __future__ import annotations
 
 import abc
 import importlib.metadata as _md

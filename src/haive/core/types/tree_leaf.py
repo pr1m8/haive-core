@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Tree_Leaf core module.
 
 This module provides tree leaf functionality for the Haive framework.
@@ -14,7 +16,6 @@ Functions:
 """
 
 # tree_model.py
-from __future__ import annotations
 
 from typing import Generic, Literal, TypeVar
 
