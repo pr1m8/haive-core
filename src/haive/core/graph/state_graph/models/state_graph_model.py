@@ -124,14 +124,12 @@ class GraphModel(SerializableModel, Generic[TNode]):
         # Check that entry and finish points exist if set
         if self.entry_point and self.entry_point not in self.nodes:
             raise ValueError(
-                f"Entry point '{
-                    self.entry_point}' references non-existent node"
+                f"Entry point '{self.entry_point}' references non-existent node"
             )
 
         if self.finish_point and self.finish_point not in self.nodes:
             raise ValueError(
-                f"Finish point '{
-                    self.finish_point}' references non-existent node"
+                f"Finish point '{self.finish_point}' references non-existent node"
             )
 
         return self
