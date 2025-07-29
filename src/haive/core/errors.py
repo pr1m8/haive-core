@@ -13,8 +13,7 @@ import sys
 def short_traceback(exc_type, exc_value, exc_tb) -> None:
     """A custom exception hook to provide short, clean tracebacks.
 
-    It prints only the error type and message, avoiding the full stack
-    trace.
+    It prints only the error type and message, avoiding the full stack trace.
     """
 
 
