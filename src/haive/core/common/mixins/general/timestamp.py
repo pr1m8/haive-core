@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Timestamp mixin for tracking creation and modification times.
 
 This module provides a mixin for adding timestamp tracking to Pydantic models.
@@ -28,7 +30,6 @@ Usage:
     ```
 """
 
-from __future__ import annotations
 
 from datetime import datetime
 

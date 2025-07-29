@@ -81,9 +81,8 @@ class MCPPromptTemplate(BaseModel):
 class MCPToolWrapper(BaseTool):
     """Wrapper to convert MCP tools to Haive-compatible tools.
 
-    This wrapper allows MCP tools to be used seamlessly within the Haive
-    framework by adapting their interface to match BaseTool
-    expectations.
+    This wrapper allows MCP tools to be used seamlessly within the Haive framework by
+    adapting their interface to match BaseTool expectations.
     """
 
     name: str
@@ -167,11 +166,11 @@ class MCPMixin(BaseModel):
     async def setup_mcp(self) -> None:
         """Initialize MCP integration.
 
-        Sets up the MCP manager, discovers tools, loads resources, and
-        configures prompts based on the MCP configuration.
+        Sets up the MCP manager, discovers tools, loads resources, and configures
+        prompts based on the MCP configuration.
 
-        This method should be called after creating the configuration
-        but before using any MCP features.
+        This method should be called after creating the configuration but before using
+        any MCP features.
         """
         if not self.mcp_config or not getattr(self.mcp_config, "enabled", False):
             logger.info("MCP not enabled or configured")
@@ -463,8 +462,8 @@ class MCPMixin(BaseModel):
     def cleanup_mcp(self) -> None:
         """Clean up MCP resources.
 
-        This should be called when the configuration is no longer needed
-        to properly close MCP connections.
+        This should be called when the configuration is no longer needed to properly
+        close MCP connections.
         """
         if self._mcp_manager:
             try:
