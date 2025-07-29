@@ -1,8 +1,7 @@
 """Simple test script for the modular BaseGraph architecture.
 
-from typing import Any
-This script tests the basic functionality of the new modular components
-to ensure they work correctly before integrating with existing agents.
+from typing import Any This script tests the basic functionality of the new modular
+components to ensure they work correctly before integrating with existing agents.
 """
 
 import logging

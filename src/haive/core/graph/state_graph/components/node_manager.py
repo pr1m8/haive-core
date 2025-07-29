@@ -1,7 +1,7 @@
 """Node management component for BaseGraph.
 
-This module provides the NodeManager class that handles all node-related operations
-in the BaseGraph architecture, following the modular design principles.
+This module provides the NodeManager class that handles all node-related operations in
+the BaseGraph architecture, following the modular design principles.
 """
 
 import logging

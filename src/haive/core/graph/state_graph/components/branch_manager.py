@@ -1,7 +1,7 @@
 """Branch management component for BaseGraph.
 
-This module provides the BranchManager class that handles all conditional routing
-and branch operations in the BaseGraph architecture.
+This module provides the BranchManager class that handles all conditional routing and
+branch operations in the BaseGraph architecture.
 """
 
 import logging

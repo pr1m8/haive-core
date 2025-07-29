@@ -1,7 +1,7 @@
 """Base component interface for BaseGraph modular architecture.
 
-This module provides the abstract base class that all BaseGraph components
-must inherit from, ensuring consistent interfaces and proper lifecycle management.
+This module provides the abstract base class that all BaseGraph components must inherit
+from, ensuring consistent interfaces and proper lifecycle management.
 """
 
 from abc import ABC
@@ -87,9 +87,9 @@ class BaseGraphComponent(ABC):
     def cleanup(self) -> None:
         """Clean up component resources.
 
-        This method is called when the graph is being destroyed or
-        when components need to be reset. Subclasses should override
-        this method to perform any component-specific cleanup.
+        This method is called when the graph is being destroyed or when components need
+        to be reset. Subclasses should override this method to perform any component-
+        specific cleanup.
         """
         self._initialized = False
 

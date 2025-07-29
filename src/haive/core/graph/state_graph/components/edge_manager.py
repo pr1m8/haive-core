@@ -1,7 +1,7 @@
 """Edge management component for BaseGraph.
 
-This module provides the EdgeManager class that handles all edge-related operations
-in the BaseGraph architecture, maintaining clean separation of concerns.
+This module provides the EdgeManager class that handles all edge-related operations in
+the BaseGraph architecture, maintaining clean separation of concerns.
 """
 
 import logging
