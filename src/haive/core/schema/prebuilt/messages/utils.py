@@ -1,8 +1,7 @@
 """Utility classes and functions for message processing in Haive.
 
-This module provides common utilities used by various implementations
-of MessagesState, enabling advanced message analysis, transformation,
-and tracking features.
+This module provides common utilities used by various implementations of MessagesState,
+enabling advanced message analysis, transformation, and tracking features.
 """
 
 from datetime import datetime

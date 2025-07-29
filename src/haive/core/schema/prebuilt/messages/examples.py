@@ -1,8 +1,8 @@
-"""From typing import Any
-Examples demonstrating the use of the enhanced MessagesState system.
+"""From typing import Any Examples demonstrating the use of the enhanced MessagesState
+system.
 
-This file contains complete examples of common usage patterns, demonstrating
-both the classic API and the enhanced features.
+This file contains complete examples of common usage patterns, demonstrating both the
+classic API and the enhanced features.
 """
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage

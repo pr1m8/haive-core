@@ -1,8 +1,8 @@
 """Token usage tracking schema for LLM interactions.
 
-This module provides schemas for tracking token usage, costs, and capacity
-across different LLM providers and models. It supports comprehensive metrics
-including cached tokens, audio tokens, and reasoning tokens.
+This module provides schemas for tracking token usage, costs, and capacity across
+different LLM providers and models. It supports comprehensive metrics including cached
+tokens, audio tokens, and reasoning tokens.
 """
 
 from typing import Self

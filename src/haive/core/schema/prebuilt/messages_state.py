@@ -141,6 +141,7 @@ class MessagesState(StateSchema):
     @model_validator(mode="after")
     def ensure_system_before_human(self) -> Self:
         """Ensure system messages come before human messages.
+
         If a human message is followed by a system message, flip their order.
         """
         if len(self.messages) < 2:
@@ -172,9 +173,9 @@ class MessagesState(StateSchema):
     ) -> list[AnyMessage]:
         """Parse AI messages with structured output using PydanticToolsParser.
 
-        This validator automatically parses AI message content that matches
-        the configured structured output models and adds corresponding tool
-        messages to the conversation.
+        This validator automatically parses AI message content that matches the
+        configured structured output models and adds corresponding tool messages to the
+        conversation.
         """
         # Skip if not enabled or no parser configured
         if not info.data.get("parse_structured_outputs", False):
@@ -262,6 +263,7 @@ class MessagesState(StateSchema):
         self, content: str, metadata: dict[str, Any] | None = None
     ) -> None:
         """Add a system message at the beginning of the conversation.
+
         If a system message already exists, it will be replaced.
         """
         # Create system message
@@ -430,7 +432,8 @@ class MessagesState(StateSchema):
         return injected_calls
 
     def send_tool_calls(self, node_name: str = "tools") -> str | list[Send]:
-        """Convert tool calls from the last AI message into Send objects for LangGraph routing.
+        """Convert tool calls from the last AI message into Send objects for LangGraph
+        routing.
 
         Args:
             node_name: The name of the node to send tool calls to

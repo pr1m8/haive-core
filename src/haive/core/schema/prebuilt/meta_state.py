@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Meta state schema with embedded agent and graph composition support.
 
 This module provides MetaStateSchema, a specialized state schema for graph-level
@@ -31,7 +33,6 @@ Example:
     ```
 """
 
-from __future__ import annotations
 
 import asyncio
 import logging

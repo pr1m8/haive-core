@@ -69,11 +69,6 @@ _DOCUMENT_COMPONENTS = {
 def __getattr__(name: str):
     """Lazy loading for document state components."""
     if name in _DOCUMENT_COMPONENTS:
-        from haive.core.schema.prebuilt.document_state import (
-            DocumentEngineInputSchema,
-            DocumentEngineOutputSchema,
-            DocumentState,
-        )
 
         return locals()[name]
 

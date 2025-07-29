@@ -96,7 +96,8 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
     def sync_tools_and_update_routes(self) -> Self:
         """Sync tools from engines and update tool routes after model creation.
 
-        This runs after the parent validators, so engines and tool routes are already set up.
+        This runs after the parent validators, so engines and tool routes are already
+        set up.
         """
         # Fix any PydanticUndefined values in tool-related fields
         from pydantic_core import PydanticUndefined
@@ -199,6 +200,7 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
 
     def _sync_tools_to_engines_by_route(self) -> None:
         """Sync tools to appropriate engines based on their routes and engine types.
+
         Only syncs tools to engines that can handle their specific route type.
         """
         # Sync to class-level engines
@@ -581,8 +583,7 @@ class ToolState(ToolRouteMixin, MessagesStateWithTokenUsage):
                     )
 
     def remove_tool(self, tool: Any) -> None:
-        """Remove a tool and update tool routes.
-        Also removes from all engines.
+        """Remove a tool and update tool routes. Also removes from all engines.
 
         Args:
             tool: Tool to remove

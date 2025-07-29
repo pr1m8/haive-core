@@ -191,7 +191,9 @@ class MessageList(RootModel[list[AnyMessage]]):
 
     @model_validator(mode="after")
     def ensure_proper_messages_and_ordering(self) -> Self:
-        """Ensure all messages are proper Message objects and system messages come before human."""
+        """Ensure all messages are proper Message objects and system messages come before
+        human.
+        """
         # First ensure all items are proper Message objects
         # This handles cases where persistence returns dicts instead of Message
         # objects

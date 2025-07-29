@@ -1,7 +1,7 @@
 """Token usage tracking mixin for MessagesState.
 
-This module provides a mixin class that adds token usage tracking capabilities
-to MessagesState or any other schema that manages messages.
+This module provides a mixin class that adds token usage tracking capabilities to
+MessagesState or any other schema that manages messages.
 """
 
 from typing import Any

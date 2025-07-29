@@ -1,10 +1,11 @@
+from __future__ import annotations
+
 """LLM-specific state with single engine and token tracking.
 
-This module provides a state schema optimized for LLM-based agents that need
-to track token usage against thresholds and metadata.
+This module provides a state schema optimized for LLM-based agents that need to track
+token usage against thresholds and metadata.
 """
 
-from __future__ import annotations
 
 from typing import Any, Self
 
@@ -44,7 +45,8 @@ MODEL_CONTEXT_LENGTHS = {
 
 
 class LLMState(ToolState):
-    """State schema for LLM-based agents with single engine, tool management and token tracking.
+    """State schema for LLM-based agents with single engine, tool management and token
+    tracking.
 
     This schema is designed for agents that:
     - Use a single primary LLM engine (with optional additional engines)

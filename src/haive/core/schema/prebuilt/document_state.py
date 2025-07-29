@@ -357,8 +357,8 @@ class DocumentEngineOutputSchema(StateSchema):
     def calculate_statistics(self) -> None:
         """Calculates aggregate statistics from the loaded documents.
 
-        This method updates the output state with summary statistics, such as
-        average processing time and total counts for chunks, characters, and words.
+        This method updates the output state with summary statistics, such as average
+        processing time and total counts for chunks, characters, and words.
         """
         if self.successful_documents > 0:
             self.average_processing_time = (

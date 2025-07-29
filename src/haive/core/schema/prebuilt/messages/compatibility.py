@@ -1,8 +1,8 @@
 """Compatibility layer for MessagesState implementations.
 
-This module provides adapter classes and utilities that enable backward
-compatibility while adding new features from the enhanced MessagesState
-implementation. It serves as a bridge between the old and new architectures.
+This module provides adapter classes and utilities that enable backward compatibility
+while adding new features from the enhanced MessagesState implementation. It serves as a
+bridge between the old and new architectures.
 """
 
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
@@ -20,12 +20,11 @@ from haive.core.schema.prebuilt.messages.utils import (
 
 
 class MessagesStateAdapter:
-    """Adapter that enables old MessagesState instances to use new features
-    with minimal changes to their API.
+    """Adapter that enables old MessagesState instances to use new features with minimal
+    changes to their API.
 
-    This adapter wraps an existing MessagesState instance and provides
-    methods that implement the enhanced functionality from the new
-    MessagesState architecture.
+    This adapter wraps an existing MessagesState instance and provides methods that
+    implement the enhanced functionality from the new MessagesState architecture.
     """
 
     def __init__(self, messages_state) -> None:
@@ -214,7 +213,8 @@ class MessagesStateAdapter:
         return completed
 
     def send_tool_calls(self, node_name: str = "tools") -> str | list[Send]:
-        """Convert tool calls from the last AI message into Send objects for LangGraph routing.
+        """Convert tool calls from the last AI message into Send objects for LangGraph
+        routing.
 
         Args:
             node_name: The name of the node to send tool calls to

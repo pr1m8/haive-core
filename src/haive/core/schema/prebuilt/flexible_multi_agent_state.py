@@ -1,7 +1,7 @@
 """Flexible multi-agent state that doesn't force messages or tools.
 
-This module provides flexible state schemas for multi-agent systems without
-forcing specific fields like messages or tools.
+This module provides flexible state schemas for multi-agent systems without forcing
+specific fields like messages or tools.
 """
 
 from typing import TYPE_CHECKING, Any, Optional, Self

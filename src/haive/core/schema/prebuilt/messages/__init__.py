@@ -20,13 +20,6 @@ from haive.core.schema.prebuilt.messages.token_usage_mixin import TokenUsageMixi
 
 # Import compatibility and utils if they exist
 try:
-    from haive.core.schema.prebuilt.messages.compatibility import MessagesStateAdapter
-    from haive.core.schema.prebuilt.messages.utils import (
-        MessageRound,
-        ToolCallInfo,
-        is_real_human_message,
-        is_tool_error,
-    )
 
     ENHANCED_FEATURES_AVAILABLE = True
 except ImportError:

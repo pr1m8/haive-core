@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Multi-agent state with hierarchical agent management and recompilation support.
 
 This module provides a comprehensive state schema for managing multiple agents in
@@ -96,7 +98,6 @@ See Also:
     - :mod:`langgraph.graph`: LangGraph integration
 """
 
-from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Self
 
@@ -335,8 +336,8 @@ class MultiAgentState(ToolState):
     def convert_agents_to_dict(cls, v: list[Any] | dict[str, Any]) -> dict[str, Any]:
         """Convert list of agents to dict keyed by agent name.
 
-        This allows flexible initialization while maintaining consistent
-        internal representation for hierarchical access.
+        This allows flexible initialization while maintaining consistent internal
+        representation for hierarchical access.
         """
         if isinstance(v, list):
             # Convert list to dict using agent names
