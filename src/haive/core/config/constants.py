@@ -1,7 +1,7 @@
 """Path constants for the Haive framework.
 
-This module handles path resolution for the polyrepo structure where
-packages like haive-core are in the packages/ directory.
+This module handles path resolution for the polyrepo structure where packages like
+haive-core are in the packages/ directory.
 """
 
 import logging

@@ -14,7 +14,6 @@ Functions:
 """
 
 # src/haive/core/config/runnable.py
-
 """Configuration management for Haive runnables.
 
 This module provides utilities for creating, managing, and manipulating runtime configurations
@@ -57,8 +56,8 @@ from pydantic import BaseModel
 class RunnableConfigManager:
     """Enhanced manager for creating and manipulating RunnableConfig objects.
 
-    Provides methods for creating standardized configs, extracting values,
-    and managing engine-specific configurations.
+    Provides methods for creating standardized configs, extracting values, and managing
+    engine-specific configurations.
     """
 
     @staticmethod

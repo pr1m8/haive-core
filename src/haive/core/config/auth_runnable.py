@@ -51,7 +51,8 @@ from haive.core.config.runnable import RunnableConfigManager
 
 
 class HaiveRunnableConfigManager(RunnableConfigManager):
-    """Enhanced runnable config manager with Supabase authentication and PostgreSQL integration.
+    """Enhanced runnable config manager with Supabase authentication and PostgreSQL
+    integration.
 
     Extends the base RunnableConfigManager with methods for Supabase user
     authentication, enhanced session management, and PostgreSQL persistence
