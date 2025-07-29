@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """LLM Provider Implementations Module.
 
 This module provides specific implementations for different LLM providers,
@@ -29,7 +31,6 @@ Typical usage example:
     ```
 """
 
-from __future__ import annotations
 
 from collections.abc import Iterator
 from typing import TypeVar

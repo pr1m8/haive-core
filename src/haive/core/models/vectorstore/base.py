@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Base model module.
 
 This module provides base functionality for the Haive framework.
@@ -12,7 +14,6 @@ Functions:
     create_retriever: Create Retriever functionality.
 """
 
-from __future__ import annotations
 
 from enum import Enum
 from typing import Any
