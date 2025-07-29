@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """_Base schema module.
 
 This module provides  base functionality for the Haive framework.
@@ -12,7 +14,6 @@ Functions:
     in: In functionality.
 """
 
-from __future__ import annotations
 
 import logging
 from collections import defaultdict

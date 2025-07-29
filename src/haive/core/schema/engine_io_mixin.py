@@ -1,11 +1,12 @@
+from __future__ import annotations
+
 """Engine I/O Schema Mixin for State Schemas.
 
-This module provides a mixin to handle engine-related I/O logic separately
-from the core state schema functionality. This separation makes the code
-more modular and allows for optional engine capabilities.
+This module provides a mixin to handle engine-related I/O logic separately from the core
+state schema functionality. This separation makes the code more modular and allows for
+optional engine capabilities.
 """
 
-from __future__ import annotations
 
 import logging
 from typing import TYPE_CHECKING, Any

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """SchemaComposer for the Haive Schema System.
 
 from typing import Any, Optional
@@ -64,7 +66,6 @@ Example:
     ```
 """
 
-from __future__ import annotations
 
 import inspect
 import logging
@@ -2050,7 +2051,8 @@ class SchemaComposer:
     def configure_messages_field(
         self, with_reducer: bool = True, force_add: bool = False
     ) -> SchemaComposer:
-        """Configure a messages field with appropriate settings if it exists or if requested.
+        """Configure a messages field with appropriate settings if it exists or if
+        requested.
 
         Args:
             with_reducer: Whether to add a reducer for the messages field

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """State schema base class for the Haive framework.
 
 from typing import Any
@@ -59,7 +61,6 @@ Example:
     ```
 """
 
-from __future__ import annotations
 
 import builtins
 import copy
@@ -242,8 +243,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
     def validate_engines(cls, v) -> Any:
         """Handle both serialized dicts and actual Engine instances in engines dict.
 
-        Similar to validate_engine but for the engines dictionary.
-        Each value can be either a serialized dict or an actual Engine instance.
+        Similar to validate_engine but for the engines dictionary. Each value can be
+        either a serialized dict or an actual Engine instance.
         """
         if not isinstance(v, dict):
             return v
@@ -374,7 +375,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
 
     @model_validator(mode="after")
     def setup_engines_and_tools(self) -> Self:
-        """Setup engines and sync their tools, structured output models, and add engine to state.
+        """Setup engines and sync their tools, structured output models, and add engine to
+        state.
 
         This validator runs after the model is created and:
         1. Finds all engine fields in the state
@@ -548,8 +550,8 @@ class StateSchema(BaseModel, Generic[TEngine, TEngines]):
     def model_post_init(self, __context: Any) -> None:
         """Sync engines from class level to instance level after initialization.
 
-        This ensures that engines stored at the class level (via SchemaComposer)
-        are available on state instances.
+        This ensures that engines stored at the class level (via SchemaComposer) are
+        available on state instances.
         """
         # Initialize engines field if it's PydanticUndefined
         from pydantic_core import PydanticUndefined

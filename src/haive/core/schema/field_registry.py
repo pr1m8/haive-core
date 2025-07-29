@@ -240,8 +240,8 @@ class StandardFields:
 class FieldRegistry:
     """Dynamic field registry for custom field definitions.
 
-    This complements StandardFields by allowing registration of custom
-    field definitions at runtime.
+    This complements StandardFields by allowing registration of custom field definitions
+    at runtime.
     """
 
     _registry: dict[str, FieldDefinition] = {}
@@ -328,14 +328,18 @@ class PrebuiltStates:
 
     @classmethod
     def llm_state(cls) -> Any:
-        """Get LLMState for single-engine LLM agents with token tracking and model awareness."""
+        """Get LLMState for single-engine LLM agents with token tracking and model
+        awareness.
+        """
         from haive.core.schema.prebuilt.llm_state import LLMState
 
         return LLMState
 
     @classmethod
     def tool_state(cls) -> Any:
-        """Get ToolState for tool-using agents with LLM features, tools, and token tracking."""
+        """Get ToolState for tool-using agents with LLM features, tools, and token
+        tracking.
+        """
         from haive.core.schema.prebuilt.tool_state import ToolState
 
         return ToolState

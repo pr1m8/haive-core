@@ -1,11 +1,11 @@
-"""From typing import Any
-Typed State Schema with Generic Engine Support.
+from __future__ import annotations
 
-This module provides enhanced state schema classes that use generics for proper
-engine typing while maintaining backward compatibility with existing code.
+"""From typing import Any Typed State Schema with Generic Engine Support.
+
+This module provides enhanced state schema classes that use generics for proper engine
+typing while maintaining backward compatibility with existing code.
 """
 
-from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Generic, TypeVar
 

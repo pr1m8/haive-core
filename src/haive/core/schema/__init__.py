@@ -99,12 +99,11 @@ __license__ = "MIT"
 
 # Type imports for better IDE support
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from typing import TypeAlias
 
-    from pydantic import BaseModel
 
 # Core schema imports
 # Schema composition imports
@@ -229,9 +228,8 @@ def _initialize_schema_module() -> None:
 
     # Validate critical imports
     try:
-        from typing import get_type_hints
+        pass
 
-        from pydantic import BaseModel, Field
     except ImportError as e:
         raise ImportError(
             f"Critical schema dependencies missing: {e.name}. "

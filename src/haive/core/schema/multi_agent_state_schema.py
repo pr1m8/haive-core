@@ -1,12 +1,12 @@
+from __future__ import annotations
+
 """Multi-agent state schema for the Haive framework.
 
-This module provides a specialized StateSchema for multi-agent architectures,
-addressing key issues with engine handling, consolidation, and access from
-engine nodes. It ensures proper engine access and visibility for sub-agents
-in complex agent workflows.
+This module provides a specialized StateSchema for multi-agent architectures, addressing
+key issues with engine handling, consolidation, and access from engine nodes. It ensures
+proper engine access and visibility for sub-agents in complex agent workflows.
 """
 
-from __future__ import annotations
 
 import logging
 from typing import Any, Self
@@ -188,9 +188,9 @@ class MultiAgentStateSchema(StateSchema):
 class MultiAgentSchemaComposer:
     """Utility for creating MultiAgentStateSchema classes.
 
-    This class provides static methods for creating MultiAgentStateSchema classes
-    from existing schemas or components, ensuring proper engine handling in
-    multi-agent architectures.
+    This class provides static methods for creating MultiAgentStateSchema classes from
+    existing schemas or components, ensuring proper engine handling in multi-agent
+    architectures.
     """
 
     @staticmethod

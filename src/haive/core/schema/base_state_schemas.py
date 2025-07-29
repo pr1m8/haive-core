@@ -1,10 +1,11 @@
+from __future__ import annotations
+
 """Base state schemas with clear inheritance hierarchy.
 
-This module provides a cleaner inheritance structure for state schemas,
-separating concerns between different types of agents and workflows.
+This module provides a cleaner inheritance structure for state schemas, separating
+concerns between different types of agents and workflows.
 """
 
-from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
@@ -39,8 +40,8 @@ class MinimalState(BaseModel):
 class MessagingState(MinimalState):
     """State that includes message handling.
 
-    For workflows that need conversation/message tracking but not
-    necessarily LLM capabilities (e.g., routing, logging, monitoring).
+    For workflows that need conversation/message tracking but not necessarily LLM
+    capabilities (e.g., routing, logging, monitoring).
     """
 
     messages: list[BaseMessage] = Field(
@@ -59,8 +60,8 @@ class MessagingState(MinimalState):
 class EngineState(MessagingState):
     """State that can hold engines (serializable components).
 
-    This is the base for states that need engines but aren't
-    necessarily "agents" in the LLM sense.
+    This is the base for states that need engines but aren't necessarily "agents" in the
+    LLM sense.
     """
 
     engines: dict[str, Engine | dict[str, Any]] = Field(
@@ -106,8 +107,8 @@ class EngineState(MessagingState):
 class ToolState(EngineState):
     """State that includes tool management.
 
-    For workflows that use tools but might not have a primary LLM
-    (e.g., pure tool orchestration, data processing pipelines).
+    For workflows that use tools but might not have a primary LLM (e.g., pure tool
+    orchestration, data processing pipelines).
     """
 
     tools: list[Any] = Field(default_factory=list, description="Available tools")
@@ -129,8 +130,7 @@ class ToolState(EngineState):
 class AgentState(ToolState):
     """State for a single agent with a primary engine (usually LLM).
 
-    This is the base for traditional agents that have a main
-    decision-making engine.
+    This is the base for traditional agents that have a main decision-making engine.
     """
 
     # Primary engine (for backward compatibility and convenience)
@@ -171,8 +171,8 @@ class AgentState(ToolState):
 class WorkflowState(AgentState):
     """State for workflow agents that can modify their own execution graph.
 
-    This enables meta-programming where agents can inspect and modify
-    their own workflow based on results.
+    This enables meta-programming where agents can inspect and modify their own workflow
+    based on results.
     """
 
     # The workflow graph (serializable)
@@ -217,8 +217,8 @@ class WorkflowState(AgentState):
 class MetaAgentState(WorkflowState):
     """State for meta-agents that can spawn and manage other agents.
 
-    This is for advanced scenarios where agents create and coordinate
-    other agents dynamically.
+    This is for advanced scenarios where agents create and coordinate other agents
+    dynamically.
     """
 
     # Sub-agents managed by this meta-agent
@@ -266,8 +266,7 @@ class MetaAgentState(WorkflowState):
 class MultiAgentState(MessagingState):
     """State for multi-agent systems with proper isolation.
 
-    This provides a clean separation between shared state and
-    per-agent private state.
+    This provides a clean separation between shared state and per-agent private state.
     """
 
     # Shared state accessible by all agents

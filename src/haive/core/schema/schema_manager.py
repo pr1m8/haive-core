@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """StateSchemaManager for creating and manipulating state schemas.
 
 This module provides the StateSchemaManager class, which offers a low-level API for
@@ -62,7 +64,6 @@ This module is part of the Haive Schema System, providing the lower-level founda
 for schema manipulation that complements the higher-level SchemaComposer.
 """
 
-from __future__ import annotations
 
 import inspect
 import logging
