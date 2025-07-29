@@ -160,8 +160,7 @@ class NamedList(BaseModel, Generic[T]):
         if not self.unresolved_refs or not self.registry:
             if self.unresolved_refs and not self.allow_unresolved:
                 raise ValueError(
-                    f"Unresolved references: {
-                        self.unresolved_refs} (no registry provided)"
+                    f"Unresolved references: {self.unresolved_refs} (no registry provided)"
                 )
             return
 

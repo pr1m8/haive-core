@@ -93,8 +93,7 @@ def get_github_settings() -> GithubSettings:
 
 
 class GithubRepo(BaseModel):
-    """Configuration for a GitHub repository with automatic validation and
-    discovery.
+    """Configuration for a GitHub repository with automatic validation and discovery.
 
     Features:
     - Automatic branch discovery with fallback (main -> master -> develop -> etc.)
@@ -218,7 +217,7 @@ class GithubRepo(BaseModel):
         """Lazy-load settings."""
         if self._settings is None:
             self._settings = get_github_settings()
-        return self._settings
+        return self._settings  # type: ignore
 
     @property
     def http_client(self) -> httpx.Client:
@@ -291,9 +290,7 @@ class GithubRepo(BaseModel):
             self.is_valid = False
             self.validation_error = str(e)
             logger.exception(
-                f"Repository validation failed for {
-                    self.owner}/{
-                    self.name}: {e}"
+                f"Repository validation failed for {self.owner}/{self.name}: {e}"
             )
 
         return self
@@ -409,8 +406,7 @@ class GithubRepo(BaseModel):
                     valid_branch = branch
                     if branch != self.branch and self.branch:
                         self.validation_warnings.append(
-                            f"Specified branch '{
-                                self.branch}' not found, using '{branch}' instead"
+                            f"Specified branch '{self.branch}' not found, using '{branch}' instead"
                         )
                     break
 
@@ -419,10 +415,7 @@ class GithubRepo(BaseModel):
                 # Update branch to the one we're actually using
                 if not self.branch:
                     self.branch = valid_branch
-                logger.info(
-                    f"Using branch '{valid_branch}' for {
-                        self.full_name}"
-                )
+                logger.info(f"Using branch '{valid_branch}' for {self.full_name}")
             else:
                 # No valid branch found
                 tried_branches = ", ".join(branches_to_try[:5])
@@ -443,8 +436,7 @@ class GithubRepo(BaseModel):
         elif self.branch:
             if not self._check_branch_exists(self.branch):
                 raise ValueError(
-                    f"Branch '{
-                        self.branch}' not found and auto-retry is disabled"
+                    f"Branch '{self.branch}' not found and auto-retry is disabled"
                 )
             self.discovered_branch = self.branch
         else:
