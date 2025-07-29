@@ -1,7 +1,7 @@
 """LangGraph conversion utilities for Haive graphs.
 
-from typing import Any, Dict
-This module provides functions to convert Haive graphs to and from LangGraph objects.
+from typing import Any, Dict This module provides functions to convert Haive graphs to
+and from LangGraph objects.
 """
 
 import inspect
