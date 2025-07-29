@@ -101,22 +101,23 @@ class ComponentRef(BaseModel, Generic[T]):
     def from_engine(cls, engine: "Any") -> "ComponentRef":
         """Create a reference from an engine instance.
 
-        Factory method to create a component reference that points to
-        the given engine.
+                Factory method to create a component reference that points to
+                the given engine.
 
-        Args:
-            engine: The engine to reference.
+                Args:
+                    engine: The engine to reference.
 
-        Returns:
-            ComponentRef: A new component reference pointing to the engine.
+                Returns:
+                    ComponentRef: A new component reference pointing to the engine.
 
-        Examples:
-            >>> from haive.core.engine.base import Engine, EngineType
-            >>> engine = Engine(name="my_engine", engine_type=EngineType.LLM)
-            >>> ref = ComponentRef.from_engine(engine)
-            >>> ref.name
-            'my_engine'
-            >>> ref.type
-            <EngineType.LLM: 'llm'>
+                Examples:
+                    >>> from haive.core.engine.base import Engine
+        from haive.core.engine.base.types import EngineType
+                    >>> engine = Engine(name="my_engine", engine_type=EngineType.LLM)
+                    >>> ref = ComponentRef.from_engine(engine)
+                    >>> ref.name
+                    'my_engine'
+                    >>> ref.type
+                    <EngineType.LLM: 'llm'>
         """
         return cls(id=engine.id, name=engine.name, type=engine.engine_type)

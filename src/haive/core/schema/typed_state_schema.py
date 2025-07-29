@@ -198,7 +198,7 @@ class MultiEngineStateSchema(StateSchema):
         # Check by engine type
         for name, engine in self.engines.items():
             if hasattr(engine, "engine_type"):
-                from haive.core.engine.base import EngineType
+                from haive.core.engine.base.types import EngineType
 
                 if engine.engine_type == EngineType.LLM:
                     return engine
@@ -216,7 +216,7 @@ class MultiEngineStateSchema(StateSchema):
         # Check by engine type
         for name, engine in self.engines.items():
             if hasattr(engine, "engine_type"):
-                from haive.core.engine.base import EngineType
+                from haive.core.engine.base.types import EngineType
 
                 if engine.engine_type == EngineType.RETRIEVER:
                     return engine

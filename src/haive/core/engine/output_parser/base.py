@@ -22,7 +22,8 @@ from enum import Enum
 from langchain_core.messages import BaseMessage
 from langchain_core.runnables import RunnableConfig
 
-from haive.core.engine.base import EngineType, InvokableEngine
+from haive.core.engine.base import InvokableEngine
+from haive.core.engine.base.types import EngineType
 from haive.core.registry.decorators import register_component
 
 logger = logging.getLogger(__name__)

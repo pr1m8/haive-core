@@ -32,8 +32,7 @@ logger = logging.getLogger(__name__)
 class NodeFunction(Protocol):
     """Protocol for node functions."""
 
-    def __call__(self, state: Any,
-                 config: dict[str, Any] | None = None) -> Any: ...
+    def __call__(self, state: Any, config: dict[str, Any] | None = None) -> Any: ...
 
 
 class NodeFactory:
@@ -102,8 +101,7 @@ class NodeFactory:
         if input_mapping is None and hasattr(config, "_derive_input_mapping"):
             input_mapping = cls._derive_input_mapping(config)
 
-        if output_mapping is None and hasattr(
-                config, "_derive_output_mapping"):
+        if output_mapping is None and hasattr(config, "_derive_output_mapping"):
             output_mapping = cls._derive_output_mapping(config)
 
         # Handle different types of configs
@@ -170,13 +168,13 @@ class NodeFactory:
         # Callable config
         if callable(config):
             # Ensure the callable is config-aware
-            return cls._ensure_config_aware(
-                config, command_goto, runnable_config)
+            return cls._ensure_config_aware(config, command_goto, runnable_config)
 
         # Unsupported config type
         raise ValueError(
             f"Unsupported node configuration type: {
-                type(config)}")
+                type(config)}"
+        )
 
     @classmethod
     def create_node_function(
@@ -235,8 +233,7 @@ class NodeFactory:
         if input_mapping is None and hasattr(config, "_derive_input_mapping"):
             input_mapping = cls._derive_input_mapping(config)
 
-        if output_mapping is None and hasattr(
-                config, "_derive_output_mapping"):
+        if output_mapping is None and hasattr(config, "_derive_output_mapping"):
             output_mapping = cls._derive_output_mapping(config)
 
         # Handle different types of configs
@@ -303,13 +300,13 @@ class NodeFactory:
         # Callable config
         if callable(config):
             # Ensure the callable is config-aware
-            return cls._ensure_config_aware(
-                config, command_goto, runnable_config)
+            return cls._ensure_config_aware(config, command_goto, runnable_config)
 
         # Unsupported config type
         raise ValueError(
             f"Unsupported node configuration type: {
-                type(config)}")
+                type(config)}"
+        )
 
     @classmethod
     def create_node_function(
@@ -324,7 +321,7 @@ class NodeFactory:
         # Handle string references to engines
         if isinstance(config, str):
             # Try to resolve from engine registry
-            from haive.core.engine.base import EngineRegistry, EngineType
+            from haive.core.engine.base.registry import EngineRegistry, EngineType
 
             registry = EngineRegistry.get_instance()
 
@@ -362,8 +359,7 @@ class NodeFactory:
         if input_mapping is None and hasattr(config, "_derive_input_mapping"):
             input_mapping = cls._derive_input_mapping(config)
 
-        if output_mapping is None and hasattr(
-                config, "_derive_output_mapping"):
+        if output_mapping is None and hasattr(config, "_derive_output_mapping"):
             output_mapping = cls._derive_output_mapping(config)
 
         # Handle different types of configs
@@ -430,13 +426,13 @@ class NodeFactory:
         # Callable config
         if callable(config):
             # Ensure the callable is config-aware
-            return cls._ensure_config_aware(
-                config, command_goto, runnable_config)
+            return cls._ensure_config_aware(config, command_goto, runnable_config)
 
         # Unsupported config type
         raise ValueError(
             f"Unsupported node configuration type: {
-                type(config)}")
+                type(config)}"
+        )
 
     @classmethod
     def create_tool_node(
@@ -463,15 +459,13 @@ class NodeFactory:
         # Create base tool node
         base_tool_node = ToolNode(tools)
 
-        def node_function(state: Dict[str, Any],
-                          config: RunnableConfig | None = None):
+        def node_function(state: Dict[str, Any], config: RunnableConfig | None = None):
             """Config-aware tool node."""
             # Merge configs
             merged_config = cls._merge_configs(runnable_config, config)
 
             # Extract allowed tools if specified
-            allowed_tools = cls._extract_from_config(
-                merged_config, "allowed_tools")
+            allowed_tools = cls._extract_from_config(merged_config, "allowed_tools")
 
             # Use all tools or filter based on config
             active_tools = tools
@@ -479,8 +473,7 @@ class NodeFactory:
                 # Filter tools
                 active_tools = [t for t in tools if t.name in allowed_tools]
                 if not active_tools:
-                    logger.warning(
-                        f"No tools match allowed_tools: {allowed_tools}")
+                    logger.warning(f"No tools match allowed_tools: {allowed_tools}")
                     active_tools = tools
 
                 # Create temporary node with filtered tools
@@ -513,8 +506,7 @@ class NodeFactory:
             A node function that sets config in state
         """
 
-        def node_function(state: Dict[str, Any],
-                          config: Dict[str, Any] = None):
+        def node_function(state: Dict[str, Any], config: Dict[str, Any] = None):
             """Set runnable_config in state."""
             # Create a merged config
             merged_config = cls._merge_configs(runnable_config, config)
@@ -545,8 +537,7 @@ class NodeFactory:
             A node function that structures output
         """
 
-        def node_function(state: Dict[str, Any],
-                          config: Dict[str, Any] = None):
+        def node_function(state: Dict[str, Any], config: Dict[str, Any] = None):
             """Process state into structured output."""
             try:
                 # Get the last message content
@@ -574,8 +565,7 @@ class NodeFactory:
                     import re
 
                     # Try to extract a JSON block if it exists
-                    json_match = re.search(
-                        r"```(?:json)?\s*([\s\S]*?)\s*```", content)
+                    json_match = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", content)
                     if json_match:
                         json_str = json_match.group(1)
                     else:
@@ -654,8 +644,7 @@ class NodeFactory:
             )
 
         # Generic invokable engine node
-        def node_function(state: Dict[str, Any],
-                          config: RunnableConfig | None = None):
+        def node_function(state: Dict[str, Any], config: RunnableConfig | None = None):
             """Invokable engine node."""
             logger.debug(f"Invokable engine node called with state: {state}")
 
@@ -703,8 +692,7 @@ class NodeFactory:
             A node function for the LLM
         """
 
-        def node_function(state: Dict[str, Any],
-                          config: RunnableConfig | None = None):
+        def node_function(state: Dict[str, Any], config: RunnableConfig | None = None):
             """LLM node function."""
             logger.debug("LLM node called with state")
 
@@ -756,8 +744,7 @@ class NodeFactory:
             A node function for the vector store
         """
 
-        def node_function(state: Dict[str, Any],
-                          config: RunnableConfig | None = None):
+        def node_function(state: Dict[str, Any], config: RunnableConfig | None = None):
             """Vector store node function."""
             logger.debug("Vector store node called with state")
 
@@ -791,7 +778,8 @@ class NodeFactory:
                 documents = engine.invoke(input_data, merged_config)
                 logger.debug(
                     f"Vector store result: {
-                        len(documents)} documents")
+                        len(documents)} documents"
+                )
             except Exception as e:
                 logger.error(f"Error invoking vector store: {e}")
                 return cls._create_error_command(state, str(e), command_goto)
@@ -828,8 +816,7 @@ class NodeFactory:
             A node function for the retriever
         """
 
-        def node_function(state: Dict[str, Any],
-                          config: RunnableConfig | None = None):
+        def node_function(state: Dict[str, Any], config: RunnableConfig | None = None):
             """Retriever node function."""
             logger.debug("Retriever node called with state")
 
@@ -898,8 +885,7 @@ class NodeFactory:
             A node function for the agent
         """
 
-        def node_function(state: Dict[str, Any],
-                          config: RunnableConfig | None = None):
+        def node_function(state: Dict[str, Any], config: RunnableConfig | None = None):
             """Agent node function."""
             logger.debug("Agent node called with state")
 
@@ -953,8 +939,7 @@ class NodeFactory:
             )
 
         # Generic non-invokable engine node
-        def node_function(state: Dict[str, Any],
-                          config: RunnableConfig | None = None):
+        def node_function(state: Dict[str, Any], config: RunnableConfig | None = None):
             """Non-invokable engine node."""
             logger.debug("Non-invokable engine node called with state")
 
@@ -1005,8 +990,7 @@ class NodeFactory:
             A node function for the embeddings engine
         """
 
-        def node_function(state: Dict[str, Any],
-                          config: RunnableConfig | None = None):
+        def node_function(state: Dict[str, Any], config: RunnableConfig | None = None):
             """Embeddings node function."""
             logger.debug("Embeddings node called with state")
 
@@ -1037,8 +1021,7 @@ class NodeFactory:
                             input_data["text"], runnable_config=merged_config
                         )
                     elif "documents" in input_data or "texts" in input_data:
-                        docs = input_data.get(
-                            "documents") or input_data.get("texts")
+                        docs = input_data.get("documents") or input_data.get("texts")
                         result = engine.embed_documents(
                             docs, runnable_config=merged_config
                         )
@@ -1063,8 +1046,7 @@ class NodeFactory:
                 return cls._create_error_command(state, str(e), command_goto)
 
             # Process result into state update
-            state_update = cls._process_embeddings_result(
-                result, state, output_mapping)
+            state_update = cls._process_embeddings_result(result, state, output_mapping)
 
             # Return with command
             return Command(update=state_update, goto=command_goto)
@@ -1125,8 +1107,7 @@ class NodeFactory:
             A node function for the engine
         """
 
-        def node_function(state: Dict[str, Any],
-                          config: RunnableConfig | None = None):
+        def node_function(state: Dict[str, Any], config: RunnableConfig | None = None):
             """Generic engine node."""
             logger.debug("Generic engine node called with state")
 
@@ -1180,8 +1161,7 @@ class NodeFactory:
             state_dict = state.dict()
         else:
             # Dict-like or other
-            state_dict = state if hasattr(
-                state, "__getitem__") else vars(state)
+            state_dict = state if hasattr(state, "__getitem__") else vars(state)
 
         # If no mapping, check if state is simple enough to use directly
         if not input_mapping:
@@ -1258,8 +1238,7 @@ class NodeFactory:
                 isinstance(state, dict) and "messages" in state
             ):
                 messages = (
-                    state.messages if hasattr(
-                        state, "messages") else state["messages"]
+                    state.messages if hasattr(state, "messages") else state["messages"]
                 )
                 state_update["messages"] = messages + [result]
         elif isinstance(result, list) and all(
@@ -1270,8 +1249,7 @@ class NodeFactory:
                 isinstance(state, dict) and "messages" in state
             ):
                 messages = (
-                    state.messages if hasattr(
-                        state, "messages") else state["messages"]
+                    state.messages if hasattr(state, "messages") else state["messages"]
                 )
                 state_update["messages"] = messages + result
         elif isinstance(result, str):
@@ -1289,11 +1267,9 @@ class NodeFactory:
                 isinstance(state, dict) and "messages" in state
             ):
                 messages = (
-                    state.messages if hasattr(
-                        state, "messages") else state["messages"]
+                    state.messages if hasattr(state, "messages") else state["messages"]
                 )
-                state_update["messages"] = messages + \
-                    [AIMessage(content=result)]
+                state_update["messages"] = messages + [AIMessage(content=result)]
         # Simple value
         elif output_mapping:
             # Use first mapping as default
@@ -1415,8 +1391,7 @@ class NodeFactory:
             isinstance(state, dict) and "messages" in state
         ):
             messages = (
-                state.messages if hasattr(
-                    state, "messages") else state["messages"]
+                state.messages if hasattr(state, "messages") else state["messages"]
             )
             error_msg = AIMessage(content=f"Error: {error_message}")
             state_update["messages"] = messages + [error_msg]
@@ -1448,8 +1423,7 @@ class NodeFactory:
         if accepts_config:
 
             @wraps(func)
-            def config_wrapper(
-                    state: Dict[str, Any], config: Dict[str, Any] = None):
+            def config_wrapper(state: Dict[str, Any], config: Dict[str, Any] = None):
                 # Merge configs
                 merged_config = cls._merge_configs(runnable_config, config)
 
@@ -1469,8 +1443,7 @@ class NodeFactory:
 
         # Make it config-aware
         @wraps(func)
-        def basic_wrapper(state: Dict[str, Any],
-                          config: Dict[str, Any] = None):
+        def basic_wrapper(state: Dict[str, Any], config: Dict[str, Any] = None):
             # Call without config
             result = func(state)
 

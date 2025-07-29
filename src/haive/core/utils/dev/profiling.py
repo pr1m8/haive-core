@@ -6,14 +6,11 @@ memory analysis, CPU profiling, and execution optimization insights.
 """
 
 import functools
-import inspect
 import subprocess
-import sys
-import tempfile
 import time
-from contextlib import contextmanager
+from collections.abc import Callable
+from contextlib import contextmanager, suppress
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Union
 
 # Try to import profiling tools
 try:
@@ -74,7 +71,7 @@ class TimingProfiler:
     """Simple timing profiler for function execution."""
 
     def __init__(self):
-        self.timings: Dict[str, List[float]] = {}
+        self.timings: dict[str, list[float]] = {}
         self.console = Console() if HAS_RICH else None
 
     def time_function(self, func: Callable) -> Callable:
@@ -98,11 +95,11 @@ class TimingProfiler:
                 if HAS_RICH and self.console:
                     self.console.print(f"⏱️  {func_name}: {duration:.6f}s", style="blue")
                 else:
-                    print(f"⏱️  {func_name}: {duration:.6f}s")
+                    pass
 
         return wrapper
 
-    def get_stats(self) -> Dict[str, Dict[str, float]]:
+    def get_stats(self) -> dict[str, dict[str, float]]:
         """Get timing statistics for all functions."""
         stats = {}
 
@@ -142,7 +139,6 @@ class TimingProfiler:
     def clear(self) -> None:
         """Clear timing data."""
         self.timings.clear()
-        print("🧹 Timing data cleared")
 
 
 class MemoryProfiler:
@@ -188,23 +184,19 @@ class MemoryProfiler:
                         style=color,
                     )
                 else:
-                    symbol = "📈" if memory_delta > 0 else "📉"
-                    print(
-                        f"{symbol} {func_name}: {memory_delta:+.2f} MB (total: {memory_after:.2f} MB)"
-                    )
+                    pass
 
         return wrapper
 
     def memory_line_by_line(self, func: Callable) -> Callable:
         """Profile memory usage line by line using memory_profiler."""
         if not HAS_MEMORY_PROFILER:
-            print("⚠️  memory_profiler not available, using basic memory profiling")
             return self.profile_memory(func)
 
         # Add @profile decorator for memory_profiler
         return memory_profiler.profile(func)
 
-    def get_current_usage(self) -> Dict[str, float]:
+    def get_current_usage(self) -> dict[str, float]:
         """Get current memory usage statistics."""
         current = self._get_memory_usage()
         delta_from_baseline = current - self.baseline_memory
@@ -226,9 +218,7 @@ class MemoryProfiler:
 
             self.console.print(table)
         else:
-            print(
-                f"💾 Memory - Current: {current:.2f} MB, Baseline: {self.baseline_memory:.2f} MB, Delta: {delta_from_baseline:+.2f} MB"
-            )
+            pass
 
         return stats
 
@@ -243,7 +233,6 @@ class LineProfiler:
     def profile_lines(self, func: Callable) -> Callable:
         """Profile function line by line."""
         if not HAS_LINE_PROFILER:
-            print("⚠️  line_profiler not available")
             return func
 
         self.profiler.add_function(func)
@@ -259,16 +248,14 @@ class LineProfiler:
 
         return wrapper
 
-    def show_stats(self, filename: Optional[str] = None) -> None:
+    def show_stats(self, filename: str | None = None) -> None:
         """Show line profiling statistics."""
         if not self.profiler:
-            print("⚠️  Line profiler not available")
             return
 
         if filename:
             with open(filename, "w") as f:
                 self.profiler.print_stats(stream=f)
-            print(f"📝 Line profiling stats saved to {filename}")
         else:
             self.profiler.print_stats()
 
@@ -282,7 +269,6 @@ class CPUProfiler:
     def profile_cpu(self, func: Callable, duration: int = 10) -> Callable:
         """Profile CPU usage with pyinstrument."""
         if not HAS_PYINSTRUMENT:
-            print("⚠️  pyinstrument not available")
             return func
 
         @functools.wraps(func)
@@ -299,8 +285,6 @@ class CPUProfiler:
                 if HAS_RICH and self.console:
                     self.console.print("🔥 CPU Profiling Results:", style="bold red")
 
-                print(profiler.output_text(unicode=True, color=True))
-
         return wrapper
 
     def profile_with_scalene(
@@ -308,7 +292,6 @@ class CPUProfiler:
     ) -> None:
         """Profile a script with Scalene."""
         if not HAS_SCALENE:
-            print("⚠️  scalene not available")
             return
 
         Path(output_dir).mkdir(exist_ok=True)
@@ -316,11 +299,8 @@ class CPUProfiler:
 
         cmd = ["scalene", "--html", "--outfile", str(output_file), script_path]
 
-        try:
+        with suppress(subprocess.CalledProcessError):
             subprocess.run(cmd, check=True)
-            print(f"📊 Scalene profile saved to {output_file}")
-        except subprocess.CalledProcessError as e:
-            print(f"❌ Scalene profiling failed: {e}")
 
 
 class ProfilingUtilities:
@@ -333,7 +313,7 @@ class ProfilingUtilities:
         self.cpu_profiler = CPUProfiler()
         self.console = Console() if HAS_RICH else None
 
-    def time(self, func: Optional[Callable] = None) -> Callable:
+    def time(self, func: Callable | None = None) -> Callable:
         """Time function execution."""
         if func:
             return self.timing_profiler.time_function(func)
@@ -341,7 +321,7 @@ class ProfilingUtilities:
             return self.timing_profiler.time_function
 
     def memory(
-        self, func: Optional[Callable] = None, line_by_line: bool = False
+        self, func: Callable | None = None, line_by_line: bool = False
     ) -> Callable:
         """Profile memory usage."""
         if line_by_line:
@@ -354,14 +334,14 @@ class ProfilingUtilities:
         else:
             return profiler_func
 
-    def line(self, func: Optional[Callable] = None) -> Callable:
+    def line(self, func: Callable | None = None) -> Callable:
         """Profile line-by-line execution."""
         if func:
             return self.line_profiler.profile_lines(func)
         else:
             return self.line_profiler.profile_lines
 
-    def cpu(self, func: Optional[Callable] = None) -> Callable:
+    def cpu(self, func: Callable | None = None) -> Callable:
         """Profile CPU usage."""
         if func:
             return self.cpu_profiler.profile_cpu(func)
@@ -379,7 +359,7 @@ class ProfilingUtilities:
                     style="bold blue",
                 )
             else:
-                print(f"🔬 Starting comprehensive profiling of {func.__name__}")
+                pass
 
             # Apply multiple profilers
             profiled_func = self.timing_profiler.time_function(
@@ -411,7 +391,7 @@ class ProfilingUtilities:
         if HAS_RICH and self.console:
             self.console.print(f"🏁 Starting profile context: {name}", style="blue")
         else:
-            print(f"🏁 Starting profile context: {name}")
+            pass
 
         try:
             yield self
@@ -440,24 +420,18 @@ class ProfilingUtilities:
 
                 if cpu_profiler:
                     self.console.print("🔥 CPU Profile:", style="bold red")
-                    print(cpu_profiler.output_text(unicode=True, color=True))
             else:
-                print(f"⏱️  Profile '{name}' completed in {duration:.6f}s")
 
                 if start_memory:
                     end_memory = self.memory_profiler._get_memory_usage()
                     memory_delta = end_memory - start_memory
-                    print(
-                        f"💾 Memory delta: {memory_delta:+.2f} MB (final: {end_memory:.2f} MB)"
-                    )
 
                 if cpu_profiler:
-                    print("🔥 CPU Profile:")
-                    print(cpu_profiler.output_text(unicode=True, color=True))
+                    pass
 
     def benchmark(
         self, func: Callable, iterations: int = 1000, warmup: int = 100
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """Benchmark a function with multiple iterations."""
         if HAS_RICH and self.console:
             self.console.print(
@@ -465,7 +439,7 @@ class ProfilingUtilities:
                 style="bold green",
             )
         else:
-            print(f"🏃 Benchmarking {func.__name__} ({iterations} iterations)")
+            pass
 
         # Warmup
         for _ in range(warmup):
@@ -526,15 +500,14 @@ class ProfilingUtilities:
 
             self.console.print(table)
         else:
-            print(f"📊 Benchmark results for {func.__name__}:")
-            for key, value in stats.items():
-                print(f"  {key}: {value}")
+            for _key, _value in stats.items():
+                pass
 
         return stats
 
     def compare(
-        self, funcs: List[Callable], iterations: int = 1000
-    ) -> Dict[str, Dict[str, float]]:
+        self, funcs: list[Callable], iterations: int = 1000
+    ) -> dict[str, dict[str, float]]:
         """Compare performance of multiple functions."""
         results = {}
 
@@ -570,7 +543,7 @@ class ProfilingUtilities:
         if HAS_RICH and self.console:
             self.console.print("📊 Profiling Statistics", style="bold blue")
         else:
-            print("📊 Profiling Statistics")
+            pass
 
         self.timing_profiler.get_stats()
         self.memory_profiler.get_current_usage()
@@ -581,9 +554,8 @@ class ProfilingUtilities:
     def clear(self) -> None:
         """Clear all profiling data."""
         self.timing_profiler.clear()
-        print("🧹 All profiling data cleared")
 
-    def status(self) -> Dict[str, bool]:
+    def status(self) -> dict[str, bool]:
         """Get status of available profiling tools."""
         status = {
             "line_profiler": HAS_LINE_PROFILER,
@@ -605,9 +577,8 @@ class ProfilingUtilities:
 
             self.console.print(table)
         else:
-            print("🔧 Profiling Tools Status:")
             for tool, available in status.items():
-                print(f"  {tool}: {'✅' if available else '❌'}")
+                pass
 
         return status
 

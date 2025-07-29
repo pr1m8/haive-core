@@ -1,3 +1,7 @@
+import inspect
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
+
+
 def check_interfaces(
     obj: Any,
     interfaces: Dict[str, Optional[List[str]]],

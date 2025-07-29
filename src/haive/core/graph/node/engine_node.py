@@ -6,7 +6,8 @@ from typing import Any
 from langgraph.types import Command, RetryPolicy, Send
 from pydantic import Field
 
-from haive.core.engine.base import Engine, EngineType
+from haive.core.engine.base import Engine
+from haive.core.engine.base.types import EngineType
 from haive.core.graph.common.types import ConfigLike, StateLike
 from haive.core.graph.node.base_config import NodeConfig
 from haive.core.graph.node.types import NodeType

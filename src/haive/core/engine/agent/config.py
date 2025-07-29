@@ -39,7 +39,8 @@ from haive.core.engine.agent.protocols import (
     StreamingAgentProtocol,
     VisualizationAgentProtocol,
 )
-from haive.core.engine.base import Engine, EngineType, InvokableEngine
+from haive.core.engine.base import Engine, InvokableEngine
+from haive.core.engine.base.types import EngineType
 from haive.core.graph.node.config import NodeConfig
 from haive.core.persistence.base import CheckpointerConfig
 
@@ -775,7 +776,7 @@ class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
         # If not found locally, look it up in the registry
         if isinstance(ref, str):
             # Try each engine type
-            from haive.core.engine.base import EngineRegistry
+            from haive.core.engine.base.registry import EngineRegistry
 
             registry = EngineRegistry.get_instance()
             for engine_type in EngineType:

@@ -41,14 +41,6 @@ Examples:
 
    get_provider
    list_providers
-   OpenAIProvider
-   AnthropicProvider
-   AzureOpenAIProvider
-   GeminiProvider
-   VertexAIProvider
-   MistralProvider
-   GroqProvider
-   CohereProvider
 """
 
 import logging

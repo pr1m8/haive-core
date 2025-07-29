@@ -9,7 +9,8 @@ from langchain_core.tools.base import BaseTool, BaseToolkit
 from langgraph.types import RetryPolicy
 from pydantic import BaseModel, Field, field_validator
 
-from haive.core.engine.base import EngineType, InvokableEngine
+from haive.core.engine.base import InvokableEngine
+from haive.core.engine.base.types import EngineType
 
 logger = logging.getLogger(__name__)
 

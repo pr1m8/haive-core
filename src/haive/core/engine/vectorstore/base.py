@@ -13,7 +13,8 @@ from typing import Any
 from langchain_core.vectorstores import VectorStore
 from pydantic import Field
 
-from haive.core.engine.base import EngineType, InvokableEngine
+from haive.core.engine.base import InvokableEngine
+from haive.core.engine.base.types import EngineType
 from haive.core.models.embeddings.base import BaseEmbeddingConfig
 
 logger = logging.getLogger(__name__)

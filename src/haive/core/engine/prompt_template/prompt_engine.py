@@ -104,7 +104,8 @@ from langchain_core.prompts import (
 from langchain_core.prompts.base import FormatOutputType
 from pydantic import BaseModel, Field
 
-from haive.core.engine.base import EngineType, InvokableEngine
+from haive.core.engine.base import InvokableEngine
+from haive.core.engine.base.types import EngineType
 from haive.core.schema.schema_composer import SchemaComposer
 
 

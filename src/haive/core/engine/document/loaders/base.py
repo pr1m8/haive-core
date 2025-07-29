@@ -8,7 +8,8 @@ from langchain_core.documents import Document
 from langchain_core.runnables import RunnableConfig
 from pydantic import Field, computed_field
 
-from haive.core.engine.base import EngineType, InvokableEngine
+from haive.core.engine.base import InvokableEngine
+from haive.core.engine.base.types import EngineType
 from haive.core.engine.loaders.base import BaseDocumentLoader
 from haive.core.engine.loaders.source_factory import SourceFactory
 from haive.core.engine.loaders.sources.base import BaseSource

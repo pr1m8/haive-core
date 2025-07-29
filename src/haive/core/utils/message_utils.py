@@ -1,5 +1,5 @@
 from collections.abc import Callable, Sequence
-from typing import Any
+from typing import Any, Dict
 from uuid import uuid4
 
 from langchain_core.messages import (

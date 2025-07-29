@@ -9,11 +9,10 @@ import inspect
 import json
 import logging
 import sys
-import traceback
 from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 # Try to import rich for beautiful logging
 try:
@@ -76,7 +75,7 @@ class DevLogger:
     def __init__(self, name: str = "haive.dev"):
         self.name = name
         self.console = Console() if HAS_RICH else None
-        self.context_stack: List[Dict[str, Any]] = []
+        self.context_stack: list[dict[str, Any]] = []
         self.logger = self._setup_logger()
 
     def _setup_logger(self) -> logging.Logger:
@@ -106,7 +105,7 @@ class DevLogger:
 
         return logger
 
-    def _get_caller_info(self) -> Dict[str, Any]:
+    def _get_caller_info(self) -> dict[str, Any]:
         """Get information about the calling code."""
         frame = inspect.currentframe()
         try:
@@ -137,7 +136,7 @@ class DevLogger:
         if kwargs:
             extra_parts = []
             for key, value in kwargs.items():
-                if isinstance(value, (dict, list)):
+                if isinstance(value, dict | list):
                     extra_parts.append(f"{key}={json.dumps(value, default=str)}")
                 else:
                     extra_parts.append(f"{key}={value}")
@@ -176,9 +175,7 @@ class DevLogger:
         else:
             self.logger.warning(formatted, extra=caller)
 
-    def error(
-        self, message: str, exception: Optional[Exception] = None, **kwargs
-    ) -> None:
+    def error(self, message: str, exception: Exception | None = None, **kwargs) -> None:
         """Log error message with optional exception."""
         formatted = self._format_message(message, **kwargs)
         caller = self._get_caller_info()
@@ -191,7 +188,7 @@ class DevLogger:
             self.logger.error(formatted, extra=caller, exc_info=exception)
 
     def critical(
-        self, message: str, exception: Optional[Exception] = None, **kwargs
+        self, message: str, exception: Exception | None = None, **kwargs
     ) -> None:
         """Log critical message with optional exception."""
         formatted = self._format_message(message, **kwargs)
@@ -245,7 +242,7 @@ class DevLogger:
             else:
                 self.logger.debug(f"Exiting context: {name}")
 
-    def table(self, data: List[Dict[str, Any]], title: str = "Data") -> None:
+    def table(self, data: list[dict[str, Any]], title: str = "Data") -> None:
         """Log data as a formatted table."""
         if not data:
             self.info(f"Empty table: {title}")
@@ -255,7 +252,7 @@ class DevLogger:
             table = Table(title=title)
 
             # Add columns
-            for key in data[0].keys():
+            for key in data[0]:
                 table.add_column(str(key), style="cyan")
 
             # Add rows
@@ -305,9 +302,7 @@ class DevLogger:
             else:
                 self.info(line)
 
-    def metrics(
-        self, metrics: Dict[str, Union[int, float]], title: str = "Metrics"
-    ) -> None:
+    def metrics(self, metrics: dict[str, int | float], title: str = "Metrics") -> None:
         """Log metrics in a formatted way."""
         if HAS_RICH and self.console:
             table = Table(title=title, show_header=True, header_style="bold magenta")
@@ -352,7 +347,7 @@ class DevLogger:
         finally:
             self.timer_end(name)
 
-    def set_level(self, level: Union[str, int]) -> None:
+    def set_level(self, level: str | int) -> None:
         """Set logging level."""
         if isinstance(level, str):
             level = getattr(logging, level.upper())

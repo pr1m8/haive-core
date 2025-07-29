@@ -15,7 +15,7 @@ from langgraph.types import Command, Send
 from pydantic import BaseModel
 
 from haive.core.config.runnable import RunnableConfigManager
-from haive.core.engine.base import EngineType
+from haive.core.engine.base.types import EngineType
 from haive.core.graph.node.config import NodeConfig
 from haive.core.graph.node.registry import register_node_processor
 

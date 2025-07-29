@@ -100,7 +100,7 @@ class ParserNodeConfig(NodeConfig):
         # LAST: Fallback to registry
         logger.debug("  Engine not found in state, trying registry...")
         try:
-            from haive.core.engine.base import EngineRegistry
+            from haive.core.engine.base.registry import EngineRegistry
 
             registry = EngineRegistry.get_instance()
             engine = registry.find(self.engine_name)

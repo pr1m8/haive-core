@@ -187,7 +187,7 @@ class StateGraphEditor(BaseModel):
             # Resolve engine if it's a string
             resolved_engine = engine
             if isinstance(engine, str):
-                from haive.core.engine.base import EngineRegistry, EngineType
+                from haive.core.engine.base.registry import EngineRegistry, EngineType
 
                 registry = EngineRegistry.get_instance()
                 for engine_type in EngineType:
@@ -350,7 +350,10 @@ class StateGraphEditor(BaseModel):
                 # Resolve engine if it's a string
                 resolved_engine = node_config.engine
                 if isinstance(resolved_engine, str):
-                    from haive.core.engine.base import EngineRegistry, EngineType
+                    from haive.core.engine.base.registry import (
+                        EngineRegistry,
+                        EngineType,
+                    )
 
                     registry = EngineRegistry.get_instance()
                     for engine_type in EngineType:

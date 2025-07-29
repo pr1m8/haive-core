@@ -218,7 +218,7 @@ class ValidationNodeConfigV2(BaseNodeConfig):
 
         # Try registry
         try:
-            from haive.core.engine.base import EngineRegistry
+            from haive.core.engine.base.registry import EngineRegistry
 
             registry = EngineRegistry.get_instance()
             engine = registry.find(self.engine_name)

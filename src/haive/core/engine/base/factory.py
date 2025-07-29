@@ -19,29 +19,30 @@ T = TypeVar("T")  # Type variable for the created component
 class ComponentFactory(BaseModel, Generic[T]):
     """Factory for creating runtime components from engine configurations.
 
-    This class implements the factory pattern to separate serializable configurations
-    from non-serializable runtime components. It provides lazy instantiation,
-    caching, and the ability to override configuration at runtime.
+        This class implements the factory pattern to separate serializable configurations
+        from non-serializable runtime components. It provides lazy instantiation,
+        caching, and the ability to override configuration at runtime.
 
-    Attributes:
-        engine_ref (ComponentRef): Reference to the engine configuration that will
-            be used to create the component.
-        runtime_config (Optional[Dict[str, Any]]): Runtime configuration overrides
-            that will be applied when creating the component.
-        _component (Optional[T]): Private cache for the created component instance.
+        Attributes:
+            engine_ref (ComponentRef): Reference to the engine configuration that will
+                be used to create the component.
+            runtime_config (Optional[Dict[str, Any]]): Runtime configuration overrides
+                that will be applied when creating the component.
+            _component (Optional[T]): Private cache for the created component instance.
 
-    Type Parameters:
-        T: The type of component that will be created by this factory.
+        Type Parameters:
+            T: The type of component that will be created by this factory.
 
-    Examples:
-        >>> from haive.core.engine.base import Engine, EngineType
-        >>> from haive.core.engine.base.factory import ComponentFactory
-        >>> # Create an engine
-        >>> engine = Engine(name="my_engine", engine_type=EngineType.LLM)
-        >>> # Create a factory for the engine
-        >>> factory = ComponentFactory.for_engine(engine, {"temperature": 0.7})
-        >>> # Create the runtime component
-        >>> component = factory.create()
+        Examples:
+            >>> from haive.core.engine.base import Engine
+    from haive.core.engine.base.types import EngineType
+            >>> from haive.core.engine.base.factory import ComponentFactory
+            >>> # Create an engine
+            >>> engine = Engine(name="my_engine", engine_type=EngineType.LLM)
+            >>> # Create a factory for the engine
+            >>> factory = ComponentFactory.for_engine(engine, {"temperature": 0.7})
+            >>> # Create the runtime component
+            >>> component = factory.create()
     """
 
     # Reference to the engine configuration
@@ -124,25 +125,26 @@ class ComponentFactory(BaseModel, Generic[T]):
     ) -> "ComponentFactory[T]":
         """Create a factory for a specific engine.
 
-        Factory method to create a component factory that will use the specified
-        engine and runtime configuration.
+                Factory method to create a component factory that will use the specified
+                engine and runtime configuration.
 
-        Args:
-            engine (Any): The engine instance to use for component creation.
-            runtime_config (Optional[Dict[str, Any]]): Optional runtime configuration
-                overrides to apply when creating the component.
+                Args:
+                    engine (Any): The engine instance to use for component creation.
+                    runtime_config (Optional[Dict[str, Any]]): Optional runtime configuration
+                        overrides to apply when creating the component.
 
-        Returns:
-            ComponentFactory[T]: A new component factory configured for the engine.
+                Returns:
+                    ComponentFactory[T]: A new component factory configured for the engine.
 
-        Examples:
-            >>> from haive.core.engine.base import Engine, EngineType
-            >>> engine = Engine(name="text-embedding-ada-002", engine_type=EngineType.EMBEDDINGS)
-            >>> factory = ComponentFactory.for_engine(
-            ...     engine,
-            ...     {"batch_size": 10}
-            ... )
-            >>> embeddings = factory.create()
+                Examples:
+                    >>> from haive.core.engine.base import Engine
+        from haive.core.engine.base.types import EngineType
+                    >>> engine = Engine(name="text-embedding-ada-002", engine_type=EngineType.EMBEDDINGS)
+                    >>> factory = ComponentFactory.for_engine(
+                    ...     engine,
+                    ...     {"batch_size": 10}
+                    ... )
+                    >>> embeddings = factory.create()
         """
         # Import here to avoid circular imports
         from haive.core.engine.base.reference import ComponentRef

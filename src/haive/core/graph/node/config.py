@@ -291,7 +291,7 @@ class NodeConfig(BaseModel):
 
         # Lookup engine by name in registry
         try:
-            from haive.core.engine.base import EngineRegistry
+            from haive.core.engine.base.registry import EngineRegistry
 
             registry = EngineRegistry.get_instance()
 

@@ -239,7 +239,7 @@ class StatefulNodeConfig(BaseNodeConfig, ABC):
 
         # Check registry
         try:
-            from haive.core.engine.base import EngineRegistry
+            from haive.core.engine.base.registry import EngineRegistry
 
             registry = EngineRegistry.get_instance()
             return registry.find(name)

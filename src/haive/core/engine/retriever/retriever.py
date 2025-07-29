@@ -51,7 +51,8 @@ from langchain_core.retrievers import BaseRetriever
 from langchain_core.runnables import RunnableConfig
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from haive.core.engine.base import EngineType, InvokableEngine
+from haive.core.engine.base import InvokableEngine
+from haive.core.engine.base.types import EngineType
 from haive.core.engine.retriever.types import RetrieverType
 from haive.core.engine.vectorstore.vectorstore import VectorStoreConfig
 

@@ -110,7 +110,7 @@ from haive.core.schema.prebuilt.tool_state import ToolState
 
 # Import Agent using TYPE_CHECKING to avoid circular imports entirely
 if TYPE_CHECKING:
-    from haive.agents.base import Agent
+    pass
 
 # Rich console for debug visualization
 console = Console()
@@ -284,7 +284,7 @@ class MultiAgentState(ToolState):
     agents: list[Any] | dict[str, Any] = Field(
         default_factory=dict,
         description="Agent instances contained in this state (not flattened). "
-                   "Should contain haive.agents.base.Agent instances.",
+        "Should contain haive.agents.base.Agent instances.",
     )
 
     # Hierarchical state management - each agent has isolated state
@@ -332,9 +332,7 @@ class MultiAgentState(ToolState):
 
     @field_validator("agents", mode="before")
     @classmethod
-    def convert_agents_to_dict(
-        cls, v: list[Any] | dict[str, Any]
-    ) -> dict[str, Any]:
+    def convert_agents_to_dict(cls, v: list[Any] | dict[str, Any]) -> dict[str, Any]:
         """Convert list of agents to dict keyed by agent name.
 
         This allows flexible initialization while maintaining consistent

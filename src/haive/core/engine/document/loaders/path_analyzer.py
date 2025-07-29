@@ -26,6 +26,16 @@ class PathType(str, Enum):
     UNKNOWN = "unknown"
 
 
+class SourceCategory(str, Enum):
+    """Source category classification."""
+
+    LOCAL = "local"
+    REMOTE = "remote"
+    DATABASE = "database"
+    CLOUD = "cloud"
+    UNKNOWN = "unknown"
+
+
 class FileCategory(str, Enum):
     """High-level file category."""
 

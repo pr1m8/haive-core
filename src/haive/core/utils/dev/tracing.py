@@ -7,12 +7,12 @@ function calls, variable changes, and performance bottlenecks.
 
 import functools
 import inspect
-import sys
 import time
 import traceback
+from collections.abc import Callable
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Set
+from typing import Any
 
 # Try to import tracing tools
 try:
@@ -45,41 +45,36 @@ class CallTracker:
     """Track function calls and execution flow."""
 
     def __init__(self):
-        self.calls: List[Dict[str, Any]] = []
-        self.call_stack: List[str] = []
+        self.calls: list[dict[str, Any]] = []
+        self.call_stack: list[str] = []
         self.enabled = False
-        self.filters: Set[str] = set()
+        self.filters: set[str] = set()
         self.console = Console() if HAS_RICH else None
 
     def enable(self) -> None:
         """Enable call tracking."""
         self.enabled = True
-        print("🔍 Call tracking enabled")
 
     def disable(self) -> None:
         """Disable call tracking."""
         self.enabled = False
-        print("❌ Call tracking disabled")
 
     def add_filter(self, pattern: str) -> None:
         """Add a filter pattern for calls to track."""
         self.filters.add(pattern)
-        print(f"➕ Added filter: {pattern}")
 
     def remove_filter(self, pattern: str) -> None:
         """Remove a filter pattern."""
         self.filters.discard(pattern)
-        print(f"➖ Removed filter: {pattern}")
 
     def should_track(self, function_name: str, filename: str) -> bool:
         """Check if a call should be tracked based on filters."""
         if not self.filters:
             return True
 
-        for pattern in self.filters:
-            if pattern in function_name or pattern in filename:
-                return True
-        return False
+        return any(
+            pattern in function_name or pattern in filename for pattern in self.filters
+        )
 
     def track_call(self, func: Callable) -> Callable:
         """Decorator to track function calls."""
@@ -113,7 +108,7 @@ class CallTracker:
             if HAS_RICH and self.console:
                 self.console.print(f"{indent}→ {call_signature}", style="blue")
             else:
-                print(f"📞 {indent}→ {call_signature}")
+                pass
 
             self.call_stack.append(function_name)
 
@@ -132,7 +127,7 @@ class CallTracker:
                         f"{indent}← {function_name} ({duration:.3f}s)", style="green"
                     )
                 else:
-                    print(f"✅ {indent}← {function_name} ({duration:.3f}s)")
+                    pass
 
                 return result
 
@@ -149,7 +144,7 @@ class CallTracker:
                         f"{indent}✗ {function_name} ({duration:.3f}s): {e}", style="red"
                     )
                 else:
-                    print(f"❌ {indent}✗ {function_name} ({duration:.3f}s): {e}")
+                    pass
 
                 raise
             finally:
@@ -158,7 +153,7 @@ class CallTracker:
 
         return wrapper
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get call statistics."""
         if not self.calls:
             return {"total_calls": 0}
@@ -198,10 +193,9 @@ class CallTracker:
 
             self.console.print(table)
         else:
-            print("\n📊 Call Statistics:")
-            for key, value in stats.items():
+            for key, _value in stats.items():
                 if key != "function_counts":
-                    print(f"  {key}: {value}")
+                    pass
 
         return stats
 
@@ -209,26 +203,23 @@ class CallTracker:
         """Clear call history."""
         self.calls.clear()
         self.call_stack.clear()
-        print("🧹 Call history cleared")
 
 
 class VariableTracker:
     """Track variable changes during execution."""
 
     def __init__(self):
-        self.tracked_vars: Dict[str, Any] = {}
-        self.changes: List[Dict[str, Any]] = []
+        self.tracked_vars: dict[str, Any] = {}
+        self.changes: list[dict[str, Any]] = []
         self.enabled = False
 
     def enable(self) -> None:
         """Enable variable tracking."""
         self.enabled = True
-        print("📊 Variable tracking enabled")
 
     def disable(self) -> None:
         """Disable variable tracking."""
         self.enabled = False
-        print("❌ Variable tracking disabled")
 
     def track(self, name: str, value: Any) -> None:
         """Track a variable change."""
@@ -249,9 +240,7 @@ class VariableTracker:
             self.changes.append(change_info)
             self.tracked_vars[name] = value
 
-            print(f"🔄 {name}: {old_value} → {value}")
-
-    def _get_caller_info(self) -> Dict[str, Any]:
+    def _get_caller_info(self) -> dict[str, Any]:
         """Get information about the caller."""
         frame = inspect.currentframe().f_back.f_back
         if frame:
@@ -262,7 +251,7 @@ class VariableTracker:
             }
         return {}
 
-    def get_history(self, var_name: Optional[str] = None) -> List[Dict[str, Any]]:
+    def get_history(self, var_name: str | None = None) -> list[dict[str, Any]]:
         """Get change history for a variable or all variables."""
         if var_name:
             return [c for c in self.changes if c["name"] == var_name]
@@ -272,7 +261,6 @@ class VariableTracker:
         """Clear tracking history."""
         self.tracked_vars.clear()
         self.changes.clear()
-        print("🧹 Variable tracking history cleared")
 
 
 class TracingUtilities:
@@ -284,7 +272,7 @@ class TracingUtilities:
         self.console = Console() if HAS_RICH else None
 
     def calls(
-        self, func: Optional[Callable] = None, filters: Optional[List[str]] = None
+        self, func: Callable | None = None, filters: list[str] | None = None
     ) -> Callable:
         """Trace function calls."""
         if filters:
@@ -298,10 +286,9 @@ class TracingUtilities:
         else:
             return self.call_tracker.track_call
 
-    def snoop(self, func: Optional[Callable] = None, **kwargs) -> Callable:
+    def snoop(self, func: Callable | None = None, **kwargs) -> Callable:
         """Trace function execution with pysnooper if available."""
         if not HAS_PYSNOOPER:
-            print("⚠️  pysnooper not available, using basic tracing")
             return self.calls(func)
 
         if func:
@@ -312,13 +299,11 @@ class TracingUtilities:
     def hunt(self, condition: str = "call", **kwargs) -> None:
         """Use hunter for advanced tracing if available."""
         if not HAS_HUNTER:
-            print("⚠️  hunter not available")
             return
 
-        print(f"🎯 Starting hunter trace with condition: {condition}")
         hunter.trace(condition, **kwargs)
 
-    def stack(self, limit: Optional[int] = None) -> str:
+    def stack(self, limit: int | None = None) -> str:
         """Get formatted call stack."""
         stack = traceback.format_stack(limit=limit)
         formatted = "📚 Call Stack:\n" + "".join(stack)
@@ -330,7 +315,7 @@ class TracingUtilities:
             panel = Panel(syntax, title="Call Stack", border_style="blue")
             self.console.print(panel)
         else:
-            print(formatted)
+            pass
 
         return formatted
 
@@ -353,17 +338,14 @@ class TracingUtilities:
     @contextmanager
     def trace_context(self, name: str = "trace"):
         """Context manager for tracing a block of code."""
-        print(f"🏁 Starting trace: {name}")
         start_time = time.time()
 
         try:
             yield self
-        except Exception as e:
-            print(f"💥 Exception in {name}: {e}")
+        except Exception:
             raise
         finally:
-            duration = time.time() - start_time
-            print(f"🏁 Trace '{name}' completed in {duration:.3f}s")
+            time.time() - start_time
 
     def profile_calls(self, func: Callable) -> Callable:
         """Profile function calls with detailed timing."""
@@ -379,7 +361,7 @@ class TracingUtilities:
                 result = func(*args, **kwargs)
 
                 end_time = time.time()
-                duration = end_time - start_time
+                end_time - start_time
                 memory_after = self._get_memory_usage()
                 memory_delta = (
                     memory_after - memory_before
@@ -387,21 +369,19 @@ class TracingUtilities:
                     else None
                 )
 
-                print(f"⏱️  {func.__name__}: {duration:.3f}s")
                 if memory_delta:
-                    print(f"💾 Memory delta: {memory_delta:.2f} MB")
+                    pass
 
                 return result
 
-            except Exception as e:
+            except Exception:
                 end_time = time.time()
-                duration = end_time - start_time
-                print(f"❌ {func.__name__}: {duration:.3f}s (failed: {e})")
+                end_time - start_time
                 raise
 
         return wrapper
 
-    def _get_memory_usage(self) -> Optional[float]:
+    def _get_memory_usage(self) -> float | None:
         """Get current memory usage in MB."""
         try:
             import psutil
@@ -411,7 +391,7 @@ class TracingUtilities:
         except ImportError:
             return None
 
-    def stats(self) -> Dict[str, Any]:
+    def stats(self) -> dict[str, Any]:
         """Get comprehensive tracing statistics."""
         call_stats = self.call_tracker.get_stats()
         var_changes = len(self.var_tracker.changes)
@@ -439,9 +419,8 @@ class TracingUtilities:
         """Clear all tracing data."""
         self.call_tracker.clear()
         self.var_tracker.clear()
-        print("🧹 All tracing data cleared")
 
-    def report(self, filename: Optional[str] = None) -> str:
+    def report(self, filename: str | None = None) -> str:
         """Generate a comprehensive tracing report."""
         report_lines = [
             "# Tracing Report",
@@ -472,9 +451,8 @@ class TracingUtilities:
 
         if filename:
             Path(filename).write_text(report)
-            print(f"📝 Report saved to {filename}")
         else:
-            print(report)
+            pass
 
         return report
 

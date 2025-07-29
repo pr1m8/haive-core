@@ -76,7 +76,8 @@ from langchain_core.runnables import RunnableConfig
 from langchain_core.vectorstores import VectorStore
 from pydantic import ConfigDict, Field, field_validator
 
-from haive.core.engine.base import EngineType, InvokableEngine
+from haive.core.engine.base import InvokableEngine
+from haive.core.engine.base.types import EngineType
 from haive.core.models.embeddings.base import (
     BaseEmbeddingConfig,
     HuggingFaceEmbeddingConfig,

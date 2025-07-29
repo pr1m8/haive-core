@@ -15,7 +15,7 @@ from langchain_core.messages import BaseMessage, ToolMessage
 from langchain_core.runnables import RunnableConfig
 from pydantic import BaseModel, Field
 
-from haive.core.engine.base import EngineType
+from haive.core.engine.base.types import EngineType
 from haive.core.graph.node.base_config import NodeConfig
 from haive.core.graph.node.engine_node import EngineNodeConfig
 from haive.core.graph.node.types import NodeType
