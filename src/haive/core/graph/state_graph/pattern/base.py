@@ -28,8 +28,8 @@ logger = logging.getLogger(__name__)
 class GraphPattern(BaseGraph, ABC):
     """Abstract base class for graph patterns built on BaseGraph.
 
-    GraphPattern provides a foundation for creating reusable graph structures
-    with automatic inheritance of nodes, edges, and conditional branches.
+    GraphPattern provides a foundation for creating reusable graph structures with
+    automatic inheritance of nodes, edges, and conditional branches.
     """
 
     # Pattern structure to be defined in subclasses - renamed to avoid
