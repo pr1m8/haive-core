@@ -1,30 +1,21 @@
 """Branch system for dynamic routing based on state values."""
 
 from collections.abc import Callable
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from haive.core.graph.branches.branch import Branch
-from haive.core.graph.branches.dynamic import DynamicMapping
 from haive.core.graph.branches.send_mapping import (
     SendGenerator,
     SendMapping,
-    SendMappingList,
 )
 from haive.core.graph.branches.types import (
     BranchMode,
-    BranchProtocol,
-    BranchResult,
     ComparisonType,
-)
-from haive.core.graph.common.field_utils import (
-    extract_base_field,
-    extract_field,
-    get_field_value,
 )
 from haive.core.graph.common.references import CallableReference
 
 # Import from common utilities
-from haive.core.graph.common.types import ConfigLike, NodeOutput, StateLike
+from haive.core.graph.common.types import StateLike
 
 
 # Factory functions for common branch types

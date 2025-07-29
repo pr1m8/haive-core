@@ -1,7 +1,7 @@
 """Core Branch implementation for dynamic routing.
 
-This module provides a unified Branch class that replaces the need for
-separate ConditionalEdge objects, consolidating all routing logic.
+This module provides a unified Branch class that replaces the need for separate
+ConditionalEdge objects, consolidating all routing logic.
 """
 
 import logging
