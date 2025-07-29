@@ -44,7 +44,8 @@ from rich.syntax import Syntax
 from rich.table import Table
 from rich.tree import Tree
 
-from haive.core.engine.base import Engine, EngineType
+from haive.core.engine.base import Engine
+from haive.core.engine.base.types import EngineType
 
 logger = logging.getLogger(__name__)
 

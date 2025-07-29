@@ -36,7 +36,9 @@ lint:
     - trufflehog@3.90.2
     - yamllint@1.37.1
   ignore:
-    - "tests/**"
+    - linters: [ALL]
+      paths:
+        - "tests/**"
 actions:
   enabled:
     - trunk-announce
