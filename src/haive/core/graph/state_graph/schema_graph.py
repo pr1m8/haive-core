@@ -32,8 +32,8 @@ console = Console()
 class SchemaGraph(BaseGraph, GraphSchemaMixin[StateLike, Optional[ConfigLike]]):
     """Graph implementation with schema management capabilities.
 
-    SchemaGraph extends BaseGraph with state schema management, enabling
-    seamless integration with LangGraph and providing type validation.
+    SchemaGraph extends BaseGraph with state schema management, enabling seamless
+    integration with LangGraph and providing type validation.
     """
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -88,8 +88,8 @@ class SchemaGraph(BaseGraph, GraphSchemaMixin[StateLike, Optional[ConfigLike]]):
     def display(self) -> Any:
         """Display a visual representation of the graph structure.
 
-        Outputs information about nodes, edges, and branches,
-        and generates a Mermaid diagram for visualization.
+        Outputs information about nodes, edges, and branches, and generates a Mermaid
+        diagram for visualization.
         """
         # Display basic graph info
         for name, _node in self.nodes.items():

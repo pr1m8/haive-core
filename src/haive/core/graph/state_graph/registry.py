@@ -1,7 +1,7 @@
 """State graph registry for managing graph model instances.
 
-This module provides a singleton registry for managing state graph models
-in the Haive framework.
+This module provides a singleton registry for managing state graph models in the Haive
+framework.
 """
 
 from typing import Any, ClassVar, Optional

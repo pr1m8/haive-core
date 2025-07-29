@@ -1,8 +1,7 @@
 """Graph pattern decorator for registering state graph patterns.
 
-from typing import Any
-This module provides decorators for registering functions as graph patterns
-in the Haive state graph system.
+from typing import Any This module provides decorators for registering functions as
+graph patterns in the Haive state graph system.
 """
 
 import functools

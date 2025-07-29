@@ -1,8 +1,7 @@
-"""From typing import Any, Dict
-Serialization support for BaseGraph.
+"""From typing import Any, Dict Serialization support for BaseGraph.
 
-This module provides serialization and deserialization utilities for BaseGraph,
-enabling graphs to be stored, loaded, and exchanged with minimal information loss.
+This module provides serialization and deserialization utilities for BaseGraph, enabling
+graphs to be stored, loaded, and exchanged with minimal information loss.
 """
 
 import importlib

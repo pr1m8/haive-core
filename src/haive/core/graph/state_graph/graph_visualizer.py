@@ -1,7 +1,9 @@
-"""Enhanced graph visualization utilities for Haive graphs with automatic Agent detection and expansion.
+"""Enhanced graph visualization utilities for Haive graphs with automatic Agent detection
+and expansion.
 
-This module provides comprehensive visualization that automatically detects nodes with Agent engines
-or nodes that are Agents themselves, expanding them to show their complete internal graph structure.
+This module provides comprehensive visualization that automatically detects nodes with
+Agent engines or nodes that are Agents themselves, expanding them to show their complete
+internal graph structure.
 """
 
 import logging
@@ -553,17 +555,13 @@ class GraphVisualizer:
             if start_id not in context.processed_nodes:
                 # Use consistent shapes for START/END
                 lines.append(
-                    f'{indent}{start_id}(["▶ START"]):::{
-                        NodeStyle.START.value}'
+                    f'{indent}{start_id}(["▶ START"]):::{NodeStyle.START.value}'
                 )
                 context.processed_nodes.add(start_id)
                 context.node_mappings[f"{parent_prefix}START"] = start_id
 
             if end_id not in context.processed_nodes:
-                lines.append(
-                    f'{indent}{end_id}(["■ END"]):::{
-                        NodeStyle.END.value}'
-                )
+                lines.append(f'{indent}{end_id}(["■ END"]):::{NodeStyle.END.value}')
                 context.processed_nodes.add(end_id)
                 context.node_mappings[f"{parent_prefix}END"] = end_id
 
@@ -665,8 +663,7 @@ class GraphVisualizer:
         # Create subgraph
         lines.append("")
         lines.append(
-            f'{indent}subgraph {subgraph_id}["🤖 {
-                cls._sanitize_label(node_name)} Agent"]'
+            f'{indent}subgraph {subgraph_id}["🤖 {cls._sanitize_label(node_name)} Agent"]'
         )
         lines.append(f"{indent}    direction TB")
 
@@ -679,17 +676,13 @@ class GraphVisualizer:
         if start_id not in context.processed_nodes:
             # Add START at the top of the subgraph
             lines.append(
-                f'{indent}    {start_id}(["▶ START"]):::{
-                    NodeStyle.START.value}'
+                f'{indent}    {start_id}(["▶ START"]):::{NodeStyle.START.value}'
             )
             context.processed_nodes.add(start_id)
 
         if end_id not in context.processed_nodes:
             # Add END at the bottom (will be rendered later after other nodes)
-            lines.append(
-                f'{indent}    {end_id}(["■ END"]):::{
-                    NodeStyle.END.value}'
-            )
+            lines.append(f'{indent}    {end_id}(["■ END"]):::{NodeStyle.END.value}')
             context.processed_nodes.add(end_id)
 
         # Map START/END nodes for proper edge connections

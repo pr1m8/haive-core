@@ -23,8 +23,8 @@ console = Console()
 class GraphPath(BaseModel):
     """Model representing a path through the graph with analysis capabilities.
 
-    Provides methods for analyzing paths including conditional branches,
-    reaching END nodes, and path visualization.
+    Provides methods for analyzing paths including conditional branches, reaching END
+    nodes, and path visualization.
     """
 
     nodes: list[str] = Field(

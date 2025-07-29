@@ -17,10 +17,10 @@ class PatternDefinition(SerializableModel):
     apply_func: FunctionReference = Field(
         ..., description="Function to apply the pattern"
     )
-    parameters: Dict[str, Any] = Field(
+    parameters: dict[str, Any] = Field(
         default_factory=dict, description="Default parameter values"
     )
-    example: Optional[str] = Field(default=None, description="Example usage")
+    example: str | None = Field(default=None, description="Example usage")
 
     __model_type__: ClassVar[str] = "pattern"
     __abstract__ = False

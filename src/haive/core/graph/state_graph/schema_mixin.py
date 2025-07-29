@@ -27,8 +27,8 @@ C = TypeVar("C", bound=ConfigLike | None)
 class GraphSchemaMixin(BaseModel, Generic[T, C]):
     """Mixin for schema management in graphs.
 
-    This mixin provides functionality for managing state, input, and output schemas
-    in graph objects.
+    This mixin provides functionality for managing state, input, and output schemas in
+    graph objects.
     """
 
     state_schema: T = Field(description="Schema for graph state")
