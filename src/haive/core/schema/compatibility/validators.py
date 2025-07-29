@@ -1,6 +1,8 @@
-"""Field and model validation framework with async support."""
-
 from __future__ import annotations
+
+"""Field and model validation framework with async support.
+"""
+
 
 import asyncio
 from abc import ABC, abstractmethod
@@ -366,7 +368,7 @@ class CommonValidators:
         """Basic email validation."""
         import re
 
-        pattern = f"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+        pattern = rf"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
         return bool(re.match(pattern, value))
 
     @staticmethod

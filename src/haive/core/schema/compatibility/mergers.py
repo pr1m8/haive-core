@@ -1,6 +1,8 @@
-"""Schema merging strategies for combining multiple schemas."""
-
 from __future__ import annotations
+
+"""Schema merging strategies for combining multiple schemas.
+"""
+
 
 from abc import ABC, abstractmethod
 from enum import Enum

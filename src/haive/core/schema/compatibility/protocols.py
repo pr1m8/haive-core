@@ -1,8 +1,9 @@
-"""From typing import Any
-Protocol definitions for extending the schema compatibility system.
+from __future__ import annotations
+
+"""From typing import Any Protocol definitions for extending the schema compatibility
+system.
 """
 
-from __future__ import annotations
 
 from typing import Any, Protocol, TypeVar, runtime_checkable
 

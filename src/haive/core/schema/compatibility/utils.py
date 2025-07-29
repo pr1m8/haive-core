@@ -1,8 +1,8 @@
-"""From typing import Any
-Utility functions for the schema compatibility module.
+from __future__ import annotations
+
+"""From typing import Any Utility functions for the schema compatibility module.
 """
 
-from __future__ import annotations
 
 import difflib
 import hashlib

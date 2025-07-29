@@ -1,6 +1,8 @@
-"""LangChain-specific type converters for documents, messages, and prompts."""
-
 from __future__ import annotations
+
+"""LangChain-specific type converters for documents, messages, and prompts.
+"""
+
 
 import hashlib
 import json

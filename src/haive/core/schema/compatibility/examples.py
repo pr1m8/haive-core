@@ -1,8 +1,7 @@
-"""From typing import Any
-Examples demonstrating the schema compatibility module.
+"""From typing import Any Examples demonstrating the schema compatibility module.
 
-This file shows various use cases and patterns for using the
-schema compatibility system in the Haive framework.
+This file shows various use cases and patterns for using the schema compatibility system
+in the Haive framework.
 """
 
 import contextlib

@@ -1,6 +1,8 @@
-"""Compatibility reporting and debugging tools."""
-
 from __future__ import annotations
+
+"""Compatibility reporting and debugging tools.
+"""
+
 
 import json
 from dataclasses import dataclass, field

@@ -1,6 +1,8 @@
-"""Advanced field mapping with path resolution and transformations."""
-
 from __future__ import annotations
+
+"""Advanced field mapping with path resolution and transformations.
+"""
+
 
 import re
 from collections.abc import Callable

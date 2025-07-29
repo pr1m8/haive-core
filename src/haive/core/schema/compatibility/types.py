@@ -1,6 +1,8 @@
-"""Core type definitions for the schema compatibility module."""
-
 from __future__ import annotations
+
+"""Core type definitions for the schema compatibility module.
+"""
+
 
 from collections.abc import Callable
 from dataclasses import dataclass, field

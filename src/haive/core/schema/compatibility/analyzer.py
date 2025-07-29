@@ -1,6 +1,8 @@
-"""Advanced type analysis engine for deep type introspection."""
-
 from __future__ import annotations
+
+"""Advanced type analysis engine for deep type introspection.
+"""
+
 
 import inspect
 import sys
