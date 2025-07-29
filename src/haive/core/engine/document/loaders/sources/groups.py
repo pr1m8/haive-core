@@ -213,7 +213,7 @@ class SourceGroups:
 
 
 # Optional: Reverse Mapping for quick lookup
-SOURCE_TO_GROUP: Dict[SourceType, str] = {}
+SOURCE_TO_GROUP: dict[SourceType, str] = {}
 for group_name in dir(SourceGroups):
     if group_name.startswith("_"):
         continue

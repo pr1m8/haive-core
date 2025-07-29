@@ -37,8 +37,8 @@ logger = logging.getLogger(__name__)
 class CheckpointerConfig(BaseModel):
     """Base configuration for agent persistence.
 
-    CheckpointerConfig provides a consistent interface for configuring
-    how agent state is persisted.
+    CheckpointerConfig provides a consistent interface for configuring how agent state
+    is persisted.
     """
 
     type: CheckpointerType = Field(default=CheckpointerType.memory)

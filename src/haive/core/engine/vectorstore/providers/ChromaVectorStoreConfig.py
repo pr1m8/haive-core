@@ -152,7 +152,6 @@ class ChromaVectorStoreConfig(BaseVectorStoreConfig):
         client_settings = None
         if self.chroma_server_host:
             try:
-                import chromadb
                 from chromadb.config import Settings
 
                 client_settings = Settings(

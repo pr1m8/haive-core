@@ -1,8 +1,8 @@
 """Pattern configuration for agent composition.
 
 This module provides pattern-related configuration classes for the agent system,
-enabling declarative, pattern-based agent composition with proper validation
-and integration with the GraphPatternRegistry.
+enabling declarative, pattern-based agent composition with proper validation and
+integration with the GraphPatternRegistry.
 """
 
 import logging
@@ -16,8 +16,8 @@ logger = logging.getLogger(__name__)
 class PatternConfig(BaseModel):
     """Configuration for a pattern to be applied to an agent.
 
-    This allows detailed configuration of pattern application,
-    including parameters, application order, and conditions.
+    This allows detailed configuration of pattern application, including parameters,
+    application order, and conditions.
     """
 
     name: str = Field(description="Name of the pattern to apply")
@@ -68,8 +68,8 @@ class PatternConfig(BaseModel):
 class PatternManager:
     """Manager for pattern application and tracking.
 
-    This class handles pattern ordering, validation, parameter resolution,
-    and application tracking.
+    This class handles pattern ordering, validation, parameter resolution, and
+    application tracking.
     """
 
     def __init__(self) -> None:

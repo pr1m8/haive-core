@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Core engine abstractions for the Haive framework.
 
 This module provides the base classes and abstractions for all engines in the Haive
@@ -9,7 +11,6 @@ invokable itself. It standardizes how engines define their input and output fiel
 requirements.
 """
 
-from __future__ import annotations
 
 import json
 import logging

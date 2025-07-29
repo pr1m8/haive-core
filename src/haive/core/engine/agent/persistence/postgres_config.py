@@ -39,9 +39,8 @@ logger = logging.getLogger(__name__)
 class PostgresCheckpointerConfig(CheckpointerConfig):
     """Configuration for PostgreSQL-based checkpointing.
 
-    This class handles creation and configuration of a PostgreSQL-based
-    checkpointer for LangGraph agents, with thread registration and pool
-    management.
+    This class handles creation and configuration of a PostgreSQL-based checkpointer for
+    LangGraph agents, with thread registration and pool management.
     """
 
     type: CheckpointerType = CheckpointerType.postgres

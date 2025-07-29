@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Agent - Base class for all agent implementations in the Haive framework.
 
 from typing import Any
@@ -6,7 +8,6 @@ execution flows, persistence management, and extensibility through patterns.
 All agent implementations conform to the protocol interfaces for consistent API access.
 """
 
-from __future__ import annotations
 
 import asyncio
 import json
@@ -1547,8 +1548,8 @@ class Agent(Generic[TConfig], ABC):
     def setup_workflow(self) -> None:
         """Set up the workflow graph for this agent.
 
-        This method must be implemented by concrete agent classes to define
-        the agent's workflow structure.
+        This method must be implemented by concrete agent classes to define the agent's
+        workflow structure.
         """
 
     @property
@@ -2557,7 +2558,7 @@ class Agent(Generic[TConfig], ABC):
         config: RunnableConfig | None = None,
         debug: bool | None = None,
         **kwargs,
-    ) -> Generator[dict[str, Any], None, None]:
+    ) -> Generator[dict[str, Any]]:
         """Stream agent execution with input data.
 
         Args:
@@ -2774,7 +2775,7 @@ class Agent(Generic[TConfig], ABC):
         config: RunnableConfig | None = None,
         debug: bool | None = None,
         **kwargs,
-    ) -> AsyncGenerator[dict[str, Any], None]:
+    ) -> AsyncGenerator[dict[str, Any]]:
         """Asynchronously stream agent execution with input data.
 
         Args:

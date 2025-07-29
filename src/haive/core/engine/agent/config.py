@@ -74,8 +74,8 @@ TState = TypeVar("TState")
 class PatternConfig(BaseModel):
     """Configuration for a pattern to be applied to an agent.
 
-    This allows detailed configuration of pattern application,
-    including parameters, application order, and conditions.
+    This allows detailed configuration of pattern application, including parameters,
+    application order, and conditions.
     """
 
     name: str = Field(description="Name of the pattern to apply")
@@ -124,11 +124,11 @@ class PatternConfig(BaseModel):
 
 
 class AgentConfig(InvokableEngine[TIn, TOut], Generic[TIn, TOut, TState]):
-    """Base configuration for an agent architecture.
-    Extends InvokableEngine to provide a consistent interface with the Engine framework.
+    """Base configuration for an agent architecture. Extends InvokableEngine to provide a
+    consistent interface with the Engine framework.
 
-    This class is designed to NEVER include __runnable_config__ in any schemas.
-    By default, it uses PostgreSQL for persistence if available.
+    This class is designed to NEVER include __runnable_config__ in any schemas. By
+    default, it uses PostgreSQL for persistence if available.
 
     This implementation supports protocol validation to ensure that agent
     implementations conform to the expected interfaces.

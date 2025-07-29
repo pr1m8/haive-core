@@ -37,7 +37,7 @@ import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 from langchain_core.documents import Document
 from pydantic import BaseModel, Field
@@ -1007,7 +1007,7 @@ class AutoLoader:
 
         progress_callback = kwargs.pop("progress_callback", None)
 
-        def load_single_source(source_config: Dict[str, Any]):
+        def load_single_source(source_config: dict[str, Any]):
             """Load a single source."""
             if isinstance(source_config, str):
                 path_or_url = source_config

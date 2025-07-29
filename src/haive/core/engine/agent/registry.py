@@ -14,7 +14,6 @@ Functions:
 """
 
 # src/haive/core/engine/agent/registry.py
-
 """Agent registry module for managing and resolving agent classes.
 
 from typing import Any

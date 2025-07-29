@@ -1,22 +1,7 @@
-"""Vectorstore engine module.
+from __future__ import annotations
 
-This module provides vectorstore functionality for the Haive framework.
-
-Classes:
-    for: for implementation.
-    class: class implementation.
-    VectorStoreProvider: VectorStoreProvider implementation.
-
-Functions:
-    get_my_vectorstore_class: Get My Vectorstore Class functionality.
-    extend: Extend functionality.
-    validate_engine_type: Validate Engine Type functionality.
-"""
-
-# src/haive/core/engine/vectorstore.py
 """Vector store engine implementation for the Haive framework.
 
-from typing import Any
 This module provides a comprehensive interface for working with vector stores in the Haive framework.
 It includes configuration models and utilities for creating, managing, and interacting with various
 vector store backends.
@@ -77,7 +62,6 @@ Example:
     TODO: Need to seperate and implement the registry system, similar to retrievers and add base.
 """
 
-from __future__ import annotations
 
 import logging
 from collections.abc import Callable

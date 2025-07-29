@@ -216,7 +216,7 @@ class FAISSVectorStoreConfig(BaseVectorStoreConfig):
         # Handle GPU configuration
         if self.use_gpu:
             try:
-                import faiss
+                pass
 
                 # This would require additional GPU setup logic
                 # For now, we'll use the default CPU implementation

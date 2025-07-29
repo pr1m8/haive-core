@@ -1,10 +1,11 @@
+from __future__ import annotations
+
 """Base vector store configuration for the Haive framework.
 
 This module provides the base configuration class and registration system for vector
 stores, following the same pattern as the retriever configurations.
 """
 
-from __future__ import annotations
 
 import logging
 from abc import abstractmethod

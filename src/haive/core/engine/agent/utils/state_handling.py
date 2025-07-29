@@ -9,7 +9,6 @@ Functions:
 """
 
 # src/haive.core/engine/agent/utils/state_handling.py
-
 """State handling utilities for agent inputs and outputs.
 
 This module provides functions for processing and transforming state data

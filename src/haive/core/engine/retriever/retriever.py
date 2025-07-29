@@ -14,7 +14,6 @@ Functions:
 """
 
 # src/haive/core/engine/retriever.py
-
 """Retriever engine implementation for the Haive framework.
 
 from typing import Any
@@ -383,8 +382,8 @@ class BaseRetrieverConfig(InvokableEngine[RetrieverInput, RetrieverOutput]):
     def _ensure_retrievers_loaded(cls):
         """Ensure all retriever implementations are loaded.
 
-        This method automatically imports all modules in the retriever package
-        to ensure all retriever implementations are registered.
+        This method automatically imports all modules in the retriever package to ensure
+        all retriever implementations are registered.
         """
         if cls._initialized:
             return

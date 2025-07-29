@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """AugLLM configuration system for enhanced LLM chains.
 
 from typing import Any, Dict
@@ -19,7 +21,6 @@ The configuration system is designed to be highly customizable while providing
 sensible defaults and automatic detection of configuration requirements.
 """
 
-from __future__ import annotations
 
 import json
 import logging

@@ -1,19 +1,19 @@
 """PostgreSQL persistence manager for the Haive framework.
 
-This module provides a comprehensive persistence manager that integrates
-Supabase authentication with PostgreSQL persistence for agent state management.
-It centralizes thread registration, checkpoint management, and connection
-pool handling in a robust and reusable design.
+This module provides a comprehensive persistence manager that integrates Supabase
+authentication with PostgreSQL persistence for agent state management. It centralizes
+thread registration, checkpoint management, and connection pool handling in a robust and
+reusable design.
 
-The PersistenceManager class serves as the primary integration point between
-the HaiveRunnableConfigManager and the underlying PostgreSQL database.
+The PersistenceManager class serves as the primary integration point between the
+HaiveRunnableConfigManager and the underlying PostgreSQL database.
 """
 
 import json  # Import json at the module level for consistent serialization
 import logging
 import urllib.parse
 import uuid
-from typing import Any, Dict
+from typing import Any
 
 from langgraph.checkpoint.memory import MemorySaver
 
@@ -52,7 +52,7 @@ class PersistenceManager:
     5. Integration with HaiveRunnableConfigManager for authentication
     """
 
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: dict[str, Any] = None):
         """Initialize persistence manager with optional configuration.
 
         Args:
@@ -65,9 +65,10 @@ class PersistenceManager:
         self.pool_opened = False
 
     def get_checkpointer(
-        self, persistence_type=None, persistence_config: Dict[str, Any] = None
+        self, persistence_type=None, persistence_config: dict[str, Any] = None
     ):
-        """Create and return the appropriate checkpointer based on configuration and available dependencies.
+        """Create and return the appropriate checkpointer based on configuration and
+        available dependencies.
 
         Args:
             persistence_type: Optional persistence type override
@@ -299,7 +300,8 @@ class PersistenceManager:
             logger.exception(f"Error closing pool: {e}")
 
     def register_thread(self, thread_id: str, auth_info=None):
-        """Register a thread in the PostgreSQL database, including user context from Supabase.
+        """Register a thread in the PostgreSQL database, including user context from
+        Supabase.
 
         Args:
             thread_id: Thread ID to register
@@ -540,7 +542,7 @@ class PersistenceManager:
         return config, current_thread_id
 
     @staticmethod
-    def get_or_create_thread_id(config: Dict[str, Any] = None):
+    def get_or_create_thread_id(config: dict[str, Any] = None):
         """Get thread ID from config or create a new one.
 
         Args:

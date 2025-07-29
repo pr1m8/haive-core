@@ -14,7 +14,6 @@ Functions:
 """
 
 # src/haive/core/engine/retriever/mixins.py
-
 """Retriever mixins for the Haive framework."""
 
 from typing import Any

@@ -122,7 +122,8 @@ from haive.core.schema.schema_composer import SchemaComposer
 
 
 class PromptTemplateEngine(InvokableEngine[dict[str, Any], FormatOutputType]):
-    """An invokable engine that wraps LangChain prompt templates with automatic schema derivation.
+    """An invokable engine that wraps LangChain prompt templates with automatic schema
+    derivation.
 
     This engine makes prompt templates first-class citizens in the Haive framework,
     providing automatic input schema generation, robust formatting, and seamless
@@ -213,7 +214,8 @@ class PromptTemplateEngine(InvokableEngine[dict[str, Any], FormatOutputType]):
         super().__init__(**data)
 
     def derive_input_schema(self) -> type[BaseModel]:
-        """Derive input schema from prompt template variables with intelligent type inference.
+        """Derive input schema from prompt template variables with intelligent type
+        inference.
 
         This method analyzes the prompt template to extract all input variables and
         generates a Pydantic BaseModel schema with appropriate field types. It uses

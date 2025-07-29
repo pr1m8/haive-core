@@ -576,8 +576,7 @@ class InfluxDBSource(RemoteSource):
 
             if self.measurement:
                 query_parts.append(
-                    f'|> filter(fn: (r) => r["_measurement"] == "{
-                        self.measurement}")'
+                    f'|> filter(fn: (r) => r["_measurement"] == "{self.measurement}")'
                 )
 
             if self.window_period and self.aggregation_method:

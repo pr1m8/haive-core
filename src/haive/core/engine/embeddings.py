@@ -31,8 +31,8 @@ class EmbeddingsEngineConfig(
 ):
     """Configuration for embedding engines.
 
-    EmbeddingsEngineConfig wraps an embedding model and provides methods for
-    embedding documents and queries.
+    EmbeddingsEngineConfig wraps an embedding model and provides methods for embedding
+    documents and queries.
     """
 
     engine_type: EngineType = Field(default=EngineType.EMBEDDINGS)

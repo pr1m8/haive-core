@@ -21,8 +21,8 @@ TState = TypeVar("TState")
 class AgentProtocol(Protocol[TIn, TOut, TState]):
     """Protocol defining the core functionality of an Agent.
 
-    This protocol specifies the minimum interface requirements for
-    Agent implementations in the Haive framework.
+    This protocol specifies the minimum interface requirements for Agent implementations
+    in the Haive framework.
     """
 
     @property
@@ -85,8 +85,8 @@ class AgentProtocol(Protocol[TIn, TOut, TState]):
 class StreamingAgentProtocol(Protocol[TIn, TOut]):
     """Protocol defining streaming functionality for Agents.
 
-    This protocol extends the core agent functionality with
-    streaming capabilities for real-time outputs.
+    This protocol extends the core agent functionality with streaming capabilities for
+    real-time outputs.
     """
 
     def stream(
@@ -140,8 +140,8 @@ class StreamingAgentProtocol(Protocol[TIn, TOut]):
 class PersistentAgentProtocol(Protocol):
     """Protocol defining persistence functionality for Agents.
 
-    This protocol specifies methods related to state persistence
-    and thread management in agents.
+    This protocol specifies methods related to state persistence and thread management
+    in agents.
     """
 
     def save_state_history(self, runnable_config: RunnableConfig | None = None) -> bool:
@@ -185,8 +185,7 @@ class PersistentAgentProtocol(Protocol):
 class VisualizationAgentProtocol(Protocol):
     """Protocol defining visualization capabilities for Agents.
 
-    This protocol specifies methods related to graph visualization
-    and debugging.
+    This protocol specifies methods related to graph visualization and debugging.
     """
 
     def visualize_graph(self, output_path: str | None = None) -> None:
@@ -202,8 +201,8 @@ class VisualizationAgentProtocol(Protocol):
 class ExtensibilityAgentProtocol(Protocol):
     """Protocol defining pattern-based extensibility for Agents.
 
-    This protocol specifies methods related to pattern application
-    and graph modification.
+    This protocol specifies methods related to pattern application and graph
+    modification.
     """
 
     def apply_pattern(self, pattern_name: str, **kwargs) -> None:
@@ -228,8 +227,8 @@ class FullAgentProtocol(
 ):
     """Protocol combining all agent capabilities.
 
-    This protocol represents a fully-featured agent with all available
-    capabilities in the Haive framework.
+    This protocol represents a fully-featured agent with all available capabilities in
+    the Haive framework.
     """
 
 
