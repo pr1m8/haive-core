@@ -129,3 +129,5 @@ venv/
 docker/nginx/sites-enabled/
 .venv/
 poetry.lock
+# Lock files should not be tracked
+poetry.lock
