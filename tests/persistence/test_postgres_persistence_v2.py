@@ -562,7 +562,7 @@ class Test_CheckpointerSetup:
             # Test it works by registering a thread
             register_thread_if_needed(checkpointer, test_thread_id, {"test": True})
 
-            logger.info("✅ Set up PostgreSQL checkpointer using utility function"n")
+            logger.info("✅ Set up PostgreSQL checkpointer using utility function")
 
         except ImportError:
             pytest.skip("PostgreSQL dependencies not available")
