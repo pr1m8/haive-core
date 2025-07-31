@@ -75,6 +75,7 @@ def query_database(thread_id):
 
             thread_data = cursor.fetchone()
             if thread_data:
+                pass
             else:
                 pass
 
