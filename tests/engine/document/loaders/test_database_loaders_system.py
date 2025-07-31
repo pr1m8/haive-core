@@ -134,7 +134,7 @@ def test_database_loaders_system():
         if detected == expected_type:
             detection_success += 1
         else:
-            pass })")
+            pass
 
     assert (
         detection_success >= 7
