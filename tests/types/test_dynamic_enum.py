@@ -58,4 +58,4 @@ if __name__ == "__main__":
     test_dynamic_registration()
     test_dynamic_removal()
     test_json_schema()
-           test_dynamic_enum_factory()
+    test_dynamic_enum_factory()
