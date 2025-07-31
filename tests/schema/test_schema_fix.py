@@ -79,6 +79,7 @@ def test_schema_formation():
 
     # Check the agent's output schema
     if hasattr(agent, "output_schema") and agent.output_schema:
+        pass
     else:
         pass
 
