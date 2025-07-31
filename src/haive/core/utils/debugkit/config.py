@@ -12,6 +12,17 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 
+def _parse_environment_from_env() -> "Environment":
+    """Parse environment from HAIVE_ENV variable, handling file paths."""
+    env_var = os.getenv("HAIVE_ENV", "development")
+    if env_var.endswith(".env") or "/" in env_var:
+        # HAIVE_ENV is set to a file path, use default
+        env_name = "development"
+    else:
+        env_name = env_var
+    return Environment(env_name)
+
+
 class Environment(str, Enum):
     """Supported runtime environments.
 
@@ -127,7 +138,7 @@ class DevConfig:
     # Global settings
     enabled: bool = True
     environment: Environment = field(
-        default_factory=lambda: Environment(os.getenv("HAIVE_ENV", "development"))
+        default_factory=lambda: _parse_environment_from_env()
     )
 
     # Component toggles
