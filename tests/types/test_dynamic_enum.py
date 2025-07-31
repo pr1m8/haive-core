@@ -52,9 +52,10 @@ def test_dynamic_enum_factory():
     assert m2.destination == "pluto"
 
 
-           if __name__ == "__main__":
-           test_valid_enum()
-           test_dynamic_registration()
-           test_dynamic_removal()
-           test_json_schema()
+
+if __name__ == "__main__":
+    test_valid_enum()
+    test_dynamic_registration()
+    test_dynamic_removal()
+    test_json_schema()
            test_dynamic_enum_factory()
