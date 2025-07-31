@@ -227,10 +227,8 @@ class DevConfig:
     def _configure_for_testing(self) -> None:
         """Configure for testing environment with balanced features."""
         # Debug print
-        print(f"DEBUG: _env_overrides = {self._env_overrides}")
-        print(
-            f"DEBUG: trace_sampling_rate in overrides? {'trace_sampling_rate' in self._env_overrides}"
-        )
+        # print(f"DEBUG: _env_overrides = {self._env_overrides}")
+        # print(f"DEBUG: trace_sampling_rate in overrides? {'trace_sampling_rate' in self._env_overrides}")
 
         if "trace_sampling_rate" not in self._env_overrides:
             self.trace_sampling_rate = 0.1  # 10% sampling
@@ -354,10 +352,9 @@ class DevConfig:
                 "HAIVE_DASHBOARD_PORT", "dashboard_port", _env_int, 8888
             ),
             verbose=_track_env("HAIVE_VERBOSE", "verbose", _env_bool, False),
+            _env_overrides=overrides,  # Pass overrides to constructor
         )
 
-        # Store overrides for later use in __post_init__
-        config._env_overrides = overrides
         return config
 
     def update(self, **kwargs: Any) -> None:
