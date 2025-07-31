@@ -168,7 +168,7 @@ def trace_serialization():
         if hasattr(obj, "prompt_template") or (
             isinstance(obj, dict) and "prompt_template" in obj
         ):
-            logger.error("🔍 SERIALIZATION of object with prompt_template!"e!")
+            logger.error("🔍 SERIALIZATION of object with prompt_template!")
             logger.error(f"   Object type: {type(obj)}")
 
             if hasattr(obj, "prompt_template"):
