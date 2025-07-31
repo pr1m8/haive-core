@@ -152,6 +152,6 @@ if __name__ == "__main__":
 
 
     if test1_passed and test2_passed:
-        pass.")
+        pass
     else:
-        passs.")
+        pass

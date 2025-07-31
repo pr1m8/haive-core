@@ -137,7 +137,7 @@ def test_web_loaders_system():
                 if "web" in actual_type or "sitemap" in actual_type:
                     classification_success += 1
             else:
-                passed")
+                pass
         except Exception as e:
             pass
 

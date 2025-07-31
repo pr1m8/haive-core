@@ -336,6 +336,7 @@ def test_data_lake_sources():
     for config in test_configs:
         try:
             if config.get("platform") == CloudPlatform.APACHE_ICEBERG:
+                pass
             else:
                 source = MockDeltaLakeSource(**config)
                 loader_kwargs = source.get_loader_kwargs()
