@@ -183,6 +183,9 @@ class DevConfig:
     max_file_size: int = 100 * 1024 * 1024  # 100MB
     retention_days: int = 30
 
+    # Internal field to track environment variable overrides
+    _env_overrides: Dict[str, Any] = field(default_factory=dict, init=False, repr=False)
+
     # Tool selection
     excluded_paths: List[str] = field(
         default_factory=lambda: [
@@ -223,12 +226,19 @@ class DevConfig:
 
     def _configure_for_testing(self) -> None:
         """Configure for testing environment with balanced features."""
-        self.trace_sampling_rate = 0.1  # 10% sampling
-        self.profile_enabled = True
-        self.benchmark_enabled = False
-        self.static_analysis_enabled = False
-        self.verbose = False
-        self.log_level = LogLevel.WARNING
+        if "trace_sampling_rate" not in self._env_overrides:
+            self.trace_sampling_rate = 0.1  # 10% sampling
+        if "profile_enabled" not in self._env_overrides:
+            self.profile_enabled = True
+        if "benchmark_enabled" not in self._env_overrides:
+            self.benchmark_enabled = False
+        if "static_analysis_enabled" not in self._env_overrides:
+            self.static_analysis_enabled = False
+        if "verbose" not in self._env_overrides:
+            self.verbose = False
+        # Don't override log_level if it was set via environment variable
+        if os.getenv("HAIVE_LOG_LEVEL") is None:
+            self.log_level = LogLevel.WARNING
         self.storage_backend = StorageBackend.MEMORY
         self.dashboard_enabled = False
 
@@ -291,25 +301,58 @@ class DevConfig:
         else:
             env_name = env_var
 
-        return cls(
-            enabled=_env_bool("HAIVE_DEV_ENABLED", True),
+        # Track which environment variables were explicitly set
+        overrides = {}
+
+        # Helper to track overrides
+        def _track_env(env_var: str, field_name: str, parser, default):
+            value = parser(env_var, default)
+            if os.getenv(env_var) is not None:
+                overrides[field_name] = value
+            return value
+
+        config = cls(
+            enabled=_track_env("HAIVE_DEV_ENABLED", "enabled", _env_bool, True),
             environment=Environment(env_name),
-            debug_enabled=_env_bool("HAIVE_DEBUG_ENABLED", True),
-            log_enabled=_env_bool("HAIVE_LOG_ENABLED", True),
-            trace_enabled=_env_bool("HAIVE_TRACE_ENABLED", True),
-            profile_enabled=_env_bool("HAIVE_PROFILE_ENABLED", True),
-            benchmark_enabled=_env_bool("HAIVE_BENCHMARK_ENABLED", True),
-            static_analysis_enabled=_env_bool("HAIVE_STATIC_ANALYSIS_ENABLED", True),
-            trace_sampling_rate=_env_float("HAIVE_TRACE_SAMPLING_RATE", 1.0),
+            debug_enabled=_track_env(
+                "HAIVE_DEBUG_ENABLED", "debug_enabled", _env_bool, True
+            ),
+            log_enabled=_track_env("HAIVE_LOG_ENABLED", "log_enabled", _env_bool, True),
+            trace_enabled=_track_env(
+                "HAIVE_TRACE_ENABLED", "trace_enabled", _env_bool, True
+            ),
+            profile_enabled=_track_env(
+                "HAIVE_PROFILE_ENABLED", "profile_enabled", _env_bool, True
+            ),
+            benchmark_enabled=_track_env(
+                "HAIVE_BENCHMARK_ENABLED", "benchmark_enabled", _env_bool, True
+            ),
+            static_analysis_enabled=_track_env(
+                "HAIVE_STATIC_ANALYSIS_ENABLED",
+                "static_analysis_enabled",
+                _env_bool,
+                True,
+            ),
+            trace_sampling_rate=_track_env(
+                "HAIVE_TRACE_SAMPLING_RATE", "trace_sampling_rate", _env_float, 1.0
+            ),
             storage_backend=StorageBackend(
                 os.getenv("HAIVE_STORAGE_BACKEND", "sqlite")
             ),
             storage_path=os.getenv("HAIVE_STORAGE_PATH", ".haive_dev_data"),
             log_level=LogLevel(os.getenv("HAIVE_LOG_LEVEL", "INFO")),
-            dashboard_enabled=_env_bool("HAIVE_DASHBOARD_ENABLED", False),
-            dashboard_port=_env_int("HAIVE_DASHBOARD_PORT", 8888),
-            verbose=_env_bool("HAIVE_VERBOSE", False),
+            dashboard_enabled=_track_env(
+                "HAIVE_DASHBOARD_ENABLED", "dashboard_enabled", _env_bool, False
+            ),
+            dashboard_port=_track_env(
+                "HAIVE_DASHBOARD_PORT", "dashboard_port", _env_int, 8888
+            ),
+            verbose=_track_env("HAIVE_VERBOSE", "verbose", _env_bool, False),
         )
+
+        # Store overrides for later use in __post_init__
+        config._env_overrides = overrides
+        return config
 
     def update(self, **kwargs: Any) -> None:
         """Update configuration with new values.
