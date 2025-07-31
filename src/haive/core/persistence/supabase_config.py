@@ -26,7 +26,6 @@ import uuid
 from datetime import datetime
 from typing import Any, Self
 
-from haive.dataflow.db.supabase import get_supabase_client as _get_client
 from pydantic import Field, model_validator
 from supabase import create_client
 
@@ -34,6 +33,7 @@ from haive.core.persistence import SupabaseCheckpointerConfig
 from haive.core.persistence.base import CheckpointerConfig
 from haive.core.persistence.types import CheckpointerType
 from haive.core.persistence.utils import deserialize_metadata, serialize_metadata
+from haive.dataflow.db.supabase import get_supabase_client as _get_client
 
 logger = logging.getLogger(__name__)
 

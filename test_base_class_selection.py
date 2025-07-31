@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Test script to verify SchemaComposer base class selection logic.
-This tests that LLM engines always get LLMState as their base clas\w+.\s+"""
+This tests that LLM engines always get LLMState as their base class."""
 
 import sys
 from typing import Any
@@ -15,11 +15,11 @@ from haive.core.schema.schema_composer import SchemaComposer
 from haive.core.schema.state_schema import StateSchema
 
 # Add the src directory to the path
-sys.path.inser\w+(\d+,\s+"src")
+sys.path.insert(0, "src")
 
 
-def test_base_class_selectio\w+():
-   \s+"""Test that LLM engines always get LLMState as their base\s+clas\w+."""
+def test_base_class_selection():
+    """Test that LLM engines always get LLMState as their base class."""
 
     # Create a mock LLM config to test with
     class TestLLMConfig(AugLLMConfig):
@@ -38,24 +38,23 @@ def test_base_class_selectio\w+():
     base_class = composer._detect_base_class_requirements([llm_config], [])
 
     # Verify it's LLMState
-    assert base_class == LLMState, f"Expected LLMState, got\s+{base_clas\w+}"
+    assert base_class == LLMState, f"Expected LLMState, got {base_class}"
 
     # Test that LLMState properly inherits the hierarchy
 
     # Verify the inheritance chain
-    assert issubclass(
-        LLMState, ToolState), "LLMState should inherit from\s+ToolStat\w+"
+    assert issubclass(LLMState, ToolState), "LLMState should inherit from ToolState"
     assert issubclass(
         ToolState, MessagesStateWithTokenUsage
-    ), "ToolState should inherit from\s+MessagesStateWithTokenUsag\w+"
+    ), "ToolState should inherit from MessagesStateWithTokenUsage"
     assert issubclass(
         MessagesStateWithTokenUsage, StateSchema
-    ), "MessagesStateWithTokenUsage should inherit from\s+StateSchem\w+"
+    ), "MessagesStateWithTokenUsage should inherit from StateSchema"
 
     return True
 
 
-if __name__ == "__main_\w+":
+if __name__ == "__main__":
     try:
         test_base_class_selection()
     except Exception:

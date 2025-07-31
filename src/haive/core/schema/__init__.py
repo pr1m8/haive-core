@@ -122,8 +122,8 @@ from haive.core.schema.field_utils import (
 )
 from haive.core.schema.multi_agent_state_schema import (
     MultiAgentSchemaComposer,
+    MultiAgentStateSchema,
 )
-from haive.core.schema.multi_agent_state_schema import MultiAgentStateSchema
 from haive.core.schema.multi_agent_state_schema import (
     MultiAgentStateSchema as PrebuiltMultiAgentStateSchema,
 )

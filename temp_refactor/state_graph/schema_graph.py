@@ -3,12 +3,9 @@
 This module provides the SchemaGraph class, which is a StateGraph with
 enhanced schema management capabilities.
 """
-"""
-"""
-"""
 
 import logging
-from typing import Any, Type
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -24,9 +21,6 @@ class SchemaGraph(StateGraph):
     SchemaGraph is a StateGraph with additional methods for schema
     validation and handling.
     """
-"""
-"""
-"""
 
     def __init__(self, name: str, state_schema: type[BaseModel], **kwargs):
         """Initialize a SchemaGraph.
@@ -36,9 +30,6 @@ class SchemaGraph(StateGraph):
             state_schema: Schema for graph state
             **kwargs: Additional graph properties
         """
-"""
-"""
-"""
         super().__init__(name=name, state_schema=state_schema, **kwargs)
 
     def validate_state(self, state: Any) -> Any:
@@ -50,9 +41,6 @@ class SchemaGraph(StateGraph):
         Returns:
             Validated state
         """
-"""
-"""
-"""
         return self.create_state(state)
 
     def update_state_schema(self, new_schema: type[BaseModel]) -> "SchemaGraph":
@@ -64,9 +52,6 @@ class SchemaGraph(StateGraph):
         Returns:
             Self for method chaining
         """
-"""
-"""
-"""
         self.state_schema = new_schema
 
         # Track schema change
@@ -80,23 +65,19 @@ class SchemaGraph(StateGraph):
         Outputs information about nodes, edges, branches, and generates
         a Mermaid diagram for visualization.
         """
-"""
-"""
-"""
 
         # Display schema information
-        schema_name = getattr(
-            self.state_schema, "__name__", str(self.state_schema))
+        getattr(self.state_schema, "__name__", str(self.state_schema))
 
         # Display basic graph info
         for name, _node in self.nodes.items():
-            node_type = self.node_types.get(name, "unknown")
+            self.node_types.get(name, "unknown")
 
-        for src, dst in self.edges:
+        for _src, _dst in self.edges:
             pass
 
         for _branch_id, branch in self.branches.items():
-            for cond, dest in branch.destinations.items():
+            for _cond, _dest in branch.destinations.items():
                 pass
             if branch.default:
                 pass
@@ -104,10 +85,9 @@ class SchemaGraph(StateGraph):
         # Display validation issues if any
         issues = self.validate_graph()
         if issues:
-            for issue in issues:
+            for _issue in issues:
                 pass
         else:
             pass
-
 
         return self

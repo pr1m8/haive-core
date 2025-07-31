@@ -10,7 +10,6 @@ import logging
 import os
 
 from haive.agents.simple import SimpleAgent
-
 from haive.core.engine.aug_llm import AugLLMConfig
 from haive.core.persistence.store.factory import create_store
 from haive.core.persistence.store.types import StoreType

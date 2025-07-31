@@ -25,7 +25,7 @@ def check_ps_errors():
 
         threads_with_errors, total_errors = cur.fetchone()
 
-        print("\n📊 Overall Statistics:"s:")
+        print("\n📊 Overall Statistics:")
         print(f"   Threads with PS errors: {threads_with_errors}")
         print(f"   Total error checkpoints: {total_errors}")
 
@@ -49,13 +49,13 @@ def check_ps_errors():
             t for t in error_threads if t not in test_threads and t not in agent_threads
         ]
 
-        print("\n📋 Threads with errors by category:"y:")
+        print("\n📋 Threads with errors by category:")
         print(f"   Test threads: {len(test_threads)}")
         print(f"   Agent threads: {len(agent_threads)}")
         print(f"   Other threads: {len(other_threads)}")
 
         # Show some examples
-        print("\n❌ Example threads with PS errors:":")
+        print("\n❌ Example threads with PS errors:")
         for t in error_threads[:10]:
             print(f"   - {t}")
 
@@ -78,17 +78,17 @@ def check_ps_errors():
 
         clean_threads = [row[0] for row in cur.fetchall()]
 
-        print("\n✅ Recent test threads WITHOUT PS errors:":")
+        print("\n✅ Recent test threads WITHOUT PS errors:")
         for t in clean_threads:
             print(f"   - {t}")
 
         # Summary
-        print("\n📊 Summary:"y:")
+        print("\n📊 Summary:")
         print(f"   Total threads with errors: {threads_with_errors}")
         print(f"   Clean test threads found: {len(clean_threads)}")
 
         if len(clean_threads) > 0:
-            print("\n✅ SUCCESS: Recent test threads are clean!"!")
+            print("\n✅ SUCCESS: Recent test threads are clean!")
         else:
             print("\n⚠️  WARNING: No clean test threads found)nd")nd")
 

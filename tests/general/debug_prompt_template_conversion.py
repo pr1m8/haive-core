@@ -42,7 +42,7 @@ def add_prompt_template_breakpoint():
     original_init = None
 
     def debug_init(self, *args, **kwargs):
-        logger.error("🚨 BREAKPOINT: BasePromptTemplate.__init__ called!"d!")
+        logger.error("🚨 BREAKPOINT: BasePromptTemplate.__init__ called!")
         logger.error(f"   Args: {args}")
         logger.error(f"   Kwargs: {kwargs}")
         logger.error(f"   Class: {self.__class__}")
@@ -75,7 +75,7 @@ def trace_model_dump_calls():
 
     def debug_model_dump(self, *args, **kwargs):
         if hasattr(self, "prompt_template") or "prompt_template" in str(type(self)):
-            logger.error("🔍 MODEL_DUMP CALL on object with prompt_template!"e!")
+            logger.error("🔍 MODEL_DUMP CALL on object with prompt_template!")
             logger.error(f"   Object type: {type(self)}")
             logger.error(f"   Args: {args}")
             logger.error(f"   Kwargs: {kwargs}")
@@ -102,7 +102,7 @@ def trace_model_dump_calls():
 
                 # Breakpoint for dict conversion
                 if isinstance(result["prompt_template"], dict):
-                    logger.error("🚨 PROMPT TEMPLATE CONVERTED TO DICT!"T!")
+                    logger.error("🚨 PROMPT TEMPLATE CONVERTED TO DICT!")
                     pdb.set_trace()
 
             return result
@@ -124,7 +124,7 @@ def trace_pydantic_validation():
 
     def debug_validate_python(self, obj, *args, **kwargs):
         if "BasePromptTemplate" in str(self) or "prompt_template" in str(obj):
-            logger.error("🔍 PYDANTIC VALIDATION of prompt_template!"e!")
+            logger.error("🔍 PYDANTIC VALIDATION of prompt_template!")
             logger.error(f"   Validator: {self}")
             logger.error(f"   Object type: {type(obj)}")
             logger.error(f"   Object: {obj}")
