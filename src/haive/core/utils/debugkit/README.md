@@ -94,14 +94,14 @@ result = calculate_tax(50000, 0.25)  # Automatically shows values
 ```python
 def process_orders(orders: List[Order]) -> ProcessingResult:
     """Process orders with structured logging."""
-    dev.info("Processing orders", count=len(orders))
+    debugkit.info("Processing orders", count=len(orders))
 
-    with dev.context("validation") as ctx:
+    with debugkit.context("validation") as ctx:
         ctx.info("Validating orders...")
         valid_orders = validate_orders(orders)
         ctx.success(f"Validated {len(valid_orders)} orders")
 
-    with dev.context("processing") as ctx:
+    with debugkit.context("processing") as ctx:
         results = []
         for i, order in enumerate(valid_orders):
             if i % 10 == 0:
