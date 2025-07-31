@@ -18,7 +18,7 @@ class VectorStoreProvider(str, Enum):
     """Enumeration of supported vector store providers."""
 
     Chroma = "Chroma"
-    vs_FAISS = "FAISS"
+    FAISS = "FAISS"  # Removed deprecated vs_ prefix
     Pinecone = "Pinecone"
     Weaviate = "Weaviate"
     Zilliz = "Zilliz"
@@ -38,7 +38,7 @@ class VectorStoreConfig(BaseModel):
         description="The embedding model to use for the vector store",
     )
     vector_store_provider: VectorStoreProvider = Field(
-        default=VectorStoreProvider.vs_FAISS,
+        default=VectorStoreProvider.FAISS,
         description="The type of vector store to use",
     )
     vector_store_path: str = Field(
@@ -65,7 +65,7 @@ class VectorStoreConfig(BaseModel):
             from langchain_community.vectorstores import Chroma
 
             vs = Chroma
-        elif self.vector_store_provider == VectorStoreProvider.vs_FAISS:
+        elif self.vector_store_provider == VectorStoreProvider.FAISS:
             from langchain_community.vectorstores import FAISS
 
             vs = FAISS
