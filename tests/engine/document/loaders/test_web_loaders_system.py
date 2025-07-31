@@ -171,9 +171,9 @@ def test_web_loaders_system():
             if recursive_registration:
                 bulk_info = recursive_registration.bulk_info
         else:
-            passce")
+            pass
     except Exception as e:
-        passe}")
+        pass
 
     # Test 6: Documentation Site Sources
 
