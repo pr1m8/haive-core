@@ -25,8 +25,6 @@ Typical usage example:
 
 import importlib
 
-import vectorstore
-
 from haive.core.models.metadata import ModelMetadata
 from haive.core.models.metadata_mixin import ModelMetadataMixin as MetadataMixin
 
