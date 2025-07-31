@@ -269,6 +269,7 @@ def test_file_sharing_services():
                 source = MockGoogleDriveSource(**config)
                 scrape_config = source.scrape_all()
             else:
+                pass
 
             sharing_tests_passed += 1
 
