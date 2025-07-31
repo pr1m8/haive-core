@@ -418,7 +418,7 @@ def main():
     if failed_count == 0:
         pass
     else:
-        passs.")
+        pass
 
     # Save detailed results
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
