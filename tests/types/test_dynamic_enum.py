@@ -31,7 +31,7 @@ def test_dynamic_removal():
     try:
         Animal(kind="cat", name="Whiskers")
     except ValidationError as e:
-        passe)
+        pass
 
 
             def test_json_schema():
