@@ -147,7 +147,7 @@ def test_database_system():
 
 
     except Exception as e:
-        pass")
+        pass
 
     # Test 4: Text Splitter Configuration
 
@@ -180,7 +180,7 @@ def test_database_system():
 
 
     except Exception as e:
-        pass")
+        pass
 
     # Test 5: Fetch All Configuration
 
@@ -296,7 +296,7 @@ def test_database_system():
             class_tests_passed += 1
 
         except Exception as e:
-            pass")
+            pass
 
 
     # Summary
@@ -307,37 +307,37 @@ def test_database_system():
     if detection_success >= 7:
         passed_tests += 1
     else:
-        pass")
+        pass
 
     if registration_success:
         passed_tests += 1
     else:
-        pass")
+        pass
 
     if strategies_tested >= 4:
         passed_tests += 1
     else:
-        pass")
+        pass
 
     if splitters_tested >= 5:
         passed_tests += 1
     else:
-        pass")
+        pass
 
     if fetch_all_success:
         passed_tests += 1
     else:
-        pass")
+        pass
 
     if schema_success:
         passed_tests += 1
     else:
-        pass")
+        pass
 
     if class_tests_passed >= 6:
         passed_tests += 1
     else:
-        pass")
+        pass
 
 
     if passed_tests >= 6:
