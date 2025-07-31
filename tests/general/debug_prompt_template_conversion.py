@@ -287,7 +287,7 @@ def main():
                     "validate_python",
                 ]
             ):
-                logger.error("📍 CRITICAL FRAME:"E:")
+                logger.error("📍 CRITICAL FRAME:")
                 logger.error(f"   File: {frame_info.filename}")
                 logger.error(f"   Line: {frame_info.lineno}")
                 logger.error(f"   Function: {frame_info.name}")
