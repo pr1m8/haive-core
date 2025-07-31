@@ -189,7 +189,7 @@ def test_complete_file_system():
     for code_file in code_files:
         source = enhanced_registry.create_source(code_file)
         if source:
-            passe}")
+            pass
         else:
             pass
 
