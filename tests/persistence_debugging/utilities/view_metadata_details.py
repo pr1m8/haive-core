@@ -125,6 +125,7 @@ def view_metadata_details():
                                 pass
 
                         except Exception as e:
+                            pass
                     else:
                         pass
 

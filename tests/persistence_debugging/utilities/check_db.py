@@ -85,7 +85,7 @@ def check_database():
                 recent_checkpoint_activity = cursor.fetchone()[0]
 
     except Exception as e:
-        pass")
+        pass
 
 
 if __name__ == "__main__":

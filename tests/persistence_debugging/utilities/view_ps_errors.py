@@ -71,6 +71,7 @@ def view_ps_errors():
                                                         "prepared statement"
                                                         in content.lower()
                                                     ):
+                                                        pass
 
                                     # Check error field
                                     if "error" in node_data:
