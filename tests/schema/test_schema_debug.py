@@ -57,6 +57,7 @@ def test_schema_debug():
 
     # Check agent's output schema
     if hasattr(agent, "output_schema") and agent.output_schema:
+        pass
     else:
         pass
 
