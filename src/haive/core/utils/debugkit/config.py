@@ -184,7 +184,7 @@ class DevConfig:
     retention_days: int = 30
 
     # Internal field to track environment variable overrides
-    _env_overrides: Dict[str, Any] = field(default_factory=dict, init=False, repr=False)
+    _env_overrides: Dict[str, Any] = field(default_factory=dict, init=True, repr=False)
 
     # Tool selection
     excluded_paths: List[str] = field(
@@ -226,6 +226,12 @@ class DevConfig:
 
     def _configure_for_testing(self) -> None:
         """Configure for testing environment with balanced features."""
+        # Debug print
+        print(f"DEBUG: _env_overrides = {self._env_overrides}")
+        print(
+            f"DEBUG: trace_sampling_rate in overrides? {'trace_sampling_rate' in self._env_overrides}"
+        )
+
         if "trace_sampling_rate" not in self._env_overrides:
             self.trace_sampling_rate = 0.1  # 10% sampling
         if "profile_enabled" not in self._env_overrides:
