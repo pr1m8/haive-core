@@ -205,7 +205,7 @@ def test_database_loaders_system():
             strategy_tests_passed += 1
 
         except Exception as e:
-            pass")
+            pass
 
     assert strategy_tests_passed >= 4, "Most loading strategies should work"
 
