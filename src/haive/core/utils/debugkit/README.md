@@ -74,14 +74,14 @@ def process_data(data: List[Dict[str, Any]]) -> ProcessedResult:
 ### Simple Debugging
 
 ```python
-from haive.core.utils.dev import dev
+from haive.core.utils.debugkit import debugkit
 
 def calculate_tax(income: float, rate: float) -> float:
     """Calculate tax with debugging."""
-    dev.ice(income, rate)  # See input values
+    debugkit.ice(income, rate)  # See input values
 
     tax = income * rate
-    dev.ice(tax)  # See calculated result
+    debugkit.ice(tax)  # See calculated result
 
     return tax
 
@@ -118,7 +118,7 @@ def process_orders(orders: List[Order]) -> ProcessingResult:
 ### Comprehensive Code Analysis
 
 ```python
-@dev.instrument(analyze=True, profile=True)
+@debugkit.instrument(analyze=True, profile=True)
 def complex_algorithm(data: List[Dict[str, Any]], config: AlgorithmConfig) -> Result:
     """Complex algorithm with full analysis."""
     # Implementation with automatic:
@@ -146,24 +146,24 @@ if report.combined_score < 70:
 from pathlib import Path
 
 # Analyze single file
-results = dev.static_analysis.analyze_file(
+results = debugkit.static_analysis.analyze_file(
     Path("my_module.py"),
     tools=["mypy", "radon", "vulture", "pyflakes"]
 )
 
 # Generate comprehensive report
-report = dev.static_analysis.generate_report(results, format="markdown")
+report = debugkit.static_analysis.generate_report(results, format="markdown")
 print(report)
 
 # Analyze entire project
-project_results = dev.static_analysis.analyze_project(
+project_results = debugkit.static_analysis.analyze_project(
     Path("./src"),
     tools=["mypy", "radon", "vulture"],
     parallel=True
 )
 
 # Get summary statistics
-summary = dev.static_analysis.get_project_summary(project_results)
+summary = debugkit.static_analysis.get_project_summary(project_results)
 print(f"Total files: {summary['total_files']}")
 print(f"Total issues: {summary['total_findings']}")
 print(f"Average issues per file: {summary['average_findings_per_file']:.1f}")
@@ -183,7 +183,7 @@ def benchmark_algorithms():
     }
 
     # Benchmark all implementations
-    results = dev.benchmark.compare(algorithms, iterations=1000)
+    results = debugkit.benchmark.compare(algorithms, iterations=1000)
 
     # Find fastest
     fastest = min(results.items(), key=lambda x: x[1]['average'])
@@ -196,11 +196,11 @@ def benchmark_algorithms():
 
 ```python
 import os
-from haive.core.utils.dev import dev
+from haive.core.utils.debugkit import debugkit
 
 # Configure for production
 if os.getenv("ENVIRONMENT") == "production":
-    dev.configure(
+    debugkit.configure(
         # Minimal overhead in production
         trace_sampling_rate=0.01,  # 1% sampling
         profile_enabled=False,
@@ -211,7 +211,7 @@ if os.getenv("ENVIRONMENT") == "production":
         log_level="ERROR"
     )
 else:
-    dev.configure(
+    debugkit.configure(
         # Full debugging in development
         verbose=True,
         trace_sampling_rate=1.0,
@@ -226,12 +226,12 @@ else:
 def analyze_codebase(project_path: str) -> AnalysisReport:
     """Comprehensive codebase analysis."""
 
-    with dev.context("codebase_analysis") as ctx:
+    with debugkit.context("codebase_analysis") as ctx:
         ctx.info("Starting analysis", path=project_path)
 
         # 1. Static analysis
         ctx.checkpoint("static_analysis_start")
-        static_results = dev.static_analysis.analyze_project(
+        static_results = debugkit.static_analysis.analyze_project(
             Path(project_path),
             tools=["mypy", "radon", "vulture", "pyflakes"],
             parallel=True
@@ -267,15 +267,15 @@ def analyze_codebase(project_path: str) -> AnalysisReport:
 
 ```python
 import asyncio
-from haive.core.utils.dev import dev
+from haive.core.utils.debugkit import debugkit
 
 # Service A
 async def service_a_handler(request_id: str, data: Dict) -> Response:
     """Handle request in Service A."""
     # Set correlation ID for distributed tracing
-    dev.set_correlation_id(request_id)
+    debugkit.set_correlation_id(request_id)
 
-    with dev.context("service_a_processing") as ctx:
+    with debugkit.context("service_a_processing") as ctx:
         ctx.info("Processing request", data_size=len(data))
 
         # Process data
@@ -293,9 +293,9 @@ async def service_a_handler(request_id: str, data: Dict) -> Response:
 async def service_b_handler(request_id: str, data: Dict) -> Dict:
     """Handle request in Service B."""
     # Use same correlation ID
-    dev.set_correlation_id(request_id)
+    debugkit.set_correlation_id(request_id)
 
-    with dev.context("service_b_processing") as ctx:
+    with debugkit.context("service_b_processing") as ctx:
         ctx.info("Received data from Service A", data_size=len(data))
 
         result = await service_b_logic(data)
@@ -310,25 +310,25 @@ async def service_b_handler(request_id: str, data: Dict) -> Dict:
 
 ```python
 import pytest
-from haive.core.utils.dev import dev
+from haive.core.utils.debugkit import debugkit
 
 class TestWithDevelopmentUtils:
     """Example test class using development utilities."""
 
     def setup_method(self):
         """Setup development utilities for testing."""
-        dev.configure(
+        debugkit.configure(
             environment="testing",
             verbose=True,
             profile_enabled=True,
             trace_sampling_rate=1.0
         )
 
-    @dev.instrument(profile=True, analyze=True)
+    @debugkit.instrument(profile=True, analyze=True)
     def test_algorithm_performance(self):
         """Test algorithm with performance monitoring."""
 
-        with dev.context("algorithm_test") as ctx:
+        with debugkit.context("algorithm_test") as ctx:
             ctx.info("Testing algorithm performance")
 
             # Test data
@@ -348,7 +348,7 @@ class TestWithDevelopmentUtils:
     def test_error_handling_with_debugging(self):
         """Test error handling with automatic debugging."""
 
-        @dev.debug.breakpoint_on_exception
+        @debugkit.debug.breakpoint_on_exception
         def potentially_failing_function():
             # This will start debugger if it fails
             risky_operation()
@@ -388,10 +388,10 @@ export HAIVE_DASHBOARD_PORT=8888
 ### Programmatic Configuration
 
 ```python
-from haive.core.utils.dev import dev, DevConfig, Environment, LogLevel
+from haive.core.utils.debugkit import debugkit, DevConfig, Environment, LogLevel
 
 # Method 1: Update global config
-dev.configure(
+debugkit.configure(
     environment=Environment.DEVELOPMENT,
     verbose=True,
     log_level=LogLevel.DEBUG,
@@ -417,19 +417,28 @@ env_config = DevConfig.from_env()
 ### Component Overview
 
 ```
-haive.core.utils.dev/
-├── config.py              # Configuration system
+haive.core.utils.debugkit/
 ├── __init__.py            # Unified interface
-├── fallbacks.py           # Fallback implementations
-├── analysis/              # Code analysis
-│   ├── types.py          # Type analysis
-│   ├── complexity.py     # Complexity analysis
-│   └── static.py         # Static analysis orchestration
-├── debugging.py           # Debug utilities (when available)
-├── logging.py            # Logging utilities (when available)
-├── tracing.py            # Tracing utilities (when available)
-├── profiling.py          # Profiling utilities (when available)
-└── benchmarking.py       # Benchmarking utilities (when available)
+├── config.py              # Configuration system
+├── core/                  # Core components
+│   ├── __init__.py       # DevContext, UnifiedDev, CodeAnalysisReport
+│   ├── context.py        # DevContext class
+│   └── unified.py        # UnifiedDev and CodeAnalysisReport
+├── debug/                 # Debug utilities submodule
+│   └── __init__.py       # Debug interface with fallbacks
+├── logging/               # Logging utilities submodule
+│   └── __init__.py       # Structured logging with fallbacks
+├── tracing/               # Tracing utilities submodule
+│   └── __init__.py       # Tracing interface with fallbacks
+├── profiling/             # Profiling utilities submodule
+│   └── __init__.py       # Performance profiling with fallbacks
+├── benchmarking/          # Benchmarking utilities submodule
+│   └── __init__.py       # Benchmarking and load testing
+└── analysis/              # Analysis utilities submodule
+    ├── __init__.py       # Factory functions and exports
+    ├── types.py          # Type analysis
+    ├── complexity.py     # Complexity analysis
+    └── static.py         # Static analysis orchestration
 ```
 
 ### Key Design Principles
@@ -446,12 +455,12 @@ The system uses **smart fallbacks** when optional dependencies are missing:
 
 ```python
 # With rich, icecream, mypy, radon installed
-from haive.core.utils.dev import dev
-dev.ice("Beautiful output")  # Full rich formatting
+from haive.core.utils.debugkit import debugkit
+debugkit.ice("Beautiful output")  # Full rich formatting
 
 # Without optional dependencies
-from haive.core.utils.dev import dev
-dev.ice("Still works")  # Fallback to print with enhanced formatting
+from haive.core.utils.debugkit import debugkit
+debugkit.ice("Still works")  # Fallback to print with enhanced formatting
 ```
 
 ## 📊 Available Tools
@@ -512,7 +521,7 @@ dev.ice("Still works")  # Fallback to print with enhanced formatting
 ### Custom Analyzers
 
 ```python
-from haive.core.utils.dev.analysis.static import ToolAnalyzer, AnalysisType
+from haive.core.utils.debugkit.analysis.static import ToolAnalyzer, AnalysisType
 
 class CustomAnalyzer(ToolAnalyzer):
     """Custom static analysis tool integration."""
@@ -530,13 +539,13 @@ class CustomAnalyzer(ToolAnalyzer):
         return findings
 
 # Register custom analyzer
-dev.static_analysis.available_tools["custom_tool"] = CustomAnalyzer()
+debugkit.static_analysis.available_tools["custom_tool"] = CustomAnalyzer()
 ```
 
 ### Custom Metrics
 
 ```python
-from haive.core.utils.dev import dev
+from haive.core.utils.debugkit import debugkit
 
 # Extend with custom metrics
 class CustomMetrics:
@@ -553,20 +562,20 @@ class CustomMetrics:
         return api_metrics
 
 # Integration
-dev.custom_metrics = CustomMetrics()
+debugkit.custom_metrics = CustomMetrics()
 ```
 
 ### Distributed Tracing
 
 ```python
-from haive.core.utils.dev import dev
+from haive.core.utils.debugkit import debugkit
 import opentelemetry
 
 # OpenTelemetry integration
-@dev.instrument(distributed_trace=True)
+@debugkit.instrument(distributed_trace=True)
 async def microservice_operation(request):
     """Operation traced across services."""
-    with dev.context("operation", service="auth") as ctx:
+    with debugkit.context("operation", service="auth") as ctx:
         # Trace spans automatically created
         result = await auth_logic(request)
         ctx.success("Auth complete")
@@ -591,10 +600,10 @@ async def microservice_operation(request):
 
 ```python
 # Performance comparison (1M function calls)
-Plain function:     0.85s
-@dev.instrument:    0.89s (+4.7%)
-With profiling:     1.12s (+31.8%)
-With analysis:      0.86s (+1.2%, cached)
+Plain function:        0.85s
+@debugkit.instrument:  0.89s (+4.7%)
+With profiling:        1.12s (+31.8%)
+With analysis:         0.86s (+1.2%, cached)
 ```
 
 ## 🔍 Troubleshooting
@@ -605,14 +614,14 @@ With analysis:      0.86s (+1.2%, cached)
 
 ```python
 # If optional dependencies are missing
-from haive.core.utils.dev import dev  # Always works with fallbacks
+from haive.core.utils.debugkit import debugkit  # Always works with fallbacks
 ```
 
 **Performance Issues:**
 
 ```python
 # Reduce overhead in production
-dev.configure(
+debugkit.configure(
     trace_sampling_rate=0.01,
     profile_enabled=False,
     auto_analyze=False
@@ -623,7 +632,7 @@ dev.configure(
 
 ```python
 # Check available tools
-available = dev.static_analysis.get_available_tools()
+available = debugkit.static_analysis.get_available_tools()
 print(f"Available tools: {available}")
 ```
 
@@ -631,17 +640,17 @@ print(f"Available tools: {available}")
 
 ```python
 # Clear caches periodically
-dev.clear_cache()
+debugkit.clear_cache()
 
 # Limit cache size
-dev.configure(max_cache_size=100)
+debugkit.configure(max_cache_size=100)
 ```
 
 ### Debug Configuration
 
 ```python
 # Enable maximum debugging
-dev.configure(
+debugkit.configure(
     verbose=True,
     log_level="TRACE",
     trace_sampling_rate=1.0,
@@ -649,7 +658,7 @@ dev.configure(
 )
 
 # Check configuration
-stats = dev.get_stats()
+stats = debugkit.get_stats()
 print(f"Current config: {stats['config']}")
 ```
 
@@ -689,9 +698,9 @@ Built on top of excellent Python tools:
 **Ready to supercharge your Python development workflow?**
 
 ```python
-from haive.core.utils.dev import dev
+from haive.core.utils.debugkit import debugkit
 
-@dev.instrument(analyze=True, profile=True)
+@debugkit.instrument(analyze=True, profile=True)
 def your_amazing_function():
     return "Let's build something great!"
 ```
