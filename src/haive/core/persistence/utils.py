@@ -16,7 +16,6 @@ import logging
 from typing import Any
 
 from psycopg_pool import ConnectionPool
-from psycopg_pool.base import AsyncPool
 
 logger = logging.getLogger(__name__)
 

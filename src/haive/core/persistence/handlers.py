@@ -25,8 +25,8 @@ import json
 import logging
 from typing import Any
 
-from psycopg_pool.base import BaseConnectionPool
-from psycopg_pool.pool import AsyncConnectionPool, ConnectionPool
+from psycopg_pool import AsyncConnectionPool
+from psycopg_pool.pool import ConnectionPool
 from pydantic import BaseModel, SecretStr
 
 from haive.core.persistence.memory import MemoryCheckpointerConfig
